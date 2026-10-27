@@ -21,7 +21,8 @@ const me = { id: person, displayName: 'Synthetic PM', email: 'pm@hub.test', role
 const taskDetail = { task, project: { id: pid, projectNumber: project.projectNumber, name: project.name, status: project.status }, collaborators: [], watchers: [], permissions: { edit: { ok: true }, assign: { ok: true }, setReviewer: { ok: true }, dueDate: { ok: true }, dueNeedsReason: false, block: { ok: true }, delete: { ok: true }, restore: false, comment: false, transitions: [{ to: 'In Progress', allowed: true, needsReason: false }], isReviewer: false, dependencies: false, enterTime: false, needsReason: false, allowSelfReview: false }, description: 'Synthetic detail' }
 const timeline = { latestPlanned: { date: '2026-11-05', itemKey: 'SYN-046-D001', targetDate: '2026-10-30', rule: 'Working days' }, handoffs: [{ id: id(7), key: 'SYN-046-H001', title: 'Civil to Electrical', status: 'Submitted', sendingDisciplineId: discipline, receivingDisciplineId: discipline, neededBy: '2026-10-25', promisedBy: '2026-10-27', dateMismatch: true, isOverdue: true, daysOverdue: 3 }], permissions: { manageMilestones: false, needsReason: false }, tasks: [{ ...task, affectedMilestoneIds: [milestoneId], canEditDates: false, dueNeedsReason: false, isOverdue: false, slipShown: true }], dependencies: [], deliverableLinks: [], deliverables: [{ id: deliverableId, canEditDates: true, createdOn: '2026-10-18', slipShown: true, baselineStartDate: '2026-10-20', baselineDueDate: '2026-10-28', baselineSlipShown: true }] }
 
-const activity = ['12:10','12:08','12:04','12:00','11:49'].map((time,i)=>({id:id(40+i),occurredAt:`2026-10-18T${time}:00Z`,actorId:person,actorName:'Synthetic PM',actorType:'User',itemType:'Task',itemId:taskId,itemKey:task.key,itemName:task.name,action:'Updated',categories:['dates'],changes:[{field:'Name',old:`Before ${i}`,new:`After ${i}`}],summary:`Synthetic change ${i}`,reason:`Synthetic reason ${i}`,source:'Web'}))
+const { activityPage } = require('./activity.fixture.cjs')
+const activity = activityPage(id, { actorId: person, itemId: taskId, itemKey: task.key, itemName: task.name })
 let server, browser
 ;(async () => {
   server = spawn(process.execPath, ['node_modules/vite/bin/vite.js', 'preview', '--host', '127.0.0.1', '--port', port, '--strictPort'], { cwd: path.resolve(__dirname, '..'), stdio: 'inherit' })
@@ -45,7 +46,7 @@ let server, browser
     else if (p === 'workspaces') data = []
     else if (p === 'views') data = { views: [{ id: id(8), name: 'My saved view', scope: 'Personal', isDefault: false, rowVersion: 1, params: { group: 'status' }, dropped: [], canEdit: true }], canShare: false }
     else if (p === 'reference') data = { disciplines: [{ id: discipline, name: 'Civil', isActive: true }], clients: [], offices: [], deliverableTypes: [{id:id(60),name:'Synthetic drawing',isActive:true}], phases: [], projectTypes: [], limits: { roleLabel: 80 } }
-    else if (p === `projects/${pid}/activity` || p === `items/Task/${taskId}/activity`) data = {items:activity,totalCount:activity.length}
+    else if (p === `projects/${pid}/activity` || p === `items/Task/${taskId}/activity`) data = activity
     else if (p === 'users') data = [{ id: person, displayName: 'Synthetic PM', isActive: true }]
     else if (p === `projects/${pid}` || p === `projects/${project.projectNumber}`) data = viewerMode ? { ...project, status: 'Archived', permissions: { ...project.permissions, edit: { ok: false }, createTaskIn: [], createDeliverableIn: [] } } : project
     else if (p === `projects/${pid}/tasks`) data = { items: [viewerMode ? { ...task, can: { edit: false, assign: false, changeDue: false, block: false } } : task], totalCount: 1, page: 1, pageSize: 200 }

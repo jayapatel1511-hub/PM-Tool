@@ -1,14 +1,10 @@
+import type { components } from '@/gen/api'
 import { Button } from '@/components/ui/button'
 import { Empty, tdCls, thCls } from '@/components/hub/common'
 import { fmtDate, fmtTime } from '@/lib/format'
 import { runtimeText, t, tv } from '@/lib/i18n'
 
-export interface ActivityRow {
-  id: string; occurredAt: string; actorId?: string; actorName?: string; actorType: string; projectId?: string
-  itemType: string; itemId?: string; itemKey?: string; itemName?: string; action: string; categories: string[]
-  changes: { field: string; old: unknown; new: unknown; oldLabel?: string; newLabel?: string }[]
-  summary: string; reason?: string; source: string; correlationId?: string; snapshot?: Record<string, unknown>; snapshotLabels?: Record<string, string | null>
-}
+export type ActivityRow = components['schemas']['ActivityEntry']
 
 export interface ActivityGroup { rows: ActivityRow[] }
 /** Groups adjacent changes by actor and item. The API rows remain untouched; this only changes presentation. */
@@ -42,7 +38,7 @@ const show = (v?: string | null) => {
 /** "Due date: 2026-09-10 → 2026-09-17" (§20.3 human-readable changes). */
 export function ChangeList({ row }: { row: ActivityRow }) {
   if (row.action === 'Deleted' && row.snapshot) {
-    return <details><summary className="cursor-pointer text-muted-foreground">{t('activity.snapshot')}</summary><ul className="mt-1 space-y-0.5">{Object.entries(row.snapshot).filter(([, v]) => v != null && v !== '')
+    return <details><summary className="cursor-pointer text-muted-foreground">{t('activity.snapshot')}</summary><ul className="mt-1 space-y-0.5">{Object.entries(row.snapshot as Record<string, unknown>).filter(([, v]) => v != null && v !== '')
       .map(([k, v]) => <li key={k}><span className="text-muted-foreground">{fieldLabel(k)}:</span>{' '}{show(row.snapshotLabels?.[k] ?? (typeof v === 'string' ? v : JSON.stringify(v)))}</li>)}</ul></details>
   }
   if (!row.changes.length) return null

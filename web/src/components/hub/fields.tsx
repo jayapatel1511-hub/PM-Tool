@@ -1,13 +1,13 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Check, Pencil } from 'lucide-react'
 import { createContext, useContext, useEffect, useId, useRef, useState, type ReactNode } from 'react'
-import { ChangeList, actionLabel, groupActivity, type ActivityRow } from '@/components/hub/activity'
+import { ChangeList, actionLabel, groupActivity } from '@/components/hub/activity'
 import { Empty, ErrorBanner, Loading, Spinner } from '@/components/hub/common'
 import { Avatar, PeoplePicker } from '@/components/hub/people'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useFlag, useMe } from '@/lib/auth'
-import { get, watchWrite, type ApiError, type WriteWatch } from '@/lib/api'
+import { typedRequest, watchWrite, type ApiError, type WriteWatch } from '@/lib/api'
 import { ago, fmtDate, fmtTime } from '@/lib/format'
 import { invalidateChange } from '@/lib/keys'
 import { t , runtimeText } from '@/lib/i18n'
@@ -270,7 +270,7 @@ export function HistoryList({ type, id }: { type: string; id: string }) {
   const small = useFlag('small_ux')
   const burst = (useMe().settings as { activityBurstMinutes?: number }).activityBurstMinutes ?? 10
   const grouped = small && sp.get('groupChanges') === 'true'
-  const q = useQuery({ queryKey: ['history', type, id], queryFn: () => get<{ items: ActivityRow[] }>(`items/${type}/${id}/activity?pageSize=100`) })
+  const q = useQuery({ queryKey: ['history', type, id], queryFn: () => typedRequest('get', '/api/v1/items/{type}/{id}/activity', { params: { type, id }, query: { pageSize: 100 } }) })
   if (q.isPending) return <Loading rows={3} />
   if (q.error) return <div className="p-4"><ErrorBanner error={q.error} retry={() => q.refetch()} /></div>
   if (!q.data?.items.length) return <Empty>{t('activity.empty')}</Empty>

@@ -3922,7 +3922,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["PageOfObject"];
+                        "application/json": components["schemas"]["PageOfActivityEntry"];
                     };
                 };
             };
@@ -4458,7 +4458,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfObjectAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint"];
+                        "application/json": components["schemas"]["AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint"];
                     };
                 };
             };
@@ -7250,7 +7250,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["PageOfObject"];
+                        "application/json": components["schemas"]["PageOfActivityEntry"];
                     };
                 };
             };
@@ -15966,6 +15966,35 @@ export interface components {
             rowVersion: null | number;
             toStatus: string;
         };
+        ActivityEntry: {
+            action: string;
+            /** Format: uuid */
+            actorId: null | string;
+            actorName: null | string;
+            actorType: string;
+            categories: string[];
+            changes: components["schemas"]["ChangeLine"][];
+            /** Format: uuid */
+            correlationId: null | string;
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            itemId: null | string;
+            itemKey: null | string;
+            itemName: null | string;
+            itemType: string;
+            /** Format: date-time */
+            occurredAt: string;
+            /** Format: uuid */
+            projectId: null | string;
+            reason: null | string;
+            snapshot: null | components["schemas"]["JsonElement"];
+            snapshotLabels: null | {
+                [key: string]: string;
+            };
+            source: string;
+            summary: string;
+        };
         AdminReviewStrip: {
             checks: components["schemas"]["AdminReviewStripCount"][];
             /** Format: date-time */
@@ -16064,6 +16093,15 @@ export interface components {
             assign: boolean;
             pickUp: boolean;
             withdraw: boolean;
+        };
+        AnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndboolean: {
+            /** Format: int32 */
+            count: number;
+            entry: components["schemas"]["ActivityEntry"];
+            notified: boolean;
+            projectName: null | string;
+            projectNumber: null | string;
+            unread: boolean;
         };
         AnonymousTypeOfAnonymousTypeOfGuidAndstringAndbooleanAndstringAndListOfOpenItem: {
             items: null | components["schemas"]["OpenItem"][];
@@ -16321,8 +16359,8 @@ export interface components {
             source: null | string;
             status: null | string;
         };
-        AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfObjectAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint: {
-            items: null | components["schemas"]["AnonymousTypeOfObjectAndintAndstringAndstringAndbooleanAndboolean"][];
+        AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint: {
+            items: null | components["schemas"]["AnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndboolean"][];
             /** Format: int32 */
             page: number;
             /** Format: int32 */
@@ -16368,15 +16406,6 @@ export interface components {
         AnonymousTypeOfListOfWidgetAndboolean: {
             isDefault: boolean;
             layout: null | components["schemas"]["Widget"][];
-        };
-        AnonymousTypeOfObjectAndintAndstringAndstringAndbooleanAndboolean: {
-            /** Format: int32 */
-            count: number;
-            entry: unknown;
-            notified: boolean;
-            projectName: null | string;
-            projectNumber: null | string;
-            unread: boolean;
         };
         AnonymousTypeOfRowAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndRowAndIEnumerableOfAnonymousTypeOfintAndGuidAndRow: {
             /** Format: int32 */
@@ -16667,6 +16696,13 @@ export interface components {
             reason: null | string;
             /** Format: int32 */
             rowVersion: null | number;
+        };
+        ChangeLine: {
+            field: string;
+            new: null | components["schemas"]["JsonElement"];
+            newLabel: null | string;
+            old: null | components["schemas"]["JsonElement"];
+            oldLabel: null | string;
         };
         ChannelBody: {
             app: boolean;
@@ -18284,6 +18320,17 @@ export interface components {
             };
             /** Format: uuid */
             templateId: string;
+        };
+        PageOfActivityEntry: {
+            filters?: unknown;
+            items: components["schemas"]["ActivityEntry"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            sort?: null | string;
+            /** Format: int32 */
+            totalCount: number;
         };
         PageOfObject: {
             filters?: unknown;

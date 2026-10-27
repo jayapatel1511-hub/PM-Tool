@@ -715,11 +715,12 @@ public static partial class ReportEndpoints
 }
 
 /// Sends list and report rows as CSV (UTF-8 with BOM) or XLSX (header, frozen pane, typed dates, Parameters sheet), and
-/// records who exported what, never the contents (§19, §20.1, FR-010).
+/// records who exported what, never the contents (§19, §20.1, FR-010). `header` lines open the CSV and join the Parameters
+/// sheet without being logged, for text that is content rather than a filter (the Admin review's reviewer note, §55.4).
 public static class ExportFile
 {
     public static async Task<IResult> Send(HubDb db, SettingsStore store, string? format, string title, IReadOnlyList<Col> cols, JsonArray rows, IReadOnlyList<(string, string)> parameters,
-        Guid? projectId, string key, TimeProvider clock)
+        Guid? projectId, string key, TimeProvider clock, IReadOnlyList<(string, string)>? header = null)
     {
         if (rows.Count > Export.MaxRows) throw ApiException.Rule("export_too_large", "export.too_large", null, Export.MaxRows);
         var s = await store.Get(db);
@@ -734,9 +735,9 @@ public static class ExportFile
         var file = $"{key}-{now:yyyyMMdd-HHmm}.{(xlsx ? "xlsx" : "csv")}";
         var items = rows.Cast<object>();
         return xlsx
-            ? Results.File(Export.ToXlsx(title, items, columns, [.. parameters, (Text.Get("export.generated"), $"{now:yyyy-MM-dd HH:mm} ({s.OrgTimeZone})")]),
+            ? Results.File(Export.ToXlsx(title, items, columns, [.. parameters, .. header ?? [], (Text.Get("export.generated"), $"{now:yyyy-MM-dd HH:mm} ({s.OrgTimeZone})")]),
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", file)
-            : Results.File(Export.ToCsv(items, columns), "text/csv; charset=utf-8", file);
+            : Results.File(Export.ToCsv(items, columns, header), "text/csv; charset=utf-8", file);
     }
 
     static JsonNode? At(JsonNode? n, string path)

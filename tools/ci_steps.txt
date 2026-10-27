@@ -53,6 +53,7 @@ web: cd web && npm run test:resources
 web: cd web && npm run test:task-pickup
 web: cd web && npm run test:verifiable-records
 web: cd web && npm run test:schema-workflows
+web: cd web && npm run test:admin-review
 web: cd web && npm run test:supervisor-capacity
 web: cd web && npm run test:ui-review
 web: cd web && npm run test:interaction

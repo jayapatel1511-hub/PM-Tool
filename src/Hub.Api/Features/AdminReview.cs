@@ -129,6 +129,8 @@ public static class AdminReviewEndpoints
             return TypedResults.Ok(new CheckList(k.Key, Title(k, c.Settings), Rule(k, c.Settings), await k.Rows(c)));
         });
 
+        g.MapGet("/{id:guid}/export", ExportReview);
+
         // FR-ADR-03: the counts are taken here, at this moment, never from the client.
         g.MapPost("", async (RecordBody body, HubDb db, SettingsStore store, CurrentUser me, TimeProvider clock) =>
         {
@@ -149,6 +151,21 @@ public static class AdminReviewEndpoints
             await db.SaveChangesAsync();
             return TypedResults.Created($"/api/v1/admin/review/{review.Id}", await Record(db, review));
         });
+    }
+
+    static readonly Col[] ExportCols = [new("check", "check"), new("rule", "rule"), new("count", "count", "number"), new("note", "note")];
+
+    /// FR-ADR-06: one recorded review as CSV or XLSX, a header block (date, reviewer, note) then one row per check. Only counts and
+    /// the reviewer's own notes leave the Hub, never a person list (§8.7); each export is logged like every other (§20.1).
+    static async Task<IResult> ExportReview(Guid id, string? format, HubDb db, SettingsStore store, TimeProvider clock)
+    {
+        var r = await db.Set<AdminReview>().AsNoTracking().FirstOrDefaultAsync(x => x.Id == id) ?? throw ApiException.NotFound();
+        var s = await store.Get(db);
+        var rec = await Record(db, r);
+        var rows = rec.Checks.Select(k => Defs.FirstOrDefault(d => d.Key == k.Key) is { } d
+            ? new { Check = Title(d, s), Rule = Rule(d, s), k.Count, k.Note } : new { Check = k.Key, Rule = "", k.Count, k.Note });
+        (string, string)[] header = [(Text.Get("col.date"), Clock.Local(rec.ReviewedAt, s).ToString("yyyy-MM-dd HH:mm")), (Text.Get("col.reviewer"), rec.Reviewer), (Text.Get("col.note"), rec.Note ?? "")];
+        return await ExportFile.Send(db, store, format, Text.Get("adminReview.title"), ExportCols, JsonSerializer.SerializeToNode(rows, JsonOpts.Web)!.AsArray(), [], null, "admin-review", clock, header);
     }
 
     static async Task<ReviewRecord> Record(HubDb db, AdminReview r) => new(r.Id, r.ReviewedAt, r.ReviewerId,

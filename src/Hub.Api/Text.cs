@@ -758,7 +758,7 @@ public static class Text
         ["col.closeCause"] = "Closing cause",
         ["col.daysOpen"] = "Days open",
         ["col.missCategory"] = "Miss category",
-        ["col.count"] = "Count",
+        ["col.count"] = "Count", ["col.check"] = "Check", ["col.rule"] = "Rule",
         ["report.noUnit"] = "No unit",
         ["report.notRecorded"] = "Not recorded",
         ["report.unassigned"] = "Unassigned",

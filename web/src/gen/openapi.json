@@ -16276,6 +16276,36 @@
         ]
       }
     },
+    "/api/v1/admin/review/{id}/export": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "AdminReviewEndpoints"
+        ]
+      }
+    },
     "/api/v1/admin/settings": {
       "get": {
         "responses": {
@@ -32816,6 +32846,9 @@
     },
     {
       "name": "TaskPickupEndpoints"
+    },
+    {
+      "name": "AdminReviewEndpoints"
     }
   ]
 }

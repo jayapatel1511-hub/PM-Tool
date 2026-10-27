@@ -3,10 +3,10 @@
 const { chromium } = require('playwright')
 const assert = require('node:assert/strict')
 const { startPreview, mockPlatformApi } = require('./platform-fixtures.cjs')
+const { emptyPortfolio, lastReview: strip } = require('./portfolio.fixture.cjs')
 
 const port = Number(process.env.ADMIN_STRIP_TEST_PORT || '7266')
 const personId = '00000000-0000-0000-0000-000000000002'
-const strip = { reviewedAt: '2026-10-14T15:00:00Z', checks: [{ key: 'inactiveOnTeams', title: 'Inactive users still on teams', count: 2 }, { key: 'noManager', title: 'Users without a manager', count: 1 }] }
 
 ;(async () => {
   const { base, child } = await startPreview(port)
@@ -28,7 +28,7 @@ const strip = { reviewedAt: '2026-10-14T15:00:00Z', checks: [{ key: 'inactiveOnT
     else if (p === 'organisation') data = { includeIndirectReports: false, units: [] }
     else if (p === 'workspaces') data = []
     else if (p === 'views') data = { views: [], canShare: false }
-    else if (p === 'portfolio') data = { ownOnly: false, tiles: { active: 0, red: 0, yellow: 0, green: 0, submissions14: 0, overdueDecisions: 0 }, projects: [] }
+    else if (p === 'portfolio') data = emptyPortfolio()
     else if (p === 'portfolio/admin-review') { stripGets.push(p); data = answer }
     else { await route.fallback(); return }
     await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(data) })

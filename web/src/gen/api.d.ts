@@ -6777,7 +6777,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfbooleanAndAnonymousTypeOfintAndintAndintAndintAndintAndintAndJsonArray"];
+                        "application/json": components["schemas"]["PortfolioView"];
                     };
                 };
             };
@@ -16443,11 +16443,6 @@ export interface components {
             successors: null | components["schemas"]["AnonymousTypeOfintAndGuidAndRow"][];
             task: components["schemas"]["TaskQueriesRow"];
         };
-        AnonymousTypeOfbooleanAndAnonymousTypeOfintAndintAndintAndintAndintAndintAndJsonArray: {
-            ownOnly: boolean;
-            projects: components["schemas"]["JsonArray"];
-            tiles: components["schemas"]["AnonymousTypeOfintAndintAndintAndintAndintAndint"];
-        };
         AnonymousTypeOfbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndint: {
             admin: boolean;
             allStaff: boolean;
@@ -16499,20 +16494,6 @@ export interface components {
             following: number;
             /** Format: int32 */
             notifications: number;
-        };
-        AnonymousTypeOfintAndintAndintAndintAndintAndint: {
-            /** Format: int32 */
-            active: number;
-            /** Format: int32 */
-            green: number;
-            /** Format: int32 */
-            overdueDecisions: number;
-            /** Format: int32 */
-            red: number;
-            /** Format: int32 */
-            submissions14: number;
-            /** Format: int32 */
-            yellow: number;
         };
         "AnonymousTypeOfstringAndString[]AndAnonymousTypeOfstringAndstringAndstring": {
             authMode: null | string;
@@ -18498,6 +18479,25 @@ export interface components {
             reason?: null | string;
             /** Format: int32 */
             rowVersion: number;
+        };
+        PortfolioTiles: {
+            /** Format: int32 */
+            active: number;
+            /** Format: int32 */
+            green: number;
+            /** Format: int32 */
+            overdueDecisions: number;
+            /** Format: int32 */
+            red: number;
+            /** Format: int32 */
+            submissions14: number;
+            /** Format: int32 */
+            yellow: number;
+        };
+        PortfolioView: {
+            ownOnly: boolean;
+            projects: components["schemas"]["JsonArray"];
+            tiles: components["schemas"]["PortfolioTiles"];
         };
         PrerequisiteBody: {
             /** Format: uuid */

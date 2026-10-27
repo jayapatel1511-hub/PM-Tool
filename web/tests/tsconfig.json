@@ -18,6 +18,7 @@
     "decisions.fixture.cjs",
     "comments.fixture.cjs",
     "activity.fixture.cjs",
-    "task-start.fixture.cjs"
+    "task-start.fixture.cjs",
+    "portfolio.fixture.cjs"
   ]
 }

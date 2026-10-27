@@ -11368,39 +11368,6 @@
     "$.components.schemas.AnonymousTypeOfRowAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndRowAndIEnumerableOfAnonymousTypeOfintAndGuidAndRow.type": [
       "string"
     ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndAnonymousTypeOfintAndintAndintAndintAndintAndintAndJsonArray": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndAnonymousTypeOfintAndintAndintAndintAndintAndintAndJsonArray.properties": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndAnonymousTypeOfintAndintAndintAndintAndintAndintAndJsonArray.properties.ownOnly": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndAnonymousTypeOfintAndintAndintAndintAndintAndintAndJsonArray.properties.ownOnly.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndAnonymousTypeOfintAndintAndintAndintAndintAndintAndJsonArray.properties.projects": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndAnonymousTypeOfintAndintAndintAndintAndintAndintAndJsonArray.properties.projects.$ref": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndAnonymousTypeOfintAndintAndintAndintAndintAndintAndJsonArray.properties.tiles": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndAnonymousTypeOfintAndintAndintAndintAndintAndintAndJsonArray.properties.tiles.$ref": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndAnonymousTypeOfintAndintAndintAndintAndintAndintAndJsonArray.required": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndAnonymousTypeOfintAndintAndintAndintAndintAndintAndJsonArray.required[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndAnonymousTypeOfintAndintAndintAndintAndintAndintAndJsonArray.type": [
-      "string"
-    ],
     "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndint": [
       "object"
     ],
@@ -11756,93 +11723,6 @@
       "string"
     ],
     "$.components.schemas.AnonymousTypeOfintAndint.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndintAndintAndintAndintAndint": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndintAndintAndintAndintAndint.properties": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndintAndintAndintAndintAndint.properties.active": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndintAndintAndintAndintAndint.properties.active.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndintAndintAndintAndintAndint.properties.active.pattern": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndintAndintAndintAndintAndint.properties.active.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndintAndintAndintAndintAndint.properties.green": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndintAndintAndintAndintAndint.properties.green.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndintAndintAndintAndintAndint.properties.green.pattern": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndintAndintAndintAndintAndint.properties.green.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndintAndintAndintAndintAndint.properties.overdueDecisions": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndintAndintAndintAndintAndint.properties.overdueDecisions.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndintAndintAndintAndintAndint.properties.overdueDecisions.pattern": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndintAndintAndintAndintAndint.properties.overdueDecisions.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndintAndintAndintAndintAndint.properties.red": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndintAndintAndintAndintAndint.properties.red.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndintAndintAndintAndintAndint.properties.red.pattern": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndintAndintAndintAndintAndint.properties.red.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndintAndintAndintAndintAndint.properties.submissions14": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndintAndintAndintAndintAndint.properties.submissions14.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndintAndintAndintAndintAndint.properties.submissions14.pattern": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndintAndintAndintAndintAndint.properties.submissions14.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndintAndintAndintAndintAndint.properties.yellow": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndintAndintAndintAndintAndint.properties.yellow.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndintAndintAndintAndintAndint.properties.yellow.pattern": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndintAndintAndintAndintAndint.properties.yellow.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndintAndintAndintAndintAndint.required": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndintAndintAndintAndintAndint.required[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndintAndintAndintAndintAndint.type": [
       "string"
     ],
     "$.components.schemas.AnonymousTypeOfstringAndString[]AndAnonymousTypeOfstringAndstringAndstring": [
@@ -25001,6 +24881,126 @@
       "string"
     ],
     "$.components.schemas.PlanningVersionBody.type": [
+      "string"
+    ],
+    "$.components.schemas.PortfolioTiles": [
+      "object"
+    ],
+    "$.components.schemas.PortfolioTiles.properties": [
+      "object"
+    ],
+    "$.components.schemas.PortfolioTiles.properties.active": [
+      "object"
+    ],
+    "$.components.schemas.PortfolioTiles.properties.active.format": [
+      "string"
+    ],
+    "$.components.schemas.PortfolioTiles.properties.active.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PortfolioTiles.properties.active.type": [
+      "string"
+    ],
+    "$.components.schemas.PortfolioTiles.properties.green": [
+      "object"
+    ],
+    "$.components.schemas.PortfolioTiles.properties.green.format": [
+      "string"
+    ],
+    "$.components.schemas.PortfolioTiles.properties.green.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PortfolioTiles.properties.green.type": [
+      "string"
+    ],
+    "$.components.schemas.PortfolioTiles.properties.overdueDecisions": [
+      "object"
+    ],
+    "$.components.schemas.PortfolioTiles.properties.overdueDecisions.format": [
+      "string"
+    ],
+    "$.components.schemas.PortfolioTiles.properties.overdueDecisions.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PortfolioTiles.properties.overdueDecisions.type": [
+      "string"
+    ],
+    "$.components.schemas.PortfolioTiles.properties.red": [
+      "object"
+    ],
+    "$.components.schemas.PortfolioTiles.properties.red.format": [
+      "string"
+    ],
+    "$.components.schemas.PortfolioTiles.properties.red.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PortfolioTiles.properties.red.type": [
+      "string"
+    ],
+    "$.components.schemas.PortfolioTiles.properties.submissions14": [
+      "object"
+    ],
+    "$.components.schemas.PortfolioTiles.properties.submissions14.format": [
+      "string"
+    ],
+    "$.components.schemas.PortfolioTiles.properties.submissions14.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PortfolioTiles.properties.submissions14.type": [
+      "string"
+    ],
+    "$.components.schemas.PortfolioTiles.properties.yellow": [
+      "object"
+    ],
+    "$.components.schemas.PortfolioTiles.properties.yellow.format": [
+      "string"
+    ],
+    "$.components.schemas.PortfolioTiles.properties.yellow.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PortfolioTiles.properties.yellow.type": [
+      "string"
+    ],
+    "$.components.schemas.PortfolioTiles.required": [
+      "array"
+    ],
+    "$.components.schemas.PortfolioTiles.required[]": [
+      "string"
+    ],
+    "$.components.schemas.PortfolioTiles.type": [
+      "string"
+    ],
+    "$.components.schemas.PortfolioView": [
+      "object"
+    ],
+    "$.components.schemas.PortfolioView.properties": [
+      "object"
+    ],
+    "$.components.schemas.PortfolioView.properties.ownOnly": [
+      "object"
+    ],
+    "$.components.schemas.PortfolioView.properties.ownOnly.type": [
+      "string"
+    ],
+    "$.components.schemas.PortfolioView.properties.projects": [
+      "object"
+    ],
+    "$.components.schemas.PortfolioView.properties.projects.$ref": [
+      "string"
+    ],
+    "$.components.schemas.PortfolioView.properties.tiles": [
+      "object"
+    ],
+    "$.components.schemas.PortfolioView.properties.tiles.$ref": [
+      "string"
+    ],
+    "$.components.schemas.PortfolioView.required": [
+      "array"
+    ],
+    "$.components.schemas.PortfolioView.required[]": [
+      "string"
+    ],
+    "$.components.schemas.PortfolioView.type": [
       "string"
     ],
     "$.components.schemas.PrerequisiteBody": [
@@ -60346,6 +60346,29 @@
     ]
   },
   "GET /api/v1/portfolio/admin-review 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "GET /api/v1/portfolio/export 403": {
     "$": [
       "object"
     ],

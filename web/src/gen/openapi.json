@@ -1911,25 +1911,6 @@
         ],
         "type": "object"
       },
-      "AnonymousTypeOfbooleanAndAnonymousTypeOfintAndintAndintAndintAndintAndintAndJsonArray": {
-        "properties": {
-          "ownOnly": {
-            "type": "boolean"
-          },
-          "projects": {
-            "$ref": "#/components/schemas/JsonArray"
-          },
-          "tiles": {
-            "$ref": "#/components/schemas/AnonymousTypeOfintAndintAndintAndintAndintAndint"
-          }
-        },
-        "required": [
-          "ownOnly",
-          "tiles",
-          "projects"
-        ],
-        "type": "object"
-      },
       "AnonymousTypeOfbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndint": {
         "properties": {
           "admin": {
@@ -2134,49 +2115,6 @@
         "required": [
           "notifications",
           "following"
-        ],
-        "type": "object"
-      },
-      "AnonymousTypeOfintAndintAndintAndintAndintAndint": {
-        "properties": {
-          "active": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          },
-          "green": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          },
-          "overdueDecisions": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          },
-          "red": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          },
-          "submissions14": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          },
-          "yellow": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "active",
-          "red",
-          "yellow",
-          "green",
-          "submissions14",
-          "overdueDecisions"
         ],
         "type": "object"
       },
@@ -9866,6 +9804,68 @@
         },
         "required": [
           "rowVersion"
+        ],
+        "type": "object"
+      },
+      "PortfolioTiles": {
+        "properties": {
+          "active": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "green": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "overdueDecisions": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "red": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "submissions14": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "yellow": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "active",
+          "red",
+          "yellow",
+          "green",
+          "submissions14",
+          "overdueDecisions"
+        ],
+        "type": "object"
+      },
+      "PortfolioView": {
+        "properties": {
+          "ownOnly": {
+            "type": "boolean"
+          },
+          "projects": {
+            "$ref": "#/components/schemas/JsonArray"
+          },
+          "tiles": {
+            "$ref": "#/components/schemas/PortfolioTiles"
+          }
+        },
+        "required": [
+          "ownOnly",
+          "tiles",
+          "projects"
         ],
         "type": "object"
       },
@@ -21610,7 +21610,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnonymousTypeOfbooleanAndAnonymousTypeOfintAndintAndintAndintAndintAndintAndJsonArray"
+                  "$ref": "#/components/schemas/PortfolioView"
                 }
               }
             },

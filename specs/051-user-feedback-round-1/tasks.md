@@ -16,7 +16,7 @@ Each slice is one PR. Slices in Parts A, B and C merge dark behind `flag.data_en
   - `useDraft`, `useUnsavedGuard`; adopted by every create dialog, register form, comment and rich-text editor; the Reload action of FR-LIVE-03 goes through the guard.
   - Covers FR-SAV-03, FR-SAV-04, FR-SAV-06; AC-SAV-01, AC-SAV-05.
   - Tests: `data-entry.cjs` (Escape then reopen restores; Discard clears; prompt on navigation without a draft; no draft for an empty form; pruned after `draft_keep_days`).
-- [ ] S04 Sign-in expiry (S). After S03.
+- [x] S04 Sign-in expiry (S). After S03.
   - Pending field or draft stored before `onUnauthorized`; same route reopened after sign-in; one retry.
   - Covers FR-SAV-05; AC-SAV-04.
   - Tests: `data-entry.cjs` with an expired dev session.

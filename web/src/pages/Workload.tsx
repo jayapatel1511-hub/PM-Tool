@@ -27,7 +27,7 @@ import type { Page as PageOf } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import type { SavedViewKeys } from '@/gen/registry.gen'
 import { GROUP_BY, GROUP_LABEL, groupPeople } from '@/components/planner/labels'
-import { descendantUnitIds, useOrgPlacement } from '@/hooks/useOrgPlacement'
+import { descendantUnitIds, unitLabel, useOrgPlacement } from '@/hooks/useOrgPlacement'
 import { MenuSelect, errorText } from './projects/Tasks'
 
 /** The server's load band for the week (FR-FIG-05), from the organisation's workload thresholds. */
@@ -92,7 +92,7 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
   const groupBy = (GROUP_BY as readonly string[]).includes(sp.get('groupBy') ?? '') || (org.enabled && sp.get('groupBy') === 'homeUnit') ? sp.get('groupBy')! : 'supervisor'
   const unitIds = filters.unitId ? descendantUnitIds(org.units, filters.unitId) : null
   const scopedPeople = org.enabled && filters.unitId ? people.filter(p => org.placementMap.has(p.id) && unitIds!.has(org.placementMap.get(p.id) as string)) : people
-  const unitName = (id: string | null | undefined) => id == null ? t('staff.group.notSet') : org.units.find(u => u.id === id)?.name ?? t('staff.group.unknown')
+  const unitName = (id: string | null | undefined) => id == null ? t('staff.group.notSet') : unitLabel(org.units, id) ?? t('staff.group.unknown')
   const groups = groupBy === 'homeUnit' ? [...scopedPeople.reduce((m, p) => { const unit = org.placementMap.get(p.id); const key = unit === undefined ? t('staff.group.unknown') : unitName(unit); m.set(key, [...(m.get(key) ?? []), p]); return m }, new Map<string, PersonRow[]>())] : groupPeople(scopedPeople, groupBy, ref.data)
   const allPartial = people.length > 0 && people.every((p) => p.partialScope)
   const named = useFlag('figure_names')
@@ -159,7 +159,7 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
                 <option value="">{t('workload.anyProject')}</option>{projects.data?.items.map((p) => <option key={p.id} value={p.id}>{p.projectNumber} {p.name}</option>)}
               </select>
             </Field>
-            {org.enabled && <Field label={t('org.unit')} htmlFor="wl-unit" className="w-full sm:w-56"><select id="wl-unit" className={selectCls} value={filters.unitId ?? ''} onChange={(e) => set('unitId', e.target.value)}><option value="">{t('org.anyUnit')}</option>{org.units.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}</select></Field>}
+            {org.enabled && <Field label={t('org.unit')} htmlFor="wl-unit" className="w-full sm:w-56"><select id="wl-unit" className={selectCls} value={filters.unitId ?? ''} onChange={(e) => set('unitId', e.target.value)}><option value="">{t('org.anyUnit')}</option>{org.units.map(u => <option key={u.id} value={u.id}>{unitLabel(org.units, u.id)}</option>)}</select></Field>}
             <Field label={t('workload.from')} htmlFor="wl-from" className="w-full sm:w-44">
               <Input id="wl-from" type="date" value={filters.from ?? ''} onChange={(e) => set('from', e.target.value)} />
             </Field>

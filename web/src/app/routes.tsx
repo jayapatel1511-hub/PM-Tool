@@ -33,6 +33,7 @@ const MissingPage = lazy(() => lazyImport(NotFound.routeLoad))
 const PickupPage = route(() => import('@/pages/Pickup').then(m => ({ default: m.PickupPage })))
 const OrganisationPage = route(() => import('@/pages/Organisation').then(m => ({ default: m.OrganisationPage })))
 const StructureAdmin = route(() => import('@/pages/admin/Structure').then(m => ({ default: m.StructureAdmin })))
+const AdminReview = route(() => import('@/pages/admin/AdminReview').then(m => ({ default: m.AdminReview })))
 const AuditChains = route(() => import('@/pages/admin/AuditChains').then(m => ({ default: m.AuditChains })))
 const HomePage = route(() => import('@/pages/Home').then(m => ({ default: m.HomePage })))
 const WorkspaceBoardPage = route(() => import('@/pages/WorkspaceTasks').then(m => ({ default: m.WorkspaceBoardPage })))
@@ -106,6 +107,7 @@ export const routes: RouteObject[] = [
   { path: 'organisation', ...routed(OrganisationPage, 'org_structure') },
   { path: 'admin/structure', ...admin(StructureAdmin, 'org_structure') },
   { path: 'admin/audit-chains', ...admin(AuditChains, 'verifiable_log') },
+  { path: 'admin/review', ...admin(AdminReview, 'admin_review') },
   { path: 'my-work', element: <MyWorkPage /> },
   { path: 'home', ...routed(HomePage) },
   { path: 'boards', ...routed(WorkspaceBoardPage) },

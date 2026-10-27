@@ -31,6 +31,7 @@ export const itemKeys: Readonly<Record<string, readonly string[]>> = {
   OrgLevel: ['admin', 'organisation', 'organisation-placements', 'staff', 'workload', 'planning-grid', 'report'],
   OrgUnit: ['admin', 'organisation', 'organisation-placements', 'staff', 'workload', 'planning-grid', 'report'],
   CommitmentMissCategory: ['admin', 'weekly-promise', 'readiness-detail'],
+  AdminReview: ['admin'],
   UserPreferences: ['onboarding', 'me'],
   Project: ['projects-pick', 'planner-projects-filter', 'workspace-coordination', 'portfolio', 'workload'],
   Member: ['coord-options', 'staff', 'workload', 'workspace-coordination'],

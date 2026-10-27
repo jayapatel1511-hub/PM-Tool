@@ -32,12 +32,13 @@ const Active = ({ on }: { on: boolean }) => <Pill tone={on ? 'ok' : 'idle'}>{on 
 
 /** Administration (§13.15): plain forms and lifecycle tables under one row of tabs; desktop and tablet only (§13.0). */
 export function AdminLayout({ children }: { children: React.ReactNode }) {
-  const structure = useFlag('org_structure'), chain = useFlag('verifiable_log')
+  const structure = useFlag('org_structure'), chain = useFlag('verifiable_log'), adminReview = useFlag('admin_review')
   const title = t('admin.title')
   const links = [...KINDS.map((k) => ({ to: `/admin/reference/${k}`, label: runtimeText(`admin.${k}`) })),
     { to: '/admin/settings', label: t('admin.settings') }, { to: '/admin/users', label: t('admin.users') }, { to: '/admin/activity', label: t('admin.activity') },
     ...(structure ? [{ to: '/admin/structure', label: t('admin.structure.title') }] : []),
     ...(chain ? [{ to: '/admin/audit-chains', label: t('auditChains.title') }] : []),
+    ...(adminReview ? [{ to: '/admin/review', label: t('adminReview.title') }] : []),
     ...ADMIN_EXTRA]
   return (
     <DesktopOnly notice={<Page title={title}><Notice icon={Monitor} title={t('app.phoneNotice')}

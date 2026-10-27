@@ -183,7 +183,7 @@ function BottomLink({ to, icon: Icon, label }: { to: string; icon: React.Compone
 }
 
 /** Pages the navigation lists under another entry, or not at all, still name themselves in the breadcrumb. */
-const CRUMBS: Record<string, string> = { '/timeline': 'wsview.timeline', '/search': 'search.title', '/preferences': 'top.preferences', '/planner': 'planner.title', '/workload': 'nav.workload', '/boards': 'nav.boards', '/calendar': 'nav.calendar', '/admin/users': 'admin.users', '/admin/settings': 'admin.settings', '/admin/activity': 'admin.activity', '/admin/operations': 'ops.title', '/admin/holidays': 'holiday.title' }
+const CRUMBS: Record<string, string> = { '/timeline': 'wsview.timeline', '/search': 'search.title', '/preferences': 'top.preferences', '/planner': 'planner.title', '/workload': 'nav.workload', '/boards': 'nav.boards', '/calendar': 'nav.calendar', '/admin/users': 'admin.users', '/admin/settings': 'admin.settings', '/admin/activity': 'admin.activity', '/admin/operations': 'ops.title', '/admin/holidays': 'holiday.title', '/admin/review': 'adminReview.title' }
 
 /** Where you are: the app, the section from the navigation, and inside a project its number, name and tab. The project
  *  name comes from the same cached query as the project header, so this adds no request. */

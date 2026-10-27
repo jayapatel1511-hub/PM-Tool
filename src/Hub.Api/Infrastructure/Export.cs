@@ -29,9 +29,15 @@ public static class Export
 
     public static byte[] Bom(string s) => [.. Encoding.UTF8.GetPreamble(), .. Encoding.UTF8.GetBytes(s)];
 
-    public static byte[] ToCsv(IEnumerable<object> rows, IReadOnlyList<ExportColumn> cols)
+    /// `header` is an optional block of label,value lines above the column row, set off by one blank line (§55.4 FR-ADR-06).
+    public static byte[] ToCsv(IEnumerable<object> rows, IReadOnlyList<ExportColumn> cols, IReadOnlyList<(string, string)>? header = null)
     {
         var sb = new StringBuilder();
+        if (header is { Count: > 0 })
+        {
+            foreach (var (k, v) in header) sb.AppendLine($"{Csv(k)},{Csv(v)}");
+            sb.AppendLine();
+        }
         sb.AppendLine(string.Join(",", cols.Select(c => Csv(c.Header))));
         foreach (var r in rows) sb.AppendLine(string.Join(",", cols.Select(c => Csv(Format(c.Value(r))))));
         return Bom(sb.ToString());

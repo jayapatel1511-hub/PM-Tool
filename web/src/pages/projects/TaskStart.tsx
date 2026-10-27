@@ -8,7 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { ApiError, get, post } from '@/lib/api'
+import { ApiError, post, typedRequest } from '@/lib/api'
 import { fmtDate } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 
@@ -16,20 +16,13 @@ import { t, tv } from '@/lib/i18n'
  *  recording a start authorisation for the performer (FR-RDY-02). */
 export interface StartRequest { id: string; key: string; to?: string; body?: Record<string, unknown> }
 
-interface StartReadiness {
-  readinessState: string; assessed: boolean; unknown: string[]; blocked: string[]; note?: string | null
-  needsAuthorisation: boolean; canAuthorise: boolean
-  authorisation?: Authorisation | null; unusableAuthorisation?: Authorisation | null
-}
-interface Authorisation { id: string; authorisedByName?: string | null; reason: string; createdAt: string }
-
 /** Attention text keeps its ▲ symbol and tint, so the warning never rests on colour alone. */
 const warnBox = 'rounded-md border border-warn/40 bg-warn-bg px-4 py-3 text-warn'
 
 /** Readiness warning for a start that is Not Ready or Needs Assessment: the starter acknowledges it and gives a reason;
  *  a PM or Discipline Lead authorises inline, anyone else needs the authorisation recorded for this readiness. */
 export function StartAuthorisationDialog({ req, onClose }: { req: StartRequest; onClose: (done: boolean) => void }) {
-  const q = useQuery({ queryKey: ['task-start', req.id], queryFn: () => get<StartReadiness>(`tasks/${req.id}/start-readiness`), gcTime: 0 })
+  const q = useQuery({ queryKey: ['task-start', req.id], queryFn: () => typedRequest('get', '/api/v1/tasks/{id}/start-readiness', { params: { id: req.id } }), gcTime: 0 })
   const [ack, setAck] = useState(false), [reason, setReason] = useState(''), [busy, setBusy] = useState(false), [err, setErr] = useState<unknown>(null)
   const receipt = useRef<{ signature: string; id: string } | null>(null)
   const starting = !!req.body, r = q.data
@@ -43,7 +36,7 @@ export function StartAuthorisationDialog({ req, onClose }: { req: StartRequest; 
   const record = () => run(async () => {
     const payload = { acknowledged: true, reason: reason.trim() }, signature = JSON.stringify(payload)
     if (receipt.current?.signature !== signature) receipt.current = { signature, id: crypto.randomUUID() }
-    await post(`tasks/${req.id}/start-authorisations`, { ...payload, requestId: receipt.current.id })
+    await typedRequest('post', '/api/v1/tasks/{id}/start-authorisations', { params: { id: req.id }, body: { ...payload, requestId: receipt.current.id } })
     toast.success(t('tasks.startAuthRecorded', { key: req.key }))
   })
   return (

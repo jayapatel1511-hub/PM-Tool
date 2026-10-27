@@ -17,6 +17,7 @@
     "document-links.fixture.cjs",
     "decisions.fixture.cjs",
     "comments.fixture.cjs",
-    "activity.fixture.cjs"
+    "activity.fixture.cjs",
+    "task-start.fixture.cjs"
   ]
 }

@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
@@ -97,7 +98,7 @@ public static class ActivityEndpoints
     public static async Task<List<ActivityEntry>> Render(HubDb db, List<ActivityLog> rows)
     {
         var parsed = rows.Select(r => (Row: r, Changes: JsonSerializer.Deserialize<List<Change>>(r.Changes, JsonOpts.Web) ?? [],
-            Snapshot: r.Snapshot is null ? (JsonElement?)null : JsonSerializer.Deserialize<JsonElement>(r.Snapshot))).ToList();
+            Snapshot: r.Snapshot is null ? (JsonElement?)null : Unshown(JsonSerializer.Deserialize<JsonElement>(r.Snapshot)))).ToList();
         var ids = new HashSet<Guid>();
         foreach (var (r, cs, snapshot) in parsed)
         {
@@ -111,7 +112,8 @@ public static class ActivityEndpoints
             : v is { } x && x.ValueKind != JsonValueKind.Null ? (x.ValueKind == JsonValueKind.String ? x.GetString() : x.ToString()) : null;
         return parsed.Select(p =>
         {
-            var changes = p.Changes.Select(c => new ChangeLine(c.Field, c.Old, c.New, L(c.Old), L(c.New))).ToList();
+            var changes = p.Changes.Select(c => NotShown.Contains(c.Field) ? new ChangeLine(c.Field, null, null, Text.Get("activity.notShown"), Text.Get("activity.notShown"))
+                : new ChangeLine(c.Field, c.Old, c.New, L(c.Old), L(c.New))).ToList();
             var snapshotLabels = p.Snapshot is { ValueKind: JsonValueKind.Object } s
                 ? s.EnumerateObject().ToDictionary(field => field.Name, field => L(field.Value)) : null;
             var summary = p.Row.Action == "Deleted" && snapshotLabels is not null
@@ -132,6 +134,17 @@ public static class ActivityEndpoints
     }
 
     /// Field labels for summaries; the SPA translates field names itself.
+    /// Fields whose values only some readers of the log may see (a project's internal notes are for members and management,
+    /// while its log is open to every viewer): the log says they changed, never what to.
+    static readonly HashSet<string> NotShown = ["InternalNotes"];
+    static JsonElement Unshown(JsonElement snapshot)
+    {
+        if (snapshot.ValueKind != JsonValueKind.Object || !NotShown.Any(f => snapshot.TryGetProperty(f, out _))) return snapshot;
+        var node = JsonNode.Parse(snapshot.GetRawText())!.AsObject();
+        foreach (var f in NotShown) node.Remove(f);
+        return JsonSerializer.Deserialize<JsonElement>(node.ToJsonString());
+    }
+
     static string Label(string field) => field.EndsWith("Id") && field.Length > 2 ? field[..^2] : field;
 
     public static Task<Dictionary<Guid, string>> Names(HubDb db, HashSet<Guid> ids) =>

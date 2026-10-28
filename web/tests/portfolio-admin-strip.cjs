@@ -15,7 +15,7 @@ const personId = '00000000-0000-0000-0000-000000000002'
   page.setDefaultTimeout(10000)
   const fallback = mockPlatformApi(page)
   const errors = [], stripGets = []
-  let flag = true, roles = ['Executive'], admin = false, answer = strip
+  let flag = true, roles = ['Executive'], admin = false, answer = strip, portfolio = emptyPortfolio
   await page.addInitScript(() => { sessionStorage.setItem('hub.devUser', 'alex@hub.test'); sessionStorage.setItem('hub.signedIn', '1') })
   page.on('pageerror', e => errors.push(e.message))
   await page.route('**/api/**', async route => {
@@ -28,7 +28,7 @@ const personId = '00000000-0000-0000-0000-000000000002'
     else if (p === 'organisation') data = { includeIndirectReports: false, units: [] }
     else if (p === 'workspaces') data = []
     else if (p === 'views') data = { views: [], canShare: false }
-    else if (p === 'portfolio') data = emptyPortfolio()
+    else if (p === 'portfolio') data = portfolio()
     else if (p === 'portfolio/admin-review') { stripGets.push(p); data = answer }
     else { await route.fallback(); return }
     await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(data) })
@@ -59,7 +59,14 @@ const personId = '00000000-0000-0000-0000-000000000002'
     roles = ['Executive']; flag = false
     await open(); assert.equal(await stripBox.count(), 0)
     assert.equal(stripGets.length, before, 'no request for the strip')
+
+    // FR-REC-14: a large default font grows the rem breakpoints but not the px phone switch; the table must still show.
+    portfolio = () => ({ ownOnly: false, tiles: { active: 1, red: 0, yellow: 0, green: 1, submissions14: 0, overdueDecisions: 0 }, projects: [{ id: '00000000-0000-0000-0000-000000000040', projectNumber: 'P-0040', name: 'Synthetic project', status: 'Active', client: { id: '00000000-0000-0000-0000-000000000050', name: 'Synthetic client' }, pm: { id: personId, displayName: 'Alex Chen' }, officeId: null, office: null, phase: null, projectTypeId: null, projectType: null, health: { computed: 'Green', reported: 'Green' }, trend: [], overdueDeliverables: 0, overdueTasks: 0, blockedTasks: 0, decisionsOverdue: 0, highIssues: 0, attention: 0 }] })
+    await page.setViewportSize({ width: 1000, height: 800 })
+    await (await page.context().newCDPSession(page)).send('Page.setFontSizes', { fontSizes: { standard: 24, fixed: 20 } })
+    await page.goto(`${base}/portfolio`); await page.locator('table').waitFor({ state: 'attached' })
+    assert.ok(await page.locator('table').isVisible(), 'the Portfolio table shows at 1000 px with a 24 px default font')
     assert.deepEqual(errors, []); assert.deepEqual(fallback.unknownGets, [])
-    console.log(JSON.stringify({ scope: 'Chromium mocked portfolio admin strip', executive: true, none: true, admin: true, supervisorAbsent: true, flagOffAbsent: true, axe, errors }))
+    console.log(JSON.stringify({ scope: 'Chromium mocked portfolio admin strip', executive: true, none: true, admin: true, supervisorAbsent: true, flagOffAbsent: true, largeFontTable: true, axe, errors }))
   } finally { await browser.close(); child.kill() }
 })().catch(e => { console.error(e); process.exitCode = 1 })

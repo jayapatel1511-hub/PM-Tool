@@ -13,11 +13,13 @@ const checks = [
   { key: 'noManager', title: 'Users without a manager', rule: 'Active users with no manager', count: 1, listUrl: '/admin/review/checks/noManager' },
   { key: 'noSignIn', title: 'No sign-in for 90 days', rule: 'Active users whose last sign-in is more than 90 days ago', count: 0, listUrl: '/admin/review/checks/noSignIn' },
   { key: 'inactiveReference', title: 'Reference data deactivated while in use', rule: 'Inactive reference data still set on a live project', count: 1, listUrl: '/admin/review/checks/inactiveReference' },
+  { key: 'settingsChanged', title: 'Settings changed', rule: 'Organisation settings changed since the last review', count: 1, listUrl: '/admin/review/checks/settingsChanged' },
 ]
 const lists = {
   inactiveOnTeams: [{ id: alexId, name: 'Alex Chen', detail: 'alex@hub.test', at: null, link: `/people/${alexId}/reassign-work` }, { id: null, name: 'Omar Diaz', detail: 'omar@hub.test', at: null, link: '/people/o/reassign-work' }],
   noManager: [{ id: 'lena', name: 'Lena Park', detail: 'lena@hub.test', at: null, link: '/admin/users' }],
   inactiveReference: [{ id: 'c1', name: 'Old client', detail: 'clients', at: null, link: '/admin/reference/clients' }],
+  settingsChanged: [{ id: null, name: 'task_due_soon_days', detail: null, at: '2026-10-10T12:00:00Z', link: '/admin/settings' }],
 }
 
 async function run(base, { flagOn, admin = true }) {
@@ -83,6 +85,8 @@ async function run(base, { flagOn, admin = true }) {
     await page.getByRole('link', { name: 'Open Old client' }).waitFor()
     await page.getByRole('button', { name: 'Show list: Users without a manager (1)' }).click()
     assert.equal(await page.getByRole('link', { name: 'Open Lena Park' }).getAttribute('href'), '/admin/users')
+    await page.getByRole('button', { name: 'Show list: Settings changed (1)' }).click()
+    await page.getByRole('link', { name: 'Open Task due soon (days)' }).waitFor() // the Settings page's name, not the raw key
 
     // Axe: the open lists and the form meet WCAG 2.1 AA (§22).
     await page.addScriptTag({ path: require.resolve('axe-core/axe.min.js') })

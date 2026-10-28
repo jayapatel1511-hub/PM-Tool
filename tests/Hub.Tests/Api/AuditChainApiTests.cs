@@ -44,14 +44,17 @@ public sealed class AuditChainApiTests
         });
         await Enable(f); await d.NewTask(project.Id);
         var admin = f.As(TestData.Admin);
-        var verified = await (await admin.GetAsync($"/api/v1/admin/audit-chains/{project.Id}/verify")).Json();
+        var verified = await (await admin.Post($"/api/v1/admin/audit-chains/{project.Id}/verify", new { })).Json();
         Assert.True(verified["valid"]!.GetValue<bool>()); Assert.True(verified["total"]!.GetValue<long>() >= 10_000);
+        // A verify can alert every Admin, so it is a POST under the Origin check; a link (GET) cannot run it.
+        Assert.Equal(System.Net.HttpStatusCode.NotFound, (await admin.GetAsync($"/api/v1/admin/audit-chains/{project.Id}/verify?headSeq=1&headHash=x")).StatusCode);
+        Assert.Null(await f.DbAsync(db => db.Set<ActivityChainHead>().Where(h => h.ChainId == project.Id).Select(h => h.FirstBrokenSeq).SingleAsync()));
         var marker = await f.DbAsync(db => db.ActivityLog.Where(a => a.ProjectId == project.Id && a.Action == "Chain started").SingleAsync());
         Assert.True(JsonDocument.Parse(marker.Changes).RootElement[0].GetProperty("new").GetInt32() >= 10_000);
         await (await admin.GetAsync($"/api/v1/projects/{project.Id}/activity")).Json();
         var record = await (await admin.GetAsync($"/api/v1/admin/audit-chains/{project.Id}/record?format=json")).Json();
         await d.NewTask(project.Id);
-        var anchored = await (await admin.GetAsync($"/api/v1/admin/audit-chains/{project.Id}/verify?headSeq={record["headSeq"]}&headHash={record["headHash"]}")).Json();
+        var anchored = await (await admin.Post($"/api/v1/admin/audit-chains/{project.Id}/verify?headSeq={record["headSeq"]}&headHash={record["headHash"]}", new { })).Json();
         Assert.True(anchored["valid"]!.GetValue<bool>());
         var target = await f.DbAsync(db => db.ActivityLog.Where(a => a.ProjectId == project.Id && a.Action == "Legacy").OrderBy(a => a.ChainSeq).FirstAsync());
         await f.DbAsync(async db =>
@@ -61,10 +64,10 @@ public sealed class AuditChainApiTests
             finally { await db.Database.ExecuteSqlRawAsync("ALTER TABLE hub.activity_log ENABLE TRIGGER activity_log_no_update"); }
             return 0;
         });
-        var failed = await (await admin.GetAsync($"/api/v1/admin/audit-chains/{project.Id}/verify")).Json();
+        var failed = await (await admin.Post($"/api/v1/admin/audit-chains/{project.Id}/verify", new { })).Json();
         Assert.False(failed["valid"]!.GetValue<bool>()); Assert.Equal(target.ChainSeq, failed["firstBrokenSeq"]!.GetValue<long>());
         var mails = await f.DbAsync(db => db.Emails.CountAsync(e => e.DedupKey != null && e.DedupKey.StartsWith($"audit-chain:{project.Id}:")));
-        await (await admin.GetAsync($"/api/v1/admin/audit-chains/{project.Id}/verify")).Json();
+        await (await admin.Post($"/api/v1/admin/audit-chains/{project.Id}/verify", new { })).Json();
         Assert.Equal(mails, await f.DbAsync(db => db.Emails.CountAsync(e => e.DedupKey != null && e.DedupKey.StartsWith($"audit-chain:{project.Id}:"))));
         Assert.True(mails > 0);
         Assert.Equal(1, await f.DbAsync(db => db.ActivityLog.CountAsync(a => a.ProjectId == project.Id && a.Action == "Chain started")));
@@ -103,18 +106,18 @@ public sealed class AuditChainApiTests
         var admin = f.As(TestData.Admin);
         var head = await f.DbAsync(db => db.Set<ActivityChainHead>().AsNoTracking().SingleAsync(h => h.ChainId == p.Id));
         Assert.Equal(0, head.LastVerifiedSeq);
-        Assert.Equal(System.Net.HttpStatusCode.BadRequest, (await admin.GetAsync($"/api/v1/admin/audit-chains/{p.Id}/verify?from={head.HeadSeq + 1}")).StatusCode);
-        await (await admin.GetAsync($"/api/v1/admin/audit-chains/{p.Id}/verify?from={head.HeadSeq}")).Json();
+        Assert.Equal(System.Net.HttpStatusCode.BadRequest, (await admin.Post($"/api/v1/admin/audit-chains/{p.Id}/verify?from={head.HeadSeq + 1}", new { })).StatusCode);
+        await (await admin.Post($"/api/v1/admin/audit-chains/{p.Id}/verify?from={head.HeadSeq}", new { })).Json();
         var partial = await f.DbAsync(db => db.Set<ActivityChainHead>().AsNoTracking().SingleAsync(h => h.ChainId == p.Id));
         Assert.Equal(0, partial.LastVerifiedSeq); Assert.Null(partial.LastVerifiedAt);
-        await (await admin.GetAsync($"/api/v1/admin/audit-chains/{p.Id}/verify?headSeq=1")).Json();
+        await (await admin.Post($"/api/v1/admin/audit-chains/{p.Id}/verify?headSeq=1", new { })).Json();
         var prefixIntegrity = await (await admin.GetAsync($"/api/v1/projects/{p.Id}/activity/integrity")).Json();
         Assert.Null(prefixIntegrity["valid"]); Assert.Equal(1, prefixIntegrity["verifiedEntries"]!.GetValue<long>());
         var report = await (await admin.GetAsync($"/api/v1/reports/project-activity-log?projectId={p.Id}")).Json();
         Assert.Contains(report["parameters"]!.AsArray(), x => x!["label"]!.GetValue<string>().StartsWith("Log integrity") && x["value"]!.GetValue<string>() == "Log awaiting verification");
-        await (await admin.GetAsync($"/api/v1/admin/audit-chains/{p.Id}/verify")).Json();
+        await (await admin.Post($"/api/v1/admin/audit-chains/{p.Id}/verify", new { })).Json();
         await d.NewTask(p.Id);
-        var verified = await (await admin.GetAsync($"/api/v1/admin/audit-chains/{p.Id}/verify?from={head.HeadSeq + 1}")).Json();
+        var verified = await (await admin.Post($"/api/v1/admin/audit-chains/{p.Id}/verify?from={head.HeadSeq + 1}", new { })).Json();
         Assert.True(verified["valid"]!.GetValue<bool>());
         var after = await f.DbAsync(db => db.Set<ActivityChainHead>().AsNoTracking().SingleAsync(h => h.ChainId == p.Id));
         Assert.Equal(after.HeadSeq, after.LastVerifiedSeq);
@@ -126,7 +129,7 @@ public sealed class AuditChainApiTests
             finally { await db.Database.ExecuteSqlRawAsync("ALTER TABLE hub.activity_log ENABLE TRIGGER activity_log_no_update"); }
             return 0;
         });
-        var broken = await (await admin.GetAsync($"/api/v1/admin/audit-chains/{p.Id}/verify?from={after.LastVerifiedSeq + 1}")).Json();
+        var broken = await (await admin.Post($"/api/v1/admin/audit-chains/{p.Id}/verify?from={after.LastVerifiedSeq + 1}", new { })).Json();
         Assert.False(broken["valid"]!.GetValue<bool>()); Assert.Equal(after.LastVerifiedSeq, broken["firstBrokenSeq"]!.GetValue<long>());
     }
 

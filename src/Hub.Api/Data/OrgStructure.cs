@@ -46,7 +46,7 @@ public static class OrgStructureModel
         {
             e.ToTable("org_units", "hub");
             e.Property(x => x.Name).HasMaxLength(200).IsRequired();
-            e.HasIndex(x => new { x.ParentId, x.Name }).IsUnique();
+            e.HasIndex(x => new { x.ParentId, x.Name }).IsUnique().AreNullsDistinct(false); // two top-level units cannot share a name either (FR-UNT-13)
             e.HasIndex(x => x.LevelId);
             e.HasIndex(x => x.LeaderId);
             e.Property(x => x.RowVersion).IsConcurrencyToken();

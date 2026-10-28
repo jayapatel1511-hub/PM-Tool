@@ -483,7 +483,8 @@ namespace Hub.Api.Data.Migrations
                 schema: "hub",
                 table: "org_unit",
                 columns: new[] { "parent_id", "name" },
-                unique: true);
+                unique: true)
+                .Annotation("Npgsql:NullsDistinct", false);
 
             migrationBuilder.CreateIndex(
                 name: "ix_route_count_day_route_key",

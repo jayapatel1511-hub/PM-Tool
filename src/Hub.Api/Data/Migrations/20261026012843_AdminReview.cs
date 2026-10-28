@@ -45,6 +45,14 @@ namespace Hub.Api.Data.Migrations
                 schema: "hub",
                 table: "admin_review",
                 column: "reviewer_id");
+
+            // FR-ADR-03: a recorded review is access-review evidence, so the database refuses edits and deletes too.
+            migrationBuilder.Sql("""
+CREATE FUNCTION hub.admin_review_immutable() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN RAISE EXCEPTION 'admin_review is append-only'; END $$;
+CREATE TRIGGER admin_review_no_update BEFORE UPDATE OR DELETE ON hub.admin_review FOR EACH ROW EXECUTE FUNCTION hub.admin_review_immutable();
+CREATE TRIGGER admin_review_no_truncate BEFORE TRUNCATE ON hub.admin_review FOR EACH STATEMENT EXECUTE FUNCTION hub.admin_review_immutable();
+""");
         }
 
         /// <inheritdoc />
@@ -53,6 +61,7 @@ namespace Hub.Api.Data.Migrations
             migrationBuilder.DropTable(
                 name: "admin_review",
                 schema: "hub");
+            migrationBuilder.Sql("DROP FUNCTION hub.admin_review_immutable();");
         }
     }
 }

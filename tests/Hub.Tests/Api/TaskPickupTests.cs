@@ -127,10 +127,12 @@ public sealed class TaskPickupTests
             var managerRow = (await (await f.As(TestData.Sam).GetAsync("/api/v1/pickup-offers")).Json()).AsArray().Single(offer => offer!.G("taskId") == id)!;
             Assert.False(managerRow["canPickUp"]!.GetValue<bool>());
             Assert.True(managerRow["canAssign"]!.GetValue<bool>());
+            Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Sam).DeleteAsync($"/api/v1/tasks/{id}/pickup-offer")).StatusCode); // FR-PKP-03: assign, not withdraw
             Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Sam).Post($"/api/v1/tasks/{id}/pickup", new { rowVersion = version })).StatusCode);
             Assert.DoesNotContain((await (await f.As(TestData.Diane).GetAsync("/api/v1/pickup-offers")).Json()).AsArray(), offer => offer!.G("taskId") == id);
             var detail = await (await f.As(TestData.Sam).GetAsync($"/api/v1/tasks/{id}/pickup-offer")).Json();
             Assert.True(detail["allowed"]!["assign"]!.GetValue<bool>());
+            Assert.False(detail["allowed"]!["withdraw"]!.GetValue<bool>());
             Assert.Contains(detail["candidates"]!.AsArray(), candidate => candidate!.G("id") == d.User(TestData.Jill));
             var assigned = await (await f.As(TestData.Sam).Post($"/api/v1/tasks/{id}/pickup-offer/assign", new { userId = d.User(TestData.Jill), rowVersion = version })).Json();
             Assert.Equal(d.User(TestData.Jill), assigned.G("assigneeId"));
@@ -332,6 +334,9 @@ public sealed class TaskPickupTests
             Assert.Equal(1, await Rows(TestData.Jill, picked.Id)); // the picker is in the offer's team
             Assert.Equal(1, await Rows(TestData.Jill, moved.Id)); // the offer's team keeps it after a reassignment outside the team
             Assert.Equal(0, await Rows(TestData.Omar, moved.Id)); // the new assignee's team never saw the offer
+            // FR-PKP-12 follows the list (FR-PKP-04): those who may assign the offer see it too, outside the team.
+            Assert.Equal(1, await Rows(TestData.Sam, picked.Id)); // the offer's assignee's direct manager
+            Assert.Equal(1, await Rows(TestData.Pm, moved.Id)); // the project's PM
         }
     }
 

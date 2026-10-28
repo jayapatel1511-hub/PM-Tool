@@ -133,6 +133,8 @@ public sealed record OrgSettings
         ["route_counter_enabled"] = "route_counter",
         ["autosave_delay_ms"] = "data_entry_safety",
         ["draft_keep_days"] = "data_entry_safety",
+        ["admin_review_interval_days"] = "admin_review",
+        ["admin_review_idle_days"] = "admin_review",
     };
 
     public static OrgSettings From(IReadOnlyDictionary<string, JsonElement> v)

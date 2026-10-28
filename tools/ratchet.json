@@ -99,7 +99,7 @@
       "server": "Only the named sending owner can submit or respond."
     },
     "home.range": {
-      "client": "{from} \u2013 {to}",
+      "client": "{from} – {to}",
       "server": "Choose a range of at most a year, ending after it starts."
     },
     "ind.atRisk": {

@@ -6713,6 +6713,7 @@
       "boolean"
     ],
     "$.actions[].ownerDisciplineId": [
+      "null",
       "string"
     ],
     "$.actions[].ownerExternalPartyId": [
@@ -6728,7 +6729,8 @@
       "string"
     ],
     "$.actions[].ownerUserId": [
-      "null"
+      "null",
+      "string"
     ],
     "$.actions[].partyIsClient": [
       "boolean"
@@ -6937,6 +6939,264 @@
     "$.completed": [
       "array"
     ],
+    "$.completed[]": [
+      "object"
+    ],
+    "$.completed[].assigneeActive": [
+      "boolean"
+    ],
+    "$.completed[].assigneeId": [
+      "string"
+    ],
+    "$.completed[].assigneeName": [
+      "string"
+    ],
+    "$.completed[].can": [
+      "object"
+    ],
+    "$.completed[].can.assign": [
+      "boolean"
+    ],
+    "$.completed[].can.block": [
+      "boolean"
+    ],
+    "$.completed[].can.changeDue": [
+      "boolean"
+    ],
+    "$.completed[].can.edit": [
+      "boolean"
+    ],
+    "$.completed[].collaboratorIds": [
+      "array"
+    ],
+    "$.completed[].commentCount": [
+      "number"
+    ],
+    "$.completed[].completedAt": [
+      "string"
+    ],
+    "$.completed[].createdAt": [
+      "string"
+    ],
+    "$.completed[].createdBy": [
+      "string"
+    ],
+    "$.completed[].createdByName": [
+      "string"
+    ],
+    "$.completed[].deliverableDueDate": [
+      "null"
+    ],
+    "$.completed[].deliverableId": [
+      "null"
+    ],
+    "$.completed[].deliverableKey": [
+      "null"
+    ],
+    "$.completed[].deliverableName": [
+      "null"
+    ],
+    "$.completed[].deliverableOrder": [
+      "null"
+    ],
+    "$.completed[].deliverableStatus": [
+      "null"
+    ],
+    "$.completed[].disciplineCode": [
+      "string"
+    ],
+    "$.completed[].disciplineColour": [
+      "string"
+    ],
+    "$.completed[].disciplineName": [
+      "string"
+    ],
+    "$.completed[].disciplineOrder": [
+      "number"
+    ],
+    "$.completed[].dueDate": [
+      "null"
+    ],
+    "$.completed[].dueDateChangeCount": [
+      "number"
+    ],
+    "$.completed[].effectiveMilestoneId": [
+      "null"
+    ],
+    "$.completed[].estimatedHours": [
+      "null"
+    ],
+    "$.completed[].id": [
+      "string"
+    ],
+    "$.completed[].key": [
+      "string"
+    ],
+    "$.completed[].lane": [
+      "string"
+    ],
+    "$.completed[].lastActivityAt": [
+      "string"
+    ],
+    "$.completed[].manualBlockReason": [
+      "null"
+    ],
+    "$.completed[].manualBlockSetAt": [
+      "null"
+    ],
+    "$.completed[].manualBlockType": [
+      "null"
+    ],
+    "$.completed[].milestoneDate": [
+      "null"
+    ],
+    "$.completed[].milestoneDerived": [
+      "boolean"
+    ],
+    "$.completed[].milestoneId": [
+      "null"
+    ],
+    "$.completed[].milestoneKey": [
+      "null"
+    ],
+    "$.completed[].milestoneName": [
+      "null"
+    ],
+    "$.completed[].name": [
+      "string"
+    ],
+    "$.completed[].originalDueDate": [
+      "null"
+    ],
+    "$.completed[].originalStartDate": [
+      "null"
+    ],
+    "$.completed[].predecessorCount": [
+      "number"
+    ],
+    "$.completed[].priority": [
+      "string"
+    ],
+    "$.completed[].progressPct": [
+      "number"
+    ],
+    "$.completed[].projectDisciplineId": [
+      "string"
+    ],
+    "$.completed[].projectId": [
+      "string"
+    ],
+    "$.completed[].projectName": [
+      "string"
+    ],
+    "$.completed[].projectNumber": [
+      "string"
+    ],
+    "$.completed[].projectStatus": [
+      "string"
+    ],
+    "$.completed[].requiresReview": [
+      "boolean"
+    ],
+    "$.completed[].reviewRound": [
+      "number"
+    ],
+    "$.completed[].reviewerId": [
+      "null"
+    ],
+    "$.completed[].reviewerName": [
+      "null"
+    ],
+    "$.completed[].rowVersion": [
+      "number"
+    ],
+    "$.completed[].sortOrder": [
+      "number"
+    ],
+    "$.completed[].startDate": [
+      "null"
+    ],
+    "$.completed[].state": [
+      "object"
+    ],
+    "$.completed[].state.affectedMilestoneIds": [
+      "array"
+    ],
+    "$.completed[].state.blockedBy": [
+      "array"
+    ],
+    "$.completed[].state.blockedSince": [
+      "null"
+    ],
+    "$.completed[].state.blockingCount": [
+      "number"
+    ],
+    "$.completed[].state.blockingTaskIds": [
+      "array"
+    ],
+    "$.completed[].state.daysBlocked": [
+      "number"
+    ],
+    "$.completed[].state.daysOverdue": [
+      "number"
+    ],
+    "$.completed[].state.evaluatedAt": [
+      "string"
+    ],
+    "$.completed[].state.inconsistencyDetail": [
+      "array"
+    ],
+    "$.completed[].state.isBlocked": [
+      "boolean"
+    ],
+    "$.completed[].state.isBlocking": [
+      "boolean"
+    ],
+    "$.completed[].state.isDateInconsistent": [
+      "boolean"
+    ],
+    "$.completed[].state.isDueSoon": [
+      "boolean"
+    ],
+    "$.completed[].state.isHeldPastDue": [
+      "boolean"
+    ],
+    "$.completed[].state.isInactiveOwner": [
+      "boolean"
+    ],
+    "$.completed[].state.isMissingDueDate": [
+      "boolean"
+    ],
+    "$.completed[].state.isOverdue": [
+      "boolean"
+    ],
+    "$.completed[].state.isReviewStalled": [
+      "boolean"
+    ],
+    "$.completed[].state.isStale": [
+      "boolean"
+    ],
+    "$.completed[].state.isUnassigned": [
+      "boolean"
+    ],
+    "$.completed[].state.isWaiting": [
+      "boolean"
+    ],
+    "$.completed[].state.notes": [
+      "array"
+    ],
+    "$.completed[].state.staleDays": [
+      "number"
+    ],
+    "$.completed[].status": [
+      "string"
+    ],
+    "$.completed[].statusChangedAt": [
+      "string"
+    ],
+    "$.completed[].successorCount": [
+      "number"
+    ],
     "$.decisions": [
       "array"
     ],
@@ -7064,7 +7324,8 @@
       "string"
     ],
     "$.deliverables[].requiredReviewPackageId": [
-      "null"
+      "null",
+      "string"
     ],
     "$.deliverables[].requiresReview": [
       "boolean"
@@ -7350,6 +7611,216 @@
     ],
     "$.reviews.deliverables": [
       "array"
+    ],
+    "$.reviews.deliverables[]": [
+      "object"
+    ],
+    "$.reviews.deliverables[].createdAt": [
+      "string"
+    ],
+    "$.reviews.deliverables[].deliverableTypeId": [
+      "string"
+    ],
+    "$.reviews.deliverables[].disciplineColour": [
+      "string"
+    ],
+    "$.reviews.deliverables[].disciplineName": [
+      "string"
+    ],
+    "$.reviews.deliverables[].disciplineOrder": [
+      "number"
+    ],
+    "$.reviews.deliverables[].dueDate": [
+      "string"
+    ],
+    "$.reviews.deliverables[].id": [
+      "string"
+    ],
+    "$.reviews.deliverables[].issuedDate": [
+      "null"
+    ],
+    "$.reviews.deliverables[].issuedTo": [
+      "null"
+    ],
+    "$.reviews.deliverables[].key": [
+      "string"
+    ],
+    "$.reviews.deliverables[].lastActivityAt": [
+      "string"
+    ],
+    "$.reviews.deliverables[].milestoneDate": [
+      "null"
+    ],
+    "$.reviews.deliverables[].milestoneId": [
+      "null"
+    ],
+    "$.reviews.deliverables[].milestoneKey": [
+      "null"
+    ],
+    "$.reviews.deliverables[].milestoneName": [
+      "null"
+    ],
+    "$.reviews.deliverables[].name": [
+      "string"
+    ],
+    "$.reviews.deliverables[].originalDueDate": [
+      "string"
+    ],
+    "$.reviews.deliverables[].originalStartDate": [
+      "null"
+    ],
+    "$.reviews.deliverables[].ownerActive": [
+      "boolean"
+    ],
+    "$.reviews.deliverables[].ownerId": [
+      "string"
+    ],
+    "$.reviews.deliverables[].ownerName": [
+      "string"
+    ],
+    "$.reviews.deliverables[].priority": [
+      "string"
+    ],
+    "$.reviews.deliverables[].projectDisciplineId": [
+      "string"
+    ],
+    "$.reviews.deliverables[].projectId": [
+      "string"
+    ],
+    "$.reviews.deliverables[].requiredReviewPackageId": [
+      "null"
+    ],
+    "$.reviews.deliverables[].requiresReview": [
+      "boolean"
+    ],
+    "$.reviews.deliverables[].reviewerId": [
+      "string"
+    ],
+    "$.reviews.deliverables[].reviewerName": [
+      "string"
+    ],
+    "$.reviews.deliverables[].revision": [
+      "null"
+    ],
+    "$.reviews.deliverables[].rowVersion": [
+      "number"
+    ],
+    "$.reviews.deliverables[].startDate": [
+      "null"
+    ],
+    "$.reviews.deliverables[].state": [
+      "object"
+    ],
+    "$.reviews.deliverables[].state.atRiskReasons": [
+      "array"
+    ],
+    "$.reviews.deliverables[].state.atRiskReasons[]": [
+      "object"
+    ],
+    "$.reviews.deliverables[].state.atRiskReasons[].colour": [
+      "null"
+    ],
+    "$.reviews.deliverables[].state.atRiskReasons[].rule": [
+      "string"
+    ],
+    "$.reviews.deliverables[].state.atRiskReasons[].text": [
+      "string"
+    ],
+    "$.reviews.deliverables[].state.atRiskReasons[].threshold": [
+      "number"
+    ],
+    "$.reviews.deliverables[].state.atRiskReasons[].values": [
+      "null"
+    ],
+    "$.reviews.deliverables[].state.blockedBy": [
+      "array"
+    ],
+    "$.reviews.deliverables[].state.blockingCount": [
+      "number"
+    ],
+    "$.reviews.deliverables[].state.daysOverdue": [
+      "number"
+    ],
+    "$.reviews.deliverables[].state.derivedPredecessorIds": [
+      "array"
+    ],
+    "$.reviews.deliverables[].state.derivedSuccessorIds": [
+      "array"
+    ],
+    "$.reviews.deliverables[].state.estimatedHoursTotal": [
+      "number"
+    ],
+    "$.reviews.deliverables[].state.inconsistencyDetail": [
+      "array"
+    ],
+    "$.reviews.deliverables[].state.isAtRisk": [
+      "boolean"
+    ],
+    "$.reviews.deliverables[].state.isBlocked": [
+      "boolean"
+    ],
+    "$.reviews.deliverables[].state.isDateInconsistent": [
+      "boolean"
+    ],
+    "$.reviews.deliverables[].state.isDueSoon": [
+      "boolean"
+    ],
+    "$.reviews.deliverables[].state.isInactiveOwner": [
+      "boolean"
+    ],
+    "$.reviews.deliverables[].state.isOverdue": [
+      "boolean"
+    ],
+    "$.reviews.deliverables[].state.isStale": [
+      "boolean"
+    ],
+    "$.reviews.deliverables[].state.isUnassigned": [
+      "boolean"
+    ],
+    "$.reviews.deliverables[].state.isWaiting": [
+      "boolean"
+    ],
+    "$.reviews.deliverables[].state.issuedWithOpenWork": [
+      "boolean"
+    ],
+    "$.reviews.deliverables[].state.milestoneCancelled": [
+      "boolean"
+    ],
+    "$.reviews.deliverables[].state.progressPct": [
+      "null"
+    ],
+    "$.reviews.deliverables[].state.remainingHours": [
+      "number"
+    ],
+    "$.reviews.deliverables[].state.slipDays": [
+      "number"
+    ],
+    "$.reviews.deliverables[].state.taskBlocked": [
+      "number"
+    ],
+    "$.reviews.deliverables[].state.taskCancelled": [
+      "number"
+    ],
+    "$.reviews.deliverables[].state.taskComplete": [
+      "number"
+    ],
+    "$.reviews.deliverables[].state.taskOpen": [
+      "number"
+    ],
+    "$.reviews.deliverables[].state.taskOverdue": [
+      "number"
+    ],
+    "$.reviews.deliverables[].state.taskTotal": [
+      "number"
+    ],
+    "$.reviews.deliverables[].status": [
+      "string"
+    ],
+    "$.reviews.deliverables[].tasks": [
+      "null"
+    ],
+    "$.reviews.deliverables[].typeName": [
+      "string"
     ],
     "$.reviews.tasks": [
       "array"
@@ -21530,6 +22001,810 @@
     "$.components.schemas.DeliverableMarks.type": [
       "string"
     ],
+    "$.components.schemas.DeliverableRow": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.baselineDueDate": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.baselineDueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.baselineDueDate.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableRow.properties.baselineDueDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.baselineSlipShown": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.baselineSlipShown.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableRow.properties.baselineSlipShown.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.baselineStartDate": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.baselineStartDate.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.baselineStartDate.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableRow.properties.baselineStartDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.canRebaseline": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.canRebaseline.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableRow.properties.canRebaseline.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.deliverableTypeId": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.deliverableTypeId.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.deliverableTypeId.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.disciplineColour": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.disciplineColour.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableRow.properties.disciplineColour.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.disciplineName": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.disciplineName.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableRow.properties.disciplineName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.disciplineOrder": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.disciplineOrder.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.disciplineOrder.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.disciplineOrder.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.dueDate": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.dueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.dueDate.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableRow.properties.dueDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.issuedDate": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.issuedDate.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.issuedDate.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableRow.properties.issuedDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.issuedTo": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.issuedTo.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableRow.properties.issuedTo.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.lastActivityAt": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.lastActivityAt.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.lastActivityAt.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.milestoneDate": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.milestoneDate.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.milestoneDate.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableRow.properties.milestoneDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.milestoneId": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.milestoneId.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.milestoneId.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableRow.properties.milestoneId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.milestoneKey": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.milestoneKey.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableRow.properties.milestoneKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.milestoneName": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.milestoneName.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableRow.properties.milestoneName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.originalDueDate": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.originalDueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.originalDueDate.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableRow.properties.originalDueDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.originalStartDate": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.originalStartDate.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.originalStartDate.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableRow.properties.originalStartDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.ownerActive": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.ownerActive.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.ownerId": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.ownerId.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.ownerId.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableRow.properties.ownerId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.ownerName": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.ownerName.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableRow.properties.ownerName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.priority": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.priority.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.projectDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.projectDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.projectDisciplineId.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.requiredReviewPackageId": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.requiredReviewPackageId.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.requiredReviewPackageId.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableRow.properties.requiredReviewPackageId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.requiresReview": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.requiresReview.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.reviewerId": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.reviewerId.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.reviewerId.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableRow.properties.reviewerId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.reviewerName": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.reviewerName.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableRow.properties.reviewerName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.revision": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.revision.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableRow.properties.revision.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.sinceBaselineDays": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.sinceBaselineDays.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.sinceBaselineDays.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.sinceBaselineDays.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableRow.properties.sinceBaselineDays.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.slipShown": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.slipShown.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableRow.properties.slipShown.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.startDate": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.startDate.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.startDate.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableRow.properties.startDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.state": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.state.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableRow.properties.state.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.state.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.state.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.tasks": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.tasks.items": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.tasks.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.tasks.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableRow.properties.tasks.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.properties.typeName": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRow.properties.typeName.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableRow.properties.typeName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.required": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRow.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.atRiskReasons": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.atRiskReasons.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.atRiskReasons.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.atRiskReasons.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.atRiskReasons.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.blockedBy": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.blockedBy.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.blockedBy.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.blockedBy.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.blockedBy.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.blockingCount": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.blockingCount.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.blockingCount.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.blockingCount.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.daysOverdue": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.daysOverdue.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.daysOverdue.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.daysOverdue.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.derivedPredecessorIds": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.derivedPredecessorIds.items": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.derivedPredecessorIds.items.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.derivedPredecessorIds.items.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.derivedPredecessorIds.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.derivedSuccessorIds": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.derivedSuccessorIds.items": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.derivedSuccessorIds.items.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.derivedSuccessorIds.items.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.derivedSuccessorIds.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.estimatedHoursTotal": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.estimatedHoursTotal.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.estimatedHoursTotal.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.estimatedHoursTotal.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.inconsistencyDetail": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.inconsistencyDetail.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.inconsistencyDetail.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.inconsistencyDetail.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.inconsistencyDetail.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.isAtRisk": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.isAtRisk.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.isBlocked": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.isBlocked.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.isDateInconsistent": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.isDateInconsistent.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.isDueSoon": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.isDueSoon.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.isInactiveOwner": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.isInactiveOwner.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.isOverdue": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.isOverdue.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.isStale": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.isStale.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.isUnassigned": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.isUnassigned.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.isWaiting": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.isWaiting.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.issuedWithOpenWork": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.issuedWithOpenWork.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.milestoneCancelled": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.milestoneCancelled.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.progressPct": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.progressPct.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.progressPct.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.progressPct.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.progressPct.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.remainingHours": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.remainingHours.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.remainingHours.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.remainingHours.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.slipDays": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.slipDays.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.slipDays.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.slipDays.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.taskBlocked": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.taskBlocked.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.taskBlocked.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.taskBlocked.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.taskCancelled": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.taskCancelled.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.taskCancelled.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.taskCancelled.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.taskComplete": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.taskComplete.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.taskComplete.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.taskComplete.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.taskOpen": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.taskOpen.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.taskOpen.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.taskOpen.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.taskOverdue": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.taskOverdue.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.taskOverdue.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.taskOverdue.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.taskTotal": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.taskTotal.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.taskTotal.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.properties.taskTotal.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.required": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableStateRead.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableStateRead.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableTaskRead": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableTaskRead.properties": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableTaskRead.properties.assignee": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableTaskRead.properties.assignee.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableTaskRead.properties.assignee.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableTaskRead.properties.deliverableId": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableTaskRead.properties.deliverableId.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableTaskRead.properties.deliverableId.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableTaskRead.properties.deliverableId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableTaskRead.properties.dueDate": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableTaskRead.properties.dueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableTaskRead.properties.dueDate.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableTaskRead.properties.dueDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableTaskRead.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableTaskRead.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableTaskRead.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableTaskRead.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableTaskRead.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableTaskRead.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableTaskRead.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableTaskRead.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableTaskRead.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableTaskRead.required": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableTaskRead.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableTaskRead.type": [
+      "string"
+    ],
     "$.components.schemas.DeliverableTransitionBody": [
       "object"
     ],
@@ -27851,6 +29126,273 @@
     "$.components.schemas.MeetingActionBody.type": [
       "string"
     ],
+    "$.components.schemas.MeetingActionRow": [
+      "object"
+    ],
+    "$.components.schemas.MeetingActionRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.converted": [
+      "object"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.converted.type": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.daysOverdue": [
+      "object"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.daysOverdue.format": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.daysOverdue.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.daysOverdue.type": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.decisionKey": [
+      "object"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.decisionKey.type": [
+      "array"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.decisionKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.dueDate": [
+      "object"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.dueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.dueDate.type": [
+      "array"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.dueDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.isOverdue": [
+      "object"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.isOverdue.type": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.leadId": [
+      "object"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.leadId.format": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.leadId.type": [
+      "array"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.leadId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.leadName": [
+      "object"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.leadName.type": [
+      "array"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.leadName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.meetingDate": [
+      "object"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.meetingDate.format": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.meetingDate.type": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.meetingId": [
+      "object"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.meetingId.format": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.meetingId.type": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.meetingTitle": [
+      "object"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.meetingTitle.type": [
+      "array"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.meetingTitle.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.noLead": [
+      "object"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.noLead.type": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.ownerDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.ownerDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.ownerDisciplineId.type": [
+      "array"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.ownerDisciplineId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.ownerExternalPartyId": [
+      "object"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.ownerExternalPartyId.format": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.ownerExternalPartyId.type": [
+      "array"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.ownerExternalPartyId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.ownerName": [
+      "object"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.ownerName.type": [
+      "array"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.ownerName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.ownerType": [
+      "object"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.ownerType.type": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.ownerTypeLabel": [
+      "object"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.ownerTypeLabel.type": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.ownerUserId": [
+      "object"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.ownerUserId.format": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.ownerUserId.type": [
+      "array"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.ownerUserId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.partyIsClient": [
+      "object"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.partyIsClient.type": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.projectNumber.type": [
+      "array"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.projectNumber.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.relatedDecisionId": [
+      "object"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.relatedDecisionId.format": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.relatedDecisionId.type": [
+      "array"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.relatedDecisionId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.relatedTaskId": [
+      "object"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.relatedTaskId.format": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.relatedTaskId.type": [
+      "array"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.relatedTaskId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.taskKey": [
+      "object"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.taskKey.type": [
+      "array"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.taskKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.text": [
+      "object"
+    ],
+    "$.components.schemas.MeetingActionRow.properties.text.type": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.required": [
+      "array"
+    ],
+    "$.components.schemas.MeetingActionRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.MeetingActionRow.type": [
+      "string"
+    ],
     "$.components.schemas.MeetingBody": [
       "object"
     ],
@@ -28332,6 +29874,1221 @@
       "string"
     ],
     "$.components.schemas.MissRow.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffAssignment": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.addedAt": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.addedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.addedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.canRemove": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.canRemove.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.leads": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.leads.items": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.leads.items.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.leads.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.memberId": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.memberId.format": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.memberId.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.nextDue": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.nextDue.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.nextDue.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.nextDue.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.nextDue.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.open": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.open.format": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.open.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.open.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.overdue": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.overdue.format": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.overdue.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.overdue.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.primaryDiscipline": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.primaryDiscipline.type": [
+      "array"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.primaryDiscipline.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.reportedHealth": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.reportedHealth.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.roles": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.roles.items": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.roles.items.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.roles.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffAssignment.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffAssignment.required": [
+      "array"
+    ],
+    "$.components.schemas.MyStaffAssignment.required[]": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffAssignment.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffList": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffList.properties": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffList.properties.canSeeAll": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffList.properties.canSeeAll.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffList.properties.people": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffList.properties.people.items": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffList.properties.people.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffList.properties.people.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffList.properties.scope": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffList.properties.scope.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffList.properties.tiles": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffList.properties.tiles.$ref": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffList.required": [
+      "array"
+    ],
+    "$.components.schemas.MyStaffList.required[]": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffList.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffNextDue": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffNextDue.properties": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffNextDue.properties.dueDate": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffNextDue.properties.dueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffNextDue.properties.dueDate.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffNextDue.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffNextDue.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffNextDue.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffNextDue.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffNextDue.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffNextDue.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffNextDue.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffNextDue.required": [
+      "array"
+    ],
+    "$.components.schemas.MyStaffNextDue.required[]": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffNextDue.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffPerson.properties": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.blocked": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.blocked.format": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.blocked.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.blocked.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.blocking": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.blocking.format": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.blocking.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.blocking.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.deliverablesDue": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.deliverablesDue.format": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.deliverablesDue.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.deliverablesDue.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.displayName": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.displayName.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.isActive": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.isActive.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.jobTitle": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.jobTitle.type": [
+      "array"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.jobTitle.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.lastActivityAt": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.lastActivityAt.format": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.lastActivityAt.type": [
+      "array"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.lastActivityAt.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.officeId": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.officeId.format": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.officeId.type": [
+      "array"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.officeId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.open": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.open.format": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.open.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.open.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.overdue": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.overdue.format": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.overdue.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.overdue.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.projects": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.projects.format": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.projects.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.projects.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.reviews": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.reviews.format": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.reviews.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.reviews.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.reviewsStalled": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.reviewsStalled.format": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.reviewsStalled.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.reviewsStalled.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.roles": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffPerson.properties.roles.$ref": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.required": [
+      "array"
+    ],
+    "$.components.schemas.MyStaffPerson.required[]": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffPerson.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffRoles": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffRoles.properties": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffRoles.properties.dl": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffRoles.properties.dl.format": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffRoles.properties.dl.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffRoles.properties.dl.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffRoles.properties.pm": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffRoles.properties.pm.format": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffRoles.properties.pm.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffRoles.properties.pm.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffRoles.properties.reviewer": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffRoles.properties.reviewer.format": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffRoles.properties.reviewer.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffRoles.properties.reviewer.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffRoles.properties.team": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffRoles.properties.team.format": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffRoles.properties.team.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffRoles.properties.team.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffRoles.properties.viewer": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffRoles.properties.viewer.format": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffRoles.properties.viewer.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffRoles.properties.viewer.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffRoles.required": [
+      "array"
+    ],
+    "$.components.schemas.MyStaffRoles.required[]": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffRoles.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffTiles": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffTiles.properties": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffTiles.properties.assignments": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffTiles.properties.assignments.format": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffTiles.properties.assignments.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffTiles.properties.assignments.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffTiles.properties.reviewsStalled": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffTiles.properties.reviewsStalled.format": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffTiles.properties.reviewsStalled.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffTiles.properties.reviewsStalled.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffTiles.properties.staff": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffTiles.properties.staff.format": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffTiles.properties.staff.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffTiles.properties.staff.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffTiles.properties.withBlocked": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffTiles.properties.withBlocked.format": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffTiles.properties.withBlocked.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffTiles.properties.withBlocked.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffTiles.properties.withOverdue": [
+      "object"
+    ],
+    "$.components.schemas.MyStaffTiles.properties.withOverdue.format": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffTiles.properties.withOverdue.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffTiles.properties.withOverdue.type": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffTiles.required": [
+      "array"
+    ],
+    "$.components.schemas.MyStaffTiles.required[]": [
+      "string"
+    ],
+    "$.components.schemas.MyStaffTiles.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkDecision": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkDecision.properties": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkDecision.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkDecision.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkDecision.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkDecision.properties.impactLevel": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkDecision.properties.impactLevel.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkDecision.properties.isDueSoon": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkDecision.properties.isDueSoon.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkDecision.properties.isOverdue": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkDecision.properties.isOverdue.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkDecision.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkDecision.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkDecision.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkDecision.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkDecision.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkDecision.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkDecision.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkDecision.properties.requiredByDate": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkDecision.properties.requiredByDate.format": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkDecision.properties.requiredByDate.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkDecision.properties.role": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkDecision.properties.role.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkDecision.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkDecision.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkDecision.properties.subject": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkDecision.properties.subject.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkDecision.required": [
+      "array"
+    ],
+    "$.components.schemas.MyWorkDecision.required[]": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkDecision.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkFollow": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkFollow.properties": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkFollow.properties.level": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkFollow.properties.level.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkFollow.properties.source": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkFollow.properties.source.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkFollow.required": [
+      "array"
+    ],
+    "$.components.schemas.MyWorkFollow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkFollow.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkMilestone": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkMilestone.properties": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkMilestone.properties.date": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkMilestone.properties.date.format": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkMilestone.properties.date.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkMilestone.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkMilestone.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkMilestone.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkMilestone.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkMilestone.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkMilestone.properties.milestoneType": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkMilestone.properties.milestoneType.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkMilestone.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkMilestone.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkMilestone.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkMilestone.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkMilestone.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkMilestone.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkMilestone.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkMilestone.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkMilestone.properties.status.type": [
+      "array"
+    ],
+    "$.components.schemas.MyWorkMilestone.properties.status.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkMilestone.required": [
+      "array"
+    ],
+    "$.components.schemas.MyWorkMilestone.required[]": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkMilestone.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkNextMilestone": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkNextMilestone.properties": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkNextMilestone.properties.date": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkNextMilestone.properties.date.format": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkNextMilestone.properties.date.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkNextMilestone.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkNextMilestone.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkNextMilestone.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkNextMilestone.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkNextMilestone.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkNextMilestone.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkNextMilestone.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkNextMilestone.required": [
+      "array"
+    ],
+    "$.components.schemas.MyWorkNextMilestone.required[]": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkNextMilestone.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkPerson": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkPerson.properties": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkPerson.properties.displayName": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkPerson.properties.displayName.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkPerson.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkPerson.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkPerson.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkPerson.properties.isActive": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkPerson.properties.isActive.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkPerson.properties.jobTitle": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkPerson.properties.jobTitle.type": [
+      "array"
+    ],
+    "$.components.schemas.MyWorkPerson.properties.jobTitle.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkPerson.required": [
+      "array"
+    ],
+    "$.components.schemas.MyWorkPerson.required[]": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkPerson.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkProject": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkProject.properties": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkProject.properties.computedHealth": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkProject.properties.computedHealth.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkProject.properties.follow": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkProject.properties.follow.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.MyWorkProject.properties.follow.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkProject.properties.follow.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkProject.properties.follow.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkProject.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkProject.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkProject.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkProject.properties.leads": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkProject.properties.leads.items": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkProject.properties.leads.items.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkProject.properties.leads.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkProject.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkProject.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkProject.properties.nextMilestone": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkProject.properties.nextMilestone.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.MyWorkProject.properties.nextMilestone.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkProject.properties.nextMilestone.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkProject.properties.nextMilestone.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkProject.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkProject.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkProject.properties.reportedHealth": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkProject.properties.reportedHealth.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkProject.properties.roles": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkProject.properties.roles.items": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkProject.properties.roles.items.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkProject.properties.roles.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkProject.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkProject.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkProject.required": [
+      "array"
+    ],
+    "$.components.schemas.MyWorkProject.required[]": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkProject.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkReviews": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkReviews.properties": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkReviews.properties.deliverables": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkReviews.properties.deliverables.items": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkReviews.properties.deliverables.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkReviews.properties.deliverables.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkReviews.properties.tasks": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkReviews.properties.tasks.items": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkReviews.properties.tasks.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkReviews.properties.tasks.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkReviews.required": [
+      "array"
+    ],
+    "$.components.schemas.MyWorkReviews.required[]": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkReviews.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkSuccessor": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkSuccessor.properties": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkSuccessor.properties.assigneeName": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkSuccessor.properties.assigneeName.type": [
+      "array"
+    ],
+    "$.components.schemas.MyWorkSuccessor.properties.assigneeName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkSuccessor.properties.dueDate": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkSuccessor.properties.dueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkSuccessor.properties.dueDate.type": [
+      "array"
+    ],
+    "$.components.schemas.MyWorkSuccessor.properties.dueDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkSuccessor.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkSuccessor.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkSuccessor.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkSuccessor.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkSuccessor.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkSuccessor.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkSuccessor.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkSuccessor.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkSuccessor.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkSuccessor.required": [
+      "array"
+    ],
+    "$.components.schemas.MyWorkSuccessor.required[]": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkSuccessor.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkView": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkView.properties": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkView.properties.actions": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkView.properties.actions.items": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkView.properties.actions.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkView.properties.actions.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkView.properties.attention": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkView.properties.attention.$ref": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkView.properties.completed": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkView.properties.completed.items": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkView.properties.completed.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkView.properties.completed.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkView.properties.decisions": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkView.properties.decisions.items": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkView.properties.decisions.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkView.properties.decisions.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkView.properties.deliverables": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkView.properties.deliverables.items": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkView.properties.deliverables.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkView.properties.deliverables.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkView.properties.milestones": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkView.properties.milestones.items": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkView.properties.milestones.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkView.properties.milestones.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkView.properties.people": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkView.properties.people.additionalProperties": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkView.properties.people.additionalProperties.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkView.properties.people.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkView.properties.person": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkView.properties.person.$ref": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkView.properties.projects": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkView.properties.projects.items": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkView.properties.projects.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkView.properties.projects.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkView.properties.readOnly": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkView.properties.readOnly.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkView.properties.reviews": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkView.properties.reviews.$ref": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkView.properties.successors": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkView.properties.successors.items": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkView.properties.successors.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkView.properties.successors.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkView.properties.tasks": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkView.properties.tasks.items": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkView.properties.tasks.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkView.properties.tasks.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkView.properties.today": [
+      "object"
+    ],
+    "$.components.schemas.MyWorkView.properties.today.format": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkView.properties.today.type": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkView.required": [
+      "array"
+    ],
+    "$.components.schemas.MyWorkView.required[]": [
+      "string"
+    ],
+    "$.components.schemas.MyWorkView.type": [
       "string"
     ],
     "$.components.schemas.NoticeAction": [
@@ -54671,6 +57428,9 @@
     "$.paths./api/v1/me/work.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/me/work.get.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/me/work.get.responses.200.description": [
       "string"
     ],
@@ -57502,6 +60262,12 @@
     ],
     "$.paths./api/v1/projects/{id}/actions.get.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/projects/{id}/actions.get.responses.200.content.application/json.schema.items": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/actions.get.responses.200.content.application/json.schema.items.$ref": [
+      "string"
     ],
     "$.paths./api/v1/projects/{id}/actions.get.responses.200.content.application/json.schema.type": [
       "string"
@@ -68519,6 +71285,9 @@
     "$.paths./api/v1/staff.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/staff.get.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/staff.get.responses.200.description": [
       "string"
     ],
@@ -68572,6 +71341,15 @@
     ],
     "$.paths./api/v1/staff/{userId}/assignments.get.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/staff/{userId}/assignments.get.responses.200.content.application/json.schema.items": [
+      "object"
+    ],
+    "$.paths./api/v1/staff/{userId}/assignments.get.responses.200.content.application/json.schema.items.$ref": [
+      "string"
+    ],
+    "$.paths./api/v1/staff/{userId}/assignments.get.responses.200.content.application/json.schema.type": [
+      "string"
     ],
     "$.paths./api/v1/staff/{userId}/assignments.get.responses.200.description": [
       "string"
@@ -100006,6 +102784,7 @@
       "string"
     ],
     "$.notesLink": [
+      "null",
       "string"
     ],
     "$.projectId": [

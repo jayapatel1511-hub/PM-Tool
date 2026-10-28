@@ -2,6 +2,7 @@
 // The API rules and digest job are covered separately by server tests; this keeps the browser contract small.
 const { chromium } = require('playwright')
 const { clientConfig } = require('./config.fixture.cjs')
+const { myStaffPerson, myStaffList } = require('./my-work.fixture.cjs')
 const path = require('path')
 const { spawn } = require('child_process')
 const assert = require('node:assert/strict')
@@ -11,11 +12,7 @@ const base = `http://127.0.0.1:${port}`
 const id = n => `00000000-0000-0000-0000-${String(n).padStart(12, '0')}`
 const supervisor = id(1), free = id(2), partial = id(3), missing = id(4)
 const monday = '2026-12-28'
-const staffRow = (personId, displayName, extra = {}) => ({
-  id: personId, displayName, jobTitle: 'Engineer', officeId: null, isActive: true, projects: 1,
-  roles: { pm: 0, dl: 0, team: 1, reviewer: 0, viewer: 0 }, open: 2, overdue: 0, blocked: 0, blocking: 0,
-  reviews: 0, reviewsStalled: 0, deliverablesDue: 0, lastActivityAt: null, ...extra,
-})
+const staffRow = (personId, displayName, extra = {}) => myStaffPerson({ id: personId, displayName, jobTitle: 'Engineer', open: 2, ...extra })
 const initialPeople = [
   staffRow(free, 'Free Engineer', { overdue: 1, blocked: 1, reviewsStalled: 1 }),
   staffRow(partial, 'Partial Engineer'),
@@ -31,7 +28,7 @@ const me = {
   preferences: { denseRows: true, digestEnabled: true },
 }
 const ref = { disciplines: [], clients: [], offices: [], deliverableTypes: [], phases: [], projectTypes: [] }
-const emptyStaff = people => ({ scope: 'direct', canSeeAll: true, tiles: { staff: people.length, assignments: people.length, withOverdue: 0, withBlocked: 0, reviewsStalled: 0 }, people })
+const emptyStaff = people => myStaffList(people, { canSeeAll: true, tiles: { staff: people.length, assignments: people.length, withOverdue: 0, withBlocked: 0, reviewsStalled: 0 } })
 const grid = people => ({ weeks: [monday], currentWeek: monday, evaluatedAt: '2027-01-03T00:00:00Z', partialView: false, draftAccess: false,
   settings: { horizonWeeks: 12, overPct: 105, underPct: 50, underWeeks: 2, staleDays: 28, maxHoursPerWeek: 80 }, people })
 const prefs = holdDigestWhenAway => ({

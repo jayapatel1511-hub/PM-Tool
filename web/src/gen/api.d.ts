@@ -5069,7 +5069,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["MyWorkView"];
                     };
                 };
             };
@@ -7210,7 +7210,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown[];
+                        "application/json": components["schemas"]["MeetingActionRow"][];
                     };
                 };
             };
@@ -13924,7 +13924,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["MyStaffList"];
                     };
                 };
             };
@@ -13963,7 +13963,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["MyStaffAssignment"][];
                     };
                 };
             };
@@ -17994,6 +17994,124 @@ export interface components {
             issues: components["schemas"]["IssueMarks"][];
             marks: string[];
         };
+        DeliverableRow: {
+            /** Format: date */
+            baselineDueDate?: null | string;
+            baselineSlipShown?: null | boolean;
+            /** Format: date */
+            baselineStartDate?: null | string;
+            canRebaseline?: null | boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            deliverableTypeId: string;
+            disciplineColour: null | string;
+            disciplineName: null | string;
+            /** Format: int32 */
+            disciplineOrder: number;
+            /** Format: date */
+            dueDate: null | string;
+            /** Format: uuid */
+            id: string;
+            /** Format: date */
+            issuedDate: null | string;
+            issuedTo: null | string;
+            key: string;
+            /** Format: date-time */
+            lastActivityAt: string;
+            /** Format: date */
+            milestoneDate: null | string;
+            /** Format: uuid */
+            milestoneId: null | string;
+            milestoneKey: null | string;
+            milestoneName: null | string;
+            name: string;
+            /** Format: date */
+            originalDueDate: null | string;
+            /** Format: date */
+            originalStartDate: null | string;
+            ownerActive: boolean;
+            /** Format: uuid */
+            ownerId: null | string;
+            ownerName: null | string;
+            priority: string;
+            /** Format: uuid */
+            projectDisciplineId: string;
+            /** Format: uuid */
+            projectId: string;
+            /** Format: uuid */
+            requiredReviewPackageId: null | string;
+            requiresReview: boolean;
+            /** Format: uuid */
+            reviewerId: null | string;
+            reviewerName: null | string;
+            revision: null | string;
+            /** Format: int32 */
+            rowVersion: number;
+            /** Format: int32 */
+            sinceBaselineDays?: null | number;
+            slipShown: null | boolean;
+            /** Format: date */
+            startDate: null | string;
+            state: null | components["schemas"]["DeliverableStateRead"];
+            status: string;
+            tasks: null | components["schemas"]["DeliverableTaskRead"][];
+            typeName: null | string;
+        };
+        DeliverableStateRead: {
+            atRiskReasons: null | components["schemas"]["JsonElement"];
+            blockedBy: null | components["schemas"]["JsonElement"];
+            /** Format: int32 */
+            blockingCount: number;
+            /** Format: int32 */
+            daysOverdue: number;
+            derivedPredecessorIds: string[];
+            derivedSuccessorIds: string[];
+            /** Format: double */
+            estimatedHoursTotal: number;
+            inconsistencyDetail: null | components["schemas"]["JsonElement"];
+            isAtRisk: boolean;
+            isBlocked: boolean;
+            isDateInconsistent: boolean;
+            isDueSoon: boolean;
+            isInactiveOwner: boolean;
+            isOverdue: boolean;
+            isStale: boolean;
+            isUnassigned: boolean;
+            isWaiting: boolean;
+            issuedWithOpenWork: boolean;
+            milestoneCancelled: boolean;
+            /** Format: int32 */
+            progressPct: null | number;
+            /** Format: double */
+            remainingHours: number;
+            /** Format: int32 */
+            slipDays: number;
+            /** Format: int32 */
+            taskBlocked: number;
+            /** Format: int32 */
+            taskCancelled: number;
+            /** Format: int32 */
+            taskComplete: number;
+            /** Format: int32 */
+            taskOpen: number;
+            /** Format: int32 */
+            taskOverdue: number;
+            /** Format: int32 */
+            taskTotal: number;
+        };
+        DeliverableTaskRead: {
+            assignee: null | string;
+            /** Format: uuid */
+            deliverableId: null | string;
+            /** Format: date */
+            dueDate: null | string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            status: string;
+        };
         DeliverableTransitionBody: {
             comment: null | string;
             reason: null | string;
@@ -18976,6 +19094,49 @@ export interface components {
             relatedTaskId: null | string;
             text: string;
         };
+        MeetingActionRow: {
+            converted: boolean;
+            /** Format: int32 */
+            daysOverdue: number;
+            decisionKey: null | string;
+            /** Format: date */
+            dueDate: null | string;
+            /** Format: uuid */
+            id: string;
+            isOverdue: boolean;
+            key: string;
+            /** Format: uuid */
+            leadId: null | string;
+            leadName: null | string;
+            /** Format: date */
+            meetingDate: string;
+            /** Format: uuid */
+            meetingId: string;
+            meetingTitle: null | string;
+            noLead: boolean;
+            /** Format: uuid */
+            ownerDisciplineId: null | string;
+            /** Format: uuid */
+            ownerExternalPartyId: null | string;
+            ownerName: null | string;
+            ownerType: string;
+            ownerTypeLabel: string;
+            /** Format: uuid */
+            ownerUserId: null | string;
+            partyIsClient: boolean;
+            /** Format: uuid */
+            projectId: string;
+            projectNumber: null | string;
+            /** Format: uuid */
+            relatedDecisionId: null | string;
+            /** Format: uuid */
+            relatedTaskId: null | string;
+            /** Format: int32 */
+            rowVersion: number;
+            status: string;
+            taskKey: null | string;
+            text: string;
+        };
         MeetingBody: {
             /** Format: uuid */
             calendarEventId: null | string;
@@ -19045,6 +19206,189 @@ export interface components {
             commitments: string[];
             /** Format: int32 */
             count: number;
+        };
+        MyStaffAssignment: {
+            /** Format: date-time */
+            addedAt: string;
+            canRemove: boolean;
+            leads: string[];
+            /** Format: uuid */
+            memberId: string;
+            name: string;
+            nextDue: null | components["schemas"]["MyStaffNextDue"];
+            /** Format: int32 */
+            open: number;
+            /** Format: int32 */
+            overdue: number;
+            primaryDiscipline: null | string;
+            /** Format: uuid */
+            projectId: string;
+            projectNumber: string;
+            reportedHealth: string;
+            roles: string[];
+            /** Format: int32 */
+            rowVersion: number;
+            status: string;
+        };
+        MyStaffList: {
+            canSeeAll: boolean;
+            people: components["schemas"]["MyStaffPerson"][];
+            scope: string;
+            tiles: components["schemas"]["MyStaffTiles"];
+        };
+        MyStaffNextDue: {
+            /** Format: date */
+            dueDate: string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+        };
+        MyStaffPerson: {
+            /** Format: int32 */
+            blocked: number;
+            /** Format: int32 */
+            blocking: number;
+            /** Format: int32 */
+            deliverablesDue: number;
+            displayName: string;
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+            jobTitle: null | string;
+            /** Format: date-time */
+            lastActivityAt: null | string;
+            /** Format: uuid */
+            officeId: null | string;
+            /** Format: int32 */
+            open: number;
+            /** Format: int32 */
+            overdue: number;
+            /** Format: int32 */
+            projects: number;
+            /** Format: int32 */
+            reviews: number;
+            /** Format: int32 */
+            reviewsStalled: number;
+            roles: components["schemas"]["MyStaffRoles"];
+        };
+        MyStaffRoles: {
+            /** Format: int32 */
+            dl: number;
+            /** Format: int32 */
+            pm: number;
+            /** Format: int32 */
+            reviewer: number;
+            /** Format: int32 */
+            team: number;
+            /** Format: int32 */
+            viewer: number;
+        };
+        MyStaffTiles: {
+            /** Format: int32 */
+            assignments: number;
+            /** Format: int32 */
+            reviewsStalled: number;
+            /** Format: int32 */
+            staff: number;
+            /** Format: int32 */
+            withBlocked: number;
+            /** Format: int32 */
+            withOverdue: number;
+        };
+        MyWorkDecision: {
+            /** Format: uuid */
+            id: string;
+            impactLevel: string;
+            isDueSoon: boolean;
+            isOverdue: boolean;
+            key: string;
+            /** Format: uuid */
+            projectId: string;
+            projectNumber: string;
+            /** Format: date */
+            requiredByDate: string;
+            role: string;
+            status: string;
+            subject: string;
+        };
+        MyWorkFollow: {
+            level: string;
+            source: string;
+        };
+        MyWorkMilestone: {
+            /** Format: date */
+            date: string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            milestoneType: string;
+            name: string;
+            /** Format: uuid */
+            projectId: string;
+            projectNumber: string;
+            status: null | string;
+        };
+        MyWorkNextMilestone: {
+            /** Format: date */
+            date: string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+        };
+        MyWorkPerson: {
+            displayName: string;
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+            jobTitle: null | string;
+        };
+        MyWorkProject: {
+            computedHealth: string;
+            follow: null | components["schemas"]["MyWorkFollow"];
+            /** Format: uuid */
+            id: string;
+            leads: string[];
+            name: string;
+            nextMilestone: null | components["schemas"]["MyWorkNextMilestone"];
+            projectNumber: string;
+            reportedHealth: string;
+            roles: string[];
+            status: string;
+        };
+        MyWorkReviews: {
+            deliverables: components["schemas"]["DeliverableRow"][];
+            tasks: components["schemas"]["TaskQueriesRow"][];
+        };
+        MyWorkSuccessor: {
+            assigneeName: null | string;
+            /** Format: date */
+            dueDate: null | string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            status: string;
+        };
+        MyWorkView: {
+            actions: components["schemas"]["MeetingActionRow"][];
+            attention: components["schemas"]["AttentionList"];
+            completed: components["schemas"]["TaskQueriesRow"][];
+            decisions: components["schemas"]["MyWorkDecision"][];
+            deliverables: components["schemas"]["DeliverableRow"][];
+            milestones: components["schemas"]["MyWorkMilestone"][];
+            people: {
+                [key: string]: string;
+            };
+            person: components["schemas"]["MyWorkPerson"];
+            projects: components["schemas"]["MyWorkProject"][];
+            readOnly: boolean;
+            reviews: components["schemas"]["MyWorkReviews"];
+            successors: components["schemas"]["MyWorkSuccessor"][];
+            tasks: components["schemas"]["TaskQueriesRow"][];
+            /** Format: date */
+            today: string;
         };
         NoticeAction: {
             action: string;

@@ -13,7 +13,7 @@ test('item changes keep the previous project and item-specific invalidations (AC
     SubmissionPackage: ['submissions', 'submission-detail', 'coord-options'],
     PersonAvailabilityOverride: ['availability', 'availability-view', 'planning-grid', 'my-week'],
     ReviewRound: ['reviews', 'review-detail', 'changes', 'change-detail', 'coord-options', 'input-uses', 'handoffs', 'handoff-detail', 'submissions', 'submission-detail', 'workspace-coordination', 'deliverable'],
-    PlanningEntry: ['planning-grid', 'planning-entries'], DesignBasisEntry: ['design-basis', 'design-basis-detail'],
+    PlanningEntry: ['planning-grid', 'planning-entries'], DesignBasisEntry: ['design-basis', 'design-basis-detail'], Member: ['staff'],
   }
   for (const root of ['history', 'comments', 'links']) assert.ok(keysForChange('Risk', 'p1').some(k => k[0] === root))
   for (const [type, roots] of Object.entries(before)) {

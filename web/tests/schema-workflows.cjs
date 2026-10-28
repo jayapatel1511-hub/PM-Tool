@@ -8,6 +8,7 @@ const path = require('node:path')
 const assert = require('node:assert/strict')
 const { commitmentRow, commitmentList, commitmentDetail } = require('./weekly-commitments.fixture.cjs')
 const { coordinationOptions } = require('./reviews.fixture.cjs')
+const { myWork: myWorkAnswer, myWorkPerson } = require('./my-work.fixture.cjs')
 
 const port = process.env.PORT || '19505'
 const base = `http://127.0.0.1:${port}`
@@ -31,7 +32,7 @@ const confirmId = id(73)
 const reliability = { snapshots: [{ id: id(70), weekStart: '2026-09-28', reliability: { met: 78, committed: 100, percent: 78, band: 'Watch', withdrawn: 2, notYetRecorded: 20, awaiting: 1 } }], misses: [{ categoryId: id(71), category: 'Blocked by dependency', count: 2, commitments: [id(72)] }], awaiting: [{ id: confirmId, key: 'PROM-13', rowVersion: 4, canConfirm: true }] }
 const promiseDetail = commitmentDetail(commitmentRow(projectId, { id: id(72), key: 'PROM-12', targetId: taskId, performerId: personId, weekStart: '2026-09-28', targetDate: '2026-10-02', intendedOutput: 'Complete drainage review', completionCriteria: 'Peer review recorded', state: 'Not Met', rowVersion: 4 }),
   [{ id: id(74), fromState: 'Committed', toState: 'Not Met', reason: 'Blocked by dependency', actorId: personId }])
-const myWork = { person: { id: id(1), displayName: 'Sam Supervisor', isActive: true }, readOnly: false, today: '2026-10-03', attention: { total: 0, items: [] }, tasks: [], reviews: { tasks: [], deliverables: [] }, deliverables: [], people: {}, successors: [], decisions: [], actions: [], projects: [], milestones: [], completed: [] }
+const myWork = myWorkAnswer({ person: myWorkPerson(id(1), 'Sam Supervisor'), today: '2026-10-03' })
 
 function responseFor(method, p, body, query) {
   if (p === 'config') return clientConfig()

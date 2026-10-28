@@ -10,24 +10,18 @@ import { OneSignal, type Signal } from '@/components/hub/indicators'
 import { HealthPill, Key } from '@/components/hub/pills'
 import { Button } from '@/components/ui/button'
 import { useProject, useReference } from '@/hooks/data'
-import { del, get, post, qs } from '@/lib/api'
+import type { components } from '@/gen/api'
+import { del, get, post, qs, typedRequest } from '@/lib/api'
+import { invalidateChange } from '@/lib/keys'
 import { useFlag, useMe } from '@/lib/auth'
 import { ago, fmtDate, shortDate, today } from '@/lib/format'
 import { runtimeText, t, tv, type TextKey } from '@/lib/i18n'
 import type { Page as PageOf, ProjectRow } from '@/lib/types'
 import { cn, type Accent } from '@/lib/utils'
 
-interface StaffRow {
-  id: string; displayName: string; jobTitle?: string; officeId?: string; isActive: boolean; projects: number
-  roles: { pm: number; dl: number; team: number; reviewer: number; viewer: number }
-  open: number; overdue: number; blocked: number; blocking: number; reviews: number; reviewsStalled: number; deliverablesDue: number; lastActivityAt?: string
-}
-interface StaffData { scope: string; canSeeAll: boolean; tiles: { staff: number; assignments: number; withOverdue: number; withBlocked: number; reviewsStalled: number }; people: StaffRow[] }
+type StaffRow = components['schemas']['MyStaffPerson']
 interface OrganisationUnits { includeIndirectReports?: boolean; units: { id: string; name: string; parentId?: string; leaderId?: string; closedOn?: string }[] }
-interface Assignment {
-  memberId: string; rowVersion: number; projectId: string; projectNumber: string; name: string; status: string; reportedHealth: string; roles: string[]; leads: string[]
-  primaryDiscipline?: string; addedAt: string; open: number; overdue: number; nextDue?: { id: string; key: string; name: string; dueDate: string } | null; canRemove: boolean
-}
+type Assignment = components['schemas']['MyStaffAssignment']
 
 const COLS: [keyof StaffRow | 'name', TextKey][] = [['name', 'staff.name'], ['projects', 'staff.projects'], ['open', 'dash.open'], ['overdue', 'ind.overdue'], ['blocked', 'ind.blocked'],
   ['blocking', 'staff.blocking'], ['reviews', 'staff.reviews'], ['deliverablesDue', 'dash.due14'], ['lastActivityAt', 'task.lastActivity']]
@@ -43,7 +37,7 @@ export function StaffPage() {
   const set = (k: string, v?: string) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
   const f = { scope: sp.get('scope') ?? undefined, showInactive: sp.get('inactive') === '1' || undefined, officeId: sp.get('office') ?? undefined,
     disciplineId: sp.get('discipline') ?? undefined, indicator: sp.get('indicator') ?? undefined }
-  const q = useQuery({ queryKey: ['staff', f], queryFn: () => get<StaffData>(`staff${qs(f)}`) })
+  const q = useQuery({ queryKey: ['staff', f], queryFn: () => typedRequest('get', '/api/v1/staff', { query: f }) })
   const showCapacity = useMe().capabilities.workload
   const capacity = usePeopleCapacity(weekOf(today()), !!q.data, q.data?.people.map((p) => p.id) ?? [])
   const [open, setOpen] = useState<Set<string>>(new Set())
@@ -57,7 +51,7 @@ export function StaffPage() {
     const r = typeof va === 'number' ? va - (vb as number) : String(va).localeCompare(String(vb))
     return sort.desc ? -r : r
   }) : d.people
-  const office = (id?: string) => ref.data?.offices.find((o) => o.id === id)?.name
+  const office = (id?: string | null) => ref.data?.offices.find((o) => o.id === id)?.name
   // Summary tiles (§13.19) filter the table; the selected one is outlined and checked, never tinted alone.
   const tile = (label: string, n: number, accent: Accent, definition: string, indicator?: string) => {
     const on = !!indicator && f.indicator === indicator
@@ -164,10 +158,10 @@ export function StaffPage() {
 
 function Assignments({ person, scope, onChanged }: { person: StaffRow; scope?: string; onChanged: () => void }) {
   const qc = useQueryClient()
-  const q = useQuery({ queryKey: ['staff', person.id, 'assignments', scope], queryFn: () => get<Assignment[]>(`staff/${person.id}/assignments${qs({ scope })}`) })
+  const q = useQuery({ queryKey: ['staff', person.id, 'assignments', scope], queryFn: () => typedRequest('get', '/api/v1/staff/{userId}/assignments', { params: { userId: person.id }, query: { scope } }) })
   const [assigning, setAssigning] = useState(false)
   const [removing, setRemoving] = useState<Assignment | null>(null)
-  const reload = () => { qc.invalidateQueries({ queryKey: ['staff'] }); onChanged() }
+  const reload = () => { invalidateChange(qc, 'Member'); onChanged() }
   if (q.isPending) return <Loading rows={2} />
   if (q.error) return <ErrorBanner error={q.error} />
   return (

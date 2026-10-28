@@ -5,6 +5,7 @@ const path = require('path')
 const { weekPreview, weekApplied } = require('./week-planning.fixture.cjs')
 const { subscriptionState, subscriptionLink } = require('./calendar-subscription.fixture.cjs')
 const { calendarEvent, calendarDeadline, calendarRange, calendarCancelled } = require('./calendar.fixture.cjs')
+const { planningHit, searchResult } = require('./search.fixture.cjs')
 
 const port = process.env.PORT ?? '5194'
 const base = `http://127.0.0.1:${port}`
@@ -98,7 +99,7 @@ const pause = (ms = 100) => new Promise((r) => setTimeout(r, ms))
       else if (p === `planning/entries/${entryId}/still-valid`) { current = makeEntry({ ...current, stale: false, lastValidatedAt: '2026-10-03T00:00:00Z', rowVersion: current.rowVersion + 1 }); data = current }
       else if (p === `users/${alex}/availability`) { if (failAwayRead) { status = 500; data = { detail: 'Availability reload failed' } } else data = availability }
       else if (p === 'planning/leave/manual' && req.method() === 'POST') { if (conflictAwayOnce) { conflictAwayOnce = false; availability = [{ workDate: weeks[0], rowVersion: 7 }, { workDate: '2026-10-06', rowVersion: 8 }]; status = 409; data = { detail: 'Availability dates changed', code: 'planning.stale_dates' } } else if (failAwaySaveOnce) { failAwaySaveOnce = false; status = 500; data = { detail: 'Time away save failed' } } else data = { days: 2 } }
-      else if (p === 'search') data = { q: 'proposal', exact: [], groups: { planning: [{ id: entryId, name: 'Alex Engineer · proposal support', status: 'Published', dueDate: weeks[0], startWeek: weeks[0], personId: alex }] }, counts: { planning: 1 } }
+      else if (p === 'search') data = searchResult('proposal', { planning: [planningHit({ id: entryId, name: 'Alex Engineer · proposal support', startWeek: weeks[0], personId: alex })] })
       else unknown.push(p)
       await route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(data) })
     })

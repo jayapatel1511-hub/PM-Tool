@@ -13880,7 +13880,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["SearchResponse"];
                     };
                 };
             };
@@ -19381,6 +19381,174 @@ export interface components {
             /** Format: double */
             weeklyHours: number;
             workingDays: number[];
+        };
+        SearchAllocationHit: {
+            /** Format: date */
+            dueDate: string;
+            /** Format: uuid */
+            id: string;
+            name: string;
+            projectNumber: string;
+            status: string;
+        };
+        SearchBasisHit: {
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            owner: null | string;
+            projectNumber: string;
+        };
+        SearchCommentHit: {
+            author: null | string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            itemId: string;
+            itemType: string;
+            key: string;
+            match: null | string;
+            name: string;
+            projectNumber: string;
+        };
+        SearchDecisionHit: {
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            projectNumber: string;
+            /** Format: date */
+            requiredByDate: string;
+            status: string;
+        };
+        SearchDeliverableHit: {
+            /** Format: date */
+            dueDate: null | string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            match: null | string;
+            name: string;
+            owner: null | string;
+            projectNumber: string;
+            status: string;
+        };
+        SearchExact: {
+            /** Format: uuid */
+            id: null | string;
+            key: string;
+            projectNumber: string;
+            type: string;
+        };
+        SearchGroups: {
+            allocations?: null | components["schemas"]["SearchAllocationHit"][];
+            changes?: null | components["schemas"]["SearchStatusHit"][];
+            comments?: null | components["schemas"]["SearchCommentHit"][];
+            commitments?: null | components["schemas"]["SearchOwnedHit"][];
+            constraints?: null | components["schemas"]["SearchOwnedHit"][];
+            decisions?: null | components["schemas"]["SearchDecisionHit"][];
+            deliverables?: null | components["schemas"]["SearchDeliverableHit"][];
+            "design-basis"?: null | components["schemas"]["SearchBasisHit"][];
+            handoffs?: null | components["schemas"]["SearchOwnedHit"][];
+            milestones?: null | components["schemas"]["SearchMilestoneHit"][];
+            people?: null | components["schemas"]["SearchPersonHit"][];
+            planning?: null | components["schemas"]["SearchPlanningHit"][];
+            projects?: null | components["schemas"]["SearchProjectHit"][];
+            reviews?: null | components["schemas"]["SearchStatusHit"][];
+            submissions?: null | components["schemas"]["SearchSubmissionHit"][];
+            tasks?: null | components["schemas"]["SearchTaskHit"][];
+        };
+        SearchMilestoneHit: {
+            /** Format: date */
+            date: null | string;
+            /** Format: uuid */
+            id: string;
+            isCancelled: boolean;
+            isComplete: boolean;
+            key: string;
+            name: string;
+            projectNumber: string;
+        };
+        SearchOwnedHit: {
+            /** Format: date */
+            dueDate: string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            owner: null | string;
+            projectNumber: string;
+            status: string;
+        };
+        SearchPersonHit: {
+            canViewWork: boolean;
+            displayName: string;
+            email: string;
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+            jobTitle: null | string;
+        };
+        SearchPlanningHit: {
+            /** Format: date */
+            dueDate: string;
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** Format: uuid */
+            personId: string;
+            /** Format: date */
+            startWeek: string;
+            status: string;
+        };
+        SearchProjectHit: {
+            client: null | string;
+            /** Format: uuid */
+            id: string;
+            name: string;
+            pm: null | string;
+            projectNumber: string;
+            status: string;
+        };
+        SearchResponse: {
+            counts: {
+                [key: string]: number;
+            };
+            exact: null | components["schemas"]["SearchExact"];
+            groups: components["schemas"]["SearchGroups"];
+            q: string;
+        };
+        SearchStatusHit: {
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            projectNumber: string;
+            status: string;
+        };
+        SearchSubmissionHit: {
+            /** Format: date */
+            dueDate: string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            owner: null | string;
+            projectNumber: string;
+        };
+        SearchTaskHit: {
+            assignee: null | string;
+            /** Format: date */
+            dueDate: null | string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            match: null | string;
+            name: string;
+            projectNumber: string;
+            status: string;
         };
         Selection: {
             /** Format: uuid */

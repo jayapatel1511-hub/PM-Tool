@@ -13222,6 +13222,714 @@
         ],
         "type": "object"
       },
+      "SearchAllocationHit": {
+        "properties": {
+          "dueDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "status",
+          "dueDate",
+          "projectNumber"
+        ],
+        "type": "object"
+      },
+      "SearchBasisHit": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "owner": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectNumber": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "projectNumber",
+          "owner"
+        ],
+        "type": "object"
+      },
+      "SearchCommentHit": {
+        "properties": {
+          "author": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "itemId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "itemType": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "match": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "itemType",
+          "itemId",
+          "key",
+          "name",
+          "projectNumber",
+          "author",
+          "createdAt",
+          "match"
+        ],
+        "type": "object"
+      },
+      "SearchDecisionHit": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "requiredByDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "status",
+          "requiredByDate",
+          "projectNumber"
+        ],
+        "type": "object"
+      },
+      "SearchDeliverableHit": {
+        "properties": {
+          "dueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "match": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "owner": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "status",
+          "dueDate",
+          "projectNumber",
+          "owner",
+          "match"
+        ],
+        "type": "object"
+      },
+      "SearchExact": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "key": {
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "projectNumber",
+          "key"
+        ],
+        "type": "object"
+      },
+      "SearchGroups": {
+        "properties": {
+          "allocations": {
+            "items": {
+              "$ref": "#/components/schemas/SearchAllocationHit"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "changes": {
+            "items": {
+              "$ref": "#/components/schemas/SearchStatusHit"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "comments": {
+            "items": {
+              "$ref": "#/components/schemas/SearchCommentHit"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "commitments": {
+            "items": {
+              "$ref": "#/components/schemas/SearchOwnedHit"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "constraints": {
+            "items": {
+              "$ref": "#/components/schemas/SearchOwnedHit"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "decisions": {
+            "items": {
+              "$ref": "#/components/schemas/SearchDecisionHit"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "deliverables": {
+            "items": {
+              "$ref": "#/components/schemas/SearchDeliverableHit"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "design-basis": {
+            "items": {
+              "$ref": "#/components/schemas/SearchBasisHit"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "handoffs": {
+            "items": {
+              "$ref": "#/components/schemas/SearchOwnedHit"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "milestones": {
+            "items": {
+              "$ref": "#/components/schemas/SearchMilestoneHit"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "people": {
+            "items": {
+              "$ref": "#/components/schemas/SearchPersonHit"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "planning": {
+            "items": {
+              "$ref": "#/components/schemas/SearchPlanningHit"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "projects": {
+            "items": {
+              "$ref": "#/components/schemas/SearchProjectHit"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "reviews": {
+            "items": {
+              "$ref": "#/components/schemas/SearchStatusHit"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "submissions": {
+            "items": {
+              "$ref": "#/components/schemas/SearchSubmissionHit"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/SearchTaskHit"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "SearchMilestoneHit": {
+        "properties": {
+          "date": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isCancelled": {
+            "type": "boolean"
+          },
+          "isComplete": {
+            "type": "boolean"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "date",
+          "isComplete",
+          "isCancelled",
+          "projectNumber"
+        ],
+        "type": "object"
+      },
+      "SearchOwnedHit": {
+        "properties": {
+          "dueDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "owner": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "status",
+          "dueDate",
+          "projectNumber",
+          "owner"
+        ],
+        "type": "object"
+      },
+      "SearchPersonHit": {
+        "properties": {
+          "canViewWork": {
+            "type": "boolean"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "jobTitle": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "email",
+          "jobTitle",
+          "isActive",
+          "canViewWork"
+        ],
+        "type": "object"
+      },
+      "SearchPlanningHit": {
+        "properties": {
+          "dueDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "personId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "startWeek": {
+            "format": "date",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "status",
+          "dueDate",
+          "startWeek",
+          "personId"
+        ],
+        "type": "object"
+      },
+      "SearchProjectHit": {
+        "properties": {
+          "client": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "pm": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "projectNumber",
+          "name",
+          "status",
+          "client",
+          "pm"
+        ],
+        "type": "object"
+      },
+      "SearchResponse": {
+        "properties": {
+          "counts": {
+            "additionalProperties": {
+              "format": "int32",
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "exact": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/SearchExact"
+              }
+            ]
+          },
+          "groups": {
+            "$ref": "#/components/schemas/SearchGroups"
+          },
+          "q": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "q",
+          "exact",
+          "groups",
+          "counts"
+        ],
+        "type": "object"
+      },
+      "SearchStatusHit": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "status",
+          "projectNumber"
+        ],
+        "type": "object"
+      },
+      "SearchSubmissionHit": {
+        "properties": {
+          "dueDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "owner": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectNumber": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "dueDate",
+          "projectNumber",
+          "owner"
+        ],
+        "type": "object"
+      },
+      "SearchTaskHit": {
+        "properties": {
+          "assignee": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "match": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "status",
+          "dueDate",
+          "projectNumber",
+          "assignee",
+          "match"
+        ],
+        "type": "object"
+      },
       "Selection": {
         "properties": {
           "id": {
@@ -34170,7 +34878,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResponse"
+                }
               }
             },
             "description": "OK"

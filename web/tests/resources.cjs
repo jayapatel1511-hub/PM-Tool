@@ -1,4 +1,5 @@
 const { openRoles, contractExample } = require('./open-roles.fixture.cjs')
+const { personTasks, capacitySet } = require('./workload.fixture.cjs')
 // Resources workflow UI checks with mocked API responses (run after `npm run build`); API tests cover server rules.
 // Tuesday visual batch 1: a partial view never claims spare capacity (FR-CAP-06), proposed requests stay outside load
 // (FR-CAP-04), negative remaining keeps its minus sign, person accents survive a re-sort, denied access, phones and a
@@ -18,7 +19,8 @@ const cells = (set) => weeks.map((week, i) => { const c = { week, hours: 0, pct:
 const person = (pid_, name, extra) => ({ id: pid_, displayName: name, supervisorId: sam, supervisorName: 'Sam Supervisor', capacity: 40, capacityOverride: false, noDueDate: 0,
   openTasks: 2, unestimated: 0, overdue: 0, projects: 1, overAssigned: false, underAssigned: false, cluster: false, canSetCapacity: true, indicator: 'ok', ...extra });
 let partial = true, forbidden = false, figureNames = false, unassignedOn = false, assigned = false, assignmentConflict = true;
-let typedPatchHeaders;
+let typedPatchHeaders, typedCapacity;
+const taskDrillCalls = [];
 const assignmentCalls = [], capacityCalls = [];
 const taskId = id(90);
 const grid = (sort) => {
@@ -68,6 +70,8 @@ let server, browser;
       if (assignmentConflict) { assignmentConflict = false; status = 409; data = { code: 'concurrency_conflict', detail: 'Synthetic stale task version' } }
       else { assigned = true; data = { id: taskId, rowVersion: 8 } }
     }
+    else if (p === `workload/${alex}/tasks`) { taskDrillCalls.push(Object.fromEntries(u.searchParams)); data = personTasks(weeks, project) }
+    else if (p === `users/${alex}/capacity` && route.request().method() === 'PUT') { const body = route.request().postDataJSON(); typedCapacity = { body, headers: route.request().headers() }; data = capacitySet(alex, body.hours) }
     else if (p === 'workload') [status, data] = forbidden ? [403, { code: 'forbidden', detail: 'You cannot open the workload view.' }] : [200, grid(u.searchParams.get('sort'))]
     else if (p === 'projects/P-DEMO' || p === `projects/${pid}`) data = project
     else if (p.endsWith('/date-review')) data = { window: null, tasks: [], deliverables: [] }
@@ -177,6 +181,22 @@ let server, browser;
   await page.getByRole('option', { name: /Jill Partial/ }).click();
   await unassigned.waitFor({ state: 'detached' }); assert.equal(assignmentCalls.length, 2);
   unassignedOn = false;
+
+  // S15 Workload: the expand row and the capacity dialog call the typed helper; the mock answers with contract-typed fixtures.
+  await page.getByRole('button', { name: "Show Alex Overloaded's tasks" }).click();
+  await page.getByText('Synthetic dated task').waitFor(); await page.getByText('Synthetic open task').waitFor();
+  assert.deepEqual(taskDrillCalls, [{}], 'The expand row asks for the current weeks: no from parameter');
+  const drillRow = (name) => page.getByRole('row').filter({ hasText: name });
+  assert.match(await drillRow('Synthetic dated task').innerText(), /Due 2026-10-09[\s\S]*Est\. 16 h[\s\S]*Left 12 h/, 'Dated task shows its due date, estimate and remaining hours');
+  assert.match(await drillRow('Synthetic open task').innerText(), /No due date/, 'A null due date and estimate render as missing, not as a crash');
+  await page.getByRole('button', { name: "Set capacity for Alex Overloaded" }).click();
+  await page.getByLabel('Hours per week').fill('32'); await page.getByRole('dialog').getByRole('button', { name: 'Save', exact: true }).click();
+  await page.getByRole('dialog').waitFor({ state: 'detached' });
+  assert.deepEqual(typedCapacity.body, { hours: 32 }); assert.equal(typedCapacity.headers['x-hub-source'], 'UI');
+  await page.getByRole('button', { name: "Set capacity for Alex Overloaded" }).click();
+  await page.getByLabel('Hours per week').fill(''); await page.getByRole('dialog').getByRole('button', { name: 'Save', exact: true }).click();
+  await page.getByRole('dialog').waitFor({ state: 'detached' });
+  assert.deepEqual(typedCapacity.body, { hours: null }, 'An empty field clears the override');
 
   // Denied access explains itself and offers no export or saved views.
   forbidden = true; await page.reload();

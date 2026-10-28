@@ -15398,7 +15398,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["CapacitySet"];
+                    };
                 };
             };
         };
@@ -15799,7 +15801,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["PersonTaskLoad"];
                     };
                 };
             };
@@ -16684,6 +16686,12 @@ export interface components {
         CapacityBody: {
             /** Format: double */
             hours: null | number;
+        };
+        CapacitySet: {
+            /** Format: uuid */
+            id: string;
+            /** Format: double */
+            weeklyCapacityHours: null | number;
         };
         ChainVerification: {
             /** Format: uuid */
@@ -18526,6 +18534,39 @@ export interface components {
             displayName: string;
             /** Format: uuid */
             id: string;
+        };
+        PersonTaskLoad: {
+            projects: components["schemas"]["PersonTaskProject"][];
+            weeks: string[];
+        };
+        PersonTaskProject: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            projectNumber: string;
+            tasks: components["schemas"]["PersonTaskRow"][];
+        };
+        PersonTaskRow: {
+            canReassign: boolean;
+            /** Format: date */
+            dueDate: null | string;
+            /** Format: double */
+            estimatedHours: null | number;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            /** Format: double */
+            noDueDate: number;
+            overdue: boolean;
+            /** Format: int32 */
+            progressPct: number;
+            /** Format: double */
+            remaining: null | number;
+            /** Format: int32 */
+            rowVersion: number;
+            status: string;
+            weeks: number[];
         };
         Phase: {
             auditKey?: null | string;

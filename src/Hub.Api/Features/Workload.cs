@@ -4,6 +4,7 @@ using System.Text.Json.Nodes;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Api.Features;
@@ -14,6 +15,7 @@ public static class WorkloadEndpoints
 {
     public sealed record WorkloadQuery(Guid? SupervisorId, Guid? DisciplineId, Guid? OfficeId, Guid? ProjectId, string? Indicator, DateOnly? From, string? Sort, Guid? UnitId = null);
     public sealed record CapacityBody(decimal? Hours);
+    public sealed record CapacitySet(Guid Id, decimal? WeeklyCapacityHours);
 
     public sealed record LoadThresholds(int OverPct, int AmberPct, int UnderPct);
     public sealed record LoadCell(DateOnly Week, decimal Hours, decimal Pct, decimal Available, decimal Confirmed, decimal Proposed,
@@ -33,6 +35,12 @@ public static class WorkloadEndpoints
     public sealed record UnassignedWork(int TotalCount, string ShowAllPath, List<UnassignedTask> Tasks);
     public sealed record UnassignedTask(Guid Id, string Key, string Name, Guid ProjectId, string ProjectNumber, string ProjectName, Guid ProjectDisciplineId,
         string? DisciplineName, DateOnly? StartDate, DateOnly? DueDate, decimal? EstimatedHours, int RowVersion, bool CanAssign, string EditPath);
+
+    /// The expand row (§13.11): Person → Project → tasks, each with its hours per week.
+    public sealed record PersonTaskLoad(IEnumerable<DateOnly> Weeks, List<PersonTaskProject> Projects);
+    public sealed record PersonTaskProject(Guid Id, string ProjectNumber, string Name, List<PersonTaskRow> Tasks);
+    public sealed record PersonTaskRow(Guid Id, string Key, string Name, string Status, DateOnly? DueDate, decimal? EstimatedHours, int ProgressPct,
+        decimal? Remaining, bool Overdue, decimal NoDueDate, int RowVersion, IEnumerable<decimal> Weeks, bool CanReassign);
 
     public const int Weeks = 8;
     internal static readonly string[] LiveProjects = [ProjectStatus.Setup, ProjectStatus.Active];
@@ -79,7 +87,7 @@ public static class WorkloadEndpoints
             Check.That(body.Hours is null or (>= 0 and <= 80), "hours", "error.positive");
             u.WeeklyCapacityHours = body.Hours;
             await db.SaveChangesAsync();
-            return Results.Ok(new { u.Id, u.WeeklyCapacityHours });
+            return TypedResults.Ok(new CapacitySet(u.Id, u.WeeklyCapacityHours));
         });
     }
 
@@ -291,7 +299,7 @@ public static class WorkloadEndpoints
     }
 
     /// Person → Project → tasks with each task's hours per week (§13.11 expand row), and whether the viewer may reassign it.
-    static async Task<object> PersonTasks(Guid userId, DateOnly? from, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock)
+    static async Task<Ok<PersonTaskLoad>> PersonTasks(Guid userId, DateOnly? from, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock)
     {
         await PeopleScope.DemandWorkload(db, access.Actor);
         var person = await (await PeopleScope.Widen(db, access.Actor, People(db, access, me))).Where(u => u.Id == userId).Select(u => new { u.Id, u.SupervisorId }).FirstOrDefaultAsync() ?? throw ApiException.NotFound();
@@ -303,24 +311,21 @@ public static class WorkloadEndpoints
         var projectIds = tasks.Select(t => t.ProjectId).Distinct().ToList();
         var projects = await db.Projects.AsNoTracking().Where(p => projectIds.Contains(p.Id)).ToListAsync();
         var cal = await Calendars.For(db, s, projectIds);
-        var groups = new List<object>();
+        var groups = new List<PersonTaskProject>();
         foreach (var p in projects.OrderBy(p => p.ProjectNumber))
         {
             var ctx = await access.Context(p);
-            var rows = new List<object>();
+            var rows = new List<PersonTaskRow>();
             foreach (var t in tasks.Where(t => t.ProjectId == p.Id).OrderBy(t => t.DueDate ?? DateOnly.MaxValue))
             {
                 var load = Workload.Spread(new LoadTask(t.Id, t.ProjectId, t.EstimatedHours, t.ProgressPct, t.StartDate, t.DueDate), today, cal(t.ProjectId));
                 var facts = new TaskFacts(t.ProjectDisciplineId, t.AssigneeId, null, null, new HashSet<Guid>(), t.Status, AssigneeSupervisorId: person.SupervisorId);
-                rows.Add(new
-                {
-                    t.Id, t.Key, t.Name, t.Status, t.DueDate, t.EstimatedHours, t.ProgressPct, Remaining = load.Remaining, load.Overdue, NoDueDate = load.NoDueDate, t.RowVersion,
-                    Weeks = weeks.Select(w => Math.Round(load.ByWeek.GetValueOrDefault(w), 1)), CanReassign = Permissions.AssignTask(access.Actor, ctx, facts).Ok,
-                });
+                rows.Add(new PersonTaskRow(t.Id, t.Key, t.Name, t.Status, t.DueDate, t.EstimatedHours, t.ProgressPct, load.Remaining, load.Overdue, load.NoDueDate, t.RowVersion,
+                    weeks.Select(w => Math.Round(load.ByWeek.GetValueOrDefault(w), 1)), Permissions.AssignTask(access.Actor, ctx, facts).Ok));
             }
-            groups.Add(new { p.Id, p.ProjectNumber, p.Name, Tasks = rows });
+            groups.Add(new PersonTaskProject(p.Id, p.ProjectNumber, p.Name, rows));
         }
-        return new { Weeks = weeks, Projects = groups };
+        return TypedResults.Ok(new PersonTaskLoad(weeks, groups));
     }
 
     /// Workload by Discipline (§19): the same hours summed by discipline across the people in the viewer's scope.

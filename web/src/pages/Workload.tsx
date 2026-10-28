@@ -38,8 +38,7 @@ type Unassigned = components['schemas']['UnassignedWork']
 /** Open demand with no person named yet (FR-ROLE-04): shown apart from people, never in anyone's load. */
 interface UnfilledRole { id: string; projectId: string; projectNumber: string; projectName: string; roleLabel: string; disciplineName?: string | null; fromDate: string; throughDate: string; plannedHours: number; cells: { week: string; hours: number }[] }
 interface UnassignedTask { id: string; key: string; name: string; projectId: string; projectNumber: string; projectName: string; disciplineName?: string | null; startDate?: string | null; dueDate?: string | null; estimatedHours?: number | null; rowVersion: number; canAssign: boolean; editPath: string }
-interface TaskLoadRow { id: string; key: string; name: string; status: string; dueDate?: string; estimatedHours?: number | null; progressPct: number; remaining?: number | null; overdue: boolean; noDueDate: number; rowVersion: number; weeks: number[]; canReassign: boolean }
-interface PersonTasks { weeks: string[]; projects: { id: string; projectNumber: string; name: string; tasks: TaskLoadRow[] }[] }
+type TaskLoadRow = components['schemas']['PersonTaskRow']
 
 const FILTERS = ['supervisorId', 'disciplineId', 'officeId', 'projectId', 'unitId', 'indicator', 'from', 'sort'] as const satisfies readonly (SavedViewKeys['workload'] | 'page' | 'panel' | 'draftAccessReason')[]
 const INDICATORS = ['over', 'under', 'cluster', 'unestimated'] as const
@@ -391,21 +390,21 @@ type RowState = { status: 'saving' } | { status: 'failed'; error: unknown }
 /** Person → Project → tasks, aligned with the week columns (§13.11), with reassignment where the viewer may (FR-006). */
 function PersonTasksRows({ id, name, from, weeks, onChanged }: { id: string; name: string; from?: string | null; weeks: number; onChanged: () => void }) {
   const qc = useQueryClient()
-  const q = useQuery({ queryKey: ['workload', id, 'tasks', from], queryFn: () => get<PersonTasks>(`workload/${id}/tasks${qs({ from })}`) })
+  const q = useQuery({ queryKey: ['workload', id, 'tasks', from], queryFn: () => typedRequest('get', '/api/v1/workload/{userId}/tasks', { params: { userId: id }, query: { from: from ?? undefined } }) })
   const [state, setState] = useState<Record<string, RowState>>({})
   const forget = (taskId: string) => setState((s) => { const n = { ...s }; delete n[taskId]; return n })
   const row = (content: React.ReactNode) => <tr><td colSpan={weeks + 2} className="border-b bg-muted px-4 py-3"><div className="sticky left-4 w-fit max-w-[calc(100vw-8rem)]">{content}</div></td></tr>
   if (q.isPending) return row(<span className="flex items-center gap-2 text-sm text-muted-foreground"><Spinner />{t('workload.loadingTasks', { name })}</span>)
   if (q.error) return row(<ErrorBanner error={q.error} retry={() => q.refetch()} />)
   if (!q.data.projects.length) return row(<span className="text-sm text-muted-foreground">{t('workload.noTasks')}</span>)
-  const reassign = async (task: TaskLoadRow, to: string | null) => {
+  const reassign = async (task: TaskLoadRow, to: string | null, projectId: string) => {
     if (!to) return
     setState((s) => ({ ...s, [task.id]: { status: 'saving' } }))
     try {
       await patch(`tasks/${task.id}`, { assigneeId: to }, task.rowVersion)
       toast.success(t('workload.reassigned', { key: task.key }))
       forget(task.id)
-      qc.invalidateQueries({ queryKey: ['workload'] }); onChanged()
+      void invalidateChange(qc, 'Task', projectId); onChanged()
     } catch (e) { setState((s) => ({ ...s, [task.id]: { status: 'failed', error: e } })) }
   }
   return (
@@ -444,7 +443,7 @@ function PersonTasksRows({ id, name, from, weeks, onChanged }: { id: string; nam
                 <td className="border-b px-4 py-2 align-top">
                   {tk.canReassign ? (
                     <div className="w-52 space-y-1">
-                      <PeoplePicker value={null} onChange={(v) => reassign(tk, v)} disabled={st?.status === 'saving'} placeholder={t('workload.reassignTo')} label={t('workload.reassignTask', { key: tk.key })} />
+                      <PeoplePicker value={null} onChange={(v) => reassign(tk, v, p.id)} disabled={st?.status === 'saving'} placeholder={t('workload.reassignTo')} label={t('workload.reassignTask', { key: tk.key })} />
                       <div aria-live="polite" className="text-xs/[18px]">
                         {st?.status === 'saving' && <span className="flex items-center gap-1.5 text-muted-foreground"><Spinner className="size-3.5" />{t('workload.reassigning')}</span>}
                         {st?.status === 'failed' && <span role="alert" className="text-bad">
@@ -500,7 +499,7 @@ function CapacityDialog({ p, defaultCapacity, onClose }: { p: PersonRow; default
   return (
     <ConfirmDialog open onOpenChange={(o) => !o && onClose(false)} title={t('workload.capacityTitle', { name: p.displayName })} confirmLabel={t('common.save')}
       body={t('workload.capacityHint', { h: defaultCapacity })} busy={invalid}
-      onConfirm={async () => { await put(`users/${p.id}/capacity`, { hours: value === '' ? null : Number(value) }); toast.success(t('common.saved')); onClose(true) }}>
+      onConfirm={async () => { await typedRequest('put', '/api/v1/users/{id}/capacity', { params: { id: p.id }, body: { hours: value === '' ? null : Number(value) } }); toast.success(t('common.saved')); onClose(true) }}>
       <Field label={t('workload.hoursPerWeek')} htmlFor="cap-h" optional error={invalid ? t('workload.capacityRange') : undefined}>
         <div className="flex items-center gap-2"><Input id="cap-h" className="w-32" type="number" min={0} max={80} step={0.5} value={value} placeholder={String(defaultCapacity)} aria-invalid={invalid || undefined} onChange={(e) => setValue(e.target.value)} /><span className="text-sm text-muted-foreground">{t('workload.hoursUnit')}</span></div>
       </Field>

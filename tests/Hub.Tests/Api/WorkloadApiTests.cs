@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using Hub.Domain;
 using Microsoft.EntityFrameworkCore;
@@ -133,6 +134,40 @@ public sealed class WorkloadApiTests(HubFactory f)
         Assert.Equal((20m, true, 80m), (part["capacity"]!.GetValue<decimal>(), part["capacityOverride"]!.GetValue<bool>(), part["cells"]![0]!["pct"]!.GetValue<decimal>()));
         Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Sam).Put($"/api/v1/users/{U(TestData.Pm)}/capacity", new { hours = 20 })).StatusCode);
         Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Alex).GetAsync("/api/v1/workload")).StatusCode);
+    }
+
+    [Fact]
+    public async Task Person_tasks_and_capacity_keep_their_property_names_order_kinds_and_refusals() // the typed records must serialise to the bytes Workload.tsx already reads
+    {
+        var p = await d.Project(); var person = await Report(); var sam = f.As(TestData.Sam);
+        await d.NewTask(p.Id, TestData.Pm, new { assigneeId = person.Id, estimatedHours = 16, dueDate = "2026-09-18" });
+        await d.NewTask(p.Id, TestData.Pm, new { assigneeId = person.Id }); // no estimate and no due date: the nulls stay null, not omitted
+        var drill = await (await sam.GetAsync($"/api/v1/workload/{person.Id}/tasks")).Json();
+        Assert.Equal(["weeks", "projects"], drill.AsObject().Select(x => x.Key));
+        Assert.Equal(Enumerable.Repeat(JsonValueKind.String, 8), drill["weeks"]!.AsArray().Select(w => w!.GetValueKind()));
+        var group = Assert.Single(drill["projects"]!.AsArray())!;
+        Assert.Equal(["id", "projectNumber", "name", "tasks"], group.AsObject().Select(x => x.Key));
+        Assert.Equal((p.Id, p.ProjectNumber), (group.G("id"), group.S("projectNumber")));
+        string[] taskKeys = ["id", "key", "name", "status", "dueDate", "estimatedHours", "progressPct", "remaining", "overdue", "noDueDate", "rowVersion", "weeks", "canReassign"];
+        var tasks = group["tasks"]!.AsArray().Select(t => t!).ToArray();
+        Assert.Equal(2, tasks.Length);
+        Assert.All(tasks, t => { Assert.Equal(taskKeys, t.AsObject().Select(x => x.Key)); Assert.Equal(Enumerable.Repeat(JsonValueKind.Number, 8), t["weeks"]!.AsArray().Select(w => w!.GetValueKind())); });
+        var (dated, undated) = (tasks[0], tasks[1]); // due date order, a task with none last
+        Assert.Equal(("2026-09-18", 16m, JsonValueKind.Number, true), (dated.S("dueDate"), dated["estimatedHours"]!.GetValue<decimal>(), dated["remaining"]!.GetValueKind(), dated["canReassign"]!.GetValue<bool>()));
+        Assert.Equal((null, null, null), (undated["dueDate"], undated["estimatedHours"], undated["remaining"])); // present (the key order above) and null
+        Assert.Equal(HttpStatusCode.NotFound, (await sam.GetAsync($"/api/v1/workload/{Guid.NewGuid()}/tasks")).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Alex).GetAsync($"/api/v1/workload/{person.Id}/tasks")).StatusCode);
+
+        var capacity = $"/api/v1/users/{person.Id}/capacity";
+        var cleared = await (await sam.Put(capacity, new { hours = (decimal?)null })).Json(); // no override yet: the person follows the default
+        Assert.Equal(["id", "weeklyCapacityHours"], cleared.AsObject().Select(x => x.Key)); Assert.Equal(person.Id, cleared.G("id")); Assert.Null(cleared["weeklyCapacityHours"]);
+        var set = await (await sam.Put(capacity, new { hours = 20 })).Json();
+        Assert.Equal(["id", "weeklyCapacityHours"], set.AsObject().Select(x => x.Key));
+        Assert.Equal((person.Id, 20m), (set.G("id"), set["weeklyCapacityHours"]!.GetValue<decimal>()));
+        Assert.Equal(HttpStatusCode.BadRequest, (await sam.Put(capacity, new { hours = 81 })).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await sam.Put(capacity, new { hours = -1 })).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await sam.Put($"/api/v1/users/{Guid.NewGuid()}/capacity", new { hours = 20 })).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Alex).Put(capacity, new { hours = 20 })).StatusCode);
     }
 
     [Fact]

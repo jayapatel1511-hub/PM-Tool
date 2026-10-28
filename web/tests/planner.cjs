@@ -4,6 +4,7 @@ const { spawn } = require('child_process')
 const path = require('path')
 const { weekPreview, weekApplied } = require('./week-planning.fixture.cjs')
 const { subscriptionState, subscriptionLink } = require('./calendar-subscription.fixture.cjs')
+const { calendarEvent, calendarDeadline, calendarRange, calendarCancelled } = require('./calendar.fixture.cjs')
 
 const port = process.env.PORT ?? '5194'
 const base = `http://127.0.0.1:${port}`
@@ -18,6 +19,8 @@ const makeEntry = (o = {}) => ({ id: entryId, personId: alex, personName: 'Alex 
 let current = makeEntry()
 let failEntryRead = false, denyEntryRead = false, failAwayRead = false, conflictAwayOnce = false, failAwaySaveOnce = false
 let bulkConflict = false, subscriptionEnabled = false, partialRita = false, keptMode = false
+const calendarEventId = id(30)
+let calendarEntries = [calendarDeadline(id(31), projectId), calendarEvent(calendarEventId, projectId)]
 const keptQuick = []
 let availability = [{ workDate: weeks[0], rowVersion: 3 }, { workDate: '2026-10-06', rowVersion: 4 }]
 const selfEntry = makeEntry({ id: selfId, personId: alex, personName: 'Alex Engineer', ownerId: alex, ownerName: 'Alex Engineer', ownerKind: 'Self', startWeek: weeks[5], endWeek: weeks[5], projectId: null, projectDisciplineId: null, label: 'self planning', sourceCategory: 'Proposal', hoursPerWeek: 4, confidence: 'Confirmed', visibility: 'Confirmed', canChangeVisibility: false, stale: false, rowVersion: 2 })
@@ -39,7 +42,7 @@ const pause = (ms = 100) => new Promise((r) => setTimeout(r, ms))
     page.on('pageerror', (e) => errors.push(e.message))
     await page.route('**/api/**', async (route) => {
       const req = route.request(); const u = new URL(req.url()); const p = u.pathname.replace('/api/v1/', ''); const b = body(req)
-      calls.push({ method: req.method(), path: p, url: req.url(), body: b, key: req.headers()['idempotency-key'] })
+      calls.push({ method: req.method(), path: p, url: req.url(), body: b, key: req.headers()['idempotency-key'], headers: req.headers() })
       let status = 200, data = {}
       if (p === 'config') data = { authMode: 'Development', entra: {} }
       else if (p === 'me') data = myWorkMode ? { ...me, id: alex, displayName: 'Alex Engineer', systemRoles: [], capabilities: { ...me.capabilities, workload: false } } : (adminMode ? { ...me, capabilities: { ...me.capabilities, admin: true } } : me)
@@ -59,7 +62,10 @@ const pause = (ms = 100) => new Promise((r) => setTimeout(r, ms))
       else if (p === 'planning/leave/import') data = { applied: 1, unchanged: 0 }
       else if (p === 'planning/week-preview') data = weekPreview({ operation: u.searchParams.get('operation') ?? 'Copy', week: u.searchParams.get('week') ?? weeks[0], entryId, personId: alex })
       else if (p === 'planning/week-apply') { if (bulkConflict) { bulkConflict = false; status = 409; data = { detail: 'Weekly snapshot changed', code: 'concurrency_conflict' } } else data = weekApplied({ week: b.week ?? weeks[0], entryId, personId: alex }) }
-      else if (p === 'calendar') data = { entries: [], timeZone: 'America/Halifax' }
+      else if (p === 'calendar') data = calendarRange(u.searchParams.get('from') ?? '', u.searchParams.get('to') ?? '', calendarEntries)
+      else if (p === 'calendar/events' && req.method() === 'POST') { const made = calendarEvent(id(32), projectId, { ...b, rowVersion: 1 }); calendarEntries = [...calendarEntries, made]; status = 201; data = made }
+      else if (p === `calendar/events/${calendarEventId}` && req.method() === 'PATCH') { const was = calendarEntries.find((e) => e.id === calendarEventId); data = calendarEvent(calendarEventId, projectId, { ...was, ...b, rowVersion: was.rowVersion + 1 }); calendarEntries = calendarEntries.map((e) => e.id === calendarEventId ? data : e) }
+      else if (p === `calendar/events/${calendarEventId}/cancel`) { data = calendarCancelled(calendarEventId, b.rowVersion + 1); calendarEntries = calendarEntries.filter((e) => e.id !== calendarEventId) }
       else if (p === 'me/calendar-subscription') { if (req.method() === 'POST') { subscriptionEnabled = true; data = subscriptionLink('https://example.test/synthetic-calendar') } else if (req.method() === 'DELETE') { subscriptionEnabled = false; status = 204; data = undefined } else data = subscriptionState(subscriptionEnabled) }
       else if (p.startsWith('planning/grid')) { if (denyGrid) { status = 403; data = { detail: 'You cannot open the workload view' } } else if (failGrid) { status = 500; data = { detail: 'Planner unavailable' } } else {
           data = grid(new URL(req.url()).searchParams.get('includeMyDrafts') !== 'false')
@@ -183,6 +189,25 @@ const pause = (ms = 100) => new Promise((r) => setTimeout(r, ms))
     await page.goto(`${base}/planner?from=2026-10-12`); await page.getByRole('main').getByRole('button', { name: 'More actions' }).click(); await page.getByRole('menuitem', { name: 'Copy last week', exact: true }).click(); let bulkDialog = page.getByRole('dialog'); await bulkDialog.getByText('Synthetic weekly allocation', { exact: true }).waitFor(); assert.equal(await bulkDialog.getByRole('button', { name: 'Copy selected as Drafts', exact: true }).isDisabled(), true); await bulkDialog.getByRole('checkbox').check(); assert.deepEqual(await axe('copy-week-preview'), []); await bulkDialog.getByRole('button', { name: 'Copy selected as Drafts', exact: true }).click(); await bulkDialog.waitFor({ state: 'detached' }); assert.equal(calls.filter(c => c.path === 'planning/week-apply').at(-1).body.entries.length, 1); assert.equal(calls.filter(c => c.path === 'planning/week-apply').at(-1).body.week, '2026-10-12');
     await page.getByRole('button', { name: 'Publish weekly plan', exact: true }).click(); bulkDialog = page.getByRole('dialog'); await bulkDialog.getByRole('checkbox').check(); bulkConflict = true; await bulkDialog.getByRole('button', { name: 'Publish selected', exact: true }).click(); await bulkDialog.getByText('Weekly snapshot changed').waitFor(); assert.equal(await bulkDialog.getByRole('button', { name: 'Publish selected', exact: true }).isDisabled(), true); await bulkDialog.getByRole('button', { name: 'Reload', exact: true }).click(); await page.waitForFunction(() => !document.querySelector('[role="dialog"] input[type="checkbox"]')?.checked); assert.equal(await bulkDialog.getByRole('checkbox').isChecked(), false); await bulkDialog.getByRole('button', { name: 'Cancel', exact: true }).click(); recoveryChecks.push('weekly snapshot conflict clears selections before a new command');
     await page.goto(`${base}/calendar`); await page.getByRole('button', { name: 'Sync my calendar', exact: true }).click(); const syncDialog = page.getByRole('dialog'); await syncDialog.getByRole('button', { name: 'Create private link', exact: true }).waitFor(); assert.deepEqual(await axe('calendar-subscription'), []); await syncDialog.getByRole('button', { name: 'Create private link', exact: true }).click(); await syncDialog.getByLabel('Private subscription URL', { exact: true }).waitFor(); assert.equal(await syncDialog.getByLabel('Private subscription URL', { exact: true }).inputValue(), 'https://example.test/synthetic-calendar'); await syncDialog.getByRole('button', { name: 'Revoke link', exact: true }).click(); await syncDialog.getByRole('button', { name: 'Create private link', exact: true }).waitFor(); assert.equal(await syncDialog.getByLabel('Private subscription URL', { exact: true }).count(), 0);
+    // S15 Calendar: the range read, the event dialog and its cancel call the typed helper; the mock answers with contract-typed fixtures.
+    await page.goto(`${base}/calendar?mode=agenda&date=2026-10-12`); await page.getByRole('button', { name: /Survey review/ }).waitFor()
+    const rangeCall = new URL(calls.filter(c => c.path === 'calendar').at(-1).url).searchParams
+    assert.deepEqual([rangeCall.get('from'), rangeCall.get('to'), rangeCall.get('types')], ['2026-10-12', '2026-11-11', 'Deadline,Meeting,Site Work,Internal Task'])
+    await page.getByRole('button', { name: /Coordination meeting/ }).click(); let eventDialog = page.getByRole('dialog'); await eventDialog.getByLabel('Title', { exact: true }).fill('Coordination meeting moved'); assert.deepEqual(await axe('calendar-event'), [])
+    await eventDialog.getByRole('button', { name: 'Save', exact: true }).click(); await eventDialog.waitFor({ state: 'detached' })
+    const patchCall = calls.filter(c => c.method === 'PATCH' && c.path === `calendar/events/${calendarEventId}`).at(-1)
+    assert.deepEqual(patchCall.body, { type: 'Meeting', title: 'Coordination meeting moved', projectId, start: '2026-10-14T09:00', end: '2026-10-14T10:00', location: 'Boardroom', description: null, visibility: 'Project' })
+    assert.equal(patchCall.headers['if-match'], '"3"'); assert.equal(patchCall.headers['x-hub-source'], 'UI')
+    await page.getByRole('button', { name: /Coordination meeting moved/ }).waitFor() // the save refreshed the range through keys.ts
+    await page.getByRole('button', { name: /Coordination meeting moved/ }).click(); await page.getByRole('dialog').getByRole('button', { name: 'Cancel event', exact: true }).click(); await page.getByRole('dialog').waitFor({ state: 'detached' })
+    const cancelCall = calls.filter(c => c.path === `calendar/events/${calendarEventId}/cancel`).at(-1)
+    assert.deepEqual(cancelCall.body, { rowVersion: 4 }); assert.equal(cancelCall.headers['x-hub-source'], 'UI'); assert.equal(cancelCall.headers['if-match'], undefined)
+    await page.getByRole('button', { name: /Coordination meeting moved/ }).waitFor({ state: 'detached' })
+    await page.getByRole('button', { name: 'New event', exact: true }).click(); eventDialog = page.getByRole('dialog'); await eventDialog.getByLabel('Title', { exact: true }).fill('Site walk'); await eventDialog.getByLabel('Project', { exact: true }).selectOption({ label: 'P-100 Harbour survey' })
+    await eventDialog.getByRole('button', { name: 'Save', exact: true }).click(); await eventDialog.waitFor({ state: 'detached' })
+    const postCall = calls.filter(c => c.method === 'POST' && c.path === 'calendar/events').at(-1)
+    assert.deepEqual(postCall.body, { type: 'Meeting', title: 'Site walk', projectId, start: '2026-10-12T09:00', end: '2026-10-12T10:00', location: null, description: null, visibility: 'Project' })
+    assert.equal(postCall.headers['x-hub-source'], 'UI'); assert.equal(postCall.headers['if-match'], undefined); await page.getByRole('button', { name: /Site walk/ }).waitFor()
     console.log(JSON.stringify({ flowCount: 20, recoveryChecks, apiCalls: calls.length, createdEntities: created.length, notifications: notifications.length, axe: axeReports, errors, unknownGets: [...new Set(unknown)] }))
     assert.deepEqual(errors, []); assert.deepEqual([...new Set(unknown)], []); assert.ok(axeReports.every((x) => x.violations.length === 0))
   } finally { await browser?.close(); server.kill() }

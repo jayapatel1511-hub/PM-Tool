@@ -2313,7 +2313,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["CalendarRange"];
                     };
                 };
             };
@@ -2383,12 +2383,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["CalendarEventRow"];
+                    };
                 };
             };
         };
@@ -2422,7 +2424,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["CalendarEventRow"];
                     };
                 };
             };
@@ -2452,7 +2454,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["CalendarEventRow"];
+                    };
                 };
             };
         };
@@ -2487,7 +2491,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["CalendarEventCancelled"];
+                    };
                 };
             };
         };
@@ -16673,9 +16679,96 @@ export interface components {
             linked: components["schemas"]["LinkedItem"][];
             skipped: components["schemas"]["SkippedItem"][];
         };
+        CalendarEntry: components["schemas"]["CalendarEntryCalendarDeadline"] | components["schemas"]["CalendarEntryCalendarEventRow"];
+        CalendarEntryCalendarDeadline: {
+            /** Format: date */
+            date: string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            kind: string;
+            overdue: boolean;
+            /** Format: uuid */
+            projectId: string;
+            projectName: string;
+            projectNumber: string;
+            sourceType: string;
+            status: null | string;
+            title: string;
+        };
+        CalendarEntryCalendarEventRow: {
+            canEdit: boolean;
+            cancelled: boolean;
+            description: null | string;
+            end: string;
+            /** Format: date-time */
+            endAt: string;
+            /** Format: uuid */
+            id: string;
+            kind: string;
+            location: null | string;
+            owner: null | string;
+            /** Format: uuid */
+            ownerId: string;
+            /** Format: uuid */
+            projectId: null | string;
+            projectName: null | string;
+            projectNumber: null | string;
+            /** Format: int32 */
+            rowVersion: number;
+            start: string;
+            /** Format: date-time */
+            startAt: string;
+            timeZone: string;
+            title: string;
+            type: string;
+            visibility: string;
+        };
+        CalendarEventCancelled: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
+        };
+        CalendarEventRow: {
+            canEdit: boolean;
+            cancelled: boolean;
+            description: null | string;
+            end: string;
+            /** Format: date-time */
+            endAt: string;
+            /** Format: uuid */
+            id: string;
+            kind: string;
+            location: null | string;
+            owner: null | string;
+            /** Format: uuid */
+            ownerId: string;
+            /** Format: uuid */
+            projectId: null | string;
+            projectName: null | string;
+            projectNumber: null | string;
+            /** Format: int32 */
+            rowVersion: number;
+            start: string;
+            /** Format: date-time */
+            startAt: string;
+            timeZone: string;
+            title: string;
+            type: string;
+            visibility: string;
+        };
         CalendarFeedVersionBody: {
             /** Format: int32 */
             rowVersion: number;
+        };
+        CalendarRange: {
+            entries: components["schemas"]["CalendarEntry"][];
+            /** Format: date */
+            from: string;
+            timeZone: string;
+            /** Format: date */
+            to: string;
         };
         Can: {
             assign: boolean;

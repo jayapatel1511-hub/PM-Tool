@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useProject, useProjectRefresh } from '@/hooks/data'
 import { useFlag } from '@/lib/auth'
+import type { components } from '@/gen/api'
 import { ApiError, get, patch, post, qs, typedRequest } from '@/lib/api'
 import { addDays, fmtDate, today } from '@/lib/format'
 import { t, tv , runtimeText } from '@/lib/i18n'
@@ -231,7 +232,7 @@ function MeetingForm({ projectId, meeting, onClose }: { projectId: string; meeti
   const safe = useSafeForm(meeting ? null : `meeting.new.${projectId}`, f, setF) // FR-SAV-03
   const from = f.meetingDate ? addDays(f.meetingDate, -3) : today()
   const events = useQuery({ queryKey: ['calendar', projectId, 'meeting-link', from], enabled: !!f.meetingDate,
-    queryFn: () => get<{ entries: { kind: string; id: string; title: string; start: string }[] }>(`calendar${qs({ from, to: addDays(from, 6), projectIds: projectId, types: 'Meeting' })}`) })
+    queryFn: () => typedRequest('get', '/api/v1/calendar', { query: { from, to: addDays(from, 6), projectIds: projectId, types: 'Meeting' } }) })
   const submit = async () => {
     setErr(null); setBusy(true)
     try {
@@ -256,7 +257,7 @@ function MeetingForm({ projectId, meeting, onClose }: { projectId: string; meeti
           <Field label={t('meeting.calendarEvent')} htmlFor="m-event" error={fe.calendarEventId} className="sm:col-span-2">
             <select id="m-event" className={selectCls} value={f.calendarEventId ?? ''} onChange={(e) => setF({ ...f, calendarEventId: e.target.value || null })}>
               <option value="">{t('meeting.noEvent')}</option>
-              {(events.data?.entries ?? []).filter((x) => x.kind === 'event').map((x) => <option key={x.id} value={x.id}>{x.title} · {fmtDate(x.start.slice(0, 10))}</option>)}
+              {(events.data?.entries ?? []).filter((x): x is components['schemas']['CalendarEventRow'] => x.kind === 'event').map((x) => <option key={x.id} value={x.id}>{x.title} · {fmtDate(x.start.slice(0, 10))}</option>)}
             </select>
           </Field>
           {err && !Object.keys(fe).length && <div className="sm:col-span-2"><ErrorBanner error={err} /></div>}

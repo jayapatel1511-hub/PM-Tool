@@ -56,5 +56,5 @@ Each slice below moves one hand-rolled table onto `DataTable`, passes the parity
 - [ ] S36 (S) Vacation, `web/src/pages/Vacation.tsx`. FR-REC-14, FR-REC-15. AC-REC-07, AC-REC-14, AC-REC-15. Tests: parity run; `AvailabilityBuildTests`.
 - [ ] S37 (S) Milestones, `web/src/pages/projects/Milestones.tsx`. FR-REC-14, FR-REC-15. AC-REC-07, AC-REC-14, AC-REC-15. Tests: parity run; `MilestonesDeliverablesTests`.
 - [ ] S38 (S) Project List, `web/src/pages/projects/ProjectList.tsx`. FR-REC-14, FR-REC-15. AC-REC-07, AC-REC-14, AC-REC-15. Tests: parity run; `ProjectsTests`, `counts`.
-- [ ] S39 (S) Portfolio, `web/src/pages/Portfolio.tsx`. FR-REC-14, FR-REC-15. AC-REC-07, AC-REC-14, AC-REC-15. Tests: parity run; `PortfolioTests`.
+- [x] S39 (S) Portfolio, `web/src/pages/Portfolio.tsx`. FR-REC-14, FR-REC-15. AC-REC-07, AC-REC-14, AC-REC-15. Tests: parity run; `PortfolioTests`. Done (build 043-S39): the Portfolio table uses `DataTable` (with the new `groupRow`, `onRowClick` and `oneBody` props, and `cards={false}`); `html_tables` is 57 on the merged tree. See verification.md.
 - [x] S40 (S) Reviews and Changes, `web/src/pages/projects/CoordinationRegister.tsx`. FR-REC-14, FR-REC-15. AC-REC-07, AC-REC-14, AC-REC-15. Tests: parity run; `ReviewChangeTests`, `reviews-changes.cjs`.

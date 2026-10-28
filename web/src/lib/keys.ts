@@ -7,9 +7,12 @@ export const roots = {
   planningEntries: ['planning-entries'], myWeek: ['my-week'],
 } as const
 
+const taskKeys = ['task', 'wtasks', 'wboard', 'gantt', 'coordination', 'workload', 'planning-grid', 'planning-entries', 'my-week', 'mywork-tasks', 'open-work'] as const
+const deliverableKeys = ['deliverable', 'gantt', 'coordination', 'coord-options', 'workspace-coordination'] as const
+
 export const itemKeys: Readonly<Record<string, readonly string[]>> = {
-  Task: ['task', 'wtasks', 'wboard', 'gantt', 'coordination', 'workload', 'planning-grid', 'planning-entries', 'my-week', 'mywork-tasks', 'open-work'],
-  Deliverable: ['deliverable', 'gantt', 'coordination', 'coord-options', 'workspace-coordination'],
+  Task: taskKeys, Dependency: taskKeys, // a link changes both tasks' waiting and blocked state, the chain and the candidates under 'task'
+  Deliverable: deliverableKeys, DeliverableDependency: deliverableKeys,
   Milestone: ['milestone', 'gantt', 'coordination', 'submission-milestones'], Decision: ['decision', 'coordination', 'basis-decision-options'],
   Action: ['action', 'coordination'], Risk: ['risk', 'coordination'], Issue: ['issue', 'coordination', 'issue-locations', 'issue-documents', 'issue-verification', 'issue-reference-impacts', 'review-issues'],
   OpenRole: ['allocations', 'open-roles', 'workload', 'planning-grid', 'planning-entries', 'my-week'],

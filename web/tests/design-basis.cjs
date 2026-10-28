@@ -4,6 +4,7 @@
 const { chromium } = require('playwright');
 const { clientConfig } = require('./config.fixture.cjs');
 const { meView } = require('./me.fixture.cjs');
+const { taskDependencies } = require('./dependencies.fixture.cjs');
 const path = require('path'), { spawn } = require('child_process'), assert = require('assert/strict');
 const { decisionRow, externalParty } = require('./decisions.fixture.cjs');
 const { savedView, viewList, viewSaved } = require('./views.fixture.cjs');
@@ -114,7 +115,7 @@ let server, browser;
     else if (p === `projects/${pid}/deliverables` || p === `projects/${pid}/milestones`) data = [];
     else if (p === `projects/${pid}/tasks`) data = { items: [taskRow()], page: 1, pageSize: 200, totalCount: 1 };
     else if (p === `tasks/${task}`) data = taskDetail();
-    else if (p === `tasks/${task}/dependencies`) data = { dependsOn: [], blocks: [] };
+    else if (p === `tasks/${task}/dependencies`) data = taskDependencies();
     else if (p === `items/Task/${task}/comments`) data = { items: [], canComment: true };
     else if (p === `items/Task/${task}/links`) data = { links: [], inherited: [], canAdd: true };
     else if (p === `projects/${pid}/design-basis`) { lists.push(u.search); data = basisPage([row(e1, 'P-DEMO-B001', v12, 'Confirmed'), row(e2, 'P-DEMO-B002', null, 'Withdrawn')], { total: 101, page: Number(u.searchParams.get('page') ?? 1) }) }

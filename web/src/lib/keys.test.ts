@@ -14,6 +14,7 @@ test('item changes keep the previous project and item-specific invalidations (AC
     PersonAvailabilityOverride: ['availability', 'availability-view', 'planning-grid', 'my-week'],
     ReviewRound: ['reviews', 'review-detail', 'changes', 'change-detail', 'coord-options', 'input-uses', 'handoffs', 'handoff-detail', 'submissions', 'submission-detail', 'workspace-coordination', 'deliverable'],
     PlanningEntry: ['planning-grid', 'planning-entries'], DesignBasisEntry: ['design-basis', 'design-basis-detail'], Member: ['staff'], SavedView: ['views'], ReferenceData: ['reference'], Setting: ['me'],
+    Dependency: ['task', 'gantt', 'coordination', 'workload', 'mywork-tasks'], DeliverableDependency: ['deliverable', 'gantt', 'coordination', 'coord-options'],
   }
   for (const root of ['history', 'comments', 'links']) assert.ok(keysForChange('Risk', 'p1').some(k => k[0] === root))
   for (const [type, roots] of Object.entries(before)) {
@@ -56,6 +57,8 @@ test('child audit types refresh mounted details and dependent pickers; reconnect
 test('invalidation prefixes match actual mounted screen query keys', () => {
   const mounted: Record<string, string[][]> = {
     Task: [['wtasks', 'scope'], ['wboard', 'scope'], ['gantt', 'scope'], ['closeout', 'p1']],
+    Dependency: [['task', 'i1', 'deps', '3'], ['task', 'i1', 'chain'], ['task', 'i1', 'candidates', 'predecessor', ''], ['gantt', 'scope']],
+    DeliverableDependency: [['deliverable', 'i1'], ['gantt', 'scope']],
     Deliverable: [['gantt', 'scope']], DocumentLink: [['files', 'scope']],
     Risk: [['search-counts', 'scope'], ['search-page', 'scope']],
     IssueLocation: [['issue-locations', 'i1']], ReadinessAssessment: [['readiness-detail', 'p1', 'i1']],

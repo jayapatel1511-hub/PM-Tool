@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using Hub.Api.Data;
 using Hub.Api.Features;
@@ -263,6 +264,113 @@ public sealed class DependencyTypeApiTests(HubFactory f)
             await admin.Put("/api/v1/admin/settings/working_days_enabled", new { value = false }).Result.Json();
             await f.DbAsync(db => db.Holidays.Where(h => h.OfficeId == office && h.Date == new DateOnly(2026, 11, 11)).ExecuteDeleteAsync());
         }
+    }
+
+    [Fact]
+    public async Task Dependency_responses_keep_their_property_names_order_nulls_and_nesting() // the typed records must serialise to the bytes the app already reads (040-S15-Dependencies)
+    {
+        static string[] Keys(JsonNode? n) => [.. n!.AsObject().Select(x => x.Key)];
+        string[] edge = ["dependencyId", "note", "lagDays", "type", "task", "satisfied"];
+        string[] edgeTask = ["id", "key", "name", "status", "dueDate", "startDate", "assigneeId", "assigneeName", "overdue", "blocked", "waiting"];
+        var p = await d.Project();
+        var pm = f.As(TestData.Pm);
+        var a = await d.NewTask(p.Id, TestData.Pm, new { name = "Dep pin A", assigneeId = U(TestData.Alex), startDate = "2026-10-05", dueDate = "2026-10-09" });
+        var b = await d.NewTask(p.Id, TestData.Pm, new { name = "Dep pin B" });
+        var c = await d.NewTask(p.Id, TestData.Pm, new { name = "Dep pin C" });
+        var e = await d.NewTask(p.Id, TestData.Pm, new { name = "Dep pin E" });
+        var g = await d.NewTask(p.Id, TestData.Pm, new { name = "Dep pin G" });
+        await f.DbAsync(async db => { (await db.Tasks.SingleAsync(x => x.Id == c.G("id"))).Status = TaskStatuses.Complete; return await db.SaveChangesAsync(); });
+
+        // Adding: 201 with a Location, the new id and the warnings (none, then one for a finished successor, then one for a finished predecessor).
+        var first = await pm.Post($"/api/v1/tasks/{b.S("id")}/dependencies", new { predecessorTaskId = a.G("id"), type = DependencyTypes.StartToStart, lagDays = 3, note = "Review first" });
+        var ab = await first.Json(201);
+        Assert.Equal(["id", "warnings"], Keys(ab));
+        Assert.Empty(ab["warnings"]!.AsArray());
+        Assert.Equal($"/api/v1/dependencies/{ab.S("id")}", first.Headers.Location!.OriginalString);
+        var ac = await pm.Post($"/api/v1/tasks/{a.S("id")}/dependencies", new { successorTaskId = c.G("id") }).Result.Json(201);
+        Assert.Equal(["id", "warnings"], Keys(ac));
+        Assert.Equal([Hub.Api.Text.Get("dep.successor_complete", c.S("key"))], ac["warnings"]!.AsArray().Select(x => x!.GetValue<string>()));
+        var cb = await pm.Post($"/api/v1/tasks/{b.S("id")}/dependencies", new { predecessorTaskId = c.G("id") }).Result.Json(201);
+        Assert.Equal([Hub.Api.Text.Get("dep.predecessor_complete", c.S("key"))], cb["warnings"]!.AsArray().Select(x => x!.GetValue<string>()));
+        await pm.Post($"/api/v1/tasks/{e.S("id")}/dependencies", new { predecessorTaskId = b.G("id") }).Result.Json(201);
+        await f.Evaluate(p.Id);
+
+        // Reading a task's links: both sides, each with the note (null, not omitted), lag, type, the other task's facts and the satisfied tick.
+        var ofA = await pm.GetAsync($"/api/v1/tasks/{a.S("id")}/dependencies").Result.Json();
+        Assert.Equal(["dependsOn", "blocks"], Keys(ofA));
+        Assert.Empty(ofA["dependsOn"]!.AsArray());
+        var blocks = ofA["blocks"]!.AsArray();
+        Assert.Equal(2, blocks.Count);
+        Assert.All(blocks, x => { Assert.Equal(edge, Keys(x)); Assert.Equal(edgeTask, Keys(x!["task"])); });
+        var toB = blocks.Single(x => x!["task"]!.G("id") == b.G("id"))!;
+        Assert.Equal((ab.G("id"), "Review first", 3, DependencyTypes.StartToStart), (toB.G("dependencyId"), toB.S("note"), toB.I("lagDays"), toB.S("type")));
+        Assert.Equal((b.S("key"), "Dep pin B", TaskStatuses.NotStarted), (toB["task"]!.S("key"), toB["task"]!.S("name"), toB["task"]!.S("status")));
+        Assert.All(new[] { "dueDate", "startDate", "assigneeId", "assigneeName" }, k => { Assert.True(toB["task"]!.AsObject().ContainsKey(k)); Assert.Null(toB["task"]![k]); });
+        Assert.All(new[] { "overdue", "blocked", "waiting" }, k => Assert.True(toB["task"]![k]!.GetValueKind() is JsonValueKind.True or JsonValueKind.False));
+        Assert.False(toB["satisfied"]!.GetValue<bool>());
+        var toC = blocks.Single(x => x!["task"]!.G("id") == c.G("id"))!;
+        Assert.Equal((DependencyTypes.FinishToStart, 0), (toC.S("type"), toC.I("lagDays")));
+        Assert.True(toC.AsObject().ContainsKey("note")); Assert.Null(toC["note"]);
+
+        var ofB = await pm.GetAsync($"/api/v1/tasks/{b.S("id")}/dependencies").Result.Json();
+        Assert.Equal(["dependsOn", "blocks"], Keys(ofB));
+        Assert.Equal(2, ofB["dependsOn"]!.AsArray().Count);
+        Assert.Equal(e.G("id"), Assert.Single(ofB["blocks"]!.AsArray())!["task"]!.G("id"));
+        var fromA = ofB["dependsOn"]!.AsArray().Single(x => x!["task"]!.G("id") == a.G("id"))!;
+        Assert.Equal(edge, Keys(fromA)); Assert.Equal(edgeTask, Keys(fromA["task"]));
+        Assert.Equal((a.G("id"), "Dep pin A", "2026-10-05", "2026-10-09", U(TestData.Alex), "Alex Chen"),
+            (fromA["task"]!.G("id"), fromA["task"]!.S("name"), fromA["task"]!.S("startDate"), fromA["task"]!.S("dueDate"), fromA["task"]!.G("assigneeId"), fromA["task"]!.S("assigneeName")));
+        Assert.False(fromA["satisfied"]!.GetValue<bool>());
+        Assert.True(ofB["dependsOn"]!.AsArray().Single(x => x!["task"]!.G("id") == c.G("id"))!["satisfied"]!.GetValue<bool>()); // the finished predecessor of a Finish-to-Start link
+
+        // Candidates: a list of seven properties; existing links and loops are disabled with their reasons, the rest carry a null reason.
+        var candidates = await pm.GetAsync($"/api/v1/tasks/{b.S("id")}/dependency-candidates").Result.Json();
+        Assert.All(candidates.AsArray(), x => Assert.Equal(["id", "key", "name", "status", "dueDate", "disabled", "reason"], Keys(x)));
+        var existing = candidates.AsArray().Single(x => x!.G("id") == a.G("id"))!;
+        Assert.Equal((true, Hub.Api.Text.Get("dep.duplicate")), (existing["disabled"]!.GetValue<bool>(), existing.S("reason")));
+        Assert.Equal((a.S("key"), "Dep pin A", TaskStatuses.NotStarted, "2026-10-09"), (existing.S("key"), existing.S("name"), existing.S("status"), existing.S("dueDate")));
+        var loops = await pm.GetAsync($"/api/v1/tasks/{a.S("id")}/dependency-candidates").Result.Json(); // a task that already waits on a would close a loop
+        Assert.Equal(Hub.Api.Text.Get("dep.would_cycle"), loops.AsArray().Single(x => x!.G("id") == e.G("id"))!.S("reason"));
+        var free = await pm.GetAsync($"/api/v1/tasks/{e.S("id")}/dependency-candidates?direction=successor&q={g.S("key")}").Result.Json();
+        var open = Assert.Single(free.AsArray())!;
+        Assert.Equal(g.G("id"), open.G("id"));
+        Assert.False(open["disabled"]!.GetValue<bool>()); Assert.True(open.AsObject().ContainsKey("reason")); Assert.Null(open["reason"]);
+
+        // The chain: the task itself, its depth, then each transitive side with its level, the task it was reached from and the full task row.
+        var chain = await pm.GetAsync($"/api/v1/tasks/{b.S("id")}/chain?depth=7").Result.Json();
+        Assert.Equal(["task", "depth", "predecessors", "successors"], Keys(chain));
+        Assert.Equal((b.G("id"), 7), (chain["task"]!.G("id"), chain.I("depth")));
+        Assert.Equal(2, chain["predecessors"]!.AsArray().Count);
+        Assert.All(chain["predecessors"]!.AsArray(), x => { Assert.Equal(["level", "parentId", "task"], Keys(x)); Assert.Equal((1, b.G("id")), (x!.I("level"), x.G("parentId"))); });
+        var succ = Assert.Single(chain["successors"]!.AsArray())!;
+        Assert.Equal(e.G("id"), succ["task"]!.G("id"));
+        Assert.Equal(Keys(chain["task"]), Keys(succ["task"])); // the one task row every list answers with
+        Assert.Equal(1, (await pm.GetAsync($"/api/v1/tasks/{b.S("id")}/chain?depth=0").Result.Json()).I("depth")); // clamped to 1..50
+        Assert.Equal(50, (await pm.GetAsync($"/api/v1/tasks/{b.S("id")}/chain?depth=99").Result.Json()).I("depth"));
+
+        // Removing: 204 with no body; the link is gone from both sides; a second delete, an unknown id and a person who may not manage links are refused.
+        var removed = await pm.DeleteAsync($"/api/v1/dependencies/{cb.S("id")}");
+        Assert.Equal(HttpStatusCode.NoContent, removed.StatusCode); Assert.Empty(await removed.Content.ReadAsStringAsync());
+        Assert.Equal(a.G("id"), Assert.Single((await pm.GetAsync($"/api/v1/tasks/{b.S("id")}/dependencies").Result.Json())["dependsOn"]!.AsArray())!["task"]!.G("id"));
+        await pm.DeleteAsync($"/api/v1/dependencies/{cb.S("id")}").Result.Json(404);
+        await pm.DeleteAsync($"/api/v1/dependencies/{Guid.NewGuid()}").Result.Json(404);
+        await f.As(TestData.Rita).DeleteAsync($"/api/v1/dependencies/{ab.S("id")}").Result.Json(403);
+        Assert.Equal(2, (await pm.GetAsync($"/api/v1/tasks/{a.S("id")}/dependencies").Result.Json())["blocks"]!.AsArray().Count);
+
+        // Deliverable links: 201 with a Location and only the id; the delete answers 204 and then 404.
+        var dp = await Deliverable(p.Id, new { });
+        var ds = await Deliverable(p.Id, new { });
+        var dl = await pm.Post($"/api/v1/deliverables/{ds.S("id")}/dependencies", new { predecessorDeliverableId = dp.G("id"), type = DependencyTypes.FinishToFinish, lagDays = 2, note = "Client review" });
+        var link = await dl.Json(201);
+        Assert.Equal(["id"], Keys(link));
+        Assert.Equal($"/api/v1/deliverable-dependencies/{link.S("id")}", dl.Headers.Location!.OriginalString);
+        await f.As(TestData.Rita).DeleteAsync($"/api/v1/deliverable-dependencies/{link.S("id")}").Result.Json(403);
+        var dropped = await pm.DeleteAsync($"/api/v1/deliverable-dependencies/{link.S("id")}");
+        Assert.Equal(HttpStatusCode.NoContent, dropped.StatusCode); Assert.Empty(await dropped.Content.ReadAsStringAsync());
+        Assert.Empty((await pm.GetAsync($"/api/v1/deliverables/{ds.S("id")}").Result.Json())["explicitPredecessors"]!.AsArray());
+        await pm.DeleteAsync($"/api/v1/deliverable-dependencies/{link.S("id")}").Result.Json(404);
+        await pm.DeleteAsync($"/api/v1/deliverable-dependencies/{Guid.NewGuid()}").Result.Json(404);
+        Assert.Equal(1, await f.DbAsync(db => db.ActivityLog.CountAsync(x => x.ItemId == Guid.Parse(link.S("id")) && x.Action == "Deleted")));
     }
 
     [Fact]

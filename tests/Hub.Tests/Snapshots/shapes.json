@@ -114,7 +114,99 @@
       "string"
     ]
   },
+  "DELETE /api/v1/deliverable-dependencies/{id} 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "DELETE /api/v1/deliverable-dependencies/{id} 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "DELETE /api/v1/deliverables/{id} 422": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "DELETE /api/v1/dependencies/{id} 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "DELETE /api/v1/dependencies/{id} 404": {
     "$": [
       "object"
     ],
@@ -10432,84 +10524,6 @@
     "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndintAndstringAndDateTimeOffsetAndDateTimeOffset.type": [
       "string"
     ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateOnlyAndbooleanAndstring": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateOnlyAndbooleanAndstring.properties": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateOnlyAndbooleanAndstring.properties.disabled": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateOnlyAndbooleanAndstring.properties.disabled.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateOnlyAndbooleanAndstring.properties.dueDate": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateOnlyAndbooleanAndstring.properties.dueDate.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateOnlyAndbooleanAndstring.properties.dueDate.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateOnlyAndbooleanAndstring.properties.dueDate.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateOnlyAndbooleanAndstring.properties.id": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateOnlyAndbooleanAndstring.properties.id.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateOnlyAndbooleanAndstring.properties.id.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateOnlyAndbooleanAndstring.properties.key": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateOnlyAndbooleanAndstring.properties.key.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateOnlyAndbooleanAndstring.properties.key.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateOnlyAndbooleanAndstring.properties.name": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateOnlyAndbooleanAndstring.properties.name.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateOnlyAndbooleanAndstring.properties.name.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateOnlyAndbooleanAndstring.properties.reason": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateOnlyAndbooleanAndstring.properties.reason.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateOnlyAndbooleanAndstring.properties.reason.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateOnlyAndbooleanAndstring.properties.status": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateOnlyAndbooleanAndstring.properties.status.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateOnlyAndbooleanAndstring.properties.status.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateOnlyAndbooleanAndstring.required": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateOnlyAndbooleanAndstring.required[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateOnlyAndbooleanAndstring.type": [
-      "string"
-    ],
     "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndint": [
       "object"
     ],
@@ -11062,39 +11076,6 @@
     "$.components.schemas.AnonymousTypeOfListOfAnonymousTypeOfGuidAndGuidAndstringAndstringAndstringAndGuidAndbooleanAndintAndintAndIEnumerableOfAnonymousTypeOfGuidAndGuidAndstringAndstringAndstringAndGuidAndbooleanAndListOfstringAndGuidAndDateTimeOffsetAndGuidAndintAndIEnumerableOfGuidAndbooleanAndbooleanAndbooleanAndstring.type": [
       "string"
     ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndListOfObject": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndListOfObject.properties": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndListOfObject.properties.blocks": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndListOfObject.properties.blocks.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndListOfObject.properties.blocks.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndListOfObject.properties.dependsOn": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndListOfObject.properties.dependsOn.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndListOfObject.properties.dependsOn.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndListOfObject.required": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndListOfObject.required[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndListOfObject.type": [
-      "string"
-    ],
     "$.components.schemas.AnonymousTypeOfListOfWidgetAndboolean": [
       "object"
     ],
@@ -11129,69 +11110,6 @@
       "string"
     ],
     "$.components.schemas.AnonymousTypeOfListOfWidgetAndboolean.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfRowAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndRowAndIEnumerableOfAnonymousTypeOfintAndGuidAndRow": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfRowAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndRowAndIEnumerableOfAnonymousTypeOfintAndGuidAndRow.properties": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfRowAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndRowAndIEnumerableOfAnonymousTypeOfintAndGuidAndRow.properties.depth": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfRowAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndRowAndIEnumerableOfAnonymousTypeOfintAndGuidAndRow.properties.depth.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfRowAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndRowAndIEnumerableOfAnonymousTypeOfintAndGuidAndRow.properties.depth.pattern": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfRowAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndRowAndIEnumerableOfAnonymousTypeOfintAndGuidAndRow.properties.depth.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfRowAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndRowAndIEnumerableOfAnonymousTypeOfintAndGuidAndRow.properties.predecessors": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfRowAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndRowAndIEnumerableOfAnonymousTypeOfintAndGuidAndRow.properties.predecessors.items": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfRowAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndRowAndIEnumerableOfAnonymousTypeOfintAndGuidAndRow.properties.predecessors.items.$ref": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfRowAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndRowAndIEnumerableOfAnonymousTypeOfintAndGuidAndRow.properties.predecessors.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfRowAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndRowAndIEnumerableOfAnonymousTypeOfintAndGuidAndRow.properties.predecessors.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfRowAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndRowAndIEnumerableOfAnonymousTypeOfintAndGuidAndRow.properties.successors": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfRowAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndRowAndIEnumerableOfAnonymousTypeOfintAndGuidAndRow.properties.successors.items": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfRowAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndRowAndIEnumerableOfAnonymousTypeOfintAndGuidAndRow.properties.successors.items.$ref": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfRowAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndRowAndIEnumerableOfAnonymousTypeOfintAndGuidAndRow.properties.successors.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfRowAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndRowAndIEnumerableOfAnonymousTypeOfintAndGuidAndRow.properties.successors.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfRowAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndRowAndIEnumerableOfAnonymousTypeOfintAndGuidAndRow.properties.task": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfRowAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndRowAndIEnumerableOfAnonymousTypeOfintAndGuidAndRow.properties.task.$ref": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfRowAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndRowAndIEnumerableOfAnonymousTypeOfintAndGuidAndRow.required": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfRowAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndRowAndIEnumerableOfAnonymousTypeOfintAndGuidAndRow.required[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfRowAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndRowAndIEnumerableOfAnonymousTypeOfintAndGuidAndRow.type": [
       "string"
     ],
     "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean": [
@@ -11312,48 +11230,6 @@
       "string"
     ],
     "$.components.schemas.AnonymousTypeOfint.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndGuidAndRow": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndGuidAndRow.properties": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndGuidAndRow.properties.level": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndGuidAndRow.properties.level.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndGuidAndRow.properties.level.pattern": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndGuidAndRow.properties.level.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndGuidAndRow.properties.parentId": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndGuidAndRow.properties.parentId.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndGuidAndRow.properties.parentId.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndGuidAndRow.properties.task": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndGuidAndRow.properties.task.$ref": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndGuidAndRow.required": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndGuidAndRow.required[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndGuidAndRow.type": [
       "string"
     ],
     "$.components.schemas.AnonymousTypeOfintAndint": [
@@ -14699,6 +14575,48 @@
       "string"
     ],
     "$.components.schemas.CapacitySet.type": [
+      "string"
+    ],
+    "$.components.schemas.ChainStep": [
+      "object"
+    ],
+    "$.components.schemas.ChainStep.properties": [
+      "object"
+    ],
+    "$.components.schemas.ChainStep.properties.level": [
+      "object"
+    ],
+    "$.components.schemas.ChainStep.properties.level.format": [
+      "string"
+    ],
+    "$.components.schemas.ChainStep.properties.level.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ChainStep.properties.level.type": [
+      "string"
+    ],
+    "$.components.schemas.ChainStep.properties.parentId": [
+      "object"
+    ],
+    "$.components.schemas.ChainStep.properties.parentId.format": [
+      "string"
+    ],
+    "$.components.schemas.ChainStep.properties.parentId.type": [
+      "string"
+    ],
+    "$.components.schemas.ChainStep.properties.task": [
+      "object"
+    ],
+    "$.components.schemas.ChainStep.properties.task.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ChainStep.required": [
+      "array"
+    ],
+    "$.components.schemas.ChainStep.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ChainStep.type": [
       "string"
     ],
     "$.components.schemas.ChainVerification": [
@@ -21967,6 +21885,30 @@
     "$.components.schemas.DeliverableCreateBody.type": [
       "string"
     ],
+    "$.components.schemas.DeliverableDependencyAdded": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableDependencyAdded.properties": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableDependencyAdded.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableDependencyAdded.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableDependencyAdded.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableDependencyAdded.required": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableDependencyAdded.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableDependencyAdded.type": [
+      "string"
+    ],
     "$.components.schemas.DeliverableIn": [
       "object"
     ],
@@ -23362,6 +23304,111 @@
     "$.components.schemas.DependencyAddBody.type": [
       "string"
     ],
+    "$.components.schemas.DependencyAdded": [
+      "object"
+    ],
+    "$.components.schemas.DependencyAdded.properties": [
+      "object"
+    ],
+    "$.components.schemas.DependencyAdded.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.DependencyAdded.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.DependencyAdded.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.DependencyAdded.properties.warnings": [
+      "object"
+    ],
+    "$.components.schemas.DependencyAdded.properties.warnings.items": [
+      "object"
+    ],
+    "$.components.schemas.DependencyAdded.properties.warnings.items.type": [
+      "string"
+    ],
+    "$.components.schemas.DependencyAdded.properties.warnings.type": [
+      "string"
+    ],
+    "$.components.schemas.DependencyAdded.required": [
+      "array"
+    ],
+    "$.components.schemas.DependencyAdded.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DependencyAdded.type": [
+      "string"
+    ],
+    "$.components.schemas.DependencyCandidate": [
+      "object"
+    ],
+    "$.components.schemas.DependencyCandidate.properties": [
+      "object"
+    ],
+    "$.components.schemas.DependencyCandidate.properties.disabled": [
+      "object"
+    ],
+    "$.components.schemas.DependencyCandidate.properties.disabled.type": [
+      "string"
+    ],
+    "$.components.schemas.DependencyCandidate.properties.dueDate": [
+      "object"
+    ],
+    "$.components.schemas.DependencyCandidate.properties.dueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.DependencyCandidate.properties.dueDate.type": [
+      "array"
+    ],
+    "$.components.schemas.DependencyCandidate.properties.dueDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DependencyCandidate.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.DependencyCandidate.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.DependencyCandidate.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.DependencyCandidate.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.DependencyCandidate.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.DependencyCandidate.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.DependencyCandidate.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.DependencyCandidate.properties.reason": [
+      "object"
+    ],
+    "$.components.schemas.DependencyCandidate.properties.reason.type": [
+      "array"
+    ],
+    "$.components.schemas.DependencyCandidate.properties.reason.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DependencyCandidate.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.DependencyCandidate.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.DependencyCandidate.required": [
+      "array"
+    ],
+    "$.components.schemas.DependencyCandidate.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DependencyCandidate.type": [
+      "string"
+    ],
     "$.components.schemas.DependencyIn": [
       "object"
     ],
@@ -23387,6 +23434,111 @@
       "string"
     ],
     "$.components.schemas.DependencyIn.type": [
+      "string"
+    ],
+    "$.components.schemas.DependencyTaskRef": [
+      "object"
+    ],
+    "$.components.schemas.DependencyTaskRef.properties": [
+      "object"
+    ],
+    "$.components.schemas.DependencyTaskRef.properties.assigneeId": [
+      "object"
+    ],
+    "$.components.schemas.DependencyTaskRef.properties.assigneeId.format": [
+      "string"
+    ],
+    "$.components.schemas.DependencyTaskRef.properties.assigneeId.type": [
+      "array"
+    ],
+    "$.components.schemas.DependencyTaskRef.properties.assigneeId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DependencyTaskRef.properties.assigneeName": [
+      "object"
+    ],
+    "$.components.schemas.DependencyTaskRef.properties.assigneeName.type": [
+      "array"
+    ],
+    "$.components.schemas.DependencyTaskRef.properties.assigneeName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DependencyTaskRef.properties.blocked": [
+      "object"
+    ],
+    "$.components.schemas.DependencyTaskRef.properties.blocked.type": [
+      "string"
+    ],
+    "$.components.schemas.DependencyTaskRef.properties.dueDate": [
+      "object"
+    ],
+    "$.components.schemas.DependencyTaskRef.properties.dueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.DependencyTaskRef.properties.dueDate.type": [
+      "array"
+    ],
+    "$.components.schemas.DependencyTaskRef.properties.dueDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DependencyTaskRef.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.DependencyTaskRef.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.DependencyTaskRef.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.DependencyTaskRef.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.DependencyTaskRef.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.DependencyTaskRef.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.DependencyTaskRef.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.DependencyTaskRef.properties.overdue": [
+      "object"
+    ],
+    "$.components.schemas.DependencyTaskRef.properties.overdue.type": [
+      "string"
+    ],
+    "$.components.schemas.DependencyTaskRef.properties.startDate": [
+      "object"
+    ],
+    "$.components.schemas.DependencyTaskRef.properties.startDate.format": [
+      "string"
+    ],
+    "$.components.schemas.DependencyTaskRef.properties.startDate.type": [
+      "array"
+    ],
+    "$.components.schemas.DependencyTaskRef.properties.startDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DependencyTaskRef.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.DependencyTaskRef.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.DependencyTaskRef.properties.waiting": [
+      "object"
+    ],
+    "$.components.schemas.DependencyTaskRef.properties.waiting.type": [
+      "string"
+    ],
+    "$.components.schemas.DependencyTaskRef.required": [
+      "array"
+    ],
+    "$.components.schemas.DependencyTaskRef.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DependencyTaskRef.type": [
       "string"
     ],
     "$.components.schemas.DesignBasisAssignBody": [
@@ -45160,6 +45312,63 @@
     "$.components.schemas.TaskBulkBody.type": [
       "string"
     ],
+    "$.components.schemas.TaskChain": [
+      "object"
+    ],
+    "$.components.schemas.TaskChain.properties": [
+      "object"
+    ],
+    "$.components.schemas.TaskChain.properties.depth": [
+      "object"
+    ],
+    "$.components.schemas.TaskChain.properties.depth.format": [
+      "string"
+    ],
+    "$.components.schemas.TaskChain.properties.depth.pattern": [
+      "string"
+    ],
+    "$.components.schemas.TaskChain.properties.depth.type": [
+      "string"
+    ],
+    "$.components.schemas.TaskChain.properties.predecessors": [
+      "object"
+    ],
+    "$.components.schemas.TaskChain.properties.predecessors.items": [
+      "object"
+    ],
+    "$.components.schemas.TaskChain.properties.predecessors.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.TaskChain.properties.predecessors.type": [
+      "string"
+    ],
+    "$.components.schemas.TaskChain.properties.successors": [
+      "object"
+    ],
+    "$.components.schemas.TaskChain.properties.successors.items": [
+      "object"
+    ],
+    "$.components.schemas.TaskChain.properties.successors.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.TaskChain.properties.successors.type": [
+      "string"
+    ],
+    "$.components.schemas.TaskChain.properties.task": [
+      "object"
+    ],
+    "$.components.schemas.TaskChain.properties.task.$ref": [
+      "string"
+    ],
+    "$.components.schemas.TaskChain.required": [
+      "array"
+    ],
+    "$.components.schemas.TaskChain.required[]": [
+      "string"
+    ],
+    "$.components.schemas.TaskChain.type": [
+      "string"
+    ],
     "$.components.schemas.TaskCreateBody": [
       "object"
     ],
@@ -45323,6 +45532,108 @@
       "string"
     ],
     "$.components.schemas.TaskCreateBody.type": [
+      "string"
+    ],
+    "$.components.schemas.TaskDependencyEdge": [
+      "object"
+    ],
+    "$.components.schemas.TaskDependencyEdge.properties": [
+      "object"
+    ],
+    "$.components.schemas.TaskDependencyEdge.properties.dependencyId": [
+      "object"
+    ],
+    "$.components.schemas.TaskDependencyEdge.properties.dependencyId.format": [
+      "string"
+    ],
+    "$.components.schemas.TaskDependencyEdge.properties.dependencyId.type": [
+      "string"
+    ],
+    "$.components.schemas.TaskDependencyEdge.properties.lagDays": [
+      "object"
+    ],
+    "$.components.schemas.TaskDependencyEdge.properties.lagDays.format": [
+      "string"
+    ],
+    "$.components.schemas.TaskDependencyEdge.properties.lagDays.pattern": [
+      "string"
+    ],
+    "$.components.schemas.TaskDependencyEdge.properties.lagDays.type": [
+      "string"
+    ],
+    "$.components.schemas.TaskDependencyEdge.properties.note": [
+      "object"
+    ],
+    "$.components.schemas.TaskDependencyEdge.properties.note.type": [
+      "array"
+    ],
+    "$.components.schemas.TaskDependencyEdge.properties.note.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TaskDependencyEdge.properties.satisfied": [
+      "object"
+    ],
+    "$.components.schemas.TaskDependencyEdge.properties.satisfied.type": [
+      "string"
+    ],
+    "$.components.schemas.TaskDependencyEdge.properties.task": [
+      "object"
+    ],
+    "$.components.schemas.TaskDependencyEdge.properties.task.$ref": [
+      "string"
+    ],
+    "$.components.schemas.TaskDependencyEdge.properties.type": [
+      "object"
+    ],
+    "$.components.schemas.TaskDependencyEdge.properties.type.type": [
+      "string"
+    ],
+    "$.components.schemas.TaskDependencyEdge.required": [
+      "array"
+    ],
+    "$.components.schemas.TaskDependencyEdge.required[]": [
+      "string"
+    ],
+    "$.components.schemas.TaskDependencyEdge.type": [
+      "string"
+    ],
+    "$.components.schemas.TaskDependencyList": [
+      "object"
+    ],
+    "$.components.schemas.TaskDependencyList.properties": [
+      "object"
+    ],
+    "$.components.schemas.TaskDependencyList.properties.blocks": [
+      "object"
+    ],
+    "$.components.schemas.TaskDependencyList.properties.blocks.items": [
+      "object"
+    ],
+    "$.components.schemas.TaskDependencyList.properties.blocks.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.TaskDependencyList.properties.blocks.type": [
+      "string"
+    ],
+    "$.components.schemas.TaskDependencyList.properties.dependsOn": [
+      "object"
+    ],
+    "$.components.schemas.TaskDependencyList.properties.dependsOn.items": [
+      "object"
+    ],
+    "$.components.schemas.TaskDependencyList.properties.dependsOn.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.TaskDependencyList.properties.dependsOn.type": [
+      "string"
+    ],
+    "$.components.schemas.TaskDependencyList.required": [
+      "array"
+    ],
+    "$.components.schemas.TaskDependencyList.required[]": [
+      "string"
+    ],
+    "$.components.schemas.TaskDependencyList.type": [
       "string"
     ],
     "$.components.schemas.TaskDetailCollaborator": [
@@ -56098,10 +56409,10 @@
     "$.paths./api/v1/deliverable-dependencies/{id}.delete.responses": [
       "object"
     ],
-    "$.paths./api/v1/deliverable-dependencies/{id}.delete.responses.200": [
+    "$.paths./api/v1/deliverable-dependencies/{id}.delete.responses.204": [
       "object"
     ],
-    "$.paths./api/v1/deliverable-dependencies/{id}.delete.responses.200.description": [
+    "$.paths./api/v1/deliverable-dependencies/{id}.delete.responses.204.description": [
       "string"
     ],
     "$.paths./api/v1/deliverable-dependencies/{id}.delete.tags": [
@@ -56371,10 +56682,22 @@
     "$.paths./api/v1/deliverables/{id}/dependencies.post.responses": [
       "object"
     ],
-    "$.paths./api/v1/deliverables/{id}/dependencies.post.responses.200": [
+    "$.paths./api/v1/deliverables/{id}/dependencies.post.responses.201": [
       "object"
     ],
-    "$.paths./api/v1/deliverables/{id}/dependencies.post.responses.200.description": [
+    "$.paths./api/v1/deliverables/{id}/dependencies.post.responses.201.content": [
+      "object"
+    ],
+    "$.paths./api/v1/deliverables/{id}/dependencies.post.responses.201.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/deliverables/{id}/dependencies.post.responses.201.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/deliverables/{id}/dependencies.post.responses.201.content.application/json.schema.$ref": [
+      "string"
+    ],
+    "$.paths./api/v1/deliverables/{id}/dependencies.post.responses.201.description": [
       "string"
     ],
     "$.paths./api/v1/deliverables/{id}/dependencies.post.tags": [
@@ -56662,10 +56985,10 @@
     "$.paths./api/v1/dependencies/{id}.delete.responses": [
       "object"
     ],
-    "$.paths./api/v1/dependencies/{id}.delete.responses.200": [
+    "$.paths./api/v1/dependencies/{id}.delete.responses.204": [
       "object"
     ],
-    "$.paths./api/v1/dependencies/{id}.delete.responses.200.description": [
+    "$.paths./api/v1/dependencies/{id}.delete.responses.204.description": [
       "string"
     ],
     "$.paths./api/v1/dependencies/{id}.delete.tags": [
@@ -73915,10 +74238,22 @@
     "$.paths./api/v1/tasks/{id}/dependencies.post.responses": [
       "object"
     ],
-    "$.paths./api/v1/tasks/{id}/dependencies.post.responses.200": [
+    "$.paths./api/v1/tasks/{id}/dependencies.post.responses.201": [
       "object"
     ],
-    "$.paths./api/v1/tasks/{id}/dependencies.post.responses.200.description": [
+    "$.paths./api/v1/tasks/{id}/dependencies.post.responses.201.content": [
+      "object"
+    ],
+    "$.paths./api/v1/tasks/{id}/dependencies.post.responses.201.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/tasks/{id}/dependencies.post.responses.201.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/tasks/{id}/dependencies.post.responses.201.content.application/json.schema.$ref": [
+      "string"
+    ],
+    "$.paths./api/v1/tasks/{id}/dependencies.post.responses.201.description": [
       "string"
     ],
     "$.paths./api/v1/tasks/{id}/dependencies.post.tags": [
@@ -95994,10 +96329,12 @@
       "boolean"
     ],
     "$.predecessors[].task.assigneeId": [
-      "null"
+      "null",
+      "string"
     ],
     "$.predecessors[].task.assigneeName": [
-      "null"
+      "null",
+      "string"
     ],
     "$.predecessors[].task.can": [
       "object"
@@ -96063,7 +96400,8 @@
       "number"
     ],
     "$.predecessors[].task.dueDate": [
-      "null"
+      "null",
+      "string"
     ],
     "$.predecessors[].task.dueDateChangeCount": [
       "number"
@@ -96114,10 +96452,12 @@
       "string"
     ],
     "$.predecessors[].task.originalDueDate": [
-      "null"
+      "null",
+      "string"
     ],
     "$.predecessors[].task.originalStartDate": [
-      "null"
+      "null",
+      "string"
     ],
     "$.predecessors[].task.predecessorCount": [
       "number"
@@ -96162,10 +96502,84 @@
       "number"
     ],
     "$.predecessors[].task.startDate": [
-      "null"
+      "null",
+      "string"
     ],
     "$.predecessors[].task.state": [
+      "null",
+      "object"
+    ],
+    "$.predecessors[].task.state.affectedMilestoneIds": [
+      "array"
+    ],
+    "$.predecessors[].task.state.blockedBy": [
+      "array"
+    ],
+    "$.predecessors[].task.state.blockedSince": [
       "null"
+    ],
+    "$.predecessors[].task.state.blockingCount": [
+      "number"
+    ],
+    "$.predecessors[].task.state.blockingTaskIds": [
+      "array"
+    ],
+    "$.predecessors[].task.state.blockingTaskIds[]": [
+      "string"
+    ],
+    "$.predecessors[].task.state.daysBlocked": [
+      "number"
+    ],
+    "$.predecessors[].task.state.daysOverdue": [
+      "number"
+    ],
+    "$.predecessors[].task.state.evaluatedAt": [
+      "string"
+    ],
+    "$.predecessors[].task.state.inconsistencyDetail": [
+      "array"
+    ],
+    "$.predecessors[].task.state.isBlocked": [
+      "boolean"
+    ],
+    "$.predecessors[].task.state.isBlocking": [
+      "boolean"
+    ],
+    "$.predecessors[].task.state.isDateInconsistent": [
+      "boolean"
+    ],
+    "$.predecessors[].task.state.isDueSoon": [
+      "boolean"
+    ],
+    "$.predecessors[].task.state.isHeldPastDue": [
+      "boolean"
+    ],
+    "$.predecessors[].task.state.isInactiveOwner": [
+      "boolean"
+    ],
+    "$.predecessors[].task.state.isMissingDueDate": [
+      "boolean"
+    ],
+    "$.predecessors[].task.state.isOverdue": [
+      "boolean"
+    ],
+    "$.predecessors[].task.state.isReviewStalled": [
+      "boolean"
+    ],
+    "$.predecessors[].task.state.isStale": [
+      "boolean"
+    ],
+    "$.predecessors[].task.state.isUnassigned": [
+      "boolean"
+    ],
+    "$.predecessors[].task.state.isWaiting": [
+      "boolean"
+    ],
+    "$.predecessors[].task.state.notes": [
+      "array"
+    ],
+    "$.predecessors[].task.state.staleDays": [
+      "number"
     ],
     "$.predecessors[].task.status": [
       "string"
@@ -96366,7 +96780,110 @@
       "null"
     ],
     "$.successors[].task.state": [
+      "null",
+      "object"
+    ],
+    "$.successors[].task.state.affectedMilestoneIds": [
+      "array"
+    ],
+    "$.successors[].task.state.blockedBy": [
+      "array"
+    ],
+    "$.successors[].task.state.blockedBy[]": [
+      "object"
+    ],
+    "$.successors[].task.state.blockedBy[].blocking": [
+      "boolean"
+    ],
+    "$.successors[].task.state.blockedBy[].due": [
       "null"
+    ],
+    "$.successors[].task.state.blockedBy[].id": [
+      "string"
+    ],
+    "$.successors[].task.state.blockedBy[].key": [
+      "string"
+    ],
+    "$.successors[].task.state.blockedBy[].name": [
+      "string"
+    ],
+    "$.successors[].task.state.blockedBy[].overdue": [
+      "boolean"
+    ],
+    "$.successors[].task.state.blockedBy[].ownerId": [
+      "null"
+    ],
+    "$.successors[].task.state.blockedBy[].reason": [
+      "null"
+    ],
+    "$.successors[].task.state.blockedBy[].status": [
+      "string"
+    ],
+    "$.successors[].task.state.blockedBy[].type": [
+      "string"
+    ],
+    "$.successors[].task.state.blockedSince": [
+      "null"
+    ],
+    "$.successors[].task.state.blockingCount": [
+      "number"
+    ],
+    "$.successors[].task.state.blockingTaskIds": [
+      "array"
+    ],
+    "$.successors[].task.state.daysBlocked": [
+      "number"
+    ],
+    "$.successors[].task.state.daysOverdue": [
+      "number"
+    ],
+    "$.successors[].task.state.evaluatedAt": [
+      "string"
+    ],
+    "$.successors[].task.state.inconsistencyDetail": [
+      "array"
+    ],
+    "$.successors[].task.state.isBlocked": [
+      "boolean"
+    ],
+    "$.successors[].task.state.isBlocking": [
+      "boolean"
+    ],
+    "$.successors[].task.state.isDateInconsistent": [
+      "boolean"
+    ],
+    "$.successors[].task.state.isDueSoon": [
+      "boolean"
+    ],
+    "$.successors[].task.state.isHeldPastDue": [
+      "boolean"
+    ],
+    "$.successors[].task.state.isInactiveOwner": [
+      "boolean"
+    ],
+    "$.successors[].task.state.isMissingDueDate": [
+      "boolean"
+    ],
+    "$.successors[].task.state.isOverdue": [
+      "boolean"
+    ],
+    "$.successors[].task.state.isReviewStalled": [
+      "boolean"
+    ],
+    "$.successors[].task.state.isStale": [
+      "boolean"
+    ],
+    "$.successors[].task.state.isUnassigned": [
+      "boolean"
+    ],
+    "$.successors[].task.state.isWaiting": [
+      "boolean"
+    ],
+    "$.successors[].task.state.notes": [
+      "array"
+    ],
+    "$.successors[].task.state.staleDays": [
+      "number"
     ],
     "$.successors[].task.status": [
       "string"
@@ -96555,7 +97072,113 @@
       "null"
     ],
     "$.task.state": [
+      "null",
+      "object"
+    ],
+    "$.task.state.affectedMilestoneIds": [
+      "array"
+    ],
+    "$.task.state.blockedBy": [
+      "array"
+    ],
+    "$.task.state.blockedBy[]": [
+      "object"
+    ],
+    "$.task.state.blockedBy[].blocking": [
+      "boolean"
+    ],
+    "$.task.state.blockedBy[].due": [
+      "string"
+    ],
+    "$.task.state.blockedBy[].id": [
+      "string"
+    ],
+    "$.task.state.blockedBy[].key": [
+      "string"
+    ],
+    "$.task.state.blockedBy[].name": [
+      "string"
+    ],
+    "$.task.state.blockedBy[].overdue": [
+      "boolean"
+    ],
+    "$.task.state.blockedBy[].ownerId": [
+      "string"
+    ],
+    "$.task.state.blockedBy[].reason": [
+      "string"
+    ],
+    "$.task.state.blockedBy[].status": [
+      "string"
+    ],
+    "$.task.state.blockedBy[].type": [
+      "string"
+    ],
+    "$.task.state.blockedSince": [
       "null"
+    ],
+    "$.task.state.blockingCount": [
+      "number"
+    ],
+    "$.task.state.blockingTaskIds": [
+      "array"
+    ],
+    "$.task.state.blockingTaskIds[]": [
+      "string"
+    ],
+    "$.task.state.daysBlocked": [
+      "number"
+    ],
+    "$.task.state.daysOverdue": [
+      "number"
+    ],
+    "$.task.state.evaluatedAt": [
+      "string"
+    ],
+    "$.task.state.inconsistencyDetail": [
+      "array"
+    ],
+    "$.task.state.isBlocked": [
+      "boolean"
+    ],
+    "$.task.state.isBlocking": [
+      "boolean"
+    ],
+    "$.task.state.isDateInconsistent": [
+      "boolean"
+    ],
+    "$.task.state.isDueSoon": [
+      "boolean"
+    ],
+    "$.task.state.isHeldPastDue": [
+      "boolean"
+    ],
+    "$.task.state.isInactiveOwner": [
+      "boolean"
+    ],
+    "$.task.state.isMissingDueDate": [
+      "boolean"
+    ],
+    "$.task.state.isOverdue": [
+      "boolean"
+    ],
+    "$.task.state.isReviewStalled": [
+      "boolean"
+    ],
+    "$.task.state.isStale": [
+      "boolean"
+    ],
+    "$.task.state.isUnassigned": [
+      "boolean"
+    ],
+    "$.task.state.isWaiting": [
+      "boolean"
+    ],
+    "$.task.state.notes": [
+      "array"
+    ],
+    "$.task.state.staleDays": [
+      "number"
     ],
     "$.task.status": [
       "string"
@@ -96625,7 +97248,8 @@
       "number"
     ],
     "$.blocks[].note": [
-      "null"
+      "null",
+      "string"
     ],
     "$.blocks[].satisfied": [
       "boolean"
@@ -96686,7 +97310,8 @@
       "number"
     ],
     "$.dependsOn[].note": [
-      "null"
+      "null",
+      "string"
     ],
     "$.dependsOn[].satisfied": [
       "boolean"
@@ -96695,10 +97320,12 @@
       "object"
     ],
     "$.dependsOn[].task.assigneeId": [
-      "null"
+      "null",
+      "string"
     ],
     "$.dependsOn[].task.assigneeName": [
-      "null"
+      "null",
+      "string"
     ],
     "$.dependsOn[].task.blocked": [
       "boolean"
@@ -96744,7 +97371,8 @@
       "boolean"
     ],
     "$[].dueDate": [
-      "null"
+      "null",
+      "string"
     ],
     "$[].id": [
       "string"
@@ -96756,6 +97384,7 @@
       "string"
     ],
     "$[].reason": [
+      "null",
       "string"
     ],
     "$[].status": [
@@ -110242,6 +110871,9 @@
     ],
     "$.warnings": [
       "array"
+    ],
+    "$.warnings[]": [
+      "string"
     ]
   },
   "POST /api/v1/tasks/{id}/dependencies 400": {

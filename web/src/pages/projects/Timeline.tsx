@@ -6,7 +6,6 @@ import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import type { components } from '@/gen/api'
 import { useFlag } from '@/lib/auth'
-import type { DateContextRead } from '@/components/hub/date-context'
 import { ScheduleNote } from '@/components/hub/schedule-note'
 import { ActiveFilters, ChoiceMenu, ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Notice, Page, Section, selectCls, useIsPhone } from '@/components/hub/common'
 import { useItemPanel } from '@/components/hub/panel-host'
@@ -16,7 +15,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useProjectRefresh } from '@/hooks/data'
-import { get, patch, qs, typedRequest } from '@/lib/api'
+import { get, patch, typedRequest } from '@/lib/api'
 import { addDays, daysBetween, fmtDate, monthLabel, shortDate, today } from '@/lib/format'
 import { plural, t, tv , runtimeText } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
@@ -470,7 +469,7 @@ export function MoveDialog({ move, projectComplete, onClose }: { move: Move; pro
   const newDue = addDays(move.due, move.days)
   const reason = move.needsReason || projectComplete
   const dateContext = useFlag('date_context')
-  const context = useQuery({ queryKey: ['date-context', move.kind, move.id, newStart, newDue], enabled: dateContext, queryFn: () => get<DateContextRead>(`items/${move.kind === 'task' ? 'Task' : 'Deliverable'}/${move.id}/date-context${qs({ startDate: newStart, dueDate: newDue })}`) })
+  const context = useQuery({ queryKey: ['date-context', move.kind, move.id, newStart, newDue], enabled: dateContext, queryFn: () => typedRequest('get', '/api/v1/items/{type}/{id}/date-context', { params: { type: move.kind === 'task' ? 'Task' : 'Deliverable', id: move.id }, query: { startDate: newStart ?? undefined, dueDate: newDue } }) })
   return (
     <ConfirmDialog open onOpenChange={(o) => !o && onClose(false)} reason={reason ? true : undefined} title={t('timeline.moveTitle', { key: move.key, name: move.name })}
       confirmLabel={t('timeline.moveConfirm')}

@@ -21,7 +21,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useProject, useProjectRefresh, useReference } from '@/hooks/data'
-import { ApiError, del, get, patch, post, qs, typedRequest } from '@/lib/api'
+import { ApiError, get, patch, post, qs, typedRequest } from '@/lib/api'
 import { fmtDate, fmtTime, hours, today } from '@/lib/format'
 import { runtimeText, t, tv } from '@/lib/i18n'
 import type { ProjectDetail } from '@/lib/types'
@@ -503,7 +503,7 @@ function ExplicitDeps({ d, data, onChange }: { d: DeliverableRow; data: any; onC
   const openPanel = useItemPanel()
   const [adding, setAdding] = useState<'predecessor' | 'successor' | null>(null)
   const can: boolean = data.permissions.linkDeliverables
-  const remove = async (x: DepRow) => { try { await del(`deliverable-dependencies/${x.dependencyId}`); onChange() } catch (e) { toast.error(errorText(e)) } }
+  const remove = async (x: DepRow) => { try { await typedRequest('delete', '/api/v1/deliverable-dependencies/{id}', { params: { id: x.dependencyId } }); onChange() } catch (e) { toast.error(errorText(e)) } }
   const list = (rows: DepRow[], label: string, dir: 'predecessor' | 'successor') => (
     <div>
       <div className="mb-1 flex items-center justify-between font-medium">{runtimeText(label)}
@@ -543,7 +543,8 @@ function LinkDeliverable({ d, direction, exclude, onClose }: { d: DeliverableRow
   const save = async () => {
     setErr(null); setBusy(true)
     try {
-      await post(`deliverables/${d.id}/dependencies`, { [direction === 'predecessor' ? 'predecessorDeliverableId' : 'successorDeliverableId']: choice, lagDays: Number(lag) || 0, type, note: note || null })
+      await typedRequest('post', '/api/v1/deliverables/{id}/dependencies', { params: { id: d.id }, body: {
+        predecessorDeliverableId: direction === 'predecessor' ? choice : null, successorDeliverableId: direction === 'successor' ? choice : null, lagDays: Number(lag) || 0, type, note: note || null } })
       onClose(true)
     } catch (e) {
       const x = e as ApiError

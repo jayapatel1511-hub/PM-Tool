@@ -3,6 +3,7 @@ const { chromium } = require('playwright')
 const { clientConfig } = require('./config.fixture.cjs')
 const { savedView, viewList } = require('./views.fixture.cjs')
 const { meView, referenceData, referenceDiscipline, referenceDeliverableType } = require('./me.fixture.cjs')
+const { taskDependencies, dateContextRead } = require('./dependencies.fixture.cjs')
 const assert = require('node:assert/strict')
 const { spawn } = require('node:child_process')
 const path = require('node:path')
@@ -60,7 +61,7 @@ let server, browser
     else if (p === `projects/${pid}/milestones`) data = [milestone]
     else if (p === `tasks/${taskId}` && method === 'GET') data = {...taskDetail,relatedDeliverables:related?[{id:deliverableId,key:deliverable.key,name:deliverable.name}]:[]}
     else if (p === `tasks/${taskId}/start-readiness`) data = startReadiness({ taskId, key: task.key })
-    else if (p === `tasks/${taskId}/dependencies`) data = { dependsOn: [], blocks: [] }
+    else if (p === `tasks/${taskId}/dependencies`) data = taskDependencies()
     else if (p === `items/Task/${taskId}/links` || p === `items/Deliverable/${deliverableId}/links`) data = { links: [], inherited: [], canAdd: false }
     else if (p === `items/Task/${taskId}/comments` || p === `items/Deliverable/${deliverableId}/comments`) data = { items: [], canComment: false }
     else if (p === `deliverables/${deliverableId}`) data = { relatedTasks:related?[{id:taskId,key:task.key,name:task.name}]:[], deliverable:viewerMode?{...deliverable,canRebaseline:false}:deliverable, project, tasks: deliverable.tasks, issues: [], derivedPredecessors: [], derivedSuccessors: [], permissions: deliverable.permissions }
@@ -68,10 +69,10 @@ let server, browser
     else if (p === `milestones/${milestoneId}/history` || p === `deliverables/${deliverableId}/history` || p === `tasks/${taskId}/history`) data = []
     else if (p === 'timeline') data = ganttPage(project, timeline)
     else if (p === 'projects') data = [project]
-    else if (p === `items/Deliverable/${deliverableId}/date-context`) data = {dates:{inconsistencies:[],newInconsistencies:[{text:'Synthetic new date inconsistency'}],successors:[{id:id(61),key:'SYN-046-T061',reason:{text:'Synthetic successor moves out of sequence'}}]},tasks:[{id:taskId,key:task.key,reason:{text:'Synthetic task lies outside deliverable dates'}}]}
+    else if (p === `items/Deliverable/${deliverableId}/date-context`) data = dateContextRead({newInconsistencies:[{text:'Synthetic new date inconsistency'}],successors:[{id:id(61),key:'SYN-046-T061',reason:{text:'Synthetic successor moves out of sequence'}}]},{tasks:[{id:taskId,key:task.key,reason:{text:'Synthetic task lies outside deliverable dates'}}]})
     else if (p === `projects/${pid}/timeline`) data = timeline
     else if (p === `projects/${pid}/date-review`) data = { window: null, tasks: [], deliverables: [] }
-    else if (p === `items/Task/${taskId}/date-context`) data = { dates: { earliestStart: { date: '2026-10-22' }, earliestDue: { date: '2026-11-03' }, latestDue: { date: '2026-11-10' }, inconsistencies: [], successors: [], newInconsistencies: [] } }
+    else if (p === `items/Task/${taskId}/date-context`) data = dateContextRead({ earliestStart: { date: '2026-10-22', reasons: [] }, earliestDue: { date: '2026-11-03', reasons: [] }, latestDue: { date: '2026-11-10', reasons: [] } })
     else if (p.endsWith('/follow')) data = { level: 'My items only', source: 'Assignment' }
     else if (p === `tasks/${taskId}/transition`) { if (delayedTransition) await new Promise(resolve => { releaseTransition = resolve }); writes.push({ method, path: p, body: req.postDataJSON?.() }); data = delayedTransition ? { code:'forbidden',detail:'Synthetic transition refusal' } : { code: 'start_authorisation_required', detail: 'A start authorisation is required.' } }
     else if (method === 'POST' || method === 'PATCH' || method === 'DELETE') { writes.push({ method, path: p, body: req.postDataJSON?.() }); data = p === `tasks/${taskId}` ? { rowVersion: 3 } : {} }

@@ -1,11 +1,14 @@
 import { useQuery } from '@tanstack/react-query'
+import type { components } from '@/gen/api'
 import { get } from '@/lib/api'
 import { useFlag } from '@/lib/auth'
 import { fmtDate } from '@/lib/format'
 import { t } from '@/lib/i18n'
-export interface DateContextRead { dates: { earliestStart?: { date: string }; earliestDue?: { date: string }; latestDue?: { date: string }; inconsistencies: { text: string }[]; successors: { id: string; key: string; reason: { text: string } }[]; newInconsistencies: { text: string }[] }; availability?: { date: string; message: string; nextAvailableDate?: string }[]; tasks?: { id: string; key: string; reason: { text: string } }[] }
+/** The read answered for a date, derived from the contract so a server rename of a field fails the build. */
+export type DateContextRead = components['schemas']['DateContextRead']
 export function DateHint({ type, id, startDate, dueDate }: { type: string; id: string; startDate?: string | null; dueDate?: string | null }) {
   const enabled = useFlag('date_context')
+  // An empty date means "cleared" to the server, so the query is written here: the typed helper leaves empty values out.
   const params = new URLSearchParams(); if (startDate !== undefined) params.set('startDate', startDate ?? ''); if (dueDate !== undefined) params.set('dueDate', dueDate ?? '')
   const q = useQuery({ queryKey: ['date-context', type, id, startDate, dueDate], enabled, staleTime: 0, queryFn: () => get<DateContextRead>(`items/${type}/${id}/date-context?${params}`) })
   if (!enabled || !q.data) return null

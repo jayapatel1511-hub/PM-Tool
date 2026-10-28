@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using Hub.Api.Data;
 using Hub.Domain;
@@ -336,6 +337,70 @@ public sealed class TimelineTests(HubFactory f)
             await (await admin.Put("/api/v1/admin/settings/flag.schedule_baseline", new { value = previousFlag })).Json();
             await (await admin.Put("/api/v1/admin/settings/slip_display_days", new { value = previousThreshold })).Json();
         }
+    }
+
+    static string[] Keys(JsonNode? n) => n!.AsObject().Select(x => x.Key).ToArray();
+
+    [Fact]
+    public async Task Both_timelines_keep_their_property_names_order_and_types() // the typed records must serialise to the bytes the Timeline and Gantt pages already read
+    {
+        var (p, _) = await HandoffTimelineFixture();
+        var pm = f.As(TestData.Pm); var target = DateOnly.FromDateTime(f.Clock.Now.UtcDateTime).AddDays(20);
+        var a = await Deliverable(p.Id, new { dueDate = target.AddDays(7), startDate = target.AddDays(1) });
+        var b = await Deliverable(p.Id, new { dueDate = target.AddDays(9) });
+        var first = await d.NewTask(p.Id, TestData.Pm, new { deliverableId = a.G("id"), assigneeId = U(TestData.Alex), startDate = "2026-09-01", dueDate = "2026-09-10" });
+        var second = await d.NewTask(p.Id, TestData.Pm, new { deliverableId = b.G("id"), startDate = "2026-09-21", dueDate = "2026-10-02" });
+        await pm.Post($"/api/v1/tasks/{second.S("id")}/dependencies", new { predecessorTaskId = first.G("id"), type = DependencyTypes.StartToStart, lagDays = 2 }).Result.Json(201);
+        var explicitLink = await Deliverable(p.Id, new { name = "Follows the first" });
+        await pm.Post($"/api/v1/deliverables/{explicitLink.S("id")}/dependencies", new { predecessorDeliverableId = a.G("id"), type = DependencyTypes.FinishToFinish, lagDays = 3 }).Result.Json(201);
+        var milestone = await pm.Post($"/api/v1/projects/{p.Id}/milestones", new { name = "Submission", milestoneType = "Design Submission", date = target.AddDays(30) }).Result.Json(201);
+        await f.DbAsync(async db => {
+            (await db.Projects.SingleAsync(x => x.Id == p.Id)).TargetCompletionDate = target;
+            var baselined = await db.Deliverables.SingleAsync(x => x.Id == a.G("id")); baselined.BaselineStartDate = target; baselined.BaselineDueDate = target.AddDays(2);
+            (await db.Milestones.SingleAsync(x => x.Id == milestone.G("id"))).BaselineDate = target.AddDays(20);
+            return await db.SaveChangesAsync();
+        });
+        await f.Evaluate(p.Id);
+
+        string[] task = ["id", "key", "name", "deliverableId", "projectDisciplineId", "milestoneId", "startDate", "dueDate", "originalStartDate", "originalDueDate", "status", "progressPct", "assignee", "rowVersion", "createdOn", "isOverdue", "canEditDates", "dueNeedsReason"];
+        string[] deliverable = ["id", "key", "name", "startDate", "dueDate", "originalStartDate", "originalDueDate", "status", "rowVersion", "createdOn", "progressPct", "isOverdue", "canEditDates"];
+        string[] milestoneKeys = ["id", "key", "name", "date", "isComplete", "status"];
+        void Check(JsonNode data, bool schedule, bool handoffs)
+        {
+            Assert.Equal(new[] { "permissions", "tasks", "dependencies", "deliverableLinks", "deliverables", "milestones" }
+                .Concat(schedule ? ["latestPlanned"] : []).Concat(handoffs ? ["handoffs"] : []), Keys(data));
+            Assert.Equal(["manageMilestones", "needsReason"], Keys(data["permissions"]));
+            Assert.Equal(task.Concat(schedule ? ["slipShown"] : []).Concat(handoffs ? ["affectedMilestoneIds"] : []), Keys(data["tasks"]![0]));
+            Assert.Equal(["id", "predecessorTaskId", "successorTaskId", "type", "lagDays", "highlighted"], Keys(data["dependencies"]![0]));
+            foreach (var link in data["deliverableLinks"]!.AsArray()) Assert.Equal(["from", "to", "type", "lagDays", "highlighted", "derived"], Keys(link));
+            Assert.Equal(2, data["deliverableLinks"]!.AsArray().Count); // the explicit link and the one derived from the task link
+            Assert.Equal(schedule ? deliverable.Concat(["slipShown"]) : deliverable, Keys(data["deliverables"]!.AsArray().Single(x => x!.G("id") == explicitLink.G("id"))));
+            Assert.Equal(schedule ? deliverable.Concat(["slipShown", "baselineStartDate", "baselineDueDate", "baselineSlipShown"]) : deliverable,
+                Keys(data["deliverables"]!.AsArray().Single(x => x!.G("id") == a.G("id")))); // baselines only with the flag and when set
+            Assert.Equal(schedule ? milestoneKeys.Concat(["originalDate", "slipShown", "baselineDate", "baselineSlipShown"]) : milestoneKeys, Keys(data["milestones"]![0]));
+            if (schedule) Assert.Equal(["date", "itemKey", "targetDate", "rule"], Keys(data["latestPlanned"]));
+            if (handoffs) Assert.Equal(["id", "key", "title", "status", "sendingDisciplineId", "receivingDisciplineId", "neededBy", "promisedBy", "dateMismatch", "isOverdue", "daysOverdue"], Keys(data["handoffs"]![0]));
+        }
+        async Task Both(bool schedule, bool handoffs)
+        {
+            Check(await Timeline(p.Id), schedule, handoffs);
+            var cross = await (await pm.GetAsync($"/api/v1/timeline?projects={p.Id}")).Json();
+            Assert.Equal(["projects", "truncated", "max"], Keys(cross));
+            Assert.Equal(["project", "data"], Keys(cross["projects"]![0]));
+            Assert.Equal(["id", "projectNumber", "name", "status", "startDate", "targetCompletionDate"], Keys(cross["projects"]![0]!["project"]));
+            Check(cross["projects"]![0]!["data"]!, schedule, false); // the cross-project view has neither the handoffs nor the chain ids
+            Assert.Equal((false, 25), (cross["truncated"]!.GetValue<bool>(), cross.I("max")));
+        }
+        await Both(false, false);
+        await ScheduleFlag(true, () => HandoffFlag(true, () => Both(true, true)));
+        await ScheduleFlag(true, () => HandoffFlag(false, () => Both(true, false)));
+        await ScheduleFlag(false, () => HandoffFlag(true, () => Both(false, true)));
+
+        var row = (await Timeline(p.Id))["tasks"]!.AsArray().Single(x => x!.G("id") == first.G("id"))!;
+        Assert.Equal(JsonValueKind.String, row["createdOn"]!.GetValueKind()); Assert.Equal(JsonValueKind.Number, row["rowVersion"]!.GetValueKind());
+        Assert.Equal(JsonValueKind.String, row["assignee"]!.GetValueKind());
+        var dep = (await Timeline(p.Id))["dependencies"]![0]!;
+        Assert.Equal(JsonValueKind.Number, dep["lagDays"]!.GetValueKind()); Assert.Equal(JsonValueKind.True, dep["highlighted"]!.GetValueKind()); // its predecessor is unfinished and overdue
     }
 
     [Fact]

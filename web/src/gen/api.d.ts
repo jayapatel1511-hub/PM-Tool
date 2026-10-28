@@ -9587,7 +9587,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["TimelineData"];
                     };
                 };
             };
@@ -15314,7 +15314,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfListOfObjectAndbooleanAndint"];
+                        "application/json": components["schemas"]["TimelineGantt"];
                     };
                 };
             };
@@ -16427,12 +16427,6 @@ export interface components {
         AnonymousTypeOfListOfObjectAndboolean: {
             canShare: boolean;
             views: null | unknown[];
-        };
-        AnonymousTypeOfListOfObjectAndbooleanAndint: {
-            /** Format: int32 */
-            max: number;
-            projects: null | unknown[];
-            truncated: boolean;
         };
         AnonymousTypeOfListOfWidgetAndboolean: {
             isDefault: boolean;
@@ -18509,6 +18503,14 @@ export interface components {
             /** Format: uuid */
             unitId: null | string;
         };
+        PlannedTarget: {
+            /** Format: date */
+            date: string;
+            itemKey: string;
+            rule?: null | string;
+            /** Format: date */
+            targetDate: string;
+        };
         PlanningCreateBody: {
             confidence?: null | string;
             /** Format: date */
@@ -19644,6 +19646,161 @@ export interface components {
             userId: string;
             /** Format: date */
             workDate: string;
+        };
+        TimelineData: {
+            deliverableLinks: components["schemas"]["TimelineDeliverableLink"][];
+            deliverables: components["schemas"]["TimelineDeliverable"][];
+            dependencies: components["schemas"]["TimelineDependency"][];
+            handoffs?: null | components["schemas"]["TimelineHandoff"][];
+            latestPlanned?: null | components["schemas"]["PlannedTarget"];
+            milestones: components["schemas"]["TimelineMilestone"][];
+            permissions: components["schemas"]["TimelinePermissions"];
+            tasks: components["schemas"]["TimelineTask"][];
+        };
+        TimelineDeliverable: {
+            /** Format: date */
+            baselineDueDate?: null | string;
+            baselineSlipShown?: null | boolean;
+            /** Format: date */
+            baselineStartDate?: null | string;
+            canEditDates: boolean;
+            /** Format: date */
+            createdOn: string;
+            /** Format: date */
+            dueDate: null | string;
+            /** Format: uuid */
+            id: string;
+            isOverdue: boolean;
+            key: string;
+            name: string;
+            /** Format: date */
+            originalDueDate: null | string;
+            /** Format: date */
+            originalStartDate: null | string;
+            /** Format: int32 */
+            progressPct: number;
+            /** Format: int32 */
+            rowVersion: number;
+            slipShown?: null | boolean;
+            /** Format: date */
+            startDate: null | string;
+            status: string;
+        };
+        TimelineDeliverableLink: {
+            derived: boolean;
+            /** Format: uuid */
+            from: string;
+            highlighted: boolean;
+            /** Format: int32 */
+            lagDays: null | number;
+            /** Format: uuid */
+            to: string;
+            type: string;
+        };
+        TimelineDependency: {
+            highlighted: boolean;
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            lagDays: number;
+            /** Format: uuid */
+            predecessorTaskId: string;
+            /** Format: uuid */
+            successorTaskId: string;
+            type: string;
+        };
+        TimelineGantt: {
+            /** Format: int32 */
+            max: number;
+            projects: components["schemas"]["TimelineProjectGroup"][];
+            truncated: boolean;
+        };
+        TimelineHandoff: {
+            dateMismatch: boolean;
+            /** Format: int32 */
+            daysOverdue: number;
+            /** Format: uuid */
+            id: string;
+            isOverdue: boolean;
+            key: string;
+            /** Format: date */
+            neededBy: string;
+            /** Format: date */
+            promisedBy: null | string;
+            /** Format: uuid */
+            receivingDisciplineId: string;
+            /** Format: uuid */
+            sendingDisciplineId: string;
+            status: string;
+            title: string;
+        };
+        TimelineMilestone: {
+            /** Format: date */
+            baselineDate?: null | string;
+            baselineSlipShown?: null | boolean;
+            /** Format: date */
+            date: null | string;
+            /** Format: uuid */
+            id: string;
+            isComplete: boolean;
+            key: string;
+            name: string;
+            /** Format: date */
+            originalDate?: null | string;
+            slipShown?: null | boolean;
+            status: null | string;
+        };
+        TimelinePermissions: {
+            manageMilestones: boolean;
+            needsReason: boolean;
+        };
+        TimelineProject: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            projectNumber: string;
+            /** Format: date */
+            startDate: null | string;
+            status: string;
+            /** Format: date */
+            targetCompletionDate: null | string;
+        };
+        TimelineProjectGroup: {
+            data: components["schemas"]["TimelineData"];
+            project: components["schemas"]["TimelineProject"];
+        };
+        TimelineTask: {
+            affectedMilestoneIds?: null | string[];
+            assignee: null | string;
+            canEditDates: boolean;
+            /** Format: date */
+            createdOn: string;
+            /** Format: uuid */
+            deliverableId: null | string;
+            /** Format: date */
+            dueDate: null | string;
+            dueNeedsReason: boolean;
+            /** Format: uuid */
+            id: string;
+            isOverdue: boolean;
+            key: string;
+            /** Format: uuid */
+            milestoneId: null | string;
+            name: string;
+            /** Format: date */
+            originalDueDate: null | string;
+            /** Format: date */
+            originalStartDate: null | string;
+            /** Format: int32 */
+            progressPct: number;
+            /** Format: uuid */
+            projectDisciplineId: string;
+            /** Format: int32 */
+            rowVersion: number;
+            slipShown?: null | boolean;
+            /** Format: date */
+            startDate: null | string;
+            status: string;
         };
         UnassignedTask: {
             canAssign: boolean;

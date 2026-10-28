@@ -4,9 +4,10 @@ import { ChevronDown, ChevronRight, ChevronsDownUp, ChevronsUpDown, ListTree, Mo
 import { Fragment, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
+import type { components } from '@/gen/api'
 import { useFlag } from '@/lib/auth'
 import type { DateContextRead } from '@/components/hub/date-context'
-import { ScheduleNote, type PlannedTarget } from '@/components/hub/schedule-note'
+import { ScheduleNote } from '@/components/hub/schedule-note'
 import { ActiveFilters, ChoiceMenu, ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Notice, Page, Section, selectCls, useIsPhone } from '@/components/hub/common'
 import { useItemPanel } from '@/components/hub/panel-host'
 import { Key, toneOf } from '@/components/hub/pills'
@@ -15,7 +16,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useProjectRefresh } from '@/hooks/data'
-import { get, patch, qs } from '@/lib/api'
+import { get, patch, qs, typedRequest } from '@/lib/api'
 import { addDays, daysBetween, fmtDate, monthLabel, shortDate, today } from '@/lib/format'
 import { plural, t, tv , runtimeText } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
@@ -65,20 +66,8 @@ const max = (xs: (string | null | undefined)[]) => xs.filter(Boolean).reduce<str
 export const HATCH = 'repeating-linear-gradient(135deg, var(--bad) 0 3px, transparent 3px 7px)'
 const FILTERS = ['disciplineId', 'milestoneId', 'status', 'hideCompleted', 'from', 'to', 'chainTo'] as const
 
-interface TimelineTask {
-  id: string; key: string; name: string; deliverableId?: string | null; projectDisciplineId: string; milestoneId?: string | null; startDate?: string | null; dueDate?: string | null
-  originalStartDate?: string | null; originalDueDate?: string | null; status: string; progressPct: number; assignee?: string | null; rowVersion: number; createdOn: string
-  isOverdue: boolean; slipShown?: boolean; affectedMilestoneIds?: string[]; canEditDates: boolean; dueNeedsReason: boolean
-}
-interface TimelineHandoff { id: string; key: string; title: string; status: string; sendingDisciplineId: string; receivingDisciplineId: string; neededBy: string; promisedBy?: string; dateMismatch: boolean; isOverdue: boolean; daysOverdue: number }
-interface TimelineData {
-  latestPlanned?: PlannedTarget; handoffs?: TimelineHandoff[]
-  permissions: { manageMilestones: boolean; needsReason: boolean }
-  tasks: TimelineTask[]
-  dependencies: { id: string; predecessorTaskId: string; successorTaskId: string; type: string; lagDays: number; highlighted: boolean }[]
-  deliverableLinks: { from: string; to: string; type: string; lagDays?: number | null; highlighted: boolean; derived: boolean }[]
-  deliverables: { id: string; canEditDates: boolean; createdOn: string; slipShown?: boolean; baselineStartDate?: string; baselineDueDate?: string; baselineSlipShown?: boolean }[]
-}
+type TimelineTask = components['schemas']['TimelineTask']
+type TimelineHandoff = components['schemas']['TimelineHandoff']
 /** `assumed`: no start date, so the bar starts at the creation date (§40 AC-TL-01). */
 interface Span { start: string; end: string; late: boolean; assumed?: boolean; ghost?: { start: string; end: string } | null; baseline?: { start: string; end: string } | null }
 type RowT =
@@ -112,7 +101,7 @@ export function TimelineTab() {
   const f = { disciplineId: sp.get('disciplineId'), milestoneId: sp.get('milestoneId'), status: sp.get('status'), hide: sp.get('hideCompleted') === 'true', from: sp.get('from'), to: sp.get('to') }
   const ms = useQuery({ queryKey: ['p', p.id, 'milestones', true, ''], queryFn: () => get<MilestoneRow[]>(`projects/${p.id}/milestones?showCompleted=true`) })
   const dels = useQuery({ queryKey: ['p', p.id, 'deliverables', {}], queryFn: () => get<DeliverableRow[]>(`projects/${p.id}/deliverables`) })
-  const tl = useQuery({ queryKey: ['p', p.id, 'timeline'], queryFn: () => get<TimelineData>(`projects/${p.id}/timeline`) })
+  const tl = useQuery({ queryKey: ['p', p.id, 'timeline'], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/timeline', { params: { id: p.id } }) })
   const header = { title: t('ptab.timeline'), subtitle: t('calm.timeline.scope') }
   if (ms.isPending || dels.isPending || tl.isPending) return <Page {...header}><div className="rounded-lg border bg-card"><Loading rows={8} /></div></Page>
   if (ms.error || dels.error || tl.error) return <Page {...header}><ErrorBanner error={ms.error ?? dels.error ?? tl.error} retry={() => { ms.refetch(); dels.refetch(); tl.refetch() }} /></Page>

@@ -19,7 +19,8 @@ const deliverable = { id: deliverableId, projectId: pid, key: 'SYN-046-D001', na
 const milestone = { id: milestoneId, key: 'SYN-046-M01', name: 'Synthetic review', milestoneType: 'Review', date: '2026-11-01', originalDate: '2026-10-29', isComplete: false, isCancelled: false, canRebaseline: true, baselineDate: '2026-10-29', sinceBaselineDays: 3, rowVersion: 2, projectId: pid, deliverableIssued: 0, deliverableTotal: 1, taskComplete: 0, taskTotal: 1, statusReasons: [], deliverables: [] }
 const me = { id: person, displayName: 'Synthetic PM', email: 'pm@hub.test', roles: [], systemRoles: [], capabilities: { createProject: true, createTask: true, portfolio: true, workload: true, staff: true, allStaff: true, admin: false, templates: true, readOnly: false, directReports: 0 }, settings: { today: '2026-10-18', dateFormat: 'yyyy-MM-dd', orgTimeZone: 'America/Halifax', idleTimeoutHours: 8, chainDepthLimit: 20 }, preferences: { denseRows: true }, flags }
 const taskDetail = { task, project: { id: pid, projectNumber: project.projectNumber, name: project.name, status: project.status }, collaborators: [], watchers: [], permissions: { edit: { ok: true }, assign: { ok: true }, setReviewer: { ok: true }, dueDate: { ok: true }, dueNeedsReason: false, block: { ok: true }, delete: { ok: true }, restore: false, comment: false, transitions: [{ to: 'In Progress', allowed: true, needsReason: false }], isReviewer: false, dependencies: false, enterTime: false, needsReason: false, allowSelfReview: false }, description: 'Synthetic detail' }
-const timeline = { latestPlanned: { date: '2026-11-05', itemKey: 'SYN-046-D001', targetDate: '2026-10-30', rule: 'Working days' }, handoffs: [{ id: id(7), key: 'SYN-046-H001', title: 'Civil to Electrical', status: 'Submitted', sendingDisciplineId: discipline, receivingDisciplineId: discipline, neededBy: '2026-10-25', promisedBy: '2026-10-27', dateMismatch: true, isOverdue: true, daysOverdue: 3 }], permissions: { manageMilestones: false, needsReason: false }, tasks: [{ ...task, affectedMilestoneIds: [milestoneId], canEditDates: false, dueNeedsReason: false, isOverdue: false, slipShown: true }], dependencies: [], deliverableLinks: [], deliverables: [{ id: deliverableId, canEditDates: true, createdOn: '2026-10-18', slipShown: true, baselineStartDate: '2026-10-20', baselineDueDate: '2026-10-28', baselineSlipShown: true }] }
+const { projectTimeline, ganttPage } = require('./timeline.fixture.cjs')
+const timeline = projectTimeline({ discipline, task: taskId, deliverable: deliverableId, milestone: milestoneId, handoff: id(7) })
 
 const { activityPage } = require('./activity.fixture.cjs')
 const { startReadiness } = require('./task-start.fixture.cjs')
@@ -62,7 +63,7 @@ let server, browser
     else if (p === `deliverables/${deliverableId}`) data = { relatedTasks:related?[{id:taskId,key:task.key,name:task.name}]:[], deliverable:viewerMode?{...deliverable,canRebaseline:false}:deliverable, project, tasks: deliverable.tasks, issues: [], derivedPredecessors: [], derivedSuccessors: [], permissions: deliverable.permissions }
     else if (p === `milestones/${milestoneId}`) data = { milestone, permissions: { manage: { ok: true } }, deliverables: [], completesPhase: null }
     else if (p === `milestones/${milestoneId}/history` || p === `deliverables/${deliverableId}/history` || p === `tasks/${taskId}/history`) data = []
-    else if (p === 'timeline') data = {projects:[{project,data:{...timeline,deliverables:[{...deliverable,...timeline.deliverables[0]}],milestones:[milestone]}}],truncated:false,max:100}
+    else if (p === 'timeline') data = ganttPage(project, timeline)
     else if (p === 'projects') data = [project]
     else if (p === `items/Deliverable/${deliverableId}/date-context`) data = {dates:{inconsistencies:[],newInconsistencies:[{text:'Synthetic new date inconsistency'}],successors:[{id:id(61),key:'SYN-046-T061',reason:{text:'Synthetic successor moves out of sequence'}}]},tasks:[{id:taskId,key:task.key,reason:{text:'Synthetic task lies outside deliverable dates'}}]}
     else if (p === `projects/${pid}/timeline`) data = timeline
@@ -190,13 +191,14 @@ let server, browser
 
   // Original and PM-baseline ghosts obey the server's threshold decisions independently.
   deliverable.originalStartDate='2026-10-20'; deliverable.originalDueDate='2026-10-28'
-  timeline.deliverables[0].slipShown=false; timeline.deliverables[0].baselineSlipShown=false
+  Object.assign(timeline.deliverables[0],{originalStartDate:'2026-10-20',originalDueDate:'2026-10-28',slipShown:false,baselineSlipShown:false})
   milestone.slipShown=false; milestone.baselineSlipShown=false
+  Object.assign(timeline.milestones[0],{slipShown:false,baselineSlipShown:false})
   await page.goto(`${base}/projects/${project.projectNumber}/timeline`)
   await page.getByRole('heading',{name:'Timeline',exact:true}).waitFor()
   assert.equal(await page.locator('[title^="Original dates "]').count(),0)
   assert.equal(await page.locator('[title^="PM baseline dates "]').count(),0)
-  deliverable.originalDueDate='2026-10-26'; timeline.deliverables[0].slipShown=true; timeline.deliverables[0].baselineSlipShown=true
+  deliverable.originalDueDate='2026-10-26'; Object.assign(timeline.deliverables[0],{originalDueDate:'2026-10-26',slipShown:true,baselineSlipShown:true})
   await page.reload()
   await page.locator('[title^="Original dates "]').first().waitFor()
   await page.locator('[title^="PM baseline dates "]').first().waitFor()

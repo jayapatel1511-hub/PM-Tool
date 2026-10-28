@@ -6,7 +6,8 @@
 //                           grouped, for the shared DataTable's group rows), the project Team tab, the Milestones list (a slipped milestone with a deliverable, for its expanded detail row), the open-roles tab of
 //                           the Active, Complete and empty-role projects, the Reviews and Changes registers, the workspace
 //                           Team page scoped to the Active project, the Portfolio (plain, and grouped by client, which
-//                           needs flag.status_rollups), the Holidays admin list and four Administration reference lists (the column
+//                           needs flag.status_rollups), the Project List (my projects, all grouped by status, all ungrouped),
+//                           the Holidays admin list and four Administration reference lists (the column
 //                           variants of the one table), all compared as the administrator only: a route under /admin/ runs for
 //                           Jordan Lee and no other persona). {project}, {complete}, {empty} and
 //                           {restricted} are synthetic project numbers, {projectId} the Active project's id,
@@ -35,6 +36,7 @@ const SCREENS = (process.env.TUESDAY_RECORD_SCREENS ?? [
   '/projects/{project}/allocations?tab=roles', '/projects/{complete}/allocations?tab=roles', '/projects/{empty}/allocations?tab=roles',
   '/projects/{project}/reviews', '/projects/{project}/changes', '/team?projects={projectId}',
   '/portfolio', '/portfolio?group=client',
+  '/projects', '/projects?mine=false', '/projects?mine=false&group=none',
   '/admin/holidays',
   '/admin/reference/disciplines', '/admin/reference/clients', '/admin/reference/offices', '/admin/reference/deliverableTypes',
 ].join(' ')).split(/\s+/).filter(Boolean)
@@ -268,9 +270,11 @@ async function browserSnapshot(origin, who, width, ids, { removeHeader = false, 
         await page.keyboard.press('Escape'); await settle()
         out.popover = { fields: popoverFields, changes, closed: !await dialogOpen(), focusReturned: await trigger.evaluate(e => document.activeElement === e) }
       }
-      const chips = await page.locator('main button[aria-pressed]').filter({ visible: true }).count()
+      // Quick filters only: a row's own toggle (the Project List's star) writes to the shared database.
+      const chipSelector = 'main button[aria-pressed]:not(td button, li button)'
+      const chips = await page.locator(chipSelector).filter({ visible: true }).count()
       for (let i = 0; i < chips; i++) {
-        const chip = page.locator('main button[aria-pressed]').filter({ visible: true }).nth(i)
+        const chip = page.locator(chipSelector).filter({ visible: true }).nth(i)
         const name = (await chip.textContent())?.trim()
         await chip.click(); await settle()
         out.quick.push({ name, url: here(), rows: await rows() })
@@ -377,8 +381,8 @@ async function browserSnapshot(origin, who, width, ids, { removeHeader = false, 
         if (!await page.evaluate(() => !!document.activeElement?.closest('main'))) break
         order.push(await focused())
       }
-      // A Remove button deletes its record, so it is never the row control this run activates.
-      const row = page.locator('main tbody').locator('button:not([aria-label^="Remove"]),a').filter({ visible: true }).first()
+      // A Remove button deletes its record and a toggle (the Project List star) writes, so neither is the row control this run activates.
+      const row = page.locator('main tbody').locator('button:not([aria-label^="Remove"]):not([aria-pressed]),a').filter({ visible: true }).first()
       if (!await visible(row)) return { order, row: null }
       const start = here()
       await row.focus(); await page.keyboard.press('Enter'); await settle()

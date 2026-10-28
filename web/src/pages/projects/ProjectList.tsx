@@ -3,7 +3,9 @@ import { useQuery } from '@tanstack/react-query'
 import { Columns3, Plus, Rows3, Star } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router'
-import { AccentDot, ActiveFilters, ChoiceMenu, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Page, Segmented, TableRegion, selectCls, tdCls, thCls } from '@/components/hub/common'
+import { AccentDot, ActiveFilters, ChoiceMenu, Empty, ErrorBanner, Field, FilterBar, Missing, Page, Segmented, selectCls, tdCls, thCls } from '@/components/hub/common'
+import { DataTable } from '@/components/hub/registers'
+import type { Column } from '@/components/hub/table'
 import { Chip, HealthPill, Key, PriorityBadge, ProgressBar, StatusPill } from '@/components/hub/pills'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -26,6 +28,7 @@ type Col = (typeof COLUMNS)[number]
 const DEFAULT_COLS: Col[] = ['client', 'pm', 'status', 'health', 'priority', 'due', 'progress', 'nextMilestone', 'overdue', 'blocked', 'myRole']
 /** URL filters shown as removable tokens; scope (mine), grouping and sort are view choices, not filters. */
 const FILTERS = ['q', 'status', 'health', 'officeId', 'disciplineId', 'leadUnitId', 'includeArchived', 'ids', 'computedHealth'] as const satisfies readonly (SavedViewKeys['projects'] | 'page' | 'panel' | 'draftAccessReason')[]
+type ProjectCol = Column<ProjectRow> & { sortKey?: string; clearsSort?: boolean }
 const href = (r: ProjectRow) => `/projects/${encodeURIComponent(r.projectNumber)}`
 
 /** Project list and grouped board presentation (§13.2, FR-021, §36.2 FR-VIS-03). Filters live in the URL. */
@@ -61,7 +64,39 @@ export function ProjectListPage() {
   const sort = sp.get('sort')
   const sortBy = (k: string) => set('sort', sort === `${k}:asc` ? `${k}:desc` : `${k}:asc`)
   const dir = (k: string) => (sort === `${k}:asc` ? 'ascending' : sort === `${k}:desc` ? 'descending' : 'none')
-  const shown = COLUMNS.filter((c) => cols.includes(c))
+  const ordered = groups.flatMap((g) => g.rows)
+  const labelOf = new Map(groups.flatMap((g) => g.rows.map((r) => [r.id, g.label] as const)))
+  const columns: ProjectCol[] = [
+    { id: 'star', label: t('projects.star'), fixed: true, className: 'w-12 px-2', cell: (r) => <StarButton row={r} onDone={() => list.refetch()} /> },
+    { id: 'number', label: t('projects.col.number'), fixed: true, sortKey: 'number', className: 'whitespace-nowrap', cell: (r) => <span className="inline-flex items-center gap-2"><AccentDot id={r.id} /><Key>{r.projectNumber}</Key></span> },
+    { id: 'name', label: t('common.name'), fixed: true, sortKey: 'name', className: 'min-w-48',
+      cell: (r) => <Link to={href(r)} onClick={(e) => e.stopPropagation()} className="break-words font-semibold hover:underline">{r.name}</Link> },
+    { id: 'client', label: t('projects.col.client'), sortKey: 'client', cell: (r) => r.client.name },
+    { id: 'pm', label: t('projects.col.pm'), sortKey: 'pm', className: 'whitespace-nowrap', cell: (r) => r.pm.displayName },
+    { id: 'office', label: t('projects.col.office'), cell: (r) => r.office ?? <Missing /> },
+    { id: 'phase', label: t('projects.col.phase'), cell: (r) => r.phase ?? <Missing /> },
+    { id: 'status', label: t('projects.col.status'), sortKey: 'status', cell: (r) => <StatusPill status={r.status} /> },
+    { id: 'health', label: t('projects.col.health'), clearsSort: true, cell: (r) => <>
+      <Link to={`${href(r)}?why=health`} onClick={(e) => e.stopPropagation()} className="inline-flex rounded-md"><HealthPills r={r} /><span className="sr-only">{t('common.why')}</span></Link>
+      <OverrideNote r={r} />
+    </> },
+    { id: 'priority', label: t('projects.col.priority'), sortKey: 'priority', cell: (r) => <PriorityBadge priority={r.priority} /> },
+    { id: 'due', label: t('projects.col.due'), sortKey: 'due', className: 'whitespace-nowrap tabular-nums', cell: (r) => fmtDate(r.targetCompletionDate) },
+    { id: 'progress', label: t('projects.col.progress'), sortKey: 'progress', cell: (r) => <ProgressBar pct={r.progressPct} /> },
+    { id: 'nextMilestone', label: t('projects.col.nextMilestone'), className: 'min-w-44', cell: (r) => <NextMilestone r={r} /> },
+    { id: 'overdue', label: t('projects.col.overdue'), sortKey: 'overdue', className: 'text-right tabular-nums', cell: (r) => <span className={cn(r.overdueTasks > 0 && 'font-semibold text-bad')}>{r.overdueTasks}</span> },
+    { id: 'blocked', label: t('projects.col.blocked'), className: 'text-right tabular-nums', cell: (r) => <span className={cn(r.blockedTasks > 0 && 'font-semibold text-bad')}>{r.blockedTasks}</span> },
+    { id: 'myRole', label: t('projects.col.myRole'), cell: (r) => r.myRoles.map((x) => runtimeText(`role.${x}`)).join(', ') },
+    { id: 'activity', label: t('projects.col.activity'), sortKey: 'activity', className: 'whitespace-nowrap text-xs/[18px] text-muted-foreground', cell: (r) => ago(r.lastActivityAt) },
+  ]
+  const table = {
+    visible: columns.filter((c) => c.fixed || cols.includes(c.id as Col)),
+    header: (c: ProjectCol) => c.id === 'star'
+      ? <th key={c.id} scope="col" className="w-12 px-2"><span className="sr-only">{c.label}</span></th>
+      : <Th key={c.id} label={c.label} numeric={c.className?.includes('text-right')}
+          {...(c.sortKey ? { sort: dir(c.sortKey), onSort: () => sortBy(c.sortKey!) } : c.clearsSort ? { onSort: () => set('sort', null) } : {})} />,
+    cell: (c: ProjectCol, r: ProjectRow) => <td key={c.id} className={cn(tdCls, c.className)}>{c.cell(r)}</td>,
+  }
   const ids = sp.get('ids')
   const tokens = ([
     ['q', t('common.search'), sp.get('q')],
@@ -141,96 +176,33 @@ export function ProjectListPage() {
       </FilterBar>
 
       {list.error && <ErrorBanner error={list.error} retry={() => list.refetch()} />}
-      {list.isPending ? <div className="rounded-lg border bg-card"><Loading rows={8} /></div> : rows.length === 0 ? (
-        <div className="rounded-lg border bg-card">
-          <Empty title={t('projects.emptyTitle')} action={(tokens.length > 0 || mine || create) && (
-            <div className="flex flex-wrap justify-center gap-2">
-              {tokens.length > 0 && <Button variant="outline" onClick={clear}>{t('filters.clear')}</Button>}
-              {mine && <Button variant="outline" onClick={() => set('mine', 'false')}>{t('projects.all')}</Button>}
-              {create}
-            </div>
-          )}>{mine ? t('projects.emptyMine') : t('projects.empty')}</Empty>
-        </div>
-      ) : (
-        <>
-          {/* Phones (§13.0): the list becomes cards with the project's identity stripe. */}
-          <div className="space-y-6 md:hidden">
-            {groups.map((g) => (
-              <section key={g.key} aria-labelledby={`pl-g-${g.key}`} className="space-y-2">
-                <h2 id={`pl-g-${g.key}`} className="text-xs/[18px] font-semibold uppercase tracking-[0.5px] text-muted-foreground">
-                  {g.label} <span className="ml-1 rounded-md bg-secondary px-2 py-0.5 font-medium normal-case tracking-normal tabular-nums">{g.rows.length}</span>
-                </h2>
-                <ul className="space-y-2">{g.rows.map((r) => <ProjectCard key={r.id} r={r} onStar={() => list.refetch()} />)}</ul>
-              </section>
-            ))}
+      <DataTable table={table} rows={ordered} loading={list.isPending} caption={t('nav.projects')} current={() => false} onRowClick={(r) => navigate(href(r))}
+        groupBy={groupBy === 'status' ? (r) => labelOf.get(r.id) ?? '' : undefined}
+        groupRow={(label, count, span) => (
+          <tr className="border-t">
+            <th scope="rowgroup" colSpan={span} className="bg-sidebar px-(--cell-px) py-2 text-left text-xs/[18px] font-semibold uppercase tracking-[0.5px] text-muted-foreground">
+              {label} <span className="ml-1 rounded-md bg-card px-2 py-0.5 font-medium normal-case tracking-normal tabular-nums">{count}</span>
+            </th>
+          </tr>
+        )}
+        empty={<Empty title={t('projects.emptyTitle')} action={(tokens.length > 0 || mine || create) && (
+          <div className="flex flex-wrap justify-center gap-2">
+            {tokens.length > 0 && <Button variant="outline" onClick={clear}>{t('filters.clear')}</Button>}
+            {mine && <Button variant="outline" onClick={() => set('mine', 'false')}>{t('projects.all')}</Button>}
+            {create}
           </div>
-          <TableRegion className="hidden md:block">
-            <table className="w-full text-sm">
-              <caption className="sr-only">{t('nav.projects')}</caption>
-              <thead className="bg-muted">
-                <tr>
-                  <th scope="col" className="w-12 px-2"><span className="sr-only">{t('projects.star')}</span></th>
-                  <Th label={t('projects.col.number')} sort={dir('number')} onSort={() => sortBy('number')} />
-                  <Th label={t('common.name')} sort={dir('name')} onSort={() => sortBy('name')} />
-                  {shown.includes('client') && <Th label={t('projects.col.client')} sort={dir('client')} onSort={() => sortBy('client')} />}
-                  {shown.includes('pm') && <Th label={t('projects.col.pm')} sort={dir('pm')} onSort={() => sortBy('pm')} />}
-                  {shown.includes('office') && <Th label={t('projects.col.office')} />}
-                  {shown.includes('phase') && <Th label={t('projects.col.phase')} />}
-                  {shown.includes('status') && <Th label={t('projects.col.status')} sort={dir('status')} onSort={() => sortBy('status')} />}
-                  {shown.includes('health') && <Th label={t('projects.col.health')} onSort={() => set('sort', null)} />}
-                  {shown.includes('priority') && <Th label={t('projects.col.priority')} sort={dir('priority')} onSort={() => sortBy('priority')} />}
-                  {shown.includes('due') && <Th label={t('projects.col.due')} sort={dir('due')} onSort={() => sortBy('due')} />}
-                  {shown.includes('progress') && <Th label={t('projects.col.progress')} sort={dir('progress')} onSort={() => sortBy('progress')} />}
-                  {shown.includes('nextMilestone') && <Th label={t('projects.col.nextMilestone')} />}
-                  {shown.includes('overdue') && <Th label={t('projects.col.overdue')} sort={dir('overdue')} onSort={() => sortBy('overdue')} numeric />}
-                  {shown.includes('blocked') && <Th label={t('projects.col.blocked')} numeric />}
-                  {shown.includes('myRole') && <Th label={t('projects.col.myRole')} />}
-                  {shown.includes('activity') && <Th label={t('projects.col.activity')} sort={dir('activity')} onSort={() => sortBy('activity')} />}
-                </tr>
-              </thead>
-              {groups.map((g) => (
-                <tbody key={g.key}>
-                  {groupBy === 'status' && (
-                    <tr className="border-t">
-                      <th scope="rowgroup" colSpan={3 + shown.length} className="bg-sidebar px-(--cell-px) py-2 text-left text-xs/[18px] font-semibold uppercase tracking-[0.5px] text-muted-foreground">
-                        {g.label} <span className="ml-1 rounded-md bg-card px-2 py-0.5 font-medium normal-case tracking-normal tabular-nums">{g.rows.length}</span>
-                      </th>
-                    </tr>
-                  )}
-                  {g.rows.map((r) => (
-                    <tr key={r.id} className="cursor-pointer border-t hover:bg-muted" onClick={() => navigate(href(r))}>
-                      <td className="w-12 px-2 py-(--cell-py) align-top"><StarButton row={r} onDone={() => list.refetch()} /></td>
-                      <td className={cn(tdCls, 'whitespace-nowrap')}><span className="inline-flex items-center gap-2"><AccentDot id={r.id} /><Key>{r.projectNumber}</Key></span></td>
-                      <td className={cn(tdCls, 'min-w-48')}><Link to={href(r)} onClick={(e) => e.stopPropagation()} className="break-words font-semibold hover:underline">{r.name}</Link></td>
-                      {shown.includes('client') && <td className={tdCls}>{r.client.name}</td>}
-                      {shown.includes('pm') && <td className={cn(tdCls, 'whitespace-nowrap')}>{r.pm.displayName}</td>}
-                      {shown.includes('office') && <td className={tdCls}>{r.office ?? <Missing />}</td>}
-                      {shown.includes('phase') && <td className={tdCls}>{r.phase ?? <Missing />}</td>}
-                      {shown.includes('status') && <td className={tdCls}><StatusPill status={r.status} /></td>}
-                      {shown.includes('health') && (
-                        <td className={tdCls}>
-                          <Link to={`${href(r)}?why=health`} onClick={(e) => e.stopPropagation()} className="inline-flex rounded-md">
-                            <HealthPills r={r} /><span className="sr-only">{t('common.why')}</span>
-                          </Link>
-                          <OverrideNote r={r} />
-                        </td>
-                      )}
-                      {shown.includes('priority') && <td className={tdCls}><PriorityBadge priority={r.priority} /></td>}
-                      {shown.includes('due') && <td className={cn(tdCls, 'whitespace-nowrap tabular-nums')}>{fmtDate(r.targetCompletionDate)}</td>}
-                      {shown.includes('progress') && <td className={tdCls}><ProgressBar pct={r.progressPct} /></td>}
-                      {shown.includes('nextMilestone') && <td className={cn(tdCls, 'min-w-44')}><NextMilestone r={r} /></td>}
-                      {shown.includes('overdue') && <td className={cn(tdCls, 'text-right tabular-nums', r.overdueTasks > 0 && 'font-semibold text-bad')}>{r.overdueTasks}</td>}
-                      {shown.includes('blocked') && <td className={cn(tdCls, 'text-right tabular-nums', r.blockedTasks > 0 && 'font-semibold text-bad')}>{r.blockedTasks}</td>}
-                      {shown.includes('myRole') && <td className={tdCls}>{r.myRoles.map((x) => runtimeText(`role.${x}`)).join(', ')}</td>}
-                      {shown.includes('activity') && <td className={cn(tdCls, 'whitespace-nowrap text-xs/[18px] text-muted-foreground')}>{ago(r.lastActivityAt)}</td>}
-                    </tr>
-                  ))}
-                </tbody>
-              ))}
-            </table>
-          </TableRegion>
-        </>
-      )}
+        )}>{mine ? t('projects.emptyMine') : t('projects.empty')}</Empty>}
+        /* Phones (§13.0): the list becomes cards with the project's identity stripe. */
+        cards={<div className="space-y-6 md:hidden">
+          {groups.map((g) => (
+            <section key={g.key} aria-labelledby={`pl-g-${g.key}`} className="space-y-2">
+              <h2 id={`pl-g-${g.key}`} className="text-xs/[18px] font-semibold uppercase tracking-[0.5px] text-muted-foreground">
+                {g.label} <span className="ml-1 rounded-md bg-secondary px-2 py-0.5 font-medium normal-case tracking-normal tabular-nums">{g.rows.length}</span>
+              </h2>
+              <ul className="space-y-2">{g.rows.map((r) => <ProjectCard key={r.id} r={r} onStar={() => list.refetch()} />)}</ul>
+            </section>
+          ))}
+        </div>} />
       {creating && <CreateProjectDialog onClose={() => setCreating(false)} />}
     </Page>
   )

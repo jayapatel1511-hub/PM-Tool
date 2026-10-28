@@ -7,6 +7,7 @@ const { myWork, myWorkPerson, myStaffPerson, myStaffList } = require('./my-work.
 const { savedView, viewList, viewSaved } = require('./views.fixture.cjs')
 const { meView, referenceData, referenceDiscipline } = require('./me.fixture.cjs')
 const { startPreview, project: baseProject, task: baseTask, taskDetail, deliverableDetail, panelIds, mockPlatformApi } = require('./platform-fixtures.cjs')
+const { deliverableList } = require('./deliverables.fixture.cjs')
 const { allocationRow, allocationPage, allocationDetail, allocationLink, capacityDay, confirmationPreview } = require('./allocations.fixture.cjs')
 
 const port = Number(process.env.WORKFLOW_TEST_PORT || '19508')
@@ -57,7 +58,8 @@ const views = { allocations:[sharedView], staff: [staffView], portfolio: [savedV
     else if (p === `projects/${projectId}/open-roles`) data = []
     else if (p === `projects/${projectId}/changes/options`) data = coordinationOptions({ actorId:personId,people:[{id:personId,displayName:'Alex Chen'}],disciplines:[{id:disciplineId,name:'Civil'}],sources:[],heads:[], tasks: [coordinationTask({ id: task.id, key: task.key, name: task.name, projectDisciplineId: task.projectDisciplineId, ownerId: task.assigneeId, rowVersion: task.rowVersion, status: task.status })], deliverables: [], manageDisciplineIds: [], canCreate: { changes: false, reviews: false }, canWrite: true })
     else if (p === `projects/${projectId}/tasks`) data = { items: [task], page: 1, pageSize: 200, totalCount: 1 }
-    else if (p === `projects/${projectId}/deliverables` || p === `projects/${projectId}/milestones`) data = []
+    else if (p === `projects/${projectId}/deliverables`) data = deliverableList()
+    else if (p === `projects/${projectId}/milestones`) data = []
     else if (p === 'portfolio') data = { ownOnly: false, tiles: { active: 1, red: 0, yellow: 0, green: 1, submissions14: 0, overdueDecisions: 0 }, projects: [{ id: projectId, projectNumber: project.projectNumber, name: project.name, status: 'Active', client: { id: id(50), name: 'Synthetic client' }, pm: { id: personId, displayName: 'Alex Chen' }, officeId: null, office: null, phase: null, projectTypeId: null, projectType: null, health: { computed: 'Green', reported: 'Green' }, trend: [], overdueDeliverables: 0, overdueTasks: 0, blockedTasks: 0, decisionsOverdue: 0, highIssues: 0, attention: 0 }] }
     else if (p === 'staff') data = myStaffList([myStaffPerson({ id: personId, displayName: 'Alex Chen', roles: { pm: 1, dl: 0, team: 1, reviewer: 0, viewer: 0 }, open: 1 })], { scope: 'all', canSeeAll: true })
     else if (p.startsWith('staff/')) data = []

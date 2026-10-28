@@ -1,5 +1,4 @@
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
@@ -20,7 +19,8 @@ public static class DeliverableEndpoints
 
     public static void Map(RouteGroupBuilder api)
     {
-        api.MapGet("/projects/{id:guid}/deliverables", List);
+        api.MapGet("/projects/{id:guid}/deliverables", async Task<Ok<List<DeliverableRow>>> (Guid id, [AsParameters] DeliverableQuery f, Access access, HubDb db, SettingsStore store) =>
+            TypedResults.Ok(await List(id, f, access, db, store)));
         api.MapPost("/projects/{id:guid}/deliverables", Create);
         api.MapPost("/projects/{id:guid}/deliverables/bulk", Bulk);
         api.MapGet("/deliverables/{id}", Get);
@@ -52,19 +52,51 @@ public static class DeliverableEndpoints
         int RowVersion, DateTimeOffset CreatedAt, DateTimeOffset LastActivityAt, string? DisciplineName, string? DisciplineColour, int DisciplineOrder,
         string? TypeName, string? OwnerName, bool OwnerActive, string? ReviewerName, string? MilestoneKey, string? MilestoneName, DateOnly? MilestoneDate,
         DeliverableStateRead? State, IReadOnlyList<DeliverableTaskRead>? Tasks,
-        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] bool? SlipShown,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] bool? SlipShown = null,
         [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] DateOnly? BaselineStartDate = null,
         [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] DateOnly? BaselineDueDate = null,
         [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? SinceBaselineDays = null,
         [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] bool? BaselineSlipShown = null,
         [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] bool? CanRebaseline = null);
     public sealed record DeliverableTaskRead(Guid Id, string Key, string Name, string Status, DateOnly? DueDate, Guid? DeliverableId, string? Assignee);
+    public sealed record DeliverableCreated(Guid Id, string Key, int RowVersion, DateOnly? DueDate, IReadOnlyList<string> Warnings);
+    public sealed record DeliverableEdited(Guid Id, int RowVersion, IReadOnlyList<string> Warnings);
+    public sealed record DeliverableTransitioned(Guid Id, string Status, int RowVersion);
+    public sealed record DeliverableTaskRef(Guid Id, string Key, string Name, string Status);
+    public sealed record DeliverableIssueResult(Guid Id, string Status, int RowVersion, IReadOnlyList<DeliverableTaskRef> OpenTasks);
+    public sealed record DeliverableRestored(Guid Id, int RowVersion);
+    public sealed record DeliverableBulkSkipped(Guid Id, string Key, string Reason);
+    public sealed record DeliverableBulkResult(int Updated, IReadOnlyList<DeliverableBulkSkipped> Skipped);
+    public sealed record DeliverableProject(Guid Id, string ProjectNumber, string Name, string Status);
+    public sealed record DeliverablePermission(bool Ok, string? Reason);
+    public sealed record DeliverableTransitionOption(string To, bool Allowed, bool NeedsReason);
+    public sealed record DeliverablePermissions(DeliverablePermission Edit, bool Delete, IReadOnlyList<DeliverableTransitionOption> Transitions, bool Issue, bool LinkDeliverables,
+        bool IssueNeedsConfirm, string? ReadyToIssueGuard, bool Comment, bool CreateTask, bool NeedsReason);
+    public sealed record DerivedDeliverable(Guid Id, string Key, string Name, string Status, DateOnly? DueDate);
+    public sealed record DeliverableIssueRead(Guid Id, DateOnly IssuedDate, string? Revision, string? IssuedTo, string? TransmittalUrl, string? Note, string? IssuedBy);
+    public sealed record DeliverableLinkRead(Guid DependencyId, string Type, int LagDays, string? Note, Guid Id, string Key, string Name, string Status, DateOnly? DueDate,
+        DateOnly? IssuedDate, Guid ProjectDisciplineId, bool Satisfied);
+    public sealed record DeliverableDetail(DeliverableRow Deliverable, string? Description, string? TransmittalUrl, string? IssueNote, DateOnly? AcceptedDate, string? OnHoldReason,
+        string? CancelledReason, string? PreviousStatus, DeliverableProject Project, IReadOnlyList<DerivedDeliverable> DerivedPredecessors, IReadOnlyList<DerivedDeliverable> DerivedSuccessors,
+        IReadOnlyList<DeliverableIssueRead> Issues, IReadOnlyList<DeliverableLinkRead> ExplicitPredecessors, IReadOnlyList<DeliverableLinkRead> ExplicitSuccessors,
+        DeliverablePermissions Permissions, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<DeliverableTaskRef>? RelatedTasks = null);
+
+    // What the register's query reads for each row, before the state and the task list are added.
+    sealed record DisciplineFacts(string Name, string Colour, int SortOrder);
+    sealed record PersonFacts(string DisplayName, bool IsActive);
+    sealed record MilestoneFacts(string Key, string Name, DateOnly? Date);
+    sealed record RowSource(Guid Id, Guid ProjectId, string Key, string Name, Guid ProjectDisciplineId, Guid DeliverableTypeId, Guid? OwnerId, Guid? ReviewerId, Guid? MilestoneId,
+        DateOnly? StartDate, DateOnly? DueDate, DateOnly? OriginalDueDate, DateOnly? OriginalStartDate, DateOnly? BaselineStartDate, DateOnly? BaselineDueDate, string Priority, string Status,
+        string? Revision, DateOnly? IssuedDate, string? IssuedTo, bool RequiresReview, Guid? RequiredReviewPackageId, int RowVersion, DateTimeOffset CreatedAt, DateTimeOffset LastActivityAt,
+        DisciplineFacts? Discipline, string? Type, PersonFacts? Owner, PersonFacts? Reviewer, MilestoneFacts? Milestone, DeliverableState? State);
+    sealed record TaskLabel(string Key, string Name);
+    sealed record TasksToConfirm<T>(IReadOnlyList<T> Tasks); // the extra of the two 409 problems that ask first
     public sealed record DeliverableStateRead(int? ProgressPct, int TaskTotal, int TaskComplete, int TaskCancelled, int TaskOpen, int TaskOverdue, int TaskBlocked,
         decimal EstimatedHoursTotal, decimal RemainingHours, bool IsOverdue, int DaysOverdue, bool IsDueSoon, bool IsAtRisk, JsonElement? AtRiskReasons,
         bool IsUnassigned, bool IsStale, bool IsDateInconsistent, JsonElement? InconsistencyDetail, int SlipDays, bool IsInactiveOwner, bool IssuedWithOpenWork,
         bool MilestoneCancelled, bool IsWaiting, bool IsBlocked, JsonElement? BlockedBy, int BlockingCount, List<Guid> DerivedPredecessorIds, List<Guid> DerivedSuccessorIds);
 
-    public static async Task<List<object>> List(Guid id, [AsParameters] DeliverableQuery f, Access access, HubDb db, SettingsStore store)
+    public static async Task<List<DeliverableRow>> List(Guid id, [AsParameters] DeliverableQuery f, Access access, HubDb db, SettingsStore store)
     {
         await access.Project(id, track: false);
         var query = Filter(db, db.Deliverables.AsNoTracking().Where(d => d.ProjectId == id), f.DisciplineId, f.Status, f.MilestoneId, f.OwnerId, f.TypeId, f.DueFrom, f.DueTo, f.Indicator, f.RequiresReview, f.Q);
@@ -106,25 +138,23 @@ public static class DeliverableEndpoints
         return query;
     }
 
-    public static async Task<List<object>> Rows(HubDb db, IQueryable<Deliverable> q, bool includeTasks = false, OrgSettings? schedule = null)
+    public static async Task<List<DeliverableRow>> Rows(HubDb db, IQueryable<Deliverable> q, bool includeTasks = false, OrgSettings? schedule = null)
     {
-        var list = await q.OrderBy(d => d.DueDate == null).ThenBy(d => d.DueDate).ThenBy(d => d.Seq).Select(d => new
-        {
+        var list = await q.OrderBy(d => d.DueDate == null).ThenBy(d => d.DueDate).ThenBy(d => d.Seq).Select(d => new RowSource(
             d.Id, d.ProjectId, d.Key, d.Name, d.ProjectDisciplineId, d.DeliverableTypeId, d.OwnerId, d.ReviewerId, d.MilestoneId, d.StartDate, d.DueDate,
             d.OriginalDueDate, d.OriginalStartDate, d.BaselineStartDate, d.BaselineDueDate, d.Priority, d.Status, d.Revision, d.IssuedDate, d.IssuedTo, d.RequiresReview, d.RequiredReviewPackageId, d.RowVersion, d.CreatedAt, d.LastActivityAt,
-            Discipline = db.ProjectDisciplines.Where(x => x.Id == d.ProjectDisciplineId).Select(x => new { x.Discipline!.Name, x.Discipline.Colour, x.SortOrder }).FirstOrDefault(),
-            Type = db.DeliverableTypes.Where(x => x.Id == d.DeliverableTypeId).Select(x => x.Name).FirstOrDefault(),
-            Owner = db.Users.Where(u => u.Id == d.OwnerId).Select(u => new { u.DisplayName, u.IsActive }).FirstOrDefault(),
-            Reviewer = db.Users.Where(u => u.Id == d.ReviewerId).Select(u => new { u.DisplayName, u.IsActive }).FirstOrDefault(),
-            Milestone = db.Milestones.Where(m => m.Id == d.MilestoneId).Select(m => new { m.Key, m.Name, m.Date, m.IsCancelled }).FirstOrDefault(),
-            State = db.DeliverableStates.Where(s => s.DeliverableId == d.Id).FirstOrDefault(),
-        }).ToListAsync();
+            db.ProjectDisciplines.Where(x => x.Id == d.ProjectDisciplineId).Select(x => new DisciplineFacts(x.Discipline!.Name, x.Discipline.Colour, x.SortOrder)).FirstOrDefault(),
+            db.DeliverableTypes.Where(x => x.Id == d.DeliverableTypeId).Select(x => x.Name).FirstOrDefault(),
+            db.Users.Where(u => u.Id == d.OwnerId).Select(u => new PersonFacts(u.DisplayName, u.IsActive)).FirstOrDefault(),
+            db.Users.Where(u => u.Id == d.ReviewerId).Select(u => new PersonFacts(u.DisplayName, u.IsActive)).FirstOrDefault(),
+            db.Milestones.Where(m => m.Id == d.MilestoneId).Select(m => new MilestoneFacts(m.Key, m.Name, m.Date)).FirstOrDefault(),
+            db.DeliverableStates.Where(s => s.DeliverableId == d.Id).FirstOrDefault())).ToListAsync();
         var tasks = includeTasks
             ? (await db.Tasks.AsNoTracking().Where(t => t.DeliverableId != null && list.Select(x => x.Id).Contains(t.DeliverableId.Value)).OrderBy(t => t.SortOrder).ThenBy(t => t.Seq)
                 .Select(t => new DeliverableTaskRead(t.Id, t.Key, t.Name, t.Status, t.DueDate, t.DeliverableId, db.Users.Where(u => u.Id == t.AssigneeId).Select(u => u.DisplayName).FirstOrDefault()))
                 .ToListAsync()).ToLookup(t => t.DeliverableId)
             : null;
-        return list.Select(d => (object)new DeliverableRow(
+        return list.Select(d => new DeliverableRow(
             d.Id, d.ProjectId, d.Key, d.Name, d.ProjectDisciplineId, d.DeliverableTypeId, d.OwnerId, d.ReviewerId, d.MilestoneId, d.StartDate, d.DueDate,
             d.OriginalDueDate, d.OriginalStartDate, d.Priority, d.Status, d.Revision, d.IssuedDate, d.IssuedTo, d.RequiresReview, d.RequiredReviewPackageId, d.RowVersion, d.CreatedAt, d.LastActivityAt,
             d.Discipline?.Name, d.Discipline?.Colour, d.Discipline?.SortOrder ?? 0, d.Type,
@@ -148,7 +178,7 @@ public static class DeliverableEndpoints
 
     // ---------- Create (FR-DEL-01, DL-01, DL-03, DL-13, AC-DEL-01, AC-PERM-02) ----------
 
-    static async Task<IResult> Create(Guid id, CreateBody body, Access access, HubDb db, TeamService team, Notifier notify, SettingsStore store)
+    static async Task<Created<DeliverableCreated>> Create(Guid id, CreateBody body, Access access, HubDb db, TeamService team, Notifier notify, SettingsStore store)
     {
         var (p, ctx) = await access.Project(id);
         if (!(await store.Get(db)).IsFlagOn("small_ux")) body = body with { FromTaskId = null };
@@ -191,7 +221,7 @@ public static class DeliverableEndpoints
             return d;
         });
         var warnings = Warnings(d, ms);
-        return Results.Created($"/api/v1/deliverables/{d.Id}", new { d.Id, d.Key, d.RowVersion, d.DueDate, warnings });
+        return TypedResults.Created($"/api/v1/deliverables/{d.Id}", new DeliverableCreated(d.Id, d.Key, d.RowVersion, d.DueDate, warnings));
     }
 
     static string[] Warnings(Deliverable d, Milestone? ms) =>
@@ -227,18 +257,18 @@ public static class DeliverableEndpoints
 
     // ---------- Detail (§13.6.1) ----------
 
-    static async Task<object> Get(string id, Access access, HubDb db, SettingsStore store, TimeProvider clock)
+    static async Task<Ok<DeliverableDetail>> Get(string id, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
         var d = (Guid.TryParse(id, out var g) ? await db.Deliverables.AsNoTracking().FirstOrDefaultAsync(x => x.Id == g)
             : await db.Deliverables.AsNoTracking().FirstOrDefaultAsync(x => x.Key == id)) ?? throw ApiException.NotFound();
         var (p, ctx) = await access.Project(d.ProjectId, track: false);
         var settings = await store.Get(db);
-        var row = (DeliverableRow)(await Rows(db, db.Deliverables.AsNoTracking().Where(x => x.Id == d.Id), includeTasks: true, schedule: settings)).Single();
+        var row = (await Rows(db, db.Deliverables.AsNoTracking().Where(x => x.Id == d.Id), includeTasks: true, schedule: settings)).Single();
         row = row with { CanRebaseline = settings.IsFlagOn("schedule_baseline") ? Permissions.Rebaseline(access.Actor, ctx, d.Status is DeliverableStatus.Issued or DeliverableStatus.Accepted or DeliverableStatus.Cancelled).Ok : null };
         var facts = await Facts(db, d);
         var a = access.Actor;
         var transitions = DeliverableStatus.All.Where(to => to != DeliverableStatus.Issued && Workflow.DeliverableStep(d.Status, to, d.RequiresReview, d.PreviousStatus))
-            .Select(to => new { To = to, Allowed = Permissions.DeliverableTransition(a, ctx, facts, d.Status, to).Ok, NeedsReason = Workflow.DeliverableNeedsReason(to) || to == DeliverableStatus.RevisionRequired || ProjectStatus.NeedsCorrectionReason(p.Status) });
+            .Select(to => new DeliverableTransitionOption(to, Permissions.DeliverableTransition(a, ctx, facts, d.Status, to).Ok, Workflow.DeliverableNeedsReason(to) || to == DeliverableStatus.RevisionRequired || ProjectStatus.NeedsCorrectionReason(p.Status))).ToList();
         var guard = Workflow.DeliverableGuard(d.Status, DeliverableStatus.ReadyToIssue, d.RequiresReview);
         var issuePerm = Permissions.DeliverableTransition(a, ctx, facts, DeliverableStatus.ReadyToIssue, DeliverableStatus.Issued);
         var canIssue = issuePerm.Ok && (d.Status == DeliverableStatus.ReadyToIssue
@@ -246,38 +276,32 @@ public static class DeliverableEndpoints
         var derivedPreds = await DerivedDeps(db, d.Id, predecessors: true);
         var derivedSuccs = await DerivedDeps(db, d.Id, predecessors: false);
         var issues = await db.DeliverableIssues.AsNoTracking().Where(i => i.DeliverableId == d.Id).OrderByDescending(i => i.IssuedDate).ThenByDescending(i => i.CreatedAt)
-            .Select(i => new { i.Id, i.IssuedDate, i.Revision, i.IssuedTo, i.TransmittalUrl, i.Note, IssuedBy = db.Users.Where(u => u.Id == i.IssuedBy).Select(u => u.DisplayName).FirstOrDefault() }).ToListAsync();
+            .Select(i => new DeliverableIssueRead(i.Id, i.IssuedDate, i.Revision, i.IssuedTo, i.TransmittalUrl, i.Note, db.Users.Where(u => u.Id == i.IssuedBy).Select(u => u.DisplayName).FirstOrDefault())).ToListAsync();
         var edit = Permissions.EditDeliverable(a, ctx, facts);
         var judge = await DependencyEndpoints.Judge(db, p, store, clock);
-        var result = new
-        {
-            Deliverable = row, d.Description, d.TransmittalUrl, d.IssueNote, d.AcceptedDate, d.OnHoldReason, d.CancelledReason, d.PreviousStatus,
-            Project = new { p.Id, p.ProjectNumber, p.Name, p.Status },
-            DerivedPredecessors = derivedPreds, DerivedSuccessors = derivedSuccs, Issues = issues,
-            ExplicitPredecessors = await ExplicitDeps(db, judge, d, predecessors: true), ExplicitSuccessors = await ExplicitDeps(db, judge, d, predecessors: false),
-            Permissions = new
-            {
-                Edit = new { edit.Ok, Reason = edit.Why is null ? null : Text.Get(edit.Why, await DisciplineName(db, d.ProjectDisciplineId)) },
-                Delete = Permissions.DeleteDeliverable(a, ctx, facts).Ok, Transitions = transitions, Issue = canIssue,
-                LinkDeliverables = Permissions.ManageDeliverableDependency(a, ctx, d.ProjectDisciplineId, d.ProjectDisciplineId).Ok, // the other end's lead may also link
-                IssueNeedsConfirm = d.Status != DeliverableStatus.ReadyToIssue,
-                ReadyToIssueGuard = guard is null ? null : Text.Get(guard), Comment = Permissions.Comment(a, ctx).Ok,
-                CreateTask = Permissions.CreateTask(a, ctx, d.ProjectDisciplineId).Ok, NeedsReason = ProjectStatus.NeedsCorrectionReason(p.Status),
-            },
-        };
-        if (!settings.IsFlagOn("small_ux")) return result;
-        var json = JsonSerializer.SerializeToNode(result, JsonOpts.Web)!.AsObject();
-        json["relatedTasks"] = JsonSerializer.SerializeToNode(await db.Tasks.AsNoTracking().Where(t => t.ProjectId == p.Id
-            && db.ItemLinks.Any(l => l.ProjectId == p.Id && l.SourceType == ItemType.Task && l.SourceId == t.Id
-                && l.TargetType == ItemType.Deliverable && l.TargetId == d.Id && l.Relation == ItemRelation.Related))
-            .OrderBy(t => t.Key).Select(t => new { t.Id, t.Key, t.Name, t.Status }).ToListAsync(), JsonOpts.Web);
-        return json;
+        return TypedResults.Ok(new DeliverableDetail(row, d.Description, d.TransmittalUrl, d.IssueNote, d.AcceptedDate, d.OnHoldReason, d.CancelledReason, d.PreviousStatus,
+            new DeliverableProject(p.Id, p.ProjectNumber, p.Name, p.Status),
+            derivedPreds, derivedSuccs, issues,
+            await ExplicitDeps(db, judge, d, predecessors: true), await ExplicitDeps(db, judge, d, predecessors: false),
+            new DeliverablePermissions(
+                new DeliverablePermission(edit.Ok, edit.Why is null ? null : Text.Get(edit.Why, await DisciplineName(db, d.ProjectDisciplineId))),
+                Permissions.DeleteDeliverable(a, ctx, facts).Ok, transitions, canIssue,
+                Permissions.ManageDeliverableDependency(a, ctx, d.ProjectDisciplineId, d.ProjectDisciplineId).Ok, // the other end's lead may also link
+                d.Status != DeliverableStatus.ReadyToIssue,
+                guard is null ? null : Text.Get(guard), Permissions.Comment(a, ctx).Ok,
+                Permissions.CreateTask(a, ctx, d.ProjectDisciplineId).Ok, ProjectStatus.NeedsCorrectionReason(p.Status)),
+            settings.IsFlagOn("small_ux")
+                ? await db.Tasks.AsNoTracking().Where(t => t.ProjectId == p.Id
+                    && db.ItemLinks.Any(l => l.ProjectId == p.Id && l.SourceType == ItemType.Task && l.SourceId == t.Id
+                        && l.TargetType == ItemType.Deliverable && l.TargetId == d.Id && l.Relation == ItemRelation.Related))
+                    .OrderBy(t => t.Key).Select(t => new DeliverableTaskRef(t.Id, t.Key, t.Name, t.Status)).ToListAsync()
+                : null));
     }
 
     /// D-18: deliverable B depends on A when a task in B has a predecessor in A (read-only).
     /// Explicit deliverable dependencies (FR-DEP-09, packet 021) with their type, lag and note, shown apart from derived ones.
     /// `satisfied` comes from the evaluator's rule (AC-DEPT-05): finish means Issued or Accepted, start means left Not Started.
-    static async Task<List<object>> ExplicitDeps(HubDb db, DependencyEndpoints.LinkJudge judge, Deliverable self, bool predecessors)
+    static async Task<List<DeliverableLinkRead>> ExplicitDeps(HubDb db, DependencyEndpoints.LinkJudge judge, Deliverable self, bool predecessors)
     {
         var deliverableId = self.Id;
         var edges = await db.DeliverableDependencies.AsNoTracking()
@@ -288,12 +312,12 @@ public static class DeliverableEndpoints
         {
             var x = items[predecessors ? e.PredecessorDeliverableId : e.SuccessorDeliverableId];
             var pred = predecessors ? x : self;
-            return (object)new { DependencyId = e.Id, Type = e.DependencyType, e.LagDays, e.Note, x.Id, x.Key, x.Name, x.Status, x.DueDate, x.IssuedDate, x.ProjectDisciplineId,
-                Satisfied = judge.Satisfied(e.DependencyType, pred.Status, pred.StartedAt, pred.IssuedDate, e.LagDays) };
+            return new DeliverableLinkRead(e.Id, e.DependencyType, e.LagDays, e.Note, x.Id, x.Key, x.Name, x.Status, x.DueDate, x.IssuedDate, x.ProjectDisciplineId,
+                judge.Satisfied(e.DependencyType, pred.Status, pred.StartedAt, pred.IssuedDate, e.LagDays));
         })];
     }
 
-    static async Task<List<object>> DerivedDeps(HubDb db, Guid deliverableId, bool predecessors)
+    static async Task<List<DerivedDeliverable>> DerivedDeps(HubDb db, Guid deliverableId, bool predecessors)
     {
         var q = predecessors
             ? from dep in db.Dependencies join s in db.Tasks on dep.SuccessorTaskId equals s.Id join pr in db.Tasks on dep.PredecessorTaskId equals pr.Id
@@ -301,12 +325,12 @@ public static class DeliverableEndpoints
             : from dep in db.Dependencies join s in db.Tasks on dep.SuccessorTaskId equals s.Id join pr in db.Tasks on dep.PredecessorTaskId equals pr.Id
               where pr.DeliverableId == deliverableId && s.DeliverableId != null && s.DeliverableId != deliverableId select s.DeliverableId!.Value;
         var ids = await q.Distinct().ToListAsync();
-        return (await db.Deliverables.AsNoTracking().Where(x => ids.Contains(x.Id)).Select(x => new { x.Id, x.Key, x.Name, x.Status, x.DueDate }).ToListAsync()).Cast<object>().ToList();
+        return await db.Deliverables.AsNoTracking().Where(x => ids.Contains(x.Id)).Select(x => new DerivedDeliverable(x.Id, x.Key, x.Name, x.Status, x.DueDate)).ToListAsync();
     }
 
     // ---------- Edit (FR-DEL-01, DL-10, E-16) ----------
 
-    static async Task<IResult> Edit(Guid id, JsonElement body, HttpContext http, Access access, HubDb db, TeamService team, Notifier notify)
+    static async Task<Ok<DeliverableEdited>> Edit(Guid id, JsonElement body, HttpContext http, Access access, HubDb db, TeamService team, Notifier notify)
     {
         var (d, p, ctx) = await Load(db, access, id);
         var facts = await Facts(db, d);
@@ -348,7 +372,7 @@ public static class DeliverableEndpoints
                 Access.Demand(Permissions.CreateDeliverable(access.Actor, ctx, pd.Id));
                 var tasks = await db.Tasks.Where(t => t.DeliverableId == d.Id).ToListAsync();
                 if (tasks.Count > 0 && patch.Bool("confirmMoveTasks") != true) // DL-10
-                    throw ApiException.Conflict("confirm_move_tasks", "deliverable.confirm_move_tasks", new { tasks = tasks.Select(t => new { t.Key, t.Name }) }, tasks.Count);
+                    throw ApiException.Conflict("confirm_move_tasks", "deliverable.confirm_move_tasks", new TasksToConfirm<TaskLabel>([.. tasks.Select(t => new TaskLabel(t.Key, t.Name))]), tasks.Count);
                 foreach (var t in tasks) t.ProjectDisciplineId = pd.Id;
                 d.ProjectDisciplineId = pd.Id;
             }
@@ -362,12 +386,12 @@ public static class DeliverableEndpoints
             await db.SaveChangesAsync();
         }
         Http.ETag(http, d);
-        return Results.Ok(new { d.Id, d.RowVersion, warnings = Warnings(d, ms) });
+        return TypedResults.Ok(new DeliverableEdited(d.Id, d.RowVersion, Warnings(d, ms)));
     }
 
     // ---------- Lifecycle (DL-02, DL-04, AC-DEL-03, AC-DEL-04, E-24) ----------
 
-    static async Task<IResult> Transition(Guid id, TransitionBody body, HttpContext http, Access access, HubDb db, Notifier notify, TimeProvider clock, SettingsStore store)
+    static async Task<Ok<DeliverableTransitioned>> Transition(Guid id, TransitionBody body, HttpContext http, Access access, HubDb db, Notifier notify, TimeProvider clock, SettingsStore store)
     {
         var projectId = await db.Deliverables.Where(d => d.Id == id).Select(d => (Guid?)d.ProjectId).FirstOrDefaultAsync() ?? throw ApiException.NotFound();
         await access.Project(projectId, false);
@@ -411,12 +435,12 @@ public static class DeliverableEndpoints
         else if (to == DeliverableStatus.InReview)
             await notify.Send(NotificationEvents.ReviewRequested, d.ReviewerId, Item(p, d), Text.Get("notify.deliverable_review", await notify.ActorName(), d.Key, d.Name));
         await db.SaveChangesAsync();
-        return Results.Ok(new { d.Id, d.Status, d.RowVersion });
+        return TypedResults.Ok(new DeliverableTransitioned(d.Id, d.Status, d.RowVersion));
         });
     }
 
     /// DL-05, DL-06, AC-DEL-05: issue records date, revision and recipient; open tasks need confirmation and stay open.
-    static async Task<IResult> Issue(Guid id, IssueBody body, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock, CurrentUser me)
+    static async Task<Ok<DeliverableIssueResult>> Issue(Guid id, IssueBody body, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock, CurrentUser me)
     {
         var projectId = await db.Deliverables.Where(d => d.Id == id).Select(d => (Guid?)d.ProjectId).FirstOrDefaultAsync() ?? throw ApiException.NotFound();
         await access.Project(projectId, false);
@@ -432,9 +456,9 @@ public static class DeliverableEndpoints
             || (manager && (d.Status == DeliverableStatus.InReview || (!d.RequiresReview && d.Status is DeliverableStatus.InProgress or DeliverableStatus.NotStarted)));
         if (!allowedFrom) throw ApiException.Rule("guard", d.RequiresReview ? "guard.ready_to_issue_needs_review" : "deliverable.issue_not_ready");
         var open = await db.Tasks.Where(t => t.DeliverableId == d.Id && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled)
-            .Select(t => new { t.Id, t.Key, t.Name, t.Status }).ToListAsync();
+            .Select(t => new DeliverableTaskRef(t.Id, t.Key, t.Name, t.Status)).ToListAsync();
         if (open.Count > 0 && body.ConfirmOpenTasks != true)
-            throw ApiException.Conflict("confirm_open_tasks", "deliverable.open_tasks", new { tasks = open }, open.Count);
+            throw ApiException.Conflict("confirm_open_tasks", "deliverable.open_tasks", new TasksToConfirm<DeliverableTaskRef>(open), open.Count);
         var today = clock.Today(await store.Get(db));
         var issued = body.IssuedDate ?? today;
         Check.That(issued <= today, "issuedDate", "milestone.future_completion");
@@ -454,11 +478,11 @@ public static class DeliverableEndpoints
             TransmittalUrl = d.TransmittalUrl, Note = d.IssueNote, IssuedBy = me.Id, CreatedAt = now });
         db.Audit.Note(d, action: "Issued", reason: open.Count > 0 ? Text.Get("deliverable.issued_with_open", string.Join(", ", open.Select(o => o.Key))) : null);
         await db.SaveChangesAsync();
-        return Results.Ok(new { d.Id, d.Status, d.RowVersion, openTasks = open });
+        return TypedResults.Ok(new DeliverableIssueResult(d.Id, d.Status, d.RowVersion, open));
         });
     }
 
-    static async Task<IResult> Delete(Guid id, Access access, HubDb db, TimeProvider clock, CurrentUser me)
+    static async Task<NoContent> Delete(Guid id, Access access, HubDb db, TimeProvider clock, CurrentUser me)
     {
         var (d, _, ctx) = await Load(db, access, id);
         Access.Demand(Permissions.DeleteDeliverable(access.Actor, ctx, await Facts(db, d)));
@@ -466,11 +490,11 @@ public static class DeliverableEndpoints
         d.DeletedAt = clock.GetUtcNow();
         d.DeletedBy = me.Id;
         await db.SaveChangesAsync();
-        return Results.NoContent();
+        return TypedResults.NoContent();
     }
 
     /// FR-RCV-03: like the task restore; the save hook logs "Restored" and queues re-evaluation. Its deleted tasks stay deleted.
-    static async Task<IResult> Restore(Guid id, HttpContext http, Access access, HubDb db)
+    static async Task<Ok<DeliverableRestored>> Restore(Guid id, HttpContext http, Access access, HubDb db)
     {
         var d = await db.Deliverables.IgnoreQueryFilters().FirstOrDefaultAsync(x => x.Id == id && x.DeletedAt != null) ?? throw ApiException.NotFound();
         var (_, ctx) = await access.Project(d.ProjectId);
@@ -479,17 +503,17 @@ public static class DeliverableEndpoints
         d.DeletedAt = null;
         d.DeletedBy = null;
         await db.SaveChangesAsync();
-        return Results.Ok(new { d.Id, d.RowVersion });
+        return TypedResults.Ok(new DeliverableRestored(d.Id, d.RowVersion));
     }
 
     // ---------- Bulk (§13.6: set milestone, shift due dates, set owner; T-23 row by row) ----------
 
-    static async Task<object> Bulk(Guid id, BulkBody body, Access access, HubDb db, TeamService team)
+    static async Task<Ok<DeliverableBulkResult>> Bulk(Guid id, BulkBody body, Access access, HubDb db, TeamService team)
     {
         var (p, ctx) = await access.Project(id);
         var p2 = body.Params is { } pe ? new Patch(pe) : new Patch(default);
         var items = await db.Deliverables.Where(d => d.ProjectId == id && body.Ids.Contains(d.Id)).ToListAsync();
-        var skipped = new List<object>();
+        var skipped = new List<DeliverableBulkSkipped>();
         var updated = 0;
         if (body.Operation == "shiftDueDates") db.Audit.Reason = Check.Reason(body.Reason); // G-09 bulk date shift
         Milestone? ms = null;
@@ -497,7 +521,7 @@ public static class DeliverableEndpoints
         foreach (var d in items)
         {
             var perm = Permissions.EditDeliverable(access.Actor, ctx, await Facts(db, d));
-            if (!perm) { skipped.Add(new { d.Id, d.Key, reason = Text.Get(perm.Why!, "") }); continue; }
+            if (!perm) { skipped.Add(new DeliverableBulkSkipped(d.Id, d.Key, Text.Get(perm.Why!, ""))); continue; }
             switch (body.Operation)
             {
                 case "setMilestone": d.MilestoneId = ms?.Id; if (d.DueDate is null && ms?.Date is { } md) d.DueDate = md; break;
@@ -517,7 +541,7 @@ public static class DeliverableEndpoints
             updated++;
         }
         await db.SaveChangesAsync();
-        return new { updated, skipped };
+        return TypedResults.Ok(new DeliverableBulkResult(updated, skipped));
     }
 
     public static NotifyItem Item(Project p, Deliverable d) => new(p.Id, ItemType.Deliverable, d.Id, d.Key, $"/projects/{p.ProjectNumber}/deliverables?panel=Deliverable:{d.Id}", p.ProjectNumber);

@@ -183,6 +183,29 @@
       "string"
     ]
   },
+  "DELETE /api/v1/deliverables/{id} 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "DELETE /api/v1/deliverables/{id} 422": {
     "$": [
       "object"
@@ -3755,8 +3778,14 @@
     "$.deliverable.state.derivedPredecessorIds": [
       "array"
     ],
+    "$.deliverable.state.derivedPredecessorIds[]": [
+      "string"
+    ],
     "$.deliverable.state.derivedSuccessorIds": [
       "array"
+    ],
+    "$.deliverable.state.derivedSuccessorIds[]": [
+      "string"
     ],
     "$.deliverable.state.estimatedHoursTotal": [
       "number"
@@ -3859,6 +3888,7 @@
       "string"
     ],
     "$.deliverable.tasks[].dueDate": [
+      "null",
       "string"
     ],
     "$.deliverable.tasks[].id": [
@@ -3879,8 +3909,44 @@
     "$.derivedPredecessors": [
       "array"
     ],
+    "$.derivedPredecessors[]": [
+      "object"
+    ],
+    "$.derivedPredecessors[].dueDate": [
+      "string"
+    ],
+    "$.derivedPredecessors[].id": [
+      "string"
+    ],
+    "$.derivedPredecessors[].key": [
+      "string"
+    ],
+    "$.derivedPredecessors[].name": [
+      "string"
+    ],
+    "$.derivedPredecessors[].status": [
+      "string"
+    ],
     "$.derivedSuccessors": [
       "array"
+    ],
+    "$.derivedSuccessors[]": [
+      "object"
+    ],
+    "$.derivedSuccessors[].dueDate": [
+      "null"
+    ],
+    "$.derivedSuccessors[].id": [
+      "string"
+    ],
+    "$.derivedSuccessors[].key": [
+      "string"
+    ],
+    "$.derivedSuccessors[].name": [
+      "string"
+    ],
+    "$.derivedSuccessors[].status": [
+      "string"
     ],
     "$.description": [
       "null"
@@ -3940,6 +4006,7 @@
       "string"
     ],
     "$.explicitSuccessors[].dueDate": [
+      "null",
       "string"
     ],
     "$.explicitSuccessors[].id": [
@@ -3973,7 +4040,8 @@
       "string"
     ],
     "$.issueNote": [
-      "null"
+      "null",
+      "string"
     ],
     "$.issues": [
       "array"
@@ -23110,6 +23178,81 @@
     "$.components.schemas.DeliverableBulkBody.type": [
       "string"
     ],
+    "$.components.schemas.DeliverableBulkResult": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableBulkResult.properties": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableBulkResult.properties.skipped": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableBulkResult.properties.skipped.items": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableBulkResult.properties.skipped.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableBulkResult.properties.skipped.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableBulkResult.properties.updated": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableBulkResult.properties.updated.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableBulkResult.properties.updated.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableBulkResult.properties.updated.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableBulkResult.required": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableBulkResult.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableBulkResult.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableBulkSkipped": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableBulkSkipped.properties": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableBulkSkipped.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableBulkSkipped.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableBulkSkipped.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableBulkSkipped.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableBulkSkipped.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableBulkSkipped.properties.reason": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableBulkSkipped.properties.reason.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableBulkSkipped.required": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableBulkSkipped.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableBulkSkipped.type": [
+      "string"
+    ],
     "$.components.schemas.DeliverableCreateBody": [
       "object"
     ],
@@ -23257,6 +23400,72 @@
     "$.components.schemas.DeliverableCreateBody.type": [
       "string"
     ],
+    "$.components.schemas.DeliverableCreated": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableCreated.properties": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableCreated.properties.dueDate": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableCreated.properties.dueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableCreated.properties.dueDate.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableCreated.properties.dueDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableCreated.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableCreated.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableCreated.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableCreated.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableCreated.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableCreated.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableCreated.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableCreated.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableCreated.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableCreated.properties.warnings": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableCreated.properties.warnings.items": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableCreated.properties.warnings.items.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableCreated.properties.warnings.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableCreated.required": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableCreated.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableCreated.type": [
+      "string"
+    ],
     "$.components.schemas.DeliverableDependencyAdded": [
       "object"
     ],
@@ -23279,6 +23488,228 @@
       "string"
     ],
     "$.components.schemas.DeliverableDependencyAdded.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableDetail": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableDetail.properties": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.acceptedDate": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.acceptedDate.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.acceptedDate.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.acceptedDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.cancelledReason": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.cancelledReason.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.cancelledReason.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.deliverable": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.deliverable.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.derivedPredecessors": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.derivedPredecessors.items": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.derivedPredecessors.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.derivedPredecessors.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.derivedSuccessors": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.derivedSuccessors.items": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.derivedSuccessors.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.derivedSuccessors.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.description": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.description.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.description.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.explicitPredecessors": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.explicitPredecessors.items": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.explicitPredecessors.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.explicitPredecessors.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.explicitSuccessors": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.explicitSuccessors.items": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.explicitSuccessors.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.explicitSuccessors.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.issueNote": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.issueNote.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.issueNote.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.issues": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.issues.items": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.issues.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.issues.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.onHoldReason": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.onHoldReason.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.onHoldReason.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.permissions": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.permissions.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.previousStatus": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.previousStatus.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.previousStatus.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.project": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.project.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.relatedTasks": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.relatedTasks.items": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.relatedTasks.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.relatedTasks.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.relatedTasks.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.transmittalUrl": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.transmittalUrl.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableDetail.properties.transmittalUrl.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableDetail.required": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableDetail.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableDetail.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableEdited": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableEdited.properties": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableEdited.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableEdited.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableEdited.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableEdited.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableEdited.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableEdited.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableEdited.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableEdited.properties.warnings": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableEdited.properties.warnings.items": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableEdited.properties.warnings.items.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableEdited.properties.warnings.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableEdited.required": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableEdited.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableEdited.type": [
       "string"
     ],
     "$.components.schemas.DeliverableIn": [
@@ -23452,6 +23883,255 @@
     "$.components.schemas.DeliverableIssueBody.type": [
       "string"
     ],
+    "$.components.schemas.DeliverableIssueRead": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableIssueRead.properties": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableIssueRead.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableIssueRead.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableIssueRead.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableIssueRead.properties.issuedBy": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableIssueRead.properties.issuedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableIssueRead.properties.issuedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableIssueRead.properties.issuedDate": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableIssueRead.properties.issuedDate.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableIssueRead.properties.issuedDate.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableIssueRead.properties.issuedTo": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableIssueRead.properties.issuedTo.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableIssueRead.properties.issuedTo.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableIssueRead.properties.note": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableIssueRead.properties.note.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableIssueRead.properties.note.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableIssueRead.properties.revision": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableIssueRead.properties.revision.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableIssueRead.properties.revision.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableIssueRead.properties.transmittalUrl": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableIssueRead.properties.transmittalUrl.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableIssueRead.properties.transmittalUrl.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableIssueRead.required": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableIssueRead.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableIssueRead.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableIssueResult": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableIssueResult.properties": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableIssueResult.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableIssueResult.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableIssueResult.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableIssueResult.properties.openTasks": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableIssueResult.properties.openTasks.items": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableIssueResult.properties.openTasks.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableIssueResult.properties.openTasks.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableIssueResult.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableIssueResult.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableIssueResult.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableIssueResult.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableIssueResult.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableIssueResult.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableIssueResult.required": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableIssueResult.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableIssueResult.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableLinkRead": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.dependencyId": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.dependencyId.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.dependencyId.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.dueDate": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.dueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.dueDate.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.dueDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.issuedDate": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.issuedDate.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.issuedDate.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.issuedDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.lagDays": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.lagDays.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.lagDays.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.lagDays.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.note": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.note.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.note.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.projectDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.projectDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.projectDisciplineId.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.satisfied": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.satisfied.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.type": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableLinkRead.properties.type.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableLinkRead.required": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableLinkRead.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableLinkRead.type": [
+      "string"
+    ],
     "$.components.schemas.DeliverableMarks": [
       "object"
     ],
@@ -23498,6 +24178,198 @@
       "string"
     ],
     "$.components.schemas.DeliverableMarks.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverablePermission": [
+      "object"
+    ],
+    "$.components.schemas.DeliverablePermission.properties": [
+      "object"
+    ],
+    "$.components.schemas.DeliverablePermission.properties.ok": [
+      "object"
+    ],
+    "$.components.schemas.DeliverablePermission.properties.ok.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverablePermission.properties.reason": [
+      "object"
+    ],
+    "$.components.schemas.DeliverablePermission.properties.reason.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverablePermission.properties.reason.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverablePermission.required": [
+      "array"
+    ],
+    "$.components.schemas.DeliverablePermission.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverablePermission.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverablePermissions": [
+      "object"
+    ],
+    "$.components.schemas.DeliverablePermissions.properties": [
+      "object"
+    ],
+    "$.components.schemas.DeliverablePermissions.properties.comment": [
+      "object"
+    ],
+    "$.components.schemas.DeliverablePermissions.properties.comment.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverablePermissions.properties.createTask": [
+      "object"
+    ],
+    "$.components.schemas.DeliverablePermissions.properties.createTask.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverablePermissions.properties.delete": [
+      "object"
+    ],
+    "$.components.schemas.DeliverablePermissions.properties.delete.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverablePermissions.properties.edit": [
+      "object"
+    ],
+    "$.components.schemas.DeliverablePermissions.properties.edit.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DeliverablePermissions.properties.issue": [
+      "object"
+    ],
+    "$.components.schemas.DeliverablePermissions.properties.issue.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverablePermissions.properties.issueNeedsConfirm": [
+      "object"
+    ],
+    "$.components.schemas.DeliverablePermissions.properties.issueNeedsConfirm.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverablePermissions.properties.linkDeliverables": [
+      "object"
+    ],
+    "$.components.schemas.DeliverablePermissions.properties.linkDeliverables.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverablePermissions.properties.needsReason": [
+      "object"
+    ],
+    "$.components.schemas.DeliverablePermissions.properties.needsReason.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverablePermissions.properties.readyToIssueGuard": [
+      "object"
+    ],
+    "$.components.schemas.DeliverablePermissions.properties.readyToIssueGuard.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverablePermissions.properties.readyToIssueGuard.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverablePermissions.properties.transitions": [
+      "object"
+    ],
+    "$.components.schemas.DeliverablePermissions.properties.transitions.items": [
+      "object"
+    ],
+    "$.components.schemas.DeliverablePermissions.properties.transitions.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DeliverablePermissions.properties.transitions.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverablePermissions.required": [
+      "array"
+    ],
+    "$.components.schemas.DeliverablePermissions.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverablePermissions.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableProject": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableProject.properties": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableProject.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableProject.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableProject.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableProject.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableProject.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableProject.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableProject.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableProject.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableProject.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableProject.required": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableProject.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableProject.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRestored": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRestored.properties": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRestored.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRestored.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRestored.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRestored.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableRestored.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRestored.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRestored.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRestored.required": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableRestored.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableRestored.type": [
       "string"
     ],
     "$.components.schemas.DeliverableRow": [
@@ -24304,6 +25176,48 @@
     "$.components.schemas.DeliverableTaskRead.type": [
       "string"
     ],
+    "$.components.schemas.DeliverableTaskRef": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableTaskRef.properties": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableTaskRef.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableTaskRef.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableTaskRef.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableTaskRef.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableTaskRef.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableTaskRef.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableTaskRef.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableTaskRef.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableTaskRef.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableTaskRef.required": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableTaskRef.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableTaskRef.type": [
+      "string"
+    ],
     "$.components.schemas.DeliverableTransitionBody": [
       "object"
     ],
@@ -24356,6 +25270,81 @@
       "string"
     ],
     "$.components.schemas.DeliverableTransitionBody.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableTransitionOption": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableTransitionOption.properties": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableTransitionOption.properties.allowed": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableTransitionOption.properties.allowed.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableTransitionOption.properties.needsReason": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableTransitionOption.properties.needsReason.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableTransitionOption.properties.to": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableTransitionOption.properties.to.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableTransitionOption.required": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableTransitionOption.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableTransitionOption.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableTransitioned": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableTransitioned.properties": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableTransitioned.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableTransitioned.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableTransitioned.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableTransitioned.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableTransitioned.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableTransitioned.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableTransitioned.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableTransitioned.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableTransitioned.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableTransitioned.required": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableTransitioned.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableTransitioned.type": [
       "string"
     ],
     "$.components.schemas.DeliverableTypeRow": [
@@ -24914,6 +25903,60 @@
       "string"
     ],
     "$.components.schemas.DependencyTaskRef.type": [
+      "string"
+    ],
+    "$.components.schemas.DerivedDeliverable": [
+      "object"
+    ],
+    "$.components.schemas.DerivedDeliverable.properties": [
+      "object"
+    ],
+    "$.components.schemas.DerivedDeliverable.properties.dueDate": [
+      "object"
+    ],
+    "$.components.schemas.DerivedDeliverable.properties.dueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.DerivedDeliverable.properties.dueDate.type": [
+      "array"
+    ],
+    "$.components.schemas.DerivedDeliverable.properties.dueDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DerivedDeliverable.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.DerivedDeliverable.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.DerivedDeliverable.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.DerivedDeliverable.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.DerivedDeliverable.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.DerivedDeliverable.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.DerivedDeliverable.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.DerivedDeliverable.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.DerivedDeliverable.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.DerivedDeliverable.required": [
+      "array"
+    ],
+    "$.components.schemas.DerivedDeliverable.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DerivedDeliverable.type": [
       "string"
     ],
     "$.components.schemas.DesignBasisAssignBody": [
@@ -60517,10 +61560,10 @@
     "$.paths./api/v1/deliverables/{id}.delete.responses": [
       "object"
     ],
-    "$.paths./api/v1/deliverables/{id}.delete.responses.200": [
+    "$.paths./api/v1/deliverables/{id}.delete.responses.204": [
       "object"
     ],
-    "$.paths./api/v1/deliverables/{id}.delete.responses.200.description": [
+    "$.paths./api/v1/deliverables/{id}.delete.responses.204.description": [
       "string"
     ],
     "$.paths./api/v1/deliverables/{id}.delete.tags": [
@@ -60567,6 +61610,9 @@
     ],
     "$.paths./api/v1/deliverables/{id}.get.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/deliverables/{id}.get.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/deliverables/{id}.get.responses.200.description": [
       "string"
@@ -60627,6 +61673,18 @@
     ],
     "$.paths./api/v1/deliverables/{id}.patch.responses.200": [
       "object"
+    ],
+    "$.paths./api/v1/deliverables/{id}.patch.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/deliverables/{id}.patch.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/deliverables/{id}.patch.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/deliverables/{id}.patch.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/deliverables/{id}.patch.responses.200.description": [
       "string"
@@ -60823,6 +61881,18 @@
     "$.paths./api/v1/deliverables/{id}/issue.post.responses.200": [
       "object"
     ],
+    "$.paths./api/v1/deliverables/{id}/issue.post.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/deliverables/{id}/issue.post.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/deliverables/{id}/issue.post.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/deliverables/{id}/issue.post.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/deliverables/{id}/issue.post.responses.200.description": [
       "string"
     ],
@@ -60943,6 +62013,18 @@
     "$.paths./api/v1/deliverables/{id}/restore.post.responses.200": [
       "object"
     ],
+    "$.paths./api/v1/deliverables/{id}/restore.post.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/deliverables/{id}/restore.post.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/deliverables/{id}/restore.post.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/deliverables/{id}/restore.post.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/deliverables/{id}/restore.post.responses.200.description": [
       "string"
     ],
@@ -61005,6 +62087,18 @@
     ],
     "$.paths./api/v1/deliverables/{id}/transition.post.responses.200": [
       "object"
+    ],
+    "$.paths./api/v1/deliverables/{id}/transition.post.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/deliverables/{id}/transition.post.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/deliverables/{id}/transition.post.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/deliverables/{id}/transition.post.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/deliverables/{id}/transition.post.responses.200.description": [
       "string"
@@ -67621,6 +68715,12 @@
     "$.paths./api/v1/projects/{id}/deliverables.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/projects/{id}/deliverables.get.responses.200.content.application/json.schema.items": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/deliverables.get.responses.200.content.application/json.schema.items.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/projects/{id}/deliverables.get.responses.200.content.application/json.schema.type": [
       "string"
     ],
@@ -67681,10 +68781,22 @@
     "$.paths./api/v1/projects/{id}/deliverables.post.responses": [
       "object"
     ],
-    "$.paths./api/v1/projects/{id}/deliverables.post.responses.200": [
+    "$.paths./api/v1/projects/{id}/deliverables.post.responses.201": [
       "object"
     ],
-    "$.paths./api/v1/projects/{id}/deliverables.post.responses.200.description": [
+    "$.paths./api/v1/projects/{id}/deliverables.post.responses.201.content": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/deliverables.post.responses.201.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/deliverables.post.responses.201.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/deliverables.post.responses.201.content.application/json.schema.$ref": [
+      "string"
+    ],
+    "$.paths./api/v1/projects/{id}/deliverables.post.responses.201.description": [
       "string"
     ],
     "$.paths./api/v1/projects/{id}/deliverables.post.tags": [
@@ -67755,6 +68867,9 @@
     ],
     "$.paths./api/v1/projects/{id}/deliverables/bulk.post.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/projects/{id}/deliverables/bulk.post.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/projects/{id}/deliverables/bulk.post.responses.200.description": [
       "string"
@@ -90010,6 +91125,7 @@
       "string"
     ],
     "$[].tasks[].dueDate": [
+      "null",
       "string"
     ],
     "$[].tasks[].id": [
@@ -105778,6 +106894,9 @@
     ],
     "$.warnings": [
       "array"
+    ],
+    "$.warnings[]": [
+      "string"
     ]
   },
   "PATCH /api/v1/deliverables/{id} 400": {
@@ -112573,6 +113692,18 @@
     ],
     "$.skipped": [
       "array"
+    ],
+    "$.skipped[]": [
+      "object"
+    ],
+    "$.skipped[].id": [
+      "string"
+    ],
+    "$.skipped[].key": [
+      "string"
+    ],
+    "$.skipped[].reason": [
+      "string"
     ],
     "$.updated": [
       "number"

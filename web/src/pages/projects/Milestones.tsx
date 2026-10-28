@@ -432,7 +432,7 @@ function CancelDialog({ p, m, onClose, onDone }: { p: ProjectDetail; m: Mileston
   const others = useQuery({ queryKey: ['p', p.id, 'milestones', false, ''], queryFn: () => get<MilestoneRow[]>(`projects/${p.id}/milestones`) })
   if (retarget && retarget.length > 0) return (
     <ConfirmDialog open onOpenChange={(o) => { if (!o) onDone() }} title={t('milestone.retargetTitle', { n: retarget.length })} confirmLabel={t('milestone.retarget')} busy={!target}
-      onConfirm={async () => { await post(`projects/${p.id}/deliverables/bulk`, { ids: retarget.map((x) => x.id), operation: 'setMilestone', params: { milestoneId: target } }); onDone() }}>
+      onConfirm={async () => { await typedRequest('post', '/api/v1/projects/{id}/deliverables/bulk', { params: { id: p.id }, body: { ids: retarget.map((x) => x.id), operation: 'setMilestone', params: { milestoneId: target }, reason: null } }); onDone() }}>
       <ul className={itemList}>{retarget.map((x) => <li key={x.id}><span className="key">{x.key}</span> {x.name}</li>)}</ul>
       <Field label={t('milestone.retargetTo')} htmlFor="mr-target">
         <select id="mr-target" className={selectCls} value={target} onChange={(e) => setTarget(e.target.value)}>

@@ -301,7 +301,7 @@ public static class DashboardEndpoints
     }
 
     // The deliverable rows are already DeliverableRow records; their helper still lists them as objects.
-    static async Task<List<DeliverableEndpoints.DeliverableRow>> DeliverableRows(HubDb db, IQueryable<Deliverable> q) => [.. (await DeliverableEndpoints.Rows(db, q)).Cast<DeliverableEndpoints.DeliverableRow>()];
+    static Task<List<DeliverableEndpoints.DeliverableRow>> DeliverableRows(HubDb db, IQueryable<Deliverable> q) => DeliverableEndpoints.Rows(db, q);
 
     sealed record MilestoneWithState(Milestone Milestone, MilestoneState? State);
     sealed record OpenTaskFacts(Guid Id, Guid ProjectDisciplineId, DateOnly? DueDate, bool Overdue, bool Blocked);

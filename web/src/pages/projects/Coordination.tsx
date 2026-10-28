@@ -49,7 +49,7 @@ function byBlocker(rows: TaskRow[]) {
   return [...groups.values()].sort((a, b) => Math.max(...b.rows.map((r) => r.state?.daysBlocked ?? 0)) - Math.max(...a.rows.map((r) => r.state?.daysBlocked ?? 0)))
 }
 
-function byDiscipline<T extends { disciplineName?: string; disciplineOrder?: number }>(rows: T[]) {
+function byDiscipline<T extends { disciplineName?: string | null; disciplineOrder?: number }>(rows: T[]) {
   const m = new Map<string, T[]>()
   for (const r of [...rows].sort((a, b) => (a.disciplineOrder ?? 0) - (b.disciplineOrder ?? 0))) m.set(r.disciplineName ?? '', [...(m.get(r.disciplineName ?? '') ?? []), r])
   return [...m.entries()]

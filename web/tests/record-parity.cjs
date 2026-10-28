@@ -7,8 +7,9 @@
 //                           the Active, Complete and empty-role projects, the Reviews and Changes registers, the workspace
 //                           Team page scoped to the Active project, the Portfolio (plain, and grouped by client, which
 //                           needs flag.status_rollups), Vacation (its coverage concerns), the Project List (my projects, all grouped by status, all ungrouped),
-//                           the Holidays admin list and four Administration reference lists (the column
-//                           variants of the one table), all compared as the administrator only: a route under /admin/ runs for
+//                           the Holidays admin list, four Administration reference lists (the column
+//                           variants of the one table) and the Users list (with an inactive user, and its two filter check
+//                           boxes ticked and cleared), all compared as the administrator only: a route under /admin/ runs for
 //                           Jordan Lee and no other persona), and the Allocations list (plain, with its detail panel open, and
 //                           empty). {project}, {complete}, {empty} and
 //                           {restricted} are synthetic project numbers, {projectId} the Active project's id,
@@ -42,6 +43,7 @@ const SCREENS = (process.env.TUESDAY_RECORD_SCREENS ?? [
   '/admin/holidays',
   '/admin/reference/disciplines', '/admin/reference/clients', '/admin/reference/offices', '/admin/reference/deliverableTypes',
   '/projects/{project}/allocations', '/projects/{project}/allocations?allocation={allocation}', '/projects/{empty}/allocations',
+  '/admin/users',
 ].join(' ')).split(/\s+/).filter(Boolean)
 const FLAGS = (process.env.TUESDAY_RECORD_FLAGS ?? '').split(/[\s,]+/).filter(Boolean)
 // Project Manager, Discipline Lead, Team Member, Read Only, a user outside the Restricted project, and the administrator
@@ -51,9 +53,10 @@ const ADDITIONS = 'flag.record_engine_additions' // §47.5 FR-REC-12, kept on th
 const WIDTHS = [1600, 375]
 const launch = () => chromium.launch({ headless: true, ...(process.env.CHROME_EXECUTABLE_PATH ? { executablePath: process.env.CHROME_EXECUTABLE_PATH } : {}) })
 // Both builds read the same API-created records. Only the local origin is volatile;
-// IDs and timestamps are evidence, not noise to erase from a parity report. The one exception is React's generated id
-// (`_r_20_`): its counter shifts with render timing, about one page load in fifty, in a build compared with itself.
-const clean = (value) => JSON.parse(JSON.stringify(value, (_, v) => typeof v === 'string' ? v.replace(/^https?:\/\/[^/]+/, '').replace(/^_r_[0-9a-v]+_$/, '_r_') : v))
+// IDs and timestamps are evidence, not noise to erase from a parity report. The exceptions are React's generated id
+// (`_r_20_`): its counter shifts with render timing, about one page load in fifty, in a build compared with itself; and a
+// minute-precision timestamp (the Users list's Last sign-in, as each build's run signs the persona in again): only its format is compared.
+const clean = (value) => JSON.parse(JSON.stringify(value, (_, v) => typeof v === 'string' ? v.replace(/^https?:\/\/[^/]+/, '').replace(/^_r_[0-9a-v]+_$/, '_r_').replace(/\b\d{4}-\d{2}-\d{2} \d{2}:\d{2}\b/g, '<date time>') : v))
 const slug = route => route.replace(/\{(\w+)\}/g, '$1').replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '')
 
 function diff(a, b, at = '$', out = []) {
@@ -193,6 +196,11 @@ async function fixtures() {
   for (const [officeId, date, name] of [[null, `${year}-07-01`, 'Synthetic parity holiday'], [reference.offices[0].id, `${year}-12-26`, 'Synthetic parity office holiday']]) {
     await api('admin/holidays', 'jordan', { method: 'POST', body: JSON.stringify({ officeId, date, name }) }).catch(error => { if (!/HTTP 409/.test(error.message)) throw error })
   }
+  // One inactive user (Omar Haddad, no persona), for the Users list's muted row and "(inactive)" name; Development sign-in cannot
+  // create users, and a repeat run finds him already inactive.
+  const omar = (await api('admin/users?q=omar%40hub.test&inactive=true', 'jordan')).find(x => x.email === 'omar@hub.test')
+  assert.ok(omar, 'Omar Haddad fixture user missing')
+  if (omar.isActive) await api(`admin/users/${omar.id}`, 'jordan', { method: 'PATCH', headers: { 'If-Match': `"${omar.rowVersion}"` }, body: JSON.stringify({ isActive: false, rowVersion: omar.rowVersion }) })
   await setting('restricted_projects_enabled', true)
   const restricted = await createProject(reference, 'R', 'Synthetic restricted parity project', false)
   const restrictedDraft = await api(`projects/${restricted.id}`, 'priya')
@@ -382,6 +390,17 @@ async function browserSnapshot(origin, who, width, ids, { removeHeader = false, 
       }
       return { items, downloads }
     }
+    // The Users list's check boxes (Show inactive, No supervisor): the rows with each ticked, then cleared again.
+    const checkEvidence = async () => {
+      const boxes = page.locator('main [role=checkbox]'), out = []
+      for (let i = 0; i < await boxes.count(); i++) {
+        const box = boxes.nth(i), name = (await box.evaluate(e => e.closest('label')?.textContent ?? '')).trim()
+        await box.click(); await settle()
+        out.push({ name, checked: await box.getAttribute('aria-checked'), rows: await rows() })
+        await box.click(); await settle()
+      }
+      return out
+    }
     // The screen's create action (Raise risk, Add open role): the form it opens, such as the required correction reason
     // on a Complete project, then Esc without saving.
     const createEvidence = async () => {
@@ -444,7 +463,8 @@ async function browserSnapshot(origin, who, width, ids, { removeHeader = false, 
       const state = { url: here(), tree: await tree(), controls: await controls(), fields: await fields(), requests: [...new Set(gets.filter(x => !x.startsWith('meta')))].sort(), axe: await scan() }
       if (shots) await page.screenshot({ path: path.join(path.dirname(output), `${origin === base ? 'base' : 'candidate'}-${who}-${width}-${slug(route)}.png`), fullPage: true })
       if (await dialogOpen()) state.panel = await panelEvidence()
-      else Object.assign(state, { filters: await filterEvidence(url), sort: await sortEvidence(url), columns: await columnEvidence(), views: await viewEvidence(url), exports: await exportEvidence(), create: await createEvidence(), keyboard: await keyboardEvidence(url) })
+      else Object.assign(state, { filters: await filterEvidence(url), sort: await sortEvidence(url), columns: await columnEvidence(), views: await viewEvidence(url), exports: await exportEvidence(), create: await createEvidence(),
+        ...(route === '/admin/users' && { checks: await checkEvidence() }), keyboard: await keyboardEvidence(url) })
       if (state.axe.length) snapshot.problems.push(`${route}: serious/critical accessibility issues ${state.axe.join(', ')}`)
       if (who === 'jill' && route.includes('{project}')) {
         await go(expand(route, { ...ids, project: ids.restricted }))

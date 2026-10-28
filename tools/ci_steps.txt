@@ -98,6 +98,7 @@ web: node web/scripts/run-smoke-live.mjs
 # The Holidays admin list is compared as the administrator only (an /admin/ route runs for no other persona).
 # The Project List (my projects, all projects grouped by status, all projects ungrouped) is compared too.
 # Vacation is compared too (its coverage concerns: approved leave, a task due on it and an undated task).
+# The Users admin list is compared the same way, with an inactive user and its Show inactive and No supervisor check boxes.
 web: if [ "${GITHUB_EVENT_NAME:-}" = pull_request ]; then cd web && TUESDAY_RECORD_BASE_REF=HEAD^1 npm run test:record-parity; fi
 nightly: TUESDAY_UI_BASE_URL=http://127.0.0.1:5173 TUESDAY_API_BASE_URL=http://127.0.0.1:5080 node web/tests/smoke-live.cjs
 nightly: TUESDAY_SYNTHETIC_API=1 TUESDAY_LIVE_UI_URL=http://127.0.0.1:5173 TUESDAY_LIVE_API_URL=http://127.0.0.1:5080 node web/tests/live-real.cjs

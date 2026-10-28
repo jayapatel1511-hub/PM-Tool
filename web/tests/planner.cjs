@@ -1,5 +1,6 @@
 const { chromium } = require('playwright')
 const { clientConfig } = require('./config.fixture.cjs')
+const { viewList } = require('./views.fixture.cjs')
 const { myWork, myWorkPerson } = require('./my-work.fixture.cjs')
 const assert = require('node:assert/strict')
 const { spawn } = require('child_process')
@@ -54,7 +55,7 @@ const pause = (ms = 100) => new Promise((r) => setTimeout(r, ms))
       else if (p === 'me/notifications/pulse') data = { stamp: '0' }
       else if (p === 'me/notifications/unread-count') data = { notifications: notifications.length, following: 0 }
       else if (p.startsWith('me/notifications')) data = notifications
-      else if (p === 'views') data = { views: [], canShare: false }
+      else if (p === 'views') data = viewList()
       else if (p === 'reference') data = { disciplines: [{ id: id(22), name: 'Global Civil' }], offices: [] }
       else if (p.startsWith('projects/') && p.endsWith('/team')) data = { disciplines: [{ id: disciplineId, name: 'Civil', isActive: true }] }
       else if (p === 'projects' || p.startsWith('projects?')) data = { items: [{ id: projectId, projectNumber: 'P-100', name: 'Harbour survey', status: 'Active' }] }

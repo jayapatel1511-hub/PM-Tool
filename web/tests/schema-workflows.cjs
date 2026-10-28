@@ -2,6 +2,7 @@
 // assertions below are against rendered workflows and captured request bodies.
 const { chromium } = require('playwright')
 const { clientConfig } = require('./config.fixture.cjs')
+const { viewList } = require('./views.fixture.cjs')
 const { spawn } = require('node:child_process')
 const fs = require('node:fs')
 const path = require('node:path')
@@ -63,7 +64,7 @@ function responseFor(method, p, body, query) {
   if (p === 'me/work') return myWork
   if (p === 'tasks') return { items: [], page: 1, pageSize: 200, totalCount: 0 }
   if (p === 'planning/grid') return { weeks: ['2026-09-28', '2026-10-05', '2026-10-12', '2026-10-19', '2026-10-26', '2026-11-02'], currentWeek: '2026-09-28', people: [{ id: id(1), displayName: 'Sam Supervisor', canCreateSelfEntry: false, cells: [{ week: '2026-09-28', capacity: 40, timeAway: 0, additionalAvailability: 0, confirmed: 0, expected: 0, possible: 0, remaining: 40, taskEstimates: 0, unestimatedTasks: 0, staleEntries: 0, overPlanned: false, underPlanned: false }], entries: [] }] }
-  if (p === 'views') return { views: [], canShare: false }
+  if (p === 'views') return viewList()
   if (p === 'projects') return { items: [project], page: 1, pageSize: 200, totalCount: 1 }
   return undefined
 }

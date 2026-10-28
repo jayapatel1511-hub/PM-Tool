@@ -4,6 +4,7 @@ const { clientConfig } = require('./config.fixture.cjs')
 const assert = require('node:assert/strict')
 const { coordinationOptions, coordinationTask } = require('./reviews.fixture.cjs')
 const { myWork, myWorkPerson, myStaffPerson, myStaffList } = require('./my-work.fixture.cjs')
+const { savedView, viewList, viewSaved } = require('./views.fixture.cjs')
 const { startPreview, project: baseProject, task: baseTask, taskDetail, deliverableDetail, panelIds, mockPlatformApi } = require('./platform-fixtures.cjs')
 
 const port = Number(process.env.WORKFLOW_TEST_PORT || '19508')
@@ -14,8 +15,9 @@ const personId = id(2), disciplineId = id(11), taskId = id(1), allocationId = id
 const project = { ...baseProject, permissions: { ...baseProject.permissions, proposeAllocation: { ok: true }, createDeliverableIn:[], needsReason: false }, disciplines: [{ id: disciplineId, name: 'Civil', isActive: true }] }
 const task = { ...baseTask, id: taskId, projectId, projectDisciplineId: disciplineId, assigneeId: personId, assigneeName: 'Alex Chen', ownerId: personId, ownerName: 'Alex Chen', status: 'Not Started', rowVersion: 1, dueDate: '2026-10-28' }
 const allocation = { id: allocationId, personId, personName: 'Alex Chen', purpose: 'Production', fromDate: '2026-10-19', throughDate: '2026-10-23', plannedHours: 40, status: 'Proposed', rowVersion: 1, personState: 'Eligible' }
-const sharedView={id:id(43),name:'Shared allocation view',scope:'Project',isDefault:false,rowVersion:1,params:{status:'Proposed',purpose:'Production'},dropped:[],canEdit:false}
-const views = { allocations:[sharedView], staff: [{ id: viewId, name: 'Staff default', scope: 'Personal', isDefault: true, rowVersion: 1, params: { scope: 'all', inactive: '1' }, dropped: [], canEdit: true }], portfolio: [{ id: id(42), name: 'Portfolio personal', scope: 'Personal', isDefault: false, rowVersion: 1, params: { status: 'Active' }, dropped: [], canEdit: true }] }
+const sharedView=savedView({id:id(43),name:'Shared allocation view',scope:'Project',params:{status:'Proposed',purpose:'Production'},canEdit:false})
+const staffView = savedView({ id: viewId, name: 'Staff default', isDefault: true, params: { scope: 'all', inactive: '1' } })
+const views = { allocations:[sharedView], staff: [staffView], portfolio: [savedView({ id: id(42), name: 'Portfolio personal', params: { status: 'Active' } })] }
 
 ;(async () => {
   const { base, child } = await startPreview(port)
@@ -29,7 +31,7 @@ const views = { allocations:[sharedView], staff: [{ id: viewId, name: 'Staff def
   page.on('pageerror', e => {errors.push(e.message);console.error(e.message)})
   await page.route('**/api/**', async route => {
     const req = route.request(); const url = new URL(req.url()); const p = url.pathname.replace('/api/v1/', ''); const method = req.method(); let status = 200; let data = {}
-    if (method !== 'GET') writes.push({ method, path: p, body: req.postDataJSON?.() })
+    if (method !== 'GET') writes.push({ method, path: p, body: req.postDataJSON?.(), ifMatch: req.headers()['if-match'], source: req.headers()['x-hub-source'] })
     if (p === 'config') data = clientConfig()
     else if (p === 'me') data = { id: personId, displayName: 'Alex Chen', email: 'alex@hub.test', roles: [], systemRoles: ['ProjectManager'], capabilities: { createProject: false, createTask: true, portfolio: true, workload, staff: true, allStaff: true, admin: true, templates: true, readOnly: false, directReports: 1 }, settings: { today: '2026-10-18', dateFormat: 'yyyy-MM-dd', orgTimeZone: 'America/Halifax', idleTimeoutHours: 8, restrictedProjectsEnabled: true }, preferences: { denseRows: true }, flags: { small_ux: true, allocation_preview: true, org_structure: true } }
     else if (p === 'me/notifications/unread-count') data = { notifications: 0, following: 0 }
@@ -41,8 +43,10 @@ const views = { allocations:[sharedView], staff: [{ id: viewId, name: 'Staff def
     else if (p === 'users') {userQueries.push(url.searchParams.get('projectId'));data=[{id:personId,displayName:'Alex Chen',isActive:true,onProject:url.searchParams.has('projectId')}]}
     else if (p === `tasks/${taskId}`) data={...taskDetail,task}
     else if (p === `deliverables/${panelIds.deliverable}`) data={...deliverableDetail,permissions:{...deliverableDetail.permissions,edit:{ok:true}}}
-    else if (p === 'views' && method==='POST') data={id:id(44)}
-    else if (p === 'views') { const listType = url.searchParams.get('listType'); data = { views: views[listType] ?? [], canShare: false } }
+    else if (p === 'views' && method==='POST') { status = 201; data = viewSaved(id(44)) }
+    else if (p === 'views') { const listType = url.searchParams.get('listType'); data = viewList(views[listType] ?? []) }
+    else if (p.startsWith('views/') && method==='PATCH') data = viewSaved(p.slice('views/'.length), 2)
+    else if (p.startsWith('views/') && method==='DELETE') { status = 204; data = undefined }
     else if (p === `projects/${projectId}` || p === `projects/${project.projectNumber}`) data = project
     else if (p === `projects/${projectId}/allocations` || p === `projects/${project.projectNumber}/allocations`) data = { items: [allocation], page: 1, pageSize: 50, totalCount: 1 }
     else if (p === `projects/${projectId}/allocations/${allocationId}`) data = { ...allocation, personEligible: true, links: [{ workType: 'Task', workId: taskId, workDate: '2026-10-20' }], days: [], overCapacityWarningRecorded: false, canConfirm: true, canManage: true }
@@ -82,6 +86,39 @@ const views = { allocations:[sharedView], staff: [{ id: viewId, name: 'Staff def
     const copy=writes.find(w=>w.path==='views'&&w.method==='POST')
     assert.equal(copy.body.scope,'Personal');assert.deepEqual(copy.body.params,sharedView.params);assert.equal(copy.body.isDefault,false)
     assert.equal(JSON.stringify(sharedView),sharedBefore);assert.equal(writes.filter(w=>w.path===`views/${sharedView.id}`).length,0)
+    assert.equal(copy.source,'UI');assert.equal(copy.ifMatch,undefined);assert.equal(copy.body.projectId,projectId);assert.equal(copy.body.listType,'allocations') // the typed save carries the project and the source
+
+    // A personal view is updated, made the default and deleted: the version it was read at goes in If-Match, every write names its source, and each is the one request.
+    const personal=views.portfolio[0]
+    await page.goto(`${base}/portfolio?view=${personal.id}&status=Active`)
+    const viewWrite=async(item,method)=>{
+      await page.getByRole('button',{name:personal.name,exact:true}).click()
+      const done=page.waitForResponse(r=>r.request().method()===method&&r.url().endsWith(`/api/v1/views/${personal.id}`))
+      await page.getByRole('menuitem',{name:item}).click();await done
+      return writes.filter(w=>w.path===`views/${personal.id}`&&w.method===method).at(-1)
+    }
+    const update=await viewWrite(`Update "${personal.name}" with current filters`,'PATCH')
+    assert.equal(update.body.params.status,'Active');assert.equal(update.ifMatch,'"1"');assert.equal(update.source,'UI')
+    const makeDefault=await viewWrite('Open this list in this view','PATCH')
+    assert.deepEqual(makeDefault.body,{isDefault:true});assert.equal(makeDefault.ifMatch,'"1"');assert.equal(makeDefault.source,'UI')
+    const removed=await viewWrite('Delete this view','DELETE')
+    assert.equal(removed.ifMatch,undefined);assert.equal(removed.source,'UI');await page.waitForURL(url=>!url.searchParams.has('view'))
+
+    // Manual board order: a card moved with the keyboard saves its lane's new order through the typed PUT (source header, no If-Match), and the board asks for the order it saved.
+    const cards=['a','b','c'].map((k,i)=>({...baseTask,id:id(60+i),key:`T-00${i+1}`,name:`Card ${k}`,lane:'To Do',disciplineName:'Civil',disciplineCode:'CIV',disciplineColour:'#2563eb',disciplineOrder:1,projectNumber:project.projectNumber,projectName:project.name,predecessorCount:0,successorCount:0,commentCount:0,assigneeActive:true,createdAt:'2026-10-01T00:00:00Z',lastActivityAt:'2026-10-01T00:00:00Z'}))
+    const boardTasks=route=>route.fulfill({json:{items:cards,page:1,pageSize:200,totalCount:cards.length}})
+    const puts=[]
+    const boardOrder=route=>{const r=route.request();puts.push({path:new URL(r.url()).pathname,body:r.postDataJSON(),ifMatch:r.headers()['if-match'],source:r.headers()['x-hub-source']});return route.fulfill({status:204})}
+    await page.route(/\/api\/v1\/projects\/[^/]+\/tasks\?/,boardTasks);await page.route(/\/api\/v1\/projects\/[^/]+\/board-order$/,boardOrder)
+    await page.goto(`${base}/projects/${project.projectNumber}/board?sort=board`)
+    await page.getByRole('button',{name:/^Move.*Card a/}).waitFor()
+    const saved=page.waitForResponse(r=>r.request().method()==='PUT'&&r.url().endsWith(`/api/v1/projects/${projectId}/board-order`))
+    await page.getByRole('button',{name:/^Move.*Card a/}).focus()
+    for(const key of ['Space','ArrowDown','Space']){await page.keyboard.press(key);await page.waitForTimeout(250)} // the keyboard sensor takes each step on its own frame
+    await saved
+    assert.equal(puts.length,1);const order=puts[0];assert.equal(order.path,`/api/v1/projects/${projectId}/board-order`)
+    assert.deepEqual(order.body,{taskIds:[cards[1].id,cards[0].id,cards[2].id]});assert.equal(order.source,'UI');assert.equal(order.ifMatch,undefined)
+    await page.unroute(/\/api\/v1\/projects\/[^/]+\/tasks\?/,boardTasks);await page.unroute(/\/api\/v1\/projects\/[^/]+\/board-order$/,boardOrder)
 
     await page.goto(`${base}/portfolio`); await page.getByRole('heading', { name: 'Portfolio', exact: true }).waitFor()
     const plannerLink = page.getByRole('link', { name: /capacity.*discipline|planner/i }).first(); assert.equal(await plannerLink.count(), 1); assert.match(await plannerLink.getAttribute('href'), /^\/planner\?/)
@@ -107,6 +144,6 @@ const views = { allocations:[sharedView], staff: [{ id: viewId, name: 'Staff def
     const axeViolations=await page.evaluate(async()=>(await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}})).violations.map(v=>({id:v.id,targets:v.nodes.map(n=>n.target)})))
     assert.deepEqual(axeViolations,[])
     assert.deepEqual(errors, []); assert.deepEqual(unknownGets, []);assert.deepEqual(fallback.unknownGets,[])
-    console.log(JSON.stringify({ scope: 'Chromium mocked workflows',staffDefaultAndRestore:true,sharedViewCopy:true,taskAndDeliverableProjectPickers:true,portfolioPickerUnscoped:true,allocationTwoOfFive:true,portfolioPlannerAccess:true,axeViolations, posts: writes.length, errors, unknownGets }))
+    console.log(JSON.stringify({ scope: 'Chromium mocked workflows',staffDefaultAndRestore:true,sharedViewCopy:true,personalViewWrites:true,boardOrderWrite:true,taskAndDeliverableProjectPickers:true,portfolioPickerUnscoped:true,allocationTwoOfFive:true,portfolioPlannerAccess:true,axeViolations, posts: writes.length, errors, unknownGets }))
   } finally { await browser.close(); child.kill() }
 })().catch(e => { console.error(e); process.exitCode = 1 })

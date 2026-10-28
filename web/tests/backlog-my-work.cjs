@@ -4,6 +4,7 @@
 // mine + backlog, is a saved view like the others, and Today no longer lists a blocked Backlog task.
 const assert = require('node:assert/strict')
 const { startPreview, newMockPage, me, work, task, project } = require('./platform-fixtures.cjs')
+const { savedView, viewList, viewSaved } = require('./views.fixture.cjs')
 
 const port = Number(process.env.BACKLOG_TEST_PORT ?? 7260)
 const projects = ['P-ALPHA', 'P-BRAVO', 'P-CHARLIE'].map((projectNumber, i) => ({ id: `00000000-0000-0000-0000-0000000001${i}0`, projectNumber, name: `Synthetic ${projectNumber}` }))
@@ -32,8 +33,8 @@ async function run(base, on) {
   })
   await page.route(/\/api\/v1\/views(\?|$)/, async route => {
     const request = route.request()
-    if (request.method() === 'POST') { saved.push(request.postDataJSON()); return route.fulfill({ status: 201, json: { id: 'view-nodate' } }) }
-    route.fulfill({ json: { canShare: false, views: saved.length ? [{ id: 'view-nodate', name: saved[0].name, scope: 'Personal', isDefault: false, rowVersion: 1, params: saved[0].params, dropped: [], canEdit: true }] : [] } })
+    if (request.method() === 'POST') { saved.push(request.postDataJSON()); return route.fulfill({ status: 201, json: viewSaved('view-nodate') }) }
+    route.fulfill({ json: viewList(saved.length ? [savedView({ id: 'view-nodate', name: saved[0].name, params: saved[0].params })] : []) })
   })
   const views = page.getByRole('button', { name: /^My Work views/ })
   const menu = async () => { await views.click(); const items = await page.getByRole('menuitemradio').allInnerTexts(); await page.keyboard.press('Escape'); return items.map(x => x.trim()) }

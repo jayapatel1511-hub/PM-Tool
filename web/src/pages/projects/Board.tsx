@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useProjectRefresh } from '@/hooks/data'
 import { ViewMenu } from '@/components/hub/views'
-import { ApiError, get, patch, put, qs } from '@/lib/api'
+import { ApiError, get, patch, qs, typedRequest } from '@/lib/api'
 import { useFlag } from '@/lib/auth'
 import { addDays, shortDate, today } from '@/lib/format'
 import { plural, t, tv , runtimeText } from '@/lib/i18n'
@@ -99,7 +99,7 @@ export function BoardTab() {
   /** FR-004: with Manual order chosen, a card dropped within its lane is saved at its new place for the whole team. */
   const onReorder = async (ids: string[], snapBack: () => void) => {
     if (sort !== 'board') { snapBack(); toast.info(t('board.manualHint')); return }
-    try { await put(`projects/${p.id}/board-order`, { taskIds: ids }); q.refetch() } catch (e) { snapBack(); toast.error(errorText(e)) }
+    try { await typedRequest('put', '/api/v1/projects/{id}/board-order', { params: { id: p.id }, body: { taskIds: ids } }); q.refetch() } catch (e) { snapBack(); toast.error(errorText(e)) }
   }
 
   return (

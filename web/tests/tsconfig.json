@@ -36,6 +36,7 @@
     "config.fixture.cjs",
     "handoffs.fixture.cjs",
     "reviews.fixture.cjs",
-    "my-work.fixture.cjs"
+    "my-work.fixture.cjs",
+    "views.fixture.cjs"
   ]
 }

@@ -7,6 +7,7 @@ const { personTasks, capacitySet } = require('./workload.fixture.cjs')
 // refused capacity preview each get an explanation, and the screens pass axe.
 const { chromium } = require('playwright');
 const { clientConfig } = require('./config.fixture.cjs');
+const { viewList } = require('./views.fixture.cjs');
 const path = require('path'), { spawn } = require('child_process'), assert = require('assert/strict');
 const port = process.env.PORT ?? '5177', base = `http://127.0.0.1:${port}`;
 const id = n => `00000000-0000-0000-0000-${String(n).padStart(12, '0')}`;
@@ -62,7 +63,7 @@ let server, browser;
     else if (p === 'me/notifications/pulse') data = { stamp: '0' }
     else if (p === 'me/notifications/unread-count') data = { notifications: 0, following: 0 }
     else if (p === 'workspaces') data = []
-    else if (p === 'views') data = { views: [], canShare: false }
+    else if (p === 'views') data = viewList()
     else if (p === 'reference') data = { disciplines: [], clients: [], offices: [], deliverableTypes: [], phases: [], projectTypes: [], limits: { roleLabel: 80 } }
     else if (p === 'projects') data = { items: [project], page: 1, pageSize: 200, totalCount: 1 }
     else if (p === 'users') data = [{ id: jill, displayName: 'Jill Partial', isActive: true }]

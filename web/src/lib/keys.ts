@@ -35,6 +35,7 @@ export const itemKeys: Readonly<Record<string, readonly string[]>> = {
   UserPreferences: ['onboarding', 'me'],
   Project: ['projects-pick', 'planner-projects-filter', 'workspace-coordination', 'portfolio', 'workload'],
   Member: ['coord-options', 'staff', 'workload', 'workspace-coordination'],
+  SavedView: ['views'],
 }
 
 const coordination = ['reviews', 'review-detail', 'changes', 'change-detail', 'coord-options', 'input-uses', 'handoffs', 'handoff-detail', 'submissions', 'submission-detail', 'submission-choices', 'deliverable', 'workspace-coordination', 'coordination']

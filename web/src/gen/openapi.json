@@ -1655,24 +1655,6 @@
         ],
         "type": "object"
       },
-      "AnonymousTypeOfListOfObjectAndboolean": {
-        "properties": {
-          "canShare": {
-            "type": "boolean"
-          },
-          "views": {
-            "type": [
-              "null",
-              "array"
-            ]
-          }
-        },
-        "required": [
-          "views",
-          "canShare"
-        ],
-        "type": "object"
-      },
       "AnonymousTypeOfListOfWidgetAndboolean": {
         "properties": {
           "isDefault": {
@@ -18010,6 +17992,87 @@
         ],
         "type": "object"
       },
+      "SavedViewList": {
+        "properties": {
+          "canShare": {
+            "type": "boolean"
+          },
+          "views": {
+            "items": {
+              "$ref": "#/components/schemas/SavedViewRow"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "views",
+          "canShare"
+        ],
+        "type": "object"
+      },
+      "SavedViewRow": {
+        "properties": {
+          "canEdit": {
+            "type": "boolean"
+          },
+          "dropped": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isDefault": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "owner": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "params": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "scope": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "scope",
+          "projectId",
+          "isDefault",
+          "rowVersion",
+          "params",
+          "dropped",
+          "owner",
+          "canEdit"
+        ],
+        "type": "object"
+      },
       "ScheduleBody": {
         "properties": {
           "fromDate": {
@@ -23572,6 +23635,24 @@
           "scope",
           "params",
           "isDefault"
+        ],
+        "type": "object"
+      },
+      "ViewSaved": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "rowVersion"
         ],
         "type": "object"
       },
@@ -31927,8 +32008,8 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -42048,7 +42129,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnonymousTypeOfListOfObjectAndboolean"
+                  "$ref": "#/components/schemas/SavedViewList"
                 }
               }
             },
@@ -42071,8 +42152,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ViewSaved"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -42094,8 +42182,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -42126,6 +42214,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ViewSaved"
+                }
+              }
+            },
             "description": "OK"
           }
         },

@@ -7458,8 +7458,8 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -15623,7 +15623,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfListOfObjectAndboolean"];
+                        "application/json": components["schemas"]["SavedViewList"];
                     };
                 };
             };
@@ -15642,12 +15642,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ViewSaved"];
+                    };
                 };
             };
         };
@@ -15678,8 +15680,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -15709,7 +15711,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ViewSaved"];
+                    };
                 };
             };
         };
@@ -16418,10 +16422,6 @@ export interface components {
         AnonymousTypeOfListOfObjectAndListOfObject: {
             blocks: null | unknown[];
             dependsOn: null | unknown[];
-        };
-        AnonymousTypeOfListOfObjectAndboolean: {
-            canShare: boolean;
-            views: null | unknown[];
         };
         AnonymousTypeOfListOfWidgetAndboolean: {
             isDefault: boolean;
@@ -20664,6 +20664,27 @@ export interface components {
             rowVersion: number;
             sourceRevisionIds: string[];
         };
+        SavedViewList: {
+            canShare: boolean;
+            views: components["schemas"]["SavedViewRow"][];
+        };
+        SavedViewRow: {
+            canEdit: boolean;
+            dropped: string[];
+            /** Format: uuid */
+            id: string;
+            isDefault: boolean;
+            name: string;
+            owner: null | string;
+            params: {
+                [key: string]: string;
+            };
+            /** Format: uuid */
+            projectId: null | string;
+            /** Format: int32 */
+            rowVersion: number;
+            scope: string;
+        };
         ScheduleBody: {
             /** Format: date */
             fromDate: string;
@@ -22084,6 +22105,12 @@ export interface components {
             /** Format: uuid */
             projectId: null | string;
             scope: null | string;
+        };
+        ViewSaved: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
         };
         VisibilityBody: {
             reason?: null | string;

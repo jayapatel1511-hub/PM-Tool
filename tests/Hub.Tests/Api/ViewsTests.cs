@@ -196,6 +196,84 @@ public sealed class ViewsTests(HubFactory f)
         Assert.Equal(HttpStatusCode.BadRequest, (await pm.Post("/api/v1/views", new { name = "Invalid group", listType = "portfolio", @params = new { group = "unknown" } })).StatusCode);
     }
 
+    static string[] Keys(JsonNode? n) => n!.AsObject().Select(x => x.Key).ToArray();
+
+    /// Packet 040 S15 (Views): the wire shape of the list, the save answers and the empty answers, pinned before the responses became records.
+    [Fact]
+    public async Task Saved_view_answers_keep_their_property_names_order_and_status_codes()
+    {
+        var p = await d.Project();
+        var civil = d.ProjectDiscipline(p.Id, "Civil");
+        var marc = f.As(TestData.Marc);
+        var alex = f.As(TestData.Alex);
+
+        // A project view saved by the lead, a personal default and one with a missing reference, all seen by the same person.
+        var sharedPost = await marc.Post("/api/v1/views", new { name = "Shared by discipline", listType = "tasks", projectId = p.Id, scope = "Project",
+            @params = new Dictionary<string, string> { ["disciplineId"] = civil.ToString(), ["sort"] = "dueDate:desc", ["cols"] = "status,dueDate" } });
+        Assert.Equal(HttpStatusCode.Created, sharedPost.StatusCode);
+        var shared = await sharedPost.Json(201);
+        Assert.Equal($"/api/v1/views/{shared.S("id")}", sharedPost.Headers.Location!.ToString());
+        Assert.Equal(new[] { "id", "rowVersion" }, Keys(shared));
+        var mine = await alex.Post("/api/v1/views", new { name = "Mine", listType = "tasks", projectId = p.Id, @params = new Dictionary<string, string> { ["mine"] = "true", ["group"] = "status" }, isDefault = true }).Result.Json(201);
+        var gone = await alex.Post("/api/v1/views", new { name = "Gone", listType = "tasks", projectId = p.Id, @params = new Dictionary<string, string> { ["status"] = "In Progress" } }).Result.Json(201);
+        await f.DbAsync(async db => { var row = await db.SavedViews.FirstAsync(x => x.Id == gone.G("id")); row.Filters = row.Filters.Replace("{", "{\"retired\":\"x\","); return await db.SaveChangesAsync(); });
+
+        var list = await Views(TestData.Alex, p.Id);
+        Assert.Equal(new[] { "views", "canShare" }, Keys(list));
+        Assert.False(list["canShare"]!.GetValue<bool>());
+        var rows = list["views"]!.AsArray();
+        Assert.Equal(new[] { "Gone", "Mine", "Shared by discipline" }, rows.Select(v => v!.S("name"))); // Personal before Project, then by name
+        var rowKeys = new[] { "id", "name", "scope", "projectId", "isDefault", "rowVersion", "params", "dropped", "owner", "canEdit" };
+        Assert.All(rows, v => Assert.Equal(rowKeys, Keys(v)));
+        var sharedRow = rows.Single(v => v!.G("id") == shared.G("id"))!;
+        Assert.Equal(("Project", p.Id, false, "Marc Dubois", false), (sharedRow.S("scope"), sharedRow.G("projectId"), sharedRow["isDefault"]!.GetValue<bool>(), sharedRow.S("owner"), sharedRow["canEdit"]!.GetValue<bool>()));
+        Assert.Equal(new[] { "cols", "disciplineId", "sort" }, Keys(sharedRow["params"]).Order()); // stored as jsonb, so the keys come back in its order
+        Assert.Empty(sharedRow["dropped"]!.AsArray());
+        var mineRow = rows.Single(v => v!.G("id") == mine.G("id"))!;
+        Assert.Equal(("Personal", true, true, mine.I("rowVersion")), (mineRow.S("scope"), mineRow["isDefault"]!.GetValue<bool>(), mineRow["canEdit"]!.GetValue<bool>(), mineRow.I("rowVersion")));
+        var goneRow = rows.Single(v => v!.G("id") == gone.G("id"))!;
+        Assert.Equal(new[] { "retired" }, goneRow["dropped"]!.AsArray().Select(x => x!.GetValue<string>()));
+        Assert.Equal(new[] { "status" }, Keys(goneRow["params"]));
+
+        // The PM sees the same project views and may share and edit them; a list with no views has an empty array and no share right.
+        var asPm = await Views(TestData.Pm, p.Id);
+        Assert.True(asPm["canShare"]!.GetValue<bool>());
+        Assert.Equal(new[] { "Shared by discipline" }, asPm["views"]!.AsArray().Select(v => v!.S("name")));
+        Assert.True(asPm["views"]![0]!["canEdit"]!.GetValue<bool>());
+        var empty = await f.As(TestData.Jill).GetAsync("/api/v1/views?listType=portfolio").Result.Json();
+        Assert.Equal(new[] { "views", "canShare" }, Keys(empty));
+        Assert.Empty(empty["views"]!.AsArray());
+        Assert.False(empty["canShare"]!.GetValue<bool>());
+
+        // A save answers with the id and the version the next write sends.
+        var patch = await alex.Patch($"/api/v1/views/{mine.S("id")}", new { name = "Mine, renamed" }, mine.I("rowVersion"));
+        Assert.Equal(HttpStatusCode.OK, patch.StatusCode);
+        var patched = await patch.Json();
+        Assert.Equal(new[] { "id", "rowVersion" }, Keys(patched));
+        Assert.Equal(mine.G("id"), patched.G("id"));
+        Assert.Equal(mine.I("rowVersion") + 1, patched.I("rowVersion"));
+
+        // The refusals no shape check sees.
+        Assert.Equal(HttpStatusCode.Conflict, (await alex.Patch($"/api/v1/views/{mine.S("id")}", new { name = "Stale" }, mine.I("rowVersion"))).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await f.As(TestData.Jill).Patch($"/api/v1/views/{mine.S("id")}", new { name = "Not yours" }, patched.I("rowVersion"))).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await alex.Post("/api/v1/views", new { name = "", listType = "tasks", projectId = p.Id })).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await alex.Post("/api/v1/views", new { name = "Nowhere", listType = "nonsense" })).StatusCode);
+
+        // A delete answers 204 with no body, and the view is gone.
+        var deleted = await alex.DeleteAsync($"/api/v1/views/{mine.S("id")}");
+        Assert.Equal(HttpStatusCode.NoContent, deleted.StatusCode);
+        Assert.Equal("", await deleted.Content.ReadAsStringAsync());
+        Assert.Equal(HttpStatusCode.NotFound, (await alex.DeleteAsync($"/api/v1/views/{mine.S("id")}")).StatusCode);
+        Assert.DoesNotContain((await Views(TestData.Alex, p.Id))["views"]!.AsArray(), v => v!.G("id") == mine.G("id"));
+
+        // The board order answers 204 with no body as well, and an empty task list is refused.
+        var task = await d.NewTask(p.Id, TestData.Pm);
+        var order = await alex.Put($"/api/v1/projects/{p.Id}/board-order", new { taskIds = new[] { task.G("id") } });
+        Assert.Equal(HttpStatusCode.NoContent, order.StatusCode);
+        Assert.Equal("", await order.Content.ReadAsStringAsync());
+        Assert.Equal(HttpStatusCode.BadRequest, (await alex.Put($"/api/v1/projects/{p.Id}/board-order", new { taskIds = Array.Empty<Guid>() })).StatusCode);
+    }
+
     [Fact]
     public async Task Manual_board_order_is_shared_by_the_team() // FR-004, US3, SC-002
     {

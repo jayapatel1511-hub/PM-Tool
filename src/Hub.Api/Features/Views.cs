@@ -2,6 +2,7 @@ using System.Text.Json;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Api.Features;
@@ -13,6 +14,12 @@ public static class ViewEndpoints
 {
     public sealed record ViewBody(string Name, string ListType, Guid? ProjectId, string? Scope, Dictionary<string, string>? Params, bool? IsDefault);
     public sealed record OrderBody(Guid[] TaskIds);
+    /// One saved view as a list's Views menu reads it: its definition (`Params`), the parameters dropped because the list no longer knows them or their value is gone (`Dropped`), and whether the reader may change it.
+    public sealed record SavedViewRow(Guid Id, string Name, string Scope, Guid? ProjectId, bool IsDefault, int RowVersion, Dictionary<string, string> Params, List<string> Dropped, string? Owner, bool CanEdit);
+    /// The reader's personal views of a list, then the project's shared ones; `CanShare` is whether they may save a view for the whole project.
+    public sealed record SavedViewList(IReadOnlyList<SavedViewRow> Views, bool CanShare);
+    /// The answer to saving or changing a view: the id and the version the next write must send.
+    public sealed record ViewSaved(Guid Id, int RowVersion);
 
     const string Personal = "Personal", ProjectScope = "Project";
     static readonly string[] PortfolioGroups = ["none", "client", "office", "projectType"];
@@ -20,7 +27,7 @@ public static class ViewEndpoints
 
     public static void Map(RouteGroupBuilder api)
     {
-        api.MapGet("/views", async (string listType, Guid? projectId, Access access, HubDb db, CurrentUser me, SettingsStore store) =>
+        api.MapGet("/views", async Task<Ok<SavedViewList>> (string listType, Guid? projectId, Access access, HubDb db, CurrentUser me, SettingsStore store) =>
         {
             var settings = await store.Get(db);
             Check.OneOf(listType, [.. Lists.Keys], "listType");
@@ -34,19 +41,16 @@ public static class ViewEndpoints
             var canShare = ctx is not null && Permissions.ManageSavedProjectView(access.Actor, ctx).Ok;
             var ownerIds = views.Select(v => v.OwnerId).Distinct().ToList();
             var owners = await db.Users.Where(u => ownerIds.Contains(u.Id)).ToDictionaryAsync(u => u.Id, u => u.DisplayName);
-            var rows = new List<object>();
+            var rows = new List<SavedViewRow>();
             foreach (var v in views)
             {
                 var (kept, dropped) = await Clean(db, listType, projectId, JsonSerializer.Deserialize<Dictionary<string, string>>(v.Filters) ?? []);
-                rows.Add(new
-                {
-                    v.Id, v.Name, v.Scope, v.ProjectId, v.IsDefault, v.RowVersion, Params = kept, Dropped = dropped, Owner = owners.GetValueOrDefault(v.OwnerId),
-                    CanEdit = v.Scope == Personal ? v.OwnerId == me.Id : canShare,
-                });
+                rows.Add(new SavedViewRow(v.Id, v.Name, v.Scope, v.ProjectId, v.IsDefault, v.RowVersion, kept, dropped, owners.GetValueOrDefault(v.OwnerId),
+                    v.Scope == Personal ? v.OwnerId == me.Id : canShare));
             }
-            return new { Views = rows, CanShare = canShare };
+            return TypedResults.Ok(new SavedViewList(rows, canShare));
         });
-        api.MapPost("/views", async (ViewBody body, Access access, HubDb db, CurrentUser me, SettingsStore store) =>
+        api.MapPost("/views", async Task<Created<ViewSaved>> (ViewBody body, Access access, HubDb db, CurrentUser me, SettingsStore store) =>
         {
             var settings = await store.Get(db);
             Check.OneOf(body.ListType, [.. Lists.Keys], "listType");
@@ -66,9 +70,9 @@ public static class ViewEndpoints
             db.SavedViews.Add(v);
             if (body.IsDefault == true) await MakeDefault(db, v, me.Id);
             await db.SaveChangesAsync();
-            return Results.Created($"/api/v1/views/{v.Id}", new { v.Id, v.RowVersion });
+            return TypedResults.Created($"/api/v1/views/{v.Id}", new ViewSaved(v.Id, v.RowVersion));
         });
-        api.MapPatch("/views/{id:guid}", async (Guid id, JsonElement body, HttpContext http, Access access, HubDb db, CurrentUser me, SettingsStore store) =>
+        api.MapPatch("/views/{id:guid}", async Task<Ok<ViewSaved>> (Guid id, JsonElement body, HttpContext http, Access access, HubDb db, CurrentUser me, SettingsStore store) =>
         {
             var v = await Editable(db, access, me, id, await store.Get(db));
             var patch = new Patch(body);
@@ -81,17 +85,17 @@ public static class ViewEndpoints
                 else v.IsDefault = false;
             }
             await db.SaveChangesAsync();
-            return Results.Ok(new { v.Id, v.RowVersion });
+            return TypedResults.Ok(new ViewSaved(v.Id, v.RowVersion));
         });
-        api.MapDelete("/views/{id:guid}", async (Guid id, Access access, HubDb db, CurrentUser me, SettingsStore store) =>
+        api.MapDelete("/views/{id:guid}", async Task<NoContent> (Guid id, Access access, HubDb db, CurrentUser me, SettingsStore store) =>
         {
             db.SavedViews.Remove(await Editable(db, access, me, id, await store.Get(db))); // a preference, not a work item: removed outright
             await db.SaveChangesAsync();
-            return Results.NoContent();
+            return TypedResults.NoContent();
         });
 
         // §13.4, FR-004: the lane's cards in the order the team arranged them, shared by the project's members.
-        api.MapPut("/projects/{id:guid}/board-order", async (Guid id, OrderBody body, Access access, HubDb db) =>
+        api.MapPut("/projects/{id:guid}/board-order", async Task<NoContent> (Guid id, OrderBody body, Access access, HubDb db) =>
         {
             var (_, ctx) = await access.Project(id, track: false);
             Access.Demand(Permissions.ArrangeBoard(access.Actor, ctx));
@@ -106,7 +110,7 @@ public static class ViewEndpoints
                 row.Position = i + 1;
             }
             await db.SaveChangesAsync();
-            return Results.NoContent();
+            return TypedResults.NoContent();
         });
     }
 

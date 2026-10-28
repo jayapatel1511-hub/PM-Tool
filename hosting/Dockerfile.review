@@ -2,12 +2,13 @@
 ARG RELEASE_SHA=dev
 
 FROM node:24-alpine AS web
-ARG RELEASE_SHA
-ENV VITE_HUB_BUILD=$RELEASE_SHA
 WORKDIR /work
 COPY web/package.json web/package-lock.json web/.npmrc web/
 RUN cd web && npm ci
 COPY web/ web/
+# Declared after npm ci so a new SHA reuses the cached dependency layer instead of reinstalling from the registry.
+ARG RELEASE_SHA
+ENV VITE_HUB_BUILD=$RELEASE_SHA
 RUN mkdir -p src/Hub.Api && cd web && npm run build
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build

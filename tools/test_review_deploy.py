@@ -26,13 +26,14 @@ class ReviewDeployTests(unittest.TestCase):
         self.labels={'org.opencontainers.image.revision':self.sha,'hub.contract-migration':'none'}
         for name,path in [('compose','hosting/homedev.compose.yml'),('probe','scripts/verify-homedev-review.py')]:
             self.labels['hub.review-'+name+'-sha256']=hashlib.sha256((self.root/path).read_bytes()).hexdigest()
-        self.calls=[];self.reject='';self.failing_probe=False;self.current='b'*40
+        self.calls=[];self.reject='';self.failing_probe=False;self.current='b'*40;self.images=''
 
     def fake_command(self,argv,**kw):
         self.calls.append(argv)
         if argv[0]=='gh' and self.reject=='provenance':raise RuntimeError('provenance failed')
         if 'imagetools' in argv:
             return json.dumps({'digest':self.digest}) if argv[-1]=='{{json .Manifest}}' else json.dumps({'config':{'Labels':self.labels}})
+        if argv[:3]==['docker','image','ls']:return self.images
         if argv[:2]==['docker','inspect']:
             return 'pm-tool-review-db' if argv[-1].endswith('db-1') else 'sha256:'+'b'*64 if argv[3]=='{{.Image}}' else 'pm-tool-review:'+self.current
         if 'psql' in argv:return ''
@@ -52,6 +53,7 @@ class ReviewDeployTests(unittest.TestCase):
         backup=next(i for i,c in enumerate(self.calls) if c[0].endswith('pm-tool-review-backup'))
         start=next(i for i,c in enumerate(self.calls) if 'up' in c)
         self.assertLess(backup,start)
+        self.assertLess(self.calls.index(['test','-x','/usr/local/libexec/pm-tool-review-backup']),next(i for i,c in enumerate(self.calls) if c[:2] in (['docker','tag'],['docker','pull'])))
         self.assertTrue(all('pilot' not in ' '.join(c) for c in self.calls))
         self.assertIn('--no-build',self.calls[start])
         self.assertEqual(os.stat(self.state/'state.json').st_mode&0o777,0o644)
@@ -76,8 +78,17 @@ class ReviewDeployTests(unittest.TestCase):
                 if kind=='contract':self.labels['hub.contract-migration']='20261018235959_Drop'
                 if kind in ['compose','probe']:self.labels['hub.review-'+kind+'-sha256']='changed'
                 with self.assertRaises(RuntimeError):self.deploy()
-                self.assertFalse(any('pull' in c or 'up' in c for c in self.calls))
+                self.assertFalse(any('pull' in c or 'up' in c or c[0].endswith('pm-tool-review-backup') for c in self.calls))
                 self.labels=labels
+
+    def test_success_prunes_only_old_deploy_images(self):
+        image=lambda c:'sha256:'+c*64
+        rows=[(image('9'),self.sha),(image('8'),'8'*40),(image('7'),'7'*40),(image('b'),'b'*40),(image('b'),'rollback-'+'b'*64),
+              (image('6'),'manual'),(image('5'),'5'*40)]
+        self.images='\n'.join(i+' '+t for i,t in rows)
+        self.deploy()
+        # Newest three kept; the rollback image and a hand-named image are never removed.
+        self.assertEqual([c[-1] for c in self.calls if c[:3]==['docker','image','rm']],[image('5')])
 
 
 if __name__=='__main__':unittest.main()

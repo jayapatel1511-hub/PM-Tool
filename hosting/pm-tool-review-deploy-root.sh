@@ -21,6 +21,18 @@ STATE = Path('/var/lib/pm-tool-review-deploy')
 REPOSITORY = 'jayapatel1511-hub/PM-Tool'
 IMAGE = 'ghcr.io/jayapatel1511-hub/pm-tool'
 REVISION = 'org.opencontainers.image.revision'
+KEEP_IMAGES = 3  # the running image, its rollback image and one older
+BACKUP = '/usr/local/libexec/pm-tool-review-backup'
+
+
+def prune(run, previous_id):
+    # Newest first. Only images named solely by this helper or activation (<sha>, rollback-<id>) are removed; Docker
+    # refuses to delete the running image, and --force also drops the registry digest name that would keep it.
+    rows = [line.split() for line in run(['docker', 'image', 'ls', '--no-trunc', '--format', '{{.ID}} {{.Tag}}', 'pm-tool-review']).splitlines()]
+    other = {image_id for image_id, tag in rows if not re.fullmatch(r'[0-9a-f]{40}|rollback-[0-9a-f]{64}', tag)}
+    for image_id in list(dict.fromkeys(image_id for image_id, _ in rows))[KEEP_IMAGES:]:
+        if image_id != previous_id and image_id not in other:
+            run(['docker', 'image', 'rm', '--force', image_id])
 
 
 def command(argv, *, capture=True, env=None):
@@ -86,11 +98,14 @@ def deploy(root=ROOT, state_dir=STATE, run=command):
     previous_id = run(['docker', 'inspect', '--format', '{{.Image}}', 'pm-tool-review-api-1'])
     if not re.fullmatch(r'sha256:[0-9a-f]{64}', previous_id):
         raise RuntimeError('running image has no immutable image ID')
+    # A missing backup helper stops the run before any tag or pull; the dump itself waits for a good pull, so a registry
+    # outage does not leave a new dump every five minutes.
+    run(['test', '-x', BACKUP])
     rollback_tag = 'rollback-'+previous_id.split(':')[1]
     run(['docker', 'tag', previous_id, 'pm-tool-review:'+rollback_tag])
     run(['docker', 'pull', ref])
     run(['docker', 'tag', ref, 'pm-tool-review:'+sha])
-    dump = run(['/usr/local/libexec/pm-tool-review-backup'])
+    dump = run([BACKUP])
     if not dump.startswith('Verified private dump: '):
         raise RuntimeError('backup helper did not verify a nonempty dump')
     compose = ['docker', 'compose', '--env-file', '.runtime/review.env', '-f', 'hosting/homedev.compose.yml']
@@ -125,6 +140,10 @@ def deploy(root=ROOT, state_dir=STATE, run=command):
         raise
     state.update(sha=sha, digest=digest, time=datetime.datetime.now(datetime.timezone.utc).isoformat())
     write_state(state_path, state)
+    try:
+        prune(run, previous_id)
+    except RuntimeError:
+        print('WARN old review images not pruned; retried after the next deployment')
     print('PASS review deployed '+sha+' '+digest)
 
 

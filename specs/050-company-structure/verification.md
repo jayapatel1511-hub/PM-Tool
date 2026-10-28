@@ -48,3 +48,7 @@ Closes the three PARTIAL rows (AC-UNT-01, AC-UNT-05, AC-UNT-06) with real API an
 - Merged-tree check at integration: `dotnet build Hub.slnx` 0 errors; Org, TaskPickup and Workload backend tests 87/87; web `npm run build` and `npm run lint` exit 0. The full 1,514-test backend suite and the 799-response shape gate were not re-run: no backend source or API response shape changed. The real-API harness was not re-run on the merged tree.
 - Defaults relied on: 050-D4 (include_indirect_reports off by default) and 050-D1 (org_structure dark behind `flag.org_structure`). No new decision defaults.
 - Still open: hosted, pilot and human sessions. AC-UNT-09's broader hierarchy UI acceptance remains a human check. Not Accepted.
+
+## 2026-10-28 release review
+
+- Fixed: two top-level units could share a name (the unique index treated null parents as distinct), and Workload's home-unit grouping, keyed by label, merged them. The index in the unreleased `DeliveryWorkflowRecords` migration is now NULLS NOT DISTINCT, so the second one is a 409; `OrgStructureTests` checks it.

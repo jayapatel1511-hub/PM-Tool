@@ -9,15 +9,18 @@ import { DataTable } from '@/components/hub/registers'
 import { useTable, type Column } from '@/components/hub/table'
 import { ViewMenu } from '@/components/hub/views'
 import { Button } from '@/components/ui/button'
-import { get, qs, typedRequest } from '@/lib/api'
+import type { components } from '@/gen/api'
+import { typedRequest } from '@/lib/api'
 import { invalidateChange } from '@/lib/keys'
 import { plural, t, tv } from '@/lib/i18n'
 import { fmtDate } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import { useCurrentProject } from './ProjectLayout'
-import { CoordStatus, Count, PersonLabel, RegisterPager, SelectField, discName, personName, peopleChoices, disciplineChoices, type CoordOptions, type RecordVersion } from './CoordinationForms'
+import { CoordStatus, Count, PersonLabel, RegisterPager, SelectField, discName, personName, peopleChoices, disciplineChoices, type CoordOptions } from './CoordinationForms'
 
-type Row = RecordVersion & { key: string; title: string; status: string; coordinatorId?: string; ownerId?: string; outstandingDisciplines?: number; blockingFindings?: number; roundNumber?: number; waitingDays?: number; assessmentDueDate?: string; pendingAssessments?: number }
+type Schemas = components['schemas']
+/** The two registers share their key fields and each shows the columns of its own kind, so both generated rows are read through one type. */
+type Row = Pick<Schemas['ReviewRow'], 'id' | 'key' | 'title' | 'status' | 'rowVersion'> & Partial<Schemas['ReviewRow']> & Partial<Schemas['ChangeRow']>
 export type RegisterContext = { options: CoordOptions; projectId: string; number: string; refresh: () => void; open: (id: string) => void }
 export function CoordinationRegister({ kind, statuses, create, detail, extra }: { kind: 'reviews' | 'changes'; statuses: string[]; create: (c: RegisterContext & { close: () => void }) => ReactNode; detail: (c: RegisterContext & { id: string; close: () => void }) => ReactNode; extra?: (c: RegisterContext) => ReactNode }) {
   const phone = useIsPhone()
@@ -27,7 +30,7 @@ export function CoordinationRegister({ kind, statuses, create, detail, extra }: 
   const options = useQuery({ queryKey: ['coord-options', p.id], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/changes/options', { params: { projectId: p.id } }) })
   const list = useQuery({ queryKey: [kind, p.id, filters, page], queryFn: (): Promise<{ items: Row[]; totalCount: number; pageSize: number }> => kind === 'reviews'
     ? typedRequest('get', '/api/v1/projects/{projectId}/reviews', { params: { projectId: p.id }, query: { Q: filters.q, Status: filters.status, OwnerId: filters.ownerId, DisciplineId: filters.disciplineId, Mine: filters.mine === 'true', page } })
-    : get<{ items: Row[]; totalCount: number; pageSize: number }>(`projects/${p.id}/changes${qs({ ...filters, page })}`) })
+    : typedRequest('get', '/api/v1/projects/{projectId}/changes', { params: { projectId: p.id }, query: { Q: filters.q, Status: filters.status, OwnerId: filters.ownerId, Mine: filters.mine === 'true', page } }) })
   const change = (key: string, value: string) => { const next = new URLSearchParams(sp); if (value) next.set(key, value); else next.delete(key); if (key !== 'page' && key !== 'panel') next.delete('page'); setSp(next) }
   const open = (id: string) => change('panel', `${type}:${id}`), panel = sp.get('panel')?.startsWith(`${type}:`) ? sp.get('panel')!.slice(type.length + 1) : null
   const ctx = options.data ? { options: options.data, projectId: p.id, number: p.projectNumber, refresh, open } : null

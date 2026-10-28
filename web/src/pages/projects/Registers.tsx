@@ -54,14 +54,7 @@ interface IssueDetail extends Detail { issue: IssueRow; originRisk?: { id: strin
 interface IssueLocation { id: string; kind: string; siteArea?: string; building?: string; level?: string; room?: string; assetSystem?: string; alignment?: string; startStation?: number; endStation?: number; stationUnits?: string; coordinateX?: number; coordinateY?: number; coordinateZ?: number; coordinateReferenceSystem?: string; coordinateUnits?: string; rowVersion: number }
 interface IssueDocument { sourceSystem?: string; stableSourceId?: string; registeredBy?: string; registeredAt?: string; registrationMethod?: string; replacedById?: string | null; id: string; kind: string; identifier: string; revision: string; sourceUrl: string; externalTopicId?: string; modelElementGuid?: string; viewpointUrl?: string; isAvailable: boolean; rowVersion: number }
 interface IssueVerification { id: string; verifierId: string; status: string; evidenceUrl?: string; note?: string; verifiedAt?: string; rowVersion: number }
-interface IssueReferenceImpact {
-  id: string; documentReferenceId: string; previousRevisionId: string; currentRevisionId: string; ownerId: string; verifierId?: string | null
-  status: 'Pending' | 'Unaffected' | 'ReopenRequested'; ownerDisposition?: 'Unaffected' | 'Reopen' | null; verifierDisposition?: 'Unaffected' | 'Reopen' | null
-  ownerDecidedAt?: string | null; verifierDecidedAt?: string | null; ownerReason?: string | null; verifierReason?: string | null; rowVersion: number
-  previousRevision?: { sourceKey?: string; externalIdentifier?: string; revision?: string } | null
-  currentRevision?: { sourceKey?: string; externalIdentifier?: string; revision?: string } | null
-  documentReference?: { identifier?: string; revision?: string; kind?: string } | null
-}
+type IssueReferenceImpact = components['schemas']['ReferenceImpactRow']
 type Target = { type: 'Task' | 'Deliverable'; id: string; key: string; name: string }
 
 const RISK_STATUSES = ['Open', 'Monitoring', 'Closed', 'Realised']
@@ -834,7 +827,7 @@ export function IssuePanel({ id }: PanelProps) {
 
 function IssueReferenceImpacts({ issue }: { issue: IssueRow }) {
   const me = useMe()
-  const q = useQuery({ queryKey: ['issue-reference-impacts', issue.id], queryFn: () => get<IssueReferenceImpact[]>(`issues/${issue.id}/reference-impacts`) })
+  const q = useQuery({ queryKey: ['issue-reference-impacts', issue.id], queryFn: () => typedRequest('get', '/api/v1/issues/{id}/reference-impacts', { params: { id: issue.id } }) })
   const [reason, setReason] = useState<Record<string, string>>({})
   const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState<unknown>(null)
@@ -953,7 +946,7 @@ function IssueMetadata({ issue, canEdit, onChanged }: { issue: IssueRow; canEdit
   const me = useMe()
   const uid = useId()
   const eligible = useQuery({ queryKey: ['issue-verifier-eligible', issue.projectId],
-    queryFn: () => get<{ people: { id: string; displayName: string }[] }>(`projects/${issue.projectId}/changes/options`) })
+    queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/changes/options', { params: { projectId: issue.projectId } }) })
   const locations = useQuery({ queryKey: ['issue-locations', issue.id], queryFn: () => get<IssueLocation[]>(`issues/${issue.id}/locations`) })
   const documents = useQuery({ queryKey: ['issue-documents', issue.id], queryFn: () => get<IssueDocument[]>(`issues/${issue.id}/documents`) })
   const verification = useQuery({ queryKey: ['issue-verification', issue.id], queryFn: () => get<IssueVerification[]>(`issues/${issue.id}/verification`) })

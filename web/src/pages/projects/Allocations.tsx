@@ -77,7 +77,7 @@ function Allocations(header: { title: string; subtitle: ReactNode }) {
   const open = (id: string | null) => { const next = new URLSearchParams(sp); if (id) next.set('allocation', id); else next.delete('allocation'); setSp(next) }
   const base = `projects/${project.id}/allocations`
   const list = useQuery({ queryKey: ['allocations', project.id, filters, page], queryFn: () => get<AllocationPage>(`${base}${qs({ ...filters, page })}`) })
-  const options = useQuery({ queryKey: ['coord-options', project.id], queryFn: () => get<CoordOptions>(`projects/${project.id}/changes/options`) })
+  const options = useQuery({ queryKey: ['coord-options', project.id], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/changes/options', { params: { projectId: project.id } }) })
   const proposal = useOffer()(project.permissions.proposeAllocation, project.status) // FR-FIG-08 decision 1
   // §47.5 FR-REC-12, behind flag.record_engine_additions: the open roles as CSV or Excel, after the page's own entries.
   const roleExport = useFlag('record_engine_additions') ? [{ path: 'lists/open-roles/export', params: { projectId: project.id }, name: `${project.projectNumber}-open-roles`, label: t('openRole.tab') }] : undefined

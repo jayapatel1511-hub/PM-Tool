@@ -599,7 +599,85 @@ public sealed class ReviewChangeTests(HubFactory f)
         var manager = await Get(TestData.Pm, root + $"/reviews/{id}");
         Assert.Equal((true, true, true, true), (manager["canCoordinate"]!.GetValue<bool>(), manager["canManage"]!.GetValue<bool>(), manager["canWrite"]!.GetValue<bool>(), manager["canReassignVerifier"]!.GetValue<bool>()));
     }
+    [Fact]
+    public async Task Change_register_detail_input_uses_and_reference_impacts_keep_their_property_names_order_nulls_and_flags() // the typed records must serialise to the bytes the Changes page and the issue panel already read
+    {
+        var s = await New(); var root = Root(s);
+        var target = await Target(s); var second = await Target(s);
+        await Adopt(s, target, s.Revision, s.Revision); await Adopt(s, second, s.Revision, s.Revision);
+        var issue = await Post(TestData.Alex, root + "/issues", new { title = "General source reference", severity = "Low", ownerId = data.User(TestData.Alex), projectDisciplineId = s.Civil }, 201);
+        var issueId = issue.G("id");
+        int IssueVersion() => f.Db(db => db.Issues.Single(i => i.Id == issueId).RowVersion);
+        await Post(TestData.Alex, $"/api/v1/issues/{issueId}/documents", new { kind = "Drawing", identifier = "survey", revision = "A", sourceUrl = "https://example.test/A.pdf", isAvailable = true, rowVersion = IssueVersion() }, 201);
+        await Post(TestData.Alex, $"/api/v1/issues/{issueId}/transition", new { toStatus = "Resolved", resolution = "Closed against revision A", rowVersion = IssueVersion() });
+        Assert.Empty((await Get(TestData.Alex, $"/api/v1/issues/{issueId}/reference-impacts")).AsArray());
+
+        var notice = await Notice(s);
+        var draftList = await Get(TestData.Alex, root + "/changes"); var draft = await Get(TestData.Alex, root + $"/changes/{notice}");
+        Assert.Equal(["items", "page", "pageSize", "totalCount", "sort", "filters"], Keys(draftList)); Assert.Equal((1, 50, 1), (draftList.I("page"), draftList.I("pageSize"), draftList.I("totalCount"))); Assert.Null(draftList["sort"]); Assert.Null(draftList["filters"]); // null, not omitted
+        var draftRow = Assert.Single(draftList["items"]!.AsArray())!;
+        Assert.Equal(["id", "key", "title", "status", "rowVersion", "ownerId", "scope", "assessmentDueDate", "pendingAssessments"], Keys(draftRow));
+        Assert.Equal((notice, ChangeStatus.Draft, "East corridor", "2026-09-18", 0), (draftRow.G("id"), draftRow.S("status"), draftRow.S("scope"), draftRow.S("assessmentDueDate"), draftRow.I("pendingAssessments")));
+        Assert.Equal(DetailKeys, Keys(draft)); Assert.Empty(draft["assessments"]!.AsArray()); Assert.Empty(draft["completeAssessmentIds"]!.AsArray()); Assert.Empty(draft["uses"]!.AsArray());
+        Assert.Equal((false, true), (draft["canManage"]!.GetValue<bool>(), draft["head"] is JsonObject)); // the head is the source's current revision until the change is published
+        await Publish(s, notice);
+        var a1 = Assessment(notice, target); await Assess(s, notice, a1, TestData.Omar, "disposition", AssessmentStatus.Unaffected); await Assess(s, notice, a1, TestData.Pm, "approveRetention");
+
+        var detail = await Get(TestData.Alex, root + $"/changes/{notice}");
+        Assert.Equal(DetailKeys, Keys(detail));
+        var change = detail["notice"]!;
+        Assert.Equal(["title", "ownerId", "projectDisciplineId", "oldRevisionId", "newRevisionId", "description", "scope", "effectiveDate", "assessmentDueDate", "status", "publishedAt", "auditType", "auditProjectId", "auditKey", "auditName", "auditDisciplineId",
+            "projectId", "key", "seq", "deletedAt", "deletedBy", "createdAt", "createdBy", "updatedAt", "updatedBy", "rowVersion", "id"], Keys(change));
+        Assert.Equal((notice, ChangeStatus.Open, "ChangeNotice", "2026-09-14", s.Revision, 1), (change.G("id"), change.S("status"), change.S("auditType"), change.S("effectiveDate"), change.G("oldRevisionId"), change.I("seq"))); Assert.NotNull(change["publishedAt"]); Assert.Null(change["deletedAt"]);
+        var assessments = detail["assessments"]!.AsArray(); Assert.Equal(2, assessments.Count);
+        Assert.Equal(["changeNoticeId", "targetType", "targetId", "ownerId", "reviewerId", "inputUseId", "handoffId", "revisionUsedId", "status", "acknowledgedAt", "rationale", "evidenceUrl", "correctionTaskId", "effortImpactHours", "dateImpactDays",
+            "retainOldRevision", "retentionApprovedBy", "retentionReason", "verifiedBy", "verifiedAt", "auditType", "projectId", "auditProjectId", "auditKey", "auditName", "createdAt", "createdBy", "updatedAt", "updatedBy", "rowVersion", "id"], Keys(assessments[0]!));
+        var done = assessments.Single(a => a!.G("id") == a1)!; var open = assessments.Single(a => a!.G("id") != a1)!;
+        Assert.Equal((AssessmentStatus.Unaffected, true, data.User(TestData.Pm), "https://example.test/evidence.pdf"), (done.S("status"), done["retainOldRevision"]!.GetValue<bool>(), done.G("retentionApprovedBy"), done.S("evidenceUrl")));
+        Assert.Equal(AssessmentStatus.Pending, open.S("status")); foreach (var name in new[] { "handoffId", "acknowledgedAt", "rationale", "evidenceUrl", "correctionTaskId", "effortImpactHours", "dateImpactDays", "retentionApprovedBy", "retentionReason", "verifiedBy", "verifiedAt", "auditKey", "auditName" }) Assert.Null(open[name]); // null, not omitted
+        Assert.Equal([a1], detail["completeAssessmentIds"]!.AsArray().Select(x => x!.GetValue<Guid>()));
+        Assert.Equal(SourceRevisionKeys, Keys(detail["oldRevision"]!)); Assert.Equal(SourceRevisionKeys, Keys(detail["newRevision"]!)); Assert.Equal(("A", "B"), (detail["oldRevision"]!.S("revision"), detail["newRevision"]!.S("revision"))); Assert.Equal(s.Revision, detail["newRevision"]!.G("supersedesId"));
+        var head = detail["head"]!; Assert.Equal(["identity", "currentRevisionId", "ownerId", "projectDisciplineId", "auditType", "projectId", "auditProjectId", "auditKey", "auditName", "createdAt", "createdBy", "updatedAt", "updatedBy", "rowVersion", "id"], Keys(head));
+        Assert.Equal(detail["newRevision"]!.G("id"), head.G("currentRevisionId"));
+        Assert.Equal((data.User(TestData.Alex), true, true, false, 4), (detail.G("actorId"), detail["canWrite"]!.GetValue<bool>(), detail["canPublish"]!.GetValue<bool>(), detail["canManage"]!.GetValue<bool>(), detail["eligiblePeople"]!.AsArray().Count));
+        var uses = detail["uses"]!.AsArray(); Assert.Equal(2, uses.Count); Assert.Equal(UseKeys, Keys(uses[0]!)); Assert.Equal(new[] { target, second }.Order(), uses.Select(u => u!.G("targetId")).Order());
+        var viewer = await Get(TestData.Rita, root + $"/changes/{notice}"); Assert.Equal((false, false, false), (viewer["canWrite"]!.GetValue<bool>(), viewer["canPublish"]!.GetValue<bool>(), viewer["canManage"]!.GetValue<bool>()));
+        var manager = await Get(TestData.Pm, root + $"/changes/{notice}"); Assert.True(manager["canManage"]!.GetValue<bool>());
+
+        var list = await Get(TestData.Omar, root + "/changes"); var row = Assert.Single(list["items"]!.AsArray())!;
+        Assert.Equal(["items", "page", "pageSize", "totalCount", "sort", "filters"], Keys(list)); Assert.Equal(["id", "key", "title", "status", "rowVersion", "ownerId", "scope", "assessmentDueDate", "pendingAssessments"], Keys(row));
+        Assert.Equal((ChangeStatus.Open, 1, 1), (row.S("status"), row.I("pendingAssessments"), row.I("rowVersion")));
+        Assert.Equal(notice, Assert.Single((await Get(TestData.Omar, root + "/changes?Mine=true"))["items"]!.AsArray())!.G("id"));
+        var generated = await Get(TestData.Alex, root + $"/changes?Q=survey&Status=Open&OwnerId={data.User(TestData.Alex)}&Mine=false&page=1&pageSize=1"); // the names the generated client sends
+        Assert.Equal((notice, 1, 1), (Assert.Single(generated["items"]!.AsArray())!.G("id"), generated.I("pageSize"), generated.I("totalCount")));
+        Assert.Empty((await Get(TestData.Alex, root + $"/changes?Status={ChangeStatus.Closed}"))["items"]!.AsArray());
+
+        var all = await Get(TestData.Omar, root + "/input-uses");
+        Assert.Equal(["items", "page", "pageSize", "totalCount", "assessments", "history"], Keys(all)); Assert.Equal((1, 50, 2), (all.I("page"), all.I("pageSize"), all.I("totalCount")));
+        Assert.Equal(UseKeys, Keys(all["items"]![0]!)); Assert.Equal(2, all["items"]!.AsArray().Count);
+        var assessed = all["assessments"]!.AsArray(); Assert.Equal(2, assessed.Count);
+        Assert.Equal(["targetType", "targetId", "status", "changeNoticeId", "key", "newRevisionId", "noticeStatus"], Keys(assessed[0]!));
+        var assessedRow = assessed.Single(a => a!.G("targetId") == target)!; Assert.Equal((AssessmentStatus.Unaffected, notice, ChangeStatus.Open, detail["newRevision"]!.G("id")), (assessedRow.S("status"), assessedRow.G("changeNoticeId"), assessedRow.S("noticeStatus"), assessedRow.G("newRevisionId")));
+        var history = all["history"]!.AsArray(); Assert.Equal(2, history.Count);
+        Assert.Equal(["inputUseId", "sourceRevisionId", "intendedUse", "reason", "auditType", "projectId", "auditProjectId", "auditKey", "auditName", "createdAt", "createdBy", "updatedAt", "updatedBy", "rowVersion", "id"], Keys(history[0]!));
+        Assert.Equal(("Incorporated into design basis", "InputAdoption"), (history[0]!.S("reason"), history[0]!.S("auditType")));
+        var one = await Get(TestData.Omar, root + $"/input-uses?targetType=Task&targetId={target}&page=1&pageSize=1");
+        Assert.Equal((target, 1, 1), (Assert.Single(one["items"]!.AsArray())!.G("targetId"), one.I("pageSize"), one.I("totalCount"))); Assert.Equal(target, Assert.Single(one["assessments"]!.AsArray())!.G("targetId")); Assert.Single(one["history"]!.AsArray());
+
+        var impacts = await Get(TestData.Alex, $"/api/v1/issues/{issueId}/reference-impacts"); var impact = Assert.Single(impacts.AsArray())!;
+        Assert.Equal(["id", "documentReferenceId", "previousRevisionId", "currentRevisionId", "ownerId", "verifierId", "status", "ownerDisposition", "ownerReason", "verifierDisposition", "verifierReason", "ownerDecidedAt", "verifierDecidedAt", "rowVersion",
+            "documentReference", "previousRevision", "currentRevision"], Keys(impact));
+        Assert.Equal((IssueReferenceImpactStatus.Pending, s.Revision, detail["newRevision"]!.G("id"), data.User(TestData.Alex)), (impact.S("status"), impact.G("previousRevisionId"), impact.G("currentRevisionId"), impact.G("ownerId")));
+        foreach (var name in new[] { "verifierId", "ownerDisposition", "ownerReason", "verifierDisposition", "verifierReason", "ownerDecidedAt", "verifierDecidedAt" }) Assert.Null(impact[name]); // null, not omitted
+        Assert.Equal(["identifier", "revision", "kind"], Keys(impact["documentReference"]!)); Assert.Equal(("survey", "A", "Drawing"), (impact["documentReference"]!.S("identifier"), impact["documentReference"]!.S("revision"), impact["documentReference"]!.S("kind")));
+        Assert.Equal(["sourceKey", "externalIdentifier", "revision"], Keys(impact["previousRevision"]!)); Assert.Equal(["sourceKey", "externalIdentifier", "revision"], Keys(impact["currentRevision"]!));
+        Assert.Equal(("A", "B", "survey"), (impact["previousRevision"]!.S("revision"), impact["currentRevision"]!.S("revision"), impact["currentRevision"]!.S("externalIdentifier")));
+        var export = await f.As(TestData.Alex).GetAsync(root + "/changes/export?format=csv"); var csv = await export.Content.ReadAsStringAsync();
+        Assert.Contains("Key,Name,Status,Due,Incomplete assessments,Scope", csv); Assert.Contains(",Coordinated survey,Open,2026-09-18,1,East corridor", csv);
+    }
     static string[] Keys(JsonNode n) => n.AsObject().Select(x => x.Key).ToArray();
+    static readonly string[] DetailKeys = ["notice", "assessments", "completeAssessmentIds", "oldRevision", "newRevision", "head", "actorId", "canWrite", "canPublish", "canManage", "eligiblePeople", "uses"];
+    static readonly string[] UseKeys = ["targetType", "targetId", "ownerId", "sourceIdentity", "sourceRevisionId", "intendedUse", "adoptedAt", "adoptedBy", "auditType", "projectId", "auditProjectId", "auditKey", "auditName", "createdAt", "createdBy", "updatedAt", "updatedBy", "rowVersion", "id"];
     static readonly string[] SourceRevisionKeys = ["projectId", "deliverableId", "sourceRowVersion", "sourceIdentity", "sourceSystem", "externalIdentifier", "issuer", "scope", "sourceCheckedAt", "supersedesId", "authorIds",
         "identityHash", "sourceKey", "title", "revision", "url", "auditType", "auditProjectId", "auditKey", "auditName", "createdAt", "createdBy", "updatedAt", "updatedBy", "rowVersion", "id"];
 }

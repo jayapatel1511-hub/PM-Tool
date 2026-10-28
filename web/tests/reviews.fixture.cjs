@@ -128,7 +128,86 @@ const reviewDetail = (r) => ({
   rounds: [], assignments: [], findings: [], manifest: [], events: [], eligiblePeople: [], actorId: none, canCoordinate: false, canManage: false, canWrite: false, canReassignVerifier: false, ...r,
 })
 
+/**
+ * One notice of the Changes register: Draft with nothing pending unless given.
+ * @param {Pick<Schemas['ChangeRow'], 'id' | 'key' | 'title'> & Partial<Schemas['ChangeRow']>} r
+ * @returns {Schemas['ChangeRow']}
+ */
+const changeRow = (r) => ({ status: 'Draft', rowVersion: 1, ownerId: none, scope: 'East corridor', assessmentDueDate: '2026-09-18', pendingAssessments: 0, ...r })
+
+/**
+ * One page of the Changes register. The page and size are the request's, as the server echoes them.
+ * @param {Schemas['ChangeRow'][]} items
+ * @param {{ total?: number, page?: number, pageSize?: number }} [paging]
+ * @returns {Schemas['PageOfChangeRow']}
+ */
+const changePage = (items, paging = {}) => ({ items, page: paging.page ?? 1, pageSize: paging.pageSize ?? 50, totalCount: paging.total ?? items.length })
+
+/**
+ * A change notice as stored.
+ * @param {Pick<Schemas['ChangeNoticeRow'], 'id' | 'key' | 'title'> & Partial<Schemas['ChangeNoticeRow']>} r
+ * @returns {Schemas['ChangeNoticeRow']}
+ */
+const changeNoticeRow = (r) => ({
+  ownerId: none, projectDisciplineId: none, oldRevisionId: none, newRevisionId: none, description: 'Changed corridor alignment', scope: 'East corridor', effectiveDate: '2026-09-14', assessmentDueDate: '2026-09-18',
+  status: 'Draft', publishedAt: null, auditType: 'ChangeNotice', auditProjectId: null, auditKey: null, auditName: null, auditDisciplineId: null, projectId: none, seq: 1, deletedAt: null, deletedBy: null,
+  ...audit, rowVersion: 1, ...r,
+})
+
+/**
+ * One work item a notice asks its owner to assess; nothing is decided unless given.
+ * @param {Pick<Schemas['ChangeAssessmentRow'], 'id' | 'targetType' | 'targetId' | 'ownerId' | 'revisionUsedId'> & Partial<Schemas['ChangeAssessmentRow']>} r
+ * @returns {Schemas['ChangeAssessmentRow']}
+ */
+const changeAssessmentRow = (r) => ({
+  changeNoticeId: none, reviewerId: null, inputUseId: null, handoffId: null, status: 'Pending Assessment', acknowledgedAt: null, rationale: null, evidenceUrl: null, correctionTaskId: null, effortImpactHours: null,
+  dateImpactDays: null, retainOldRevision: true, retentionApprovedBy: null, retentionReason: null, verifiedBy: null, verifiedAt: null, auditType: 'ChangeAssessment', projectId: none, auditProjectId: null,
+  auditKey: null, auditName: null, ...audit, rowVersion: 0, ...r,
+})
+
+/**
+ * A source revision a work item has adopted as an input.
+ * @param {Pick<Schemas['InputUseRow'], 'id' | 'targetType' | 'targetId' | 'sourceIdentity' | 'sourceRevisionId'> & Partial<Schemas['InputUseRow']>} r
+ * @returns {Schemas['InputUseRow']}
+ */
+const inputUseRow = (r) => ({
+  ownerId: none, intendedUse: 'Service route', adoptedAt: stamp, adoptedBy: none, auditType: 'InputUse', projectId: none, auditProjectId: null, auditKey: null, auditName: null, ...audit, rowVersion: 0, ...r,
+})
+
+/**
+ * The assessment a notice asked of one target.
+ * @param {Pick<Schemas['InputUseAssessment'], 'targetId' | 'changeNoticeId' | 'key' | 'newRevisionId'> & Partial<Schemas['InputUseAssessment']>} r
+ * @returns {Schemas['InputUseAssessment']}
+ */
+const inputUseAssessment = (r) => ({ targetType: 'Task', status: 'Pending Assessment', noticeStatus: 'Open', ...r })
+
+/**
+ * One page of input uses with the assessments and history of the targets on it. The page and size are the request's.
+ * @param {Schemas['InputUseRow'][]} items
+ * @param {{ assessments?: Schemas['InputUseAssessment'][], history?: Schemas['InputAdoptionRow'][], total?: number, page?: number, pageSize?: number }} [more]
+ * @returns {Schemas['InputUsePage']}
+ */
+const inputUsePage = (items, more = {}) => ({ items, page: more.page ?? 1, pageSize: more.pageSize ?? 50, totalCount: more.total ?? items.length, assessments: more.assessments ?? [], history: more.history ?? [] })
+
+/**
+ * One notice as the detail panel reads it; the viewer may do nothing unless the can flags say so.
+ * @param {Pick<Schemas['ChangeDetail'], 'notice' | 'oldRevision' | 'newRevision'> & Partial<Schemas['ChangeDetail']>} r
+ * @returns {Schemas['ChangeDetail']}
+ */
+const changeDetail = (r) => ({ assessments: [], completeAssessmentIds: [], head: null, actorId: none, canWrite: false, canPublish: false, canManage: false, eligiblePeople: [], uses: [], ...r })
+
+/**
+ * A superseded source reference on a resolved issue; nothing is decided unless given.
+ * @param {Pick<Schemas['ReferenceImpactRow'], 'id' | 'documentReferenceId' | 'previousRevisionId' | 'currentRevisionId'> & Partial<Schemas['ReferenceImpactRow']>} r
+ * @returns {Schemas['ReferenceImpactRow']}
+ */
+const referenceImpactRow = (r) => ({
+  ownerId: none, verifierId: null, status: 'Pending', ownerDisposition: null, ownerReason: null, verifierDisposition: null, verifierReason: null, ownerDecidedAt: null, verifierDecidedAt: null, rowVersion: 0,
+  documentReference: null, previousRevision: null, currentRevision: null, ...r,
+})
+
 module.exports = {
   sourceRevisionRow, sourceHeadRow, coordinationSource, coordinationDeliverable, coordinationTask, coordinationOptions,
   reviewRow, reviewPage, reviewPackageRow, reviewRoundRow, reviewAssignmentRow, reviewFindingRow, reviewFindingEventRow, reviewManifestRow, reviewDetail,
+  changeRow, changePage, changeNoticeRow, changeAssessmentRow, inputUseRow, inputUseAssessment, inputUsePage, changeDetail, referenceImpactRow,
 }

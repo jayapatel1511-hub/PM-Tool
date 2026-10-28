@@ -37,7 +37,7 @@ export function SubmissionsTab() {
   const project = useCurrentProject(), qc = useQueryClient(), [sp, setSp] = useSearchParams(), [adding, setAdding] = useState(false)
   const page = Math.max(1, Number(sp.get('page')) || 1), panel = sp.get('panel')?.startsWith('SubmissionPackage:') ? sp.get('panel')!.slice(18) : null
   const filters = Object.fromEntries(['q', 'status', 'coordinatorId', 'milestoneId', 'targetFrom', 'targetTo'].map(k => [k, sp.get(k) ?? '']))
-  const options = useQuery({ queryKey: ['coord-options', project.id], queryFn: () => get<CoordOptions>(`projects/${project.id}/changes/options`) })
+  const options = useQuery({ queryKey: ['coord-options', project.id], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/changes/options', { params: { projectId: project.id } }) })
   const milestones = useQuery({ queryKey: ['submission-milestones', project.id], queryFn: () => get<Milestone[]>(`projects/${project.id}/milestones?showCompleted=true`) })
   const list = useQuery({ queryKey: ['submissions', project.id, filters, page], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/submissions', { params: { projectId: project.id },
     query: { Q: filters.q, Status: filters.status, CoordinatorId: filters.coordinatorId, MilestoneId: filters.milestoneId, TargetFrom: filters.targetFrom, TargetTo: filters.targetTo, page } }) })

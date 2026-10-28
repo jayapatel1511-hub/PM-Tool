@@ -3715,7 +3715,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["ReferenceImpactRow"][];
                     };
                 };
             };
@@ -10245,7 +10245,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["PageOfChangeRow"];
                     };
                 };
             };
@@ -10361,7 +10361,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["ChangeDetail"];
                     };
                 };
             };
@@ -11461,7 +11461,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["InputUsePage"];
                     };
                 };
             };
@@ -16907,6 +16907,61 @@ export interface components {
             verifiedAt: string;
             verifier: string;
         };
+        ChangeAssessmentRow: {
+            /** Format: date-time */
+            acknowledgedAt: null | string;
+            auditKey: null | string;
+            auditName: null | string;
+            /** Format: uuid */
+            auditProjectId: null | string;
+            auditType: string;
+            /** Format: uuid */
+            changeNoticeId: string;
+            /** Format: uuid */
+            correctionTaskId: null | string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            /** Format: int32 */
+            dateImpactDays: null | number;
+            /** Format: double */
+            effortImpactHours: null | number;
+            evidenceUrl: null | string;
+            /** Format: uuid */
+            handoffId: null | string;
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            inputUseId: null | string;
+            /** Format: uuid */
+            ownerId: string;
+            /** Format: uuid */
+            projectId: string;
+            rationale: null | string;
+            retainOldRevision: boolean;
+            /** Format: uuid */
+            retentionApprovedBy: null | string;
+            retentionReason: null | string;
+            /** Format: uuid */
+            reviewerId: null | string;
+            /** Format: uuid */
+            revisionUsedId: string;
+            /** Format: int32 */
+            rowVersion: number;
+            status: string;
+            /** Format: uuid */
+            targetId: string;
+            targetType: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: uuid */
+            updatedBy: null | string;
+            /** Format: date-time */
+            verifiedAt: null | string;
+            /** Format: uuid */
+            verifiedBy: null | string;
+        };
         ChangeDateBody: {
             cascadeDeliverables: null | boolean;
             dryRun: null | boolean;
@@ -16917,12 +16972,91 @@ export interface components {
             /** Format: int32 */
             rowVersion: null | number;
         };
+        ChangeDetail: {
+            /** Format: uuid */
+            actorId: string;
+            assessments: components["schemas"]["ChangeAssessmentRow"][];
+            canManage: boolean;
+            canPublish: boolean;
+            canWrite: boolean;
+            completeAssessmentIds: string[];
+            eligiblePeople: string[];
+            head: null | components["schemas"]["SourceHeadRow"];
+            newRevision: components["schemas"]["SourceRevisionRow"];
+            notice: components["schemas"]["ChangeNoticeRow"];
+            oldRevision: components["schemas"]["SourceRevisionRow"];
+            uses: components["schemas"]["InputUseRow"][];
+        };
         ChangeLine: {
             field: string;
             new: null | components["schemas"]["JsonElement"];
             newLabel: null | string;
             old: null | components["schemas"]["JsonElement"];
             oldLabel: null | string;
+        };
+        ChangeNoticeRow: {
+            /** Format: date */
+            assessmentDueDate: string;
+            /** Format: uuid */
+            auditDisciplineId: null | string;
+            auditKey: null | string;
+            auditName: null | string;
+            /** Format: uuid */
+            auditProjectId: null | string;
+            auditType: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            /** Format: date-time */
+            deletedAt: null | string;
+            /** Format: uuid */
+            deletedBy: null | string;
+            description: string;
+            /** Format: date */
+            effectiveDate: string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            /** Format: uuid */
+            newRevisionId: string;
+            /** Format: uuid */
+            oldRevisionId: string;
+            /** Format: uuid */
+            ownerId: string;
+            /** Format: uuid */
+            projectDisciplineId: string;
+            /** Format: uuid */
+            projectId: string;
+            /** Format: date-time */
+            publishedAt: null | string;
+            /** Format: int32 */
+            rowVersion: number;
+            scope: string;
+            /** Format: int32 */
+            seq: number;
+            status: string;
+            title: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: uuid */
+            updatedBy: null | string;
+        };
+        ChangeRow: {
+            /** Format: date */
+            assessmentDueDate: string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            /** Format: uuid */
+            ownerId: string;
+            /** Format: int32 */
+            pendingAssessments: number;
+            /** Format: int32 */
+            rowVersion: number;
+            scope: string;
+            status: string;
+            title: string;
         };
         ChannelBody: {
             app: boolean;
@@ -18852,6 +18986,90 @@ export interface components {
             applied: boolean;
             errors: string[];
         };
+        InputAdoptionRow: {
+            auditKey: null | string;
+            auditName: null | string;
+            /** Format: uuid */
+            auditProjectId: null | string;
+            auditType: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            inputUseId: string;
+            intendedUse: string;
+            /** Format: uuid */
+            projectId: string;
+            reason: string;
+            /** Format: int32 */
+            rowVersion: number;
+            /** Format: uuid */
+            sourceRevisionId: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: uuid */
+            updatedBy: null | string;
+        };
+        InputUseAssessment: {
+            /** Format: uuid */
+            changeNoticeId: string;
+            key: string;
+            /** Format: uuid */
+            newRevisionId: string;
+            noticeStatus: string;
+            status: string;
+            /** Format: uuid */
+            targetId: string;
+            targetType: string;
+        };
+        InputUsePage: {
+            assessments: components["schemas"]["InputUseAssessment"][];
+            history: components["schemas"]["InputAdoptionRow"][];
+            items: components["schemas"]["InputUseRow"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+        };
+        InputUseRow: {
+            /** Format: date-time */
+            adoptedAt: string;
+            /** Format: uuid */
+            adoptedBy: string;
+            auditKey: null | string;
+            auditName: null | string;
+            /** Format: uuid */
+            auditProjectId: null | string;
+            auditType: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            /** Format: uuid */
+            id: string;
+            intendedUse: string;
+            /** Format: uuid */
+            ownerId: string;
+            /** Format: uuid */
+            projectId: string;
+            /** Format: int32 */
+            rowVersion: number;
+            sourceIdentity: string;
+            /** Format: uuid */
+            sourceRevisionId: string;
+            /** Format: uuid */
+            targetId: string;
+            targetType: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: uuid */
+            updatedBy: null | string;
+        };
         Integrity: {
             /** Format: date-time */
             checkedAt: null | string;
@@ -19770,6 +19988,17 @@ export interface components {
             /** Format: int32 */
             totalCount: number;
         };
+        PageOfChangeRow: {
+            filters?: unknown;
+            items: components["schemas"]["ChangeRow"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            sort?: null | string;
+            /** Format: int32 */
+            totalCount: number;
+        };
         PageOfDeletedItem: {
             filters?: unknown;
             items: components["schemas"]["DeletedItem"][];
@@ -20285,6 +20514,44 @@ export interface components {
             name: string;
             /** Format: int32 */
             sortOrder: number;
+        };
+        ReferenceImpactDocument: {
+            identifier: string;
+            kind: string;
+            revision: string;
+        };
+        ReferenceImpactRevision: {
+            externalIdentifier: string;
+            revision: string;
+            sourceKey: string;
+        };
+        ReferenceImpactRow: {
+            currentRevision: null | components["schemas"]["ReferenceImpactRevision"];
+            /** Format: uuid */
+            currentRevisionId: string;
+            documentReference: null | components["schemas"]["ReferenceImpactDocument"];
+            /** Format: uuid */
+            documentReferenceId: string;
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            ownerDecidedAt: null | string;
+            ownerDisposition: null | string;
+            /** Format: uuid */
+            ownerId: string;
+            ownerReason: null | string;
+            previousRevision: null | components["schemas"]["ReferenceImpactRevision"];
+            /** Format: uuid */
+            previousRevisionId: string;
+            /** Format: int32 */
+            rowVersion: number;
+            status: string;
+            /** Format: date-time */
+            verifierDecidedAt: null | string;
+            verifierDisposition: null | string;
+            /** Format: uuid */
+            verifierId: null | string;
+            verifierReason: null | string;
         };
         ReferenceLimits: {
             /** Format: int32 */

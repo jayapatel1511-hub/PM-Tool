@@ -13,7 +13,7 @@ test('item changes keep the previous project and item-specific invalidations (AC
     SubmissionPackage: ['submissions', 'submission-detail', 'coord-options'],
     PersonAvailabilityOverride: ['availability', 'availability-view', 'planning-grid', 'my-week'],
     ReviewRound: ['reviews', 'review-detail', 'changes', 'change-detail', 'coord-options', 'input-uses', 'handoffs', 'handoff-detail', 'submissions', 'submission-detail', 'workspace-coordination', 'deliverable'],
-    PlanningEntry: ['planning-grid', 'planning-entries'], DesignBasisEntry: ['design-basis', 'design-basis-detail'], Member: ['staff'], SavedView: ['views'], ReferenceData: ['reference'], Setting: ['me'],
+    PlanningEntry: ['planning-grid', 'planning-entries'], DesignBasisEntry: ['design-basis', 'design-basis-detail'], Member: ['staff'], SavedView: ['views'], ReferenceData: ['reference', 'admin'], Setting: ['me', 'admin'], Holiday: ['admin', 'availability-view', 'workload'],
     Dependency: ['task', 'gantt', 'coordination', 'workload', 'mywork-tasks'], DeliverableDependency: ['deliverable', 'gantt', 'coordination', 'coord-options'],
     Discipline: ['planner-project-disciplines'],
     ApprovedLeave: ['availability-view', 'planning-grid', 'my-week'], PersonSchedule: ['availability-view', 'planning-grid', 'my-week'], // the Vacation page's own refresh after leave, schedule and import commands
@@ -62,7 +62,8 @@ test('invalidation prefixes match actual mounted screen query keys', () => {
     Dependency: [['task', 'i1', 'deps', '3'], ['task', 'i1', 'chain'], ['task', 'i1', 'candidates', 'predecessor', ''], ['gantt', 'scope']],
     DeliverableDependency: [['deliverable', 'i1'], ['gantt', 'scope']],
     Deliverable: [['gantt', 'scope'], ['open-items', 'm1']], DocumentLink: [['files', 'scope']],
-    ApprovedLeave: [['availability-view', '2026-10-01', '2026-10-31'], ['planning-grid', 'scope'], ['my-week', 'scope']], PersonSchedule: [['availability-view', '2026-10-01', '2026-10-31']], User: [['hr-identities']],
+    ApprovedLeave: [['availability-view', '2026-10-01', '2026-10-31'], ['planning-grid', 'scope'], ['my-week', 'scope']], PersonSchedule: [['availability-view', '2026-10-01', '2026-10-31']], User: [['hr-identities'], ['admin', 'users', '', false, false], ['admin', 'users', 'all']],
+    ReferenceData: [['admin', 'offices'], ['admin', 'disciplines'], ['reference']], Setting: [['admin', 'settings'], ['me']], Holiday: [['admin', 'holidays', 2026, ''], ['availability-view', '2026-10-01', '2026-10-31'], ['workload', 'scope']],
     Member: [['p', 'p1', 'team'], ['open-items', 'm1']], Discipline: [['p', 'p1', 'team'], ['planner-project-disciplines', 'p1']],
     Risk: [['search-counts', 'scope'], ['search-page', 'scope']],
     IssueLocation: [['issue-locations', 'i1']], ReadinessAssessment: [['readiness-detail', 'p1', 'i1']],

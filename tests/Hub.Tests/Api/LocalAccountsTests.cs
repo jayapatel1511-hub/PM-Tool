@@ -163,9 +163,13 @@ public sealed class LocalAccountsTests : IDisposable
 
         // The admin adds a person under their future Entra sign-in name, with title, office and supervisor.
         var office = f.Db(db => db.Offices.First().Id);
-        var created = await (await Send(c, HttpMethod.Post, "/api/v1/admin/users", adminCookie,
-            new { email = "Pat.Pilot@Example.com", displayName = "Pat Pilot", jobTitle = "Civil EIT", officeId = office, supervisorId = admin.Id })).Json(201);
+        var createdResponse = await Send(c, HttpMethod.Post, "/api/v1/admin/users", adminCookie,
+            new { email = "Pat.Pilot@Example.com", displayName = "Pat Pilot", jobTitle = "Civil EIT", officeId = office, supervisorId = admin.Id });
+        var created = await createdResponse.Json(201);
         var patId = created.G("id");
+        Assert.Equal(["id", "rowVersion"], created.AsObject().Select(x => x.Key)); // 040-S15-Admin: the typed answer keeps its two properties and its Location
+        Assert.Equal($"/api/v1/admin/users/{patId}", createdResponse.Headers.Location!.OriginalString);
+        Assert.Equal(f.Db(db => db.Users.Single(u => u.Id == patId).RowVersion), created.I("rowVersion"));
         var pat = Person("Pat.Pilot@Example.com");
         Assert.Equal(patId, pat.Id);
         Assert.Equal(("Pat Pilot", "Civil EIT", (Guid?)office, (Guid?)admin.Id, true), (pat.DisplayName, pat.JobTitle, pat.OfficeId, pat.SupervisorId, pat.IsActive));

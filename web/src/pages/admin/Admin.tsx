@@ -15,7 +15,8 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
-import { ApiError, del, get, patch, post, put, qs, typedRequest } from '@/lib/api'
+import type { components } from '@/gen/api'
+import { ApiError, typedRequest } from '@/lib/api'
 import { fmtTime } from '@/lib/format'
 import { invalidateChange } from '@/lib/keys'
 import { runtimeText, t } from '@/lib/i18n'
@@ -28,6 +29,7 @@ import { useSafeForm } from '@/hooks/drafts'
 
 const KINDS = ['disciplines', 'clients', 'offices', 'deliverableTypes', 'phases', 'projectTypes'] as const
 type Kind = (typeof KINDS)[number]
+type Schemas = components['schemas']
 
 const h2 = 'text-lg/[26px] font-semibold tracking-[-0.2px]'
 const card = 'rounded-lg border bg-card'
@@ -64,26 +66,28 @@ export function AdminIndex() { return <Navigate to="/admin/reference/disciplines
 
 // ---------- Reference data (FR-008..FR-015) ----------
 
-interface Ref { id: string; name: string; isActive: boolean; sortOrder: number; rowVersion: number; code?: string; colour?: string; timeZone?: string; shortName?: string; defaultDisciplineId?: string }
+/** One entry of any kind: the shared columns, and whichever of the kind's own columns it has (the contract's rows for each kind). */
+type Ref = Schemas['ReferenceRow'] & Partial<Schemas['OfficeRow'] & Schemas['DisciplineRow'] & Schemas['ClientRow'] & Schemas['DeliverableTypeRow']>
 
 export function ReferenceData() {
   const { kind = 'disciplines' } = useParams() as { kind: Kind }
   const qc = useQueryClient()
-  const list = useQuery({ queryKey: ['admin', kind], queryFn: () => get<Ref[]>(`admin/${kind}`) })
-  const disciplines = useQuery({ queryKey: ['admin', 'disciplines'], queryFn: () => get<Ref[]>('admin/disciplines'), enabled: kind === 'deliverableTypes' })
+  const path = `/api/v1/admin/${kind}` as const
+  const list = useQuery({ queryKey: ['admin', kind], queryFn: (): Promise<Ref[]> => typedRequest('get', path, {}) })
+  const disciplines = useQuery({ queryKey: ['admin', 'disciplines'], queryFn: () => typedRequest('get', '/api/v1/admin/disciplines', {}), enabled: kind === 'deliverableTypes' })
   const [editing, setEditing] = useState<Partial<Ref> | null>(null)
   const [deactivate, setDeactivate] = useState<{ row: Ref; projects: number } | null>(null)
-  const refresh = () => { qc.invalidateQueries({ queryKey: ['admin', kind] }); void invalidateChange(qc, 'ReferenceData') }
+  const refresh = () => { void invalidateChange(qc, 'ReferenceData') }
   const save = useMutation({
-    mutationFn: (r: Partial<Ref>) => r.id ? patch(`admin/${kind}/${r.id}`, r, r.rowVersion) : post(`admin/${kind}`, r),
+    mutationFn: (r: Partial<Ref>) => r.id ? typedRequest('patch', `/api/v1/admin/${kind}/{id}`, { params: { id: r.id }, body: r, ifMatch: r.rowVersion }) : typedRequest('post', path, { body: r }),
     onSuccess: () => { refresh(); setEditing(null); toast.success(t('common.saved')) },
   })
   const rows = list.data ?? []
   const move = async (i: number, dir: -1 | 1) => {
     const a = rows[i], b = rows[i + dir]
     if (!b) return
-    await patch(`admin/${kind}/${a.id}`, { sortOrder: b.sortOrder === a.sortOrder ? a.sortOrder + dir : b.sortOrder }, a.rowVersion)
-    await patch(`admin/${kind}/${b.id}`, { sortOrder: a.sortOrder }, b.rowVersion)
+    await typedRequest('patch', `/api/v1/admin/${kind}/{id}`, { params: { id: a.id }, body: { sortOrder: b.sortOrder === a.sortOrder ? a.sortOrder + dir : b.sortOrder }, ifMatch: a.rowVersion })
+    await typedRequest('patch', `/api/v1/admin/${kind}/{id}`, { params: { id: b.id }, body: { sortOrder: a.sortOrder }, ifMatch: b.rowVersion })
     refresh()
   }
   const hasCode = kind === 'disciplines' || kind === 'offices'
@@ -108,7 +112,7 @@ export function ReferenceData() {
       <div className="flex justify-end gap-1">
         <Button size="sm" variant="outline" onClick={() => setEditing(r)}>{t('common.edit')}</Button>
         {r.isActive
-          ? <Button size="sm" variant="ghost" onClick={async () => setDeactivate({ row: r, projects: (await get(`admin/${kind}/${r.id}/usage`)).projects })}>{t('admin.deactivate')}</Button>
+          ? <Button size="sm" variant="ghost" onClick={async () => setDeactivate({ row: r, projects: (await typedRequest('get', `/api/v1/admin/${kind}/{id}/usage`, { params: { id: r.id } })).projects })}>{t('admin.deactivate')}</Button>
           : <Button size="sm" variant="ghost" onClick={() => save.mutate({ id: r.id, rowVersion: r.rowVersion, isActive: true })}>{t('admin.activate')}</Button>}
       </div>) },
   ], rows, (r) => [r.sortOrder])
@@ -162,11 +166,13 @@ export function ReferenceData() {
 
 // ---------- Settings (FR-014) ----------
 
-interface SettingRow { key: string; kind: string; group: string; default: any; value: any; packet?: string }
+type SettingRow = Schemas['SettingRow']
+
+type ChannelValue = { app?: boolean; email?: boolean }
 
 export function Settings() {
   const qc = useQueryClient()
-  const list = useQuery({ queryKey: ['admin', 'settings'], queryFn: () => get<SettingRow[]>('admin/settings') })
+  const list = useQuery({ queryKey: ['admin', 'settings'], queryFn: () => typedRequest('get', '/api/v1/admin/settings', {}) })
   const [draft, setDraft] = useState<Record<string, any>>({})
   const [errors, setErrors] = useState<Record<string, unknown>>({})
   const [pending, setPending] = useState<Record<string, boolean>>({})
@@ -177,9 +183,8 @@ export function Settings() {
     setErrors((e) => ({ ...e, [key]: null }))
     setPending((p) => ({ ...p, [key]: true }))
     try {
-      await put(`admin/settings/${encodeURIComponent(key)}`, { value })
-      await qc.invalidateQueries({ queryKey: ['admin', 'settings'] })
-      void invalidateChange(qc, 'Setting')
+      await typedRequest('put', '/api/v1/admin/settings/{key}', { params: { key }, body: { value } })
+      await invalidateChange(qc, 'Setting')
       clearDraft(key)
       toast.success(t('common.saved'))
     } catch (e) {
@@ -194,7 +199,7 @@ export function Settings() {
     : s.key.startsWith('notify_default.') ? runtimeText(`event.${s.key.slice(15)}`)
     : s.key.startsWith('flag.') ? t('admin.flagLabel', { name: s.key.slice(5), packet: s.packet ?? '' }) : runtimeText(`setting.${s.key}`)
   const fallback = (s: SettingRow) => s.default != null && typeof s.default === 'object'
-    ? [s.default.app && t('pref.app'), s.default.email && t('pref.email')].filter(Boolean).join(' + ') : String(s.default)
+    ? [(s.default as ChannelValue).app && t('pref.app'), (s.default as ChannelValue).email && t('pref.email')].filter(Boolean).join(' + ') : String(s.default)
   // Form page (design §5): a 760 px field region; each setting shows its current value, its default and its own error.
   return (
     <div className="max-w-[760px] space-y-6">
@@ -241,7 +246,7 @@ export function Settings() {
 
 // ---------- Users and roles (FR-004, FR-016, FR-017, FR-027, E-26) ----------
 
-interface UserRow { id: string; displayName: string; email: string; jobTitle?: string; officeId?: string; supervisorId?: string; homeDisciplineId?: string | null; isActive: boolean; weeklyCapacityHours?: number; isTemplateEditor: boolean; lastSignInAt?: string; rowVersion: number; roles: { role: string; source: string }[] }
+type UserRow = Schemas['AdminUserRow']
 
 /** A system role with where it comes from: directory-group roles are filled, roles added in the Hub are outlined. */
 const RoleBadge = ({ r, children }: { r: UserRow['roles'][number]; children: React.ReactNode }) => (
@@ -253,14 +258,14 @@ export function Users() {
   const [q, setQ] = useState('')
   const [inactive, setInactive] = useState(false)
   const [noSup, setNoSup] = useState(false)
-  const list = useQuery({ queryKey: ['admin', 'users', q, inactive, noSup], queryFn: () => get<UserRow[]>(`admin/users${qs({ q, inactive, noSupervisor: noSup })}`) })
-  const everyone = useQuery({ queryKey: ['admin', 'users', 'all'], queryFn: () => get<UserRow[]>('admin/users?inactive=true') })
+  const list = useQuery({ queryKey: ['admin', 'users', q, inactive, noSup], queryFn: () => typedRequest('get', '/api/v1/admin/users', { query: { q, inactive, noSupervisor: noSup } }) })
+  const everyone = useQuery({ queryKey: ['admin', 'users', 'all'], queryFn: () => typedRequest('get', '/api/v1/admin/users', { query: { inactive: true } }) })
   const ref = useQuery({ queryKey: ['reference'], queryFn: () => typedRequest('get', '/api/v1/reference', {}) })
   const [edit, setEdit] = useState<UserRow | null>(null)
   const [creating, setCreating] = useState(false)
   const [handoff, setHandoff] = useState<{ id: string; email: string; displayName: string } | null>(null)
   const supervisor = (id: string) => everyone.data?.find((u) => u.id === id)?.displayName ?? <Missing />
-  const refresh = () => qc.invalidateQueries({ queryKey: ['admin', 'users'] })
+  const refresh = () => { void invalidateChange(qc, 'User') }
   const rows = list.data ?? []
   // FR-REC-14: the shared DataTable; no column sorts and none is optional, so the list keeps the server's order.
   const table = useTable<UserRow>('hub.userColumns', ([
@@ -312,7 +317,7 @@ function CreateUserDialog({ users, offices, onClose, onCreated }: { users: UserR
   const submit = async (e: React.FormEvent) => {
     e.preventDefault(); setErr(null); setBusy(true)
     try {
-      const result = await post<{ id: string }>('admin/users', { ...form, officeId: form.officeId || null, supervisorId: form.supervisorId || null })
+      const result = await typedRequest('post', '/api/v1/admin/users', { body: { ...form, officeId: form.officeId || null, supervisorId: form.supervisorId || null } })
       safe.clear(); toast.success(t('common.saved')); onCreated({ id: result.id, email: form.email.trim(), displayName: form.displayName.trim() })
     } catch (e) { setErr(e) } finally { setBusy(false) }
   }
@@ -356,12 +361,12 @@ function UserDialog({ user, users, offices, disciplines, onClose }: { user: User
   const submit = async () => {
     setErr(null); setBusy(true)
     try {
-      await patch(`admin/users/${user.id}`, { supervisorId: form.supervisorId || null, officeId: form.officeId || null, homeDisciplineId: form.homeDisciplineId || null, weeklyCapacityHours: form.weeklyCapacityHours === '' ? null : Number(form.weeklyCapacityHours), isTemplateEditor: form.isTemplateEditor, isActive: form.isActive }, user.rowVersion)
+      await typedRequest('patch', '/api/v1/admin/users/{id}', { params: { id: user.id }, body: { supervisorId: form.supervisorId || null, officeId: form.officeId || null, homeDisciplineId: form.homeDisciplineId || null, weeklyCapacityHours: form.weeklyCapacityHours === '' ? null : Number(form.weeklyCapacityHours), isTemplateEditor: form.isTemplateEditor, isActive: form.isActive }, ifMatch: user.rowVersion })
       toast.success(t('common.saved')); onClose()
     } catch (e) { setErr(e) } finally { setBusy(false) }
   }
-  const addRole = async () => { if (!role) return; try { await post(`admin/users/${user.id}/roles`, { role }); setRoles([...roles, { role, source: 'Manual' }]); setRole('') } catch (e) { setErr(e) } }
-  const removeRole = async (r: string) => { try { await del(`admin/users/${user.id}/roles/${r}`); setRoles(roles.filter((x) => !(x.role === r && x.source === 'Manual'))) } catch (e) { setErr(e) } }
+  const addRole = async () => { if (!role) return; try { await typedRequest('post', '/api/v1/admin/users/{id}/roles', { params: { id: user.id }, body: { role } }); setRoles([...roles, { role, source: 'Manual' }]); setRole('') } catch (e) { setErr(e) } }
+  const removeRole = async (r: string) => { try { await typedRequest('delete', '/api/v1/admin/users/{id}/roles/{role}', { params: { id: user.id, role: r } }); setRoles(roles.filter((x) => !(x.role === r && x.source === 'Manual'))) } catch (e) { setErr(e) } }
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-lg">
@@ -421,7 +426,7 @@ function UserDialog({ user, users, offices, disciplines, onClose }: { user: User
 export function OrgActivity() {
   const [page, setPage] = useState(1)
   const [hideSignIns, setHideSignIns] = useState(true)
-  const list = useQuery({ queryKey: ['admin', 'activity', page, hideSignIns], queryFn: () => get(`admin/activity${qs({ page, pageSize: 50, excludeAction: hideSignIns ? 'SignedIn' : undefined })}`) })
+  const list = useQuery({ queryKey: ['admin', 'activity', page, hideSignIns], queryFn: () => typedRequest('get', '/api/v1/admin/activity', { query: { page, pageSize: 50, excludeAction: hideSignIns ? 'SignedIn' : undefined } }) })
   return (
     <div className="space-y-4">
       <div className="max-w-3xl"><h2 className={h2}>{t('admin.activity')}</h2>

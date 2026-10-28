@@ -43,6 +43,7 @@
     "dependencies.fixture.cjs",
     "team.fixture.cjs",
     "availability.fixture.cjs",
-    "allocations.fixture.cjs"
+    "allocations.fixture.cjs",
+    "admin.fixture.cjs"
   ]
 }

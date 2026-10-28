@@ -203,6 +203,110 @@
         ],
         "type": "object"
       },
+      "AdminUserRole": {
+        "properties": {
+          "role": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "source"
+        ],
+        "type": "object"
+      },
+      "AdminUserRow": {
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "homeDisciplineId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "isTemplateEditor": {
+            "type": "boolean"
+          },
+          "jobTitle": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "lastSignInAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "officeId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "roles": {
+            "items": {
+              "$ref": "#/components/schemas/AdminUserRole"
+            },
+            "type": "array"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "supervisorId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "weeklyCapacityHours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "null",
+              "number"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "email",
+          "jobTitle",
+          "officeId",
+          "supervisorId",
+          "homeDisciplineId",
+          "isActive",
+          "weeklyCapacityHours",
+          "isTemplateEditor",
+          "lastSignInAt",
+          "rowVersion",
+          "roles"
+        ],
+        "type": "object"
+      },
       "AdoptBody": {
         "properties": {
           "expectedCurrentRevisionId": {
@@ -765,96 +869,6 @@
         ],
         "type": "object"
       },
-      "AnonymousTypeOfDateTimeOffsetAndListOfOpsProblemAndListOfObjectAndintAndListOfAnonymousTypeOfGuidAndstringAndstringAndintAndstringAndDateTimeOffsetAndDateTimeOffsetAndint": {
-        "properties": {
-          "asOf": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "deadLetterCount": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          },
-          "deadLetters": {
-            "items": {
-              "$ref": "#/components/schemas/AnonymousTypeOfGuidAndstringAndstringAndintAndstringAndDateTimeOffsetAndDateTimeOffset"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "jobs": {
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "pendingChanges": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          },
-          "problems": {
-            "items": {
-              "$ref": "#/components/schemas/OpsProblem"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          }
-        },
-        "required": [
-          "asOf",
-          "problems",
-          "jobs",
-          "pendingChanges",
-          "deadLetters",
-          "deadLetterCount"
-        ],
-        "type": "object"
-      },
-      "AnonymousTypeOfGuidAndGuidAndstringAndDateOnlyAndstring": {
-        "properties": {
-          "date": {
-            "format": "date",
-            "type": "string"
-          },
-          "id": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "name": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "office": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "officeId": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        },
-        "required": [
-          "id",
-          "officeId",
-          "office",
-          "date",
-          "name"
-        ],
-        "type": "object"
-      },
       "AnonymousTypeOfGuidAndstringAndstring": {
         "properties": {
           "displayName": {
@@ -878,58 +892,6 @@
           "userId",
           "displayName",
           "source"
-        ],
-        "type": "object"
-      },
-      "AnonymousTypeOfGuidAndstringAndstringAndintAndstringAndDateTimeOffsetAndDateTimeOffset": {
-        "properties": {
-          "attempts": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "deadLetteredAt": {
-            "format": "date-time",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "eventType": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "id": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "lastError": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "projectNumber": {
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        },
-        "required": [
-          "id",
-          "eventType",
-          "projectNumber",
-          "attempts",
-          "lastError",
-          "createdAt",
-          "deadLetteredAt"
         ],
         "type": "object"
       },
@@ -977,104 +939,6 @@
           "status",
           "lastSeenAt",
           "unread"
-        ],
-        "type": "object"
-      },
-      "AnonymousTypeOfGuidAndstringAndstringAndstringAndGuidAndGuidAndGuidAndbooleanAnddecimalAndbooleanAndDateTimeOffsetAndintAndIEnumerableOfAnonymousTypeOfstringAndstring": {
-        "properties": {
-          "displayName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "email": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "homeDisciplineId": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "id": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "isActive": {
-            "type": "boolean"
-          },
-          "isTemplateEditor": {
-            "type": "boolean"
-          },
-          "jobTitle": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "lastSignInAt": {
-            "format": "date-time",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "officeId": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "roles": {
-            "items": {
-              "$ref": "#/components/schemas/AnonymousTypeOfstringAndstring"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "rowVersion": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          },
-          "supervisorId": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "weeklyCapacityHours": {
-            "format": "double",
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
-            "type": [
-              "null",
-              "number"
-            ]
-          }
-        },
-        "required": [
-          "id",
-          "displayName",
-          "email",
-          "jobTitle",
-          "officeId",
-          "supervisorId",
-          "homeDisciplineId",
-          "isActive",
-          "weeklyCapacityHours",
-          "isTemplateEditor",
-          "lastSignInAt",
-          "rowVersion",
-          "roles"
         ],
         "type": "object"
       },
@@ -1283,19 +1147,6 @@
         ],
         "type": "object"
       },
-      "AnonymousTypeOfint": {
-        "properties": {
-          "projects": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "projects"
-        ],
-        "type": "object"
-      },
       "AnonymousTypeOfintAndint": {
         "properties": {
           "following": {
@@ -1350,27 +1201,6 @@
           "defaultEmail",
           "direct",
           "custom"
-        ],
-        "type": "object"
-      },
-      "AnonymousTypeOfstringAndstring": {
-        "properties": {
-          "role": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "source": {
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        },
-        "required": [
-          "role",
-          "source"
         ],
         "type": "object"
       },
@@ -4615,7 +4445,29 @@
         ],
         "type": "object"
       },
-      "Client": {
+      "ClientConfig": {
+        "properties": {
+          "authMode": {
+            "type": "string"
+          },
+          "entra": {
+            "$ref": "#/components/schemas/EntraClientConfig"
+          },
+          "providers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "authMode",
+          "providers",
+          "entra"
+        ],
+        "type": "object"
+      },
+      "ClientRow": {
         "properties": {
           "auditKey": {
             "type": [
@@ -4637,10 +4489,7 @@
             ]
           },
           "auditType": {
-            "type": [
-              "null",
-              "string"
-            ]
+            "type": "string"
           },
           "createdAt": {
             "format": "date-time",
@@ -4691,27 +4540,21 @@
             ]
           }
         },
-        "type": "object"
-      },
-      "ClientConfig": {
-        "properties": {
-          "authMode": {
-            "type": "string"
-          },
-          "entra": {
-            "$ref": "#/components/schemas/EntraClientConfig"
-          },
-          "providers": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          }
-        },
         "required": [
-          "authMode",
-          "providers",
-          "entra"
+          "shortName",
+          "name",
+          "isActive",
+          "sortOrder",
+          "auditType",
+          "auditProjectId",
+          "auditKey",
+          "auditName",
+          "createdAt",
+          "createdBy",
+          "updatedAt",
+          "updatedBy",
+          "rowVersion",
+          "id"
         ],
         "type": "object"
       },
@@ -5079,78 +4922,6 @@
           "truncated",
           "snapshots"
         ],
-        "type": "object"
-      },
-      "CommitmentMissCategory": {
-        "properties": {
-          "auditKey": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "auditName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "auditProjectId": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "auditType": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "createdBy": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "id": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "isActive": {
-            "type": "boolean"
-          },
-          "name": {
-            "type": "string"
-          },
-          "rowVersion": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          },
-          "sortOrder": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "updatedBy": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        },
         "type": "object"
       },
       "CommitmentReliability": {
@@ -9186,7 +8957,7 @@
         ],
         "type": "object"
       },
-      "DeliverableType": {
+      "DeliverableTypeRow": {
         "properties": {
           "auditKey": {
             "type": [
@@ -9208,10 +8979,7 @@
             ]
           },
           "auditType": {
-            "type": [
-              "null",
-              "string"
-            ]
+            "type": "string"
           },
           "createdAt": {
             "format": "date-time",
@@ -9263,6 +9031,22 @@
             ]
           }
         },
+        "required": [
+          "defaultDisciplineId",
+          "name",
+          "isActive",
+          "sortOrder",
+          "auditType",
+          "auditProjectId",
+          "auditKey",
+          "auditName",
+          "createdAt",
+          "createdBy",
+          "updatedAt",
+          "updatedBy",
+          "rowVersion",
+          "id"
+        ],
         "type": "object"
       },
       "Delta": {
@@ -9794,84 +9578,6 @@
         ],
         "type": "object"
       },
-      "Discipline": {
-        "properties": {
-          "auditKey": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "auditName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "auditProjectId": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "auditType": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "code": {
-            "type": "string"
-          },
-          "colour": {
-            "type": "string"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "createdBy": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "id": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "isActive": {
-            "type": "boolean"
-          },
-          "name": {
-            "type": "string"
-          },
-          "rowVersion": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          },
-          "sortOrder": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "updatedBy": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        },
-        "type": "object"
-      },
       "DisciplineBody": {
         "properties": {
           "disciplineId": {
@@ -9959,6 +9665,98 @@
           "colour",
           "values",
           "threshold"
+        ],
+        "type": "object"
+      },
+      "DisciplineRow": {
+        "properties": {
+          "auditKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditProjectId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditType": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "colour": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "sortOrder": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "code",
+          "colour",
+          "name",
+          "isActive",
+          "sortOrder",
+          "auditType",
+          "auditProjectId",
+          "auditKey",
+          "auditName",
+          "createdAt",
+          "createdBy",
+          "updatedAt",
+          "updatedBy",
+          "rowVersion",
+          "id"
         ],
         "type": "object"
       },
@@ -11550,6 +11348,18 @@
         ],
         "type": "object"
       },
+      "HolidayAdded": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
       "HolidayBody": {
         "properties": {
           "date": {
@@ -11572,6 +11382,42 @@
         },
         "required": [
           "officeId",
+          "date",
+          "name"
+        ],
+        "type": "object"
+      },
+      "HolidayRow": {
+        "properties": {
+          "date": {
+            "format": "date",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "office": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "officeId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "officeId",
+          "office",
           "date",
           "name"
         ],
@@ -15032,7 +14878,7 @@
         ],
         "type": "object"
       },
-      "Office": {
+      "OfficeRow": {
         "properties": {
           "auditKey": {
             "type": [
@@ -15054,10 +14900,7 @@
             ]
           },
           "auditType": {
-            "type": [
-              "null",
-              "string"
-            ]
+            "type": "string"
           },
           "code": {
             "type": "string"
@@ -15108,6 +14951,23 @@
             ]
           }
         },
+        "required": [
+          "code",
+          "timeZone",
+          "name",
+          "isActive",
+          "sortOrder",
+          "auditType",
+          "auditProjectId",
+          "auditKey",
+          "auditName",
+          "createdAt",
+          "createdBy",
+          "updatedAt",
+          "updatedBy",
+          "rowVersion",
+          "id"
+        ],
         "type": "object"
       },
       "OpenBody": {
@@ -15325,6 +15185,139 @@
         "required": [
           "person",
           "items"
+        ],
+        "type": "object"
+      },
+      "OperationsRead": {
+        "properties": {
+          "asOf": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "deadLetterCount": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "deadLetters": {
+            "items": {
+              "$ref": "#/components/schemas/OpsDeadLetter"
+            },
+            "type": "array"
+          },
+          "jobs": {
+            "items": {
+              "$ref": "#/components/schemas/OpsJob"
+            },
+            "type": "array"
+          },
+          "pendingChanges": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "problems": {
+            "items": {
+              "$ref": "#/components/schemas/OpsProblem"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "asOf",
+          "problems",
+          "jobs",
+          "pendingChanges",
+          "deadLetters",
+          "deadLetterCount"
+        ],
+        "type": "object"
+      },
+      "OpsDeadLetter": {
+        "properties": {
+          "attempts": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "deadLetteredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lastError": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "eventType",
+          "projectNumber",
+          "attempts",
+          "lastError",
+          "createdAt",
+          "deadLetteredAt"
+        ],
+        "type": "object"
+      },
+      "OpsJob": {
+        "properties": {
+          "failed24h": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "finishedAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "job": {
+            "type": "string"
+          },
+          "lastSuccess": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "startedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "job",
+          "startedAt",
+          "finishedAt",
+          "status",
+          "lastSuccess",
+          "failed24h"
         ],
         "type": "object"
       },
@@ -16437,78 +16430,6 @@
           "weeks",
           "canReassign"
         ],
-        "type": "object"
-      },
-      "Phase": {
-        "properties": {
-          "auditKey": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "auditName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "auditProjectId": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "auditType": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "createdBy": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "id": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "isActive": {
-            "type": "boolean"
-          },
-          "name": {
-            "type": "string"
-          },
-          "rowVersion": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          },
-          "sortOrder": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "updatedBy": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        },
         "type": "object"
       },
       "PickerUser": {
@@ -17707,78 +17628,6 @@
         ],
         "type": "object"
       },
-      "ProjectType": {
-        "properties": {
-          "auditKey": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "auditName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "auditProjectId": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "auditType": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "createdBy": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "id": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "isActive": {
-            "type": "boolean"
-          },
-          "name": {
-            "type": "string"
-          },
-          "rowVersion": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          },
-          "sortOrder": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "updatedBy": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        },
-        "type": "object"
-      },
       "PublishBody": {
         "properties": {
           "additionalTargets": {
@@ -18444,6 +18293,103 @@
           "id",
           "name",
           "isActive"
+        ],
+        "type": "object"
+      },
+      "ReferenceRow": {
+        "properties": {
+          "auditKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditProjectId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditType": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "sortOrder": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "isActive",
+          "sortOrder",
+          "auditType",
+          "auditProjectId",
+          "auditKey",
+          "auditName",
+          "createdAt",
+          "createdBy",
+          "updatedAt",
+          "updatedBy",
+          "rowVersion",
+          "id"
+        ],
+        "type": "object"
+      },
+      "ReferenceUsage": {
+        "properties": {
+          "projects": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "projects"
         ],
         "type": "object"
       },
@@ -21524,6 +21470,52 @@
         "required": [
           "id",
           "rowVersion"
+        ],
+        "type": "object"
+      },
+      "SettingRow": {
+        "properties": {
+          "default": {},
+          "group": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "packet": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "value": {
+            "$ref": "#/components/schemas/JsonElement"
+          }
+        },
+        "required": [
+          "key",
+          "kind",
+          "group",
+          "default",
+          "value"
+        ],
+        "type": "object"
+      },
+      "SettingSaved": {
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "value": {
+            "$ref": "#/components/schemas/JsonElement"
+          }
+        },
+        "required": [
+          "key",
+          "value"
         ],
         "type": "object"
       },
@@ -26289,6 +26281,24 @@
         ],
         "type": "object"
       },
+      "UserSaved": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
       "VersionInput": {
         "properties": {
           "confirmationDueDate": {
@@ -27721,7 +27731,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PageOfObject"
+                  "$ref": "#/components/schemas/PageOfActivityEntry"
                 }
               }
             },
@@ -27848,7 +27858,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/Client"
+                    "$ref": "#/components/schemas/ClientRow"
                   },
                   "type": "array"
                 }
@@ -27873,8 +27883,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientRow"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -27907,6 +27924,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientRow"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -27933,7 +27957,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnonymousTypeOfint"
+                  "$ref": "#/components/schemas/ReferenceUsage"
                 }
               }
             },
@@ -27953,7 +27977,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/CommitmentMissCategory"
+                    "$ref": "#/components/schemas/ReferenceRow"
                   },
                   "type": "array"
                 }
@@ -27978,8 +28002,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferenceRow"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -28012,6 +28043,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferenceRow"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -28038,7 +28076,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnonymousTypeOfint"
+                  "$ref": "#/components/schemas/ReferenceUsage"
                 }
               }
             },
@@ -28058,7 +28096,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/DeliverableType"
+                    "$ref": "#/components/schemas/DeliverableTypeRow"
                   },
                   "type": "array"
                 }
@@ -28083,8 +28121,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliverableTypeRow"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -28117,6 +28162,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliverableTypeRow"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -28143,7 +28195,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnonymousTypeOfint"
+                  "$ref": "#/components/schemas/ReferenceUsage"
                 }
               }
             },
@@ -28163,7 +28215,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/Discipline"
+                    "$ref": "#/components/schemas/DisciplineRow"
                   },
                   "type": "array"
                 }
@@ -28188,8 +28240,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisciplineRow"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -28222,6 +28281,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisciplineRow"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -28248,7 +28314,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnonymousTypeOfint"
+                  "$ref": "#/components/schemas/ReferenceUsage"
                 }
               }
             },
@@ -28310,7 +28376,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/AnonymousTypeOfGuidAndGuidAndstringAndDateOnlyAndstring"
+                    "$ref": "#/components/schemas/HolidayRow"
                   },
                   "type": "array"
                 }
@@ -28335,8 +28401,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HolidayAdded"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -28358,8 +28431,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -28375,7 +28448,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/Office"
+                    "$ref": "#/components/schemas/OfficeRow"
                   },
                   "type": "array"
                 }
@@ -28400,8 +28473,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfficeRow"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -28434,6 +28514,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfficeRow"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -28460,7 +28547,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnonymousTypeOfint"
+                  "$ref": "#/components/schemas/ReferenceUsage"
                 }
               }
             },
@@ -28479,7 +28566,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnonymousTypeOfDateTimeOffsetAndListOfOpsProblemAndListOfObjectAndintAndListOfAnonymousTypeOfGuidAndstringAndstringAndintAndstringAndDateTimeOffsetAndDateTimeOffsetAndint"
+                  "$ref": "#/components/schemas/OperationsRead"
                 }
               }
             },
@@ -28872,7 +28959,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/Phase"
+                    "$ref": "#/components/schemas/ReferenceRow"
                   },
                   "type": "array"
                 }
@@ -28897,8 +28984,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferenceRow"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -28931,6 +29025,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferenceRow"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -28957,7 +29058,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnonymousTypeOfint"
+                  "$ref": "#/components/schemas/ReferenceUsage"
                 }
               }
             },
@@ -28977,7 +29078,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/ProjectType"
+                    "$ref": "#/components/schemas/ReferenceRow"
                   },
                   "type": "array"
                 }
@@ -29002,8 +29103,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferenceRow"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -29036,6 +29144,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferenceRow"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -29062,7 +29177,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnonymousTypeOfint"
+                  "$ref": "#/components/schemas/ReferenceUsage"
                 }
               }
             },
@@ -29186,6 +29301,9 @@
             "content": {
               "application/json": {
                 "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SettingRow"
+                  },
                   "type": "array"
                 }
               }
@@ -29222,6 +29340,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingSaved"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -29268,7 +29393,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/AnonymousTypeOfGuidAndstringAndstringAndstringAndGuidAndGuidAndGuidAndbooleanAnddecimalAndbooleanAndDateTimeOffsetAndintAndIEnumerableOfAnonymousTypeOfstringAndstring"
+                    "$ref": "#/components/schemas/AdminUserRow"
                   },
                   "type": "array"
                 }
@@ -29293,8 +29418,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserSaved"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -29327,6 +29459,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserSaved"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -29359,8 +29498,8 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -29390,8 +29529,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [

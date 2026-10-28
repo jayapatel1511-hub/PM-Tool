@@ -8,11 +8,13 @@ import { useTable, type Column } from '@/components/hub/table'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useReference } from '@/hooks/data'
-import { ApiError, del, get, post, qs } from '@/lib/api'
+import type { components } from '@/gen/api'
+import { ApiError, typedRequest } from '@/lib/api'
 import { fmtDate } from '@/lib/format'
 import { t } from '@/lib/i18n'
+import { invalidateChange } from '@/lib/keys'
 
-interface HolidayRow { id: string; officeId?: string | null; office?: string | null; date: string; name: string }
+type HolidayRow = components['schemas']['HolidayRow']
 
 const ORG = '__org'
 
@@ -26,18 +28,18 @@ export function Holidays() {
   const [f, setF] = useState<{ office: string; date: string; name: string }>({ office: ORG, date: '', name: '' })
   const [err, setErr] = useState<ApiError | null>(null)
   const [busy, setBusy] = useState(false)
-  const q = useQuery({ queryKey: ['admin', 'holidays', year, office], queryFn: () => get<HolidayRow[]>(`admin/holidays${qs({ year, officeId: office === ORG ? null : office || null })}`) })
+  const q = useQuery({ queryKey: ['admin', 'holidays', year, office], queryFn: () => typedRequest('get', '/api/v1/admin/holidays', { query: { year, officeId: office === ORG ? undefined : office || undefined } }) })
   const rows = (q.data ?? []).filter((h) => office !== ORG || !h.officeId)
   const offices = (ref.data?.offices ?? []).filter((o) => o.isActive)
-  const refresh = () => qc.invalidateQueries({ queryKey: ['admin', 'holidays'] })
+  const refresh = () => invalidateChange(qc, 'Holiday')
   const add = async () => {
     setErr(null); setBusy(true)
     try {
-      await post('admin/holidays', { officeId: f.office === ORG ? null : f.office, date: f.date, name: f.name })
+      await typedRequest('post', '/api/v1/admin/holidays', { body: { officeId: f.office === ORG ? null : f.office, date: f.date, name: f.name } })
       toast.success(t('common.saved')); setF({ ...f, date: '', name: '' }); refresh()
     } catch (e) { setErr(e as ApiError) } finally { setBusy(false) }
   }
-  const remove = async (h: HolidayRow) => { try { await del(`admin/holidays/${h.id}`); refresh() } catch (e) { toast.error((e as Error).message) } }
+  const remove = async (h: HolidayRow) => { try { await typedRequest('delete', '/api/v1/admin/holidays/{id}', { params: { id: h.id } }); refresh() } catch (e) { toast.error((e as Error).message) } }
   // Every column is fixed: the page has no Columns menu and no sort, so a `?cols=` link cannot hide one (§13.0).
   const columns: Column<HolidayRow>[] = [
     { id: 'date', label: t('holiday.date'), fixed: true, className: 'whitespace-nowrap tabular-nums', cell: (h) => fmtDate(h.date) },

@@ -4,7 +4,7 @@ import { lazy, useEffect, useRef, useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import type { components } from '@/gen/api'
-import { api, configureApi, get } from '@/lib/api'
+import { api, configureApi, typedRequest } from '@/lib/api'
 import { setDateContext } from '@/lib/format'
 import { t , runtimeText } from '@/lib/i18n'
 import { lazyImport } from '@/lib/lazy'
@@ -17,7 +17,7 @@ import { configureClientErrorReporter, disableClientErrorReporter } from '@/lib/
 
 export type { Me, Offer } from './auth-context'
 export { Ctx, useFlag, useMe, useAuth, useOffer } from './auth-context'
-import { Ctx, type Me } from './auth-context'
+import { Ctx } from './auth-context'
 
 
 const DEV_KEY = 'hub.devUser'
@@ -59,7 +59,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
         }
         if (c.authMode === 'LocalPassword' || c.authMode === 'Social') {
           configureApi(async () => ({}), () => { qc.removeQueries({ queryKey: ['me'] }); preparePublicRoute(); setReady('public') })
-          try { await get<Me>('me'); if (!cancelled) { configureErrorReporter(() => ({})); finishSignIn(); setReady('ready') } }
+          try { await typedRequest('get', '/api/v1/me', {}); if (!cancelled) { configureErrorReporter(() => ({})); finishSignIn(); setReady('ready') } }
           catch { if (!cancelled) { preparePublicRoute(); setReady('public') } }
           return
         }
@@ -148,11 +148,11 @@ function PublicLogin({ mode, providers, onSignIn, onLocalSignIn, onPick, idle, e
 }
 
 function Signed({ children, onSignOut }: { children: ReactNode; onSignOut: () => void }) {
-  const me = useQuery({ queryKey: ['me'], queryFn: () => get<Me>('me'), staleTime: 60_000 })
+  const me = useQuery({ queryKey: ['me'], queryFn: () => typedRequest('get', '/api/v1/me', {}), staleTime: 60_000 })
   useEffect(() => {
     if (me.data && !sessionStorage.getItem(SIGNIN_KEY)) {
       sessionStorage.setItem(SIGNIN_KEY, '1')
-      api('me/sign-in', { method: 'POST' }).catch(() => {})
+      typedRequest('post', '/api/v1/me/sign-in', {}).catch(() => {})
     }
   }, [me.data])
   useIdleSignOut(me.data?.settings.idleTimeoutHours ?? 8, onSignOut)

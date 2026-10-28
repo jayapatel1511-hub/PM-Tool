@@ -1,11 +1,11 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { get } from '@/lib/api'
+import { get, typedRequest } from '@/lib/api'
 import { refreshProject } from '@/lib/keys'
-import type { ProjectDetail, Reference } from '@/lib/types'
+import type { ProjectDetail } from '@/lib/types'
 
 /** Active and inactive reference data for pickers and labels (inactive entries only label existing items). */
 export function useReference() {
-  return useQuery({ queryKey: ['reference'], queryFn: () => get<Reference>('reference'), staleTime: 5 * 60_000 })
+  return useQuery({ queryKey: ['reference'], queryFn: () => typedRequest('get', '/api/v1/reference', {}), staleTime: 5 * 60_000 })
 }
 
 export function useProject(idOrNumber: string | undefined) {

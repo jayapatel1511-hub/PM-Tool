@@ -3,15 +3,13 @@ import { ChevronDown, ChevronRight } from 'lucide-react'
 import { useState } from 'react'
 import { Empty, ErrorBanner, Loading, Page, Section } from '@/components/hub/common'
 import { Avatar } from '@/components/hub/people'
-import { get, typedRequest } from '@/lib/api'
+import { typedRequest } from '@/lib/api'
 import { plural, t } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
-type Reference = { disciplines?: { id: string; name: string }[]; offices?: { id: string; name: string }[] }
-
 export function OrganisationPage() {
   const q = useQuery({ queryKey: ['organisation'], queryFn: () => typedRequest('get', '/api/v1/organisation', {}) })
-  const ref = useQuery({ queryKey: ['reference'], queryFn: () => get<Reference>('reference') })
+  const ref = useQuery({ queryKey: ['reference'], queryFn: () => typedRequest('get', '/api/v1/reference', {}) })
   const [open, setOpen] = useState<Set<string>>(new Set())
   if (q.isPending) return <Page title={t('organisation.title')}><Loading rows={8} /></Page>
   if (q.error) return <Page title={t('organisation.title')}><ErrorBanner error={q.error} retry={() => q.refetch()} /></Page>

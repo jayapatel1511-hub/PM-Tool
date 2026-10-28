@@ -10,6 +10,7 @@ const assert = require('node:assert/strict')
 const { commitmentRow, commitmentList, commitmentDetail } = require('./weekly-commitments.fixture.cjs')
 const { coordinationOptions } = require('./reviews.fixture.cjs')
 const { myWork: myWorkAnswer, myWorkPerson } = require('./my-work.fixture.cjs')
+const { meView, referenceData, referenceDiscipline, referenceOffice } = require('./me.fixture.cjs')
 
 const port = process.env.PORT || '19505'
 const base = `http://127.0.0.1:${port}`
@@ -18,7 +19,7 @@ fs.mkdirSync(out, { recursive: true })
 const id = n => `00000000-0000-0000-0000-${String(n).padStart(12, '0')}`
 const projectId = id(10), levelId = id(20), unitId = id(21), taskId = id(30), offerId = id(31), chainId = id(40), personId = id(50)
 const project = { id: projectId, projectNumber: 'P-DEMO', name: 'Synthetic workflow project', client: 'Pilot client', pmName: 'Pat PM', status: 'Active', visibility: 'Open', rowVersion: 1, links: [], disciplines: [], starred: false, myRoles: [], health: { computed: 'Green', reported: 'Green', overrideActive: false, reasons: [] }, permissions: { edit: { ok: false }, healthOverride: { ok: false }, reviewDates: { ok: false }, snooze: { ok: false }, captureWeeklyPlan: { ok: false }, raiseRegister: { ok: false }, isPm: false, leadOf: [], createTaskIn: [], createDeliverableIn: [], transitions: [], needsReason: false } }
-const me = { id: id(1), displayName: 'Sam Supervisor', email: 'sam@hub.test', isTemplateEditor: false, roles: [], systemRoles: ['Admin'], capabilities: { createProject: true, createTask: true, portfolio: true, workload: true, staff: true, allStaff: true, admin: true, templates: true, readOnly: false, directReports: 2 }, settings: { today: '2026-10-03', dateFormat: 'yyyy-MM-dd', orgTimeZone: 'America/Halifax', idleTimeoutHours: 8, restrictedProjectsEnabled: false, allowSelfReview: false, taskDueSoonDays: 7, milestoneApproachingDays: 14, chainDepthLimit: 100, defaultWeeklyCapacityHours: 40, coordinationLookaheadWeeks: 6, workingDaysEnabled: true }, preferences: { digestEnabled: true, denseRows: true, weeklySummaryEnabled: true }, flags: { task_pickup: false, org_structure: false, verifiable_log: false, commitment_reliability: false } }
+const me = meView({ id: id(1), displayName: 'Sam Supervisor', email: 'sam@hub.test', systemRoles: ['Admin'], capabilities: { createProject: true, createTask: true, portfolio: true, workload: true, staff: true, allStaff: true, admin: true, templates: true, directReports: 2 }, settings: { today: '2026-10-03', taskDueSoonDays: 7, chainDepthLimit: 100, coordinationLookaheadWeeks: 6, workingDaysEnabled: true }, flags: { task_pickup: false, org_structure: false, verifiable_log: false, commitment_reliability: false } })
 
 const errors = [], unknownGets = [], calls = [], axeReports = [], shots = []
 let failImport = false, featurePhase = 'off', totalApiCalls = 0
@@ -39,7 +40,7 @@ function responseFor(method, p, body, query) {
   if (p === 'config') return clientConfig()
   if (p === 'me') return { ...me, flags: featurePhase === 'off' ? { task_pickup: false, org_structure: false, verifiable_log: false, commitment_reliability: false } : { task_pickup: true, org_structure: true, verifiable_log: true, commitment_reliability: true } }
   if (p === 'me/sign-in') return {}
-  if (p === 'reference') return { disciplines: [{ id: id(60), name: 'Civil' }], offices: [{ id: id(61), name: 'Halifax' }], clients: [], deliverableTypes: [], phases: [], projectTypes: [] }
+  if (p === 'reference') return referenceData({ disciplines: [referenceDiscipline(id(60), 'Civil')], offices: [referenceOffice(id(61), 'Halifax')] })
   if (p === 'workspaces') return []
   if (p === `projects/${projectId}` || p === 'projects/P-DEMO') return project
   if (p === 'pickup-offers') return [offer, assignOffer]

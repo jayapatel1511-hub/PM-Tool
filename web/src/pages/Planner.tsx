@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input'
 import { UrlSearchInput } from '@/components/hub/url-search'
 import { useFlag, useMe } from '@/lib/auth'
 import { addDays, fmtDate, shortDate, today } from '@/lib/format'
-import { ApiError, api, get, qs } from '@/lib/api'
+import { ApiError, api, get, qs, typedRequest } from '@/lib/api'
 import { invalidateChange } from '@/lib/keys'
 import { runtimeText, t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
@@ -54,7 +54,7 @@ function Planner() {
   const listQ = useQuery({ queryKey: ['planning-entries', filters], queryFn: () => get<EntryPage>(`planning/entries${qs({ ...filters, pageSize: 50 })}`), enabled: view === 'list' })
   const data = gridQ.data; const editable = view !== 'list' && wide
   const projectsQ = useQuery({ queryKey: ['planner-projects-filter'], queryFn: () => get<{ items: { id: string; projectNumber?: string; name: string; status?: string }[] }>('projects?mine=true&pageSize=200') })
-  const referenceQ = useQuery({ queryKey: ['planner-reference'], queryFn: () => get<{ disciplines?: { id: string; name: string }[]; offices?: { id: string; name: string }[] }>('reference') })
+  const referenceQ = useQuery({ queryKey: ['planner-reference'], queryFn: () => typedRequest('get', '/api/v1/reference', {}) })
   const org = useOrgPlacement(data?.people.map(p => p.id) ?? [])
   const unitIds = filters.unitId ? descendantUnitIds(org.units, filters.unitId) : null
   const people = data?.people.filter(p => !org.enabled || !filters.unitId || (org.placementMap.has(p.id) && unitIds!.has(org.placementMap.get(p.id) as string))) ?? []

@@ -213,7 +213,7 @@ export function InlineText({ value, onSave, multiline, disabled, placeholder, ti
 }) {
   const labelId = useContext(FieldLabelContext)
   const field = useContext(FieldNameContext) ?? title
-  const delay = useMe().settings.autosaveDelayMs
+  const delay = useMe().settings.autosaveDelayMs ?? undefined
   const [editing, setEditing] = useState(initiallyEditing)
   const ref = useRef<HTMLInputElement & HTMLTextAreaElement>(null)
   // A list row renamed in place (initiallyEditing) is not an edit panel field: it keeps saving on blur and Enter only.

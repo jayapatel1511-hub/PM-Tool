@@ -3,7 +3,7 @@ import { t, type TextKey } from '@/lib/i18n'
 // Dates are calendar dates (YYYY-MM-DD) compared in the organisation time zone (§10.6, G-03).
 let orgToday = new Date().toISOString().slice(0, 10)
 let dateFormat = 'yyyy-MM-dd'
-export function setDateContext(today: string, fmt: string) { orgToday = today; dateFormat = fmt }
+export function setDateContext(today: string, fmt: string | null) { orgToday = today; dateFormat = fmt ?? dateFormat }
 export const today = () => orgToday
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']

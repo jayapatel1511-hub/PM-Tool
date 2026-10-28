@@ -1,9 +1,6 @@
 export interface ProjectStatusNoteData { text: string; author?: string; at?: string; header: { computedHealth: string; reportedHealth?: string; nextMilestone?: { name: string; date?: string }; openAttention: number } }
 // Response shapes of the Hub API used by the SPA.
 
-export interface RefItem { id: string; name: string; isActive: boolean; code?: string; colour?: string; sortOrder?: number; shortName?: string; timeZone?: string; defaultDisciplineId?: string }
-export interface Reference { disciplines: RefItem[]; clients: RefItem[]; offices: RefItem[]; deliverableTypes: RefItem[]; phases: RefItem[]; projectTypes: RefItem[]; limits: { roleLabel: number } }
-
 export interface Perm { ok: boolean; reason?: string | null }
 export interface MilestoneRef { id: string; key: string; name: string; date?: string | null; status?: string | null; milestoneType?: string }
 

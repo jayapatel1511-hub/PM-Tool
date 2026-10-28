@@ -1,5 +1,8 @@
 using System.Net;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using Hub.Api.Data;
+using Hub.Domain;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -259,6 +262,87 @@ public sealed class FoundationsTests(HubFactory f)
             Assert.Contains("<title>Hub</title>", await c.GetStringAsync("/projects/P-1/tasks"));
         }
         finally { Directory.Delete(root, true); }
+    }
+
+    [Fact]
+    public async Task Me_reference_and_sign_in_keep_their_property_names_order_nulls_and_nesting() // the typed records must serialise to the bytes the app already reads (040-S15-Me)
+    {
+        static string[] Keys(JsonNode? n) => [.. n!.AsObject().Select(x => x.Key)];
+        string[] settings = ["dateFormat", "orgTimeZone", "today", "idleTimeoutHours", "restrictedProjectsEnabled", "allowSelfReview", "taskDueSoonDays", "milestoneApproachingDays",
+            "chainDepthLimit", "defaultWeeklyCapacityHours", "coordinationLookaheadWeeks", "workingDaysEnabled"];
+        string[] gated = ["activityBurstMinutes", "routeCounterEnabled", "autosaveDelayMs", "draftKeepDays"];
+        string[] flagged = ["small_ux", "route_counter", "data_entry_safety"];
+        foreach (var flag in flagged) await f.As(Admin).Put($"/api/v1/admin/settings/flag.{flag}", new { value = false }).Result.Json(); // the shared host may have been left with one on
+        var email = $"shape{Guid.NewGuid():N}"[..14] + "@hub.test";
+        var newcomer = await f.As(email).GetAsync("/api/v1/me").Result.Json();
+        Assert.Equal(["id", "displayName", "email", "jobTitle", "officeId", "supervisorId", "isTemplateEditor", "roles", "systemRoles", "capabilities", "settings", "preferences", "flags"], Keys(newcomer));
+        Assert.Equal(email, newcomer.S("email"));
+        Assert.Null(newcomer["jobTitle"]); Assert.Null(newcomer["officeId"]); Assert.Null(newcomer["supervisorId"]); // null, not omitted
+        Assert.False(newcomer["isTemplateEditor"]!.GetValue<bool>());
+        Assert.Empty(newcomer["roles"]!.AsArray()); Assert.Empty(newcomer["systemRoles"]!.AsArray());
+        Assert.Equal(["createProject", "createTask", "portfolio", "workload", "staff", "allStaff", "admin", "templates", "readOnly", "directReports"], Keys(newcomer["capabilities"]));
+        Assert.Equal(settings, Keys(newcomer["settings"])); // the four settings behind a flag are left out while it is off, not sent as null
+        Assert.Equal(["digestEnabled", "digestTimeLocal", "denseRows", "weeklySummaryEnabled"], Keys(newcomer["preferences"]));
+        Assert.Null(newcomer["preferences"]!["digestTimeLocal"]);
+        Assert.Equal(Hub.Domain.Flags.All.Select(x => x.Name), Keys(newcomer["flags"])); // flag names keep their own spelling
+        Assert.All(newcomer["flags"]!.AsObject(), x => Assert.True(x.Value!.GetValueKind() is JsonValueKind.True or JsonValueKind.False));
+
+        var admin = await f.As(Admin).GetAsync("/api/v1/me").Result.Json();
+        Assert.Equal(("Jordan Lee", true), (admin.S("displayName"), admin["capabilities"]!["admin"]!.GetValue<bool>()));
+        Assert.All(admin["roles"]!.AsArray(), x => Assert.Equal(["role", "source"], Keys(x)));
+        Assert.Contains(("Admin", "Manual"), admin["roles"]!.AsArray().Select(x => (x!.S("role"), x.S("source"))));
+        Assert.Contains("Admin", admin["systemRoles"]!.AsArray().Select(x => x!.GetValue<string>()));
+        var marc = await f.As(TestData.Marc).GetAsync("/api/v1/me").Result.Json();
+        var marcRoles = marc["roles"]!.AsArray().Select(x => x!.S("role")).ToList(); var marcSystem = marc["systemRoles"]!.AsArray().Select(x => x!.GetValue<string>()).ToList();
+        Assert.Equal(marcRoles.OrderBy(x => x), marcRoles); Assert.Equal(marcSystem.Order(), marcSystem); // both lists are ordered by role name
+        Assert.Subset(marcRoles.ToHashSet(), new HashSet<string> { "ProjectManager", "Supervisor" }); Assert.Equal(marcRoles.Order(), marcSystem.Order());
+        Assert.True(marc["capabilities"]!["staff"]!.GetValue<bool>());
+        var sam = await f.As(TestData.Sam).GetAsync("/api/v1/me").Result.Json(); // other tests give Sam reports of their own, so the count is read from the table
+        Assert.Equal(f.Db(db => db.Users.Count(u => u.SupervisorId == sam.G("id") && u.IsActive)), sam["capabilities"]!.I("directReports"));
+        Assert.True(sam["capabilities"]!.I("directReports") >= 3);
+        Assert.True((await f.As(TestData.Rita).GetAsync("/api/v1/me").Result.Json())["capabilities"]!["readOnly"]!.GetValue<bool>());
+        var groups = await f.As(email, "Hub.ProjectManager").GetAsync("/api/v1/me").Result.Json();
+        Assert.Equal(("ProjectManager", "Group"), (groups["roles"]![0]!.S("role"), groups["roles"]![0]!.S("source")));
+
+        try
+        {
+            foreach (var flag in flagged) await f.As(Admin).Put($"/api/v1/admin/settings/flag.{flag}", new { value = true }).Result.Json();
+            var on = await f.As(TestData.Alex).GetAsync("/api/v1/me").Result.Json();
+            Assert.Equal([.. settings, .. gated], Keys(on["settings"])); // each is added after the settings that are always sent
+            Assert.All(new[] { "activityBurstMinutes", "autosaveDelayMs", "draftKeepDays" }, key => Assert.True(on["settings"]![key]!.GetValue<int>() > 0));
+            Assert.True(on["settings"]!["routeCounterEnabled"]!.GetValueKind() is JsonValueKind.True or JsonValueKind.False);
+            Assert.True(on["flags"]!["small_ux"]!.GetValue<bool>());
+        }
+        finally { foreach (var flag in flagged) await f.As(Admin).Put($"/api/v1/admin/settings/flag.{flag}", new { value = false }).Result.Json(); }
+        Assert.Equal(settings, Keys((await f.As(TestData.Alex).GetAsync("/api/v1/me").Result.Json())["settings"]));
+
+        var reference = await f.As(TestData.Alex).GetAsync("/api/v1/reference").Result.Json();
+        Assert.Equal(["disciplines", "clients", "offices", "deliverableTypes", "phases", "projectTypes", "limits"], Keys(reference));
+        var discipline = reference["disciplines"]!.AsArray().Single(x => x!.S("name") == "Project Management")!; // other tests add rows of their own
+        Assert.Equal(["id", "name", "code", "colour", "isActive", "sortOrder"], Keys(discipline));
+        Assert.Equal(("PM", "#475569"), (discipline.S("code"), discipline.S("colour")));
+        Assert.Equal(reference["disciplines"]!.AsArray().Select(x => x!.I("sortOrder")).Order(), reference["disciplines"]!.AsArray().Select(x => x!.I("sortOrder"))); // by sort order, then name
+        Assert.Equal(["id", "name", "shortName", "isActive"], Keys(reference["clients"]![0]));
+        Assert.Equal(["id", "name", "code", "timeZone", "isActive"], Keys(reference["offices"]![0]));
+        var drawing = reference["deliverableTypes"]!.AsArray().Single(x => x!.S("name") == "Drawing Package")!;
+        Assert.Equal(["id", "name", "defaultDisciplineId", "isActive"], Keys(drawing));
+        Assert.Null(drawing["defaultDisciplineId"]); // null, not omitted
+        Assert.Equal(["id", "name", "isActive", "sortOrder"], Keys(reference["phases"]![0]));
+        Assert.Equal(["id", "name", "isActive"], Keys(reference["projectTypes"]![0]));
+        Assert.Equal(["roleLabel"], Keys(reference["limits"]));
+        Assert.Equal(OpenRoleLimits.Label, reference["limits"]!.I("roleLabel"));
+
+        var alex = TestData.Alex; var id = f.Db(db => db.Users.Single(u => u.Email == alex).Id);
+        int Events() => f.Db(db => db.ActivityLog.Count(a => a.ItemId == id && a.Action == "SignedIn"));
+        var before = Events();
+        var signedIn = await f.As(alex).Post("/api/v1/me/sign-in", new { });
+        Assert.Equal(HttpStatusCode.NoContent, signedIn.StatusCode); Assert.Empty(await signedIn.Content.ReadAsStringAsync());
+        Assert.Equal(before + 1, Events()); // the development sign-in is audited here, as the local and social ones are when they issue their cookie
+        var row = f.Db(db => db.ActivityLog.Where(a => a.ItemId == id && a.Action == "SignedIn").OrderByDescending(a => a.OccurredAt).ThenByDescending(a => a.Id).First());
+        Assert.Equal((id, ItemType.User, alex, "Alex Chen"), (row.ActorUserId, row.ItemType, row.ItemKey, row.ItemName));
+        Assert.Equal(["access"], row.Categories);
+        Assert.Equal(f.Clock.GetUtcNow(), f.Db(db => db.Users.Single(u => u.Id == id).LastSignInAt));
+        Assert.Equal(HttpStatusCode.Unauthorized, (await f.CreateClient().PostAsync("/api/v1/me/sign-in", null)).StatusCode);
     }
 
     [Fact]

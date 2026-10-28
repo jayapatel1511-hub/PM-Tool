@@ -4,6 +4,7 @@ const { chromium } = require('playwright')
 const { clientConfig } = require('./config.fixture.cjs')
 const { viewList } = require('./views.fixture.cjs')
 const { myStaffPerson, myStaffList } = require('./my-work.fixture.cjs')
+const { meView, referenceData } = require('./me.fixture.cjs')
 const path = require('path')
 const { spawn } = require('child_process')
 const assert = require('node:assert/strict')
@@ -22,13 +23,11 @@ const initialPeople = [
 const cell = (personId, extra = {}) => ({ week: monday, capacity: 40, timeAway: 8, additionalAvailability: 0, approved: 0,
   confirmed: 20, expected: 0, possible: 0, remaining: 12, taskEstimates: 0, unestimatedTasks: 0,
   overPlanned: false, underPlanned: false, staleEntries: 0, ownDraftHours: 0, ...extra, personId })
-const me = {
-  id: supervisor, displayName: 'Sam Supervisor', email: 'sam@hub.test', roles: [], systemRoles: ['Supervisor'],
-  capabilities: { createProject: false, createTask: true, portfolio: false, workload: true, staff: true, allStaff: true, admin: false, templates: false, readOnly: false, directReports: 3 },
-  settings: { today: '2027-01-03', dateFormat: 'yyyy-MM-dd', orgTimeZone: 'America/Halifax', idleTimeoutHours: 8 },
-  preferences: { denseRows: true, digestEnabled: true },
-}
-const ref = { disciplines: [], clients: [], offices: [], deliverableTypes: [], phases: [], projectTypes: [] }
+const me = meView({
+  id: supervisor, displayName: 'Sam Supervisor', email: 'sam@hub.test', systemRoles: ['Supervisor'],
+  capabilities: { createTask: true, workload: true, staff: true, allStaff: true, directReports: 3 }, settings: { today: '2027-01-03' },
+})
+const ref = referenceData()
 const emptyStaff = people => myStaffList(people, { canSeeAll: true, tiles: { staff: people.length, assignments: people.length, withOverdue: 0, withBlocked: 0, reviewsStalled: 0 } })
 const grid = people => ({ weeks: [monday], currentWeek: monday, evaluatedAt: '2027-01-03T00:00:00Z', partialView: false, draftAccess: false,
   settings: { horizonWeeks: 12, overPct: 105, underPct: 50, underWeeks: 2, staleDays: 28, maxHoursPerWeek: 80 }, people })

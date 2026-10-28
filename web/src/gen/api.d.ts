@@ -4331,7 +4331,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfGuidAndstringAndstringAndstringAndGuidAndGuidAndbooleanAndIOrderedEnumerableOfAnonymousTypeOfstringAndstringAndIOrderedEnumerableOfstringAndAnonymousTypeOfbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndintAndCurrentSettingsAndAnonymousTypeOfbooleanAndstringAndbooleanAndbooleanAndIReadOnlyDictionaryOfstringAndboolean"];
+                        "application/json": components["schemas"]["MeView"];
                     };
                 };
             };
@@ -4997,8 +4997,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -13559,7 +13559,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfListOfAnonymousTypeOfGuidAndstringAndstringAndstringAndbooleanAndintAndListOfAnonymousTypeOfGuidAndstringAndstringAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndstringAndstringAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndGuidAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndbooleanAndintAndListOfAnonymousTypeOfGuidAndstringAndbooleanAndAnonymousTypeOfint"];
+                        "application/json": components["schemas"]["ReferenceView"];
                     };
                 };
             };
@@ -16243,40 +16243,11 @@ export interface components {
             /** Format: int32 */
             sortOrder: number;
         };
-        AnonymousTypeOfGuidAndstringAndGuidAndboolean: {
-            /** Format: uuid */
-            defaultDisciplineId: null | string;
-            /** Format: uuid */
-            id: string;
-            isActive: boolean;
-            name: null | string;
-        };
-        AnonymousTypeOfGuidAndstringAndboolean: {
-            /** Format: uuid */
-            id: string;
-            isActive: boolean;
-            name: null | string;
-        };
-        AnonymousTypeOfGuidAndstringAndbooleanAndint: {
-            /** Format: uuid */
-            id: string;
-            isActive: boolean;
-            name: null | string;
-            /** Format: int32 */
-            sortOrder: number;
-        };
         AnonymousTypeOfGuidAndstringAndstring: {
             displayName: null | string;
             source: null | string;
             /** Format: uuid */
             userId: string;
-        };
-        AnonymousTypeOfGuidAndstringAndstringAndboolean: {
-            /** Format: uuid */
-            id: string;
-            isActive: boolean;
-            name: null | string;
-            shortName: null | string;
         };
         AnonymousTypeOfGuidAndstringAndstringAndintAndstringAndDateTimeOffsetAndDateTimeOffset: {
             /** Format: int32 */
@@ -16335,44 +16306,6 @@ export interface components {
             /** Format: double */
             weeklyCapacityHours: null | number;
         };
-        AnonymousTypeOfGuidAndstringAndstringAndstringAndGuidAndGuidAndbooleanAndIOrderedEnumerableOfAnonymousTypeOfstringAndstringAndIOrderedEnumerableOfstringAndAnonymousTypeOfbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndintAndCurrentSettingsAndAnonymousTypeOfbooleanAndstringAndbooleanAndbooleanAndIReadOnlyDictionaryOfstringAndboolean: {
-            capabilities: components["schemas"]["AnonymousTypeOfbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndint"];
-            displayName: null | string;
-            email: null | string;
-            flags: null | {
-                [key: string]: boolean;
-            };
-            /** Format: uuid */
-            id: string;
-            isTemplateEditor: boolean;
-            jobTitle: null | string;
-            /** Format: uuid */
-            officeId: null | string;
-            preferences: components["schemas"]["AnonymousTypeOfbooleanAndstringAndbooleanAndboolean"];
-            roles: null | components["schemas"]["AnonymousTypeOfstringAndstring"][];
-            settings: components["schemas"]["CurrentSettings"];
-            /** Format: uuid */
-            supervisorId: null | string;
-            systemRoles: null | string[];
-        };
-        AnonymousTypeOfGuidAndstringAndstringAndstringAndboolean: {
-            code: null | string;
-            /** Format: uuid */
-            id: string;
-            isActive: boolean;
-            name: null | string;
-            timeZone: null | string;
-        };
-        AnonymousTypeOfGuidAndstringAndstringAndstringAndbooleanAndint: {
-            code: null | string;
-            colour: null | string;
-            /** Format: uuid */
-            id: string;
-            isActive: boolean;
-            name: null | string;
-            /** Format: int32 */
-            sortOrder: number;
-        };
         AnonymousTypeOfGuidAndstringAndstringAndstringAndint: {
             displayName: null | string;
             hrPersonKey: null | string;
@@ -16412,15 +16345,6 @@ export interface components {
             manageReason: null | string;
             members: null | components["schemas"]["AnonymousTypeOfGuidAndGuidAndstringAndstringAndstringAndGuidAndbooleanAndListOfstringAndGuidAndDateTimeOffsetAndGuidAndintAndIEnumerableOfGuidAndbooleanAndboolean"][];
         };
-        AnonymousTypeOfListOfAnonymousTypeOfGuidAndstringAndstringAndstringAndbooleanAndintAndListOfAnonymousTypeOfGuidAndstringAndstringAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndstringAndstringAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndGuidAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndbooleanAndintAndListOfAnonymousTypeOfGuidAndstringAndbooleanAndAnonymousTypeOfint: {
-            clients: null | components["schemas"]["AnonymousTypeOfGuidAndstringAndstringAndboolean"][];
-            deliverableTypes: null | components["schemas"]["AnonymousTypeOfGuidAndstringAndGuidAndboolean"][];
-            disciplines: null | components["schemas"]["AnonymousTypeOfGuidAndstringAndstringAndstringAndbooleanAndint"][];
-            limits: components["schemas"]["AnonymousTypeOfint"];
-            offices: null | components["schemas"]["AnonymousTypeOfGuidAndstringAndstringAndstringAndboolean"][];
-            phases: null | components["schemas"]["AnonymousTypeOfGuidAndstringAndbooleanAndint"][];
-            projectTypes: null | components["schemas"]["AnonymousTypeOfGuidAndstringAndboolean"][];
-        };
         AnonymousTypeOfListOfObjectAndListOfObject: {
             blocks: null | unknown[];
             dependsOn: null | unknown[];
@@ -16436,19 +16360,6 @@ export interface components {
             successors: null | components["schemas"]["AnonymousTypeOfintAndGuidAndRow"][];
             task: components["schemas"]["TaskQueriesRow"];
         };
-        AnonymousTypeOfbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndint: {
-            admin: boolean;
-            allStaff: boolean;
-            createProject: boolean;
-            createTask: boolean;
-            /** Format: int32 */
-            directReports: number;
-            portfolio: boolean;
-            readOnly: boolean;
-            staff: boolean;
-            templates: boolean;
-            workload: boolean;
-        };
         "AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean": {
             digestEnabled: boolean;
             holdDigestWhenAway: boolean;
@@ -16460,15 +16371,9 @@ export interface components {
             weekendDigests: boolean;
             weeklySummaryEnabled: boolean;
         };
-        AnonymousTypeOfbooleanAndstringAndbooleanAndboolean: {
-            denseRows: boolean;
-            digestEnabled: boolean;
-            digestTimeLocal: null | string;
-            weeklySummaryEnabled: boolean;
-        };
         AnonymousTypeOfint: {
             /** Format: int32 */
-            roleLabel: number;
+            projects: number;
         };
         AnonymousTypeOfintAndGuidAndRow: {
             /** Format: int32 */
@@ -19223,6 +19128,49 @@ export interface components {
             /** Format: date */
             throughDate: string;
         };
+        MeCapabilities: {
+            admin: boolean;
+            allStaff: boolean;
+            createProject: boolean;
+            createTask: boolean;
+            /** Format: int32 */
+            directReports: number;
+            portfolio: boolean;
+            readOnly: boolean;
+            staff: boolean;
+            templates: boolean;
+            workload: boolean;
+        };
+        MePreferences: {
+            denseRows: boolean;
+            digestEnabled: boolean;
+            digestTimeLocal: null | string;
+            weeklySummaryEnabled: boolean;
+        };
+        MeRole: {
+            role: string;
+            source: string;
+        };
+        MeView: {
+            capabilities: components["schemas"]["MeCapabilities"];
+            displayName: string;
+            email: string;
+            flags: {
+                [key: string]: boolean;
+            };
+            /** Format: uuid */
+            id: string;
+            isTemplateEditor: boolean;
+            jobTitle: null | string;
+            /** Format: uuid */
+            officeId: null | string;
+            preferences: components["schemas"]["MePreferences"];
+            roles: components["schemas"]["MeRole"][];
+            settings: components["schemas"]["CurrentSettings"];
+            /** Format: uuid */
+            supervisorId: null | string;
+            systemRoles: string[];
+        };
         MeetingActionBody: {
             /** Format: date */
             dueDate: null | string;
@@ -20293,6 +20241,66 @@ export interface components {
         RecordBody: {
             checks: null | components["schemas"]["CheckNote"][];
             note: null | string;
+        };
+        ReferenceClient: {
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+            name: string;
+            shortName: null | string;
+        };
+        ReferenceDeliverableType: {
+            /** Format: uuid */
+            defaultDisciplineId: null | string;
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+            name: string;
+        };
+        ReferenceDiscipline: {
+            code: string;
+            colour: string;
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+            name: string;
+            /** Format: int32 */
+            sortOrder: number;
+        };
+        ReferenceLimits: {
+            /** Format: int32 */
+            roleLabel: number;
+        };
+        ReferenceOffice: {
+            code: string;
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+            name: string;
+            timeZone: string;
+        };
+        ReferencePhase: {
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+            name: string;
+            /** Format: int32 */
+            sortOrder: number;
+        };
+        ReferenceProjectType: {
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+            name: string;
+        };
+        ReferenceView: {
+            clients: components["schemas"]["ReferenceClient"][];
+            deliverableTypes: components["schemas"]["ReferenceDeliverableType"][];
+            disciplines: components["schemas"]["ReferenceDiscipline"][];
+            limits: components["schemas"]["ReferenceLimits"];
+            offices: components["schemas"]["ReferenceOffice"][];
+            phases: components["schemas"]["ReferencePhase"][];
+            projectTypes: components["schemas"]["ReferenceProjectType"][];
         };
         RegisterBody: {
             /** Format: date */

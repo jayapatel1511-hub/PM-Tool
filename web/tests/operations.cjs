@@ -2,6 +2,7 @@
 const assert = require('node:assert/strict'), fs = require('node:fs'), path = require('node:path');
 const { spawn } = require('node:child_process'), { chromium } = require('playwright'), ts = require('typescript');
 const { clientConfig } = require('./config.fixture.cjs');
+const { meView } = require('./me.fixture.cjs');
 const root = path.resolve(__dirname, '..'), port = process.env.PORT ?? '19501', base = `http://127.0.0.1:${port}`;
 const cache = new Map();
 function sourceModule(file) {
@@ -43,7 +44,7 @@ let server, browser;
     if (p.endsWith('/client-errors')) { clientReports.push(route.request().postDataJSON()); return route.fulfill({status: 204}); }
     if (p.endsWith('/config')) data = clientConfig();
     else if (p === '/api/dev/users') data = [];
-    else if (p.endsWith('/me')) data = { id: '00000000-0000-0000-0000-000000000001', displayName: 'Synthetic Admin', email: 'synthetic@hub.test', roles: [], systemRoles: ['Admin'], capabilities: { admin: true, readOnly: false, directReports: 0 }, settings: { today: '2026-10-18', dateFormat: 'yyyy-MM-dd', orgTimeZone: 'America/Halifax', idleTimeoutHours: 8 }, preferences: { denseRows: accountDenseRows }, flags: {} };
+    else if (p.endsWith('/me')) data = meView({ id: '00000000-0000-0000-0000-000000000001', displayName: 'Synthetic Admin', email: 'synthetic@hub.test', systemRoles: ['Admin'], capabilities: { admin: true }, preferences: { denseRows: accountDenseRows } });
     else if (p.endsWith('/preferences/density')) { densitySaves++; accountDenseRows = JSON.parse(route.request().postData() || '{}').denseRows; return route.fulfill({ status: 204 }); }
     else if (p.endsWith('/notifications/pulse')) data = { stamp: 'synthetic' };
     else if (p.endsWith('/notifications/unread-count')) { countReads++; data = { notifications: unread, following: 50 } }

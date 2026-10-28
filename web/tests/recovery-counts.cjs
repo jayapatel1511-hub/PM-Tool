@@ -2,6 +2,7 @@
 const { chromium } = require('playwright');
 const { clientConfig } = require('./config.fixture.cjs');
 const { viewList } = require('./views.fixture.cjs');
+const { meView, referenceData, referenceDiscipline, referenceClient, referenceOffice } = require('./me.fixture.cjs');
 const assert = require('node:assert/strict');
 const { spawn } = require('node:child_process');
 const path = require('node:path');
@@ -20,9 +21,9 @@ let evaluationFlows=false, snoozed=false, overridden=false; // 040-S15: the atte
 // 040-S15: the Time page's entries; Add Time, a correction and a deletion change them
 const timeEntries=[timeRow({id:id(40),projectId:pid,taskId:id(41),userId:person,canEdit:false,rowVersion:3})], timeReads=[];
 const attentionItem=attentionRow({id:id(70),projectId:pid,itemId:id(71)});
-const me=()=>({id:person,displayName:'Synthetic PM',email:'pm@hub.test',roles:[],systemRoles:[],isTemplateEditor:true,
- capabilities:{createProject:true,createTask:true,portfolio:true,workload:false,staff:true,allStaff:true,admin:false,templates:true,readOnly:false,directReports:2},
- settings:{today:'2026-10-18',dateFormat:'yyyy-MM-dd',orgTimeZone:'America/Halifax',idleTimeoutHours:8,taskDueSoonDays:7,milestoneApproachingDays:14,chainDepthLimit:20,coordinationLookaheadWeeks:6},preferences:{denseRows:true},flags});
+const me=()=>meView({id:person,displayName:'Synthetic PM',email:'pm@hub.test',isTemplateEditor:true,
+ capabilities:{createProject:true,createTask:true,portfolio:true,staff:true,allStaff:true,templates:true,directReports:2},
+ settings:{today:'2026-10-18',taskDueSoonDays:7,chainDepthLimit:20,coordinationLookaheadWeeks:6},flags});
 const project=()=>({id:pid,projectNumber:'SYN-RCV',name:'Synthetic recovery project',clientId:client,client:'Synthetic client',officeId:office,office:'Synthetic office',pmName:'Synthetic PM',status:'Active',visibility:'Open',rowVersion:overridden?2:1,links:[],disciplines:[{id:civil,disciplineId:civil,name:'Civil',code:'C',colour:'#467762',leadUserId:person,leadName:'Synthetic PM',isActive:true}],starred:false,myRoles:['PM'],
  health:{computed:'Green',reported:overridden?'Yellow':'Green',overrideActive:overridden,...(overridden?{healthOverride:'Yellow',overrideBy:'Synthetic PM',healthOverrideExpiresAt:'2026-10-30T12:00:00Z'}:{}),reasons:[]},permissions:{edit:yes,healthOverride:evaluationFlows?yes:no,reviewDates:no,snooze:evaluationFlows?yes:no,manageMilestones:no,raiseRegister:no,isPm:true,leadOf:[],createTaskIn:[],createDeliverableIn:[],transitions:[],restore:{ok:restoreAllowed}}});
 const row=(n)=>({id:id(20+n),projectNumber:`SYN-${n}`,name:`Synthetic project ${n}`,client:{id:client,name:'Synthetic client'},pm:{id:person,displayName:'Synthetic PM'},office:'Synthetic office',officeId:office,status:'Active',computedHealth:n===1?'Red':'Green',reportedHealth:n===1?'Red':'Green',healthReasons:[],overrideActive:false,trend:[],overdueTasks:n,blockedTasks:n,overdueDecisions:n,highIssues:0,attentionCritical:n,attentionWarning:0,overdueDeliverables:n+1,myRoles:[]});
@@ -44,7 +45,7 @@ let server,browser;const errors=[],requests=[],unknown=[];
   else if(p==='me/notifications/unread-count')data={notifications:0,following:0};
   else if(p==='workspaces')data=[];
   else if(p==='views')data=viewList();
-  else if(p==='reference')data={disciplines:[{id:civil,name:'Civil',isActive:true}],clients:[{id:client,name:'Synthetic client',isActive:true}],offices:[{id:office,name:'Synthetic office',isActive:true}],deliverableTypes:[],phases:[],projectTypes:[],limits:{roleLabel:80}};
+  else if(p==='reference')data=referenceData({disciplines:[referenceDiscipline(civil,'Civil')],clients:[referenceClient(client,'Synthetic client')],offices:[referenceOffice(office,'Synthetic office')]});
   else if(p==='projects')data={items:[{...row(1),id:pid,projectNumber:'SYN-RCV'}],totalCount:1};
   else if(p===`projects/${pid}`||p==='projects/SYN-RCV')data=project();
   else if(p.endsWith('/date-review'))data={window:null,tasks:[],deliverables:[]};

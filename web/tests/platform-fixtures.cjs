@@ -2,6 +2,7 @@ const path = require('node:path')
 const { spawn } = require('node:child_process')
 const assert = require('node:assert/strict')
 const { chromium } = require('playwright')
+const { clientConfig } = require('./config.fixture.cjs')
 
 const taskId = '00000000-0000-0000-0000-000000000001'
 const panelIds = { milestone: '00000000-0000-0000-0000-000000000021', deliverable: '00000000-0000-0000-0000-000000000022', decision: '00000000-0000-0000-0000-000000000023', action: '00000000-0000-0000-0000-000000000024', risk: '00000000-0000-0000-0000-000000000025', issue: '00000000-0000-0000-0000-000000000026' }
@@ -41,7 +42,7 @@ function mockPlatformApi(page, { build, buildIds = ['mock-build-a', 'mock-build-
   const routePromise = page.route('**/api/**', async route => {
     const request = route.request(); const url = new URL(request.url()); const p = url.pathname.replace('/api/v1/', '')
     let status = 200; let data = {}
-    if (p === 'config') data = { authMode: 'Development', entra: {} }
+    if (p === 'config') data = clientConfig()
     else if (p === 'me') { data = me; await route.fulfill({ status, contentType: 'application/json', headers: { 'x-hub-build': currentBuild }, body: JSON.stringify(data) }); return }
     else if (p === 'me/work') data = work
     else if (p === `projects/${project.projectNumber}` || p === `projects/${project.id}`) data = project

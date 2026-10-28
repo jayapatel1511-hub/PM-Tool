@@ -1,4 +1,5 @@
 const { chromium } = require('playwright');
+const { clientConfig } = require('./config.fixture.cjs');
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
@@ -25,7 +26,7 @@ const errors=[], unknown=[];
  page.on('pageerror',e=>errors.push(e.message));
  await page.route('**/api/**',async route=>{
   const req=route.request(),u=new URL(req.url()),path=u.pathname.replace('/api/v1/',''),method=req.method();let data={};
-  if(path==='config')data={authMode:'Development',entra:{}};
+  if(path==='config')data=clientConfig();
   else if(path==='me')data=me;
   else if(path==='me/sign-in')data={};
   else if(path==='me/notifications/pulse')data={stamp:'0'};

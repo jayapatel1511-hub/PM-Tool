@@ -27,7 +27,7 @@ interface Prefs {
  *  fields sit in a 760 px region (design §5). */
 export function PreferencesPage() {
   const me = useMe()
-  const signInConfig = useQuery({ queryKey: ['sign-in-config'], queryFn: () => get<{ authMode: string }>('config') })
+  const signInConfig = useQuery({ queryKey: ['sign-in-config'], queryFn: () => typedRequest('get', '/api/v1/config', {}) })
   const signInMethods = useQuery({ queryKey: ['sign-in-methods'], enabled: signInConfig.data?.authMode === 'Social', queryFn: () => get<{ available: string[]; connected: string[] }>('auth/social/providers') })
   const qc = useQueryClient()
   const q = useQuery({ queryKey: ['preferences'], queryFn: () => get<Prefs>('me/preferences') })

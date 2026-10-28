@@ -1,6 +1,7 @@
 // Browser evidence for packets 048-050. The UI talks to a mocked API, but all
 // assertions below are against rendered workflows and captured request bodies.
 const { chromium } = require('playwright')
+const { clientConfig } = require('./config.fixture.cjs')
 const { spawn } = require('node:child_process')
 const fs = require('node:fs')
 const path = require('node:path')
@@ -32,7 +33,7 @@ const promiseDetail = commitmentDetail(commitmentRow(projectId, { id: id(72), ke
 const myWork = { person: { id: id(1), displayName: 'Sam Supervisor', isActive: true }, readOnly: false, today: '2026-10-03', attention: { total: 0, items: [] }, tasks: [], reviews: { tasks: [], deliverables: [] }, deliverables: [], people: {}, successors: [], decisions: [], actions: [], projects: [], milestones: [], completed: [] }
 
 function responseFor(method, p, body, query) {
-  if (p === 'config') return { authMode: 'Development', entra: {} }
+  if (p === 'config') return clientConfig()
   if (p === 'me') return { ...me, flags: featurePhase === 'off' ? { task_pickup: false, org_structure: false, verifiable_log: false, commitment_reliability: false } : { task_pickup: true, org_structure: true, verifiable_log: true, commitment_reliability: true } }
   if (p === 'me/sign-in') return {}
   if (p === 'reference') return { disciplines: [{ id: id(60), name: 'Civil' }], offices: [{ id: id(61), name: 'Halifax' }], clients: [], deliverableTypes: [], phases: [], projectTypes: [] }

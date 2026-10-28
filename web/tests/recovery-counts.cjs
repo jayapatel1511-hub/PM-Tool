@@ -1,5 +1,6 @@
 // Packet 045: real browser interactions over labelled synthetic API responses.
 const { chromium } = require('playwright');
+const { clientConfig } = require('./config.fixture.cjs');
 const assert = require('node:assert/strict');
 const { spawn } = require('node:child_process');
 const path = require('node:path');
@@ -33,7 +34,7 @@ let server,browser;const errors=[],requests=[],unknown=[];
  page.on('pageerror',e=>errors.push(e.message));
  await page.route('**/api/**',async route=>{
   const req=route.request(),u=new URL(req.url()),p=u.pathname.replace('/api/v1/','');let data={},status=200;
-  if(p==='config')data={authMode:'Development',entra:{}};
+  if(p==='config')data=clientConfig();
   else if(p==='me')data=me();
   else if(p==='me/sign-in')data={};
   else if(p==='me/notifications/pulse')data={stamp:'0'};

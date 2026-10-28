@@ -1,4 +1,5 @@
 const { chromium } = require('playwright')
+const { clientConfig } = require('./config.fixture.cjs')
 const assert = require('node:assert/strict')
 const { spawn } = require('child_process')
 const path = require('path')
@@ -45,7 +46,7 @@ const pause = (ms = 100) => new Promise((r) => setTimeout(r, ms))
       const req = route.request(); const u = new URL(req.url()); const p = u.pathname.replace('/api/v1/', ''); const b = body(req)
       calls.push({ method: req.method(), path: p, url: req.url(), body: b, key: req.headers()['idempotency-key'], headers: req.headers() })
       let status = 200, data = {}
-      if (p === 'config') data = { authMode: 'Development', entra: {} }
+      if (p === 'config') data = clientConfig()
       else if (p === 'me') data = myWorkMode ? { ...me, id: alex, displayName: 'Alex Engineer', systemRoles: [], capabilities: { ...me.capabilities, workload: false } } : (adminMode ? { ...me, capabilities: { ...me.capabilities, admin: true } } : me)
       else if (p === 'me/work') data = { person: { id: alex, displayName: 'Alex Engineer', isActive: true }, readOnly: false, today: '2026-10-03', attention: { total: 0, items: [] }, tasks: [], reviews: { tasks: [], deliverables: [] }, deliverables: [], people: {}, successors: [], decisions: [], actions: [], projects: [], milestones: [], completed: [] }
       else if (p === 'me/sign-in') data = {}

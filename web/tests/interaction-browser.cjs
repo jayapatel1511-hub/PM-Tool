@@ -1,5 +1,6 @@
 // Packet 046: focused browser checks against deterministic mocked API contracts.
 const { chromium } = require('playwright')
+const { clientConfig } = require('./config.fixture.cjs')
 const assert = require('node:assert/strict')
 const { spawn } = require('node:child_process')
 const path = require('node:path')
@@ -41,7 +42,7 @@ let server, browser
     const req = route.request(); const u = new URL(req.url()); const p = u.pathname.replace('/api/v1/', ''); const method = req.method(); let data = {}
     if (p === `items/Task/${taskId}/date-context`) dateContextRequests.push(u.search)
     if (p === `tasks/${taskId}` && method === 'PATCH' && renameConflict) { writes.push({ method, path: p, body: req.postDataJSON() }); await route.fulfill({status:409,contentType:'application/json',body:JSON.stringify({code:'concurrency_conflict',detail:'Synthetic rename conflict'})}); return }
-    if (p === 'config') data = { authMode: 'Development', entra: {} }
+    if (p === 'config') data = clientConfig()
     else if (p === 'me') data = me
     else if (p === 'me/sign-in') data = {}
     else if (p.startsWith('me/notifications/')) data = p.endsWith('unread-count') ? { notifications: 0, following: 0 } : { stamp: '0' }

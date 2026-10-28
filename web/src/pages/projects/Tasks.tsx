@@ -727,6 +727,7 @@ function BacklogQuickAdd({ p, onCreated }: { p: ProjectDetail; onCreated: () => 
   const [assignee, setAssignee] = useState<{ id: string | null; name?: string | null }>({ id: me.id, name: me.displayName })
   const [priority, setPriority] = useState('Medium')
   const [busy, setBusy] = useState(false)
+  const nameInput = useRef<HTMLInputElement>(null)
   const disciplineId = discipline ?? allowed.find((d) => d.disciplineId === home.data?.[0]?.homeDisciplineId)?.id ?? allowed[0]?.id
   const submit = async () => {
     if (busy || !name.trim() || !disciplineId) return
@@ -736,12 +737,15 @@ function BacklogQuickAdd({ p, onCreated }: { p: ProjectDetail; onCreated: () => 
       toast.success(t('task.created', { key: r.key }))
       setName('')
       onCreated()
-    } catch (e) { toast.error(Object.values((e as ApiError).fieldErrors ?? {})[0]?.[0] ?? errorText(e)) } finally { setBusy(false) }
+    } catch (e) { toast.error(Object.values((e as ApiError).fieldErrors ?? {})[0]?.[0] ?? errorText(e)) } finally {
+      setBusy(false)
+      nameInput.current?.focus() // the Add button is disabled while saving and with an empty name, so focus returns to the name for the next one
+    }
   }
   return (
     <form className="flex flex-wrap items-end gap-3 rounded-lg border bg-card p-3" aria-label={t('backlog.quickAdd')} onSubmit={(e) => { e.preventDefault(); submit() }}>
       <Field label={t('backlog.quickAdd')} htmlFor="bq-name" className="w-full min-w-56 sm:w-auto sm:flex-1">
-        <Input id="bq-name" value={name} placeholder={t('backlog.quickAddPlaceholder')} onChange={(e) => setName(e.target.value)} />
+        <Input id="bq-name" ref={nameInput} value={name} placeholder={t('backlog.quickAddPlaceholder')} onChange={(e) => setName(e.target.value)} />
       </Field>
       <Field label={t('common.discipline')} htmlFor="bq-discipline" className="w-full sm:w-44">
         <select id="bq-discipline" className={selectCls} value={disciplineId ?? ''} onChange={(e) => setDiscipline(e.target.value)}>{allowed.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select>

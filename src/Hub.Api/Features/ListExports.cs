@@ -52,7 +52,7 @@ public static class ListExportEndpoints
             var (p, _) = await access.Project(id, track: false);
             var s = await store.Get(db);
             var f = TaskFilter.From(http.Request.Query);
-            var q = TaskQueries.Sort(TaskQueries.Apply(db, db.Tasks.AsNoTracking().Where(t => t.ProjectId == id), f, me.Id, clock.Today(s), s), f.Sort).Take(Export.MaxRows + 1);
+            var q = TaskQueries.Sort(TaskQueries.Apply(db, db.Tasks.AsNoTracking().Where(t => t.ProjectId == id), f, me.Id, clock.Today(s), s), f.Sort, db, f.WorkspaceId).Take(Export.MaxRows + 1); // ordered as the list (sort=board included)
             var rows = Indicators(Json(await TaskQueries.Rows(db, q, access.Actor)));
             // FR-BKL-08: a Yes/No `backlog` column while `flag.backlog` is on.
             Col[] cols = s.IsFlagOn(TaskRules.BacklogFlag) ? [.. TaskCols, new("backlog", "backlog")] : TaskCols;

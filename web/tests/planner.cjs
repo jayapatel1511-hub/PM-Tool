@@ -3,6 +3,7 @@ const assert = require('node:assert/strict')
 const { spawn } = require('child_process')
 const path = require('path')
 const { weekPreview, weekApplied } = require('./week-planning.fixture.cjs')
+const { subscriptionState, subscriptionLink } = require('./calendar-subscription.fixture.cjs')
 
 const port = process.env.PORT ?? '5194'
 const base = `http://127.0.0.1:${port}`
@@ -59,7 +60,7 @@ const pause = (ms = 100) => new Promise((r) => setTimeout(r, ms))
       else if (p === 'planning/week-preview') data = weekPreview({ operation: u.searchParams.get('operation') ?? 'Copy', week: u.searchParams.get('week') ?? weeks[0], entryId, personId: alex })
       else if (p === 'planning/week-apply') { if (bulkConflict) { bulkConflict = false; status = 409; data = { detail: 'Weekly snapshot changed', code: 'concurrency_conflict' } } else data = weekApplied({ week: b.week ?? weeks[0], entryId, personId: alex }) }
       else if (p === 'calendar') data = { entries: [], timeZone: 'America/Halifax' }
-      else if (p === 'me/calendar-subscription') { if (req.method() === 'POST') { subscriptionEnabled = true; data = { url: 'https://example.test/synthetic-calendar', rowVersion: 2 } } else if (req.method() === 'DELETE') { subscriptionEnabled = false; data = {} } else data = { enabled: subscriptionEnabled, rowVersion: subscriptionEnabled ? 2 : 0 } }
+      else if (p === 'me/calendar-subscription') { if (req.method() === 'POST') { subscriptionEnabled = true; data = subscriptionLink('https://example.test/synthetic-calendar') } else if (req.method() === 'DELETE') { subscriptionEnabled = false; status = 204; data = undefined } else data = subscriptionState(subscriptionEnabled) }
       else if (p.startsWith('planning/grid')) { if (denyGrid) { status = 403; data = { detail: 'You cannot open the workload view' } } else if (failGrid) { status = 500; data = { detail: 'Planner unavailable' } } else {
           data = grid(new URL(req.url()).searchParams.get('includeMyDrafts') !== 'false')
           if (u.searchParams.has('from')) {

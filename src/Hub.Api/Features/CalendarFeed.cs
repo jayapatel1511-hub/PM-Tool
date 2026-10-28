@@ -3,6 +3,7 @@ using System.Text;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Api.Features;
@@ -10,13 +11,15 @@ namespace Hub.Api.Features;
 public static class CalendarFeedEndpoints
 {
     public sealed record VersionBody(int RowVersion);
+    public sealed record SubscriptionState(bool Enabled, int RowVersion);
+    public sealed record SubscriptionLink(string Url, int RowVersion);
     sealed record Source(string Key, DateOnly From, DateOnly Through, string Summary);
 
     public static void Map(RouteGroupBuilder api)
     {
         api.MapGet("/me/calendar-subscription", async (CurrentUser me, HubDb db) => {
             var row = await db.CalendarSubscriptions.AsNoTracking().SingleOrDefaultAsync(s => s.UserId == me.Id);
-            return new { Enabled = row?.TokenHash != null, RowVersion = row?.RowVersion ?? 0 };
+            return TypedResults.Ok(new SubscriptionState(row?.TokenHash != null, row?.RowVersion ?? 0));
         });
         api.MapPost("/me/calendar-subscription", Rotate);
         api.MapDelete("/me/calendar-subscription", Revoke);
@@ -24,7 +27,7 @@ public static class CalendarFeedEndpoints
     }
 
     static string Hash(string token) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
-    static async Task<IResult> Rotate(VersionBody body, CurrentUser me, HubDb db, HttpContext http)
+    static async Task<Ok<SubscriptionLink>> Rotate(VersionBody body, CurrentUser me, HubDb db, HttpContext http)
     {
         return await Tx.Run(db, async () => {
             await PersonCapacity.LockPeople(db, [me.Id]);
@@ -35,17 +38,17 @@ public static class CalendarFeedEndpoints
             db.LogEvent("CalendarSubscription", row.Id, "Rotated", "access"); await db.SaveChangesAsync();
             http.Response.Headers.CacheControl = "no-store";
             // Only this response contains the token. It is never saved in an idempotency receipt or audit record.
-            return Results.Ok(new { Url = $"{http.Request.Scheme}://{http.Request.Host}/api/v1/calendar-feed.ics?token={token}", row.RowVersion });
+            return TypedResults.Ok(new SubscriptionLink($"{http.Request.Scheme}://{http.Request.Host}/api/v1/calendar-feed.ics?token={token}", row.RowVersion));
         });
     }
 
-    static async Task<IResult> Revoke(int rowVersion, CurrentUser me, HubDb db)
+    static async Task<NoContent> Revoke(int rowVersion, CurrentUser me, HubDb db)
     {
         return await Tx.Run(db, async () => {
             await PersonCapacity.LockPeople(db, [me.Id]);
             var row = await db.CalendarSubscriptions.SingleOrDefaultAsync(s => s.UserId == me.Id) ?? throw ApiException.NotFound();
             AvailabilityEndpoints.Version(row.RowVersion, rowVersion); row.TokenHash = null;
-            db.LogEvent("CalendarSubscription", row.Id, "Revoked", "access"); await db.SaveChangesAsync(); return Results.NoContent();
+            db.LogEvent("CalendarSubscription", row.Id, "Revoked", "access"); await db.SaveChangesAsync(); return TypedResults.NoContent();
         });
     }
 

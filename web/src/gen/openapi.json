@@ -1997,23 +1997,6 @@
         ],
         "type": "object"
       },
-      "AnonymousTypeOfbooleanAndint": {
-        "properties": {
-          "enabled": {
-            "type": "boolean"
-          },
-          "rowVersion": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "enabled",
-          "rowVersion"
-        ],
-        "type": "object"
-      },
       "AnonymousTypeOfbooleanAndstringAndbooleanAndboolean": {
         "properties": {
           "denseRows": {
@@ -13102,6 +13085,40 @@
         ],
         "type": "object"
       },
+      "SubscriptionLink": {
+        "properties": {
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
+      "SubscriptionState": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "enabled",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
       "TargetRef": {
         "properties": {
           "rowVersion": {
@@ -20310,8 +20327,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -20324,7 +20341,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnonymousTypeOfbooleanAndint"
+                  "$ref": "#/components/schemas/SubscriptionState"
                 }
               }
             },
@@ -20348,6 +20365,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionLink"
+                }
+              }
+            },
             "description": "OK"
           }
         },

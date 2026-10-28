@@ -4358,7 +4358,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfbooleanAndint"];
+                        "application/json": components["schemas"]["SubscriptionState"];
                     };
                 };
             };
@@ -4382,7 +4382,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["SubscriptionLink"];
+                    };
                 };
             };
         };
@@ -4397,8 +4399,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -16463,11 +16465,6 @@ export interface components {
             weekendDigests: boolean;
             weeklySummaryEnabled: boolean;
         };
-        AnonymousTypeOfbooleanAndint: {
-            enabled: boolean;
-            /** Format: int32 */
-            rowVersion: number;
-        };
         AnonymousTypeOfbooleanAndstringAndbooleanAndboolean: {
             denseRows: boolean;
             digestEnabled: boolean;
@@ -19316,6 +19313,16 @@ export interface components {
             /** Format: int32 */
             rowVersion: number;
             transmittalUrl: string;
+        };
+        SubscriptionLink: {
+            /** Format: int32 */
+            rowVersion: number;
+            url: string;
+        };
+        SubscriptionState: {
+            enabled: boolean;
+            /** Format: int32 */
+            rowVersion: number;
         };
         TargetRef: {
             /** Format: int32 */

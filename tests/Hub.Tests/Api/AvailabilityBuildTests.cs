@@ -189,6 +189,40 @@ public sealed class AvailabilityBuildTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Calendar_subscription_and_feed_keep_their_property_names_order_status_and_headers() // the typed records must serialise to the bytes the Sync dialog already reads
+    {
+        var p = await Person(); var c = f.As(p.Email); const string route = "/api/v1/me/calendar-subscription";
+        var off = await (await c.GetAsync(route)).Json();
+        Assert.Equal(["enabled", "rowVersion"], off.AsObject().Select(x => x.Key));
+        Assert.Equal((JsonValueKind.False, JsonValueKind.Number, 0), (off["enabled"]!.GetValueKind(), off["rowVersion"]!.GetValueKind(), off.I("rowVersion")));
+
+        var rotate = await c.Post(route, new { rowVersion = 0 }); Assert.Equal(HttpStatusCode.OK, rotate.StatusCode); Assert.True(rotate.Headers.CacheControl!.NoStore); // the token is shown once and never cached
+        var link = await rotate.Json(); Assert.Equal(["url", "rowVersion"], link.AsObject().Select(x => x.Key));
+        Assert.Matches(@"^https?://[^/]+/api/v1/calendar-feed\.ics\?token=[0-9a-f]{64}$", link.S("url")); Assert.Equal(JsonValueKind.Number, link["rowVersion"]!.GetValueKind());
+        var on = await (await c.GetAsync(route)).Json(); Assert.Equal(["enabled", "rowVersion"], on.AsObject().Select(x => x.Key));
+        Assert.Equal((JsonValueKind.True, link.I("rowVersion")), (on["enabled"]!.GetValueKind(), on.I("rowVersion")));
+        Assert.Equal(HttpStatusCode.Conflict, (await c.Post(route, new { rowVersion = 0 })).StatusCode); // a stale rotate or revoke changes nothing
+        Assert.Equal(HttpStatusCode.Conflict, (await c.DeleteAsync($"{route}?rowVersion=0")).StatusCode);
+
+        using var anonymous = f.CreateClient(); var feed = await anonymous.GetAsync(link.S("url"));
+        Assert.Equal(HttpStatusCode.OK, feed.StatusCode); Assert.Equal("text/calendar; charset=utf-8", feed.Content.Headers.ContentType!.ToString());
+        Assert.True(feed.Headers.CacheControl!.NoStore && feed.Headers.CacheControl.Private); Assert.Equal("no-referrer", Assert.Single(feed.Headers.GetValues("Referrer-Policy")));
+        Assert.StartsWith("BEGIN:VCALENDAR", await feed.Content.ReadAsStringAsync());
+        var token = link.S("url")[^64..];
+        foreach (var bad in new[] { "", $"?token={token[1..]}", $"?token=g{token[1..]}", $"?token={new string('0', 64)}" }) { // missing, short, not hex, unknown
+            var refused = await anonymous.GetAsync("/api/v1/calendar-feed.ics" + bad);
+            Assert.Equal(HttpStatusCode.Unauthorized, refused.StatusCode); Assert.True(refused.Headers.CacheControl!.NoStore); Assert.Equal("no-referrer", Assert.Single(refused.Headers.GetValues("Referrer-Policy")));
+        }
+
+        var revoked = await c.DeleteAsync($"{route}?rowVersion={link.I("rowVersion")}");
+        Assert.Equal(HttpStatusCode.NoContent, revoked.StatusCode); Assert.Equal("", await revoked.Content.ReadAsStringAsync());
+        var after = await (await c.GetAsync(route)).Json(); Assert.Equal(["enabled", "rowVersion"], after.AsObject().Select(x => x.Key));
+        Assert.False(after["enabled"]!.GetValue<bool>()); Assert.True(after.I("rowVersion") > link.I("rowVersion"));
+        Assert.Equal(HttpStatusCode.Unauthorized, (await anonymous.GetAsync(link.S("url"))).StatusCode);
+        var other = await Person(); Assert.Equal(HttpStatusCode.NotFound, (await f.As(other.Email).DeleteAsync($"{route}?rowVersion=0")).StatusCode); // nothing to revoke
+    }
+
+    [Fact]
     public async Task Coverage_exports_and_calendar_recheck_project_permissions()
     {
         var p = await Person(); var project = await d.Project();

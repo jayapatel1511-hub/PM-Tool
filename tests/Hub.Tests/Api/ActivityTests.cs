@@ -37,6 +37,22 @@ public sealed class ActivityTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Internal_notes_values_never_reach_the_project_log_readers()
+    {
+        var p = await d.Project();
+        const string secret = "Fee dispute with the client";
+        (await f.As(TestData.Pm).Patch($"/api/v1/projects/{p.Id}", new { internalNotes = secret }, d.Version(p.Id))).EnsureSuccessStatusCode();
+        // The project log is open to every viewer of the project; its internal notes are for members and management only.
+        var history = await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/activity").Result.Json();
+        Assert.DoesNotContain(secret, history.ToJsonString());
+        var line = history["items"]!.AsArray().SelectMany(i => i!["changes"]!.AsArray()).Single(c => c!.S("field") == "InternalNotes")!;
+        Assert.Equal("Not shown", line.S("newLabel"));
+        var export = await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/activity/export?format=csv");
+        export.EnsureSuccessStatusCode();
+        Assert.DoesNotContain(secret, await export.Content.ReadAsStringAsync());
+    }
+
+    [Fact]
     public async Task Time_notes_follow_source_permissions_in_activity_and_export()
     {
         var p = await d.Project();

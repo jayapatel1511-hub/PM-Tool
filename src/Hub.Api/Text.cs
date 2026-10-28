@@ -243,6 +243,7 @@ public static class Text
         ["col.handoffSender"] = "Sending owner", ["col.handoffReceiver"] = "Receiving owner",
         ["col.handoffNeeded"] = "Needed by", ["col.handoffPromised"] = "Promised by", ["col.handoffPurpose"] = "Intended use",
         ["common.system"] = "System",
+        ["activity.notShown"] = "Not shown",
         ["role.PM"] = "Project Manager",
         ["role.TeamMember"] = "Team Member",
         ["role.Reviewer"] = "Reviewer",

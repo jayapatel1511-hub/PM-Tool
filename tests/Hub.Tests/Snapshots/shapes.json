@@ -30898,6 +30898,1179 @@
     "$.components.schemas.ScheduleBody.type": [
       "string"
     ],
+    "$.components.schemas.SearchAllocationHit": [
+      "object"
+    ],
+    "$.components.schemas.SearchAllocationHit.properties": [
+      "object"
+    ],
+    "$.components.schemas.SearchAllocationHit.properties.dueDate": [
+      "object"
+    ],
+    "$.components.schemas.SearchAllocationHit.properties.dueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.SearchAllocationHit.properties.dueDate.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchAllocationHit.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.SearchAllocationHit.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.SearchAllocationHit.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchAllocationHit.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.SearchAllocationHit.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchAllocationHit.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.SearchAllocationHit.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchAllocationHit.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.SearchAllocationHit.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchAllocationHit.required": [
+      "array"
+    ],
+    "$.components.schemas.SearchAllocationHit.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchAllocationHit.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchBasisHit": [
+      "object"
+    ],
+    "$.components.schemas.SearchBasisHit.properties": [
+      "object"
+    ],
+    "$.components.schemas.SearchBasisHit.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.SearchBasisHit.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.SearchBasisHit.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchBasisHit.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.SearchBasisHit.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchBasisHit.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.SearchBasisHit.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchBasisHit.properties.owner": [
+      "object"
+    ],
+    "$.components.schemas.SearchBasisHit.properties.owner.type": [
+      "array"
+    ],
+    "$.components.schemas.SearchBasisHit.properties.owner.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchBasisHit.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.SearchBasisHit.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchBasisHit.required": [
+      "array"
+    ],
+    "$.components.schemas.SearchBasisHit.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchBasisHit.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchCommentHit": [
+      "object"
+    ],
+    "$.components.schemas.SearchCommentHit.properties": [
+      "object"
+    ],
+    "$.components.schemas.SearchCommentHit.properties.author": [
+      "object"
+    ],
+    "$.components.schemas.SearchCommentHit.properties.author.type": [
+      "array"
+    ],
+    "$.components.schemas.SearchCommentHit.properties.author.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchCommentHit.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.SearchCommentHit.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.SearchCommentHit.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchCommentHit.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.SearchCommentHit.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.SearchCommentHit.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchCommentHit.properties.itemId": [
+      "object"
+    ],
+    "$.components.schemas.SearchCommentHit.properties.itemId.format": [
+      "string"
+    ],
+    "$.components.schemas.SearchCommentHit.properties.itemId.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchCommentHit.properties.itemType": [
+      "object"
+    ],
+    "$.components.schemas.SearchCommentHit.properties.itemType.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchCommentHit.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.SearchCommentHit.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchCommentHit.properties.match": [
+      "object"
+    ],
+    "$.components.schemas.SearchCommentHit.properties.match.type": [
+      "array"
+    ],
+    "$.components.schemas.SearchCommentHit.properties.match.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchCommentHit.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.SearchCommentHit.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchCommentHit.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.SearchCommentHit.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchCommentHit.required": [
+      "array"
+    ],
+    "$.components.schemas.SearchCommentHit.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchCommentHit.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchDecisionHit": [
+      "object"
+    ],
+    "$.components.schemas.SearchDecisionHit.properties": [
+      "object"
+    ],
+    "$.components.schemas.SearchDecisionHit.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.SearchDecisionHit.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.SearchDecisionHit.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchDecisionHit.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.SearchDecisionHit.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchDecisionHit.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.SearchDecisionHit.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchDecisionHit.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.SearchDecisionHit.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchDecisionHit.properties.requiredByDate": [
+      "object"
+    ],
+    "$.components.schemas.SearchDecisionHit.properties.requiredByDate.format": [
+      "string"
+    ],
+    "$.components.schemas.SearchDecisionHit.properties.requiredByDate.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchDecisionHit.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.SearchDecisionHit.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchDecisionHit.required": [
+      "array"
+    ],
+    "$.components.schemas.SearchDecisionHit.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchDecisionHit.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchDeliverableHit": [
+      "object"
+    ],
+    "$.components.schemas.SearchDeliverableHit.properties": [
+      "object"
+    ],
+    "$.components.schemas.SearchDeliverableHit.properties.dueDate": [
+      "object"
+    ],
+    "$.components.schemas.SearchDeliverableHit.properties.dueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.SearchDeliverableHit.properties.dueDate.type": [
+      "array"
+    ],
+    "$.components.schemas.SearchDeliverableHit.properties.dueDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchDeliverableHit.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.SearchDeliverableHit.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.SearchDeliverableHit.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchDeliverableHit.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.SearchDeliverableHit.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchDeliverableHit.properties.match": [
+      "object"
+    ],
+    "$.components.schemas.SearchDeliverableHit.properties.match.type": [
+      "array"
+    ],
+    "$.components.schemas.SearchDeliverableHit.properties.match.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchDeliverableHit.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.SearchDeliverableHit.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchDeliverableHit.properties.owner": [
+      "object"
+    ],
+    "$.components.schemas.SearchDeliverableHit.properties.owner.type": [
+      "array"
+    ],
+    "$.components.schemas.SearchDeliverableHit.properties.owner.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchDeliverableHit.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.SearchDeliverableHit.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchDeliverableHit.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.SearchDeliverableHit.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchDeliverableHit.required": [
+      "array"
+    ],
+    "$.components.schemas.SearchDeliverableHit.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchDeliverableHit.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchExact": [
+      "object"
+    ],
+    "$.components.schemas.SearchExact.properties": [
+      "object"
+    ],
+    "$.components.schemas.SearchExact.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.SearchExact.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.SearchExact.properties.id.type": [
+      "array"
+    ],
+    "$.components.schemas.SearchExact.properties.id.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchExact.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.SearchExact.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchExact.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.SearchExact.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchExact.properties.type": [
+      "object"
+    ],
+    "$.components.schemas.SearchExact.properties.type.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchExact.required": [
+      "array"
+    ],
+    "$.components.schemas.SearchExact.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchExact.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchGroups": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties.allocations": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties.allocations.items": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties.allocations.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.SearchGroups.properties.allocations.type": [
+      "array"
+    ],
+    "$.components.schemas.SearchGroups.properties.allocations.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchGroups.properties.changes": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties.changes.items": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties.changes.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.SearchGroups.properties.changes.type": [
+      "array"
+    ],
+    "$.components.schemas.SearchGroups.properties.changes.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchGroups.properties.comments": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties.comments.items": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties.comments.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.SearchGroups.properties.comments.type": [
+      "array"
+    ],
+    "$.components.schemas.SearchGroups.properties.comments.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchGroups.properties.commitments": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties.commitments.items": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties.commitments.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.SearchGroups.properties.commitments.type": [
+      "array"
+    ],
+    "$.components.schemas.SearchGroups.properties.commitments.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchGroups.properties.constraints": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties.constraints.items": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties.constraints.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.SearchGroups.properties.constraints.type": [
+      "array"
+    ],
+    "$.components.schemas.SearchGroups.properties.constraints.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchGroups.properties.decisions": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties.decisions.items": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties.decisions.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.SearchGroups.properties.decisions.type": [
+      "array"
+    ],
+    "$.components.schemas.SearchGroups.properties.decisions.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchGroups.properties.deliverables": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties.deliverables.items": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties.deliverables.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.SearchGroups.properties.deliverables.type": [
+      "array"
+    ],
+    "$.components.schemas.SearchGroups.properties.deliverables.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchGroups.properties.design-basis": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties.design-basis.items": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties.design-basis.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.SearchGroups.properties.design-basis.type": [
+      "array"
+    ],
+    "$.components.schemas.SearchGroups.properties.design-basis.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchGroups.properties.handoffs": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties.handoffs.items": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties.handoffs.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.SearchGroups.properties.handoffs.type": [
+      "array"
+    ],
+    "$.components.schemas.SearchGroups.properties.handoffs.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchGroups.properties.milestones": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties.milestones.items": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties.milestones.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.SearchGroups.properties.milestones.type": [
+      "array"
+    ],
+    "$.components.schemas.SearchGroups.properties.milestones.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchGroups.properties.people": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties.people.items": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties.people.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.SearchGroups.properties.people.type": [
+      "array"
+    ],
+    "$.components.schemas.SearchGroups.properties.people.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchGroups.properties.planning": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties.planning.items": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties.planning.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.SearchGroups.properties.planning.type": [
+      "array"
+    ],
+    "$.components.schemas.SearchGroups.properties.planning.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchGroups.properties.projects": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties.projects.items": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties.projects.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.SearchGroups.properties.projects.type": [
+      "array"
+    ],
+    "$.components.schemas.SearchGroups.properties.projects.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchGroups.properties.reviews": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties.reviews.items": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties.reviews.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.SearchGroups.properties.reviews.type": [
+      "array"
+    ],
+    "$.components.schemas.SearchGroups.properties.reviews.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchGroups.properties.submissions": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties.submissions.items": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties.submissions.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.SearchGroups.properties.submissions.type": [
+      "array"
+    ],
+    "$.components.schemas.SearchGroups.properties.submissions.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchGroups.properties.tasks": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties.tasks.items": [
+      "object"
+    ],
+    "$.components.schemas.SearchGroups.properties.tasks.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.SearchGroups.properties.tasks.type": [
+      "array"
+    ],
+    "$.components.schemas.SearchGroups.properties.tasks.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchGroups.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchMilestoneHit": [
+      "object"
+    ],
+    "$.components.schemas.SearchMilestoneHit.properties": [
+      "object"
+    ],
+    "$.components.schemas.SearchMilestoneHit.properties.date": [
+      "object"
+    ],
+    "$.components.schemas.SearchMilestoneHit.properties.date.format": [
+      "string"
+    ],
+    "$.components.schemas.SearchMilestoneHit.properties.date.type": [
+      "array"
+    ],
+    "$.components.schemas.SearchMilestoneHit.properties.date.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchMilestoneHit.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.SearchMilestoneHit.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.SearchMilestoneHit.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchMilestoneHit.properties.isCancelled": [
+      "object"
+    ],
+    "$.components.schemas.SearchMilestoneHit.properties.isCancelled.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchMilestoneHit.properties.isComplete": [
+      "object"
+    ],
+    "$.components.schemas.SearchMilestoneHit.properties.isComplete.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchMilestoneHit.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.SearchMilestoneHit.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchMilestoneHit.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.SearchMilestoneHit.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchMilestoneHit.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.SearchMilestoneHit.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchMilestoneHit.required": [
+      "array"
+    ],
+    "$.components.schemas.SearchMilestoneHit.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchMilestoneHit.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchOwnedHit": [
+      "object"
+    ],
+    "$.components.schemas.SearchOwnedHit.properties": [
+      "object"
+    ],
+    "$.components.schemas.SearchOwnedHit.properties.dueDate": [
+      "object"
+    ],
+    "$.components.schemas.SearchOwnedHit.properties.dueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.SearchOwnedHit.properties.dueDate.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchOwnedHit.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.SearchOwnedHit.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.SearchOwnedHit.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchOwnedHit.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.SearchOwnedHit.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchOwnedHit.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.SearchOwnedHit.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchOwnedHit.properties.owner": [
+      "object"
+    ],
+    "$.components.schemas.SearchOwnedHit.properties.owner.type": [
+      "array"
+    ],
+    "$.components.schemas.SearchOwnedHit.properties.owner.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchOwnedHit.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.SearchOwnedHit.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchOwnedHit.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.SearchOwnedHit.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchOwnedHit.required": [
+      "array"
+    ],
+    "$.components.schemas.SearchOwnedHit.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchOwnedHit.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchPersonHit": [
+      "object"
+    ],
+    "$.components.schemas.SearchPersonHit.properties": [
+      "object"
+    ],
+    "$.components.schemas.SearchPersonHit.properties.canViewWork": [
+      "object"
+    ],
+    "$.components.schemas.SearchPersonHit.properties.canViewWork.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchPersonHit.properties.displayName": [
+      "object"
+    ],
+    "$.components.schemas.SearchPersonHit.properties.displayName.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchPersonHit.properties.email": [
+      "object"
+    ],
+    "$.components.schemas.SearchPersonHit.properties.email.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchPersonHit.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.SearchPersonHit.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.SearchPersonHit.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchPersonHit.properties.isActive": [
+      "object"
+    ],
+    "$.components.schemas.SearchPersonHit.properties.isActive.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchPersonHit.properties.jobTitle": [
+      "object"
+    ],
+    "$.components.schemas.SearchPersonHit.properties.jobTitle.type": [
+      "array"
+    ],
+    "$.components.schemas.SearchPersonHit.properties.jobTitle.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchPersonHit.required": [
+      "array"
+    ],
+    "$.components.schemas.SearchPersonHit.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchPersonHit.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchPlanningHit": [
+      "object"
+    ],
+    "$.components.schemas.SearchPlanningHit.properties": [
+      "object"
+    ],
+    "$.components.schemas.SearchPlanningHit.properties.dueDate": [
+      "object"
+    ],
+    "$.components.schemas.SearchPlanningHit.properties.dueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.SearchPlanningHit.properties.dueDate.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchPlanningHit.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.SearchPlanningHit.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.SearchPlanningHit.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchPlanningHit.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.SearchPlanningHit.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchPlanningHit.properties.personId": [
+      "object"
+    ],
+    "$.components.schemas.SearchPlanningHit.properties.personId.format": [
+      "string"
+    ],
+    "$.components.schemas.SearchPlanningHit.properties.personId.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchPlanningHit.properties.startWeek": [
+      "object"
+    ],
+    "$.components.schemas.SearchPlanningHit.properties.startWeek.format": [
+      "string"
+    ],
+    "$.components.schemas.SearchPlanningHit.properties.startWeek.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchPlanningHit.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.SearchPlanningHit.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchPlanningHit.required": [
+      "array"
+    ],
+    "$.components.schemas.SearchPlanningHit.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchPlanningHit.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchProjectHit": [
+      "object"
+    ],
+    "$.components.schemas.SearchProjectHit.properties": [
+      "object"
+    ],
+    "$.components.schemas.SearchProjectHit.properties.client": [
+      "object"
+    ],
+    "$.components.schemas.SearchProjectHit.properties.client.type": [
+      "array"
+    ],
+    "$.components.schemas.SearchProjectHit.properties.client.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchProjectHit.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.SearchProjectHit.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.SearchProjectHit.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchProjectHit.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.SearchProjectHit.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchProjectHit.properties.pm": [
+      "object"
+    ],
+    "$.components.schemas.SearchProjectHit.properties.pm.type": [
+      "array"
+    ],
+    "$.components.schemas.SearchProjectHit.properties.pm.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchProjectHit.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.SearchProjectHit.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchProjectHit.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.SearchProjectHit.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchProjectHit.required": [
+      "array"
+    ],
+    "$.components.schemas.SearchProjectHit.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchProjectHit.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchResponse": [
+      "object"
+    ],
+    "$.components.schemas.SearchResponse.properties": [
+      "object"
+    ],
+    "$.components.schemas.SearchResponse.properties.counts": [
+      "object"
+    ],
+    "$.components.schemas.SearchResponse.properties.counts.additionalProperties": [
+      "object"
+    ],
+    "$.components.schemas.SearchResponse.properties.counts.additionalProperties.format": [
+      "string"
+    ],
+    "$.components.schemas.SearchResponse.properties.counts.additionalProperties.pattern": [
+      "string"
+    ],
+    "$.components.schemas.SearchResponse.properties.counts.additionalProperties.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchResponse.properties.counts.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchResponse.properties.exact": [
+      "object"
+    ],
+    "$.components.schemas.SearchResponse.properties.exact.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.SearchResponse.properties.exact.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.SearchResponse.properties.exact.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.SearchResponse.properties.exact.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.SearchResponse.properties.groups": [
+      "object"
+    ],
+    "$.components.schemas.SearchResponse.properties.groups.$ref": [
+      "string"
+    ],
+    "$.components.schemas.SearchResponse.properties.q": [
+      "object"
+    ],
+    "$.components.schemas.SearchResponse.properties.q.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchResponse.required": [
+      "array"
+    ],
+    "$.components.schemas.SearchResponse.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchResponse.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchStatusHit": [
+      "object"
+    ],
+    "$.components.schemas.SearchStatusHit.properties": [
+      "object"
+    ],
+    "$.components.schemas.SearchStatusHit.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.SearchStatusHit.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.SearchStatusHit.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchStatusHit.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.SearchStatusHit.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchStatusHit.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.SearchStatusHit.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchStatusHit.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.SearchStatusHit.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchStatusHit.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.SearchStatusHit.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchStatusHit.required": [
+      "array"
+    ],
+    "$.components.schemas.SearchStatusHit.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchStatusHit.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchSubmissionHit": [
+      "object"
+    ],
+    "$.components.schemas.SearchSubmissionHit.properties": [
+      "object"
+    ],
+    "$.components.schemas.SearchSubmissionHit.properties.dueDate": [
+      "object"
+    ],
+    "$.components.schemas.SearchSubmissionHit.properties.dueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.SearchSubmissionHit.properties.dueDate.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchSubmissionHit.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.SearchSubmissionHit.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.SearchSubmissionHit.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchSubmissionHit.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.SearchSubmissionHit.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchSubmissionHit.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.SearchSubmissionHit.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchSubmissionHit.properties.owner": [
+      "object"
+    ],
+    "$.components.schemas.SearchSubmissionHit.properties.owner.type": [
+      "array"
+    ],
+    "$.components.schemas.SearchSubmissionHit.properties.owner.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchSubmissionHit.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.SearchSubmissionHit.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchSubmissionHit.required": [
+      "array"
+    ],
+    "$.components.schemas.SearchSubmissionHit.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchSubmissionHit.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchTaskHit": [
+      "object"
+    ],
+    "$.components.schemas.SearchTaskHit.properties": [
+      "object"
+    ],
+    "$.components.schemas.SearchTaskHit.properties.assignee": [
+      "object"
+    ],
+    "$.components.schemas.SearchTaskHit.properties.assignee.type": [
+      "array"
+    ],
+    "$.components.schemas.SearchTaskHit.properties.assignee.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchTaskHit.properties.dueDate": [
+      "object"
+    ],
+    "$.components.schemas.SearchTaskHit.properties.dueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.SearchTaskHit.properties.dueDate.type": [
+      "array"
+    ],
+    "$.components.schemas.SearchTaskHit.properties.dueDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchTaskHit.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.SearchTaskHit.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.SearchTaskHit.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchTaskHit.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.SearchTaskHit.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchTaskHit.properties.match": [
+      "object"
+    ],
+    "$.components.schemas.SearchTaskHit.properties.match.type": [
+      "array"
+    ],
+    "$.components.schemas.SearchTaskHit.properties.match.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchTaskHit.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.SearchTaskHit.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchTaskHit.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.SearchTaskHit.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchTaskHit.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.SearchTaskHit.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.SearchTaskHit.required": [
+      "array"
+    ],
+    "$.components.schemas.SearchTaskHit.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SearchTaskHit.type": [
+      "string"
+    ],
     "$.components.schemas.Selection": [
       "object"
     ],
@@ -60310,6 +61483,9 @@
     "$.paths./api/v1/search.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/search.get.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/search.get.responses.200.description": [
       "string"
     ],
@@ -80068,6 +81244,24 @@
     "$.groups.changes": [
       "array"
     ],
+    "$.groups.changes[]": [
+      "object"
+    ],
+    "$.groups.changes[].id": [
+      "string"
+    ],
+    "$.groups.changes[].key": [
+      "string"
+    ],
+    "$.groups.changes[].name": [
+      "string"
+    ],
+    "$.groups.changes[].projectNumber": [
+      "string"
+    ],
+    "$.groups.changes[].status": [
+      "string"
+    ],
     "$.groups.comments": [
       "array"
     ],
@@ -80186,7 +81380,8 @@
       "object"
     ],
     "$.groups.deliverables[].dueDate": [
-      "null"
+      "null",
+      "string"
     ],
     "$.groups.deliverables[].id": [
       "string"
@@ -80312,6 +81507,27 @@
     "$.groups.planning": [
       "array"
     ],
+    "$.groups.planning[]": [
+      "object"
+    ],
+    "$.groups.planning[].dueDate": [
+      "string"
+    ],
+    "$.groups.planning[].id": [
+      "string"
+    ],
+    "$.groups.planning[].name": [
+      "string"
+    ],
+    "$.groups.planning[].personId": [
+      "string"
+    ],
+    "$.groups.planning[].startWeek": [
+      "string"
+    ],
+    "$.groups.planning[].status": [
+      "string"
+    ],
     "$.groups.projects": [
       "array"
     ],
@@ -80388,10 +81604,12 @@
       "object"
     ],
     "$.groups.tasks[].assignee": [
-      "null"
+      "null",
+      "string"
     ],
     "$.groups.tasks[].dueDate": [
-      "null"
+      "null",
+      "string"
     ],
     "$.groups.tasks[].id": [
       "string"
@@ -80400,7 +81618,8 @@
       "string"
     ],
     "$.groups.tasks[].match": [
-      "null"
+      "null",
+      "string"
     ],
     "$.groups.tasks[].name": [
       "string"

@@ -4,17 +4,21 @@ import { Briefcase, CalendarCheck, CheckSquare, Flag, FileText, Link2Off, Messag
 import { useEffect, useId, useMemo, useState, type RefObject } from 'react'
 import { useNavigate } from 'react-router'
 import { useIsPhone } from '@/components/hub/common'
-import { get, qs } from '@/lib/api'
+import type { components } from '@/gen/api'
+import { typedRequest } from '@/lib/api'
 import { fmtDate } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
 export const GROUPS = ['projects', 'tasks', 'deliverables', 'milestones', 'decisions', 'handoffs', 'reviews', 'changes', 'submissions', 'allocations', 'design-basis', 'constraints', 'commitments', 'planning', 'comments', 'people'] as const
 export type Group = (typeof GROUPS)[number]
-export interface SearchResult {
-  q: string; exact: { type: string; id?: string | null; projectNumber: string; key: string } | null
-  groups: Partial<Record<Group, any[]>>; counts: Partial<Record<Group, number>>
-}
+type Schemas = components['schemas']
+export type SearchResult = Schemas['SearchResponse']
+type Rows = NonNullable<NonNullable<SearchResult['groups'][Group]>>
+type AllKeys<U> = U extends unknown ? keyof U : never
+type Loose<U, K extends PropertyKey = AllKeys<U>> = U extends unknown ? U & { [P in Exclude<K, keyof U>]?: undefined } : never
+/** A row of any group that shares the key, name and status shape, with the fields only some of them carry read as optional: a field the server renames or drops fails the build here. */
+type Row = Loose<NonNullable<SearchResult['groups'][Exclude<Group, 'projects' | 'people' | 'planning' | 'comments'>]>[number]>
 export interface Hit { id: string; icon: LucideIcon; key?: string; title: string; sub: string; href: string | null; match?: string | null }
 
 /** Item keys such as 1234-T0042 open the item directly (§18.1, FR-SRCH-02). */
@@ -31,20 +35,20 @@ export function itemHref(type: string, projectNumber: string, id?: string | null
   if (id && type === 'PlanningEntry') return `/planner?entry=${id}`
   return type === 'Project' || !id ? base : `${base}/${TAB[type] ?? 'dashboard'}?panel=${type}:${id}`
 }
-export function toHits(group: Group, rows: any[] = []): Hit[] {
-  const icon = ICON[group]
-  if (group === 'projects') return rows.map((p) => ({ id: p.id, icon, key: p.projectNumber, title: p.name, sub: [p.client, p.pm, tv(p.status)].filter(Boolean).join(' · '), href: itemHref('Project', p.projectNumber) }))
-  if (group === 'people') return rows.map((u) => ({ id: u.id, icon, title: u.isActive ? u.displayName : t('common.inactiveSuffix', { name: u.displayName }),
+export function toHits(group: Group, rows?: Rows | null): Hit[] {
+  const icon = ICON[group], list = rows ?? []
+  if (group === 'projects') return (list as Schemas['SearchProjectHit'][]).map((p) => ({ id: p.id, icon, key: p.projectNumber, title: p.name, sub: [p.client, p.pm, tv(p.status)].filter(Boolean).join(' · '), href: itemHref('Project', p.projectNumber) }))
+  if (group === 'people') return (list as Schemas['SearchPersonHit'][]).map((u) => ({ id: u.id, icon, title: u.isActive ? u.displayName : t('common.inactiveSuffix', { name: u.displayName }),
     sub: [u.jobTitle, u.email].filter(Boolean).join(' · '), href: u.canViewWork ? `/my-work?userId=${u.id}` : null }))
-  if (group === 'planning') return rows.map((x) => ({ id: x.id, icon, title: x.name, sub: [visibilityLabel(x.status), fmtDate(x.dueDate)].join(' · '), href: x.status === 'Self' ? `/my-work?myWeek=${x.startWeek ?? x.dueDate}&planningEntry=${x.id}` : `/planner?personId=${x.personId}&entry=${x.id}` }))
-  if (group === 'comments') return rows.map((c) => ({ id: c.id, icon, key: c.key, title: c.name, match: c.match, // FR-004: the comment's item, with the matching text
+  if (group === 'planning') return (list as Schemas['SearchPlanningHit'][]).map((x) => ({ id: x.id, icon, title: x.name, sub: [visibilityLabel(x.status), fmtDate(x.dueDate)].join(' · '), href: x.status === 'Self' ? `/my-work?myWeek=${x.startWeek ?? x.dueDate}&planningEntry=${x.id}` : `/planner?personId=${x.personId}&entry=${x.id}` }))
+  if (group === 'comments') return (list as Schemas['SearchCommentHit'][]).map((c) => ({ id: c.id, icon, key: c.key, title: c.name, match: c.match, // FR-004: the comment's item, with the matching text
     sub: [c.projectNumber, c.author, fmtDate(c.createdAt?.slice(0, 10))].filter((v) => v && v !== '—').join(' · '), href: itemHref(c.itemType, c.projectNumber, c.itemId) }))
-  return rows.map((x) => ({ id: x.id, icon, key: x.key, title: x.name, match: x.match,
+  return (list as Row[]).map((x) => ({ id: x.id, icon, key: x.key, title: x.name, match: x.match,
     sub: [x.projectNumber, x.status ? tv(x.status) : x.isComplete ? tv('Complete') : null, x.assignee ?? x.owner, fmtDate(x.dueDate ?? x.date ?? x.requiredByDate)].filter((v) => v && v !== '—').join(' · '),
     href: itemHref(TYPE[group], x.projectNumber, x.id) }))
 }
 
-export const searchQuery = (q: string, extra: Record<string, unknown> = {}) => get<SearchResult>(`search${qs({ q, ...extra })}`)
+export const searchQuery = (q: string, extra: { type?: Group; includeArchived?: boolean; limit?: number; page?: number } = {}) => typedRequest('get', '/api/v1/search', { query: { q, ...extra } })
 
 /** Top-bar search (§18.1): top five per type as you type, arrow keys and Enter, "See all results" for the results page. */
 export function SearchBox({ inputRef }: { inputRef: RefObject<HTMLInputElement | null> }) {

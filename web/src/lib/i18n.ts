@@ -15,6 +15,10 @@ export function t(key: TextKey, params?: Record<string, string | number | null |
 
 /** Explicit escape hatch for keys assembled from server data or reusable component props (§44.3). */
 export const runtimeText = (key: string, params?: Record<string, string | number | null | undefined>) => t(key as TextKey, params)
+/** An organisation setting's name as the Settings page shows it; a flag without its packet shows its name alone. */
+export const settingLabel = (key: string, packet?: string | null) => key.startsWith('rule_enabled.') ? t('rule.enabled', { rule: key.slice(13), name: runtimeText(`rule.${key.slice(13)}`) })
+  : key.startsWith('notify_default.') ? runtimeText(`event.${key.slice(15)}`)
+  : key.startsWith('flag.') ? (packet ? t('admin.flagLabel', { name: key.slice(5), packet }) : key.slice(5)) : runtimeText(`setting.${key}`)
 
 /** Canonical names are stored verbatim (§10); translation goes through the `value.` table. */
 export const tv = (value: string | null | undefined) => (value == null ? '—' : table[`value.${value}`] ?? value)

@@ -12,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { typedRequest } from '@/lib/api'
 import { fmtDate } from '@/lib/format'
 import { invalidateChange } from '@/lib/keys'
-import { t, type TextKey } from '@/lib/i18n'
+import { settingLabel, t, type TextKey } from '@/lib/i18n'
 
 /** The checks whose detail is a code, not text: the reference list a deactivated record belongs to, and the role a grant gives. */
 const DETAIL: Record<string, Record<string, TextKey>> = {
@@ -32,14 +32,14 @@ function CheckList({ id, check }: { id: string; check: string }) {
         <caption className="sr-only">{list.data.title}</caption>
         <thead className="bg-muted"><tr><th className={thCls}>{t('common.name')}</th><th className={thCls}>{t('common.details')}</th><th className={thCls}>{t('common.date')}</th><th className={thCls}><span className="sr-only">{t('common.actions')}</span></th></tr></thead>
         <tbody>
-          {list.data.rows.map((r, i) => (
+          {list.data.rows.map((r, i) => { const name = check === 'settingsChanged' ? settingLabel(r.name) : r.name; return (
             <tr key={`${r.id ?? r.name}-${i}`} className="border-t">
-              <td className={tdCls}>{r.name}</td>
+              <td className={tdCls}>{name}</td>
               <td className={`${tdCls} text-muted-foreground`}>{detailText(check, r.detail)}</td>
               <td className={`${tdCls} tabular-nums`}>{fmtDate(r.at)}</td>
-              <td className={`${tdCls} text-right`}><Link className="text-primary underline-offset-2 hover:underline" to={r.link} aria-label={t('adminReview.openRow', { name: r.name })}>{t('common.open')}</Link></td>
+              <td className={`${tdCls} text-right`}><Link className="text-primary underline-offset-2 hover:underline" to={r.link} aria-label={t('adminReview.openRow', { name })}>{t('common.open')}</Link></td>
             </tr>
-          ))}
+          ) })}
         </tbody>
       </table>
     </div>

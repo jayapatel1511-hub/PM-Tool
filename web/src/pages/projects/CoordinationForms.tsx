@@ -22,7 +22,7 @@ export type WorkRef = Schemas['CoordinationDeliverable'] | Schemas['Coordination
 export type SourceRevision = Schemas['SourceRevisionRow']
 export type SourceHead = Schemas['SourceHeadRow']
 export type CoordOptions = Schemas['CoordinationOptions']
-export type InputUse = RecordVersion & { targetType: string; targetId: string; ownerId: string; sourceIdentity: string; sourceRevisionId: string; intendedUse: string; adoptedAt: string; adoptedBy: string }
+export type InputUse = Schemas['InputUseRow']
 export type Choice = { value: string; label: string }
 export const peopleChoices = (o: CoordOptions): Choice[] => o.people.map(p => ({ value: p.id, label: p.displayName }))
 export const disciplineChoices = (o: CoordOptions): Choice[] => o.disciplines.map(p => ({ value: p.id, label: p.name }))

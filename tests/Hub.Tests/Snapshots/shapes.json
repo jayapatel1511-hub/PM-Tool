@@ -6365,6 +6365,7 @@
       "string"
     ],
     "$.items[].entry.itemKey": [
+      "null",
       "string"
     ],
     "$.items[].entry.itemName": [
@@ -14721,6 +14722,336 @@
     "$.components.schemas.ChainVerification.type": [
       "string"
     ],
+    "$.components.schemas.ChangeAssessmentRow": [
+      "object"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.acknowledgedAt": [
+      "object"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.acknowledgedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.acknowledgedAt.type": [
+      "array"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.acknowledgedAt.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.auditKey": [
+      "object"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.auditKey.type": [
+      "array"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.auditKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.auditName": [
+      "object"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.auditName.type": [
+      "array"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.auditName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.auditProjectId": [
+      "object"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.auditProjectId.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.auditProjectId.type": [
+      "array"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.auditProjectId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.auditType": [
+      "object"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.auditType.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.changeNoticeId": [
+      "object"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.changeNoticeId.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.changeNoticeId.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.correctionTaskId": [
+      "object"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.correctionTaskId.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.correctionTaskId.type": [
+      "array"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.correctionTaskId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.createdBy": [
+      "object"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.createdBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.createdBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.createdBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.dateImpactDays": [
+      "object"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.dateImpactDays.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.dateImpactDays.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.dateImpactDays.type": [
+      "array"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.dateImpactDays.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.effortImpactHours": [
+      "object"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.effortImpactHours.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.effortImpactHours.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.effortImpactHours.type": [
+      "array"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.effortImpactHours.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.evidenceUrl": [
+      "object"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.evidenceUrl.type": [
+      "array"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.evidenceUrl.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.handoffId": [
+      "object"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.handoffId.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.handoffId.type": [
+      "array"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.handoffId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.inputUseId": [
+      "object"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.inputUseId.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.inputUseId.type": [
+      "array"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.inputUseId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.ownerId": [
+      "object"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.ownerId.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.ownerId.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.rationale": [
+      "object"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.rationale.type": [
+      "array"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.rationale.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.retainOldRevision": [
+      "object"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.retainOldRevision.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.retentionApprovedBy": [
+      "object"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.retentionApprovedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.retentionApprovedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.retentionApprovedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.retentionReason": [
+      "object"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.retentionReason.type": [
+      "array"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.retentionReason.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.reviewerId": [
+      "object"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.reviewerId.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.reviewerId.type": [
+      "array"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.reviewerId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.revisionUsedId": [
+      "object"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.revisionUsedId.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.revisionUsedId.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.targetId": [
+      "object"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.targetId.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.targetId.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.targetType": [
+      "object"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.targetType.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.updatedAt": [
+      "object"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.updatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.updatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.updatedBy": [
+      "object"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.updatedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.updatedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.updatedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.verifiedAt": [
+      "object"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.verifiedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.verifiedAt.type": [
+      "array"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.verifiedAt.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.verifiedBy": [
+      "object"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.verifiedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.verifiedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.properties.verifiedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.required": [
+      "array"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ChangeAssessmentRow.type": [
+      "string"
+    ],
     "$.components.schemas.ChangeDateBody": [
       "object"
     ],
@@ -14796,6 +15127,135 @@
     "$.components.schemas.ChangeDateBody.type": [
       "string"
     ],
+    "$.components.schemas.ChangeDetail": [
+      "object"
+    ],
+    "$.components.schemas.ChangeDetail.properties": [
+      "object"
+    ],
+    "$.components.schemas.ChangeDetail.properties.actorId": [
+      "object"
+    ],
+    "$.components.schemas.ChangeDetail.properties.actorId.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeDetail.properties.actorId.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeDetail.properties.assessments": [
+      "object"
+    ],
+    "$.components.schemas.ChangeDetail.properties.assessments.items": [
+      "object"
+    ],
+    "$.components.schemas.ChangeDetail.properties.assessments.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ChangeDetail.properties.assessments.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeDetail.properties.canManage": [
+      "object"
+    ],
+    "$.components.schemas.ChangeDetail.properties.canManage.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeDetail.properties.canPublish": [
+      "object"
+    ],
+    "$.components.schemas.ChangeDetail.properties.canPublish.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeDetail.properties.canWrite": [
+      "object"
+    ],
+    "$.components.schemas.ChangeDetail.properties.canWrite.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeDetail.properties.completeAssessmentIds": [
+      "object"
+    ],
+    "$.components.schemas.ChangeDetail.properties.completeAssessmentIds.items": [
+      "object"
+    ],
+    "$.components.schemas.ChangeDetail.properties.completeAssessmentIds.items.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeDetail.properties.completeAssessmentIds.items.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeDetail.properties.completeAssessmentIds.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeDetail.properties.eligiblePeople": [
+      "object"
+    ],
+    "$.components.schemas.ChangeDetail.properties.eligiblePeople.items": [
+      "object"
+    ],
+    "$.components.schemas.ChangeDetail.properties.eligiblePeople.items.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeDetail.properties.eligiblePeople.items.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeDetail.properties.eligiblePeople.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeDetail.properties.head": [
+      "object"
+    ],
+    "$.components.schemas.ChangeDetail.properties.head.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.ChangeDetail.properties.head.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.ChangeDetail.properties.head.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.ChangeDetail.properties.head.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeDetail.properties.newRevision": [
+      "object"
+    ],
+    "$.components.schemas.ChangeDetail.properties.newRevision.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ChangeDetail.properties.notice": [
+      "object"
+    ],
+    "$.components.schemas.ChangeDetail.properties.notice.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ChangeDetail.properties.oldRevision": [
+      "object"
+    ],
+    "$.components.schemas.ChangeDetail.properties.oldRevision.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ChangeDetail.properties.uses": [
+      "object"
+    ],
+    "$.components.schemas.ChangeDetail.properties.uses.items": [
+      "object"
+    ],
+    "$.components.schemas.ChangeDetail.properties.uses.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ChangeDetail.properties.uses.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeDetail.required": [
+      "array"
+    ],
+    "$.components.schemas.ChangeDetail.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ChangeDetail.type": [
+      "string"
+    ],
     "$.components.schemas.ChangeLine": [
       "object"
     ],
@@ -14863,6 +15323,363 @@
       "string"
     ],
     "$.components.schemas.ChangeLine.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow": [
+      "object"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.assessmentDueDate": [
+      "object"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.assessmentDueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.assessmentDueDate.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.auditDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.auditDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.auditDisciplineId.type": [
+      "array"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.auditDisciplineId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.auditKey": [
+      "object"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.auditKey.type": [
+      "array"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.auditKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.auditName": [
+      "object"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.auditName.type": [
+      "array"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.auditName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.auditProjectId": [
+      "object"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.auditProjectId.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.auditProjectId.type": [
+      "array"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.auditProjectId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.auditType": [
+      "object"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.auditType.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.createdBy": [
+      "object"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.createdBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.createdBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.createdBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.deletedAt": [
+      "object"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.deletedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.deletedAt.type": [
+      "array"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.deletedAt.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.deletedBy": [
+      "object"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.deletedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.deletedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.deletedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.description": [
+      "object"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.description.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.effectiveDate": [
+      "object"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.effectiveDate.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.effectiveDate.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.newRevisionId": [
+      "object"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.newRevisionId.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.newRevisionId.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.oldRevisionId": [
+      "object"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.oldRevisionId.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.oldRevisionId.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.ownerId": [
+      "object"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.ownerId.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.ownerId.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.projectDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.projectDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.projectDisciplineId.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.publishedAt": [
+      "object"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.publishedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.publishedAt.type": [
+      "array"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.publishedAt.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.scope": [
+      "object"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.scope.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.seq": [
+      "object"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.seq.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.seq.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.seq.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.updatedAt": [
+      "object"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.updatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.updatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.updatedBy": [
+      "object"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.updatedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.updatedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ChangeNoticeRow.properties.updatedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.required": [
+      "array"
+    ],
+    "$.components.schemas.ChangeNoticeRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ChangeNoticeRow.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeRow": [
+      "object"
+    ],
+    "$.components.schemas.ChangeRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.ChangeRow.properties.assessmentDueDate": [
+      "object"
+    ],
+    "$.components.schemas.ChangeRow.properties.assessmentDueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeRow.properties.assessmentDueDate.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.ChangeRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeRow.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.ChangeRow.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeRow.properties.ownerId": [
+      "object"
+    ],
+    "$.components.schemas.ChangeRow.properties.ownerId.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeRow.properties.ownerId.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeRow.properties.pendingAssessments": [
+      "object"
+    ],
+    "$.components.schemas.ChangeRow.properties.pendingAssessments.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeRow.properties.pendingAssessments.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ChangeRow.properties.pendingAssessments.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.ChangeRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.ChangeRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ChangeRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeRow.properties.scope": [
+      "object"
+    ],
+    "$.components.schemas.ChangeRow.properties.scope.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeRow.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.ChangeRow.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeRow.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.ChangeRow.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.ChangeRow.required": [
+      "array"
+    ],
+    "$.components.schemas.ChangeRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ChangeRow.type": [
       "string"
     ],
     "$.components.schemas.ChannelBody": [
@@ -27447,6 +28264,498 @@
     "$.components.schemas.ImportValidation.type": [
       "string"
     ],
+    "$.components.schemas.InputAdoptionRow": [
+      "object"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.auditKey": [
+      "object"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.auditKey.type": [
+      "array"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.auditKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.auditName": [
+      "object"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.auditName.type": [
+      "array"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.auditName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.auditProjectId": [
+      "object"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.auditProjectId.format": [
+      "string"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.auditProjectId.type": [
+      "array"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.auditProjectId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.auditType": [
+      "object"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.auditType.type": [
+      "string"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.createdBy": [
+      "object"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.createdBy.format": [
+      "string"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.createdBy.type": [
+      "array"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.createdBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.inputUseId": [
+      "object"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.inputUseId.format": [
+      "string"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.inputUseId.type": [
+      "string"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.intendedUse": [
+      "object"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.intendedUse.type": [
+      "string"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.reason": [
+      "object"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.reason.type": [
+      "string"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.sourceRevisionId": [
+      "object"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.sourceRevisionId.format": [
+      "string"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.sourceRevisionId.type": [
+      "string"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.updatedAt": [
+      "object"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.updatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.updatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.updatedBy": [
+      "object"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.updatedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.updatedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.InputAdoptionRow.properties.updatedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.InputAdoptionRow.required": [
+      "array"
+    ],
+    "$.components.schemas.InputAdoptionRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.InputAdoptionRow.type": [
+      "string"
+    ],
+    "$.components.schemas.InputUseAssessment": [
+      "object"
+    ],
+    "$.components.schemas.InputUseAssessment.properties": [
+      "object"
+    ],
+    "$.components.schemas.InputUseAssessment.properties.changeNoticeId": [
+      "object"
+    ],
+    "$.components.schemas.InputUseAssessment.properties.changeNoticeId.format": [
+      "string"
+    ],
+    "$.components.schemas.InputUseAssessment.properties.changeNoticeId.type": [
+      "string"
+    ],
+    "$.components.schemas.InputUseAssessment.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.InputUseAssessment.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.InputUseAssessment.properties.newRevisionId": [
+      "object"
+    ],
+    "$.components.schemas.InputUseAssessment.properties.newRevisionId.format": [
+      "string"
+    ],
+    "$.components.schemas.InputUseAssessment.properties.newRevisionId.type": [
+      "string"
+    ],
+    "$.components.schemas.InputUseAssessment.properties.noticeStatus": [
+      "object"
+    ],
+    "$.components.schemas.InputUseAssessment.properties.noticeStatus.type": [
+      "string"
+    ],
+    "$.components.schemas.InputUseAssessment.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.InputUseAssessment.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.InputUseAssessment.properties.targetId": [
+      "object"
+    ],
+    "$.components.schemas.InputUseAssessment.properties.targetId.format": [
+      "string"
+    ],
+    "$.components.schemas.InputUseAssessment.properties.targetId.type": [
+      "string"
+    ],
+    "$.components.schemas.InputUseAssessment.properties.targetType": [
+      "object"
+    ],
+    "$.components.schemas.InputUseAssessment.properties.targetType.type": [
+      "string"
+    ],
+    "$.components.schemas.InputUseAssessment.required": [
+      "array"
+    ],
+    "$.components.schemas.InputUseAssessment.required[]": [
+      "string"
+    ],
+    "$.components.schemas.InputUseAssessment.type": [
+      "string"
+    ],
+    "$.components.schemas.InputUsePage": [
+      "object"
+    ],
+    "$.components.schemas.InputUsePage.properties": [
+      "object"
+    ],
+    "$.components.schemas.InputUsePage.properties.assessments": [
+      "object"
+    ],
+    "$.components.schemas.InputUsePage.properties.assessments.items": [
+      "object"
+    ],
+    "$.components.schemas.InputUsePage.properties.assessments.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.InputUsePage.properties.assessments.type": [
+      "string"
+    ],
+    "$.components.schemas.InputUsePage.properties.history": [
+      "object"
+    ],
+    "$.components.schemas.InputUsePage.properties.history.items": [
+      "object"
+    ],
+    "$.components.schemas.InputUsePage.properties.history.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.InputUsePage.properties.history.type": [
+      "string"
+    ],
+    "$.components.schemas.InputUsePage.properties.items": [
+      "object"
+    ],
+    "$.components.schemas.InputUsePage.properties.items.items": [
+      "object"
+    ],
+    "$.components.schemas.InputUsePage.properties.items.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.InputUsePage.properties.items.type": [
+      "string"
+    ],
+    "$.components.schemas.InputUsePage.properties.page": [
+      "object"
+    ],
+    "$.components.schemas.InputUsePage.properties.page.format": [
+      "string"
+    ],
+    "$.components.schemas.InputUsePage.properties.page.pattern": [
+      "string"
+    ],
+    "$.components.schemas.InputUsePage.properties.page.type": [
+      "string"
+    ],
+    "$.components.schemas.InputUsePage.properties.pageSize": [
+      "object"
+    ],
+    "$.components.schemas.InputUsePage.properties.pageSize.format": [
+      "string"
+    ],
+    "$.components.schemas.InputUsePage.properties.pageSize.pattern": [
+      "string"
+    ],
+    "$.components.schemas.InputUsePage.properties.pageSize.type": [
+      "string"
+    ],
+    "$.components.schemas.InputUsePage.properties.totalCount": [
+      "object"
+    ],
+    "$.components.schemas.InputUsePage.properties.totalCount.format": [
+      "string"
+    ],
+    "$.components.schemas.InputUsePage.properties.totalCount.pattern": [
+      "string"
+    ],
+    "$.components.schemas.InputUsePage.properties.totalCount.type": [
+      "string"
+    ],
+    "$.components.schemas.InputUsePage.required": [
+      "array"
+    ],
+    "$.components.schemas.InputUsePage.required[]": [
+      "string"
+    ],
+    "$.components.schemas.InputUsePage.type": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow": [
+      "object"
+    ],
+    "$.components.schemas.InputUseRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.InputUseRow.properties.adoptedAt": [
+      "object"
+    ],
+    "$.components.schemas.InputUseRow.properties.adoptedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.properties.adoptedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.properties.adoptedBy": [
+      "object"
+    ],
+    "$.components.schemas.InputUseRow.properties.adoptedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.properties.adoptedBy.type": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.properties.auditKey": [
+      "object"
+    ],
+    "$.components.schemas.InputUseRow.properties.auditKey.type": [
+      "array"
+    ],
+    "$.components.schemas.InputUseRow.properties.auditKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.properties.auditName": [
+      "object"
+    ],
+    "$.components.schemas.InputUseRow.properties.auditName.type": [
+      "array"
+    ],
+    "$.components.schemas.InputUseRow.properties.auditName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.properties.auditProjectId": [
+      "object"
+    ],
+    "$.components.schemas.InputUseRow.properties.auditProjectId.format": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.properties.auditProjectId.type": [
+      "array"
+    ],
+    "$.components.schemas.InputUseRow.properties.auditProjectId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.properties.auditType": [
+      "object"
+    ],
+    "$.components.schemas.InputUseRow.properties.auditType.type": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.InputUseRow.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.properties.createdBy": [
+      "object"
+    ],
+    "$.components.schemas.InputUseRow.properties.createdBy.format": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.properties.createdBy.type": [
+      "array"
+    ],
+    "$.components.schemas.InputUseRow.properties.createdBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.InputUseRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.properties.intendedUse": [
+      "object"
+    ],
+    "$.components.schemas.InputUseRow.properties.intendedUse.type": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.properties.ownerId": [
+      "object"
+    ],
+    "$.components.schemas.InputUseRow.properties.ownerId.format": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.properties.ownerId.type": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.InputUseRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.InputUseRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.properties.sourceIdentity": [
+      "object"
+    ],
+    "$.components.schemas.InputUseRow.properties.sourceIdentity.type": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.properties.sourceRevisionId": [
+      "object"
+    ],
+    "$.components.schemas.InputUseRow.properties.sourceRevisionId.format": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.properties.sourceRevisionId.type": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.properties.targetId": [
+      "object"
+    ],
+    "$.components.schemas.InputUseRow.properties.targetId.format": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.properties.targetId.type": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.properties.targetType": [
+      "object"
+    ],
+    "$.components.schemas.InputUseRow.properties.targetType.type": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.properties.updatedAt": [
+      "object"
+    ],
+    "$.components.schemas.InputUseRow.properties.updatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.properties.updatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.properties.updatedBy": [
+      "object"
+    ],
+    "$.components.schemas.InputUseRow.properties.updatedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.properties.updatedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.InputUseRow.properties.updatedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.required": [
+      "array"
+    ],
+    "$.components.schemas.InputUseRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.InputUseRow.type": [
+      "string"
+    ],
     "$.components.schemas.Integrity": [
       "object"
     ],
@@ -33465,6 +34774,81 @@
     "$.components.schemas.PageOfBasisRegisterRow.type": [
       "string"
     ],
+    "$.components.schemas.PageOfChangeRow": [
+      "object"
+    ],
+    "$.components.schemas.PageOfChangeRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.PageOfChangeRow.properties.filters": [
+      "object"
+    ],
+    "$.components.schemas.PageOfChangeRow.properties.items": [
+      "object"
+    ],
+    "$.components.schemas.PageOfChangeRow.properties.items.items": [
+      "object"
+    ],
+    "$.components.schemas.PageOfChangeRow.properties.items.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.PageOfChangeRow.properties.items.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfChangeRow.properties.page": [
+      "object"
+    ],
+    "$.components.schemas.PageOfChangeRow.properties.page.format": [
+      "string"
+    ],
+    "$.components.schemas.PageOfChangeRow.properties.page.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PageOfChangeRow.properties.page.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfChangeRow.properties.pageSize": [
+      "object"
+    ],
+    "$.components.schemas.PageOfChangeRow.properties.pageSize.format": [
+      "string"
+    ],
+    "$.components.schemas.PageOfChangeRow.properties.pageSize.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PageOfChangeRow.properties.pageSize.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfChangeRow.properties.sort": [
+      "object"
+    ],
+    "$.components.schemas.PageOfChangeRow.properties.sort.type": [
+      "array"
+    ],
+    "$.components.schemas.PageOfChangeRow.properties.sort.type[]": [
+      "string"
+    ],
+    "$.components.schemas.PageOfChangeRow.properties.totalCount": [
+      "object"
+    ],
+    "$.components.schemas.PageOfChangeRow.properties.totalCount.format": [
+      "string"
+    ],
+    "$.components.schemas.PageOfChangeRow.properties.totalCount.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PageOfChangeRow.properties.totalCount.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfChangeRow.required": [
+      "array"
+    ],
+    "$.components.schemas.PageOfChangeRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.PageOfChangeRow.type": [
+      "string"
+    ],
     "$.components.schemas.PageOfDeletedItem": [
       "object"
     ],
@@ -36949,6 +38333,267 @@
       "string"
     ],
     "$.components.schemas.ReferenceDiscipline.type": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactDocument": [
+      "object"
+    ],
+    "$.components.schemas.ReferenceImpactDocument.properties": [
+      "object"
+    ],
+    "$.components.schemas.ReferenceImpactDocument.properties.identifier": [
+      "object"
+    ],
+    "$.components.schemas.ReferenceImpactDocument.properties.identifier.type": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactDocument.properties.kind": [
+      "object"
+    ],
+    "$.components.schemas.ReferenceImpactDocument.properties.kind.type": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactDocument.properties.revision": [
+      "object"
+    ],
+    "$.components.schemas.ReferenceImpactDocument.properties.revision.type": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactDocument.required": [
+      "array"
+    ],
+    "$.components.schemas.ReferenceImpactDocument.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactDocument.type": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRevision": [
+      "object"
+    ],
+    "$.components.schemas.ReferenceImpactRevision.properties": [
+      "object"
+    ],
+    "$.components.schemas.ReferenceImpactRevision.properties.externalIdentifier": [
+      "object"
+    ],
+    "$.components.schemas.ReferenceImpactRevision.properties.externalIdentifier.type": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRevision.properties.revision": [
+      "object"
+    ],
+    "$.components.schemas.ReferenceImpactRevision.properties.revision.type": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRevision.properties.sourceKey": [
+      "object"
+    ],
+    "$.components.schemas.ReferenceImpactRevision.properties.sourceKey.type": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRevision.required": [
+      "array"
+    ],
+    "$.components.schemas.ReferenceImpactRevision.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRevision.type": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRow": [
+      "object"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.currentRevision": [
+      "object"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.currentRevision.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.currentRevision.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.currentRevision.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.currentRevision.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.currentRevisionId": [
+      "object"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.currentRevisionId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.currentRevisionId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.documentReference": [
+      "object"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.documentReference.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.documentReference.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.documentReference.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.documentReference.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.documentReferenceId": [
+      "object"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.documentReferenceId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.documentReferenceId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.ownerDecidedAt": [
+      "object"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.ownerDecidedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.ownerDecidedAt.type": [
+      "array"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.ownerDecidedAt.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.ownerDisposition": [
+      "object"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.ownerDisposition.type": [
+      "array"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.ownerDisposition.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.ownerId": [
+      "object"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.ownerId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.ownerId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.ownerReason": [
+      "object"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.ownerReason.type": [
+      "array"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.ownerReason.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.previousRevision": [
+      "object"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.previousRevision.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.previousRevision.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.previousRevision.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.previousRevision.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.previousRevisionId": [
+      "object"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.previousRevisionId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.previousRevisionId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.verifierDecidedAt": [
+      "object"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.verifierDecidedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.verifierDecidedAt.type": [
+      "array"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.verifierDecidedAt.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.verifierDisposition": [
+      "object"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.verifierDisposition.type": [
+      "array"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.verifierDisposition.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.verifierId": [
+      "object"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.verifierId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.verifierId.type": [
+      "array"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.verifierId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.verifierReason": [
+      "object"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.verifierReason.type": [
+      "array"
+    ],
+    "$.components.schemas.ReferenceImpactRow.properties.verifierReason.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRow.required": [
+      "array"
+    ],
+    "$.components.schemas.ReferenceImpactRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ReferenceImpactRow.type": [
       "string"
     ],
     "$.components.schemas.ReferenceLimits": [
@@ -57777,6 +59422,15 @@
     "$.paths./api/v1/issues/{id}/reference-impacts.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/issues/{id}/reference-impacts.get.responses.200.content.application/json.schema.items": [
+      "object"
+    ],
+    "$.paths./api/v1/issues/{id}/reference-impacts.get.responses.200.content.application/json.schema.items.$ref": [
+      "string"
+    ],
+    "$.paths./api/v1/issues/{id}/reference-impacts.get.responses.200.content.application/json.schema.type": [
+      "string"
+    ],
     "$.paths./api/v1/issues/{id}/reference-impacts.get.responses.200.description": [
       "string"
     ],
@@ -67506,6 +69160,9 @@
     "$.paths./api/v1/projects/{projectId}/changes.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/projects/{projectId}/changes.get.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/projects/{projectId}/changes.get.responses.200.description": [
       "string"
     ],
@@ -67661,6 +69318,9 @@
     ],
     "$.paths./api/v1/projects/{projectId}/changes/{id}.get.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/projects/{projectId}/changes/{id}.get.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/projects/{projectId}/changes/{id}.get.responses.200.description": [
       "string"
@@ -69485,6 +71145,9 @@
     ],
     "$.paths./api/v1/projects/{projectId}/input-uses.get.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/projects/{projectId}/input-uses.get.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/projects/{projectId}/input-uses.get.responses.200.description": [
       "string"
@@ -87955,6 +89618,36 @@
     "$.items": [
       "array"
     ],
+    "$.items[]": [
+      "object"
+    ],
+    "$.items[].assessmentDueDate": [
+      "string"
+    ],
+    "$.items[].id": [
+      "string"
+    ],
+    "$.items[].key": [
+      "string"
+    ],
+    "$.items[].ownerId": [
+      "string"
+    ],
+    "$.items[].pendingAssessments": [
+      "number"
+    ],
+    "$.items[].rowVersion": [
+      "number"
+    ],
+    "$.items[].scope": [
+      "string"
+    ],
+    "$.items[].status": [
+      "string"
+    ],
+    "$.items[].title": [
+      "string"
+    ],
     "$.page": [
       "number"
     ],
@@ -88307,6 +90000,502 @@
       "string"
     ],
     "$.type": [
+      "string"
+    ]
+  },
+  "GET /api/v1/projects/{projectId}/changes/{id} 200": {
+    "$": [
+      "object"
+    ],
+    "$.actorId": [
+      "string"
+    ],
+    "$.assessments": [
+      "array"
+    ],
+    "$.assessments[]": [
+      "object"
+    ],
+    "$.assessments[].acknowledgedAt": [
+      "null"
+    ],
+    "$.assessments[].auditKey": [
+      "null"
+    ],
+    "$.assessments[].auditName": [
+      "null"
+    ],
+    "$.assessments[].auditProjectId": [
+      "string"
+    ],
+    "$.assessments[].auditType": [
+      "string"
+    ],
+    "$.assessments[].changeNoticeId": [
+      "string"
+    ],
+    "$.assessments[].correctionTaskId": [
+      "null"
+    ],
+    "$.assessments[].createdAt": [
+      "string"
+    ],
+    "$.assessments[].createdBy": [
+      "string"
+    ],
+    "$.assessments[].dateImpactDays": [
+      "null"
+    ],
+    "$.assessments[].effortImpactHours": [
+      "null"
+    ],
+    "$.assessments[].evidenceUrl": [
+      "null",
+      "string"
+    ],
+    "$.assessments[].handoffId": [
+      "null"
+    ],
+    "$.assessments[].id": [
+      "string"
+    ],
+    "$.assessments[].inputUseId": [
+      "string"
+    ],
+    "$.assessments[].ownerId": [
+      "string"
+    ],
+    "$.assessments[].projectId": [
+      "string"
+    ],
+    "$.assessments[].rationale": [
+      "null",
+      "string"
+    ],
+    "$.assessments[].retainOldRevision": [
+      "boolean"
+    ],
+    "$.assessments[].retentionApprovedBy": [
+      "null",
+      "string"
+    ],
+    "$.assessments[].retentionReason": [
+      "null",
+      "string"
+    ],
+    "$.assessments[].reviewerId": [
+      "string"
+    ],
+    "$.assessments[].revisionUsedId": [
+      "string"
+    ],
+    "$.assessments[].rowVersion": [
+      "number"
+    ],
+    "$.assessments[].status": [
+      "string"
+    ],
+    "$.assessments[].targetId": [
+      "string"
+    ],
+    "$.assessments[].targetType": [
+      "string"
+    ],
+    "$.assessments[].updatedAt": [
+      "string"
+    ],
+    "$.assessments[].updatedBy": [
+      "string"
+    ],
+    "$.assessments[].verifiedAt": [
+      "null"
+    ],
+    "$.assessments[].verifiedBy": [
+      "null"
+    ],
+    "$.canManage": [
+      "boolean"
+    ],
+    "$.canPublish": [
+      "boolean"
+    ],
+    "$.canWrite": [
+      "boolean"
+    ],
+    "$.completeAssessmentIds": [
+      "array"
+    ],
+    "$.completeAssessmentIds[]": [
+      "string"
+    ],
+    "$.eligiblePeople": [
+      "array"
+    ],
+    "$.eligiblePeople[]": [
+      "string"
+    ],
+    "$.head": [
+      "object"
+    ],
+    "$.head.auditKey": [
+      "null"
+    ],
+    "$.head.auditName": [
+      "null"
+    ],
+    "$.head.auditProjectId": [
+      "string"
+    ],
+    "$.head.auditType": [
+      "string"
+    ],
+    "$.head.createdAt": [
+      "string"
+    ],
+    "$.head.createdBy": [
+      "string"
+    ],
+    "$.head.currentRevisionId": [
+      "string"
+    ],
+    "$.head.id": [
+      "string"
+    ],
+    "$.head.identity": [
+      "string"
+    ],
+    "$.head.ownerId": [
+      "string"
+    ],
+    "$.head.projectDisciplineId": [
+      "string"
+    ],
+    "$.head.projectId": [
+      "string"
+    ],
+    "$.head.rowVersion": [
+      "number"
+    ],
+    "$.head.updatedAt": [
+      "string"
+    ],
+    "$.head.updatedBy": [
+      "string"
+    ],
+    "$.newRevision": [
+      "object"
+    ],
+    "$.newRevision.auditKey": [
+      "string"
+    ],
+    "$.newRevision.auditName": [
+      "string"
+    ],
+    "$.newRevision.auditProjectId": [
+      "string"
+    ],
+    "$.newRevision.auditType": [
+      "string"
+    ],
+    "$.newRevision.authorIds": [
+      "array"
+    ],
+    "$.newRevision.authorIds[]": [
+      "string"
+    ],
+    "$.newRevision.createdAt": [
+      "string"
+    ],
+    "$.newRevision.createdBy": [
+      "string"
+    ],
+    "$.newRevision.deliverableId": [
+      "string"
+    ],
+    "$.newRevision.externalIdentifier": [
+      "string"
+    ],
+    "$.newRevision.id": [
+      "string"
+    ],
+    "$.newRevision.identityHash": [
+      "string"
+    ],
+    "$.newRevision.issuer": [
+      "string"
+    ],
+    "$.newRevision.projectId": [
+      "string"
+    ],
+    "$.newRevision.revision": [
+      "string"
+    ],
+    "$.newRevision.rowVersion": [
+      "number"
+    ],
+    "$.newRevision.scope": [
+      "string"
+    ],
+    "$.newRevision.sourceCheckedAt": [
+      "null"
+    ],
+    "$.newRevision.sourceIdentity": [
+      "string"
+    ],
+    "$.newRevision.sourceKey": [
+      "string"
+    ],
+    "$.newRevision.sourceRowVersion": [
+      "number"
+    ],
+    "$.newRevision.sourceSystem": [
+      "string"
+    ],
+    "$.newRevision.supersedesId": [
+      "string"
+    ],
+    "$.newRevision.title": [
+      "string"
+    ],
+    "$.newRevision.updatedAt": [
+      "string"
+    ],
+    "$.newRevision.updatedBy": [
+      "string"
+    ],
+    "$.newRevision.url": [
+      "string"
+    ],
+    "$.notice": [
+      "object"
+    ],
+    "$.notice.assessmentDueDate": [
+      "string"
+    ],
+    "$.notice.auditDisciplineId": [
+      "string"
+    ],
+    "$.notice.auditKey": [
+      "string"
+    ],
+    "$.notice.auditName": [
+      "string"
+    ],
+    "$.notice.auditProjectId": [
+      "string"
+    ],
+    "$.notice.auditType": [
+      "string"
+    ],
+    "$.notice.createdAt": [
+      "string"
+    ],
+    "$.notice.createdBy": [
+      "string"
+    ],
+    "$.notice.deletedAt": [
+      "null"
+    ],
+    "$.notice.deletedBy": [
+      "null"
+    ],
+    "$.notice.description": [
+      "string"
+    ],
+    "$.notice.effectiveDate": [
+      "string"
+    ],
+    "$.notice.id": [
+      "string"
+    ],
+    "$.notice.key": [
+      "string"
+    ],
+    "$.notice.newRevisionId": [
+      "string"
+    ],
+    "$.notice.oldRevisionId": [
+      "string"
+    ],
+    "$.notice.ownerId": [
+      "string"
+    ],
+    "$.notice.projectDisciplineId": [
+      "string"
+    ],
+    "$.notice.projectId": [
+      "string"
+    ],
+    "$.notice.publishedAt": [
+      "null",
+      "string"
+    ],
+    "$.notice.rowVersion": [
+      "number"
+    ],
+    "$.notice.scope": [
+      "string"
+    ],
+    "$.notice.seq": [
+      "number"
+    ],
+    "$.notice.status": [
+      "string"
+    ],
+    "$.notice.title": [
+      "string"
+    ],
+    "$.notice.updatedAt": [
+      "string"
+    ],
+    "$.notice.updatedBy": [
+      "string"
+    ],
+    "$.oldRevision": [
+      "object"
+    ],
+    "$.oldRevision.auditKey": [
+      "string"
+    ],
+    "$.oldRevision.auditName": [
+      "string"
+    ],
+    "$.oldRevision.auditProjectId": [
+      "string"
+    ],
+    "$.oldRevision.auditType": [
+      "string"
+    ],
+    "$.oldRevision.authorIds": [
+      "array"
+    ],
+    "$.oldRevision.authorIds[]": [
+      "string"
+    ],
+    "$.oldRevision.createdAt": [
+      "string"
+    ],
+    "$.oldRevision.createdBy": [
+      "string"
+    ],
+    "$.oldRevision.deliverableId": [
+      "string"
+    ],
+    "$.oldRevision.externalIdentifier": [
+      "string"
+    ],
+    "$.oldRevision.id": [
+      "string"
+    ],
+    "$.oldRevision.identityHash": [
+      "string"
+    ],
+    "$.oldRevision.issuer": [
+      "string"
+    ],
+    "$.oldRevision.projectId": [
+      "string"
+    ],
+    "$.oldRevision.revision": [
+      "string"
+    ],
+    "$.oldRevision.rowVersion": [
+      "number"
+    ],
+    "$.oldRevision.scope": [
+      "string"
+    ],
+    "$.oldRevision.sourceCheckedAt": [
+      "null"
+    ],
+    "$.oldRevision.sourceIdentity": [
+      "string"
+    ],
+    "$.oldRevision.sourceKey": [
+      "string"
+    ],
+    "$.oldRevision.sourceRowVersion": [
+      "number"
+    ],
+    "$.oldRevision.sourceSystem": [
+      "string"
+    ],
+    "$.oldRevision.supersedesId": [
+      "null"
+    ],
+    "$.oldRevision.title": [
+      "string"
+    ],
+    "$.oldRevision.updatedAt": [
+      "string"
+    ],
+    "$.oldRevision.updatedBy": [
+      "string"
+    ],
+    "$.oldRevision.url": [
+      "string"
+    ],
+    "$.uses": [
+      "array"
+    ],
+    "$.uses[]": [
+      "object"
+    ],
+    "$.uses[].adoptedAt": [
+      "string"
+    ],
+    "$.uses[].adoptedBy": [
+      "string"
+    ],
+    "$.uses[].auditKey": [
+      "null"
+    ],
+    "$.uses[].auditName": [
+      "null"
+    ],
+    "$.uses[].auditProjectId": [
+      "string"
+    ],
+    "$.uses[].auditType": [
+      "string"
+    ],
+    "$.uses[].createdAt": [
+      "string"
+    ],
+    "$.uses[].createdBy": [
+      "string"
+    ],
+    "$.uses[].id": [
+      "string"
+    ],
+    "$.uses[].intendedUse": [
+      "string"
+    ],
+    "$.uses[].ownerId": [
+      "string"
+    ],
+    "$.uses[].projectId": [
+      "string"
+    ],
+    "$.uses[].rowVersion": [
+      "number"
+    ],
+    "$.uses[].sourceIdentity": [
+      "string"
+    ],
+    "$.uses[].sourceRevisionId": [
+      "string"
+    ],
+    "$.uses[].targetId": [
+      "string"
+    ],
+    "$.uses[].targetType": [
+      "string"
+    ],
+    "$.uses[].updatedAt": [
+      "string"
+    ],
+    "$.uses[].updatedBy": [
       "string"
     ]
   },
@@ -90208,6 +92397,161 @@
     ],
     "$.type": [
       "string"
+    ]
+  },
+  "GET /api/v1/projects/{projectId}/input-uses 200": {
+    "$": [
+      "object"
+    ],
+    "$.assessments": [
+      "array"
+    ],
+    "$.assessments[]": [
+      "object"
+    ],
+    "$.assessments[].changeNoticeId": [
+      "string"
+    ],
+    "$.assessments[].key": [
+      "string"
+    ],
+    "$.assessments[].newRevisionId": [
+      "string"
+    ],
+    "$.assessments[].noticeStatus": [
+      "string"
+    ],
+    "$.assessments[].status": [
+      "string"
+    ],
+    "$.assessments[].targetId": [
+      "string"
+    ],
+    "$.assessments[].targetType": [
+      "string"
+    ],
+    "$.history": [
+      "array"
+    ],
+    "$.history[]": [
+      "object"
+    ],
+    "$.history[].auditKey": [
+      "null"
+    ],
+    "$.history[].auditName": [
+      "null"
+    ],
+    "$.history[].auditProjectId": [
+      "string"
+    ],
+    "$.history[].auditType": [
+      "string"
+    ],
+    "$.history[].createdAt": [
+      "string"
+    ],
+    "$.history[].createdBy": [
+      "string"
+    ],
+    "$.history[].id": [
+      "string"
+    ],
+    "$.history[].inputUseId": [
+      "string"
+    ],
+    "$.history[].intendedUse": [
+      "string"
+    ],
+    "$.history[].projectId": [
+      "string"
+    ],
+    "$.history[].reason": [
+      "string"
+    ],
+    "$.history[].rowVersion": [
+      "number"
+    ],
+    "$.history[].sourceRevisionId": [
+      "string"
+    ],
+    "$.history[].updatedAt": [
+      "string"
+    ],
+    "$.history[].updatedBy": [
+      "string"
+    ],
+    "$.items": [
+      "array"
+    ],
+    "$.items[]": [
+      "object"
+    ],
+    "$.items[].adoptedAt": [
+      "string"
+    ],
+    "$.items[].adoptedBy": [
+      "string"
+    ],
+    "$.items[].auditKey": [
+      "null"
+    ],
+    "$.items[].auditName": [
+      "null"
+    ],
+    "$.items[].auditProjectId": [
+      "string"
+    ],
+    "$.items[].auditType": [
+      "string"
+    ],
+    "$.items[].createdAt": [
+      "string"
+    ],
+    "$.items[].createdBy": [
+      "string"
+    ],
+    "$.items[].id": [
+      "string"
+    ],
+    "$.items[].intendedUse": [
+      "string"
+    ],
+    "$.items[].ownerId": [
+      "string"
+    ],
+    "$.items[].projectId": [
+      "string"
+    ],
+    "$.items[].rowVersion": [
+      "number"
+    ],
+    "$.items[].sourceIdentity": [
+      "string"
+    ],
+    "$.items[].sourceRevisionId": [
+      "string"
+    ],
+    "$.items[].targetId": [
+      "string"
+    ],
+    "$.items[].targetType": [
+      "string"
+    ],
+    "$.items[].updatedAt": [
+      "string"
+    ],
+    "$.items[].updatedBy": [
+      "string"
+    ],
+    "$.page": [
+      "number"
+    ],
+    "$.pageSize": [
+      "number"
+    ],
+    "$.totalCount": [
+      "number"
     ]
   },
   "GET /api/v1/projects/{projectId}/input-uses 404": {

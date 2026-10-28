@@ -49,7 +49,7 @@ export function ReadinessTab() {
   const reliabilityEnabled = useFlag('commitment_reliability')
   const qc = useQueryClient(), [proposing, setProposing] = useState(false), [snapshotWeek, setSnapshotWeek] = useState<string | null>(null)
   const [inspecting, setInspecting] = useState(false)
-  const options = useQuery({ queryKey: ['coord-options', p.id], queryFn: () => get<CoordOptions>(`projects/${p.id}/changes/options`) })
+  const options = useQuery({ queryKey: ['coord-options', p.id], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/changes/options', { params: { projectId: p.id } }) })
   const lookahead = useMe().settings.coordinationLookaheadWeeks
   const [sp, setSp] = useSearchParams()
   const day = DAYS.includes(p.coordinationDay ?? '') ? p.coordinationDay! : 'Monday'

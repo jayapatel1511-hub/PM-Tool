@@ -3421,6 +3421,216 @@
         ],
         "type": "object"
       },
+      "ChangeAssessmentRow": {
+        "properties": {
+          "acknowledgedAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditProjectId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditType": {
+            "type": "string"
+          },
+          "changeNoticeId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "correctionTaskId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dateImpactDays": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "effortImpactHours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "null",
+              "number"
+            ]
+          },
+          "evidenceUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "handoffId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "inputUseId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "ownerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rationale": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "retainOldRevision": {
+            "type": "boolean"
+          },
+          "retentionApprovedBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "retentionReason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "reviewerId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "revisionUsedId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "targetId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "targetType": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "verifiedAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "verifiedBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "changeNoticeId",
+          "targetType",
+          "targetId",
+          "ownerId",
+          "reviewerId",
+          "inputUseId",
+          "handoffId",
+          "revisionUsedId",
+          "status",
+          "acknowledgedAt",
+          "rationale",
+          "evidenceUrl",
+          "correctionTaskId",
+          "effortImpactHours",
+          "dateImpactDays",
+          "retainOldRevision",
+          "retentionApprovedBy",
+          "retentionReason",
+          "verifiedBy",
+          "verifiedAt",
+          "auditType",
+          "projectId",
+          "auditProjectId",
+          "auditKey",
+          "auditName",
+          "createdAt",
+          "createdBy",
+          "updatedAt",
+          "updatedBy",
+          "rowVersion",
+          "id"
+        ],
+        "type": "object"
+      },
       "ChangeDateBody": {
         "properties": {
           "cascadeDeliverables": {
@@ -3470,6 +3680,83 @@
         ],
         "type": "object"
       },
+      "ChangeDetail": {
+        "properties": {
+          "actorId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "assessments": {
+            "items": {
+              "$ref": "#/components/schemas/ChangeAssessmentRow"
+            },
+            "type": "array"
+          },
+          "canManage": {
+            "type": "boolean"
+          },
+          "canPublish": {
+            "type": "boolean"
+          },
+          "canWrite": {
+            "type": "boolean"
+          },
+          "completeAssessmentIds": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "eligiblePeople": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "head": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/SourceHeadRow"
+              }
+            ]
+          },
+          "newRevision": {
+            "$ref": "#/components/schemas/SourceRevisionRow"
+          },
+          "notice": {
+            "$ref": "#/components/schemas/ChangeNoticeRow"
+          },
+          "oldRevision": {
+            "$ref": "#/components/schemas/SourceRevisionRow"
+          },
+          "uses": {
+            "items": {
+              "$ref": "#/components/schemas/InputUseRow"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "notice",
+          "assessments",
+          "completeAssessmentIds",
+          "oldRevision",
+          "newRevision",
+          "head",
+          "actorId",
+          "canWrite",
+          "canPublish",
+          "canManage",
+          "eligiblePeople",
+          "uses"
+        ],
+        "type": "object"
+      },
       "ChangeLine": {
         "properties": {
           "field": {
@@ -3514,6 +3801,219 @@
           "new",
           "oldLabel",
           "newLabel"
+        ],
+        "type": "object"
+      },
+      "ChangeNoticeRow": {
+        "properties": {
+          "assessmentDueDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "auditDisciplineId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditProjectId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditType": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "deletedAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "deletedBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "effectiveDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "newRevisionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "oldRevisionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ownerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectDisciplineId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "publishedAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "seq": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "title",
+          "ownerId",
+          "projectDisciplineId",
+          "oldRevisionId",
+          "newRevisionId",
+          "description",
+          "scope",
+          "effectiveDate",
+          "assessmentDueDate",
+          "status",
+          "publishedAt",
+          "auditType",
+          "auditProjectId",
+          "auditKey",
+          "auditName",
+          "auditDisciplineId",
+          "projectId",
+          "key",
+          "seq",
+          "deletedAt",
+          "deletedBy",
+          "createdAt",
+          "createdBy",
+          "updatedAt",
+          "updatedBy",
+          "rowVersion",
+          "id"
+        ],
+        "type": "object"
+      },
+      "ChangeRow": {
+        "properties": {
+          "assessmentDueDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "ownerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "pendingAssessments": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "title",
+          "status",
+          "rowVersion",
+          "ownerId",
+          "scope",
+          "assessmentDueDate",
+          "pendingAssessments"
         ],
         "type": "object"
       },
@@ -10858,6 +11358,295 @@
         ],
         "type": "object"
       },
+      "InputAdoptionRow": {
+        "properties": {
+          "auditKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditProjectId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditType": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "inputUseId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "intendedUse": {
+            "type": "string"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "sourceRevisionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "inputUseId",
+          "sourceRevisionId",
+          "intendedUse",
+          "reason",
+          "auditType",
+          "projectId",
+          "auditProjectId",
+          "auditKey",
+          "auditName",
+          "createdAt",
+          "createdBy",
+          "updatedAt",
+          "updatedBy",
+          "rowVersion",
+          "id"
+        ],
+        "type": "object"
+      },
+      "InputUseAssessment": {
+        "properties": {
+          "changeNoticeId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "newRevisionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "noticeStatus": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "targetId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "targetType": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "targetType",
+          "targetId",
+          "status",
+          "changeNoticeId",
+          "key",
+          "newRevisionId",
+          "noticeStatus"
+        ],
+        "type": "object"
+      },
+      "InputUsePage": {
+        "properties": {
+          "assessments": {
+            "items": {
+              "$ref": "#/components/schemas/InputUseAssessment"
+            },
+            "type": "array"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/InputAdoptionRow"
+            },
+            "type": "array"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/InputUseRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "pageSize": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "totalCount": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "totalCount",
+          "assessments",
+          "history"
+        ],
+        "type": "object"
+      },
+      "InputUseRow": {
+        "properties": {
+          "adoptedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "adoptedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "auditKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditProjectId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditType": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "intendedUse": {
+            "type": "string"
+          },
+          "ownerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "sourceIdentity": {
+            "type": "string"
+          },
+          "sourceRevisionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "targetId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "targetType": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "targetType",
+          "targetId",
+          "ownerId",
+          "sourceIdentity",
+          "sourceRevisionId",
+          "intendedUse",
+          "adoptedAt",
+          "adoptedBy",
+          "auditType",
+          "projectId",
+          "auditProjectId",
+          "auditKey",
+          "auditName",
+          "createdAt",
+          "createdBy",
+          "updatedAt",
+          "updatedBy",
+          "rowVersion",
+          "id"
+        ],
+        "type": "object"
+      },
       "Integrity": {
         "properties": {
           "checkedAt": {
@@ -14383,6 +15172,45 @@
         ],
         "type": "object"
       },
+      "PageOfChangeRow": {
+        "properties": {
+          "filters": {},
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ChangeRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "pageSize": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "sort": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "totalCount": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "totalCount"
+        ],
+        "type": "object"
+      },
       "PageOfDeletedItem": {
         "properties": {
           "filters": {},
@@ -16366,6 +17194,171 @@
           "colour",
           "isActive",
           "sortOrder"
+        ],
+        "type": "object"
+      },
+      "ReferenceImpactDocument": {
+        "properties": {
+          "identifier": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "identifier",
+          "revision",
+          "kind"
+        ],
+        "type": "object"
+      },
+      "ReferenceImpactRevision": {
+        "properties": {
+          "externalIdentifier": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "string"
+          },
+          "sourceKey": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "sourceKey",
+          "externalIdentifier",
+          "revision"
+        ],
+        "type": "object"
+      },
+      "ReferenceImpactRow": {
+        "properties": {
+          "currentRevision": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ReferenceImpactRevision"
+              }
+            ]
+          },
+          "currentRevisionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "documentReference": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ReferenceImpactDocument"
+              }
+            ]
+          },
+          "documentReferenceId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ownerDecidedAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "ownerDisposition": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "ownerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ownerReason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "previousRevision": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ReferenceImpactRevision"
+              }
+            ]
+          },
+          "previousRevisionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "verifierDecidedAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "verifierDisposition": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "verifierId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "verifierReason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "documentReferenceId",
+          "previousRevisionId",
+          "currentRevisionId",
+          "ownerId",
+          "verifierId",
+          "status",
+          "ownerDisposition",
+          "ownerReason",
+          "verifierDisposition",
+          "verifierReason",
+          "ownerDecidedAt",
+          "verifierDecidedAt",
+          "rowVersion",
+          "documentReference",
+          "previousRevision",
+          "currentRevision"
         ],
         "type": "object"
       },
@@ -28651,7 +29644,12 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ReferenceImpactRow"
+                  },
+                  "type": "array"
+                }
               }
             },
             "description": "OK"
@@ -36934,7 +37932,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/PageOfChangeRow"
+                }
               }
             },
             "description": "OK"
@@ -37060,7 +38060,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/ChangeDetail"
+                }
               }
             },
             "description": "OK"
@@ -38528,7 +39530,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/InputUsePage"
+                }
               }
             },
             "description": "OK"

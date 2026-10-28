@@ -65,7 +65,7 @@ export function DesignBasisTab() {
   const set = (name: string, value: string) => setSp(p => { const next = new URLSearchParams(p); if (value) next.set(name, value); else next.delete(name);
     if (name !== 'basis' && name !== 'page') next.delete('page'); return next })
   const base = `projects/${project.id}/design-basis`
-  const options = useQuery({ queryKey: ['coord-options', project.id], queryFn: () => get<CoordOptions>(`projects/${project.id}/changes/options`) })
+  const options = useQuery({ queryKey: ['coord-options', project.id], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/changes/options', { params: { projectId: project.id } }) })
   const team = useQuery({ queryKey: ['p', project.id, 'team'], queryFn: () => get<Team>(`projects/${project.id}/team`) })
   const allowedDisciplines = project.permissions.createBasisIn
   const canCreate = !!options.data?.canWrite && allowedDisciplines.length > 0

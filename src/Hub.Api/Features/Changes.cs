@@ -56,6 +56,56 @@ public static class ChangeEndpoints
     public sealed record CoordinationOptions(Guid ActorId, bool CanWrite, Guid[] ManageDisciplineIds, CoordinationCanCreate CanCreate, IReadOnlyList<CoordinationPerson> People,
         IReadOnlyList<CoordinationDiscipline> Disciplines, IReadOnlyList<CoordinationSource> Sources, IReadOnlyList<SourceHeadRow> Heads,
         IReadOnlyList<CoordinationDeliverable> Deliverables, IReadOnlyList<CoordinationTask> Tasks);
+    /// One notice of the register. PendingAssessments counts its assessments that are not yet complete.
+    public sealed record ChangeRow(Guid Id, string Key, string Title, string Status, int RowVersion, Guid OwnerId, string Scope, DateOnly AssessmentDueDate, int PendingAssessments);
+    public sealed record ChangeNoticeRow(string Title, Guid OwnerId, Guid ProjectDisciplineId, Guid OldRevisionId, Guid NewRevisionId, string Description, string Scope, DateOnly EffectiveDate, DateOnly AssessmentDueDate,
+        string Status, DateTimeOffset? PublishedAt, string AuditType, Guid? AuditProjectId, string? AuditKey, string? AuditName, Guid? AuditDisciplineId, Guid ProjectId, string Key, int Seq, DateTimeOffset? DeletedAt,
+        Guid? DeletedBy, DateTimeOffset CreatedAt, Guid? CreatedBy, DateTimeOffset UpdatedAt, Guid? UpdatedBy, int RowVersion, Guid Id)
+    {
+        public static ChangeNoticeRow From(ChangeNotice c) => new(c.Title, c.OwnerId, c.ProjectDisciplineId, c.OldRevisionId, c.NewRevisionId, c.Description, c.Scope, c.EffectiveDate, c.AssessmentDueDate,
+            c.Status, c.PublishedAt, c.AuditType, c.AuditProjectId, c.AuditKey, c.AuditName, c.AuditDisciplineId, c.ProjectId, c.Key, c.Seq, c.DeletedAt,
+            c.DeletedBy, c.CreatedAt, c.CreatedBy, c.UpdatedAt, c.UpdatedBy, c.RowVersion, c.Id);
+    }
+    /// One work item a notice asks its owner to assess against the new revision.
+    public sealed record ChangeAssessmentRow(Guid ChangeNoticeId, string TargetType, Guid TargetId, Guid OwnerId, Guid? ReviewerId, Guid? InputUseId, Guid? HandoffId, Guid RevisionUsedId, string Status,
+        DateTimeOffset? AcknowledgedAt, string? Rationale, string? EvidenceUrl, Guid? CorrectionTaskId, decimal? EffortImpactHours, int? DateImpactDays, bool RetainOldRevision, Guid? RetentionApprovedBy,
+        string? RetentionReason, Guid? VerifiedBy, DateTimeOffset? VerifiedAt, string AuditType, Guid ProjectId, Guid? AuditProjectId, string? AuditKey, string? AuditName, DateTimeOffset CreatedAt, Guid? CreatedBy,
+        DateTimeOffset UpdatedAt, Guid? UpdatedBy, int RowVersion, Guid Id)
+    {
+        public static ChangeAssessmentRow From(ChangeAssessment a) => new(a.ChangeNoticeId, a.TargetType, a.TargetId, a.OwnerId, a.ReviewerId, a.InputUseId, a.HandoffId, a.RevisionUsedId, a.Status,
+            a.AcknowledgedAt, a.Rationale, a.EvidenceUrl, a.CorrectionTaskId, a.EffortImpactHours, a.DateImpactDays, a.RetainOldRevision, a.RetentionApprovedBy,
+            a.RetentionReason, a.VerifiedBy, a.VerifiedAt, a.AuditType, a.ProjectId, a.AuditProjectId, a.AuditKey, a.AuditName, a.CreatedAt, a.CreatedBy,
+            a.UpdatedAt, a.UpdatedBy, a.RowVersion, a.Id);
+    }
+    /// A source revision a work item has adopted as an input, and the use it was adopted for.
+    public sealed record InputUseRow(string TargetType, Guid TargetId, Guid OwnerId, string SourceIdentity, Guid SourceRevisionId, string IntendedUse, DateTimeOffset AdoptedAt, Guid AdoptedBy, string AuditType,
+        Guid ProjectId, Guid? AuditProjectId, string? AuditKey, string? AuditName, DateTimeOffset CreatedAt, Guid? CreatedBy, DateTimeOffset UpdatedAt, Guid? UpdatedBy, int RowVersion, Guid Id)
+    {
+        public static InputUseRow From(InputUse u) => new(u.TargetType, u.TargetId, u.OwnerId, u.SourceIdentity, u.SourceRevisionId, u.IntendedUse, u.AdoptedAt, u.AdoptedBy, u.AuditType,
+            u.ProjectId, u.AuditProjectId, u.AuditKey, u.AuditName, u.CreatedAt, u.CreatedBy, u.UpdatedAt, u.UpdatedBy, u.RowVersion, u.Id);
+    }
+    /// One step of an input use's history: the revision it moved to, the use and the reason.
+    public sealed record InputAdoptionRow(Guid InputUseId, Guid SourceRevisionId, string IntendedUse, string Reason, string AuditType, Guid ProjectId, Guid? AuditProjectId, string? AuditKey, string? AuditName,
+        DateTimeOffset CreatedAt, Guid? CreatedBy, DateTimeOffset UpdatedAt, Guid? UpdatedBy, int RowVersion, Guid Id)
+    {
+        public static InputAdoptionRow From(InputAdoption a) => new(a.InputUseId, a.SourceRevisionId, a.IntendedUse, a.Reason, a.AuditType, a.ProjectId, a.AuditProjectId, a.AuditKey, a.AuditName,
+            a.CreatedAt, a.CreatedBy, a.UpdatedAt, a.UpdatedBy, a.RowVersion, a.Id);
+    }
+    /// The assessment a notice asked of one target, for the target's inputs list.
+    public sealed record InputUseAssessment(string TargetType, Guid TargetId, string Status, Guid ChangeNoticeId, string Key, Guid NewRevisionId, string NoticeStatus);
+    /// A page of input uses with the notice assessments and adoption history of the targets on it.
+    public sealed record InputUsePage(IReadOnlyList<InputUseRow> Items, int Page, int PageSize, int TotalCount, IReadOnlyList<InputUseAssessment> Assessments, IReadOnlyList<InputAdoptionRow> History);
+    /// One notice as the detail panel reads it. CompleteAssessmentIds names the assessments that can close it; the can flags are the viewer's own rights; Head is null when the source has none.
+    public sealed record ChangeDetail(ChangeNoticeRow Notice, IReadOnlyList<ChangeAssessmentRow> Assessments, IReadOnlyList<Guid> CompleteAssessmentIds, SourceRevisionRow OldRevision, SourceRevisionRow NewRevision,
+        SourceHeadRow? Head, Guid ActorId, bool CanWrite, bool CanPublish, bool CanManage, IReadOnlyList<Guid> EligiblePeople, IReadOnlyList<InputUseRow> Uses);
+    public sealed record ReferenceImpactDocument(string Identifier, string Revision, string Kind);
+    public sealed record ReferenceImpactRevision(string SourceKey, string ExternalIdentifier, string Revision);
+    /// A superseded source reference on a resolved issue, with the owner's and verifier's decisions. A reference or revision that no longer resolves is null.
+    public sealed record ReferenceImpactRow(Guid Id, Guid DocumentReferenceId, Guid PreviousRevisionId, Guid CurrentRevisionId, Guid OwnerId, Guid? VerifierId, string Status, string? OwnerDisposition,
+        string? OwnerReason, string? VerifierDisposition, string? VerifierReason, DateTimeOffset? OwnerDecidedAt, DateTimeOffset? VerifierDecidedAt, int RowVersion, ReferenceImpactDocument? DocumentReference,
+        ReferenceImpactRevision? PreviousRevision, ReferenceImpactRevision? CurrentRevision);
+    sealed record PendingCount(Guid Id, int Count);
+    sealed record NoticeHandoff(Handoff H, SourceRevision Source);
     public static void Map(RouteGroupBuilder api)
     {
         api.MapGet("/projects/{projectId:guid}/changes", List);
@@ -176,9 +226,10 @@ public static class ChangeEndpoints
             }
             foreach (var use in await db.InputUses.Where(u => u.ProjectId == p.Id && u.SourceIdentity == head.Identity && u.SourceRevisionId != next.Id).ToListAsync())
                 await AddAssessment(db, p, c, use.TargetType, use.TargetId, use.SourceRevisionId, use.Id, null);
-            var handoffs = await db.Handoffs.Where(h => h.ProjectId == p.Id && h.Status != HandoffStatus.Cancelled && h.CurrentRevisionId != null)
-                .Join(db.HandoffRevisions, h => h.CurrentRevisionId, r => (Guid?)r.Id, (h, r) => new { H = h, R = r })
-                .Join(db.SourceRevisions, x => x.R.SourceRevisionId, r => r.Id, (x, r) => new { x.H, Source = r }).ToListAsync();
+            var handoffs = await (from h in db.Handoffs.Where(h => h.ProjectId == p.Id && h.Status != HandoffStatus.Cancelled && h.CurrentRevisionId != null)
+                join r in db.HandoffRevisions on h.CurrentRevisionId equals (Guid?)r.Id
+                join sr in db.SourceRevisions on r.SourceRevisionId equals sr.Id
+                select new NoticeHandoff(h, sr)).ToListAsync();
             foreach (var h in handoffs.Where(h => Coordination.Identity(h.Source) == head.Identity && h.Source.Id != next.Id))
                 await AddAssessment(db, p, c, h.H.TargetTaskId != null ? "Task" : "Deliverable", h.H.TargetTaskId ?? h.H.TargetDeliverableId!.Value, h.Source.Id, null, h.H.Id);
             Check.That((body.AdditionalTargets?.Length ?? 0) <= 200, "additionalTargets", "change.targets");
@@ -306,7 +357,7 @@ public static class ChangeEndpoints
             (await db.Tasks.Where(t => t.ProjectId == p.Id && t.Status != TaskStatuses.Cancelled).Select(t => new CoordinationTask(t.Id, t.Key, t.Name, t.ProjectDisciplineId, t.AssigneeId, t.RowVersion, t.Status, false, false)).ToListAsync())
                 .Select(t => t with { CanCommit = CanCommit(t.OwnerId, t.ProjectDisciplineId), CanManage = CanManage(t.ProjectDisciplineId) }).ToList()));
     }
-    static async Task<object> Uses(Guid projectId, string? targetType, Guid? targetId, int? page, int? pageSize, Access access, HubDb db)
+    static async Task<Ok<InputUsePage>> Uses(Guid projectId, string? targetType, Guid? targetId, int? page, int? pageSize, Access access, HubDb db)
     {
         await access.Project(projectId, false);
         var q = db.InputUses.AsNoTracking().Where(u => u.ProjectId == projectId);
@@ -314,7 +365,9 @@ public static class ChangeEndpoints
         var (pg, size) = Http.Paging(page, pageSize); var total = await q.CountAsync();
         var uses = await q.OrderByDescending(u => u.AdoptedAt).ThenBy(u => u.Id).Skip((pg - 1) * size).Take(size).ToListAsync(); var ids = uses.Select(u => u.Id).ToArray();
         var targetIds = uses.Select(u => u.TargetId).ToArray();
-        return new { Items = uses, Page = pg, PageSize = size, TotalCount = total, Assessments = await db.ChangeAssessments.Where(a => a.ProjectId == projectId && targetIds.Contains(a.TargetId)).Join(db.ChangeNotices, a => a.ChangeNoticeId, c => c.Id, (a, c) => new { a.TargetType, a.TargetId, a.Status, a.ChangeNoticeId, c.Key, c.NewRevisionId, NoticeStatus = c.Status }).ToListAsync(), History = await db.InputAdoptions.Where(a => ids.Contains(a.InputUseId)).OrderBy(a => a.CreatedAt).ThenBy(a => a.Id).ToListAsync() };
+        return TypedResults.Ok(new InputUsePage(uses.Select(InputUseRow.From).ToList(), pg, size, total,
+            await db.ChangeAssessments.Where(a => a.ProjectId == projectId && targetIds.Contains(a.TargetId)).Join(db.ChangeNotices, a => a.ChangeNoticeId, c => c.Id, (a, c) => new InputUseAssessment(a.TargetType, a.TargetId, a.Status, a.ChangeNoticeId, c.Key, c.NewRevisionId, c.Status)).ToListAsync(),
+            (await db.InputAdoptions.Where(a => ids.Contains(a.InputUseId)).OrderBy(a => a.CreatedAt).ThenBy(a => a.Id).ToListAsync()).Select(InputAdoptionRow.From).ToList()));
     }
     static IQueryable<ChangeNotice> Query(HubDb db, Guid project, Filter f, Guid actor)
     {
@@ -325,32 +378,33 @@ public static class ChangeEndpoints
         if (f.Mine == true) q = q.Where(c => c.OwnerId == actor || db.ChangeAssessments.Any(a => a.ChangeNoticeId == c.Id && (a.OwnerId == actor || a.ReviewerId == actor)));
         return q.OrderBy(c => c.AssessmentDueDate).ThenBy(c => c.Seq);
     }
-    static async Task<List<object>> Rows(HubDb db, IQueryable<ChangeNotice> query)
+    static async Task<List<ChangeRow>> Rows(HubDb db, IQueryable<ChangeNotice> query)
     {
         var rows = await query.ToListAsync(); var ids = rows.Select(c => c.Id).ToArray();
-        var counts = await Incomplete(db).Where(a => ids.Contains(a.ChangeNoticeId)).GroupBy(a => a.ChangeNoticeId).Select(g => new { Id = g.Key, Count = g.Count() }).ToDictionaryAsync(x => x.Id, x => x.Count);
-        return rows.Select(c => (object)new { c.Id, c.Key, c.Title, c.Status, c.RowVersion, c.OwnerId, c.Scope, c.AssessmentDueDate, PendingAssessments = counts.GetValueOrDefault(c.Id) }).ToList();
+        var counts = await Incomplete(db).Where(a => ids.Contains(a.ChangeNoticeId)).GroupBy(a => a.ChangeNoticeId).Select(g => new PendingCount(g.Key, g.Count())).ToDictionaryAsync(x => x.Id, x => x.Count);
+        return rows.Select(c => new ChangeRow(c.Id, c.Key, c.Title, c.Status, c.RowVersion, c.OwnerId, c.Scope, c.AssessmentDueDate, counts.GetValueOrDefault(c.Id))).ToList();
     }
-    static async Task<object> List(Guid projectId, [AsParameters] Filter filter, int? page, int? pageSize, Access access, HubDb db)
-    { await access.Project(projectId, false); var q = Query(db, projectId, filter, access.Me.Id); var (pg, size) = Http.Paging(page, pageSize); return new Page<object>(await Rows(db, q.Skip((pg - 1) * size).Take(size)), pg, size, await q.CountAsync()); }
-    static async Task<object> Detail(Guid projectId, Guid id, Access access, HubDb db)
+    static async Task<Ok<Page<ChangeRow>>> List(Guid projectId, [AsParameters] Filter filter, int? page, int? pageSize, Access access, HubDb db)
+    { await access.Project(projectId, false); var q = Query(db, projectId, filter, access.Me.Id); var (pg, size) = Http.Paging(page, pageSize); return TypedResults.Ok(new Page<ChangeRow>(await Rows(db, q.Skip((pg - 1) * size).Take(size)), pg, size, await q.CountAsync())); }
+    static async Task<Ok<ChangeDetail>> Detail(Guid projectId, Guid id, Access access, HubDb db)
     {
         var (p, ctx) = await access.Project(projectId, false); var c = await Load(db, p.Id, id);
         var assessments = await db.ChangeAssessments.Where(a => a.ChangeNoticeId == id).ToListAsync(); var newRevision = await Coordination.Revision(db, p.Id, c.NewRevisionId);
         var complete = new List<Guid>(); foreach (var a in assessments) if (await Complete(db, a)) complete.Add(a.Id);
         var useIds = assessments.Select(a => a.InputUseId).OfType<Guid>().ToArray();
-        return new { Notice = c, Assessments = assessments, CompleteAssessmentIds = complete, OldRevision = await Coordination.Revision(db, p.Id, c.OldRevisionId), NewRevision = newRevision, Head = await Coordination.Head(db, newRevision),
-            ActorId = access.Me.Id, CanWrite = Permissions.CoordinationWrite(access.Actor, ctx).Ok,
-            CanPublish = Permissions.PublishSource(access.Actor, ctx, c.ProjectDisciplineId, newRevision.DeliverableId is { } did ? await db.Deliverables.Where(x => x.Id == did).Select(x => x.OwnerId).FirstOrDefaultAsync() : (await Coordination.Head(db, newRevision))?.OwnerId).Ok,
-            CanManage = Permissions.ManageCoordination(access.Actor, ctx, c.ProjectDisciplineId).Ok, EligiblePeople = await Coordination.People(db, p).Select(u => u.Id).ToListAsync(),
-            Uses = await db.InputUses.Where(u => u.ProjectId == p.Id && useIds.Contains(u.Id)).ToListAsync() };
+        var oldRevision = await Coordination.Revision(db, p.Id, c.OldRevisionId); var head = await Coordination.Head(db, newRevision);
+        return TypedResults.Ok(new ChangeDetail(ChangeNoticeRow.From(c), assessments.Select(ChangeAssessmentRow.From).ToList(), complete, SourceRevisionRow.From(oldRevision), SourceRevisionRow.From(newRevision), head is null ? null : SourceHeadRow.From(head),
+            access.Me.Id, Permissions.CoordinationWrite(access.Actor, ctx).Ok,
+            Permissions.PublishSource(access.Actor, ctx, c.ProjectDisciplineId, newRevision.DeliverableId is { } did ? await db.Deliverables.Where(x => x.Id == did).Select(x => x.OwnerId).FirstOrDefaultAsync() : head?.OwnerId).Ok,
+            Permissions.ManageCoordination(access.Actor, ctx, c.ProjectDisciplineId).Ok, await Coordination.People(db, p).Select(u => u.Id).ToListAsync(),
+            (await db.InputUses.Where(u => u.ProjectId == p.Id && useIds.Contains(u.Id)).ToListAsync()).Select(InputUseRow.From).ToList()));
     }
     static async Task<IResult> ExportRows(Guid projectId, [AsParameters] Filter filter, string? format, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
         var (p, _) = await access.Project(projectId, false); var rows = await Rows(db, Query(db, projectId, filter, access.Me.Id).Take(Export.MaxRows + 1));
         return await ExportFile.Send(db, store, format, Text.Get("export.changes", p.ProjectNumber), Columns, JsonSerializer.SerializeToNode(rows, JsonOpts.Web)!.AsArray(), await ListExportEndpoints.Filters(db, http, access), p.Id, $"{p.ProjectNumber}-changes", clock);
     }
-    static async Task<object> ListIssueImpacts(Guid id, Access access, HubDb db)
+    static async Task<Ok<List<ReferenceImpactRow>>> ListIssueImpacts(Guid id, Access access, HubDb db)
     {
         var (_, project, _) = await RegisterEndpoints.LoadIssue(db, access, id);
         var impacts = await db.IssueReferenceImpactAssessments.AsNoTracking().Where(a => a.ProjectId == project.Id && a.IssueId == id)
@@ -361,11 +415,11 @@ public static class ChangeEndpoints
             .ToDictionaryAsync(d => d.Id);
         var revisions = await db.SourceRevisions.AsNoTracking().Where(r => r.ProjectId == project.Id && revisionIds.Contains(r.Id))
             .ToDictionaryAsync(r => r.Id);
-        return impacts.Select(a => new { a.Id, a.DocumentReferenceId, a.PreviousRevisionId, a.CurrentRevisionId, a.OwnerId, a.VerifierId, a.Status,
+        return TypedResults.Ok(impacts.Select(a => new ReferenceImpactRow(a.Id, a.DocumentReferenceId, a.PreviousRevisionId, a.CurrentRevisionId, a.OwnerId, a.VerifierId, a.Status,
             a.OwnerDisposition, a.OwnerReason, a.VerifierDisposition, a.VerifierReason, a.OwnerDecidedAt, a.VerifierDecidedAt, a.RowVersion,
-            DocumentReference = documents.TryGetValue(a.DocumentReferenceId, out var d) ? new { d.Identifier, d.Revision, d.Kind } : null,
-            PreviousRevision = revisions.TryGetValue(a.PreviousRevisionId, out var old) ? new { old.SourceKey, old.ExternalIdentifier, old.Revision } : null,
-            CurrentRevision = revisions.TryGetValue(a.CurrentRevisionId, out var current) ? new { current.SourceKey, current.ExternalIdentifier, current.Revision } : null }).ToList();
+            documents.TryGetValue(a.DocumentReferenceId, out var d) ? new ReferenceImpactDocument(d.Identifier, d.Revision, d.Kind) : null,
+            revisions.TryGetValue(a.PreviousRevisionId, out var old) ? new ReferenceImpactRevision(old.SourceKey, old.ExternalIdentifier, old.Revision) : null,
+            revisions.TryGetValue(a.CurrentRevisionId, out var current) ? new ReferenceImpactRevision(current.SourceKey, current.ExternalIdentifier, current.Revision) : null)).ToList());
     }
     static async Task<Coordination.Result> DecideIssueImpact(Guid id, Guid impactId, IssueImpactBody body, Access access, HubDb db, TimeProvider clock)
     {

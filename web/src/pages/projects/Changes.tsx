@@ -6,18 +6,19 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { get, qs } from '@/lib/api'
+import { typedRequest } from '@/lib/api'
+import type { components } from '@/gen/api'
 import { addDays, fmtDate, fmtTime, today } from '@/lib/format'
 import { t, tv , runtimeText } from '@/lib/i18n'
 import { CoordinationRegister, type RegisterContext } from './CoordinationRegister'
-import { CommandForm, CoordStatus, FieldsCommand, PersonLabel, RegisterPager, SelectField, SourceLink, WorkLink, personName, peopleChoices, disciplineChoices, sourceChoices, workChoices, workRef, type RecordVersion, type SourceRevision, type SourceHead, type FormField, type InputUse } from './CoordinationForms'
+import { CommandForm, CoordStatus, FieldsCommand, PersonLabel, RegisterPager, SelectField, SourceLink, WorkLink, personName, peopleChoices, disciplineChoices, sourceChoices, workChoices, workRef, type FormField, type InputUse } from './CoordinationForms'
 import { useSafeForm } from '@/hooks/drafts'
 
+type Schemas = components['schemas']
 const stamp = (value: string) => <time dateTime={value} title={value}>{fmtTime(value)}</time>
 
-type Notice = RecordVersion & { key: string; title: string; ownerId: string; projectDisciplineId: string; oldRevisionId: string; newRevisionId: string; description: string; scope: string; assessmentDueDate: string; effectiveDate: string; status: string }
-type Assessment = RecordVersion & { targetType: string; targetId: string; ownerId: string; reviewerId?: string; inputUseId?: string; handoffId?: string; revisionUsedId: string; status: string; acknowledgedAt?: string; rationale?: string; evidenceUrl?: string; correctionTaskId?: string; effortImpactHours?: number; dateImpactDays?: number; retainOldRevision: boolean; retentionApprovedBy?: string; retentionReason?: string; verifiedBy?: string; verifiedAt?: string }
-type Detail = { notice: Notice; assessments: Assessment[]; completeAssessmentIds: string[]; oldRevision: SourceRevision; newRevision: SourceRevision; head: SourceHead; actorId: string; canWrite: boolean; canPublish: boolean; canManage: boolean; uses: InputUse[] }
+type Assessment = Schemas['ChangeAssessmentRow']
+type Detail = Schemas['ChangeDetail']
 const reason: FormField = { name: 'reason', label: 'coord.reason', type: 'textarea' }
 const subhead = 'text-base/6 font-semibold', check = 'mt-0.5 size-4 shrink-0 accent-(--primary)'
 const dl = 'grid grid-cols-[minmax(8rem,auto)_1fr] gap-x-4 gap-y-2'
@@ -45,7 +46,7 @@ function SourceForm({ options: o, projectId, open, close, refresh }: RegisterCon
 function InputRegister(c: RegisterContext) {
   const { options: o, projectId } = c, [sp, setSp] = useSearchParams(), [adopting, setAdopting] = useState(false)
   const target = sp.get('target') ?? '', [type, id] = target.split(':'), page = Math.max(1, Number(sp.get('inputsPage')) || 1)
-  const q = useQuery({ queryKey: ['input-uses', projectId, target, page], queryFn: () => get<{ items: InputUse[]; totalCount: number; pageSize: number; assessments: { targetId: string; changeNoticeId: string; key: string; newRevisionId: string; status: string; noticeStatus: string }[]; history: { id: string; inputUseId: string; sourceRevisionId: string; reason: string; createdAt: string; createdBy: string }[] }>(`projects/${projectId}/input-uses${qs({ targetType: type, targetId: id, page })}`) })
+  const q = useQuery({ queryKey: ['input-uses', projectId, target, page], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/input-uses', { params: { projectId }, query: { targetType: type, targetId: id, page } }) })
   const change = (key: string, value: string) => { const next = new URLSearchParams(sp); if (value) next.set(key, value); else next.delete(key); if (key === 'target') next.delete('inputsPage'); setSp(next) }
   return <section aria-labelledby="change-inputs-h" className="space-y-4 border-t pt-6">
     <div className="flex flex-wrap items-start justify-between gap-3"><div className="max-w-3xl"><h2 id="change-inputs-h" className="text-lg/[26px] font-semibold tracking-[-0.2px]">{t('change.inputs')}</h2><p className="mt-1 text-base/6 text-muted-foreground">{t('change.detectionBoundary')}</p></div>{o.canWrite && <Button variant="outline" onClick={() => setAdopting(true)}>{t('change.recordUse')}</Button>}</div>
@@ -75,7 +76,7 @@ function AdoptForm({ options: o, projectId, refresh, close, initialTarget, uses 
   const [target, setTarget] = useState(initialTarget), [source, setSource] = useState(''), [purpose, setPurpose] = useState(''), [reason, setReason] = useState('')
   const [type, id] = target.split(':'), work = workRef(o, type, id), registered = o.sources.find(s => s.revision.id === source), use = uses.find(u => u.targetId === id && u.sourceIdentity === registered?.identity)
   // Query the selected work independently: its existing input may be outside the visible page.
-  const q = useQuery({ queryKey: ['input-uses', projectId, target, 'adopt'], queryFn: () => get<{ items: InputUse[] }>(`projects/${projectId}/input-uses${qs({ targetType: type, targetId: id })}`), enabled: !!id })
+  const q = useQuery({ queryKey: ['input-uses', projectId, target, 'adopt'], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/input-uses', { params: { projectId }, query: { targetType: type, targetId: id } }), enabled: !!id })
   return <CommandForm title={t('change.recordUse')} hint={t('change.adoptHint')} path={`projects/${projectId}/input-uses`} payload={() => ({ targetType: type, targetId: id, targetRowVersion: work?.rowVersion, sourceRevisionId: source, expectedCurrentRevisionId: source, inputUseRowVersion: (q.data?.items.find(u => u.sourceIdentity === registered?.identity) ?? use)?.rowVersion, intendedUse: purpose, reason })} onClose={close} onDone={() => { refresh(); close() }}>
     <SelectField label={t('change.target')} value={target} onChange={setTarget} choices={workChoices(o).filter(c => { const [type, id] = c.value.split(':'); return workRef(o, type, id)?.ownerId === o.actorId })} /><SelectField label={t('change.current')} value={source} onChange={setSource} choices={sourceChoices(o)} />
     <Field label={t('handoff.purpose')} htmlFor="input-purpose"><Textarea id="input-purpose" required value={purpose} onChange={e => setPurpose(e.target.value)} /></Field><Field label={t('coord.reason')} htmlFor="input-reason"><Textarea id="input-reason" required value={reason} onChange={e => setReason(e.target.value)} /></Field>{q.error && <ErrorBanner error={q.error} />}
@@ -83,7 +84,7 @@ function AdoptForm({ options: o, projectId, refresh, close, initialTarget, uses 
 }
 function ChangeDetail(c: RegisterContext & { id: string; close: () => void }) {
   const { options: o, projectId, id, close } = c
-  const q = useQuery({ queryKey: ['change-detail', projectId, id], queryFn: () => get<Detail>(`projects/${projectId}/changes/${id}`) })
+  const q = useQuery({ queryKey: ['change-detail', projectId, id], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/changes/{id}', { params: { projectId, id } }) })
   const [action, setAction] = useState<{ type: string; assessment?: Assessment } | null>(null), d = q.data, n = d?.notice
   const done = () => { setAction(null); c.refresh(); q.refetch() }
   return <><Dialog open onOpenChange={v => !v && close()}><DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-4xl"><DialogHeader><DialogTitle>{n ? `${n.key} · ${n.title}` : t('changes.title')}</DialogTitle><DialogDescription>{t('change.detectionBoundary')}</DialogDescription></DialogHeader>
@@ -98,7 +99,7 @@ function ChangeDetail(c: RegisterContext & { id: string; close: () => void }) {
       <p className="whitespace-pre-wrap text-base/6">{n.description}</p>
       <div className="space-y-2"><div className="grid gap-3 sm:grid-cols-2">{[d.oldRevision, d.newRevision].map((s, i) => <section key={s.id} className="space-y-1 rounded-lg border bg-muted p-4"><h3 className="mb-2 font-semibold">{t(i ? 'change.proposed' : 'change.previous')}</h3><SourceLink source={s} /><p>{s.issuer}</p><p className="text-muted-foreground">{t('change.registered')}: <span className="tabular-nums">{stamp(s.createdAt)}</span></p><p className="text-muted-foreground">{t('change.sourceCheckedAt')}: {s.sourceCheckedAt ? stamp(s.sourceCheckedAt) : t('change.notChecked')}</p></section>)}</div><p className="text-xs/[18px] text-muted-foreground">{t('handoff.manualRevision')}</p></div>
       <section className="space-y-3"><h3 className={subhead}>{t('change.assessments')}</h3>{!d.assessments.length && <p className="text-muted-foreground">{t(n.status === 'Draft' ? 'change.publishHint' : 'change.noAssessments')}</p>}{d.assessments.map(a => {
-        const w = workRef(o, a.targetType, a.targetId), canManage = !!w && w.canManage === true, owner = a.ownerId === d.actorId && a.ownerId === w?.ownerId, live = d.canWrite && n.status === 'Open', used = d.uses.find(u => u.id === a.inputUseId)?.sourceRevisionId ?? a.revisionUsedId, current = o.sources.find(s => s.revision.id === d.head.currentRevisionId)?.revision, complete = d.completeAssessmentIds.includes(a.id)
+        const w = workRef(o, a.targetType, a.targetId), canManage = !!w && w.canManage === true, owner = a.ownerId === d.actorId && a.ownerId === w?.ownerId, live = d.canWrite && n.status === 'Open', used = d.uses.find(u => u.id === a.inputUseId)?.sourceRevisionId ?? a.revisionUsedId, current = o.sources.find(s => s.revision.id === d.head?.currentRevisionId)?.revision, complete = d.completeAssessmentIds.includes(a.id)
         return <article key={a.id} className="space-y-3 rounded-lg border p-4">
           <h4 className="font-semibold"><WorkLink options={o} type={a.targetType} id={a.targetId} number={c.number} /></h4>
           <dl className={dl}>
@@ -119,7 +120,7 @@ function ChangeDetail(c: RegisterContext & { id: string; close: () => void }) {
 function ChangeCommand({ c, d, action, close, done }: { c: RegisterContext; d: Detail; action: { type: string; assessment?: Assessment }; close: () => void; done: () => void }) {
   const o = c.options, n = d.notice, a = action.assessment, type = action.type, base = `projects/${c.projectId}/changes/${n.id}`
   const [extra, setExtra] = useState<string[]>([]), [status, setStatus] = useState(a?.status === 'Pending Assessment' ? 'Unaffected' : a?.status ?? 'Unaffected')
-  if (type === 'publish') return <CommandForm path={`${base}/publish`} title={t('change.publish')} hint={t('change.publishHint')} payload={() => ({ rowVersion: n.rowVersion, headRowVersion: d.head.rowVersion, additionalTargets: extra.map(key => { const [type, id] = key.split(':'); return { targetType: type, targetId: id, rowVersion: workRef(o, type, id)?.rowVersion } }) })} onClose={close} onDone={done}><fieldset className="space-y-1 rounded-lg border p-4"><legend className="px-1 text-sm font-semibold">{t('change.additional')}</legend>{workChoices(o).map(w => <label className="flex items-start gap-2 py-1 text-sm" key={w.value}><input type="checkbox" className={check} checked={extra.includes(w.value)} onChange={e => setExtra(v => e.target.checked ? [...v, w.value] : v.filter(x => x !== w.value))} />{w.label}</label>)}</fieldset><p className="text-sm text-muted-foreground">{t('change.detectionBoundary')}</p></CommandForm>
+  if (type === 'publish') return <CommandForm path={`${base}/publish`} title={t('change.publish')} hint={t('change.publishHint')} payload={() => ({ rowVersion: n.rowVersion, headRowVersion: d.head?.rowVersion, additionalTargets: extra.map(key => { const [type, id] = key.split(':'); return { targetType: type, targetId: id, rowVersion: workRef(o, type, id)?.rowVersion } }) })} onClose={close} onDone={done}><fieldset className="space-y-1 rounded-lg border p-4"><legend className="px-1 text-sm font-semibold">{t('change.additional')}</legend>{workChoices(o).map(w => <label className="flex items-start gap-2 py-1 text-sm" key={w.value}><input type="checkbox" className={check} checked={extra.includes(w.value)} onChange={e => setExtra(v => e.target.checked ? [...v, w.value] : v.filter(x => x !== w.value))} />{w.label}</label>)}</fieldset><p className="text-sm text-muted-foreground">{t('change.detectionBoundary')}</p></CommandForm>
   let fields: FormField[] = [reason], initial: Record<string, string> = {}, path = `${base}/action`, build: (v: Record<string, string>) => object = v => ({ ...v, rowVersion: n.rowVersion, action: type === 'noticeAssign' ? 'assign' : type })
   if (type === 'noticeAssign') fields.unshift({ name: 'ownerId', label: 'coord.owner', choices: peopleChoices(o) })
   if (a) {
@@ -128,7 +129,7 @@ function ChangeCommand({ c, d, action, close, done }: { c: RegisterContext; d: D
     fields = type === 'acknowledge' ? [] : [{ name: 'rationale', label: 'coord.rationale', type: 'textarea' }]
     if (type === 'assign') fields.unshift({ name: 'reviewerId', label: 'review.verifier', choices: peopleChoices(o) })
     if (type === 'disposition') { fields = [{ name: 'rationale', label: 'coord.rationale', type: 'textarea' }, { name: 'evidenceUrl', label: 'coord.evidenceUrl', type: 'url' }]; initial = { rationale: a.rationale ?? '', evidenceUrl: a.evidenceUrl ?? '' }; if (status === 'Update Required') fields.push({ name: 'correctionTaskId', label: 'change.correction', choices: o.tasks.map(w => ({ value: w.id, label: `${w.key} · ${w.name}` })) }, { name: 'effortImpactHours', label: 'change.effort', type: 'number', min: 0 }, { name: 'dateImpactDays', label: 'change.dateImpact', type: 'number' }) }
-    build = v => ({ ...v, rowVersion: a.rowVersion, action: type, status: type === 'disposition' ? status : undefined, ownerId: type === 'assign' ? w?.ownerId : undefined, targetRowVersion: w?.rowVersion, inputUseRowVersion: use?.rowVersion, expectedCurrentRevisionId: d.head.currentRevisionId, correctionTaskRowVersion: o.tasks.find(t => t.id === (v.correctionTaskId ?? a.correctionTaskId))?.rowVersion, effortImpactHours: v.effortImpactHours != null ? Number(v.effortImpactHours) : undefined, dateImpactDays: v.dateImpactDays != null ? Number(v.dateImpactDays) : undefined })
+    build = v => ({ ...v, rowVersion: a.rowVersion, action: type, status: type === 'disposition' ? status : undefined, ownerId: type === 'assign' ? w?.ownerId : undefined, targetRowVersion: w?.rowVersion, inputUseRowVersion: use?.rowVersion, expectedCurrentRevisionId: d.head?.currentRevisionId, correctionTaskRowVersion: o.tasks.find(t => t.id === (v.correctionTaskId ?? a.correctionTaskId))?.rowVersion, effortImpactHours: v.effortImpactHours != null ? Number(v.effortImpactHours) : undefined, dateImpactDays: v.dateImpactDays != null ? Number(v.dateImpactDays) : undefined })
   }
   if (type === 'disposition') return <DispositionForm title={t('change.disposition')} path={path} fields={fields} initial={initial} build={build} status={status} setStatus={setStatus} close={close} done={done} />
   return <FieldsCommand title={runtimeText(`change.command.${type}`)} path={path} fields={fields} initial={initial} build={build} onClose={close} onDone={done} hint={type === 'acknowledge' ? t('change.ackHint') : undefined} />

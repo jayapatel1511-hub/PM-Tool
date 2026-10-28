@@ -280,11 +280,22 @@ public static class TaskPickupReporting
     public static IQueryable<TaskPickupOffer> Rows(HubDb db, IQueryable<Guid> visibleProjects) => db.Set<TaskPickupOffer>().AsNoTracking()
         .Where(o => visibleProjects.Contains(db.Tasks.IgnoreQueryFilters().Where(t => t.Id == o.TaskId).Select(t => t.ProjectId).FirstOrDefault()));
 
-    /// The team of the offer's assignee, not the task's current one: a pick-up or reassignment must not move an offer's history
-    /// away from the team that saw it in the list, or to a team that never could.
-    public static IQueryable<TaskPickupOffer> Rows(HubDb db, IQueryable<Guid> visibleProjects, AppUser viewer, bool orgStructureOn)
-        => Rows(db, visibleProjects).Where(o => o.AssigneeId != null && o.AssigneeId != viewer.Id && db.Users.Any(u => u.Id == o.AssigneeId && u.IsActive && viewer.IsActive
-            && (orgStructureOn && u.UnitId != null ? u.UnitId == viewer.UnitId : u.SupervisorId != null && u.SupervisorId == viewer.SupervisorId)));
+    /// FR-PKP-12 under the list's rules (FR-PKP-04): the team of the offer's assignee (not the task's current one, so a pick-up or
+    /// reassignment never moves an offer's history to a team that never saw it), and those who may assign it (direct manager, PM,
+    /// Discipline Lead). A since-deactivated assignee's offers stay with their team.
+    public static async Task<List<T>> Visible<T>(HubDb db, Access access, AppUser viewer, bool orgStructureOn, IReadOnlyList<T> rows, Func<T, (Guid Assignee, Guid Project, Guid Discipline)> key)
+    {
+        var keys = rows.Select(key).ToList();
+        var ids = keys.Select(k => k.Assignee).Distinct().ToArray();
+        var projectIds = keys.Select(k => k.Project).Distinct().ToArray();
+        var people = await db.Users.AsNoTracking().Where(u => ids.Contains(u.Id)).ToDictionaryAsync(u => u.Id);
+        var contexts = new Dictionary<Guid, ProjectContext>();
+        foreach (var project in await db.Projects.AsNoTracking().Where(p => projectIds.Contains(p.Id)).ToListAsync())
+            contexts[project.Id] = await access.Context(project);
+        return rows.Where((_, i) => keys[i] is var (a, p, d) && a != viewer.Id && people.TryGetValue(a, out var u)
+            && (TaskPickupRules.SameTeam(orgStructureOn, u.UnitId, viewer.UnitId, u.SupervisorId, viewer.SupervisorId, true, viewer.IsActive)
+                || contexts.TryGetValue(p, out var ctx) && TaskPickupRules.CanAssign(access.Actor, ctx, d, u.SupervisorId))).ToList();
+    }
 }
 
 /// Serialize offer state with task changes before handlers read either row; an offer never races a terminal save.

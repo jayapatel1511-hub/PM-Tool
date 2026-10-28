@@ -332,6 +332,9 @@ public sealed class TaskPickupTests
             Assert.Equal(1, await Rows(TestData.Jill, picked.Id)); // the picker is in the offer's team
             Assert.Equal(1, await Rows(TestData.Jill, moved.Id)); // the offer's team keeps it after a reassignment outside the team
             Assert.Equal(0, await Rows(TestData.Omar, moved.Id)); // the new assignee's team never saw the offer
+            // FR-PKP-12 follows the list (FR-PKP-04): those who may assign the offer see it too, outside the team.
+            Assert.Equal(1, await Rows(TestData.Sam, picked.Id)); // the offer's assignee's direct manager
+            Assert.Equal(1, await Rows(TestData.Pm, moved.Id)); // the project's PM
         }
     }
 

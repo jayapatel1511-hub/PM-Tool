@@ -633,19 +633,22 @@ public static partial class ReportEndpoints
     /// FR-ASG-08: Supervisors see their direct reports; Executives and Admins may ask for all staff.
     static async Task<Result> PickupOffers(Ctx c)
     {
-        var offers = TaskPickupReporting.Rows(c.Db, c.Access.VisibleProjectIds(), await c.Db.Users.AsNoTracking().SingleAsync(u => u.Id == c.Me.Id), c.S.IsFlagOn("org_structure"));
         var from = c.Date("from") ?? c.Today.AddDays(-42); var to = c.Date("to") ?? c.Today;
         Check.That(to >= from, "to", "error.invalid");
         // G-03: the range is organisation-time days, like the default "today", so an evening offer is in today's report.
         var zone = Clock.Zone(c.S);
         DateTimeOffset Utc(DateOnly d) { var t = d.ToDateTime(TimeOnly.MinValue); return new DateTimeOffset(t, zone.GetUtcOffset(t)).ToUniversalTime(); }
         var (start, end) = (Utc(from), Utc(to.AddDays(1)));
-        var rows = await offers.Where(o => o.OpenedAt >= start && o.OpenedAt < end)
+        var found = await TaskPickupReporting.Rows(c.Db, c.Access.VisibleProjectIds()).Where(o => o.OpenedAt >= start && o.OpenedAt < end && o.AssigneeId != null)
             .Join(c.Db.Tasks.IgnoreQueryFilters(), o => o.TaskId, t => t.Id, (o, t) => new { o, t })
             .Where(r => c.ProjectIds().Contains(r.t.ProjectId) && (c.Id("disciplineId") == null || r.t.ProjectDisciplineId == c.Id("disciplineId")))
-            .OrderBy(r => r.o.OpenedAt).Take(Cap).Select(r => new { Project = c.Db.Projects.Where(p => p.Id == r.t.ProjectId).Select(p => p.ProjectNumber).First(),
+            .OrderBy(r => r.o.OpenedAt).Select(r => new { Assignee = r.o.AssigneeId!.Value, r.t.ProjectId, r.t.ProjectDisciplineId,
+                Project = c.Db.Projects.Where(p => p.Id == r.t.ProjectId).Select(p => p.ProjectNumber).First(),
                 Discipline = c.Db.ProjectDisciplines.Where(d => d.Id == r.t.ProjectDisciplineId).Select(d => d.Discipline!.Name).First(),
                 Offered = r.o.OpenedAt, Closed = r.o.ClosedAt, r.o.CloseCause }).ToListAsync();
+        // ponytail: filters in memory to share the list's rule; offers per range are few. Push it into SQL if the report gets slow.
+        var viewer = await c.Db.Users.AsNoTracking().SingleAsync(u => u.Id == c.Me.Id);
+        var rows = (await TaskPickupReporting.Visible(c.Db, c.Access, viewer, c.S.IsFlagOn("org_structure"), found, r => (r.Assignee, r.ProjectId, r.ProjectDisciplineId))).Take(Cap).ToList();
         return new(Json(rows.Select(r => new PickupRow(r.Project, r.Discipline, r.Offered, r.Closed, TaskPickupRules.CauseText(r.CloseCause),
             (int)((r.Closed ?? c.Now) - r.Offered).TotalDays))), "/pickup");
     }

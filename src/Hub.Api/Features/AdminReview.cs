@@ -142,7 +142,7 @@ public static class AdminReviewEndpoints
             var c = await Context(db, store, clock);
             var shown = Shown(c.Settings).ToList();
             var notes = body.Checks ?? [];
-            foreach (var n in notes) Check.That(shown.Any(k => k.Key == n.Key), "checks", "error.invalid");
+            foreach (var n in notes) Check.That(n is not null && shown.Any(k => k.Key == n.Key), "checks", "error.invalid");
             var checks = new List<CheckRecord>();
             foreach (var k in shown)
                 checks.Add(new(k.Key, (await k.Rows(c)).Count, Check.Optional(notes.FirstOrDefault(n => n.Key == k.Key)?.Note, "checks", 2000)));

@@ -45,6 +45,19 @@ public sealed class AdminReviewTests : IDisposable
     static string[] Names(JsonArray rows) => [.. rows.Select(r => r!.S("name")).Order()];
 
     [Fact]
+    [Trait("flag-off", "admin_review"), Trait("flag-on", "admin_review")]
+    public async Task Its_two_settings_are_listed_only_with_the_flag() // AC-ADR-06, FR-ADR-08
+    {
+        foreach (var on in new[] { false, true })
+        {
+            await Flag("admin_review", on);
+            var keys = (await Admin.GetAsync("/api/v1/admin/settings").Result.Json()).AsArray().Select(r => r!.S("key")).ToList();
+            Assert.Equal(on, keys.Contains("admin_review_interval_days"));
+            Assert.Equal(on, keys.Contains("admin_review_idle_days"));
+        }
+    }
+
+    [Fact]
     [Trait("flag-off", "admin_review")]
     public async Task With_the_flag_off_an_Admin_finds_no_review_and_others_are_refused_as_on_every_admin_route() // AC-ADR-06
     {
@@ -180,10 +193,14 @@ public sealed class AdminReviewTests : IDisposable
 
         // Unknown keys are refused and record nothing; a second review is a new record beside the first.
         Assert.Equal(HttpStatusCode.BadRequest, (await Admin.Post("/api/v1/admin/review", new { checks = new[] { new { key = "invented", note = "x" } } })).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await Admin.Post("/api/v1/admin/review", new { checks = new object?[] { null } })).StatusCode);
         f.Clock.Now = f.Clock.Now.AddDays(91);
         Assert.True((await Admin.GetAsync("/api/v1/admin/review").Result.Json())["overdue"]!.GetValue<bool>());
         (await Admin.Post("/api/v1/admin/review", new { note = "Correction" })).EnsureSuccessStatusCode();
         Assert.Equal(2, await f.DbAsync(db => db.Set<AdminReview>().CountAsync()));
+        var edit = await Assert.ThrowsAsync<Npgsql.PostgresException>(() => f.DbAsync(db => db.Database.ExecuteSqlRawAsync("UPDATE hub.admin_review SET note = 'x'")));
+        Assert.Contains("append-only", edit.MessageText);
+        await Assert.ThrowsAsync<Npgsql.PostgresException>(() => f.DbAsync(db => db.Database.ExecuteSqlRawAsync("DELETE FROM hub.admin_review")));
         Assert.Equal("Quarterly access review", await f.DbAsync(db => db.Set<AdminReview>().Where(r => r.Id == recorded.G("id")).Select(r => r.Note).SingleAsync()));
 
         // No edit or delete path exists, and the store refuses both.

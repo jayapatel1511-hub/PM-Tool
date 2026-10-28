@@ -17,6 +17,7 @@ const fs = require('node:fs')
 const os = require('node:os')
 const path = require('node:path')
 const { startPreview, newMockPage, me, project, task, taskDetail, panelIds, deliverableDetail, links, comments } = require('./platform-fixtures.cjs')
+const { dependencyEdge, dependencyTask, taskDependencies } = require('./dependencies.fixture.cjs')
 
 const delay = 300
 const port = Number(process.env.DATA_ENTRY_TEST_PORT ?? 7206)
@@ -197,14 +198,13 @@ async function run(base, on) {
     const taskB = structuredClone(taskDetail)
     Object.assign(taskB.task, { id: '00000000-0000-0000-0000-000000000042', key: 'T-002', name: 'Second task' })
     const savedB = []
-    const edge = (to) => ({ dependencyId: `00000000-0000-0000-0000-0000000000d${to.key.slice(-1)}`, lagDays: 0, satisfied: false,
-      task: { id: to.id, key: to.key, name: to.name, status: 'Not Started', overdue: false, blocked: false, waiting: false } })
+    const edge = (to) => dependencyEdge({ dependencyId: `00000000-0000-0000-0000-0000000000d${to.key.slice(-1)}`, task: dependencyTask({ id: to.id, key: to.key, name: to.name }) })
     await page.route(new RegExp(`/api/v1/tasks/${taskB.task.id}$`), route => {
       if (route.request().method() === 'PATCH') { savedB.push(route.request().postDataJSON()); return route.fulfill({ json: { ...taskB.task, warnings: [] } }) }
       return route.fulfill({ json: structuredClone(taskB) })
     })
-    await page.route(`**/api/v1/tasks/${taskB.task.id}/dependencies`, route => route.fulfill({ json: { dependsOn: [edge(task)], blocks: [] } }))
-    await page.route(`**/api/v1/tasks/${task.id}/dependencies`, route => route.fulfill({ json: { dependsOn: [edge(taskB.task)], blocks: [] } }))
+    await page.route(`**/api/v1/tasks/${taskB.task.id}/dependencies`, route => route.fulfill({ json: taskDependencies([edge(task)]) }))
+    await page.route(`**/api/v1/tasks/${task.id}/dependencies`, route => route.fulfill({ json: taskDependencies([edge(taskB.task)]) }))
     await page.route(`**/api/v1/items/Task/${taskB.task.id}/links`, route => route.fulfill({ json: links }))
     await page.route(`**/api/v1/items/Task/${taskB.task.id}/comments`, route => route.fulfill({ json: comments }))
     const nameButton = (text) => dialog.getByRole('button', { name: text, exact: true }).first()

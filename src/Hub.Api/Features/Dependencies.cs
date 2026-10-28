@@ -1,6 +1,7 @@
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
@@ -16,17 +17,34 @@ public static class DependencyEndpoints
         [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] UnavailableDate[]? Availability = null,
         [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] DateSuccessor[]? Tasks = null);
 
+    /// The task at the other end of a link, with the facts the dependency list shows.
+    public sealed record DependencyTaskRef(Guid Id, string Key, string Name, string Status, DateOnly? DueDate, DateOnly? StartDate, Guid? AssigneeId, string? AssigneeName,
+        bool Overdue, bool Blocked, bool Waiting);
+    public sealed record TaskDependencyEdge(Guid DependencyId, string? Note, int LagDays, string Type, DependencyTaskRef Task, bool Satisfied);
+    public sealed record TaskDependencyList(IReadOnlyList<TaskDependencyEdge> DependsOn, IReadOnlyList<TaskDependencyEdge> Blocks);
+    public sealed record DependencyAdded(Guid Id, IReadOnlyList<string> Warnings);
+    public sealed record DeliverableDependencyAdded(Guid Id);
+    /// One task reached from `ParentId` at `Level` steps from the task asked about.
+    public sealed record ChainStep(int Level, Guid ParentId, TaskQueries.Row Task);
+    public sealed record TaskChain(TaskQueries.Row Task, int Depth, IReadOnlyList<ChainStep> Predecessors, IReadOnlyList<ChainStep> Successors);
+    public sealed record DependencyCandidate(Guid Id, string Key, string Name, string Status, DateOnly? DueDate, bool Disabled, string? Reason);
+
+    /// Query projections: the two ends of a link, and one link with the facts the list judges it by.
+    sealed record LinkEnds(Guid Predecessor, Guid Successor);
+    sealed record PredecessorState(string Status, DateTimeOffset? StartedAt, DateTimeOffset? CompletedAt);
+    sealed record EdgeRead(Guid DependencyId, string? Note, int LagDays, string Type, PredecessorState Pred, DependencyTaskRef Task);
+
     public static void Map(RouteGroupBuilder api)
     {
         api.MapGet("/items/{type}/{id:guid}/date-context", Dates);
-        api.MapGet("/tasks/{id:guid}/dependencies", async (Guid id, Access access, HubDb db, SettingsStore store, TimeProvider clock) =>
+        api.MapGet("/tasks/{id:guid}/dependencies", async Task<Ok<TaskDependencyList>> (Guid id, Access access, HubDb db, SettingsStore store, TimeProvider clock) =>
         {
             var (t, p, _) = await TaskEndpoints.Load(db, access, id);
             var judge = await Judge(db, p, store, clock);
-            return new { dependsOn = await Edges(db, judge, t.Id, predecessors: true), blocks = await Edges(db, judge, t.Id, predecessors: false) };
+            return TypedResults.Ok(new TaskDependencyList(await Edges(db, judge, t.Id, predecessors: true), await Edges(db, judge, t.Id, predecessors: false)));
         });
 
-        api.MapPost("/tasks/{id:guid}/dependencies", async (Guid id, AddBody body, Access access, HubDb db) =>
+        api.MapPost("/tasks/{id:guid}/dependencies", async Task<Created<DependencyAdded>> (Guid id, AddBody body, Access access, HubDb db) =>
         {
             var (t, p, ctx) = await TaskEndpoints.Load(db, access, id);
             var (pred, succ) = body.PredecessorTaskId is { } pr ? (pr, t.Id) : body.SuccessorTaskId is { } su ? (t.Id, su) : throw ApiException.Invalid("predecessorTaskId", "error.required");
@@ -36,10 +54,10 @@ public static class DependencyEndpoints
                 await db.SaveChangesAsync();
                 return r;
             });
-            return Results.Created($"/api/v1/dependencies/{edge.Id}", new { edge.Id, warnings });
+            return TypedResults.Created($"/api/v1/dependencies/{edge.Id}", new DependencyAdded(edge.Id, warnings));
         });
 
-        api.MapDelete("/dependencies/{id:guid}", async (Guid id, Access access, HubDb db, Notifier notify, TimeProvider clock, CurrentUser me) =>
+        api.MapDelete("/dependencies/{id:guid}", async Task<NoContent> (Guid id, Access access, HubDb db, Notifier notify, TimeProvider clock, CurrentUser me) =>
         {
             var e = await db.Dependencies.FirstOrDefaultAsync(x => x.Id == id) ?? throw ApiException.NotFound();
             var (p, ctx) = await access.Project(e.ProjectId);
@@ -53,11 +71,11 @@ public static class DependencyEndpoints
             await notify.Send(NotificationEvents.DependencyRemoved, succ.AssigneeId, TaskEndpoints.Item(p, succ),
                 Text.Get("notify.dependency_removed", await notify.ActorName(), pred.Key, succ.Key, succ.Name));
             await db.SaveChangesAsync();
-            return Results.NoContent();
+            return TypedResults.NoContent();
         });
 
         // FR-DEP-09 (packet 021): explicit links between deliverables, typed (FR-DEPT-01), with an optional lag; loops refused (D-03).
-        api.MapPost("/deliverables/{id:guid}/dependencies", async (Guid id, DeliverableBody body, Access access, HubDb db) =>
+        api.MapPost("/deliverables/{id:guid}/dependencies", async Task<Created<DeliverableDependencyAdded>> (Guid id, DeliverableBody body, Access access, HubDb db) =>
         {
             var d = await db.Deliverables.FirstOrDefaultAsync(x => x.Id == id) ?? throw ApiException.NotFound();
             var (p, ctx) = await access.Project(d.ProjectId);
@@ -74,8 +92,8 @@ public static class DependencyEndpoints
                 if (pred.Id == succ.Id) throw ApiException.Conflict("dependency_self", "dep.self");
                 if (await db.DeliverableDependencies.AnyAsync(x => x.PredecessorDeliverableId == pred.Id && x.SuccessorDeliverableId == succ.Id))
                     throw ApiException.Conflict("dependency_duplicate", "dep.duplicate");
-                var edges = await db.DeliverableDependencies.Where(x => x.ProjectId == p.Id).Select(x => new { x.PredecessorDeliverableId, x.SuccessorDeliverableId }).ToListAsync();
-                if (Graph.CycleIfAdded(edges.Select(e => (e.PredecessorDeliverableId, e.SuccessorDeliverableId)), pred.Id, succ.Id) is { } loop)
+                var edges = await db.DeliverableDependencies.Where(x => x.ProjectId == p.Id).Select(x => new LinkEnds(x.PredecessorDeliverableId, x.SuccessorDeliverableId)).ToListAsync();
+                if (Graph.CycleIfAdded(edges.Select(e => (e.Predecessor, e.Successor)), pred.Id, succ.Id) is { } loop)
                 {
                     var keys = await db.Deliverables.Where(x => loop.Contains(x.Id)).ToDictionaryAsync(x => x.Id, x => x.Key);
                     var path = loop.Select(x => keys[x]).ToList();
@@ -89,10 +107,10 @@ public static class DependencyEndpoints
                 await db.SaveChangesAsync();
                 return edge;
             });
-            return Results.Created($"/api/v1/deliverable-dependencies/{edge.Id}", new { edge.Id });
+            return TypedResults.Created($"/api/v1/deliverable-dependencies/{edge.Id}", new DeliverableDependencyAdded(edge.Id));
         });
 
-        api.MapDelete("/deliverable-dependencies/{id:guid}", async (Guid id, Access access, HubDb db, TimeProvider clock, CurrentUser me) =>
+        api.MapDelete("/deliverable-dependencies/{id:guid}", async Task<NoContent> (Guid id, Access access, HubDb db, TimeProvider clock, CurrentUser me) =>
         {
             var e = await db.DeliverableDependencies.FirstOrDefaultAsync(x => x.Id == id) ?? throw ApiException.NotFound();
             var (_, ctx) = await access.Project(e.ProjectId);
@@ -103,15 +121,15 @@ public static class DependencyEndpoints
             e.DeletedBy = me.Id;
             e.AuditKey = $"{pred.Key} → {succ.Key}";
             await db.SaveChangesAsync();
-            return Results.NoContent();
+            return TypedResults.NoContent();
         });
 
         // FR-DEP-07: transitive predecessors and successors with their states, up to the chain depth limit.
-        api.MapGet("/tasks/{id:guid}/chain", async (Guid id, int? depth, Access access, HubDb db, SettingsStore store) =>
+        api.MapGet("/tasks/{id:guid}/chain", async Task<Ok<TaskChain>> (Guid id, int? depth, Access access, HubDb db, SettingsStore store) =>
         {
             var (t, _, _) = await TaskEndpoints.Load(db, access, id);
             var limit = Math.Clamp(depth ?? (await store.Get(db)).ChainDepthLimit, 1, 50);
-            var edges = await db.Dependencies.Where(d => d.ProjectId == t.ProjectId).Select(d => new { d.PredecessorTaskId, d.SuccessorTaskId }).ToListAsync();
+            var edges = await db.Dependencies.Where(d => d.ProjectId == t.ProjectId).Select(d => new LinkEnds(d.PredecessorTaskId, d.SuccessorTaskId)).ToListAsync();
             List<(Guid Id, int Level, Guid Parent)> Walk(bool up)
             {
                 var result = new List<(Guid, int, Guid)>();
@@ -121,7 +139,7 @@ public static class DependencyEndpoints
                 {
                     var next = new List<Guid>();
                     foreach (var f in frontier)
-                        foreach (var n in up ? edges.Where(e => e.SuccessorTaskId == f).Select(e => e.PredecessorTaskId) : edges.Where(e => e.PredecessorTaskId == f).Select(e => e.SuccessorTaskId))
+                        foreach (var n in up ? edges.Where(e => e.Successor == f).Select(e => e.Predecessor) : edges.Where(e => e.Predecessor == f).Select(e => e.Successor))
                             if (seen.Add(n)) { result.Add((n, level, f)); next.Add(n); }
                     frontier = next;
                 }
@@ -130,35 +148,32 @@ public static class DependencyEndpoints
             var up = Walk(true);
             var down = Walk(false);
             var ids = up.Select(x => x.Id).Concat(down.Select(x => x.Id)).Append(t.Id).ToList();
-            var rows = (await TaskQueries.Rows(db, db.Tasks.AsNoTracking().Where(x => ids.Contains(x.Id)), access.Actor)).ToDictionary(r => (Guid)((dynamic)r).Id);
-            return new
-            {
-                task = rows[t.Id], depth = limit,
-                predecessors = up.Select(x => new { level = x.Level, parentId = x.Parent, task = rows[x.Id] }),
-                successors = down.Select(x => new { level = x.Level, parentId = x.Parent, task = rows[x.Id] }),
-            };
+            var rows = (await TaskQueries.Rows(db, db.Tasks.AsNoTracking().Where(x => ids.Contains(x.Id)), access.Actor)).ToDictionary(r => r.Id);
+            return TypedResults.Ok(new TaskChain(rows[t.Id], limit,
+                [.. up.Select(x => new ChainStep(x.Level, x.Parent, rows[x.Id]))],
+                [.. down.Select(x => new ChainStep(x.Level, x.Parent, rows[x.Id]))]));
         });
 
         // FR-002: candidates for a new dependency, with loop-creating tasks listed as disabled.
-        api.MapGet("/tasks/{id:guid}/dependency-candidates", async (Guid id, string? q, string? direction, Access access, HubDb db) =>
+        api.MapGet("/tasks/{id:guid}/dependency-candidates", async Task<Ok<List<DependencyCandidate>>> (Guid id, string? q, string? direction, Access access, HubDb db) =>
         {
             var (t, _, _) = await TaskEndpoints.Load(db, access, id);
-            var edges = await db.Dependencies.Where(d => d.ProjectId == t.ProjectId).Select(d => new { d.PredecessorTaskId, d.SuccessorTaskId }).ToListAsync();
-            var graph = edges.Select(e => (e.PredecessorTaskId, e.SuccessorTaskId)).ToList();
+            var edges = await db.Dependencies.Where(d => d.ProjectId == t.ProjectId).Select(d => new LinkEnds(d.PredecessorTaskId, d.SuccessorTaskId)).ToListAsync();
+            var graph = edges.Select(e => (e.Predecessor, e.Successor)).ToList();
             var query = db.Tasks.AsNoTracking().Where(x => x.ProjectId == t.ProjectId && x.Id != t.Id);
             if (!string.IsNullOrWhiteSpace(q)) query = query.Where(x => EF.Functions.ILike(x.Name, $"%{q.Trim()}%") || EF.Functions.ILike(x.Key, $"%{q.Trim()}%"));
-            var list = await query.OrderBy(x => x.Seq).Take(30).Select(x => new { x.Id, x.Key, x.Name, x.Status, x.DueDate }).ToListAsync();
+            var list = await query.OrderBy(x => x.Seq).Take(30).Select(x => new DependencyCandidate(x.Id, x.Key, x.Name, x.Status, x.DueDate, false, null)).ToListAsync();
             var asPred = direction != "successor";
-            return list.Select(x =>
+            return TypedResults.Ok(list.Select(x =>
             {
-                var existing = edges.Any(e => asPred ? e.PredecessorTaskId == x.Id && e.SuccessorTaskId == t.Id : e.PredecessorTaskId == t.Id && e.SuccessorTaskId == x.Id);
+                var existing = edges.Any(e => asPred ? e.Predecessor == x.Id && e.Successor == t.Id : e.Predecessor == t.Id && e.Successor == x.Id);
                 var cycle = asPred ? Graph.CycleIfAdded(graph, x.Id, t.Id) : Graph.CycleIfAdded(graph, t.Id, x.Id);
-                return new { x.Id, x.Key, x.Name, x.Status, x.DueDate, disabled = existing || cycle is not null, reason = existing ? Text.Get("dep.duplicate") : cycle is not null ? Text.Get("dep.would_cycle") : null };
-            });
+                return x with { Disabled = existing || cycle is not null, Reason = existing ? Text.Get("dep.duplicate") : cycle is not null ? Text.Get("dep.would_cycle") : null };
+            }).ToList());
         });
     }
 
-    static async Task<DateContextRead> Dates(string type, Guid id, string? startDate, string? dueDate,
+    static async Task<Ok<DateContextRead>> Dates(string type, Guid id, string? startDate, string? dueDate,
         Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
         var settings = await store.Get(db);
@@ -220,25 +235,20 @@ public static class DependencyEndpoints
             }
             availability = warnings.ToArray();
         }
-        return new(dates, availability, children);
+        return TypedResults.Ok(new DateContextRead(dates, availability, children));
     }
 
-    static async Task<List<object>> Edges(HubDb db, LinkJudge judge, Guid taskId, bool predecessors) =>
+    static async Task<List<TaskDependencyEdge>> Edges(HubDb db, LinkJudge judge, Guid taskId, bool predecessors) =>
         (await db.Dependencies.AsNoTracking().Where(d => predecessors ? d.SuccessorTaskId == taskId : d.PredecessorTaskId == taskId)
-            .Select(d => new
-            {
-                DependencyId = d.Id, d.Note, d.LagDays, Type = d.DependencyType,
-                Pred = db.Tasks.Where(x => x.Id == d.PredecessorTaskId).Select(x => new { x.Status, x.StartedAt, x.CompletedAt }).First(),
-                Task = db.Tasks.Where(x => x.Id == (predecessors ? d.PredecessorTaskId : d.SuccessorTaskId)).Select(x => new
-                {
-                    x.Id, x.Key, x.Name, x.Status, x.DueDate, x.StartDate, x.AssigneeId, AssigneeName = db.Users.Where(u => u.Id == x.AssigneeId).Select(u => u.DisplayName).FirstOrDefault(),
-                    Overdue = db.TaskStates.Where(s => s.TaskId == x.Id).Select(s => s.IsOverdue).FirstOrDefault(),
-                    Blocked = db.TaskStates.Where(s => s.TaskId == x.Id).Select(s => s.IsBlocked).FirstOrDefault(),
-                    Waiting = db.TaskStates.Where(s => s.TaskId == x.Id).Select(s => s.IsWaiting).FirstOrDefault(),
-                }).First(),
-            }).ToListAsync())
-        .Select(d => (object)new { d.DependencyId, d.Note, d.LagDays, d.Type, d.Task,
-            Satisfied = judge.Satisfied(d.Type, d.Pred.Status, d.Pred.StartedAt, judge.Local(d.Pred.CompletedAt), d.LagDays) }).ToList();
+            .Select(d => new EdgeRead(d.Id, d.Note, d.LagDays, d.DependencyType,
+                db.Tasks.Where(x => x.Id == d.PredecessorTaskId).Select(x => new PredecessorState(x.Status, x.StartedAt, x.CompletedAt)).First(),
+                db.Tasks.Where(x => x.Id == (predecessors ? d.PredecessorTaskId : d.SuccessorTaskId)).Select(x => new DependencyTaskRef(
+                    x.Id, x.Key, x.Name, x.Status, x.DueDate, x.StartDate, x.AssigneeId, db.Users.Where(u => u.Id == x.AssigneeId).Select(u => u.DisplayName).FirstOrDefault(),
+                    db.TaskStates.Where(s => s.TaskId == x.Id).Select(s => s.IsOverdue).FirstOrDefault(),
+                    db.TaskStates.Where(s => s.TaskId == x.Id).Select(s => s.IsBlocked).FirstOrDefault(),
+                    db.TaskStates.Where(s => s.TaskId == x.Id).Select(s => s.IsWaiting).FirstOrDefault())).First())).ToListAsync())
+        .Select(d => new TaskDependencyEdge(d.DependencyId, d.Note, d.LagDays, d.Type, d.Task,
+            judge.Satisfied(d.Type, d.Pred.Status, d.Pred.StartedAt, judge.Local(d.Pred.CompletedAt), d.LagDays))).ToList();
 
     /// FR-DEPT-01: an omitted type is Finish-to-Start; anything outside the vocabulary is refused.
     public static string LinkType(string? type)
@@ -285,8 +295,8 @@ public static class DependencyEndpoints
         Access.Demand(Permissions.ManageDependency(access.Actor, ctx, await TaskEndpoints.Facts(db, pred), await TaskEndpoints.Facts(db, succ)));
         if (pred.Id == succ.Id) throw ApiException.Conflict("dependency_self", "dep.self");
         if (await db.Dependencies.AnyAsync(d => d.PredecessorTaskId == pred.Id && d.SuccessorTaskId == succ.Id)) throw ApiException.Conflict("dependency_duplicate", "dep.duplicate");
-        var edges = await db.Dependencies.Where(d => d.ProjectId == p.Id).Select(d => new { d.PredecessorTaskId, d.SuccessorTaskId }).ToListAsync();
-        if (Graph.CycleIfAdded(edges.Select(e => (e.PredecessorTaskId, e.SuccessorTaskId)), pred.Id, succ.Id) is { } loop)
+        var edges = await db.Dependencies.Where(d => d.ProjectId == p.Id).Select(d => new LinkEnds(d.PredecessorTaskId, d.SuccessorTaskId)).ToListAsync();
+        if (Graph.CycleIfAdded(edges.Select(e => (e.Predecessor, e.Successor)), pred.Id, succ.Id) is { } loop)
         {
             var keys = await db.Tasks.Where(x => loop.Contains(x.Id)).ToDictionaryAsync(x => x.Id, x => x.Key);
             var path = loop.Select(x => keys[x]).ToList();

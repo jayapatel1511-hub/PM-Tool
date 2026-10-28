@@ -878,58 +878,6 @@
         ],
         "type": "object"
       },
-      "AnonymousTypeOfGuidAndstringAndstringAndstringAndDateOnlyAndbooleanAndstring": {
-        "properties": {
-          "disabled": {
-            "type": "boolean"
-          },
-          "dueDate": {
-            "format": "date",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "id": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "key": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "name": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "reason": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "status": {
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        },
-        "required": [
-          "id",
-          "key",
-          "name",
-          "status",
-          "dueDate",
-          "disabled",
-          "reason"
-        ],
-        "type": "object"
-      },
       "AnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndint": {
         "properties": {
           "lastSeenAt": {
@@ -1275,27 +1223,6 @@
         ],
         "type": "object"
       },
-      "AnonymousTypeOfListOfObjectAndListOfObject": {
-        "properties": {
-          "blocks": {
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "dependsOn": {
-            "type": [
-              "null",
-              "array"
-            ]
-          }
-        },
-        "required": [
-          "dependsOn",
-          "blocks"
-        ],
-        "type": "object"
-      },
       "AnonymousTypeOfListOfWidgetAndboolean": {
         "properties": {
           "isDefault": {
@@ -1314,43 +1241,6 @@
         "required": [
           "layout",
           "isDefault"
-        ],
-        "type": "object"
-      },
-      "AnonymousTypeOfRowAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndRowAndIEnumerableOfAnonymousTypeOfintAndGuidAndRow": {
-        "properties": {
-          "depth": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          },
-          "predecessors": {
-            "items": {
-              "$ref": "#/components/schemas/AnonymousTypeOfintAndGuidAndRow"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "successors": {
-            "items": {
-              "$ref": "#/components/schemas/AnonymousTypeOfintAndGuidAndRow"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "task": {
-            "$ref": "#/components/schemas/TaskQueriesRow"
-          }
-        },
-        "required": [
-          "task",
-          "depth",
-          "predecessors",
-          "successors"
         ],
         "type": "object"
       },
@@ -1425,28 +1315,6 @@
         },
         "required": [
           "projects"
-        ],
-        "type": "object"
-      },
-      "AnonymousTypeOfintAndGuidAndRow": {
-        "properties": {
-          "level": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          },
-          "parentId": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "task": {
-            "$ref": "#/components/schemas/TaskQueriesRow"
-          }
-        },
-        "required": [
-          "level",
-          "parentId",
-          "task"
         ],
         "type": "object"
       },
@@ -3472,6 +3340,28 @@
         "required": [
           "id",
           "weeklyCapacityHours"
+        ],
+        "type": "object"
+      },
+      "ChainStep": {
+        "properties": {
+          "level": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "parentId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "task": {
+            "$ref": "#/components/schemas/TaskQueriesRow"
+          }
+        },
+        "required": [
+          "level",
+          "parentId",
+          "task"
         ],
         "type": "object"
       },
@@ -7690,6 +7580,18 @@
         ],
         "type": "object"
       },
+      "DeliverableDependencyAdded": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
       "DeliverableIn": {
         "properties": {
           "deliverableTypeId": {
@@ -8540,6 +8442,68 @@
         ],
         "type": "object"
       },
+      "DependencyAdded": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "warnings"
+        ],
+        "type": "object"
+      },
+      "DependencyCandidate": {
+        "properties": {
+          "disabled": {
+            "type": "boolean"
+          },
+          "dueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "reason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "status",
+          "dueDate",
+          "disabled",
+          "reason"
+        ],
+        "type": "object"
+      },
       "DependencyIn": {
         "properties": {
           "predecessor": {
@@ -8552,6 +8516,73 @@
         "required": [
           "predecessor",
           "successor"
+        ],
+        "type": "object"
+      },
+      "DependencyTaskRef": {
+        "properties": {
+          "assigneeId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "assigneeName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "blocked": {
+            "type": "boolean"
+          },
+          "dueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "overdue": {
+            "type": "boolean"
+          },
+          "startDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "type": "string"
+          },
+          "waiting": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "status",
+          "dueDate",
+          "startDate",
+          "assigneeId",
+          "assigneeName",
+          "overdue",
+          "blocked",
+          "waiting"
         ],
         "type": "object"
       },
@@ -21314,6 +21345,37 @@
         ],
         "type": "object"
       },
+      "TaskChain": {
+        "properties": {
+          "depth": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "predecessors": {
+            "items": {
+              "$ref": "#/components/schemas/ChainStep"
+            },
+            "type": "array"
+          },
+          "successors": {
+            "items": {
+              "$ref": "#/components/schemas/ChainStep"
+            },
+            "type": "array"
+          },
+          "task": {
+            "$ref": "#/components/schemas/TaskQueriesRow"
+          }
+        },
+        "required": [
+          "task",
+          "depth",
+          "predecessors",
+          "successors"
+        ],
+        "type": "object"
+      },
       "TaskCreateBody": {
         "properties": {
           "assigneeId": {
@@ -21419,6 +21481,64 @@
           "dueDate",
           "estimatedHours",
           "dependsOn"
+        ],
+        "type": "object"
+      },
+      "TaskDependencyEdge": {
+        "properties": {
+          "dependencyId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lagDays": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "note": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "satisfied": {
+            "type": "boolean"
+          },
+          "task": {
+            "$ref": "#/components/schemas/DependencyTaskRef"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "dependencyId",
+          "note",
+          "lagDays",
+          "type",
+          "task",
+          "satisfied"
+        ],
+        "type": "object"
+      },
+      "TaskDependencyList": {
+        "properties": {
+          "blocks": {
+            "items": {
+              "$ref": "#/components/schemas/TaskDependencyEdge"
+            },
+            "type": "array"
+          },
+          "dependsOn": {
+            "items": {
+              "$ref": "#/components/schemas/TaskDependencyEdge"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "dependsOn",
+          "blocks"
         ],
         "type": "object"
       },
@@ -27707,8 +27827,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -27849,8 +27969,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliverableDependencyAdded"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -28001,8 +28128,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -41720,7 +41847,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnonymousTypeOfRowAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndRowAndIEnumerableOfAnonymousTypeOfintAndGuidAndRow"
+                  "$ref": "#/components/schemas/TaskChain"
                 }
               }
             },
@@ -41843,7 +41970,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnonymousTypeOfListOfObjectAndListOfObject"
+                  "$ref": "#/components/schemas/TaskDependencyList"
                 }
               }
             },
@@ -41877,8 +42004,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DependencyAdded"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -41919,7 +42053,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/AnonymousTypeOfGuidAndstringAndstringAndstringAndDateOnlyAndbooleanAndstring"
+                    "$ref": "#/components/schemas/DependencyCandidate"
                   },
                   "type": "array"
                 }

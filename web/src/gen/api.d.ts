@@ -2872,8 +2872,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -3026,12 +3026,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["DeliverableDependencyAdded"];
+                    };
                 };
             };
         };
@@ -3216,8 +3218,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -14159,7 +14161,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfRowAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndRowAndIEnumerableOfAnonymousTypeOfintAndGuidAndRow"];
+                        "application/json": components["schemas"]["TaskChain"];
                     };
                 };
             };
@@ -14308,7 +14310,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfListOfObjectAndListOfObject"];
+                        "application/json": components["schemas"]["TaskDependencyList"];
                     };
                 };
             };
@@ -14329,12 +14331,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["DependencyAdded"];
+                    };
                 };
             };
         };
@@ -14371,7 +14375,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfGuidAndstringAndstringAndstringAndDateOnlyAndbooleanAndstring"][];
+                        "application/json": components["schemas"]["DependencyCandidate"][];
                     };
                 };
             };
@@ -16262,17 +16266,6 @@ export interface components {
             lastError: null | string;
             projectNumber: null | string;
         };
-        AnonymousTypeOfGuidAndstringAndstringAndstringAndDateOnlyAndbooleanAndstring: {
-            disabled: boolean;
-            /** Format: date */
-            dueDate: null | string;
-            /** Format: uuid */
-            id: string;
-            key: null | string;
-            name: null | string;
-            reason: null | string;
-            status: null | string;
-        };
         AnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndint: {
             /** Format: date-time */
             lastSeenAt: null | string;
@@ -16345,20 +16338,9 @@ export interface components {
             manageReason: null | string;
             members: null | components["schemas"]["AnonymousTypeOfGuidAndGuidAndstringAndstringAndstringAndGuidAndbooleanAndListOfstringAndGuidAndDateTimeOffsetAndGuidAndintAndIEnumerableOfGuidAndbooleanAndboolean"][];
         };
-        AnonymousTypeOfListOfObjectAndListOfObject: {
-            blocks: null | unknown[];
-            dependsOn: null | unknown[];
-        };
         AnonymousTypeOfListOfWidgetAndboolean: {
             isDefault: boolean;
             layout: null | components["schemas"]["Widget"][];
-        };
-        AnonymousTypeOfRowAndintAndIEnumerableOfAnonymousTypeOfintAndGuidAndRowAndIEnumerableOfAnonymousTypeOfintAndGuidAndRow: {
-            /** Format: int32 */
-            depth: number;
-            predecessors: null | components["schemas"]["AnonymousTypeOfintAndGuidAndRow"][];
-            successors: null | components["schemas"]["AnonymousTypeOfintAndGuidAndRow"][];
-            task: components["schemas"]["TaskQueriesRow"];
         };
         "AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean": {
             digestEnabled: boolean;
@@ -16374,13 +16356,6 @@ export interface components {
         AnonymousTypeOfint: {
             /** Format: int32 */
             projects: number;
-        };
-        AnonymousTypeOfintAndGuidAndRow: {
-            /** Format: int32 */
-            level: number;
-            /** Format: uuid */
-            parentId: string;
-            task: components["schemas"]["TaskQueriesRow"];
         };
         AnonymousTypeOfintAndint: {
             /** Format: int32 */
@@ -16907,6 +16882,13 @@ export interface components {
             id: string;
             /** Format: double */
             weeklyCapacityHours: null | number;
+        };
+        ChainStep: {
+            /** Format: int32 */
+            level: number;
+            /** Format: uuid */
+            parentId: string;
+            task: components["schemas"]["TaskQueriesRow"];
         };
         ChainVerification: {
             /** Format: uuid */
@@ -18008,6 +17990,10 @@ export interface components {
             /** Format: date */
             startDate: null | string;
         };
+        DeliverableDependencyAdded: {
+            /** Format: uuid */
+            id: string;
+        };
         DeliverableIn: {
             /** Format: uuid */
             deliverableTypeId: string;
@@ -18213,9 +18199,42 @@ export interface components {
             successorTaskId: null | string;
             type?: null | string;
         };
+        DependencyAdded: {
+            /** Format: uuid */
+            id: string;
+            warnings: string[];
+        };
+        DependencyCandidate: {
+            disabled: boolean;
+            /** Format: date */
+            dueDate: null | string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            reason: null | string;
+            status: string;
+        };
         DependencyIn: {
             predecessor: string;
             successor: string;
+        };
+        DependencyTaskRef: {
+            /** Format: uuid */
+            assigneeId: null | string;
+            assigneeName: null | string;
+            blocked: boolean;
+            /** Format: date */
+            dueDate: null | string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            overdue: boolean;
+            /** Format: date */
+            startDate: null | string;
+            status: string;
+            waiting: boolean;
         };
         DesignBasisAssignBody: {
             /** Format: int32 */
@@ -21548,6 +21567,13 @@ export interface components {
             reason: null | string;
             taskIds: string[];
         };
+        TaskChain: {
+            /** Format: int32 */
+            depth: number;
+            predecessors: components["schemas"]["ChainStep"][];
+            successors: components["schemas"]["ChainStep"][];
+            task: components["schemas"]["TaskQueriesRow"];
+        };
         TaskCreateBody: {
             /** Format: uuid */
             assigneeId: null | string;
@@ -21570,6 +21596,20 @@ export interface components {
             reviewerId: null | string;
             /** Format: date */
             startDate: null | string;
+        };
+        TaskDependencyEdge: {
+            /** Format: uuid */
+            dependencyId: string;
+            /** Format: int32 */
+            lagDays: number;
+            note: null | string;
+            satisfied: boolean;
+            task: components["schemas"]["DependencyTaskRef"];
+            type: string;
+        };
+        TaskDependencyList: {
+            blocks: components["schemas"]["TaskDependencyEdge"][];
+            dependsOn: components["schemas"]["TaskDependencyEdge"][];
         };
         TaskDetailCollaborator: {
             displayName: string;

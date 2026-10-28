@@ -39,6 +39,7 @@
     "my-work.fixture.cjs",
     "views.fixture.cjs",
     "dashboard.fixture.cjs",
-    "me.fixture.cjs"
+    "me.fixture.cjs",
+    "dependencies.fixture.cjs"
   ]
 }

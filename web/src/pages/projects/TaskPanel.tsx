@@ -21,7 +21,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useProject, useProjectRefresh } from '@/hooks/data'
-import { ApiError, del, get, post, qs, typedRequest } from '@/lib/api'
+import type { components } from '@/gen/api'
+import { ApiError, del, get, post, typedRequest } from '@/lib/api'
 import { invalidateChange } from '@/lib/keys'
 import { useFlag, useMe } from '@/lib/auth'
 import { fmtDate, fmtTime, today } from '@/lib/format'
@@ -287,18 +288,21 @@ function ProgressSlider({ value, disabled, onCommit }: { value: number; disabled
 
 // ---------- Dependencies and chain view (packet 005: FR-DEP-01..08, D-03, D-10) ----------
 
-interface Edge { dependencyId: string; note?: string; lagDays: number; type?: string; satisfied: boolean
-  task: { id: string; key: string; name: string; status: string; dueDate?: string; startDate?: string; assigneeName?: string; overdue: boolean; blocked: boolean; waiting: boolean } }
+type Edge = components['schemas']['TaskDependencyEdge']
+/** The chain's own shape comes from the contract; its task rows keep the page type of the file that owns them until that conversion lands. */
+interface Chain extends Omit<components['schemas']['TaskChain'], 'task' | 'predecessors' | 'successors'> {
+  task: TaskRow; predecessors: { level: number; task: TaskRow }[]; successors: { level: number; task: TaskRow }[]
+}
 
 function Dependencies({ task, canManage, onChanged }: { task: TaskRow; canManage: boolean; onChanged: () => void }) {
-  const q = useQuery({ queryKey: ['task', task.id, 'deps', task.rowVersion], queryFn: () => get<{ dependsOn: Edge[]; blocks: Edge[] }>(`tasks/${task.id}/dependencies`) })
+  const q = useQuery({ queryKey: ['task', task.id, 'deps', task.rowVersion], queryFn: () => typedRequest('get', '/api/v1/tasks/{id}/dependencies', { params: { id: task.id } }) })
   const openPanel = useItemPanel()
   const [adding, setAdding] = useState<'predecessor' | 'successor' | null>(null)
   const [chain, setChain] = useState(false)
   const [err, setErr] = useState<unknown>(null)
   const remove = async (e: Edge) => {
     setErr(null)
-    try { await del(`dependencies/${e.dependencyId}`); q.refetch(); onChanged() } catch (x) { setErr(x) }
+    try { await typedRequest('delete', '/api/v1/dependencies/{id}', { params: { id: e.dependencyId } }); q.refetch(); onChanged() } catch (x) { setErr(x) }
   }
   const list = (edges: Edge[], empty: string) => edges.length === 0 ? <p className="text-sm text-muted-foreground">{empty}</p> : (
     <ul className="divide-y rounded-md border">
@@ -347,12 +351,12 @@ function AddDependency({ task, direction, onClose }: { task: TaskRow; direction:
   const [choice, setChoice] = useState<string | null>(null)
   const [err, setErr] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
-  const q = useQuery({ queryKey: ['task', task.id, 'candidates', direction, term], queryFn: () => get<{ id: string; key: string; name: string; status: string; dueDate?: string; disabled: boolean; reason?: string }[]>(`tasks/${task.id}/dependency-candidates${qs({ q: term, direction })}`) })
+  const q = useQuery({ queryKey: ['task', task.id, 'candidates', direction, term], queryFn: () => typedRequest('get', '/api/v1/tasks/{id}/dependency-candidates', { params: { id: task.id }, query: { q: term, direction } }) })
   const save = async () => {
     setErr(null); setBusy(true)
     try {
-      const extra = { note: note || null, lagDays: Number(lag) || 0, type }
-      await post(`tasks/${task.id}/dependencies`, direction === 'predecessor' ? { predecessorTaskId: choice, ...extra } : { successorTaskId: choice, ...extra })
+      await typedRequest('post', '/api/v1/tasks/{id}/dependencies', { params: { id: task.id }, body: {
+        predecessorTaskId: direction === 'predecessor' ? choice : null, successorTaskId: direction === 'successor' ? choice : null, note: note || null, lagDays: Number(lag) || 0, type } })
       onClose(true)
     } catch (e) {
       const x = e as ApiError
@@ -391,7 +395,7 @@ function AddDependency({ task, direction, onClose }: { task: TaskRow; direction:
 
 /** Chain view: transitive predecessors above and successors below with their states (FR-DEP-07). */
 function ChainDialog({ task, onClose }: { task: TaskRow; onClose: () => void }) {
-  const q = useQuery({ queryKey: ['task', task.id, 'chain'], queryFn: () => get<{ task: TaskRow; depth: number; predecessors: { level: number; task: TaskRow }[]; successors: { level: number; task: TaskRow }[] }>(`tasks/${task.id}/chain`) })
+  const q = useQuery({ queryKey: ['task', task.id, 'chain'], queryFn: async () => (await typedRequest('get', '/api/v1/tasks/{id}/chain', { params: { id: task.id } })) as unknown as Chain })
   const openPanel = useItemPanel()
   const row = (r: TaskRow, level: number, self = false) => (
     <li key={`${r.id}-${level}`} className={cn('flex flex-wrap items-center gap-2 rounded-md px-3 py-1.5 text-sm', self && 'bg-accent font-medium shadow-[inset_3px_0_0_var(--primary)]')} style={{ marginLeft: Math.min(level, 8) * 14 }}>

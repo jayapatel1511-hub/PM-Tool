@@ -139,6 +139,30 @@ public sealed class DateContextTests(HubFactory f)
     }
 
     [Fact, Trait("Spec", "AC-INT-09")]
+    public async Task The_read_keeps_its_property_order_and_leaves_out_what_does_not_apply() // the typed answer must serialise to the bytes the app already reads (040-S15-Dependencies)
+    {
+        static string[] Keys(JsonNode? n) => [.. n!.AsObject().Select(x => x.Key)];
+        var p = await data.Project(); var due = new DateOnly(2026, 10, 15); var parent = await Deliverable(p, "D-ENVELOPE", due);
+        await f.DbAsync(async db => { (await db.Deliverables.SingleAsync(row => row.Id == parent.Id)).OwnerId = data.User(TestData.Alex); return await db.SaveChangesAsync(); });
+        var task = await data.NewTask(p.Id, extra: new { startDate = due, dueDate = due.AddDays(2) });
+        var child = await data.NewTask(p.Id, extra: new { deliverableId = parent.Id, dueDate = due.AddDays(2) });
+        await Flag(true, async () => {
+            var unassigned = await (await Admin.GetAsync(Url(ItemType.Task, task.G("id")))).Json();
+            Assert.Equal(new[] { "dates" }, Keys(unassigned)); // no assignee in scope and no deliverable: availability and tasks are left out, not null
+            Assert.Equal(new[] { "earliestStart", "earliestDue", "latestDue", "inconsistencies", "successors", "newInconsistencies" }, Keys(unassigned["dates"]));
+            var read = await (await Admin.GetAsync(Url(ItemType.Deliverable, parent.Id) + "?dueDate=2026-10-14")).Json();
+            Assert.Equal(new[] { "dates", "availability", "tasks" }, Keys(read));
+            Assert.Equal(new[] { "id", "key", "reason" }, Keys(read["tasks"]![0])); Assert.Equal(child.G("id"), read["tasks"]![0]!.G("id"));
+            var far = await Deliverable(p, "D-FAR", new DateOnly(2027, 9, 18)); // beyond the horizon the owner has no next available day, sent as null
+            await f.DbAsync(async db => { (await db.Deliverables.SingleAsync(row => row.Id == far.Id)).OwnerId = data.User(TestData.Alex); return await db.SaveChangesAsync(); });
+            var warning = (await (await Admin.GetAsync(Url(ItemType.Deliverable, far.Id))).Json())["availability"]!.AsArray().Single()!;
+            Assert.Equal(new[] { "date", "message", "nextAvailableDate" }, Keys(warning)); Assert.Null(warning["nextAvailableDate"]);
+            var cleared = await (await Admin.GetAsync(Url(ItemType.Deliverable, parent.Id) + "?dueDate=")).Json();
+            Assert.Equal(new[] { "dates", "availability", "tasks" }, Keys(cleared)); Assert.Empty(cleared["tasks"]!.AsArray()); Assert.IsType<JsonArray>(cleared["availability"]); // sent as empty arrays, not left out
+        });
+    }
+
+    [Fact, Trait("Spec", "AC-INT-09")]
     public async Task Missing_unreadable_deleted_and_unsupported_items_are_not_found()
     {
         var p = await data.Project(); var t = await data.NewTask(p.Id); var d = await Deliverable(p, "D-PRIVATE", null);

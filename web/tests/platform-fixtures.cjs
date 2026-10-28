@@ -7,6 +7,7 @@ const { viewList } = require('./views.fixture.cjs')
 const { coordinationOptions } = require('./reviews.fixture.cjs')
 const { myWork, myWorkPerson, myWorkProject } = require('./my-work.fixture.cjs')
 const { meView, referenceData } = require('./me.fixture.cjs')
+const { taskDependencies } = require('./dependencies.fixture.cjs')
 
 const taskId = '00000000-0000-0000-0000-000000000001'
 const panelIds = { milestone: '00000000-0000-0000-0000-000000000021', deliverable: '00000000-0000-0000-0000-000000000022', decision: '00000000-0000-0000-0000-000000000023', action: '00000000-0000-0000-0000-000000000024', risk: '00000000-0000-0000-0000-000000000025', issue: '00000000-0000-0000-0000-000000000026' }
@@ -67,7 +68,7 @@ function mockPlatformApi(page, { build, buildIds = ['mock-build-a', 'mock-build-
     else if (p === `projects/${project.id}/milestones` || p === `projects/${project.projectNumber}/milestones`) data = []
     else if (p === `projects/${project.id}/deliverables` || p === `projects/${project.projectNumber}/deliverables`) data = []
     else if (p === `projects/${project.id}/date-review` || p === `projects/${project.projectNumber}/date-review`) data = { window: null, tasks: [], deliverables: [] }
-    else if (p === `tasks/${taskId}/dependencies`) data = { dependsOn: [], blocks: [] }
+    else if (p === `tasks/${taskId}/dependencies`) data = taskDependencies()
     else if (p === 'projects') data = { items: [project], page: 1, pageSize: 200, totalCount: 1 }
     else if (p === 'admin/users') data = []
     else if (p === 'views') data = views

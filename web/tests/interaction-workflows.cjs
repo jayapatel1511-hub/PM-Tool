@@ -2,6 +2,7 @@
 const { chromium } = require('playwright')
 const { clientConfig } = require('./config.fixture.cjs')
 const assert = require('node:assert/strict')
+const { coordinationOptions, coordinationTask } = require('./reviews.fixture.cjs')
 const { startPreview, project: baseProject, task: baseTask, taskDetail, deliverableDetail, panelIds, mockPlatformApi } = require('./platform-fixtures.cjs')
 
 const port = Number(process.env.WORKFLOW_TEST_PORT || '19508')
@@ -47,7 +48,7 @@ const views = { allocations:[sharedView], staff: [{ id: viewId, name: 'Staff def
     else if (p === `projects/${projectId}/allocations/${allocationId}/confirmation-preview`) data = { id: allocationId, rowVersion: 1, days: [1, 2, 3, 4, 5].map((n, i) => ({ date: `2026-10-${19 + i}`, availableHours: 8, confirmedHours: 0, proposedHours: i < 2 ? 10 : 6, resultingHours: i < 2 ? 10 : 6, overByHours: i < 2 ? 2 : 0, dateVersion: 1 })) }
     else if (p === `projects/${projectId}/allocations/review-options`) data = []
     else if (p === `projects/${projectId}/open-roles`) data = []
-    else if (p === `projects/${projectId}/changes/options`) data = { actorId:personId,people:[{id:personId,displayName:'Alex Chen'}],disciplines:[{id:disciplineId,name:'Civil'}],sources:[],heads:[], tasks: [task], deliverables: [], manageDisciplineIds: [], canCreate: { changes: false, reviews: false }, canWrite: true }
+    else if (p === `projects/${projectId}/changes/options`) data = coordinationOptions({ actorId:personId,people:[{id:personId,displayName:'Alex Chen'}],disciplines:[{id:disciplineId,name:'Civil'}],sources:[],heads:[], tasks: [coordinationTask({ id: task.id, key: task.key, name: task.name, projectDisciplineId: task.projectDisciplineId, ownerId: task.assigneeId, rowVersion: task.rowVersion, status: task.status })], deliverables: [], manageDisciplineIds: [], canCreate: { changes: false, reviews: false }, canWrite: true })
     else if (p === `projects/${projectId}/tasks`) data = { items: [task], page: 1, pageSize: 200, totalCount: 1 }
     else if (p === `projects/${projectId}/deliverables` || p === `projects/${projectId}/milestones`) data = []
     else if (p === 'portfolio') data = { ownOnly: false, tiles: { active: 1, red: 0, yellow: 0, green: 1, submissions14: 0, overdueDecisions: 0 }, projects: [{ id: projectId, projectNumber: project.projectNumber, name: project.name, status: 'Active', client: { id: id(50), name: 'Synthetic client' }, pm: { id: personId, displayName: 'Alex Chen' }, officeId: null, office: null, phase: null, projectTypeId: null, projectType: null, health: { computed: 'Green', reported: 'Green' }, trend: [], overdueDeliverables: 0, overdueTasks: 0, blockedTasks: 0, decisionsOverdue: 0, highIssues: 0, attention: 0 }] }

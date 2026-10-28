@@ -1,4 +1,5 @@
 const { openRoles, contractExample } = require('./open-roles.fixture.cjs')
+const { coordinationOptions } = require('./reviews.fixture.cjs')
 const { personTasks, capacitySet } = require('./workload.fixture.cjs')
 // Resources workflow UI checks with mocked API responses (run after `npm run build`); API tests cover server rules.
 // Tuesday visual batch 1: a partial view never claims spare capacity (FR-CAP-06), proposed requests stay outside load
@@ -77,7 +78,7 @@ let server, browser;
     else if (p === 'projects/P-DEMO' || p === `projects/${pid}`) data = project
     else if (p.endsWith('/date-review')) data = { window: null, tasks: [], deliverables: [] }
     else if (p.endsWith('/follow')) data = { level: 'My items only', source: 'Assignment' }
-    else if (p === `projects/${pid}/changes/options`) data = { actorId: sam, canWrite: true, manageDisciplineIds: [], people: [{ id: jill, displayName: 'Jill Partial' }], disciplines: [], sources: [], heads: [], deliverables: [], tasks: [] }
+    else if (p === `projects/${pid}/changes/options`) data = coordinationOptions({ actorId: sam, canWrite: true, people: [{ id: jill, displayName: 'Jill Partial' }] })
     else if (p === `projects/${pid}/open-roles`) data = openRoles
     else if (p === `open-roles/${contractExample.id}` && route.request().method() === 'PATCH') { typedPatchHeaders = route.request().headers(); data = { ...contractExample, rowVersion: contractExample.rowVersion + 1 } }
     else if (p === `projects/${pid}/allocations`) data = { items: [allocation(proposed, 'Proposed'), allocation(confirmed, 'Confirmed')], page: 1, pageSize: 50, totalCount: 2 }

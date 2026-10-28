@@ -6,18 +6,19 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { get } from '@/lib/api'
+import type { components } from '@/gen/api'
+import { get, typedRequest } from '@/lib/api'
 import { addDays, fmtDate, today } from '@/lib/format'
 import { t, tv , runtimeText } from '@/lib/i18n'
 import { CoordinationRegister, type RegisterContext } from './CoordinationRegister'
-import { CommandForm, CoordStatus, FieldsCommand, PersonLabel, SelectField, SourceLink, discName, personName, peopleChoices, disciplineChoices, type RecordVersion, type SourceRevision, type FormField } from './CoordinationForms'
+import { CommandForm, CoordStatus, FieldsCommand, PersonLabel, SelectField, SourceLink, discName, personName, peopleChoices, disciplineChoices, type FormField } from './CoordinationForms'
 import { useSafeForm } from '@/hooks/drafts'
 
-type Package = RecordVersion & { title: string; key: string; purpose: string; projectDisciplineId: string; coordinatorId: string; status: string; currentRoundId: string; roundNumber: number; requiredForIssue: boolean }
-type Assignment = RecordVersion & { roundId: string; projectDisciplineId: string; reviewerId: string; dueDate: string; status: string; rationale?: string; decidedAt?: string }
-type Finding = RecordVersion & { roundId: string; sourceRevisionId: string; projectDisciplineId: string; resolverId: string; verifierId: string; text: string; severity: string; status: string; response?: string; evidenceUrl?: string; carriedFromId?: string; withdrawalAcknowledgedBy?: string; issueId?: string | null }
+type Schemas = components['schemas']
+type Assignment = Schemas['ReviewAssignmentRow']
+type Finding = Schemas['ReviewFindingRow']
 type ReviewIssue = { id: string; key: string; title: string; status: string; ownerName?: string }
-type Detail = { package: Package; rounds: { id: string; number: number; status: string; purpose: string; reason?: string; removalImpact?: string; startedAt?: string }[]; assignments: Assignment[]; findings: Finding[]; manifest: { roundId: string; sourceRevisionId: string; source: SourceRevision }[]; events: { id: string; findingId: string; action: string; reason: string; createdAt: string; createdBy: string }[]; actorId: string; canWrite: boolean; canCoordinate: boolean; canManage: boolean; canReassignVerifier: boolean }
+type Detail = Schemas['ReviewDetail']
 const reason: FormField = { name: 'reason', label: 'coord.reason', type: 'textarea' }
 const fieldset = 'space-y-1 rounded-lg border p-4', legend = 'px-1 text-sm font-semibold', check = 'mt-0.5 size-4 shrink-0 accent-(--primary)'
 const subhead = 'text-base/6 font-semibold'
@@ -46,7 +47,7 @@ function ReviewForm({ options: o, projectId, refresh, open, close, existing }: R
 }
 function ReviewDetail(c: RegisterContext & { id: string; close: () => void }) {
   const { options: o, projectId, number, id, close } = c
-  const q = useQuery({ queryKey: ['review-detail', projectId, id], queryFn: () => get<Detail>(`projects/${projectId}/reviews/${id}`) })
+  const q = useQuery({ queryKey: ['review-detail', projectId, id], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/reviews/{id}', { params: { projectId, id } }) })
   const issues = useQuery({ queryKey: ['review-issues', projectId], queryFn: () => get<ReviewIssue[]>(`projects/${projectId}/issues`), enabled: !!q.data?.findings.some(f => !!f.issueId), staleTime: 30_000 })
   const [roundId, setRoundId] = useState(''), [action, setAction] = useState<{ type: string; assignment?: Assignment; finding?: Finding } | null>(null)
   const d = q.data, p = d?.package, round = d?.rounds.find(r => r.id === (roundId || p?.currentRoundId)), current = round?.id === p?.currentRoundId
@@ -88,7 +89,7 @@ function ReviewDetail(c: RegisterContext & { id: string; close: () => void }) {
           </dl>
           {f.response && <p className="whitespace-pre-wrap">{f.response}</p>}{f.evidenceUrl && <a className="text-primary underline underline-offset-4" href={f.evidenceUrl} target="_blank" rel="noopener noreferrer">{t('coord.evidence')}</a>}{f.withdrawalAcknowledgedBy && <p>{t('review.withdrawalAcknowledged')}</p>}
           {live && <div className="flex flex-wrap gap-2">{f.resolverId === d.actorId && f.status === 'Open' && <Button size="sm" onClick={() => setAction({ type: 'Responded', finding: f })}>{t('review.respond')}</Button>}{f.verifierId === d.actorId && <>{f.status === 'Responded' && <><Button size="sm" onClick={() => setAction({ type: 'Verified Closed', finding: f })}>{t('review.verify')}</Button><Button size="sm" variant="outline" onClick={() => setAction({ type: 'Open', finding: f })}>{t('review.return')}</Button></>}{['Open', 'Responded'].includes(f.status) && <Button size="sm" variant="outline" onClick={() => setAction({ type: 'Withdrawn', finding: f })}>{t('review.withdraw')}</Button>}</>}{f.status === 'Withdrawn' && f.severity === 'Blocking' && !f.withdrawalAcknowledgedBy && p.coordinatorId === d.actorId && <Button size="sm" onClick={() => setAction({ type: 'acknowledgeWithdrawal', finding: f })}>{t('review.ackWithdrawal')}</Button>}{['Open', 'Responded'].includes(f.status) && <>{d.canCoordinate && <Button size="sm" variant="outline" onClick={() => setAction({ type: 'assignResolver', finding: f })}>{t('review.assignResolver')}</Button>}{d.canReassignVerifier && <Button size="sm" variant="outline" onClick={() => setAction({ type: 'assignVerifier', finding: f })}>{t('review.assignVerifier')}</Button>}</>}</div>}
-          <details className="border-t pt-2"><summary className="cursor-pointer py-1 font-medium">{t('coord.history')}</summary><ol className="mt-2 space-y-2">{d.events.filter(e => e.findingId === f.id).map(e => <li key={e.id}><span className="font-medium">{tv(e.action)}</span> · {personName(o, e.createdBy)} · <span className="tabular-nums">{new Date(e.createdAt).toLocaleString()}</span><p className="whitespace-pre-wrap">{e.reason}</p></li>)}</ol></details>
+          <details className="border-t pt-2"><summary className="cursor-pointer py-1 font-medium">{t('coord.history')}</summary><ol className="mt-2 space-y-2">{d.events.filter(e => e.findingId === f.id).map(e => <li key={e.id}><span className="font-medium">{tv(e.action)}</span> · {personName(o, e.createdBy ?? undefined)} · <span className="tabular-nums">{new Date(e.createdAt).toLocaleString()}</span><p className="whitespace-pre-wrap">{e.reason}</p></li>)}</ol></details>
         </article>)}
       </section>
     </div>}

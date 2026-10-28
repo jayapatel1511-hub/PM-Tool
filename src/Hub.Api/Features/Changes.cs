@@ -2,6 +2,7 @@ using System.Text.Json;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Api.Features;
@@ -21,6 +22,40 @@ public static class ChangeEndpoints
     public sealed record IssueImpactBody(Guid RequestId, int RowVersion, string Disposition, string Reason);
     public sealed record Filter(string? Q, string? Status, Guid? OwnerId, bool? Mine);
     static readonly Col[] Columns = Hub.Api.Records.ChangeNoticeRecord.ChangesColumns;
+
+    // The rows below mirror the stored rows, audit fields included, in the order each row has always been written (the OrgStructure `*Response` precedent).
+    /// An immutable registered source revision, as stored.
+    public sealed record SourceRevisionRow(Guid ProjectId, Guid? DeliverableId, int SourceRowVersion, string SourceIdentity, string SourceSystem, string ExternalIdentifier, string Issuer,
+        string Scope, DateTimeOffset? SourceCheckedAt, Guid? SupersedesId, Guid[] AuthorIds, string IdentityHash, string SourceKey, string Title, string Revision, string Url,
+        string AuditType, Guid? AuditProjectId, string? AuditKey, string? AuditName, DateTimeOffset CreatedAt, Guid? CreatedBy, DateTimeOffset UpdatedAt, Guid? UpdatedBy,
+        int RowVersion, Guid Id)
+    {
+        public static SourceRevisionRow From(SourceRevision r) => new(r.ProjectId, r.DeliverableId, r.SourceRowVersion, r.SourceIdentity, r.SourceSystem, r.ExternalIdentifier, r.Issuer,
+            r.Scope, r.SourceCheckedAt, r.SupersedesId, r.AuthorIds, r.IdentityHash, r.SourceKey, r.Title, r.Revision, r.Url, r.AuditType, r.AuditProjectId, r.AuditKey, r.AuditName,
+            r.CreatedAt, r.CreatedBy, r.UpdatedAt, r.UpdatedBy, r.RowVersion, r.Id);
+    }
+    /// The current revision of one source identity, as stored.
+    public sealed record SourceHeadRow(string Identity, Guid CurrentRevisionId, Guid OwnerId, Guid ProjectDisciplineId, string AuditType, Guid ProjectId, Guid? AuditProjectId,
+        string? AuditKey, string? AuditName, DateTimeOffset CreatedAt, Guid? CreatedBy, DateTimeOffset UpdatedAt, Guid? UpdatedBy, int RowVersion, Guid Id)
+    {
+        public static SourceHeadRow From(SourceHead h) => new(h.Identity, h.CurrentRevisionId, h.OwnerId, h.ProjectDisciplineId, h.AuditType, h.ProjectId, h.AuditProjectId,
+            h.AuditKey, h.AuditName, h.CreatedAt, h.CreatedBy, h.UpdatedAt, h.UpdatedBy, h.RowVersion, h.Id);
+    }
+    /// What the viewer may start: Changes needs a source they may publish, Reviews a discipline they manage.
+    public sealed record CoordinationCanCreate(bool Changes, bool Reviews);
+    public sealed record CoordinationPerson(Guid Id, string DisplayName);
+    public sealed record CoordinationDiscipline(Guid Id, string Name);
+    /// A registered revision with its source identity; Published and IsCurrent say whether it can be reviewed or adopted now.
+    public sealed record CoordinationSource(SourceRevisionRow Revision, string Identity, bool Published, bool IsCurrent);
+    /// A deliverable the viewer can name as a source; CanCommit and CanManage are the viewer's own rights over it.
+    public sealed record CoordinationDeliverable(Guid Id, string Key, string Name, Guid ProjectDisciplineId, Guid? OwnerId, int RowVersion, string? Revision, string? TransmittalUrl,
+        string Status, bool CanCommit, bool CanManage);
+    /// A task the viewer can name as work that adopts a source; CanCommit and CanManage are the viewer's own rights over it.
+    public sealed record CoordinationTask(Guid Id, string Key, string Name, Guid ProjectDisciplineId, Guid? OwnerId, int RowVersion, string Status, bool CanCommit, bool CanManage);
+    /// What the Changes and Reviews registers choose from, and what the viewer may create. Both options routes answer it.
+    public sealed record CoordinationOptions(Guid ActorId, bool CanWrite, Guid[] ManageDisciplineIds, CoordinationCanCreate CanCreate, IReadOnlyList<CoordinationPerson> People,
+        IReadOnlyList<CoordinationDiscipline> Disciplines, IReadOnlyList<CoordinationSource> Sources, IReadOnlyList<SourceHeadRow> Heads,
+        IReadOnlyList<CoordinationDeliverable> Deliverables, IReadOnlyList<CoordinationTask> Tasks);
     public static void Map(RouteGroupBuilder api)
     {
         api.MapGet("/projects/{projectId:guid}/changes", List);
@@ -247,7 +282,7 @@ public static class ChangeEndpoints
             }
             db.Audit.Note(a, reason: body.Rationale); await Notify(notify, p, c, new[] { a.OwnerId, a.ReviewerId, c.OwnerId }.OfType<Guid>()); return a;
         });
-    public static async Task<object> Options(Guid projectId, Access access, HubDb db)
+    public static async Task<Ok<CoordinationOptions>> Options(Guid projectId, Access access, HubDb db)
     {
         var (p, ctx) = await access.Project(projectId, false);
         var sources = await db.SourceRevisions.AsNoTracking().Where(r => r.ProjectId == p.Id).OrderByDescending(r => r.CreatedAt).ToListAsync();
@@ -259,14 +294,17 @@ public static class ChangeEndpoints
         var ownedDeliverables = await db.Deliverables.AsNoTracking().Where(d => d.ProjectId == p.Id && d.OwnerId == access.Actor.Id && d.Status != DeliverableStatus.Cancelled).Select(d => d.ProjectDisciplineId).ToListAsync();
         bool CanManage(Guid discipline) => managed.Contains(discipline);
         bool CanCommit(Guid? owner, Guid discipline) => owner is { } id && Permissions.NamedCoordinationAction(access.Actor, ctx, id).Ok || CanManage(discipline);
-        return new { ActorId = access.Me.Id, CanWrite = Permissions.CoordinationWrite(access.Actor, ctx).Ok,
-            ManageDisciplineIds = managed.ToArray(),
-            CanCreate = new { Changes = managed.Count > 0 || ownedDeliverables.Any(d => Permissions.PublishSource(access.Actor, ctx, d, access.Actor.Id).Ok) || heads.Any(h => Permissions.PublishSource(access.Actor, ctx, h.ProjectDisciplineId, h.OwnerId).Ok), Reviews = managed.Count > 0 },
-            People = await Coordination.People(db, p).OrderBy(u => u.DisplayName).Select(u => new { u.Id, u.DisplayName }).ToListAsync(),
-            Disciplines = await db.ProjectDisciplines.Where(d => d.ProjectId == p.Id && d.IsActive).Select(d => new { d.Id, d.Discipline!.Name }).ToListAsync(),
-            Sources = sources.Select(r => new { Revision = r, Identity = Coordination.Identity(r), Published = published.Contains(r.Id), IsCurrent = !heads.Any(h => h.Identity == Coordination.Identity(r)) || heads.Any(h => h.CurrentRevisionId == r.Id) }), Heads = heads,
-            Deliverables = (await db.Deliverables.Where(d => d.ProjectId == p.Id && d.Status != DeliverableStatus.Cancelled).Select(d => new { d.Id, d.Key, d.Name, d.ProjectDisciplineId, d.OwnerId, d.RowVersion, d.Revision, d.TransmittalUrl, d.Status }).ToListAsync()).Select(d => new { d.Id, d.Key, d.Name, d.ProjectDisciplineId, d.OwnerId, d.RowVersion, d.Revision, d.TransmittalUrl, d.Status, CanCommit = CanCommit(d.OwnerId, d.ProjectDisciplineId), CanManage = CanManage(d.ProjectDisciplineId) }),
-            Tasks = (await db.Tasks.Where(t => t.ProjectId == p.Id && t.Status != TaskStatuses.Cancelled).Select(t => new { t.Id, t.Key, t.Name, t.ProjectDisciplineId, OwnerId = t.AssigneeId, t.RowVersion, t.Status }).ToListAsync()).Select(t => new { t.Id, t.Key, t.Name, t.ProjectDisciplineId, t.OwnerId, t.RowVersion, t.Status, CanCommit = CanCommit(t.OwnerId, t.ProjectDisciplineId), CanManage = CanManage(t.ProjectDisciplineId) }) };
+        return TypedResults.Ok(new CoordinationOptions(access.Me.Id, Permissions.CoordinationWrite(access.Actor, ctx).Ok,
+            managed.ToArray(),
+            new CoordinationCanCreate(managed.Count > 0 || ownedDeliverables.Any(d => Permissions.PublishSource(access.Actor, ctx, d, access.Actor.Id).Ok) || heads.Any(h => Permissions.PublishSource(access.Actor, ctx, h.ProjectDisciplineId, h.OwnerId).Ok), managed.Count > 0),
+            await Coordination.People(db, p).OrderBy(u => u.DisplayName).Select(u => new CoordinationPerson(u.Id, u.DisplayName)).ToListAsync(),
+            await db.ProjectDisciplines.Where(d => d.ProjectId == p.Id && d.IsActive).Select(d => new CoordinationDiscipline(d.Id, d.Discipline!.Name)).ToListAsync(),
+            sources.Select(r => new CoordinationSource(SourceRevisionRow.From(r), Coordination.Identity(r), published.Contains(r.Id), !heads.Any(h => h.Identity == Coordination.Identity(r)) || heads.Any(h => h.CurrentRevisionId == r.Id))).ToList(),
+            heads.Select(SourceHeadRow.From).ToList(),
+            (await db.Deliverables.Where(d => d.ProjectId == p.Id && d.Status != DeliverableStatus.Cancelled).Select(d => new CoordinationDeliverable(d.Id, d.Key, d.Name, d.ProjectDisciplineId, d.OwnerId, d.RowVersion, d.Revision, d.TransmittalUrl, d.Status, false, false)).ToListAsync())
+                .Select(d => d with { CanCommit = CanCommit(d.OwnerId, d.ProjectDisciplineId), CanManage = CanManage(d.ProjectDisciplineId) }).ToList(),
+            (await db.Tasks.Where(t => t.ProjectId == p.Id && t.Status != TaskStatuses.Cancelled).Select(t => new CoordinationTask(t.Id, t.Key, t.Name, t.ProjectDisciplineId, t.AssigneeId, t.RowVersion, t.Status, false, false)).ToListAsync())
+                .Select(t => t with { CanCommit = CanCommit(t.OwnerId, t.ProjectDisciplineId), CanManage = CanManage(t.ProjectDisciplineId) }).ToList()));
     }
     static async Task<object> Uses(Guid projectId, string? targetType, Guid? targetId, int? page, int? pageSize, Access access, HubDb db)
     {

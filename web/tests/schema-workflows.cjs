@@ -7,6 +7,7 @@ const fs = require('node:fs')
 const path = require('node:path')
 const assert = require('node:assert/strict')
 const { commitmentRow, commitmentList, commitmentDetail } = require('./weekly-commitments.fixture.cjs')
+const { coordinationOptions } = require('./reviews.fixture.cjs')
 
 const port = process.env.PORT || '19505'
 const base = `http://127.0.0.1:${port}`
@@ -56,7 +57,7 @@ function responseFor(method, p, body, query) {
   if (p === `projects/${projectId}/weekly-commitments`) return commitmentList([])
   if (p === 'admin/organisation/import/preview' && failImport) return { __status: 422, detail: 'CSV header is missing email.' }
   if (p === 'admin/organisation/import/preview' && method === 'POST') return { rows: 2, changes: [{ kind: 'create', unitPath: 'Design / Water' }, { kind: 'unchanged', email: 'alex@hub.test' }], creates: 1, applied: false }
-  if (p === `projects/${projectId}/changes/options`) return { canWrite: false, people: [], disciplines: [], sources: [], heads: [], deliverables: [], tasks: [] }
+  if (p === `projects/${projectId}/changes/options`) return coordinationOptions({ canWrite: false })
   if (p === 'notifications/pulse' || p === 'me/notifications/pulse' || p === 'notifications/unread-count' || p === 'me/notifications/unread-count') return p.endsWith('count') ? { notifications: 0, following: 0 } : { stamp: '0' }
   if (p === 'me/work') return myWork
   if (p === 'tasks') return { items: [], page: 1, pageSize: 200, totalCount: 0 }

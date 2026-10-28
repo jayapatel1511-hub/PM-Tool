@@ -2,6 +2,7 @@ using System.Text.Json;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Api.Features;
@@ -18,6 +19,56 @@ public static class ReviewEndpoints
     public sealed record FindingAction(Guid RequestId, int RowVersion, string Action, string Reason, string? EvidenceUrl, Guid? OwnerId);
     public sealed record Filter(string? Q, string? Status, Guid? OwnerId, Guid? DisciplineId, bool? Mine);
     static readonly Col[] Columns = Hub.Api.Records.ReviewPackageRecord.ReviewsColumns;
+
+    /// One package of the register. OutstandingDisciplines counts the current round's reviews not yet approved, BlockingFindings its open blocking findings, and WaitingDays the whole days since the round started while it waits on reviewers.
+    public sealed record ReviewRow(Guid Id, string Key, string Title, string Status, Guid CoordinatorId, int RoundNumber, int RowVersion, int OutstandingDisciplines, int BlockingFindings, int WaitingDays);
+    /// An issue linked from a finding of a current round, with its page of the list.
+    public sealed record LinkedIssuePage(IReadOnlyList<DisciplineCoordinationEndpoints.CoordinationIssueRow> Items, int TotalCount, int Page, int PageSize);
+    sealed record Projection(ReviewPackage P, int OutstandingDisciplines, int BlockingFindings, DateTimeOffset? Started);
+    sealed record ManifestJoin(ReviewManifestItem Item, SourceRevision Source);
+
+    // The rows below mirror the stored rows, audit fields included, in the order each row has always been written (the OrgStructure `*Response` precedent).
+    public sealed record ReviewPackageRow(string Title, string Purpose, Guid CoordinatorId, Guid ProjectDisciplineId, string Status, Guid? CurrentRoundId, int RoundNumber, bool RequiredForIssue,
+        string AuditType, Guid? AuditProjectId, string? AuditKey, string? AuditName, Guid? AuditDisciplineId, Guid ProjectId, string Key, int Seq, DateTimeOffset? DeletedAt, Guid? DeletedBy,
+        DateTimeOffset CreatedAt, Guid? CreatedBy, DateTimeOffset UpdatedAt, Guid? UpdatedBy, int RowVersion, Guid Id)
+    {
+        public static ReviewPackageRow From(ReviewPackage p) => new(p.Title, p.Purpose, p.CoordinatorId, p.ProjectDisciplineId, p.Status, p.CurrentRoundId, p.RoundNumber, p.RequiredForIssue,
+            p.AuditType, p.AuditProjectId, p.AuditKey, p.AuditName, p.AuditDisciplineId, p.ProjectId, p.Key, p.Seq, p.DeletedAt, p.DeletedBy, p.CreatedAt, p.CreatedBy, p.UpdatedAt, p.UpdatedBy, p.RowVersion, p.Id);
+    }
+    public sealed record ReviewRoundRow(Guid PackageId, int Number, string Purpose, string? Reason, string? RemovalImpact, DateTimeOffset? StartedAt, string Status, string AuditType, Guid ProjectId,
+        Guid? AuditProjectId, string? AuditKey, string? AuditName, DateTimeOffset CreatedAt, Guid? CreatedBy, DateTimeOffset UpdatedAt, Guid? UpdatedBy, int RowVersion, Guid Id)
+    {
+        public static ReviewRoundRow From(ReviewRound r) => new(r.PackageId, r.Number, r.Purpose, r.Reason, r.RemovalImpact, r.StartedAt, r.Status, r.AuditType, r.ProjectId,
+            r.AuditProjectId, r.AuditKey, r.AuditName, r.CreatedAt, r.CreatedBy, r.UpdatedAt, r.UpdatedBy, r.RowVersion, r.Id);
+    }
+    /// One discipline's review of a round: who reviews it, by when, and what they decided.
+    public sealed record ReviewAssignmentRow(Guid RoundId, Guid ProjectDisciplineId, Guid ReviewerId, DateOnly DueDate, string Status, string? Rationale, DateTimeOffset? DecidedAt, Guid? DecidedBy,
+        string AuditType, Guid ProjectId, Guid? AuditProjectId, string? AuditKey, string? AuditName, DateTimeOffset CreatedAt, Guid? CreatedBy, DateTimeOffset UpdatedAt, Guid? UpdatedBy, int RowVersion, Guid Id)
+    {
+        public static ReviewAssignmentRow From(DisciplineReview a) => new(a.RoundId, a.ProjectDisciplineId, a.ReviewerId, a.DueDate, a.Status, a.Rationale, a.DecidedAt, a.DecidedBy,
+            a.AuditType, a.ProjectId, a.AuditProjectId, a.AuditKey, a.AuditName, a.CreatedAt, a.CreatedBy, a.UpdatedAt, a.UpdatedBy, a.RowVersion, a.Id);
+    }
+    public sealed record ReviewFindingRow(Guid PackageId, Guid RoundId, Guid? CarriedFromId, Guid? IssueId, Guid SourceRevisionId, Guid ProjectDisciplineId, Guid OriginatorId, Guid ResolverId,
+        Guid VerifierId, string Text, string Severity, string Status, string? Response, string? EvidenceUrl, Guid? WithdrawalAcknowledgedBy, string AuditType, string? AuditName, Guid ProjectId,
+        Guid? AuditProjectId, string? AuditKey, DateTimeOffset CreatedAt, Guid? CreatedBy, DateTimeOffset UpdatedAt, Guid? UpdatedBy, int RowVersion, Guid Id)
+    {
+        public static ReviewFindingRow From(ReviewFinding f) => new(f.PackageId, f.RoundId, f.CarriedFromId, f.IssueId, f.SourceRevisionId, f.ProjectDisciplineId, f.OriginatorId, f.ResolverId,
+            f.VerifierId, f.Text, f.Severity, f.Status, f.Response, f.EvidenceUrl, f.WithdrawalAcknowledgedBy, f.AuditType, f.AuditName, f.ProjectId,
+            f.AuditProjectId, f.AuditKey, f.CreatedAt, f.CreatedBy, f.UpdatedAt, f.UpdatedBy, f.RowVersion, f.Id);
+    }
+    /// One step of a finding's history.
+    public sealed record ReviewFindingEventRow(Guid FindingId, string Action, string Reason, string? EvidenceUrl, string AuditType, Guid ProjectId, Guid? AuditProjectId, string? AuditKey,
+        string? AuditName, DateTimeOffset CreatedAt, Guid? CreatedBy, DateTimeOffset UpdatedAt, Guid? UpdatedBy, int RowVersion, Guid Id)
+    {
+        public static ReviewFindingEventRow From(FindingEvent e) => new(e.FindingId, e.Action, e.Reason, e.EvidenceUrl, e.AuditType, e.ProjectId, e.AuditProjectId, e.AuditKey,
+            e.AuditName, e.CreatedAt, e.CreatedBy, e.UpdatedAt, e.UpdatedBy, e.RowVersion, e.Id);
+    }
+    /// A source revision a round reviews, with the authors captured when the round was built.
+    public sealed record ReviewManifestRow(Guid Id, Guid RoundId, Guid DeliverableId, Guid SourceRevisionId, Guid[] AuthorIds, ChangeEndpoints.SourceRevisionRow Source);
+    /// One package as the detail panel reads it, with every round, assignment, finding and event. The can flags are the viewer's own rights.
+    public sealed record ReviewDetail(ReviewPackageRow Package, IReadOnlyList<ReviewRoundRow> Rounds, IReadOnlyList<ReviewAssignmentRow> Assignments, IReadOnlyList<ReviewFindingRow> Findings,
+        IReadOnlyList<ReviewManifestRow> Manifest, IReadOnlyList<ReviewFindingEventRow> Events, IReadOnlyList<Guid> EligiblePeople, Guid ActorId, bool CanCoordinate, bool CanManage,
+        bool CanWrite, bool CanReassignVerifier);
 
     public static void Map(RouteGroupBuilder api)
     {
@@ -322,16 +373,17 @@ public static class ReviewEndpoints
         if (f.Mine == true) q = q.Where(p => p.CoordinatorId == actor || db.DisciplineReviews.Any(a => a.RoundId == p.CurrentRoundId && a.ReviewerId == actor));
         return q.OrderByDescending(p => p.UpdatedAt).ThenBy(p => p.Seq);
     }
-    static async Task<List<object>> Rows(HubDb db, IQueryable<ReviewPackage> query, DateTimeOffset now)
+    static async Task<List<ReviewRow>> Rows(HubDb db, IQueryable<ReviewPackage> query, DateTimeOffset now)
     {
-        var rows = await query.Select(p => new { P = p, OutstandingDisciplines = db.DisciplineReviews.Count(a => a.RoundId == p.CurrentRoundId && a.Status != DisciplineReviewStatus.Approved),
-            BlockingFindings = db.ReviewFindings.Count(f => f.RoundId == p.CurrentRoundId && f.Severity == "Blocking" && f.Status != FindingStatus.VerifiedClosed && (f.Status != FindingStatus.Withdrawn || f.Severity == "Blocking" && f.WithdrawalAcknowledgedBy == null)),
-            Started = db.ReviewRounds.Where(r => r.Id == p.CurrentRoundId).Select(r => r.StartedAt).FirstOrDefault() }).ToListAsync();
-        return rows.Select(x => (object)new { x.P.Id, x.P.Key, x.P.Title, x.P.Status, x.P.CoordinatorId, x.P.RoundNumber, x.P.RowVersion, x.OutstandingDisciplines, x.BlockingFindings, WaitingDays = x.Started is { } start && (x.P.Status == ReviewStatus.InReview || x.P.Status == ReviewStatus.ChangesRequired) ? Math.Max(0, (int)(now - start).TotalDays) : 0 }).ToList();
+        var rows = await query.Select(p => new Projection(p, db.DisciplineReviews.Count(a => a.RoundId == p.CurrentRoundId && a.Status != DisciplineReviewStatus.Approved),
+            db.ReviewFindings.Count(f => f.RoundId == p.CurrentRoundId && f.Severity == "Blocking" && f.Status != FindingStatus.VerifiedClosed && (f.Status != FindingStatus.Withdrawn || f.Severity == "Blocking" && f.WithdrawalAcknowledgedBy == null)),
+            db.ReviewRounds.Where(r => r.Id == p.CurrentRoundId).Select(r => r.StartedAt).FirstOrDefault())).ToListAsync();
+        return rows.Select(x => new ReviewRow(x.P.Id, x.P.Key, x.P.Title, x.P.Status, x.P.CoordinatorId, x.P.RoundNumber, x.P.RowVersion, x.OutstandingDisciplines, x.BlockingFindings,
+            x.Started is { } start && (x.P.Status == ReviewStatus.InReview || x.P.Status == ReviewStatus.ChangesRequired) ? Math.Max(0, (int)(now - start).TotalDays) : 0)).ToList();
     }
-    static async Task<object> List(Guid projectId, [AsParameters] Filter filter, int? page, int? pageSize, Access access, HubDb db, TimeProvider clock)
-    { await access.Project(projectId, false); var q = Query(db, projectId, filter, access.Me.Id); var (pg, size) = Http.Paging(page, pageSize); return new Page<object>(await Rows(db, q.Skip((pg - 1) * size).Take(size), clock.GetUtcNow()), pg, size, await q.CountAsync()); }
-    static async Task<object> LinkedIssues(Guid projectId, Guid? disciplineId, Guid? ownerId, int? page, int? pageSize, Access access, HubDb db)
+    static async Task<Ok<Page<ReviewRow>>> List(Guid projectId, [AsParameters] Filter filter, int? page, int? pageSize, Access access, HubDb db, TimeProvider clock)
+    { await access.Project(projectId, false); var q = Query(db, projectId, filter, access.Me.Id); var (pg, size) = Http.Paging(page, pageSize); return TypedResults.Ok(new Page<ReviewRow>(await Rows(db, q.Skip((pg - 1) * size).Take(size), clock.GetUtcNow()), pg, size, await q.CountAsync())); }
+    static async Task<Ok<LinkedIssuePage>> LinkedIssues(Guid projectId, Guid? disciplineId, Guid? ownerId, int? page, int? pageSize, Access access, HubDb db)
     {
         await access.Project(projectId, false);
         var q = db.Issues.AsNoTracking().Where(i => i.ProjectId == projectId &&
@@ -343,22 +395,24 @@ public static class ReviewEndpoints
         var (pg, size) = Http.Paging(page, pageSize);
         var total = await q.CountAsync();
         var rows = await q.OrderBy(i => i.Key).Skip((pg - 1) * size).Take(size)
-            .Select(i => new { i.Id, i.Key, i.Title, i.Status, i.OwnerId,
-                OwnerName = db.Users.Where(u => u.Id == i.OwnerId).Select(u => u.DisplayName).FirstOrDefault(),
-                i.ProjectDisciplineId }).ToListAsync();
-        return new { Items = rows, TotalCount = total, Page = pg, PageSize = size };
+            .Select(i => new DisciplineCoordinationEndpoints.CoordinationIssueRow(i.Id, i.Key, i.Title, i.Status, i.OwnerId,
+                db.Users.Where(u => u.Id == i.OwnerId).Select(u => u.DisplayName).FirstOrDefault(), i.ProjectDisciplineId)).ToListAsync();
+        return TypedResults.Ok(new LinkedIssuePage(rows, total, pg, size));
     }
-    static async Task<object> Options(Guid projectId, Access access, HubDb db) => await ChangeEndpoints.Options(projectId, access, db);
-    static async Task<object> Detail(Guid projectId, Guid id, Access access, HubDb db)
+    static Task<Ok<ChangeEndpoints.CoordinationOptions>> Options(Guid projectId, Access access, HubDb db) => ChangeEndpoints.Options(projectId, access, db);
+    static async Task<Ok<ReviewDetail>> Detail(Guid projectId, Guid id, Access access, HubDb db)
     {
         var (project, ctx) = await access.Project(projectId, false); var p = await Load(db, projectId, id);
         var rounds = await db.ReviewRounds.Where(r => r.PackageId == id).OrderByDescending(r => r.Number).ToListAsync(); var ids = rounds.Select(r => r.Id).ToArray();
-        return new { Package = p, Rounds = rounds, Assignments = await db.DisciplineReviews.Where(a => ids.Contains(a.RoundId)).ToListAsync(), Findings = await db.ReviewFindings.Where(f => f.PackageId == id).OrderBy(f => f.CreatedAt).ThenBy(f => f.Id).ToListAsync(),
-            Manifest = await db.ReviewManifestItems.Where(m => ids.Contains(m.RoundId)).Join(db.SourceRevisions, m => m.SourceRevisionId, s => s.Id, (m, s) => new { m.Id, m.RoundId, m.DeliverableId, m.SourceRevisionId, m.AuthorIds, Source = s }).ToListAsync(),
-            Events = await db.FindingEvents.Where(e => db.ReviewFindings.Any(f => f.Id == e.FindingId && f.PackageId == id)).OrderBy(e => e.CreatedAt).ThenBy(e => e.Id).ToListAsync(),
-            EligiblePeople = await Coordination.People(db, project).Select(u => u.Id).ToListAsync(), ActorId = access.Me.Id,
-            CanCoordinate = Permissions.CoordinateReview(access.Actor, ctx, p.ProjectDisciplineId, p.CoordinatorId).Ok, CanManage = Permissions.ManageCoordination(access.Actor, ctx, p.ProjectDisciplineId).Ok,
-            CanWrite = Permissions.CoordinationWrite(access.Actor, ctx).Ok, CanReassignVerifier = Permissions.ManageTeam(access.Actor, ctx).Ok };
+        var assignments = await db.DisciplineReviews.Where(a => ids.Contains(a.RoundId)).ToListAsync();
+        var findings = await db.ReviewFindings.Where(f => f.PackageId == id).OrderBy(f => f.CreatedAt).ThenBy(f => f.Id).ToListAsync();
+        var manifest = await db.ReviewManifestItems.Where(m => ids.Contains(m.RoundId)).Join(db.SourceRevisions, m => m.SourceRevisionId, s => s.Id, (m, s) => new ManifestJoin(m, s)).ToListAsync();
+        var events = await db.FindingEvents.Where(e => db.ReviewFindings.Any(f => f.Id == e.FindingId && f.PackageId == id)).OrderBy(e => e.CreatedAt).ThenBy(e => e.Id).ToListAsync();
+        return TypedResults.Ok(new ReviewDetail(ReviewPackageRow.From(p), rounds.Select(ReviewRoundRow.From).ToList(), assignments.Select(ReviewAssignmentRow.From).ToList(), findings.Select(ReviewFindingRow.From).ToList(),
+            manifest.Select(x => new ReviewManifestRow(x.Item.Id, x.Item.RoundId, x.Item.DeliverableId, x.Item.SourceRevisionId, x.Item.AuthorIds, ChangeEndpoints.SourceRevisionRow.From(x.Source))).ToList(),
+            events.Select(ReviewFindingEventRow.From).ToList(), await Coordination.People(db, project).Select(u => u.Id).ToListAsync(), access.Me.Id,
+            Permissions.CoordinateReview(access.Actor, ctx, p.ProjectDisciplineId, p.CoordinatorId).Ok, Permissions.ManageCoordination(access.Actor, ctx, p.ProjectDisciplineId).Ok,
+            Permissions.CoordinationWrite(access.Actor, ctx).Ok, Permissions.ManageTeam(access.Actor, ctx).Ok));
     }
     static async Task<IResult> ExportRows(Guid projectId, [AsParameters] Filter filter, string? format, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {

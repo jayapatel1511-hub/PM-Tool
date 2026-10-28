@@ -3,6 +3,7 @@ const { spawn } = require('node:child_process')
 const assert = require('node:assert/strict')
 const { chromium } = require('playwright')
 const { clientConfig } = require('./config.fixture.cjs')
+const { coordinationOptions } = require('./reviews.fixture.cjs')
 
 const taskId = '00000000-0000-0000-0000-000000000001'
 const panelIds = { milestone: '00000000-0000-0000-0000-000000000021', deliverable: '00000000-0000-0000-0000-000000000022', decision: '00000000-0000-0000-0000-000000000023', action: '00000000-0000-0000-0000-000000000024', risk: '00000000-0000-0000-0000-000000000025', issue: '00000000-0000-0000-0000-000000000026' }
@@ -54,7 +55,7 @@ function mockPlatformApi(page, { build, buildIds = ['mock-build-a', 'mock-build-
     else if (p === `risks/${panelIds.risk}`) data = riskDetail
     else if (p === `issues/${panelIds.issue}`) data = issueDetail
     else if (p === `projects/${project.id}/external-parties`) data = []
-    else if (p === `projects/${project.id}/changes/options`) data = { actorId: me.id, canWrite: false, manageDisciplineIds: [], people: [], disciplines: [], sources: [], heads: [], deliverables: [], tasks: [] }
+    else if (p === `projects/${project.id}/changes/options`) data = coordinationOptions({ actorId: me.id, canWrite: false })
     else if (p === `issues/${panelIds.issue}/locations`) data = []
     else if (p === `issues/${panelIds.issue}/documents`) data = []
     else if (p === `issues/${panelIds.issue}/verification`) data = []

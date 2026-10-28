@@ -39,8 +39,8 @@ export function RegisterCards<T extends { id: string }>({ groups, columns, curre
 
 /** The shared register list (§47.7, FR-REC-14): a table from `md` up, cards below it, optional group rows, one selected row.
  *  A list with its own phone cards (or none), group row or click-through row passes `cards`, `groupRow` or `onRowClick`;
- *  `oneBody` keeps the groups in a single `<tbody>`. */
-export function DataTable<T extends { id: string }>({ table, rows, loading, empty, current, groupBy, caption, label, cards, wide, groupRow, onRowClick, oneBody, flush }: {
+ *  `oneBody` keeps the groups in a single `<tbody>`; `detail` adds a full-width row under a row that has one (an expanded milestone). */
+export function DataTable<T extends { id: string }>({ table, rows, loading, empty, current, groupBy, caption, label, cards, wide, groupRow, onRowClick, oneBody, flush, detail }: {
   table: { visible: Column<T>[]; header: (c: Column<T>) => ReactElement; cell: (c: Column<T>, r: T) => ReactNode }; rows: T[]; loading: boolean; empty: ReactNode
   current: (r: T) => boolean; groupBy?: (r: T) => string; caption: string
   /** Names the scroll region (role region) when the screen's table had one. */ label?: string
@@ -50,6 +50,7 @@ export function DataTable<T extends { id: string }>({ table, rows, loading, empt
   groupRow?: (label: string, count: number, span: number) => ReactElement; onRowClick?: (r: T) => void; oneBody?: boolean
   /** The list sits inside a bordered section: no border of its own, no phone cards and no extra Tab stop (a scrolling table at every width). */
   flush?: boolean
+  detail?: (r: T) => ReactNode
 }) {
   const box = (node: ReactNode) => flush ? node : <div className="rounded-lg border bg-card">{node}</div>
   if (loading) return box(<Loading rows={flush ? 4 : 6} />)
@@ -62,7 +63,10 @@ export function DataTable<T extends { id: string }>({ table, rows, loading, empt
   }
   const body = groups.map((group, index) => <Fragment key={`${index}-${group.label}`}>
     {groupBy && (groupRow?.(group.label, group.items.length, table.visible.length) ?? <GroupRow span={table.visible.length} label={group.label} count={group.items.length} />)}
-    {group.items.map((r) => <tr key={r.id} className={cn('border-t hover:bg-muted', onRowClick && 'cursor-pointer', current(r) && SELECTED_ROW)} onClick={onRowClick && (() => onRowClick(r))}>{table.visible.map((c) => table.cell(c, r))}</tr>)}
+    {group.items.map((r) => { const more = detail?.(r); return <Fragment key={r.id}>
+      <tr className={cn('border-t hover:bg-muted', onRowClick && 'cursor-pointer', current(r) && SELECTED_ROW)} onClick={onRowClick && (() => onRowClick(r))}>{table.visible.map((c) => table.cell(c, r))}</tr>
+      {more && <tr className="border-t bg-muted"><td colSpan={table.visible.length} className="py-3 pl-14 pr-(--cell-px)">{more}</td></tr>}
+    </Fragment> })}
   </Fragment>)
   const grid = (
     <table className="w-full text-sm">

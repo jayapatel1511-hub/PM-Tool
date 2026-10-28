@@ -2010,144 +2010,19 @@
       },
       "AnonymousTypeOfstringAndstringAndstring": {
         "properties": {
-          "header": {
+          "apiScope": {
             "type": [
               "null",
               "string"
             ]
           },
-          "path": {
+          "clientId": {
             "type": [
               "null",
               "string"
             ]
           },
-          "type": {
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        },
-        "required": [
-          "path",
-          "header",
-          "type"
-        ],
-        "type": "object"
-      },
-      "AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring": {
-        "properties": {
-          "code": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "columns": {
-            "items": {
-              "$ref": "#/components/schemas/AnonymousTypeOfstringAndstringAndstring"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "itemType": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "listLink": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "parameters": {
-            "items": {
-              "$ref": "#/components/schemas/AnonymousTypeOfstringAndstring"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "rows": {
-            "$ref": "#/components/schemas/JsonArray"
-          },
-          "title": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "total": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          },
-          "totalIsLowerBound": {
-            "type": "boolean"
-          },
-          "truncated": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "code",
-          "title",
-          "itemType",
-          "columns",
-          "rows",
-          "total",
-          "totalIsLowerBound",
-          "truncated",
-          "listLink",
-          "parameters"
-        ],
-        "type": "object"
-      },
-      "AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstring": {
-        "properties": {
-          "code": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "columns": {
-            "items": {
-              "$ref": "#/components/schemas/AnonymousTypeOfstringAndstringAndstring"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "description": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "itemType": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "params": {
-            "items": {
-              "$ref": "#/components/schemas/AnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "title": {
+          "tenantId": {
             "type": [
               "null",
               "string"
@@ -2155,12 +2030,9 @@
           }
         },
         "required": [
-          "code",
-          "title",
-          "description",
-          "params",
-          "itemType",
-          "columns"
+          "clientId",
+          "tenantId",
+          "apiScope"
         ],
         "type": "object"
       },
@@ -2199,51 +2071,6 @@
           "displayName",
           "jobTitle",
           "roles"
-        ],
-        "type": "object"
-      },
-      "AnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring": {
-        "properties": {
-          "default": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "key": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "label": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "options": {
-            "items": {
-              "$ref": "#/components/schemas/AnonymousTypeOfstringAndstring"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "type": {
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        },
-        "required": [
-          "key",
-          "label",
-          "type",
-          "default",
-          "options"
         ],
         "type": "object"
       },
@@ -12384,6 +12211,192 @@
           "documentRowVersion",
           "document",
           "reason"
+        ],
+        "type": "object"
+      },
+      "ReportAppliedParameter": {
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "label",
+          "value"
+        ],
+        "type": "object"
+      },
+      "ReportColumn": {
+        "properties": {
+          "header": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "header",
+          "type"
+        ],
+        "type": "object"
+      },
+      "ReportListItem": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "columns": {
+            "items": {
+              "$ref": "#/components/schemas/ReportColumn"
+            },
+            "type": "array"
+          },
+          "description": {
+            "type": "string"
+          },
+          "itemType": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "params": {
+            "items": {
+              "$ref": "#/components/schemas/ReportParamView"
+            },
+            "type": "array"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "title",
+          "description",
+          "params",
+          "itemType",
+          "columns"
+        ],
+        "type": "object"
+      },
+      "ReportOption": {
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value",
+          "label"
+        ],
+        "type": "object"
+      },
+      "ReportParamView": {
+        "properties": {
+          "default": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "options": {
+            "items": {
+              "$ref": "#/components/schemas/ReportOption"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "type",
+          "default",
+          "options"
+        ],
+        "type": "object"
+      },
+      "ReportView": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "columns": {
+            "items": {
+              "$ref": "#/components/schemas/ReportColumn"
+            },
+            "type": "array"
+          },
+          "itemType": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "listLink": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "parameters": {
+            "items": {
+              "$ref": "#/components/schemas/ReportAppliedParameter"
+            },
+            "type": "array"
+          },
+          "rows": {
+            "$ref": "#/components/schemas/JsonArray"
+          },
+          "title": {
+            "type": "string"
+          },
+          "total": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "totalIsLowerBound": {
+            "type": "boolean"
+          },
+          "truncated": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "code",
+          "title",
+          "itemType",
+          "columns",
+          "rows",
+          "total",
+          "totalIsLowerBound",
+          "truncated",
+          "listLink",
+          "parameters"
         ],
         "type": "object"
       },
@@ -33056,7 +33069,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstring"
+                    "$ref": "#/components/schemas/ReportListItem"
                   },
                   "type": "array"
                 }
@@ -33087,7 +33100,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring"
+                  "$ref": "#/components/schemas/ReportView"
                 }
               }
             },

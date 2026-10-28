@@ -13590,7 +13590,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstring"][];
+                        "application/json": components["schemas"]["ReportListItem"][];
                     };
                 };
             };
@@ -13627,7 +13627,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring"];
+                        "application/json": components["schemas"]["ReportView"];
                     };
                 };
             };
@@ -16498,43 +16498,15 @@ export interface components {
             source: null | string;
         };
         AnonymousTypeOfstringAndstringAndstring: {
-            header: null | string;
-            path: null | string;
-            type: null | string;
-        };
-        AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring: {
-            code: null | string;
-            columns: null | components["schemas"]["AnonymousTypeOfstringAndstringAndstring"][];
-            itemType: null | string;
-            listLink: null | string;
-            parameters: null | components["schemas"]["AnonymousTypeOfstringAndstring"][];
-            rows: components["schemas"]["JsonArray"];
-            title: null | string;
-            /** Format: int32 */
-            total: number;
-            totalIsLowerBound: boolean;
-            truncated: boolean;
-        };
-        AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstring: {
-            code: null | string;
-            columns: null | components["schemas"]["AnonymousTypeOfstringAndstringAndstring"][];
-            description: null | string;
-            itemType: null | string;
-            params: null | components["schemas"]["AnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring"][];
-            title: null | string;
+            apiScope: null | string;
+            clientId: null | string;
+            tenantId: null | string;
         };
         AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfstring: {
             displayName: null | string;
             email: null | string;
             jobTitle: null | string;
             roles: null | string[];
-        };
-        AnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring: {
-            default: null | string;
-            key: null | string;
-            label: null | string;
-            options: null | components["schemas"]["AnonymousTypeOfstringAndstring"][];
-            type: null | string;
         };
         ApplicabilityBody: {
             applies: boolean;
@@ -19167,6 +19139,47 @@ export interface components {
             requestId: string;
             /** Format: int32 */
             rowVersion: number;
+        };
+        ReportAppliedParameter: {
+            label: string;
+            value: string;
+        };
+        ReportColumn: {
+            header: string;
+            path: string;
+            type: string;
+        };
+        ReportListItem: {
+            code: string;
+            columns: components["schemas"]["ReportColumn"][];
+            description: string;
+            itemType: null | string;
+            params: components["schemas"]["ReportParamView"][];
+            title: string;
+        };
+        ReportOption: {
+            label: string;
+            value: string;
+        };
+        ReportParamView: {
+            default: null | string;
+            key: string;
+            label: string;
+            options: null | components["schemas"]["ReportOption"][];
+            type: string;
+        };
+        ReportView: {
+            code: string;
+            columns: components["schemas"]["ReportColumn"][];
+            itemType: null | string;
+            listLink: null | string;
+            parameters: components["schemas"]["ReportAppliedParameter"][];
+            rows: components["schemas"]["JsonArray"];
+            title: string;
+            /** Format: int32 */
+            total: number;
+            totalIsLowerBound: boolean;
+            truncated: boolean;
         };
         ResolveConflictBody: {
             /** Format: int32 */

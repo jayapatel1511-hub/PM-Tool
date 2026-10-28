@@ -4,6 +4,7 @@ using System.Text.Json.Nodes;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Api.Features;
@@ -22,6 +23,23 @@ public sealed record Col(string Path, string Header, string Type = "text", strin
 public static partial class ReportEndpoints
 {
     public sealed record Param(string Key, string Type, string[]? Options = null, string? Default = null);
+    /// A column as the screen and the export header show it: its path into the row, its resolved title and its type.
+    public sealed record ReportColumn(string Path, string Header, string Type);
+    public sealed record ReportOption(string Value, string Label);
+    public sealed record ReportParamView(string Key, string Label, string Type, string? Default, IReadOnlyList<ReportOption>? Options);
+    /// One report in the catalogue: what it asks for and the columns it shows when it asks for nothing more.
+    public sealed record ReportListItem(string Code, string Title, string Description, IReadOnlyList<ReportParamView> Params, string? ItemType, IReadOnlyList<ReportColumn> Columns);
+    /// A parameter as the server applied it, in words, so the result states what it covers.
+    public sealed record ReportAppliedParameter(string Label, string Value);
+    /// One report run. The rows differ by report, so `Rows` stays an array of free-form objects read through `Columns`.
+    public sealed record ReportView(string Code, string Title, string? ItemType, IReadOnlyList<ReportColumn> Columns, JsonArray Rows, int Total, bool TotalIsLowerBound, bool Truncated,
+        string? ListLink, IReadOnlyList<ReportAppliedParameter> Parameters);
+    sealed record TaskHoursRow(DateOnly WorkDate, string Person, string ProjectNumber, string TaskKey, string TaskName, decimal Hours, string? Note, string ItemType, Guid Id);
+    sealed record HealthRow(string ProjectNumber, string Name, DateOnly Date, string Computed, string Reported);
+    sealed record PilotWeekRow(DateOnly WeekOf, int Projects, int Reviewed, int? Unassigned, int? NoDueDate, int? Blocked, int People, int Updaters, int? UpdatersPct);
+    sealed record PickupRow(string Project, string Discipline, DateTimeOffset Offered, DateTimeOffset? Closed, string CloseCause, int DaysOpen);
+    sealed record MissReportRow(string? Project, string? Discipline, string? Category, int Count);
+    sealed record StaffRow(string Person, string ProjectNumber, string ProjectName, string ProjectStatus, string Roles, string? PrimaryDiscipline, DateOnly AddedAt, string? AddedBy, int OpenTasks, int OverdueTasks);
     sealed record Def(string Code, Param[] Params, Col[] Cols, Func<Ctx, Task<Result>> Run, Func<Actor, bool>? Allowed = null, string? Flag = null);
     sealed record Result(JsonArray Rows, string? ListLink = null, Col[]? Columns = null);
 
@@ -115,30 +133,24 @@ public static partial class ReportEndpoints
 
     public static void Map(RouteGroupBuilder api)
     {
-        api.MapGet("/reports", async (CurrentUser me, HubDb db, SettingsStore store) =>
+        api.MapGet("/reports", async Task<Ok<ReportListItem[]>> (CurrentUser me, HubDb db, SettingsStore store) =>
         {
             var settings = await store.Get(db);
             var unitNames = settings.IsFlagOn("org_structure") ? await db.Set<OrgUnit>().AsNoTracking().OrderBy(u => u.Name).ToDictionaryAsync(u => u.Id.ToString(), u => u.Name) : new Dictionary<string, string>();
             var unitRead = await PeopleScope.ReadsAsUnitLeader(db, settings, me.Actor);
-            return All.Where(r => ((r.Allowed?.Invoke(me.Actor) ?? true) || unitRead && (UnitReadableReport(r.Code))) && (r.Flag == null || settings.IsFlagOn(r.Flag))).Select(r => new
-        {
-            r.Code, Title = Text.Get($"report.{r.Code}"), Description = Text.Get($"report.{r.Code}.about"),
-            Params = ReportParams(r, settings, unitNames.Keys.ToArray()).Select(p => new { p.Key, Label = Text.Get($"param.{p.Key}"), p.Type, Default = p.Key == "weeks" && r.Flag == "capacity_reports" ? settings.PlanningHorizonWeeks.ToString(CultureInfo.InvariantCulture) : p.Default,
-                Options = p.Options?.Where(o => !(p.Key == "scope" && o == "all" && !Permissions.ViewAllStaff(me.Actor))).Select(o => new { Value = o, Label = p.Key == "unitId" ? unitNames.GetValueOrDefault(o, o) : Text.Get($"opt.{o}") }) }),
-            ItemType = ItemTypeOf(r.Code),
-            Columns = r.Cols.Select(c => new { c.Path, Header = c.Title, c.Type }),
+            return TypedResults.Ok(All.Where(r => ((r.Allowed?.Invoke(me.Actor) ?? true) || unitRead && (UnitReadableReport(r.Code))) && (r.Flag == null || settings.IsFlagOn(r.Flag))).Select(r => new ReportListItem(
+                r.Code, Text.Get($"report.{r.Code}"), Text.Get($"report.{r.Code}.about"),
+                [.. ReportParams(r, settings, unitNames.Keys.ToArray()).Select(p => new ReportParamView(p.Key, Text.Get($"param.{p.Key}"), p.Type, p.Key == "weeks" && r.Flag == "capacity_reports" ? settings.PlanningHorizonWeeks.ToString(CultureInfo.InvariantCulture) : p.Default,
+                    p.Options is null ? null : [.. p.Options.Where(o => !(p.Key == "scope" && o == "all" && !Permissions.ViewAllStaff(me.Actor))).Select(o => new ReportOption(o, p.Key == "unitId" ? unitNames.GetValueOrDefault(o, o) : Text.Get($"opt.{o}")))]))],
+                ItemTypeOf(r.Code), [.. r.Cols.Select(c => new ReportColumn(c.Path, c.Title, c.Type))])).ToArray());
         });
-        });
-        api.MapGet("/reports/{code}", async (string code, HttpContext http, HubDb db, Access access, CurrentUser me, SettingsStore store, TimeProvider clock) =>
+        api.MapGet("/reports/{code}", async Task<Ok<ReportView>> (string code, HttpContext http, HubDb db, Access access, CurrentUser me, SettingsStore store, TimeProvider clock) =>
         {
             var (def, ctx) = await Prepare(code, http, db, access, me, store, clock);
             var r = await def.Run(ctx);
-            return new
-            {
-                def.Code, Title = Text.Get($"report.{def.Code}"), ItemType = ItemTypeOf(def.Code), Columns = (r.Columns ?? def.Cols).Select(c => new { c.Path, Header = c.Title, c.Type }),
-                Rows = new JsonArray([.. r.Rows.Take(ScreenRows).Select(x => x?.DeepClone())]), Total = r.Rows.Count, TotalIsLowerBound = r.Rows.Count >= Cap, Truncated = r.Rows.Count > ScreenRows, r.ListLink,
-                Parameters = (await ctx.Describe(ReportParams(def, ctx.S), def.Code == "project-activity-log")).Select(p => new { Label = p.Item1, Value = p.Item2 }),
-            };
+            return TypedResults.Ok(new ReportView(def.Code, Text.Get($"report.{def.Code}"), ItemTypeOf(def.Code), [.. (r.Columns ?? def.Cols).Select(c => new ReportColumn(c.Path, c.Title, c.Type))],
+                new JsonArray([.. r.Rows.Take(ScreenRows).Select(x => x?.DeepClone())]), r.Rows.Count, r.Rows.Count >= Cap, r.Rows.Count > ScreenRows, r.ListLink,
+                [.. (await ctx.Describe(ReportParams(def, ctx.S), def.Code == "project-activity-log")).Select(p => new ReportAppliedParameter(p.Item1, p.Item2))]));
         });
         api.MapGet("/reports/{code}/export", async (string code, string? format, HttpContext http, HubDb db, Access access, CurrentUser me, SettingsStore store, TimeProvider clock) =>
         {
@@ -562,7 +574,7 @@ public static partial class ReportEndpoints
         var (from, to) = await TimeEndpoints.Range(new(c.Date("from"), c.Date("to"), null, null, null, null), c.Db, c.Store, c.Clock); // the Time view's bound
         var f = new TimeEndpoints.TimeQuery(from, to, c.Id("projectId"), null, c.Id("userId"), c.Str("scope") == "team" ? "all" : "mine");
         var rows = await TimeEndpoints.Visible(f, c.Access, c.Db, c.Me);
-        var json = Json(rows.Select(r => (object)new { r.WorkDate, r.Person, r.ProjectNumber, r.TaskKey, r.TaskName, r.Hours, r.Note, ItemType = ItemType.Task, Id = r.TaskId }));
+        var json = Json(rows.Select(r => new TaskHoursRow(r.WorkDate, r.Person, r.ProjectNumber, r.TaskKey, r.TaskName, r.Hours, r.Note, ItemType.Task, r.TaskId)));
         json.Add(new JsonObject { ["person"] = Text.Get("time.total"), ["hours"] = rows.Sum(r => r.Hours) });
         var qs = string.Join("&", new[] { ("from", from.ToString("yyyy-MM-dd")), ("to", to.ToString("yyyy-MM-dd")), ("projectId", c.Str("projectId")), ("userId", c.Str("userId")), ("scope", c.Str("scope") == "team" ? "all" : null) }
             .Where(x => x.Item2 is not null).Select(x => $"{x.Item1}={x.Item2}"));
@@ -583,7 +595,7 @@ public static partial class ReportEndpoints
         var rows = await c.Db.HealthSnapshots.AsNoTracking().Where(x => c.ProjectIds().Contains(x.ProjectId) && x.SnapshotDate >= from && x.SnapshotDate <= to)
             .Join(c.Db.Projects, x => x.ProjectId, p => p.Id, (x, p) => new { p.ProjectNumber, p.Name, Date = x.SnapshotDate, Computed = x.ComputedHealth, Reported = x.ReportedHealth })
             .OrderBy(x => x.ProjectNumber).ThenBy(x => x.Date).Take(Cap).ToListAsync();
-        return new(Json(rows));
+        return new(Json(rows.Select(x => new HealthRow(x.ProjectNumber, x.Name, x.Date, x.Computed, x.Reported))));
     }
 
     /// Packet 011 FR-001: the pilot's weekly readings for the chosen projects — G1 weeks with a coordination review recorded,
@@ -612,12 +624,8 @@ public static partial class ReportEndpoints
                 .Select(g => JsonSerializer.Deserialize<Dictionary<string, int>>(g.MaxBy(x => x.SnapshotDate)!.Counts) ?? []).ToList();
             int? Sum(string k) => latest.Count == 0 ? null : latest.Sum(d => d.GetValueOrDefault(k));
             var updaters = changes.Where(x => x.OccurredAt >= from && x.OccurredAt < to && people.Contains(x.User)).Select(x => x.User).Distinct().Count();
-            rows.Add(new
-            {
-                WeekOf = w, Projects = pids.Count, Reviewed = reviews.Where(x => x.OccurredAt >= from && x.OccurredAt < to).Select(x => x.ProjectId).Distinct().Count(),
-                Unassigned = Sum("tasksUnassigned"), NoDueDate = Sum("tasksNoDueDate"), Blocked = Sum("tasksBlocked"),
-                People = people.Count, Updaters = updaters, UpdatersPct = people.Count == 0 ? (int?)null : updaters * 100 / people.Count,
-            });
+            rows.Add(new PilotWeekRow(w, pids.Count, reviews.Where(x => x.OccurredAt >= from && x.OccurredAt < to).Select(x => x.ProjectId).Distinct().Count(),
+                Sum("tasksUnassigned"), Sum("tasksNoDueDate"), Sum("tasksBlocked"), people.Count, updaters, people.Count == 0 ? null : updaters * 100 / people.Count));
         }
         return new(Json(rows));
     }
@@ -638,8 +646,8 @@ public static partial class ReportEndpoints
             .OrderBy(r => r.o.OpenedAt).Take(Cap).Select(r => new { Project = c.Db.Projects.Where(p => p.Id == r.t.ProjectId).Select(p => p.ProjectNumber).First(),
                 Discipline = c.Db.ProjectDisciplines.Where(d => d.Id == r.t.ProjectDisciplineId).Select(d => d.Discipline!.Name).First(),
                 Offered = r.o.OpenedAt, Closed = r.o.ClosedAt, r.o.CloseCause }).ToListAsync();
-        return new(Json(rows.Select(r => new { r.Project, r.Discipline, r.Offered, r.Closed, CloseCause = TaskPickupRules.CauseText(r.CloseCause),
-            DaysOpen = (int)((r.Closed ?? c.Now) - r.Offered).TotalDays })), "/pickup");
+        return new(Json(rows.Select(r => new PickupRow(r.Project, r.Discipline, r.Offered, r.Closed, TaskPickupRules.CauseText(r.CloseCause),
+            (int)((r.Closed ?? c.Now) - r.Offered).TotalDays))), "/pickup");
     }
 
     static async Task<Result> CommitmentMisses(Ctx c)
@@ -658,8 +666,8 @@ public static partial class ReportEndpoints
         var disciplines = await c.Db.ProjectDisciplines.Include(d => d.Discipline).ToDictionaryAsync(d => d.Id, d => d.Discipline!.Name);
         var data = commitments.Select(o => new { o.ProjectId, DisciplineId = o.TargetType == "Task" ? tasks.GetValueOrDefault(o.TargetId) : deliverables.GetValueOrDefault(o.TargetId),
             CategoryId = events.FirstOrDefault(e => e.CommitmentId == o.Id)?.MissCategoryId }).Where(o => c.Id("disciplineId") == null || o.DisciplineId == c.Id("disciplineId"));
-        return new(Json(data.GroupBy(o => new { o.ProjectId, o.DisciplineId, o.CategoryId }).Select(g => new { Project = projects.GetValueOrDefault(g.Key.ProjectId),
-            Discipline = disciplines.GetValueOrDefault(g.Key.DisciplineId), Category = g.Key.CategoryId is { } category ? categories.GetValueOrDefault(category) : Text.Get("report.notRecorded"), Count = g.Count() })));
+        return new(Json(data.GroupBy(o => new { o.ProjectId, o.DisciplineId, o.CategoryId }).Select(g => new MissReportRow(projects.GetValueOrDefault(g.Key.ProjectId),
+            disciplines.GetValueOrDefault(g.Key.DisciplineId), g.Key.CategoryId is { } category ? categories.GetValueOrDefault(category) : Text.Get("report.notRecorded"), g.Count()))));
     }
 
     static async Task<Result> StaffAssignments(Ctx c)
@@ -685,12 +693,8 @@ public static partial class ReportEndpoints
             OpenTasks = c.Db.Tasks.Count(t => t.ProjectId == m.ProjectId && t.AssigneeId == m.UserId && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled),
             OverdueTasks = c.Db.Tasks.Count(t => t.ProjectId == m.ProjectId && t.AssigneeId == m.UserId && c.Db.TaskStates.Any(s => s.TaskId == t.Id && s.IsOverdue)),
         }).OrderBy(r => r.Person).ThenBy(r => r.Project.ProjectNumber).Take(Cap).ToListAsync();
-        var data = Json(rows.OrderBy(r => r.Person).ThenBy(r => r.Project.ProjectNumber).Select(r => (object)new
-        {
-            r.Person, r.Project.ProjectNumber, ProjectName = r.Project.Name, ProjectStatus = r.Project.Status,
-            Roles = string.Join(", ", r.Roles.Select(x => Text.Get($"role.{x}"))), r.PrimaryDiscipline,
-            AddedAt = Clock.LocalDate(r.AddedAt, c.S), r.AddedBy, r.OpenTasks, r.OverdueTasks,
-        }));
+        var data = Json(rows.OrderBy(r => r.Person).ThenBy(r => r.Project.ProjectNumber).Select(r => new StaffRow(r.Person, r.Project.ProjectNumber, r.Project.Name, r.Project.Status,
+            string.Join(", ", r.Roles.Select(x => Text.Get($"role.{x}"))), r.PrimaryDiscipline, Clock.LocalDate(r.AddedAt, c.S), r.AddedBy, r.OpenTasks, r.OverdueTasks)));
         if (!c.S.IsFlagOn("org_structure")) return new(data);
         var ids = rows.Select(r => r.UserId).Distinct().ToArray();
         var week = c.Date("week");

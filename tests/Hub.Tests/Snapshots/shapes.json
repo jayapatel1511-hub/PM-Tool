@@ -11719,31 +11719,31 @@
     "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.properties": [
       "object"
     ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.properties.header": [
+    "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.properties.apiScope": [
       "object"
     ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.properties.header.type": [
+    "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.properties.apiScope.type": [
       "array"
     ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.properties.header.type[]": [
+    "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.properties.apiScope.type[]": [
       "string"
     ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.properties.path": [
+    "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.properties.clientId": [
       "object"
     ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.properties.path.type": [
+    "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.properties.clientId.type": [
       "array"
     ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.properties.path.type[]": [
+    "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.properties.clientId.type[]": [
       "string"
     ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.properties.type": [
+    "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.properties.tenantId": [
       "object"
     ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.properties.type.type": [
+    "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.properties.tenantId.type": [
       "array"
     ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.properties.type.type[]": [
+    "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.properties.tenantId.type[]": [
       "string"
     ],
     "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.required": [
@@ -11753,198 +11753,6 @@
       "string"
     ],
     "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.code": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.code.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.code.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.columns": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.columns.items": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.columns.items.$ref": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.columns.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.columns.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.itemType": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.itemType.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.itemType.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.listLink": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.listLink.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.listLink.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.parameters": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.parameters.items": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.parameters.items.$ref": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.parameters.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.parameters.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.rows": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.rows.$ref": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.title": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.title.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.title.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.total": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.total.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.total.pattern": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.total.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.totalIsLowerBound": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.totalIsLowerBound.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.truncated": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.truncated.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.required": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.required[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndJsonArrayAndintAndbooleanAndbooleanAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstring": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstring.properties": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstring.properties.code": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstring.properties.code.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstring.properties.code.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstring.properties.columns": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstring.properties.columns.items": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstring.properties.columns.items.$ref": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstring.properties.columns.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstring.properties.columns.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstring.properties.description": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstring.properties.description.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstring.properties.description.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstring.properties.itemType": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstring.properties.itemType.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstring.properties.itemType.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstring.properties.params": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstring.properties.params.items": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstring.properties.params.items.$ref": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstring.properties.params.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstring.properties.params.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstring.properties.title": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstring.properties.title.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstring.properties.title.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstring.required": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstring.required[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstringAndstring.type": [
       "string"
     ],
     "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfstring": [
@@ -12002,72 +11810,6 @@
       "string"
     ],
     "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfstring.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.default": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.default.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.default.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.key": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.key.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.key.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.label": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.label.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.label.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.options": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.options.items": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.options.items.$ref": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.options.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.options.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.type": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.type.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.properties.type.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.required": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.required[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndstringAndIEnumerableOfAnonymousTypeOfstringAndstring.type": [
       "string"
     ],
     "$.components.schemas.ApplicabilityBody": [
@@ -29429,6 +29171,315 @@
       "string"
     ],
     "$.components.schemas.ReplaceIssueDocumentBody.type": [
+      "string"
+    ],
+    "$.components.schemas.ReportAppliedParameter": [
+      "object"
+    ],
+    "$.components.schemas.ReportAppliedParameter.properties": [
+      "object"
+    ],
+    "$.components.schemas.ReportAppliedParameter.properties.label": [
+      "object"
+    ],
+    "$.components.schemas.ReportAppliedParameter.properties.label.type": [
+      "string"
+    ],
+    "$.components.schemas.ReportAppliedParameter.properties.value": [
+      "object"
+    ],
+    "$.components.schemas.ReportAppliedParameter.properties.value.type": [
+      "string"
+    ],
+    "$.components.schemas.ReportAppliedParameter.required": [
+      "array"
+    ],
+    "$.components.schemas.ReportAppliedParameter.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ReportAppliedParameter.type": [
+      "string"
+    ],
+    "$.components.schemas.ReportColumn": [
+      "object"
+    ],
+    "$.components.schemas.ReportColumn.properties": [
+      "object"
+    ],
+    "$.components.schemas.ReportColumn.properties.header": [
+      "object"
+    ],
+    "$.components.schemas.ReportColumn.properties.header.type": [
+      "string"
+    ],
+    "$.components.schemas.ReportColumn.properties.path": [
+      "object"
+    ],
+    "$.components.schemas.ReportColumn.properties.path.type": [
+      "string"
+    ],
+    "$.components.schemas.ReportColumn.properties.type": [
+      "object"
+    ],
+    "$.components.schemas.ReportColumn.properties.type.type": [
+      "string"
+    ],
+    "$.components.schemas.ReportColumn.required": [
+      "array"
+    ],
+    "$.components.schemas.ReportColumn.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ReportColumn.type": [
+      "string"
+    ],
+    "$.components.schemas.ReportListItem": [
+      "object"
+    ],
+    "$.components.schemas.ReportListItem.properties": [
+      "object"
+    ],
+    "$.components.schemas.ReportListItem.properties.code": [
+      "object"
+    ],
+    "$.components.schemas.ReportListItem.properties.code.type": [
+      "string"
+    ],
+    "$.components.schemas.ReportListItem.properties.columns": [
+      "object"
+    ],
+    "$.components.schemas.ReportListItem.properties.columns.items": [
+      "object"
+    ],
+    "$.components.schemas.ReportListItem.properties.columns.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ReportListItem.properties.columns.type": [
+      "string"
+    ],
+    "$.components.schemas.ReportListItem.properties.description": [
+      "object"
+    ],
+    "$.components.schemas.ReportListItem.properties.description.type": [
+      "string"
+    ],
+    "$.components.schemas.ReportListItem.properties.itemType": [
+      "object"
+    ],
+    "$.components.schemas.ReportListItem.properties.itemType.type": [
+      "array"
+    ],
+    "$.components.schemas.ReportListItem.properties.itemType.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReportListItem.properties.params": [
+      "object"
+    ],
+    "$.components.schemas.ReportListItem.properties.params.items": [
+      "object"
+    ],
+    "$.components.schemas.ReportListItem.properties.params.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ReportListItem.properties.params.type": [
+      "string"
+    ],
+    "$.components.schemas.ReportListItem.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.ReportListItem.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.ReportListItem.required": [
+      "array"
+    ],
+    "$.components.schemas.ReportListItem.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ReportListItem.type": [
+      "string"
+    ],
+    "$.components.schemas.ReportOption": [
+      "object"
+    ],
+    "$.components.schemas.ReportOption.properties": [
+      "object"
+    ],
+    "$.components.schemas.ReportOption.properties.label": [
+      "object"
+    ],
+    "$.components.schemas.ReportOption.properties.label.type": [
+      "string"
+    ],
+    "$.components.schemas.ReportOption.properties.value": [
+      "object"
+    ],
+    "$.components.schemas.ReportOption.properties.value.type": [
+      "string"
+    ],
+    "$.components.schemas.ReportOption.required": [
+      "array"
+    ],
+    "$.components.schemas.ReportOption.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ReportOption.type": [
+      "string"
+    ],
+    "$.components.schemas.ReportParamView": [
+      "object"
+    ],
+    "$.components.schemas.ReportParamView.properties": [
+      "object"
+    ],
+    "$.components.schemas.ReportParamView.properties.default": [
+      "object"
+    ],
+    "$.components.schemas.ReportParamView.properties.default.type": [
+      "array"
+    ],
+    "$.components.schemas.ReportParamView.properties.default.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReportParamView.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.ReportParamView.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.ReportParamView.properties.label": [
+      "object"
+    ],
+    "$.components.schemas.ReportParamView.properties.label.type": [
+      "string"
+    ],
+    "$.components.schemas.ReportParamView.properties.options": [
+      "object"
+    ],
+    "$.components.schemas.ReportParamView.properties.options.items": [
+      "object"
+    ],
+    "$.components.schemas.ReportParamView.properties.options.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ReportParamView.properties.options.type": [
+      "array"
+    ],
+    "$.components.schemas.ReportParamView.properties.options.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReportParamView.properties.type": [
+      "object"
+    ],
+    "$.components.schemas.ReportParamView.properties.type.type": [
+      "string"
+    ],
+    "$.components.schemas.ReportParamView.required": [
+      "array"
+    ],
+    "$.components.schemas.ReportParamView.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ReportParamView.type": [
+      "string"
+    ],
+    "$.components.schemas.ReportView": [
+      "object"
+    ],
+    "$.components.schemas.ReportView.properties": [
+      "object"
+    ],
+    "$.components.schemas.ReportView.properties.code": [
+      "object"
+    ],
+    "$.components.schemas.ReportView.properties.code.type": [
+      "string"
+    ],
+    "$.components.schemas.ReportView.properties.columns": [
+      "object"
+    ],
+    "$.components.schemas.ReportView.properties.columns.items": [
+      "object"
+    ],
+    "$.components.schemas.ReportView.properties.columns.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ReportView.properties.columns.type": [
+      "string"
+    ],
+    "$.components.schemas.ReportView.properties.itemType": [
+      "object"
+    ],
+    "$.components.schemas.ReportView.properties.itemType.type": [
+      "array"
+    ],
+    "$.components.schemas.ReportView.properties.itemType.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReportView.properties.listLink": [
+      "object"
+    ],
+    "$.components.schemas.ReportView.properties.listLink.type": [
+      "array"
+    ],
+    "$.components.schemas.ReportView.properties.listLink.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReportView.properties.parameters": [
+      "object"
+    ],
+    "$.components.schemas.ReportView.properties.parameters.items": [
+      "object"
+    ],
+    "$.components.schemas.ReportView.properties.parameters.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ReportView.properties.parameters.type": [
+      "string"
+    ],
+    "$.components.schemas.ReportView.properties.rows": [
+      "object"
+    ],
+    "$.components.schemas.ReportView.properties.rows.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ReportView.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.ReportView.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.ReportView.properties.total": [
+      "object"
+    ],
+    "$.components.schemas.ReportView.properties.total.format": [
+      "string"
+    ],
+    "$.components.schemas.ReportView.properties.total.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ReportView.properties.total.type": [
+      "string"
+    ],
+    "$.components.schemas.ReportView.properties.totalIsLowerBound": [
+      "object"
+    ],
+    "$.components.schemas.ReportView.properties.totalIsLowerBound.type": [
+      "string"
+    ],
+    "$.components.schemas.ReportView.properties.truncated": [
+      "object"
+    ],
+    "$.components.schemas.ReportView.properties.truncated.type": [
+      "string"
+    ],
+    "$.components.schemas.ReportView.required": [
+      "array"
+    ],
+    "$.components.schemas.ReportView.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ReportView.type": [
       "string"
     ],
     "$.components.schemas.ResolveConflictBody": [
@@ -78113,6 +78164,7 @@
       "number"
     ],
     "$.rows[].updatersPct": [
+      "null",
       "number"
     ],
     "$.rows[].verificationStatus": [

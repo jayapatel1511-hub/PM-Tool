@@ -8865,6 +8865,175 @@
         ],
         "type": "object"
       },
+      "HandoffChangeAssessment": {
+        "properties": {
+          "changeNoticeId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "noticeStatus": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "changeNoticeId",
+          "key",
+          "title",
+          "noticeStatus"
+        ],
+        "type": "object"
+      },
+      "HandoffDetail": {
+        "properties": {
+          "changeAssessments": {
+            "items": {
+              "$ref": "#/components/schemas/HandoffChangeAssessment"
+            },
+            "type": "array"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/HandoffHistoryRow"
+            },
+            "type": "array"
+          },
+          "permissions": {
+            "$ref": "#/components/schemas/HandoffDetailPermissions"
+          },
+          "revisions": {
+            "items": {
+              "$ref": "#/components/schemas/HandoffRevisionRow"
+            },
+            "type": "array"
+          },
+          "row": {
+            "$ref": "#/components/schemas/HandoffRow"
+          }
+        },
+        "required": [
+          "row",
+          "permissions",
+          "changeAssessments",
+          "history",
+          "revisions"
+        ],
+        "type": "object"
+      },
+      "HandoffDetailPermissions": {
+        "properties": {
+          "assign": {
+            "$ref": "#/components/schemas/HandoffPermission"
+          },
+          "edit": {
+            "$ref": "#/components/schemas/HandoffPermission"
+          },
+          "transitions": {
+            "items": {
+              "$ref": "#/components/schemas/HandoffTransition"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "edit",
+          "assign",
+          "transitions"
+        ],
+        "type": "object"
+      },
+      "HandoffDiscipline": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object"
+      },
+      "HandoffHistoryRow": {
+        "properties": {
+          "actor": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "criteriaOutcome": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "revisionId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "toStatus": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "fromStatus",
+          "toStatus",
+          "revisionId",
+          "reason",
+          "criteriaOutcome",
+          "createdAt",
+          "createdBy",
+          "actor"
+        ],
+        "type": "object"
+      },
       "HandoffMoveBody": {
         "properties": {
           "criteriaOutcome": {
@@ -8901,6 +9070,497 @@
           "rowVersion",
           "reason",
           "criteriaOutcome"
+        ],
+        "type": "object"
+      },
+      "HandoffOptions": {
+        "properties": {
+          "canCreate": {
+            "type": "boolean"
+          },
+          "disciplines": {
+            "items": {
+              "$ref": "#/components/schemas/HandoffDiscipline"
+            },
+            "type": "array"
+          },
+          "people": {
+            "items": {
+              "$ref": "#/components/schemas/HandoffPerson"
+            },
+            "type": "array"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/HandoffSource"
+            },
+            "type": "array"
+          },
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/HandoffTask"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "sources",
+          "disciplines",
+          "people",
+          "tasks",
+          "canCreate"
+        ],
+        "type": "object"
+      },
+      "HandoffPermission": {
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "ok",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "HandoffPerson": {
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "displayName"
+        ],
+        "type": "object"
+      },
+      "HandoffRevisionRow": {
+        "properties": {
+          "acceptanceCriteria": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "intendedUse": {
+            "type": "string"
+          },
+          "neededBy": {
+            "format": "date",
+            "type": "string"
+          },
+          "previousRevisionId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "promisedBy": {
+            "format": "date",
+            "type": "string"
+          },
+          "receivingOwnerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "response": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "sendingOwnerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/HandoffRevisionSource"
+          },
+          "targetDeliverableId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "targetTaskId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "previousRevisionId",
+          "intendedUse",
+          "acceptanceCriteria",
+          "neededBy",
+          "promisedBy",
+          "sendingOwnerId",
+          "receivingOwnerId",
+          "targetTaskId",
+          "targetDeliverableId",
+          "response",
+          "createdAt",
+          "createdBy",
+          "source"
+        ],
+        "type": "object"
+      },
+      "HandoffRevisionSource": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "revision": {
+            "type": "string"
+          },
+          "sourceKey": {
+            "type": "string"
+          },
+          "sourceRowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "sourceKey",
+          "title",
+          "revision",
+          "url",
+          "sourceRowVersion",
+          "createdAt",
+          "createdBy"
+        ],
+        "type": "object"
+      },
+      "HandoffRow": {
+        "properties": {
+          "acceptanceCriteria": {
+            "type": "string"
+          },
+          "currentRevisionId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dateMismatch": {
+            "type": "boolean"
+          },
+          "declaredRevision": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "incorporatedRevisionId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "intendedUse": {
+            "type": "string"
+          },
+          "isOverdue": {
+            "type": "boolean"
+          },
+          "key": {
+            "type": "string"
+          },
+          "neededBy": {
+            "format": "date",
+            "type": "string"
+          },
+          "ownersAvailable": {
+            "type": "boolean"
+          },
+          "promisedBy": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "receiverName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "receivingDisciplineId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "receivingOwnerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "senderName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "sendingDisciplineId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "sendingOwnerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "sourceChanged": {
+            "type": "boolean"
+          },
+          "sourceDeliverableId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "sourceKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "sourceRowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "sourceUrl": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "targetDeliverableId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "targetKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "targetTaskId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "title",
+          "status",
+          "rowVersion",
+          "sourceDeliverableId",
+          "sourceRowVersion",
+          "declaredRevision",
+          "sourceUrl",
+          "sendingDisciplineId",
+          "receivingDisciplineId",
+          "sendingOwnerId",
+          "receivingOwnerId",
+          "targetTaskId",
+          "targetDeliverableId",
+          "intendedUse",
+          "acceptanceCriteria",
+          "neededBy",
+          "promisedBy",
+          "currentRevisionId",
+          "incorporatedRevisionId",
+          "senderName",
+          "receiverName",
+          "sourceKey",
+          "targetKey",
+          "ownersAvailable",
+          "sourceChanged",
+          "dateMismatch",
+          "isOverdue"
+        ],
+        "type": "object"
+      },
+      "HandoffSource": {
+        "properties": {
+          "dueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectDisciplineId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "revision": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "transmittalUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "projectDisciplineId",
+          "ownerId",
+          "revision",
+          "transmittalUrl",
+          "rowVersion",
+          "dueDate"
+        ],
+        "type": "object"
+      },
+      "HandoffTask": {
+        "properties": {
+          "dueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectDisciplineId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "projectDisciplineId",
+          "ownerId",
+          "dueDate"
+        ],
+        "type": "object"
+      },
+      "HandoffTransition": {
+        "properties": {
+          "permission": {
+            "$ref": "#/components/schemas/HandoffPermission"
+          },
+          "to": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "to",
+          "permission"
         ],
         "type": "object"
       },
@@ -11765,6 +12425,45 @@
           "items": {
             "items": {
               "$ref": "#/components/schemas/DeletedItem"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "pageSize": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "sort": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "totalCount": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "totalCount"
+        ],
+        "type": "object"
+      },
+      "PageOfHandoffRow": {
+        "properties": {
+          "filters": {},
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/HandoffRow"
             },
             "type": "array"
           },
@@ -33447,7 +34146,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/PageOfHandoffRow"
+                }
               }
             },
             "description": "OK"
@@ -33480,8 +34181,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommandResult"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -33572,7 +34280,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/HandoffOptions"
+                }
               }
             },
             "description": "OK"
@@ -33609,7 +34319,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/HandoffDetail"
+                }
               }
             },
             "description": "OK"

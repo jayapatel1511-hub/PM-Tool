@@ -23465,6 +23465,291 @@
     "$.components.schemas.HandoffAssignBody.type": [
       "string"
     ],
+    "$.components.schemas.HandoffChangeAssessment": [
+      "object"
+    ],
+    "$.components.schemas.HandoffChangeAssessment.properties": [
+      "object"
+    ],
+    "$.components.schemas.HandoffChangeAssessment.properties.changeNoticeId": [
+      "object"
+    ],
+    "$.components.schemas.HandoffChangeAssessment.properties.changeNoticeId.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffChangeAssessment.properties.changeNoticeId.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffChangeAssessment.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.HandoffChangeAssessment.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffChangeAssessment.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffChangeAssessment.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.HandoffChangeAssessment.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffChangeAssessment.properties.noticeStatus": [
+      "object"
+    ],
+    "$.components.schemas.HandoffChangeAssessment.properties.noticeStatus.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffChangeAssessment.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.HandoffChangeAssessment.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffChangeAssessment.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.HandoffChangeAssessment.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffChangeAssessment.required": [
+      "array"
+    ],
+    "$.components.schemas.HandoffChangeAssessment.required[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffChangeAssessment.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffDetail": [
+      "object"
+    ],
+    "$.components.schemas.HandoffDetail.properties": [
+      "object"
+    ],
+    "$.components.schemas.HandoffDetail.properties.changeAssessments": [
+      "object"
+    ],
+    "$.components.schemas.HandoffDetail.properties.changeAssessments.items": [
+      "object"
+    ],
+    "$.components.schemas.HandoffDetail.properties.changeAssessments.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.HandoffDetail.properties.changeAssessments.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffDetail.properties.history": [
+      "object"
+    ],
+    "$.components.schemas.HandoffDetail.properties.history.items": [
+      "object"
+    ],
+    "$.components.schemas.HandoffDetail.properties.history.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.HandoffDetail.properties.history.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffDetail.properties.permissions": [
+      "object"
+    ],
+    "$.components.schemas.HandoffDetail.properties.permissions.$ref": [
+      "string"
+    ],
+    "$.components.schemas.HandoffDetail.properties.revisions": [
+      "object"
+    ],
+    "$.components.schemas.HandoffDetail.properties.revisions.items": [
+      "object"
+    ],
+    "$.components.schemas.HandoffDetail.properties.revisions.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.HandoffDetail.properties.revisions.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffDetail.properties.row": [
+      "object"
+    ],
+    "$.components.schemas.HandoffDetail.properties.row.$ref": [
+      "string"
+    ],
+    "$.components.schemas.HandoffDetail.required": [
+      "array"
+    ],
+    "$.components.schemas.HandoffDetail.required[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffDetail.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffDetailPermissions": [
+      "object"
+    ],
+    "$.components.schemas.HandoffDetailPermissions.properties": [
+      "object"
+    ],
+    "$.components.schemas.HandoffDetailPermissions.properties.assign": [
+      "object"
+    ],
+    "$.components.schemas.HandoffDetailPermissions.properties.assign.$ref": [
+      "string"
+    ],
+    "$.components.schemas.HandoffDetailPermissions.properties.edit": [
+      "object"
+    ],
+    "$.components.schemas.HandoffDetailPermissions.properties.edit.$ref": [
+      "string"
+    ],
+    "$.components.schemas.HandoffDetailPermissions.properties.transitions": [
+      "object"
+    ],
+    "$.components.schemas.HandoffDetailPermissions.properties.transitions.items": [
+      "object"
+    ],
+    "$.components.schemas.HandoffDetailPermissions.properties.transitions.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.HandoffDetailPermissions.properties.transitions.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffDetailPermissions.required": [
+      "array"
+    ],
+    "$.components.schemas.HandoffDetailPermissions.required[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffDetailPermissions.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffDiscipline": [
+      "object"
+    ],
+    "$.components.schemas.HandoffDiscipline.properties": [
+      "object"
+    ],
+    "$.components.schemas.HandoffDiscipline.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.HandoffDiscipline.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffDiscipline.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffDiscipline.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.HandoffDiscipline.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffDiscipline.required": [
+      "array"
+    ],
+    "$.components.schemas.HandoffDiscipline.required[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffDiscipline.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffHistoryRow": [
+      "object"
+    ],
+    "$.components.schemas.HandoffHistoryRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.HandoffHistoryRow.properties.actor": [
+      "object"
+    ],
+    "$.components.schemas.HandoffHistoryRow.properties.actor.type": [
+      "array"
+    ],
+    "$.components.schemas.HandoffHistoryRow.properties.actor.type[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffHistoryRow.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.HandoffHistoryRow.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffHistoryRow.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffHistoryRow.properties.createdBy": [
+      "object"
+    ],
+    "$.components.schemas.HandoffHistoryRow.properties.createdBy.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffHistoryRow.properties.createdBy.type": [
+      "array"
+    ],
+    "$.components.schemas.HandoffHistoryRow.properties.createdBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffHistoryRow.properties.criteriaOutcome": [
+      "object"
+    ],
+    "$.components.schemas.HandoffHistoryRow.properties.criteriaOutcome.type": [
+      "array"
+    ],
+    "$.components.schemas.HandoffHistoryRow.properties.criteriaOutcome.type[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffHistoryRow.properties.fromStatus": [
+      "object"
+    ],
+    "$.components.schemas.HandoffHistoryRow.properties.fromStatus.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffHistoryRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.HandoffHistoryRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffHistoryRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffHistoryRow.properties.reason": [
+      "object"
+    ],
+    "$.components.schemas.HandoffHistoryRow.properties.reason.type": [
+      "array"
+    ],
+    "$.components.schemas.HandoffHistoryRow.properties.reason.type[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffHistoryRow.properties.revisionId": [
+      "object"
+    ],
+    "$.components.schemas.HandoffHistoryRow.properties.revisionId.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffHistoryRow.properties.revisionId.type": [
+      "array"
+    ],
+    "$.components.schemas.HandoffHistoryRow.properties.revisionId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffHistoryRow.properties.toStatus": [
+      "object"
+    ],
+    "$.components.schemas.HandoffHistoryRow.properties.toStatus.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffHistoryRow.required": [
+      "array"
+    ],
+    "$.components.schemas.HandoffHistoryRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffHistoryRow.type": [
+      "string"
+    ],
     "$.components.schemas.HandoffMoveBody": [
       "object"
     ],
@@ -23526,6 +23811,819 @@
       "string"
     ],
     "$.components.schemas.HandoffMoveBody.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffOptions": [
+      "object"
+    ],
+    "$.components.schemas.HandoffOptions.properties": [
+      "object"
+    ],
+    "$.components.schemas.HandoffOptions.properties.canCreate": [
+      "object"
+    ],
+    "$.components.schemas.HandoffOptions.properties.canCreate.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffOptions.properties.disciplines": [
+      "object"
+    ],
+    "$.components.schemas.HandoffOptions.properties.disciplines.items": [
+      "object"
+    ],
+    "$.components.schemas.HandoffOptions.properties.disciplines.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.HandoffOptions.properties.disciplines.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffOptions.properties.people": [
+      "object"
+    ],
+    "$.components.schemas.HandoffOptions.properties.people.items": [
+      "object"
+    ],
+    "$.components.schemas.HandoffOptions.properties.people.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.HandoffOptions.properties.people.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffOptions.properties.sources": [
+      "object"
+    ],
+    "$.components.schemas.HandoffOptions.properties.sources.items": [
+      "object"
+    ],
+    "$.components.schemas.HandoffOptions.properties.sources.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.HandoffOptions.properties.sources.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffOptions.properties.tasks": [
+      "object"
+    ],
+    "$.components.schemas.HandoffOptions.properties.tasks.items": [
+      "object"
+    ],
+    "$.components.schemas.HandoffOptions.properties.tasks.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.HandoffOptions.properties.tasks.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffOptions.required": [
+      "array"
+    ],
+    "$.components.schemas.HandoffOptions.required[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffOptions.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffPermission": [
+      "object"
+    ],
+    "$.components.schemas.HandoffPermission.properties": [
+      "object"
+    ],
+    "$.components.schemas.HandoffPermission.properties.ok": [
+      "object"
+    ],
+    "$.components.schemas.HandoffPermission.properties.ok.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffPermission.properties.reason": [
+      "object"
+    ],
+    "$.components.schemas.HandoffPermission.properties.reason.type": [
+      "array"
+    ],
+    "$.components.schemas.HandoffPermission.properties.reason.type[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffPermission.required": [
+      "array"
+    ],
+    "$.components.schemas.HandoffPermission.required[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffPermission.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffPerson": [
+      "object"
+    ],
+    "$.components.schemas.HandoffPerson.properties": [
+      "object"
+    ],
+    "$.components.schemas.HandoffPerson.properties.displayName": [
+      "object"
+    ],
+    "$.components.schemas.HandoffPerson.properties.displayName.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffPerson.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.HandoffPerson.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffPerson.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffPerson.required": [
+      "array"
+    ],
+    "$.components.schemas.HandoffPerson.required[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffPerson.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionRow": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.acceptanceCriteria": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.acceptanceCriteria.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.createdBy": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.createdBy.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.createdBy.type": [
+      "array"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.createdBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.intendedUse": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.intendedUse.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.neededBy": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.neededBy.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.neededBy.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.previousRevisionId": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.previousRevisionId.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.previousRevisionId.type": [
+      "array"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.previousRevisionId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.promisedBy": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.promisedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.promisedBy.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.receivingOwnerId": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.receivingOwnerId.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.receivingOwnerId.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.response": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.response.type": [
+      "array"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.response.type[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.sendingOwnerId": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.sendingOwnerId.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.sendingOwnerId.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.source": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.source.$ref": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.targetDeliverableId": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.targetDeliverableId.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.targetDeliverableId.type": [
+      "array"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.targetDeliverableId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.targetTaskId": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.targetTaskId.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.targetTaskId.type": [
+      "array"
+    ],
+    "$.components.schemas.HandoffRevisionRow.properties.targetTaskId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionRow.required": [
+      "array"
+    ],
+    "$.components.schemas.HandoffRevisionRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionRow.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionSource": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRevisionSource.properties": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRevisionSource.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRevisionSource.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionSource.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionSource.properties.createdBy": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRevisionSource.properties.createdBy.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionSource.properties.createdBy.type": [
+      "array"
+    ],
+    "$.components.schemas.HandoffRevisionSource.properties.createdBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionSource.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRevisionSource.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionSource.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionSource.properties.revision": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRevisionSource.properties.revision.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionSource.properties.sourceKey": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRevisionSource.properties.sourceKey.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionSource.properties.sourceRowVersion": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRevisionSource.properties.sourceRowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionSource.properties.sourceRowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionSource.properties.sourceRowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionSource.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRevisionSource.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionSource.properties.url": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRevisionSource.properties.url.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionSource.required": [
+      "array"
+    ],
+    "$.components.schemas.HandoffRevisionSource.required[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRevisionSource.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRow.properties.acceptanceCriteria": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRow.properties.acceptanceCriteria.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.currentRevisionId": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRow.properties.currentRevisionId.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.currentRevisionId.type": [
+      "array"
+    ],
+    "$.components.schemas.HandoffRow.properties.currentRevisionId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.dateMismatch": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRow.properties.dateMismatch.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.declaredRevision": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRow.properties.declaredRevision.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.incorporatedRevisionId": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRow.properties.incorporatedRevisionId.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.incorporatedRevisionId.type": [
+      "array"
+    ],
+    "$.components.schemas.HandoffRow.properties.incorporatedRevisionId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.intendedUse": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRow.properties.intendedUse.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.isOverdue": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRow.properties.isOverdue.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRow.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.neededBy": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRow.properties.neededBy.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.neededBy.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.ownersAvailable": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRow.properties.ownersAvailable.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.promisedBy": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRow.properties.promisedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.promisedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.HandoffRow.properties.promisedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.receiverName": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRow.properties.receiverName.type": [
+      "array"
+    ],
+    "$.components.schemas.HandoffRow.properties.receiverName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.receivingDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRow.properties.receivingDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.receivingDisciplineId.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.receivingOwnerId": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRow.properties.receivingOwnerId.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.receivingOwnerId.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.senderName": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRow.properties.senderName.type": [
+      "array"
+    ],
+    "$.components.schemas.HandoffRow.properties.senderName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.sendingDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRow.properties.sendingDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.sendingDisciplineId.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.sendingOwnerId": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRow.properties.sendingOwnerId.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.sendingOwnerId.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.sourceChanged": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRow.properties.sourceChanged.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.sourceDeliverableId": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRow.properties.sourceDeliverableId.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.sourceDeliverableId.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.sourceKey": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRow.properties.sourceKey.type": [
+      "array"
+    ],
+    "$.components.schemas.HandoffRow.properties.sourceKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.sourceRowVersion": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRow.properties.sourceRowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.sourceRowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.sourceRowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.sourceUrl": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRow.properties.sourceUrl.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRow.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.targetDeliverableId": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRow.properties.targetDeliverableId.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.targetDeliverableId.type": [
+      "array"
+    ],
+    "$.components.schemas.HandoffRow.properties.targetDeliverableId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.targetKey": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRow.properties.targetKey.type": [
+      "array"
+    ],
+    "$.components.schemas.HandoffRow.properties.targetKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.targetTaskId": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRow.properties.targetTaskId.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.targetTaskId.type": [
+      "array"
+    ],
+    "$.components.schemas.HandoffRow.properties.targetTaskId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.HandoffRow.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.required": [
+      "array"
+    ],
+    "$.components.schemas.HandoffRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffRow.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffSource": [
+      "object"
+    ],
+    "$.components.schemas.HandoffSource.properties": [
+      "object"
+    ],
+    "$.components.schemas.HandoffSource.properties.dueDate": [
+      "object"
+    ],
+    "$.components.schemas.HandoffSource.properties.dueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffSource.properties.dueDate.type": [
+      "array"
+    ],
+    "$.components.schemas.HandoffSource.properties.dueDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffSource.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.HandoffSource.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffSource.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffSource.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.HandoffSource.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffSource.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.HandoffSource.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffSource.properties.ownerId": [
+      "object"
+    ],
+    "$.components.schemas.HandoffSource.properties.ownerId.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffSource.properties.ownerId.type": [
+      "array"
+    ],
+    "$.components.schemas.HandoffSource.properties.ownerId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffSource.properties.projectDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.HandoffSource.properties.projectDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffSource.properties.projectDisciplineId.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffSource.properties.revision": [
+      "object"
+    ],
+    "$.components.schemas.HandoffSource.properties.revision.type": [
+      "array"
+    ],
+    "$.components.schemas.HandoffSource.properties.revision.type[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffSource.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.HandoffSource.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffSource.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.HandoffSource.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffSource.properties.transmittalUrl": [
+      "object"
+    ],
+    "$.components.schemas.HandoffSource.properties.transmittalUrl.type": [
+      "array"
+    ],
+    "$.components.schemas.HandoffSource.properties.transmittalUrl.type[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffSource.required": [
+      "array"
+    ],
+    "$.components.schemas.HandoffSource.required[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffSource.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffTask": [
+      "object"
+    ],
+    "$.components.schemas.HandoffTask.properties": [
+      "object"
+    ],
+    "$.components.schemas.HandoffTask.properties.dueDate": [
+      "object"
+    ],
+    "$.components.schemas.HandoffTask.properties.dueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffTask.properties.dueDate.type": [
+      "array"
+    ],
+    "$.components.schemas.HandoffTask.properties.dueDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffTask.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.HandoffTask.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffTask.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffTask.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.HandoffTask.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffTask.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.HandoffTask.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffTask.properties.ownerId": [
+      "object"
+    ],
+    "$.components.schemas.HandoffTask.properties.ownerId.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffTask.properties.ownerId.type": [
+      "array"
+    ],
+    "$.components.schemas.HandoffTask.properties.ownerId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffTask.properties.projectDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.HandoffTask.properties.projectDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.HandoffTask.properties.projectDisciplineId.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffTask.required": [
+      "array"
+    ],
+    "$.components.schemas.HandoffTask.required[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffTask.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffTransition": [
+      "object"
+    ],
+    "$.components.schemas.HandoffTransition.properties": [
+      "object"
+    ],
+    "$.components.schemas.HandoffTransition.properties.permission": [
+      "object"
+    ],
+    "$.components.schemas.HandoffTransition.properties.permission.$ref": [
+      "string"
+    ],
+    "$.components.schemas.HandoffTransition.properties.to": [
+      "object"
+    ],
+    "$.components.schemas.HandoffTransition.properties.to.type": [
+      "string"
+    ],
+    "$.components.schemas.HandoffTransition.required": [
+      "array"
+    ],
+    "$.components.schemas.HandoffTransition.required[]": [
+      "string"
+    ],
+    "$.components.schemas.HandoffTransition.type": [
       "string"
     ],
     "$.components.schemas.Head": [
@@ -28512,6 +29610,81 @@
       "string"
     ],
     "$.components.schemas.PageOfDeletedItem.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfHandoffRow": [
+      "object"
+    ],
+    "$.components.schemas.PageOfHandoffRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.PageOfHandoffRow.properties.filters": [
+      "object"
+    ],
+    "$.components.schemas.PageOfHandoffRow.properties.items": [
+      "object"
+    ],
+    "$.components.schemas.PageOfHandoffRow.properties.items.items": [
+      "object"
+    ],
+    "$.components.schemas.PageOfHandoffRow.properties.items.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.PageOfHandoffRow.properties.items.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfHandoffRow.properties.page": [
+      "object"
+    ],
+    "$.components.schemas.PageOfHandoffRow.properties.page.format": [
+      "string"
+    ],
+    "$.components.schemas.PageOfHandoffRow.properties.page.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PageOfHandoffRow.properties.page.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfHandoffRow.properties.pageSize": [
+      "object"
+    ],
+    "$.components.schemas.PageOfHandoffRow.properties.pageSize.format": [
+      "string"
+    ],
+    "$.components.schemas.PageOfHandoffRow.properties.pageSize.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PageOfHandoffRow.properties.pageSize.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfHandoffRow.properties.sort": [
+      "object"
+    ],
+    "$.components.schemas.PageOfHandoffRow.properties.sort.type": [
+      "array"
+    ],
+    "$.components.schemas.PageOfHandoffRow.properties.sort.type[]": [
+      "string"
+    ],
+    "$.components.schemas.PageOfHandoffRow.properties.totalCount": [
+      "object"
+    ],
+    "$.components.schemas.PageOfHandoffRow.properties.totalCount.format": [
+      "string"
+    ],
+    "$.components.schemas.PageOfHandoffRow.properties.totalCount.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PageOfHandoffRow.properties.totalCount.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfHandoffRow.required": [
+      "array"
+    ],
+    "$.components.schemas.PageOfHandoffRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.PageOfHandoffRow.type": [
       "string"
     ],
     "$.components.schemas.PageOfListRow": [
@@ -60416,6 +61589,9 @@
     "$.paths./api/v1/projects/{projectId}/handoffs.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/projects/{projectId}/handoffs.get.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/projects/{projectId}/handoffs.get.responses.200.description": [
       "string"
     ],
@@ -60473,10 +61649,22 @@
     "$.paths./api/v1/projects/{projectId}/handoffs.post.responses": [
       "object"
     ],
-    "$.paths./api/v1/projects/{projectId}/handoffs.post.responses.200": [
+    "$.paths./api/v1/projects/{projectId}/handoffs.post.responses.201": [
       "object"
     ],
-    "$.paths./api/v1/projects/{projectId}/handoffs.post.responses.200.description": [
+    "$.paths./api/v1/projects/{projectId}/handoffs.post.responses.201.content": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{projectId}/handoffs.post.responses.201.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{projectId}/handoffs.post.responses.201.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{projectId}/handoffs.post.responses.201.content.application/json.schema.$ref": [
+      "string"
+    ],
+    "$.paths./api/v1/projects/{projectId}/handoffs.post.responses.201.description": [
       "string"
     ],
     "$.paths./api/v1/projects/{projectId}/handoffs.post.tags": [
@@ -60575,6 +61763,9 @@
     "$.paths./api/v1/projects/{projectId}/handoffs/options.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/projects/{projectId}/handoffs/options.get.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/projects/{projectId}/handoffs/options.get.responses.200.description": [
       "string"
     ],
@@ -60628,6 +61819,9 @@
     ],
     "$.paths./api/v1/projects/{projectId}/handoffs/{id}.get.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/projects/{projectId}/handoffs/{id}.get.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/projects/{projectId}/handoffs/{id}.get.responses.200.description": [
       "string"
@@ -80131,6 +81325,95 @@
       "string"
     ],
     "$.type": [
+      "string"
+    ]
+  },
+  "GET /api/v1/projects/{projectId}/handoffs/options 200": {
+    "$": [
+      "object"
+    ],
+    "$.canCreate": [
+      "boolean"
+    ],
+    "$.disciplines": [
+      "array"
+    ],
+    "$.disciplines[]": [
+      "object"
+    ],
+    "$.disciplines[].id": [
+      "string"
+    ],
+    "$.disciplines[].name": [
+      "string"
+    ],
+    "$.people": [
+      "array"
+    ],
+    "$.people[]": [
+      "object"
+    ],
+    "$.people[].displayName": [
+      "string"
+    ],
+    "$.people[].id": [
+      "string"
+    ],
+    "$.sources": [
+      "array"
+    ],
+    "$.sources[]": [
+      "object"
+    ],
+    "$.sources[].dueDate": [
+      "null"
+    ],
+    "$.sources[].id": [
+      "string"
+    ],
+    "$.sources[].key": [
+      "string"
+    ],
+    "$.sources[].name": [
+      "string"
+    ],
+    "$.sources[].ownerId": [
+      "string"
+    ],
+    "$.sources[].projectDisciplineId": [
+      "string"
+    ],
+    "$.sources[].revision": [
+      "string"
+    ],
+    "$.sources[].rowVersion": [
+      "number"
+    ],
+    "$.sources[].transmittalUrl": [
+      "null"
+    ],
+    "$.tasks": [
+      "array"
+    ],
+    "$.tasks[]": [
+      "object"
+    ],
+    "$.tasks[].dueDate": [
+      "string"
+    ],
+    "$.tasks[].id": [
+      "string"
+    ],
+    "$.tasks[].key": [
+      "string"
+    ],
+    "$.tasks[].name": [
+      "string"
+    ],
+    "$.tasks[].ownerId": [
+      "string"
+    ],
+    "$.tasks[].projectDisciplineId": [
       "string"
     ]
   },

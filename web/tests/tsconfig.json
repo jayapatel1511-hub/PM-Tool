@@ -33,6 +33,7 @@
     "search.fixture.cjs",
     "coordination.fixture.cjs",
     "design-basis.fixture.cjs",
-    "config.fixture.cjs"
+    "config.fixture.cjs",
+    "handoffs.fixture.cjs"
   ]
 }

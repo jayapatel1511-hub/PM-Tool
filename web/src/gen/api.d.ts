@@ -11147,7 +11147,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["PageOfHandoffRow"];
                     };
                 };
             };
@@ -11168,12 +11168,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["CommandResult"];
+                    };
                 };
             };
         };
@@ -11249,7 +11251,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["HandoffOptions"];
                     };
                 };
             };
@@ -11287,7 +11289,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["HandoffDetail"];
                     };
                 };
             };
@@ -18309,6 +18311,48 @@ export interface components {
             /** Format: uuid */
             sendingOwnerId: string;
         };
+        HandoffChangeAssessment: {
+            /** Format: uuid */
+            changeNoticeId: string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            noticeStatus: string;
+            status: string;
+            title: string;
+        };
+        HandoffDetail: {
+            changeAssessments: components["schemas"]["HandoffChangeAssessment"][];
+            history: components["schemas"]["HandoffHistoryRow"][];
+            permissions: components["schemas"]["HandoffDetailPermissions"];
+            revisions: components["schemas"]["HandoffRevisionRow"][];
+            row: components["schemas"]["HandoffRow"];
+        };
+        HandoffDetailPermissions: {
+            assign: components["schemas"]["HandoffPermission"];
+            edit: components["schemas"]["HandoffPermission"];
+            transitions: components["schemas"]["HandoffTransition"][];
+        };
+        HandoffDiscipline: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+        };
+        HandoffHistoryRow: {
+            actor: null | string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            criteriaOutcome: null | string;
+            fromStatus: string;
+            /** Format: uuid */
+            id: string;
+            reason: null | string;
+            /** Format: uuid */
+            revisionId: null | string;
+            toStatus: string;
+        };
         HandoffMoveBody: {
             criteriaOutcome: null | string;
             reason: null | string;
@@ -18317,6 +18361,139 @@ export interface components {
             /** Format: int32 */
             rowVersion: null | number;
             toStatus: string;
+        };
+        HandoffOptions: {
+            canCreate: boolean;
+            disciplines: components["schemas"]["HandoffDiscipline"][];
+            people: components["schemas"]["HandoffPerson"][];
+            sources: components["schemas"]["HandoffSource"][];
+            tasks: components["schemas"]["HandoffTask"][];
+        };
+        HandoffPermission: {
+            ok: boolean;
+            reason: null | string;
+        };
+        HandoffPerson: {
+            displayName: string;
+            /** Format: uuid */
+            id: string;
+        };
+        HandoffRevisionRow: {
+            acceptanceCriteria: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            /** Format: uuid */
+            id: string;
+            intendedUse: string;
+            /** Format: date */
+            neededBy: string;
+            /** Format: uuid */
+            previousRevisionId: null | string;
+            /** Format: date */
+            promisedBy: string;
+            /** Format: uuid */
+            receivingOwnerId: string;
+            response: null | string;
+            /** Format: uuid */
+            sendingOwnerId: string;
+            source: components["schemas"]["HandoffRevisionSource"];
+            /** Format: uuid */
+            targetDeliverableId: null | string;
+            /** Format: uuid */
+            targetTaskId: null | string;
+        };
+        HandoffRevisionSource: {
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            /** Format: uuid */
+            id: string;
+            revision: string;
+            sourceKey: string;
+            /** Format: int32 */
+            sourceRowVersion: number;
+            title: string;
+            url: string;
+        };
+        HandoffRow: {
+            acceptanceCriteria: string;
+            /** Format: uuid */
+            currentRevisionId: null | string;
+            dateMismatch: boolean;
+            declaredRevision: string;
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            incorporatedRevisionId: null | string;
+            intendedUse: string;
+            isOverdue: boolean;
+            key: string;
+            /** Format: date */
+            neededBy: string;
+            ownersAvailable: boolean;
+            /** Format: date */
+            promisedBy: null | string;
+            receiverName: null | string;
+            /** Format: uuid */
+            receivingDisciplineId: string;
+            /** Format: uuid */
+            receivingOwnerId: string;
+            /** Format: int32 */
+            rowVersion: number;
+            senderName: null | string;
+            /** Format: uuid */
+            sendingDisciplineId: string;
+            /** Format: uuid */
+            sendingOwnerId: string;
+            sourceChanged: boolean;
+            /** Format: uuid */
+            sourceDeliverableId: string;
+            sourceKey: null | string;
+            /** Format: int32 */
+            sourceRowVersion: number;
+            sourceUrl: string;
+            status: string;
+            /** Format: uuid */
+            targetDeliverableId: null | string;
+            targetKey: null | string;
+            /** Format: uuid */
+            targetTaskId: null | string;
+            title: string;
+        };
+        HandoffSource: {
+            /** Format: date */
+            dueDate: null | string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            /** Format: uuid */
+            ownerId: null | string;
+            /** Format: uuid */
+            projectDisciplineId: string;
+            revision: null | string;
+            /** Format: int32 */
+            rowVersion: number;
+            transmittalUrl: null | string;
+        };
+        HandoffTask: {
+            /** Format: date */
+            dueDate: null | string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            /** Format: uuid */
+            ownerId: null | string;
+            /** Format: uuid */
+            projectDisciplineId: string;
+        };
+        HandoffTransition: {
+            permission: components["schemas"]["HandoffPermission"];
+            to: string;
         };
         Head: {
             /** Format: int64 */
@@ -19065,6 +19242,17 @@ export interface components {
         PageOfDeletedItem: {
             filters?: unknown;
             items: components["schemas"]["DeletedItem"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            sort?: null | string;
+            /** Format: int32 */
+            totalCount: number;
+        };
+        PageOfHandoffRow: {
+            filters?: unknown;
+            items: components["schemas"]["HandoffRow"][];
             /** Format: int32 */
             page: number;
             /** Format: int32 */

@@ -84,7 +84,7 @@ public static class AdminEndpoints
             });
         });
 
-        g.MapPut("/settings/{key}", async (string key, JsonElement body, HubDb db, SettingsStore store, TimeProvider clock) =>
+        g.MapPut("/settings/{key}", async (string key, JsonElement body, HubDb db, SettingsStore store, TimeProvider clock, EvaluationSignal signal) =>
         {
             var def = OrgSettings.Def(key) ?? throw ApiException.Invalid("key", "setting.unknown");
             var value = body.ValueKind == JsonValueKind.Object && body.TryGetProperty("value", out var v) ? v : body;
@@ -97,9 +97,17 @@ public static class AdminEndpoints
                 throw ApiException.Invalid("value", "audit.initialize_required");
             var json = value.GetRawText();
             var row = await db.Settings.FirstOrDefaultAsync(s => s.Key == key) ?? throw ApiException.Invalid("key", "setting.unknown");
-            if (row.Value != json) { row.Value = json; row.UpdatedAt = clock.GetUtcNow(); row.UpdatedBy = db.Audit.ActorId; }
+            if (row.Value != json)
+            {
+                row.Value = json; row.UpdatedAt = clock.GetUtcNow(); row.UpdatedBy = db.Audit.ActorId;
+                // The evaluator reads thresholds, health, rules, the calendar and `flag.backlog` (FR-BKL-05): re-evaluate every Active
+                // project now, through the outbox, rather than leave health and milestone status stale until the nightly run (FR-BKL-09).
+                if (def.Group is "thresholds" or "health" or "rules" or "calendar" || key == $"flag.{TaskRules.BacklogFlag}")
+                    db.Outbox.Add(new OutboxEvent { EventType = "SettingsChanged", CreatedAt = clock.GetUtcNow(), Payload = JsonSerializer.Serialize(new { key }) });
+            }
             await db.SaveChangesAsync();
             store.Invalidate();
+            signal.Poke();
             return Results.Ok(new { key, value = JsonDocument.Parse(row.Value).RootElement });
         });
 

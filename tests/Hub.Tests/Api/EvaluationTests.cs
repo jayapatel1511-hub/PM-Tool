@@ -354,6 +354,38 @@ public sealed class EvaluationTests(HubFactory f)
         Assert.True((await State(t)).IsOverdue);
     }
 
+    /// FR-BKL-09 (review fixes 2026-10-28): switching `flag.backlog` queues every Active project for re-evaluation through the outbox,
+    /// so stored health follows the switch, and its rollback, at once rather than at the next nightly run.
+    [Fact, Trait("flag-off", "backlog"), Trait("flag-on", "backlog")]
+    [Trait("Spec", "FR-BKL-09")]
+    public async Task Switching_the_backlog_flag_re_evaluates_stored_health()
+    {
+        var p = await d.Project();
+        string In(int days) => DateOnly.FromDateTime(f.Clock.Now.UtcDateTime).AddDays(days).ToString("yyyy-MM-dd");
+        for (var i = 0; i < 3; i++) await d.NewTask(p.Id, TestData.Pm, new { dueDate = In(-2) });
+        for (var i = 0; i < 6; i++) await d.NewTask(p.Id, TestData.Pm, new { dueDate = In(20) });
+        for (var i = 0; i < 6; i++) await d.NewTask(p.Id, TestData.Pm); // Backlog
+        await f.Evaluate(p.Id);
+        await f.DbAsync(db => db.Outbox.Where(o => o.ProjectId == p.Id).ExecuteUpdateAsync(u => u.SetProperty(o => o.ProcessedAt, f.Clock.Now)));
+        Task<string> Computed() => f.DbAsync(db => db.ProjectStates.Where(s => s.ProjectId == p.Id).Select(s => s.ComputedHealth).FirstAsync());
+        async Task Switch(bool on)
+        {
+            (await f.As(TestData.Admin).Put("/api/v1/admin/settings/flag.backlog", new { value = on })).EnsureSuccessStatusCode();
+            for (var i = 0; i < 20 && await f.DbAsync(db => db.Outbox.AnyAsync(o => o.EventType == "SettingsChanged" && o.ProcessedAt == null)); i++)
+                await EvaluationWorker.ProcessOnce(f.Services, f.Clock, CancellationToken.None);
+        }
+        // 3 overdue of 15 open is 20 %, Yellow; with the Backlog left out, 3 of 9 is 33 %, Red (FR-BKL-05).
+        Assert.Equal(Health.Yellow, await Computed());
+        try
+        {
+            await Switch(true);
+            Assert.Equal(Health.Red, await Computed());
+            await Switch(false);
+            Assert.Equal(Health.Yellow, await Computed());
+        }
+        finally { await Switch(false); }
+    }
+
     [Fact]
     public async Task Large_project_re_evaluates_within_two_seconds() // §22: 2,000 tasks
     {

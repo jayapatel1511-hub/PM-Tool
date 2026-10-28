@@ -329,13 +329,16 @@ public sealed class ReadinessApiTests(HubFactory f)
         var deliverable = new Deliverable { ProjectId = project.Id, Key = "D" + Guid.NewGuid().ToString("N")[..8],
             Name = "Backlog under deliverable", ProjectDisciplineId = disciplineId, DeliverableTypeId = await data.DeliverableType(),
             OwnerId = deliverableOwner, DueDate = today.AddDays(2) };
-        WorkTask Under(int seq, string name, DateOnly? start, DateOnly? due) => new() { ProjectId = project.Id, Seq = seq, Key = "T" + Guid.NewGuid().ToString("N")[..8],
-            Name = name, ProjectDisciplineId = disciplineId, DeliverableId = deliverable.Id, AssigneeId = deliverableOwner,
+        var backlogOnly = new Deliverable { ProjectId = project.Id, Key = "D" + Guid.NewGuid().ToString("N")[..8],
+            Seq = 1, Name = "Only Backlog work", ProjectDisciplineId = disciplineId, DeliverableTypeId = deliverable.DeliverableTypeId,
+            OwnerId = deliverableOwner, DueDate = today.AddDays(2) };
+        WorkTask Under(int seq, string name, DateOnly? start, DateOnly? due, Deliverable? under = null) => new() { ProjectId = project.Id, Seq = seq, Key = "T" + Guid.NewGuid().ToString("N")[..8],
+            Name = name, ProjectDisciplineId = disciplineId, DeliverableId = (under ?? deliverable).Id, AssigneeId = deliverableOwner,
             StartDate = start, DueDate = due, EstimatedHours = 8m };
         await f.DbAsync(async db =>
         {
-            db.Deliverables.Add(deliverable);
-            db.Tasks.AddRange(Under(101, "Dated layout", today, today.AddDays(2)), Under(102, "Backlog layout", null, null));
+            db.Deliverables.AddRange(deliverable, backlogOnly);
+            db.Tasks.AddRange(Under(101, "Dated layout", today, today.AddDays(2)), Under(102, "Backlog layout", null, null), Under(103, "Backlog sketch", null, null, backlogOnly));
             await db.SaveChangesAsync(); return 0;
         });
         Task<ReadinessEndpoints.CapacityEvaluation> Capacity(string type, Guid id) =>
@@ -344,6 +347,14 @@ public sealed class ReadinessApiTests(HubFactory f)
         // Off: unchanged, the Backlog task is other active workload and undated required work.
         Assert.Contains("other active workload", (await Capacity("Task", task)).Reason);
         Assert.Contains("dated within the target window", (await Capacity("Deliverable", deliverable.Id)).Reason);
+        // A deliverable whose only open work is in the Backlog reads unknown until that work is dated, with the flag off and on.
+        async Task OnlyBacklogIsUnknown()
+        {
+            var c = await Capacity("Deliverable", backlogOnly.Id);
+            Assert.Equal((true, (bool?)null), (c.Applies, c.Satisfied));
+            Assert.Contains("dated within the target window", c.Reason);
+        }
+        await OnlyBacklogIsUnknown();
         await Backlog(true);
         try
         {
@@ -351,6 +362,7 @@ public sealed class ReadinessApiTests(HubFactory f)
             Assert.True(forTask.Satisfied == true, forTask.Reason);
             var forDeliverable = await Capacity("Deliverable", deliverable.Id);
             Assert.True(forDeliverable.Satisfied == true, forDeliverable.Reason);
+            await OnlyBacklogIsUnknown();
         }
         finally { await Backlog(false); }
     }

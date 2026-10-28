@@ -5,34 +5,17 @@ import { ErrorBanner, Field, FilterBar, Loading, PageHelp, selectCls } from '@/c
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useItemPanel } from '@/components/hub/panel-host'
-import { get, qs } from '@/lib/api'
+import type { components } from '@/gen/api'
+import { get, typedRequest } from '@/lib/api'
 import { fmtDate, fmtTime } from '@/lib/format'
 import { plural, t, tv } from '@/lib/i18n'
 import type { ProjectDetail } from '@/lib/types'
 import type { Accent } from '@/lib/utils'
 import { CoordStatus } from './CoordinationForms'
 
-type Handoff = { id: string; key: string; title: string; status: string; neededBy: string; promisedBy?: string; targetKey?: string; sendingOwnerId: string; receivingOwnerId: string; sendingDisciplineId: string; receivingDisciplineId: string }
-export type ChangeCounts = { pendingAssessments: number; acknowledgedPending: number; projectPending: number }
-type Change = ChangeCounts & { id: string; key: string; title: string; status: string; ownerId?: string }
-type Review = { id: string; key: string; title: string; status: string; outstandingDisciplines: number; blockingFindings: number; coordinatorId?: string }
-type LinkedIssue = { id: string; key: string; title: string; status: string; ownerId?: string | null; ownerName?: string | null; projectDisciplineId?: string | null }
-type InputUse = { id: string; targetType: string; targetId: string; sourceRevisionId: string; targetKey?: string | null; targetName?: string | null; sourceKey?: string | null; sourceUrl?: string | null; revision?: string | null; intendedUse: string }
-type BlockerGroup = { handoffId: string; handoffKey: string; taskIds: string[]; taskKeys: string[] }
-type Startability = { id: string; targetType: 'Task' | 'Deliverable'; targetId: string; key: string; name: string;
-  dueDate: string | null; state: string; blocked: string[]; unknown: string[] }
-type LinkedAction = { id: string; key: string; text: string; status: string; dueDate: string | null;
-  sourceType: 'Handoff' | 'ChangeNotice'; sourceId: string; targetType: 'Task' | 'Deliverable'; targetId: string }
-type ChangeTarget = { changeNoticeId: string; targetType: 'Task' | 'Deliverable'; targetId: string }
-type UnavailableChangeTarget = { changeNoticeId: string; count: number }
-type UpcomingSubmission = { id: string; key: string; title: string; status: string; effectiveStatus: string; targetDate: string; coordinatorId: string; failingChecks: { sourceId?: string; kind: string; code: string; message: string; sourcePath?: string }[] }
-type StaffingConflict = { id: string; key: string; targetType: string; targetId: string; description: string; neededBy: string; state: string; affectedOwnerId: string; removalOwnerId: string }
-type Data = { handoffs: Handoff[]; outgoing: Handoff[]; incoming: Handoff[]; changes: Change[]; reviews: Review[]; linkedIssues: LinkedIssue[]; uses: InputUse[]; blockerGroups: BlockerGroup[]; usesTotal: number; linkedIssuesTotal: number; handoffsTotal: number; outgoingTotal: number; incomingTotal: number; outgoingPage: number; incomingPage: number; reviewsPage: number; reviewsPageSize: number; changesTotal: number; reviewsTotal: number; evaluatedAt: string;
-  startability: Startability[]; startabilityReadyTotal: number; startabilityFrom: string; startabilityTo: string;
-  linkedActions: LinkedAction[]; changeTargets: ChangeTarget[]; unavailableChangeTargets: UnavailableChangeTarget[];
-  usesPage: number; usesPageSize: number; linkedIssuesPage: number; linkedIssuesPageSize: number; changesPage: number; changesPageSize: number;
-  startabilityTotal: number; startabilityPage: number; startabilityPageSize: number; upcomingSubmissions: UpcomingSubmission[]; upcomingSubmissionsTotal: number;
-  staffingConflicts: StaffingConflict[]; staffingConflictsTotal: number; upcomingSubmissionsPage: number; staffingConflictsPage: number; blockerGroupsPage: number; handoffPage: number; handoffPageSize: number; blockerGroupsTotal: number; page: number; pageSize: number }
+type Schemas = components['schemas']
+export type ChangeCounts = Pick<Schemas['CoordinationChangeRow'], 'pendingAssessments' | 'acknowledgedPending' | 'projectPending'>
+type LinkedAction = Schemas['CoordinationLinkedAction']
 
 /** Each of the five questions keeps one identity stripe wherever it appears; the stripe never signals status. */
 const QUESTION_ACCENT: Record<string, Accent> = { owe: 'blue', waiting: 'mint', using: 'lavender', changed: 'peach', start: 'amber' }
@@ -85,7 +68,8 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
   const q = useQuery({
     queryKey: ['p', project.id, 'discipline-coordination', disciplineId, ownerId, from, to, page, printAll],
     staleTime: 0,
-    queryFn: () => get<Data>(`projects/${project.id}/discipline-coordination${qs({ disciplineId, ownerId, from, to, page: printAll ? undefined : page, pageSize: printAll ? undefined : 4 })}`),
+    queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/discipline-coordination', { params: { projectId: project.id },
+      query: { disciplineId, ownerId, from, to, page: printAll ? undefined : page, pageSize: printAll ? undefined : 4 } }),
   })
   useEffect(() => {
     if (!printAll || q.isPending || q.isFetching || !onPrinted) return
@@ -144,7 +128,7 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
     {r.detail && <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">{r.detail}</div>}
   </li>)}</ul> : none
   const linkedIssueItems = d.linkedIssues
-  const existingActions = (sourceType: LinkedAction['sourceType'], sourceId: string) => d.linkedActions.filter(a => a.sourceType === sourceType && a.sourceId === sourceId)
+  const existingActions = (sourceType: string, sourceId: string) => d.linkedActions.filter(a => a.sourceType === sourceType && a.sourceId === sourceId)
   const actionLinks = (rows: LinkedAction[]) => rows.length > 0 && <ul className="mt-1 space-y-1 text-xs">{rows.map(a =>
     <li key={a.id}>{t('dcv.existingAction')} <Link className={keyLink} to={registerUrl('meetings', `Action:${a.id}`)}>{a.key}</Link> · {a.text} · {tv(a.status)}{a.dueDate && <span className="tabular-nums"> · {fmtDate(a.dueDate)}</span>}</li>)}</ul>
   const capture = (key: string, onClick: () => void) => meeting && canCapture && onCapture &&

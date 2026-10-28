@@ -3263,7 +3263,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["WorkspaceCoordinationProjection"];
                     };
                 };
             };
@@ -11102,7 +11102,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["CoordinationProjection"];
                     };
                 };
             };
@@ -17142,11 +17142,221 @@ export interface components {
             /** Format: int32 */
             rowVersion: null | number;
         };
+        CoordinationBlockerGroup: {
+            /** Format: uuid */
+            handoffId: string;
+            handoffKey: string;
+            taskIds: string[];
+            taskKeys: string[];
+        };
+        CoordinationChangeRow: {
+            /** Format: int32 */
+            acknowledgedPending: number;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            /** Format: uuid */
+            ownerId: string;
+            /** Format: int32 */
+            pendingAssessments: number;
+            /** Format: int32 */
+            projectPending: number;
+            status: string;
+            title: string;
+        };
+        CoordinationChangeTarget: {
+            available: boolean;
+            /** Format: uuid */
+            changeNoticeId: string;
+            /** Format: uuid */
+            targetId: string;
+            targetType: string;
+        };
+        CoordinationHandoffRow: {
+            /** Format: uuid */
+            id: string;
+            key: string;
+            /** Format: date */
+            neededBy: string;
+            /** Format: date */
+            promisedBy: null | string;
+            /** Format: uuid */
+            receivingDisciplineId: string;
+            /** Format: uuid */
+            receivingOwnerId: string;
+            /** Format: uuid */
+            sendingDisciplineId: string;
+            /** Format: uuid */
+            sendingOwnerId: string;
+            status: string;
+            /** Format: uuid */
+            targetDeliverableId: null | string;
+            /** Format: uuid */
+            targetTaskId: null | string;
+            title: string;
+        };
+        CoordinationInputUseRow: {
+            /** Format: date-time */
+            adoptedAt: string;
+            /** Format: uuid */
+            adoptedBy: string;
+            /** Format: uuid */
+            id: string;
+            intendedUse: string;
+            /** Format: uuid */
+            ownerId: string;
+            revision: null | string;
+            /** Format: int32 */
+            rowVersion: number;
+            sourceIdentity: string;
+            sourceKey: null | string;
+            /** Format: uuid */
+            sourceRevisionId: string;
+            sourceUrl: null | string;
+            /** Format: uuid */
+            targetId: string;
+            targetKey: null | string;
+            targetName: null | string;
+            targetType: string;
+        };
+        CoordinationIssueRow: {
+            /** Format: uuid */
+            id: string;
+            key: string;
+            /** Format: uuid */
+            ownerId: string;
+            ownerName: null | string;
+            /** Format: uuid */
+            projectDisciplineId: null | string;
+            status: string;
+            title: string;
+        };
+        CoordinationLinkedAction: {
+            /** Format: date */
+            dueDate: null | string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            /** Format: uuid */
+            sourceId: string;
+            sourceType: string;
+            status: string;
+            text: string;
+        };
+        CoordinationProjection: {
+            blockerGroups: components["schemas"]["CoordinationBlockerGroup"][];
+            /** Format: int32 */
+            blockerGroupsPage: number;
+            /** Format: int32 */
+            blockerGroupsTotal: number;
+            changeTargets: components["schemas"]["CoordinationChangeTarget"][];
+            /** Format: int32 */
+            changeTargetsTotal: number;
+            changes: components["schemas"]["CoordinationChangeRow"][];
+            /** Format: int32 */
+            changesPage: number;
+            /** Format: int32 */
+            changesPageSize: number;
+            /** Format: int32 */
+            changesTotal: number;
+            /** Format: date-time */
+            evaluatedAt: string;
+            /** Format: int32 */
+            handoffPage: number;
+            /** Format: int32 */
+            handoffPageSize: number;
+            handoffs: components["schemas"]["CoordinationHandoffRow"][];
+            /** Format: int32 */
+            handoffsTotal: number;
+            incoming: components["schemas"]["CoordinationHandoffRow"][];
+            /** Format: int32 */
+            incomingPage: number;
+            /** Format: int32 */
+            incomingTotal: number;
+            linkedActions: components["schemas"]["CoordinationLinkedAction"][];
+            /** Format: int32 */
+            linkedActionsTotal: number;
+            linkedIssues: components["schemas"]["CoordinationIssueRow"][];
+            /** Format: int32 */
+            linkedIssuesPage: number;
+            /** Format: int32 */
+            linkedIssuesPageSize: number;
+            /** Format: int32 */
+            linkedIssuesTotal: number;
+            outgoing: components["schemas"]["CoordinationHandoffRow"][];
+            /** Format: int32 */
+            outgoingPage: number;
+            /** Format: int32 */
+            outgoingTotal: number;
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            reviews: components["schemas"]["CoordinationReviewRow"][];
+            /** Format: int32 */
+            reviewsPage: number;
+            /** Format: int32 */
+            reviewsPageSize: number;
+            /** Format: int32 */
+            reviewsTotal: number;
+            staffingConflicts: components["schemas"]["StaffingContextRow"][];
+            /** Format: int32 */
+            staffingConflictsPage: number;
+            /** Format: int32 */
+            staffingConflictsTotal: number;
+            startability: components["schemas"]["StartabilityRow"][];
+            /** Format: date */
+            startabilityFrom: string;
+            /** Format: int32 */
+            startabilityPage: number;
+            /** Format: int32 */
+            startabilityPageSize: number;
+            /** Format: int32 */
+            startabilityReadyTotal: number;
+            /** Format: date */
+            startabilityTo: string;
+            /** Format: int32 */
+            startabilityTotal: number;
+            unavailableChangeTargets: components["schemas"]["CoordinationUnavailableTarget"][];
+            /** Format: int32 */
+            unavailableChangeTargetsTotal: number;
+            upcomingSubmissions: components["schemas"]["SubmissionContextRow"][];
+            /** Format: int32 */
+            upcomingSubmissionsPage: number;
+            /** Format: int32 */
+            upcomingSubmissionsTotal: number;
+            uses: components["schemas"]["CoordinationInputUseRow"][];
+            /** Format: int32 */
+            usesPage: number;
+            /** Format: int32 */
+            usesPageSize: number;
+            /** Format: int32 */
+            usesTotal: number;
+        };
         CoordinationResult: {
             /** Format: uuid */
             id: string;
             /** Format: int32 */
             rowVersion: number;
+        };
+        CoordinationReviewRow: {
+            /** Format: int32 */
+            blockingFindings: number;
+            /** Format: uuid */
+            coordinatorId: string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            /** Format: int32 */
+            outstandingDisciplines: number;
+            status: string;
+            title: string;
+        };
+        CoordinationUnavailableTarget: {
+            /** Format: uuid */
+            changeNoticeId: string;
+            /** Format: int32 */
+            count: number;
         };
         CreateUserBody: {
             displayName: null | string;
@@ -19597,6 +19807,22 @@ export interface components {
             days: number;
             note: string;
         };
+        StaffingContextRow: {
+            /** Format: uuid */
+            affectedOwnerId: string;
+            description: string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            /** Format: date */
+            neededBy: string;
+            /** Format: uuid */
+            removalOwnerId: string;
+            state: string;
+            /** Format: uuid */
+            targetId: string;
+            targetType: string;
+        };
         StartAuthorisationView: {
             /** Format: uuid */
             authorisedBy: string;
@@ -19613,6 +19839,24 @@ export interface components {
             requestId: string;
             /** Format: int32 */
             rowVersion: number;
+        };
+        StartabilityRow: {
+            blocked: string[];
+            /** Format: uuid */
+            disciplineId: string;
+            /** Format: date */
+            dueDate: null | string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            /** Format: uuid */
+            ownerId: null | string;
+            state: string;
+            /** Format: uuid */
+            targetId: string;
+            targetType: string;
+            unknown: string[];
         };
         State: {
             affectedMilestoneIds: string[];
@@ -19731,6 +19975,19 @@ export interface components {
             /** Format: uuid */
             updatedBy: null | string;
         };
+        SubmissionContextRow: {
+            /** Format: uuid */
+            coordinatorId: string;
+            effectiveStatus: string;
+            failingChecks: components["schemas"]["SubmissionFailingCheck"][];
+            /** Format: uuid */
+            id: string;
+            key: string;
+            status: string;
+            /** Format: date */
+            targetDate: string;
+            title: string;
+        };
         SubmissionCreateBody: {
             /** Format: uuid */
             coordinatorId: string;
@@ -19798,6 +20055,14 @@ export interface components {
             updatedAt: string;
             /** Format: uuid */
             updatedBy: null | string;
+        };
+        SubmissionFailingCheck: {
+            code: string;
+            kind: string;
+            message: string;
+            /** Format: uuid */
+            sourceId: null | string;
+            sourcePath: null | string;
         };
         SubmissionIssueBody: {
             destination: string;
@@ -20767,6 +21032,44 @@ export interface components {
             projectIds: null | string[];
             /** Format: int32 */
             rowVersion?: null | number;
+        };
+        WorkspaceCoordinationProject: {
+            data: components["schemas"]["CoordinationProjection"];
+            /** Format: uuid */
+            disciplineId: null | string;
+            /** Format: uuid */
+            id: string;
+            name: string;
+            projectNumber: string;
+        };
+        WorkspaceCoordinationProjection: {
+            /** Format: uuid */
+            actorId: string;
+            disciplines: components["schemas"]["WorkspaceDisciplineChoice"][];
+            /** Format: date-time */
+            evaluatedAt: string;
+            owners: components["schemas"]["WorkspaceOwnerChoice"][];
+            projectChoices: components["schemas"]["WorkspaceProjectChoice"][];
+            projects: components["schemas"]["WorkspaceCoordinationProject"][];
+            scope: string;
+        };
+        WorkspaceDisciplineChoice: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+        };
+        WorkspaceOwnerChoice: {
+            displayName: string;
+            /** Format: uuid */
+            id: string;
+        };
+        WorkspaceProjectChoice: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** Format: uuid */
+            projectManagerId: string;
+            projectNumber: string;
         };
         WorkspaceRow: {
             /** Format: int32 */

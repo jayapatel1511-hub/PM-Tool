@@ -4140,6 +4140,46 @@
     "$.projects[].data.incomingTotal": [
       "number"
     ],
+    "$.projects[].data.incoming[]": [
+      "object"
+    ],
+    "$.projects[].data.incoming[].id": [
+      "string"
+    ],
+    "$.projects[].data.incoming[].key": [
+      "string"
+    ],
+    "$.projects[].data.incoming[].neededBy": [
+      "string"
+    ],
+    "$.projects[].data.incoming[].promisedBy": [
+      "null",
+      "string"
+    ],
+    "$.projects[].data.incoming[].receivingDisciplineId": [
+      "string"
+    ],
+    "$.projects[].data.incoming[].receivingOwnerId": [
+      "string"
+    ],
+    "$.projects[].data.incoming[].sendingDisciplineId": [
+      "string"
+    ],
+    "$.projects[].data.incoming[].sendingOwnerId": [
+      "string"
+    ],
+    "$.projects[].data.incoming[].status": [
+      "string"
+    ],
+    "$.projects[].data.incoming[].targetDeliverableId": [
+      "null"
+    ],
+    "$.projects[].data.incoming[].targetTaskId": [
+      "string"
+    ],
+    "$.projects[].data.incoming[].title": [
+      "string"
+    ],
     "$.projects[].data.linkedActions": [
       "array"
     ],
@@ -4307,6 +4347,36 @@
     ],
     "$.projects[].data.staffingConflictsTotal": [
       "number"
+    ],
+    "$.projects[].data.staffingConflicts[]": [
+      "object"
+    ],
+    "$.projects[].data.staffingConflicts[].affectedOwnerId": [
+      "string"
+    ],
+    "$.projects[].data.staffingConflicts[].description": [
+      "string"
+    ],
+    "$.projects[].data.staffingConflicts[].id": [
+      "string"
+    ],
+    "$.projects[].data.staffingConflicts[].key": [
+      "string"
+    ],
+    "$.projects[].data.staffingConflicts[].neededBy": [
+      "string"
+    ],
+    "$.projects[].data.staffingConflicts[].removalOwnerId": [
+      "string"
+    ],
+    "$.projects[].data.staffingConflicts[].state": [
+      "string"
+    ],
+    "$.projects[].data.staffingConflicts[].targetId": [
+      "string"
+    ],
+    "$.projects[].data.staffingConflicts[].targetType": [
+      "string"
     ],
     "$.projects[].data.startability": [
       "array"
@@ -15940,6 +16010,1221 @@
     "$.components.schemas.ConvertBody.type": [
       "string"
     ],
+    "$.components.schemas.CoordinationBlockerGroup": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationBlockerGroup.properties": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationBlockerGroup.properties.handoffId": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationBlockerGroup.properties.handoffId.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationBlockerGroup.properties.handoffId.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationBlockerGroup.properties.handoffKey": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationBlockerGroup.properties.handoffKey.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationBlockerGroup.properties.taskIds": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationBlockerGroup.properties.taskIds.items": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationBlockerGroup.properties.taskIds.items.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationBlockerGroup.properties.taskIds.items.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationBlockerGroup.properties.taskIds.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationBlockerGroup.properties.taskKeys": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationBlockerGroup.properties.taskKeys.items": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationBlockerGroup.properties.taskKeys.items.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationBlockerGroup.properties.taskKeys.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationBlockerGroup.required": [
+      "array"
+    ],
+    "$.components.schemas.CoordinationBlockerGroup.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationBlockerGroup.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationChangeRow": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationChangeRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationChangeRow.properties.acknowledgedPending": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationChangeRow.properties.acknowledgedPending.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationChangeRow.properties.acknowledgedPending.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationChangeRow.properties.acknowledgedPending.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationChangeRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationChangeRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationChangeRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationChangeRow.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationChangeRow.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationChangeRow.properties.ownerId": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationChangeRow.properties.ownerId.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationChangeRow.properties.ownerId.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationChangeRow.properties.pendingAssessments": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationChangeRow.properties.pendingAssessments.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationChangeRow.properties.pendingAssessments.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationChangeRow.properties.pendingAssessments.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationChangeRow.properties.projectPending": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationChangeRow.properties.projectPending.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationChangeRow.properties.projectPending.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationChangeRow.properties.projectPending.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationChangeRow.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationChangeRow.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationChangeRow.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationChangeRow.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationChangeRow.required": [
+      "array"
+    ],
+    "$.components.schemas.CoordinationChangeRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationChangeRow.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationChangeTarget": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationChangeTarget.properties": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationChangeTarget.properties.available": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationChangeTarget.properties.available.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationChangeTarget.properties.changeNoticeId": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationChangeTarget.properties.changeNoticeId.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationChangeTarget.properties.changeNoticeId.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationChangeTarget.properties.targetId": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationChangeTarget.properties.targetId.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationChangeTarget.properties.targetId.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationChangeTarget.properties.targetType": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationChangeTarget.properties.targetType.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationChangeTarget.required": [
+      "array"
+    ],
+    "$.components.schemas.CoordinationChangeTarget.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationChangeTarget.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationHandoffRow": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.neededBy": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.neededBy.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.neededBy.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.promisedBy": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.promisedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.promisedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.promisedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.receivingDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.receivingDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.receivingDisciplineId.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.receivingOwnerId": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.receivingOwnerId.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.receivingOwnerId.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.sendingDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.sendingDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.sendingDisciplineId.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.sendingOwnerId": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.sendingOwnerId.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.sendingOwnerId.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.targetDeliverableId": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.targetDeliverableId.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.targetDeliverableId.type": [
+      "array"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.targetDeliverableId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.targetTaskId": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.targetTaskId.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.targetTaskId.type": [
+      "array"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.targetTaskId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.required": [
+      "array"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationHandoffRow.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationInputUseRow": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.adoptedAt": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.adoptedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.adoptedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.adoptedBy": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.adoptedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.adoptedBy.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.intendedUse": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.intendedUse.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.ownerId": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.ownerId.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.ownerId.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.revision": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.revision.type": [
+      "array"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.revision.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.sourceIdentity": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.sourceIdentity.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.sourceKey": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.sourceKey.type": [
+      "array"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.sourceKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.sourceRevisionId": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.sourceRevisionId.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.sourceRevisionId.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.sourceUrl": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.sourceUrl.type": [
+      "array"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.sourceUrl.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.targetId": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.targetId.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.targetId.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.targetKey": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.targetKey.type": [
+      "array"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.targetKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.targetName": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.targetName.type": [
+      "array"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.targetName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.targetType": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.properties.targetType.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.required": [
+      "array"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationInputUseRow.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationIssueRow": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationIssueRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationIssueRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationIssueRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationIssueRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationIssueRow.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationIssueRow.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationIssueRow.properties.ownerId": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationIssueRow.properties.ownerId.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationIssueRow.properties.ownerId.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationIssueRow.properties.ownerName": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationIssueRow.properties.ownerName.type": [
+      "array"
+    ],
+    "$.components.schemas.CoordinationIssueRow.properties.ownerName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationIssueRow.properties.projectDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationIssueRow.properties.projectDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationIssueRow.properties.projectDisciplineId.type": [
+      "array"
+    ],
+    "$.components.schemas.CoordinationIssueRow.properties.projectDisciplineId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationIssueRow.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationIssueRow.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationIssueRow.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationIssueRow.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationIssueRow.required": [
+      "array"
+    ],
+    "$.components.schemas.CoordinationIssueRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationIssueRow.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationLinkedAction": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationLinkedAction.properties": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationLinkedAction.properties.dueDate": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationLinkedAction.properties.dueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationLinkedAction.properties.dueDate.type": [
+      "array"
+    ],
+    "$.components.schemas.CoordinationLinkedAction.properties.dueDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationLinkedAction.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationLinkedAction.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationLinkedAction.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationLinkedAction.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationLinkedAction.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationLinkedAction.properties.sourceId": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationLinkedAction.properties.sourceId.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationLinkedAction.properties.sourceId.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationLinkedAction.properties.sourceType": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationLinkedAction.properties.sourceType.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationLinkedAction.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationLinkedAction.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationLinkedAction.properties.text": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationLinkedAction.properties.text.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationLinkedAction.required": [
+      "array"
+    ],
+    "$.components.schemas.CoordinationLinkedAction.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationLinkedAction.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.blockerGroups": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.blockerGroups.items": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.blockerGroups.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.blockerGroups.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.blockerGroupsPage": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.blockerGroupsPage.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.blockerGroupsPage.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.blockerGroupsPage.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.blockerGroupsTotal": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.blockerGroupsTotal.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.blockerGroupsTotal.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.blockerGroupsTotal.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.changeTargets": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.changeTargets.items": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.changeTargets.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.changeTargets.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.changeTargetsTotal": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.changeTargetsTotal.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.changeTargetsTotal.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.changeTargetsTotal.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.changes": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.changes.items": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.changes.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.changes.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.changesPage": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.changesPage.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.changesPage.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.changesPage.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.changesPageSize": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.changesPageSize.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.changesPageSize.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.changesPageSize.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.changesTotal": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.changesTotal.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.changesTotal.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.changesTotal.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.evaluatedAt": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.evaluatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.evaluatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.handoffPage": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.handoffPage.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.handoffPage.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.handoffPage.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.handoffPageSize": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.handoffPageSize.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.handoffPageSize.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.handoffPageSize.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.handoffs": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.handoffs.items": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.handoffs.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.handoffs.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.handoffsTotal": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.handoffsTotal.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.handoffsTotal.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.handoffsTotal.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.incoming": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.incoming.items": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.incoming.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.incoming.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.incomingPage": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.incomingPage.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.incomingPage.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.incomingPage.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.incomingTotal": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.incomingTotal.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.incomingTotal.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.incomingTotal.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.linkedActions": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.linkedActions.items": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.linkedActions.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.linkedActions.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.linkedActionsTotal": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.linkedActionsTotal.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.linkedActionsTotal.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.linkedActionsTotal.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.linkedIssues": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.linkedIssues.items": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.linkedIssues.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.linkedIssues.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.linkedIssuesPage": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.linkedIssuesPage.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.linkedIssuesPage.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.linkedIssuesPage.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.linkedIssuesPageSize": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.linkedIssuesPageSize.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.linkedIssuesPageSize.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.linkedIssuesPageSize.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.linkedIssuesTotal": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.linkedIssuesTotal.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.linkedIssuesTotal.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.linkedIssuesTotal.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.outgoing": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.outgoing.items": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.outgoing.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.outgoing.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.outgoingPage": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.outgoingPage.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.outgoingPage.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.outgoingPage.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.outgoingTotal": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.outgoingTotal.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.outgoingTotal.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.outgoingTotal.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.page": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.page.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.page.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.page.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.pageSize": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.pageSize.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.pageSize.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.pageSize.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.reviews": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.reviews.items": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.reviews.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.reviews.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.reviewsPage": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.reviewsPage.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.reviewsPage.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.reviewsPage.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.reviewsPageSize": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.reviewsPageSize.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.reviewsPageSize.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.reviewsPageSize.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.reviewsTotal": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.reviewsTotal.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.reviewsTotal.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.reviewsTotal.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.staffingConflicts": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.staffingConflicts.items": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.staffingConflicts.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.staffingConflicts.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.staffingConflictsPage": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.staffingConflictsPage.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.staffingConflictsPage.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.staffingConflictsPage.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.staffingConflictsTotal": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.staffingConflictsTotal.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.staffingConflictsTotal.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.staffingConflictsTotal.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.startability": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.startability.items": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.startability.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.startability.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.startabilityFrom": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.startabilityFrom.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.startabilityFrom.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.startabilityPage": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.startabilityPage.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.startabilityPage.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.startabilityPage.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.startabilityPageSize": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.startabilityPageSize.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.startabilityPageSize.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.startabilityPageSize.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.startabilityReadyTotal": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.startabilityReadyTotal.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.startabilityReadyTotal.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.startabilityReadyTotal.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.startabilityTo": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.startabilityTo.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.startabilityTo.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.startabilityTotal": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.startabilityTotal.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.startabilityTotal.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.startabilityTotal.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.unavailableChangeTargets": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.unavailableChangeTargets.items": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.unavailableChangeTargets.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.unavailableChangeTargets.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.unavailableChangeTargetsTotal": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.unavailableChangeTargetsTotal.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.unavailableChangeTargetsTotal.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.unavailableChangeTargetsTotal.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.upcomingSubmissions": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.upcomingSubmissions.items": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.upcomingSubmissions.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.upcomingSubmissions.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.upcomingSubmissionsPage": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.upcomingSubmissionsPage.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.upcomingSubmissionsPage.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.upcomingSubmissionsPage.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.upcomingSubmissionsTotal": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.upcomingSubmissionsTotal.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.upcomingSubmissionsTotal.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.upcomingSubmissionsTotal.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.uses": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.uses.items": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.uses.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.uses.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.usesPage": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.usesPage.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.usesPage.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.usesPage.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.usesPageSize": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.usesPageSize.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.usesPageSize.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.usesPageSize.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.usesTotal": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.usesTotal.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.usesTotal.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.properties.usesTotal.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.required": [
+      "array"
+    ],
+    "$.components.schemas.CoordinationProjection.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationProjection.type": [
+      "string"
+    ],
     "$.components.schemas.CoordinationResult": [
       "object"
     ],
@@ -15974,6 +17259,117 @@
       "string"
     ],
     "$.components.schemas.CoordinationResult.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationReviewRow": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationReviewRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationReviewRow.properties.blockingFindings": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationReviewRow.properties.blockingFindings.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationReviewRow.properties.blockingFindings.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationReviewRow.properties.blockingFindings.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationReviewRow.properties.coordinatorId": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationReviewRow.properties.coordinatorId.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationReviewRow.properties.coordinatorId.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationReviewRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationReviewRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationReviewRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationReviewRow.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationReviewRow.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationReviewRow.properties.outstandingDisciplines": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationReviewRow.properties.outstandingDisciplines.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationReviewRow.properties.outstandingDisciplines.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationReviewRow.properties.outstandingDisciplines.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationReviewRow.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationReviewRow.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationReviewRow.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationReviewRow.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationReviewRow.required": [
+      "array"
+    ],
+    "$.components.schemas.CoordinationReviewRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationReviewRow.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationUnavailableTarget": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationUnavailableTarget.properties": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationUnavailableTarget.properties.changeNoticeId": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationUnavailableTarget.properties.changeNoticeId.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationUnavailableTarget.properties.changeNoticeId.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationUnavailableTarget.properties.count": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationUnavailableTarget.properties.count.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationUnavailableTarget.properties.count.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationUnavailableTarget.properties.count.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationUnavailableTarget.required": [
+      "array"
+    ],
+    "$.components.schemas.CoordinationUnavailableTarget.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationUnavailableTarget.type": [
       "string"
     ],
     "$.components.schemas.CreateUserBody": [
@@ -32344,6 +33740,90 @@
     "$.components.schemas.SnoozeBody.type": [
       "string"
     ],
+    "$.components.schemas.StaffingContextRow": [
+      "object"
+    ],
+    "$.components.schemas.StaffingContextRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.StaffingContextRow.properties.affectedOwnerId": [
+      "object"
+    ],
+    "$.components.schemas.StaffingContextRow.properties.affectedOwnerId.format": [
+      "string"
+    ],
+    "$.components.schemas.StaffingContextRow.properties.affectedOwnerId.type": [
+      "string"
+    ],
+    "$.components.schemas.StaffingContextRow.properties.description": [
+      "object"
+    ],
+    "$.components.schemas.StaffingContextRow.properties.description.type": [
+      "string"
+    ],
+    "$.components.schemas.StaffingContextRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.StaffingContextRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.StaffingContextRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.StaffingContextRow.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.StaffingContextRow.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.StaffingContextRow.properties.neededBy": [
+      "object"
+    ],
+    "$.components.schemas.StaffingContextRow.properties.neededBy.format": [
+      "string"
+    ],
+    "$.components.schemas.StaffingContextRow.properties.neededBy.type": [
+      "string"
+    ],
+    "$.components.schemas.StaffingContextRow.properties.removalOwnerId": [
+      "object"
+    ],
+    "$.components.schemas.StaffingContextRow.properties.removalOwnerId.format": [
+      "string"
+    ],
+    "$.components.schemas.StaffingContextRow.properties.removalOwnerId.type": [
+      "string"
+    ],
+    "$.components.schemas.StaffingContextRow.properties.state": [
+      "object"
+    ],
+    "$.components.schemas.StaffingContextRow.properties.state.type": [
+      "string"
+    ],
+    "$.components.schemas.StaffingContextRow.properties.targetId": [
+      "object"
+    ],
+    "$.components.schemas.StaffingContextRow.properties.targetId.format": [
+      "string"
+    ],
+    "$.components.schemas.StaffingContextRow.properties.targetId.type": [
+      "string"
+    ],
+    "$.components.schemas.StaffingContextRow.properties.targetType": [
+      "object"
+    ],
+    "$.components.schemas.StaffingContextRow.properties.targetType.type": [
+      "string"
+    ],
+    "$.components.schemas.StaffingContextRow.required": [
+      "array"
+    ],
+    "$.components.schemas.StaffingContextRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.StaffingContextRow.type": [
+      "string"
+    ],
     "$.components.schemas.StartAuthorisationView": [
       "object"
     ],
@@ -32444,6 +33924,120 @@
       "string"
     ],
     "$.components.schemas.StartBody.type": [
+      "string"
+    ],
+    "$.components.schemas.StartabilityRow": [
+      "object"
+    ],
+    "$.components.schemas.StartabilityRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.StartabilityRow.properties.blocked": [
+      "object"
+    ],
+    "$.components.schemas.StartabilityRow.properties.blocked.items": [
+      "object"
+    ],
+    "$.components.schemas.StartabilityRow.properties.blocked.items.type": [
+      "string"
+    ],
+    "$.components.schemas.StartabilityRow.properties.blocked.type": [
+      "string"
+    ],
+    "$.components.schemas.StartabilityRow.properties.disciplineId": [
+      "object"
+    ],
+    "$.components.schemas.StartabilityRow.properties.disciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.StartabilityRow.properties.disciplineId.type": [
+      "string"
+    ],
+    "$.components.schemas.StartabilityRow.properties.dueDate": [
+      "object"
+    ],
+    "$.components.schemas.StartabilityRow.properties.dueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.StartabilityRow.properties.dueDate.type": [
+      "array"
+    ],
+    "$.components.schemas.StartabilityRow.properties.dueDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.StartabilityRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.StartabilityRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.StartabilityRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.StartabilityRow.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.StartabilityRow.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.StartabilityRow.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.StartabilityRow.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.StartabilityRow.properties.ownerId": [
+      "object"
+    ],
+    "$.components.schemas.StartabilityRow.properties.ownerId.format": [
+      "string"
+    ],
+    "$.components.schemas.StartabilityRow.properties.ownerId.type": [
+      "array"
+    ],
+    "$.components.schemas.StartabilityRow.properties.ownerId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.StartabilityRow.properties.state": [
+      "object"
+    ],
+    "$.components.schemas.StartabilityRow.properties.state.type": [
+      "string"
+    ],
+    "$.components.schemas.StartabilityRow.properties.targetId": [
+      "object"
+    ],
+    "$.components.schemas.StartabilityRow.properties.targetId.format": [
+      "string"
+    ],
+    "$.components.schemas.StartabilityRow.properties.targetId.type": [
+      "string"
+    ],
+    "$.components.schemas.StartabilityRow.properties.targetType": [
+      "object"
+    ],
+    "$.components.schemas.StartabilityRow.properties.targetType.type": [
+      "string"
+    ],
+    "$.components.schemas.StartabilityRow.properties.unknown": [
+      "object"
+    ],
+    "$.components.schemas.StartabilityRow.properties.unknown.items": [
+      "object"
+    ],
+    "$.components.schemas.StartabilityRow.properties.unknown.items.type": [
+      "string"
+    ],
+    "$.components.schemas.StartabilityRow.properties.unknown.type": [
+      "string"
+    ],
+    "$.components.schemas.StartabilityRow.required": [
+      "array"
+    ],
+    "$.components.schemas.StartabilityRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.StartabilityRow.type": [
       "string"
     ],
     "$.components.schemas.State": [
@@ -33253,6 +34847,84 @@
     "$.components.schemas.SubmissionCheckRow.type": [
       "string"
     ],
+    "$.components.schemas.SubmissionContextRow": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionContextRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionContextRow.properties.coordinatorId": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionContextRow.properties.coordinatorId.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionContextRow.properties.coordinatorId.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionContextRow.properties.effectiveStatus": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionContextRow.properties.effectiveStatus.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionContextRow.properties.failingChecks": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionContextRow.properties.failingChecks.items": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionContextRow.properties.failingChecks.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionContextRow.properties.failingChecks.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionContextRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionContextRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionContextRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionContextRow.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionContextRow.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionContextRow.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionContextRow.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionContextRow.properties.targetDate": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionContextRow.properties.targetDate.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionContextRow.properties.targetDate.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionContextRow.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionContextRow.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionContextRow.required": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionContextRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionContextRow.type": [
+      "string"
+    ],
     "$.components.schemas.SubmissionCreateBody": [
       "object"
     ],
@@ -33692,6 +35364,60 @@
       "string"
     ],
     "$.components.schemas.SubmissionEvidenceRow.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionFailingCheck": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionFailingCheck.properties": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionFailingCheck.properties.code": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionFailingCheck.properties.code.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionFailingCheck.properties.kind": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionFailingCheck.properties.kind.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionFailingCheck.properties.message": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionFailingCheck.properties.message.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionFailingCheck.properties.sourceId": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionFailingCheck.properties.sourceId.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionFailingCheck.properties.sourceId.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionFailingCheck.properties.sourceId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionFailingCheck.properties.sourcePath": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionFailingCheck.properties.sourcePath.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionFailingCheck.properties.sourcePath.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionFailingCheck.required": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionFailingCheck.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionFailingCheck.type": [
       "string"
     ],
     "$.components.schemas.SubmissionIssueBody": [
@@ -40042,6 +41768,252 @@
     "$.components.schemas.WorkspaceBody.type": [
       "string"
     ],
+    "$.components.schemas.WorkspaceCoordinationProject": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProject.properties": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProject.properties.data": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProject.properties.data.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProject.properties.disciplineId": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProject.properties.disciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProject.properties.disciplineId.type": [
+      "array"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProject.properties.disciplineId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProject.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProject.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProject.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProject.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProject.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProject.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProject.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProject.required": [
+      "array"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProject.required[]": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProject.type": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProjection": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProjection.properties": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProjection.properties.actorId": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProjection.properties.actorId.format": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProjection.properties.actorId.type": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProjection.properties.disciplines": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProjection.properties.disciplines.items": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProjection.properties.disciplines.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProjection.properties.disciplines.type": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProjection.properties.evaluatedAt": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProjection.properties.evaluatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProjection.properties.evaluatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProjection.properties.owners": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProjection.properties.owners.items": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProjection.properties.owners.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProjection.properties.owners.type": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProjection.properties.projectChoices": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProjection.properties.projectChoices.items": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProjection.properties.projectChoices.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProjection.properties.projectChoices.type": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProjection.properties.projects": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProjection.properties.projects.items": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProjection.properties.projects.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProjection.properties.projects.type": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProjection.properties.scope": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProjection.properties.scope.type": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProjection.required": [
+      "array"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProjection.required[]": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceCoordinationProjection.type": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceDisciplineChoice": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceDisciplineChoice.properties": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceDisciplineChoice.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceDisciplineChoice.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceDisciplineChoice.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceDisciplineChoice.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceDisciplineChoice.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceDisciplineChoice.required": [
+      "array"
+    ],
+    "$.components.schemas.WorkspaceDisciplineChoice.required[]": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceDisciplineChoice.type": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceOwnerChoice": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceOwnerChoice.properties": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceOwnerChoice.properties.displayName": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceOwnerChoice.properties.displayName.type": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceOwnerChoice.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceOwnerChoice.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceOwnerChoice.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceOwnerChoice.required": [
+      "array"
+    ],
+    "$.components.schemas.WorkspaceOwnerChoice.required[]": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceOwnerChoice.type": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceProjectChoice": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceProjectChoice.properties": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceProjectChoice.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceProjectChoice.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceProjectChoice.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceProjectChoice.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceProjectChoice.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceProjectChoice.properties.projectManagerId": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceProjectChoice.properties.projectManagerId.format": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceProjectChoice.properties.projectManagerId.type": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceProjectChoice.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.WorkspaceProjectChoice.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceProjectChoice.required": [
+      "array"
+    ],
+    "$.components.schemas.WorkspaceProjectChoice.required[]": [
+      "string"
+    ],
+    "$.components.schemas.WorkspaceProjectChoice.type": [
+      "string"
+    ],
     "$.components.schemas.WorkspaceRow": [
       "object"
     ],
@@ -45087,6 +47059,9 @@
     ],
     "$.paths./api/v1/discipline-coordination.get.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/discipline-coordination.get.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/discipline-coordination.get.responses.200.description": [
       "string"
@@ -56917,6 +58892,9 @@
     "$.paths./api/v1/projects/{projectId}/discipline-coordination.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/projects/{projectId}/discipline-coordination.get.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/projects/{projectId}/discipline-coordination.get.responses.200.description": [
       "string"
     ],
@@ -65766,6 +67744,9 @@
     "$.items[].warnings": [
       "array"
     ],
+    "$.items[].warnings[]": [
+      "string"
+    ],
     "$.items[].weekHours": [
       "null"
     ],
@@ -66299,6 +68280,9 @@
     ],
     "$.people[].entries[].warnings": [
       "array"
+    ],
+    "$.people[].entries[].warnings[]": [
+      "string"
     ],
     "$.people[].entries[].weekHours": [
       "null"
@@ -76002,6 +77986,30 @@
     "$.linkedIssuesTotal": [
       "number"
     ],
+    "$.linkedIssues[]": [
+      "object"
+    ],
+    "$.linkedIssues[].id": [
+      "string"
+    ],
+    "$.linkedIssues[].key": [
+      "string"
+    ],
+    "$.linkedIssues[].ownerId": [
+      "string"
+    ],
+    "$.linkedIssues[].ownerName": [
+      "string"
+    ],
+    "$.linkedIssues[].projectDisciplineId": [
+      "string"
+    ],
+    "$.linkedIssues[].status": [
+      "string"
+    ],
+    "$.linkedIssues[].title": [
+      "string"
+    ],
     "$.outgoing": [
       "array"
     ],
@@ -76101,6 +78109,36 @@
     "$.staffingConflictsTotal": [
       "number"
     ],
+    "$.staffingConflicts[]": [
+      "object"
+    ],
+    "$.staffingConflicts[].affectedOwnerId": [
+      "string"
+    ],
+    "$.staffingConflicts[].description": [
+      "string"
+    ],
+    "$.staffingConflicts[].id": [
+      "string"
+    ],
+    "$.staffingConflicts[].key": [
+      "string"
+    ],
+    "$.staffingConflicts[].neededBy": [
+      "string"
+    ],
+    "$.staffingConflicts[].removalOwnerId": [
+      "string"
+    ],
+    "$.staffingConflicts[].state": [
+      "string"
+    ],
+    "$.staffingConflicts[].targetId": [
+      "string"
+    ],
+    "$.staffingConflicts[].targetType": [
+      "string"
+    ],
     "$.startability": [
       "array"
     ],
@@ -76161,6 +78199,9 @@
     "$.startability[].unknown": [
       "array"
     ],
+    "$.startability[].unknown[]": [
+      "string"
+    ],
     "$.unavailableChangeTargets": [
       "array"
     ],
@@ -76184,6 +78225,51 @@
     ],
     "$.upcomingSubmissionsTotal": [
       "number"
+    ],
+    "$.upcomingSubmissions[]": [
+      "object"
+    ],
+    "$.upcomingSubmissions[].coordinatorId": [
+      "string"
+    ],
+    "$.upcomingSubmissions[].effectiveStatus": [
+      "string"
+    ],
+    "$.upcomingSubmissions[].failingChecks": [
+      "array"
+    ],
+    "$.upcomingSubmissions[].failingChecks[]": [
+      "object"
+    ],
+    "$.upcomingSubmissions[].failingChecks[].code": [
+      "string"
+    ],
+    "$.upcomingSubmissions[].failingChecks[].kind": [
+      "string"
+    ],
+    "$.upcomingSubmissions[].failingChecks[].message": [
+      "string"
+    ],
+    "$.upcomingSubmissions[].failingChecks[].sourceId": [
+      "null"
+    ],
+    "$.upcomingSubmissions[].failingChecks[].sourcePath": [
+      "null"
+    ],
+    "$.upcomingSubmissions[].id": [
+      "string"
+    ],
+    "$.upcomingSubmissions[].key": [
+      "string"
+    ],
+    "$.upcomingSubmissions[].status": [
+      "string"
+    ],
+    "$.upcomingSubmissions[].targetDate": [
+      "string"
+    ],
+    "$.upcomingSubmissions[].title": [
+      "string"
     ],
     "$.uses": [
       "array"

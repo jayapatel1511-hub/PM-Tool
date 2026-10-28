@@ -7,30 +7,18 @@ import { ViewMenu } from '@/components/hub/views'
 import { useScope } from '@/components/hub/workspace'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { get, qs } from '@/lib/api'
+import type { components } from '@/gen/api'
+import { qs, typedRequest } from '@/lib/api'
 import { csvCell } from '@/lib/csv'
 import { fmtDate } from '@/lib/format'
 import { plural, t, tv } from '@/lib/i18n'
 import { accentOf, cn } from '@/lib/utils'
-import { ChangeAssessmentCounts, type ChangeCounts } from './projects/DisciplineCoordinationView'
+import { ChangeAssessmentCounts } from './projects/DisciplineCoordinationView'
 
+type Schemas = components['schemas']
 type Item = { id: string; key: string; title: string; status: string }
-type Handoff = Item & { sendingOwnerId: string; receivingOwnerId: string; sendingDisciplineId: string; receivingDisciplineId: string }
-type Group = { handoffId: string; handoffKey: string; taskIds: string[]; taskKeys: string[] }
-type Startability = { id: string; targetType: 'Task' | 'Deliverable'; targetId: string; key: string; name: string;
-  dueDate: string | null; state: string; blocked: string[]; unknown: string[] }
-type LinkedAction = { id: string; key: string; text: string; status: string; dueDate: string | null;
-  sourceType: 'Handoff' | 'ChangeNotice'; sourceId: string }
-type UnavailableChangeTarget = { changeNoticeId: string; count: number }
-type ProjectProjection = { id: string; projectNumber: string; name: string; disciplineId: string | null; data: {
-  handoffs: Handoff[]; outgoing: Handoff[]; incoming: Handoff[]; changes: (Item & ChangeCounts)[]; reviews: Item[];
-  linkedIssues: Item[]; uses: { id: string; targetKey: string | null; targetName: string | null; sourceKey: string | null; revision: string | null; intendedUse: string }[]; blockerGroups: Group[];
-  startability: Startability[]; startabilityReadyTotal: number; startabilityFrom: string; startabilityTo: string;
-  linkedActions: LinkedAction[]; unavailableChangeTargets: UnavailableChangeTarget[]
-} }
-type Choice = { id: string; name?: string; projectNumber?: string; displayName?: string }
-type Projection = { evaluatedAt: string; projects: ProjectProjection[]; projectChoices: Choice[];
-  disciplines: Choice[]; owners: Choice[] }
+type Projection = Schemas['WorkspaceCoordinationProjection']
+type ProjectProjection = Projection['projects'][number]
 
 function downloadCsv(projection: Projection) {
   const lines = ['evaluatedAt,project,section,id,key,title,status']
@@ -78,7 +66,7 @@ export function WorkspaceCoordination() {
     scopeWorkspaceId: scope.ws?.id }
   const q = useQuery({ queryKey: ['workspace-coordination', scope.kind, scope.api, projectId, disciplineId, ownerId, from, to],
     enabled: scope.ready,
-    queryFn: () => get<Projection>(`discipline-coordination${qs({ ...scopeParams, projectId, disciplineId, ownerId, from, to })}`) })
+    queryFn: () => typedRequest('get', '/api/v1/discipline-coordination', { query: { ...scopeParams, projectId, disciplineId, ownerId, from, to } }) })
   const header = { title: t('dcv.ws.title'), subtitle: t('dcv.ws.subtitle') }
   const dates = <>
     <Field label={t('common.from')} htmlFor="workspace-coordination-from" className="w-full sm:w-44"><Input id="workspace-coordination-from" type="date" value={from} onChange={e => set('from', e.target.value)} /></Field>
@@ -101,7 +89,7 @@ export function WorkspaceCoordination() {
   const item = (project: ProjectProjection, path: string, prefix: string, row: Item) =>
     <li key={row.id}><Link className={cn('font-medium', link)} to={`/projects/${project.projectNumber}/${path}?panel=${prefix}:${row.id}`}>
       {project.projectNumber} · {row.key}</Link> · {row.title} · <span className="text-muted-foreground">{tv(row.status)}</span></li>
-  const actionsFor = (project: ProjectProjection, type: LinkedAction['sourceType'], id: string) =>
+  const actionsFor = (project: ProjectProjection, type: string, id: string) =>
     project.data.linkedActions.filter(action => action.sourceType === type && action.sourceId === id)
       .map(action => <li key={action.id}>{t('dcv.existingAction')} <Link className={link} to={`/projects/${project.projectNumber}/meetings?panel=Action:${action.id}`}>
         {action.key}</Link> · {action.text} · <span className="text-muted-foreground">{tv(action.status)}</span>{action.dueDate && ` · ${t('dcv.actionDue', { date: fmtDate(action.dueDate) })}`}</li>)

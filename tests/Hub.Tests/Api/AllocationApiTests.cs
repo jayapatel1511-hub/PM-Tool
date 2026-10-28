@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using Hub.Api.Data;
 using Hub.Api.Features;
@@ -26,6 +27,62 @@ public sealed class AllocationApiTests(HubFactory f)
             return 0;
         });
         return (personId, email);
+    }
+
+    static string[] Keys(JsonNode? node) => [.. node!.AsObject().Select(x => x.Key)];
+    static bool IsNull(JsonNode? node, string key) => node!.AsObject().TryGetPropertyValue(key, out var value) && value is null; // written as null, not left out
+
+    [Fact]
+    public async Task Allocation_reads_keep_their_property_names_order_and_nulls() // 040-S15: the typed records must serialise to the bytes the Allocations page already reads
+    {
+        var project = await data.Project();
+        var (personId, email) = await FreshReport(project.Id);
+        var day = new DateOnly(2026, 10, 5);
+        var task = await data.NewTask(project.Id, extra: new { assigneeId = personId, estimatedHours = 8m, startDate = day, dueDate = day });
+        var root = $"/api/v1/projects/{project.Id}/allocations";
+        var created = await (await f.As(TestData.Pm).Post(root, new AllocationEndpoints.CreateBody(Guid.NewGuid(), personId, AllocationPurpose.Production,
+            day, day, 8, [new(day, 8)], [new("Task", task.G("id"), day)], null))).Json();
+        var id = created.G("id");
+
+        var list = await (await f.As(TestData.Pm).GetAsync(root)).Json();
+        Assert.Equal(["items", "page", "pageSize", "totalCount", "sort", "filters"], Keys(list));
+        Assert.True(IsNull(list, "sort") && IsNull(list, "filters"));
+        var row = list["items"]!.AsArray().Single(a => a!.G("id") == id)!;
+        Assert.Equal(["id", "personId", "personName", "purpose", "fromDate", "throughDate", "plannedHours", "status", "rowVersion", "personState"], Keys(row));
+        Assert.Equal((JsonValueKind.String, "Production", "2026-10-05", 8m, "Proposed", "Eligible"),
+            (row["personName"]!.GetValueKind(), row.S("purpose"), row.S("fromDate"), row["plannedHours"]!.GetValue<decimal>(), row.S("status"), row.S("personState")));
+
+        var detail = await (await f.As(TestData.Pm).GetAsync($"{root}/{id}")).Json();
+        Assert.Equal(["id", "projectId", "personId", "personName", "personState", "personEligible", "purpose", "fromDate", "throughDate", "plannedHours", "status",
+            "confirmedBy", "confirmedAt", "overCapacityWarningRecorded", "rowVersion", "canConfirm", "canManage", "days", "links"], Keys(detail));
+        Assert.True(IsNull(detail, "confirmedBy") && IsNull(detail, "confirmedAt")); // a proposal has no confirmation yet
+        Assert.Equal(("Eligible", true, false, false, true), (detail.S("personState"), detail["personEligible"]!.GetValue<bool>(), detail["overCapacityWarningRecorded"]!.GetValue<bool>(),
+            detail["canConfirm"]!.GetValue<bool>(), detail["canManage"]!.GetValue<bool>()));
+        var dayRow = Assert.Single(detail["days"]!.AsArray())!; Assert.Equal(["workDate", "hours"], Keys(dayRow)); Assert.Equal(("2026-10-05", 8m), (dayRow.S("workDate"), dayRow["hours"]!.GetValue<decimal>()));
+        var link = Assert.Single(detail["links"]!.AsArray())!; Assert.Equal(["workType", "workId", "workDate", "reviewHours", "reviewPackageId"], Keys(link));
+        Assert.Equal(("Task", task.G("id")), (link.S("workType"), link.G("workId"))); Assert.True(IsNull(link, "reviewHours") && IsNull(link, "reviewPackageId")); // a task link has neither
+        await (await f.As(TestData.Alex).GetAsync($"{root}/{id}")).Json(404);
+
+        var preview = await (await f.As(TestData.Sam).GetAsync($"{root}/{id}/confirmation-preview")).Json();
+        Assert.Equal(["id", "rowVersion", "days"], Keys(preview)); Assert.Equal((id, created.I("rowVersion")), (preview.G("id"), preview.I("rowVersion")));
+        var capacity = Assert.Single(preview["days"]!.AsArray())!;
+        Assert.Equal(["date", "availableHours", "confirmedHours", "proposedHours", "resultingHours", "overByHours", "dateVersion"], Keys(capacity));
+        Assert.Equal(("2026-10-05", 8m, JsonValueKind.Number), (capacity.S("date"), capacity["proposedHours"]!.GetValue<decimal>(), capacity["dateVersion"]!.GetValueKind()));
+        await (await f.As(TestData.Sam).Post($"{root}/{id}/confirm", new AllocationEndpoints.ConfirmBody(Guid.NewGuid(), created.I("rowVersion"),
+            [new(day, capacity["dateVersion"]!.GetValue<int>())], null))).Json();
+        var confirmed = await (await f.As(TestData.Sam).GetAsync($"{root}/{id}")).Json();
+        Assert.Equal(JsonValueKind.String, confirmed["confirmedBy"]!.GetValueKind()); Assert.Equal(JsonValueKind.String, confirmed["confirmedAt"]!.GetValueKind());
+        Assert.Equal(("Confirmed", false), (confirmed.S("status"), confirmed["canConfirm"]!.GetValue<bool>())); // only a proposal can be confirmed
+
+        var date = new DateOnly(2026, 10, 6);
+        var path = $"/api/v1/users/{personId}/availability/{date:yyyy-MM-dd}";
+        var saved = await (await f.As(TestData.Sam).Put(path, new AllocationEndpoints.AvailabilityBody(0, 4, AvailabilityCategory.Reduced))).Json();
+        Assert.Equal(["workDate", "availableHours", "category", "rowVersion"], Keys(saved));
+        Assert.Equal(("2026-10-06", 4m, AvailabilityCategory.Reduced, 1), (saved.S("workDate"), saved["availableHours"]!.GetValue<decimal>(), saved.S("category"), saved.I("rowVersion")));
+        var read = await (await f.As(email).GetAsync($"/api/v1/users/{personId}/availability?from={date:yyyy-MM-dd}&through={date:yyyy-MM-dd}")).Json();
+        Assert.Equal(["workDate", "availableHours", "category", "rowVersion"], Keys(Assert.Single(read.AsArray())));
+        Assert.Empty((await (await f.As(email).GetAsync($"/api/v1/users/{personId}/availability?from=2026-11-01&through=2026-11-02")).Json()).AsArray()); // a day with no override is an empty array
+        await (await f.As(TestData.Sam).GetAsync($"/api/v1/users/{personId}/availability?from={date:yyyy-MM-dd}&through=2025-01-01")).Json(400);
     }
 
     [Fact]

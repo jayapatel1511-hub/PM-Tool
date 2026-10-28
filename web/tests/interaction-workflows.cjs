@@ -7,6 +7,7 @@ const { myWork, myWorkPerson, myStaffPerson, myStaffList } = require('./my-work.
 const { savedView, viewList, viewSaved } = require('./views.fixture.cjs')
 const { meView, referenceData, referenceDiscipline } = require('./me.fixture.cjs')
 const { startPreview, project: baseProject, task: baseTask, taskDetail, deliverableDetail, panelIds, mockPlatformApi } = require('./platform-fixtures.cjs')
+const { allocationRow, allocationPage, allocationDetail, allocationLink, capacityDay, confirmationPreview } = require('./allocations.fixture.cjs')
 
 const port = Number(process.env.WORKFLOW_TEST_PORT || '19508')
 const id = n => `00000000-0000-0000-0000-${String(n).padStart(12, '0')}`
@@ -15,7 +16,7 @@ const personId = id(2), disciplineId = id(11), taskId = id(1), allocationId = id
 
 const project = { ...baseProject, permissions: { ...baseProject.permissions, proposeAllocation: { ok: true }, createDeliverableIn:[], needsReason: false }, disciplines: [{ id: disciplineId, name: 'Civil', isActive: true }] }
 const task = { ...baseTask, id: taskId, projectId, projectDisciplineId: disciplineId, assigneeId: personId, assigneeName: 'Alex Chen', ownerId: personId, ownerName: 'Alex Chen', status: 'Not Started', rowVersion: 1, dueDate: '2026-10-28' }
-const allocation = { id: allocationId, personId, personName: 'Alex Chen', purpose: 'Production', fromDate: '2026-10-19', throughDate: '2026-10-23', plannedHours: 40, status: 'Proposed', rowVersion: 1, personState: 'Eligible' }
+const allocation = allocationRow({ id: allocationId, personId, personName: 'Alex Chen', fromDate: '2026-10-19', throughDate: '2026-10-23', plannedHours: 40, rowVersion: 1 })
 const sharedView=savedView({id:id(43),name:'Shared allocation view',scope:'Project',params:{status:'Proposed',purpose:'Production'},canEdit:false})
 const staffView = savedView({ id: viewId, name: 'Staff default', isDefault: true, params: { scope: 'all', inactive: '1' } })
 const views = { allocations:[sharedView], staff: [staffView], portfolio: [savedView({ id: id(42), name: 'Portfolio personal', params: { status: 'Active' } })] }
@@ -49,9 +50,9 @@ const views = { allocations:[sharedView], staff: [staffView], portfolio: [savedV
     else if (p.startsWith('views/') && method==='PATCH') data = viewSaved(p.slice('views/'.length), 2)
     else if (p.startsWith('views/') && method==='DELETE') { status = 204; data = undefined }
     else if (p === `projects/${projectId}` || p === `projects/${project.projectNumber}`) data = project
-    else if (p === `projects/${projectId}/allocations` || p === `projects/${project.projectNumber}/allocations`) data = { items: [allocation], page: 1, pageSize: 50, totalCount: 1 }
-    else if (p === `projects/${projectId}/allocations/${allocationId}`) data = { ...allocation, personEligible: true, links: [{ workType: 'Task', workId: taskId, workDate: '2026-10-20' }], days: [], overCapacityWarningRecorded: false, canConfirm: true, canManage: true }
-    else if (p === `projects/${projectId}/allocations/${allocationId}/confirmation-preview`) data = { id: allocationId, rowVersion: 1, days: [1, 2, 3, 4, 5].map((n, i) => ({ date: `2026-10-${19 + i}`, availableHours: 8, confirmedHours: 0, proposedHours: i < 2 ? 10 : 6, resultingHours: i < 2 ? 10 : 6, overByHours: i < 2 ? 2 : 0, dateVersion: 1 })) }
+    else if (p === `projects/${projectId}/allocations` || p === `projects/${project.projectNumber}/allocations`) data = allocationPage([allocation])
+    else if (p === `projects/${projectId}/allocations/${allocationId}`) data = allocationDetail({ ...allocation, projectId, links: [allocationLink({ workId: taskId, workDate: '2026-10-20' })], canConfirm: true, canManage: true })
+    else if (p === `projects/${projectId}/allocations/${allocationId}/confirmation-preview`) data = confirmationPreview({ id: allocationId, days: [1, 2, 3, 4, 5].map((n, i) => capacityDay({ date: `2026-10-${19 + i}`, proposedHours: i < 2 ? 10 : 6, resultingHours: i < 2 ? 10 : 6, overByHours: i < 2 ? 2 : 0 })) })
     else if (p === `projects/${projectId}/allocations/review-options`) data = []
     else if (p === `projects/${projectId}/open-roles`) data = []
     else if (p === `projects/${projectId}/changes/options`) data = coordinationOptions({ actorId:personId,people:[{id:personId,displayName:'Alex Chen'}],disciplines:[{id:disciplineId,name:'Civil'}],sources:[],heads:[], tasks: [coordinationTask({ id: task.id, key: task.key, name: task.name, projectDisciplineId: task.projectDisciplineId, ownerId: task.assigneeId, rowVersion: task.rowVersion, status: task.status })], deliverables: [], manageDisciplineIds: [], canCreate: { changes: false, reviews: false }, canWrite: true })

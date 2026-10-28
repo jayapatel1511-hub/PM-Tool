@@ -3,6 +3,7 @@ using System.Text.Json.Nodes;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Api.Features;
@@ -22,8 +23,20 @@ public static class AllocationEndpoints
     public sealed record CapacityDay(DateOnly Date, decimal AvailableHours, decimal ConfirmedHours,
         decimal ProposedHours, decimal ResultingHours, decimal OverByHours, int DateVersion);
     public sealed record Filter(string? Q, Guid? PersonId, string? Purpose, string? Status, DateOnly? From, DateOnly? To);
-    sealed record AllocationRow(Guid Id, Guid PersonId, string? PersonName, string Purpose, DateOnly FromDate, DateOnly ThroughDate,
+    /// PersonState is Eligible, Inactive, Removed (no longer on the project) or Missing.
+    public sealed record AllocationRow(Guid Id, Guid PersonId, string? PersonName, string Purpose, DateOnly FromDate, DateOnly ThroughDate,
         decimal PlannedHours, string Status, int RowVersion, string PersonState);
+    public sealed record AllocationDay(DateOnly WorkDate, decimal Hours);
+    /// A task or review the allocation reserves time for; the review hours and package are set only for a review.
+    public sealed record AllocationLink(string WorkType, Guid WorkId, DateOnly WorkDate, decimal? ReviewHours, Guid? ReviewPackageId);
+    /// The confirmation fields are null until the allocation has been confirmed; a confirmed record that is edited keeps them.
+    public sealed record AllocationDetail(Guid Id, Guid ProjectId, Guid PersonId, string? PersonName, string PersonState, bool PersonEligible, string Purpose,
+        DateOnly FromDate, DateOnly ThroughDate, decimal PlannedHours, string Status, Guid? ConfirmedBy, DateTimeOffset? ConfirmedAt,
+        bool OverCapacityWarningRecorded, int RowVersion, bool CanConfirm, bool CanManage, List<AllocationDay> Days, List<AllocationLink> Links);
+    public sealed record ConfirmationPreviewRead(Guid Id, int RowVersion, List<CapacityDay> Days);
+    public sealed record ReviewOptionRow(Guid Id, Guid ReviewerId, DateOnly DueDate, Guid PackageId, string PackageKey, string PackageTitle);
+    public sealed record DayAvailabilityRow(DateOnly WorkDate, decimal AvailableHours, string Category, int RowVersion);
+    sealed record PersonContact(string DisplayName, Guid? SupervisorId);
 
     internal static IQueryable<ResourceAllocation> VisibleQuery(HubDb db, Actor actor, IQueryable<Guid> managedProjectIds) =>
         db.Allocations.AsNoTracking().Where(a => managedProjectIds.Contains(a.ProjectId) || a.CreatedBy == actor.Id || ((actor.Supervisor || actor.Admin)
@@ -51,7 +64,7 @@ public static class AllocationEndpoints
     static async Task NotifyChanged(HubDb db, Notifier notify, Project project, ResourceAllocation a)
     {
         var person = await db.Users.Where(u => u.Id == a.PersonId)
-            .Select(u => new { u.DisplayName, u.SupervisorId }).FirstAsync();
+            .Select(u => new PersonContact(u.DisplayName, u.SupervisorId)).FirstAsync();
         await notify.Send(NotificationEvents.AllocationChanged,
             [project.ProjectManagerId, a.CreatedBy, person.SupervisorId],
             new NotifyItem(project.Id, "ResourceAllocation", a.Id, null,
@@ -172,7 +185,7 @@ public static class AllocationEndpoints
         return result;
     }
 
-    static async Task<object> ConfirmationPreview(Guid projectId, Guid id, Access access, HubDb db, SettingsStore store, TimeProvider clock)
+    static async Task<Ok<ConfirmationPreviewRead>> ConfirmationPreview(Guid projectId, Guid id, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
         var (project, ctx) = await access.Project(projectId, false);
         var a = await db.Allocations.AsNoTracking().FirstOrDefaultAsync(a => a.ProjectId == projectId && a.Id == id) ?? throw ApiException.NotFound();
@@ -182,7 +195,7 @@ public static class AllocationEndpoints
         Access.Demand(Permissions.ConfirmAllocation(access.Actor, ctx, supervisorId));
         Check.That(a.Status == AllocationStatus.Proposed, "status", "error.invalid");
         await ValidateSaved(db, project, a, store);
-        return new { a.Id, a.RowVersion, Days = await Capacity(db, access, a, store, clock) };
+        return TypedResults.Ok(new ConfirmationPreviewRead(a.Id, a.RowVersion, await Capacity(db, access, a, store, clock)));
     }
 
     static Task<Coordination.Result> Confirm(Guid projectId, Guid id, ConfirmBody body, Access access, HubDb db, SettingsStore store, TimeProvider clock, Notifier notify) =>
@@ -213,22 +226,22 @@ public static class AllocationEndpoints
             return a;
         });
 
-    static async Task<object> Availability(Guid personId, DateOnly from, DateOnly through, HubDb db, Access access)
+    static async Task<Ok<List<DayAvailabilityRow>>> Availability(Guid personId, DateOnly from, DateOnly through, HubDb db, Access access)
     {
         Check.That(from != default && through >= from && through.DayNumber - from.DayNumber <= 366, "through", "error.date_range");
         var person = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == personId && u.IsActive) ?? throw ApiException.NotFound();
         if (!(access.Actor.Id == personId || access.Actor.Admin || (access.Actor.Supervisor && person.SupervisorId == access.Actor.Id)))
             throw ApiException.NotFound();
-        return await db.AvailabilityOverrides.AsNoTracking().Where(x => x.PersonId == personId && x.WorkDate >= from && x.WorkDate <= through)
-            .OrderBy(x => x.WorkDate).Select(x => new { x.WorkDate, x.AvailableHours, x.Category, x.RowVersion }).ToListAsync();
+        return TypedResults.Ok(await db.AvailabilityOverrides.AsNoTracking().Where(x => x.PersonId == personId && x.WorkDate >= from && x.WorkDate <= through)
+            .OrderBy(x => x.WorkDate).Select(x => new DayAvailabilityRow(x.WorkDate, x.AvailableHours, x.Category, x.RowVersion)).ToListAsync());
     }
 
-    static async Task<object> SetAvailability(Guid personId, DateOnly date, AvailabilityBody body, HubDb db, Access access)
+    static async Task<Ok<DayAvailabilityRow>> SetAvailability(Guid personId, DateOnly date, AvailabilityBody body, HubDb db, Access access)
     {
         Check.That(date != default, "date", "error.required");
         Check.That(body.AvailableHours is >= 0 and <= 24, "availableHours", "error.invalid");
         Check.OneOf(body.Category, AvailabilityCategory.All, "category");
-        return await Tx.Run(db, async () =>
+        return TypedResults.Ok(await Tx.Run(db, async () =>
         {
             // A person row serializes availability and confirmations across projects.
             await db.Database.SqlQueryRaw<Guid>("SELECT id AS \"Value\" FROM hub.app_user WHERE id = {0} FOR UPDATE", personId).ToListAsync();
@@ -249,8 +262,8 @@ public static class AllocationEndpoints
             if (version is null) db.PersonDateVersions.Add(new PersonDateVersion { PersonId = personId, WorkDate = date, RowVersion = 1 });
             else db.Entry(version).Property(v => v.WorkDate).IsModified = true;
             await db.SaveChangesAsync();
-            return new { row.WorkDate, row.AvailableHours, row.Category, row.RowVersion };
-        });
+            return new DayAvailabilityRow(row.WorkDate, row.AvailableHours, row.Category, row.RowVersion);
+        }));
     }
 
     static IQueryable<ResourceAllocation> Query(Guid projectId, Filter filter, Access access, HubDb db, IQueryable<Guid> managedProjectIds)
@@ -280,7 +293,7 @@ public static class AllocationEndpoints
                     : eligible.Any(u => u.Id == a.PersonId) ? "Eligible" : "Removed"));
     }
 
-    static async Task<object> List(Guid projectId, [AsParameters] Filter filter, int? page, int? pageSize, Access access, HubDb db)
+    static async Task<Ok<Page<AllocationRow>>> List(Guid projectId, [AsParameters] Filter filter, int? page, int? pageSize, Access access, HubDb db)
     {
         var (project, ctx) = await access.Project(projectId, false);
         Check.That(!filter.From.HasValue || !filter.To.HasValue || filter.To >= filter.From, "to", "error.date_range");
@@ -289,7 +302,7 @@ public static class AllocationEndpoints
             : db.Projects.Where(_ => false).Select(p => p.Id);
         var q = Rows(project, filter, access, db, managedProjects);
         var (pg, size) = Http.Paging(page, pageSize);
-        return new Page<AllocationRow>(await q.Skip((pg - 1) * size).Take(size).ToListAsync(), pg, size, await q.CountAsync());
+        return TypedResults.Ok(new Page<AllocationRow>(await q.Skip((pg - 1) * size).Take(size).ToListAsync(), pg, size, await q.CountAsync()));
     }
 
     static async Task<IResult> ExportRows(Guid projectId, [AsParameters] Filter filter, string? format, HttpContext http, Access access,
@@ -306,22 +319,22 @@ public static class AllocationEndpoints
             $"{project.ProjectNumber}-allocations", clock);
     }
 
-    static async Task<object> ReviewOptions(Guid projectId, Access access, HubDb db)
+    static async Task<Ok<List<ReviewOptionRow>>> ReviewOptions(Guid projectId, Access access, HubDb db)
     {
         var (_, ctx) = await access.Project(projectId, false);
         Access.Demand(Permissions.ProposeAllocation(access.Actor, ctx));
-        return await db.DisciplineReviews.AsNoTracking().Where(r => r.ProjectId == projectId
+        return TypedResults.Ok(await db.DisciplineReviews.AsNoTracking().Where(r => r.ProjectId == projectId
             && r.Status != DisciplineReviewStatus.Approved
             && db.ReviewPackages.Any(p => p.ProjectId == projectId && p.CurrentRoundId == r.RoundId
                 && p.Status != ReviewStatus.Cancelled && p.Status != ReviewStatus.Superseded && p.Status != ReviewStatus.Approved))
-            .OrderBy(r => r.DueDate).Select(r => new { r.Id, r.ReviewerId, r.DueDate,
-                PackageId = db.ReviewPackages.Where(p => p.CurrentRoundId == r.RoundId).Select(p => p.Id).FirstOrDefault(),
-                PackageKey = db.ReviewPackages.Where(p => p.CurrentRoundId == r.RoundId).Select(p => p.Key).FirstOrDefault(),
-                PackageTitle = db.ReviewPackages.Where(p => p.CurrentRoundId == r.RoundId).Select(p => p.Title).FirstOrDefault() })
-            .ToListAsync();
+            .OrderBy(r => r.DueDate).Select(r => new ReviewOptionRow(r.Id, r.ReviewerId, r.DueDate,
+                db.ReviewPackages.Where(p => p.CurrentRoundId == r.RoundId).Select(p => p.Id).FirstOrDefault(),
+                db.ReviewPackages.Where(p => p.CurrentRoundId == r.RoundId).Select(p => p.Key).FirstOrDefault()!,
+                db.ReviewPackages.Where(p => p.CurrentRoundId == r.RoundId).Select(p => p.Title).FirstOrDefault()!))
+            .ToListAsync());
     }
 
-    static async Task<object> Detail(Guid projectId, Guid id, Access access, HubDb db)
+    static async Task<Ok<AllocationDetail>> Detail(Guid projectId, Guid id, Access access, HubDb db)
     {
         var (project, ctx) = await access.Project(projectId, false);
         var actor = access.Actor;
@@ -334,15 +347,15 @@ public static class AllocationEndpoints
         var personState = person is null ? "Missing" : !person.IsActive ? "Inactive" : personEligible ? "Eligible" : "Removed";
         var canConfirm = a.Status == AllocationStatus.Proposed && personEligible && Permissions.ConfirmAllocation(actor, ctx, person.SupervisorId).Ok;
         var canManage = Permissions.ProposeAllocation(actor, ctx).Ok && (manager || a.CreatedBy == actor.Id);
-        return new { a.Id, a.ProjectId, a.PersonId, PersonName = person?.DisplayName, PersonState = personState, PersonEligible = personEligible,
+        return TypedResults.Ok(new AllocationDetail(a.Id, a.ProjectId, a.PersonId, person?.DisplayName, personState, personEligible,
             a.Purpose, a.FromDate, a.ThroughDate, a.PlannedHours, a.Status,
-            a.ConfirmedBy, a.ConfirmedAt, OverCapacityWarningRecorded = a.OverCapacityReason != null, a.RowVersion, CanConfirm = canConfirm, CanManage = canManage,
-            Days = await db.AllocationDayOverrides.AsNoTracking().Where(d => d.AllocationId == id).OrderBy(d => d.WorkDate)
-                .Select(d => new { d.WorkDate, d.Hours }).ToListAsync(),
-            Links = await db.AllocationWorkLinks.AsNoTracking().Where(l => l.AllocationId == id && l.ReleasedAt == null)
-                .OrderBy(l => l.WorkDate).Select(l => new { l.WorkType, l.WorkId, l.WorkDate, l.ReviewHours,
-                    ReviewPackageId = l.WorkType == "Review" ? db.ReviewPackages.Where(p => db.DisciplineReviews.Any(r => r.Id == l.WorkId && r.RoundId == p.CurrentRoundId))
-                        .Select(p => (Guid?)p.Id).FirstOrDefault() : null }).ToListAsync() };
+            a.ConfirmedBy, a.ConfirmedAt, a.OverCapacityReason != null, a.RowVersion, canConfirm, canManage,
+            await db.AllocationDayOverrides.AsNoTracking().Where(d => d.AllocationId == id).OrderBy(d => d.WorkDate)
+                .Select(d => new AllocationDay(d.WorkDate, d.Hours)).ToListAsync(),
+            await db.AllocationWorkLinks.AsNoTracking().Where(l => l.AllocationId == id && l.ReleasedAt == null)
+                .OrderBy(l => l.WorkDate).Select(l => new AllocationLink(l.WorkType, l.WorkId, l.WorkDate, l.ReviewHours,
+                    l.WorkType == "Review" ? db.ReviewPackages.Where(p => db.DisciplineReviews.Any(r => r.Id == l.WorkId && r.RoundId == p.CurrentRoundId))
+                        .Select(p => (Guid?)p.Id).FirstOrDefault() : null)).ToListAsync()));
     }
 
     static async Task Validate(HubDb db, Project p, Guid personId, string purpose, DateOnly from, DateOnly through,

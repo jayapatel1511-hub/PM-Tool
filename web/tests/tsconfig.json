@@ -42,6 +42,7 @@
     "me.fixture.cjs",
     "dependencies.fixture.cjs",
     "team.fixture.cjs",
-    "availability.fixture.cjs"
+    "availability.fixture.cjs",
+    "allocations.fixture.cjs"
   ]
 }

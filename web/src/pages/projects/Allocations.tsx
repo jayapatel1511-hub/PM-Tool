@@ -23,7 +23,7 @@ import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/
 import { Textarea } from '@/components/ui/textarea'
 import { useProject, useReference } from '@/hooks/data'
 import { useFlag } from '@/lib/auth'
-import { ApiError, get, post, qs, typedRequest } from '@/lib/api'
+import { ApiError, typedRequest } from '@/lib/api'
 import { useOffer, type Offer } from '@/lib/auth'
 import { fmtDate, hours, today, loadBandText } from '@/lib/format'
 import { runtimeText, t, tv, type TextKey } from '@/lib/i18n'
@@ -34,12 +34,10 @@ import { useCurrentProject } from './ProjectLayout'
 import { DraftNotice } from '@/components/hub/drafts'
 import { useSafeForm } from '@/hooks/drafts'
 
-type Allocation = { id: string; personId: string; personName: string | null; purpose: string; fromDate: string; throughDate: string; plannedHours: number; status: string; rowVersion: number; personState: 'Eligible' | 'Inactive' | 'Removed' | 'Missing' }
-type AllocationPage = { items: Allocation[]; page: number; pageSize: number; totalCount: number }
-type Detail = Allocation & { personEligible: boolean; confirmedBy?: string; confirmedAt?: string; links: { workType: string; workId: string; workDate: string; reviewHours?: number; reviewPackageId?: string }[]; days: { workDate: string; hours: number }[]; overCapacityWarningRecorded: boolean; canConfirm: boolean; canManage: boolean }
-type Preview = { id: string; rowVersion: number; days: { date: string; availableHours: number; confirmedHours: number; proposedHours: number; resultingHours: number; overByHours: number; dateVersion: number }[] }
+type Allocation = components['schemas']['AllocationRow']
+type Detail = components['schemas']['AllocationDetail']
+type Preview = components['schemas']['ConfirmationPreviewRead']
 type AllocationPreview = Extract<paths['/api/v1/projects/{projectId}/allocations']['post']['responses'][200]['content']['application/json'], { preview: boolean }>
-type ReviewOption = { id: string; reviewerId: string; dueDate: string; packageId: string; packageKey: string; packageTitle: string }
 /** Unfilled project demand (§40, FR-ROLE-01): filled by proposing a normal allocation that names it (D1). */
 type OpenRole = components['schemas']['OpenRoleRow']
 type Fill = { openRoleId: string; roleLabel: string; fromDate: string; throughDate: string; plannedHours: number }
@@ -59,7 +57,7 @@ const PURPOSE_ACCENT: Record<string, string> = { Production: 'blue', Review: 'la
 const Purpose = ({ purpose }: { purpose: string }) => (
   <span data-accent={PURPOSE_ACCENT[purpose] ?? 'blue'} className="inline-flex items-center whitespace-nowrap rounded-md bg-(--acc-bg) px-2 py-0.5 text-xs/[18px] font-medium text-(--acc-fg)">{runtimeText(`allocation.purpose.${purpose}`)}</span>
 )
-const eligibility = (state: Allocation['personState']) => t(state === 'Inactive' ? 'allocation.personInactiveWarning' : state === 'Removed' ? 'allocation.personRemovedWarning' : 'allocation.personMissingWarning')
+const eligibility = (state: string) => t(state === 'Inactive' ? 'allocation.personInactiveWarning' : state === 'Removed' ? 'allocation.personRemovedWarning' : 'allocation.personMissingWarning')
 
 export function AllocationsTab() {
   // §41 R5: a short scope, with the fuller description behind the help button.
@@ -76,13 +74,13 @@ function Allocations(header: { title: string; subtitle: ReactNode }) {
   const filtered = Object.values(filters).some(Boolean)
   const open = (id: string | null) => { const next = new URLSearchParams(sp); if (id) next.set('allocation', id); else next.delete('allocation'); setSp(next) }
   const base = `projects/${project.id}/allocations`
-  const list = useQuery({ queryKey: ['allocations', project.id, filters, page], queryFn: () => get<AllocationPage>(`${base}${qs({ ...filters, page })}`) })
+  const list = useQuery({ queryKey: ['allocations', project.id, filters, page], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/allocations', { params: { projectId: project.id }, query: { ...filters, page } }) })
   const options = useQuery({ queryKey: ['coord-options', project.id], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/changes/options', { params: { projectId: project.id } }) })
   const proposal = useOffer()(project.permissions.proposeAllocation, project.status) // FR-FIG-08 decision 1
   // §47.5 FR-REC-12, behind flag.record_engine_additions: the open roles as CSV or Excel, after the page's own entries.
   const roleExport = useFlag('record_engine_additions') ? [{ path: 'lists/open-roles/export', params: { projectId: project.id }, name: `${project.projectNumber}-open-roles`, label: t('openRole.tab') }] : undefined
   const [roleForm, setRoleForm] = useState<OpenRole | 'new' | null>(null), [filling, setFilling] = useState<Fill | null>(null), [cancelling, setCancelling] = useState<OpenRole | null>(null)
-  const refresh = () => { qc.invalidateQueries({ queryKey: ['allocations', project.id] }); qc.invalidateQueries({ queryKey: ['workload'] }) }
+  const refresh = () => { void invalidateChange(qc, 'ResourceAllocation', project.id) }
   const change = (key: string, value: string) => { const next = new URLSearchParams(sp); if (value) next.set(key, value); else next.delete(key); if (key !== 'page' && key !== 'allocation') next.delete('page'); setSp(next) }
   const clear = () => { const next = new URLSearchParams(sp); for (const k of Object.keys(filters)) next.delete(k); next.delete('page'); setSp(next) }
   const pages = list.data ? Math.max(1, Math.ceil(list.data.totalCount / list.data.pageSize)) : 1
@@ -142,7 +140,7 @@ function Allocations(header: { title: string; subtitle: ReactNode }) {
       </div>}
     </FilterBar>
     {options.error && <ErrorBanner error={options.error} retry={() => options.refetch()} />}
-    {view === 'roles' ? <OpenRoles roles={roles} base={base} proposal={proposal} canFill={proposal.shown && !!options.data}
+    {view === 'roles' ? <OpenRoles roles={roles} projectId={project.id} proposal={proposal} canFill={proposal.shown && !!options.data}
       onAdd={() => setRoleForm('new')} onEdit={setRoleForm} onCancel={setCancelling} onOpenAllocation={open}
       onFill={r => setFilling({ openRoleId: r.id, roleLabel: r.roleLabel, fromDate: r.fromDate, throughDate: r.throughDate, plannedHours: r.plannedHours })} /> : <>
     {list.error ? <ErrorBanner error={list.error} retry={() => list.refetch()} />
@@ -186,7 +184,7 @@ function Proposal({ projectId, base, options, close, done, existing, fill, compl
   const [days, setDays] = useState<DayDraft[]>(() => existing?.days.map(d => ({ key: crypto.randomUUID(), workDate: d.workDate, hours: String(d.hours) })) ?? [])
   const [reason, setReason] = useState('')
   const [allocationPreview, setAllocationPreview] = useState<AllocationPreview | null>(null), [previewError, setPreviewError] = useState<unknown>(null)
-  const reviewOptions = useQuery({ queryKey: ['allocation-review-options', base], queryFn: () => get<ReviewOption[]>(`${base}/review-options`) })
+  const reviewOptions = useQuery({ queryKey: ['allocation-review-options', projectId], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/allocations/review-options', { params: { projectId } }) })
   const tasks = options.tasks.filter(w => w.ownerId === personId && !['Complete', 'Cancelled', 'On Hold'].includes(w.status))
   const reviews = (reviewOptions.data ?? []).filter(r => r.reviewerId === personId)
   const choices = purpose === 'Production' ? tasks.map(w => ({ value: w.id, label: `${w.key} · ${w.name}` })) :
@@ -244,6 +242,7 @@ function Proposal({ projectId, base, options, close, done, existing, fill, compl
 }
 
 const ACTION_BODY = { decline: 'allocation.declineBody', cancel: 'allocation.cancelBody', complete: 'allocation.completeBody' } as const
+const CLOSE_PATH = { decline: '/api/v1/projects/{projectId}/allocations/{id}/decline', cancel: '/api/v1/projects/{projectId}/allocations/{id}/cancel', complete: '/api/v1/projects/{projectId}/allocations/{id}/complete' } as const
 
 /** The allocation's detail panel (§13.0: a 560 px right panel on desktop, full width below), deep-linked by ?allocation=. */
 function AllocationDetail({ projectId, base, id, projectNumber, options, close, refresh }: { projectId: string; base: string; id: string; projectNumber: string; options?: CoordOptions; close: () => void; refresh: () => void }) {
@@ -256,10 +255,10 @@ function AllocationDetail({ projectId, base, id, projectNumber, options, close, 
   const [error, setError] = useState<unknown>(null)
   const [previewing, setPreviewing] = useState(false)
   const previewEnabled = useFlag('allocation_preview')
-  const detail = useQuery({ queryKey: ['allocation-detail', base, id], queryFn: () => get<Detail>(`${base}/${id}`) })
+  const detail = useQuery({ queryKey: ['allocation-detail', projectId, id], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/allocations/{id}', { params: { projectId, id } }) })
   const row = detail.data
   const done = () => { setAction(null); setPreview(null); setError(null); detail.refetch(); refresh() }
-  const startConfirm = async () => { setError(null); setPreviewing(true); setConfirmReason(''); setAllocationPreview(null); try { setPreview(await get<Preview>(`${base}/${id}/confirmation-preview`)); setAction('confirm') } catch (e) { setError(e) } finally { setPreviewing(false) } }
+  const startConfirm = async () => { setError(null); setPreviewing(true); setConfirmReason(''); setAllocationPreview(null); try { setPreview(await typedRequest('get', '/api/v1/projects/{projectId}/allocations/{id}/confirmation-preview', { params: { projectId, id } })); setAction('confirm') } catch (e) { setError(e) } finally { setPreviewing(false) } }
   const needsConfirmReason = preview?.days.some(d => d.overByHours > 0) ?? false
   useEffect(() => {
     setAllocationPreview(null); setConfirmPreviewError(null)
@@ -339,10 +338,12 @@ function AllocationDetail({ projectId, base, id, projectNumber, options, close, 
         onConfirm={async reason => {
           if (action === 'confirm' && !preview) return
           if (action === 'confirm' && previewEnabled) { if (!allocationPreview) return; reason = confirmReason.trim() }
-          const payload = action === 'confirm' ? { requestId: crypto.randomUUID(), rowVersion: preview!.rowVersion,
-            dateVersions: preview!.days.map(d => ({ workDate: d.date, rowVersion: d.dateVersion })), overCapacityReason: reason || null } :
-            { requestId: crypto.randomUUID(), rowVersion: row.rowVersion, reason }
-          try { await post(`${base}/${id}/${action}`, payload); toast.success(t('common.saved')); done() } catch (e) { setError(e); if ((e as ApiError).status === 409) { setAction(null); await detail.refetch() } }
+          const params = { projectId, id }
+          try {
+            if (action === 'confirm') await typedRequest('post', '/api/v1/projects/{projectId}/allocations/{id}/confirm', { params, body: { requestId: crypto.randomUUID(), rowVersion: preview!.rowVersion,
+              dateVersions: preview!.days.map(d => ({ workDate: d.date, rowVersion: d.dateVersion })), overCapacityReason: reason || null } })
+            else await typedRequest('post', CLOSE_PATH[action], { params, body: { requestId: crypto.randomUUID(), rowVersion: row.rowVersion, reason } })
+            toast.success(t('common.saved')); done() } catch (e) { setError(e); if ((e as ApiError).status === 409) { setAction(null); await detail.refetch() } }
         }}>
         {action === 'confirm' && preview && <>
           {previewEnabled && <>
@@ -372,8 +373,8 @@ function AllocationDetail({ projectId, base, id, projectNumber, options, close, 
 
 /** The project's open roles (FR-ROLE-01..04): demand before a person is named. Fill proposes a normal allocation for it.
  *  Behind flag.record_engine_additions (§47.5 FR-REC-12) the headers sort and the role label opens the read-only panel. */
-function OpenRoles({ roles, base, proposal, canFill, onAdd, onEdit, onCancel, onFill, onOpenAllocation }: {
-  roles: ReturnType<typeof useQuery<OpenRole[]>>; base: string; proposal: Offer; canFill: boolean
+function OpenRoles({ roles, projectId, proposal, canFill, onAdd, onEdit, onCancel, onFill, onOpenAllocation }: {
+  roles: ReturnType<typeof useQuery<OpenRole[]>>; projectId: string; proposal: Offer; canFill: boolean
   onAdd: () => void; onEdit: (r: OpenRole) => void; onCancel: (r: OpenRole) => void; onFill: (r: OpenRole) => void; onOpenAllocation: (id: string) => void
 }) {
   const additions = useFlag('record_engine_additions'), openPanel = useItemPanel(), [sp] = useSearchParams()
@@ -386,7 +387,7 @@ function OpenRoles({ roles, base, proposal, canFill, onAdd, onEdit, onCancel, on
     { id: 'dates', label: t('allocation.dates'), fixed: true, sort: r => r.fromDate, className: 'whitespace-nowrap tabular-nums', cell: r => <>{fmtDate(r.fromDate)} – {fmtDate(r.throughDate)}</> },
     { id: 'hours', label: t('allocation.plannedHours'), fixed: true, sort: r => r.plannedHours, className: 'text-right font-medium tabular-nums', cell: r => hours(r.plannedHours) },
     { id: 'status', label: t('common.status'), fixed: true, sort: r => r.status, cell: r => <RoleStatus status={r.status} /> },
-    { id: 'filled', label: t('openRole.filledBy'), fixed: true, cell: r => r.filledAllocationId ? <FilledBy base={base} id={r.filledAllocationId} open={onOpenAllocation} /> : <span className="text-muted-foreground">{t('common.dash')}</span> },
+    { id: 'filled', label: t('openRole.filledBy'), fixed: true, cell: r => r.filledAllocationId ? <FilledBy projectId={projectId} id={r.filledAllocationId} open={onOpenAllocation} /> : <span className="text-muted-foreground">{t('common.dash')}</span> },
   ]
   const table = useTable('hub.openRoleColumns', columns, roles.data ?? [], r => [r.fromDate, r.roleLabel])
   if (roles.isPending) return <div className="rounded-lg border bg-card"><Loading rows={3} /></div>
@@ -447,8 +448,8 @@ export function OpenRolePanel({ id }: PanelProps) {
 }
 
 /** Who fills a role: the filling allocation's person, opening that allocation. Shows a dash when the viewer cannot open it. */
-function FilledBy({ base, id, open }: { base: string; id: string; open: (id: string) => void }) {
-  const q = useQuery({ queryKey: ['allocation-detail', base, id], queryFn: () => get<Detail>(`${base}/${id}`), retry: false })
+function FilledBy({ projectId, id, open }: { projectId: string; id: string; open: (id: string) => void }) {
+  const q = useQuery({ queryKey: ['allocation-detail', projectId, id], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/allocations/{id}', { params: { projectId, id } }), retry: false })
   if (q.isPending) return <Spinner />
   if (!q.data) return <span className="text-muted-foreground">{t('common.dash')}</span>
   return <button type="button" className="flex items-center gap-2 text-left text-primary underline-offset-4 hover:underline" onClick={() => open(id)}>

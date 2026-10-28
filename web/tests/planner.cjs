@@ -10,6 +10,7 @@ const { weekPreview, weekApplied } = require('./week-planning.fixture.cjs')
 const { subscriptionState, subscriptionLink } = require('./calendar-subscription.fixture.cjs')
 const { teamDiscipline, projectTeam } = require('./team.fixture.cjs')
 const { availabilityDay, availabilityPerson, availabilityConcern, availabilityRead, hrIdentity, importRow, leaveImportPreview, leaveImportApplied, recordSaved } = require('./availability.fixture.cjs')
+const { dayAvailability } = require('./allocations.fixture.cjs')
 const { calendarEvent, calendarDeadline, calendarRange, calendarCancelled } = require('./calendar.fixture.cjs')
 const { planningHit, searchResult } = require('./search.fixture.cjs')
 
@@ -29,7 +30,7 @@ let bulkConflict = false, subscriptionEnabled = false, partialRita = false, kept
 const calendarEventId = id(30)
 let calendarEntries = [calendarDeadline(id(31), projectId), calendarEvent(calendarEventId, projectId)]
 const keptQuick = []
-let availability = [{ workDate: weeks[0], rowVersion: 3 }, { workDate: '2026-10-06', rowVersion: 4 }]
+let availability = [dayAvailability({ workDate: weeks[0], rowVersion: 3 }), dayAvailability({ workDate: '2026-10-06', rowVersion: 4 })]
 const selfEntry = makeEntry({ id: selfId, personId: alex, personName: 'Alex Engineer', ownerId: alex, ownerName: 'Alex Engineer', ownerKind: 'Self', startWeek: weeks[5], endWeek: weeks[5], projectId: null, projectDisciplineId: null, label: 'self planning', sourceCategory: 'Proposal', hoursPerWeek: 4, confidence: 'Confirmed', visibility: 'Confirmed', canChangeVisibility: false, stale: false, rowVersion: 2 })
 const cell = (week, personId) => ({ week, capacity: personId === rita ? 37.5 : 40, timeAway: 0, additionalAvailability: 0, approved: 12, confirmed: personId === alex ? 8 : 0, expected: personId === alex ? 8 : 0, possible: 0, remaining: personId === alex ? 24 : 40, taskEstimates: 14, unestimatedTasks: 1, overPlanned: false, underPlanned: false, staleEntries: personId === alex ? 1 : 0, ownDraftHours: 0 })
 const grid = (includeSelf = true) => ({ weeks, currentWeek: weeks[0], evaluatedAt: '2026-10-03T00:00:00Z', partialView: partialRita, draftAccess: false, settings: { horizonWeeks: 12, overPct: 105, underPct: 50, underWeeks: 2, staleDays: 28, maxHoursPerWeek: 80 }, people: empty ? [] : people.map((p) => ({ ...p, partial: partialRita && p.id === rita, cells: weeks.map((w) => cell(w, p.id)), indicators: p.id === alex ? ['StalePlan'] : [], entries: p.id === alex ? [current] : (includeSelf && p.id === sam ? [selfEntry] : []), taskContexts: p.id === alex ? [{ projectId, projectNumber: 'P-100', projectName: 'Harbour survey', weeks: [{ week: weeks[0], hours: 10, unestimatedTasks: 1 }] }] : [], approvedAllocations: [{ allocationId: id(30), projectId, projectNumber: 'P-100', projectName: 'Harbour survey', canOpen: true, weeks: [{ week: weeks[0], hours: 12 }] }] })) })
@@ -105,7 +106,7 @@ const pause = (ms = 100) => new Promise((r) => setTimeout(r, ms))
       else if (p === `planning/entries/${entryId}/visibility`) { current = makeEntry({ ...current, visibility: b.visibility, rowVersion: current.rowVersion + 1 }); notifications.push({ event: 'PlanningEntryChanged', visibility: b.visibility }); data = current }
       else if (p === `planning/entries/${entryId}/still-valid`) { current = makeEntry({ ...current, stale: false, lastValidatedAt: '2026-10-03T00:00:00Z', rowVersion: current.rowVersion + 1 }); data = current }
       else if (p === `users/${alex}/availability`) { if (failAwayRead) { status = 500; data = { detail: 'Availability reload failed' } } else data = availability }
-      else if (p === 'planning/leave/manual' && req.method() === 'POST') { if (conflictAwayOnce) { conflictAwayOnce = false; availability = [{ workDate: weeks[0], rowVersion: 7 }, { workDate: '2026-10-06', rowVersion: 8 }]; status = 409; data = { detail: 'Availability dates changed', code: 'planning.stale_dates' } } else if (failAwaySaveOnce) { failAwaySaveOnce = false; status = 500; data = { detail: 'Time away save failed' } } else data = recordSaved(id(83)) }
+      else if (p === 'planning/leave/manual' && req.method() === 'POST') { if (conflictAwayOnce) { conflictAwayOnce = false; availability = [dayAvailability({ workDate: weeks[0], rowVersion: 7 }), dayAvailability({ workDate: '2026-10-06', rowVersion: 8 })]; status = 409; data = { detail: 'Availability dates changed', code: 'planning.stale_dates' } } else if (failAwaySaveOnce) { failAwaySaveOnce = false; status = 500; data = { detail: 'Time away save failed' } } else data = recordSaved(id(83)) }
       else if (p === 'search') data = searchResult('proposal', { planning: [planningHit({ id: entryId, name: 'Alex Engineer · proposal support', startWeek: weeks[0], personId: alex })] })
       else unknown.push(p)
       await route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(data) })

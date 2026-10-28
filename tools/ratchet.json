@@ -2,11 +2,11 @@
   "counters": {
     "anonymous_objects": {
       "ratchet": true,
-      "value": 474
+      "value": 466
     },
     "api_helpers_without_type": {
       "ratchet": true,
-      "value": 104
+      "value": 102
     },
     "client_permission_derivations": {
       "ratchet": false,
@@ -14,7 +14,7 @@
     },
     "direct_invalidate_queries": {
       "ratchet": true,
-      "value": 35
+      "value": 33
     },
     "html_tables": {
       "ratchet": true,
@@ -34,7 +34,7 @@
     },
     "task_object_handlers": {
       "ratchet": true,
-      "value": 36
+      "value": 30
     },
     "untyped_results": {
       "ratchet": true,
@@ -99,7 +99,7 @@
       "server": "Only the named sending owner can submit or respond."
     },
     "home.range": {
-      "client": "{from} – {to}",
+      "client": "{from} \u2013 {to}",
       "server": "Choose a range of at most a year, ending after it starts."
     },
     "ind.atRisk": {

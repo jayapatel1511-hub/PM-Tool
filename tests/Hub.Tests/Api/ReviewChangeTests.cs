@@ -153,6 +153,9 @@ public sealed class ReviewChangeTests(HubFactory f)
         var basePath = Root(setup) + "/allocations";
         var options = await Get(TestData.Pm, basePath + "/review-options");
         Assert.Contains(options.AsArray(), row => row!.G("id") == assignmentId && row.G("packageId") == packageId);
+        var option = options.AsArray().Single(row => row!.G("id") == assignmentId)!; // 040-S15: the typed record keeps the names and order the proposal form reads
+        Assert.Equal(["id", "reviewerId", "dueDate", "packageId", "packageKey", "packageTitle"], option.AsObject().Select(x => x.Key));
+        Assert.Equal(System.Text.Json.JsonValueKind.String, option["packageKey"]!.GetValueKind()); Assert.Equal(System.Text.Json.JsonValueKind.String, option["packageTitle"]!.GetValueKind());
         await (await f.As(TestData.Rita).GetAsync(basePath + "/review-options")).Json(403);
         var date = new DateOnly(2026, 9, 17);
         var allocation = await Post(TestData.Pm, basePath, new AllocationEndpoints.CreateBody(Guid.NewGuid(), data.User(TestData.Omar),
@@ -160,6 +163,7 @@ public sealed class ReviewChangeTests(HubFactory f)
         var detail = await Get(TestData.Pm, basePath + $"/{allocation.G("id")}");
         Assert.Equal(packageId, detail["links"]![0]!.G("reviewPackageId"));
         Assert.Equal(3, detail["links"]![0]!["reviewHours"]!.GetValue<decimal>());
+        Assert.Equal(["workType", "workId", "workDate", "reviewHours", "reviewPackageId"], detail["links"]![0]!.AsObject().Select(x => x.Key));
         var grid = await (await f.As(TestData.Lena).GetAsync("/api/v1/workload")).Json();
         var person = grid["people"]!.AsArray().Single(p => p!.G("id") == data.User(TestData.Omar))!;
         Assert.Equal(4, person["cells"]![0]!["proposed"]!.GetValue<decimal>());

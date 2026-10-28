@@ -66,6 +66,7 @@ test('invalidation prefixes match actual mounted screen query keys', () => {
     Member: [['p', 'p1', 'team'], ['open-items', 'm1']], Discipline: [['p', 'p1', 'team'], ['planner-project-disciplines', 'p1']],
     Risk: [['search-counts', 'scope'], ['search-page', 'scope']],
     IssueLocation: [['issue-locations', 'i1']], ReadinessAssessment: [['readiness-detail', 'p1', 'i1']],
+    ResourceAllocation: [['allocations', 'p1', {}, 1], ['allocation-detail', 'p1', 'i1'], ['allocation-review-options', 'p1'], ['workload', 'scope']],
   }
   for (const [type, queries] of Object.entries(mounted)) for (const query of queries)
     assert.ok(keysForChange(type, 'p1').some(prefix => prefix.every((part, i) => query[i] === part)), `${type}: ${query}`)

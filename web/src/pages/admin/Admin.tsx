@@ -3,10 +3,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowDown, ArrowUp, Monitor, Plus, X } from 'lucide-react'
 import { useState } from 'react'
 import { NavLink, Navigate, useParams, Link } from 'react-router'
-import { ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Notice, Page, Section, Spinner, TableRegion, selectCls, tdCls, thCls } from '@/components/hub/common'
+import { ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Notice, Page, Section, Spinner, selectCls } from '@/components/hub/common'
 import { ActivityTable } from '@/components/hub/activity'
 import { DataTable } from '@/components/hub/registers'
-import { useTable } from '@/components/hub/table'
+import { useTable, type Column } from '@/components/hub/table'
 import { Avatar } from '@/components/hub/people'
 import { Chip, Pill } from '@/components/hub/pills'
 import { Badge } from '@/components/ui/badge'
@@ -30,8 +30,6 @@ type Kind = (typeof KINDS)[number]
 
 const h2 = 'text-lg/[26px] font-semibold tracking-[-0.2px]'
 const card = 'rounded-lg border bg-card'
-/** A table cell holding 32 px row controls keeps the 36 px compact row. */
-const ctl = cn(tdCls, 'py-0.5')
 const Active = ({ on }: { on: boolean }) => <Pill tone={on ? 'ok' : 'idle'}>{on ? t('common.active') : t('common.inactive')}</Pill>
 
 /** Administration (§13.15): plain forms and lifecycle tables under one row of tabs; desktop and tablet only (§13.0). */
@@ -263,6 +261,24 @@ export function Users() {
   const supervisor = (id: string) => everyone.data?.find((u) => u.id === id)?.displayName ?? <Missing />
   const refresh = () => qc.invalidateQueries({ queryKey: ['admin', 'users'] })
   const rows = list.data ?? []
+  // FR-REC-14: the shared DataTable; no column sorts and none is optional, so the list keeps the server's order.
+  const table = useTable<UserRow>('hub.userColumns', ([
+    { id: 'name', label: t('common.name'), cell: (u) => (
+      <div className="flex items-start gap-2.5"><Avatar id={u.id} name={u.displayName} />
+        <div className="min-w-0"><div className="font-semibold">{u.isActive ? u.displayName : t('common.inactiveSuffix', { name: u.displayName })}</div>
+          <div className="break-words text-xs/[18px] text-muted-foreground">{u.email}</div></div></div>) },
+    { id: 'jobTitle', label: t('admin.jobTitle'), cell: (u) => u.jobTitle || <Missing /> },
+    { id: 'office', label: t('admin.office'), cell: (u) => ref.data?.offices.find((o: any) => o.id === u.officeId)?.name ?? <Missing /> },
+    { id: 'supervisor', label: t('admin.supervisor'), cell: (u) => u.supervisorId ? supervisor(u.supervisorId) : <Chip tone="warn">{t('admin.noSupervisor')}</Chip> },
+    { id: 'roles', label: t('admin.roles'), cell: (u) => <div className="flex flex-wrap gap-1">{u.roles.map((r) => <RoleBadge key={r.role + r.source} r={r}>{runtimeText(`role.${r.role}`)}</RoleBadge>)}</div> },
+    { id: 'status', label: t('common.status'), cell: (u) => <Active on={u.isActive} /> },
+    { id: 'lastSignIn', label: t('admin.lastSignIn'), className: 'whitespace-nowrap tabular-nums', cell: (u) => u.lastSignInAt ? fmtTime(u.lastSignInAt) : <Missing /> },
+    { id: 'actions', label: t('common.actions'), srOnly: true, className: 'py-0.5', cell: (u) => (
+      <div className="flex justify-end gap-1">
+        <Button size="sm" variant="ghost" asChild><Link to={`/people/${u.id}/reassign-work`}>{t('reassign.action')}</Link></Button>
+        <Button size="sm" variant="outline" onClick={() => setEdit(u)}>{t('common.edit')}</Button>
+      </div>) },
+  ] as Column<UserRow>[]).map((c) => ({ ...c, fixed: true, className: cn('align-top', c.className) })), rows, (u) => [u.displayName])
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -275,39 +291,9 @@ export function Users() {
           <label className="flex min-h-(--control-h) items-center gap-2 text-sm"><Checkbox checked={inactive} onCheckedChange={(c) => setInactive(!!c)} />{t('common.showInactive')}</label>
           <label className="flex min-h-(--control-h) items-center gap-2 text-sm"><Checkbox checked={noSup} onCheckedChange={(c) => setNoSup(!!c)} />{t('admin.noSupervisor')}</label>
         </>} />
-      {list.error ? <ErrorBanner error={list.error} retry={() => list.refetch()} /> : list.isPending ? <div className={card}><Loading /></div>
-        : rows.length === 0 ? <div className={card}><Empty>{t('admin.noUsers')}</Empty></div> : (
-        <TableRegion>
-          <table className="w-full text-sm">
-            <caption className="sr-only">{t('admin.users')}</caption>
-            <thead className="bg-muted">
-              <tr>{(['common.name', 'admin.jobTitle', 'admin.office', 'admin.supervisor', 'admin.roles', 'common.status', 'admin.lastSignIn', ''] as const).map((h) => <th key={h} scope="col" className={thCls}>{h ? t(h) : <span className="sr-only">{t('common.actions')}</span>}</th>)}</tr>
-            </thead>
-            <tbody>
-              {rows.map((u) => (
-                <tr key={u.id} className={cn('border-t hover:bg-muted', !u.isActive && 'text-muted-foreground')}>
-                  <td className={tdCls}>
-                    <div className="flex items-start gap-2.5"><Avatar id={u.id} name={u.displayName} />
-                      <div className="min-w-0"><div className="font-semibold">{u.isActive ? u.displayName : t('common.inactiveSuffix', { name: u.displayName })}</div>
-                        <div className="break-words text-xs/[18px] text-muted-foreground">{u.email}</div></div></div>
-                  </td>
-                  <td className={tdCls}>{u.jobTitle || <Missing />}</td>
-                  <td className={tdCls}>{ref.data?.offices.find((o: any) => o.id === u.officeId)?.name ?? <Missing />}</td>
-                  <td className={tdCls}>{u.supervisorId ? supervisor(u.supervisorId) : <Chip tone="warn">{t('admin.noSupervisor')}</Chip>}</td>
-                  <td className={tdCls}><div className="flex flex-wrap gap-1">{u.roles.map((r) => <RoleBadge key={r.role + r.source} r={r}>{runtimeText(`role.${r.role}`)}</RoleBadge>)}</div></td>
-                  <td className={tdCls}><Active on={u.isActive} /></td>
-                  <td className={cn(tdCls, 'whitespace-nowrap tabular-nums')}>{u.lastSignInAt ? fmtTime(u.lastSignInAt) : <Missing />}</td>
-                  <td className={ctl}>
-                    <div className="flex justify-end gap-1">
-                      <Button size="sm" variant="ghost" asChild><Link to={`/people/${u.id}/reassign-work`}>{t('reassign.action')}</Link></Button>
-                      <Button size="sm" variant="outline" onClick={() => setEdit(u)}>{t('common.edit')}</Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </TableRegion>
+      {list.error ? <ErrorBanner error={list.error} retry={() => list.refetch()} /> : (
+        <DataTable table={table} rows={table.sorted} loading={list.isPending} wide caption={t('admin.users')} current={() => false}
+          rowClass={(u) => !u.isActive && 'text-muted-foreground'} empty={<Empty>{t('admin.noUsers')}</Empty>} />
       )}
       {edit && <UserDialog user={edit} users={everyone.data ?? []} offices={ref.data?.offices ?? []} disciplines={ref.data?.disciplines ?? []} onClose={() => { setEdit(null); refresh() }} />}
       {creating && <CreateUserDialog users={everyone.data ?? []} offices={ref.data?.offices ?? []}

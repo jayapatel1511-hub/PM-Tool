@@ -388,7 +388,7 @@ function OpenRoles({ roles, base, proposal, canFill, onAdd, onEdit, onCancel, on
     { id: 'status', label: t('common.status'), fixed: true, sort: r => r.status, cell: r => <RoleStatus status={r.status} /> },
     { id: 'filled', label: t('openRole.filledBy'), fixed: true, cell: r => r.filledAllocationId ? <FilledBy base={base} id={r.filledAllocationId} open={onOpenAllocation} /> : <span className="text-muted-foreground">{t('common.dash')}</span> },
   ]
-  const table = useTable('hub.openRoleColumns', columns, roles.data ?? [], r => [r.fromDate, r.roleLabel])
+  const table = useTable('hub.openRoleColumns', columns, roles.data ?? [], r => [r.fromDate, r.roleLabel], null) // `page` is the allocations list's
   if (roles.isPending) return <div className="rounded-lg border bg-card"><Loading rows={3} /></div>
   if (roles.error) return <ErrorBanner error={roles.error} retry={() => roles.refetch()} />
   if (!roles.data.length) return <div className="rounded-lg border bg-card"><Empty title={t('openRole.empty')} action={proposal.shown && <Button variant="outline" {...proposal.props} onClick={onAdd}><Plus className="size-4" />{t('openRole.new')}</Button>}>{t('openRole.emptyHint')}</Empty></div>

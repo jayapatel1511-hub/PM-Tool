@@ -12,7 +12,8 @@ const cmp = (a: unknown, b: unknown) => (a == null && b == null ? 0 : a == null 
 
 /** Register tables (§13.0, FR-006): click a header to sort (the URL keeps it), due date and key break ties, and each viewer
  *  chooses the columns they see (kept in this browser only). */
-export function useTable<T>(storageKey: string, columns: Column<T>[], rows: T[], tiebreak: (r: T) => unknown[]) {
+/** `pageParam` is the list's own page in the URL, reset when the sort changes; null for a list that shares the URL with another's pager. */
+export function useTable<T>(storageKey: string, columns: Column<T>[], rows: T[], tiebreak: (r: T) => unknown[], pageParam: string | null = 'page') {
   const [sp, setSp] = useSearchParams()
   const [hidden, setHidden] = useState<string[]>(() => { try { return JSON.parse(localStorage.getItem(storageKey) ?? 'null') ?? columns.filter((c) => c.optional).map((c) => c.id) } catch { return [] } })
   const [field, dir] = (sp.get('sort') ?? '').split(':')
@@ -26,7 +27,7 @@ export function useTable<T>(storageKey: string, columns: Column<T>[], rows: T[],
     const n = new URLSearchParams(sp)
     const next = field !== id ? id : dir === 'desc' ? null : `${id}:desc`
     if (next) n.set('sort', next); else n.delete('sort')
-    n.delete('page')
+    if (pageParam) n.delete(pageParam)
     setSp(n, { replace: true })
   }
   const header = (c: Column<T>) => (

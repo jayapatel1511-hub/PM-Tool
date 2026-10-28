@@ -62,6 +62,7 @@ web: cd web && npm run test:planning-reporting
 web: cd web && npm run test:portfolio-admin-strip
 web: cd web && npm run test:dependencies
 web: cd web && npm run test:team
+web: cd web && npm run test:admin
 web: cd web && npm audit --audit-level=critical --omit=dev
 web [always]: mkdir -p ci-artifacts && if [ -d web/test-results ]; then cp -R web/test-results ci-artifacts/browser-evidence; fi
 

@@ -208,7 +208,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["PageOfObject"];
+                        "application/json": components["schemas"]["PageOfActivityEntry"];
                     };
                 };
             };
@@ -356,7 +356,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["Client"][];
+                        "application/json": components["schemas"]["ClientRow"][];
                     };
                 };
             };
@@ -375,12 +375,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ClientRow"];
+                    };
                 };
             };
         };
@@ -423,7 +425,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ClientRow"];
+                    };
                 };
             };
         };
@@ -453,7 +457,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfint"];
+                        "application/json": components["schemas"]["ReferenceUsage"];
                     };
                 };
             };
@@ -488,7 +492,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["CommitmentMissCategory"][];
+                        "application/json": components["schemas"]["ReferenceRow"][];
                     };
                 };
             };
@@ -507,12 +511,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ReferenceRow"];
+                    };
                 };
             };
         };
@@ -555,7 +561,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ReferenceRow"];
+                    };
                 };
             };
         };
@@ -585,7 +593,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfint"];
+                        "application/json": components["schemas"]["ReferenceUsage"];
                     };
                 };
             };
@@ -620,7 +628,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["DeliverableType"][];
+                        "application/json": components["schemas"]["DeliverableTypeRow"][];
                     };
                 };
             };
@@ -639,12 +647,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["DeliverableTypeRow"];
+                    };
                 };
             };
         };
@@ -687,7 +697,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["DeliverableTypeRow"];
+                    };
                 };
             };
         };
@@ -717,7 +729,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfint"];
+                        "application/json": components["schemas"]["ReferenceUsage"];
                     };
                 };
             };
@@ -752,7 +764,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["Discipline"][];
+                        "application/json": components["schemas"]["DisciplineRow"][];
                     };
                 };
             };
@@ -771,12 +783,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["DisciplineRow"];
+                    };
                 };
             };
         };
@@ -819,7 +833,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["DisciplineRow"];
+                    };
                 };
             };
         };
@@ -849,7 +865,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfint"];
+                        "application/json": components["schemas"]["ReferenceUsage"];
                     };
                 };
             };
@@ -922,7 +938,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfGuidAndGuidAndstringAndDateOnlyAndstring"][];
+                        "application/json": components["schemas"]["HolidayRow"][];
                     };
                 };
             };
@@ -941,12 +957,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["HolidayAdded"];
+                    };
                 };
             };
         };
@@ -977,8 +995,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -1013,7 +1031,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["Office"][];
+                        "application/json": components["schemas"]["OfficeRow"][];
                     };
                 };
             };
@@ -1032,12 +1050,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["OfficeRow"];
+                    };
                 };
             };
         };
@@ -1080,7 +1100,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["OfficeRow"];
+                    };
                 };
             };
         };
@@ -1110,7 +1132,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfint"];
+                        "application/json": components["schemas"]["ReferenceUsage"];
                     };
                 };
             };
@@ -1145,7 +1167,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfDateTimeOffsetAndListOfOpsProblemAndListOfObjectAndintAndListOfAnonymousTypeOfGuidAndstringAndstringAndintAndstringAndDateTimeOffsetAndDateTimeOffsetAndint"];
+                        "application/json": components["schemas"]["OperationsRead"];
                     };
                 };
             };
@@ -1624,7 +1646,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["Phase"][];
+                        "application/json": components["schemas"]["ReferenceRow"][];
                     };
                 };
             };
@@ -1643,12 +1665,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ReferenceRow"];
+                    };
                 };
             };
         };
@@ -1691,7 +1715,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ReferenceRow"];
+                    };
                 };
             };
         };
@@ -1721,7 +1747,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfint"];
+                        "application/json": components["schemas"]["ReferenceUsage"];
                     };
                 };
             };
@@ -1756,7 +1782,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["ProjectType"][];
+                        "application/json": components["schemas"]["ReferenceRow"][];
                     };
                 };
             };
@@ -1775,12 +1801,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ReferenceRow"];
+                    };
                 };
             };
         };
@@ -1823,7 +1851,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ReferenceRow"];
+                    };
                 };
             };
         };
@@ -1853,7 +1883,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfint"];
+                        "application/json": components["schemas"]["ReferenceUsage"];
                     };
                 };
             };
@@ -2020,7 +2050,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown[];
+                        "application/json": components["schemas"]["SettingRow"][];
                     };
                 };
             };
@@ -2061,7 +2091,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["SettingSaved"];
+                    };
                 };
             };
         };
@@ -2099,7 +2131,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfGuidAndstringAndstringAndstringAndGuidAndGuidAndGuidAndbooleanAnddecimalAndbooleanAndDateTimeOffsetAndintAndIEnumerableOfAnonymousTypeOfstringAndstring"][];
+                        "application/json": components["schemas"]["AdminUserRow"][];
                     };
                 };
             };
@@ -2118,12 +2150,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["UserSaved"];
+                    };
                 };
             };
         };
@@ -2166,7 +2200,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["UserSaved"];
+                    };
                 };
             };
         };
@@ -2196,8 +2232,8 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -2233,8 +2269,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -16114,6 +16150,32 @@ export interface components {
             key: string;
             title: string;
         };
+        AdminUserRole: {
+            role: string;
+            source: string;
+        };
+        AdminUserRow: {
+            displayName: string;
+            email: string;
+            /** Format: uuid */
+            homeDisciplineId: null | string;
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+            isTemplateEditor: boolean;
+            jobTitle: null | string;
+            /** Format: date-time */
+            lastSignInAt: null | string;
+            /** Format: uuid */
+            officeId: null | string;
+            roles: components["schemas"]["AdminUserRole"][];
+            /** Format: int32 */
+            rowVersion: number;
+            /** Format: uuid */
+            supervisorId: null | string;
+            /** Format: double */
+            weeklyCapacityHours: null | number;
+        };
         AdoptBody: {
             /** Format: uuid */
             expectedCurrentRevisionId: string;
@@ -16276,45 +16338,11 @@ export interface components {
             projectNumber: null | string;
             unread: boolean;
         };
-        AnonymousTypeOfDateTimeOffsetAndListOfOpsProblemAndListOfObjectAndintAndListOfAnonymousTypeOfGuidAndstringAndstringAndintAndstringAndDateTimeOffsetAndDateTimeOffsetAndint: {
-            /** Format: date-time */
-            asOf: string;
-            /** Format: int32 */
-            deadLetterCount: number;
-            deadLetters: null | components["schemas"]["AnonymousTypeOfGuidAndstringAndstringAndintAndstringAndDateTimeOffsetAndDateTimeOffset"][];
-            jobs: null | unknown[];
-            /** Format: int32 */
-            pendingChanges: number;
-            problems: null | components["schemas"]["OpsProblem"][];
-        };
-        AnonymousTypeOfGuidAndGuidAndstringAndDateOnlyAndstring: {
-            /** Format: date */
-            date: string;
-            /** Format: uuid */
-            id: string;
-            name: null | string;
-            office: null | string;
-            /** Format: uuid */
-            officeId: null | string;
-        };
         AnonymousTypeOfGuidAndstringAndstring: {
             displayName: null | string;
             source: null | string;
             /** Format: uuid */
             userId: string;
-        };
-        AnonymousTypeOfGuidAndstringAndstringAndintAndstringAndDateTimeOffsetAndDateTimeOffset: {
-            /** Format: int32 */
-            attempts: number;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            deadLetteredAt: null | string;
-            eventType: null | string;
-            /** Format: uuid */
-            id: string;
-            lastError: null | string;
-            projectNumber: null | string;
         };
         AnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndint: {
             /** Format: date-time */
@@ -16326,28 +16354,6 @@ export interface components {
             status: null | string;
             /** Format: int32 */
             unread: number;
-        };
-        AnonymousTypeOfGuidAndstringAndstringAndstringAndGuidAndGuidAndGuidAndbooleanAnddecimalAndbooleanAndDateTimeOffsetAndintAndIEnumerableOfAnonymousTypeOfstringAndstring: {
-            displayName: null | string;
-            email: null | string;
-            /** Format: uuid */
-            homeDisciplineId: null | string;
-            /** Format: uuid */
-            id: string;
-            isActive: boolean;
-            isTemplateEditor: boolean;
-            jobTitle: null | string;
-            /** Format: date-time */
-            lastSignInAt: null | string;
-            /** Format: uuid */
-            officeId: null | string;
-            roles: null | components["schemas"]["AnonymousTypeOfstringAndstring"][];
-            /** Format: int32 */
-            rowVersion: number;
-            /** Format: uuid */
-            supervisorId: null | string;
-            /** Format: double */
-            weeklyCapacityHours: null | number;
         };
         AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring: {
             level: null | string;
@@ -16388,10 +16394,6 @@ export interface components {
             weekendDigests: boolean;
             weeklySummaryEnabled: boolean;
         };
-        AnonymousTypeOfint: {
-            /** Format: int32 */
-            projects: number;
-        };
         AnonymousTypeOfintAndint: {
             /** Format: int32 */
             following: number;
@@ -16406,10 +16408,6 @@ export interface components {
             defaultEmail: boolean;
             direct: boolean;
             email: boolean;
-        };
-        AnonymousTypeOfstringAndstring: {
-            role: null | string;
-            source: null | string;
         };
         AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfstring: {
             displayName: null | string;
@@ -17262,34 +17260,34 @@ export interface components {
             link: string;
             name: string;
         };
-        Client: {
-            auditKey?: null | string;
-            auditName?: null | string;
-            /** Format: uuid */
-            auditProjectId?: null | string;
-            auditType?: null | string;
-            /** Format: date-time */
-            createdAt?: string;
-            /** Format: uuid */
-            createdBy?: null | string;
-            /** Format: uuid */
-            id?: string;
-            isActive?: boolean;
-            name?: string;
-            /** Format: int32 */
-            rowVersion?: number;
-            shortName?: null | string;
-            /** Format: int32 */
-            sortOrder?: number;
-            /** Format: date-time */
-            updatedAt?: string;
-            /** Format: uuid */
-            updatedBy?: null | string;
-        };
         ClientConfig: {
             authMode: string;
             entra: components["schemas"]["EntraClientConfig"];
             providers: string[];
+        };
+        ClientRow: {
+            auditKey: null | string;
+            auditName: null | string;
+            /** Format: uuid */
+            auditProjectId: null | string;
+            auditType: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+            name: string;
+            /** Format: int32 */
+            rowVersion: number;
+            shortName: null | string;
+            /** Format: int32 */
+            sortOrder: number;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: uuid */
+            updatedBy: null | string;
         };
         Closeout: {
             decisions: null | string;
@@ -17382,29 +17380,6 @@ export interface components {
             /** Format: int32 */
             total: number;
             truncated: boolean;
-        };
-        CommitmentMissCategory: {
-            auditKey?: null | string;
-            auditName?: null | string;
-            /** Format: uuid */
-            auditProjectId?: null | string;
-            auditType?: null | string;
-            /** Format: date-time */
-            createdAt?: string;
-            /** Format: uuid */
-            createdBy?: null | string;
-            /** Format: uuid */
-            id?: string;
-            isActive?: boolean;
-            name?: string;
-            /** Format: int32 */
-            rowVersion?: number;
-            /** Format: int32 */
-            sortOrder?: number;
-            /** Format: date-time */
-            updatedAt?: string;
-            /** Format: uuid */
-            updatedBy?: null | string;
         };
         CommitmentReliability: {
             /** Format: int32 */
@@ -18444,30 +18419,30 @@ export interface components {
             rowVersion: null | number;
             toStatus: string;
         };
-        DeliverableType: {
-            auditKey?: null | string;
-            auditName?: null | string;
+        DeliverableTypeRow: {
+            auditKey: null | string;
+            auditName: null | string;
             /** Format: uuid */
-            auditProjectId?: null | string;
-            auditType?: null | string;
+            auditProjectId: null | string;
+            auditType: string;
             /** Format: date-time */
-            createdAt?: string;
+            createdAt: string;
             /** Format: uuid */
-            createdBy?: null | string;
+            createdBy: null | string;
             /** Format: uuid */
-            defaultDisciplineId?: null | string;
+            defaultDisciplineId: null | string;
             /** Format: uuid */
-            id?: string;
-            isActive?: boolean;
-            name?: string;
+            id: string;
+            isActive: boolean;
+            name: string;
             /** Format: int32 */
-            rowVersion?: number;
+            rowVersion: number;
             /** Format: int32 */
-            sortOrder?: number;
+            sortOrder: number;
             /** Format: date-time */
-            updatedAt?: string;
+            updatedAt: string;
             /** Format: uuid */
-            updatedBy?: null | string;
+            updatedBy: null | string;
         };
         Delta: {
             /** Format: int32 */
@@ -18610,31 +18585,6 @@ export interface components {
             time: null | string;
             weeklySummary: null | boolean;
         };
-        Discipline: {
-            auditKey?: null | string;
-            auditName?: null | string;
-            /** Format: uuid */
-            auditProjectId?: null | string;
-            auditType?: null | string;
-            code?: string;
-            colour?: string;
-            /** Format: date-time */
-            createdAt?: string;
-            /** Format: uuid */
-            createdBy?: null | string;
-            /** Format: uuid */
-            id?: string;
-            isActive?: boolean;
-            name?: string;
-            /** Format: int32 */
-            rowVersion?: number;
-            /** Format: int32 */
-            sortOrder?: number;
-            /** Format: date-time */
-            updatedAt?: string;
-            /** Format: uuid */
-            updatedBy?: null | string;
-        };
         DisciplineBody: {
             /** Format: uuid */
             disciplineId: string;
@@ -18658,6 +18608,31 @@ export interface components {
             text: string;
             threshold: unknown;
             values: null | Record<string, never>;
+        };
+        DisciplineRow: {
+            auditKey: null | string;
+            auditName: null | string;
+            /** Format: uuid */
+            auditProjectId: null | string;
+            auditType: string;
+            code: string;
+            colour: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+            name: string;
+            /** Format: int32 */
+            rowVersion: number;
+            /** Format: int32 */
+            sortOrder: number;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: uuid */
+            updatedBy: null | string;
         };
         DispositionBody: {
             /** Format: date */
@@ -19087,10 +19062,24 @@ export interface components {
             people: components["schemas"]["Person"][];
             records: components["schemas"]["DeliverableBaseline"][];
         };
+        HolidayAdded: {
+            /** Format: uuid */
+            id: string;
+        };
         HolidayBody: {
             /** Format: date */
             date: null | string;
             name: string;
+            /** Format: uuid */
+            officeId: null | string;
+        };
+        HolidayRow: {
+            /** Format: date */
+            date: string;
+            /** Format: uuid */
+            id: string;
+            name: string;
+            office: null | string;
             /** Format: uuid */
             officeId: null | string;
         };
@@ -20002,30 +19991,30 @@ export interface components {
             /** Format: uuid */
             taskId: string;
         };
-        Office: {
-            auditKey?: null | string;
-            auditName?: null | string;
+        OfficeRow: {
+            auditKey: null | string;
+            auditName: null | string;
             /** Format: uuid */
-            auditProjectId?: null | string;
-            auditType?: null | string;
-            code?: string;
+            auditProjectId: null | string;
+            auditType: string;
+            code: string;
             /** Format: date-time */
-            createdAt?: string;
+            createdAt: string;
             /** Format: uuid */
-            createdBy?: null | string;
+            createdBy: null | string;
             /** Format: uuid */
-            id?: string;
-            isActive?: boolean;
-            name?: string;
+            id: string;
+            isActive: boolean;
+            name: string;
             /** Format: int32 */
-            rowVersion?: number;
+            rowVersion: number;
             /** Format: int32 */
-            sortOrder?: number;
-            timeZone?: string;
+            sortOrder: number;
+            timeZone: string;
             /** Format: date-time */
-            updatedAt?: string;
+            updatedAt: string;
             /** Format: uuid */
-            updatedBy?: null | string;
+            updatedBy: null | string;
         };
         OpenBody: {
             /** Format: int32 */
@@ -20084,6 +20073,42 @@ export interface components {
         OpenWorkView: {
             items: components["schemas"]["OpenItem"][];
             person: components["schemas"]["OpenWorkPerson"];
+        };
+        OperationsRead: {
+            /** Format: date-time */
+            asOf: string;
+            /** Format: int32 */
+            deadLetterCount: number;
+            deadLetters: components["schemas"]["OpsDeadLetter"][];
+            jobs: components["schemas"]["OpsJob"][];
+            /** Format: int32 */
+            pendingChanges: number;
+            problems: components["schemas"]["OpsProblem"][];
+        };
+        OpsDeadLetter: {
+            /** Format: int32 */
+            attempts: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            deadLetteredAt: string;
+            eventType: string;
+            /** Format: uuid */
+            id: string;
+            lastError: null | string;
+            projectNumber: null | string;
+        };
+        OpsJob: {
+            /** Format: int32 */
+            failed24h: number;
+            /** Format: date-time */
+            finishedAt: null | string;
+            job: string;
+            /** Format: date-time */
+            lastSuccess: null | string;
+            /** Format: date-time */
+            startedAt: string;
+            status: string;
         };
         OpsProblem: {
             detail: string;
@@ -20379,29 +20404,6 @@ export interface components {
             rowVersion: number;
             status: string;
             weeks: number[];
-        };
-        Phase: {
-            auditKey?: null | string;
-            auditName?: null | string;
-            /** Format: uuid */
-            auditProjectId?: null | string;
-            auditType?: null | string;
-            /** Format: date-time */
-            createdAt?: string;
-            /** Format: uuid */
-            createdBy?: null | string;
-            /** Format: uuid */
-            id?: string;
-            isActive?: boolean;
-            name?: string;
-            /** Format: int32 */
-            rowVersion?: number;
-            /** Format: int32 */
-            sortOrder?: number;
-            /** Format: date-time */
-            updatedAt?: string;
-            /** Format: uuid */
-            updatedBy?: null | string;
         };
         PickerUser: {
             displayName: null | string;
@@ -20706,29 +20708,6 @@ export interface components {
             rowVersion: null | number;
             toStatus: string;
         };
-        ProjectType: {
-            auditKey?: null | string;
-            auditName?: null | string;
-            /** Format: uuid */
-            auditProjectId?: null | string;
-            auditType?: null | string;
-            /** Format: date-time */
-            createdAt?: string;
-            /** Format: uuid */
-            createdBy?: null | string;
-            /** Format: uuid */
-            id?: string;
-            isActive?: boolean;
-            name?: string;
-            /** Format: int32 */
-            rowVersion?: number;
-            /** Format: int32 */
-            sortOrder?: number;
-            /** Format: date-time */
-            updatedAt?: string;
-            /** Format: uuid */
-            updatedBy?: null | string;
-        };
         PublishBody: {
             additionalTargets: null | components["schemas"]["TargetRef"][];
             /** Format: int32 */
@@ -20899,6 +20878,33 @@ export interface components {
             id: string;
             isActive: boolean;
             name: string;
+        };
+        ReferenceRow: {
+            auditKey: null | string;
+            auditName: null | string;
+            /** Format: uuid */
+            auditProjectId: null | string;
+            auditType: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+            name: string;
+            /** Format: int32 */
+            rowVersion: number;
+            /** Format: int32 */
+            sortOrder: number;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: uuid */
+            updatedBy: null | string;
+        };
+        ReferenceUsage: {
+            /** Format: int32 */
+            projects: number;
         };
         ReferenceView: {
             clients: components["schemas"]["ReferenceClient"][];
@@ -21667,6 +21673,18 @@ export interface components {
             id: string;
             /** Format: int32 */
             rowVersion: number;
+        };
+        SettingRow: {
+            default: unknown;
+            group: string;
+            key: string;
+            kind: string;
+            packet?: null | string;
+            value: components["schemas"]["JsonElement"];
+        };
+        SettingSaved: {
+            key: string;
+            value: components["schemas"]["JsonElement"];
         };
         SkippedItem: {
             /** Format: uuid */
@@ -22899,6 +22917,12 @@ export interface components {
         UserBody: {
             /** Format: uuid */
             userId: string;
+        };
+        UserSaved: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
         };
         VersionInput: {
             /** Format: date */

@@ -28,6 +28,7 @@
     "test:data-entry": "node tests/data-entry.cjs",
     "test:dependencies": "node tests/dependencies.cjs",
     "test:team": "node tests/team.cjs",
+    "test:admin": "node tests/admin.cjs",
     "test:backlog-my-work": "node tests/backlog-my-work.cjs",
     "test:admin-review": "node tests/admin-review.cjs",
     "test:portfolio-admin-strip": "node tests/portfolio-admin-strip.cjs",

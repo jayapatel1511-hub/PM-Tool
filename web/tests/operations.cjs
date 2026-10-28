@@ -3,6 +3,7 @@ const assert = require('node:assert/strict'), fs = require('node:fs'), path = re
 const { spawn } = require('node:child_process'), { chromium } = require('playwright'), ts = require('typescript');
 const { clientConfig } = require('./config.fixture.cjs');
 const { meView } = require('./me.fixture.cjs');
+const { operationsRead, opsDeadLetter } = require('./admin.fixture.cjs');
 const root = path.resolve(__dirname, '..'), port = process.env.PORT ?? '19501', base = `http://127.0.0.1:${port}`;
 const cache = new Map();
 function sourceModule(file) {
@@ -49,7 +50,7 @@ let server, browser;
     else if (p.endsWith('/notifications/pulse')) data = { stamp: 'synthetic' };
     else if (p.endsWith('/notifications/unread-count')) { countReads++; data = { notifications: unread, following: 50 } }
     else if (p.endsWith('/outbox/retry')) { retries++; failed = false; data = { retried: 1 } }
-    else if (p.endsWith('/admin/operations')) data = { asOf: '2026-10-18T22:00:00Z', pendingChanges: 0, problems: [], jobs: renderError ? {} : [], deadLetterCount: failed ? 1 : 0, deadLetters: failed ? [{ id: '00000000-0000-0000-0000-000000000002', eventType: 'SyntheticEvent', projectNumber: 'SYN-1', attempts: 10, lastError: 'SyntheticException', createdAt: '2026-10-18T21:00:00Z', deadLetteredAt: '2026-10-18T22:00:00Z' }] : [] };
+    else if (p.endsWith('/admin/operations')) data = { ...operationsRead({ deadLetterCount: failed ? 1 : 0, deadLetters: failed ? [opsDeadLetter({ id: '00000000-0000-0000-0000-000000000002', eventType: 'SyntheticEvent', projectNumber: 'SYN-1', lastError: 'SyntheticException', deadLetteredAt: '2026-10-18T22:00:00Z' })] : [] }), ...(renderError && { jobs: {} }) }; // the render error is a deliberately malformed read
     else if (p.endsWith('/projects') || p.endsWith('/me/starred-projects')) data = { items: [], total: 0 };
     else if (p.endsWith('/me/sign-in')) return route.fulfill({ status: 204 });
     return route.fulfill({ json: data });

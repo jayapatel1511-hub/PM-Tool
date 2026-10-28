@@ -1,17 +1,10 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { Empty, ErrorBanner, Loading, Missing, Section, tdCls, thCls } from '@/components/hub/common'
 import { Pill } from '@/components/hub/pills'
-import { get, typedRequest } from '@/lib/api'
+import { typedRequest } from '@/lib/api'
 import { ago, fmtTime } from '@/lib/format'
 import { t , runtimeText } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
-
-interface Ops {
-  asOf: string; pendingChanges: number; deadLetterCount: number
-  problems: { kind: string; detail: string }[]
-  jobs: { job: string; startedAt: string; finishedAt?: string; status: string; lastSuccess?: string; failed24h: number }[]
-  deadLetters: { id: string; eventType: string; projectNumber?: string; attempts: number; lastError?: string; createdAt: string; deadLetteredAt: string }[]
-}
 
 /** Operations (§23.8, packet 011 FR-006): the conditions operators are alerted on, checked now, and each background job's
  *  last run. The same checks run every five minutes and raise the environment's alert. */
@@ -19,7 +12,7 @@ interface Ops {
 const jobLabel = (job: string) => { const k = `ops.job.${job}`; const s = runtimeText(k); return s === k ? job : s }
 
 export function Operations() {
-  const q = useQuery({ queryKey: ['admin', 'operations'], queryFn: () => get<Ops>('admin/operations'), refetchInterval: 60_000 })
+  const q = useQuery({ queryKey: ['admin', 'operations'], queryFn: () => typedRequest('get', '/api/v1/admin/operations', {}), refetchInterval: 60_000 })
   const retry = useMutation({ mutationFn: (id?: string) => typedRequest('post', '/api/v1/admin/operations/outbox/retry', { query: { id }, body: {} }), onSuccess: () => { void q.refetch() } })
   if (q.isPending) return <div className="rounded-lg border bg-card"><Loading rows={6} /></div>
   if (q.error) return <ErrorBanner error={q.error} retry={() => q.refetch()} />

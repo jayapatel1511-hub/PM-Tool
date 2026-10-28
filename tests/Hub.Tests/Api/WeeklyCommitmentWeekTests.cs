@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using Hub.Api.Data;
 using Hub.Api.Features;
@@ -141,4 +142,59 @@ public sealed class WeeklyCommitmentWeekTests(HubFactory f)
         var id = (await Post(TestData.Pm, $"{root}/Task/{task}", Proposal(task, Monday, "Record the late closeout promise"))).G("id");
         Assert.Equal(CommitmentState.Proposed, f.Db(db => db.OutputCommitments.Single(c => c.Id == id).State));
     }
+
+    [Fact]
+    public async Task List_and_detail_keep_their_property_names_order_and_types() // the typed records must serialise to the bytes the Readiness page already reads
+    {
+        var (project, task, root) = await Work(null);
+        var kept = (await Post(TestData.Pm, $"{root}/Task/{task}", Proposal(task, Monday))).G("id");
+        var dropped = (await Post(TestData.Pm, $"{root}/Task/{task}", Proposal(task, Monday) with { TargetDate = Monday.AddDays(1) })).G("id");
+        var proposed = await (await f.As(TestData.Pm).GetAsync($"{root}/{kept}")).Json();
+        Assert.Equal(["commitment", "events", "canCommit", "canRecordMet", "canRecordNotMet", "canWithdraw"], proposed.AsObject().Select(x => x.Key));
+        Assert.Empty(proposed["events"]!.AsArray());
+        Assert.Equal(CommitmentRowKeys, proposed["commitment"]!.AsObject().Select(x => x.Key));
+        Assert.Null(proposed["commitment"]!["snapshotId"]); Assert.Null(proposed["commitment"]!["completionEvidenceUrl"]); // null, not omitted
+        var own = await (await f.As(TestData.Alex).GetAsync($"{root}/{kept}")).Json(); // the performer may sign or withdraw an open proposal
+        Assert.Equal((JsonValueKind.True, JsonValueKind.False, JsonValueKind.False, JsonValueKind.True),
+            (own["canCommit"]!.GetValueKind(), own["canRecordMet"]!.GetValueKind(), own["canRecordNotMet"]!.GetValueKind(), own["canWithdraw"]!.GetValueKind()));
+
+        await Post(TestData.Alex, $"{root}/{dropped}/transition", new WeeklyCommitmentsEndpoints.MoveBody(Guid.NewGuid(), Version<OutputCommitment>(dropped), CommitmentState.Withdrawn, "Scope moved on", null));
+        await f.DbAsync(async db =>
+        {
+            var row = await db.OutputCommitments.SingleAsync(c => c.Id == kept);
+            row.State = CommitmentState.Committed; row.ReadinessAtCommit = ReadinessState.Ready;
+            return await db.SaveChangesAsync();
+        });
+        var snapshot = (await Post(TestData.Pm, $"{root}/snapshot", new WeeklyCommitmentsEndpoints.SnapshotBody(Guid.NewGuid(), Monday, "Close the week"))).G("id");
+        await Post(TestData.Alex, $"{root}/{kept}/transition", new WeeklyCommitmentsEndpoints.MoveBody(Guid.NewGuid(), Version<OutputCommitment>(kept), CommitmentState.Met, "Output checked", "https://example.test/output"));
+
+        var detail = await (await f.As(TestData.Alex).GetAsync($"{root}/{kept}")).Json();
+        Assert.Equal(["commitment", "events", "canCommit", "canRecordMet", "canRecordNotMet", "canWithdraw"], detail.AsObject().Select(x => x.Key));
+        var row = detail["commitment"]!;
+        Assert.Equal(CommitmentRowKeys, row.AsObject().Select(x => x.Key));
+        Assert.Equal(snapshot, row.G("snapshotId")); Assert.Equal("https://example.test/output", row.S("completionEvidenceUrl"));
+        Assert.Equal(project.Id, row.G("projectId")); Assert.Equal("OutputCommitment", row.S("auditType"));
+        var events = detail["events"]!.AsArray();
+        var evt = Assert.Single(events)!;
+        Assert.Equal(CommitmentEventKeys, evt.AsObject().Select(x => x.Key));
+        Assert.Equal(("Committed", "Met", "https://example.test/output"), (evt.S("fromState"), evt.S("toState"), evt.S("evidenceUrl")));
+        var dropEvent = (await (await f.As(TestData.Alex).GetAsync($"{root}/{dropped}")).Json())["events"]!.AsArray().Single()!;
+        Assert.Equal(CommitmentEventKeys, dropEvent.AsObject().Select(x => x.Key)); Assert.Null(dropEvent["evidenceUrl"]);
+        foreach (var flag in new[] { "canCommit", "canRecordMet", "canRecordNotMet", "canWithdraw" }) Assert.Equal(JsonValueKind.False, detail[flag]!.GetValueKind()); // the promise is closed
+
+        var legacy = await (await f.As(TestData.Pm).GetAsync($"{root}?weekStart={Monday:yyyy-MM-dd}")).Json();
+        Assert.Equal(["commitments", "total", "truncated", "snapshots"], legacy.AsObject().Select(x => x.Key)); // no paging fields on legacy calls
+        Assert.Equal(CommitmentRowKeys, legacy["commitments"]![0]!.AsObject().Select(x => x.Key));
+        var summary = Assert.Single(legacy["snapshots"]!.AsArray())!;
+        Assert.Equal(["id", "weekStart", "capturedAt", "committedCount", "met", "withdrawn"], summary.AsObject().Select(x => x.Key));
+        Assert.Equal((1, 1, 0), (summary.I("committedCount"), summary.I("met"), summary.I("withdrawn")));
+        var paged = await (await f.As(TestData.Pm).GetAsync($"{root}?weekStart={Monday:yyyy-MM-dd}&page=1&pageSize=1")).Json();
+        Assert.Equal(["commitments", "total", "page", "pageSize", "truncated", "snapshots"], paged.AsObject().Select(x => x.Key));
+        Assert.Equal((2, 1, 1), (paged.I("total"), paged.I("page"), paged.I("pageSize")));
+    }
+
+    static readonly string[] CommitmentRowKeys = ["seq", "key", "snapshotId", "targetType", "targetId", "performerId", "intendedOutput", "completionCriteria", "targetDate", "weekStart",
+        "readinessAtCommit", "state", "completionEvidenceUrl", "auditType", "auditKey", "auditName", "projectId", "auditProjectId", "createdAt", "createdBy", "updatedAt", "updatedBy", "rowVersion", "id"];
+    static readonly string[] CommitmentEventKeys = ["commitmentId", "fromState", "toState", "reason", "evidenceUrl", "actorId", "auditType", "projectId", "auditProjectId", "auditKey", "auditName",
+        "createdAt", "createdBy", "updatedAt", "updatedBy", "rowVersion", "id"];
 }

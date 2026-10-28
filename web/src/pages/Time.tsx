@@ -11,24 +11,18 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { ApiError, del, get, patch, post, qs } from '@/lib/api'
+import type { components } from '@/gen/api'
+import { ApiError, get, qs, typedRequest } from '@/lib/api'
 import { useMe } from '@/lib/auth'
 import { addDays, fmtDate, today } from '@/lib/format'
+import { invalidateChange } from '@/lib/keys'
 import { t , runtimeText } from '@/lib/i18n'
 import type { Page as PageOf } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { DraftNotice } from '@/components/hub/drafts'
 import { useSafeForm } from '@/hooks/drafts'
 
-interface Entry {
-  id: string; projectId: string; projectNumber: string; projectName: string; taskId: string; taskKey: string; taskName: string; userId: string; person: string
-  workDate: string; hours: number; note?: string | null; rowVersion: number; canEdit: boolean; editNeedsReason: boolean
-}
-interface TimeView {
-  from: string; to: string; entries: Entry[]; total: number; byDay: { date: string; hours: number }[]
-  byTask: { taskId: string; taskKey: string; taskName: string; projectNumber: string; hours: number }[]
-  byProject: { projectId: string; projectNumber: string; projectName: string; hours: number }[]; canReview: boolean
-}
+type Entry = components['schemas']['TimeRow']
 const monday = (d: string) => addDays(d, -((new Date(d + 'T00:00:00Z').getUTCDay() + 6) % 7))
 const h = (n: number) => (Number.isInteger(n) ? String(n) : String(Number(n.toFixed(2))))
 const weekday = (d: string) => runtimeText(`calendar.dow.${new Date(d + 'T00:00:00Z').getUTCDay()}`)
@@ -45,12 +39,14 @@ export function TimePage() {
   const scope = sp.get('scope') === 'all' ? 'all' : undefined
   const filters = { from, to, scope, projectId: sp.get('projectId'), userId: sp.get('userId'), taskId: sp.get('taskId') }
   const totalLink = (key: 'projectId' | 'taskId', id: string) => `/time${qs({ ...filters, [key]: id })}`
-  const q = useQuery({ queryKey: ['time', filters], queryFn: () => get<TimeView>(`time${qs(filters)}`) })
+  // The contract names these From, To, Scope and so on; the server binds query names without regard to case, so the lower-case names stay on the wire.
+  const query: Record<string, string | null | undefined> = filters
+  const q = useQuery({ queryKey: ['time', filters], queryFn: () => typedRequest('get', '/api/v1/time', { query }) })
   const projects = useQuery({ queryKey: ['projects-pick', ''], queryFn: () => get<PageOf<{ id: string; projectNumber: string; name: string }>>('projects?pageSize=200') })
   const [adding, setAdding] = useState(false)
   const [editing, setEditing] = useState<Entry | null>(null)
   const [removing, setRemoving] = useState<Entry | null>(null)
-  const refresh = () => qc.invalidateQueries({ queryKey: ['time'] })
+  const refresh = () => { void invalidateChange(qc, 'TimeEntry') }
   const reloadEntry = async (id: string) => {
     const next = await q.refetch()
     if (next.error) throw next.error
@@ -169,7 +165,7 @@ export function TimePage() {
       {editing && <EntryDialog entry={editing} onReload={reloadEntry} onClose={(ok) => { setEditing(null); if (ok) refresh() }} />}
       {removing && <ConfirmDialog open onOpenChange={(o) => !o && setRemoving(null)} destructive reason={removing.editNeedsReason ? true : undefined}
         title={t('time.deleteTitle', { h: h(removing.hours), key: removing.taskKey })} body={t('time.deleteHint')} confirmLabel={t('time.deleteConfirm')}
-        onConfirm={async (reason) => { await del(`time/${removing.id}`, { reason: reason || undefined }, removing.rowVersion); toast.success(t('time.deleted')); refresh() }} />}
+        onConfirm={async (reason) => { await typedRequest('delete', '/api/v1/time/{id}', { params: { id: removing.id }, body: { reason: reason || null, rowVersion: null }, ifMatch: removing.rowVersion }); toast.success(t('time.deleted')); refresh() }} />}
     </Page>
   )
 }
@@ -228,8 +224,8 @@ function EntryDialog({ entry, onReload, onClose }: { entry?: Entry; onReload?: (
     if (busy || reloading || hasConflict || (currentEntry && !currentEntry.canEdit) || (!currentEntry && !task) || !f.hours) return
     setBusy(true); setErr(null)
     try {
-      if (currentEntry) await patch(`time/${currentEntry.id}`, { workDate: f.workDate, hours: Number(f.hours), note: f.note || null, reason: f.reason || undefined }, currentEntry.rowVersion)
-      else await post('time', { taskId: task!.id, workDate: f.workDate, hours: Number(f.hours), note: f.note || null })
+      if (currentEntry) await typedRequest('patch', '/api/v1/time/{id}', { params: { id: currentEntry.id }, body: { workDate: f.workDate, hours: Number(f.hours), note: f.note || null, reason: f.reason || undefined }, ifMatch: currentEntry.rowVersion })
+      else await typedRequest('post', '/api/v1/time', { body: { taskId: task!.id, workDate: f.workDate, hours: Number(f.hours), note: f.note || null } })
       safe.clear(); toast.success(t('common.saved')); onClose(true)
     } catch (e) {
       const apiErr = e as ApiError

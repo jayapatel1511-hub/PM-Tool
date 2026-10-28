@@ -4,6 +4,7 @@ using System.Text.Json.Nodes;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Api.Features;
@@ -15,24 +16,29 @@ public static class TimeEndpoints
     public sealed record EntryBody(Guid TaskId, DateOnly WorkDate, decimal Hours, string? Note);
     public sealed record TimeQuery(DateOnly? From, DateOnly? To, Guid? ProjectId, Guid? TaskId, Guid? UserId, string? Scope);
     public sealed record ReasonBody(string? Reason, int? RowVersion);
+    /// The answer to Add Time and to a correction: the entry and the version the next write must send.
+    public sealed record EntrySaved(Guid Id, int RowVersion);
+    public sealed record DayHours(DateOnly Date, decimal Hours);
+    public sealed record TaskHours(Guid TaskId, string TaskKey, string TaskName, string ProjectNumber, decimal Hours);
+    public sealed record ProjectHours(Guid ProjectId, string ProjectNumber, string ProjectName, decimal Hours);
+    /// One range of entries with the totals the Time page shows beside them; every total is a sum of `Entries` (§36.8).
+    public sealed record TimeView(DateOnly From, DateOnly To, IReadOnlyList<Row> Entries, decimal Total, IReadOnlyList<DayHours> ByDay,
+        IReadOnlyList<TaskHours> ByTask, IReadOnlyList<ProjectHours> ByProject, bool CanReview);
+    sealed record ExportRow(DateOnly WorkDate, string Person, string ProjectNumber, string TaskKey, string TaskName, decimal Hours, string? Note);
 
     static readonly Col[] Cols = Hub.Api.Records.TaskTimeEntryRecord.TimeCols;
 
     public static void Map(RouteGroupBuilder api)
     {
-        api.MapGet("/time", async ([AsParameters] TimeQuery f, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock) =>
+        api.MapGet("/time", async Task<Ok<TimeView>> ([AsParameters] TimeQuery f, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock) =>
         {
             var (from, to) = await Range(f, db, store, clock);
             var rows = await Visible(f with { From = from, To = to }, access, db, me);
-            return new
-            {
-                From = from, To = to, Entries = rows,
-                Total = rows.Sum(r => r.Hours),
-                ByDay = rows.GroupBy(r => r.WorkDate).OrderBy(g => g.Key).Select(g => new { Date = g.Key, Hours = g.Sum(r => r.Hours) }),
-                ByTask = rows.GroupBy(r => (r.TaskId, r.TaskKey, r.TaskName, r.ProjectNumber)).Select(g => new { g.Key.TaskId, g.Key.TaskKey, g.Key.TaskName, g.Key.ProjectNumber, Hours = g.Sum(r => r.Hours) }).OrderBy(x => x.TaskKey),
-                ByProject = rows.GroupBy(r => (r.ProjectId, r.ProjectNumber, r.ProjectName)).Select(g => new { g.Key.ProjectId, g.Key.ProjectNumber, g.Key.ProjectName, Hours = g.Sum(r => r.Hours) }).OrderBy(x => x.ProjectNumber),
-                CanReview = await CanReview(access, db, me),
-            };
+            return TypedResults.Ok(new TimeView(from, to, rows, rows.Sum(r => r.Hours),
+                [.. rows.GroupBy(r => r.WorkDate).OrderBy(g => g.Key).Select(g => new DayHours(g.Key, g.Sum(r => r.Hours)))],
+                [.. rows.GroupBy(r => (r.TaskId, r.TaskKey, r.TaskName, r.ProjectNumber)).Select(g => new TaskHours(g.Key.TaskId, g.Key.TaskKey, g.Key.TaskName, g.Key.ProjectNumber, g.Sum(r => r.Hours))).OrderBy(x => x.TaskKey)],
+                [.. rows.GroupBy(r => (r.ProjectId, r.ProjectNumber, r.ProjectName)).Select(g => new ProjectHours(g.Key.ProjectId, g.Key.ProjectNumber, g.Key.ProjectName, g.Sum(r => r.Hours))).OrderBy(x => x.ProjectNumber)],
+                await CanReview(access, db, me)));
         });
         api.MapGet("/time/export", async (string? format, [AsParameters] TimeQuery f, HttpContext http, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock) =>
         {
@@ -46,7 +52,7 @@ public static class TimeEndpoints
         });
         api.MapPost("/time", Create);
         api.MapPatch("/time/{id:guid}", Edit);
-        api.MapDelete("/time/{id:guid}", async (Guid id, [Microsoft.AspNetCore.Mvc.FromBody] ReasonBody? body, HttpContext http, Access access, HubDb db, CurrentUser me, TimeProvider clock) =>
+        api.MapDelete("/time/{id:guid}", async Task<NoContent> (Guid id, [Microsoft.AspNetCore.Mvc.FromBody] ReasonBody? body, HttpContext http, Access access, HubDb db, CurrentUser me, TimeProvider clock) =>
         {
             var (e, _, ctx) = await Load(db, access, id);
             var (allow, needsReason) = Permissions.EditTime(access.Actor, ctx, e.UserId);
@@ -56,7 +62,7 @@ public static class TimeEndpoints
             e.DeletedAt = clock.GetUtcNow();
             e.DeletedBy = me.Id;
             await db.SaveChangesAsync();
-            return Results.NoContent();
+            return TypedResults.NoContent();
         });
     }
 
@@ -118,7 +124,7 @@ public static class TimeEndpoints
     public static async Task<(JsonArray Rows, List<(string, string)> Parameters)> ExportRows(TimeQuery f, Access access, HubDb db, CurrentUser me, IQueryCollection query)
     {
         var rows = await Visible(f, access, db, me);
-        var json = JsonSerializer.SerializeToNode(rows.Select(r => new { r.WorkDate, r.Person, r.ProjectNumber, r.TaskKey, r.TaskName, r.Hours, r.Note }), JsonOpts.Web)!.AsArray();
+        var json = JsonSerializer.SerializeToNode(rows.Select(r => new ExportRow(r.WorkDate, r.Person, r.ProjectNumber, r.TaskKey, r.TaskName, r.Hours, r.Note)), JsonOpts.Web)!.AsArray();
         json.Add(new JsonObject { ["person"] = Text.Get("time.total"), ["hours"] = rows.Sum(r => r.Hours) });
         var parameters = new List<(string, string)> { (Text.Get("param.from"), f.From!.Value.ToString("yyyy-MM-dd")), (Text.Get("param.to"), f.To!.Value.ToString("yyyy-MM-dd")) };
         parameters.Add((Text.Get("time.entries"), Text.Get(f.Scope == "all" ? "time.scope.all" : "time.scope.mine")));
@@ -153,7 +159,7 @@ public static class TimeEndpoints
         if (already + adding > 24) throw ApiException.Invalid("hours", "time.day_over", (24 - already).ToString("0.##", CultureInfo.InvariantCulture));
     }
 
-    static async Task<IResult> Create(EntryBody body, Access access, HubDb db, CurrentUser me)
+    static async Task<Created<EntrySaved>> Create(EntryBody body, Access access, HubDb db, CurrentUser me)
     {
         var task = await db.Tasks.AsNoTracking().FirstOrDefaultAsync(t => t.Id == body.TaskId) ?? throw ApiException.Invalid("taskId", "error.not_found");
         var (p, ctx) = await access.Project(task.ProjectId, track: false);
@@ -167,10 +173,10 @@ public static class TimeEndpoints
             await db.SaveChangesAsync();
             return e;
         });
-        return Results.Created($"/api/v1/time/{e.Id}", new { e.Id, e.RowVersion });
+        return TypedResults.Created($"/api/v1/time/{e.Id}", new EntrySaved(e.Id, e.RowVersion));
     }
 
-    static async Task<IResult> Edit(Guid id, JsonElement body, HttpContext http, Access access, HubDb db, CurrentUser me)
+    static async Task<Ok<EntrySaved>> Edit(Guid id, JsonElement body, HttpContext http, Access access, HubDb db, CurrentUser me)
     {
         var (e, _, ctx) = await Load(db, access, id);
         var (allow, needsReason) = Permissions.EditTime(access.Actor, ctx, e.UserId); // the owner edits; a PM corrects with a reason
@@ -188,6 +194,6 @@ public static class TimeEndpoints
             await db.SaveChangesAsync();
             return 0;
         });
-        return Results.Ok(new { e.Id, e.RowVersion });
+        return TypedResults.Ok(new EntrySaved(e.Id, e.RowVersion));
     }
 }

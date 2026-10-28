@@ -542,91 +542,6 @@
         ],
         "type": "object"
       },
-      "AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean": {
-        "properties": {
-          "byDay": {
-            "items": {
-              "$ref": "#/components/schemas/AnonymousTypeOfDateOnlyAnddecimal"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "byProject": {
-            "items": {
-              "$ref": "#/components/schemas/AnonymousTypeOfGuidAndstringAndstringAnddecimal"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "byTask": {
-            "items": {
-              "$ref": "#/components/schemas/AnonymousTypeOfGuidAndstringAndstringAndstringAnddecimal"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "canReview": {
-            "type": "boolean"
-          },
-          "entries": {
-            "items": {
-              "$ref": "#/components/schemas/TimeRow"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "from": {
-            "format": "date",
-            "type": "string"
-          },
-          "to": {
-            "format": "date",
-            "type": "string"
-          },
-          "total": {
-            "format": "double",
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
-            "type": "number"
-          }
-        },
-        "required": [
-          "from",
-          "to",
-          "entries",
-          "total",
-          "byDay",
-          "byTask",
-          "byProject",
-          "canReview"
-        ],
-        "type": "object"
-      },
-      "AnonymousTypeOfDateOnlyAnddecimal": {
-        "properties": {
-          "date": {
-            "format": "date",
-            "type": "string"
-          },
-          "hours": {
-            "format": "double",
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
-            "type": "number"
-          }
-        },
-        "required": [
-          "date",
-          "hours"
-        ],
-        "type": "object"
-      },
       "AnonymousTypeOfDateTimeOffsetAndListOfOpsProblemAndListOfObjectAndintAndListOfAnonymousTypeOfGuidAndstringAndstringAndintAndstringAndDateTimeOffsetAndDateTimeOffsetAndint": {
         "properties": {
           "asOf": {
@@ -1021,38 +936,6 @@
           "name",
           "shortName",
           "isActive"
-        ],
-        "type": "object"
-      },
-      "AnonymousTypeOfGuidAndstringAndstringAnddecimal": {
-        "properties": {
-          "hours": {
-            "format": "double",
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
-            "type": "number"
-          },
-          "projectId": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "projectName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "projectNumber": {
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        },
-        "required": [
-          "projectId",
-          "projectNumber",
-          "projectName",
-          "hours"
         ],
         "type": "object"
       },
@@ -1477,45 +1360,6 @@
           "colour",
           "isActive",
           "sortOrder"
-        ],
-        "type": "object"
-      },
-      "AnonymousTypeOfGuidAndstringAndstringAndstringAnddecimal": {
-        "properties": {
-          "hours": {
-            "format": "double",
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
-            "type": "number"
-          },
-          "projectNumber": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "taskId": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "taskKey": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "taskName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        },
-        "required": [
-          "taskId",
-          "taskKey",
-          "taskName",
-          "projectNumber",
-          "hours"
         ],
         "type": "object"
       },
@@ -5143,6 +4987,24 @@
         ],
         "type": "object"
       },
+      "DayHours": {
+        "properties": {
+          "date": {
+            "format": "date",
+            "type": "string"
+          },
+          "hours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          }
+        },
+        "required": [
+          "date",
+          "hours"
+        ],
+        "type": "object"
+      },
       "DayInput": {
         "properties": {
           "hours": {
@@ -7132,6 +6994,24 @@
           "workDate",
           "hours",
           "note"
+        ],
+        "type": "object"
+      },
+      "EntrySaved": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "rowVersion"
         ],
         "type": "object"
       },
@@ -11672,6 +11552,32 @@
         ],
         "type": "object"
       },
+      "ProjectHours": {
+        "properties": {
+          "hours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectName": {
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "projectId",
+          "projectNumber",
+          "projectName",
+          "hours"
+        ],
+        "type": "object"
+      },
       "ProjectImportBody": {
         "properties": {
           "csv": {
@@ -14386,6 +14292,36 @@
         ],
         "type": "object"
       },
+      "TaskHours": {
+        "properties": {
+          "hours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "taskId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "taskKey": {
+            "type": "string"
+          },
+          "taskName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "taskId",
+          "taskKey",
+          "taskName",
+          "projectNumber",
+          "hours"
+        ],
+        "type": "object"
+      },
       "TaskIn": {
         "properties": {
           "assignTo": {
@@ -15720,6 +15656,61 @@
           "rowVersion",
           "canEdit",
           "editNeedsReason"
+        ],
+        "type": "object"
+      },
+      "TimeView": {
+        "properties": {
+          "byDay": {
+            "items": {
+              "$ref": "#/components/schemas/DayHours"
+            },
+            "type": "array"
+          },
+          "byProject": {
+            "items": {
+              "$ref": "#/components/schemas/ProjectHours"
+            },
+            "type": "array"
+          },
+          "byTask": {
+            "items": {
+              "$ref": "#/components/schemas/TaskHours"
+            },
+            "type": "array"
+          },
+          "canReview": {
+            "type": "boolean"
+          },
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/TimeRow"
+            },
+            "type": "array"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "total": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "entries",
+          "total",
+          "byDay",
+          "byTask",
+          "byProject",
+          "canReview"
         ],
         "type": "object"
       },
@@ -34543,7 +34534,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean"
+                  "$ref": "#/components/schemas/TimeView"
                 }
               }
             },
@@ -34566,8 +34557,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntrySaved"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -34673,8 +34671,8 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -34705,6 +34703,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntrySaved"
+                }
+              }
+            },
             "description": "OK"
           }
         },

@@ -15176,7 +15176,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean"];
+                        "application/json": components["schemas"]["TimeView"];
                     };
                 };
             };
@@ -15195,12 +15195,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["EntrySaved"];
+                    };
                 };
             };
         };
@@ -15276,8 +15278,8 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -15307,7 +15309,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["EntrySaved"];
+                    };
                 };
             };
         };
@@ -16170,25 +16174,6 @@ export interface components {
             projectNumber: null | string;
             unread: boolean;
         };
-        AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean: {
-            byDay: null | components["schemas"]["AnonymousTypeOfDateOnlyAnddecimal"][];
-            byProject: null | components["schemas"]["AnonymousTypeOfGuidAndstringAndstringAnddecimal"][];
-            byTask: null | components["schemas"]["AnonymousTypeOfGuidAndstringAndstringAndstringAnddecimal"][];
-            canReview: boolean;
-            entries: null | components["schemas"]["TimeRow"][];
-            /** Format: date */
-            from: string;
-            /** Format: date */
-            to: string;
-            /** Format: double */
-            total: number;
-        };
-        AnonymousTypeOfDateOnlyAnddecimal: {
-            /** Format: date */
-            date: string;
-            /** Format: double */
-            hours: number;
-        };
         AnonymousTypeOfDateTimeOffsetAndListOfOpsProblemAndListOfObjectAndintAndListOfAnonymousTypeOfGuidAndstringAndstringAndintAndstringAndDateTimeOffsetAndDateTimeOffsetAndint: {
             /** Format: date-time */
             asOf: string;
@@ -16285,14 +16270,6 @@ export interface components {
             name: null | string;
             shortName: null | string;
         };
-        AnonymousTypeOfGuidAndstringAndstringAnddecimal: {
-            /** Format: double */
-            hours: number;
-            /** Format: uuid */
-            projectId: string;
-            projectName: null | string;
-            projectNumber: null | string;
-        };
         AnonymousTypeOfGuidAndstringAndstringAndintAndstringAndDateTimeOffsetAndDateTimeOffset: {
             /** Format: int32 */
             attempts: number;
@@ -16387,15 +16364,6 @@ export interface components {
             name: null | string;
             /** Format: int32 */
             sortOrder: number;
-        };
-        AnonymousTypeOfGuidAndstringAndstringAndstringAnddecimal: {
-            /** Format: double */
-            hours: number;
-            projectNumber: null | string;
-            /** Format: uuid */
-            taskId: string;
-            taskKey: null | string;
-            taskName: null | string;
         };
         AnonymousTypeOfGuidAndstringAndstringAndstringAndint: {
             displayName: null | string;
@@ -17272,6 +17240,12 @@ export interface components {
             key: string;
             reason: components["schemas"]["Reason"];
         };
+        DayHours: {
+            /** Format: date */
+            date: string;
+            /** Format: double */
+            hours: number;
+        };
         DayInput: {
             /** Format: double */
             hours: number;
@@ -17797,6 +17771,12 @@ export interface components {
             taskId: string;
             /** Format: date */
             workDate: string;
+        };
+        EntrySaved: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
         };
         EventBody: {
             description: null | string;
@@ -18979,6 +18959,14 @@ export interface components {
             /** Format: int32 */
             progressPct: null | number;
         };
+        ProjectHours: {
+            /** Format: double */
+            hours: number;
+            /** Format: uuid */
+            projectId: string;
+            projectName: string;
+            projectNumber: string;
+        };
         ProjectImportBody: {
             csv: string;
         };
@@ -19652,6 +19640,15 @@ export interface components {
             id: string;
             source: string;
         };
+        TaskHours: {
+            /** Format: double */
+            hours: number;
+            projectNumber: string;
+            /** Format: uuid */
+            taskId: string;
+            taskKey: string;
+            taskName: string;
+        };
         TaskIn: {
             assignTo: null | string;
             deliverableRef: null | string;
@@ -19983,6 +19980,19 @@ export interface components {
             userId: string;
             /** Format: date */
             workDate: string;
+        };
+        TimeView: {
+            byDay: components["schemas"]["DayHours"][];
+            byProject: components["schemas"]["ProjectHours"][];
+            byTask: components["schemas"]["TaskHours"][];
+            canReview: boolean;
+            entries: components["schemas"]["TimeRow"][];
+            /** Format: date */
+            from: string;
+            /** Format: date */
+            to: string;
+            /** Format: double */
+            total: number;
         };
         TimelineData: {
             deliverableLinks: components["schemas"]["TimelineDeliverableLink"][];

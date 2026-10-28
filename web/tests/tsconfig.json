@@ -27,6 +27,7 @@
     "calendar-subscription.fixture.cjs",
     "calendar.fixture.cjs",
     "workload.fixture.cjs",
-    "evaluation.fixture.cjs"
+    "evaluation.fixture.cjs",
+    "time.fixture.cjs"
   ]
 }

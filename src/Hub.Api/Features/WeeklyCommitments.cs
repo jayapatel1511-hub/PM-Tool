@@ -1,7 +1,9 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Api.Features;
@@ -12,6 +14,37 @@ public static class WeeklyCommitmentsEndpoints
         string IntendedOutput, string CompletionCriteria, string? Reason = null);
     public sealed record MoveBody(Guid RequestId, int RowVersion, string ToState, string Reason, string? EvidenceUrl, Guid? MissCategoryId = null);
     public sealed record SnapshotBody(Guid RequestId, DateOnly WeekStart, string Reason);
+
+    /// A weekly promise as the Readiness page reads it: the stored row, audit fields included, in the order the row has always been written.
+    public sealed record CommitmentRow(int Seq, string Key, Guid? SnapshotId, string TargetType, Guid TargetId, Guid PerformerId, string IntendedOutput,
+        string CompletionCriteria, DateOnly TargetDate, DateOnly WeekStart, string ReadinessAtCommit, string State, string? CompletionEvidenceUrl,
+        string AuditType, string? AuditKey, string? AuditName, Guid ProjectId, Guid? AuditProjectId, DateTimeOffset CreatedAt, Guid? CreatedBy,
+        DateTimeOffset UpdatedAt, Guid? UpdatedBy, int RowVersion, Guid Id)
+    {
+        public static CommitmentRow From(OutputCommitment c) => new(c.Seq, c.Key, c.SnapshotId, c.TargetType, c.TargetId, c.PerformerId, c.IntendedOutput,
+            c.CompletionCriteria, c.TargetDate, c.WeekStart, c.ReadinessAtCommit, c.State, c.CompletionEvidenceUrl, c.AuditType, c.AuditKey, c.AuditName,
+            c.ProjectId, c.AuditProjectId, c.CreatedAt, c.CreatedBy, c.UpdatedAt, c.UpdatedBy, c.RowVersion, c.Id);
+    }
+    /// One recorded state change of a promise (the miss category is kept server side).
+    public sealed record CommitmentEventRow(Guid CommitmentId, string FromState, string ToState, string Reason, string? EvidenceUrl, Guid ActorId,
+        string AuditType, Guid ProjectId, Guid? AuditProjectId, string? AuditKey, string? AuditName, DateTimeOffset CreatedAt, Guid? CreatedBy,
+        DateTimeOffset UpdatedAt, Guid? UpdatedBy, int RowVersion, Guid Id)
+    {
+        public static CommitmentEventRow From(OutputCommitmentEvent e) => new(e.CommitmentId, e.FromState, e.ToState, e.Reason, e.EvidenceUrl, e.ActorId,
+            e.AuditType, e.ProjectId, e.AuditProjectId, e.AuditKey, e.AuditName, e.CreatedAt, e.CreatedBy, e.UpdatedAt, e.UpdatedBy, e.RowVersion, e.Id);
+    }
+    public sealed record SnapshotSummary(Guid Id, DateOnly WeekStart, DateTimeOffset CapturedAt, int CommittedCount, int Met, int Withdrawn);
+    public sealed record CommitmentDetail(CommitmentRow Commitment, IReadOnlyList<CommitmentEventRow> Events, bool CanCommit, bool CanRecordMet, bool CanRecordNotMet, bool CanWithdraw);
+    /// `Page` and `PageSize` are written only when the caller asked for paging, so existing recorded-week callers see the response they always did.
+    public sealed record CommitmentList
+    {
+        public required IReadOnlyList<CommitmentRow> Commitments { get; init; }
+        public required int Total { get; init; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public int? Page { get; init; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public int? PageSize { get; init; }
+        public required bool Truncated { get; init; }
+        public required IReadOnlyList<SnapshotSummary> Snapshots { get; init; }
+    }
 
     public static void Map(RouteGroupBuilder api)
     {
@@ -164,7 +197,7 @@ public static class WeeklyCommitmentsEndpoints
                 return snapshot;
             });
 
-    static async Task<object> Detail(Guid projectId, Guid id, Access access, HubDb db)
+    static async Task<Ok<CommitmentDetail>> Detail(Guid projectId, Guid id, Access access, HubDb db)
     {
         var (_, ctx) = await access.Project(projectId, false);
         var row = await db.OutputCommitments.AsNoTracking().SingleOrDefaultAsync(c => c.ProjectId == projectId && c.Id == id)
@@ -176,10 +209,10 @@ public static class WeeklyCommitmentsEndpoints
         var closable = row.State == CommitmentState.Committed && row.SnapshotId is not null;
         var events = await db.OutputCommitmentEvents.AsNoTracking().Where(e => e.ProjectId == projectId && e.CommitmentId == id)
             .OrderBy(e => e.CreatedAt).ThenBy(e => e.Id).ToListAsync();
-        return new { Commitment = row, Events = events,
-            CanCommit = own && proposed && openWeek, CanRecordMet = own && closable,
-            CanRecordNotMet = (own || manage) && closable,
-            CanWithdraw = own && proposed || (own || manage) && closable };
+        return TypedResults.Ok(new CommitmentDetail(CommitmentRow.From(row), events.Select(CommitmentEventRow.From).ToList(),
+            CanCommit: own && proposed && openWeek, CanRecordMet: own && closable,
+            CanRecordNotMet: (own || manage) && closable,
+            CanWithdraw: own && proposed || (own || manage) && closable));
     }
 
     static readonly Col[] ExportColumns = Hub.Api.Records.ScreenLists.WeeklyCommitmentsExportColumns;
@@ -212,7 +245,7 @@ public static class WeeklyCommitmentsEndpoints
     /// One recorded week (`weekStart`) or every recorded week start within `from`..`to`, so weeks recorded on an
     /// earlier coordination day stay visible beside the current ones. Target dates filter rows, not snapshot outcomes;
     /// paging is opt-in so existing recorded-week callers retain their response contract.
-    static async Task<object> List(Guid projectId, DateOnly? weekStart, DateOnly? from, DateOnly? to,
+    static async Task<Ok<CommitmentList>> List(Guid projectId, DateOnly? weekStart, DateOnly? from, DateOnly? to,
         DateOnly? targetFrom, DateOnly? targetTo, int? page, int? pageSize, Access access, HubDb db, SettingsStore settings)
     {
         var (project, _) = await access.Project(projectId, false);
@@ -229,16 +262,16 @@ public static class WeeklyCommitmentsEndpoints
         var paged = page.HasValue || pageSize.HasValue;
         var (pg, size) = Http.Paging(page, pageSize);
         var ordered = visible.OrderBy(c => c.WeekStart).ThenBy(c => c.TargetDate).ThenBy(c => c.CreatedAt).ThenBy(c => c.Id);
-        var rows = await (paged ? ordered.Skip((pg - 1) * size).Take(size) : ordered.Take(500)).ToListAsync();
+        var rows = (await (paged ? ordered.Skip((pg - 1) * size).Take(size) : ordered.Take(500)).ToListAsync()).Select(CommitmentRow.From).ToList();
         var snapshots = await db.WeeklyPlanSnapshots.AsNoTracking().Where(s => s.ProjectId == projectId &&
             (!lo.HasValue || s.WeekStart >= lo.Value) && (!hi.HasValue || s.WeekStart <= hi.Value)).ToListAsync();
         var outcome = await query.Where(c => c.SnapshotId != null)
             .GroupBy(c => new { c.SnapshotId, c.State }).Select(g => new { g.Key.SnapshotId, g.Key.State, Count = g.Count() })
             .ToListAsync();
-        var summaries = snapshots.Select(s => new { s.Id, s.WeekStart, s.CapturedAt, s.CommittedCount,
-            Met = outcome.Where(o => o.SnapshotId == s.Id && o.State == CommitmentState.Met).Sum(o => o.Count),
-            Withdrawn = outcome.Where(o => o.SnapshotId == s.Id && o.State == CommitmentState.Withdrawn).Sum(o => o.Count) });
-        if (paged) return new { Commitments = rows, Total = total, Page = pg, PageSize = size, Truncated = false, Snapshots = summaries };
-        return new { Commitments = rows, Total = total, Truncated = total > rows.Count, Snapshots = summaries };
+        var summaries = snapshots.Select(s => new SnapshotSummary(s.Id, s.WeekStart, s.CapturedAt, s.CommittedCount,
+            Met: outcome.Where(o => o.SnapshotId == s.Id && o.State == CommitmentState.Met).Sum(o => o.Count),
+            Withdrawn: outcome.Where(o => o.SnapshotId == s.Id && o.State == CommitmentState.Withdrawn).Sum(o => o.Count))).ToList();
+        return TypedResults.Ok(paged ? new CommitmentList { Commitments = rows, Total = total, Page = pg, PageSize = size, Truncated = false, Snapshots = summaries }
+            : new CommitmentList { Commitments = rows, Total = total, Truncated = total > rows.Count, Snapshots = summaries });
     }
 }

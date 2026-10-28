@@ -3594,6 +3594,191 @@
         ],
         "type": "object"
       },
+      "CommitmentDetail": {
+        "properties": {
+          "canCommit": {
+            "type": "boolean"
+          },
+          "canRecordMet": {
+            "type": "boolean"
+          },
+          "canRecordNotMet": {
+            "type": "boolean"
+          },
+          "canWithdraw": {
+            "type": "boolean"
+          },
+          "commitment": {
+            "$ref": "#/components/schemas/CommitmentRow"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/CommitmentEventRow"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "commitment",
+          "events",
+          "canCommit",
+          "canRecordMet",
+          "canRecordNotMet",
+          "canWithdraw"
+        ],
+        "type": "object"
+      },
+      "CommitmentEventRow": {
+        "properties": {
+          "actorId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "auditKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditProjectId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditType": {
+            "type": "string"
+          },
+          "commitmentId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "evidenceUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "fromState": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "toState": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "commitmentId",
+          "fromState",
+          "toState",
+          "reason",
+          "evidenceUrl",
+          "actorId",
+          "auditType",
+          "projectId",
+          "auditProjectId",
+          "auditKey",
+          "auditName",
+          "createdAt",
+          "createdBy",
+          "updatedAt",
+          "updatedBy",
+          "rowVersion",
+          "id"
+        ],
+        "type": "object"
+      },
+      "CommitmentList": {
+        "properties": {
+          "commitments": {
+            "items": {
+              "$ref": "#/components/schemas/CommitmentRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "pageSize": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "snapshots": {
+            "items": {
+              "$ref": "#/components/schemas/SnapshotSummary"
+            },
+            "type": "array"
+          },
+          "total": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "truncated": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "commitments",
+          "total",
+          "truncated",
+          "snapshots"
+        ],
+        "type": "object"
+      },
       "CommitmentMissCategory": {
         "properties": {
           "auditKey": {
@@ -3772,6 +3957,146 @@
           "snapshots",
           "misses",
           "awaiting"
+        ],
+        "type": "object"
+      },
+      "CommitmentRow": {
+        "properties": {
+          "auditKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditProjectId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditType": {
+            "type": "string"
+          },
+          "completionCriteria": {
+            "type": "string"
+          },
+          "completionEvidenceUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "intendedOutput": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "performerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "readinessAtCommit": {
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "seq": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "snapshotId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "state": {
+            "type": "string"
+          },
+          "targetDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "targetId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "targetType": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "weekStart": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "seq",
+          "key",
+          "snapshotId",
+          "targetType",
+          "targetId",
+          "performerId",
+          "intendedOutput",
+          "completionCriteria",
+          "targetDate",
+          "weekStart",
+          "readinessAtCommit",
+          "state",
+          "completionEvidenceUrl",
+          "auditType",
+          "auditKey",
+          "auditName",
+          "projectId",
+          "auditProjectId",
+          "createdAt",
+          "createdBy",
+          "updatedAt",
+          "updatedBy",
+          "rowVersion",
+          "id"
         ],
         "type": "object"
       },
@@ -12221,6 +12546,46 @@
           "weekStart",
           "capturedAt",
           "reliability"
+        ],
+        "type": "object"
+      },
+      "SnapshotSummary": {
+        "properties": {
+          "capturedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "committedCount": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "met": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "weekStart": {
+            "format": "date",
+            "type": "string"
+          },
+          "withdrawn": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "weekStart",
+          "capturedAt",
+          "committedCount",
+          "met",
+          "withdrawn"
         ],
         "type": "object"
       },
@@ -31476,7 +31841,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/CommitmentList"
+                }
               }
             },
             "description": "OK"
@@ -31601,7 +31968,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/CommitmentDetail"
+                }
               }
             },
             "description": "OK"

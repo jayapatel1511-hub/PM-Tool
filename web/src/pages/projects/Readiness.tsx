@@ -8,7 +8,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { get } from '@/lib/api'
+import { get, typedRequest } from '@/lib/api'
+import { invalidateChange } from '@/lib/keys'
+import type { components } from '@/gen/api'
 import { useSafeForm } from '@/hooks/drafts'
 import { addDays, fmtDate, fmtTime, today } from '@/lib/format'
 import { plural, t, tv , runtimeText } from '@/lib/i18n'
@@ -21,13 +23,7 @@ import { ReadinessInspector } from './ReadinessForms'
 import { ExportMenu } from '@/components/hub/export'
 import { CommitmentReliability } from './CommitmentReliability'
 
-type Commitment = {
-  id: string; key: string; targetType: string; targetId: string; performerId: string; weekStart: string; targetDate: string
-  intendedOutput: string; completionCriteria: string; state: string; snapshotId?: string | null; readinessAtCommit?: string | null
-  rowVersion: number; completionEvidenceUrl?: string
-}
-type Snapshot = { id: string; weekStart: string; capturedAt: string; committedCount: number; met: number; withdrawn: number }
-type Weekly = { commitments: Commitment[]; total: number; page: number; pageSize: number; truncated: boolean; snapshots: Snapshot[] }
+type Commitment = components['schemas']['CommitmentRow']
 type Constraint = { id: string; targetType: string; targetId: string; description: string; category: string; neededBy: string; sourceUrl: string }
 type ReadyOutput = { id: string; targetType: string; targetId: string; key: string; name: string; dueDate: string | null; intendedOutput: string; completionCriteria: string; state: string }
 type Aggregate = { constraints: Constraint[]; constraintsTotal: number; constraintsTruncated: boolean; readyOutputs: ReadyOutput[]; readyOutputsTotal: number; readyOutputsTruncated: boolean; pageSize: number }
@@ -77,7 +73,7 @@ export function ReadinessTab() {
   const linked = useQuery({ queryKey: ['readiness-constraint', p.id, constraintId], enabled: !!constraintId,
     queryFn: () => get<{ targetType: string; targetId: string }>(`projects/${p.id}/readiness/constraints/${constraintId}`) })
   // The reliability panel reads the same records; with its flag off that query is disabled and refetches nothing.
-  const done = () => { setProposing(false); setSnapshotWeek(null); qc.invalidateQueries({ queryKey: ['p', p.id, 'readiness-window'] }); qc.invalidateQueries({ queryKey: ['weekly-promise', p.id] }); qc.invalidateQueries({ queryKey: ['commitment-reliability', p.id] }) }
+  const done = () => { setProposing(false); setSnapshotWeek(null); invalidateChange(qc, 'OutputCommitment', p.id) } // ['p', id] covers the window; keys.ts adds the promise detail and reliability panel
   const weeks = useMemo(() => {
     const fromValue = dateValue(from)
     const toValue = dateValue(to)
@@ -96,9 +92,9 @@ export function ReadinessTab() {
       // A promise due in the window starts at most six days earlier; rows keep the week start they were recorded with.
       const [aggregate, weekly] = await Promise.all([
         get<Aggregate>(`projects/${p.id}/readiness/window?from=${from}&to=${to}&constraintsPage=${constraintsPage}&readyPage=${readyPage}&pageSize=50`),
-        get<Weekly>(`projects/${p.id}/weekly-commitments?from=${addDays(from, -6)}&to=${to}&targetFrom=${from}&targetTo=${to}&page=${promisePage}`),
+        typedRequest('get', '/api/v1/projects/{projectId}/weekly-commitments', { params: { projectId: p.id }, query: { from: addDays(from, -6), to, targetFrom: from, targetTo: to, page: promisePage } }),
       ])
-      return { ...aggregate, ...weekly }
+      return { ...aggregate, ...weekly, pageSize: weekly.pageSize ?? aggregate.pageSize } // a paged read always answers its page size
     },
   })
   const header = { title: t('readiness.title'), subtitle: t('readiness.subtitle') }
@@ -235,10 +231,8 @@ function SnapshotForm({ projectId, week, close, done }: { projectId: string; wee
   </CommandForm>
 }
 
-type PromiseInfo = { commitment: Commitment; events: { id: string; fromState: string; toState: string; reason: string; actorId: string; createdAt: string; evidenceUrl?: string }[];
-  canCommit: boolean; canRecordMet: boolean; canRecordNotMet: boolean; canWithdraw: boolean }
 function PromiseDetail({ projectId, id, options, close, done }: { projectId: string; id: string; options: CoordOptions; close: () => void; done: () => void }) {
-  const q = useQuery({ queryKey: ['weekly-promise', projectId, id], queryFn: () => get<PromiseInfo>(`projects/${projectId}/weekly-commitments/${id}`) })
+  const q = useQuery({ queryKey: ['weekly-promise', projectId, id], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/weekly-commitments/{id}', { params: { projectId, id } }) })
   const [action, setAction] = useState<string | null>(null)
   const row = q.data?.commitment
   const changed = () => { setAction(null); done(); q.refetch() }

@@ -14188,6 +14188,318 @@
     "$.components.schemas.CommentRow.type": [
       "string"
     ],
+    "$.components.schemas.CommitmentDetail": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentDetail.properties": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentDetail.properties.canCommit": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentDetail.properties.canCommit.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentDetail.properties.canRecordMet": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentDetail.properties.canRecordMet.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentDetail.properties.canRecordNotMet": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentDetail.properties.canRecordNotMet.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentDetail.properties.canWithdraw": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentDetail.properties.canWithdraw.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentDetail.properties.commitment": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentDetail.properties.commitment.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentDetail.properties.events": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentDetail.properties.events.items": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentDetail.properties.events.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentDetail.properties.events.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentDetail.required": [
+      "array"
+    ],
+    "$.components.schemas.CommitmentDetail.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentDetail.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentEventRow": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.actorId": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.actorId.format": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.actorId.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.auditKey": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.auditKey.type": [
+      "array"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.auditKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.auditName": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.auditName.type": [
+      "array"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.auditName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.auditProjectId": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.auditProjectId.format": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.auditProjectId.type": [
+      "array"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.auditProjectId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.auditType": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.auditType.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.commitmentId": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.commitmentId.format": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.commitmentId.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.createdBy": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.createdBy.format": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.createdBy.type": [
+      "array"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.createdBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.evidenceUrl": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.evidenceUrl.type": [
+      "array"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.evidenceUrl.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.fromState": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.fromState.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.reason": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.reason.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.toState": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.toState.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.updatedAt": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.updatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.updatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.updatedBy": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.updatedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.updatedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.CommitmentEventRow.properties.updatedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentEventRow.required": [
+      "array"
+    ],
+    "$.components.schemas.CommitmentEventRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentEventRow.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentList": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentList.properties": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentList.properties.commitments": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentList.properties.commitments.items": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentList.properties.commitments.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentList.properties.commitments.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentList.properties.page": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentList.properties.page.format": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentList.properties.page.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentList.properties.page.type": [
+      "array"
+    ],
+    "$.components.schemas.CommitmentList.properties.page.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentList.properties.pageSize": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentList.properties.pageSize.format": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentList.properties.pageSize.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentList.properties.pageSize.type": [
+      "array"
+    ],
+    "$.components.schemas.CommitmentList.properties.pageSize.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentList.properties.snapshots": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentList.properties.snapshots.items": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentList.properties.snapshots.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentList.properties.snapshots.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentList.properties.total": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentList.properties.total.format": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentList.properties.total.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentList.properties.total.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentList.properties.truncated": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentList.properties.truncated.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentList.required": [
+      "array"
+    ],
+    "$.components.schemas.CommitmentList.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentList.type": [
+      "string"
+    ],
     "$.components.schemas.CommitmentMissCategory": [
       "object"
     ],
@@ -14525,6 +14837,234 @@
       "string"
     ],
     "$.components.schemas.CommitmentReliabilityReadResponse.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentRow.properties.auditKey": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentRow.properties.auditKey.type": [
+      "array"
+    ],
+    "$.components.schemas.CommitmentRow.properties.auditKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.auditName": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentRow.properties.auditName.type": [
+      "array"
+    ],
+    "$.components.schemas.CommitmentRow.properties.auditName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.auditProjectId": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentRow.properties.auditProjectId.format": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.auditProjectId.type": [
+      "array"
+    ],
+    "$.components.schemas.CommitmentRow.properties.auditProjectId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.auditType": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentRow.properties.auditType.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.completionCriteria": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentRow.properties.completionCriteria.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.completionEvidenceUrl": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentRow.properties.completionEvidenceUrl.type": [
+      "array"
+    ],
+    "$.components.schemas.CommitmentRow.properties.completionEvidenceUrl.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentRow.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.createdBy": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentRow.properties.createdBy.format": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.createdBy.type": [
+      "array"
+    ],
+    "$.components.schemas.CommitmentRow.properties.createdBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.intendedOutput": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentRow.properties.intendedOutput.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentRow.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.performerId": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentRow.properties.performerId.format": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.performerId.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.readinessAtCommit": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentRow.properties.readinessAtCommit.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.seq": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentRow.properties.seq.format": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.seq.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.seq.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.snapshotId": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentRow.properties.snapshotId.format": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.snapshotId.type": [
+      "array"
+    ],
+    "$.components.schemas.CommitmentRow.properties.snapshotId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.state": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentRow.properties.state.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.targetDate": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentRow.properties.targetDate.format": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.targetDate.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.targetId": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentRow.properties.targetId.format": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.targetId.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.targetType": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentRow.properties.targetType.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.updatedAt": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentRow.properties.updatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.updatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.updatedBy": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentRow.properties.updatedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.updatedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.CommitmentRow.properties.updatedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.weekStart": [
+      "object"
+    ],
+    "$.components.schemas.CommitmentRow.properties.weekStart.format": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.properties.weekStart.type": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.required": [
+      "array"
+    ],
+    "$.components.schemas.CommitmentRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CommitmentRow.type": [
       "string"
     ],
     "$.components.schemas.CompleteBody": [
@@ -29021,6 +29561,84 @@
       "string"
     ],
     "$.components.schemas.SnapshotRow.type": [
+      "string"
+    ],
+    "$.components.schemas.SnapshotSummary": [
+      "object"
+    ],
+    "$.components.schemas.SnapshotSummary.properties": [
+      "object"
+    ],
+    "$.components.schemas.SnapshotSummary.properties.capturedAt": [
+      "object"
+    ],
+    "$.components.schemas.SnapshotSummary.properties.capturedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.SnapshotSummary.properties.capturedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.SnapshotSummary.properties.committedCount": [
+      "object"
+    ],
+    "$.components.schemas.SnapshotSummary.properties.committedCount.format": [
+      "string"
+    ],
+    "$.components.schemas.SnapshotSummary.properties.committedCount.pattern": [
+      "string"
+    ],
+    "$.components.schemas.SnapshotSummary.properties.committedCount.type": [
+      "string"
+    ],
+    "$.components.schemas.SnapshotSummary.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.SnapshotSummary.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.SnapshotSummary.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.SnapshotSummary.properties.met": [
+      "object"
+    ],
+    "$.components.schemas.SnapshotSummary.properties.met.format": [
+      "string"
+    ],
+    "$.components.schemas.SnapshotSummary.properties.met.pattern": [
+      "string"
+    ],
+    "$.components.schemas.SnapshotSummary.properties.met.type": [
+      "string"
+    ],
+    "$.components.schemas.SnapshotSummary.properties.weekStart": [
+      "object"
+    ],
+    "$.components.schemas.SnapshotSummary.properties.weekStart.format": [
+      "string"
+    ],
+    "$.components.schemas.SnapshotSummary.properties.weekStart.type": [
+      "string"
+    ],
+    "$.components.schemas.SnapshotSummary.properties.withdrawn": [
+      "object"
+    ],
+    "$.components.schemas.SnapshotSummary.properties.withdrawn.format": [
+      "string"
+    ],
+    "$.components.schemas.SnapshotSummary.properties.withdrawn.pattern": [
+      "string"
+    ],
+    "$.components.schemas.SnapshotSummary.properties.withdrawn.type": [
+      "string"
+    ],
+    "$.components.schemas.SnapshotSummary.required": [
+      "array"
+    ],
+    "$.components.schemas.SnapshotSummary.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SnapshotSummary.type": [
       "string"
     ],
     "$.components.schemas.SnoozeBody": [
@@ -55660,6 +56278,9 @@
     "$.paths./api/v1/projects/{projectId}/weekly-commitments.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/projects/{projectId}/weekly-commitments.get.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/projects/{projectId}/weekly-commitments.get.responses.200.description": [
       "string"
     ],
@@ -55833,6 +56454,9 @@
     ],
     "$.paths./api/v1/projects/{projectId}/weekly-commitments/{id}.get.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/projects/{projectId}/weekly-commitments/{id}.get.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/projects/{projectId}/weekly-commitments/{id}.get.responses.200.description": [
       "string"
@@ -74422,7 +75046,8 @@
       "string"
     ],
     "$.commitment.completionEvidenceUrl": [
-      "null"
+      "null",
+      "string"
     ],
     "$.commitment.createdAt": [
       "string"
@@ -74510,7 +75135,8 @@
       "string"
     ],
     "$.events[].evidenceUrl": [
-      "null"
+      "null",
+      "string"
     ],
     "$.events[].fromState": [
       "string"

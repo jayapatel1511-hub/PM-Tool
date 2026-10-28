@@ -13252,7 +13252,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["CommitmentList"];
                     };
                 };
             };
@@ -13370,7 +13370,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["CommitmentDetail"];
                     };
                 };
             };
@@ -16849,6 +16849,54 @@ export interface components {
             /** Format: int32 */
             reviewRound: null | number;
         };
+        CommitmentDetail: {
+            canCommit: boolean;
+            canRecordMet: boolean;
+            canRecordNotMet: boolean;
+            canWithdraw: boolean;
+            commitment: components["schemas"]["CommitmentRow"];
+            events: components["schemas"]["CommitmentEventRow"][];
+        };
+        CommitmentEventRow: {
+            /** Format: uuid */
+            actorId: string;
+            auditKey: null | string;
+            auditName: null | string;
+            /** Format: uuid */
+            auditProjectId: null | string;
+            auditType: string;
+            /** Format: uuid */
+            commitmentId: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            evidenceUrl: null | string;
+            fromState: string;
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            projectId: string;
+            reason: string;
+            /** Format: int32 */
+            rowVersion: number;
+            toState: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: uuid */
+            updatedBy: null | string;
+        };
+        CommitmentList: {
+            commitments: components["schemas"]["CommitmentRow"][];
+            /** Format: int32 */
+            page?: null | number;
+            /** Format: int32 */
+            pageSize?: null | number;
+            snapshots: components["schemas"]["SnapshotSummary"][];
+            /** Format: int32 */
+            total: number;
+            truncated: boolean;
+        };
         CommitmentMissCategory: {
             auditKey?: null | string;
             auditName?: null | string;
@@ -16900,6 +16948,46 @@ export interface components {
             awaiting: components["schemas"]["AwaitingRow"][];
             misses: components["schemas"]["MissRow"][];
             snapshots: components["schemas"]["SnapshotRow"][];
+        };
+        CommitmentRow: {
+            auditKey: null | string;
+            auditName: null | string;
+            /** Format: uuid */
+            auditProjectId: null | string;
+            auditType: string;
+            completionCriteria: string;
+            completionEvidenceUrl: null | string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            /** Format: uuid */
+            id: string;
+            intendedOutput: string;
+            key: string;
+            /** Format: uuid */
+            performerId: string;
+            /** Format: uuid */
+            projectId: string;
+            readinessAtCommit: string;
+            /** Format: int32 */
+            rowVersion: number;
+            /** Format: int32 */
+            seq: number;
+            /** Format: uuid */
+            snapshotId: null | string;
+            state: string;
+            /** Format: date */
+            targetDate: string;
+            /** Format: uuid */
+            targetId: string;
+            targetType: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: uuid */
+            updatedBy: null | string;
+            /** Format: date */
+            weekStart: string;
         };
         CompleteBody: {
             /** Format: date */
@@ -19084,6 +19172,20 @@ export interface components {
             reliability: components["schemas"]["CommitmentReliability"];
             /** Format: date */
             weekStart: string;
+        };
+        SnapshotSummary: {
+            /** Format: date-time */
+            capturedAt: string;
+            /** Format: int32 */
+            committedCount: number;
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            met: number;
+            /** Format: date */
+            weekStart: string;
+            /** Format: int32 */
+            withdrawn: number;
         };
         SnoozeBody: {
             /** Format: int32 */

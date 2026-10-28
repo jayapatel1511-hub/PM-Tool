@@ -5,6 +5,7 @@ const { spawn } = require('node:child_process')
 const fs = require('node:fs')
 const path = require('node:path')
 const assert = require('node:assert/strict')
+const { commitmentRow, commitmentList, commitmentDetail } = require('./weekly-commitments.fixture.cjs')
 
 const port = process.env.PORT || '19505'
 const base = `http://127.0.0.1:${port}`
@@ -26,7 +27,8 @@ const assignOffer = { ...offer, id: id(171), taskId: id(172), task: { ...offer.t
 const chain = { chainId, headSeq: 3, headHash: 'sha256-head', lastVerifiedAt: '2026-10-03T12:00:00Z', firstBrokenSeq: null }
 const confirmId = id(73)
 const reliability = { snapshots: [{ id: id(70), weekStart: '2026-09-28', reliability: { met: 78, committed: 100, percent: 78, band: 'Watch', withdrawn: 2, notYetRecorded: 20, awaiting: 1 } }], misses: [{ categoryId: id(71), category: 'Blocked by dependency', count: 2, commitments: [id(72)] }], awaiting: [{ id: confirmId, key: 'PROM-13', rowVersion: 4, canConfirm: true }] }
-const promiseDetail = { commitment: { id: id(72), key: 'PROM-12', targetType: 'Task', targetId: taskId, performerId: personId, weekStart: '2026-09-28', targetDate: '2026-10-02', intendedOutput: 'Complete drainage review', completionCriteria: 'Peer review recorded', state: 'Not Met', rowVersion: 4, completionEvidenceUrl: null }, events: [{ id: id(74), fromState: 'Committed', toState: 'Not Met', reason: 'Blocked by dependency', actorId: personId, createdAt: '2026-10-03T12:00:00Z' }], canCommit: false, canRecordMet: false, canRecordNotMet: false, canWithdraw: false }
+const promiseDetail = commitmentDetail(commitmentRow(projectId, { id: id(72), key: 'PROM-12', targetId: taskId, performerId: personId, weekStart: '2026-09-28', targetDate: '2026-10-02', intendedOutput: 'Complete drainage review', completionCriteria: 'Peer review recorded', state: 'Not Met', rowVersion: 4 }),
+  [{ id: id(74), fromState: 'Committed', toState: 'Not Met', reason: 'Blocked by dependency', actorId: personId }])
 const myWork = { person: { id: id(1), displayName: 'Sam Supervisor', isActive: true }, readOnly: false, today: '2026-10-03', attention: { total: 0, items: [] }, tasks: [], reviews: { tasks: [], deliverables: [] }, deliverables: [], people: {}, successors: [], decisions: [], actions: [], projects: [], milestones: [], completed: [] }
 
 function responseFor(method, p, body, query) {
@@ -50,7 +52,7 @@ function responseFor(method, p, body, query) {
   if (p === `projects/${projectId}/weekly-commitments/${confirmId}/confirm` && method === 'POST') return {}
   if (p.startsWith('tasks/') && p.endsWith('/pickup')) return {}
   if (p === `projects/${projectId}/readiness/window`) return { constraints: [], constraintsTotal: 0, constraintsTruncated: false, readyOutputs: [], readyOutputsTotal: 0, readyOutputsTruncated: false, pageSize: 50, truncated: false, total: 0 }
-  if (p === `projects/${projectId}/weekly-commitments`) return { commitments: [], total: 0, page: 1, pageSize: 50, truncated: false, snapshots: [] }
+  if (p === `projects/${projectId}/weekly-commitments`) return commitmentList([])
   if (p === 'admin/organisation/import/preview' && failImport) return { __status: 422, detail: 'CSV header is missing email.' }
   if (p === 'admin/organisation/import/preview' && method === 'POST') return { rows: 2, changes: [{ kind: 'create', unitPath: 'Design / Water' }, { kind: 'unchanged', email: 'alex@hub.test' }], creates: 1, applied: false }
   if (p === `projects/${projectId}/changes/options`) return { canWrite: false, people: [], disciplines: [], sources: [], heads: [], deliverables: [], tasks: [] }

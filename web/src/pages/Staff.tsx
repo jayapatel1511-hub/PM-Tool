@@ -11,7 +11,7 @@ import { HealthPill, Key } from '@/components/hub/pills'
 import { Button } from '@/components/ui/button'
 import { useProject, useReference } from '@/hooks/data'
 import type { components } from '@/gen/api'
-import { del, get, post, qs, typedRequest } from '@/lib/api'
+import { get, qs, typedRequest } from '@/lib/api'
 import { invalidateChange } from '@/lib/keys'
 import { useFlag, useMe } from '@/lib/auth'
 import { ago, fmtDate, shortDate, today } from '@/lib/format'
@@ -204,7 +204,7 @@ function AssignDialog({ person, onClose }: { person: StaffRow; onClose: (ok: boo
     <ConfirmDialog open onOpenChange={(o) => !o && onClose(false)} title={t('staff.assignTitle', { name: person.displayName })} body={t('staff.assignBody')}
       confirmLabel={t('staff.assign')} busy={!number || !discipline}
       onConfirm={async () => {
-        await post(`projects/${detail.data!.id}/members`, { userId: person.id, roles: ['TeamMember'], primaryDisciplineId: discipline })
+        await typedRequest('post', '/api/v1/projects/{id}/members', { params: { id: detail.data!.id }, body: { userId: person.id, roles: ['TeamMember'], primaryDisciplineId: discipline } })
         toast.success(t('staff.assigned', { name: person.displayName, number })); onClose(true)
       }}>
       <Field label={t('nav.projects')} htmlFor="as-project">
@@ -223,12 +223,12 @@ function AssignDialog({ person, onClose }: { person: StaffRow; onClose: (ok: boo
 
 /** TM-04, E-29: open work is reassigned within the project or left flagged, with a reason; the PM is told. */
 function RemoveDialog({ person, a, onClose }: { person: StaffRow; a: Assignment; onClose: (ok: boolean) => void }) {
-  const items = useQuery({ queryKey: ['open-items', a.memberId], queryFn: () => get<{ count: number; tasks: { id: string; key: string; name: string }[] }>(`projects/${a.projectId}/members/${a.memberId}/open-items`) })
+  const items = useQuery({ queryKey: ['open-items', a.memberId], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/members/{memberId}/open-items', { params: { id: a.projectId, memberId: a.memberId } }) })
   const [to, setTo] = useState<string | null>(null)
   return (
     <ConfirmDialog open destructive reason onOpenChange={(o) => !o && onClose(false)} title={t('staff.removeTitle', { name: person.displayName, number: a.projectNumber })} confirmLabel={t('staff.remove')}
       body={items.data ? (items.data.count > 0 ? t('staff.openItems', { n: items.data.count }) : t('staff.noOpenItems')) : undefined}
-      onConfirm={async (reason) => { await del(`projects/${a.projectId}/members/${a.memberId}${qs({ reassignTo: to, reason })}`, undefined, a.rowVersion); toast.success(t('staff.removed')); onClose(true) }}>
+      onConfirm={async (reason) => { await typedRequest('delete', '/api/v1/projects/{id}/members/{memberId}', { params: { id: a.projectId, memberId: a.memberId }, query: { reassignTo: to ?? undefined, reason }, ifMatch: a.rowVersion }); toast.success(t('staff.removed')); onClose(true) }}>
       {items.data && items.data.count > 0 && (
         <Field label={t('staff.reassignTo')} hint={t('staff.reassignHint')}><PeoplePicker value={to} onChange={setTo} exclude={[person.id]} /></Field>
       )}

@@ -7,8 +7,8 @@ export const roots = {
   planningEntries: ['planning-entries'], myWeek: ['my-week'],
 } as const
 
-const taskKeys = ['task', 'wtasks', 'wboard', 'gantt', 'coordination', 'workload', 'planning-grid', 'planning-entries', 'my-week', 'mywork-tasks', 'open-work'] as const
-const deliverableKeys = ['deliverable', 'gantt', 'coordination', 'coord-options', 'workspace-coordination'] as const
+const taskKeys = ['task', 'wtasks', 'wboard', 'gantt', 'coordination', 'workload', 'planning-grid', 'planning-entries', 'my-week', 'mywork-tasks', 'open-work', 'open-items'] as const
+const deliverableKeys = ['deliverable', 'gantt', 'coordination', 'coord-options', 'workspace-coordination', 'open-items'] as const
 
 export const itemKeys: Readonly<Record<string, readonly string[]>> = {
   Task: taskKeys, Dependency: taskKeys, // a link changes both tasks' waiting and blocked state, the chain and the candidates under 'task'
@@ -37,7 +37,8 @@ export const itemKeys: Readonly<Record<string, readonly string[]>> = {
   AdminReview: ['admin'],
   UserPreferences: ['onboarding', 'me'], ReferenceData: ['reference'], Setting: ['me'],
   Project: ['projects-pick', 'planner-projects-filter', 'workspace-coordination', 'portfolio', 'workload'],
-  Member: ['coord-options', 'staff', 'workload', 'workspace-coordination'],
+  Member: ['coord-options', 'staff', 'workload', 'workspace-coordination', 'open-items'],
+  Discipline: ['planner-project-disciplines'], // a project's discipline list, lead or active flag changes the planner entry's picker; the Team tab is under ['p', projectId]
   SavedView: ['views'],
 }
 

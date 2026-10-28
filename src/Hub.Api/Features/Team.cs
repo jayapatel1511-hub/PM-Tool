@@ -2,6 +2,7 @@ using System.Text.Json;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Api.Features;
@@ -73,10 +74,12 @@ public sealed class TeamService(HubDb db, Notifier notify, AuditContext audit, T
             Text.Get("notify.auto_added", name, p.ProjectNumber, Text.Get($"role.{role}")));
     }
 
+    sealed record Membership(List<string> Roles, Guid? PrimaryDisciplineId);
+
     async Task<bool> MayManageTeam(Project p)
     {
         var member = await db.ProjectMembers.AsNoTracking().Where(m => m.ProjectId == p.Id && m.UserId == me.Id && m.RemovedAt == null)
-            .Select(m => new { m.Roles, m.PrimaryDisciplineId }).FirstOrDefaultAsync();
+            .Select(m => new Membership(m.Roles, m.PrimaryDisciplineId)).FirstOrDefaultAsync();
         var leads = await db.ProjectDisciplines.AsNoTracking().Where(d => d.ProjectId == p.Id && d.LeadUserId == me.Id).Select(d => d.Id).ToListAsync();
         var ctx = new ProjectContext(p.Id, p.Status, p.Visibility, p.ProjectManagerId, p.AllowViewerComments,
             (member?.Roles ?? []).ToHashSet(), leads.ToHashSet(), member?.PrimaryDisciplineId);
@@ -165,31 +168,48 @@ public static class TeamEndpoints
     public sealed record MemberBody(Guid UserId, string[] Roles, Guid? PrimaryDisciplineId);
     public sealed record DisciplineBody(Guid DisciplineId, Guid? LeadUserId);
 
+    /// One discipline on the project with its lead; the name, code and colour are the reference discipline's.
+    public sealed record ProjectTeamDiscipline(Guid Id, Guid DisciplineId, string Name, string Code, string Colour, Guid? LeadUserId, bool IsActive, int SortOrder, int RowVersion);
+    /// One current member with the person's facts, the roles, the disciplines they lead and whether the caller may staff them.
+    public sealed record ProjectTeamMember(Guid Id, Guid UserId, string DisplayName, string Email, string? JobTitle, Guid? OfficeId, bool IsActive, IReadOnlyList<string> Roles,
+        Guid? PrimaryDisciplineId, DateTimeOffset AddedAt, Guid? AddedBy, int RowVersion, IReadOnlyList<Guid> LeadOf, bool IsPrimaryPm, bool CanStaff);
+    public sealed record ProjectTeamRead(IReadOnlyList<ProjectTeamDiscipline> Disciplines, IReadOnlyList<ProjectTeamMember> Members, bool CanManage, string? ManageReason);
+    public sealed record MemberAdded(Guid Id, int RowVersion);
+    /// How many open items moved to the person named in `reassignTo`.
+    public sealed record MemberRemoved(int Reassigned);
+    public sealed record ProjectDisciplineAdded(Guid Id, int RowVersion);
+    public sealed record MemberOpenTask(Guid Id, string Key, string Name, string Status, DateOnly? DueDate, string Role);
+    public sealed record MemberOpenDeliverable(Guid Id, string Key, string Name, string Status, DateOnly? DueDate);
+    public sealed record MemberOpenItems(IReadOnlyList<MemberOpenTask> Tasks, IReadOnlyList<MemberOpenDeliverable> Deliverables, int Count);
+
+    /// A member joined to the person, as the team read needs it (the supervisor decides who may be staffed).
+    sealed record MemberRead(Guid Id, Guid UserId, string DisplayName, string Email, string? JobTitle, Guid? OfficeId, bool IsActive, Guid? SupervisorId, List<string> Roles,
+        Guid? PrimaryDisciplineId, DateTimeOffset AddedAt, Guid? AddedBy, int RowVersion);
+
     public static void Map(RouteGroupBuilder api)
     {
-        api.MapGet("/projects/{id:guid}/team", async (Guid id, Access access, HubDb db) =>
+        api.MapGet("/projects/{id:guid}/team", async Task<Ok<ProjectTeamRead>> (Guid id, Access access, HubDb db) =>
         {
             var (p, ctx) = await access.Project(id, track: false);
             var disciplines = await db.ProjectDisciplines.AsNoTracking().Where(d => d.ProjectId == id).OrderBy(d => d.SortOrder)
-                .Select(d => new { d.Id, d.DisciplineId, d.Discipline!.Name, d.Discipline.Code, d.Discipline.Colour, d.LeadUserId, d.IsActive, d.SortOrder, d.RowVersion }).ToListAsync();
-            var members = await db.ProjectMembers.AsNoTracking().Where(m => m.ProjectId == id && m.RemovedAt == null)
-                .Join(db.Users, m => m.UserId, u => u.Id, (m, u) => new { m.Id, m.UserId, u.DisplayName, u.Email, u.JobTitle, u.OfficeId, u.IsActive, u.SupervisorId, m.Roles, m.PrimaryDisciplineId, m.AddedAt, m.AddedBy, m.RowVersion })
-                .OrderBy(m => m.DisplayName).ToListAsync();
+                .Select(d => new ProjectTeamDiscipline(d.Id, d.DisciplineId, d.Discipline!.Name, d.Discipline.Code, d.Discipline.Colour, d.LeadUserId, d.IsActive, d.SortOrder, d.RowVersion)).ToListAsync();
+            var members = await (from m in db.ProjectMembers.AsNoTracking()
+                join u in db.Users on m.UserId equals u.Id
+                where m.ProjectId == id && m.RemovedAt == null
+                orderby u.DisplayName
+                select new MemberRead(m.Id, m.UserId, u.DisplayName, u.Email, u.JobTitle, u.OfficeId, u.IsActive, u.SupervisorId, m.Roles, m.PrimaryDisciplineId, m.AddedAt, m.AddedBy, m.RowVersion)).ToListAsync();
             var leadIds = disciplines.Where(d => d.LeadUserId != null).Select(d => d.LeadUserId!.Value).ToHashSet();
             var a = access.Actor;
-            return new
-            {
-                disciplines,
-                members = members.Select(m => new { m.Id, m.UserId, m.DisplayName, m.Email, m.JobTitle, m.OfficeId, m.IsActive, m.Roles, m.PrimaryDisciplineId, m.AddedAt, m.AddedBy, m.RowVersion,
-                    LeadOf = disciplines.Where(d => d.LeadUserId == m.UserId).Select(d => d.Id), IsPrimaryPm = m.UserId == p.ProjectManagerId,
-                    CanStaff = Permissions.StaffOnProject(a, ctx, m.SupervisorId).Ok && m.Roles.All(r => r == ProjectRole.TeamMember) && !leadIds.Contains(m.UserId) }),
-                canManage = Permissions.ManageTeam(a, ctx).Ok,
-                manageReason = Permissions.ManageTeam(a, ctx).Why is { } w ? Text.Get(w, p.Status) : null,
-            };
+            return TypedResults.Ok(new ProjectTeamRead(disciplines,
+                [.. members.Select(m => new ProjectTeamMember(m.Id, m.UserId, m.DisplayName, m.Email, m.JobTitle, m.OfficeId, m.IsActive, m.Roles, m.PrimaryDisciplineId, m.AddedAt, m.AddedBy, m.RowVersion,
+                    [.. disciplines.Where(d => d.LeadUserId == m.UserId).Select(d => d.Id)], m.UserId == p.ProjectManagerId,
+                    Permissions.StaffOnProject(a, ctx, m.SupervisorId).Ok && m.Roles.All(r => r == ProjectRole.TeamMember) && !leadIds.Contains(m.UserId)))],
+                Permissions.ManageTeam(a, ctx).Ok,
+                Permissions.ManageTeam(a, ctx).Why is { } w ? Text.Get(w, p.Status) : null));
         });
 
         // PM, or a Supervisor adding a direct report as Team Member (§8.5.1, ASG-10).
-        api.MapPost("/projects/{id:guid}/members", async (Guid id, MemberBody body, Access access, HubDb db, TeamService team, Notifier notify) =>
+        api.MapPost("/projects/{id:guid}/members", async Task<Created<MemberAdded>> (Guid id, MemberBody body, Access access, HubDb db, TeamService team, Notifier notify) =>
         {
             var (p, ctx) = await access.Project(id);
             var person = await db.Users.FirstOrDefaultAsync(u => u.Id == body.UserId) ?? throw ApiException.Invalid("userId", "error.not_found");
@@ -205,10 +225,10 @@ public static class TeamEndpoints
                 await notify.Send(NotificationEvents.SupervisorStaffing, p.ProjectManagerId, TeamService.Item(p),
                     Text.Get("notify.supervisor_added", await notify.ActorName(), person.DisplayName, p.ProjectNumber));
             await db.SaveChangesAsync();
-            return Results.Created($"/api/v1/projects/{id}/members/{m.Id}", new { m.Id, m.RowVersion });
+            return TypedResults.Created($"/api/v1/projects/{id}/members/{m.Id}", new MemberAdded(m.Id, m.RowVersion));
         });
 
-        api.MapPatch("/projects/{id:guid}/members/{memberId:guid}", async (Guid id, Guid memberId, JsonElement body, HttpContext http, Access access, HubDb db, TeamService team) =>
+        api.MapPatch("/projects/{id:guid}/members/{memberId:guid}", async Task<NoContent> (Guid id, Guid memberId, JsonElement body, HttpContext http, Access access, HubDb db, TeamService team) =>
         {
             var (p, ctx) = await access.Project(id);
             Access.Demand(Permissions.ManageTeam(access.Actor, ctx));
@@ -229,18 +249,18 @@ public static class TeamEndpoints
                 m.PrimaryDisciplineId = pd;
             }
             await db.SaveChangesAsync();
-            return Results.NoContent();
+            return TypedResults.NoContent();
         });
 
         // TM-04: open items owned by the person, shown before removal.
-        api.MapGet("/projects/{id:guid}/members/{memberId:guid}/open-items", async (Guid id, Guid memberId, Access access, HubDb db) =>
+        api.MapGet("/projects/{id:guid}/members/{memberId:guid}/open-items", async Task<Ok<MemberOpenItems>> (Guid id, Guid memberId, Access access, HubDb db) =>
         {
             await access.Project(id, track: false);
             var m = await db.ProjectMembers.AsNoTracking().FirstOrDefaultAsync(x => x.Id == memberId && x.ProjectId == id) ?? throw ApiException.NotFound();
-            return await OpenItems(db, id, m.UserId);
+            return TypedResults.Ok(await OpenItems(db, id, m.UserId));
         });
 
-        api.MapDelete("/projects/{id:guid}/members/{memberId:guid}", async (Guid id, Guid memberId, Guid? reassignTo, string? reason, HttpContext http, Access access, HubDb db, TeamService team) =>
+        api.MapDelete("/projects/{id:guid}/members/{memberId:guid}", async Task<Ok<MemberRemoved>> (Guid id, Guid memberId, Guid? reassignTo, string? reason, HttpContext http, Access access, HubDb db, TeamService team) =>
         {
             var (p, ctx) = await access.Project(id);
             var m = await db.ProjectMembers.FirstOrDefaultAsync(x => x.Id == memberId && x.ProjectId == id && x.RemovedAt == null) ?? throw ApiException.NotFound();
@@ -261,10 +281,10 @@ public static class TeamEndpoints
             }
             var moved = await team.Remove(p, m, reassignTo, reason, bySupervisor: !asPm);
             await db.SaveChangesAsync();
-            return Results.Ok(new { reassigned = moved });
+            return TypedResults.Ok(new MemberRemoved(moved));
         });
 
-        api.MapPost("/projects/{id:guid}/disciplines", async (Guid id, DisciplineBody body, Access access, HubDb db, TeamService team) =>
+        api.MapPost("/projects/{id:guid}/disciplines", async Task<Results<Ok<ProjectDisciplineAdded>, Created<ProjectDisciplineAdded>>> (Guid id, DisciplineBody body, Access access, HubDb db, TeamService team) =>
         {
             var (p, ctx) = await access.Project(id);
             Access.Demand(Permissions.ManageTeam(access.Actor, ctx));
@@ -276,17 +296,17 @@ public static class TeamEndpoints
                 existing.IsActive = true;
                 if (body.LeadUserId is not null) await team.SetLead(p, existing, body.LeadUserId);
                 await db.SaveChangesAsync();
-                return Results.Ok(new { existing.Id, existing.RowVersion });
+                return TypedResults.Ok(new ProjectDisciplineAdded(existing.Id, existing.RowVersion));
             }
             var pd = new ProjectDiscipline { ProjectId = id, DisciplineId = body.DisciplineId, SortOrder = await db.ProjectDisciplines.CountAsync(d => d.ProjectId == id) };
             pd.Discipline = await db.Disciplines.FirstAsync(d => d.Id == body.DisciplineId);
             db.ProjectDisciplines.Add(pd);
             await team.SetLead(p, pd, body.LeadUserId);
             await db.SaveChangesAsync();
-            return Results.Created($"/api/v1/projects/{id}/disciplines/{pd.Id}", new { pd.Id, pd.RowVersion });
+            return TypedResults.Created($"/api/v1/projects/{id}/disciplines/{pd.Id}", new ProjectDisciplineAdded(pd.Id, pd.RowVersion));
         });
 
-        api.MapPatch("/projects/{id:guid}/disciplines/{pdId:guid}", async (Guid id, Guid pdId, JsonElement body, HttpContext http, Access access, HubDb db, TeamService team) =>
+        api.MapPatch("/projects/{id:guid}/disciplines/{pdId:guid}", async Task<NoContent> (Guid id, Guid pdId, JsonElement body, HttpContext http, Access access, HubDb db, TeamService team) =>
         {
             var (p, ctx) = await access.Project(id);
             Access.Demand(Permissions.ManageTeam(access.Actor, ctx));
@@ -297,11 +317,11 @@ public static class TeamEndpoints
             if (patch.Bool("isActive") is { } active) pd.IsActive = active;
             if (patch.Int("sortOrder") is { } so) pd.SortOrder = so;
             await db.SaveChangesAsync();
-            return Results.NoContent();
+            return TypedResults.NoContent();
         });
 
         // TM-05: only a discipline without non-cancelled work can be removed; otherwise deactivate.
-        api.MapDelete("/projects/{id:guid}/disciplines/{pdId:guid}", async (Guid id, Guid pdId, HttpContext http, Access access, HubDb db) =>
+        api.MapDelete("/projects/{id:guid}/disciplines/{pdId:guid}", async Task<NoContent> (Guid id, Guid pdId, HttpContext http, Access access, HubDb db) =>
         {
             var (_, ctx) = await access.Project(id);
             Access.Demand(Permissions.ManageTeam(access.Actor, ctx));
@@ -316,18 +336,18 @@ public static class TeamEndpoints
                 pd.IsActive = false; // referenced by history: deactivate rather than delete
             else db.ProjectDisciplines.Remove(pd);
             await db.SaveChangesAsync();
-            return Results.NoContent();
+            return TypedResults.NoContent();
         });
     }
 
-    public static async Task<object> OpenItems(HubDb db, Guid projectId, Guid userId)
+    public static async Task<MemberOpenItems> OpenItems(HubDb db, Guid projectId, Guid userId)
     {
         var tasks = await db.Tasks.AsNoTracking().Where(t => t.ProjectId == projectId && (t.AssigneeId == userId || t.ReviewerId == userId)
             && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled)
-            .Select(t => new { t.Id, t.Key, t.Name, t.Status, t.DueDate, Role = t.AssigneeId == userId ? "Assignee" : "Reviewer" }).ToListAsync();
+            .Select(t => new MemberOpenTask(t.Id, t.Key, t.Name, t.Status, t.DueDate, t.AssigneeId == userId ? "Assignee" : "Reviewer")).ToListAsync();
         var deliverables = await db.Deliverables.AsNoTracking().Where(d => d.ProjectId == projectId && d.OwnerId == userId
             && d.Status != DeliverableStatus.Issued && d.Status != DeliverableStatus.Accepted && d.Status != DeliverableStatus.Cancelled)
-            .Select(d => new { d.Id, d.Key, d.Name, d.Status, d.DueDate }).ToListAsync();
-        return new { tasks, deliverables, count = tasks.Count + deliverables.Count };
+            .Select(d => new MemberOpenDeliverable(d.Id, d.Key, d.Name, d.Status, d.DueDate)).ToListAsync();
+        return new MemberOpenItems(tasks, deliverables, tasks.Count + deliverables.Count);
     }
 }

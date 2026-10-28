@@ -11,7 +11,8 @@ import { useTable, type Column } from '@/components/hub/table'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useProjectRefresh, useReference } from '@/hooks/data'
-import { del, get, patch, post, qs } from '@/lib/api'
+import type { components } from '@/gen/api'
+import { typedRequest } from '@/lib/api'
 import { useFlag } from '@/lib/auth'
 import { hoursLabel } from '@/components/planner/labels'
 import { fmtDate, today } from '@/lib/format'
@@ -20,12 +21,7 @@ import { cn } from '@/lib/utils'
 import { useCurrentProject } from './ProjectLayout'
 import { AddFromTemplateDialog, usePublishedTemplates } from './FromTemplate'
 
-interface TeamData {
-  disciplines: { id: string; disciplineId: string; name: string; code: string; colour: string; leadUserId?: string; isActive: boolean; rowVersion: number }[]
-  members: { id: string; userId: string; displayName: string; email: string; jobTitle?: string; isActive: boolean; roles: string[]; primaryDisciplineId?: string
-    addedAt: string; leadOf: string[]; isPrimaryPm: boolean; canStaff: boolean; rowVersion: number }[]
-  canManage: boolean; manageReason?: string
-}
+type TeamData = components['schemas']['ProjectTeamRead']
 
 const ROLES = ['PM', 'TeamMember', 'Reviewer', 'Viewer']
 
@@ -34,7 +30,7 @@ export function TeamTab() {
   const p = useCurrentProject()
   const ref = useReference()
   const refresh = useProjectRefresh()
-  const q = useQuery({ queryKey: ['p', p.id, 'team'], queryFn: () => get<TeamData>(`projects/${p.id}/team`) })
+  const q = useQuery({ queryKey: ['p', p.id, 'team'], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/team', { params: { id: p.id } }) })
   const polish = useFlag('capacity_polish')
   const capacity = usePeopleCapacity(weekOf(today()), polish && !!q.data, q.data?.members.map(m => m.userId) ?? [])
   const away = (id: string) => { const hours = capacity(id)?.timeAway; return hours ? <Chip tone="idle">{t('planner.awayHours', { hours: hoursLabel(hours) })}</Chip> : null }
@@ -49,7 +45,7 @@ export function TeamTab() {
   if (q.isPending) return <Page {...header}><Loading /></Page>
   if (q.error) return <Page {...header}><ErrorBanner error={q.error} retry={() => q.refetch()} /></Page>
   const d = q.data
-  const name = (userId?: string) => d.members.find((m) => m.userId === userId)?.displayName
+  const name = (userId?: string | null) => d.members.find((m) => m.userId === userId)?.displayName
   const unused = ref.data?.disciplines.filter((x) => x.isActive && !d.disciplines.some((y) => y.disciplineId === x.id && y.isActive)) ?? []
 
   return (
@@ -67,18 +63,18 @@ export function TeamTab() {
                 </span>
                 <div className="min-w-48 flex-1">
                   {d.canManage && x.isActive
-                    ? <PeoplePicker value={x.leadUserId} valueName={name(x.leadUserId)} placeholder={t('team.noLead')} onChange={(id) => run(() => patch(`projects/${p.id}/disciplines/${x.id}`, { leadUserId: id }, x.rowVersion))} />
+                    ? <PeoplePicker value={x.leadUserId} valueName={name(x.leadUserId)} placeholder={t('team.noLead')} onChange={(id) => run(() => typedRequest('patch', '/api/v1/projects/{id}/disciplines/{pdId}', { params: { id: p.id, pdId: x.id }, body: { leadUserId: id }, ifMatch: x.rowVersion }))} />
                     : <span className="text-sm">{t('team.lead')}: <PersonName name={name(x.leadUserId)} /></span>}
                 </div>
                 {!x.leadUserId && x.isActive && <Chip tone="warn">{t('team.leadMissing')}</Chip>}
                 {d.canManage && (x.isActive
-                  ? <Button size="sm" variant="ghost" className="text-bad hover:text-bad" aria-label={t('team.removeNamed', { name: x.name })} onClick={() => run(() => del(`projects/${p.id}/disciplines/${x.id}`, undefined, x.rowVersion))}>{t('common.remove')}</Button>
-                  : <Button size="sm" variant="outline" onClick={() => run(() => patch(`projects/${p.id}/disciplines/${x.id}`, { isActive: true }, x.rowVersion))}>{t('admin.activate')}</Button>)}
+                  ? <Button size="sm" variant="ghost" className="text-bad hover:text-bad" aria-label={t('team.removeNamed', { name: x.name })} onClick={() => run(() => typedRequest('delete', '/api/v1/projects/{id}/disciplines/{pdId}', { params: { id: p.id, pdId: x.id }, ifMatch: x.rowVersion }))}>{t('common.remove')}</Button>
+                  : <Button size="sm" variant="outline" onClick={() => run(() => typedRequest('patch', '/api/v1/projects/{id}/disciplines/{pdId}', { params: { id: p.id, pdId: x.id }, body: { isActive: true }, ifMatch: x.rowVersion }))}>{t('admin.activate')}</Button>)}
               </li>
             ))}
           </ul>
           {d.canManage && (
-            <form className="flex flex-wrap items-end gap-3 border-t px-5 py-4" onSubmit={(e) => { e.preventDefault(); if (addDisc) run(() => post(`projects/${p.id}/disciplines`, { disciplineId: addDisc })).then(() => setAddDisc('')) }}>
+            <form className="flex flex-wrap items-end gap-3 border-t px-5 py-4" onSubmit={(e) => { e.preventDefault(); if (addDisc) run(() => typedRequest('post', '/api/v1/projects/{id}/disciplines', { params: { id: p.id }, body: { disciplineId: addDisc, leadUserId: null } })).then(() => setAddDisc('')) }}>
               <Field label={t('team.addDiscipline')} htmlFor="team-add-discipline" className="min-w-48 flex-1">
                 <select id="team-add-discipline" className={selectCls} value={addDisc} onChange={(e) => setAddDisc(e.target.value)}>
                   <option value="">{t('common.selectPlaceholder')}</option>
@@ -106,7 +102,7 @@ type Member = TeamData['members'][number]
 
 /** The members list on the shared DataTable (§47.7, FR-REC-14): a table from `md` up and, below it, one card per member with the same controls. */
 function MemberTable({ projectId, d, away, run, onRemove }: { projectId: string; d: TeamData; away: (id: string) => ReactNode; run: (f: () => Promise<unknown>) => Promise<void>; onRemove: (m: Member) => void }) {
-  const edit = (m: Member, body: object) => run(() => patch(`projects/${projectId}/members/${m.id}`, body, m.rowVersion))
+  const edit = (m: Member, body: object) => run(() => typedRequest('patch', '/api/v1/projects/{id}/members/{memberId}', { params: { id: projectId, memberId: m.id }, body, ifMatch: m.rowVersion }))
   const leadOf = (m: Member) => m.leadOf.length > 0 && ` · ${t('role.DisciplineLead')}: ${m.leadOf.map((id) => d.disciplines.find((x) => x.id === id)?.name).join(', ')}`
   const roleBox = (m: Member, r: string) => (
     <Checkbox aria-label={`${runtimeText(`role.${r}`)} — ${m.displayName}`} checked={m.roles.includes(r)} disabled={!d.canManage || (m.isPrimaryPm && r === 'PM')}
@@ -174,8 +170,9 @@ function AddMember({ projectId, disciplines, canManage, onDone }: { projectId: s
           </select>
         </Field>
         <Button disabled={!userId} onClick={async () => {
+          if (!userId) return
           setErr(null)
-          try { await post(`projects/${projectId}/members`, { userId, roles: [role], primaryDisciplineId: disc || null }); setUserId(null); toast.success(t('team.added')); onDone() }
+          try { await typedRequest('post', '/api/v1/projects/{id}/members', { params: { id: projectId }, body: { userId, roles: [role], primaryDisciplineId: disc || null } }); setUserId(null); toast.success(t('team.added')); onDone() }
           catch (e) { setErr(e) }
         }}><Plus className="size-4" />{t('common.add')}</Button>
       </div>
@@ -186,7 +183,7 @@ function AddMember({ projectId, disciplines, canManage, onDone }: { projectId: s
 
 /** TM-04: removing someone with open items asks whether to reassign or leave them flagged. */
 function RemoveMember({ projectId, member, onClose }: { projectId: string; member: TeamData['members'][number]; onClose: () => void }) {
-  const items = useQuery({ queryKey: ['open-items', member.id], queryFn: () => get(`projects/${projectId}/members/${member.id}/open-items`) })
+  const items = useQuery({ queryKey: ['open-items', member.id], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/members/{memberId}/open-items', { params: { id: projectId, memberId: member.id } }) })
   const [choice, setChoice] = useState<'leave' | 'reassign'>('reassign')
   const [to, setTo] = useState<string | null>(null)
   const n = items.data?.count ?? 0
@@ -195,11 +192,11 @@ function RemoveMember({ projectId, member, onClose }: { projectId: string; membe
       title={t('team.removeTitle', { name: member.displayName })}
       body={items.isPending ? t('app.loading') : n === 0 ? t('team.removeNoItems') : t('team.removeItems', { n })}
       confirmLabel={t('common.remove')} busy={n > 0 && choice === 'reassign' && !to}
-      onConfirm={(reason) => del(`projects/${projectId}/members/${member.id}${qs({ reassignTo: n > 0 && choice === 'reassign' ? to : undefined, reason })}`, undefined, member.rowVersion)}>
-      {n > 0 && (
+      onConfirm={(reason) => typedRequest('delete', '/api/v1/projects/{id}/members/{memberId}', { params: { id: projectId, memberId: member.id }, query: { reassignTo: n > 0 && choice === 'reassign' ? to ?? undefined : undefined, reason }, ifMatch: member.rowVersion })}>
+      {items.data && n > 0 && (
         <div className="space-y-3 text-sm">
           <ul className="max-h-40 space-y-1 overflow-y-auto rounded-md border bg-muted p-3">
-            {[...items.data.tasks, ...items.data.deliverables].map((i: any) => <li key={i.id}><span className="key">{i.key}</span> {i.name} · {tv(i.status)}</li>)}
+            {[...items.data.tasks, ...items.data.deliverables].map((i) => <li key={i.id}><span className="key">{i.key}</span> {i.name} · {tv(i.status)}</li>)}
           </ul>
           <label className="flex min-h-6 items-center gap-2"><input type="radio" name="team-remove-choice" className="size-4 accent-(--primary)" checked={choice === 'reassign'} onChange={() => setChoice('reassign')} />{t('team.reassignTo')}</label>
           {choice === 'reassign' && <Field label={t('team.newOwner')} htmlFor="team-new-owner" className="ml-6"><PeoplePicker id="team-new-owner" value={to} onChange={setTo} exclude={[member.userId]} /></Field>}

@@ -21,7 +21,6 @@ import type { ItemPartProps } from '@/pages/projects/slots-items'
 
 type CommentRow = components['schemas']['CommentRow']
 type CommentList = components['schemas']['CommentListResponse']
-interface TeamMember { userId: string; displayName: string; jobTitle?: string; isActive: boolean }
 
 export function CommentsPanel({ type, id, projectId }: ItemPartProps) {
   const qc = useQueryClient()
@@ -87,7 +86,7 @@ function Composer({ projectId, draftKey, initial = '', submitLabel, onSubmit, on
   const [mention, setMention] = useState<{ query: string; start: number } | null>(null)
   const [active, setActive] = useState(0)
   const area = useRef<HTMLTextAreaElement>(null)
-  const team = useQuery({ queryKey: ['p', projectId, 'team'], queryFn: () => get<{ members: TeamMember[] }>(`projects/${projectId}/team`), staleTime: 60_000, enabled: !!mention })
+  const team = useQuery({ queryKey: ['p', projectId, 'team'], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/team', { params: { id: projectId } }), staleTime: 60_000, enabled: !!mention })
   const others = useQuery({ queryKey: ['people', mention?.query], queryFn: () => get<Person[]>(`users${qs({ q: mention!.query, limit: 8 })}`), enabled: !!mention && mention.query.length > 0, staleTime: 60_000 })
   const options = useMemo(() => {
     if (!mention) return []

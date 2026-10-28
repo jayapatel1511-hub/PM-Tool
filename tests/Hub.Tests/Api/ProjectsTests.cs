@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.Json.Nodes;
 using Hub.Domain;
 using Microsoft.EntityFrameworkCore;
 
@@ -207,6 +208,193 @@ public sealed class ProjectsTests(HubFactory f, Xunit.Abstractions.ITestOutputHe
         var current = await f.DbAsync(db => db.ProjectMembers.SingleAsync(m => m.Id == member.Id));
         Assert.True(current.RowVersion > member.RowVersion);
         Assert.Equal(HttpStatusCode.Conflict, (await pm.Delete($"/api/v1/projects/{p.Id}/members/{member.Id}", member.RowVersion)).StatusCode);
+    }
+
+    [Fact]
+    public async Task Team_read_keeps_its_property_names_order_nulls_and_nesting() // the typed records must serialise to the bytes the app already reads (040-S15-Team)
+    {
+        static string[] Keys(JsonNode? n) => [.. n!.AsObject().Select(x => x.Key)];
+        var p = await d.Project();
+        var civil = d.ProjectDiscipline(p.Id, "Civil");
+        var electrical = d.ProjectDiscipline(p.Id, "Electrical");
+
+        // The project's manager: the whole envelope, nulls written and not omitted, no reason to refuse.
+        var team = await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/team").Result.Json();
+        Assert.Equal(["disciplines", "members", "canManage", "manageReason"], Keys(team));
+        Assert.True(team["canManage"]!.GetValue<bool>());
+        Assert.True(team.AsObject().ContainsKey("manageReason")); Assert.Null(team["manageReason"]);
+
+        var disciplines = team["disciplines"]!.AsArray();
+        Assert.Equal([civil, electrical], disciplines.Select(x => x!.G("id"))); // by sort order
+        Assert.All(disciplines, x => Assert.Equal(["id", "disciplineId", "name", "code", "colour", "leadUserId", "isActive", "sortOrder", "rowVersion"], Keys(x)));
+        Assert.Equal(("Civil", d.User(TestData.Marc), true, 0), (disciplines[0]!.S("name"), disciplines[0]!.G("leadUserId"), disciplines[0]!["isActive"]!.GetValue<bool>(), disciplines[0]!.I("sortOrder")));
+        Assert.Equal(("Electrical", d.User(TestData.Omar), 1), (disciplines[1]!.S("name"), disciplines[1]!.G("leadUserId"), disciplines[1]!.I("sortOrder")));
+        Assert.Equal(await d.Discipline("Civil"), disciplines[0]!.G("disciplineId"));
+        Assert.StartsWith("#", disciplines[0]!.S("colour"));
+        Assert.False(string.IsNullOrEmpty(disciplines[0]!.S("code")));
+        Assert.Equal(f.Db(db => db.ProjectDisciplines.Single(x => x.Id == civil).RowVersion), disciplines[0]!.I("rowVersion"));
+
+        var members = team["members"]!.AsArray();
+        Assert.Equal(new[] { TestData.Alex, TestData.Marc, TestData.Omar, TestData.Pm }.Select(e => d.User(e)).Order(), members.Select(x => x!.G("userId")).Order());
+        Assert.Equal(members.Select(x => x!.S("displayName")).Order(StringComparer.Ordinal), members.Select(x => x!.S("displayName"))); // ordered by name
+        Assert.All(members, x => Assert.Equal(["id", "userId", "displayName", "email", "jobTitle", "officeId", "isActive", "roles", "primaryDisciplineId", "addedAt", "addedBy", "rowVersion", "leadOf", "isPrimaryPm", "canStaff"], Keys(x)));
+        var pm = members.Single(x => x!.G("userId") == p.ProjectManagerId)!;
+        Assert.True(pm["isPrimaryPm"]!.GetValue<bool>());
+        Assert.Contains("PM", pm["roles"]!.AsArray().Select(x => x!.GetValue<string>()));
+        Assert.Empty(pm["leadOf"]!.AsArray());
+        Assert.Null(pm["primaryDisciplineId"]);
+        Assert.True(pm["isActive"]!.GetValue<bool>());
+        var alex = members.Single(x => x!.G("userId") == d.User(TestData.Alex))!;
+        Assert.Equal(["TeamMember"], alex["roles"]!.AsArray().Select(x => x!.GetValue<string>()));
+        Assert.Equal(civil, alex.G("primaryDisciplineId"));
+        Assert.False(alex["isPrimaryPm"]!.GetValue<bool>());
+        Assert.Equal(("alex@hub.test", "Alex Chen"), (alex.S("email"), alex.S("displayName")));
+        Assert.Matches(@"^\d{4}-\d{2}-\d{2}T", alex.S("addedAt"));
+        Assert.Equal(f.Db(db => db.ProjectMembers.Single(x => x.Id == alex.G("id")).RowVersion), alex.I("rowVersion"));
+        Assert.Equal([civil], members.Single(x => x!.G("userId") == d.User(TestData.Marc))!["leadOf"]!.AsArray().Select(x => Guid.Parse(x!.GetValue<string>())));
+        Assert.All(new[] { "jobTitle", "officeId", "addedBy" }, k => Assert.True(alex.AsObject().ContainsKey(k)));
+        Assert.All(members, x => Assert.True(x!["canStaff"]!.GetValue<bool>() is true or false));
+
+        // A member who cannot manage the team: the same envelope, the refusal text in place of the null.
+        var asAlex = await f.As(TestData.Alex).GetAsync($"/api/v1/projects/{p.Id}/team").Result.Json();
+        Assert.Equal(["disciplines", "members", "canManage", "manageReason"], Keys(asAlex));
+        Assert.False(asAlex["canManage"]!.GetValue<bool>());
+        Assert.Equal(Hub.Api.Text.Get("perm.pm", p.Status), asAlex.S("manageReason"));
+        Assert.Equal(members.Count, asAlex["members"]!.AsArray().Count);
+
+        // A supervisor of a team member may staff that report (canStaff) without managing the team.
+        var asSam = await f.As(TestData.Sam).GetAsync($"/api/v1/projects/{p.Id}/team").Result.Json();
+        Assert.False(asSam["canManage"]!.GetValue<bool>());
+        Assert.True(asSam["members"]!.AsArray().Single(x => x!.G("userId") == d.User(TestData.Alex))!["canStaff"]!.GetValue<bool>());
+        Assert.False(asSam["members"]!.AsArray().Single(x => x!.G("userId") == p.ProjectManagerId)!["canStaff"]!.GetValue<bool>());
+
+        // A project nobody can see: 404, not an empty team.
+        Assert.Equal(HttpStatusCode.NotFound, (await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{Guid.NewGuid()}/team")).StatusCode);
+    }
+
+    [Fact]
+    public async Task Member_commands_and_open_items_keep_their_answers_and_shape() // 040-S15-Team
+    {
+        static string[] Keys(JsonNode? n) => [.. n!.AsObject().Select(x => x.Key)];
+        var p = await d.Project();
+        var pm = f.As(TestData.Pm);
+        var civil = d.ProjectDiscipline(p.Id, "Civil");
+
+        // Adding: 201 with a Location, the new id and its row version.
+        var added = await pm.Post($"/api/v1/projects/{p.Id}/members", new { userId = d.User(TestData.Diane), roles = new[] { "Reviewer" }, primaryDisciplineId = civil });
+        var diane = await added.Json(201);
+        Assert.Equal(["id", "rowVersion"], Keys(diane));
+        Assert.Equal($"/api/v1/projects/{p.Id}/members/{diane.S("id")}", added.Headers.Location!.OriginalString);
+        Assert.Equal(f.Db(db => db.ProjectMembers.Single(x => x.Id == diane.G("id")).RowVersion), diane.I("rowVersion"));
+        Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Jill).Post($"/api/v1/projects/{p.Id}/members", new { userId = d.User(TestData.Jill), roles = new[] { "Viewer" } })).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await pm.Post($"/api/v1/projects/{p.Id}/members", new { userId = Guid.NewGuid(), roles = new[] { "Viewer" } })).StatusCode);
+
+        // Changing: 204 with an empty body; a missing member is a 404 and a person who cannot manage the team a 403.
+        var changed = await pm.Patch($"/api/v1/projects/{p.Id}/members/{diane.S("id")}", new { roles = new[] { "Reviewer", "Viewer" }, primaryDisciplineId = (Guid?)null }, diane.I("rowVersion"));
+        Assert.Equal(HttpStatusCode.NoContent, changed.StatusCode); Assert.Empty(await changed.Content.ReadAsStringAsync());
+        Assert.Equal(HttpStatusCode.NotFound, (await pm.Patch($"/api/v1/projects/{p.Id}/members/{Guid.NewGuid()}", new { roles = new[] { "Viewer" } })).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Alex).Patch($"/api/v1/projects/{p.Id}/members/{diane.S("id")}", new { roles = new[] { "Viewer" } }, diane.I("rowVersion") + 1)).StatusCode);
+
+        // Open items: tasks the person owns or reviews and deliverables they own, none finished; the answer's own order is tasks, deliverables, count.
+        var alexMember = await f.DbAsync(db => db.ProjectMembers.SingleAsync(m => m.ProjectId == p.Id && m.UserId == d.User(TestData.Alex) && m.RemovedAt == null));
+        var owned = await d.NewTask(p.Id, TestData.Pm, new { name = "Open pin owned", assigneeId = d.User(TestData.Alex), dueDate = "2026-10-09" });
+        var reviewed = await d.NewTask(p.Id, TestData.Pm, new { name = "Open pin reviewed", assigneeId = d.User(TestData.Marc), requiresReview = true, reviewerId = d.User(TestData.Alex) });
+        var finished = await d.NewTask(p.Id, TestData.Pm, new { name = "Open pin finished", assigneeId = d.User(TestData.Alex) });
+        await f.DbAsync(async db => { (await db.Tasks.SingleAsync(x => x.Id == finished.G("id"))).Status = TaskStatuses.Complete; return await db.SaveChangesAsync(); });
+        var deliverable = await pm.Post($"/api/v1/projects/{p.Id}/deliverables", new { name = "Open pin report", projectDisciplineId = civil, deliverableTypeId = await d.DeliverableType(), ownerId = d.User(TestData.Alex), dueDate = "2026-10-16" }).Result.Json(201);
+        var items = await pm.GetAsync($"/api/v1/projects/{p.Id}/members/{alexMember.Id}/open-items").Result.Json();
+        Assert.Equal(["tasks", "deliverables", "count"], Keys(items));
+        Assert.Equal(3, items.I("count"));
+        var tasks = items["tasks"]!.AsArray();
+        Assert.Equal(2, tasks.Count);
+        Assert.All(tasks, x => Assert.Equal(["id", "key", "name", "status", "dueDate", "role"], Keys(x)));
+        var asAssignee = tasks.Single(x => x!.G("id") == owned.G("id"))!;
+        Assert.Equal((owned.S("key"), "Open pin owned", TaskStatuses.NotStarted, "2026-10-09", "Assignee"), (asAssignee.S("key"), asAssignee.S("name"), asAssignee.S("status"), asAssignee.S("dueDate"), asAssignee.S("role")));
+        var asReviewer = tasks.Single(x => x!.G("id") == reviewed.G("id"))!;
+        Assert.Equal(("Reviewer", "Open pin reviewed"), (asReviewer.S("role"), asReviewer.S("name")));
+        Assert.True(asReviewer.AsObject().ContainsKey("dueDate")); Assert.Null(asReviewer["dueDate"]);
+        var owns = Assert.Single(items["deliverables"]!.AsArray())!;
+        Assert.Equal(["id", "key", "name", "status", "dueDate"], Keys(owns));
+        Assert.Equal((deliverable.G("id"), "Open pin report", DeliverableStatus.NotStarted, "2026-10-16"), (owns.G("id"), owns.S("name"), owns.S("status"), owns.S("dueDate")));
+        var none = await pm.GetAsync($"/api/v1/projects/{p.Id}/members/{diane.S("id")}/open-items").Result.Json();
+        Assert.Equal(["tasks", "deliverables", "count"], Keys(none));
+        Assert.Empty(none["tasks"]!.AsArray()); Assert.Empty(none["deliverables"]!.AsArray()); Assert.Equal(0, none.I("count"));
+        Assert.Equal(HttpStatusCode.NotFound, (await pm.GetAsync($"/api/v1/projects/{p.Id}/members/{Guid.NewGuid()}/open-items")).StatusCode);
+
+        // Removing: 200 with how many open items moved, and a stale version is a conflict.
+        var stale = await pm.Delete($"/api/v1/projects/{p.Id}/members/{alexMember.Id}?reassignTo={d.User(TestData.Marc)}&reason=Moved", alexMember.RowVersion - 1);
+        Assert.Equal("concurrency_conflict", (await stale.Json(409)).S("code"));
+        var moved = await pm.Delete($"/api/v1/projects/{p.Id}/members/{alexMember.Id}?reassignTo={d.User(TestData.Marc)}&reason=Moved", alexMember.RowVersion).Result.Json(200);
+        Assert.Equal(["reassigned"], Keys(moved));
+        Assert.Equal(3, moved.I("reassigned")); // one task as assignee, one as reviewer and the deliverable
+        var left = await pm.Delete($"/api/v1/projects/{p.Id}/members/{diane.S("id")}", f.Db(db => db.ProjectMembers.Single(x => x.Id == diane.G("id")).RowVersion)).Result.Json(200);
+        Assert.Equal(["reassigned"], Keys(left)); Assert.Equal(0, left.I("reassigned"));
+        Assert.Equal(HttpStatusCode.NotFound, (await pm.Delete($"/api/v1/projects/{p.Id}/members/{diane.S("id")}", 1)).StatusCode);
+    }
+
+    [Fact]
+    public async Task Project_discipline_commands_answer_with_their_ids_versions_and_refusals() // POST, PATCH and DELETE were uncalled (040-S15-Team)
+    {
+        static string[] Keys(JsonNode? n) => [.. n!.AsObject().Select(x => x.Key)];
+        var p = await d.Project();
+        var pm = f.As(TestData.Pm);
+        var structural = await d.Discipline("Structural");
+        var geotechnical = await d.Discipline("Geotechnical");
+
+        // Adding a discipline the project lacks: 201 with a Location, the id and the version; the lead joins the team.
+        var made = await pm.Post($"/api/v1/projects/{p.Id}/disciplines", new { disciplineId = structural, leadUserId = d.User(TestData.Jill) });
+        var added = await made.Json(201);
+        Assert.Equal(["id", "rowVersion"], Keys(added));
+        Assert.Equal($"/api/v1/projects/{p.Id}/disciplines/{added.S("id")}", made.Headers.Location!.OriginalString);
+        var row = await f.DbAsync(db => db.ProjectDisciplines.SingleAsync(x => x.Id == added.G("id")));
+        Assert.Equal((structural, d.User(TestData.Jill), 2, true, row.RowVersion), (row.DisciplineId, row.LeadUserId, row.SortOrder, row.IsActive, added.I("rowVersion")));
+        Assert.True(await f.DbAsync(db => db.ProjectMembers.AnyAsync(m => m.ProjectId == p.Id && m.UserId == d.User(TestData.Jill) && m.RemovedAt == null)));
+
+        // Adding it again reactivates the one row: 200, the same two properties, no Location, no second row.
+        await f.DbAsync(async db => { (await db.ProjectDisciplines.SingleAsync(x => x.Id == added.G("id"))).IsActive = false; return await db.SaveChangesAsync(); });
+        var again = await pm.Post($"/api/v1/projects/{p.Id}/disciplines", new { disciplineId = structural });
+        var reactivated = await again.Json(200);
+        Assert.Equal(["id", "rowVersion"], Keys(reactivated));
+        Assert.Equal(added.G("id"), reactivated.G("id")); Assert.Null(again.Headers.Location);
+        Assert.True(reactivated.I("rowVersion") > added.I("rowVersion"));
+        Assert.Equal(1, await f.DbAsync(db => db.ProjectDisciplines.CountAsync(x => x.ProjectId == p.Id && x.DisciplineId == structural)));
+        Assert.True(await f.DbAsync(db => db.ProjectDisciplines.Where(x => x.Id == added.G("id")).Select(x => x.IsActive).SingleAsync()));
+
+        // Refusals: a person who cannot manage the team, an unknown discipline and a missing project.
+        Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Alex).Post($"/api/v1/projects/{p.Id}/disciplines", new { disciplineId = geotechnical })).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await pm.Post($"/api/v1/projects/{p.Id}/disciplines", new { disciplineId = Guid.NewGuid() })).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await pm.Post($"/api/v1/projects/{Guid.NewGuid()}/disciplines", new { disciplineId = geotechnical })).StatusCode);
+
+        // Changing: 204 with an empty body; the lead, the active flag and the order all move; stale and missing are refused.
+        var version = f.Db(db => db.ProjectDisciplines.Single(x => x.Id == added.G("id")).RowVersion);
+        var patched = await pm.Patch($"/api/v1/projects/{p.Id}/disciplines/{added.S("id")}", new { leadUserId = d.User(TestData.Omar), isActive = false, sortOrder = 5 }, version);
+        Assert.Equal(HttpStatusCode.NoContent, patched.StatusCode); Assert.Empty(await patched.Content.ReadAsStringAsync());
+        var after = await f.DbAsync(db => db.ProjectDisciplines.SingleAsync(x => x.Id == added.G("id")));
+        Assert.Equal((d.User(TestData.Omar), false, 5), (after.LeadUserId, after.IsActive, after.SortOrder));
+        Assert.Equal("concurrency_conflict", (await (await pm.Patch($"/api/v1/projects/{p.Id}/disciplines/{added.S("id")}", new { isActive = true }, version)).Json(409)).S("code"));
+        var cleared = await pm.Patch($"/api/v1/projects/{p.Id}/disciplines/{added.S("id")}", new { leadUserId = (Guid?)null }, after.RowVersion);
+        Assert.Equal(HttpStatusCode.NoContent, cleared.StatusCode);
+        Assert.Null(await f.DbAsync(db => db.ProjectDisciplines.Where(x => x.Id == added.G("id")).Select(x => x.LeadUserId).SingleAsync()));
+        Assert.Equal(HttpStatusCode.NotFound, (await pm.Patch($"/api/v1/projects/{p.Id}/disciplines/{Guid.NewGuid()}", new { isActive = true })).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Alex).Patch($"/api/v1/projects/{p.Id}/disciplines/{added.S("id")}", new { isActive = true }, 1)).StatusCode);
+
+        // Removing: a discipline with work is refused; one nothing names is deleted with a 204 and an empty body; one a member names is deactivated.
+        var civil = d.ProjectDiscipline(p.Id, "Civil");
+        await d.NewTask(p.Id, TestData.Pm, new { name = "Discipline pin work" });
+        var civilVersion = f.Db(db => db.ProjectDisciplines.Single(x => x.Id == civil).RowVersion);
+        Assert.Equal("discipline_in_use", (await (await pm.Delete($"/api/v1/projects/{p.Id}/disciplines/{civil}", civilVersion)).Json(422)).S("code"));
+        var unused = await pm.Post($"/api/v1/projects/{p.Id}/disciplines", new { disciplineId = geotechnical }).Result.Json(201);
+        var deleted = await pm.Delete($"/api/v1/projects/{p.Id}/disciplines/{unused.S("id")}", unused.I("rowVersion"));
+        Assert.Equal(HttpStatusCode.NoContent, deleted.StatusCode); Assert.Empty(await deleted.Content.ReadAsStringAsync());
+        Assert.False(await f.DbAsync(db => db.ProjectDisciplines.AnyAsync(x => x.Id == unused.G("id"))));
+        var named = await pm.Post($"/api/v1/projects/{p.Id}/disciplines", new { disciplineId = await d.Discipline("Survey") }).Result.Json(201);
+        var alex = await f.DbAsync(db => db.ProjectMembers.SingleAsync(m => m.ProjectId == p.Id && m.UserId == d.User(TestData.Alex) && m.RemovedAt == null));
+        (await pm.Patch($"/api/v1/projects/{p.Id}/members/{alex.Id}", new { primaryDisciplineId = named.G("id") }, alex.RowVersion)).EnsureSuccessStatusCode();
+        var kept = await pm.Delete($"/api/v1/projects/{p.Id}/disciplines/{named.S("id")}", f.Db(db => db.ProjectDisciplines.Single(x => x.Id == named.G("id")).RowVersion));
+        Assert.Equal(HttpStatusCode.NoContent, kept.StatusCode); Assert.Empty(await kept.Content.ReadAsStringAsync());
+        Assert.False(await f.DbAsync(db => db.ProjectDisciplines.Where(x => x.Id == named.G("id")).Select(x => x.IsActive).SingleAsync()));
+        Assert.Equal(HttpStatusCode.NotFound, (await pm.Delete($"/api/v1/projects/{p.Id}/disciplines/{Guid.NewGuid()}", 1)).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Alex).Delete($"/api/v1/projects/{p.Id}/disciplines/{civil}", civilVersion)).StatusCode);
     }
 
     [Fact]

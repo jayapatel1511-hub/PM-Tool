@@ -8132,7 +8132,18 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ProjectDisciplineAdded"];
+                    };
+                };
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProjectDisciplineAdded"];
+                    };
                 };
             };
         };
@@ -8164,8 +8175,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -8191,8 +8202,8 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -8745,12 +8756,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["MemberAdded"];
+                    };
                 };
             };
         };
@@ -8790,7 +8803,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["MemberRemoved"];
+                    };
                 };
             };
         };
@@ -8812,8 +8827,8 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -8848,7 +8863,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["MemberOpenItems"];
                     };
                 };
             };
@@ -9513,7 +9528,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfListOfAnonymousTypeOfGuidAndGuidAndstringAndstringAndstringAndGuidAndbooleanAndintAndintAndIEnumerableOfAnonymousTypeOfGuidAndGuidAndstringAndstringAndstringAndGuidAndbooleanAndListOfstringAndGuidAndDateTimeOffsetAndGuidAndintAndIEnumerableOfGuidAndbooleanAndbooleanAndbooleanAndstring"];
+                        "application/json": components["schemas"]["ProjectTeamRead"];
                     };
                 };
             };
@@ -16207,46 +16222,6 @@ export interface components {
             /** Format: uuid */
             officeId: null | string;
         };
-        AnonymousTypeOfGuidAndGuidAndstringAndstringAndstringAndGuidAndbooleanAndListOfstringAndGuidAndDateTimeOffsetAndGuidAndintAndIEnumerableOfGuidAndbooleanAndboolean: {
-            /** Format: date-time */
-            addedAt: string;
-            /** Format: uuid */
-            addedBy: null | string;
-            canStaff: boolean;
-            displayName: null | string;
-            email: null | string;
-            /** Format: uuid */
-            id: string;
-            isActive: boolean;
-            isPrimaryPm: boolean;
-            jobTitle: null | string;
-            leadOf: null | string[];
-            /** Format: uuid */
-            officeId: null | string;
-            /** Format: uuid */
-            primaryDisciplineId: null | string;
-            roles: null | string[];
-            /** Format: int32 */
-            rowVersion: number;
-            /** Format: uuid */
-            userId: string;
-        };
-        AnonymousTypeOfGuidAndGuidAndstringAndstringAndstringAndGuidAndbooleanAndintAndint: {
-            code: null | string;
-            colour: null | string;
-            /** Format: uuid */
-            disciplineId: string;
-            /** Format: uuid */
-            id: string;
-            isActive: boolean;
-            /** Format: uuid */
-            leadUserId: null | string;
-            name: null | string;
-            /** Format: int32 */
-            rowVersion: number;
-            /** Format: int32 */
-            sortOrder: number;
-        };
         AnonymousTypeOfGuidAndstringAndstring: {
             displayName: null | string;
             source: null | string;
@@ -16331,12 +16306,6 @@ export interface components {
             digest: components["schemas"]["AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean"];
             events: null | components["schemas"]["AnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndboolean"][];
             follows: null | components["schemas"]["AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring"][];
-        };
-        AnonymousTypeOfListOfAnonymousTypeOfGuidAndGuidAndstringAndstringAndstringAndGuidAndbooleanAndintAndintAndIEnumerableOfAnonymousTypeOfGuidAndGuidAndstringAndstringAndstringAndGuidAndbooleanAndListOfstringAndGuidAndDateTimeOffsetAndGuidAndintAndIEnumerableOfGuidAndbooleanAndbooleanAndbooleanAndstring: {
-            canManage: boolean;
-            disciplines: null | components["schemas"]["AnonymousTypeOfGuidAndGuidAndstringAndstringAndstringAndGuidAndbooleanAndintAndint"][];
-            manageReason: null | string;
-            members: null | components["schemas"]["AnonymousTypeOfGuidAndGuidAndstringAndstringAndstringAndGuidAndbooleanAndListOfstringAndGuidAndDateTimeOffsetAndGuidAndintAndIEnumerableOfGuidAndbooleanAndboolean"][];
         };
         AnonymousTypeOfListOfWidgetAndboolean: {
             isDefault: boolean;
@@ -19477,6 +19446,12 @@ export interface components {
             notesLink: null | string;
             title: string;
         };
+        MemberAdded: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
+        };
         MemberBody: {
             /** Format: uuid */
             primaryDisciplineId: null | string;
@@ -19490,6 +19465,35 @@ export interface components {
             roles: string[];
             /** Format: uuid */
             userId: string;
+        };
+        MemberOpenDeliverable: {
+            /** Format: date */
+            dueDate: null | string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            status: string;
+        };
+        MemberOpenItems: {
+            /** Format: int32 */
+            count: number;
+            deliverables: components["schemas"]["MemberOpenDeliverable"][];
+            tasks: components["schemas"]["MemberOpenTask"][];
+        };
+        MemberOpenTask: {
+            /** Format: date */
+            dueDate: null | string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            role: string;
+            status: string;
+        };
+        MemberRemoved: {
+            /** Format: int32 */
+            reassigned: number;
         };
         MentionRow: {
             /** Format: uuid */
@@ -20335,6 +20339,12 @@ export interface components {
             /** Format: uuid */
             templateId: null | string;
         };
+        ProjectDisciplineAdded: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
+        };
         ProjectEvaluation: {
             computedHealth: string;
             counts: null | components["schemas"]["JsonElement"];
@@ -20377,6 +20387,52 @@ export interface components {
             projectNumber: string;
             /** Format: int32 */
             row: number;
+        };
+        ProjectTeamDiscipline: {
+            code: string;
+            colour: string;
+            /** Format: uuid */
+            disciplineId: string;
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+            /** Format: uuid */
+            leadUserId: null | string;
+            name: string;
+            /** Format: int32 */
+            rowVersion: number;
+            /** Format: int32 */
+            sortOrder: number;
+        };
+        ProjectTeamMember: {
+            /** Format: date-time */
+            addedAt: string;
+            /** Format: uuid */
+            addedBy: null | string;
+            canStaff: boolean;
+            displayName: string;
+            email: string;
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+            isPrimaryPm: boolean;
+            jobTitle: null | string;
+            leadOf: string[];
+            /** Format: uuid */
+            officeId: null | string;
+            /** Format: uuid */
+            primaryDisciplineId: null | string;
+            roles: string[];
+            /** Format: int32 */
+            rowVersion: number;
+            /** Format: uuid */
+            userId: string;
+        };
+        ProjectTeamRead: {
+            canManage: boolean;
+            disciplines: components["schemas"]["ProjectTeamDiscipline"][];
+            manageReason: null | string;
+            members: components["schemas"]["ProjectTeamMember"][];
         };
         ProjectTransitionBody: {
             closeout: null | components["schemas"]["Closeout"];

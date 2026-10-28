@@ -99,7 +99,7 @@ export function TimelineTab() {
   const zoom = (sp.get('zoom') as Zoom | null) ?? 'month'
   const f = { disciplineId: sp.get('disciplineId'), milestoneId: sp.get('milestoneId'), status: sp.get('status'), hide: sp.get('hideCompleted') === 'true', from: sp.get('from'), to: sp.get('to') }
   const ms = useQuery({ queryKey: ['p', p.id, 'milestones', true, ''], queryFn: () => get<MilestoneRow[]>(`projects/${p.id}/milestones?showCompleted=true`) })
-  const dels = useQuery({ queryKey: ['p', p.id, 'deliverables', {}], queryFn: () => get<DeliverableRow[]>(`projects/${p.id}/deliverables`) })
+  const dels = useQuery({ queryKey: ['p', p.id, 'deliverables', {}], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/deliverables', { params: { id: p.id } }) })
   const tl = useQuery({ queryKey: ['p', p.id, 'timeline'], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/timeline', { params: { id: p.id } }) })
   const header = { title: t('ptab.timeline'), subtitle: t('calm.timeline.scope') }
   if (ms.isPending || dels.isPending || tl.isPending) return <Page {...header}><div className="rounded-lg border bg-card"><Loading rows={8} /></div></Page>
@@ -486,7 +486,8 @@ export function MoveDialog({ move, projectComplete, onClose }: { move: Move; pro
       onConfirm={async (why) => {
         const body: Record<string, unknown> = { dueDate: newDue, reason: why || undefined }
         if (newStart) body.startDate = newStart
-        await patch(`${move.kind === 'task' ? 'tasks' : 'deliverables'}/${move.id}`, body, move.rowVersion)
+        if (move.kind === 'task') await patch(`tasks/${move.id}`, body, move.rowVersion)
+        else await typedRequest('patch', '/api/v1/deliverables/{id}', { params: { id: move.id }, body, ifMatch: move.rowVersion })
         toast.success(t('timeline.moved', { key: move.key }))
         onClose(true)
       }} />

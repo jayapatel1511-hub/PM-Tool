@@ -137,7 +137,7 @@ public static class MyWorkEndpoints
     }
 
     // The deliverable rows are already DeliverableRow records; their helper still lists them as objects.
-    static async Task<List<DeliverableEndpoints.DeliverableRow>> DeliverableRows(HubDb db, IQueryable<Deliverable> q) => [.. (await DeliverableEndpoints.Rows(db, q)).Cast<DeliverableEndpoints.DeliverableRow>()];
+    static Task<List<DeliverableEndpoints.DeliverableRow>> DeliverableRows(HubDb db, IQueryable<Deliverable> q) => DeliverableEndpoints.Rows(db, q);
 
     sealed record SuccessorFacts(Guid Id, string Key, string Name, string Status, DateOnly? DueDate, Guid? AssigneeId);
     sealed record ProjectFacts(Guid Id, string ProjectNumber, string Name, string Status, string? HealthOverride, DateTimeOffset? HealthOverrideExpiresAt, List<string>? Roles, List<string> Leads,

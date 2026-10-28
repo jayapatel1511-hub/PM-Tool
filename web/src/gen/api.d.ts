@@ -2946,7 +2946,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["DeliverableDetail"];
                     };
                 };
             };
@@ -2964,8 +2964,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -2995,7 +2995,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["DeliverableEdited"];
+                    };
                 };
             };
         };
@@ -3108,7 +3110,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["DeliverableIssueResult"];
+                    };
                 };
             };
         };
@@ -3184,7 +3188,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["DeliverableRestored"];
+                    };
                 };
             };
         };
@@ -3223,7 +3229,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["DeliverableTransitioned"];
+                    };
                 };
             };
         };
@@ -7943,7 +7951,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown[];
+                        "application/json": components["schemas"]["DeliverableRow"][];
                     };
                 };
             };
@@ -7964,12 +7972,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["DeliverableCreated"];
+                    };
                 };
             };
         };
@@ -8009,7 +8019,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["DeliverableBulkResult"];
                     };
                 };
             };
@@ -18237,6 +18247,17 @@ export interface components {
             params: null | components["schemas"]["JsonElement"];
             reason: null | string;
         };
+        DeliverableBulkResult: {
+            skipped: components["schemas"]["DeliverableBulkSkipped"][];
+            /** Format: int32 */
+            updated: number;
+        };
+        DeliverableBulkSkipped: {
+            /** Format: uuid */
+            id: string;
+            key: string;
+            reason: string;
+        };
         DeliverableCreateBody: {
             /** Format: uuid */
             deliverableTypeId: string;
@@ -18260,9 +18281,45 @@ export interface components {
             /** Format: date */
             startDate: null | string;
         };
+        DeliverableCreated: {
+            /** Format: date */
+            dueDate: null | string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            /** Format: int32 */
+            rowVersion: number;
+            warnings: string[];
+        };
         DeliverableDependencyAdded: {
             /** Format: uuid */
             id: string;
+        };
+        DeliverableDetail: {
+            /** Format: date */
+            acceptedDate: null | string;
+            cancelledReason: null | string;
+            deliverable: components["schemas"]["DeliverableRow"];
+            derivedPredecessors: components["schemas"]["DerivedDeliverable"][];
+            derivedSuccessors: components["schemas"]["DerivedDeliverable"][];
+            description: null | string;
+            explicitPredecessors: components["schemas"]["DeliverableLinkRead"][];
+            explicitSuccessors: components["schemas"]["DeliverableLinkRead"][];
+            issueNote: null | string;
+            issues: components["schemas"]["DeliverableIssueRead"][];
+            onHoldReason: null | string;
+            permissions: components["schemas"]["DeliverablePermissions"];
+            previousStatus: null | string;
+            project: components["schemas"]["DeliverableProject"];
+            relatedTasks?: null | components["schemas"]["DeliverableTaskRef"][];
+            transmittalUrl: null | string;
+        };
+        DeliverableEdited: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
+            warnings: string[];
         };
         DeliverableIn: {
             /** Format: uuid */
@@ -18288,11 +18345,79 @@ export interface components {
             rowVersion: null | number;
             transmittalUrl: null | string;
         };
+        DeliverableIssueRead: {
+            /** Format: uuid */
+            id: string;
+            issuedBy: null | string;
+            /** Format: date */
+            issuedDate: string;
+            issuedTo: null | string;
+            note: null | string;
+            revision: null | string;
+            transmittalUrl: null | string;
+        };
+        DeliverableIssueResult: {
+            /** Format: uuid */
+            id: string;
+            openTasks: components["schemas"]["DeliverableTaskRef"][];
+            /** Format: int32 */
+            rowVersion: number;
+            status: string;
+        };
+        DeliverableLinkRead: {
+            /** Format: uuid */
+            dependencyId: string;
+            /** Format: date */
+            dueDate: null | string;
+            /** Format: uuid */
+            id: string;
+            /** Format: date */
+            issuedDate: null | string;
+            key: string;
+            /** Format: int32 */
+            lagDays: number;
+            name: string;
+            note: null | string;
+            /** Format: uuid */
+            projectDisciplineId: string;
+            satisfied: boolean;
+            status: string;
+            type: string;
+        };
         DeliverableMarks: {
             /** Format: uuid */
             id: string;
             issues: components["schemas"]["IssueMarks"][];
             marks: string[];
+        };
+        DeliverablePermission: {
+            ok: boolean;
+            reason: null | string;
+        };
+        DeliverablePermissions: {
+            comment: boolean;
+            createTask: boolean;
+            delete: boolean;
+            edit: components["schemas"]["DeliverablePermission"];
+            issue: boolean;
+            issueNeedsConfirm: boolean;
+            linkDeliverables: boolean;
+            needsReason: boolean;
+            readyToIssueGuard: null | string;
+            transitions: components["schemas"]["DeliverableTransitionOption"][];
+        };
+        DeliverableProject: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            projectNumber: string;
+            status: string;
+        };
+        DeliverableRestored: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
         };
         DeliverableRow: {
             /** Format: date */
@@ -18350,7 +18475,7 @@ export interface components {
             rowVersion: number;
             /** Format: int32 */
             sinceBaselineDays?: null | number;
-            slipShown: null | boolean;
+            slipShown?: null | boolean;
             /** Format: date */
             startDate: null | string;
             state: null | components["schemas"]["DeliverableStateRead"];
@@ -18412,12 +18537,31 @@ export interface components {
             name: string;
             status: string;
         };
+        DeliverableTaskRef: {
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            status: string;
+        };
         DeliverableTransitionBody: {
             comment: null | string;
             reason: null | string;
             /** Format: int32 */
             rowVersion: null | number;
             toStatus: string;
+        };
+        DeliverableTransitionOption: {
+            allowed: boolean;
+            needsReason: boolean;
+            to: string;
+        };
+        DeliverableTransitioned: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
+            status: string;
         };
         DeliverableTypeRow: {
             auditKey: null | string;
@@ -18505,6 +18649,15 @@ export interface components {
             startDate: null | string;
             status: string;
             waiting: boolean;
+        };
+        DerivedDeliverable: {
+            /** Format: date */
+            dueDate: null | string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            status: string;
         };
         DesignBasisAssignBody: {
             /** Format: int32 */

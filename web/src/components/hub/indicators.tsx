@@ -8,11 +8,14 @@ import { plural, t , runtimeText } from '@/lib/i18n'
 
 export interface DeliverableStateView {
   progressPct?: number | null; taskTotal: number; taskComplete: number; taskCancelled: number; taskOpen: number; taskOverdue: number; taskBlocked: number
-  isOverdue: boolean; daysOverdue: number; isDueSoon: boolean; isAtRisk: boolean; atRiskReasons?: { text: string }[] | null; isUnassigned: boolean; isStale: boolean
-  isDateInconsistent: boolean; inconsistencyDetail?: { text: string }[] | null; slipDays: number; isInactiveOwner: boolean; issuedWithOpenWork: boolean
+  isOverdue: boolean; daysOverdue: number; isDueSoon: boolean; isAtRisk: boolean; atRiskReasons?: unknown; isUnassigned: boolean; isStale: boolean
+  isDateInconsistent: boolean; inconsistencyDetail?: unknown; slipDays: number; isInactiveOwner: boolean; issuedWithOpenWork: boolean
   milestoneCancelled: boolean; isWaiting?: boolean; isBlocked?: boolean; blockingCount?: number
-  blockedBy?: { key?: string; name?: string; reason?: string; blocking: boolean }[] | null; notes?: string[] | null
+  blockedBy?: unknown; notes?: string[] | null
 }
+
+/** The server sends these reason lists as free JSON (`{ text }` rows); anything else reads as none. */
+const reasonLines = (rows: unknown) => Array.isArray(rows) ? (rows as { text: string }[]).map((r) => r.text).join('\n') : undefined
 
 /** Evaluator note codes (§10.3) with their human labels; unknown codes are not shown. */
 export const NOTE_LABEL: Record<string, string> = {
@@ -51,14 +54,14 @@ export function OneSignal({ signals, all }: { signals: Signal[]; all?: boolean }
 function deliverableSignals(s: DeliverableStateView): Signal[] {
   const out: (Signal | false)[] = [
     s.isOverdue && { key: 'overdue', tone: 'bad', label: t('ind.overdueD', { n: s.daysOverdue }) },
-    s.isAtRisk && { key: 'atRisk', tone: 'warn', label: t('ind.atRisk'), title: s.atRiskReasons?.map((r) => r.text).join('\n') },
+    s.isAtRisk && { key: 'atRisk', tone: 'warn', label: t('ind.atRisk'), title: reasonLines(s.atRiskReasons) },
     s.isDueSoon && !s.isOverdue && { key: 'dueSoon', tone: 'warn', label: t('ind.dueSoon') },
     !!s.isBlocked && { key: 'blocked', tone: 'bad', label: t('ind.blocked') },
     !!s.isWaiting && !s.isBlocked && { key: 'waiting', tone: 'warn', label: t('ind.waiting') },
     (s.blockingCount ?? 0) > 0 && { key: 'blocking', tone: 'bad', label: t('ind.blocking', { n: s.blockingCount }) },
     s.isUnassigned && { key: 'unassigned', tone: 'warn', label: t('ind.unassigned') },
     s.isInactiveOwner && { key: 'inactiveOwner', tone: 'bad', label: t('ind.inactiveOwner') },
-    s.isDateInconsistent && { key: 'dateInconsistent', tone: 'warn', label: t('ind.dateInconsistent'), title: s.inconsistencyDetail?.map((r) => r.text).join('\n') },
+    s.isDateInconsistent && { key: 'dateInconsistent', tone: 'warn', label: t('ind.dateInconsistent'), title: reasonLines(s.inconsistencyDetail) },
     s.slipDays > 0 && { key: 'slipped', tone: 'warn', label: t('ind.slipped', { n: s.slipDays }) },
     s.isStale && { key: 'stale', tone: 'idle', label: t('ind.stale') },
     s.issuedWithOpenWork && { key: 'issuedOpenWork', tone: 'warn', label: t('ind.issuedOpenWork') },

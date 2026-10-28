@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 import { ErrorBanner, InProject, Loading, Spinner } from '@/components/hub/common'
 import { StatusPill } from '@/components/hub/pills'
 import { useProject, useProjectRefresh } from '@/hooks/data'
-import { del, get, post } from '@/lib/api'
+import { del, get, post, typedRequest } from '@/lib/api'
 import { fmtDate, relative } from '@/lib/format'
 import { plural, t , runtimeText } from '@/lib/i18n'
 import type { ProjectDetail } from '@/lib/types'
@@ -171,7 +171,7 @@ function DateReviewBanner({ p }: { p: ProjectDetail }) {
     try {
       const reason = t('dateReview.reason', { from: fmtDate(r.window!.heldFrom), to: fmtDate(r.window!.resumedOn) })
       if (r.tasks.length) await post(`projects/${p.id}/tasks/bulk`, { taskIds: r.tasks.map((x) => x.id), operation: 'shiftDueDates', params: { days: n }, reason })
-      if (r.deliverables.length) await post(`projects/${p.id}/deliverables/bulk`, { ids: r.deliverables.map((x) => x.id), operation: 'shiftDueDates', params: { days: n }, reason })
+      if (r.deliverables.length) await typedRequest('post', '/api/v1/projects/{id}/deliverables/bulk', { params: { id: p.id }, body: { ids: r.deliverables.map((x) => x.id), operation: 'shiftDueDates', params: { days: n }, reason } })
       toast.success(t('dateReview.shifted', { n })); qc.invalidateQueries({ queryKey: ['p', p.id, 'date-review'] }); refresh(p.id)
     } catch (e) { toast.error((e as Error).message) } finally { setBusy(false) }
   }

@@ -1,7 +1,7 @@
 import { PickerProject } from '@/components/hub/people'
 import { disciplineColour } from '@/lib/discipline-colour'
 import { UrlSearchInput } from '@/components/hub/url-search'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { Check, ChevronDown, ChevronRight, Link2, Plus, Send, X } from 'lucide-react'
 import { Fragment, useMemo, useState, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router'
@@ -9,7 +9,7 @@ import { toast } from 'sonner'
 import { ActiveFilters, ConfirmDialog, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Page, PageHelp, Spinner, TableRegion, selectCls } from '@/components/hub/common'
 import { DateHint } from '@/components/hub/date-context'
 import { FieldRow, HistoryList, InlineDate, InlinePerson, InlineSelect, InlineText, SaveStatus, TabBar } from '@/components/hub/fields'
-import { DepTypeChip, DepTypeField, DeliverableIndicators, progressLabel, type DeliverableStateView } from '@/components/hub/indicators'
+import { DepTypeChip, DepTypeField, DeliverableIndicators, progressLabel } from '@/components/hub/indicators'
 import { useItemPanel, type PanelProps } from '@/components/hub/panel-host'
 import { PeoplePicker } from '@/components/hub/people'
 import { Key, PriorityBadge, ProgressBar, StatusPill } from '@/components/hub/pills'
@@ -21,9 +21,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useProject, useProjectRefresh, useReference } from '@/hooks/data'
-import { ApiError, get, patch, post, qs, typedRequest } from '@/lib/api'
+import { ApiError, get, typedRequest } from '@/lib/api'
 import { fmtDate, fmtTime, hours, today } from '@/lib/format'
 import { runtimeText, t, tv } from '@/lib/i18n'
+import type { components } from '@/gen/api'
 import type { ProjectDetail } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { useFlag } from '@/lib/auth'
@@ -39,16 +40,7 @@ import { DeletedList, DeletedToggle, useShowDeleted } from '@/components/hub/del
 import { DraftNotice } from '@/components/hub/drafts'
 import { useSafeForm } from '@/hooks/drafts'
 
-export interface DeliverableRow {
-  requiredReviewPackageId?: string
-  id: string; projectId: string; key: string; name: string; projectDisciplineId: string; deliverableTypeId: string; ownerId?: string; reviewerId?: string
-  baselineStartDate?: string; baselineDueDate?: string; sinceBaselineDays?: number; canRebaseline?: boolean; baselineSlipShown?: boolean; slipShown?: boolean
-  milestoneId?: string; startDate?: string; dueDate?: string; originalDueDate?: string; originalStartDate?: string; priority: string; status: string; revision?: string; issuedDate?: string
-  issuedTo?: string; requiresReview: boolean; rowVersion: number; createdAt: string; disciplineName?: string; disciplineColour?: string; disciplineOrder: number
-  typeName?: string; ownerName?: string; ownerActive: boolean; reviewerName?: string; milestoneKey?: string; milestoneName?: string; milestoneDate?: string
-  state?: (DeliverableStateView & { derivedPredecessorIds: string[]; derivedSuccessorIds: string[] }) | null
-  tasks?: { id: string; key: string; name: string; status: string; dueDate?: string; assignee?: string }[]
-}
+export type DeliverableRow = components['schemas']['DeliverableRow']
 
 const GROUP_LABEL: Record<string, string> = { discipline: 'common.discipline', milestone: 'field.MilestoneId', status: 'common.status', owner: 'common.owner', none: 'dgroup.none' }
 export const STATUSES = ['Not Started', 'In Progress', 'In Review', 'Revision Required', 'Ready to Issue', 'Issued', 'Accepted', 'On Hold', 'Cancelled']
@@ -67,7 +59,11 @@ function LiveDeliverablesTab() {
   const filters = { disciplineId: sp.get('disciplineId'), status: sp.get('status'), milestoneId: sp.get('milestoneId'), ownerId: sp.get('ownerId'), typeId: sp.get('typeId'),
     indicator: sp.get('indicator'), dueFrom: sp.get('dueFrom'), dueTo: sp.get('dueTo'), q: sp.get('q'), requiresReview: sp.get('requiresReview'), revisionWarning: sp.get('revisionWarning') }
   const revisionEnabled = useFlag('revision_check')
-  const q = useQuery({ queryKey: ['p', p.id, 'deliverables', filters], queryFn: () => get<DeliverableRow[]>(`projects/${p.id}/deliverables${qs({ ...filters, revisionWarning: revisionEnabled ? filters.revisionWarning : undefined, includeTasks: true })}`) })
+  const q = useQuery({ queryKey: ['p', p.id, 'deliverables', filters], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/deliverables', { params: { id: p.id }, query: {
+    DisciplineId: filters.disciplineId ?? undefined, Status: filters.status ?? undefined, MilestoneId: filters.milestoneId ?? undefined, OwnerId: filters.ownerId ?? undefined, TypeId: filters.typeId ?? undefined,
+    Indicator: filters.indicator ?? undefined, DueFrom: filters.dueFrom ?? undefined, DueTo: filters.dueTo ?? undefined, Q: filters.q ?? undefined,
+    RequiresReview: (filters.requiresReview ?? undefined) as boolean | undefined, // the URL's 'true' or 'false' text goes through as it is: the query builder leaves out a boolean false, which is a real choice here
+    RevisionWarning: (revisionEnabled ? filters.revisionWarning ?? undefined : undefined) as boolean | undefined, IncludeTasks: true } }) })
   const revisionQ = useQuery({ queryKey: ['project', p.id, 'revision-check'], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/revision-check', { params: { projectId: p.id } }), enabled: revisionEnabled })
   const marks = new Map((revisionQ.data?.deliverables ?? []).map((x) => [x.id, [...x.marks, ...x.issues.flatMap((i) => i.marks)]]))
   const warningOnly = revisionEnabled && sp.get('revisionWarning') === 'true' // the filter exists only while flag.revision_check is on
@@ -84,7 +80,7 @@ function LiveDeliverablesTab() {
     { id: 'owner', label: t('common.owner'), sort: (d) => d.ownerName, className: 'whitespace-nowrap',
       cell: (d) => <Person id={d.ownerId} name={d.ownerName && (d.ownerActive ? d.ownerName : t('common.inactiveSuffix', { name: d.ownerName }))} /> },
     { id: 'reviewer', label: t('field.ReviewerId'), sort: (d) => d.reviewerName, className: 'whitespace-nowrap', cell: (d) => <Person id={d.reviewerId} name={d.reviewerName} /> },
-    { id: 'milestone', label: t('field.MilestoneId'), sort: (d) => d.milestoneDate, className: 'whitespace-nowrap', cell: (d) => d.milestoneKey ? <span title={d.milestoneName}><Key>{d.milestoneKey}</Key></span> : <Missing /> },
+    { id: 'milestone', label: t('field.MilestoneId'), sort: (d) => d.milestoneDate, className: 'whitespace-nowrap', cell: (d) => d.milestoneKey ? <span title={d.milestoneName ?? undefined}><Key>{d.milestoneKey}</Key></span> : <Missing /> },
     { id: 'due', label: t('common.due'), sort: (d) => d.dueDate, className: 'text-right', cell: (d) => <DateText date={d.dueDate} /> },
     { id: 'status', label: t('common.status'), sort: (d) => d.status, cell: (d) => <StatusPill status={d.status} /> },
     { id: 'progress', label: t('deliverable.progress'), sort: (d) => d.state?.progressPct, className: 'whitespace-nowrap text-right',
@@ -245,7 +241,7 @@ function BulkDialog({ p, op, ids, milestones, onClose }: { p: ProjectDetail; op:
       body={t('bulk.selected', { n: ids.length })} busy={!v}
       onConfirm={async (reason) => {
         const params = op === 'setMilestone' ? { milestoneId: v } : op === 'setOwner' ? { ownerId: v } : { days: Number(v) }
-        const r = await post(`projects/${p.id}/deliverables/bulk`, { ids, operation: op, params, reason })
+        const r = await typedRequest('post', '/api/v1/projects/{id}/deliverables/bulk', { params: { id: p.id }, body: { ids, operation: op, params, reason: reason ?? null } })
         toast.success(t('bulk.result', { updated: r.updated, skipped: r.skipped.length }))
         onClose(true)
       }}>
@@ -272,10 +268,12 @@ export function CreateDeliverable({ p, milestones, onClose, fromTask }: { p: Pro
     if (busy) return
     setErr(null); setBusy(true)
     try {
-      const r = await post(`projects/${p.id}/deliverables`, { ...f, ...(fromTask ? { fromTaskId: fromTask.id } : {}), ownerId: owner.id ?? lead?.leadUserId ?? null, reviewerId: reviewer, milestoneId: f.milestoneId || null,
-        startDate: f.startDate || null, dueDate: f.dueDate || null })
+      const r = await typedRequest('post', '/api/v1/projects/{id}/deliverables', { params: { id: p.id }, body: {
+        name: f.name, projectDisciplineId: f.projectDisciplineId, deliverableTypeId: f.deliverableTypeId, description: f.description ?? null, priority: f.priority ?? null, revision: f.revision ?? null,
+        requiresReview: f.requiresReview ?? null, ...(fromTask ? { fromTaskId: fromTask.id } : {}), ownerId: owner.id ?? lead?.leadUserId ?? null, reviewerId: reviewer, milestoneId: f.milestoneId || null,
+        startDate: f.startDate || null, dueDate: f.dueDate || null } })
       toast.success(t('deliverable.created', { key: r.key }))
-      r.warnings?.forEach((w: string) => toast.warning(w))
+      r.warnings.forEach((w) => toast.warning(w))
       safe.clear(); refresh(p.id); onClose()
     } catch (e) { setErr(e as ApiError) } finally { setBusy(false) }
   }
@@ -324,8 +322,7 @@ export function CreateDeliverable({ p, milestones, onClose, fromTask }: { p: Pro
 export const DELIVERABLE_TABS: { id: string; label: string; render: (d: any) => React.ReactNode }[] = []
 
 export function DeliverablePanel({ id }: PanelProps) {
-  const q = useQuery({ queryKey: ['deliverable', id], queryFn: () => get(`deliverables/${id}`) })
-  const qc = useQueryClient()
+  const q = useQuery({ queryKey: ['deliverable', id], queryFn: () => typedRequest('get', '/api/v1/deliverables/{id}', { params: { id } }) })
   const refresh = useProjectRefresh()
   const ref = useReference()
   const [tab, setTab] = useState('tasks')
@@ -342,16 +339,16 @@ export function DeliverablePanel({ id }: PanelProps) {
   if (q.isPending) return <Loading />
   if (q.error) return <div className="p-4"><ErrorBanner error={q.error} /></div>
   const data = q.data
-  const d: DeliverableRow = data.deliverable
+  const d = data.deliverable
   const perms = data.permissions
   const can = perms.edit.ok
-  const reload = () => { qc.invalidateQueries({ queryKey: ['deliverable', id] }); qc.invalidateQueries({ queryKey: ['p', d.projectId] }); refresh(d.projectId) }
+  const reload = () => refresh(d.projectId) // the map under Deliverable covers this panel's key and the project's
   // The outcome lets each inline field say Saved or Not saved (design §8); the banner keeps the reason.
   const save = async (body: object): Promise<boolean> => {
     setErr(null)
     try {
-      const r = await patch(`deliverables/${d.id}`, body, d.rowVersion)
-      r.warnings?.forEach((w: string) => toast.warning(w)); reload()
+      const r = await typedRequest('patch', '/api/v1/deliverables/{id}', { params: { id: d.id }, body, ifMatch: d.rowVersion })
+      r.warnings.forEach((w) => toast.warning(w)); reload()
       return true
     } catch (e) {
       if ((e as ApiError).code === 'confirm_move_tasks' && confirm((e as ApiError).message)) return save({ ...body, confirmMoveTasks: true })
@@ -416,7 +413,7 @@ export function DeliverablePanel({ id }: PanelProps) {
         {d.issuedDate && <FieldRow label={t('deliverable.issued')}><div className="px-2 py-1.5"><span className="tabular-nums">{fmtDate(d.issuedDate)}</span> · {d.revision} · {d.issuedTo}{data.transmittalUrl && <> · <a className="text-primary underline underline-offset-4" href={data.transmittalUrl} target="_blank" rel="noreferrer noopener">{t('deliverable.transmittal')}</a></>}</div></FieldRow>}
         {data.onHoldReason && d.status === 'On Hold' && <FieldRow label={t('field.OnHoldReason')}><div className="px-2 py-1.5">{data.onHoldReason}</div></FieldRow>}
       </FieldGroup>
-      {q.data.relatedTasks?.length > 0 && <div className="px-4 py-3 text-sm">{t('interaction.relatedTasks')}: {q.data.relatedTasks.map((r: {id:string;key:string;name:string})=><button key={r.id} className="ml-2 underline underline-offset-2" onClick={()=>openPanel('Task',r.id)}>{r.key} {r.name}</button>)}</div>}
+      {!!q.data.relatedTasks?.length && <div className="px-4 py-3 text-sm">{t('interaction.relatedTasks')}: {q.data.relatedTasks.map((r)=><button key={r.id} className="ml-2 underline underline-offset-2" onClick={()=>openPanel('Task',r.id)}>{r.key} {r.name}</button>)}</div>}
       <TabBar tabs={[{ id: 'tasks', label: t('ptab.tasks'), count: d.tasks?.length }, { id: 'deps', label: t('deliverable.dependencies') }, { id: 'issues', label: t('deliverable.issues'), count: data.issues.length },
         ...(baselineEnabled ? [{ id: 'baselines', label: t('baseline.history') }] : []),
         ...(ItemSlots.Links ? [{ id: 'links', label: t('common.links') }] : []), ...(ItemSlots.Comments ? [{ id: 'comments', label: t('common.comments') }] : []),
@@ -487,7 +484,7 @@ function DeliverableTransition({ d, to, needsReason, onClose }: { d: Deliverable
   return (
     <ConfirmDialog open onOpenChange={(o) => !o && onClose()} title={t('deliverable.transitionTitle', { key: d.key, to: tv(to) })}
       reason={needsReason && !isRevision ? true : undefined} busy={isRevision && comment.trim().length === 0}
-      onConfirm={async (reason) => { await post(`deliverables/${d.id}/transition`, { toStatus: to, reason, comment: comment || undefined, rowVersion: d.rowVersion }) }}>
+      onConfirm={async (reason) => { await typedRequest('post', '/api/v1/deliverables/{id}/transition', { params: { id: d.id }, body: { toStatus: to, reason: reason ?? null, comment: comment || null, rowVersion: d.rowVersion } }) }}>
       <Field label={isRevision ? t('deliverable.revisionComment') : t('deliverable.statusNote')} htmlFor="dt-comment" hint={isRevision ? t('deliverable.revisionHint') : t('common.optional')}>
         <Textarea id="dt-comment" rows={3} value={comment} onChange={(e) => setComment(e.target.value)} />
       </Field>
@@ -495,7 +492,7 @@ function DeliverableTransition({ d, to, needsReason, onClose }: { d: Deliverable
   )
 }
 
-interface DepRow { dependencyId: string; type?: string; lagDays: number; note?: string; id: string; key: string; name: string; status: string; dueDate?: string; issuedDate?: string; satisfied: boolean }
+type DepRow = components['schemas']['DeliverableLinkRead']
 
 /** Explicit typed links to other deliverables (FR-DEP-09, FR-DEPT-01), with an optional lag, apart from derived ones. Whether a
  *  link is met comes from the server's shared rule (AC-DEPT-05); the client never recomputes it. */
@@ -533,7 +530,7 @@ function ExplicitDeps({ d, data, onChange }: { d: DeliverableRow; data: any; onC
 }
 
 function LinkDeliverable({ d, direction, exclude, onClose }: { d: DeliverableRow; direction: 'predecessor' | 'successor'; exclude: string[]; onClose: (ok: boolean) => void }) {
-  const list = useQuery({ queryKey: ['p', d.projectId, 'deliverables', {}], queryFn: () => get<DeliverableRow[]>(`projects/${d.projectId}/deliverables`) })
+  const list = useQuery({ queryKey: ['p', d.projectId, 'deliverables', {}], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/deliverables', { params: { id: d.projectId } }) })
   const [choice, setChoice] = useState('')
   const [lag, setLag] = useState('0')
   const [type, setType] = useState('FinishToStart')
@@ -576,7 +573,7 @@ function LinkDeliverable({ d, direction, exclude, onClose }: { d: DeliverableRow
   )
 }
 
-interface IssueRow { id: string; issuedDate: string; revision?: string; issuedTo?: string; transmittalUrl?: string; note?: string; issuedBy?: string }
+type IssueRow = components['schemas']['DeliverableIssueRead']
 
 /** Every issue of the deliverable, newest first, so Rev A stays on record after Rev B goes out (FR-DEL-08, E-24).
  *  Each issue shows its own revision marks as text (FR-VER-16); `marks` is keyed by issue ID. */
@@ -611,7 +608,7 @@ function IssueDialog({ d, needsConfirm, onClose }: { d: DeliverableRow; needsCon
     <ConfirmDialog open onOpenChange={(o) => !o && onClose()} title={t('deliverable.issueTitle', { key: d.key, name: d.name })} confirmLabel={t('deliverable.issue')}
       body={open ? t('deliverable.openTasksConfirm', { n: open.length }) : needsConfirm ? t('deliverable.issueOutOfSequence', { status: tv(d.status) }) : undefined}
       onConfirm={async () => {
-        try { await post(`deliverables/${d.id}/issue`, { ...f, confirmOpenTasks: !!open, rowVersion: d.rowVersion }); toast.success(t('deliverable.issuedToast', { key: d.key })) }
+        try { await typedRequest('post', '/api/v1/deliverables/{id}/issue', { params: { id: d.id }, body: { issuedDate: f.issuedDate ?? null, revision: f.revision ?? null, issuedTo: f.issuedTo ?? null, transmittalUrl: f.transmittalUrl ?? null, note: f.note ?? null, confirmOpenTasks: !!open, rowVersion: d.rowVersion } }); toast.success(t('deliverable.issuedToast', { key: d.key })) }
         catch (e) { if ((e as ApiError).code === 'confirm_open_tasks') { setOpen((e as ApiError).body.tasks); throw new ApiError(409, { detail: t('deliverable.confirmAgain') }) } throw e }
       }}>
       <div className="grid gap-3 sm:grid-cols-2">

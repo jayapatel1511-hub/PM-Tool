@@ -402,7 +402,7 @@ export function ViewSwitch({ view, paths }: { view: 'tasks' | 'board'; paths?: {
 }
 
 export function useProjectLists(projectId: string | undefined) {
-  const deliverables = useQuery({ queryKey: ['p', projectId, 'deliverables', {}], queryFn: () => get<DeliverableRow[]>(`projects/${projectId}/deliverables`), enabled: !!projectId })
+  const deliverables = useQuery({ queryKey: ['p', projectId, 'deliverables', {}], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/deliverables', { params: { id: projectId! } }), enabled: !!projectId })
   const milestones = useQuery({ queryKey: ['p', projectId, 'milestones', false, ''], queryFn: () => get<MilestoneRow[]>(`projects/${projectId}/milestones`), enabled: !!projectId })
   return { deliverables: deliverables.data ?? [], milestones: milestones.data ?? [] }
 }

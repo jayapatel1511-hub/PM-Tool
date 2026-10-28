@@ -8178,6 +8178,46 @@
         ],
         "type": "object"
       },
+      "DeliverableBulkResult": {
+        "properties": {
+          "skipped": {
+            "items": {
+              "$ref": "#/components/schemas/DeliverableBulkSkipped"
+            },
+            "type": "array"
+          },
+          "updated": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "updated",
+          "skipped"
+        ],
+        "type": "object"
+      },
+      "DeliverableBulkSkipped": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "reason"
+        ],
+        "type": "object"
+      },
       "DeliverableCreateBody": {
         "properties": {
           "deliverableTypeId": {
@@ -8274,6 +8314,43 @@
         ],
         "type": "object"
       },
+      "DeliverableCreated": {
+        "properties": {
+          "dueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "rowVersion",
+          "dueDate",
+          "warnings"
+        ],
+        "type": "object"
+      },
       "DeliverableDependencyAdded": {
         "properties": {
           "id": {
@@ -8283,6 +8360,144 @@
         },
         "required": [
           "id"
+        ],
+        "type": "object"
+      },
+      "DeliverableDetail": {
+        "properties": {
+          "acceptedDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "cancelledReason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "deliverable": {
+            "$ref": "#/components/schemas/DeliverableRow"
+          },
+          "derivedPredecessors": {
+            "items": {
+              "$ref": "#/components/schemas/DerivedDeliverable"
+            },
+            "type": "array"
+          },
+          "derivedSuccessors": {
+            "items": {
+              "$ref": "#/components/schemas/DerivedDeliverable"
+            },
+            "type": "array"
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "explicitPredecessors": {
+            "items": {
+              "$ref": "#/components/schemas/DeliverableLinkRead"
+            },
+            "type": "array"
+          },
+          "explicitSuccessors": {
+            "items": {
+              "$ref": "#/components/schemas/DeliverableLinkRead"
+            },
+            "type": "array"
+          },
+          "issueNote": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "issues": {
+            "items": {
+              "$ref": "#/components/schemas/DeliverableIssueRead"
+            },
+            "type": "array"
+          },
+          "onHoldReason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "permissions": {
+            "$ref": "#/components/schemas/DeliverablePermissions"
+          },
+          "previousStatus": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "project": {
+            "$ref": "#/components/schemas/DeliverableProject"
+          },
+          "relatedTasks": {
+            "items": {
+              "$ref": "#/components/schemas/DeliverableTaskRef"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "transmittalUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "deliverable",
+          "description",
+          "transmittalUrl",
+          "issueNote",
+          "acceptedDate",
+          "onHoldReason",
+          "cancelledReason",
+          "previousStatus",
+          "project",
+          "derivedPredecessors",
+          "derivedSuccessors",
+          "issues",
+          "explicitPredecessors",
+          "explicitSuccessors",
+          "permissions"
+        ],
+        "type": "object"
+      },
+      "DeliverableEdited": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "rowVersion",
+          "warnings"
         ],
         "type": "object"
       },
@@ -8397,6 +8612,158 @@
         ],
         "type": "object"
       },
+      "DeliverableIssueRead": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "issuedBy": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "issuedDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "issuedTo": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "note": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "revision": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "transmittalUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "issuedDate",
+          "revision",
+          "issuedTo",
+          "transmittalUrl",
+          "note",
+          "issuedBy"
+        ],
+        "type": "object"
+      },
+      "DeliverableIssueResult": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "openTasks": {
+            "items": {
+              "$ref": "#/components/schemas/DeliverableTaskRef"
+            },
+            "type": "array"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "rowVersion",
+          "openTasks"
+        ],
+        "type": "object"
+      },
+      "DeliverableLinkRead": {
+        "properties": {
+          "dependencyId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "dueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "issuedDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "key": {
+            "type": "string"
+          },
+          "lagDays": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectDisciplineId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "satisfied": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "dependencyId",
+          "type",
+          "lagDays",
+          "note",
+          "id",
+          "key",
+          "name",
+          "status",
+          "dueDate",
+          "issuedDate",
+          "projectDisciplineId",
+          "satisfied"
+        ],
+        "type": "object"
+      },
       "DeliverableMarks": {
         "properties": {
           "id": {
@@ -8420,6 +8787,119 @@
           "id",
           "marks",
           "issues"
+        ],
+        "type": "object"
+      },
+      "DeliverablePermission": {
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "ok",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "DeliverablePermissions": {
+        "properties": {
+          "comment": {
+            "type": "boolean"
+          },
+          "createTask": {
+            "type": "boolean"
+          },
+          "delete": {
+            "type": "boolean"
+          },
+          "edit": {
+            "$ref": "#/components/schemas/DeliverablePermission"
+          },
+          "issue": {
+            "type": "boolean"
+          },
+          "issueNeedsConfirm": {
+            "type": "boolean"
+          },
+          "linkDeliverables": {
+            "type": "boolean"
+          },
+          "needsReason": {
+            "type": "boolean"
+          },
+          "readyToIssueGuard": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "transitions": {
+            "items": {
+              "$ref": "#/components/schemas/DeliverableTransitionOption"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "edit",
+          "delete",
+          "transitions",
+          "issue",
+          "linkDeliverables",
+          "issueNeedsConfirm",
+          "readyToIssueGuard",
+          "comment",
+          "createTask",
+          "needsReason"
+        ],
+        "type": "object"
+      },
+      "DeliverableProject": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "projectNumber",
+          "name",
+          "status"
+        ],
+        "type": "object"
+      },
+      "DeliverableRestored": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "rowVersion"
         ],
         "type": "object"
       },
@@ -8696,8 +9176,7 @@
           "milestoneName",
           "milestoneDate",
           "state",
-          "tasks",
-          "slipShown"
+          "tasks"
         ],
         "type": "object"
       },
@@ -8923,6 +9402,30 @@
         ],
         "type": "object"
       },
+      "DeliverableTaskRef": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "status"
+        ],
+        "type": "object"
+      },
       "DeliverableTransitionBody": {
         "properties": {
           "comment": {
@@ -8953,6 +9456,47 @@
           "toStatus",
           "reason",
           "comment",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
+      "DeliverableTransitionOption": {
+        "properties": {
+          "allowed": {
+            "type": "boolean"
+          },
+          "needsReason": {
+            "type": "boolean"
+          },
+          "to": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "to",
+          "allowed",
+          "needsReason"
+        ],
+        "type": "object"
+      },
+      "DeliverableTransitioned": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status",
           "rowVersion"
         ],
         "type": "object"
@@ -9290,6 +9834,38 @@
           "overdue",
           "blocked",
           "waiting"
+        ],
+        "type": "object"
+      },
+      "DerivedDeliverable": {
+        "properties": {
+          "dueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "status",
+          "dueDate"
         ],
         "type": "object"
       },
@@ -30120,8 +30696,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -30143,7 +30719,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/DeliverableDetail"
+                }
               }
             },
             "description": "OK"
@@ -30177,6 +30755,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliverableEdited"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -30280,6 +30865,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliverableIssueResult"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -30343,6 +30935,13 @@
         ],
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliverableRestored"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -30376,6 +30975,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliverableTransitioned"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -36056,6 +36662,9 @@
             "content": {
               "application/json": {
                 "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DeliverableRow"
+                  },
                   "type": "array"
                 }
               }
@@ -36064,7 +36673,7 @@
           }
         },
         "tags": [
-          "DeliverableEndpoints"
+          "Hub.Api"
         ]
       },
       "post": {
@@ -36090,8 +36699,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliverableCreated"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -36126,7 +36742,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/DeliverableBulkResult"
+                }
               }
             },
             "description": "OK"

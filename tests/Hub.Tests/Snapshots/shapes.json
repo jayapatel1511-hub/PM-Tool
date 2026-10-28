@@ -16543,6 +16543,108 @@
     "$.components.schemas.DecisionTransitionMutation.type": [
       "string"
     ],
+    "$.components.schemas.DeletedItem": [
+      "object"
+    ],
+    "$.components.schemas.DeletedItem.properties": [
+      "object"
+    ],
+    "$.components.schemas.DeletedItem.properties.deletedAt": [
+      "object"
+    ],
+    "$.components.schemas.DeletedItem.properties.deletedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.DeletedItem.properties.deletedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.DeletedItem.properties.deletedBy": [
+      "object"
+    ],
+    "$.components.schemas.DeletedItem.properties.deletedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.DeletedItem.properties.deletedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeletedItem.properties.discipline": [
+      "object"
+    ],
+    "$.components.schemas.DeletedItem.properties.discipline.type": [
+      "array"
+    ],
+    "$.components.schemas.DeletedItem.properties.discipline.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeletedItem.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.DeletedItem.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.DeletedItem.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.DeletedItem.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.DeletedItem.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.DeletedItem.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.DeletedItem.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.DeletedItem.properties.parentKey": [
+      "object"
+    ],
+    "$.components.schemas.DeletedItem.properties.parentKey.type": [
+      "array"
+    ],
+    "$.components.schemas.DeletedItem.properties.parentKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeletedItem.properties.restoreBlocked": [
+      "object"
+    ],
+    "$.components.schemas.DeletedItem.properties.restoreBlocked.type": [
+      "array"
+    ],
+    "$.components.schemas.DeletedItem.properties.restoreBlocked.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeletedItem.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.DeletedItem.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.DeletedItem.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DeletedItem.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.DeletedItem.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.DeletedItem.properties.status.type": [
+      "array"
+    ],
+    "$.components.schemas.DeletedItem.properties.status.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeletedItem.required": [
+      "array"
+    ],
+    "$.components.schemas.DeletedItem.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DeletedItem.type": [
+      "string"
+    ],
     "$.components.schemas.DeliverableBaseline": [
       "object"
     ],
@@ -24287,6 +24389,81 @@
       "string"
     ],
     "$.components.schemas.PageOfActivityEntry.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfDeletedItem": [
+      "object"
+    ],
+    "$.components.schemas.PageOfDeletedItem.properties": [
+      "object"
+    ],
+    "$.components.schemas.PageOfDeletedItem.properties.filters": [
+      "object"
+    ],
+    "$.components.schemas.PageOfDeletedItem.properties.items": [
+      "object"
+    ],
+    "$.components.schemas.PageOfDeletedItem.properties.items.items": [
+      "object"
+    ],
+    "$.components.schemas.PageOfDeletedItem.properties.items.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.PageOfDeletedItem.properties.items.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfDeletedItem.properties.page": [
+      "object"
+    ],
+    "$.components.schemas.PageOfDeletedItem.properties.page.format": [
+      "string"
+    ],
+    "$.components.schemas.PageOfDeletedItem.properties.page.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PageOfDeletedItem.properties.page.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfDeletedItem.properties.pageSize": [
+      "object"
+    ],
+    "$.components.schemas.PageOfDeletedItem.properties.pageSize.format": [
+      "string"
+    ],
+    "$.components.schemas.PageOfDeletedItem.properties.pageSize.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PageOfDeletedItem.properties.pageSize.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfDeletedItem.properties.sort": [
+      "object"
+    ],
+    "$.components.schemas.PageOfDeletedItem.properties.sort.type": [
+      "array"
+    ],
+    "$.components.schemas.PageOfDeletedItem.properties.sort.type[]": [
+      "string"
+    ],
+    "$.components.schemas.PageOfDeletedItem.properties.totalCount": [
+      "object"
+    ],
+    "$.components.schemas.PageOfDeletedItem.properties.totalCount.format": [
+      "string"
+    ],
+    "$.components.schemas.PageOfDeletedItem.properties.totalCount.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PageOfDeletedItem.properties.totalCount.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfDeletedItem.required": [
+      "array"
+    ],
+    "$.components.schemas.PageOfDeletedItem.required[]": [
+      "string"
+    ],
+    "$.components.schemas.PageOfDeletedItem.type": [
       "string"
     ],
     "$.components.schemas.PageOfObject": [
@@ -66478,6 +66655,29 @@
       "number"
     ]
   },
+  "GET /api/v1/projects/{id}/deliverables/deleted/export 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "GET /api/v1/projects/{id}/external-parties 200": {
     "$": [
       "array"
@@ -66943,6 +67143,29 @@
     ],
     "$.totalCount": [
       "number"
+    ]
+  },
+  "GET /api/v1/projects/{id}/milestones/deleted/export 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
     ]
   },
   "GET /api/v1/projects/{id}/risks 200": {

@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using Hub.Domain;
 using Microsoft.EntityFrameworkCore;
@@ -229,6 +230,71 @@ public sealed class RecoveryApiTests(HubFactory f)
         var log = await f.DbAsync(db => db.ActivityLog.Where(a => a.ProjectId == p.Id && a.Action == "Exported").ToListAsync());
         Assert.Equal(2, log.Count);
         Assert.All(log, a => { Assert.Null(a.Snapshot); Assert.DoesNotContain(keys[0], a.ItemName ?? ""); });
+    });
+
+    [Fact, Trait("flag-on", "show_deleted")]
+    public async Task Deleted_lists_keep_their_property_names_order_and_types() => await WithFlag(async () => // the typed rows must serialise to the bytes the Show deleted list already reads
+    {
+        var p = await d.Project();
+        var m = await Milestone(p.Id);
+        var inM = await Deliverable(p.Id, m.G("id"));
+        var t = await d.NewTask(p.Id, TestData.Pm, new { deliverableId = inM.G("id") });
+        foreach (var url in new[] { $"tasks/{t.S("id")}", $"deliverables/{inM.S("id")}", $"milestones/{m.S("id")}" })
+            (await f.As(TestData.Pm).DeleteAsync($"/api/v1/{url}")).EnsureSuccessStatusCode();
+
+        string[] row = ["id", "key", "name", "discipline", "parentKey", "status", "deletedAt", "deletedBy", "rowVersion", "restoreBlocked"];
+        var pmName = await f.DbAsync(db => db.Users.Where(u => u.Email == TestData.Pm).Select(u => u.DisplayName).FirstAsync());
+        foreach (var (kind, item, parentKey) in new[] { ("tasks", t, inM.S("key")), ("deliverables", inM, m.S("key")), ("milestones", m, (string?)null) })
+        {
+            var page = await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/{kind}/deleted?pageSize=5").Result.Json();
+            Assert.Equal(["items", "page", "pageSize", "totalCount", "sort", "filters"], page.AsObject().Select(x => x.Key));
+            Assert.Equal((1, 5, 1), (page.I("page"), page.I("pageSize"), page.I("totalCount")));
+            Assert.Null(page["sort"]); Assert.Null(page["filters"]);
+            var r = Assert.Single(page["items"]!.AsArray())!;
+            Assert.Equal(row, r.AsObject().Select(x => x.Key));
+            Assert.Equal((item.G("id"), item.S("key"), pmName), (r.G("id"), r.S("key"), r.S("deletedBy")));
+            Assert.False(string.IsNullOrEmpty(r.S("name")));
+            Assert.Equal(parentKey, r["parentKey"]?.GetValue<string>());
+            Assert.Equal(parentKey is null ? null : $"Restore {parentKey} first", r["restoreBlocked"]?.GetValue<string>()); // the milestone has no parent; the other two have a deleted one
+            Assert.Equal(JsonValueKind.String, r["deletedAt"]!.GetValueKind()); Assert.Equal(JsonValueKind.Number, r["rowVersion"]!.GetValueKind());
+            Assert.Equal(kind == "milestones" ? JsonValueKind.Null : JsonValueKind.String, r["discipline"]?.GetValueKind() ?? JsonValueKind.Null);
+        }
+    });
+
+    [Fact, Trait("flag-on", "show_deleted")]
+    public async Task Deleted_exports_of_deliverables_and_milestones_match_their_screens_and_are_logged() => await WithFlag(async () => // AC-RCV-07, FR-RCV-02: the two exports no other test called
+    {
+        var p = await d.Project();
+        var m = await Milestone(p.Id);
+        var inM = await Deliverable(p.Id, m.G("id"));
+        var loose = await Deliverable(p.Id);
+        foreach (var url in new[] { $"deliverables/{inM.S("id")}", $"deliverables/{loose.S("id")}", $"milestones/{m.S("id")}" })
+            (await f.As(TestData.Pm).DeleteAsync($"/api/v1/{url}")).EnsureSuccessStatusCode();
+
+        foreach (var kind in new[] { "deliverables", "milestones" })
+        {
+            var screen = await Deleted(kind, p.Id);
+            Assert.Equal(kind == "deliverables" ? 2 : 1, screen.Count);
+            var csv = await f.As(TestData.Pm).GetStringAsync($"/api/v1/projects/{p.Id}/{kind}/deleted/export?format=csv");
+            var lines = csv.TrimStart('\ufeff').Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            Assert.Equal("Key,Name,Discipline,Parent,Status,Deleted at,Deleted by,Restore unavailable", lines[0]);
+            Assert.Equal(screen.Count + 1, lines.Length);
+            for (var i = 0; i < screen.Count; i++) // the same rows in the same order, cell for cell (the deletion time is shown in the organisation's zone)
+            {
+                var cells = lines[i + 1].Split(',');
+                var r = screen[i]!;
+                Assert.Equal(new[] { r.S("key"), r.S("name"), r["discipline"]?.GetValue<string>() ?? "", r["parentKey"]?.GetValue<string>() ?? "", r["status"]?.GetValue<string>() ?? "",
+                    r["deletedBy"]?.GetValue<string>() ?? "", r["restoreBlocked"]?.GetValue<string>() ?? "" }, new[] { cells[0], cells[1], cells[2], cells[3], cells[4], cells[6], cells[7] });
+            }
+            Assert.Equal(kind == "deliverables" ? new[] { inM.S("key") } : Array.Empty<string>(), screen.Where(r => r!["restoreBlocked"] is not null).Select(r => r!.S("key"))); // a deliverable under a deleted milestone says so; nothing else does
+            var xlsx = await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/{kind}/deleted/export?format=xlsx");
+            Assert.Equal("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", xlsx.Content.Headers.ContentType!.MediaType);
+            foreach (var who in new[] { TestData.Marc, TestData.Alex, TestData.Rita })
+                Assert.Equal(HttpStatusCode.Forbidden, (await f.As(who).GetAsync($"/api/v1/projects/{p.Id}/{kind}/deleted/export")).StatusCode);
+        }
+
+        var log = await f.DbAsync(db => db.ActivityLog.Where(a => a.ProjectId == p.Id && a.Action == "Exported").Select(a => a.ItemKey).ToListAsync());
+        Assert.Equal(new[] { $"{p.ProjectNumber}-deleted-deliverables", $"{p.ProjectNumber}-deleted-deliverables", $"{p.ProjectNumber}-deleted-milestones", $"{p.ProjectNumber}-deleted-milestones" }, log.Order()); // two exports each; refusals log nothing
     });
 
     [Fact, Trait("flag-off", "show_deleted")]

@@ -4,6 +4,7 @@ const assert = require('node:assert/strict');
 const { spawn } = require('node:child_process');
 const path = require('node:path');
 const fs = require('node:fs');
+const { deletedTasks } = require('./recovery.fixture.cjs');
 const port = process.env.RECOVERY_TEST_PORT || '19504', base = `http://127.0.0.1:${port}`;
 const id = n => `00000000-0000-0000-0000-${String(n).padStart(12,'0')}`;
 const pid=id(1), person=id(2), civil=id(3), client=id(4), office=id(5), deleted=id(6), parent=id(7), template=id(8);
@@ -39,7 +40,7 @@ let server,browser;const errors=[],requests=[],unknown=[];
   else if(p.endsWith('/date-review'))data={window:null,tasks:[],deliverables:[]};
   else if(p.endsWith('/follow'))data={level:'My items only',source:'Assignment'};
   else if(p===`tasks/${deleted}/restore`){requests.push({path:p,ifMatch:req.headers()['if-match']});restored=true;data={id:deleted,rowVersion:5};}
-  else if(p.endsWith('/deleted'))data={items:restored?[]:[{id:deleted,key:'SYN-RCV-T001',name:'Synthetic deleted task',discipline:'Civil',parentKey:'SYN-RCV-D001',status:'Not Started',deletedAt:'2026-10-18T12:00:00Z',deletedBy:'Synthetic PM',rowVersion:4},{id:parent,key:'SYN-RCV-T002',name:'Synthetic child',discipline:'Civil',parentKey:'SYN-RCV-D002',restoreBlocked:'Restore SYN-RCV-D002 first',status:'Not Started',deletedAt:'2026-10-18T11:00:00Z',deletedBy:'Synthetic PM',rowVersion:2}],totalCount:restored?0:2,page:1,pageSize:200};
+  else if(p.endsWith('/deleted'))data=deletedTasks({deleted,parent,restored});
   else if(p===`projects/${pid}/tasks`)data={items:[],totalCount:0,page:1,pageSize:50};
   else if(p===`projects/${pid}/deliverables`||p===`projects/${pid}/milestones`)data=[];
   else if(p===`projects/${pid}/dashboard`)data=dash();

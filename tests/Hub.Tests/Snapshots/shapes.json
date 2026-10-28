@@ -19868,6 +19868,912 @@
     "$.components.schemas.CurrentSettings.type": [
       "string"
     ],
+    "$.components.schemas.DashboardCount": [
+      "object"
+    ],
+    "$.components.schemas.DashboardCount.properties": [
+      "object"
+    ],
+    "$.components.schemas.DashboardCount.properties.link": [
+      "object"
+    ],
+    "$.components.schemas.DashboardCount.properties.link.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardCount.properties.value": [
+      "object"
+    ],
+    "$.components.schemas.DashboardCount.properties.value.format": [
+      "string"
+    ],
+    "$.components.schemas.DashboardCount.properties.value.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DashboardCount.properties.value.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardCount.required": [
+      "array"
+    ],
+    "$.components.schemas.DashboardCount.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DashboardCount.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDecisions": [
+      "object"
+    ],
+    "$.components.schemas.DashboardDecisions.properties": [
+      "object"
+    ],
+    "$.components.schemas.DashboardDecisions.properties.overdue": [
+      "object"
+    ],
+    "$.components.schemas.DashboardDecisions.properties.overdue.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDecisions.properties.pending": [
+      "object"
+    ],
+    "$.components.schemas.DashboardDecisions.properties.pending.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDecisions.required": [
+      "array"
+    ],
+    "$.components.schemas.DashboardDecisions.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDecisions.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDeliverables": [
+      "object"
+    ],
+    "$.components.schemas.DashboardDeliverables.properties": [
+      "object"
+    ],
+    "$.components.schemas.DashboardDeliverables.properties.atRisk": [
+      "object"
+    ],
+    "$.components.schemas.DashboardDeliverables.properties.atRisk.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDeliverables.properties.issued": [
+      "object"
+    ],
+    "$.components.schemas.DashboardDeliverables.properties.issued.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDeliverables.properties.total": [
+      "object"
+    ],
+    "$.components.schemas.DashboardDeliverables.properties.total.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDeliverables.properties.upcoming": [
+      "object"
+    ],
+    "$.components.schemas.DashboardDeliverables.properties.upcoming.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDeliverables.required": [
+      "array"
+    ],
+    "$.components.schemas.DashboardDeliverables.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDeliverables.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline": [
+      "object"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties": [
+      "object"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.blocked": [
+      "object"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.blocked.format": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.blocked.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.blocked.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.deliverablesDue14": [
+      "object"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.deliverablesDue14.format": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.deliverablesDue14.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.deliverablesDue14.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.disciplineId": [
+      "object"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.disciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.disciplineId.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.health": [
+      "object"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.health.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.leadId": [
+      "object"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.leadId.format": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.leadId.type": [
+      "array"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.leadId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.nextDueDate": [
+      "object"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.nextDueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.nextDueDate.type": [
+      "array"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.nextDueDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.nextDueId": [
+      "object"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.nextDueId.format": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.nextDueId.type": [
+      "array"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.nextDueId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.nextDueKey": [
+      "object"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.nextDueKey.type": [
+      "array"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.nextDueKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.nextDueName": [
+      "object"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.nextDueName.type": [
+      "array"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.nextDueName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.nextDueType": [
+      "object"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.nextDueType.type": [
+      "array"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.nextDueType.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.open": [
+      "object"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.open.format": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.open.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.open.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.overdue": [
+      "object"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.overdue.format": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.overdue.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.overdue.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.reasons": [
+      "object"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.reasons.items": [
+      "object"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.reasons.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.reasons.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.sortOrder": [
+      "object"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.sortOrder.format": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.sortOrder.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.sortOrder.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.waiting": [
+      "object"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.waiting.format": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.waiting.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.properties.waiting.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.required": [
+      "array"
+    ],
+    "$.components.schemas.DashboardDiscipline.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DashboardDiscipline.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardIssues": [
+      "object"
+    ],
+    "$.components.schemas.DashboardIssues.properties": [
+      "object"
+    ],
+    "$.components.schemas.DashboardIssues.properties.high": [
+      "object"
+    ],
+    "$.components.schemas.DashboardIssues.properties.high.format": [
+      "string"
+    ],
+    "$.components.schemas.DashboardIssues.properties.high.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DashboardIssues.properties.high.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardIssues.properties.open": [
+      "object"
+    ],
+    "$.components.schemas.DashboardIssues.properties.open.format": [
+      "string"
+    ],
+    "$.components.schemas.DashboardIssues.properties.open.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DashboardIssues.properties.open.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardIssues.required": [
+      "array"
+    ],
+    "$.components.schemas.DashboardIssues.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DashboardIssues.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow": [
+      "object"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.date": [
+      "object"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.date.format": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.date.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.daysRemaining": [
+      "object"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.daysRemaining.format": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.daysRemaining.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.daysRemaining.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.deliverableIssued": [
+      "object"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.deliverableIssued.format": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.deliverableIssued.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.deliverableIssued.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.deliverableTotal": [
+      "object"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.deliverableTotal.format": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.deliverableTotal.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.deliverableTotal.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.milestoneType": [
+      "object"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.milestoneType.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.originalDate": [
+      "object"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.originalDate.format": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.originalDate.type": [
+      "array"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.originalDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.projectDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.projectDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.projectDisciplineId.type": [
+      "array"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.projectDisciplineId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.reasons": [
+      "object"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.reasons.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.reasons.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.reasons.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.reasons.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.status.type": [
+      "array"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.status.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.taskBlocked": [
+      "object"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.taskBlocked.format": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.taskBlocked.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.taskBlocked.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.taskComplete": [
+      "object"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.taskComplete.format": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.taskComplete.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.taskComplete.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.taskOverdue": [
+      "object"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.taskOverdue.format": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.taskOverdue.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.taskOverdue.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.taskTotal": [
+      "object"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.taskTotal.format": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.taskTotal.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.properties.taskTotal.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.required": [
+      "array"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DashboardMilestoneRow.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardRegisters": [
+      "object"
+    ],
+    "$.components.schemas.DashboardRegisters.properties": [
+      "object"
+    ],
+    "$.components.schemas.DashboardRegisters.properties.issuesHigh": [
+      "object"
+    ],
+    "$.components.schemas.DashboardRegisters.properties.issuesHigh.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardRegisters.properties.issuesOpen": [
+      "object"
+    ],
+    "$.components.schemas.DashboardRegisters.properties.issuesOpen.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardRegisters.properties.risksHigh": [
+      "object"
+    ],
+    "$.components.schemas.DashboardRegisters.properties.risksHigh.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardRegisters.required": [
+      "array"
+    ],
+    "$.components.schemas.DashboardRegisters.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DashboardRegisters.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardRisks": [
+      "object"
+    ],
+    "$.components.schemas.DashboardRisks.properties": [
+      "object"
+    ],
+    "$.components.schemas.DashboardRisks.properties.high": [
+      "object"
+    ],
+    "$.components.schemas.DashboardRisks.properties.high.format": [
+      "string"
+    ],
+    "$.components.schemas.DashboardRisks.properties.high.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DashboardRisks.properties.high.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardRisks.required": [
+      "array"
+    ],
+    "$.components.schemas.DashboardRisks.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DashboardRisks.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardState": [
+      "object"
+    ],
+    "$.components.schemas.DashboardState.properties": [
+      "object"
+    ],
+    "$.components.schemas.DashboardState.properties.evaluatedAt": [
+      "object"
+    ],
+    "$.components.schemas.DashboardState.properties.evaluatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.DashboardState.properties.evaluatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardState.required": [
+      "array"
+    ],
+    "$.components.schemas.DashboardState.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DashboardState.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardStatusSegments": [
+      "object"
+    ],
+    "$.components.schemas.DashboardStatusSegments.properties": [
+      "object"
+    ],
+    "$.components.schemas.DashboardStatusSegments.properties.inProgress": [
+      "object"
+    ],
+    "$.components.schemas.DashboardStatusSegments.properties.inProgress.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardStatusSegments.properties.issued": [
+      "object"
+    ],
+    "$.components.schemas.DashboardStatusSegments.properties.issued.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardStatusSegments.properties.notStarted": [
+      "object"
+    ],
+    "$.components.schemas.DashboardStatusSegments.properties.notStarted.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardStatusSegments.properties.onHold": [
+      "object"
+    ],
+    "$.components.schemas.DashboardStatusSegments.properties.onHold.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardStatusSegments.required": [
+      "array"
+    ],
+    "$.components.schemas.DashboardStatusSegments.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DashboardStatusSegments.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardTaskList": [
+      "object"
+    ],
+    "$.components.schemas.DashboardTaskList.properties": [
+      "object"
+    ],
+    "$.components.schemas.DashboardTaskList.properties.items": [
+      "object"
+    ],
+    "$.components.schemas.DashboardTaskList.properties.items.items": [
+      "object"
+    ],
+    "$.components.schemas.DashboardTaskList.properties.items.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardTaskList.properties.items.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardTaskList.properties.link": [
+      "object"
+    ],
+    "$.components.schemas.DashboardTaskList.properties.link.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardTaskList.properties.total": [
+      "object"
+    ],
+    "$.components.schemas.DashboardTaskList.properties.total.format": [
+      "string"
+    ],
+    "$.components.schemas.DashboardTaskList.properties.total.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DashboardTaskList.properties.total.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardTaskList.required": [
+      "array"
+    ],
+    "$.components.schemas.DashboardTaskList.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DashboardTaskList.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardTasks": [
+      "object"
+    ],
+    "$.components.schemas.DashboardTasks.properties": [
+      "object"
+    ],
+    "$.components.schemas.DashboardTasks.properties.backlog": [
+      "object"
+    ],
+    "$.components.schemas.DashboardTasks.properties.backlog.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.DashboardTasks.properties.backlog.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.DashboardTasks.properties.backlog.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardTasks.properties.backlog.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardTasks.properties.blocked": [
+      "object"
+    ],
+    "$.components.schemas.DashboardTasks.properties.blocked.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardTasks.properties.complete": [
+      "object"
+    ],
+    "$.components.schemas.DashboardTasks.properties.complete.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardTasks.properties.inProgress": [
+      "object"
+    ],
+    "$.components.schemas.DashboardTasks.properties.inProgress.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardTasks.properties.overdue": [
+      "object"
+    ],
+    "$.components.schemas.DashboardTasks.properties.overdue.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardTasks.properties.review": [
+      "object"
+    ],
+    "$.components.schemas.DashboardTasks.properties.review.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardTasks.properties.total": [
+      "object"
+    ],
+    "$.components.schemas.DashboardTasks.properties.total.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardTasks.properties.unassigned": [
+      "object"
+    ],
+    "$.components.schemas.DashboardTasks.properties.unassigned.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardTasks.properties.waiting": [
+      "object"
+    ],
+    "$.components.schemas.DashboardTasks.properties.waiting.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardTasks.required": [
+      "array"
+    ],
+    "$.components.schemas.DashboardTasks.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DashboardTasks.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardView": [
+      "object"
+    ],
+    "$.components.schemas.DashboardView.properties": [
+      "object"
+    ],
+    "$.components.schemas.DashboardView.properties.activity": [
+      "object"
+    ],
+    "$.components.schemas.DashboardView.properties.activity.items": [
+      "object"
+    ],
+    "$.components.schemas.DashboardView.properties.activity.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardView.properties.activity.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardView.properties.blocked": [
+      "object"
+    ],
+    "$.components.schemas.DashboardView.properties.blocked.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardView.properties.decisions": [
+      "object"
+    ],
+    "$.components.schemas.DashboardView.properties.decisions.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardView.properties.deliverables": [
+      "object"
+    ],
+    "$.components.schemas.DashboardView.properties.deliverables.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardView.properties.disciplineBacklog": [
+      "object"
+    ],
+    "$.components.schemas.DashboardView.properties.disciplineBacklog.additionalProperties": [
+      "object"
+    ],
+    "$.components.schemas.DashboardView.properties.disciplineBacklog.additionalProperties.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardView.properties.disciplineBacklog.type": [
+      "array"
+    ],
+    "$.components.schemas.DashboardView.properties.disciplineBacklog.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DashboardView.properties.disciplineDue14": [
+      "object"
+    ],
+    "$.components.schemas.DashboardView.properties.disciplineDue14.additionalProperties": [
+      "object"
+    ],
+    "$.components.schemas.DashboardView.properties.disciplineDue14.additionalProperties.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardView.properties.disciplineDue14.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardView.properties.disciplineStatus": [
+      "object"
+    ],
+    "$.components.schemas.DashboardView.properties.disciplineStatus.additionalProperties": [
+      "object"
+    ],
+    "$.components.schemas.DashboardView.properties.disciplineStatus.additionalProperties.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardView.properties.disciplineStatus.type": [
+      "array"
+    ],
+    "$.components.schemas.DashboardView.properties.disciplineStatus.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DashboardView.properties.disciplines": [
+      "object"
+    ],
+    "$.components.schemas.DashboardView.properties.disciplines.items": [
+      "object"
+    ],
+    "$.components.schemas.DashboardView.properties.disciplines.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardView.properties.disciplines.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardView.properties.dueThisWeek": [
+      "object"
+    ],
+    "$.components.schemas.DashboardView.properties.dueThisWeek.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardView.properties.issues": [
+      "object"
+    ],
+    "$.components.schemas.DashboardView.properties.issues.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardView.properties.milestones": [
+      "object"
+    ],
+    "$.components.schemas.DashboardView.properties.milestones.items": [
+      "object"
+    ],
+    "$.components.schemas.DashboardView.properties.milestones.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardView.properties.milestones.type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardView.properties.registers": [
+      "object"
+    ],
+    "$.components.schemas.DashboardView.properties.registers.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardView.properties.risks": [
+      "object"
+    ],
+    "$.components.schemas.DashboardView.properties.risks.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardView.properties.state": [
+      "object"
+    ],
+    "$.components.schemas.DashboardView.properties.state.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.DashboardView.properties.state.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.DashboardView.properties.state.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardView.properties.state.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.DashboardView.properties.tasks": [
+      "object"
+    ],
+    "$.components.schemas.DashboardView.properties.tasks.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DashboardView.required": [
+      "array"
+    ],
+    "$.components.schemas.DashboardView.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DashboardView.type": [
+      "string"
+    ],
     "$.components.schemas.DateBound": [
       "object"
     ],
@@ -23913,6 +24819,57 @@
       "string"
     ],
     "$.components.schemas.DisciplineInput.type": [
+      "string"
+    ],
+    "$.components.schemas.DisciplineReason": [
+      "object"
+    ],
+    "$.components.schemas.DisciplineReason.properties": [
+      "object"
+    ],
+    "$.components.schemas.DisciplineReason.properties.colour": [
+      "object"
+    ],
+    "$.components.schemas.DisciplineReason.properties.colour.type": [
+      "array"
+    ],
+    "$.components.schemas.DisciplineReason.properties.colour.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DisciplineReason.properties.rule": [
+      "object"
+    ],
+    "$.components.schemas.DisciplineReason.properties.rule.type": [
+      "array"
+    ],
+    "$.components.schemas.DisciplineReason.properties.rule.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DisciplineReason.properties.text": [
+      "object"
+    ],
+    "$.components.schemas.DisciplineReason.properties.text.type": [
+      "string"
+    ],
+    "$.components.schemas.DisciplineReason.properties.threshold": [
+      "object"
+    ],
+    "$.components.schemas.DisciplineReason.properties.values": [
+      "object"
+    ],
+    "$.components.schemas.DisciplineReason.properties.values.type": [
+      "array"
+    ],
+    "$.components.schemas.DisciplineReason.properties.values.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DisciplineReason.required": [
+      "array"
+    ],
+    "$.components.schemas.DisciplineReason.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DisciplineReason.type": [
       "string"
     ],
     "$.components.schemas.DispositionBody": [
@@ -49103,6 +50060,39 @@
     "$.components.schemas.WeekPreview.type": [
       "string"
     ],
+    "$.components.schemas.WeekSpan": [
+      "object"
+    ],
+    "$.components.schemas.WeekSpan.properties": [
+      "object"
+    ],
+    "$.components.schemas.WeekSpan.properties.from": [
+      "object"
+    ],
+    "$.components.schemas.WeekSpan.properties.from.format": [
+      "string"
+    ],
+    "$.components.schemas.WeekSpan.properties.from.type": [
+      "string"
+    ],
+    "$.components.schemas.WeekSpan.properties.to": [
+      "object"
+    ],
+    "$.components.schemas.WeekSpan.properties.to.format": [
+      "string"
+    ],
+    "$.components.schemas.WeekSpan.properties.to.type": [
+      "string"
+    ],
+    "$.components.schemas.WeekSpan.required": [
+      "array"
+    ],
+    "$.components.schemas.WeekSpan.required[]": [
+      "string"
+    ],
+    "$.components.schemas.WeekSpan.type": [
+      "string"
+    ],
     "$.components.schemas.WeeklyCommitmentsMoveBody": [
       "object"
     ],
@@ -49247,6 +50237,570 @@
     "$.components.schemas.WeeklyCommitmentsProposeBody.type": [
       "string"
     ],
+    "$.components.schemas.WeeklyCompleted": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCompleted.properties": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCompleted.properties.decisions": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCompleted.properties.decisions.items": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCompleted.properties.decisions.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCompleted.properties.decisions.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCompleted.properties.deliverables": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCompleted.properties.deliverables.items": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCompleted.properties.deliverables.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCompleted.properties.deliverables.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCompleted.properties.tasks": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCompleted.properties.tasks.items": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCompleted.properties.tasks.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCompleted.properties.tasks.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCompleted.required": [
+      "array"
+    ],
+    "$.components.schemas.WeeklyCompleted.required[]": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCompleted.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCoordination": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.blocked": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.blocked.items": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.blocked.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.blocked.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.completed": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.completed.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.decisions": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.decisions.items": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.decisions.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.decisions.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.deliverables": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.deliverables.items": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.deliverables.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.deliverables.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.disciplines": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.disciplines.items": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.disciplines.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.disciplines.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.dueThisWeek": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.dueThisWeek.items": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.dueThisWeek.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.dueThisWeek.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.headline": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.headline.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.held": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.held.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.issues": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.issues.items": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.issues.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.issues.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.milestones": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.milestones.items": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.milestones.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.milestones.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.overdue": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.overdue.items": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.overdue.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.overdue.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.risks": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.risks.items": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.risks.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.risks.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.upcoming": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.upcoming.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.waiting": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.waiting.items": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.waiting.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.waiting.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.window": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyCoordination.properties.window.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCoordination.required": [
+      "array"
+    ],
+    "$.components.schemas.WeeklyCoordination.required[]": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyCoordination.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyDecided": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyDecided.properties": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyDecided.properties.decisionDate": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyDecided.properties.decisionDate.format": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyDecided.properties.decisionDate.type": [
+      "array"
+    ],
+    "$.components.schemas.WeeklyDecided.properties.decisionDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyDecided.properties.decisionText": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyDecided.properties.decisionText.type": [
+      "array"
+    ],
+    "$.components.schemas.WeeklyDecided.properties.decisionText.type[]": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyDecided.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyDecided.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyDecided.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyDecided.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyDecided.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyDecided.properties.subject": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyDecided.properties.subject.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyDecided.required": [
+      "array"
+    ],
+    "$.components.schemas.WeeklyDecided.required[]": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyDecided.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyDecision": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyDecision.properties": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyDecision.properties.blocking": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyDecision.properties.blocking.format": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyDecision.properties.blocking.pattern": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyDecision.properties.blocking.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyDecision.properties.daysOverdue": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyDecision.properties.daysOverdue.format": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyDecision.properties.daysOverdue.pattern": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyDecision.properties.daysOverdue.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyDecision.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyDecision.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyDecision.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyDecision.properties.impactLevel": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyDecision.properties.impactLevel.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyDecision.properties.isOverdue": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyDecision.properties.isOverdue.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyDecision.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyDecision.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyDecision.properties.ownerName": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyDecision.properties.ownerName.type": [
+      "array"
+    ],
+    "$.components.schemas.WeeklyDecision.properties.ownerName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyDecision.properties.ownerUserId": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyDecision.properties.ownerUserId.format": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyDecision.properties.ownerUserId.type": [
+      "array"
+    ],
+    "$.components.schemas.WeeklyDecision.properties.ownerUserId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyDecision.properties.requiredByDate": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyDecision.properties.requiredByDate.format": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyDecision.properties.requiredByDate.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyDecision.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyDecision.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyDecision.properties.subject": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyDecision.properties.subject.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyDecision.required": [
+      "array"
+    ],
+    "$.components.schemas.WeeklyDecision.required[]": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyDecision.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyHeadline": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyHeadline.properties": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyHeadline.properties.blockedTasks": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyHeadline.properties.blockedTasks.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyHeadline.properties.computedHealth": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyHeadline.properties.computedHealth.type": [
+      "array"
+    ],
+    "$.components.schemas.WeeklyHeadline.properties.computedHealth.type[]": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyHeadline.properties.decisionsOverdue": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyHeadline.properties.decisionsOverdue.format": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyHeadline.properties.decisionsOverdue.pattern": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyHeadline.properties.decisionsOverdue.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyHeadline.properties.deliverablesAtRisk": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyHeadline.properties.deliverablesAtRisk.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyHeadline.properties.healthReasons": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyHeadline.properties.healthReasons.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.WeeklyHeadline.properties.healthReasons.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyHeadline.properties.healthReasons.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyHeadline.properties.healthReasons.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyHeadline.properties.nextMilestone": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyHeadline.properties.nextMilestone.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.WeeklyHeadline.properties.nextMilestone.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyHeadline.properties.nextMilestone.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyHeadline.properties.nextMilestone.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyHeadline.properties.overdueTasks": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyHeadline.properties.overdueTasks.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyHeadline.required": [
+      "array"
+    ],
+    "$.components.schemas.WeeklyHeadline.required[]": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyHeadline.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyHeld": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyHeld.properties": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyHeld.properties.deliverables": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyHeld.properties.deliverables.items": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyHeld.properties.deliverables.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyHeld.properties.deliverables.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyHeld.properties.tasks": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyHeld.properties.tasks.items": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyHeld.properties.tasks.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyHeld.properties.tasks.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyHeld.required": [
+      "array"
+    ],
+    "$.components.schemas.WeeklyHeld.required[]": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyHeld.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyIssue": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyIssue.properties": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyIssue.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyIssue.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyIssue.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyIssue.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyIssue.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyIssue.properties.severity": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyIssue.properties.severity.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyIssue.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyIssue.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyIssue.properties.targetResolutionDate": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyIssue.properties.targetResolutionDate.format": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyIssue.properties.targetResolutionDate.type": [
+      "array"
+    ],
+    "$.components.schemas.WeeklyIssue.properties.targetResolutionDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyIssue.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyIssue.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyIssue.required": [
+      "array"
+    ],
+    "$.components.schemas.WeeklyIssue.required[]": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyIssue.type": [
+      "string"
+    ],
     "$.components.schemas.WeeklyPlanningBulkBody": [
       "object"
     ],
@@ -49386,6 +50940,255 @@
       "string"
     ],
     "$.components.schemas.WeeklyPlanningCandidate.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyReviewed": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyReviewed.properties": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyReviewed.properties.lastCoordinationReviewedAt": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyReviewed.properties.lastCoordinationReviewedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyReviewed.properties.lastCoordinationReviewedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyReviewed.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyReviewed.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyReviewed.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyReviewed.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyReviewed.required": [
+      "array"
+    ],
+    "$.components.schemas.WeeklyReviewed.required[]": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyReviewed.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyRisk": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyRisk.properties": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyRisk.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyRisk.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyRisk.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyRisk.properties.impact": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyRisk.properties.impact.format": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyRisk.properties.impact.pattern": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyRisk.properties.impact.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyRisk.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyRisk.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyRisk.properties.probability": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyRisk.properties.probability.format": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyRisk.properties.probability.pattern": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyRisk.properties.probability.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyRisk.properties.reviewDate": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyRisk.properties.reviewDate.format": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyRisk.properties.reviewDate.type": [
+      "array"
+    ],
+    "$.components.schemas.WeeklyRisk.properties.reviewDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyRisk.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyRisk.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyRisk.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyRisk.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyRisk.required": [
+      "array"
+    ],
+    "$.components.schemas.WeeklyRisk.required[]": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyRisk.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyRound": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyRound.properties": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyRound.properties.discipline": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyRound.properties.discipline.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyRound.properties.top": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyRound.properties.top.items": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyRound.properties.top.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyRound.properties.top.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyRound.required": [
+      "array"
+    ],
+    "$.components.schemas.WeeklyRound.required[]": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyRound.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyUpcoming": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyUpcoming.properties": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyUpcoming.properties.deliverables": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyUpcoming.properties.deliverables.items": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyUpcoming.properties.deliverables.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyUpcoming.properties.deliverables.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyUpcoming.properties.tasks": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyUpcoming.properties.tasks.items": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyUpcoming.properties.tasks.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyUpcoming.properties.tasks.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyUpcoming.required": [
+      "array"
+    ],
+    "$.components.schemas.WeeklyUpcoming.required[]": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyUpcoming.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyWindow": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyWindow.properties": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyWindow.properties.canMarkReviewed": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyWindow.properties.canMarkReviewed.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyWindow.properties.lastCoordinationReviewedAt": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyWindow.properties.lastCoordinationReviewedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyWindow.properties.lastCoordinationReviewedAt.type": [
+      "array"
+    ],
+    "$.components.schemas.WeeklyWindow.properties.lastCoordinationReviewedAt.type[]": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyWindow.properties.nextWeek": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyWindow.properties.nextWeek.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyWindow.properties.reviewedBy": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyWindow.properties.reviewedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.WeeklyWindow.properties.reviewedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyWindow.properties.since": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyWindow.properties.since.format": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyWindow.properties.since.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyWindow.properties.thisWeek": [
+      "object"
+    ],
+    "$.components.schemas.WeeklyWindow.properties.thisWeek.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyWindow.required": [
+      "array"
+    ],
+    "$.components.schemas.WeeklyWindow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.WeeklyWindow.type": [
       "string"
     ],
     "$.components.schemas.Widget": [
@@ -60851,6 +62654,9 @@
     "$.paths./api/v1/projects/{id}/coordination.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/projects/{id}/coordination.get.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/projects/{id}/coordination.get.responses.200.description": [
       "string"
     ],
@@ -60895,6 +62701,18 @@
     ],
     "$.paths./api/v1/projects/{id}/coordination/reviewed.post.responses.200": [
       "object"
+    ],
+    "$.paths./api/v1/projects/{id}/coordination/reviewed.post.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/coordination/reviewed.post.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/coordination/reviewed.post.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/coordination/reviewed.post.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/projects/{id}/coordination/reviewed.post.responses.200.description": [
       "string"
@@ -60949,6 +62767,9 @@
     ],
     "$.paths./api/v1/projects/{id}/dashboard.get.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/projects/{id}/dashboard.get.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/projects/{id}/dashboard.get.responses.200.description": [
       "string"
@@ -78484,6 +80305,7 @@
       "string"
     ],
     "$.blocked[].originalStartDate": [
+      "null",
       "string"
     ],
     "$.blocked[].predecessorCount": [
@@ -78529,6 +80351,7 @@
       "number"
     ],
     "$.blocked[].startDate": [
+      "null",
       "string"
     ],
     "$.blocked[].state": [
@@ -78651,8 +80474,218 @@
     "$.completed.decisions": [
       "array"
     ],
+    "$.completed.decisions[]": [
+      "object"
+    ],
+    "$.completed.decisions[].decisionDate": [
+      "string"
+    ],
+    "$.completed.decisions[].decisionText": [
+      "string"
+    ],
+    "$.completed.decisions[].id": [
+      "string"
+    ],
+    "$.completed.decisions[].key": [
+      "string"
+    ],
+    "$.completed.decisions[].subject": [
+      "string"
+    ],
     "$.completed.deliverables": [
       "array"
+    ],
+    "$.completed.deliverables[]": [
+      "object"
+    ],
+    "$.completed.deliverables[].createdAt": [
+      "string"
+    ],
+    "$.completed.deliverables[].deliverableTypeId": [
+      "string"
+    ],
+    "$.completed.deliverables[].disciplineColour": [
+      "string"
+    ],
+    "$.completed.deliverables[].disciplineName": [
+      "string"
+    ],
+    "$.completed.deliverables[].disciplineOrder": [
+      "number"
+    ],
+    "$.completed.deliverables[].dueDate": [
+      "string"
+    ],
+    "$.completed.deliverables[].id": [
+      "string"
+    ],
+    "$.completed.deliverables[].issuedDate": [
+      "null"
+    ],
+    "$.completed.deliverables[].issuedTo": [
+      "null"
+    ],
+    "$.completed.deliverables[].key": [
+      "string"
+    ],
+    "$.completed.deliverables[].lastActivityAt": [
+      "string"
+    ],
+    "$.completed.deliverables[].milestoneDate": [
+      "null"
+    ],
+    "$.completed.deliverables[].milestoneId": [
+      "null"
+    ],
+    "$.completed.deliverables[].milestoneKey": [
+      "null"
+    ],
+    "$.completed.deliverables[].milestoneName": [
+      "null"
+    ],
+    "$.completed.deliverables[].name": [
+      "string"
+    ],
+    "$.completed.deliverables[].originalDueDate": [
+      "string"
+    ],
+    "$.completed.deliverables[].originalStartDate": [
+      "null"
+    ],
+    "$.completed.deliverables[].ownerActive": [
+      "boolean"
+    ],
+    "$.completed.deliverables[].ownerId": [
+      "string"
+    ],
+    "$.completed.deliverables[].ownerName": [
+      "string"
+    ],
+    "$.completed.deliverables[].priority": [
+      "string"
+    ],
+    "$.completed.deliverables[].projectDisciplineId": [
+      "string"
+    ],
+    "$.completed.deliverables[].projectId": [
+      "string"
+    ],
+    "$.completed.deliverables[].requiredReviewPackageId": [
+      "null"
+    ],
+    "$.completed.deliverables[].requiresReview": [
+      "boolean"
+    ],
+    "$.completed.deliverables[].reviewerId": [
+      "null"
+    ],
+    "$.completed.deliverables[].reviewerName": [
+      "null"
+    ],
+    "$.completed.deliverables[].revision": [
+      "null"
+    ],
+    "$.completed.deliverables[].rowVersion": [
+      "number"
+    ],
+    "$.completed.deliverables[].startDate": [
+      "null"
+    ],
+    "$.completed.deliverables[].state": [
+      "object"
+    ],
+    "$.completed.deliverables[].state.atRiskReasons": [
+      "array"
+    ],
+    "$.completed.deliverables[].state.blockedBy": [
+      "array"
+    ],
+    "$.completed.deliverables[].state.blockingCount": [
+      "number"
+    ],
+    "$.completed.deliverables[].state.daysOverdue": [
+      "number"
+    ],
+    "$.completed.deliverables[].state.derivedPredecessorIds": [
+      "array"
+    ],
+    "$.completed.deliverables[].state.derivedSuccessorIds": [
+      "array"
+    ],
+    "$.completed.deliverables[].state.estimatedHoursTotal": [
+      "number"
+    ],
+    "$.completed.deliverables[].state.inconsistencyDetail": [
+      "array"
+    ],
+    "$.completed.deliverables[].state.isAtRisk": [
+      "boolean"
+    ],
+    "$.completed.deliverables[].state.isBlocked": [
+      "boolean"
+    ],
+    "$.completed.deliverables[].state.isDateInconsistent": [
+      "boolean"
+    ],
+    "$.completed.deliverables[].state.isDueSoon": [
+      "boolean"
+    ],
+    "$.completed.deliverables[].state.isInactiveOwner": [
+      "boolean"
+    ],
+    "$.completed.deliverables[].state.isOverdue": [
+      "boolean"
+    ],
+    "$.completed.deliverables[].state.isStale": [
+      "boolean"
+    ],
+    "$.completed.deliverables[].state.isUnassigned": [
+      "boolean"
+    ],
+    "$.completed.deliverables[].state.isWaiting": [
+      "boolean"
+    ],
+    "$.completed.deliverables[].state.issuedWithOpenWork": [
+      "boolean"
+    ],
+    "$.completed.deliverables[].state.milestoneCancelled": [
+      "boolean"
+    ],
+    "$.completed.deliverables[].state.progressPct": [
+      "null"
+    ],
+    "$.completed.deliverables[].state.remainingHours": [
+      "number"
+    ],
+    "$.completed.deliverables[].state.slipDays": [
+      "number"
+    ],
+    "$.completed.deliverables[].state.taskBlocked": [
+      "number"
+    ],
+    "$.completed.deliverables[].state.taskCancelled": [
+      "number"
+    ],
+    "$.completed.deliverables[].state.taskComplete": [
+      "number"
+    ],
+    "$.completed.deliverables[].state.taskOpen": [
+      "number"
+    ],
+    "$.completed.deliverables[].state.taskOverdue": [
+      "number"
+    ],
+    "$.completed.deliverables[].state.taskTotal": [
+      "number"
+    ],
+    "$.completed.deliverables[].status": [
+      "string"
+    ],
+    "$.completed.deliverables[].tasks": [
+      "null"
+    ],
+    "$.completed.deliverables[].typeName": [
+      "string"
     ],
     "$.completed.tasks": [
       "array"
@@ -78917,6 +80950,42 @@
     ],
     "$.decisions": [
       "array"
+    ],
+    "$.decisions[]": [
+      "object"
+    ],
+    "$.decisions[].blocking": [
+      "number"
+    ],
+    "$.decisions[].daysOverdue": [
+      "number"
+    ],
+    "$.decisions[].id": [
+      "string"
+    ],
+    "$.decisions[].impactLevel": [
+      "string"
+    ],
+    "$.decisions[].isOverdue": [
+      "boolean"
+    ],
+    "$.decisions[].key": [
+      "string"
+    ],
+    "$.decisions[].ownerName": [
+      "string"
+    ],
+    "$.decisions[].ownerUserId": [
+      "string"
+    ],
+    "$.decisions[].requiredByDate": [
+      "string"
+    ],
+    "$.decisions[].status": [
+      "string"
+    ],
+    "$.decisions[].subject": [
+      "string"
     ],
     "$.deliverables": [
       "array"
@@ -79516,6 +81585,264 @@
     "$.dueThisWeek": [
       "array"
     ],
+    "$.dueThisWeek[]": [
+      "object"
+    ],
+    "$.dueThisWeek[].assigneeActive": [
+      "boolean"
+    ],
+    "$.dueThisWeek[].assigneeId": [
+      "string"
+    ],
+    "$.dueThisWeek[].assigneeName": [
+      "string"
+    ],
+    "$.dueThisWeek[].can": [
+      "object"
+    ],
+    "$.dueThisWeek[].can.assign": [
+      "boolean"
+    ],
+    "$.dueThisWeek[].can.block": [
+      "boolean"
+    ],
+    "$.dueThisWeek[].can.changeDue": [
+      "boolean"
+    ],
+    "$.dueThisWeek[].can.edit": [
+      "boolean"
+    ],
+    "$.dueThisWeek[].collaboratorIds": [
+      "array"
+    ],
+    "$.dueThisWeek[].commentCount": [
+      "number"
+    ],
+    "$.dueThisWeek[].completedAt": [
+      "null"
+    ],
+    "$.dueThisWeek[].createdAt": [
+      "string"
+    ],
+    "$.dueThisWeek[].createdBy": [
+      "string"
+    ],
+    "$.dueThisWeek[].createdByName": [
+      "string"
+    ],
+    "$.dueThisWeek[].deliverableDueDate": [
+      "null"
+    ],
+    "$.dueThisWeek[].deliverableId": [
+      "null"
+    ],
+    "$.dueThisWeek[].deliverableKey": [
+      "null"
+    ],
+    "$.dueThisWeek[].deliverableName": [
+      "null"
+    ],
+    "$.dueThisWeek[].deliverableOrder": [
+      "null"
+    ],
+    "$.dueThisWeek[].deliverableStatus": [
+      "null"
+    ],
+    "$.dueThisWeek[].disciplineCode": [
+      "string"
+    ],
+    "$.dueThisWeek[].disciplineColour": [
+      "string"
+    ],
+    "$.dueThisWeek[].disciplineName": [
+      "string"
+    ],
+    "$.dueThisWeek[].disciplineOrder": [
+      "number"
+    ],
+    "$.dueThisWeek[].dueDate": [
+      "string"
+    ],
+    "$.dueThisWeek[].dueDateChangeCount": [
+      "number"
+    ],
+    "$.dueThisWeek[].effectiveMilestoneId": [
+      "null"
+    ],
+    "$.dueThisWeek[].estimatedHours": [
+      "null"
+    ],
+    "$.dueThisWeek[].id": [
+      "string"
+    ],
+    "$.dueThisWeek[].key": [
+      "string"
+    ],
+    "$.dueThisWeek[].lane": [
+      "string"
+    ],
+    "$.dueThisWeek[].lastActivityAt": [
+      "string"
+    ],
+    "$.dueThisWeek[].manualBlockReason": [
+      "null"
+    ],
+    "$.dueThisWeek[].manualBlockSetAt": [
+      "null"
+    ],
+    "$.dueThisWeek[].manualBlockType": [
+      "null"
+    ],
+    "$.dueThisWeek[].milestoneDate": [
+      "null"
+    ],
+    "$.dueThisWeek[].milestoneDerived": [
+      "boolean"
+    ],
+    "$.dueThisWeek[].milestoneId": [
+      "null"
+    ],
+    "$.dueThisWeek[].milestoneKey": [
+      "null"
+    ],
+    "$.dueThisWeek[].milestoneName": [
+      "null"
+    ],
+    "$.dueThisWeek[].name": [
+      "string"
+    ],
+    "$.dueThisWeek[].originalDueDate": [
+      "string"
+    ],
+    "$.dueThisWeek[].originalStartDate": [
+      "null"
+    ],
+    "$.dueThisWeek[].predecessorCount": [
+      "number"
+    ],
+    "$.dueThisWeek[].priority": [
+      "string"
+    ],
+    "$.dueThisWeek[].progressPct": [
+      "number"
+    ],
+    "$.dueThisWeek[].projectDisciplineId": [
+      "string"
+    ],
+    "$.dueThisWeek[].projectId": [
+      "string"
+    ],
+    "$.dueThisWeek[].projectName": [
+      "string"
+    ],
+    "$.dueThisWeek[].projectNumber": [
+      "string"
+    ],
+    "$.dueThisWeek[].projectStatus": [
+      "string"
+    ],
+    "$.dueThisWeek[].requiresReview": [
+      "boolean"
+    ],
+    "$.dueThisWeek[].reviewRound": [
+      "number"
+    ],
+    "$.dueThisWeek[].reviewerId": [
+      "null"
+    ],
+    "$.dueThisWeek[].reviewerName": [
+      "null"
+    ],
+    "$.dueThisWeek[].rowVersion": [
+      "number"
+    ],
+    "$.dueThisWeek[].sortOrder": [
+      "number"
+    ],
+    "$.dueThisWeek[].startDate": [
+      "null"
+    ],
+    "$.dueThisWeek[].state": [
+      "object"
+    ],
+    "$.dueThisWeek[].state.affectedMilestoneIds": [
+      "array"
+    ],
+    "$.dueThisWeek[].state.blockedBy": [
+      "array"
+    ],
+    "$.dueThisWeek[].state.blockedSince": [
+      "null"
+    ],
+    "$.dueThisWeek[].state.blockingCount": [
+      "number"
+    ],
+    "$.dueThisWeek[].state.blockingTaskIds": [
+      "array"
+    ],
+    "$.dueThisWeek[].state.daysBlocked": [
+      "number"
+    ],
+    "$.dueThisWeek[].state.daysOverdue": [
+      "number"
+    ],
+    "$.dueThisWeek[].state.evaluatedAt": [
+      "string"
+    ],
+    "$.dueThisWeek[].state.inconsistencyDetail": [
+      "array"
+    ],
+    "$.dueThisWeek[].state.isBlocked": [
+      "boolean"
+    ],
+    "$.dueThisWeek[].state.isBlocking": [
+      "boolean"
+    ],
+    "$.dueThisWeek[].state.isDateInconsistent": [
+      "boolean"
+    ],
+    "$.dueThisWeek[].state.isDueSoon": [
+      "boolean"
+    ],
+    "$.dueThisWeek[].state.isHeldPastDue": [
+      "boolean"
+    ],
+    "$.dueThisWeek[].state.isInactiveOwner": [
+      "boolean"
+    ],
+    "$.dueThisWeek[].state.isMissingDueDate": [
+      "boolean"
+    ],
+    "$.dueThisWeek[].state.isOverdue": [
+      "boolean"
+    ],
+    "$.dueThisWeek[].state.isReviewStalled": [
+      "boolean"
+    ],
+    "$.dueThisWeek[].state.isStale": [
+      "boolean"
+    ],
+    "$.dueThisWeek[].state.isUnassigned": [
+      "boolean"
+    ],
+    "$.dueThisWeek[].state.isWaiting": [
+      "boolean"
+    ],
+    "$.dueThisWeek[].state.notes": [
+      "array"
+    ],
+    "$.dueThisWeek[].state.staleDays": [
+      "number"
+    ],
+    "$.dueThisWeek[].status": [
+      "string"
+    ],
+    "$.dueThisWeek[].statusChangedAt": [
+      "string"
+    ],
+    "$.dueThisWeek[].successorCount": [
+      "number"
+    ],
     "$.headline": [
       "object"
     ],
@@ -79567,7 +81894,74 @@
       "null"
     ],
     "$.headline.nextMilestone": [
+      "null",
+      "object"
+    ],
+    "$.headline.nextMilestone.date": [
+      "string"
+    ],
+    "$.headline.nextMilestone.daysRemaining": [
+      "number"
+    ],
+    "$.headline.nextMilestone.deliverableIssued": [
+      "number"
+    ],
+    "$.headline.nextMilestone.deliverableTotal": [
+      "number"
+    ],
+    "$.headline.nextMilestone.id": [
+      "string"
+    ],
+    "$.headline.nextMilestone.key": [
+      "string"
+    ],
+    "$.headline.nextMilestone.milestoneType": [
+      "string"
+    ],
+    "$.headline.nextMilestone.name": [
+      "string"
+    ],
+    "$.headline.nextMilestone.originalDate": [
+      "string"
+    ],
+    "$.headline.nextMilestone.projectDisciplineId": [
       "null"
+    ],
+    "$.headline.nextMilestone.reasons": [
+      "array"
+    ],
+    "$.headline.nextMilestone.reasons[]": [
+      "object"
+    ],
+    "$.headline.nextMilestone.reasons[].colour": [
+      "string"
+    ],
+    "$.headline.nextMilestone.reasons[].rule": [
+      "string"
+    ],
+    "$.headline.nextMilestone.reasons[].text": [
+      "string"
+    ],
+    "$.headline.nextMilestone.reasons[].threshold": [
+      "number"
+    ],
+    "$.headline.nextMilestone.reasons[].values": [
+      "null"
+    ],
+    "$.headline.nextMilestone.status": [
+      "string"
+    ],
+    "$.headline.nextMilestone.taskBlocked": [
+      "number"
+    ],
+    "$.headline.nextMilestone.taskComplete": [
+      "number"
+    ],
+    "$.headline.nextMilestone.taskOverdue": [
+      "number"
+    ],
+    "$.headline.nextMilestone.taskTotal": [
+      "number"
     ],
     "$.headline.overdueTasks": [
       "object"
@@ -79584,8 +81978,458 @@
     "$.held.deliverables": [
       "array"
     ],
+    "$.held.deliverables[]": [
+      "object"
+    ],
+    "$.held.deliverables[].createdAt": [
+      "string"
+    ],
+    "$.held.deliverables[].deliverableTypeId": [
+      "string"
+    ],
+    "$.held.deliverables[].disciplineColour": [
+      "string"
+    ],
+    "$.held.deliverables[].disciplineName": [
+      "string"
+    ],
+    "$.held.deliverables[].disciplineOrder": [
+      "number"
+    ],
+    "$.held.deliverables[].dueDate": [
+      "null"
+    ],
+    "$.held.deliverables[].id": [
+      "string"
+    ],
+    "$.held.deliverables[].issuedDate": [
+      "null"
+    ],
+    "$.held.deliverables[].issuedTo": [
+      "null"
+    ],
+    "$.held.deliverables[].key": [
+      "string"
+    ],
+    "$.held.deliverables[].lastActivityAt": [
+      "string"
+    ],
+    "$.held.deliverables[].milestoneDate": [
+      "null"
+    ],
+    "$.held.deliverables[].milestoneId": [
+      "null"
+    ],
+    "$.held.deliverables[].milestoneKey": [
+      "null"
+    ],
+    "$.held.deliverables[].milestoneName": [
+      "null"
+    ],
+    "$.held.deliverables[].name": [
+      "string"
+    ],
+    "$.held.deliverables[].originalDueDate": [
+      "null"
+    ],
+    "$.held.deliverables[].originalStartDate": [
+      "null"
+    ],
+    "$.held.deliverables[].ownerActive": [
+      "boolean"
+    ],
+    "$.held.deliverables[].ownerId": [
+      "string"
+    ],
+    "$.held.deliverables[].ownerName": [
+      "string"
+    ],
+    "$.held.deliverables[].priority": [
+      "string"
+    ],
+    "$.held.deliverables[].projectDisciplineId": [
+      "string"
+    ],
+    "$.held.deliverables[].projectId": [
+      "string"
+    ],
+    "$.held.deliverables[].requiredReviewPackageId": [
+      "null"
+    ],
+    "$.held.deliverables[].requiresReview": [
+      "boolean"
+    ],
+    "$.held.deliverables[].reviewerId": [
+      "null"
+    ],
+    "$.held.deliverables[].reviewerName": [
+      "null"
+    ],
+    "$.held.deliverables[].revision": [
+      "null"
+    ],
+    "$.held.deliverables[].rowVersion": [
+      "number"
+    ],
+    "$.held.deliverables[].startDate": [
+      "null"
+    ],
+    "$.held.deliverables[].state": [
+      "object"
+    ],
+    "$.held.deliverables[].state.atRiskReasons": [
+      "array"
+    ],
+    "$.held.deliverables[].state.blockedBy": [
+      "array"
+    ],
+    "$.held.deliverables[].state.blockingCount": [
+      "number"
+    ],
+    "$.held.deliverables[].state.daysOverdue": [
+      "number"
+    ],
+    "$.held.deliverables[].state.derivedPredecessorIds": [
+      "array"
+    ],
+    "$.held.deliverables[].state.derivedSuccessorIds": [
+      "array"
+    ],
+    "$.held.deliverables[].state.estimatedHoursTotal": [
+      "number"
+    ],
+    "$.held.deliverables[].state.inconsistencyDetail": [
+      "array"
+    ],
+    "$.held.deliverables[].state.isAtRisk": [
+      "boolean"
+    ],
+    "$.held.deliverables[].state.isBlocked": [
+      "boolean"
+    ],
+    "$.held.deliverables[].state.isDateInconsistent": [
+      "boolean"
+    ],
+    "$.held.deliverables[].state.isDueSoon": [
+      "boolean"
+    ],
+    "$.held.deliverables[].state.isInactiveOwner": [
+      "boolean"
+    ],
+    "$.held.deliverables[].state.isOverdue": [
+      "boolean"
+    ],
+    "$.held.deliverables[].state.isStale": [
+      "boolean"
+    ],
+    "$.held.deliverables[].state.isUnassigned": [
+      "boolean"
+    ],
+    "$.held.deliverables[].state.isWaiting": [
+      "boolean"
+    ],
+    "$.held.deliverables[].state.issuedWithOpenWork": [
+      "boolean"
+    ],
+    "$.held.deliverables[].state.milestoneCancelled": [
+      "boolean"
+    ],
+    "$.held.deliverables[].state.progressPct": [
+      "null"
+    ],
+    "$.held.deliverables[].state.remainingHours": [
+      "number"
+    ],
+    "$.held.deliverables[].state.slipDays": [
+      "number"
+    ],
+    "$.held.deliverables[].state.taskBlocked": [
+      "number"
+    ],
+    "$.held.deliverables[].state.taskCancelled": [
+      "number"
+    ],
+    "$.held.deliverables[].state.taskComplete": [
+      "number"
+    ],
+    "$.held.deliverables[].state.taskOpen": [
+      "number"
+    ],
+    "$.held.deliverables[].state.taskOverdue": [
+      "number"
+    ],
+    "$.held.deliverables[].state.taskTotal": [
+      "number"
+    ],
+    "$.held.deliverables[].status": [
+      "string"
+    ],
+    "$.held.deliverables[].tasks": [
+      "null"
+    ],
+    "$.held.deliverables[].typeName": [
+      "string"
+    ],
     "$.held.tasks": [
       "array"
+    ],
+    "$.held.tasks[]": [
+      "object"
+    ],
+    "$.held.tasks[].assigneeActive": [
+      "boolean"
+    ],
+    "$.held.tasks[].assigneeId": [
+      "string"
+    ],
+    "$.held.tasks[].assigneeName": [
+      "string"
+    ],
+    "$.held.tasks[].can": [
+      "object"
+    ],
+    "$.held.tasks[].can.assign": [
+      "boolean"
+    ],
+    "$.held.tasks[].can.block": [
+      "boolean"
+    ],
+    "$.held.tasks[].can.changeDue": [
+      "boolean"
+    ],
+    "$.held.tasks[].can.edit": [
+      "boolean"
+    ],
+    "$.held.tasks[].collaboratorIds": [
+      "array"
+    ],
+    "$.held.tasks[].commentCount": [
+      "number"
+    ],
+    "$.held.tasks[].completedAt": [
+      "null"
+    ],
+    "$.held.tasks[].createdAt": [
+      "string"
+    ],
+    "$.held.tasks[].createdBy": [
+      "string"
+    ],
+    "$.held.tasks[].createdByName": [
+      "string"
+    ],
+    "$.held.tasks[].deliverableDueDate": [
+      "null"
+    ],
+    "$.held.tasks[].deliverableId": [
+      "null"
+    ],
+    "$.held.tasks[].deliverableKey": [
+      "null"
+    ],
+    "$.held.tasks[].deliverableName": [
+      "null"
+    ],
+    "$.held.tasks[].deliverableOrder": [
+      "null"
+    ],
+    "$.held.tasks[].deliverableStatus": [
+      "null"
+    ],
+    "$.held.tasks[].disciplineCode": [
+      "string"
+    ],
+    "$.held.tasks[].disciplineColour": [
+      "string"
+    ],
+    "$.held.tasks[].disciplineName": [
+      "string"
+    ],
+    "$.held.tasks[].disciplineOrder": [
+      "number"
+    ],
+    "$.held.tasks[].dueDate": [
+      "null"
+    ],
+    "$.held.tasks[].dueDateChangeCount": [
+      "number"
+    ],
+    "$.held.tasks[].effectiveMilestoneId": [
+      "null"
+    ],
+    "$.held.tasks[].estimatedHours": [
+      "null"
+    ],
+    "$.held.tasks[].id": [
+      "string"
+    ],
+    "$.held.tasks[].key": [
+      "string"
+    ],
+    "$.held.tasks[].lane": [
+      "string"
+    ],
+    "$.held.tasks[].lastActivityAt": [
+      "string"
+    ],
+    "$.held.tasks[].manualBlockReason": [
+      "null"
+    ],
+    "$.held.tasks[].manualBlockSetAt": [
+      "null"
+    ],
+    "$.held.tasks[].manualBlockType": [
+      "null"
+    ],
+    "$.held.tasks[].milestoneDate": [
+      "null"
+    ],
+    "$.held.tasks[].milestoneDerived": [
+      "boolean"
+    ],
+    "$.held.tasks[].milestoneId": [
+      "null"
+    ],
+    "$.held.tasks[].milestoneKey": [
+      "null"
+    ],
+    "$.held.tasks[].milestoneName": [
+      "null"
+    ],
+    "$.held.tasks[].name": [
+      "string"
+    ],
+    "$.held.tasks[].originalDueDate": [
+      "null"
+    ],
+    "$.held.tasks[].originalStartDate": [
+      "null"
+    ],
+    "$.held.tasks[].predecessorCount": [
+      "number"
+    ],
+    "$.held.tasks[].priority": [
+      "string"
+    ],
+    "$.held.tasks[].progressPct": [
+      "number"
+    ],
+    "$.held.tasks[].projectDisciplineId": [
+      "string"
+    ],
+    "$.held.tasks[].projectId": [
+      "string"
+    ],
+    "$.held.tasks[].projectName": [
+      "string"
+    ],
+    "$.held.tasks[].projectNumber": [
+      "string"
+    ],
+    "$.held.tasks[].projectStatus": [
+      "string"
+    ],
+    "$.held.tasks[].requiresReview": [
+      "boolean"
+    ],
+    "$.held.tasks[].reviewRound": [
+      "number"
+    ],
+    "$.held.tasks[].reviewerId": [
+      "null"
+    ],
+    "$.held.tasks[].reviewerName": [
+      "null"
+    ],
+    "$.held.tasks[].rowVersion": [
+      "number"
+    ],
+    "$.held.tasks[].sortOrder": [
+      "number"
+    ],
+    "$.held.tasks[].startDate": [
+      "null"
+    ],
+    "$.held.tasks[].state": [
+      "object"
+    ],
+    "$.held.tasks[].state.affectedMilestoneIds": [
+      "array"
+    ],
+    "$.held.tasks[].state.blockedBy": [
+      "array"
+    ],
+    "$.held.tasks[].state.blockedSince": [
+      "null"
+    ],
+    "$.held.tasks[].state.blockingCount": [
+      "number"
+    ],
+    "$.held.tasks[].state.blockingTaskIds": [
+      "array"
+    ],
+    "$.held.tasks[].state.daysBlocked": [
+      "number"
+    ],
+    "$.held.tasks[].state.daysOverdue": [
+      "number"
+    ],
+    "$.held.tasks[].state.evaluatedAt": [
+      "string"
+    ],
+    "$.held.tasks[].state.inconsistencyDetail": [
+      "array"
+    ],
+    "$.held.tasks[].state.isBlocked": [
+      "boolean"
+    ],
+    "$.held.tasks[].state.isBlocking": [
+      "boolean"
+    ],
+    "$.held.tasks[].state.isDateInconsistent": [
+      "boolean"
+    ],
+    "$.held.tasks[].state.isDueSoon": [
+      "boolean"
+    ],
+    "$.held.tasks[].state.isHeldPastDue": [
+      "boolean"
+    ],
+    "$.held.tasks[].state.isInactiveOwner": [
+      "boolean"
+    ],
+    "$.held.tasks[].state.isMissingDueDate": [
+      "boolean"
+    ],
+    "$.held.tasks[].state.isOverdue": [
+      "boolean"
+    ],
+    "$.held.tasks[].state.isReviewStalled": [
+      "boolean"
+    ],
+    "$.held.tasks[].state.isStale": [
+      "boolean"
+    ],
+    "$.held.tasks[].state.isUnassigned": [
+      "boolean"
+    ],
+    "$.held.tasks[].state.isWaiting": [
+      "boolean"
+    ],
+    "$.held.tasks[].state.notes": [
+      "array"
+    ],
+    "$.held.tasks[].state.staleDays": [
+      "number"
+    ],
+    "$.held.tasks[].status": [
+      "string"
+    ],
+    "$.held.tasks[].statusChangedAt": [
+      "string"
+    ],
+    "$.held.tasks[].successorCount": [
+      "number"
     ],
     "$.issues": [
       "array"
@@ -79606,7 +82450,8 @@
       "string"
     ],
     "$.issues[].targetResolutionDate": [
-      "null"
+      "null",
+      "string"
     ],
     "$.issues[].title": [
       "string"
@@ -79663,7 +82508,8 @@
       "string"
     ],
     "$.milestones[].reasons[].threshold": [
-      "null"
+      "null",
+      "number"
     ],
     "$.milestones[].reasons[].values": [
       "null"
@@ -80699,6 +83545,9 @@
       "null",
       "string"
     ],
+    "$.blocked.items[].backlog": [
+      "boolean"
+    ],
     "$.blocked.items[].can": [
       "object"
     ],
@@ -81536,7 +84385,8 @@
       "string"
     ],
     "$.milestones[].reasons[].threshold": [
-      "null"
+      "null",
+      "number"
     ],
     "$.milestones[].reasons[].values": [
       "null"

@@ -37,6 +37,7 @@
     "handoffs.fixture.cjs",
     "reviews.fixture.cjs",
     "my-work.fixture.cjs",
-    "views.fixture.cjs"
+    "views.fixture.cjs",
+    "dashboard.fixture.cjs"
   ]
 }

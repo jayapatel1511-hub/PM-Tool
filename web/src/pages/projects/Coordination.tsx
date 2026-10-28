@@ -12,7 +12,9 @@ import { Avatar, PeoplePicker } from '@/components/hub/people'
 import { Chip, HealthPill, Key, PriorityBadge, StatusPill } from '@/components/hub/pills'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { get, post, qs } from '@/lib/api'
+import type { components } from '@/gen/api'
+import { typedRequest } from '@/lib/api'
+import { invalidateChange } from '@/lib/keys'
 import { fmtDate, fmtTime, relative, today } from '@/lib/format'
 import { t, tv , runtimeText } from '@/lib/i18n'
 import { cn, type Accent } from '@/lib/utils'
@@ -23,18 +25,12 @@ import { useCurrentProject } from './ProjectLayout'
 import { CreateTask, StatusMenu, TaskIndicators, useProjectLists, useTaskActions, useTaskHints, type Blocker, type TaskRow } from './Tasks'
 import { DisciplineCoordinationView } from './DisciplineCoordinationView'
 
-interface Milestone { id: string; key: string; name: string; date: string; daysRemaining: number; status?: string; deliverableTotal: number; deliverableIssued: number; taskTotal: number; taskComplete: number }
-interface Decision { id: string; key: string; subject: string; status: string; requiredByDate: string; impactLevel: string; ownerName?: string; isOverdue: boolean; daysOverdue: number; blocking: number }
-interface Discipline { discipline: { disciplineId: string; name: string; leadId?: string; health: string; open: number; overdue: number; blocked: number; deliverablesDue14: number }; top: TaskRow[] }
-interface Count { value: number; link: string }
-interface Coord {
-  window: { thisWeek: { from: string; to: string }; nextWeek: { from: string; to: string }; since: string; lastCoordinationReviewedAt?: string; reviewedBy?: string; canMarkReviewed: boolean }
-  headline: { computedHealth?: string; overdueTasks: Count; blockedTasks: Count; decisionsOverdue: number; deliverablesAtRisk: Count; nextMilestone?: Milestone }
-  milestones: Milestone[]; deliverables: DeliverableRow[]; decisions: Decision[]; blocked: TaskRow[]; overdue: TaskRow[]; dueThisWeek: TaskRow[]; disciplines: Discipline[]
-  issues: { id: string; key: string; title: string; status: string; severity: string; targetResolutionDate?: string }[]
-  risks: { id: string; key: string; title: string; status: string; probability: number; impact: number }[]
-  waiting: ActionRow[]
-  completed: { tasks: TaskRow[]; deliverables: DeliverableRow[]; decisions: { id: string; key: string; subject: string; decisionDate?: string }[] }
+type Weekly = components['schemas']['WeeklyCoordination']
+/** The agenda's own shapes come from the contract; the task, deliverable and action rows keep the page types of the files that own them until those conversions land. */
+interface Coord extends Omit<Weekly, 'deliverables' | 'blocked' | 'overdue' | 'dueThisWeek' | 'disciplines' | 'waiting' | 'completed' | 'upcoming' | 'held'> {
+  deliverables: DeliverableRow[]; blocked: TaskRow[]; overdue: TaskRow[]; dueThisWeek: TaskRow[]; waiting: ActionRow[]
+  disciplines: { discipline: components['schemas']['DashboardDiscipline']; top: TaskRow[] }[]
+  completed: { tasks: TaskRow[]; deliverables: DeliverableRow[]; decisions: Weekly['completed']['decisions'] }
   upcoming: { tasks: TaskRow[]; deliverables: DeliverableRow[] }
   held: { tasks: TaskRow[]; deliverables: DeliverableRow[] }
 }
@@ -80,7 +76,7 @@ export function CoordinationTab() {
   const disciplineId = sp.get('discipline') ?? undefined
   const meeting = sp.get('meeting') === '1'
   const set = (k: string, v?: string) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
-  const q = useQuery({ queryKey: ['p', p.id, 'coordination', disciplineId], queryFn: () => get<Coord>(`projects/${p.id}/coordination${qs({ disciplineId })}`) })
+  const q = useQuery({ queryKey: ['p', p.id, 'coordination', disciplineId], queryFn: async () => (await typedRequest('get', '/api/v1/projects/{id}/coordination', { params: { id: p.id }, query: { disciplineId } })) as unknown as Coord })
   const [log, setLog] = useState<{ id: string; key: string; what: string; at: string }[]>([])
   const [hideDiscussed, setHideDiscussed] = useState(false)
   const [printAll, setPrintAll] = useState(false)
@@ -90,7 +86,7 @@ export function CoordinationTab() {
   const [recording, setRecording] = useState<{ id: string; key: string } | null>(null)
   const [capturing, setCapturing] = useState<{ taskId?: string; decisionId?: string; label?: string; ownerId?: string; ownerName?: string;
     links?: { targetType: string; targetId: string }[]; linkedActionIds?: string[] } | null>(null)
-  const reload = () => { q.refetch(); qc.invalidateQueries({ queryKey: ['p', p.id] }) }
+  const reload = () => { q.refetch(); invalidateChange(qc, 'Task', p.id) }
   const actions = useTaskActions(reload, (id, key, what) => setLog((l) => [...l, { id, key, what, at: new Date().toISOString() }]))
   const touched = useMemo(() => new Set(log.map((x) => x.id)), [log])
   const root = useRef<HTMLDivElement>(null)
@@ -122,7 +118,7 @@ export function CoordinationTab() {
   const visible = (rows: TaskRow[]) => (hideDiscussed ? rows.filter((r) => !touched.has(r.id)) : rows)
 
   const canCapture = c.window.canMarkReviewed // MTG-04: the PM and leads capture actions in the meeting
-  const markReviewed = async () => { await post(`projects/${p.id}/coordination/reviewed`); toast.success(t('wc.reviewedToast')); reload() }
+  const markReviewed = async () => { await typedRequest('post', '/api/v1/projects/{id}/coordination/reviewed', { params: { id: p.id } }); toast.success(t('wc.reviewedToast')); reload() }
   const copySummary = async () => {
     await navigator.clipboard.writeText(summaryText(p.projectNumber, p.name, c))
     toast.success(t('wc.copied'))

@@ -6477,6 +6477,529 @@
         ],
         "type": "object"
       },
+      "DashboardCount": {
+        "properties": {
+          "link": {
+            "type": "string"
+          },
+          "value": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "value",
+          "link"
+        ],
+        "type": "object"
+      },
+      "DashboardDecisions": {
+        "properties": {
+          "overdue": {
+            "$ref": "#/components/schemas/DashboardCount"
+          },
+          "pending": {
+            "$ref": "#/components/schemas/DashboardCount"
+          }
+        },
+        "required": [
+          "pending",
+          "overdue"
+        ],
+        "type": "object"
+      },
+      "DashboardDeliverables": {
+        "properties": {
+          "atRisk": {
+            "$ref": "#/components/schemas/DashboardCount"
+          },
+          "issued": {
+            "$ref": "#/components/schemas/DashboardCount"
+          },
+          "total": {
+            "$ref": "#/components/schemas/DashboardCount"
+          },
+          "upcoming": {
+            "$ref": "#/components/schemas/DashboardCount"
+          }
+        },
+        "required": [
+          "upcoming",
+          "atRisk",
+          "issued",
+          "total"
+        ],
+        "type": "object"
+      },
+      "DashboardDiscipline": {
+        "properties": {
+          "blocked": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "deliverablesDue14": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "disciplineId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "health": {
+            "type": "string"
+          },
+          "leadId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "nextDueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "nextDueId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "nextDueKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "nextDueName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "nextDueType": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "open": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "overdue": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "reasons": {
+            "items": {
+              "$ref": "#/components/schemas/DisciplineReason"
+            },
+            "type": "array"
+          },
+          "sortOrder": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "waiting": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "open",
+          "health",
+          "leadId",
+          "blocked",
+          "overdue",
+          "reasons",
+          "waiting",
+          "nextDueId",
+          "sortOrder",
+          "nextDueKey",
+          "nextDueDate",
+          "nextDueName",
+          "nextDueType",
+          "disciplineId",
+          "deliverablesDue14"
+        ],
+        "type": "object"
+      },
+      "DashboardIssues": {
+        "properties": {
+          "high": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "open": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "open",
+          "high"
+        ],
+        "type": "object"
+      },
+      "DashboardMilestoneRow": {
+        "properties": {
+          "date": {
+            "format": "date",
+            "type": "string"
+          },
+          "daysRemaining": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "deliverableIssued": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "deliverableTotal": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "milestoneType": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "originalDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectDisciplineId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "reasons": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/JsonElement"
+              }
+            ]
+          },
+          "status": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "taskBlocked": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "taskComplete": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "taskOverdue": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "taskTotal": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "milestoneType",
+          "date",
+          "originalDate",
+          "projectDisciplineId",
+          "daysRemaining",
+          "status",
+          "deliverableTotal",
+          "deliverableIssued",
+          "taskTotal",
+          "taskComplete",
+          "taskOverdue",
+          "taskBlocked",
+          "reasons"
+        ],
+        "type": "object"
+      },
+      "DashboardRegisters": {
+        "properties": {
+          "issuesHigh": {
+            "$ref": "#/components/schemas/DashboardCount"
+          },
+          "issuesOpen": {
+            "$ref": "#/components/schemas/DashboardCount"
+          },
+          "risksHigh": {
+            "$ref": "#/components/schemas/DashboardCount"
+          }
+        },
+        "required": [
+          "issuesOpen",
+          "issuesHigh",
+          "risksHigh"
+        ],
+        "type": "object"
+      },
+      "DashboardRisks": {
+        "properties": {
+          "high": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "high"
+        ],
+        "type": "object"
+      },
+      "DashboardState": {
+        "properties": {
+          "evaluatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "evaluatedAt"
+        ],
+        "type": "object"
+      },
+      "DashboardStatusSegments": {
+        "properties": {
+          "inProgress": {
+            "$ref": "#/components/schemas/DashboardCount"
+          },
+          "issued": {
+            "$ref": "#/components/schemas/DashboardCount"
+          },
+          "notStarted": {
+            "$ref": "#/components/schemas/DashboardCount"
+          },
+          "onHold": {
+            "$ref": "#/components/schemas/DashboardCount"
+          }
+        },
+        "required": [
+          "notStarted",
+          "inProgress",
+          "issued",
+          "onHold"
+        ],
+        "type": "object"
+      },
+      "DashboardTaskList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TaskQueriesRow"
+            },
+            "type": "array"
+          },
+          "link": {
+            "type": "string"
+          },
+          "total": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "link"
+        ],
+        "type": "object"
+      },
+      "DashboardTasks": {
+        "properties": {
+          "backlog": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/DashboardCount"
+              }
+            ]
+          },
+          "blocked": {
+            "$ref": "#/components/schemas/DashboardCount"
+          },
+          "complete": {
+            "$ref": "#/components/schemas/DashboardCount"
+          },
+          "inProgress": {
+            "$ref": "#/components/schemas/DashboardCount"
+          },
+          "overdue": {
+            "$ref": "#/components/schemas/DashboardCount"
+          },
+          "review": {
+            "$ref": "#/components/schemas/DashboardCount"
+          },
+          "total": {
+            "$ref": "#/components/schemas/DashboardCount"
+          },
+          "unassigned": {
+            "$ref": "#/components/schemas/DashboardCount"
+          },
+          "waiting": {
+            "$ref": "#/components/schemas/DashboardCount"
+          }
+        },
+        "required": [
+          "total",
+          "complete",
+          "inProgress",
+          "review",
+          "overdue",
+          "blocked",
+          "waiting",
+          "unassigned"
+        ],
+        "type": "object"
+      },
+      "DashboardView": {
+        "properties": {
+          "activity": {
+            "items": {
+              "$ref": "#/components/schemas/ActivityEntry"
+            },
+            "type": "array"
+          },
+          "blocked": {
+            "$ref": "#/components/schemas/DashboardTaskList"
+          },
+          "decisions": {
+            "$ref": "#/components/schemas/DashboardDecisions"
+          },
+          "deliverables": {
+            "$ref": "#/components/schemas/DashboardDeliverables"
+          },
+          "disciplineBacklog": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/DashboardCount"
+            },
+            "type": [
+              "null",
+              "object"
+            ]
+          },
+          "disciplineDue14": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/DashboardCount"
+            },
+            "type": "object"
+          },
+          "disciplineStatus": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/DashboardStatusSegments"
+            },
+            "type": [
+              "null",
+              "object"
+            ]
+          },
+          "disciplines": {
+            "items": {
+              "$ref": "#/components/schemas/DashboardDiscipline"
+            },
+            "type": "array"
+          },
+          "dueThisWeek": {
+            "$ref": "#/components/schemas/DashboardTaskList"
+          },
+          "issues": {
+            "$ref": "#/components/schemas/DashboardIssues"
+          },
+          "milestones": {
+            "items": {
+              "$ref": "#/components/schemas/DashboardMilestoneRow"
+            },
+            "type": "array"
+          },
+          "registers": {
+            "$ref": "#/components/schemas/DashboardRegisters"
+          },
+          "risks": {
+            "$ref": "#/components/schemas/DashboardRisks"
+          },
+          "state": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/DashboardState"
+              }
+            ]
+          },
+          "tasks": {
+            "$ref": "#/components/schemas/DashboardTasks"
+          }
+        },
+        "required": [
+          "milestones",
+          "tasks",
+          "deliverables",
+          "decisions",
+          "issues",
+          "risks",
+          "registers",
+          "disciplines",
+          "disciplineDue14",
+          "dueThisWeek",
+          "blocked",
+          "activity",
+          "state"
+        ],
+        "type": "object"
+      },
       "DateBound": {
         "properties": {
           "date": {
@@ -8882,6 +9405,40 @@
         "required": [
           "disciplineId",
           "leadUserId"
+        ],
+        "type": "object"
+      },
+      "DisciplineReason": {
+        "properties": {
+          "colour": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rule": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "text": {
+            "type": "string"
+          },
+          "threshold": {},
+          "values": {
+            "type": [
+              "null",
+              "object"
+            ]
+          }
+        },
+        "required": [
+          "rule",
+          "text",
+          "colour",
+          "values",
+          "threshold"
         ],
         "type": "object"
       },
@@ -23731,6 +24288,23 @@
         ],
         "type": "object"
       },
+      "WeekSpan": {
+        "properties": {
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "from",
+          "to"
+        ],
+        "type": "object"
+      },
       "WeeklyCommitmentsMoveBody": {
         "properties": {
           "evidenceUrl": {
@@ -23813,6 +24387,341 @@
         ],
         "type": "object"
       },
+      "WeeklyCompleted": {
+        "properties": {
+          "decisions": {
+            "items": {
+              "$ref": "#/components/schemas/WeeklyDecided"
+            },
+            "type": "array"
+          },
+          "deliverables": {
+            "items": {
+              "$ref": "#/components/schemas/DeliverableRow"
+            },
+            "type": "array"
+          },
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/TaskQueriesRow"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "tasks",
+          "deliverables",
+          "decisions"
+        ],
+        "type": "object"
+      },
+      "WeeklyCoordination": {
+        "properties": {
+          "blocked": {
+            "items": {
+              "$ref": "#/components/schemas/TaskQueriesRow"
+            },
+            "type": "array"
+          },
+          "completed": {
+            "$ref": "#/components/schemas/WeeklyCompleted"
+          },
+          "decisions": {
+            "items": {
+              "$ref": "#/components/schemas/WeeklyDecision"
+            },
+            "type": "array"
+          },
+          "deliverables": {
+            "items": {
+              "$ref": "#/components/schemas/DeliverableRow"
+            },
+            "type": "array"
+          },
+          "disciplines": {
+            "items": {
+              "$ref": "#/components/schemas/WeeklyRound"
+            },
+            "type": "array"
+          },
+          "dueThisWeek": {
+            "items": {
+              "$ref": "#/components/schemas/TaskQueriesRow"
+            },
+            "type": "array"
+          },
+          "headline": {
+            "$ref": "#/components/schemas/WeeklyHeadline"
+          },
+          "held": {
+            "$ref": "#/components/schemas/WeeklyHeld"
+          },
+          "issues": {
+            "items": {
+              "$ref": "#/components/schemas/WeeklyIssue"
+            },
+            "type": "array"
+          },
+          "milestones": {
+            "items": {
+              "$ref": "#/components/schemas/DashboardMilestoneRow"
+            },
+            "type": "array"
+          },
+          "overdue": {
+            "items": {
+              "$ref": "#/components/schemas/TaskQueriesRow"
+            },
+            "type": "array"
+          },
+          "risks": {
+            "items": {
+              "$ref": "#/components/schemas/WeeklyRisk"
+            },
+            "type": "array"
+          },
+          "upcoming": {
+            "$ref": "#/components/schemas/WeeklyUpcoming"
+          },
+          "waiting": {
+            "items": {
+              "$ref": "#/components/schemas/MeetingActionRow"
+            },
+            "type": "array"
+          },
+          "window": {
+            "$ref": "#/components/schemas/WeeklyWindow"
+          }
+        },
+        "required": [
+          "window",
+          "headline",
+          "milestones",
+          "deliverables",
+          "decisions",
+          "blocked",
+          "overdue",
+          "dueThisWeek",
+          "disciplines",
+          "issues",
+          "risks",
+          "waiting",
+          "completed",
+          "upcoming",
+          "held"
+        ],
+        "type": "object"
+      },
+      "WeeklyDecided": {
+        "properties": {
+          "decisionDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "decisionText": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "subject",
+          "decisionText",
+          "decisionDate"
+        ],
+        "type": "object"
+      },
+      "WeeklyDecision": {
+        "properties": {
+          "blocking": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "daysOverdue": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "impactLevel": {
+            "type": "string"
+          },
+          "isOverdue": {
+            "type": "boolean"
+          },
+          "key": {
+            "type": "string"
+          },
+          "ownerName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "ownerUserId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "requiredByDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "subject",
+          "status",
+          "requiredByDate",
+          "impactLevel",
+          "ownerUserId",
+          "ownerName",
+          "isOverdue",
+          "daysOverdue",
+          "blocking"
+        ],
+        "type": "object"
+      },
+      "WeeklyHeadline": {
+        "properties": {
+          "blockedTasks": {
+            "$ref": "#/components/schemas/DashboardCount"
+          },
+          "computedHealth": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "decisionsOverdue": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "deliverablesAtRisk": {
+            "$ref": "#/components/schemas/DashboardCount"
+          },
+          "healthReasons": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/JsonElement"
+              }
+            ]
+          },
+          "nextMilestone": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/DashboardMilestoneRow"
+              }
+            ]
+          },
+          "overdueTasks": {
+            "$ref": "#/components/schemas/DashboardCount"
+          }
+        },
+        "required": [
+          "computedHealth",
+          "healthReasons",
+          "overdueTasks",
+          "blockedTasks",
+          "decisionsOverdue",
+          "deliverablesAtRisk",
+          "nextMilestone"
+        ],
+        "type": "object"
+      },
+      "WeeklyHeld": {
+        "properties": {
+          "deliverables": {
+            "items": {
+              "$ref": "#/components/schemas/DeliverableRow"
+            },
+            "type": "array"
+          },
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/TaskQueriesRow"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "tasks",
+          "deliverables"
+        ],
+        "type": "object"
+      },
+      "WeeklyIssue": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "targetResolutionDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "title",
+          "status",
+          "severity",
+          "targetResolutionDate"
+        ],
+        "type": "object"
+      },
       "WeeklyPlanningBulkBody": {
         "properties": {
           "entries": {
@@ -23889,6 +24798,146 @@
           "confidence",
           "visibility",
           "warnings"
+        ],
+        "type": "object"
+      },
+      "WeeklyReviewed": {
+        "properties": {
+          "lastCoordinationReviewedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "lastCoordinationReviewedAt",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
+      "WeeklyRisk": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "impact": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "key": {
+            "type": "string"
+          },
+          "probability": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "reviewDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "title",
+          "status",
+          "probability",
+          "impact",
+          "reviewDate"
+        ],
+        "type": "object"
+      },
+      "WeeklyRound": {
+        "properties": {
+          "discipline": {
+            "$ref": "#/components/schemas/DashboardDiscipline"
+          },
+          "top": {
+            "items": {
+              "$ref": "#/components/schemas/TaskQueriesRow"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "discipline",
+          "top"
+        ],
+        "type": "object"
+      },
+      "WeeklyUpcoming": {
+        "properties": {
+          "deliverables": {
+            "items": {
+              "$ref": "#/components/schemas/DeliverableRow"
+            },
+            "type": "array"
+          },
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/TaskQueriesRow"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "tasks",
+          "deliverables"
+        ],
+        "type": "object"
+      },
+      "WeeklyWindow": {
+        "properties": {
+          "canMarkReviewed": {
+            "type": "boolean"
+          },
+          "lastCoordinationReviewedAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "nextWeek": {
+            "$ref": "#/components/schemas/WeekSpan"
+          },
+          "reviewedBy": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "since": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "thisWeek": {
+            "$ref": "#/components/schemas/WeekSpan"
+          }
+        },
+        "required": [
+          "thisWeek",
+          "nextWeek",
+          "since",
+          "lastCoordinationReviewedAt",
+          "reviewedBy",
+          "canMarkReviewed"
         ],
         "type": "object"
       },
@@ -32070,7 +33119,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/WeeklyCoordination"
+                }
               }
             },
             "description": "OK"
@@ -32096,6 +33147,13 @@
         ],
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WeeklyReviewed"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -32136,7 +33194,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardView"
+                }
               }
             },
             "description": "OK"

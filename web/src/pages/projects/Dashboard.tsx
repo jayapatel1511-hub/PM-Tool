@@ -15,7 +15,8 @@ import { Chip, HealthPill, Key, StatusPill } from '@/components/hub/pills'
 import { Why } from '@/components/hub/why'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { get, qs } from '@/lib/api'
+import type { components } from '@/gen/api'
+import { typedRequest } from '@/lib/api'
 import { useOffer } from '@/lib/auth'
 import { fmtDate, fmtTime, relative } from '@/lib/format'
 import { t , runtimeText } from '@/lib/i18n'
@@ -24,21 +25,10 @@ import { MilestoneStrip, type MilestoneRow } from './Milestones'
 import { useCurrentProject } from './ProjectLayout'
 import { CreateTask, TaskIndicators, useProjectLists, type TaskRow } from './Tasks'
 
-interface Count { value: number; link: string }
-interface Dash {
+type Count = components['schemas']['DashboardCount']
+/** The dashboard's own shapes come from the contract; the milestone, task and activity rows keep the page types of the files that own them until those conversions land. */
+interface Dash extends Omit<components['schemas']['DashboardView'], 'milestones' | 'dueThisWeek' | 'blocked' | 'activity'> {
   milestones: (Omit<MilestoneRow, 'isComplete' | 'isCancelled'> & { reasons?: unknown })[]
-  /** `backlog` only while flag.backlog is on (FR-BKL-02). */
-  tasks: Record<'total' | 'complete' | 'inProgress' | 'review' | 'overdue' | 'blocked' | 'waiting' | 'unassigned', Count> & { backlog?: Count }
-  deliverables: Record<'upcoming' | 'atRisk' | 'issued' | 'total', Count>
-  decisions: Record<'pending' | 'overdue', Count>
-  issues: { open: number; high: number }; risks: { high: number }
-  registers: Record<'issuesOpen' | 'issuesHigh' | 'risksHigh', Count>
-  disciplineDue14: Record<string, Count>
-  disciplineStatus?: Record<string, Record<'notStarted' | 'inProgress' | 'issued' | 'onHold', Count>>
-  /** Only while flag.backlog is on (FR-BKL-07). */
-  disciplineBacklog?: Record<string, Count>
-  disciplines: { disciplineId: string; name: string; leadId?: string; health: string; reasons: { text: string }[]; open: number; overdue: number; blocked: number; waiting: number
-    deliverablesDue14: number; nextDueKey?: string; nextDueName?: string; nextDueDate?: string; nextDueType?: string; nextDueId?: string }[]
   dueThisWeek: { items: TaskRow[]; total: number; link: string }
   blocked: { items: TaskRow[]; total: number; link: string }
   activity: ActivityRow[]
@@ -56,9 +46,9 @@ export function DashboardTab() {
   const openPanel = useItemPanel()
   const lists = useProjectLists(p.id)
   const disciplineId = sp.get('discipline') ?? undefined
-  const q = useQuery({ queryKey: ['p', p.id, 'dashboard', disciplineId, important], queryFn: () => get<Dash>(`projects/${p.id}/dashboard${qs({ disciplineId, importantOnly: important })}`) })
+  const q = useQuery({ queryKey: ['p', p.id, 'dashboard', disciplineId, important], queryFn: async () => (await typedRequest('get', '/api/v1/projects/{id}/dashboard', { params: { id: p.id }, query: { disciplineId, importantOnly: important } })) as unknown as Dash })
   const base = `/projects/${p.projectNumber}`
-  const lead = (id?: string) => p.disciplines.find((x) => x.leadUserId === id)?.leadName
+  const lead = (id?: string | null) => p.disciplines.find((x) => x.leadUserId === id)?.leadName
   const snooze = useOffer()(p.permissions.snooze, p.status) // FR-FIG-08 decision 2
   return (
     <Page title={t('ptab.dashboard')} actions={<>
@@ -114,7 +104,7 @@ export function DashboardTab() {
                             {q.data.disciplineBacklog && <td className={cn(tdCls, 'text-right tabular-nums')}>{backlog && <Link className="hover:underline" to={`${base}/tasks?${backlog.link}`}>{backlog.value}</Link>}</td>}
                             <td className={cn(tdCls, 'text-right tabular-nums')}>{due14
                               ? <Link className="hover:underline" to={`${base}/deliverables?${due14.link}`}>{due14.value}</Link> : d.deliverablesDue14}</td>
-                            <td className={cn(tdCls, 'whitespace-nowrap')} title={d.nextDueName}>{d.nextDueKey ? <><Key>{d.nextDueKey}</Key> <span className="tabular-nums">{fmtDate(d.nextDueDate)}</span></> : <Missing />}</td>
+                            <td className={cn(tdCls, 'whitespace-nowrap')} title={d.nextDueName ?? undefined}>{d.nextDueKey ? <><Key>{d.nextDueKey}</Key> <span className="tabular-nums">{fmtDate(d.nextDueDate)}</span></> : <Missing />}</td>
                           </tr>
                         )
                       })}

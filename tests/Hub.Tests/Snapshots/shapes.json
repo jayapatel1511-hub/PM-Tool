@@ -13009,6 +13009,45 @@
     "$.components.schemas.BulkLinkBody.type": [
       "string"
     ],
+    "$.components.schemas.BulkLinkResult": [
+      "object"
+    ],
+    "$.components.schemas.BulkLinkResult.properties": [
+      "object"
+    ],
+    "$.components.schemas.BulkLinkResult.properties.linked": [
+      "object"
+    ],
+    "$.components.schemas.BulkLinkResult.properties.linked.items": [
+      "object"
+    ],
+    "$.components.schemas.BulkLinkResult.properties.linked.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.BulkLinkResult.properties.linked.type": [
+      "string"
+    ],
+    "$.components.schemas.BulkLinkResult.properties.skipped": [
+      "object"
+    ],
+    "$.components.schemas.BulkLinkResult.properties.skipped.items": [
+      "object"
+    ],
+    "$.components.schemas.BulkLinkResult.properties.skipped.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.BulkLinkResult.properties.skipped.type": [
+      "string"
+    ],
+    "$.components.schemas.BulkLinkResult.required": [
+      "array"
+    ],
+    "$.components.schemas.BulkLinkResult.required[]": [
+      "string"
+    ],
+    "$.components.schemas.BulkLinkResult.type": [
+      "string"
+    ],
     "$.components.schemas.CalendarFeedVersionBody": [
       "object"
     ],
@@ -15803,6 +15842,120 @@
       "string"
     ],
     "$.components.schemas.DecisionLinkSummary.type": [
+      "string"
+    ],
+    "$.components.schemas.DecisionLogEntry": [
+      "object"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties": [
+      "object"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties.currentStatus": [
+      "object"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties.currentStatus.type": [
+      "array"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties.currentStatus.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties.decisionDate": [
+      "object"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties.decisionDate.type": [
+      "array"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties.decisionDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties.decisionId": [
+      "object"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties.decisionId.format": [
+      "string"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties.decisionId.type": [
+      "array"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties.decisionId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties.itemKey": [
+      "object"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties.itemKey.type": [
+      "array"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties.itemKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties.kind": [
+      "object"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties.kind.type": [
+      "string"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties.newRequiredBy": [
+      "object"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties.newRequiredBy.type": [
+      "array"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties.newRequiredBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties.occurredAt": [
+      "object"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties.occurredAt.format": [
+      "string"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties.occurredAt.type": [
+      "string"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties.owner": [
+      "object"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties.owner.type": [
+      "array"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties.owner.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties.recordedBy": [
+      "object"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties.recordedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties.recordedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties.subject": [
+      "object"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties.subject.type": [
+      "array"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties.subject.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties.text": [
+      "object"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties.text.type": [
+      "array"
+    ],
+    "$.components.schemas.DecisionLogEntry.properties.text.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DecisionLogEntry.required": [
+      "array"
+    ],
+    "$.components.schemas.DecisionLogEntry.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DecisionLogEntry.type": [
       "string"
     ],
     "$.components.schemas.DecisionMutation": [
@@ -21092,6 +21245,36 @@
       "string"
     ],
     "$.components.schemas.LinkRow.type": [
+      "string"
+    ],
+    "$.components.schemas.LinkedItem": [
+      "object"
+    ],
+    "$.components.schemas.LinkedItem.properties": [
+      "object"
+    ],
+    "$.components.schemas.LinkedItem.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.LinkedItem.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.LinkedItem.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.LinkedItem.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.LinkedItem.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.LinkedItem.required": [
+      "array"
+    ],
+    "$.components.schemas.LinkedItem.required[]": [
+      "string"
+    ],
+    "$.components.schemas.LinkedItem.type": [
       "string"
     ],
     "$.components.schemas.LinkedRecord": [
@@ -28529,6 +28712,45 @@
       "string"
     ],
     "$.components.schemas.Selection.type": [
+      "string"
+    ],
+    "$.components.schemas.SkippedItem": [
+      "object"
+    ],
+    "$.components.schemas.SkippedItem.properties": [
+      "object"
+    ],
+    "$.components.schemas.SkippedItem.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.SkippedItem.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.SkippedItem.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.SkippedItem.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.SkippedItem.properties.key.type": [
+      "array"
+    ],
+    "$.components.schemas.SkippedItem.properties.key.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SkippedItem.properties.reason": [
+      "object"
+    ],
+    "$.components.schemas.SkippedItem.properties.reason.type": [
+      "string"
+    ],
+    "$.components.schemas.SkippedItem.required": [
+      "array"
+    ],
+    "$.components.schemas.SkippedItem.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SkippedItem.type": [
       "string"
     ],
     "$.components.schemas.SnapshotBody": [
@@ -38083,6 +38305,9 @@
     "$.paths./api/v1/decisions/{id}/links/bulk.post.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/decisions/{id}/links/bulk.post.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/decisions/{id}/links/bulk.post.responses.200.description": [
       "string"
     ],
@@ -44928,6 +45153,15 @@
     ],
     "$.paths./api/v1/projects/{id}/decision-log.get.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/projects/{id}/decision-log.get.responses.200.content.application/json.schema.items": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/decision-log.get.responses.200.content.application/json.schema.items.$ref": [
+      "string"
+    ],
+    "$.paths./api/v1/projects/{id}/decision-log.get.responses.200.content.application/json.schema.type": [
+      "string"
     ],
     "$.paths./api/v1/projects/{id}/decision-log.get.responses.200.description": [
       "string"

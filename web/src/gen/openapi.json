@@ -2906,6 +2906,27 @@
         ],
         "type": "object"
       },
+      "BulkLinkResult": {
+        "properties": {
+          "linked": {
+            "items": {
+              "$ref": "#/components/schemas/LinkedItem"
+            },
+            "type": "array"
+          },
+          "skipped": {
+            "items": {
+              "$ref": "#/components/schemas/SkippedItem"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "linked",
+          "skipped"
+        ],
+        "type": "object"
+      },
       "CalendarFeedVersionBody": {
         "properties": {
           "rowVersion": {
@@ -4519,6 +4540,86 @@
           "id",
           "key",
           "name"
+        ],
+        "type": "object"
+      },
+      "DecisionLogEntry": {
+        "properties": {
+          "currentStatus": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "decisionDate": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "decisionId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "itemKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "kind": {
+            "type": "string"
+          },
+          "newRequiredBy": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "owner": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "recordedBy": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "subject": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "text": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "decisionId",
+          "itemKey",
+          "subject",
+          "kind",
+          "occurredAt",
+          "recordedBy",
+          "owner",
+          "currentStatus",
+          "text",
+          "decisionDate",
+          "newRequiredBy"
         ],
         "type": "object"
       },
@@ -7606,6 +7707,22 @@
           "addedByName",
           "addedAt",
           "canChange"
+        ],
+        "type": "object"
+      },
+      "LinkedItem": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key"
         ],
         "type": "object"
       },
@@ -11926,6 +12043,29 @@
         "required": [
           "id",
           "rowVersion"
+        ],
+        "type": "object"
+      },
+      "SkippedItem": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "reason"
         ],
         "type": "object"
       },
@@ -17514,7 +17654,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/BulkLinkResult"
+                }
               }
             },
             "description": "OK"
@@ -23062,7 +23204,12 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DecisionLogEntry"
+                  },
+                  "type": "array"
+                }
               }
             },
             "description": "OK"

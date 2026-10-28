@@ -2791,7 +2791,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["BulkLinkResult"];
                     };
                 };
             };
@@ -7676,7 +7676,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["DecisionLogEntry"][];
                     };
                 };
             };
@@ -16676,6 +16676,10 @@ export interface components {
             targetIds: string[];
             targetType: string;
         };
+        BulkLinkResult: {
+            linked: components["schemas"]["LinkedItem"][];
+            skipped: components["schemas"]["SkippedItem"][];
+        };
         CalendarFeedVersionBody: {
             /** Format: int32 */
             rowVersion: number;
@@ -17086,6 +17090,21 @@ export interface components {
             id: string;
             key: string;
             name: string;
+        };
+        DecisionLogEntry: {
+            currentStatus: null | string;
+            decisionDate: null | string;
+            /** Format: uuid */
+            decisionId: null | string;
+            itemKey: null | string;
+            kind: string;
+            newRequiredBy: null | string;
+            /** Format: date-time */
+            occurredAt: string;
+            owner: null | string;
+            recordedBy: null | string;
+            subject: null | string;
+            text: null | string;
         };
         DecisionMutation: {
             /** Format: uuid */
@@ -17893,6 +17912,11 @@ export interface components {
             rowVersion: number;
             title: string;
             url: string;
+        };
+        LinkedItem: {
+            /** Format: uuid */
+            id: string;
+            key: string;
         };
         LinkedRecord: {
             /** Format: uuid */
@@ -19010,6 +19034,12 @@ export interface components {
             id: string;
             /** Format: int32 */
             rowVersion: number;
+        };
+        SkippedItem: {
+            /** Format: uuid */
+            id: string;
+            key: null | string;
+            reason: string;
         };
         SnapshotBody: {
             reason: string;

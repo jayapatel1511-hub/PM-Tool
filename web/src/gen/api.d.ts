@@ -2276,7 +2276,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["AttentionSnoozed"];
+                    };
                 };
             };
         };
@@ -7420,7 +7422,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["AttentionList"];
                     };
                 };
             };
@@ -8345,7 +8347,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["HealthOverrideApplied"];
+                    };
                 };
             };
         };
@@ -8365,7 +8369,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["HealthOverrideRemoved"];
+                    };
                 };
             };
         };
@@ -9238,6 +9244,15 @@ export interface paths {
             responses: {
                 /** @description OK */
                 200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProjectEvaluation"];
+                    };
+                };
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -16608,6 +16623,56 @@ export interface components {
             /** Format: uuid */
             reviewerId: string;
         };
+        AttentionList: {
+            items: components["schemas"]["AttentionRow"][];
+            /** Format: int32 */
+            snoozed: number;
+            /** Format: int32 */
+            total: number;
+            truncated: boolean;
+        };
+        AttentionRow: {
+            /** Format: int32 */
+            ageDays: number;
+            /** Format: int32 */
+            daysOverdueOrBlocked: number;
+            /** Format: date */
+            dueDate: null | string;
+            /** Format: date-time */
+            firstDetectedAt: string;
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            itemId: string;
+            itemKey: null | string;
+            itemName: null | string;
+            itemType: string;
+            message: string;
+            ownerName: null | string;
+            /** Format: uuid */
+            ownerUserId: null | string;
+            priority: null | string;
+            /** Format: uuid */
+            projectDisciplineId: null | string;
+            /** Format: uuid */
+            projectId: string;
+            projectNumber: null | string;
+            routeToUserIds: string[];
+            ruleId: string;
+            ruleName: string;
+            severity: string;
+            snoozeNote: null | string;
+            snoozed: boolean;
+            /** Format: date-time */
+            snoozedUntil: null | string;
+            why: null | components["schemas"]["JsonElement"];
+        };
+        AttentionSnoozed: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            snoozedUntil: string;
+        };
         AuthoriseBody: {
             acknowledged: boolean;
             reason: null | string;
@@ -17886,6 +17951,20 @@ export interface components {
             /** Format: uuid */
             projectTypeId: null | string;
         };
+        HealthOverrideApplied: {
+            /** Format: date-time */
+            healthOverrideExpiresAt: string;
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
+        };
+        HealthOverrideRemoved: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
+        };
         History: {
             /** Format: uuid */
             current: null | string;
@@ -18884,6 +18963,21 @@ export interface components {
             template: null | components["schemas"]["JsonElement"];
             /** Format: uuid */
             templateId: null | string;
+        };
+        ProjectEvaluation: {
+            computedHealth: string;
+            counts: null | components["schemas"]["JsonElement"];
+            disciplines: null | components["schemas"]["JsonElement"];
+            /** Format: date-time */
+            evaluatedAt: string;
+            healthReasons: null | components["schemas"]["JsonElement"];
+            inputs: null | components["schemas"]["JsonElement"];
+            /** Format: uuid */
+            nextMilestoneId: null | string;
+            /** Format: uuid */
+            nextSubmissionMilestoneId: null | string;
+            /** Format: int32 */
+            progressPct: null | number;
         };
         ProjectImportBody: {
             csv: string;

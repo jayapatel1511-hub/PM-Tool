@@ -2,25 +2,22 @@ import { useQuery } from '@tanstack/react-query'
 import { BellOff } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import type { components } from '@/gen/api'
 import { ConfirmDialog, Empty, ErrorBanner, Field, Loading } from '@/components/hub/common'
 import { useItemPanel } from '@/components/hub/panel-host'
 import { Key, Pill } from '@/components/hub/pills'
 import { Why, type Reason } from '@/components/hub/why'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { get, post, qs } from '@/lib/api'
+import { typedRequest } from '@/lib/api'
 import { fmtDate } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
 // Attention items (§12.12): ranked rule firings with the rule, threshold and values behind each (AC-ATT-06); never dismissible, only snoozed (ATT-03).
 
-export interface AttentionItem {
-  id: string; projectId: string; projectNumber?: string; ruleId: string; ruleName: string; itemType: string; itemId: string; itemKey?: string; itemName?: string
-  severity: string; message: string; why?: Reason | null; ownerName?: string | null; daysOverdueOrBlocked: number; priority?: string; dueDate?: string
-  firstDetectedAt: string; ageDays: number; snoozed: boolean; snoozedUntil?: string; snoozeNote?: string
-}
-export interface AttentionList { items: AttentionItem[]; snoozed: number; total: number }
+export type AttentionItem = components['schemas']['AttentionRow']
+export type AttentionList = components['schemas']['AttentionList']
 
 const TONE: Record<string, 'bad' | 'warn' | 'idle'> = { Critical: 'bad', Warning: 'warn', Info: 'idle' }
 
@@ -28,7 +25,7 @@ const TONE: Record<string, 'bad' | 'warn' | 'idle'> = { Critical: 'bad', Warning
 export function AttentionPanel({ projectId, canSnooze, refused, limit, disciplineId, severity }: { projectId: string; canSnooze: boolean; refused?: string; limit?: number; disciplineId?: string; severity?: string }) {
   const [showSnoozed, setShowSnoozed] = useState(false)
   const q = useQuery({ queryKey: ['p', projectId, 'attention', { showSnoozed, disciplineId, severity }],
-    queryFn: () => get<AttentionList>(`projects/${projectId}/attention${qs({ includeSnoozed: showSnoozed || undefined, disciplineId, severity })}`) })
+    queryFn: () => typedRequest('get', '/api/v1/projects/{id}/attention', { params: { id: projectId }, query: { includeSnoozed: showSnoozed || undefined, disciplineId, severity } }) })
   if (q.isPending) return <Loading rows={3} />
   if (q.error) return <div className="p-3"><ErrorBanner error={q.error} retry={() => q.refetch()} /></div>
   return (
@@ -56,7 +53,7 @@ export function AttentionRows({ items, canSnooze, refused, limit, onChanged, foo
                 <div className="flex flex-wrap items-baseline gap-x-2">
                   {showProject && a.projectNumber && !a.itemKey?.startsWith(a.projectNumber) && <Key>{a.projectNumber}</Key>}
                   <button className="text-left font-medium hover:underline" onClick={() => openPanel(a.itemType, a.itemId)}>{a.itemKey && <Key>{a.itemKey}</Key>} {a.itemName}</button>
-                  <Why reasons={a.why ? [a.why] : []} title={`${a.ruleId} ${a.ruleName}`}><span className="text-xs text-muted-foreground">{a.ruleId} {a.ruleName}</span></Why>
+                  <Why reasons={a.why ? [a.why as Reason] : []} title={`${a.ruleId} ${a.ruleName}`}><span className="text-xs text-muted-foreground">{a.ruleId} {a.ruleName}</span></Why>
                 </div>
                 <div className="text-sm text-muted-foreground">{a.message}</div>
                 <div className="text-xs/[18px] text-muted-foreground">
@@ -86,7 +83,7 @@ function SnoozeDialog({ a, onClose }: { a: AttentionItem; onClose: (ok: boolean)
   return (
     <ConfirmDialog open onOpenChange={(o) => !o && onClose(false)} title={t('attention.snoozeTitle', { item: a.itemKey ?? a.itemName ?? '' })} body={t('attention.snoozeBody')}
       reason busy={!(n >= 1 && n <= 30)} confirmLabel={t('attention.snooze')}
-      onConfirm={async (note) => { await post(`attention/${a.id}/snooze`, { days: n, note }); toast.success(t('attention.snoozed', { n })); onClose(true) }}>
+      onConfirm={async (note) => { await typedRequest('post', '/api/v1/attention/{id}/snooze', { params: { id: a.id }, body: { days: n, note } }); toast.success(t('attention.snoozed', { n })); onClose(true) }}>
       <Field label={t('attention.days')} htmlFor="snz-days" hint={t('attention.daysHint')}><Input id="snz-days" type="number" min={1} max={30} value={days} onChange={(e) => setDays(e.target.value)} /></Field>
     </ConfirmDialog>
   )

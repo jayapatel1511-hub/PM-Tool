@@ -5,16 +5,19 @@ const { spawn } = require('node:child_process');
 const path = require('node:path');
 const fs = require('node:fs');
 const { deletedTasks } = require('./recovery.fixture.cjs');
+const { attentionRow, attentionList, attentionSnoozed, healthOverrideApplied, healthOverrideRemoved } = require('./evaluation.fixture.cjs');
 const port = process.env.RECOVERY_TEST_PORT || '19504', base = `http://127.0.0.1:${port}`;
 const id = n => `00000000-0000-0000-0000-${String(n).padStart(12,'0')}`;
 const pid=id(1), person=id(2), civil=id(3), client=id(4), office=id(5), deleted=id(6), parent=id(7), template=id(8);
 const yes={ok:true}, no={ok:false};
 let flags={show_deleted:true,status_rollups:true,template_working_days:true}, restoreAllowed=true, restored=false, templateDraft=false;
+let evaluationFlows=false, snoozed=false, overridden=false; // 040-S15: the attention snooze and the health override
+const attentionItem=attentionRow({id:id(70),projectId:pid,itemId:id(71)});
 const me=()=>({id:person,displayName:'Synthetic PM',email:'pm@hub.test',roles:[],systemRoles:[],isTemplateEditor:true,
  capabilities:{createProject:true,createTask:true,portfolio:true,workload:false,staff:true,allStaff:true,admin:false,templates:true,readOnly:false,directReports:2},
  settings:{today:'2026-10-18',dateFormat:'yyyy-MM-dd',orgTimeZone:'America/Halifax',idleTimeoutHours:8,taskDueSoonDays:7,milestoneApproachingDays:14,chainDepthLimit:20,coordinationLookaheadWeeks:6},preferences:{denseRows:true},flags});
-const project=()=>({id:pid,projectNumber:'SYN-RCV',name:'Synthetic recovery project',clientId:client,client:'Synthetic client',officeId:office,office:'Synthetic office',pmName:'Synthetic PM',status:'Active',visibility:'Open',rowVersion:1,links:[],disciplines:[{id:civil,disciplineId:civil,name:'Civil',code:'C',colour:'#467762',leadUserId:person,leadName:'Synthetic PM',isActive:true}],starred:false,myRoles:['PM'],
- health:{computed:'Green',reported:'Green',overrideActive:false,reasons:[]},permissions:{edit:yes,healthOverride:no,reviewDates:no,snooze:no,manageMilestones:no,raiseRegister:no,isPm:true,leadOf:[],createTaskIn:[],createDeliverableIn:[],transitions:[],restore:{ok:restoreAllowed}}});
+const project=()=>({id:pid,projectNumber:'SYN-RCV',name:'Synthetic recovery project',clientId:client,client:'Synthetic client',officeId:office,office:'Synthetic office',pmName:'Synthetic PM',status:'Active',visibility:'Open',rowVersion:overridden?2:1,links:[],disciplines:[{id:civil,disciplineId:civil,name:'Civil',code:'C',colour:'#467762',leadUserId:person,leadName:'Synthetic PM',isActive:true}],starred:false,myRoles:['PM'],
+ health:{computed:'Green',reported:overridden?'Yellow':'Green',overrideActive:overridden,...(overridden?{healthOverride:'Yellow',overrideBy:'Synthetic PM',healthOverrideExpiresAt:'2026-10-30T12:00:00Z'}:{}),reasons:[]},permissions:{edit:yes,healthOverride:evaluationFlows?yes:no,reviewDates:no,snooze:evaluationFlows?yes:no,manageMilestones:no,raiseRegister:no,isPm:true,leadOf:[],createTaskIn:[],createDeliverableIn:[],transitions:[],restore:{ok:restoreAllowed}}});
 const row=(n)=>({id:id(20+n),projectNumber:`SYN-${n}`,name:`Synthetic project ${n}`,client:{id:client,name:'Synthetic client'},pm:{id:person,displayName:'Synthetic PM'},office:'Synthetic office',officeId:office,status:'Active',computedHealth:n===1?'Red':'Green',reportedHealth:n===1?'Red':'Green',healthReasons:[],overrideActive:false,trend:[],overdueTasks:n,blockedTasks:n,overdueDecisions:n,highIssues:0,attentionCritical:n,attentionWarning:0,overdueDeliverables:n+1,myRoles:[]});
 const count=(value=0,link='')=>({value,link});
 const dash=()=>({milestones:[],tasks:Object.fromEntries(['total','complete','inProgress','review','overdue','blocked','waiting','unassigned'].map(k=>[k,count()])),deliverables:Object.fromEntries(['upcoming','atRisk','issued','total'].map(k=>[k,count()])),decisions:{pending:count(),overdue:count()},issues:{open:0,high:0},risks:{high:0},registers:{issuesOpen:count(),issuesHigh:count(),risksHigh:count()},disciplineDue14:{[civil]:count()},disciplines:[{disciplineId:civil,name:'Civil',leadId:person,health:'Green',reasons:[],open:0,overdue:0,blocked:0,waiting:0,deliverablesDue14:0}],dueThisWeek:{items:[],total:0,link:''},blocked:{items:[],total:0,link:''},activity:[],...(flags.status_rollups?{disciplineStatus:{[civil]:{notStarted:count(2,`disciplineId=${civil}&status=Not+Started`),inProgress:count(3,`disciplineId=${civil}&status=In+Progress,In+Review`),issued:count(4,`disciplineId=${civil}&status=Issued,Accepted`),onHold:count(1,`disciplineId=${civil}&status=On+Hold`)}}}:{})});
@@ -44,7 +47,9 @@ let server,browser;const errors=[],requests=[],unknown=[];
   else if(p===`projects/${pid}/tasks`)data={items:[],totalCount:0,page:1,pageSize:50};
   else if(p===`projects/${pid}/deliverables`||p===`projects/${pid}/milestones`)data=[];
   else if(p===`projects/${pid}/dashboard`)data=dash();
-  else if(p.endsWith('/attention'))data={items:[],total:0,snoozed:0};
+  else if(p===`attention/${attentionItem.id}/snooze`){requests.push({path:p,method:req.method(),body:req.postDataJSON(),source:req.headers()['x-hub-source']});snoozed=true;data=attentionSnoozed(attentionItem.id,'2026-10-25T12:00:00Z');}
+  else if(p===`projects/${pid}/health-override`){const post=req.method()==='POST';requests.push({path:p,method:req.method(),body:post?req.postDataJSON():null,ifMatch:req.headers()['if-match'],source:req.headers()['x-hub-source']});overridden=post;data=post?healthOverrideApplied(pid,2,'2026-10-30T12:00:00Z'):healthOverrideRemoved(pid,3);}
+  else if(p.endsWith('/attention'))data=evaluationFlows&&!snoozed?attentionList([attentionItem]):attentionList([],snoozed?1:0);
   else if(p==='portfolio'){const rows=[row(1),row(2)];if(!flags.status_rollups)rows.forEach(r=>delete r.overdueDeliverables);data={ownOnly:false,tiles:{active:2,red:1,yellow:0,green:1,submissions14:0,overdueDecisions:3},projects:rows};}
   else if(p==='templates')data={canEdit:false,templates:[{id:template,familyId:template,name:'Synthetic template',version:1,status:'Published',milestones:0,deliverables:0,tasks:0,roles:0,projects:0}]};
   else if(p===`templates/${template}`)data={id:template,familyId:template,name:'Synthetic template',status:templateDraft?'Draft':'Published',version:1,canEdit:templateDraft,rowVersion:1,family:[],disciplines:[],milestones:[],deliverables:[],tasks:[],dependencies:[],basisSuggestions:[],...(flags.template_working_days?{offsetDayKind:'WorkingDays'}:{})};
@@ -79,6 +84,20 @@ let server,browser;const errors=[],requests=[],unknown=[];
  await page.goto(`${base}/projects/SYN-RCV/dashboard`);await page.getByText('4 of 10 issued',{exact:true}).waitFor();assert.match(await page.getByRole('link',{name:'In progress: 3',exact:true}).getAttribute('href'),/status=In\+Progress/);
  for(const [name,status] of [['Not started: 2',/status=Not\+Started/],['Issued: 4',/status=Issued,Accepted/],['On hold: 1',/status=On\+Hold/]]){const link=page.getByRole('link',{name,exact:true});assert.equal(await link.getAttribute('title'),name);assert.match(await link.getAttribute('href'),status,name)}const rollupAxe=await axe();
  flags.status_rollups=false;await page.reload();assert.equal(await page.getByText('4 of 10 issued',{exact:true}).count(),0);
+ // 040-S15: the Dashboard snoozes an attention item, and the header saves and removes a reported health, over answers typed against the contract.
+ evaluationFlows=true;await page.goto(`${base}/projects/SYN-RCV/dashboard`);await page.getByRole('button',{name:'Snooze P-DEMO-T0001'}).click();
+ const snoozeDialog=page.getByRole('dialog');await snoozeDialog.getByLabel('Days',{exact:true}).fill('5');await snoozeDialog.getByLabel('Reason',{exact:true}).fill('Waiting on the client');await snoozeDialog.getByRole('button',{name:'Snooze',exact:true}).click();
+ await page.getByText('Snoozed for 5 days',{exact:true}).waitFor();await page.getByRole('button',{name:/^Show 1 snoozed/}).waitFor();
+ assert.deepEqual(requests.at(-1),{path:`attention/${attentionItem.id}/snooze`,method:'POST',body:{days:5,note:'Waiting on the client'},source:'UI'});
+ const openDetails=async()=>{await page.getByRole('button',{name:'Project details and actions',exact:true}).click()};
+ await openDetails();await page.getByRole('button',{name:'Report a different health',exact:true}).click();const overrideDialog=page.getByRole('dialog',{name:'Report a different health'});
+ await overrideDialog.getByLabel('Reported',{exact:true}).selectOption('Yellow');await overrideDialog.getByLabel('Reason',{exact:true}).fill('Recovery plan agreed');await overrideDialog.getByRole('button',{name:'Override',exact:true}).click();
+ await page.getByText('Reported health saved',{exact:true}).waitFor();
+ assert.deepEqual(requests.at(-1),{path:`projects/${pid}/health-override`,method:'POST',body:{health:'Yellow',note:'Recovery plan agreed',rowVersion:1},ifMatch:undefined,source:'UI'});
+ await page.keyboard.press('Escape');await openDetails();await page.getByRole('button',{name:'Change override',exact:true}).click();await page.getByRole('button',{name:'Remove override',exact:true}).click();
+ await page.getByText('Override removed',{exact:true}).waitFor();
+ assert.deepEqual(requests.at(-1),{path:`projects/${pid}/health-override`,method:'DELETE',body:null,ifMatch:'"2"',source:'UI'});
+ evaluationFlows=false;snoozed=false;overridden=false;
  // AC-RCV-10/19/20: row links, group sum, URL and overdue column flag pair.
  flags.status_rollups=true;await page.goto(`${base}/portfolio`);await page.getByLabel('Group',{exact:true}).selectOption('client');await page.waitForURL(/group=client/);await page.locator('[data-portfolio-group]').waitFor();
  const subtotal=await page.locator('[data-portfolio-group]').innerText();assert.match(subtotal,/2 Projects/);assert.match(subtotal,/Red 1/);assert.match(subtotal,/Green 1/);

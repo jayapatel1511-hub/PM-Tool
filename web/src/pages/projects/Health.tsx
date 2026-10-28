@@ -5,7 +5,7 @@ import { HealthPill } from '@/components/hub/pills'
 import { Why } from '@/components/hub/why'
 import { Button } from '@/components/ui/button'
 import { useProjectRefresh } from '@/hooks/data'
-import { del, post } from '@/lib/api'
+import { typedRequest } from '@/lib/api'
 import { fmtDate } from '@/lib/format'
 import { t , runtimeText } from '@/lib/i18n'
 import type { ProjectDetail } from '@/lib/types'
@@ -46,7 +46,7 @@ function OverrideDialog({ p, onClose }: { p: ProjectDetail; onClose: (ok: boolea
   return (
     <ConfirmDialog open onOpenChange={(o) => !o && onClose(false)} title={t('health.overrideTitle')} reason confirmLabel={t('health.override')}
       body={t('health.overrideBody', { computed: runtimeText(`health.${p.health.computed}`) })}
-      onConfirm={async (note) => { await post(`projects/${p.id}/health-override`, { health, note, rowVersion: p.rowVersion }); toast.success(t('health.overrideSaved')); onClose(true) }}>
+      onConfirm={async (note) => { await typedRequest('post', '/api/v1/projects/{id}/health-override', { params: { id: p.id }, body: { health, note, rowVersion: p.rowVersion } }); toast.success(t('health.overrideSaved')); onClose(true) }}>
       <Field label={t('health.reported')} htmlFor="ho-health">
         <select id="ho-health" className={selectCls} value={health} onChange={(e) => setHealth(e.target.value)}>
           {['Green', 'Yellow', 'Red'].map((x) => <option key={x} value={x}>{runtimeText(`health.${x}`)}</option>)}
@@ -55,7 +55,7 @@ function OverrideDialog({ p, onClose }: { p: ProjectDetail; onClose: (ok: boolea
       {p.health.overrideActive && (
         <div><Button variant="outline" disabled={clearing} onClick={async () => {
           setClearing(true)
-          try { await del(`projects/${p.id}/health-override`, undefined, p.rowVersion); toast.success(t('health.overrideCleared')); onClose(true) }
+          try { await typedRequest('delete', '/api/v1/projects/{id}/health-override', { params: { id: p.id }, ifMatch: p.rowVersion }); toast.success(t('health.overrideCleared')); onClose(true) }
           catch (e) { toast.error((e as Error).message) } finally { setClearing(false) }
         }}>{clearing && <Spinner />}{t('health.clearOverride')}</Button></div>
       )}

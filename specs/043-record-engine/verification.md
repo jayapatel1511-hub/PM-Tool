@@ -121,6 +121,16 @@ Merge of `build2/043-S39` (Portfolio onto `DataTable`, builder commit `44321c0b`
 - Assumptions (spec defaults relied on): 043-D3 (KILL confirmed 2026-10-25, so the shared `DataTable` is used and no record engine exists); 043-D8 (the fallback table is `DataTable` in `components/hub/registers.tsx`); 043-D7 (client-only slice, no server, flag or i18n change); 043-D10 (Tier A, parity passes and no test assertion changed).
 - Left for Jay: nothing needs GitHub, homedev or sudo. Nothing is pushed and remote CI has not run.
 
+## Build 043-S29
+
+Open roles onto `DataTable` (builder commit `76b6ad38`). The run's merge failed: 043-S30 and 043-S39 had since changed `web/src/components/hub/registers.tsx`, `web/src/pages/projects/Allocations.tsx` and `tools/ratchet.json`. Rebased by hand on 2026-10-28 onto `007c6181` as `3aa32441` (branch `build2/043-S29`) and merged through `build2/release-fixes`.
+
+- Built: the open-roles table uses `DataTable` with the options other screens had added (`cards`, `rowClass`) and `Column.srOnly`, so it keeps the scrolling table at every width, muted Cancelled rows and the screen-reader-only Actions header. Flag off: static headers in the API's order; `flag.record_engine_additions` adds sorting and the panel link. The rebase kept HEAD's `registers.tsx` (it already had `rowClass`) and removed imports both conversions left unused (`SELECTED_ROW`, `TableRegion`, `tdCls`, `thCls`).
+- Checks (2026-10-28, local, on `3aa32441`): `npm run build`, `npm run lint` (existing warnings only) and `npm run typecheck:tests` exit 0; `tools/ratchet.py` `html_tables` 50 to 49.
+- Parity: PASS, 13 of 13 (`web/scripts/run-record-parity.mjs`, base `007c6181` against `3aa32441`; routes `/projects/{project}/allocations`, `?tab=roles` on the active, complete and empty projects; six personas at 1600 and 375 px, plus the AC-REC-09 flag off/on check).
+- AC rows: AC-REC-14 PASS (local); AC-REC-15 PASS (local, `html_tables` 49); AC-REC-07 PARTIAL (no assertion changed; the full sharded CI and nightly suites not run); AC-REC-09 PASS.
+- Assumptions: 043-D3, 043-D8, 043-D7 as for the other screens. Left for Jay: nothing needs GitHub, homedev or sudo.
+
 ## Build 043-S33
 
 Merge of `build2/043-S33` (Holidays list onto `DataTable`, builder commit `cb7d2c1f`) into `codex/integrate-039-050`, merge commit `780c4c96`. No text conflicts: the slice was rebased onto the integration head `680eb335` by the builder, and the merge only adds the later 040-S15 server typing, which touches none of its files. S33 is ticked in `tasks.md`. Client-only slice with no flag: no server, API, schema, i18n key or package change.

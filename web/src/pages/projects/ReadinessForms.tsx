@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { ErrorBanner, Field, Loading, Notice } from '@/components/hub/common'
 import { Key, Pill, type Tone } from '@/components/hub/pills'
+import type { components } from '@/gen/api'
 import { ApiError, get, typedRequest } from '@/lib/api'
 import { itemHref } from '@/components/hub/search'
 import { fmtDate, fmtTime, today } from '@/lib/format'
@@ -18,10 +19,7 @@ type Assessment = { id: string; rowVersion: number; ownerId: string; state: stri
 type Check = { id: string; rowVersion: number; code: string; applies: boolean | null; satisfied: boolean | null; reason?: string; evidenceUrl?: string; recordedBy?: string }
 type RdyException = { id: string; basisVersionId: string; approvedBy: string; verifierId: string; limitedWork: string; risk: string; expiresOn: string; createdAt: string }
 type Detail = { assessment: Assessment; checks: Check[]; unknown: string[]; blocked: string[]; exceptions: RdyException[]; sources: { code: string; record: LinkedRecord }[] }
-type BasisVersion = { id: string; number: number; status: string; scope: string; rowVersion: number }
-type BasisDetail = { entry: { key: string; title: string }; versions: { version: BasisVersion }[];
-  uses: { versionId: string; targetType: string; targetId: string; isCurrent: boolean }[];
-  dispositions: { versionId: string; ownerId: string; approvedBy: string; scope: string; expiresOn: string }[] }
+type BasisVersion = components['schemas']['BasisVersionRow']
 type Assumption = { key: string; title: string; version: BasisVersion; eligible: boolean; disposedUntil?: string }
 type LinkedRecord = { type: string; id: string; key: string; title: string; status: string }
 type Constraint = { id: string; key: string; rowVersion: number; category: string; description: string; removalOwnerId: string; affectedOwnerId: string;
@@ -53,9 +51,8 @@ export function ReadinessInspector({ projectId, number, options, initial, close,
   // The exception references a basis version; resolve keys, scope and eligibility from the design-basis register.
   const assumptions = useQuery({ queryKey: ['readiness-assumptions', projectId, type, id], enabled: !!q.data,
     queryFn: async () => {
-      const base = `projects/${projectId}/design-basis`
-      const page = await get<{ items: { id: string }[] }>(`${base}?kind=Assumption&affectedWorkId=${id}&pageSize=200`)
-      const details = await Promise.all(page.items.map(e => get<BasisDetail>(`${base}/${e.id}`)))
+      const page = await typedRequest('get', '/api/v1/projects/{projectId}/design-basis', { params: { projectId }, query: { Kind: 'Assumption', AffectedWorkId: id, pageSize: 200 } })
+      const details = await Promise.all(page.items.map(e => typedRequest('get', '/api/v1/projects/{projectId}/design-basis/{id}', { params: { projectId, id: e.id } })))
       return details.flatMap(d => d.versions.map(({ version }): Assumption => {
         const disposedUntil = d.dispositions.filter(x => x.versionId === version.id && x.ownerId === work?.ownerId && x.approvedBy !== work?.ownerId &&
           x.scope.toLowerCase() === version.scope.toLowerCase()).map(x => x.expiresOn).sort().pop()

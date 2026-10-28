@@ -275,6 +275,128 @@ public sealed class DesignBasisApiTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Register_and_detail_keep_their_property_names_order_nulls_and_flags() // the typed records must serialise to the bytes the Design basis page already reads
+    {
+        var project = await data.Project(); var root = $"/api/v1/projects/{project.Id}/design-basis";
+        var civil = data.ProjectDiscipline(project.Id, "Civil"); var alex = data.User(TestData.Alex);
+        var input = new DesignBasisEndpoints.VersionInput("Bridge / Pier 1", "Allowable bearing pressure", 100, "kPa", "Geotechnical report", "GEO-S-1",
+            "https://example.test/geotech", "A", new DateOnly(2026, 10, 5), null);
+        async Task Confirm(Guid entryId, Guid versionId, string who = TestData.Marc) => await Post(who, $"{root}/{entryId}/versions/{versionId}/confirm",
+            new DesignBasisEndpoints.ConfirmBody(Guid.NewGuid(), Version<DesignBasisEntry>(entryId), Version<DesignBasisVersion>(versionId), "Source checked"));
+        async Task<(Guid Entry, Guid Version)> Entry(string kind, string title, DesignBasisEndpoints.VersionInput version, Guid? inspected = null)
+        {
+            var entry = await Post(TestData.Pm, root, new DesignBasisEndpoints.CreateBody(Guid.NewGuid(), kind, title, alex, civil, data.User(TestData.Marc), version, null, inspected));
+            var id = entry.G("id"); return (id, f.Db(db => db.DesignBasisVersions.Single(v => v.EntryId == id).Id));
+        }
+        // E1: a confirmed criterion with a use, replaced by revision B, answered by the consumer, and in conflict with a peer.
+        var (e1, v1) = await Entry(BasisKind.Criterion, "Bearing pressure", input);
+        await Confirm(e1, v1);
+        var task = await data.NewTask(project.Id, extra: new { assigneeId = alex });
+        var use = await Post(TestData.Alex, $"{root}/{e1}/uses", new DesignBasisEndpoints.UseBody(Guid.NewGuid(), v1, "Task", task.G("id"), "Foundation sizing"));
+        var b = input with { NumericValue = 125, DeclaredRevision = "B" };
+        var proposed = await Post(TestData.Marc, $"{root}/{e1}/propose", new DesignBasisEndpoints.ProposeBody(Guid.NewGuid(), Version<DesignBasisEntry>(e1), Version<DesignBasisVersion>(v1), b, "New report"));
+        var v2 = proposed.G("id");
+        var pending = await Get(TestData.Pm, $"{root}/{e1}");
+        await Confirm(e1, v2);
+        var (peer, peerVersion) = await Entry(BasisKind.Criterion, "Bearing pressure", b with { NumericValue = 150 }, e1);
+        await Confirm(peer, peerVersion);
+        var impact = f.Db(db => db.BasisImpactAssessments.Single(i => i.BasisUseId == use.G("id")));
+        var beforeDecision = await Get(TestData.Alex, $"{root}/{e1}");
+        await Post(TestData.Alex, $"{root}/{e1}/impacts/{impact.Id}/decide", new DesignBasisEndpoints.ImpactBody(Guid.NewGuid(), impact.RowVersion, Version<BasisUse>(use.G("id")),
+            Version<DesignBasisVersion>(v2), f.Db(db => db.Tasks.Single(t => t.Id == task.G("id")).RowVersion), "Adopt", "Foundation sizing revised to report B", "https://example.test/review-B"));
+        // E2: an assumption approved to proceed; E3: a confirmed criterion withdrawn under a use; E4: a proposed criterion withdrawn.
+        var (e2, a1) = await Entry(BasisKind.Assumption, "Utility depth", input with { NumericValue = null, Units = null, SourceSystem = null, StableSourceId = null, SourceUrl = null, DeclaredRevision = null });
+        await Post(TestData.Marc, $"{root}/{e2}/versions/{a1}/proceed", new DesignBasisEndpoints.DispositionBody(Guid.NewGuid(), Version<DesignBasisVersion>(a1), input.Scope, alex, new DateOnly(2027, 1, 1), "Confirm before issue"));
+        var (e3, c1) = await Entry(BasisKind.Criterion, "Soil cover", input with { Scope = "Bridge / Pier 2" });
+        await Confirm(e3, c1);
+        var second = await data.NewTask(project.Id, extra: new { assigneeId = alex });
+        await Post(TestData.Alex, $"{root}/{e3}/uses", new DesignBasisEndpoints.UseBody(Guid.NewGuid(), c1, "Task", second.G("id"), "Cover check"));
+        await Post(TestData.Marc, $"{root}/{e3}/versions/{c1}/withdraw", new DesignBasisEndpoints.WithdrawBody(Guid.NewGuid(), Version<DesignBasisEntry>(e3), Version<DesignBasisVersion>(c1), "Basis withdrawn pending replacement"));
+        var (e4, d1) = await Entry(BasisKind.Criterion, "Frost depth", input with { Scope = "Bridge / Pier 3" });
+        await Post(TestData.Marc, $"{root}/{e4}/versions/{d1}/withdraw", new DesignBasisEndpoints.WithdrawBody(Guid.NewGuid(), Version<DesignBasisEntry>(e4), Version<DesignBasisVersion>(d1), "Never applicable"));
+
+        var list = await Get(TestData.Pm, root);
+        Assert.Equal(["items", "page", "pageSize", "totalCount", "sort", "filters"], list.AsObject().Select(x => x.Key));
+        Assert.Equal((1, 50, 5), (list.I("page"), list.I("pageSize"), list.I("totalCount")));
+        var rows = list["items"]!.AsArray(); Assert.Equal([e1, peer, e2, e3, e4], rows.Select(r => r!.G("id"))); // the register's order is the entry sequence
+        Assert.All(rows, r => Assert.Equal(ListKeys, r!.AsObject().Select(x => x.Key)));
+        Assert.Equal(("Confirmed", "Bridge / Pier 1", "Confirmed", v2, 1), (rows[0]!.S("currentStatus"), rows[0]!.S("currentScope"), rows[0]!.S("latestStatus"), rows[0]!.G("latestVersionId"), rows[0]!.I("conflictCount")));
+        Assert.Equal((v2, 2, "2026-10-05"), (rows[0]!.G("currentVersionId"), rows[0]!.I("rowVersion"), rows[0]!.S("confirmationDueDate")));
+        Assert.Null(rows[2]!["currentVersionId"]); Assert.Null(rows[2]!["currentStatus"]); Assert.Null(rows[2]!["currentScope"]); // null, not omitted
+        Assert.Equal(("Proposed", a1, 0), (rows[2]!.S("latestStatus"), rows[2]!.G("latestVersionId"), rows[2]!.I("conflictCount")));
+        Assert.Equal(("Withdrawn", c1, "Withdrawn", d1), (rows[3]!.S("latestStatus"), rows[3]!.G("latestVersionId"), rows[4]!.S("latestStatus"), rows[4]!.G("latestVersionId")));
+        var generated = await Get(TestData.Pm, root + $"?Kind=Criterion&Status=Confirmed&DisciplineId={civil}&Scope=Pier&Overdue=false&AffectedWorkId={task.G("id")}&page=1&pageSize=1"); // the names the generated client sends
+        Assert.Equal((e1, 1, 1), (Assert.Single(generated["items"]!.AsArray())!.G("id"), generated.I("pageSize"), generated.I("totalCount")));
+        var csv = (await (await f.As(TestData.Pm).GetAsync(root + "/export?format=csv")).Content.ReadAsStringAsync()).Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        Assert.Equal("Key,Name,Kind,Discipline,Owner,Version,Status,Scope,Value or statement,Numeric value,Units,Source system,Stable source ID,Source URL,Declared source revision,Confirmation due date", csv[0]);
+        Assert.Equal(7, csv.Length); Assert.EndsWith("-B001,Bearing pressure,Criterion,Civil,Alex Chen,1,Superseded,Bridge / Pier 1,Allowable bearing pressure,100.000000,kPa,Geotechnical report,GEO-S-1,https://example.test/geotech,A,2026-10-05", csv[1]);
+        Assert.EndsWith("-B003,Utility depth,Assumption,Civil,Alex Chen,1,Proposed,Bridge / Pier 1,Allowable bearing pressure,,,,,,,2026-10-05", csv[4]);
+
+        Assert.Equal(DetailKeys, pending.AsObject().Select(x => x.Key));
+        Assert.Equal([BasisStatus.Confirmed, BasisStatus.Proposed], pending["versions"]!.AsArray().Select(v => v!["version"]!.S("status")));
+        Assert.Empty(pending["impacts"]!.AsArray()); Assert.Empty(pending["conflicts"]!.AsArray()); Assert.Empty(pending["dispositions"]!.AsArray()); // [], not omitted
+        Assert.Equal((2, 1), (beforeDecision["versions"]!.AsArray().Count, beforeDecision["uses"]!.AsArray().Count));
+        Assert.Equal("Pending Assessment", Assert.Single(beforeDecision["impacts"]!.AsArray())!.S("status"));
+
+        var detail = await Get(TestData.Pm, $"{root}/{e1}");
+        Assert.Equal(DetailKeys, detail.AsObject().Select(x => x.Key));
+        Assert.Equal(EntryKeys, detail["entry"]!.AsObject().Select(x => x.Key));
+        Assert.Equal((BasisKind.Criterion, "DesignBasisEntry", civil, v2, "Bearing pressure"), (detail["entry"]!.S("kind"), detail["entry"]!.S("auditType"), detail["entry"]!.G("auditDisciplineId"), detail["entry"]!.G("currentVersionId"), detail["entry"]!.S("auditName")));
+        Assert.Equal(data.User(TestData.Marc), detail["entry"]!.G("independentApproverId")); Assert.Null(detail["entry"]!["deletedAt"]); Assert.Null(detail["entry"]!["deletedBy"]);
+        var versions = detail["versions"]!.AsArray(); Assert.Equal(2, versions.Count);
+        Assert.All(versions, v => { Assert.Equal(["version", "sourceMissing"], v!.AsObject().Select(x => x.Key)); Assert.Equal(VersionKeys, v["version"]!.AsObject().Select(x => x.Key)); Assert.False(v["sourceMissing"]!.GetValue<bool>()); });
+        Assert.Equal((BasisStatus.Superseded, 1, BasisStatus.Confirmed, 2), (versions[0]!["version"]!.S("status"), versions[0]!["version"]!.I("number"), versions[1]!["version"]!.S("status"), versions[1]!["version"]!.I("number")));
+        Assert.Null(versions[0]!["version"]!["supersedesVersionId"]); Assert.Null(versions[0]!["version"]!["decisionId"]); Assert.Equal(v1, versions[1]!["version"]!.G("supersedesVersionId"));
+        Assert.Equal(("DesignBasisVersion", "Allowable bearing pressure", "Source checked", 125m), (versions[1]!["version"]!.S("auditType"), versions[1]!["version"]!.S("auditName"), versions[1]!["version"]!.S("confirmationRationale"), versions[1]!["version"]!["numericValue"]!.GetValue<decimal>()));
+        Assert.Null(versions[1]!["version"]!["auditKey"]);
+        var uses = detail["uses"]!.AsArray(); Assert.Equal(2, uses.Count);
+        Assert.All(uses, u => Assert.Equal(UseKeys, u!.AsObject().Select(x => x.Key)));
+        Assert.Equal(("Task", "Foundation sizing", true), (uses.Single(u => u!.G("versionId") == v2)!.S("targetType"), uses.Single(u => u!.G("versionId") == v2)!.S("intendedUse"), uses.Single(u => u!.G("versionId") == v2)!["isCurrent"]!.GetValue<bool>()));
+        Assert.False(uses.Single(u => u!.G("versionId") == v1)!["isCurrent"]!.GetValue<bool>());
+        var decided = Assert.Single(detail["impacts"]!.AsArray())!; Assert.Equal(ImpactKeys, decided.AsObject().Select(x => x.Key));
+        Assert.Equal((AssessmentStatus.Resolved, "Foundation sizing revised to report B", "https://example.test/review-B", "BasisImpactAssessment"), (decided.S("status"), decided.S("rationale"), decided.S("evidenceUrl"), decided.S("auditType")));
+        Assert.Equal((v1, v2, alex), (decided.G("oldVersionId"), decided.G("newVersionId"), decided.G("decidedBy"))); Assert.Null(decided["withdrawalVersionId"]); Assert.NotNull(decided["decidedAt"]); Assert.Null(decided["auditKey"]);
+        var conflict = Assert.Single(detail["conflicts"]!.AsArray())!; Assert.Equal(["id", "resolved", "rowVersion", "left", "right"], conflict.AsObject().Select(x => x.Key));
+        Assert.Equal(SideKeys, conflict["left"]!.AsObject().Select(x => x.Key)); Assert.Equal(SideKeys, conflict["right"]!.AsObject().Select(x => x.Key));
+        Assert.False(conflict["resolved"]!.GetValue<bool>()); Assert.Equal(2, new[] { conflict["left"]!.G("versionId"), conflict["right"]!.G("versionId") }.Intersect([v2, peerVersion]).Count());
+        Assert.Equal([125m, 150m], new[] { conflict["left"]!, conflict["right"]! }.Select(side => side["numericValue"]!.GetValue<decimal>()).Order()); // either side first: the pair is ordered by id
+        Assert.Equal(("kPa", "Bridge / Pier 1", "Allowable bearing pressure"), (conflict["left"]!.S("units"), conflict["left"]!.S("scope"), conflict["left"]!.S("statement")));
+        Assert.Empty(detail["dispositions"]!.AsArray());
+        foreach (var (who, flags) in new[] { (TestData.Pm, (true, true, false)), (TestData.Marc, (true, true, true)), (TestData.Alex, (false, true, false)), (TestData.Omar, (false, false, false)), (TestData.Jill, (false, false, false)) })
+        {
+            var seen = await Get(who, $"{root}/{e1}"); Assert.Equal(DetailKeys, seen.AsObject().Select(x => x.Key));
+            Assert.Equal(flags, (seen["canManage"]!.GetValue<bool>(), seen["canEditProposed"]!.GetValue<bool>(), seen["canConfirm"]!.GetValue<bool>()));
+        }
+
+        var assumption = await Get(TestData.Pm, $"{root}/{e2}");
+        var proposedVersion = Assert.Single(assumption["versions"]!.AsArray())!;
+        Assert.Equal((BasisStatus.Proposed, true), (proposedVersion["version"]!.S("status"), proposedVersion["sourceMissing"]!.GetValue<bool>())); // an incomplete source is flagged
+        Assert.Null(proposedVersion["version"]!["numericValue"]); Assert.Null(proposedVersion["version"]!["units"]); Assert.Null(proposedVersion["version"]!["confirmedAt"]);
+        Assert.Null(assumption["entry"]!["currentVersionId"]); Assert.Empty(assumption["uses"]!.AsArray());
+        var disposition = Assert.Single(assumption["dispositions"]!.AsArray())!; Assert.Equal(DispositionKeys, disposition.AsObject().Select(x => x.Key));
+        Assert.Equal((a1, input.Scope, alex, "2027-01-01", "Confirm before issue"), (disposition.G("versionId"), disposition.S("scope"), disposition.G("ownerId"), disposition.S("expiresOn"), disposition.S("reason")));
+        Assert.Equal((data.User(TestData.Marc), "BasisAssumptionDisposition"), (disposition.G("approvedBy"), disposition.S("auditType")));
+        var withdrawn = Assert.Single((await Get(TestData.Pm, $"{root}/{e3}"))["impacts"]!.AsArray())!; // a withdrawal has no replacement
+        Assert.Equal(ImpactKeys, withdrawn.AsObject().Select(x => x.Key));
+        Assert.Equal((AssessmentStatus.Pending, c1, c1), (withdrawn.S("status"), withdrawn.G("oldVersionId"), withdrawn.G("withdrawalVersionId"))); Assert.Null(withdrawn["newVersionId"]); Assert.Null(withdrawn["rationale"]); Assert.Null(withdrawn["decidedAt"]);
+        var never = await Get(TestData.Pm, $"{root}/{e4}"); Assert.Equal(DetailKeys, never.AsObject().Select(x => x.Key));
+        Assert.Equal(BasisStatus.Withdrawn, Assert.Single(never["versions"]!.AsArray())!["version"]!.S("status")); Assert.Empty(never["impacts"]!.AsArray());
+    }
+
+    static readonly string[] DetailKeys = ["entry", "versions", "uses", "impacts", "conflicts", "dispositions", "canManage", "canEditProposed", "canConfirm"];
+    static readonly string[] ListKeys = ["id", "key", "title", "kind", "ownerId", "projectDisciplineId", "currentVersionId", "rowVersion", "currentStatus", "currentScope", "latestStatus", "latestVersionId", "confirmationDueDate", "conflictCount"];
+    static readonly string[] EntryKeys = ["kind", "title", "ownerId", "projectDisciplineId", "independentApproverId", "currentVersionId", "auditType", "auditProjectId", "auditKey", "auditName", "auditDisciplineId",
+        "projectId", "key", "seq", "deletedAt", "deletedBy", "createdAt", "createdBy", "updatedAt", "updatedBy", "rowVersion", "id"];
+    static readonly string[] VersionKeys = ["entryId", "number", "supersedesVersionId", "status", "scope", "statement", "numericValue", "units", "sourceSystem", "stableSourceId", "sourceUrl", "declaredRevision",
+        "confirmationDueDate", "decisionId", "confirmedBy", "confirmedAt", "confirmationRationale", "auditType", "auditName", "projectId", "auditProjectId", "auditKey", "createdAt", "createdBy", "updatedAt", "updatedBy", "rowVersion", "id"];
+    static readonly string[] UseKeys = ["id", "versionId", "targetType", "targetId", "ownerId", "intendedUse", "rowVersion", "isCurrent"];
+    static readonly string[] ImpactKeys = ["basisUseId", "oldVersionId", "newVersionId", "withdrawalVersionId", "ownerId", "status", "rationale", "evidenceUrl", "decidedBy", "decidedAt", "auditType", "projectId",
+        "auditProjectId", "auditKey", "auditName", "createdAt", "createdBy", "updatedAt", "updatedBy", "rowVersion", "id"];
+    static readonly string[] SideKeys = ["versionId", "entryKey", "scope", "statement", "numericValue", "units"];
+    static readonly string[] DispositionKeys = ["versionId", "scope", "ownerId", "approvedBy", "expiresOn", "reason", "auditType", "projectId", "auditProjectId", "auditKey", "auditName", "createdAt", "createdBy",
+        "updatedAt", "updatedBy", "rowVersion", "id"];
+
+    [Fact]
     public async Task Proposed_assumption_requires_approved_unexpired_scope_for_its_consumer()
     {
         var project = await data.Project();

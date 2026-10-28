@@ -1,6 +1,7 @@
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using System.Text.Json;
@@ -35,6 +36,60 @@ public static class DesignBasisEndpoints
     public sealed record Filter(string? Kind, string? Status, Guid? DisciplineId, string? Scope,
         bool? Overdue, Guid? AffectedWorkId);
     static readonly Col[] ExportColumns = Hub.Api.Records.DesignBasisEntryRecord.DesignBasisExportColumns;
+
+    /// One entry of the register: its current confirmed version, its latest version (any status) and the unresolved conflicts it sits in.
+    public sealed record BasisRegisterRow(Guid Id, string Key, string Title, string Kind, Guid OwnerId, Guid ProjectDisciplineId, Guid? CurrentVersionId,
+        int RowVersion, string? CurrentStatus, string? CurrentScope, string? LatestStatus, Guid? LatestVersionId, DateOnly? ConfirmationDueDate, int ConflictCount);
+
+    // The rows below mirror the stored rows, audit fields included, in the order each row has always been written (the OrgStructure `*Response` precedent).
+    public sealed record BasisEntryRow(string Kind, string Title, Guid OwnerId, Guid ProjectDisciplineId, Guid? IndependentApproverId, Guid? CurrentVersionId,
+        string AuditType, Guid? AuditProjectId, string? AuditKey, string? AuditName, Guid? AuditDisciplineId, Guid ProjectId, string Key, int Seq,
+        DateTimeOffset? DeletedAt, Guid? DeletedBy, DateTimeOffset CreatedAt, Guid? CreatedBy, DateTimeOffset UpdatedAt, Guid? UpdatedBy, int RowVersion, Guid Id)
+    {
+        public static BasisEntryRow From(DesignBasisEntry e) => new(e.Kind, e.Title, e.OwnerId, e.ProjectDisciplineId, e.IndependentApproverId, e.CurrentVersionId,
+            e.AuditType, e.AuditProjectId, e.AuditKey, e.AuditName, e.AuditDisciplineId, e.ProjectId, e.Key, e.Seq, e.DeletedAt, e.DeletedBy, e.CreatedAt, e.CreatedBy,
+            e.UpdatedAt, e.UpdatedBy, e.RowVersion, e.Id);
+    }
+    public sealed record BasisVersionRow(Guid EntryId, int Number, Guid? SupersedesVersionId, string Status, string Scope, string Statement, decimal? NumericValue,
+        string? Units, string? SourceSystem, string? StableSourceId, string? SourceUrl, string? DeclaredRevision, DateOnly? ConfirmationDueDate, Guid? DecisionId,
+        Guid? ConfirmedBy, DateTimeOffset? ConfirmedAt, string? ConfirmationRationale, string AuditType, string? AuditName, Guid ProjectId, Guid? AuditProjectId,
+        string? AuditKey, DateTimeOffset CreatedAt, Guid? CreatedBy, DateTimeOffset UpdatedAt, Guid? UpdatedBy, int RowVersion, Guid Id)
+    {
+        public static BasisVersionRow From(DesignBasisVersion v) => new(v.EntryId, v.Number, v.SupersedesVersionId, v.Status, v.Scope, v.Statement, v.NumericValue,
+            v.Units, v.SourceSystem, v.StableSourceId, v.SourceUrl, v.DeclaredRevision, v.ConfirmationDueDate, v.DecisionId, v.ConfirmedBy, v.ConfirmedAt,
+            v.ConfirmationRationale, v.AuditType, v.AuditName, v.ProjectId, v.AuditProjectId, v.AuditKey, v.CreatedAt, v.CreatedBy, v.UpdatedAt, v.UpdatedBy,
+            v.RowVersion, v.Id);
+    }
+    /// A version with the flag that its source (system, link or revision) is incomplete.
+    public sealed record BasisVersionItem(BasisVersionRow Version, bool SourceMissing);
+    /// One use of a version by a piece of work; IsCurrent is true for the latest use of that work (a replaced use stays on the old version).
+    public sealed record BasisUseRow(Guid Id, Guid VersionId, string TargetType, Guid TargetId, Guid OwnerId, string IntendedUse, int RowVersion, bool IsCurrent);
+    public sealed record BasisImpactRow(Guid BasisUseId, Guid OldVersionId, Guid? NewVersionId, Guid? WithdrawalVersionId, Guid OwnerId, string Status, string? Rationale,
+        string? EvidenceUrl, Guid? DecidedBy, DateTimeOffset? DecidedAt, string AuditType, Guid ProjectId, Guid? AuditProjectId, string? AuditKey, string? AuditName,
+        DateTimeOffset CreatedAt, Guid? CreatedBy, DateTimeOffset UpdatedAt, Guid? UpdatedBy, int RowVersion, Guid Id)
+    {
+        public static BasisImpactRow From(BasisImpactAssessment a) => new(a.BasisUseId, a.OldVersionId, a.NewVersionId, a.WithdrawalVersionId, a.OwnerId, a.Status,
+            a.Rationale, a.EvidenceUrl, a.DecidedBy, a.DecidedAt, a.AuditType, a.ProjectId, a.AuditProjectId, a.AuditKey, a.AuditName, a.CreatedAt, a.CreatedBy,
+            a.UpdatedAt, a.UpdatedBy, a.RowVersion, a.Id);
+    }
+    /// An unresolved or resolved conflict between two confirmed versions, with both sides spelled out.
+    public sealed record BasisConflictRow(Guid Id, bool Resolved, int RowVersion, ConflictSide Left, ConflictSide Right);
+    public sealed record BasisDispositionRow(Guid VersionId, string Scope, Guid OwnerId, Guid ApprovedBy, DateOnly ExpiresOn, string Reason, string AuditType, Guid ProjectId,
+        Guid? AuditProjectId, string? AuditKey, string? AuditName, DateTimeOffset CreatedAt, Guid? CreatedBy, DateTimeOffset UpdatedAt, Guid? UpdatedBy, int RowVersion, Guid Id)
+    {
+        public static BasisDispositionRow From(BasisAssumptionDisposition d) => new(d.VersionId, d.Scope, d.OwnerId, d.ApprovedBy, d.ExpiresOn, d.Reason, d.AuditType,
+            d.ProjectId, d.AuditProjectId, d.AuditKey, d.AuditName, d.CreatedAt, d.CreatedBy, d.UpdatedAt, d.UpdatedBy, d.RowVersion, d.Id);
+    }
+    /// One entry as the detail panel reads it, with what this actor may do to it.
+    public sealed record BasisDetail(BasisEntryRow Entry, IReadOnlyList<BasisVersionItem> Versions, IReadOnlyList<BasisUseRow> Uses, IReadOnlyList<BasisImpactRow> Impacts,
+        IReadOnlyList<BasisConflictRow> Conflicts, IReadOnlyList<BasisDispositionRow> Dispositions, bool CanManage, bool CanEditProposed, bool CanConfirm);
+
+    sealed record ListEntry(Guid Id, string Key, string Title, string Kind, Guid OwnerId, Guid ProjectDisciplineId, Guid? CurrentVersionId, int RowVersion);
+    sealed record ListVersion(Guid Id, Guid EntryId, int Number, string Status, string Scope, DateOnly? ConfirmationDueDate);
+    sealed record DisciplineName(Guid Id, string Name);
+    /// One version of one entry as the export writes it; the names are the export's column fields.
+    sealed record ExportRow(string Key, string Title, string Kind, string? Discipline, string? Owner, int Version, string Status, string Scope, string Statement,
+        decimal? NumericValue, string? Units, string? SourceSystem, string? StableSourceId, string? SourceUrl, string? DeclaredRevision, DateOnly? ConfirmationDueDate);
 
     public static void Map(RouteGroupBuilder api)
     {
@@ -479,18 +534,17 @@ public static class DesignBasisEndpoints
         return query;
     }
 
-    static async Task<object> List(Guid projectId, [AsParameters] Filter filter,
+    static async Task<Ok<Page<BasisRegisterRow>>> List(Guid projectId, [AsParameters] Filter filter,
         int? page, int? pageSize, Access access, HubDb db, TimeProvider clock)
     {
         await access.Project(projectId, false);
         var query = Query(projectId, filter, db, DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime));
         var (pg, size) = Http.Paging(page, pageSize);
         var entries = await query.OrderBy(e => e.Seq).Skip((pg - 1) * size).Take(size)
-            .Select(e => new { e.Id, e.Key, e.Title, e.Kind, e.OwnerId, e.ProjectDisciplineId, e.IndependentApproverId,
-                e.CurrentVersionId, e.RowVersion }).ToListAsync();
+            .Select(e => new ListEntry(e.Id, e.Key, e.Title, e.Kind, e.OwnerId, e.ProjectDisciplineId, e.CurrentVersionId, e.RowVersion)).ToListAsync();
         var entryIds = entries.Select(e => e.Id).ToArray();
         var versions = await db.DesignBasisVersions.AsNoTracking().Where(v => entryIds.Contains(v.EntryId))
-            .Select(v => new { v.Id, v.EntryId, v.Number, v.Status, v.Scope, v.ConfirmationDueDate }).ToListAsync();
+            .Select(v => new ListVersion(v.Id, v.EntryId, v.Number, v.Status, v.Scope, v.ConfirmationDueDate)).ToListAsync();
         var conflictIds = versions.Select(v => v.Id).ToArray();
         var conflicts = await db.BasisConflicts.AsNoTracking().Where(c => !c.Resolved &&
             (conflictIds.Contains(c.LeftVersionId) || conflictIds.Contains(c.RightVersionId))).ToListAsync();
@@ -498,13 +552,11 @@ public static class DesignBasisEndpoints
         {
             var current = versions.FirstOrDefault(v => v.Id == e.CurrentVersionId);
             var latest = versions.Where(v => v.EntryId == e.Id).OrderByDescending(v => v.Number).FirstOrDefault();
-            return (object)new { e.Id, e.Key, e.Title, e.Kind, e.OwnerId, e.ProjectDisciplineId, e.CurrentVersionId,
-                e.RowVersion, CurrentStatus = current?.Status, CurrentScope = current?.Scope,
-                LatestStatus = latest?.Status, LatestVersionId = latest?.Id, latest?.ConfirmationDueDate,
-                ConflictCount = conflicts.Count(c => versions.Any(v => v.EntryId == e.Id &&
-                    (c.LeftVersionId == v.Id || c.RightVersionId == v.Id))) };
+            return new BasisRegisterRow(e.Id, e.Key, e.Title, e.Kind, e.OwnerId, e.ProjectDisciplineId, e.CurrentVersionId, e.RowVersion,
+                current?.Status, current?.Scope, latest?.Status, latest?.Id, latest?.ConfirmationDueDate,
+                conflicts.Count(c => versions.Any(v => v.EntryId == e.Id && (c.LeftVersionId == v.Id || c.RightVersionId == v.Id))));
         }).ToList();
-        return new Page<object>(rows, pg, size, await query.CountAsync());
+        return TypedResults.Ok(new Page<BasisRegisterRow>(rows, pg, size, await query.CountAsync()));
     }
 
     static async Task<IResult> ExportRows(Guid projectId, [AsParameters] Filter filter, string? format,
@@ -518,23 +570,22 @@ public static class DesignBasisEndpoints
         var versions = await db.DesignBasisVersions.AsNoTracking().Where(v => v.ProjectId == projectId && ids.Contains(v.EntryId))
             .ToListAsync();
         var disciplines = await db.ProjectDisciplines.AsNoTracking().Where(d => d.ProjectId == projectId)
-            .Join(db.Disciplines, pd => pd.DisciplineId, d => d.Id, (pd, d) => new { pd.Id, d.Name })
+            .Join(db.Disciplines, pd => pd.DisciplineId, d => d.Id, (pd, d) => new DisciplineName(pd.Id, d.Name))
             .ToDictionaryAsync(d => d.Id, d => d.Name);
         var ownerIds = entries.Select(e => e.OwnerId).Distinct().ToArray();
         var owners = await db.Users.AsNoTracking().Where(u => ownerIds.Contains(u.Id))
             .ToDictionaryAsync(u => u.Id, u => u.DisplayName);
         var rows = entries.SelectMany(e => versions.Where(v => v.EntryId == e.Id).OrderBy(v => v.Number)
-            .Select(v => new { e.Key, e.Title, e.Kind,
-                Discipline = disciplines.GetValueOrDefault(e.ProjectDisciplineId),
-                Owner = owners.GetValueOrDefault(e.OwnerId), Version = v.Number, v.Status, v.Scope, v.Statement,
+            .Select(v => new ExportRow(e.Key, e.Title, e.Kind, disciplines.GetValueOrDefault(e.ProjectDisciplineId),
+                owners.GetValueOrDefault(e.OwnerId), v.Number, v.Status, v.Scope, v.Statement,
                 v.NumericValue, v.Units, v.SourceSystem, v.StableSourceId, v.SourceUrl, v.DeclaredRevision,
-                v.ConfirmationDueDate })).ToList();
+                v.ConfirmationDueDate))).ToList();
         return await ExportFile.Send(db, settings, format, $"{project.ProjectNumber} design basis", ExportColumns,
             JsonSerializer.SerializeToNode(rows, JsonOpts.Web)!.AsArray(), await ListExportEndpoints.Filters(db, http, access),
             project.Id, $"{project.ProjectNumber}-design-basis", clock);
     }
 
-    static async Task<object> Detail(Guid projectId, Guid id, Access access, HubDb db, SettingsStore settings)
+    static async Task<Ok<BasisDetail>> Detail(Guid projectId, Guid id, Access access, HubDb db, SettingsStore settings)
     {
         var (_, ctx) = await access.Project(projectId, false);
         var entry = await Entry(db, projectId, id);
@@ -542,7 +593,7 @@ public static class DesignBasisEndpoints
             .OrderBy(v => v.Number).ToListAsync();
         var ids = versions.Select(v => v.Id).ToArray();
         var uses = await db.BasisUses.AsNoTracking().Where(u => u.ProjectId == projectId && ids.Contains(u.VersionId)).ToListAsync();
-        var currentUseIds = uses.GroupBy(u => new { u.TargetType, u.TargetId })
+        var currentUseIds = uses.GroupBy(u => (u.TargetType, u.TargetId))
             .Select(g => g.OrderByDescending(u => u.CreatedAt).ThenByDescending(u => u.Id).First().Id).ToHashSet();
         var impacts = await db.BasisImpactAssessments.AsNoTracking().Where(a => a.ProjectId == projectId && ids.Contains(a.OldVersionId)).ToListAsync();
         var conflicts = await db.BasisConflicts.AsNoTracking().Where(c => c.ProjectId == projectId &&
@@ -559,16 +610,17 @@ public static class DesignBasisEndpoints
                 v.Statement, v.NumericValue, v.Units);
         }
         var dispositions = await db.BasisAssumptionDispositions.AsNoTracking().Where(d => d.ProjectId == projectId && ids.Contains(d.VersionId)).ToListAsync();
-        return new { Entry = entry, Versions = versions.Select(v => new { Version = v,
-                SourceMissing = string.IsNullOrWhiteSpace(v.SourceUrl) || string.IsNullOrWhiteSpace(v.SourceSystem) || string.IsNullOrWhiteSpace(v.DeclaredRevision) }),
-            Uses = uses.Select(u => new { u.Id, u.VersionId, u.TargetType, u.TargetId, u.OwnerId, u.IntendedUse,
-                u.RowVersion, IsCurrent = currentUseIds.Contains(u.Id) }), Impacts = impacts, Conflicts = conflicts.Select(c => new { c.Id, c.Resolved, c.RowVersion,
-                Left = Side(c.LeftVersionId), Right = Side(c.RightVersionId) }),
-            Dispositions = dispositions,
-            CanManage = Permissions.ManageCoordination(access.Actor, ctx, entry.ProjectDisciplineId).Ok,
-            CanEditProposed = Permissions.NamedCoordinationAction(access.Actor, ctx, entry.OwnerId).Ok ||
+        return TypedResults.Ok(new BasisDetail(BasisEntryRow.From(entry),
+            versions.Select(v => new BasisVersionItem(BasisVersionRow.From(v),
+                string.IsNullOrWhiteSpace(v.SourceUrl) || string.IsNullOrWhiteSpace(v.SourceSystem) || string.IsNullOrWhiteSpace(v.DeclaredRevision))).ToList(),
+            uses.Select(u => new BasisUseRow(u.Id, u.VersionId, u.TargetType, u.TargetId, u.OwnerId, u.IntendedUse, u.RowVersion, currentUseIds.Contains(u.Id))).ToList(),
+            impacts.Select(BasisImpactRow.From).ToList(),
+            conflicts.Select(c => new BasisConflictRow(c.Id, c.Resolved, c.RowVersion, Side(c.LeftVersionId), Side(c.RightVersionId))).ToList(),
+            dispositions.Select(BasisDispositionRow.From).ToList(),
+            Permissions.ManageCoordination(access.Actor, ctx, entry.ProjectDisciplineId).Ok,
+            Permissions.NamedCoordinationAction(access.Actor, ctx, entry.OwnerId).Ok ||
                 Permissions.ManageCoordination(access.Actor, ctx, entry.ProjectDisciplineId).Ok,
-            CanConfirm = Permissions.ConfirmBasis(access.Actor, ctx, entry.ProjectDisciplineId, entry.IndependentApproverId).Ok &&
-                ((await settings.Get(db)).AllowSelfReview || access.Me.Id != entry.OwnerId) };
+            Permissions.ConfirmBasis(access.Actor, ctx, entry.ProjectDisciplineId, entry.IndependentApproverId).Ok &&
+                ((await settings.Get(db)).AllowSelfReview || access.Me.Id != entry.OwnerId)));
     }
 }

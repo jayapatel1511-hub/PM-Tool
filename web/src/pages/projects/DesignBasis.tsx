@@ -11,7 +11,9 @@ import { Textarea } from '@/components/ui/textarea'
 import { ActiveFilters, ChipToggle, Empty, ErrorBanner, Field, FilterBar, Loading, Page, Spinner, TableRegion, tdCls, thCls } from '@/components/hub/common'
 import { ExportMenu } from '@/components/hub/export'
 import { Pill } from '@/components/hub/pills'
+import type { components } from '@/gen/api'
 import { ApiError, get, post, typedRequest } from '@/lib/api'
+import { invalidateChange } from '@/lib/keys'
 import { fmtDate } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
@@ -20,21 +22,10 @@ import { useCurrentProject } from './ProjectLayout'
 import { DraftNotice } from '@/components/hub/drafts'
 import { useSafeForm } from '@/hooks/drafts'
 
-type EntryRow = { id: string; key: string; title: string; kind: string; ownerId: string; projectDisciplineId: string;
-  currentVersionId?: string; rowVersion: number; currentStatus?: string; currentScope?: string; latestStatus?: string;
-  latestVersionId?: string; confirmationDueDate?: string; conflictCount: number }
-type Entry = EntryRow & { independentApproverId?: string }
-type Version = { id: string; entryId: string; number: number; status: string; scope: string; statement: string;
-  numericValue?: number; units?: string; sourceSystem?: string; stableSourceId?: string; sourceUrl?: string;
-  declaredRevision?: string; confirmationDueDate?: string; rowVersion: number; supersedesVersionId?: string;
-  confirmedBy?: string; confirmedAt?: string; confirmationRationale?: string; decisionId?: string }
-type Detail = { entry: Entry; versions: { version: Version; sourceMissing: boolean }[];
-  uses: { id: string; versionId: string; targetType: string; targetId: string; intendedUse: string; ownerId: string; rowVersion: number; isCurrent: boolean }[];
-  impacts: { id: string; basisUseId: string; oldVersionId: string; newVersionId?: string; withdrawalVersionId?: string; status: string; ownerId: string; rowVersion: number; rationale?: string; evidenceUrl?: string }[];
-  conflicts: { id: string; resolved: boolean; rowVersion: number; left: { versionId: string; entryKey: string; scope: string; statement: string; numericValue?: number; units?: string };
-    right: { versionId: string; entryKey: string; scope: string; statement: string; numericValue?: number; units?: string } }[];
-  dispositions: { id: string; versionId: string; scope: string; ownerId: string; approvedBy: string; expiresOn: string; reason: string }[];
-  canManage: boolean; canEditProposed: boolean; canConfirm: boolean }
+type Schemas = components['schemas']
+type Entry = Schemas['BasisEntryRow']
+type Version = Schemas['BasisVersionRow']
+type Detail = Schemas['BasisDetail']
 type Team = { members: { userId: string; displayName: string; primaryDisciplineId?: string }[] }
 type VersionDraft = { scope: string; statement: string; numericValue: string; units: string; sourceSystem: string;
   stableSourceId: string; sourceUrl: string; declaredRevision: string; confirmationDueDate: string; decisionId: string }
@@ -79,13 +70,12 @@ export function DesignBasisTab() {
   const allowedDisciplines = project.permissions.createBasisIn
   const canCreate = !!options.data?.canWrite && allowedDisciplines.length > 0
   const filters = { kind, status, disciplineId: discipline, scope, overdue, affectedWorkId }
-  const params = new URLSearchParams({ page: String(page) })
-  for (const [key, value] of Object.entries(filters)) if (value) params.set(key, value)
   const list = useQuery({ queryKey: ['design-basis', project.id, page, filters],
-    queryFn: () => get<{ items: EntryRow[]; pageSize: number; totalCount: number }>(`${base}?${params}`) })
-  const refresh = () => { qc.invalidateQueries({ queryKey: ['design-basis', project.id] }); qc.invalidateQueries({ queryKey: ['design-basis-detail', project.id] }) }
-  const member = (id?: string) => team.data?.members.find(m => m.userId === id)?.displayName
-  const name = (id?: string) => member(id) ?? t('coord.unavailable')
+    queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/design-basis', { params: { projectId: project.id },
+      query: { Kind: kind, Status: status, DisciplineId: discipline, Scope: scope, Overdue: overdue === 'true', AffectedWorkId: affectedWorkId, page } }) })
+  const refresh = () => { invalidateChange(qc, 'DesignBasisEntry', project.id) }
+  const member = (id?: string | null) => team.data?.members.find(m => m.userId === id)?.displayName
+  const name = (id?: string | null) => member(id) ?? t('coord.unavailable')
   const work = options.data && affectedWorkId ? [...options.data.tasks, ...options.data.deliverables].find(w => w.id === affectedWorkId) : undefined
   // Active filters as removable tokens (§13.0 Filters); the URL keeps the same parameters.
   const tokens = [
@@ -133,7 +123,7 @@ export function DesignBasisTab() {
     {list.data && <RegisterPager label={t('basis.pager')} page={page} total={list.data.totalCount} pageSize={list.data.pageSize} onPage={n => set('page', String(n))} />}
     {adding && options.data && <BasisForm base={base} number={project.projectNumber} options={options.data}
       allowedDisciplines={allowedDisciplines} assignIn={project.permissions.assignBasisIn} onClose={() => setAdding(false)} onDone={id => { setAdding(false); refresh(); set('basis', id) }} />}
-    {selected && <BasisDetail base={base} id={selected} number={project.projectNumber} options={options.data} name={name}
+    {selected && <BasisDetail projectId={project.id} base={base} id={selected} number={project.projectNumber} options={options.data} name={name}
       close={() => set('basis', '')} refresh={refresh} />}
   </Page>
 }
@@ -212,9 +202,9 @@ function BasisForm({ base, number, options, onClose, onDone, existing, editing, 
     </form></DialogContent></Dialog>
 }
 
-function BasisDetail({ base, id, number, options, name, close, refresh }: { base: string; id: string; number: string;
-  options?: CoordOptions; name: (id?: string) => string; close: () => void; refresh: () => void }) {
-  const q = useQuery({ queryKey: ['design-basis-detail', base, id], queryFn: () => get<Detail>(`${base}/${id}`) })
+function BasisDetail({ projectId, base, id, number, options, name, close, refresh }: { projectId: string; base: string; id: string; number: string;
+  options?: CoordOptions; name: (id?: string | null) => string; close: () => void; refresh: () => void }) {
+  const q = useQuery({ queryKey: ['design-basis-detail', base, id], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/design-basis/{id}', { params: { projectId, id } }) })
   const [action, setAction] = useState<'assign' | 'propose' | 'edit' | 'confirm' | 'proceed' | 'use' | 'withdraw' | 'resolveConflict' | null>(null)
   const [selectedImpact, setSelectedImpact] = useState<string | null>(null)
   const [selectedVersion, setSelectedVersion] = useState<Version | null>(null)

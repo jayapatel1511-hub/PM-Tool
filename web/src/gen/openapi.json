@@ -20988,7 +20988,7 @@
       }
     },
     "/api/v1/admin/audit-chains/{id}/verify": {
-      "get": {
+      "post": {
         "parameters": [
           {
             "in": "path",

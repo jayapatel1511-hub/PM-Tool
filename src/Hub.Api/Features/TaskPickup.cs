@@ -90,9 +90,7 @@ public static class TaskPickupEndpoints
         if (!await Enabled(db, store)) throw ApiException.NotFound();
         var (task, _, ctx) = await TaskEndpoints.Load(db, access, id);
         var offer = await db.Set<TaskPickupOffer>().FirstOrDefaultAsync(x => x.TaskId == id && x.ClosedAt == null) ?? throw ApiException.NotFound();
-        var assignee = task.AssigneeId is { } aid ? await db.Users.Where(u => u.Id == aid).Select(u => new { u.SupervisorId }).FirstOrDefaultAsync() : null;
-        Access.Demand(offer.OfferedById == me.Id || offer.AssigneeId == me.Id || TaskPickupRules.CanAssign(access.Actor, ctx, task.ProjectDisciplineId, assignee?.SupervisorId)
-            ? Allow.Yes : Allow.No("perm.pickup_withdraw"));
+        Access.Demand(TaskPickupRules.CanWithdraw(access.Actor, ctx, task.ProjectDisciplineId, offer) ? Allow.Yes : Allow.No("perm.pickup_withdraw"));
         offer.ClosedAt = clock.GetUtcNow(); offer.CloseCause = TaskPickupOffer.Withdrawn;
         var withdrawn = TaskPickupRules.CauseText(TaskPickupOffer.Withdrawn);
         db.Audit.Reason = withdrawn;
@@ -210,7 +208,7 @@ public static class TaskPickupEndpoints
         return TypedResults.Ok(new DetailResult(offer.Id, offer.Reason, offer.Note, offer.OpenedAt, offer.KeepWatching, task.RowVersion,
             new DetailTask(task.Key, task.Name, task.ProjectId, task.ProjectDisciplineId, task.DueDate),
             new Allowed(sameTeam && Permissions.Writable(access.Actor, ctx).Ok, canAssign && Permissions.Writable(access.Actor, ctx).Ok,
-                Permissions.Writable(access.Actor, ctx).Ok && (offer.OfferedById == me.Id || owner?.Id == me.Id || canAssign)),
+                Permissions.Writable(access.Actor, ctx).Ok && TaskPickupRules.CanWithdraw(access.Actor, ctx, task.ProjectDisciplineId, offer)),
             eligible.Select(u => new Candidate(u.Id, u.DisplayName)).ToList()));
     }
 
@@ -229,6 +227,10 @@ public static class TaskPickupRules
     /// FR-PKP-07: the assignee's direct manager, the project's PM or the task discipline's Lead may assign an offered task.
     public static bool CanAssign(Actor actor, ProjectContext ctx, Guid disciplineId, Guid? assigneeSupervisorId) =>
         Permissions.IsPM(actor, ctx) || Permissions.IsDL(ctx, disciplineId) || actor.Supervisor && assigneeSupervisorId == actor.Id;
+
+    /// FR-PKP-03: the offerer, the assignee, the PM or the Discipline Lead; a direct manager may assign an offer but not withdraw it.
+    public static bool CanWithdraw(Actor actor, ProjectContext ctx, Guid disciplineId, TaskPickupOffer offer) =>
+        offer.OfferedById == actor.Id || offer.AssigneeId == actor.Id || Permissions.IsPM(actor, ctx) || Permissions.IsDL(ctx, disciplineId);
 
     /// Fallback team rule for the pre-org-structure schema. Root can use the UnitId overload when enabled.
     public static bool SameTeam(bool orgStructureOn, Guid? assigneeUnitId, Guid? pickerUnitId, Guid? assigneeSupervisorId, Guid? pickerSupervisorId, bool assigneeActive, bool pickerActive)

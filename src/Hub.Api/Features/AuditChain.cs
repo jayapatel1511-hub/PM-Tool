@@ -23,7 +23,8 @@ public static class AuditChainEndpoints
         }).RequireFlag("verifiable_log");
         admin.MapGet("", async (HubDb db) => await db.Set<ActivityChainHead>().AsNoTracking().OrderBy(h => h.ChainId)
             .Select(h => new Head(h.ChainId, h.HeadSeq, h.HeadHash, h.LastVerifiedSeq, h.LastVerifiedHash, h.LastVerifiedAt, h.FirstBrokenSeq, h.AlertedBrokenSeq)).ToListAsync());
-        admin.MapGet("/{id:guid}/verify", async (Guid id, long? from, long? headSeq, string? headHash, HubDb db, TimeProvider clock) =>
+        // POST, so the Origin check covers it: a verify can raise an alert to every Admin, which a link must not trigger.
+        admin.MapPost("/{id:guid}/verify", async (Guid id, long? from, long? headSeq, string? headHash, HubDb db, TimeProvider clock) =>
             await AuditChainVerification.Check(db, id, from ?? 1, clock.GetUtcNow(), db.Audit.ActorId?.ToString() ?? "System", true, headHash, headSeq));
         admin.MapGet("/{id:guid}/record", async (Guid id, string? format, HubDb db, TimeProvider clock) =>
         {

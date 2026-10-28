@@ -2607,6 +2607,209 @@
         ],
         "type": "object"
       },
+      "AttentionList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AttentionRow"
+            },
+            "type": "array"
+          },
+          "snoozed": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "truncated": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "items",
+          "snoozed",
+          "total",
+          "truncated"
+        ],
+        "type": "object"
+      },
+      "AttentionRow": {
+        "properties": {
+          "ageDays": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "daysOverdueOrBlocked": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "dueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "firstDetectedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "itemId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "itemKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "itemName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "itemType": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "ownerName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "ownerUserId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "priority": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectDisciplineId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "routeToUserIds": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "ruleId": {
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "snoozeNote": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "snoozed": {
+            "type": "boolean"
+          },
+          "snoozedUntil": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "why": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/JsonElement"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "projectId",
+          "projectNumber",
+          "ruleId",
+          "ruleName",
+          "itemType",
+          "itemId",
+          "itemKey",
+          "itemName",
+          "severity",
+          "message",
+          "why",
+          "routeToUserIds",
+          "ownerUserId",
+          "ownerName",
+          "projectDisciplineId",
+          "daysOverdueOrBlocked",
+          "priority",
+          "dueDate",
+          "firstDetectedAt",
+          "ageDays",
+          "snoozed",
+          "snoozedUntil",
+          "snoozeNote"
+        ],
+        "type": "object"
+      },
+      "AttentionSnoozed": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "snoozedUntil": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "snoozedUntil"
+        ],
+        "type": "object"
+      },
       "AuthoriseBody": {
         "properties": {
           "acknowledged": {
@@ -7502,6 +7705,47 @@
         ],
         "type": "object"
       },
+      "HealthOverrideApplied": {
+        "properties": {
+          "healthOverrideExpiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "rowVersion",
+          "healthOverrideExpiresAt"
+        ],
+        "type": "object"
+      },
+      "HealthOverrideRemoved": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
       "History": {
         "properties": {
           "current": {
@@ -11340,6 +11584,91 @@
           "copyFromProjectId",
           "templateId",
           "template"
+        ],
+        "type": "object"
+      },
+      "ProjectEvaluation": {
+        "properties": {
+          "computedHealth": {
+            "type": "string"
+          },
+          "counts": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/JsonElement"
+              }
+            ]
+          },
+          "disciplines": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/JsonElement"
+              }
+            ]
+          },
+          "evaluatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "healthReasons": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/JsonElement"
+              }
+            ]
+          },
+          "inputs": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/JsonElement"
+              }
+            ]
+          },
+          "nextMilestoneId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "nextSubmissionMilestoneId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "progressPct": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ]
+          }
+        },
+        "required": [
+          "computedHealth",
+          "healthReasons",
+          "inputs",
+          "counts",
+          "disciplines",
+          "nextMilestoneId",
+          "nextSubmissionMilestoneId",
+          "progressPct",
+          "evaluatedAt"
         ],
         "type": "object"
       },
@@ -18795,6 +19124,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttentionSnoozed"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -24593,7 +24929,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/AttentionList"
+                }
               }
             },
             "description": "OK"
@@ -25751,6 +26089,13 @@
         ],
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthOverrideRemoved"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -25782,6 +26127,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthOverrideApplied"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -27058,7 +27410,17 @@
         ],
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectEvaluation"
+                }
+              }
+            },
             "description": "OK"
+          },
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [

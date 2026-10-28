@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Net;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
@@ -163,6 +164,86 @@ public sealed class EvaluationTests(HubFactory f)
             var back = await pm.GetAsync($"/api/v1/projects/{p.Id}/attention").Result.Json();
             Assert.Contains(back["items"]!.AsArray(), x => x!.S("ruleId") == "A-03");
         });
+    }
+
+    static string[] Keys(JsonNode? n) => n!.AsObject().Select(x => x.Key).ToArray();
+
+    [Fact]
+    public async Task Attention_snooze_override_and_state_answers_keep_their_property_names_order_kinds_and_refusals() // the typed records must serialise to the bytes the Dashboard, Health dialog and My Work already read
+    {
+        var p = await d.Project();
+        var a = await d.NewTask(p.Id, TestData.Pm, new { assigneeId = U(TestData.Alex), dueDate = "2026-09-10" });
+        await d.NewTask(p.Id, TestData.Pm, new { assigneeId = U(TestData.Jill), dependsOn = new[] { a.G("id") } });
+        await f.Evaluate(p.Id);
+        var pm = f.As(TestData.Pm);
+        string[] rowKeys = ["id", "projectId", "projectNumber", "ruleId", "ruleName", "itemType", "itemId", "itemKey", "itemName", "severity", "message", "why", "routeToUserIds", "ownerUserId",
+            "ownerName", "projectDisciplineId", "daysOverdueOrBlocked", "priority", "dueDate", "firstDetectedAt", "ageDays", "snoozed", "snoozedUntil", "snoozeNote"];
+
+        var list = await pm.GetAsync($"/api/v1/projects/{p.Id}/attention").Result.Json();
+        Assert.Equal(["items", "snoozed", "total", "truncated"], Keys(list));
+        Assert.Equal((0, false), (list.I("snoozed"), list["truncated"]!.GetValue<bool>()));
+        var items = list["items"]!.AsArray().Select(x => x!).ToArray();
+        Assert.Equal(items.Length, list.I("total"));
+        Assert.True(items.Length >= 2);
+        Assert.Equal("A-03", items[0].S("ruleId")); // ranked: blocking-and-overdue first
+        Assert.All(items, x =>
+        {
+            Assert.Equal(rowKeys, Keys(x));
+            Assert.All(new[] { "id", "projectId", "projectNumber", "ruleId", "ruleName", "itemType", "itemId", "severity", "message", "firstDetectedAt" }, k => Assert.Equal(JsonValueKind.String, x[k]!.GetValueKind()));
+            Assert.All(new[] { "daysOverdueOrBlocked", "ageDays" }, k => Assert.Equal(JsonValueKind.Number, x[k]!.GetValueKind()));
+            Assert.Equal(JsonValueKind.Array, x["routeToUserIds"]!.GetValueKind());
+            Assert.Equal(JsonValueKind.Object, x["why"]!.GetValueKind());
+            Assert.Equal(JsonValueKind.False, x["snoozed"]!.GetValueKind());
+            Assert.Equal((null, null), (x["snoozedUntil"], x["snoozeNote"])); // present (the key order above) and null
+            Assert.Equal(p.ProjectNumber, x.S("projectNumber"));
+        });
+        Assert.Equal((U(TestData.Alex), "Alex Chen"), (items[0].G("ownerUserId"), items[0].S("ownerName")));
+        Assert.Equal(JsonValueKind.String, items[0]["itemKey"]!.GetValueKind());
+        Assert.Equal(JsonValueKind.String, items[0]["dueDate"]!.GetValueKind());
+        Assert.Equal(JsonValueKind.String, items[0]["priority"]!.GetValueKind());
+        Assert.Equal(JsonValueKind.String, items[0]["projectDisciplineId"]!.GetValueKind());
+
+        var snoozed = await pm.Post($"/api/v1/attention/{items[0].S("id")}/snooze", new { days = 7, note = "Waiting on the client" }).Result.Json();
+        Assert.Equal(["id", "snoozedUntil"], Keys(snoozed));
+        Assert.Equal(JsonValueKind.String, snoozed["id"]!.GetValueKind());
+        Assert.Equal(JsonValueKind.String, snoozed["snoozedUntil"]!.GetValueKind());
+        var all = await pm.GetAsync($"/api/v1/projects/{p.Id}/attention?includeSnoozed=true").Result.Json();
+        Assert.Equal(["items", "snoozed", "total", "truncated"], Keys(all));
+        Assert.Equal((1, items.Length - 1), (all.I("snoozed"), all.I("total")));
+        var row = all["items"]!.AsArray().Single(x => x!.S("id") == items[0].S("id"))!;
+        Assert.Equal(rowKeys, Keys(row));
+        Assert.Equal((true, "Waiting on the client", snoozed.S("snoozedUntil")), (row["snoozed"]!.GetValue<bool>(), row.S("snoozeNote"), row.S("snoozedUntil")));
+        Assert.Equal(items.Length - 1, (await pm.GetAsync($"/api/v1/projects/{p.Id}/attention").Result.Json())["items"]!.AsArray().Count);
+        Assert.Equal(["items", "snoozed", "total", "truncated"], Keys(await pm.GetAsync($"/api/v1/projects/{p.Id}/attention?severity=Nothing").Result.Json())); // an empty list is still the same envelope
+        Assert.Empty((await pm.GetAsync($"/api/v1/projects/{p.Id}/attention?severity=Nothing").Result.Json())["items"]!.AsArray());
+
+        var before = d.Version(p.Id);
+        var set = await pm.Post($"/api/v1/projects/{p.Id}/health-override", new { health = "Green", note = "Recovery plan agreed", rowVersion = before }).Result.Json();
+        Assert.Equal(["id", "rowVersion", "healthOverrideExpiresAt"], Keys(set));
+        Assert.Equal((p.Id, JsonValueKind.Number, JsonValueKind.String), (set.G("id"), set["rowVersion"]!.GetValueKind(), set["healthOverrideExpiresAt"]!.GetValueKind()));
+        Assert.True(set.I("rowVersion") > before);
+        var cleared = await pm.Delete($"/api/v1/projects/{p.Id}/health-override", set.I("rowVersion")).Result.Json();
+        Assert.Equal(["id", "rowVersion"], Keys(cleared));
+        Assert.Equal((p.Id, JsonValueKind.Number), (cleared.G("id"), cleared["rowVersion"]!.GetValueKind()));
+        Assert.True(cleared.I("rowVersion") > set.I("rowVersion"));
+
+        var state = await pm.GetAsync($"/api/v1/projects/{p.Id}/state").Result.Json();
+        Assert.Equal(["computedHealth", "healthReasons", "inputs", "counts", "disciplines", "nextMilestoneId", "nextSubmissionMilestoneId", "progressPct", "evaluatedAt"], Keys(state));
+        Assert.Equal(JsonValueKind.String, state["computedHealth"]!.GetValueKind());
+        Assert.Equal((JsonValueKind.Array, JsonValueKind.Object, JsonValueKind.Object, JsonValueKind.Array), (state["healthReasons"]!.GetValueKind(), state["inputs"]!.GetValueKind(), state["counts"]!.GetValueKind(), state["disciplines"]!.GetValueKind()));
+        Assert.Equal((null, null), (state["nextMilestoneId"], state["nextSubmissionMilestoneId"])); // present (the key order above) and null
+        Assert.Equal(JsonValueKind.String, state["evaluatedAt"]!.GetValueKind());
+
+        var ghost = Guid.NewGuid();
+        Assert.Equal(HttpStatusCode.NotFound, (await pm.GetAsync($"/api/v1/projects/{ghost}/attention")).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await pm.GetAsync($"/api/v1/projects/{ghost}/state")).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await pm.Post($"/api/v1/attention/{ghost}/snooze", new { days = 7, note = "Nobody" })).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await pm.Post($"/api/v1/projects/{ghost}/health-override", new { health = "Green", note = "Nobody", rowVersion = 1 })).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await pm.Delete($"/api/v1/projects/{ghost}/health-override", 1)).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await pm.Post($"/api/v1/attention/{items[1].S("id")}/snooze", new { days = 0, note = "Too short" })).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await pm.Post($"/api/v1/attention/{items[1].S("id")}/snooze", new { days = 7, note = "" })).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await pm.Post($"/api/v1/projects/{p.Id}/health-override", new { health = "Green", note = "", rowVersion = cleared.I("rowVersion") })).StatusCode);
+        Assert.Equal(HttpStatusCode.Conflict, (await pm.Post($"/api/v1/projects/{p.Id}/health-override", new { health = "Green", note = "Stale view", rowVersion = before })).StatusCode);
     }
 
     [Fact]

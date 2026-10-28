@@ -306,6 +306,29 @@
       "string"
     ]
   },
+  "DELETE /api/v1/projects/{id}/health-override 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "DELETE /api/v1/projects/{id}/health-override 409": {
     "$": [
       "object"
@@ -12572,6 +12595,339 @@
     "$.components.schemas.Assignment.type": [
       "string"
     ],
+    "$.components.schemas.AttentionList": [
+      "object"
+    ],
+    "$.components.schemas.AttentionList.properties": [
+      "object"
+    ],
+    "$.components.schemas.AttentionList.properties.items": [
+      "object"
+    ],
+    "$.components.schemas.AttentionList.properties.items.items": [
+      "object"
+    ],
+    "$.components.schemas.AttentionList.properties.items.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.AttentionList.properties.items.type": [
+      "string"
+    ],
+    "$.components.schemas.AttentionList.properties.snoozed": [
+      "object"
+    ],
+    "$.components.schemas.AttentionList.properties.snoozed.format": [
+      "string"
+    ],
+    "$.components.schemas.AttentionList.properties.snoozed.pattern": [
+      "string"
+    ],
+    "$.components.schemas.AttentionList.properties.snoozed.type": [
+      "string"
+    ],
+    "$.components.schemas.AttentionList.properties.total": [
+      "object"
+    ],
+    "$.components.schemas.AttentionList.properties.total.format": [
+      "string"
+    ],
+    "$.components.schemas.AttentionList.properties.total.pattern": [
+      "string"
+    ],
+    "$.components.schemas.AttentionList.properties.total.type": [
+      "string"
+    ],
+    "$.components.schemas.AttentionList.properties.truncated": [
+      "object"
+    ],
+    "$.components.schemas.AttentionList.properties.truncated.type": [
+      "string"
+    ],
+    "$.components.schemas.AttentionList.required": [
+      "array"
+    ],
+    "$.components.schemas.AttentionList.required[]": [
+      "string"
+    ],
+    "$.components.schemas.AttentionList.type": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow": [
+      "object"
+    ],
+    "$.components.schemas.AttentionRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.AttentionRow.properties.ageDays": [
+      "object"
+    ],
+    "$.components.schemas.AttentionRow.properties.ageDays.format": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.ageDays.pattern": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.ageDays.type": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.daysOverdueOrBlocked": [
+      "object"
+    ],
+    "$.components.schemas.AttentionRow.properties.daysOverdueOrBlocked.format": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.daysOverdueOrBlocked.pattern": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.daysOverdueOrBlocked.type": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.dueDate": [
+      "object"
+    ],
+    "$.components.schemas.AttentionRow.properties.dueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.dueDate.type": [
+      "array"
+    ],
+    "$.components.schemas.AttentionRow.properties.dueDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.firstDetectedAt": [
+      "object"
+    ],
+    "$.components.schemas.AttentionRow.properties.firstDetectedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.firstDetectedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.AttentionRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.itemId": [
+      "object"
+    ],
+    "$.components.schemas.AttentionRow.properties.itemId.format": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.itemId.type": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.itemKey": [
+      "object"
+    ],
+    "$.components.schemas.AttentionRow.properties.itemKey.type": [
+      "array"
+    ],
+    "$.components.schemas.AttentionRow.properties.itemKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.itemName": [
+      "object"
+    ],
+    "$.components.schemas.AttentionRow.properties.itemName.type": [
+      "array"
+    ],
+    "$.components.schemas.AttentionRow.properties.itemName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.itemType": [
+      "object"
+    ],
+    "$.components.schemas.AttentionRow.properties.itemType.type": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.message": [
+      "object"
+    ],
+    "$.components.schemas.AttentionRow.properties.message.type": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.ownerName": [
+      "object"
+    ],
+    "$.components.schemas.AttentionRow.properties.ownerName.type": [
+      "array"
+    ],
+    "$.components.schemas.AttentionRow.properties.ownerName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.ownerUserId": [
+      "object"
+    ],
+    "$.components.schemas.AttentionRow.properties.ownerUserId.format": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.ownerUserId.type": [
+      "array"
+    ],
+    "$.components.schemas.AttentionRow.properties.ownerUserId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.priority": [
+      "object"
+    ],
+    "$.components.schemas.AttentionRow.properties.priority.type": [
+      "array"
+    ],
+    "$.components.schemas.AttentionRow.properties.priority.type[]": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.projectDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.AttentionRow.properties.projectDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.projectDisciplineId.type": [
+      "array"
+    ],
+    "$.components.schemas.AttentionRow.properties.projectDisciplineId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.AttentionRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.AttentionRow.properties.projectNumber.type": [
+      "array"
+    ],
+    "$.components.schemas.AttentionRow.properties.projectNumber.type[]": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.routeToUserIds": [
+      "object"
+    ],
+    "$.components.schemas.AttentionRow.properties.routeToUserIds.items": [
+      "object"
+    ],
+    "$.components.schemas.AttentionRow.properties.routeToUserIds.items.format": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.routeToUserIds.items.type": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.routeToUserIds.type": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.ruleId": [
+      "object"
+    ],
+    "$.components.schemas.AttentionRow.properties.ruleId.type": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.ruleName": [
+      "object"
+    ],
+    "$.components.schemas.AttentionRow.properties.ruleName.type": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.severity": [
+      "object"
+    ],
+    "$.components.schemas.AttentionRow.properties.severity.type": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.snoozeNote": [
+      "object"
+    ],
+    "$.components.schemas.AttentionRow.properties.snoozeNote.type": [
+      "array"
+    ],
+    "$.components.schemas.AttentionRow.properties.snoozeNote.type[]": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.snoozed": [
+      "object"
+    ],
+    "$.components.schemas.AttentionRow.properties.snoozed.type": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.snoozedUntil": [
+      "object"
+    ],
+    "$.components.schemas.AttentionRow.properties.snoozedUntil.format": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.snoozedUntil.type": [
+      "array"
+    ],
+    "$.components.schemas.AttentionRow.properties.snoozedUntil.type[]": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.why": [
+      "object"
+    ],
+    "$.components.schemas.AttentionRow.properties.why.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.AttentionRow.properties.why.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.AttentionRow.properties.why.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.properties.why.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.required": [
+      "array"
+    ],
+    "$.components.schemas.AttentionRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.AttentionRow.type": [
+      "string"
+    ],
+    "$.components.schemas.AttentionSnoozed": [
+      "object"
+    ],
+    "$.components.schemas.AttentionSnoozed.properties": [
+      "object"
+    ],
+    "$.components.schemas.AttentionSnoozed.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.AttentionSnoozed.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.AttentionSnoozed.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.AttentionSnoozed.properties.snoozedUntil": [
+      "object"
+    ],
+    "$.components.schemas.AttentionSnoozed.properties.snoozedUntil.format": [
+      "string"
+    ],
+    "$.components.schemas.AttentionSnoozed.properties.snoozedUntil.type": [
+      "string"
+    ],
+    "$.components.schemas.AttentionSnoozed.required": [
+      "array"
+    ],
+    "$.components.schemas.AttentionSnoozed.required[]": [
+      "string"
+    ],
+    "$.components.schemas.AttentionSnoozed.type": [
+      "string"
+    ],
     "$.components.schemas.AuthoriseBody": [
       "object"
     ],
@@ -20909,6 +21265,87 @@
     "$.components.schemas.HeaderBody.type": [
       "string"
     ],
+    "$.components.schemas.HealthOverrideApplied": [
+      "object"
+    ],
+    "$.components.schemas.HealthOverrideApplied.properties": [
+      "object"
+    ],
+    "$.components.schemas.HealthOverrideApplied.properties.healthOverrideExpiresAt": [
+      "object"
+    ],
+    "$.components.schemas.HealthOverrideApplied.properties.healthOverrideExpiresAt.format": [
+      "string"
+    ],
+    "$.components.schemas.HealthOverrideApplied.properties.healthOverrideExpiresAt.type": [
+      "string"
+    ],
+    "$.components.schemas.HealthOverrideApplied.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.HealthOverrideApplied.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.HealthOverrideApplied.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.HealthOverrideApplied.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.HealthOverrideApplied.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.HealthOverrideApplied.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.HealthOverrideApplied.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.HealthOverrideApplied.required": [
+      "array"
+    ],
+    "$.components.schemas.HealthOverrideApplied.required[]": [
+      "string"
+    ],
+    "$.components.schemas.HealthOverrideApplied.type": [
+      "string"
+    ],
+    "$.components.schemas.HealthOverrideRemoved": [
+      "object"
+    ],
+    "$.components.schemas.HealthOverrideRemoved.properties": [
+      "object"
+    ],
+    "$.components.schemas.HealthOverrideRemoved.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.HealthOverrideRemoved.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.HealthOverrideRemoved.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.HealthOverrideRemoved.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.HealthOverrideRemoved.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.HealthOverrideRemoved.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.HealthOverrideRemoved.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.HealthOverrideRemoved.required": [
+      "array"
+    ],
+    "$.components.schemas.HealthOverrideRemoved.required[]": [
+      "string"
+    ],
+    "$.components.schemas.HealthOverrideRemoved.type": [
+      "string"
+    ],
     "$.components.schemas.History": [
       "object"
     ],
@@ -27534,6 +27971,135 @@
       "string"
     ],
     "$.components.schemas.ProjectCreateBody.type": [
+      "string"
+    ],
+    "$.components.schemas.ProjectEvaluation": [
+      "object"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties": [
+      "object"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.computedHealth": [
+      "object"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.computedHealth.type": [
+      "string"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.counts": [
+      "object"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.counts.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.counts.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.counts.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.counts.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.disciplines": [
+      "object"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.disciplines.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.disciplines.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.disciplines.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.disciplines.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.evaluatedAt": [
+      "object"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.evaluatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.evaluatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.healthReasons": [
+      "object"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.healthReasons.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.healthReasons.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.healthReasons.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.healthReasons.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.inputs": [
+      "object"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.inputs.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.inputs.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.inputs.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.inputs.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.nextMilestoneId": [
+      "object"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.nextMilestoneId.format": [
+      "string"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.nextMilestoneId.type": [
+      "array"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.nextMilestoneId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.nextSubmissionMilestoneId": [
+      "object"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.nextSubmissionMilestoneId.format": [
+      "string"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.nextSubmissionMilestoneId.type": [
+      "array"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.nextSubmissionMilestoneId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.progressPct": [
+      "object"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.progressPct.format": [
+      "string"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.progressPct.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.progressPct.type": [
+      "array"
+    ],
+    "$.components.schemas.ProjectEvaluation.properties.progressPct.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ProjectEvaluation.required": [
+      "array"
+    ],
+    "$.components.schemas.ProjectEvaluation.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ProjectEvaluation.type": [
       "string"
     ],
     "$.components.schemas.ProjectImportBody": [
@@ -40259,6 +40825,18 @@
     "$.paths./api/v1/attention/{id}/snooze.post.responses.200": [
       "object"
     ],
+    "$.paths./api/v1/attention/{id}/snooze.post.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/attention/{id}/snooze.post.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/attention/{id}/snooze.post.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/attention/{id}/snooze.post.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/attention/{id}/snooze.post.responses.200.description": [
       "string"
     ],
@@ -47564,6 +48142,9 @@
     "$.paths./api/v1/projects/{id}/attention.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/projects/{id}/attention.get.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/projects/{id}/attention.get.responses.200.description": [
       "string"
     ],
@@ -48968,6 +49549,18 @@
     "$.paths./api/v1/projects/{id}/health-override.delete.responses.200": [
       "object"
     ],
+    "$.paths./api/v1/projects/{id}/health-override.delete.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/health-override.delete.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/health-override.delete.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/health-override.delete.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/projects/{id}/health-override.delete.responses.200.description": [
       "string"
     ],
@@ -49027,6 +49620,18 @@
     ],
     "$.paths./api/v1/projects/{id}/health-override.post.responses.200": [
       "object"
+    ],
+    "$.paths./api/v1/projects/{id}/health-override.post.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/health-override.post.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/health-override.post.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/health-override.post.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/projects/{id}/health-override.post.responses.200.description": [
       "string"
@@ -50324,7 +50929,25 @@
     "$.paths./api/v1/projects/{id}/state.get.responses.200": [
       "object"
     ],
+    "$.paths./api/v1/projects/{id}/state.get.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/state.get.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/state.get.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/state.get.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/projects/{id}/state.get.responses.200.description": [
+      "string"
+    ],
+    "$.paths./api/v1/projects/{id}/state.get.responses.204": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/state.get.responses.204.description": [
       "string"
     ],
     "$.paths./api/v1/projects/{id}/state.get.tags": [
@@ -65023,6 +65646,29 @@
       "boolean"
     ]
   },
+  "GET /api/v1/projects/{id}/attention 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "GET /api/v1/projects/{id}/closeout 200": {
     "$": [
       "object"
@@ -69999,7 +70645,8 @@
       "object"
     ],
     "$.disciplines[].reasons[].colour": [
-      "null"
+      "null",
+      "string"
     ],
     "$.disciplines[].reasons[].rule": [
       "string"
@@ -70008,7 +70655,8 @@
       "string"
     ],
     "$.disciplines[].reasons[].threshold": [
-      "null"
+      "null",
+      "number"
     ],
     "$.disciplines[].reasons[].values": [
       "null"
@@ -70029,7 +70677,8 @@
       "object"
     ],
     "$.healthReasons[].colour": [
-      "null"
+      "null",
+      "string"
     ],
     "$.healthReasons[].rule": [
       "string"
@@ -70038,13 +70687,50 @@
       "string"
     ],
     "$.healthReasons[].threshold": [
-      "null"
+      "null",
+      "number"
     ],
     "$.healthReasons[].values": [
       "null"
     ],
     "$.inputs": [
       "object"
+    ],
+    "$.inputs.dec_overdue": [
+      "number"
+    ],
+    "$.inputs.dec_overdue_blocking": [
+      "number"
+    ],
+    "$.inputs.del_overdue": [
+      "number"
+    ],
+    "$.inputs.del_overdue_5": [
+      "number"
+    ],
+    "$.inputs.inactive_owner": [
+      "number"
+    ],
+    "$.inputs.issue_high": [
+      "number"
+    ],
+    "$.inputs.ms_at_risk": [
+      "number"
+    ],
+    "$.inputs.ms_overdue": [
+      "number"
+    ],
+    "$.inputs.open_tasks": [
+      "number"
+    ],
+    "$.inputs.task_blocked_long": [
+      "number"
+    ],
+    "$.inputs.task_overdue": [
+      "number"
+    ],
+    "$.inputs.task_overdue_pct": [
+      "number"
     ],
     "$.nextMilestoneId": [
       "null"
@@ -70055,6 +70741,29 @@
     "$.progressPct": [
       "null",
       "number"
+    ]
+  },
+  "GET /api/v1/projects/{id}/state 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
     ]
   },
   "GET /api/v1/projects/{id}/tasks 200": {
@@ -84839,6 +85548,12 @@
     "$.errors.days[]": [
       "string"
     ],
+    "$.errors.note": [
+      "array"
+    ],
+    "$.errors.note[]": [
+      "string"
+    ],
     "$.status": [
       "number"
     ],
@@ -84853,6 +85568,29 @@
     ]
   },
   "POST /api/v1/attention/{id}/snooze 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "POST /api/v1/attention/{id}/snooze 404": {
     "$": [
       "object"
     ],
@@ -88521,6 +89259,12 @@
     "$.errors.health[]": [
       "string"
     ],
+    "$.errors.note": [
+      "array"
+    ],
+    "$.errors.note[]": [
+      "string"
+    ],
     "$.status": [
       "number"
     ],
@@ -88540,6 +89284,61 @@
     ],
     "$.code": [
       "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "POST /api/v1/projects/{id}/health-override 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "POST /api/v1/projects/{id}/health-override 409": {
+    "$": [
+      "object"
+    ],
+    "$.changedAt": [
+      "string"
+    ],
+    "$.changedBy": [
+      "string"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.currentRowVersion": [
+      "number"
     ],
     "$.detail": [
       "string"

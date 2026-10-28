@@ -5,6 +5,7 @@ const { chromium } = require('playwright');
 const path = require('path'), { spawn } = require('child_process'), assert = require('assert/strict');
 const { decisionRow, externalParty } = require('./decisions.fixture.cjs');
 const { commitmentRow, commitmentList } = require('./weekly-commitments.fixture.cjs');
+const { attentionList } = require('./evaluation.fixture.cjs');
 const port = process.env.PORT ?? '5176', base = `http://127.0.0.1:${port}`;
 const id = n => `00000000-0000-0000-0000-${String(n).padStart(12, '0')}`;
 const pid = id(1), consumer = id(2), lead = id(3), civil = id(4), task = id(7), e1 = id(20), e2 = id(21), v11 = id(30), v12 = id(31), v21 = id(32), u1 = id(40), u2 = id(41), i1 = id(50), i2 = id(51);
@@ -81,7 +82,7 @@ let server, browser;
       milestones: [], deliverables: [], decisions: [], blocked: [], overdue: [], dueThisWeek: [], disciplines: [], issues: [], risks: [], waiting: [],
       completed: { tasks: [], deliverables: [], decisions: [] }, upcoming: { tasks: [], deliverables: [] }, held: { tasks: [], deliverables: [] }
     };
-    else if (p === `projects/${pid}/attention`) data = { items: [], snoozed: 0, total: 0 };
+    else if (p === `projects/${pid}/attention`) data = attentionList([]);
     else if (p === `projects/${pid}/discipline-coordination`) {
       const print = !u.searchParams.has('page') && !u.searchParams.has('pageSize');
       coordinationQueries.push({ params: Object.fromEntries(u.searchParams), print });

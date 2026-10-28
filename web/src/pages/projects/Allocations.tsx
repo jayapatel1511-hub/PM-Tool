@@ -12,7 +12,7 @@ import { FieldRow, HistoryList, TabBar } from '@/components/hub/fields'
 import { useItemPanel, type PanelProps } from '@/components/hub/panel-host'
 import { Avatar } from '@/components/hub/people'
 import { Pill, type Tone } from '@/components/hub/pills'
-import { FieldGroup, PanelHead, SELECTED_ROW, TITLE_LINK } from '@/components/hub/registers'
+import { DataTable, FieldGroup, PanelHead, SELECTED_ROW, TITLE_LINK } from '@/components/hub/registers'
 import { useTable, type Column } from '@/components/hub/table'
 import { ViewMenu } from '@/components/hub/views'
 import { Button } from '@/components/ui/button'
@@ -113,6 +113,20 @@ function Allocations(header: { title: string; subtitle: ReactNode }) {
     ['from', t('allocation.from'), filters.from && fmtDate(filters.from)],
     ['to', t('allocation.through'), filters.to && fmtDate(filters.to)],
   ] as const).filter(([k]) => filters[k]).map(([key, label, value]) => ({ key, label, value: value || t('common.dash') }))
+  // The list's columns, fixed and unsorted as the hand-rolled table was (§47.7): the server filters, orders and pages the rows.
+  const table = useTable<Allocation>('hub.allocationColumns', [
+    { id: 'person', label: t('workload.person'), fixed: true, className: 'align-top', cell: a => <div className="flex items-start gap-2.5">
+      <Avatar id={a.personId} name={a.personName} />
+      <div className="min-w-0">
+        <button className="break-words text-left font-semibold text-primary underline-offset-4 hover:underline" aria-current={selected === a.id || undefined} onClick={() => open(a.id)}>{a.personName ?? t('allocation.personUnavailable')}</button>
+        {a.personState !== 'Eligible' && ['Proposed', 'Confirmed'].includes(a.status) && <p className="mt-1 text-xs/[18px] text-warn"><span aria-hidden>▲ </span>{eligibility(a.personState)}</p>}
+      </div>
+    </div> },
+    { id: 'purpose', label: t('allocation.purpose'), fixed: true, className: 'align-top', cell: a => <Purpose purpose={a.purpose} /> },
+    { id: 'dates', label: t('allocation.dates'), fixed: true, className: 'whitespace-nowrap align-top tabular-nums', cell: a => <>{fmtDate(a.fromDate)} – {fmtDate(a.throughDate)}</> },
+    { id: 'hours', label: t('allocation.plannedHours'), fixed: true, className: 'text-right align-top font-medium tabular-nums', cell: a => hours(a.plannedHours) },
+    { id: 'status', label: t('allocation.status'), fixed: true, className: 'align-top', cell: a => <AllocationStatus status={a.status} /> },
+  ], list.data?.items ?? [], a => [a.fromDate, a.personName])
   return <Page {...header} actions={<><ViewMenu listType="allocations" projectId={project.id} panelParam="allocation" /><ExportMenu path={`${base}/export`} params={filters} name={`${project.projectNumber}-allocations`} extra={roleExport} />{proposal.shown && propose}</>}>
     <FilterBar activeCount={tokens.length}
       search={view === 'allocations' && <Field label={t('common.search')} htmlFor="allocation-search"><UrlSearchInput id="allocation-search" placeholder={t('allocation.search')} value={filters.q} onValueChange={value => change('q', value)} /></Field>}
@@ -131,29 +145,11 @@ function Allocations(header: { title: string; subtitle: ReactNode }) {
     {view === 'roles' ? <OpenRoles roles={roles} base={base} proposal={proposal} canFill={proposal.shown && !!options.data}
       onAdd={() => setRoleForm('new')} onEdit={setRoleForm} onCancel={setCancelling} onOpenAllocation={open}
       onFill={r => setFilling({ openRoleId: r.id, roleLabel: r.roleLabel, fromDate: r.fromDate, throughDate: r.throughDate, plannedHours: r.plannedHours })} /> : <>
-    {list.isPending ? <div className="rounded-lg border bg-card"><Loading rows={4} /></div> : list.error ? <ErrorBanner error={list.error} retry={() => list.refetch()} /> : !list.data.items.length ?
-      <div className="rounded-lg border bg-card">{filtered
-        ? <Empty title={t('allocation.emptyFilteredTitle')} action={<Button variant="outline" onClick={clear}>{t('filters.clear')}</Button>}>{t('allocation.emptyFiltered')}</Empty>
-        : <Empty title={t('allocation.empty')} action={proposal.shown && <Button variant="outline" {...proposal.props} onClick={() => setAdding(true)}><Plus className="size-4" />{t('allocation.new')}</Button>}>{proposal.shown && t('allocation.emptyHint')}</Empty>}</div>
-      : <TableRegion><table className="w-full text-left text-sm">
-        <caption className="sr-only">{t('allocation.title')}</caption>
-        <thead className="bg-muted"><tr>
-          <th scope="col" className={th}>{t('workload.person')}</th><th scope="col" className={th}>{t('allocation.purpose')}</th><th scope="col" className={th}>{t('allocation.dates')}</th>
-          <th scope="col" className={cn(th, 'text-right')}>{t('allocation.plannedHours')}</th><th scope="col" className={th}>{t('allocation.status')}</th>
-        </tr></thead>
-        <tbody>{list.data.items.map(a => <tr key={a.id} className={cn('border-t hover:bg-muted', selected === a.id && 'bg-accent shadow-[inset_3px_0_0_var(--primary)] hover:bg-accent')}>
-          <td className={td}><div className="flex items-start gap-2.5">
-            <Avatar id={a.personId} name={a.personName} />
-            <div className="min-w-0">
-              <button className="break-words text-left font-semibold text-primary underline-offset-4 hover:underline" aria-current={selected === a.id || undefined} onClick={() => open(a.id)}>{a.personName ?? t('allocation.personUnavailable')}</button>
-              {a.personState !== 'Eligible' && ['Proposed', 'Confirmed'].includes(a.status) && <p className="mt-1 text-xs/[18px] text-warn"><span aria-hidden>▲ </span>{eligibility(a.personState)}</p>}
-            </div>
-          </div></td>
-          <td className={td}><Purpose purpose={a.purpose} /></td>
-          <td className={cn(td, 'whitespace-nowrap tabular-nums')}>{fmtDate(a.fromDate)} – {fmtDate(a.throughDate)}</td>
-          <td className={cn(td, 'text-right font-medium tabular-nums')}>{hours(a.plannedHours)}</td>
-          <td className={td}><AllocationStatus status={a.status} /></td>
-        </tr>)}</tbody></table></TableRegion>}
+    {list.error ? <ErrorBanner error={list.error} retry={() => list.refetch()} />
+      : <DataTable table={table} rows={table.sorted} loading={list.isPending} wide caption={t('allocation.title')} current={a => selected === a.id}
+        empty={filtered
+          ? <Empty title={t('allocation.emptyFilteredTitle')} action={<Button variant="outline" onClick={clear}>{t('filters.clear')}</Button>}>{t('allocation.emptyFiltered')}</Empty>
+          : <Empty title={t('allocation.empty')} action={proposal.shown && <Button variant="outline" {...proposal.props} onClick={() => setAdding(true)}><Plus className="size-4" />{t('allocation.new')}</Button>}>{proposal.shown && t('allocation.emptyHint')}</Empty>} />}
     {!list.isPending && !list.error && pages > 1 && <nav aria-label={t('allocation.pager')} className="flex items-center justify-end gap-3">
       <Button variant="outline" disabled={page <= 1} onClick={() => change('page', String(page - 1))}>{t('handoff.previous')}</Button>
       <span className="text-sm tabular-nums" aria-live="polite">{t('allocation.pageOf', { n: page, total: pages })}</span>

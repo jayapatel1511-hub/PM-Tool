@@ -9,9 +9,10 @@
 //                           needs flag.status_rollups), Vacation (its coverage concerns), the Project List (my projects, all grouped by status, all ungrouped),
 //                           the Holidays admin list and four Administration reference lists (the column
 //                           variants of the one table), all compared as the administrator only: a route under /admin/ runs for
-//                           Jordan Lee and no other persona). {project}, {complete}, {empty} and
+//                           Jordan Lee and no other persona), and the Allocations list (plain, with its detail panel open, and
+//                           empty). {project}, {complete}, {empty} and
 //                           {restricted} are synthetic project numbers, {projectId} the Active project's id,
-//                           {risk} the synthetic risk id
+//                           {risk} the synthetic risk id, {allocation} the synthetic allocation id
 //   TUESDAY_RECORD_FLAGS    flags already merged on those screens: the matrix runs with all off, then all on (§47.6)
 //   TUESDAY_RECORD_PARITY_OUT  report path; screenshots of both builds go beside it (evidence, not a pass condition)
 //   RECORD_PARITY_SELFCHECK=1  diff logic only; RECORD_PARITY_BROWSER_SELFCHECK=1  identical builds pass, a removed
@@ -40,6 +41,7 @@ const SCREENS = (process.env.TUESDAY_RECORD_SCREENS ?? [
   '/projects', '/projects?mine=false', '/projects?mine=false&group=none',
   '/admin/holidays',
   '/admin/reference/disciplines', '/admin/reference/clients', '/admin/reference/offices', '/admin/reference/deliverableTypes',
+  '/projects/{project}/allocations', '/projects/{project}/allocations?allocation={allocation}', '/projects/{empty}/allocations',
 ].join(' ')).split(/\s+/).filter(Boolean)
 const FLAGS = (process.env.TUESDAY_RECORD_FLAGS ?? '').split(/[\s,]+/).filter(Boolean)
 // Project Manager, Discipline Lead, Team Member, Read Only, a user outside the Restricted project, and the administrator
@@ -49,8 +51,9 @@ const ADDITIONS = 'flag.record_engine_additions' // §47.5 FR-REC-12, kept on th
 const WIDTHS = [1600, 375]
 const launch = () => chromium.launch({ headless: true, ...(process.env.CHROME_EXECUTABLE_PATH ? { executablePath: process.env.CHROME_EXECUTABLE_PATH } : {}) })
 // Both builds read the same API-created records. Only the local origin is volatile;
-// IDs and timestamps are evidence, not noise to erase from a parity report.
-const clean = (value) => JSON.parse(JSON.stringify(value, (_, v) => typeof v === 'string' ? v.replace(/^https?:\/\/[^/]+/, '') : v))
+// IDs and timestamps are evidence, not noise to erase from a parity report. The one exception is React's generated id
+// (`_r_20_`): its counter shifts with render timing, about one page load in fifty, in a build compared with itself.
+const clean = (value) => JSON.parse(JSON.stringify(value, (_, v) => typeof v === 'string' ? v.replace(/^https?:\/\/[^/]+/, '').replace(/^_r_[0-9a-v]+_$/, '_r_') : v))
 const slug = route => route.replace(/\{(\w+)\}/g, '$1').replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '')
 
 function diff(a, b, at = '$', out = []) {
@@ -78,6 +81,8 @@ function selfCheck() {
   assert.ok(diff(same, changed).some(x => x.includes('controls')), 'removed header must fail parity')
   assert.equal(expand('/projects/{project}/risks?panel=Risk:{risk}', { project: 'P1', risk: 'r' }), '/projects/P1/risks?panel=Risk:r')
   assert.throws(() => expand('/projects/{nope}', {}), /unknown placeholder/)
+  assert.deepEqual(diff(clean({ field: '_r_20_', url: 'http://127.0.0.1:1/x' }), clean({ field: '_r_1m_', url: 'http://127.0.0.1:2/x' })), [])
+  assert.ok(diff(clean({ field: '_r_20_' }), clean({ field: 'person' })).length, 'a named id must still be compared')
   console.log('record parity selfcheck: PASS (identical passes; removed header fails)')
 }
 
@@ -146,9 +151,17 @@ async function fixtures() {
   await api(`projects/${project.id}/issues`, 'priya', { method: 'POST', body: JSON.stringify({
     title: 'Synthetic parity issue', description: 'Parity fixture', severity: 'Medium', issueType: 'General', locations: [], documents: [],
   }) })
+  // A proposed allocation for the Allocations list. It is made before the leave below, so the days it spans still have capacity.
+  const alex = (await api('me', 'alex')).id
+  const task = await api(`projects/${project.id}/tasks`, 'marc', { method: 'POST', body: JSON.stringify({
+    name: 'Synthetic parity task', projectDisciplineId: project.discipline, assigneeId: alex, estimatedHours: 20, startDate: '2026-10-19', dueDate: '2026-10-23',
+  }) })
+  const allocation = await api(`projects/${project.id}/allocations`, 'priya', { method: 'POST', body: JSON.stringify({
+    requestId: crypto.randomUUID(), personId: alex, purpose: 'Production', fromDate: '2026-10-19', throughDate: '2026-10-23', plannedHours: 20, days: [],
+    links: [{ workType: 'Task', workId: task.id, workDate: '2026-10-19', reviewHours: null }],
+  }) })
   // Time away for the Team tab's away chip (flag.capacity_polish): leave that spans the current week whatever day the run is on.
   const day = offset => new Date(Date.now() + offset * 864e5).toISOString().slice(0, 10)
-  const alex = (await api('me', 'alex')).id
   await api('planning/leave/manual', 'jordan', { method: 'POST', body: JSON.stringify({ personId: alex, sourceSystem: 'Synthetic HR',
     externalId: `PARITY-${runId}`, fromDate: day(-7), throughDate: day(7), hoursPerDay: null, status: 'Approved', rowVersion: 0 }) })
   const milestone = { milestoneType: 'Design Submission', isClientFacing: true }
@@ -184,7 +197,7 @@ async function fixtures() {
   const restricted = await createProject(reference, 'R', 'Synthetic restricted parity project', false)
   const restrictedDraft = await api(`projects/${restricted.id}`, 'priya')
   await api(`projects/${restricted.id}`, 'priya', { method: 'PATCH', headers: { 'If-Match': `"${restrictedDraft.rowVersion}"` }, body: JSON.stringify({ visibility: 'Restricted', rowVersion: restrictedDraft.rowVersion }) })
-  return { project: project.projectNumber, projectId: project.id, risk: risk.id, openRole: openRole.id, complete: complete.projectNumber, empty: empty.projectNumber,
+  return { project: project.projectNumber, projectId: project.id, risk: risk.id, allocation: allocation.id, openRole: openRole.id, complete: complete.projectNumber, empty: empty.projectNumber,
     restricted: restricted.projectNumber, restrictedId: restricted.id }
 }
 

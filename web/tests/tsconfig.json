@@ -23,6 +23,7 @@
     "week-planning.fixture.cjs",
     "recovery.fixture.cjs",
     "timeline.fixture.cjs",
-    "weekly-commitments.fixture.cjs"
+    "weekly-commitments.fixture.cjs",
+    "calendar-subscription.fixture.cjs"
   ]
 }

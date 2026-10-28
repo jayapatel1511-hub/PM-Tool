@@ -206,6 +206,52 @@
       "string"
     ]
   },
+  "DELETE /api/v1/me/calendar-subscription 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "DELETE /api/v1/me/calendar-subscription 409": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "DELETE /api/v1/me/dashboard-layout 200": {
     "$": [
       "object"
@@ -11498,39 +11544,6 @@
       "string"
     ],
     "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndint": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndint.properties": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndint.properties.enabled": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndint.properties.enabled.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndint.properties.rowVersion": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndint.properties.rowVersion.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndint.properties.rowVersion.pattern": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndint.properties.rowVersion.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndint.required": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndint.required[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndint.type": [
       "string"
     ],
     "$.components.schemas.AnonymousTypeOfbooleanAndstringAndbooleanAndboolean": [
@@ -30526,6 +30539,72 @@
     "$.components.schemas.SubmissionIssueBody.type": [
       "string"
     ],
+    "$.components.schemas.SubscriptionLink": [
+      "object"
+    ],
+    "$.components.schemas.SubscriptionLink.properties": [
+      "object"
+    ],
+    "$.components.schemas.SubscriptionLink.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.SubscriptionLink.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.SubscriptionLink.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.SubscriptionLink.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.SubscriptionLink.properties.url": [
+      "object"
+    ],
+    "$.components.schemas.SubscriptionLink.properties.url.type": [
+      "string"
+    ],
+    "$.components.schemas.SubscriptionLink.required": [
+      "array"
+    ],
+    "$.components.schemas.SubscriptionLink.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SubscriptionLink.type": [
+      "string"
+    ],
+    "$.components.schemas.SubscriptionState": [
+      "object"
+    ],
+    "$.components.schemas.SubscriptionState.properties": [
+      "object"
+    ],
+    "$.components.schemas.SubscriptionState.properties.enabled": [
+      "object"
+    ],
+    "$.components.schemas.SubscriptionState.properties.enabled.type": [
+      "string"
+    ],
+    "$.components.schemas.SubscriptionState.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.SubscriptionState.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.SubscriptionState.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.SubscriptionState.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.SubscriptionState.required": [
+      "array"
+    ],
+    "$.components.schemas.SubscriptionState.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SubscriptionState.type": [
+      "string"
+    ],
     "$.components.schemas.TargetRef": [
       "object"
     ],
@@ -42667,10 +42746,10 @@
     "$.paths./api/v1/me/calendar-subscription.delete.responses": [
       "object"
     ],
-    "$.paths./api/v1/me/calendar-subscription.delete.responses.200": [
+    "$.paths./api/v1/me/calendar-subscription.delete.responses.204": [
       "object"
     ],
-    "$.paths./api/v1/me/calendar-subscription.delete.responses.200.description": [
+    "$.paths./api/v1/me/calendar-subscription.delete.responses.204.description": [
       "string"
     ],
     "$.paths./api/v1/me/calendar-subscription.delete.tags": [
@@ -42735,6 +42814,18 @@
     ],
     "$.paths./api/v1/me/calendar-subscription.post.responses.200": [
       "object"
+    ],
+    "$.paths./api/v1/me/calendar-subscription.post.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/me/calendar-subscription.post.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/me/calendar-subscription.post.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/me/calendar-subscription.post.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/me/calendar-subscription.post.responses.200.description": [
       "string"
@@ -85093,6 +85184,29 @@
       "number"
     ],
     "$.url": [
+      "string"
+    ]
+  },
+  "POST /api/v1/me/calendar-subscription 409": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
       "string"
     ]
   },

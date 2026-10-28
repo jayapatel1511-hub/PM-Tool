@@ -40,6 +40,7 @@
     "views.fixture.cjs",
     "dashboard.fixture.cjs",
     "me.fixture.cjs",
-    "dependencies.fixture.cjs"
+    "dependencies.fixture.cjs",
+    "team.fixture.cjs"
   ]
 }

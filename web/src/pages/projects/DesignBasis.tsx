@@ -12,7 +12,7 @@ import { ActiveFilters, ChipToggle, Empty, ErrorBanner, Field, FilterBar, Loadin
 import { ExportMenu } from '@/components/hub/export'
 import { Pill } from '@/components/hub/pills'
 import type { components } from '@/gen/api'
-import { ApiError, get, post, typedRequest } from '@/lib/api'
+import { ApiError, post, typedRequest } from '@/lib/api'
 import { invalidateChange } from '@/lib/keys'
 import { fmtDate } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
@@ -26,7 +26,6 @@ type Schemas = components['schemas']
 type Entry = Schemas['BasisEntryRow']
 type Version = Schemas['BasisVersionRow']
 type Detail = Schemas['BasisDetail']
-type Team = { members: { userId: string; displayName: string; primaryDisciplineId?: string }[] }
 type VersionDraft = { scope: string; statement: string; numericValue: string; units: string; sourceSystem: string;
   stableSourceId: string; sourceUrl: string; declaredRevision: string; confirmationDueDate: string; decisionId: string }
 const blank: VersionDraft = { scope: '', statement: '', numericValue: '', units: '', sourceSystem: '', stableSourceId: '',
@@ -66,7 +65,7 @@ export function DesignBasisTab() {
     if (name !== 'basis' && name !== 'page') next.delete('page'); return next })
   const base = `projects/${project.id}/design-basis`
   const options = useQuery({ queryKey: ['coord-options', project.id], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/changes/options', { params: { projectId: project.id } }) })
-  const team = useQuery({ queryKey: ['p', project.id, 'team'], queryFn: () => get<Team>(`projects/${project.id}/team`) })
+  const team = useQuery({ queryKey: ['p', project.id, 'team'], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/team', { params: { id: project.id } }) })
   const allowedDisciplines = project.permissions.createBasisIn
   const canCreate = !!options.data?.canWrite && allowedDisciplines.length > 0
   const filters = { kind, status, disciplineId: discipline, scope, overdue, affectedWorkId }

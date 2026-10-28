@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useItemPanel } from '@/components/hub/panel-host'
 import type { components } from '@/gen/api'
-import { get, typedRequest } from '@/lib/api'
+import { typedRequest } from '@/lib/api'
 import { fmtDate, fmtTime } from '@/lib/format'
 import { plural, t, tv } from '@/lib/i18n'
 import type { ProjectDetail } from '@/lib/types'
@@ -64,7 +64,7 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
   }, { replace: true })
   const setPage = (next: number) => setSp(p => { const n = new URLSearchParams(p); if (next > 1) n.set('rowsPage', String(next)); else n.delete('rowsPage'); return n }, { replace: true })
   const clearScope = () => setSp(p => { const next = new URLSearchParams(p); ['owner', 'from', 'to', 'rowsPage'].forEach(name => next.delete(name)); return next }, { replace: true })
-  const team = useQuery({ queryKey: ['p', project.id, 'team'], queryFn: () => get<{ members: { userId: string; displayName: string }[] }>(`projects/${project.id}/team`), staleTime: 60_000 })
+  const team = useQuery({ queryKey: ['p', project.id, 'team'], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/team', { params: { id: project.id } }), staleTime: 60_000 })
   const q = useQuery({
     queryKey: ['p', project.id, 'discipline-coordination', disciplineId, ownerId, from, to, page, printAll],
     staleTime: 0,

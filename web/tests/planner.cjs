@@ -8,6 +8,7 @@ const { spawn } = require('child_process')
 const path = require('path')
 const { weekPreview, weekApplied } = require('./week-planning.fixture.cjs')
 const { subscriptionState, subscriptionLink } = require('./calendar-subscription.fixture.cjs')
+const { teamDiscipline, projectTeam } = require('./team.fixture.cjs')
 const { calendarEvent, calendarDeadline, calendarRange, calendarCancelled } = require('./calendar.fixture.cjs')
 const { planningHit, searchResult } = require('./search.fixture.cjs')
 
@@ -58,7 +59,7 @@ const pause = (ms = 100) => new Promise((r) => setTimeout(r, ms))
       else if (p.startsWith('me/notifications')) data = notifications
       else if (p === 'views') data = viewList()
       else if (p === 'reference') data = referenceData({ disciplines: [referenceDiscipline(id(22), 'Global Civil')] })
-      else if (p.startsWith('projects/') && p.endsWith('/team')) data = { disciplines: [{ id: disciplineId, name: 'Civil', isActive: true }] }
+      else if (p.startsWith('projects/') && p.endsWith('/team')) data = projectTeam({ disciplines: [teamDiscipline({ id: disciplineId, name: 'Civil' })] })
       else if (p === 'projects' || p.startsWith('projects?')) data = { items: [{ id: projectId, projectNumber: 'P-100', name: 'Harbour survey', status: 'Active' }] }
       else if (p === 'workspaces') data = []
       else if (p === 'planning/availability') data = { canImport: true, people: [{ id: alex, displayName: 'Alex Engineer', canManage: true, weeklyHours: 40, schedules: [], unverified: [], leave: [], days: [{ date: '2026-10-12', normal: 8, available: 0, leave: 8, holiday: 0, provisional: false }] }], holidays: [], coverage: [{ personId: alex, id: id(80), key: 'T-001', name: 'Synthetic coverage task', type: 'Task', projectId, dueDate: '2026-10-12', role: 'Assignee', concern: 'Unavailable' }], imports: [] }

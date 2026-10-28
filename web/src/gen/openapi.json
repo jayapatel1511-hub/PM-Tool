@@ -632,174 +632,6 @@
         ],
         "type": "object"
       },
-      "AnonymousTypeOfGuidAndGuidAndstringAndstringAndstringAndGuidAndbooleanAndListOfstringAndGuidAndDateTimeOffsetAndGuidAndintAndIEnumerableOfGuidAndbooleanAndboolean": {
-        "properties": {
-          "addedAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "addedBy": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "canStaff": {
-            "type": "boolean"
-          },
-          "displayName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "email": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "id": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "isActive": {
-            "type": "boolean"
-          },
-          "isPrimaryPm": {
-            "type": "boolean"
-          },
-          "jobTitle": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "leadOf": {
-            "items": {
-              "format": "uuid",
-              "type": "string"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "officeId": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "primaryDisciplineId": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "roles": {
-            "items": {
-              "type": "string"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "rowVersion": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          },
-          "userId": {
-            "format": "uuid",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "userId",
-          "displayName",
-          "email",
-          "jobTitle",
-          "officeId",
-          "isActive",
-          "roles",
-          "primaryDisciplineId",
-          "addedAt",
-          "addedBy",
-          "rowVersion",
-          "leadOf",
-          "isPrimaryPm",
-          "canStaff"
-        ],
-        "type": "object"
-      },
-      "AnonymousTypeOfGuidAndGuidAndstringAndstringAndstringAndGuidAndbooleanAndintAndint": {
-        "properties": {
-          "code": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "colour": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "disciplineId": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "id": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "isActive": {
-            "type": "boolean"
-          },
-          "leadUserId": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "name": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "rowVersion": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          },
-          "sortOrder": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "id",
-          "disciplineId",
-          "name",
-          "code",
-          "colour",
-          "leadUserId",
-          "isActive",
-          "sortOrder",
-          "rowVersion"
-        ],
-        "type": "object"
-      },
       "AnonymousTypeOfGuidAndstringAndstring": {
         "properties": {
           "displayName": {
@@ -1182,44 +1014,6 @@
           "events",
           "digest",
           "follows"
-        ],
-        "type": "object"
-      },
-      "AnonymousTypeOfListOfAnonymousTypeOfGuidAndGuidAndstringAndstringAndstringAndGuidAndbooleanAndintAndintAndIEnumerableOfAnonymousTypeOfGuidAndGuidAndstringAndstringAndstringAndGuidAndbooleanAndListOfstringAndGuidAndDateTimeOffsetAndGuidAndintAndIEnumerableOfGuidAndbooleanAndbooleanAndbooleanAndstring": {
-        "properties": {
-          "canManage": {
-            "type": "boolean"
-          },
-          "disciplines": {
-            "items": {
-              "$ref": "#/components/schemas/AnonymousTypeOfGuidAndGuidAndstringAndstringAndstringAndGuidAndbooleanAndintAndint"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "manageReason": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "members": {
-            "items": {
-              "$ref": "#/components/schemas/AnonymousTypeOfGuidAndGuidAndstringAndstringAndstringAndGuidAndbooleanAndListOfstringAndGuidAndDateTimeOffsetAndGuidAndintAndIEnumerableOfGuidAndbooleanAndboolean"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          }
-        },
-        "required": [
-          "disciplines",
-          "members",
-          "canManage",
-          "manageReason"
         ],
         "type": "object"
       },
@@ -13237,6 +13031,24 @@
         ],
         "type": "object"
       },
+      "MemberAdded": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
       "MemberBody": {
         "properties": {
           "primaryDisciplineId": {
@@ -13288,6 +13100,114 @@
           "userId",
           "roles",
           "disciplineId"
+        ],
+        "type": "object"
+      },
+      "MemberOpenDeliverable": {
+        "properties": {
+          "dueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "status",
+          "dueDate"
+        ],
+        "type": "object"
+      },
+      "MemberOpenItems": {
+        "properties": {
+          "count": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "deliverables": {
+            "items": {
+              "$ref": "#/components/schemas/MemberOpenDeliverable"
+            },
+            "type": "array"
+          },
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/MemberOpenTask"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "tasks",
+          "deliverables",
+          "count"
+        ],
+        "type": "object"
+      },
+      "MemberOpenTask": {
+        "properties": {
+          "dueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "status",
+          "dueDate",
+          "role"
+        ],
+        "type": "object"
+      },
+      "MemberRemoved": {
+        "properties": {
+          "reassigned": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "reassigned"
         ],
         "type": "object"
       },
@@ -16484,6 +16404,24 @@
         ],
         "type": "object"
       },
+      "ProjectDisciplineAdded": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
       "ProjectEvaluation": {
         "properties": {
           "computedHealth": {
@@ -16668,6 +16606,185 @@
           "projectManagerEmail",
           "classification",
           "error"
+        ],
+        "type": "object"
+      },
+      "ProjectTeamDiscipline": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "colour": {
+            "type": "string"
+          },
+          "disciplineId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "leadUserId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "sortOrder": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "disciplineId",
+          "name",
+          "code",
+          "colour",
+          "leadUserId",
+          "isActive",
+          "sortOrder",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
+      "ProjectTeamMember": {
+        "properties": {
+          "addedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "addedBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "canStaff": {
+            "type": "boolean"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "isPrimaryPm": {
+            "type": "boolean"
+          },
+          "jobTitle": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "leadOf": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "officeId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryDisciplineId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "roles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "userId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "displayName",
+          "email",
+          "jobTitle",
+          "officeId",
+          "isActive",
+          "roles",
+          "primaryDisciplineId",
+          "addedAt",
+          "addedBy",
+          "rowVersion",
+          "leadOf",
+          "isPrimaryPm",
+          "canStaff"
+        ],
+        "type": "object"
+      },
+      "ProjectTeamRead": {
+        "properties": {
+          "canManage": {
+            "type": "boolean"
+          },
+          "disciplines": {
+            "items": {
+              "$ref": "#/components/schemas/ProjectTeamDiscipline"
+            },
+            "type": "array"
+          },
+          "manageReason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "members": {
+            "items": {
+              "$ref": "#/components/schemas/ProjectTeamMember"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "disciplines",
+          "members",
+          "canManage",
+          "manageReason"
         ],
         "type": "object"
       },
@@ -35061,7 +35178,24 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectDisciplineAdded"
+                }
+              }
+            },
             "description": "OK"
+          },
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectDisciplineAdded"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -35092,8 +35226,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -35132,8 +35266,8 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -35853,8 +35987,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberAdded"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -35901,6 +36042,13 @@
         ],
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberRemoved"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -35940,8 +36088,8 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -35975,7 +36123,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/MemberOpenItems"
+                }
               }
             },
             "description": "OK"
@@ -36859,7 +37009,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnonymousTypeOfListOfAnonymousTypeOfGuidAndGuidAndstringAndstringAndstringAndGuidAndbooleanAndintAndintAndIEnumerableOfAnonymousTypeOfGuidAndGuidAndstringAndstringAndstringAndGuidAndbooleanAndListOfstringAndGuidAndDateTimeOffsetAndGuidAndintAndIEnumerableOfGuidAndbooleanAndbooleanAndbooleanAndstring"
+                  "$ref": "#/components/schemas/ProjectTeamRead"
                 }
               }
             },

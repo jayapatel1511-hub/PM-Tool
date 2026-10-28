@@ -7,6 +7,7 @@ const { personTasks, capacitySet } = require('./workload.fixture.cjs')
 // refused capacity preview each get an explanation, and the screens pass axe.
 const { chromium } = require('playwright');
 const { clientConfig } = require('./config.fixture.cjs');
+const { meView, referenceData } = require('./me.fixture.cjs');
 const { viewList } = require('./views.fixture.cjs');
 const path = require('path'), { spawn } = require('child_process'), assert = require('assert/strict');
 const port = process.env.PORT ?? '5177', base = `http://127.0.0.1:${port}`;
@@ -35,9 +36,8 @@ const grid = (sort) => {
   return { weeks, today: '2026-10-03', currentWeek: weeks[0], defaultCapacity: 40, thresholds: { overPct: 110, amberPct: 90, underPct: 40 }, people: sort === 'name' ? people.reverse() : people,
     ...(unassignedOn ? { unassigned: { totalCount: assigned ? 0 : 51, showAllPath: `/tasks?unassigned=true&projects=${pid}`, tasks: assigned ? [] : [{ id: taskId, key: 'P-DEMO-T0090', name: 'Synthetic unassigned task', projectId: pid, projectNumber: 'P-DEMO', projectName: 'Synthetic resource checks', startDate: '2026-10-12', dueDate: '2026-10-16', estimatedHours: 4, rowVersion: 7, canAssign: true, editPath: `/tasks/${taskId}` }] } } : {}) }
 }
-const me = { id: sam, displayName: 'Sam Supervisor', email: 'sam@hub.test', roles: [], systemRoles: ['Supervisor'],
-  capabilities: { createProject: false, createTask: true, portfolio: false, workload: true, staff: true, allStaff: false, admin: false, templates: false, readOnly: false, directReports: 2 },
-  settings: { today: '2026-10-03', dateFormat: 'yyyy-MM-dd', orgTimeZone: 'America/Halifax', idleTimeoutHours: 8 }, preferences: { denseRows: true, digestEnabled: true } };
+const me = meView({ id: sam, displayName: 'Sam Supervisor', email: 'sam@hub.test', systemRoles: ['Supervisor'],
+  capabilities: { createTask: true, workload: true, staff: true, directReports: 2 }, settings: { today: '2026-10-03' } });
 // FR-FIG-08: Sam is neither PM nor Discipline Lead, so the server refuses every project-level flag.
 const pmOrDl = { ok: false, reason: 'Only the Project Manager or the Discipline Lead can do this.' }, pmOnly = { ok: false, reason: 'Only the Project Manager can do this.' };
 const refusedFlags = { proposeAllocation: pmOrDl, snooze: pmOrDl, manageExternalParties: pmOnly, reviewDates: pmOrDl, captureWeeklyPlan: pmOrDl, createSubmission: pmOrDl };
@@ -64,7 +64,7 @@ let server, browser;
     else if (p === 'me/notifications/unread-count') data = { notifications: 0, following: 0 }
     else if (p === 'workspaces') data = []
     else if (p === 'views') data = viewList()
-    else if (p === 'reference') data = { disciplines: [], clients: [], offices: [], deliverableTypes: [], phases: [], projectTypes: [], limits: { roleLabel: 80 } }
+    else if (p === 'reference') data = referenceData()
     else if (p === 'projects') data = { items: [project], page: 1, pageSize: 200, totalCount: 1 }
     else if (p === 'users') data = [{ id: jill, displayName: 'Jill Partial', isActive: true }]
     else if (p === 'planning/grid') { capacityCalls.push(Object.fromEntries(u.searchParams)); data = { weeks: ['2026-10-12'], people: [{ id: jill, partial: false, cells: [{ remaining: 12, timeAway: 8 }] }] } }

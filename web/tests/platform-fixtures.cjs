@@ -6,6 +6,7 @@ const { clientConfig } = require('./config.fixture.cjs')
 const { viewList } = require('./views.fixture.cjs')
 const { coordinationOptions } = require('./reviews.fixture.cjs')
 const { myWork, myWorkPerson, myWorkProject } = require('./my-work.fixture.cjs')
+const { meView, referenceData } = require('./me.fixture.cjs')
 
 const taskId = '00000000-0000-0000-0000-000000000001'
 const panelIds = { milestone: '00000000-0000-0000-0000-000000000021', deliverable: '00000000-0000-0000-0000-000000000022', decision: '00000000-0000-0000-0000-000000000023', action: '00000000-0000-0000-0000-000000000024', risk: '00000000-0000-0000-0000-000000000025', issue: '00000000-0000-0000-0000-000000000026' }
@@ -18,7 +19,7 @@ const planningGrid = { weeks: [], currentWeek: '2026-10-03', partialView: false,
 const { documentLinks: links } = require('./document-links.fixture.cjs')
 const { comments } = require('./comments.fixture.cjs')
 const taskPage = { items: [], page: 1, pageSize: 200, totalCount: 0 }
-const me = { id: '00000000-0000-0000-0000-000000000002', displayName: 'Alex Chen', email: 'alex@hub.test', roles: [], systemRoles: ['StandardUser'], capabilities: { createProject: false, createTask: true, portfolio: false, workload: true, staff: false, allStaff: false, admin: true, templates: false, readOnly: false, directReports: 0 }, settings: { today: '2026-10-03', dateFormat: 'yyyy-MM-dd', orgTimeZone: 'America/Halifax', idleTimeoutHours: 8, restrictedProjectsEnabled: true }, preferences: { denseRows: true, digestEnabled: true, weeklySummaryEnabled: true }, flags: { live_events: true, live_project_stamp: true } }
+const me = meView({ id: '00000000-0000-0000-0000-000000000002', displayName: 'Alex Chen', email: 'alex@hub.test', systemRoles: ['StandardUser'], capabilities: { createTask: true, workload: true, admin: true }, settings: { today: '2026-10-03', restrictedProjectsEnabled: true }, flags: { live_events: true, live_project_stamp: true } })
 const taskDetail = { task, description: 'Synthetic fixture task', project: { id: project.id, projectNumber: project.projectNumber, name: project.name, status: project.status }, collaborators: [], watchers: [], permissions: { edit: { ok: true }, assign: { ok: true }, setReviewer: { ok: true }, dueDate: { ok: true }, dueNeedsReason: false, block: { ok: true }, delete: { ok: true }, restore: true, comment: true, transitions: [], dependencies: true, enterTime: true, needsReason: false, allowSelfReview: true } }
 const panelPermissions = { edit: { ok: false, reason: 'Synthetic read-only panel' }, manage: { ok: false }, comment: true, changeType: { ok: false }, transitions: [{ to: 'Open', ok: false }, { to: 'Closed', ok: false }] }
 const milestoneDetail = { milestone: { id: panelIds.milestone, projectId: project.id, key: 'M-001', name: 'Synthetic milestone', milestoneType: 'Design Submission', date: '2026-10-20', originalDate: '2026-10-20', description: 'Synthetic milestone detail', isClientFacing: true, isComplete: false, isCancelled: false, rowVersion: 1, isSubmission: false, status: 'Open', statusReasons: [], slipDays: 0, deliverableTotal: 0, deliverableIssued: 0, taskTotal: 0, taskComplete: 0, taskOpen: 0, taskOverdue: 0, taskBlocked: 0 }, permissions: { ...panelPermissions, manage: { ok: false } }, deliverables: [], completesPhase: null }
@@ -75,7 +76,7 @@ function mockPlatformApi(page, { build, buildIds = ['mock-build-a', 'mock-build-
     else if (p === `items/Task/${taskId}/comments`) data = comments
     else if (/^items\/(Milestone|Deliverable|Decision|Action|Risk|Issue)\/[^/]+\/comments$/.test(p)) data = comments
     else if (/^items\/(Milestone|Deliverable|Decision|Action|Risk|Issue)\/[^/]+\/links$/.test(p)) data = links
-    else if (p === 'reference') data = { disciplines: [], clients: [], offices: [], deliverableTypes: [], phases: [], projectTypes: [], limits: { roleLabel: 80 } }
+    else if (p === 'reference') data = referenceData()
     else if (p === 'workspaces') data = []
     else if (p === 'me/notifications/pulse') { pulseRequests.push(url.toString()); data = { stamp: String(pulseRequests.length), projectStamp: String(pulseRequests.length) } }
     else if (p === 'me/notifications/unread-count') data = { notifications: 0, following: 0 }

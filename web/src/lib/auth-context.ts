@@ -1,30 +1,9 @@
+import type { components } from '@/gen/api'
 import type { Perm } from '@/lib/types'
 import { createContext, useContext } from 'react'
 
-export interface Me {
-  id: string
-  displayName: string
-  email: string
-  jobTitle?: string
-  officeId?: string
-  supervisorId?: string
-  isTemplateEditor: boolean
-  roles: { role: string; source: string }[]
-  systemRoles: string[]
-  capabilities: {
-    createProject: boolean; createTask: boolean; portfolio: boolean; workload: boolean; staff: boolean; allStaff: boolean
-    admin: boolean; templates: boolean; readOnly: boolean; directReports: number
-  }
-  settings: {
-    dateFormat: string; orgTimeZone: string; today: string; idleTimeoutHours: number; restrictedProjectsEnabled: boolean
-    allowSelfReview: boolean; taskDueSoonDays: number; milestoneApproachingDays: number; chainDepthLimit: number
-    defaultWeeklyCapacityHours: number; coordinationLookaheadWeeks: number; workingDaysEnabled: boolean; routeCounterEnabled?: boolean; activityBurstMinutes?: number
-    /** Present only while flag.data_entry_safety is on (§55.2). */
-    autosaveDelayMs?: number; draftKeepDays?: number
-  }
-  preferences: { digestEnabled: boolean; digestTimeLocal?: string; denseRows: boolean; weeklySummaryEnabled: boolean }
-  flags?: Record<string, boolean>
-}
+/** The signed-in person, derived from the contract so a server rename of a field fails the build. */
+export type Me = components['schemas']['MeView']
 
 export interface AuthState { me: Me; signOut: () => void }
 export const Ctx = createContext<AuthState | null>(null)

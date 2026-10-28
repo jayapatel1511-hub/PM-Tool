@@ -2,6 +2,7 @@ const { chromium } = require('playwright')
 const { clientConfig } = require('./config.fixture.cjs')
 const { viewList } = require('./views.fixture.cjs')
 const { myWork, myWorkPerson } = require('./my-work.fixture.cjs')
+const { meView, referenceData, referenceDiscipline } = require('./me.fixture.cjs')
 const assert = require('node:assert/strict')
 const { spawn } = require('child_process')
 const path = require('path')
@@ -17,7 +18,7 @@ const sam = id(1), alex = id(2), rita = id(3), entryId = id(10), selfId = id(11)
 const weeks = ['2026-10-05', '2026-10-12', '2026-10-19', '2026-10-26', '2026-11-02', '2026-11-09']
 const calls = [], notifications = [], created = [], recoveryChecks = []
 let failSaveOnce = false, conflictOnce = false, quickFailOnce = false, empty = false, failGrid = false, denyGrid = false, adminMode = false, myWorkMode = false
-const me = { id: sam, displayName: 'Sam Supervisor', email: 'sam@example.test', roles: [], systemRoles: ['Supervisor'], capabilities: { workload: true, admin: false, readOnly: false, createTask: true, staff: true }, settings: { today: '2026-10-03', dateFormat: 'yyyy-MM-dd', orgTimeZone: 'America/Halifax', defaultWeeklyCapacityHours: 40 }, preferences: { denseRows: true } }
+const me = meView({ id: sam, displayName: 'Sam Supervisor', email: 'sam@example.test', systemRoles: ['Supervisor'], capabilities: { workload: true, createTask: true, staff: true }, settings: { today: '2026-10-03', defaultWeeklyCapacityHours: 40 } })
 const people = [{ id: sam, displayName: 'Sam Supervisor', supervisorName: 'Leadership', weeklyCapacity: 40, canCreateSelfEntry: true, canCreateManagerEntry: false, canRecordTimeAway: false }, { id: alex, displayName: 'Alex Engineer', supervisorName: 'Sam Supervisor', weeklyCapacity: 40, canCreateSelfEntry: false, canCreateManagerEntry: true, canRecordTimeAway: true }, { id: rita, displayName: 'Rita Readonly', supervisorName: 'Sam Supervisor', weeklyCapacity: 37.5, canCreateSelfEntry: false, canCreateManagerEntry: false, canRecordTimeAway: false }]
 const makeEntry = (o = {}) => ({ id: entryId, personId: alex, personName: 'Alex Engineer', ownerId: sam, ownerName: 'Sam Supervisor', ownerKind: 'Manager', label: 'proposal support', sourceCategory: 'MajorProject', projectId, projectNumber: 'P-100', projectName: 'Harbour survey', projectDisciplineId: disciplineId, disciplineName: 'Civil', hoursPerWeek: 8, startWeek: weeks[0], endWeek: weeks[0], confidence: 'Expected', visibility: 'Draft', notes: null, lastValidatedAt: '2026-08-01T00:00:00Z', stale: true, warnings: ['StalePlan'], canEdit: true, canChangeVisibility: true, correctionOnly: false, rowVersion: 4, ...o })
 let current = makeEntry()
@@ -56,7 +57,7 @@ const pause = (ms = 100) => new Promise((r) => setTimeout(r, ms))
       else if (p === 'me/notifications/unread-count') data = { notifications: notifications.length, following: 0 }
       else if (p.startsWith('me/notifications')) data = notifications
       else if (p === 'views') data = viewList()
-      else if (p === 'reference') data = { disciplines: [{ id: id(22), name: 'Global Civil' }], offices: [] }
+      else if (p === 'reference') data = referenceData({ disciplines: [referenceDiscipline(id(22), 'Global Civil')] })
       else if (p.startsWith('projects/') && p.endsWith('/team')) data = { disciplines: [{ id: disciplineId, name: 'Civil', isActive: true }] }
       else if (p === 'projects' || p.startsWith('projects?')) data = { items: [{ id: projectId, projectNumber: 'P-100', name: 'Harbour survey', status: 'Active' }] }
       else if (p === 'workspaces') data = []

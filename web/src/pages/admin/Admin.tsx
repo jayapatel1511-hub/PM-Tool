@@ -15,8 +15,9 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
-import { ApiError, del, get, patch, post, put, qs } from '@/lib/api'
+import { ApiError, del, get, patch, post, put, qs, typedRequest } from '@/lib/api'
 import { fmtTime } from '@/lib/format'
+import { invalidateChange } from '@/lib/keys'
 import { runtimeText, t } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { useFlag } from '@/lib/auth'
@@ -72,7 +73,7 @@ export function ReferenceData() {
   const disciplines = useQuery({ queryKey: ['admin', 'disciplines'], queryFn: () => get<Ref[]>('admin/disciplines'), enabled: kind === 'deliverableTypes' })
   const [editing, setEditing] = useState<Partial<Ref> | null>(null)
   const [deactivate, setDeactivate] = useState<{ row: Ref; projects: number } | null>(null)
-  const refresh = () => { qc.invalidateQueries({ queryKey: ['admin', kind] }); qc.invalidateQueries({ queryKey: ['reference'] }) }
+  const refresh = () => { qc.invalidateQueries({ queryKey: ['admin', kind] }); void invalidateChange(qc, 'ReferenceData') }
   const save = useMutation({
     mutationFn: (r: Partial<Ref>) => r.id ? patch(`admin/${kind}/${r.id}`, r, r.rowVersion) : post(`admin/${kind}`, r),
     onSuccess: () => { refresh(); setEditing(null); toast.success(t('common.saved')) },
@@ -178,7 +179,7 @@ export function Settings() {
     try {
       await put(`admin/settings/${encodeURIComponent(key)}`, { value })
       await qc.invalidateQueries({ queryKey: ['admin', 'settings'] })
-      qc.invalidateQueries({ queryKey: ['me'] })
+      void invalidateChange(qc, 'Setting')
       clearDraft(key)
       toast.success(t('common.saved'))
     } catch (e) {
@@ -254,7 +255,7 @@ export function Users() {
   const [noSup, setNoSup] = useState(false)
   const list = useQuery({ queryKey: ['admin', 'users', q, inactive, noSup], queryFn: () => get<UserRow[]>(`admin/users${qs({ q, inactive, noSupervisor: noSup })}`) })
   const everyone = useQuery({ queryKey: ['admin', 'users', 'all'], queryFn: () => get<UserRow[]>('admin/users?inactive=true') })
-  const ref = useQuery({ queryKey: ['reference'], queryFn: () => get('reference') })
+  const ref = useQuery({ queryKey: ['reference'], queryFn: () => typedRequest('get', '/api/v1/reference', {}) })
   const [edit, setEdit] = useState<UserRow | null>(null)
   const [creating, setCreating] = useState(false)
   const [handoff, setHandoff] = useState<{ id: string; email: string; displayName: string } | null>(null)

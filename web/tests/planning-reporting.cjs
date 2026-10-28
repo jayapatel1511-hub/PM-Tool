@@ -4,6 +4,7 @@ const { chromium } = require('playwright')
 const { clientConfig } = require('./config.fixture.cjs')
 const { viewList } = require('./views.fixture.cjs')
 const { myWork, myWorkPerson } = require('./my-work.fixture.cjs')
+const { meView, referenceData, referenceClient, referenceOffice } = require('./me.fixture.cjs')
 const assert = require('node:assert/strict')
 const { spawn } = require('node:child_process')
 const path = require('node:path')
@@ -15,10 +16,10 @@ const id = n => `00000000-0000-0000-0000-${String(n).padStart(12, '0')}`
 const uid = id(1), pid = id(2)
 const posts = [], unknown = [], errors = []
 let routeEnabled = true, flagEnabled = true, readOnly = false, hidden = false, imported = false
-const me = () => ({ id: uid, displayName: readOnly ? 'Read Only' : 'Priya PM', email: 'priya@hub.test', isTemplateEditor: true,
-  roles: [], systemRoles: readOnly ? ['ReadOnly'] : ['ProjectManager'], capabilities: { createProject: !readOnly, createTask: !readOnly, portfolio: true, workload: true, staff: true, allStaff: true, admin: !readOnly, templates: !readOnly, readOnly, directReports: 0 },
-  settings: { today: '2026-10-18', dateFormat: 'yyyy-MM-dd', orgTimeZone: 'America/Halifax', idleTimeoutHours: 8, restrictedProjectsEnabled: false, allowSelfReview: false, taskDueSoonDays: 7, milestoneApproachingDays: 14, chainDepthLimit: 20, defaultWeeklyCapacityHours: 40, coordinationLookaheadWeeks: 4, workingDaysEnabled: true, routeCounterEnabled: routeEnabled },
-  preferences: { digestEnabled: true, denseRows: false, weeklySummaryEnabled: true }, flags: { onboarding_card: flagEnabled, route_counter: flagEnabled, project_import: flagEnabled, my_work_follow_up: true, project_status_note: true, template_roles: true } })
+const me = () => meView({ id: uid, displayName: readOnly ? 'Read Only' : 'Priya PM', email: 'priya@hub.test', isTemplateEditor: true,
+  systemRoles: readOnly ? ['ReadOnly'] : ['ProjectManager'], capabilities: { createProject: !readOnly, createTask: !readOnly, portfolio: true, workload: true, staff: true, allStaff: true, admin: !readOnly, templates: !readOnly, readOnly },
+  settings: { today: '2026-10-18', taskDueSoonDays: 7, chainDepthLimit: 20, coordinationLookaheadWeeks: 4, workingDaysEnabled: true, routeCounterEnabled: routeEnabled },
+  preferences: { denseRows: false }, flags: { onboarding_card: flagEnabled, route_counter: flagEnabled, project_import: flagEnabled, my_work_follow_up: true, project_status_note: true, template_roles: true } })
 const work = myWork({ person: myWorkPerson(uid, 'Priya PM'), today: '2026-10-18' })
 const project = { id: pid, projectNumber: 'P-DEMO', name: 'Synthetic project', client: 'Pilot client', pmName: 'Priya PM', pm: { displayName: 'Priya PM' }, office: { name: 'Halifax' }, status: 'Active', visibility: 'Open', rowVersion: 1, links: [], disciplines: [], starred: false, myRoles: ['PM'], health: { computed: 'Green', reported: 'Green', overrideActive: false, reasons: [] }, statusNote: { text: 'Current note', at: '2026-10-17T12:00:00Z', author: 'Priya PM', header: { computedHealth: 'Green', reportedHealth: 'Green', openAttention: 0 } }, permissions: { edit: { ok: true }, needsReason: false, isPm: true, leadOf: [], createTaskIn: [], createDeliverableIn: [], transitions: [] } }
 const template = { id: id(10), familyId: id(11), name: 'Synthetic template', description: 'Browser fixture', status: 'Draft', rowVersion: 1, canEdit: true, family: [], disciplines: [], milestones: [{ ref: 'm1', name: 'Kickoff', milestoneType: 'Kickoff', anchor: 'ProjectStart', offset: 0, isClientFacing: true }], deliverables: [], tasks: [], dependencies: [], roles: [{ ref: 'r1', disciplineId: null, label: 'Project lead', startMilestoneRef: 'm1', startOffsetDays: 0, startOffsetDayKind: 'WorkingDay', endMilestoneRef: null, endOffsetDays: 0, endOffsetDayKind: 'WorkingDay', hours: 8, note: null }], basisSuggestions: [] }
@@ -50,7 +51,7 @@ const template = { id: id(10), familyId: id(11), name: 'Synthetic template', des
       else if (p === 'projects') data = { items: [project], totalCount: 1, page: 1, pageSize: 50 }
       else if (p === `projects/${pid}` || p === 'projects/P-DEMO') data = project
       else if (p === `projects/${pid}/status-note` || p === `projects/P-DEMO/status-note`) data = project.statusNote
-      else if (p === 'reference') data = { disciplines: [], clients: [{ id: id(20), name: 'Pilot client' }], offices: [{ id: id(21), name: 'Halifax' }], deliverableTypes: [], phases: [], projectTypes: [], limits: { roleLabel: 80 } }
+      else if (p === 'reference') data = referenceData({ clients: [referenceClient(id(20), 'Pilot client')], offices: [referenceOffice(id(21), 'Halifax')] })
       else if (p === 'templates') data = method === 'POST' ? { id: template.id } : { canEdit: true, templates: [{ ...template, milestones: 1, deliverables: 0, tasks: 0, projects: 0 }] }
       else if (p === `template/${template.id}` || p === `templates/${template.id}`) data = template
       else if (p === `templates/${template.id}/structure` && method === 'PUT') data = template

@@ -38,6 +38,7 @@
     "reviews.fixture.cjs",
     "my-work.fixture.cjs",
     "views.fixture.cjs",
-    "dashboard.fixture.cjs"
+    "dashboard.fixture.cjs",
+    "me.fixture.cjs"
   ]
 }

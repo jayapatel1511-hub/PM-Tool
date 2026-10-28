@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Api.Features;
@@ -16,11 +17,29 @@ public static class MeEndpoints
         [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] bool? RouteCounterEnabled = null,
         [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? AutosaveDelayMs = null,
         [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? DraftKeepDays = null);
+    public sealed record MeRole(string Role, string Source);
+    public sealed record MeCapabilities(bool CreateProject, bool CreateTask, bool Portfolio, bool Workload, bool Staff, bool AllStaff, bool Admin, bool Templates, bool ReadOnly, int DirectReports);
+    public sealed record MePreferences(bool DigestEnabled, string? DigestTimeLocal, bool DenseRows, bool WeeklySummaryEnabled);
+    public sealed record MeView(Guid Id, string DisplayName, string Email, string? JobTitle, Guid? OfficeId, Guid? SupervisorId, bool IsTemplateEditor, IReadOnlyList<MeRole> Roles,
+        IReadOnlyList<string> SystemRoles, MeCapabilities Capabilities, CurrentSettings Settings, MePreferences Preferences, IReadOnlyDictionary<string, bool> Flags);
+
+    public sealed record ReferenceDiscipline(Guid Id, string Name, string Code, string Colour, bool IsActive, int SortOrder);
+    public sealed record ReferenceClient(Guid Id, string Name, string? ShortName, bool IsActive);
+    public sealed record ReferenceOffice(Guid Id, string Name, string Code, string TimeZone, bool IsActive);
+    public sealed record ReferenceDeliverableType(Guid Id, string Name, Guid? DefaultDisciplineId, bool IsActive);
+    public sealed record ReferencePhase(Guid Id, string Name, bool IsActive, int SortOrder);
+    public sealed record ReferenceProjectType(Guid Id, string Name, bool IsActive);
+    public sealed record ReferenceLimits(int RoleLabel);
+    public sealed record ReferenceView(IReadOnlyList<ReferenceDiscipline> Disciplines, IReadOnlyList<ReferenceClient> Clients, IReadOnlyList<ReferenceOffice> Offices,
+        IReadOnlyList<ReferenceDeliverableType> DeliverableTypes, IReadOnlyList<ReferencePhase> Phases, IReadOnlyList<ReferenceProjectType> ProjectTypes, ReferenceLimits Limits);
+
+    /// One person with the facts the picker orders by. Built with an initializer so the ordering can still be translated to SQL.
+    sealed record PickerMatch { public required AppUser User { get; init; } public bool OnProject { get; init; } public bool Direct { get; init; } }
 
     public static void Map(RouteGroupBuilder api)
     {
         // Current user, roles, capabilities and the settings the SPA needs to render dates (§25.7 GET /me).
-        api.MapGet("/me", async (HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock) =>
+        api.MapGet("/me", async Task<Ok<MeView>> (HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock) =>
         {
             var u = await db.Users.AsNoTracking().Include(x => x.Roles).FirstAsync(x => x.Id == me.Id);
             var s = await store.Get(db);
@@ -34,45 +53,31 @@ public static class MeEndpoints
                 && (p.ProjectManagerId == uid || db.ProjectDisciplines.Any(d => d.ProjectId == p.Id && d.LeadUserId == uid)
                     || db.ProjectMembers.Any(m => m.ProjectId == p.Id && m.UserId == uid && m.RemovedAt == null
                         && (m.Roles.Contains(ProjectRole.PM) || (m.Roles.Contains(ProjectRole.TeamMember) && m.PrimaryDisciplineId != null)))));
-            return new
-            {
-                u.Id, u.DisplayName, u.Email, u.JobTitle, u.OfficeId, u.SupervisorId, u.IsTemplateEditor,
-                Roles = u.Roles.Select(r => new { r.Role, r.Source }).OrderBy(r => r.Role),
-                SystemRoles = me.Roles.Order(),
-                Capabilities = new
-                {
-                    CreateProject = Permissions.CreateProject(a).Ok,
-                    CreateTask = createTask,
-                    Portfolio = Permissions.ViewPortfolio(a).Ok,
-                    Workload = Permissions.ViewWorkload(a).Ok || unitRead,
-                    Staff = Permissions.ViewStaff(a).Ok || unitRead,
-                    AllStaff = Permissions.ViewAllStaff(a),
-                    Admin = a.Admin,
-                    Templates = Permissions.ManageTemplates(a, u.IsTemplateEditor).Ok,
-                    ReadOnly = a.ReadOnly,
-                    DirectReports = directReports,
-                },
-                Settings = new CurrentSettings(s.DateFormat, s.OrgTimeZone, clock.Today(s), s.IdleTimeoutHours, s.RestrictedProjectsEnabled, s.AllowSelfReview,
+            return TypedResults.Ok(new MeView(u.Id, u.DisplayName, u.Email, u.JobTitle, u.OfficeId, u.SupervisorId, u.IsTemplateEditor,
+                [.. u.Roles.Select(r => new MeRole(r.Role, r.Source)).OrderBy(r => r.Role)],
+                [.. me.Roles.Order()],
+                new MeCapabilities(Permissions.CreateProject(a).Ok, createTask, Permissions.ViewPortfolio(a).Ok, Permissions.ViewWorkload(a).Ok || unitRead,
+                    Permissions.ViewStaff(a).Ok || unitRead, Permissions.ViewAllStaff(a), a.Admin, Permissions.ManageTemplates(a, u.IsTemplateEditor).Ok, a.ReadOnly, directReports),
+                new CurrentSettings(s.DateFormat, s.OrgTimeZone, clock.Today(s), s.IdleTimeoutHours, s.RestrictedProjectsEnabled, s.AllowSelfReview,
                     s.TaskDueSoonDays, s.MilestoneApproachingDays, s.ChainDepthLimit, s.DefaultWeeklyCapacityHours, s.CoordinationLookaheadWeeks, s.WorkingDaysEnabled,
                     s.IsFlagOn("small_ux") ? s.ActivityBurstMinutes : null,
                     s.IsFlagOn("route_counter") ? s.RouteCounterEnabled : null,
                     s.IsFlagOn("data_entry_safety") ? s.AutosaveDelayMs : null,
                     s.IsFlagOn("data_entry_safety") ? s.DraftKeepDays : null),
-                Preferences = new { pref.DigestEnabled, pref.DigestTimeLocal, pref.DenseRows, pref.WeeklySummaryEnabled },
-                Flags = s.Flags,
-            };
+                new MePreferences(pref.DigestEnabled, pref.DigestTimeLocal, pref.DenseRows, pref.WeeklySummaryEnabled),
+                s.Flags));
         });
 
         // Records a successful sign-in once per session (§20.1 access events).
-        api.MapPost("/me/sign-in", async (HubDb db, CurrentUser me, TimeProvider clock, HttpContext ctx) =>
+        api.MapPost("/me/sign-in", async Task<NoContent> (HubDb db, CurrentUser me, TimeProvider clock, HttpContext ctx) =>
         {
             // Local authentication already recorded this event before issuing its cookie.
-            if (ctx.User.Identity?.AuthenticationType is AuthSetup.LocalScheme or SocialAuth.Scheme) return Results.NoContent();
+            if (ctx.User.Identity?.AuthenticationType is AuthSetup.LocalScheme or SocialAuth.Scheme) return TypedResults.NoContent();
             var u = await db.Users.FirstAsync(x => x.Id == me.Id);
             u.LastSignInAt = clock.GetUtcNow();
             db.LogEvent(ItemType.User, u.Id, "SignedIn", "access", key: u.Email, name: u.DisplayName);
             await db.SaveChangesAsync();
-            return Results.NoContent();
+            return TypedResults.NoContent();
         });
 
         // Active people for pickers (G-11: inactive people cannot be chosen; pass active=false to include them).
@@ -92,7 +97,7 @@ public static class MeEndpoints
             if (pattern is not null) query = query.Where(u => EF.Functions.ILike(u.DisplayName, pattern) || EF.Functions.ILike(u.Email, pattern)
                 || (rank && ((u.JobTitle != null && EF.Functions.ILike(u.JobTitle, pattern))
                     || db.Disciplines.Any(d => d.Id == u.HomeDisciplineId && EF.Functions.ILike(d.Name, pattern)))));
-            var matches = query.Select(u => new { User = u, OnProject = project != null && team.Contains(u.Id),
+            var matches = query.Select(u => new PickerMatch { User = u, OnProject = project != null && team.Contains(u.Id),
                 Direct = pattern == null || EF.Functions.ILike(u.DisplayName, pattern) || EF.Functions.ILike(u.Email, pattern) });
             var ordered = matches.OrderBy(row => row.User.DisplayName);
             if (rank && project != null) ordered = matches.OrderBy(row => row.User.Id == me.Id ? 0 : row.OnProject ? 1 : 2)
@@ -103,15 +108,13 @@ public static class MeEndpoints
         });
 
         // Active reference data for every picker; inactive entries only appear on items that already use them.
-        api.MapGet("/reference", async (HubDb db) => new
-        {
-            Disciplines = await db.Disciplines.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Name).Select(x => new { x.Id, x.Name, x.Code, x.Colour, x.IsActive, x.SortOrder }).ToListAsync(),
-            Clients = await db.Clients.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Name).Select(x => new { x.Id, x.Name, x.ShortName, x.IsActive }).ToListAsync(),
-            Offices = await db.Offices.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Name).Select(x => new { x.Id, x.Name, x.Code, x.TimeZone, x.IsActive }).ToListAsync(),
-            DeliverableTypes = await db.DeliverableTypes.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Name).Select(x => new { x.Id, x.Name, x.DefaultDisciplineId, x.IsActive }).ToListAsync(),
-            Phases = await db.Phases.AsNoTracking().OrderBy(x => x.SortOrder).Select(x => new { x.Id, x.Name, x.IsActive, x.SortOrder }).ToListAsync(),
-            ProjectTypes = await db.ProjectTypes.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Name).Select(x => new { x.Id, x.Name, x.IsActive }).ToListAsync(),
-            Limits = new { RoleLabel = OpenRoleLimits.Label },
-        });
+        api.MapGet("/reference", async Task<Ok<ReferenceView>> (HubDb db) => TypedResults.Ok(new ReferenceView(
+            await db.Disciplines.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Name).Select(x => new ReferenceDiscipline(x.Id, x.Name, x.Code, x.Colour, x.IsActive, x.SortOrder)).ToListAsync(),
+            await db.Clients.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Name).Select(x => new ReferenceClient(x.Id, x.Name, x.ShortName, x.IsActive)).ToListAsync(),
+            await db.Offices.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Name).Select(x => new ReferenceOffice(x.Id, x.Name, x.Code, x.TimeZone, x.IsActive)).ToListAsync(),
+            await db.DeliverableTypes.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Name).Select(x => new ReferenceDeliverableType(x.Id, x.Name, x.DefaultDisciplineId, x.IsActive)).ToListAsync(),
+            await db.Phases.AsNoTracking().OrderBy(x => x.SortOrder).Select(x => new ReferencePhase(x.Id, x.Name, x.IsActive, x.SortOrder)).ToListAsync(),
+            await db.ProjectTypes.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Name).Select(x => new ReferenceProjectType(x.Id, x.Name, x.IsActive)).ToListAsync(),
+            new ReferenceLimits(OpenRoleLimits.Label))));
     }
 }

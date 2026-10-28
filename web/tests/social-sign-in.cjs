@@ -1,6 +1,7 @@
 const { chromium } = require('playwright');
 const { clientConfig } = require('./config.fixture.cjs');
 const { viewList } = require('./views.fixture.cjs');
+const { meView } = require('./me.fixture.cjs');
 const { spawn } = require('child_process');
 const assert = require('node:assert/strict');
 const path = require('node:path');
@@ -28,11 +29,9 @@ let server, browser;
   await page.route('**/api/**', async route => {
     const pathname = new URL(route.request().url()).pathname;
     if (pathname === '/api/v1/config') return route.fulfill({ json: clientConfig({ authMode: 'Social', providers }) });
-    if (pathname === '/api/v1/me') return signedIn ? route.fulfill({ json: {
-      id: '00000000-0000-0000-0000-000000000001', displayName: 'Synthetic Person', email: 'person@outside.example', roles: [], systemRoles: [],
-      capabilities: { createProject: false, createTask: false, portfolio: false, workload: false, staff: false, allStaff: false, admin: false, templates: false, readOnly: false, directReports: 0 },
-      settings: { today: '2026-10-14', dateFormat: 'yyyy-MM-dd', orgTimeZone: 'America/Halifax', idleTimeoutHours: 8 }, preferences: { denseRows: false, digestEnabled: true },
-    } }) : route.fulfill({ status: 401, json: { detail: 'Signed out' } });
+    if (pathname === '/api/v1/me') return signedIn ? route.fulfill({ json: meView({
+      id: '00000000-0000-0000-0000-000000000001', displayName: 'Synthetic Person', email: 'person@outside.example', settings: { today: '2026-10-14' }, preferences: { denseRows: false },
+    }) }) : route.fulfill({ status: 401, json: { detail: 'Signed out' } });
     if (pathname.startsWith('/api/v1/auth/social/sign-in/')) return route.fulfill({ contentType: 'text/html', body: '<h1>Provider redirect reached</h1>' });
     if (pathname === '/api/v1/auth/social/providers') return route.fulfill({ json: { available: providers, connected: ['Google'] } });
     if (pathname.startsWith('/api/v1/auth/social/link/')) {

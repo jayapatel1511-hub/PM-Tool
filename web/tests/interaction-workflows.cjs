@@ -5,6 +5,7 @@ const assert = require('node:assert/strict')
 const { coordinationOptions, coordinationTask } = require('./reviews.fixture.cjs')
 const { myWork, myWorkPerson, myStaffPerson, myStaffList } = require('./my-work.fixture.cjs')
 const { savedView, viewList, viewSaved } = require('./views.fixture.cjs')
+const { meView, referenceData, referenceDiscipline } = require('./me.fixture.cjs')
 const { startPreview, project: baseProject, task: baseTask, taskDetail, deliverableDetail, panelIds, mockPlatformApi } = require('./platform-fixtures.cjs')
 
 const port = Number(process.env.WORKFLOW_TEST_PORT || '19508')
@@ -33,11 +34,11 @@ const views = { allocations:[sharedView], staff: [staffView], portfolio: [savedV
     const req = route.request(); const url = new URL(req.url()); const p = url.pathname.replace('/api/v1/', ''); const method = req.method(); let status = 200; let data = {}
     if (method !== 'GET') writes.push({ method, path: p, body: req.postDataJSON?.(), ifMatch: req.headers()['if-match'], source: req.headers()['x-hub-source'] })
     if (p === 'config') data = clientConfig()
-    else if (p === 'me') data = { id: personId, displayName: 'Alex Chen', email: 'alex@hub.test', roles: [], systemRoles: ['ProjectManager'], capabilities: { createProject: false, createTask: true, portfolio: true, workload, staff: true, allStaff: true, admin: true, templates: true, readOnly: false, directReports: 1 }, settings: { today: '2026-10-18', dateFormat: 'yyyy-MM-dd', orgTimeZone: 'America/Halifax', idleTimeoutHours: 8, restrictedProjectsEnabled: true }, preferences: { denseRows: true }, flags: { small_ux: true, allocation_preview: true, org_structure: true } }
+    else if (p === 'me') data = meView({ id: personId, displayName: 'Alex Chen', email: 'alex@hub.test', systemRoles: ['ProjectManager'], capabilities: { createTask: true, portfolio: true, workload, staff: true, allStaff: true, admin: true, templates: true, directReports: 1 }, settings: { today: '2026-10-18', restrictedProjectsEnabled: true }, flags: { small_ux: true, allocation_preview: true, org_structure: true } })
     else if (p === 'me/notifications/unread-count') data = { notifications: 0, following: 0 }
     else if (p === 'me/notifications/pulse') data = { stamp: '0' }
     else if (p === 'me/work') data = myWork({ person: myWorkPerson(personId, 'Alex Chen'), today: '2026-10-18', tasks: [task] })
-    else if (p === 'reference') data = { disciplines: [{ id: disciplineId, name: 'Civil', isActive: true }], clients: [], offices: [], phases: [], projectTypes: [], limits: { roleLabel: 80 } }
+    else if (p === 'reference') data = referenceData({ disciplines: [referenceDiscipline(disciplineId, 'Civil')] })
     else if (p === 'organisation') data = { includeIndirectReports: false, units: [] }
     else if (p === 'workspaces') data=[]
     else if (p === 'users') {userQueries.push(url.searchParams.get('projectId'));data=[{id:personId,displayName:'Alex Chen',isActive:true,onProject:url.searchParams.has('projectId')}]}

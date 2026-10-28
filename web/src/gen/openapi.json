@@ -800,89 +800,6 @@
         ],
         "type": "object"
       },
-      "AnonymousTypeOfGuidAndstringAndGuidAndboolean": {
-        "properties": {
-          "defaultDisciplineId": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "id": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "isActive": {
-            "type": "boolean"
-          },
-          "name": {
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "defaultDisciplineId",
-          "isActive"
-        ],
-        "type": "object"
-      },
-      "AnonymousTypeOfGuidAndstringAndboolean": {
-        "properties": {
-          "id": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "isActive": {
-            "type": "boolean"
-          },
-          "name": {
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "isActive"
-        ],
-        "type": "object"
-      },
-      "AnonymousTypeOfGuidAndstringAndbooleanAndint": {
-        "properties": {
-          "id": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "isActive": {
-            "type": "boolean"
-          },
-          "name": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "sortOrder": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "isActive",
-          "sortOrder"
-        ],
-        "type": "object"
-      },
       "AnonymousTypeOfGuidAndstringAndstring": {
         "properties": {
           "displayName": {
@@ -906,36 +823,6 @@
           "userId",
           "displayName",
           "source"
-        ],
-        "type": "object"
-      },
-      "AnonymousTypeOfGuidAndstringAndstringAndboolean": {
-        "properties": {
-          "id": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "isActive": {
-            "type": "boolean"
-          },
-          "name": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "shortName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "shortName",
-          "isActive"
         ],
         "type": "object"
       },
@@ -1188,181 +1075,6 @@
         ],
         "type": "object"
       },
-      "AnonymousTypeOfGuidAndstringAndstringAndstringAndGuidAndGuidAndbooleanAndIOrderedEnumerableOfAnonymousTypeOfstringAndstringAndIOrderedEnumerableOfstringAndAnonymousTypeOfbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndintAndCurrentSettingsAndAnonymousTypeOfbooleanAndstringAndbooleanAndbooleanAndIReadOnlyDictionaryOfstringAndboolean": {
-        "properties": {
-          "capabilities": {
-            "$ref": "#/components/schemas/AnonymousTypeOfbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndint"
-          },
-          "displayName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "email": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "flags": {
-            "additionalProperties": {
-              "type": "boolean"
-            },
-            "type": [
-              "null",
-              "object"
-            ]
-          },
-          "id": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "isTemplateEditor": {
-            "type": "boolean"
-          },
-          "jobTitle": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "officeId": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "preferences": {
-            "$ref": "#/components/schemas/AnonymousTypeOfbooleanAndstringAndbooleanAndboolean"
-          },
-          "roles": {
-            "items": {
-              "$ref": "#/components/schemas/AnonymousTypeOfstringAndstring"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "settings": {
-            "$ref": "#/components/schemas/CurrentSettings"
-          },
-          "supervisorId": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "systemRoles": {
-            "items": {
-              "type": "string"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          }
-        },
-        "required": [
-          "id",
-          "displayName",
-          "email",
-          "jobTitle",
-          "officeId",
-          "supervisorId",
-          "isTemplateEditor",
-          "roles",
-          "systemRoles",
-          "capabilities",
-          "settings",
-          "preferences",
-          "flags"
-        ],
-        "type": "object"
-      },
-      "AnonymousTypeOfGuidAndstringAndstringAndstringAndboolean": {
-        "properties": {
-          "code": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "id": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "isActive": {
-            "type": "boolean"
-          },
-          "name": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "timeZone": {
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "code",
-          "timeZone",
-          "isActive"
-        ],
-        "type": "object"
-      },
-      "AnonymousTypeOfGuidAndstringAndstringAndstringAndbooleanAndint": {
-        "properties": {
-          "code": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "colour": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "id": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "isActive": {
-            "type": "boolean"
-          },
-          "name": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "sortOrder": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "code",
-          "colour",
-          "isActive",
-          "sortOrder"
-        ],
-        "type": "object"
-      },
       "AnonymousTypeOfGuidAndstringAndstringAndstringAndint": {
         "properties": {
           "displayName": {
@@ -1563,77 +1275,6 @@
         ],
         "type": "object"
       },
-      "AnonymousTypeOfListOfAnonymousTypeOfGuidAndstringAndstringAndstringAndbooleanAndintAndListOfAnonymousTypeOfGuidAndstringAndstringAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndstringAndstringAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndGuidAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndbooleanAndintAndListOfAnonymousTypeOfGuidAndstringAndbooleanAndAnonymousTypeOfint": {
-        "properties": {
-          "clients": {
-            "items": {
-              "$ref": "#/components/schemas/AnonymousTypeOfGuidAndstringAndstringAndboolean"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "deliverableTypes": {
-            "items": {
-              "$ref": "#/components/schemas/AnonymousTypeOfGuidAndstringAndGuidAndboolean"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "disciplines": {
-            "items": {
-              "$ref": "#/components/schemas/AnonymousTypeOfGuidAndstringAndstringAndstringAndbooleanAndint"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "limits": {
-            "$ref": "#/components/schemas/AnonymousTypeOfint"
-          },
-          "offices": {
-            "items": {
-              "$ref": "#/components/schemas/AnonymousTypeOfGuidAndstringAndstringAndstringAndboolean"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "phases": {
-            "items": {
-              "$ref": "#/components/schemas/AnonymousTypeOfGuidAndstringAndbooleanAndint"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "projectTypes": {
-            "items": {
-              "$ref": "#/components/schemas/AnonymousTypeOfGuidAndstringAndboolean"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          }
-        },
-        "required": [
-          "disciplines",
-          "clients",
-          "offices",
-          "deliverableTypes",
-          "phases",
-          "projectTypes",
-          "limits"
-        ],
-        "type": "object"
-      },
       "AnonymousTypeOfListOfObjectAndListOfObject": {
         "properties": {
           "blocks": {
@@ -1713,55 +1354,6 @@
         ],
         "type": "object"
       },
-      "AnonymousTypeOfbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndint": {
-        "properties": {
-          "admin": {
-            "type": "boolean"
-          },
-          "allStaff": {
-            "type": "boolean"
-          },
-          "createProject": {
-            "type": "boolean"
-          },
-          "createTask": {
-            "type": "boolean"
-          },
-          "directReports": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          },
-          "portfolio": {
-            "type": "boolean"
-          },
-          "readOnly": {
-            "type": "boolean"
-          },
-          "staff": {
-            "type": "boolean"
-          },
-          "templates": {
-            "type": "boolean"
-          },
-          "workload": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "createProject",
-          "createTask",
-          "portfolio",
-          "workload",
-          "staff",
-          "allStaff",
-          "admin",
-          "templates",
-          "readOnly",
-          "directReports"
-        ],
-        "type": "object"
-      },
       "AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean": {
         "properties": {
           "digestEnabled": {
@@ -1823,42 +1415,16 @@
         ],
         "type": "object"
       },
-      "AnonymousTypeOfbooleanAndstringAndbooleanAndboolean": {
-        "properties": {
-          "denseRows": {
-            "type": "boolean"
-          },
-          "digestEnabled": {
-            "type": "boolean"
-          },
-          "digestTimeLocal": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "weeklySummaryEnabled": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "digestEnabled",
-          "digestTimeLocal",
-          "denseRows",
-          "weeklySummaryEnabled"
-        ],
-        "type": "object"
-      },
       "AnonymousTypeOfint": {
         "properties": {
-          "roleLabel": {
+          "projects": {
             "format": "int32",
             "pattern": "^-?(?:0|[1-9]\\d*)$",
             "type": "integer"
           }
         },
         "required": [
-          "roleLabel"
+          "projects"
         ],
         "type": "object"
       },
@@ -12391,6 +11957,176 @@
         ],
         "type": "object"
       },
+      "MeCapabilities": {
+        "properties": {
+          "admin": {
+            "type": "boolean"
+          },
+          "allStaff": {
+            "type": "boolean"
+          },
+          "createProject": {
+            "type": "boolean"
+          },
+          "createTask": {
+            "type": "boolean"
+          },
+          "directReports": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "portfolio": {
+            "type": "boolean"
+          },
+          "readOnly": {
+            "type": "boolean"
+          },
+          "staff": {
+            "type": "boolean"
+          },
+          "templates": {
+            "type": "boolean"
+          },
+          "workload": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "createProject",
+          "createTask",
+          "portfolio",
+          "workload",
+          "staff",
+          "allStaff",
+          "admin",
+          "templates",
+          "readOnly",
+          "directReports"
+        ],
+        "type": "object"
+      },
+      "MePreferences": {
+        "properties": {
+          "denseRows": {
+            "type": "boolean"
+          },
+          "digestEnabled": {
+            "type": "boolean"
+          },
+          "digestTimeLocal": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "weeklySummaryEnabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "digestEnabled",
+          "digestTimeLocal",
+          "denseRows",
+          "weeklySummaryEnabled"
+        ],
+        "type": "object"
+      },
+      "MeRole": {
+        "properties": {
+          "role": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "source"
+        ],
+        "type": "object"
+      },
+      "MeView": {
+        "properties": {
+          "capabilities": {
+            "$ref": "#/components/schemas/MeCapabilities"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "flags": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "type": "object"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isTemplateEditor": {
+            "type": "boolean"
+          },
+          "jobTitle": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "officeId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "preferences": {
+            "$ref": "#/components/schemas/MePreferences"
+          },
+          "roles": {
+            "items": {
+              "$ref": "#/components/schemas/MeRole"
+            },
+            "type": "array"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/CurrentSettings"
+          },
+          "supervisorId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "systemRoles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "email",
+          "jobTitle",
+          "officeId",
+          "supervisorId",
+          "isTemplateEditor",
+          "roles",
+          "systemRoles",
+          "capabilities",
+          "settings",
+          "preferences",
+          "flags"
+        ],
+        "type": "object"
+      },
       "MeetingActionBody": {
         "properties": {
           "dueDate": {
@@ -16510,6 +16246,235 @@
         "required": [
           "note",
           "checks"
+        ],
+        "type": "object"
+      },
+      "ReferenceClient": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "shortName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "shortName",
+          "isActive"
+        ],
+        "type": "object"
+      },
+      "ReferenceDeliverableType": {
+        "properties": {
+          "defaultDisciplineId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "defaultDisciplineId",
+          "isActive"
+        ],
+        "type": "object"
+      },
+      "ReferenceDiscipline": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "colour": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "sortOrder": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "code",
+          "colour",
+          "isActive",
+          "sortOrder"
+        ],
+        "type": "object"
+      },
+      "ReferenceLimits": {
+        "properties": {
+          "roleLabel": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "roleLabel"
+        ],
+        "type": "object"
+      },
+      "ReferenceOffice": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "timeZone": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "code",
+          "timeZone",
+          "isActive"
+        ],
+        "type": "object"
+      },
+      "ReferencePhase": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "sortOrder": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "isActive",
+          "sortOrder"
+        ],
+        "type": "object"
+      },
+      "ReferenceProjectType": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "isActive"
+        ],
+        "type": "object"
+      },
+      "ReferenceView": {
+        "properties": {
+          "clients": {
+            "items": {
+              "$ref": "#/components/schemas/ReferenceClient"
+            },
+            "type": "array"
+          },
+          "deliverableTypes": {
+            "items": {
+              "$ref": "#/components/schemas/ReferenceDeliverableType"
+            },
+            "type": "array"
+          },
+          "disciplines": {
+            "items": {
+              "$ref": "#/components/schemas/ReferenceDiscipline"
+            },
+            "type": "array"
+          },
+          "limits": {
+            "$ref": "#/components/schemas/ReferenceLimits"
+          },
+          "offices": {
+            "items": {
+              "$ref": "#/components/schemas/ReferenceOffice"
+            },
+            "type": "array"
+          },
+          "phases": {
+            "items": {
+              "$ref": "#/components/schemas/ReferencePhase"
+            },
+            "type": "array"
+          },
+          "projectTypes": {
+            "items": {
+              "$ref": "#/components/schemas/ReferenceProjectType"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "disciplines",
+          "clients",
+          "offices",
+          "deliverableTypes",
+          "phases",
+          "projectTypes",
+          "limits"
         ],
         "type": "object"
       },
@@ -29238,7 +29203,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnonymousTypeOfGuidAndstringAndstringAndstringAndGuidAndGuidAndbooleanAndIOrderedEnumerableOfAnonymousTypeOfstringAndstringAndIOrderedEnumerableOfstringAndAnonymousTypeOfbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndintAndCurrentSettingsAndAnonymousTypeOfbooleanAndstringAndbooleanAndbooleanAndIReadOnlyDictionaryOfstringAndboolean"
+                  "$ref": "#/components/schemas/MeView"
                 }
               }
             },
@@ -29736,8 +29701,8 @@
     "/api/v1/me/sign-in": {
       "post": {
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -41180,7 +41145,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnonymousTypeOfListOfAnonymousTypeOfGuidAndstringAndstringAndstringAndbooleanAndintAndListOfAnonymousTypeOfGuidAndstringAndstringAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndstringAndstringAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndGuidAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndbooleanAndintAndListOfAnonymousTypeOfGuidAndstringAndbooleanAndAnonymousTypeOfint"
+                  "$ref": "#/components/schemas/ReferenceView"
                 }
               }
             },

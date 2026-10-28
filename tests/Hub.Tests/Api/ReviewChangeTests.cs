@@ -520,4 +520,86 @@ public sealed class ReviewChangeTests(HubFactory f)
         await ReviewAction(s, review, "cancel", 403);
         Assert.Equal(4, (await Get(TestData.Pm, Root(s) + $"/reviews/{review}"))["assignments"]!.AsArray().Count);
     }
+
+    [Fact]
+    public async Task List_linked_issues_options_and_detail_keep_their_property_names_order_nulls_and_flags() // the typed records must serialise to the bytes the Reviews and Changes pages already read
+    {
+        var s = await New(); var root = Root(s);
+        var task = await data.NewTask(s.P.Id, extra: new { assigneeId = data.User(TestData.Alex) });
+        var issue = await Post(TestData.Alex, root + "/issues", new { title = "Shared service clearance", severity = "High", ownerId = data.User(TestData.Alex), projectDisciplineId = s.Civil }, 201);
+        var id = await Review(s); var finding = await Finding(s, id, issueId: issue.G("id")); await Finding(s, id, "Advisory");
+        await Decide(s, id, s.Civil, TestData.Pm);
+        await FindingAction(s, id, finding, TestData.Alex, FindingStatus.Responded, "https://example.test/clearance.pdf");
+
+        var list = await Get(TestData.Pm, root + "/reviews");
+        Assert.Equal(["items", "page", "pageSize", "totalCount", "sort", "filters"], Keys(list));
+        Assert.Equal((1, 50, 1), (list.I("page"), list.I("pageSize"), list.I("totalCount"))); Assert.Null(list["sort"]); Assert.Null(list["filters"]); // null, not omitted
+        var row = Assert.Single(list["items"]!.AsArray())!;
+        Assert.Equal(["id", "key", "title", "status", "coordinatorId", "roundNumber", "rowVersion", "outstandingDisciplines", "blockingFindings", "waitingDays"], Keys(row));
+        Assert.Equal((id, "Civil / Electrical interface", ReviewStatus.ChangesRequired, data.User(TestData.Marc), 1), (row.G("id"), row.S("title"), row.S("status"), row.G("coordinatorId"), row.I("roundNumber")));
+        Assert.Equal((1, 1), (row.I("outstandingDisciplines"), row.I("blockingFindings"))); Assert.True(row.I("waitingDays") >= 0);
+        var generated = await Get(TestData.Pm, root + $"/reviews?Q=interface&Status={Uri.EscapeDataString(ReviewStatus.ChangesRequired)}&OwnerId={data.User(TestData.Marc)}&DisciplineId={s.Electrical}&Mine=false&page=1"); // the names the generated client sends
+        Assert.Equal(id, Assert.Single(generated["items"]!.AsArray())!.G("id"));
+        Assert.Equal(id, Assert.Single((await Get(TestData.Omar, root + "/reviews?Mine=true"))["items"]!.AsArray())!.G("id"));
+        Assert.Empty((await Get(TestData.Pm, root + $"/reviews?Status={Uri.EscapeDataString(ReviewStatus.Approved)}"))["items"]!.AsArray());
+
+        var linked = await Get(TestData.Omar, root + $"/reviews/linked-issues?disciplineId={s.Electrical}&ownerId={data.User(TestData.Alex)}&page=1&pageSize=25");
+        Assert.Equal(["items", "totalCount", "page", "pageSize"], Keys(linked)); Assert.Equal((1, 1, 25), (linked.I("totalCount"), linked.I("page"), linked.I("pageSize")));
+        var linkedRow = Assert.Single(linked["items"]!.AsArray())!;
+        Assert.Equal(["id", "key", "title", "status", "ownerId", "ownerName", "projectDisciplineId"], Keys(linkedRow));
+        Assert.Equal((issue.G("id"), data.User(TestData.Alex), s.Civil), (linkedRow.G("id"), linkedRow.G("ownerId"), linkedRow.G("projectDisciplineId"))); Assert.False(string.IsNullOrWhiteSpace(linkedRow.S("ownerName")));
+
+        foreach (var path in new[] { "/reviews/options", "/changes/options" }) {
+            var options = await Get(TestData.Pm, root + path);
+            Assert.Equal(["actorId", "canWrite", "manageDisciplineIds", "canCreate", "people", "disciplines", "sources", "heads", "deliverables", "tasks"], Keys(options));
+            Assert.Equal((data.User(TestData.Pm), true, 2), (options.G("actorId"), options["canWrite"]!.GetValue<bool>(), options["manageDisciplineIds"]!.AsArray().Count));
+            Assert.Equal(["changes", "reviews"], Keys(options["canCreate"]!)); Assert.Equal((true, true), (options["canCreate"]!["changes"]!.GetValue<bool>(), options["canCreate"]!["reviews"]!.GetValue<bool>()));
+            Assert.Equal(["id", "displayName"], Keys(options["people"]![0]!)); Assert.Equal(["id", "name"], Keys(options["disciplines"]![0]!));
+            var source = Assert.Single(options["sources"]!.AsArray())!;
+            Assert.Equal(["revision", "identity", "published", "isCurrent"], Keys(source)); Assert.Equal((true, true), (source["published"]!.GetValue<bool>(), source["isCurrent"]!.GetValue<bool>()));
+            Assert.Equal(SourceRevisionKeys, Keys(source["revision"]!)); Assert.Equal(("A", "Deliverable"), (source["revision"]!.S("revision"), source["revision"]!.S("sourceSystem"))); Assert.Null(source["revision"]!["sourceCheckedAt"]); Assert.Null(source["revision"]!["supersedesId"]); // null, not omitted
+            Assert.Equal(["identity", "currentRevisionId", "ownerId", "projectDisciplineId", "auditType", "projectId", "auditProjectId", "auditKey", "auditName", "createdAt", "createdBy", "updatedAt", "updatedBy", "rowVersion", "id"], Keys(Assert.Single(options["heads"]!.AsArray())!));
+            var deliverable = Assert.Single(options["deliverables"]!.AsArray())!;
+            Assert.Equal(["id", "key", "name", "projectDisciplineId", "ownerId", "rowVersion", "revision", "transmittalUrl", "status", "canCommit", "canManage"], Keys(deliverable));
+            Assert.Equal((s.Deliverable, "A", true, true), (deliverable.G("id"), deliverable.S("revision"), deliverable["canCommit"]!.GetValue<bool>(), deliverable["canManage"]!.GetValue<bool>())); Assert.Null(deliverable["transmittalUrl"]);
+            var taskRow = Assert.Single(options["tasks"]!.AsArray())!;
+            Assert.Equal(["id", "key", "name", "projectDisciplineId", "ownerId", "rowVersion", "status", "canCommit", "canManage"], Keys(taskRow));
+            Assert.Equal((task.G("id"), data.User(TestData.Alex)), (taskRow.G("id"), taskRow.G("ownerId")));
+        }
+
+        var notice = await Notice(s); await Publish(s, notice); // a replaced source starts round 2 and carries the open findings
+        var detail = await Get(TestData.Omar, root + $"/reviews/{id}");
+        Assert.Equal(["package", "rounds", "assignments", "findings", "manifest", "events", "eligiblePeople", "actorId", "canCoordinate", "canManage", "canWrite", "canReassignVerifier"], Keys(detail));
+        var package = detail["package"]!;
+        Assert.Equal(["title", "purpose", "coordinatorId", "projectDisciplineId", "status", "currentRoundId", "roundNumber", "requiredForIssue", "auditType", "auditProjectId", "auditKey", "auditName", "auditDisciplineId",
+            "projectId", "key", "seq", "deletedAt", "deletedBy", "createdAt", "createdBy", "updatedAt", "updatedBy", "rowVersion", "id"], Keys(package));
+        Assert.Equal((id, ReviewStatus.Draft, 2, true, "ReviewPackage"), (package.G("id"), package.S("status"), package.I("roundNumber"), package["requiredForIssue"]!.GetValue<bool>(), package.S("auditType"))); Assert.Null(package["deletedAt"]);
+        var rounds = detail["rounds"]!.AsArray(); Assert.Equal([2, 1], rounds.Select(r => r!.I("number")));
+        Assert.Equal(["packageId", "number", "purpose", "reason", "removalImpact", "startedAt", "status", "auditType", "projectId", "auditProjectId", "auditKey", "auditName", "createdAt", "createdBy", "updatedAt", "updatedBy", "rowVersion", "id"], Keys(rounds[0]!));
+        Assert.Equal((ReviewStatus.Superseded, true), (rounds[1]!.S("status"), rounds[1]!["startedAt"] is not null)); Assert.Null(rounds[0]!["startedAt"]); Assert.Null(rounds[0]!["removalImpact"]); Assert.False(string.IsNullOrWhiteSpace(rounds[0]!.S("reason")));
+        var assignments = detail["assignments"]!.AsArray(); Assert.Equal(4, assignments.Count);
+        Assert.Equal(["roundId", "projectDisciplineId", "reviewerId", "dueDate", "status", "rationale", "decidedAt", "decidedBy", "auditType", "projectId", "auditProjectId", "auditKey", "auditName", "createdAt", "createdBy", "updatedAt", "updatedBy", "rowVersion", "id"], Keys(assignments[0]!));
+        var decided = assignments.Single(a => a!.S("status") == DisciplineReviewStatus.Approved)!;
+        Assert.Equal(("2026-09-18", data.User(TestData.Pm)), (decided.S("dueDate"), decided.G("reviewerId"))); Assert.NotNull(decided["decidedAt"]); Assert.Equal(data.User(TestData.Pm), decided.G("decidedBy")); Assert.False(string.IsNullOrWhiteSpace(decided.S("rationale")));
+        var pending = assignments.First(a => a!.S("status") == DisciplineReviewStatus.Pending)!; Assert.Null(pending["rationale"]); Assert.Null(pending["decidedAt"]); Assert.Null(pending["decidedBy"]); // null, not omitted
+        var findings = detail["findings"]!.AsArray(); Assert.Equal(4, findings.Count);
+        Assert.Equal(["packageId", "roundId", "carriedFromId", "issueId", "sourceRevisionId", "projectDisciplineId", "originatorId", "resolverId", "verifierId", "text", "severity", "status", "response", "evidenceUrl", "withdrawalAcknowledgedBy",
+            "auditType", "auditName", "projectId", "auditProjectId", "auditKey", "createdAt", "createdBy", "updatedAt", "updatedBy", "rowVersion", "id"], Keys(findings[0]!));
+        var responded = findings.Single(x => x!.G("id") == finding)!;
+        Assert.Equal((FindingStatus.Responded, "Blocking", "https://example.test/clearance.pdf", issue.G("id")), (responded.S("status"), responded.S("severity"), responded.S("evidenceUrl"), responded.G("issueId"))); Assert.Null(responded["carriedFromId"]); Assert.Null(responded["withdrawalAcknowledgedBy"]);
+        var carried = findings.Single(x => x!["carriedFromId"] is not null && x.G("carriedFromId") == finding)!; Assert.Equal(issue.G("id"), carried.G("issueId")); Assert.Equal(FindingStatus.Open, carried.S("status")); Assert.Null(carried["response"]); Assert.Null(carried["evidenceUrl"]);
+        var manifest = detail["manifest"]!.AsArray(); Assert.Equal(2, manifest.Count);
+        Assert.Equal(["id", "roundId", "deliverableId", "sourceRevisionId", "authorIds", "source"], Keys(manifest[0]!)); Assert.Equal(SourceRevisionKeys, Keys(manifest[0]!["source"]!));
+        Assert.Equal(["A", "B"], manifest.Select(m => m!["source"]!.S("revision")).Order()); Assert.Equal(2, manifest[0]!["authorIds"]!.AsArray().Count);
+        var events = detail["events"]!.AsArray(); var response = Assert.Single(events, e => e!.S("action") == FindingStatus.Responded)!;
+        Assert.Equal(["findingId", "action", "reason", "evidenceUrl", "auditType", "projectId", "auditProjectId", "auditKey", "auditName", "createdAt", "createdBy", "updatedAt", "updatedBy", "rowVersion", "id"], Keys(response));
+        Assert.Equal((finding, "https://example.test/clearance.pdf"), (response.G("findingId"), response.S("evidenceUrl")));
+        Assert.Equal(4, detail["eligiblePeople"]!.AsArray().Count); Assert.Equal(data.User(TestData.Omar), detail.G("actorId"));
+        Assert.Equal((false, false, true, false), (detail["canCoordinate"]!.GetValue<bool>(), detail["canManage"]!.GetValue<bool>(), detail["canWrite"]!.GetValue<bool>(), detail["canReassignVerifier"]!.GetValue<bool>()));
+        var manager = await Get(TestData.Pm, root + $"/reviews/{id}");
+        Assert.Equal((true, true, true, true), (manager["canCoordinate"]!.GetValue<bool>(), manager["canManage"]!.GetValue<bool>(), manager["canWrite"]!.GetValue<bool>(), manager["canReassignVerifier"]!.GetValue<bool>()));
+    }
+    static string[] Keys(JsonNode n) => n.AsObject().Select(x => x.Key).ToArray();
+    static readonly string[] SourceRevisionKeys = ["projectId", "deliverableId", "sourceRowVersion", "sourceIdentity", "sourceSystem", "externalIdentifier", "issuer", "scope", "sourceCheckedAt", "supersedesId", "authorIds",
+        "identityHash", "sourceKey", "title", "revision", "url", "auditType", "auditProjectId", "auditKey", "auditName", "createdAt", "createdBy", "updatedAt", "updatedBy", "rowVersion", "id"];
 }

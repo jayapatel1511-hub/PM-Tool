@@ -5,6 +5,7 @@ const { chromium } = require('playwright');
 const { clientConfig } = require('./config.fixture.cjs');
 const path = require('path'), { spawn } = require('child_process'), assert = require('assert/strict');
 const { decisionRow, externalParty } = require('./decisions.fixture.cjs');
+const { coordinationOptions, coordinationTask } = require('./reviews.fixture.cjs');
 const { commitmentRow, commitmentList } = require('./weekly-commitments.fixture.cjs');
 const { attentionList } = require('./evaluation.fixture.cjs');
 const { submissionListRow, submissionPage } = require('./submissions.fixture.cjs');
@@ -26,9 +27,9 @@ const project = () => ({ id: pid, projectNumber: 'P-DEMO', name: 'Basis checks',
   permissions: { raiseRegister: { ok: false }, edit: { ok: false }, healthOverride: { ok: false }, ...flags(who === 'consumer'), isPm: false, leadOf: who === 'consumer' ? [] : [civil], createTaskIn: [civil], createDeliverableIn: [civil], createBasisIn: [civil], assignBasisIn: [civil], transitions: [], needsReason } });
 const me = () => ({ id: actor(), displayName: who, email: `${who}@hub.test`, roles: [], systemRoles: [], capabilities: { createProject: false, createTask: true, portfolio: false, workload: false, staff: false, admin: false, templates: false, readOnly: false, directReports: 0 },
   settings: { coordinationLookaheadWeeks: 6, today: '2026-10-01', dateFormat: 'yyyy-MM-dd', orgTimeZone: 'America/Halifax', idleTimeoutHours: 8 }, preferences: { denseRows: true, digestEnabled: true } });
-const options = () => ({ actorId: actor(), canWrite: true, manageDisciplineIds: who === 'consumer' ? [] : [civil], people: [{ id: consumer, displayName: 'Alex Consumer' }, { id: lead, displayName: 'Marc Lead' }],
+const options = () => coordinationOptions({ actorId: actor(), canWrite: true, manageDisciplineIds: who === 'consumer' ? [] : [civil], people: [{ id: consumer, displayName: 'Alex Consumer' }, { id: lead, displayName: 'Marc Lead' }],
   disciplines: [{ id: civil, name: 'Civil' }], sources: [], heads: [], deliverables: [],
-  tasks: [{ id: task, key: 'P-DEMO-T0001', name: 'Watermain layout', projectDisciplineId: civil, ownerId: consumer, rowVersion: 3, status: 'In Progress' }] });
+  tasks: [coordinationTask({ id: task, key: 'P-DEMO-T0001', name: 'Watermain layout', projectDisciplineId: civil, ownerId: consumer, rowVersion: 3, status: 'In Progress' })] });
 const version = (vid, entryId, number, status, extra = {}) => basisVersionItem({ id: vid, entryId, number, status, ...extra });
 const row = (eid, key, current, latest) => basisRegisterRow({ id: eid, key, title: `Entry ${key}`, ownerId: consumer, projectDisciplineId: civil, currentVersionId: current, currentStatus: current ? 'Confirmed' : null, latestStatus: latest });
 const entry = (eid, key, current) => basisEntryRow({ id: eid, key, title: `Entry ${key}`, ownerId: consumer, projectDisciplineId: civil, currentVersionId: current });

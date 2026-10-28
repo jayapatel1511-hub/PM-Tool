@@ -17408,6 +17408,33 @@
     "$.components.schemas.CoordinationBlockerGroup.type": [
       "string"
     ],
+    "$.components.schemas.CoordinationCanCreate": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationCanCreate.properties": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationCanCreate.properties.changes": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationCanCreate.properties.changes.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationCanCreate.properties.reviews": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationCanCreate.properties.reviews.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationCanCreate.required": [
+      "array"
+    ],
+    "$.components.schemas.CoordinationCanCreate.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationCanCreate.type": [
+      "string"
+    ],
     "$.components.schemas.CoordinationChangeRow": [
       "object"
     ],
@@ -17538,6 +17565,141 @@
       "string"
     ],
     "$.components.schemas.CoordinationChangeTarget.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationDeliverable": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationDeliverable.properties": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationDeliverable.properties.canCommit": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationDeliverable.properties.canCommit.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationDeliverable.properties.canManage": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationDeliverable.properties.canManage.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationDeliverable.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationDeliverable.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationDeliverable.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationDeliverable.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationDeliverable.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationDeliverable.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationDeliverable.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationDeliverable.properties.ownerId": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationDeliverable.properties.ownerId.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationDeliverable.properties.ownerId.type": [
+      "array"
+    ],
+    "$.components.schemas.CoordinationDeliverable.properties.ownerId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationDeliverable.properties.projectDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationDeliverable.properties.projectDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationDeliverable.properties.projectDisciplineId.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationDeliverable.properties.revision": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationDeliverable.properties.revision.type": [
+      "array"
+    ],
+    "$.components.schemas.CoordinationDeliverable.properties.revision.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationDeliverable.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationDeliverable.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationDeliverable.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationDeliverable.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationDeliverable.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationDeliverable.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationDeliverable.properties.transmittalUrl": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationDeliverable.properties.transmittalUrl.type": [
+      "array"
+    ],
+    "$.components.schemas.CoordinationDeliverable.properties.transmittalUrl.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationDeliverable.required": [
+      "array"
+    ],
+    "$.components.schemas.CoordinationDeliverable.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationDeliverable.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationDiscipline": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationDiscipline.properties": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationDiscipline.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationDiscipline.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationDiscipline.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationDiscipline.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationDiscipline.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationDiscipline.required": [
+      "array"
+    ],
+    "$.components.schemas.CoordinationDiscipline.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationDiscipline.type": [
       "string"
     ],
     "$.components.schemas.CoordinationHandoffRow": [
@@ -17946,6 +18108,159 @@
       "string"
     ],
     "$.components.schemas.CoordinationLinkedAction.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationOptions": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationOptions.properties": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.actorId": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.actorId.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.actorId.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.canCreate": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.canCreate.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.canWrite": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.canWrite.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.deliverables": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.deliverables.items": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.deliverables.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.deliverables.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.disciplines": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.disciplines.items": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.disciplines.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.disciplines.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.heads": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.heads.items": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.heads.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.heads.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.manageDisciplineIds": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.manageDisciplineIds.items": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.manageDisciplineIds.items.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.manageDisciplineIds.items.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.manageDisciplineIds.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.people": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.people.items": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.people.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.people.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.sources": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.sources.items": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.sources.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.sources.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.tasks": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.tasks.items": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.tasks.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationOptions.properties.tasks.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationOptions.required": [
+      "array"
+    ],
+    "$.components.schemas.CoordinationOptions.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationOptions.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationPerson": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationPerson.properties": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationPerson.properties.displayName": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationPerson.properties.displayName.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationPerson.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationPerson.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationPerson.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationPerson.required": [
+      "array"
+    ],
+    "$.components.schemas.CoordinationPerson.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationPerson.type": [
       "string"
     ],
     "$.components.schemas.CoordinationProjection": [
@@ -18675,6 +18990,132 @@
       "string"
     ],
     "$.components.schemas.CoordinationReviewRow.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationSource": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationSource.properties": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationSource.properties.identity": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationSource.properties.identity.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationSource.properties.isCurrent": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationSource.properties.isCurrent.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationSource.properties.published": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationSource.properties.published.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationSource.properties.revision": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationSource.properties.revision.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationSource.required": [
+      "array"
+    ],
+    "$.components.schemas.CoordinationSource.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationSource.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationTask": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationTask.properties": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationTask.properties.canCommit": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationTask.properties.canCommit.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationTask.properties.canManage": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationTask.properties.canManage.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationTask.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationTask.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationTask.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationTask.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationTask.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationTask.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationTask.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationTask.properties.ownerId": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationTask.properties.ownerId.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationTask.properties.ownerId.type": [
+      "array"
+    ],
+    "$.components.schemas.CoordinationTask.properties.ownerId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationTask.properties.projectDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationTask.properties.projectDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationTask.properties.projectDisciplineId.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationTask.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationTask.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationTask.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationTask.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationTask.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.CoordinationTask.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationTask.required": [
+      "array"
+    ],
+    "$.components.schemas.CoordinationTask.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CoordinationTask.type": [
       "string"
     ],
     "$.components.schemas.CoordinationUnavailableTarget": [
@@ -26420,6 +26861,69 @@
     "$.components.schemas.LinkRow.type": [
       "string"
     ],
+    "$.components.schemas.LinkedIssuePage": [
+      "object"
+    ],
+    "$.components.schemas.LinkedIssuePage.properties": [
+      "object"
+    ],
+    "$.components.schemas.LinkedIssuePage.properties.items": [
+      "object"
+    ],
+    "$.components.schemas.LinkedIssuePage.properties.items.items": [
+      "object"
+    ],
+    "$.components.schemas.LinkedIssuePage.properties.items.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.LinkedIssuePage.properties.items.type": [
+      "string"
+    ],
+    "$.components.schemas.LinkedIssuePage.properties.page": [
+      "object"
+    ],
+    "$.components.schemas.LinkedIssuePage.properties.page.format": [
+      "string"
+    ],
+    "$.components.schemas.LinkedIssuePage.properties.page.pattern": [
+      "string"
+    ],
+    "$.components.schemas.LinkedIssuePage.properties.page.type": [
+      "string"
+    ],
+    "$.components.schemas.LinkedIssuePage.properties.pageSize": [
+      "object"
+    ],
+    "$.components.schemas.LinkedIssuePage.properties.pageSize.format": [
+      "string"
+    ],
+    "$.components.schemas.LinkedIssuePage.properties.pageSize.pattern": [
+      "string"
+    ],
+    "$.components.schemas.LinkedIssuePage.properties.pageSize.type": [
+      "string"
+    ],
+    "$.components.schemas.LinkedIssuePage.properties.totalCount": [
+      "object"
+    ],
+    "$.components.schemas.LinkedIssuePage.properties.totalCount.format": [
+      "string"
+    ],
+    "$.components.schemas.LinkedIssuePage.properties.totalCount.pattern": [
+      "string"
+    ],
+    "$.components.schemas.LinkedIssuePage.properties.totalCount.type": [
+      "string"
+    ],
+    "$.components.schemas.LinkedIssuePage.required": [
+      "array"
+    ],
+    "$.components.schemas.LinkedIssuePage.required[]": [
+      "string"
+    ],
+    "$.components.schemas.LinkedIssuePage.type": [
+      "string"
+    ],
     "$.components.schemas.LinkedItem": [
       "object"
     ],
@@ -29829,6 +30333,81 @@
       "string"
     ],
     "$.components.schemas.PageOfObject.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfReviewRow": [
+      "object"
+    ],
+    "$.components.schemas.PageOfReviewRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.PageOfReviewRow.properties.filters": [
+      "object"
+    ],
+    "$.components.schemas.PageOfReviewRow.properties.items": [
+      "object"
+    ],
+    "$.components.schemas.PageOfReviewRow.properties.items.items": [
+      "object"
+    ],
+    "$.components.schemas.PageOfReviewRow.properties.items.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.PageOfReviewRow.properties.items.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfReviewRow.properties.page": [
+      "object"
+    ],
+    "$.components.schemas.PageOfReviewRow.properties.page.format": [
+      "string"
+    ],
+    "$.components.schemas.PageOfReviewRow.properties.page.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PageOfReviewRow.properties.page.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfReviewRow.properties.pageSize": [
+      "object"
+    ],
+    "$.components.schemas.PageOfReviewRow.properties.pageSize.format": [
+      "string"
+    ],
+    "$.components.schemas.PageOfReviewRow.properties.pageSize.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PageOfReviewRow.properties.pageSize.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfReviewRow.properties.sort": [
+      "object"
+    ],
+    "$.components.schemas.PageOfReviewRow.properties.sort.type": [
+      "array"
+    ],
+    "$.components.schemas.PageOfReviewRow.properties.sort.type[]": [
+      "string"
+    ],
+    "$.components.schemas.PageOfReviewRow.properties.totalCount": [
+      "object"
+    ],
+    "$.components.schemas.PageOfReviewRow.properties.totalCount.format": [
+      "string"
+    ],
+    "$.components.schemas.PageOfReviewRow.properties.totalCount.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PageOfReviewRow.properties.totalCount.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfReviewRow.required": [
+      "array"
+    ],
+    "$.components.schemas.PageOfReviewRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.PageOfReviewRow.type": [
       "string"
     ],
     "$.components.schemas.PageOfRow": [
@@ -33851,6 +34430,204 @@
     "$.components.schemas.ReviewActionBody.type": [
       "string"
     ],
+    "$.components.schemas.ReviewAssignmentRow": [
+      "object"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.auditKey": [
+      "object"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.auditKey.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.auditKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.auditName": [
+      "object"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.auditName.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.auditName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.auditProjectId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.auditProjectId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.auditProjectId.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.auditProjectId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.auditType": [
+      "object"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.auditType.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.createdBy": [
+      "object"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.createdBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.createdBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.createdBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.decidedAt": [
+      "object"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.decidedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.decidedAt.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.decidedAt.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.decidedBy": [
+      "object"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.decidedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.decidedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.decidedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.dueDate": [
+      "object"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.dueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.dueDate.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.projectDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.projectDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.projectDisciplineId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.rationale": [
+      "object"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.rationale.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.rationale.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.reviewerId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.reviewerId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.reviewerId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.roundId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.roundId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.roundId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.updatedAt": [
+      "object"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.updatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.updatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.updatedBy": [
+      "object"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.updatedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.updatedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.properties.updatedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.required": [
+      "array"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewAssignmentRow.type": [
+      "string"
+    ],
     "$.components.schemas.ReviewCreateBody": [
       "object"
     ],
@@ -33945,6 +34722,861 @@
       "string"
     ],
     "$.components.schemas.ReviewCreateBody.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewDetail": [
+      "object"
+    ],
+    "$.components.schemas.ReviewDetail.properties": [
+      "object"
+    ],
+    "$.components.schemas.ReviewDetail.properties.actorId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewDetail.properties.actorId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewDetail.properties.actorId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewDetail.properties.assignments": [
+      "object"
+    ],
+    "$.components.schemas.ReviewDetail.properties.assignments.items": [
+      "object"
+    ],
+    "$.components.schemas.ReviewDetail.properties.assignments.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ReviewDetail.properties.assignments.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewDetail.properties.canCoordinate": [
+      "object"
+    ],
+    "$.components.schemas.ReviewDetail.properties.canCoordinate.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewDetail.properties.canManage": [
+      "object"
+    ],
+    "$.components.schemas.ReviewDetail.properties.canManage.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewDetail.properties.canReassignVerifier": [
+      "object"
+    ],
+    "$.components.schemas.ReviewDetail.properties.canReassignVerifier.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewDetail.properties.canWrite": [
+      "object"
+    ],
+    "$.components.schemas.ReviewDetail.properties.canWrite.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewDetail.properties.eligiblePeople": [
+      "object"
+    ],
+    "$.components.schemas.ReviewDetail.properties.eligiblePeople.items": [
+      "object"
+    ],
+    "$.components.schemas.ReviewDetail.properties.eligiblePeople.items.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewDetail.properties.eligiblePeople.items.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewDetail.properties.eligiblePeople.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewDetail.properties.events": [
+      "object"
+    ],
+    "$.components.schemas.ReviewDetail.properties.events.items": [
+      "object"
+    ],
+    "$.components.schemas.ReviewDetail.properties.events.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ReviewDetail.properties.events.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewDetail.properties.findings": [
+      "object"
+    ],
+    "$.components.schemas.ReviewDetail.properties.findings.items": [
+      "object"
+    ],
+    "$.components.schemas.ReviewDetail.properties.findings.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ReviewDetail.properties.findings.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewDetail.properties.manifest": [
+      "object"
+    ],
+    "$.components.schemas.ReviewDetail.properties.manifest.items": [
+      "object"
+    ],
+    "$.components.schemas.ReviewDetail.properties.manifest.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ReviewDetail.properties.manifest.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewDetail.properties.package": [
+      "object"
+    ],
+    "$.components.schemas.ReviewDetail.properties.package.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ReviewDetail.properties.rounds": [
+      "object"
+    ],
+    "$.components.schemas.ReviewDetail.properties.rounds.items": [
+      "object"
+    ],
+    "$.components.schemas.ReviewDetail.properties.rounds.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ReviewDetail.properties.rounds.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewDetail.required": [
+      "array"
+    ],
+    "$.components.schemas.ReviewDetail.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewDetail.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingEventRow": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.action": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.action.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.auditKey": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.auditKey.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.auditKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.auditName": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.auditName.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.auditName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.auditProjectId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.auditProjectId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.auditProjectId.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.auditProjectId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.auditType": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.auditType.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.createdBy": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.createdBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.createdBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.createdBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.evidenceUrl": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.evidenceUrl.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.evidenceUrl.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.findingId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.findingId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.findingId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.reason": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.reason.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.updatedAt": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.updatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.updatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.updatedBy": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.updatedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.updatedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.properties.updatedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.required": [
+      "array"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingEventRow.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.auditKey": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.auditKey.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.auditKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.auditName": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.auditName.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.auditName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.auditProjectId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.auditProjectId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.auditProjectId.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.auditProjectId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.auditType": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.auditType.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.carriedFromId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.carriedFromId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.carriedFromId.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.carriedFromId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.createdBy": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.createdBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.createdBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.createdBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.evidenceUrl": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.evidenceUrl.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.evidenceUrl.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.issueId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.issueId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.issueId.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.issueId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.originatorId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.originatorId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.originatorId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.packageId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.packageId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.packageId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.projectDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.projectDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.projectDisciplineId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.resolverId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.resolverId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.resolverId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.response": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.response.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.response.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.roundId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.roundId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.roundId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.severity": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.severity.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.sourceRevisionId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.sourceRevisionId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.sourceRevisionId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.text": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.text.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.updatedAt": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.updatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.updatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.updatedBy": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.updatedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.updatedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.updatedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.verifierId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.verifierId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.verifierId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.withdrawalAcknowledgedBy": [
+      "object"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.withdrawalAcknowledgedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.withdrawalAcknowledgedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewFindingRow.properties.withdrawalAcknowledgedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.required": [
+      "array"
+    ],
+    "$.components.schemas.ReviewFindingRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewFindingRow.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewManifestRow": [
+      "object"
+    ],
+    "$.components.schemas.ReviewManifestRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.ReviewManifestRow.properties.authorIds": [
+      "object"
+    ],
+    "$.components.schemas.ReviewManifestRow.properties.authorIds.items": [
+      "object"
+    ],
+    "$.components.schemas.ReviewManifestRow.properties.authorIds.items.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewManifestRow.properties.authorIds.items.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewManifestRow.properties.authorIds.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewManifestRow.properties.deliverableId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewManifestRow.properties.deliverableId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewManifestRow.properties.deliverableId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewManifestRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.ReviewManifestRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewManifestRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewManifestRow.properties.roundId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewManifestRow.properties.roundId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewManifestRow.properties.roundId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewManifestRow.properties.source": [
+      "object"
+    ],
+    "$.components.schemas.ReviewManifestRow.properties.source.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ReviewManifestRow.properties.sourceRevisionId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewManifestRow.properties.sourceRevisionId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewManifestRow.properties.sourceRevisionId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewManifestRow.required": [
+      "array"
+    ],
+    "$.components.schemas.ReviewManifestRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewManifestRow.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow": [
+      "object"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.auditDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.auditDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.auditDisciplineId.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.auditDisciplineId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.auditKey": [
+      "object"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.auditKey.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.auditKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.auditName": [
+      "object"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.auditName.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.auditName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.auditProjectId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.auditProjectId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.auditProjectId.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.auditProjectId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.auditType": [
+      "object"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.auditType.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.coordinatorId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.coordinatorId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.coordinatorId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.createdBy": [
+      "object"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.createdBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.createdBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.createdBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.currentRoundId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.currentRoundId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.currentRoundId.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.currentRoundId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.deletedAt": [
+      "object"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.deletedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.deletedAt.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.deletedAt.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.deletedBy": [
+      "object"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.deletedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.deletedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.deletedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.projectDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.projectDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.projectDisciplineId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.purpose": [
+      "object"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.purpose.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.requiredForIssue": [
+      "object"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.requiredForIssue.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.roundNumber": [
+      "object"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.roundNumber.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.roundNumber.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.roundNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.seq": [
+      "object"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.seq.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.seq.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.seq.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.updatedAt": [
+      "object"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.updatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.updatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.updatedBy": [
+      "object"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.updatedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.updatedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewPackageRow.properties.updatedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.required": [
+      "array"
+    ],
+    "$.components.schemas.ReviewPackageRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewPackageRow.type": [
       "string"
     ],
     "$.components.schemas.ReviewReassignBody": [
@@ -34065,6 +35697,303 @@
       "string"
     ],
     "$.components.schemas.ReviewRecord.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRoundRow": [
+      "object"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.auditKey": [
+      "object"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.auditKey.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.auditKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.auditName": [
+      "object"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.auditName.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.auditName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.auditProjectId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.auditProjectId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.auditProjectId.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.auditProjectId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.auditType": [
+      "object"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.auditType.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.createdBy": [
+      "object"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.createdBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.createdBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.createdBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.number": [
+      "object"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.number.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.number.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.number.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.packageId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.packageId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.packageId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.purpose": [
+      "object"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.purpose.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.reason": [
+      "object"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.reason.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.reason.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.removalImpact": [
+      "object"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.removalImpact.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.removalImpact.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.startedAt": [
+      "object"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.startedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.startedAt.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.startedAt.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.updatedAt": [
+      "object"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.updatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.updatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.updatedBy": [
+      "object"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.updatedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.updatedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ReviewRoundRow.properties.updatedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRoundRow.required": [
+      "array"
+    ],
+    "$.components.schemas.ReviewRoundRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRoundRow.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRow": [
+      "object"
+    ],
+    "$.components.schemas.ReviewRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.ReviewRow.properties.blockingFindings": [
+      "object"
+    ],
+    "$.components.schemas.ReviewRow.properties.blockingFindings.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRow.properties.blockingFindings.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRow.properties.blockingFindings.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRow.properties.coordinatorId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewRow.properties.coordinatorId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRow.properties.coordinatorId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.ReviewRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRow.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.ReviewRow.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRow.properties.outstandingDisciplines": [
+      "object"
+    ],
+    "$.components.schemas.ReviewRow.properties.outstandingDisciplines.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRow.properties.outstandingDisciplines.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRow.properties.outstandingDisciplines.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRow.properties.roundNumber": [
+      "object"
+    ],
+    "$.components.schemas.ReviewRow.properties.roundNumber.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRow.properties.roundNumber.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRow.properties.roundNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.ReviewRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRow.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.ReviewRow.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRow.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.ReviewRow.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRow.properties.waitingDays": [
+      "object"
+    ],
+    "$.components.schemas.ReviewRow.properties.waitingDays.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRow.properties.waitingDays.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRow.properties.waitingDays.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRow.required": [
+      "array"
+    ],
+    "$.components.schemas.ReviewRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewRow.type": [
       "string"
     ],
     "$.components.schemas.RevisionCheckReadResponse": [
@@ -36369,6 +38298,408 @@
       "string"
     ],
     "$.components.schemas.SnoozeBody.type": [
+      "string"
+    ],
+    "$.components.schemas.SourceHeadRow": [
+      "object"
+    ],
+    "$.components.schemas.SourceHeadRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.auditKey": [
+      "object"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.auditKey.type": [
+      "array"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.auditKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.auditName": [
+      "object"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.auditName.type": [
+      "array"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.auditName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.auditProjectId": [
+      "object"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.auditProjectId.format": [
+      "string"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.auditProjectId.type": [
+      "array"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.auditProjectId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.auditType": [
+      "object"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.auditType.type": [
+      "string"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.createdBy": [
+      "object"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.createdBy.format": [
+      "string"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.createdBy.type": [
+      "array"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.createdBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.currentRevisionId": [
+      "object"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.currentRevisionId.format": [
+      "string"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.currentRevisionId.type": [
+      "string"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.identity": [
+      "object"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.identity.type": [
+      "string"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.ownerId": [
+      "object"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.ownerId.format": [
+      "string"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.ownerId.type": [
+      "string"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.projectDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.projectDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.projectDisciplineId.type": [
+      "string"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.updatedAt": [
+      "object"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.updatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.updatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.updatedBy": [
+      "object"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.updatedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.updatedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.SourceHeadRow.properties.updatedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SourceHeadRow.required": [
+      "array"
+    ],
+    "$.components.schemas.SourceHeadRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SourceHeadRow.type": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow": [
+      "object"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.auditKey": [
+      "object"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.auditKey.type": [
+      "array"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.auditKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.auditName": [
+      "object"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.auditName.type": [
+      "array"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.auditName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.auditProjectId": [
+      "object"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.auditProjectId.format": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.auditProjectId.type": [
+      "array"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.auditProjectId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.auditType": [
+      "object"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.auditType.type": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.authorIds": [
+      "object"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.authorIds.items": [
+      "object"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.authorIds.items.format": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.authorIds.items.type": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.authorIds.type": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.createdBy": [
+      "object"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.createdBy.format": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.createdBy.type": [
+      "array"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.createdBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.deliverableId": [
+      "object"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.deliverableId.format": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.deliverableId.type": [
+      "array"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.deliverableId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.externalIdentifier": [
+      "object"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.externalIdentifier.type": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.identityHash": [
+      "object"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.identityHash.type": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.issuer": [
+      "object"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.issuer.type": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.revision": [
+      "object"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.revision.type": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.scope": [
+      "object"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.scope.type": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.sourceCheckedAt": [
+      "object"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.sourceCheckedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.sourceCheckedAt.type": [
+      "array"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.sourceCheckedAt.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.sourceIdentity": [
+      "object"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.sourceIdentity.type": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.sourceKey": [
+      "object"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.sourceKey.type": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.sourceRowVersion": [
+      "object"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.sourceRowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.sourceRowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.sourceRowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.sourceSystem": [
+      "object"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.sourceSystem.type": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.supersedesId": [
+      "object"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.supersedesId.format": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.supersedesId.type": [
+      "array"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.supersedesId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.updatedAt": [
+      "object"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.updatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.updatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.updatedBy": [
+      "object"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.updatedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.updatedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.updatedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.url": [
+      "object"
+    ],
+    "$.components.schemas.SourceRevisionRow.properties.url.type": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.required": [
+      "array"
+    ],
+    "$.components.schemas.SourceRevisionRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SourceRevisionRow.type": [
       "string"
     ],
     "$.components.schemas.StaffingContextRow": [
@@ -60227,6 +62558,9 @@
     "$.paths./api/v1/projects/{projectId}/changes/options.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/projects/{projectId}/changes/options.get.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/projects/{projectId}/changes/options.get.responses.200.description": [
       "string"
     ],
@@ -63266,6 +65600,9 @@
     "$.paths./api/v1/projects/{projectId}/reviews.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/projects/{projectId}/reviews.get.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/projects/{projectId}/reviews.get.responses.200.description": [
       "string"
     ],
@@ -63440,6 +65777,9 @@
     "$.paths./api/v1/projects/{projectId}/reviews/linked-issues.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/projects/{projectId}/reviews/linked-issues.get.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/projects/{projectId}/reviews/linked-issues.get.responses.200.description": [
       "string"
     ],
@@ -63494,6 +65834,9 @@
     "$.paths./api/v1/projects/{projectId}/reviews/options.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/projects/{projectId}/reviews/options.get.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/projects/{projectId}/reviews/options.get.responses.200.description": [
       "string"
     ],
@@ -63547,6 +65890,9 @@
     ],
     "$.paths./api/v1/projects/{projectId}/reviews/{id}.get.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/projects/{projectId}/reviews/{id}.get.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/projects/{projectId}/reviews/{id}.get.responses.200.description": [
       "string"
@@ -82751,6 +85097,278 @@
       "number"
     ]
   },
+  "GET /api/v1/projects/{projectId}/reviews/options 200": {
+    "$": [
+      "object"
+    ],
+    "$.actorId": [
+      "string"
+    ],
+    "$.canCreate": [
+      "object"
+    ],
+    "$.canCreate.changes": [
+      "boolean"
+    ],
+    "$.canCreate.reviews": [
+      "boolean"
+    ],
+    "$.canWrite": [
+      "boolean"
+    ],
+    "$.deliverables": [
+      "array"
+    ],
+    "$.deliverables[]": [
+      "object"
+    ],
+    "$.deliverables[].canCommit": [
+      "boolean"
+    ],
+    "$.deliverables[].canManage": [
+      "boolean"
+    ],
+    "$.deliverables[].id": [
+      "string"
+    ],
+    "$.deliverables[].key": [
+      "string"
+    ],
+    "$.deliverables[].name": [
+      "string"
+    ],
+    "$.deliverables[].ownerId": [
+      "string"
+    ],
+    "$.deliverables[].projectDisciplineId": [
+      "string"
+    ],
+    "$.deliverables[].revision": [
+      "string"
+    ],
+    "$.deliverables[].rowVersion": [
+      "number"
+    ],
+    "$.deliverables[].status": [
+      "string"
+    ],
+    "$.deliverables[].transmittalUrl": [
+      "null"
+    ],
+    "$.disciplines": [
+      "array"
+    ],
+    "$.disciplines[]": [
+      "object"
+    ],
+    "$.disciplines[].id": [
+      "string"
+    ],
+    "$.disciplines[].name": [
+      "string"
+    ],
+    "$.heads": [
+      "array"
+    ],
+    "$.heads[]": [
+      "object"
+    ],
+    "$.heads[].auditKey": [
+      "null"
+    ],
+    "$.heads[].auditName": [
+      "null"
+    ],
+    "$.heads[].auditProjectId": [
+      "string"
+    ],
+    "$.heads[].auditType": [
+      "string"
+    ],
+    "$.heads[].createdAt": [
+      "string"
+    ],
+    "$.heads[].createdBy": [
+      "string"
+    ],
+    "$.heads[].currentRevisionId": [
+      "string"
+    ],
+    "$.heads[].id": [
+      "string"
+    ],
+    "$.heads[].identity": [
+      "string"
+    ],
+    "$.heads[].ownerId": [
+      "string"
+    ],
+    "$.heads[].projectDisciplineId": [
+      "string"
+    ],
+    "$.heads[].projectId": [
+      "string"
+    ],
+    "$.heads[].rowVersion": [
+      "number"
+    ],
+    "$.heads[].updatedAt": [
+      "string"
+    ],
+    "$.heads[].updatedBy": [
+      "string"
+    ],
+    "$.manageDisciplineIds": [
+      "array"
+    ],
+    "$.manageDisciplineIds[]": [
+      "string"
+    ],
+    "$.people": [
+      "array"
+    ],
+    "$.people[]": [
+      "object"
+    ],
+    "$.people[].displayName": [
+      "string"
+    ],
+    "$.people[].id": [
+      "string"
+    ],
+    "$.sources": [
+      "array"
+    ],
+    "$.sources[]": [
+      "object"
+    ],
+    "$.sources[].identity": [
+      "string"
+    ],
+    "$.sources[].isCurrent": [
+      "boolean"
+    ],
+    "$.sources[].published": [
+      "boolean"
+    ],
+    "$.sources[].revision": [
+      "object"
+    ],
+    "$.sources[].revision.auditKey": [
+      "string"
+    ],
+    "$.sources[].revision.auditName": [
+      "string"
+    ],
+    "$.sources[].revision.auditProjectId": [
+      "string"
+    ],
+    "$.sources[].revision.auditType": [
+      "string"
+    ],
+    "$.sources[].revision.authorIds": [
+      "array"
+    ],
+    "$.sources[].revision.authorIds[]": [
+      "string"
+    ],
+    "$.sources[].revision.createdAt": [
+      "string"
+    ],
+    "$.sources[].revision.createdBy": [
+      "string"
+    ],
+    "$.sources[].revision.deliverableId": [
+      "string"
+    ],
+    "$.sources[].revision.externalIdentifier": [
+      "string"
+    ],
+    "$.sources[].revision.id": [
+      "string"
+    ],
+    "$.sources[].revision.identityHash": [
+      "string"
+    ],
+    "$.sources[].revision.issuer": [
+      "string"
+    ],
+    "$.sources[].revision.projectId": [
+      "string"
+    ],
+    "$.sources[].revision.revision": [
+      "string"
+    ],
+    "$.sources[].revision.rowVersion": [
+      "number"
+    ],
+    "$.sources[].revision.scope": [
+      "string"
+    ],
+    "$.sources[].revision.sourceCheckedAt": [
+      "null"
+    ],
+    "$.sources[].revision.sourceIdentity": [
+      "string"
+    ],
+    "$.sources[].revision.sourceKey": [
+      "string"
+    ],
+    "$.sources[].revision.sourceRowVersion": [
+      "number"
+    ],
+    "$.sources[].revision.sourceSystem": [
+      "string"
+    ],
+    "$.sources[].revision.supersedesId": [
+      "null"
+    ],
+    "$.sources[].revision.title": [
+      "string"
+    ],
+    "$.sources[].revision.updatedAt": [
+      "string"
+    ],
+    "$.sources[].revision.updatedBy": [
+      "string"
+    ],
+    "$.sources[].revision.url": [
+      "string"
+    ],
+    "$.tasks": [
+      "array"
+    ],
+    "$.tasks[]": [
+      "object"
+    ],
+    "$.tasks[].canCommit": [
+      "boolean"
+    ],
+    "$.tasks[].canManage": [
+      "boolean"
+    ],
+    "$.tasks[].id": [
+      "string"
+    ],
+    "$.tasks[].key": [
+      "string"
+    ],
+    "$.tasks[].name": [
+      "string"
+    ],
+    "$.tasks[].ownerId": [
+      "string"
+    ],
+    "$.tasks[].projectDisciplineId": [
+      "string"
+    ],
+    "$.tasks[].rowVersion": [
+      "number"
+    ],
+    "$.tasks[].status": [
+      "string"
+    ]
+  },
   "GET /api/v1/projects/{projectId}/reviews/options 404": {
     "$": [
       "object"
@@ -82868,6 +85486,54 @@
     "$.events": [
       "array"
     ],
+    "$.events[]": [
+      "object"
+    ],
+    "$.events[].action": [
+      "string"
+    ],
+    "$.events[].auditKey": [
+      "null"
+    ],
+    "$.events[].auditName": [
+      "null"
+    ],
+    "$.events[].auditProjectId": [
+      "string"
+    ],
+    "$.events[].auditType": [
+      "string"
+    ],
+    "$.events[].createdAt": [
+      "string"
+    ],
+    "$.events[].createdBy": [
+      "string"
+    ],
+    "$.events[].evidenceUrl": [
+      "string"
+    ],
+    "$.events[].findingId": [
+      "string"
+    ],
+    "$.events[].id": [
+      "string"
+    ],
+    "$.events[].projectId": [
+      "string"
+    ],
+    "$.events[].reason": [
+      "string"
+    ],
+    "$.events[].rowVersion": [
+      "number"
+    ],
+    "$.events[].updatedAt": [
+      "string"
+    ],
+    "$.events[].updatedBy": [
+      "string"
+    ],
     "$.findings": [
       "array"
     ],
@@ -82897,7 +85563,8 @@
       "string"
     ],
     "$.findings[].evidenceUrl": [
-      "null"
+      "null",
+      "string"
     ],
     "$.findings[].id": [
       "string"
@@ -82922,7 +85589,8 @@
       "string"
     ],
     "$.findings[].response": [
-      "null"
+      "null",
+      "string"
     ],
     "$.findings[].roundId": [
       "string"

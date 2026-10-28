@@ -10319,7 +10319,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["CoordinationOptions"];
                     };
                 };
             };
@@ -12122,7 +12122,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["PageOfReviewRow"];
                     };
                 };
             };
@@ -12231,7 +12231,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["LinkedIssuePage"];
                     };
                 };
             };
@@ -12268,7 +12268,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["CoordinationOptions"];
                     };
                 };
             };
@@ -12306,7 +12306,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["ReviewDetail"];
                     };
                 };
             };
@@ -17374,6 +17374,10 @@ export interface components {
             taskIds: string[];
             taskKeys: string[];
         };
+        CoordinationCanCreate: {
+            changes: boolean;
+            reviews: boolean;
+        };
         CoordinationChangeRow: {
             /** Format: int32 */
             acknowledgedPending: number;
@@ -17396,6 +17400,28 @@ export interface components {
             /** Format: uuid */
             targetId: string;
             targetType: string;
+        };
+        CoordinationDeliverable: {
+            canCommit: boolean;
+            canManage: boolean;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            /** Format: uuid */
+            ownerId: null | string;
+            /** Format: uuid */
+            projectDisciplineId: string;
+            revision: null | string;
+            /** Format: int32 */
+            rowVersion: number;
+            status: string;
+            transmittalUrl: null | string;
+        };
+        CoordinationDiscipline: {
+            /** Format: uuid */
+            id: string;
+            name: string;
         };
         CoordinationHandoffRow: {
             /** Format: uuid */
@@ -17467,6 +17493,24 @@ export interface components {
             sourceType: string;
             status: string;
             text: string;
+        };
+        CoordinationOptions: {
+            /** Format: uuid */
+            actorId: string;
+            canCreate: components["schemas"]["CoordinationCanCreate"];
+            canWrite: boolean;
+            deliverables: components["schemas"]["CoordinationDeliverable"][];
+            disciplines: components["schemas"]["CoordinationDiscipline"][];
+            heads: components["schemas"]["SourceHeadRow"][];
+            manageDisciplineIds: string[];
+            people: components["schemas"]["CoordinationPerson"][];
+            sources: components["schemas"]["CoordinationSource"][];
+            tasks: components["schemas"]["CoordinationTask"][];
+        };
+        CoordinationPerson: {
+            displayName: string;
+            /** Format: uuid */
+            id: string;
         };
         CoordinationProjection: {
             blockerGroups: components["schemas"]["CoordinationBlockerGroup"][];
@@ -17576,6 +17620,27 @@ export interface components {
             outstandingDisciplines: number;
             status: string;
             title: string;
+        };
+        CoordinationSource: {
+            identity: string;
+            isCurrent: boolean;
+            published: boolean;
+            revision: components["schemas"]["SourceRevisionRow"];
+        };
+        CoordinationTask: {
+            canCommit: boolean;
+            canManage: boolean;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            /** Format: uuid */
+            ownerId: null | string;
+            /** Format: uuid */
+            projectDisciplineId: string;
+            /** Format: int32 */
+            rowVersion: number;
+            status: string;
         };
         CoordinationUnavailableTarget: {
             /** Format: uuid */
@@ -18754,6 +18819,15 @@ export interface components {
             title: string;
             url: string;
         };
+        LinkedIssuePage: {
+            items: components["schemas"]["CoordinationIssueRow"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+        };
         LinkedItem: {
             /** Format: uuid */
             id: string;
@@ -19275,6 +19349,17 @@ export interface components {
         PageOfObject: {
             filters?: unknown;
             items: unknown[];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            sort?: null | string;
+            /** Format: int32 */
+            totalCount: number;
+        };
+        PageOfReviewRow: {
+            filters?: unknown;
+            items: components["schemas"]["ReviewRow"][];
             /** Format: int32 */
             page: number;
             /** Format: int32 */
@@ -19869,6 +19954,41 @@ export interface components {
             /** Format: int32 */
             rowVersion: number;
         };
+        ReviewAssignmentRow: {
+            auditKey: null | string;
+            auditName: null | string;
+            /** Format: uuid */
+            auditProjectId: null | string;
+            auditType: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            /** Format: date-time */
+            decidedAt: null | string;
+            /** Format: uuid */
+            decidedBy: null | string;
+            /** Format: date */
+            dueDate: string;
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            projectDisciplineId: string;
+            /** Format: uuid */
+            projectId: string;
+            rationale: null | string;
+            /** Format: uuid */
+            reviewerId: string;
+            /** Format: uuid */
+            roundId: string;
+            /** Format: int32 */
+            rowVersion: number;
+            status: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: uuid */
+            updatedBy: null | string;
+        };
         ReviewCreateBody: {
             assignments: components["schemas"]["Assignment"][];
             /** Format: uuid */
@@ -19882,6 +20002,147 @@ export interface components {
             requiredForIssue: boolean;
             sourceRevisionIds: string[];
             title: string;
+        };
+        ReviewDetail: {
+            /** Format: uuid */
+            actorId: string;
+            assignments: components["schemas"]["ReviewAssignmentRow"][];
+            canCoordinate: boolean;
+            canManage: boolean;
+            canReassignVerifier: boolean;
+            canWrite: boolean;
+            eligiblePeople: string[];
+            events: components["schemas"]["ReviewFindingEventRow"][];
+            findings: components["schemas"]["ReviewFindingRow"][];
+            manifest: components["schemas"]["ReviewManifestRow"][];
+            package: components["schemas"]["ReviewPackageRow"];
+            rounds: components["schemas"]["ReviewRoundRow"][];
+        };
+        ReviewFindingEventRow: {
+            action: string;
+            auditKey: null | string;
+            auditName: null | string;
+            /** Format: uuid */
+            auditProjectId: null | string;
+            auditType: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            evidenceUrl: null | string;
+            /** Format: uuid */
+            findingId: string;
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            projectId: string;
+            reason: string;
+            /** Format: int32 */
+            rowVersion: number;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: uuid */
+            updatedBy: null | string;
+        };
+        ReviewFindingRow: {
+            auditKey: null | string;
+            auditName: null | string;
+            /** Format: uuid */
+            auditProjectId: null | string;
+            auditType: string;
+            /** Format: uuid */
+            carriedFromId: null | string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            evidenceUrl: null | string;
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            issueId: null | string;
+            /** Format: uuid */
+            originatorId: string;
+            /** Format: uuid */
+            packageId: string;
+            /** Format: uuid */
+            projectDisciplineId: string;
+            /** Format: uuid */
+            projectId: string;
+            /** Format: uuid */
+            resolverId: string;
+            response: null | string;
+            /** Format: uuid */
+            roundId: string;
+            /** Format: int32 */
+            rowVersion: number;
+            severity: string;
+            /** Format: uuid */
+            sourceRevisionId: string;
+            status: string;
+            text: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: uuid */
+            updatedBy: null | string;
+            /** Format: uuid */
+            verifierId: string;
+            /** Format: uuid */
+            withdrawalAcknowledgedBy: null | string;
+        };
+        ReviewManifestRow: {
+            authorIds: string[];
+            /** Format: uuid */
+            deliverableId: string;
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            roundId: string;
+            source: components["schemas"]["SourceRevisionRow"];
+            /** Format: uuid */
+            sourceRevisionId: string;
+        };
+        ReviewPackageRow: {
+            /** Format: uuid */
+            auditDisciplineId: null | string;
+            auditKey: null | string;
+            auditName: null | string;
+            /** Format: uuid */
+            auditProjectId: null | string;
+            auditType: string;
+            /** Format: uuid */
+            coordinatorId: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            /** Format: uuid */
+            currentRoundId: null | string;
+            /** Format: date-time */
+            deletedAt: null | string;
+            /** Format: uuid */
+            deletedBy: null | string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            /** Format: uuid */
+            projectDisciplineId: string;
+            /** Format: uuid */
+            projectId: string;
+            purpose: string;
+            requiredForIssue: boolean;
+            /** Format: int32 */
+            roundNumber: number;
+            /** Format: int32 */
+            rowVersion: number;
+            /** Format: int32 */
+            seq: number;
+            status: string;
+            title: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: uuid */
+            updatedBy: null | string;
         };
         ReviewReassignBody: {
             /** Format: uuid */
@@ -19902,6 +20163,56 @@ export interface components {
             reviewer: string;
             /** Format: uuid */
             reviewerId: string;
+        };
+        ReviewRoundRow: {
+            auditKey: null | string;
+            auditName: null | string;
+            /** Format: uuid */
+            auditProjectId: null | string;
+            auditType: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            number: number;
+            /** Format: uuid */
+            packageId: string;
+            /** Format: uuid */
+            projectId: string;
+            purpose: string;
+            reason: null | string;
+            removalImpact: null | string;
+            /** Format: int32 */
+            rowVersion: number;
+            /** Format: date-time */
+            startedAt: null | string;
+            status: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: uuid */
+            updatedBy: null | string;
+        };
+        ReviewRow: {
+            /** Format: int32 */
+            blockingFindings: number;
+            /** Format: uuid */
+            coordinatorId: string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            /** Format: int32 */
+            outstandingDisciplines: number;
+            /** Format: int32 */
+            roundNumber: number;
+            /** Format: int32 */
+            rowVersion: number;
+            status: string;
+            title: string;
+            /** Format: int32 */
+            waitingDays: number;
         };
         RevisionCheckReadResponse: {
             convention: null | components["schemas"]["RevisionConvention"];
@@ -20233,6 +20544,74 @@ export interface components {
             /** Format: int32 */
             days: number;
             note: string;
+        };
+        SourceHeadRow: {
+            auditKey: null | string;
+            auditName: null | string;
+            /** Format: uuid */
+            auditProjectId: null | string;
+            auditType: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            /** Format: uuid */
+            currentRevisionId: string;
+            /** Format: uuid */
+            id: string;
+            identity: string;
+            /** Format: uuid */
+            ownerId: string;
+            /** Format: uuid */
+            projectDisciplineId: string;
+            /** Format: uuid */
+            projectId: string;
+            /** Format: int32 */
+            rowVersion: number;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: uuid */
+            updatedBy: null | string;
+        };
+        SourceRevisionRow: {
+            auditKey: null | string;
+            auditName: null | string;
+            /** Format: uuid */
+            auditProjectId: null | string;
+            auditType: string;
+            authorIds: string[];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            /** Format: uuid */
+            deliverableId: null | string;
+            externalIdentifier: string;
+            /** Format: uuid */
+            id: string;
+            identityHash: string;
+            issuer: string;
+            /** Format: uuid */
+            projectId: string;
+            revision: string;
+            /** Format: int32 */
+            rowVersion: number;
+            scope: string;
+            /** Format: date-time */
+            sourceCheckedAt: null | string;
+            sourceIdentity: string;
+            sourceKey: string;
+            /** Format: int32 */
+            sourceRowVersion: number;
+            sourceSystem: string;
+            /** Format: uuid */
+            supersedesId: null | string;
+            title: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: uuid */
+            updatedBy: null | string;
+            url: string;
         };
         StaffingContextRow: {
             /** Format: uuid */

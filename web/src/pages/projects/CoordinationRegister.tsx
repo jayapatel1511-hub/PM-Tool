@@ -1,6 +1,6 @@
 import { UrlSearchInput } from '@/components/hub/url-search'
 import { useState, type ReactNode } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Plus } from 'lucide-react'
 import { useSearchParams } from 'react-router'
 import { ActiveFilters, ChipToggle, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Page, useIsPhone } from '@/components/hub/common'
@@ -9,22 +9,25 @@ import { DataTable } from '@/components/hub/registers'
 import { useTable, type Column } from '@/components/hub/table'
 import { ViewMenu } from '@/components/hub/views'
 import { Button } from '@/components/ui/button'
-import { get, qs } from '@/lib/api'
+import { get, qs, typedRequest } from '@/lib/api'
+import { invalidateChange } from '@/lib/keys'
 import { plural, t, tv } from '@/lib/i18n'
 import { fmtDate } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import { useCurrentProject } from './ProjectLayout'
-import { CoordStatus, Count, PersonLabel, RegisterPager, SelectField, discName, personName, peopleChoices, disciplineChoices, useCoordRefresh, type CoordOptions, type RecordVersion } from './CoordinationForms'
+import { CoordStatus, Count, PersonLabel, RegisterPager, SelectField, discName, personName, peopleChoices, disciplineChoices, type CoordOptions, type RecordVersion } from './CoordinationForms'
 
 type Row = RecordVersion & { key: string; title: string; status: string; coordinatorId?: string; ownerId?: string; outstandingDisciplines?: number; blockingFindings?: number; roundNumber?: number; waitingDays?: number; assessmentDueDate?: string; pendingAssessments?: number }
 export type RegisterContext = { options: CoordOptions; projectId: string; number: string; refresh: () => void; open: (id: string) => void }
 export function CoordinationRegister({ kind, statuses, create, detail, extra }: { kind: 'reviews' | 'changes'; statuses: string[]; create: (c: RegisterContext & { close: () => void }) => ReactNode; detail: (c: RegisterContext & { id: string; close: () => void }) => ReactNode; extra?: (c: RegisterContext) => ReactNode }) {
   const phone = useIsPhone()
-  const p = useCurrentProject(), [sp, setSp] = useSearchParams(), [adding, setAdding] = useState(false), refresh = useCoordRefresh(p.id)
-  const type = kind === 'reviews' ? 'ReviewPackage' : 'ChangeNotice', page = Math.max(1, Number(sp.get('page')) || 1)
+  const p = useCurrentProject(), [sp, setSp] = useSearchParams(), [adding, setAdding] = useState(false), qc = useQueryClient()
+  const type = kind === 'reviews' ? 'ReviewPackage' : 'ChangeNotice', page = Math.max(1, Number(sp.get('page')) || 1), refresh = () => { invalidateChange(qc, type, p.id) }
   const filters = Object.fromEntries(['q', 'status', 'ownerId', 'mine', ...(kind === 'reviews' ? ['disciplineId'] : [])].map(k => [k, sp.get(k) ?? '']))
-  const options = useQuery({ queryKey: ['coord-options', p.id], queryFn: () => get<CoordOptions>(`projects/${p.id}/changes/options`) })
-  const list = useQuery({ queryKey: [kind, p.id, filters, page], queryFn: () => get<{ items: Row[]; totalCount: number; pageSize: number }>(`projects/${p.id}/${kind}${qs({ ...filters, page })}`) })
+  const options = useQuery({ queryKey: ['coord-options', p.id], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/changes/options', { params: { projectId: p.id } }) })
+  const list = useQuery({ queryKey: [kind, p.id, filters, page], queryFn: (): Promise<{ items: Row[]; totalCount: number; pageSize: number }> => kind === 'reviews'
+    ? typedRequest('get', '/api/v1/projects/{projectId}/reviews', { params: { projectId: p.id }, query: { Q: filters.q, Status: filters.status, OwnerId: filters.ownerId, DisciplineId: filters.disciplineId, Mine: filters.mine === 'true', page } })
+    : get<{ items: Row[]; totalCount: number; pageSize: number }>(`projects/${p.id}/changes${qs({ ...filters, page })}`) })
   const change = (key: string, value: string) => { const next = new URLSearchParams(sp); if (value) next.set(key, value); else next.delete(key); if (key !== 'page' && key !== 'panel') next.delete('page'); setSp(next) }
   const open = (id: string) => change('panel', `${type}:${id}`), panel = sp.get('panel')?.startsWith(`${type}:`) ? sp.get('panel')!.slice(type.length + 1) : null
   const ctx = options.data ? { options: options.data, projectId: p.id, number: p.projectNumber, refresh, open } : null
@@ -56,7 +59,7 @@ export function CoordinationRegister({ kind, statuses, create, detail, extra }: 
     filters.mine && { key: 'mine', label: t('coord.mine'), value: t('common.yes') },
   ].filter(x => !!x)
   const clear = () => { const next = new URLSearchParams(sp); for (const k of Object.keys(filters)) next.delete(k); next.delete('page'); setSp(next) }
-  return <Page title={t(`${kind}.title`)} subtitle={t(`${kind}.subtitle`)} actions={<><ViewMenu listType={kind} projectId={p.id} /><ExportMenu path={`projects/${p.id}/${kind}/export`} params={filters} name={`${p.projectNumber}-${kind}`} />{ctx?.options.canWrite && ctx.options.canCreate?.[kind] && <Button onClick={() => setAdding(true)}><Plus className="size-4" />{t(`${kind}.new`)}</Button>}</>}>
+  return <Page title={t(`${kind}.title`)} subtitle={t(`${kind}.subtitle`)} actions={<><ViewMenu listType={kind} projectId={p.id} /><ExportMenu path={`projects/${p.id}/${kind}/export`} params={filters} name={`${p.projectNumber}-${kind}`} />{ctx?.options.canWrite && ctx.options.canCreate[kind] && <Button onClick={() => setAdding(true)}><Plus className="size-4" />{t(`${kind}.new`)}</Button>}</>}>
     <FilterBar activeCount={tokens.length}
       search={<Field label={t('common.search')} htmlFor={`${kind}-search`}><UrlSearchInput id={`${kind}-search`} placeholder={t('common.search')} value={filters.q} onValueChange={value => change('q', value)} /></Field>}
       quick={<ChipToggle on={filters.mine === 'true'} onClick={() => change('mine', filters.mine === 'true' ? '' : 'true')}>{t('coord.mine')}</ChipToggle>}

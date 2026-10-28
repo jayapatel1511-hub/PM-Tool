@@ -1,5 +1,6 @@
+import type { components } from '@/gen/api'
 import { useFlag } from '@/lib/auth'
-import { ScheduleNote, type PlannedTarget } from '@/components/hub/schedule-note'
+import { ScheduleNote } from '@/components/hub/schedule-note'
 import { useQuery } from '@tanstack/react-query'
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronsDownUp, ChevronsUpDown } from 'lucide-react'
 import { Fragment, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
@@ -10,22 +11,16 @@ import { Key } from '@/components/hub/pills'
 import { useScope, WorkspaceTabs } from '@/components/hub/workspace'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { get, qs } from '@/lib/api'
+import { typedRequest } from '@/lib/api'
 import { addDays, daysBetween, fmtDate, monthLabel, today } from '@/lib/format'
 import { plural, t, tv } from '@/lib/i18n'
 import { accentOf, cn } from '@/lib/utils'
 import { milestoneLabelLayout } from './gantt-labels'
 import { DepArrow, HATCH, Legend, MoveDialog, PrintLegend, ZOOM, ZoomMenu, assumedWidth, depPath, depTitle, tone, toneBg, type Move, type Zoom } from './projects/Timeline'
 
-interface Dated { id: string; key: string; name: string; startDate?: string | null; dueDate?: string | null; originalStartDate?: string | null; originalDueDate?: string | null; slipShown?: boolean; baselineStartDate?: string | null; baselineDueDate?: string | null; baselineSlipShown?: boolean
-  status: string; progressPct: number; rowVersion: number; createdOn: string; isOverdue: boolean; canEditDates: boolean }
-interface GTask extends Dated { deliverableId?: string | null; assignee?: string | null; dueNeedsReason: boolean }
-interface GProject {
-  project: { id: string; projectNumber: string; name: string; status: string; startDate?: string | null; targetCompletionDate?: string | null }
-  data: { latestPlanned?: PlannedTarget; permissions: { needsReason: boolean }; tasks: GTask[]; deliverables: Dated[]
-    dependencies: { id: string; predecessorTaskId: string; successorTaskId: string; type: string; lagDays: number; highlighted: boolean }[]
-    milestones: { id: string; key: string; name: string; date: string | null; isComplete: boolean; status: string; baselineDate?: string; baselineSlipShown?: boolean }[] }
-}
+type GTask = components['schemas']['TimelineTask']
+type Dated = components['schemas']['TimelineDeliverable'] | GTask
+type GProject = components['schemas']['TimelineProjectGroup']
 /** `assumed`: no start date, so the bar starts at the creation date (§40 AC-TL-01). */
 interface Span { start: string; end: string; late: boolean; assumed: boolean; ghost: { start: string; end: string } | null; baseline?: { start: string; end: string } | null }
 type Row =
@@ -49,7 +44,7 @@ export function GanttPage() {
   const scope = useScope()
   const [sp, setSp] = useSearchParams()
   const openPanel = useItemPanel()
-  const q = useQuery({ queryKey: ['gantt', scope.api], enabled: scope.ready, queryFn: () => get<{ projects: GProject[]; truncated: boolean; max: number }>(`timeline${qs({ projects: scope.api })}`) })
+  const q = useQuery({ queryKey: ['gantt', scope.api], enabled: scope.ready, queryFn: () => typedRequest('get', '/api/v1/timeline', { query: { projects: scope.api } }) })
   const [localClosed, setLocalClosed] = useState<Set<string>>(new Set())
   const closed = small ? new Set((sp.get('collapsed') === 'all' ? ['*'] : (sp.get('collapsed') ?? '').split(',')).filter(Boolean)) : localClosed
   const setClosed = (update: Set<string> | ((previous: Set<string>) => Set<string>)) => { const value = typeof update === 'function' ? update(closed) : update; if (small) set('collapsed', value.has('*') ? 'all' : [...value].join(',') || null); else setLocalClosed(value) }
@@ -74,7 +69,8 @@ export function GanttPage() {
     const due = i.dueDate!
     const b = i.startDate ?? i.createdOn
     const ghost = i.slipShown !== false && i.originalDueDate && (i.originalDueDate !== i.dueDate || (i.originalStartDate ?? null) !== (i.startDate ?? null)) ? { start: i.originalStartDate ?? i.originalDueDate, end: i.originalDueDate } : null
-    return { start: b > due ? due : b, end: due, late: i.isOverdue && due < now, assumed: !i.startDate, ghost, baseline: i.baselineDueDate && i.baselineSlipShown !== false ? {start:i.baselineStartDate ?? i.baselineDueDate,end:i.baselineDueDate} : null }
+    const base = 'baselineDueDate' in i ? i : null // only deliverables carry a baseline
+    return { start: b > due ? due : b, end: due, late: i.isOverdue && due < now, assumed: !i.startDate, ghost, baseline: base?.baselineDueDate && base.baselineSlipShown !== false ? {start:base.baselineStartDate ?? base.baselineDueDate,end:base.baselineDueDate} : null }
   }
   const rows: Row[] = []
   const unscheduled: { type: 'Task' | 'Deliverable' | 'Milestone'; id: string; key: string; name: string; project: string; projectId: string }[] = []

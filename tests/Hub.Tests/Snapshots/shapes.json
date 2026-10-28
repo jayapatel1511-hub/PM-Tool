@@ -11227,48 +11227,6 @@
     "$.components.schemas.AnonymousTypeOfListOfObjectAndboolean.type": [
       "string"
     ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndbooleanAndint": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndbooleanAndint.properties": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndbooleanAndint.properties.max": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndbooleanAndint.properties.max.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndbooleanAndint.properties.max.pattern": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndbooleanAndint.properties.max.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndbooleanAndint.properties.projects": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndbooleanAndint.properties.projects.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndbooleanAndint.properties.projects.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndbooleanAndint.properties.truncated": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndbooleanAndint.properties.truncated.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndbooleanAndint.required": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndbooleanAndint.required[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndbooleanAndint.type": [
-      "string"
-    ],
     "$.components.schemas.AnonymousTypeOfListOfWidgetAndboolean": [
       "object"
     ],
@@ -25096,6 +25054,54 @@
     "$.components.schemas.PlacementRow.type": [
       "string"
     ],
+    "$.components.schemas.PlannedTarget": [
+      "object"
+    ],
+    "$.components.schemas.PlannedTarget.properties": [
+      "object"
+    ],
+    "$.components.schemas.PlannedTarget.properties.date": [
+      "object"
+    ],
+    "$.components.schemas.PlannedTarget.properties.date.format": [
+      "string"
+    ],
+    "$.components.schemas.PlannedTarget.properties.date.type": [
+      "string"
+    ],
+    "$.components.schemas.PlannedTarget.properties.itemKey": [
+      "object"
+    ],
+    "$.components.schemas.PlannedTarget.properties.itemKey.type": [
+      "string"
+    ],
+    "$.components.schemas.PlannedTarget.properties.rule": [
+      "object"
+    ],
+    "$.components.schemas.PlannedTarget.properties.rule.type": [
+      "array"
+    ],
+    "$.components.schemas.PlannedTarget.properties.rule.type[]": [
+      "string"
+    ],
+    "$.components.schemas.PlannedTarget.properties.targetDate": [
+      "object"
+    ],
+    "$.components.schemas.PlannedTarget.properties.targetDate.format": [
+      "string"
+    ],
+    "$.components.schemas.PlannedTarget.properties.targetDate.type": [
+      "string"
+    ],
+    "$.components.schemas.PlannedTarget.required": [
+      "array"
+    ],
+    "$.components.schemas.PlannedTarget.required[]": [
+      "string"
+    ],
+    "$.components.schemas.PlannedTarget.type": [
+      "string"
+    ],
     "$.components.schemas.PlanningCreateBody": [
       "object"
     ],
@@ -32831,6 +32837,1011 @@
       "string"
     ],
     "$.components.schemas.TimeRow.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineData": [
+      "object"
+    ],
+    "$.components.schemas.TimelineData.properties": [
+      "object"
+    ],
+    "$.components.schemas.TimelineData.properties.deliverableLinks": [
+      "object"
+    ],
+    "$.components.schemas.TimelineData.properties.deliverableLinks.items": [
+      "object"
+    ],
+    "$.components.schemas.TimelineData.properties.deliverableLinks.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.TimelineData.properties.deliverableLinks.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineData.properties.deliverables": [
+      "object"
+    ],
+    "$.components.schemas.TimelineData.properties.deliverables.items": [
+      "object"
+    ],
+    "$.components.schemas.TimelineData.properties.deliverables.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.TimelineData.properties.deliverables.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineData.properties.dependencies": [
+      "object"
+    ],
+    "$.components.schemas.TimelineData.properties.dependencies.items": [
+      "object"
+    ],
+    "$.components.schemas.TimelineData.properties.dependencies.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.TimelineData.properties.dependencies.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineData.properties.handoffs": [
+      "object"
+    ],
+    "$.components.schemas.TimelineData.properties.handoffs.items": [
+      "object"
+    ],
+    "$.components.schemas.TimelineData.properties.handoffs.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.TimelineData.properties.handoffs.type": [
+      "array"
+    ],
+    "$.components.schemas.TimelineData.properties.handoffs.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineData.properties.latestPlanned": [
+      "object"
+    ],
+    "$.components.schemas.TimelineData.properties.latestPlanned.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.TimelineData.properties.latestPlanned.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.TimelineData.properties.latestPlanned.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.TimelineData.properties.latestPlanned.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineData.properties.milestones": [
+      "object"
+    ],
+    "$.components.schemas.TimelineData.properties.milestones.items": [
+      "object"
+    ],
+    "$.components.schemas.TimelineData.properties.milestones.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.TimelineData.properties.milestones.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineData.properties.permissions": [
+      "object"
+    ],
+    "$.components.schemas.TimelineData.properties.permissions.$ref": [
+      "string"
+    ],
+    "$.components.schemas.TimelineData.properties.tasks": [
+      "object"
+    ],
+    "$.components.schemas.TimelineData.properties.tasks.items": [
+      "object"
+    ],
+    "$.components.schemas.TimelineData.properties.tasks.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.TimelineData.properties.tasks.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineData.required": [
+      "array"
+    ],
+    "$.components.schemas.TimelineData.required[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineData.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverable": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.baselineDueDate": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.baselineDueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.baselineDueDate.type": [
+      "array"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.baselineDueDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.baselineSlipShown": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.baselineSlipShown.type": [
+      "array"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.baselineSlipShown.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.baselineStartDate": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.baselineStartDate.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.baselineStartDate.type": [
+      "array"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.baselineStartDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.canEditDates": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.canEditDates.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.createdOn": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.createdOn.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.createdOn.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.dueDate": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.dueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.dueDate.type": [
+      "array"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.dueDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.isOverdue": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.isOverdue.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.originalDueDate": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.originalDueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.originalDueDate.type": [
+      "array"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.originalDueDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.originalStartDate": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.originalStartDate.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.originalStartDate.type": [
+      "array"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.originalStartDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.progressPct": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.progressPct.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.progressPct.pattern": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.progressPct.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.slipShown": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.slipShown.type": [
+      "array"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.slipShown.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.startDate": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.startDate.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.startDate.type": [
+      "array"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.startDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDeliverable.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverable.required": [
+      "array"
+    ],
+    "$.components.schemas.TimelineDeliverable.required[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverable.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverableLink": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDeliverableLink.properties": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDeliverableLink.properties.derived": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDeliverableLink.properties.derived.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverableLink.properties.from": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDeliverableLink.properties.from.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverableLink.properties.from.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverableLink.properties.highlighted": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDeliverableLink.properties.highlighted.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverableLink.properties.lagDays": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDeliverableLink.properties.lagDays.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverableLink.properties.lagDays.pattern": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverableLink.properties.lagDays.type": [
+      "array"
+    ],
+    "$.components.schemas.TimelineDeliverableLink.properties.lagDays.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverableLink.properties.to": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDeliverableLink.properties.to.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverableLink.properties.to.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverableLink.properties.type": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDeliverableLink.properties.type.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverableLink.required": [
+      "array"
+    ],
+    "$.components.schemas.TimelineDeliverableLink.required[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDeliverableLink.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDependency": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDependency.properties": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDependency.properties.highlighted": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDependency.properties.highlighted.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDependency.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDependency.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDependency.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDependency.properties.lagDays": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDependency.properties.lagDays.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDependency.properties.lagDays.pattern": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDependency.properties.lagDays.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDependency.properties.predecessorTaskId": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDependency.properties.predecessorTaskId.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDependency.properties.predecessorTaskId.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDependency.properties.successorTaskId": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDependency.properties.successorTaskId.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDependency.properties.successorTaskId.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDependency.properties.type": [
+      "object"
+    ],
+    "$.components.schemas.TimelineDependency.properties.type.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDependency.required": [
+      "array"
+    ],
+    "$.components.schemas.TimelineDependency.required[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineDependency.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineGantt": [
+      "object"
+    ],
+    "$.components.schemas.TimelineGantt.properties": [
+      "object"
+    ],
+    "$.components.schemas.TimelineGantt.properties.max": [
+      "object"
+    ],
+    "$.components.schemas.TimelineGantt.properties.max.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineGantt.properties.max.pattern": [
+      "string"
+    ],
+    "$.components.schemas.TimelineGantt.properties.max.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineGantt.properties.projects": [
+      "object"
+    ],
+    "$.components.schemas.TimelineGantt.properties.projects.items": [
+      "object"
+    ],
+    "$.components.schemas.TimelineGantt.properties.projects.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.TimelineGantt.properties.projects.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineGantt.properties.truncated": [
+      "object"
+    ],
+    "$.components.schemas.TimelineGantt.properties.truncated.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineGantt.required": [
+      "array"
+    ],
+    "$.components.schemas.TimelineGantt.required[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineGantt.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineHandoff": [
+      "object"
+    ],
+    "$.components.schemas.TimelineHandoff.properties": [
+      "object"
+    ],
+    "$.components.schemas.TimelineHandoff.properties.dateMismatch": [
+      "object"
+    ],
+    "$.components.schemas.TimelineHandoff.properties.dateMismatch.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineHandoff.properties.daysOverdue": [
+      "object"
+    ],
+    "$.components.schemas.TimelineHandoff.properties.daysOverdue.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineHandoff.properties.daysOverdue.pattern": [
+      "string"
+    ],
+    "$.components.schemas.TimelineHandoff.properties.daysOverdue.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineHandoff.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.TimelineHandoff.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineHandoff.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineHandoff.properties.isOverdue": [
+      "object"
+    ],
+    "$.components.schemas.TimelineHandoff.properties.isOverdue.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineHandoff.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.TimelineHandoff.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineHandoff.properties.neededBy": [
+      "object"
+    ],
+    "$.components.schemas.TimelineHandoff.properties.neededBy.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineHandoff.properties.neededBy.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineHandoff.properties.promisedBy": [
+      "object"
+    ],
+    "$.components.schemas.TimelineHandoff.properties.promisedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineHandoff.properties.promisedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.TimelineHandoff.properties.promisedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineHandoff.properties.receivingDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.TimelineHandoff.properties.receivingDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineHandoff.properties.receivingDisciplineId.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineHandoff.properties.sendingDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.TimelineHandoff.properties.sendingDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineHandoff.properties.sendingDisciplineId.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineHandoff.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.TimelineHandoff.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineHandoff.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.TimelineHandoff.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineHandoff.required": [
+      "array"
+    ],
+    "$.components.schemas.TimelineHandoff.required[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineHandoff.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineMilestone": [
+      "object"
+    ],
+    "$.components.schemas.TimelineMilestone.properties": [
+      "object"
+    ],
+    "$.components.schemas.TimelineMilestone.properties.baselineDate": [
+      "object"
+    ],
+    "$.components.schemas.TimelineMilestone.properties.baselineDate.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineMilestone.properties.baselineDate.type": [
+      "array"
+    ],
+    "$.components.schemas.TimelineMilestone.properties.baselineDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineMilestone.properties.baselineSlipShown": [
+      "object"
+    ],
+    "$.components.schemas.TimelineMilestone.properties.baselineSlipShown.type": [
+      "array"
+    ],
+    "$.components.schemas.TimelineMilestone.properties.baselineSlipShown.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineMilestone.properties.date": [
+      "object"
+    ],
+    "$.components.schemas.TimelineMilestone.properties.date.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineMilestone.properties.date.type": [
+      "array"
+    ],
+    "$.components.schemas.TimelineMilestone.properties.date.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineMilestone.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.TimelineMilestone.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineMilestone.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineMilestone.properties.isComplete": [
+      "object"
+    ],
+    "$.components.schemas.TimelineMilestone.properties.isComplete.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineMilestone.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.TimelineMilestone.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineMilestone.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.TimelineMilestone.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineMilestone.properties.originalDate": [
+      "object"
+    ],
+    "$.components.schemas.TimelineMilestone.properties.originalDate.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineMilestone.properties.originalDate.type": [
+      "array"
+    ],
+    "$.components.schemas.TimelineMilestone.properties.originalDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineMilestone.properties.slipShown": [
+      "object"
+    ],
+    "$.components.schemas.TimelineMilestone.properties.slipShown.type": [
+      "array"
+    ],
+    "$.components.schemas.TimelineMilestone.properties.slipShown.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineMilestone.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.TimelineMilestone.properties.status.type": [
+      "array"
+    ],
+    "$.components.schemas.TimelineMilestone.properties.status.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineMilestone.required": [
+      "array"
+    ],
+    "$.components.schemas.TimelineMilestone.required[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineMilestone.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelinePermissions": [
+      "object"
+    ],
+    "$.components.schemas.TimelinePermissions.properties": [
+      "object"
+    ],
+    "$.components.schemas.TimelinePermissions.properties.manageMilestones": [
+      "object"
+    ],
+    "$.components.schemas.TimelinePermissions.properties.manageMilestones.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelinePermissions.properties.needsReason": [
+      "object"
+    ],
+    "$.components.schemas.TimelinePermissions.properties.needsReason.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelinePermissions.required": [
+      "array"
+    ],
+    "$.components.schemas.TimelinePermissions.required[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelinePermissions.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineProject": [
+      "object"
+    ],
+    "$.components.schemas.TimelineProject.properties": [
+      "object"
+    ],
+    "$.components.schemas.TimelineProject.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.TimelineProject.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineProject.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineProject.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.TimelineProject.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineProject.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.TimelineProject.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineProject.properties.startDate": [
+      "object"
+    ],
+    "$.components.schemas.TimelineProject.properties.startDate.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineProject.properties.startDate.type": [
+      "array"
+    ],
+    "$.components.schemas.TimelineProject.properties.startDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineProject.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.TimelineProject.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineProject.properties.targetCompletionDate": [
+      "object"
+    ],
+    "$.components.schemas.TimelineProject.properties.targetCompletionDate.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineProject.properties.targetCompletionDate.type": [
+      "array"
+    ],
+    "$.components.schemas.TimelineProject.properties.targetCompletionDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineProject.required": [
+      "array"
+    ],
+    "$.components.schemas.TimelineProject.required[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineProject.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineProjectGroup": [
+      "object"
+    ],
+    "$.components.schemas.TimelineProjectGroup.properties": [
+      "object"
+    ],
+    "$.components.schemas.TimelineProjectGroup.properties.data": [
+      "object"
+    ],
+    "$.components.schemas.TimelineProjectGroup.properties.data.$ref": [
+      "string"
+    ],
+    "$.components.schemas.TimelineProjectGroup.properties.project": [
+      "object"
+    ],
+    "$.components.schemas.TimelineProjectGroup.properties.project.$ref": [
+      "string"
+    ],
+    "$.components.schemas.TimelineProjectGroup.required": [
+      "array"
+    ],
+    "$.components.schemas.TimelineProjectGroup.required[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineProjectGroup.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask": [
+      "object"
+    ],
+    "$.components.schemas.TimelineTask.properties": [
+      "object"
+    ],
+    "$.components.schemas.TimelineTask.properties.affectedMilestoneIds": [
+      "object"
+    ],
+    "$.components.schemas.TimelineTask.properties.affectedMilestoneIds.items": [
+      "object"
+    ],
+    "$.components.schemas.TimelineTask.properties.affectedMilestoneIds.items.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.affectedMilestoneIds.items.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.affectedMilestoneIds.type": [
+      "array"
+    ],
+    "$.components.schemas.TimelineTask.properties.affectedMilestoneIds.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.assignee": [
+      "object"
+    ],
+    "$.components.schemas.TimelineTask.properties.assignee.type": [
+      "array"
+    ],
+    "$.components.schemas.TimelineTask.properties.assignee.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.canEditDates": [
+      "object"
+    ],
+    "$.components.schemas.TimelineTask.properties.canEditDates.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.createdOn": [
+      "object"
+    ],
+    "$.components.schemas.TimelineTask.properties.createdOn.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.createdOn.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.deliverableId": [
+      "object"
+    ],
+    "$.components.schemas.TimelineTask.properties.deliverableId.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.deliverableId.type": [
+      "array"
+    ],
+    "$.components.schemas.TimelineTask.properties.deliverableId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.dueDate": [
+      "object"
+    ],
+    "$.components.schemas.TimelineTask.properties.dueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.dueDate.type": [
+      "array"
+    ],
+    "$.components.schemas.TimelineTask.properties.dueDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.dueNeedsReason": [
+      "object"
+    ],
+    "$.components.schemas.TimelineTask.properties.dueNeedsReason.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.TimelineTask.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.isOverdue": [
+      "object"
+    ],
+    "$.components.schemas.TimelineTask.properties.isOverdue.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.TimelineTask.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.milestoneId": [
+      "object"
+    ],
+    "$.components.schemas.TimelineTask.properties.milestoneId.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.milestoneId.type": [
+      "array"
+    ],
+    "$.components.schemas.TimelineTask.properties.milestoneId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.TimelineTask.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.originalDueDate": [
+      "object"
+    ],
+    "$.components.schemas.TimelineTask.properties.originalDueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.originalDueDate.type": [
+      "array"
+    ],
+    "$.components.schemas.TimelineTask.properties.originalDueDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.originalStartDate": [
+      "object"
+    ],
+    "$.components.schemas.TimelineTask.properties.originalStartDate.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.originalStartDate.type": [
+      "array"
+    ],
+    "$.components.schemas.TimelineTask.properties.originalStartDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.progressPct": [
+      "object"
+    ],
+    "$.components.schemas.TimelineTask.properties.progressPct.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.progressPct.pattern": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.progressPct.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.projectDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.TimelineTask.properties.projectDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.projectDisciplineId.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.TimelineTask.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.slipShown": [
+      "object"
+    ],
+    "$.components.schemas.TimelineTask.properties.slipShown.type": [
+      "array"
+    ],
+    "$.components.schemas.TimelineTask.properties.slipShown.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.startDate": [
+      "object"
+    ],
+    "$.components.schemas.TimelineTask.properties.startDate.format": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.startDate.type": [
+      "array"
+    ],
+    "$.components.schemas.TimelineTask.properties.startDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.TimelineTask.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.required": [
+      "array"
+    ],
+    "$.components.schemas.TimelineTask.required[]": [
+      "string"
+    ],
+    "$.components.schemas.TimelineTask.type": [
       "string"
     ],
     "$.components.schemas.UnassignedTask": [
@@ -48285,6 +49296,9 @@
     ],
     "$.paths./api/v1/projects/{id}/timeline.get.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/projects/{id}/timeline.get.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/projects/{id}/timeline.get.responses.200.description": [
       "string"
@@ -68128,6 +69142,9 @@
     "$.deliverables[].baselineSlipShown": [
       "boolean"
     ],
+    "$.deliverables[].baselineStartDate": [
+      "string"
+    ],
     "$.deliverables[].canEditDates": [
       "boolean"
     ],
@@ -68258,6 +69275,12 @@
     ],
     "$.milestones[]": [
       "object"
+    ],
+    "$.milestones[].baselineDate": [
+      "string"
+    ],
+    "$.milestones[].baselineSlipShown": [
+      "boolean"
     ],
     "$.milestones[].date": [
       "null",
@@ -77871,6 +78894,7 @@
       "boolean"
     ],
     "$.projects[].data.deliverableLinks[].lagDays": [
+      "null",
       "number"
     ],
     "$.projects[].data.deliverableLinks[].to": [
@@ -77890,6 +78914,9 @@
     ],
     "$.projects[].data.deliverables[].baselineSlipShown": [
       "boolean"
+    ],
+    "$.projects[].data.deliverables[].baselineStartDate": [
+      "string"
     ],
     "$.projects[].data.deliverables[].canEditDates": [
       "boolean"
@@ -77981,6 +79008,12 @@
     ],
     "$.projects[].data.milestones[]": [
       "object"
+    ],
+    "$.projects[].data.milestones[].baselineDate": [
+      "string"
+    ],
+    "$.projects[].data.milestones[].baselineSlipShown": [
+      "boolean"
     ],
     "$.projects[].data.milestones[].date": [
       "null",

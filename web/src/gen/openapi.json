@@ -1829,30 +1829,6 @@
         ],
         "type": "object"
       },
-      "AnonymousTypeOfListOfObjectAndbooleanAndint": {
-        "properties": {
-          "max": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          },
-          "projects": {
-            "type": [
-              "null",
-              "array"
-            ]
-          },
-          "truncated": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "projects",
-          "truncated",
-          "max"
-        ],
-        "type": "object"
-      },
       "AnonymousTypeOfListOfWidgetAndboolean": {
         "properties": {
           "isDefault": {
@@ -9947,6 +9923,33 @@
         ],
         "type": "object"
       },
+      "PlannedTarget": {
+        "properties": {
+          "date": {
+            "format": "date",
+            "type": "string"
+          },
+          "itemKey": {
+            "type": "string"
+          },
+          "rule": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "targetDate": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "date",
+          "itemKey",
+          "targetDate"
+        ],
+        "type": "object"
+      },
       "PlanningCreateBody": {
         "properties": {
           "confidence": {
@@ -14515,6 +14518,601 @@
           "rowVersion",
           "canEdit",
           "editNeedsReason"
+        ],
+        "type": "object"
+      },
+      "TimelineData": {
+        "properties": {
+          "deliverableLinks": {
+            "items": {
+              "$ref": "#/components/schemas/TimelineDeliverableLink"
+            },
+            "type": "array"
+          },
+          "deliverables": {
+            "items": {
+              "$ref": "#/components/schemas/TimelineDeliverable"
+            },
+            "type": "array"
+          },
+          "dependencies": {
+            "items": {
+              "$ref": "#/components/schemas/TimelineDependency"
+            },
+            "type": "array"
+          },
+          "handoffs": {
+            "items": {
+              "$ref": "#/components/schemas/TimelineHandoff"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "latestPlanned": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PlannedTarget"
+              }
+            ]
+          },
+          "milestones": {
+            "items": {
+              "$ref": "#/components/schemas/TimelineMilestone"
+            },
+            "type": "array"
+          },
+          "permissions": {
+            "$ref": "#/components/schemas/TimelinePermissions"
+          },
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/TimelineTask"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "permissions",
+          "tasks",
+          "dependencies",
+          "deliverableLinks",
+          "deliverables",
+          "milestones"
+        ],
+        "type": "object"
+      },
+      "TimelineDeliverable": {
+        "properties": {
+          "baselineDueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "baselineSlipShown": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "baselineStartDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "canEditDates": {
+            "type": "boolean"
+          },
+          "createdOn": {
+            "format": "date",
+            "type": "string"
+          },
+          "dueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isOverdue": {
+            "type": "boolean"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "originalDueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "originalStartDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "progressPct": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "slipShown": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "startDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "startDate",
+          "dueDate",
+          "originalStartDate",
+          "originalDueDate",
+          "status",
+          "rowVersion",
+          "createdOn",
+          "progressPct",
+          "isOverdue",
+          "canEditDates"
+        ],
+        "type": "object"
+      },
+      "TimelineDeliverableLink": {
+        "properties": {
+          "derived": {
+            "type": "boolean"
+          },
+          "from": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "highlighted": {
+            "type": "boolean"
+          },
+          "lagDays": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "to": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "type",
+          "lagDays",
+          "highlighted",
+          "derived"
+        ],
+        "type": "object"
+      },
+      "TimelineDependency": {
+        "properties": {
+          "highlighted": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lagDays": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "predecessorTaskId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "successorTaskId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "predecessorTaskId",
+          "successorTaskId",
+          "type",
+          "lagDays",
+          "highlighted"
+        ],
+        "type": "object"
+      },
+      "TimelineGantt": {
+        "properties": {
+          "max": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "projects": {
+            "items": {
+              "$ref": "#/components/schemas/TimelineProjectGroup"
+            },
+            "type": "array"
+          },
+          "truncated": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "projects",
+          "truncated",
+          "max"
+        ],
+        "type": "object"
+      },
+      "TimelineHandoff": {
+        "properties": {
+          "dateMismatch": {
+            "type": "boolean"
+          },
+          "daysOverdue": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isOverdue": {
+            "type": "boolean"
+          },
+          "key": {
+            "type": "string"
+          },
+          "neededBy": {
+            "format": "date",
+            "type": "string"
+          },
+          "promisedBy": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "receivingDisciplineId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "sendingDisciplineId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "title",
+          "status",
+          "sendingDisciplineId",
+          "receivingDisciplineId",
+          "neededBy",
+          "promisedBy",
+          "dateMismatch",
+          "isOverdue",
+          "daysOverdue"
+        ],
+        "type": "object"
+      },
+      "TimelineMilestone": {
+        "properties": {
+          "baselineDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "baselineSlipShown": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "date": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isComplete": {
+            "type": "boolean"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "originalDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "slipShown": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "status": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "date",
+          "isComplete",
+          "status"
+        ],
+        "type": "object"
+      },
+      "TimelinePermissions": {
+        "properties": {
+          "manageMilestones": {
+            "type": "boolean"
+          },
+          "needsReason": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "manageMilestones",
+          "needsReason"
+        ],
+        "type": "object"
+      },
+      "TimelineProject": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "startDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "type": "string"
+          },
+          "targetCompletionDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "projectNumber",
+          "name",
+          "status",
+          "startDate",
+          "targetCompletionDate"
+        ],
+        "type": "object"
+      },
+      "TimelineProjectGroup": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/TimelineData"
+          },
+          "project": {
+            "$ref": "#/components/schemas/TimelineProject"
+          }
+        },
+        "required": [
+          "project",
+          "data"
+        ],
+        "type": "object"
+      },
+      "TimelineTask": {
+        "properties": {
+          "affectedMilestoneIds": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "assignee": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "canEditDates": {
+            "type": "boolean"
+          },
+          "createdOn": {
+            "format": "date",
+            "type": "string"
+          },
+          "deliverableId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dueNeedsReason": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isOverdue": {
+            "type": "boolean"
+          },
+          "key": {
+            "type": "string"
+          },
+          "milestoneId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "originalDueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "originalStartDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "progressPct": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "projectDisciplineId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "slipShown": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "startDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "deliverableId",
+          "projectDisciplineId",
+          "milestoneId",
+          "startDate",
+          "dueDate",
+          "originalStartDate",
+          "originalDueDate",
+          "status",
+          "progressPct",
+          "assignee",
+          "rowVersion",
+          "createdOn",
+          "isOverdue",
+          "canEditDates",
+          "dueNeedsReason"
         ],
         "type": "object"
       },
@@ -25904,7 +26502,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/TimelineData"
+                }
               }
             },
             "description": "OK"
@@ -32858,7 +33458,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnonymousTypeOfListOfObjectAndbooleanAndint"
+                  "$ref": "#/components/schemas/TimelineGantt"
                 }
               }
             },

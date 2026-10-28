@@ -10569,7 +10569,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["PageOfBasisRegisterRow"];
                     };
                 };
             };
@@ -10717,7 +10717,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["BasisDetail"];
                     };
                 };
             };
@@ -16654,6 +16654,159 @@ export interface components {
             /** Format: int32 */
             rowVersion: number;
         };
+        BasisConflictRow: {
+            /** Format: uuid */
+            id: string;
+            left: components["schemas"]["ConflictSide"];
+            resolved: boolean;
+            right: components["schemas"]["ConflictSide"];
+            /** Format: int32 */
+            rowVersion: number;
+        };
+        BasisDetail: {
+            canConfirm: boolean;
+            canEditProposed: boolean;
+            canManage: boolean;
+            conflicts: components["schemas"]["BasisConflictRow"][];
+            dispositions: components["schemas"]["BasisDispositionRow"][];
+            entry: components["schemas"]["BasisEntryRow"];
+            impacts: components["schemas"]["BasisImpactRow"][];
+            uses: components["schemas"]["BasisUseRow"][];
+            versions: components["schemas"]["BasisVersionItem"][];
+        };
+        BasisDispositionRow: {
+            /** Format: uuid */
+            approvedBy: string;
+            auditKey: null | string;
+            auditName: null | string;
+            /** Format: uuid */
+            auditProjectId: null | string;
+            auditType: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            /** Format: date */
+            expiresOn: string;
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            ownerId: string;
+            /** Format: uuid */
+            projectId: string;
+            reason: string;
+            /** Format: int32 */
+            rowVersion: number;
+            scope: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: uuid */
+            updatedBy: null | string;
+            /** Format: uuid */
+            versionId: string;
+        };
+        BasisEntryRow: {
+            /** Format: uuid */
+            auditDisciplineId: null | string;
+            auditKey: null | string;
+            auditName: null | string;
+            /** Format: uuid */
+            auditProjectId: null | string;
+            auditType: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            /** Format: uuid */
+            currentVersionId: null | string;
+            /** Format: date-time */
+            deletedAt: null | string;
+            /** Format: uuid */
+            deletedBy: null | string;
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            independentApproverId: null | string;
+            key: string;
+            kind: string;
+            /** Format: uuid */
+            ownerId: string;
+            /** Format: uuid */
+            projectDisciplineId: string;
+            /** Format: uuid */
+            projectId: string;
+            /** Format: int32 */
+            rowVersion: number;
+            /** Format: int32 */
+            seq: number;
+            title: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: uuid */
+            updatedBy: null | string;
+        };
+        BasisImpactRow: {
+            auditKey: null | string;
+            auditName: null | string;
+            /** Format: uuid */
+            auditProjectId: null | string;
+            auditType: string;
+            /** Format: uuid */
+            basisUseId: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            /** Format: date-time */
+            decidedAt: null | string;
+            /** Format: uuid */
+            decidedBy: null | string;
+            evidenceUrl: null | string;
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            newVersionId: null | string;
+            /** Format: uuid */
+            oldVersionId: string;
+            /** Format: uuid */
+            ownerId: string;
+            /** Format: uuid */
+            projectId: string;
+            rationale: null | string;
+            /** Format: int32 */
+            rowVersion: number;
+            status: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: uuid */
+            updatedBy: null | string;
+            /** Format: uuid */
+            withdrawalVersionId: null | string;
+        };
+        BasisRegisterRow: {
+            /** Format: date */
+            confirmationDueDate: null | string;
+            /** Format: int32 */
+            conflictCount: number;
+            currentScope: null | string;
+            currentStatus: null | string;
+            /** Format: uuid */
+            currentVersionId: null | string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            kind: string;
+            latestStatus: null | string;
+            /** Format: uuid */
+            latestVersionId: null | string;
+            /** Format: uuid */
+            ownerId: string;
+            /** Format: uuid */
+            projectDisciplineId: string;
+            /** Format: int32 */
+            rowVersion: number;
+            title: string;
+        };
         BasisSuggestionBody: {
             declaredRevision: null | string;
             kind: string;
@@ -16668,6 +16821,71 @@ export interface components {
             templateDisciplineId: string;
             title: string;
             units: null | string;
+        };
+        BasisUseRow: {
+            /** Format: uuid */
+            id: string;
+            intendedUse: string;
+            isCurrent: boolean;
+            /** Format: uuid */
+            ownerId: string;
+            /** Format: int32 */
+            rowVersion: number;
+            /** Format: uuid */
+            targetId: string;
+            targetType: string;
+            /** Format: uuid */
+            versionId: string;
+        };
+        BasisVersionItem: {
+            sourceMissing: boolean;
+            version: components["schemas"]["BasisVersionRow"];
+        };
+        BasisVersionRow: {
+            auditKey: null | string;
+            auditName: null | string;
+            /** Format: uuid */
+            auditProjectId: null | string;
+            auditType: string;
+            /** Format: date */
+            confirmationDueDate: null | string;
+            confirmationRationale: null | string;
+            /** Format: date-time */
+            confirmedAt: null | string;
+            /** Format: uuid */
+            confirmedBy: null | string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            /** Format: uuid */
+            decisionId: null | string;
+            declaredRevision: null | string;
+            /** Format: uuid */
+            entryId: string;
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            number: number;
+            /** Format: double */
+            numericValue: null | number;
+            /** Format: uuid */
+            projectId: string;
+            /** Format: int32 */
+            rowVersion: number;
+            scope: string;
+            sourceSystem: null | string;
+            sourceUrl: null | string;
+            stableSourceId: null | string;
+            statement: string;
+            status: string;
+            /** Format: uuid */
+            supersedesVersionId: null | string;
+            units: null | string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: uuid */
+            updatedBy: null | string;
         };
         BlockBody: {
             reason: string;
@@ -17098,6 +17316,16 @@ export interface components {
             confirm: null | boolean;
             /** Format: int32 */
             rowVersion: null | number;
+        };
+        ConflictSide: {
+            entryKey: string;
+            /** Format: double */
+            numericValue: null | number;
+            scope: string;
+            statement: string;
+            units: null | string;
+            /** Format: uuid */
+            versionId: string;
         };
         ConstraintBody: {
             category: string;
@@ -18815,6 +19043,17 @@ export interface components {
         PageOfActivityEntry: {
             filters?: unknown;
             items: components["schemas"]["ActivityEntry"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            sort?: null | string;
+            /** Format: int32 */
+            totalCount: number;
+        };
+        PageOfBasisRegisterRow: {
+            filters?: unknown;
+            items: components["schemas"]["BasisRegisterRow"][];
             /** Format: int32 */
             page: number;
             /** Format: int32 */

@@ -12809,6 +12809,930 @@
     "$.components.schemas.AwaitingRow.type": [
       "string"
     ],
+    "$.components.schemas.BasisConflictRow": [
+      "object"
+    ],
+    "$.components.schemas.BasisConflictRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.BasisConflictRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.BasisConflictRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisConflictRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisConflictRow.properties.left": [
+      "object"
+    ],
+    "$.components.schemas.BasisConflictRow.properties.left.$ref": [
+      "string"
+    ],
+    "$.components.schemas.BasisConflictRow.properties.resolved": [
+      "object"
+    ],
+    "$.components.schemas.BasisConflictRow.properties.resolved.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisConflictRow.properties.right": [
+      "object"
+    ],
+    "$.components.schemas.BasisConflictRow.properties.right.$ref": [
+      "string"
+    ],
+    "$.components.schemas.BasisConflictRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.BasisConflictRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisConflictRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.BasisConflictRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisConflictRow.required": [
+      "array"
+    ],
+    "$.components.schemas.BasisConflictRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisConflictRow.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisDetail": [
+      "object"
+    ],
+    "$.components.schemas.BasisDetail.properties": [
+      "object"
+    ],
+    "$.components.schemas.BasisDetail.properties.canConfirm": [
+      "object"
+    ],
+    "$.components.schemas.BasisDetail.properties.canConfirm.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisDetail.properties.canEditProposed": [
+      "object"
+    ],
+    "$.components.schemas.BasisDetail.properties.canEditProposed.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisDetail.properties.canManage": [
+      "object"
+    ],
+    "$.components.schemas.BasisDetail.properties.canManage.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisDetail.properties.conflicts": [
+      "object"
+    ],
+    "$.components.schemas.BasisDetail.properties.conflicts.items": [
+      "object"
+    ],
+    "$.components.schemas.BasisDetail.properties.conflicts.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.BasisDetail.properties.conflicts.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisDetail.properties.dispositions": [
+      "object"
+    ],
+    "$.components.schemas.BasisDetail.properties.dispositions.items": [
+      "object"
+    ],
+    "$.components.schemas.BasisDetail.properties.dispositions.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.BasisDetail.properties.dispositions.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisDetail.properties.entry": [
+      "object"
+    ],
+    "$.components.schemas.BasisDetail.properties.entry.$ref": [
+      "string"
+    ],
+    "$.components.schemas.BasisDetail.properties.impacts": [
+      "object"
+    ],
+    "$.components.schemas.BasisDetail.properties.impacts.items": [
+      "object"
+    ],
+    "$.components.schemas.BasisDetail.properties.impacts.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.BasisDetail.properties.impacts.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisDetail.properties.uses": [
+      "object"
+    ],
+    "$.components.schemas.BasisDetail.properties.uses.items": [
+      "object"
+    ],
+    "$.components.schemas.BasisDetail.properties.uses.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.BasisDetail.properties.uses.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisDetail.properties.versions": [
+      "object"
+    ],
+    "$.components.schemas.BasisDetail.properties.versions.items": [
+      "object"
+    ],
+    "$.components.schemas.BasisDetail.properties.versions.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.BasisDetail.properties.versions.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisDetail.required": [
+      "array"
+    ],
+    "$.components.schemas.BasisDetail.required[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisDetail.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisDispositionRow": [
+      "object"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.approvedBy": [
+      "object"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.approvedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.approvedBy.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.auditKey": [
+      "object"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.auditKey.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.auditKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.auditName": [
+      "object"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.auditName.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.auditName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.auditProjectId": [
+      "object"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.auditProjectId.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.auditProjectId.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.auditProjectId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.auditType": [
+      "object"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.auditType.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.createdBy": [
+      "object"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.createdBy.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.createdBy.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.createdBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.expiresOn": [
+      "object"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.expiresOn.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.expiresOn.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.ownerId": [
+      "object"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.ownerId.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.ownerId.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.reason": [
+      "object"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.reason.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.scope": [
+      "object"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.scope.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.updatedAt": [
+      "object"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.updatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.updatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.updatedBy": [
+      "object"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.updatedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.updatedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.updatedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.versionId": [
+      "object"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.versionId.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisDispositionRow.properties.versionId.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisDispositionRow.required": [
+      "array"
+    ],
+    "$.components.schemas.BasisDispositionRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisDispositionRow.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow": [
+      "object"
+    ],
+    "$.components.schemas.BasisEntryRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.auditDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.auditDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.auditDisciplineId.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.auditDisciplineId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.auditKey": [
+      "object"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.auditKey.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.auditKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.auditName": [
+      "object"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.auditName.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.auditName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.auditProjectId": [
+      "object"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.auditProjectId.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.auditProjectId.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.auditProjectId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.auditType": [
+      "object"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.auditType.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.createdBy": [
+      "object"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.createdBy.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.createdBy.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.createdBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.currentVersionId": [
+      "object"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.currentVersionId.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.currentVersionId.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.currentVersionId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.deletedAt": [
+      "object"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.deletedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.deletedAt.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.deletedAt.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.deletedBy": [
+      "object"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.deletedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.deletedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.deletedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.independentApproverId": [
+      "object"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.independentApproverId.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.independentApproverId.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.independentApproverId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.kind": [
+      "object"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.kind.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.ownerId": [
+      "object"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.ownerId.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.ownerId.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.projectDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.projectDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.projectDisciplineId.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.seq": [
+      "object"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.seq.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.seq.pattern": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.seq.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.updatedAt": [
+      "object"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.updatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.updatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.updatedBy": [
+      "object"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.updatedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.updatedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisEntryRow.properties.updatedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.required": [
+      "array"
+    ],
+    "$.components.schemas.BasisEntryRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisEntryRow.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow": [
+      "object"
+    ],
+    "$.components.schemas.BasisImpactRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.auditKey": [
+      "object"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.auditKey.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.auditKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.auditName": [
+      "object"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.auditName.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.auditName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.auditProjectId": [
+      "object"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.auditProjectId.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.auditProjectId.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.auditProjectId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.auditType": [
+      "object"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.auditType.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.basisUseId": [
+      "object"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.basisUseId.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.basisUseId.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.createdBy": [
+      "object"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.createdBy.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.createdBy.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.createdBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.decidedAt": [
+      "object"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.decidedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.decidedAt.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.decidedAt.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.decidedBy": [
+      "object"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.decidedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.decidedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.decidedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.evidenceUrl": [
+      "object"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.evidenceUrl.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.evidenceUrl.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.newVersionId": [
+      "object"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.newVersionId.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.newVersionId.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.newVersionId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.oldVersionId": [
+      "object"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.oldVersionId.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.oldVersionId.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.ownerId": [
+      "object"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.ownerId.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.ownerId.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.rationale": [
+      "object"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.rationale.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.rationale.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.updatedAt": [
+      "object"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.updatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.updatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.updatedBy": [
+      "object"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.updatedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.updatedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.updatedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.withdrawalVersionId": [
+      "object"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.withdrawalVersionId.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.withdrawalVersionId.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisImpactRow.properties.withdrawalVersionId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.required": [
+      "array"
+    ],
+    "$.components.schemas.BasisImpactRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisImpactRow.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisRegisterRow": [
+      "object"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.confirmationDueDate": [
+      "object"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.confirmationDueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.confirmationDueDate.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.confirmationDueDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.conflictCount": [
+      "object"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.conflictCount.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.conflictCount.pattern": [
+      "string"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.conflictCount.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.currentScope": [
+      "object"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.currentScope.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.currentScope.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.currentStatus": [
+      "object"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.currentStatus.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.currentStatus.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.currentVersionId": [
+      "object"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.currentVersionId.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.currentVersionId.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.currentVersionId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.kind": [
+      "object"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.kind.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.latestStatus": [
+      "object"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.latestStatus.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.latestStatus.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.latestVersionId": [
+      "object"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.latestVersionId.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.latestVersionId.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.latestVersionId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.ownerId": [
+      "object"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.ownerId.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.ownerId.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.projectDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.projectDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.projectDisciplineId.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.BasisRegisterRow.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisRegisterRow.required": [
+      "array"
+    ],
+    "$.components.schemas.BasisRegisterRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisRegisterRow.type": [
+      "string"
+    ],
     "$.components.schemas.BasisSuggestionBody": [
       "object"
     ],
@@ -12915,6 +13839,405 @@
       "string"
     ],
     "$.components.schemas.BasisSuggestionBody.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisUseRow": [
+      "object"
+    ],
+    "$.components.schemas.BasisUseRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.BasisUseRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.BasisUseRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisUseRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisUseRow.properties.intendedUse": [
+      "object"
+    ],
+    "$.components.schemas.BasisUseRow.properties.intendedUse.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisUseRow.properties.isCurrent": [
+      "object"
+    ],
+    "$.components.schemas.BasisUseRow.properties.isCurrent.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisUseRow.properties.ownerId": [
+      "object"
+    ],
+    "$.components.schemas.BasisUseRow.properties.ownerId.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisUseRow.properties.ownerId.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisUseRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.BasisUseRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisUseRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.BasisUseRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisUseRow.properties.targetId": [
+      "object"
+    ],
+    "$.components.schemas.BasisUseRow.properties.targetId.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisUseRow.properties.targetId.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisUseRow.properties.targetType": [
+      "object"
+    ],
+    "$.components.schemas.BasisUseRow.properties.targetType.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisUseRow.properties.versionId": [
+      "object"
+    ],
+    "$.components.schemas.BasisUseRow.properties.versionId.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisUseRow.properties.versionId.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisUseRow.required": [
+      "array"
+    ],
+    "$.components.schemas.BasisUseRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisUseRow.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionItem": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionItem.properties": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionItem.properties.sourceMissing": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionItem.properties.sourceMissing.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionItem.properties.version": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionItem.properties.version.$ref": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionItem.required": [
+      "array"
+    ],
+    "$.components.schemas.BasisVersionItem.required[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionItem.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.auditKey": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.auditKey.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.auditKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.auditName": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.auditName.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.auditName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.auditProjectId": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.auditProjectId.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.auditProjectId.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.auditProjectId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.auditType": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.auditType.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.confirmationDueDate": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.confirmationDueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.confirmationDueDate.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.confirmationDueDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.confirmationRationale": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.confirmationRationale.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.confirmationRationale.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.confirmedAt": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.confirmedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.confirmedAt.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.confirmedAt.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.confirmedBy": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.confirmedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.confirmedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.confirmedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.createdBy": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.createdBy.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.createdBy.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.createdBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.decisionId": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.decisionId.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.decisionId.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.decisionId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.declaredRevision": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.declaredRevision.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.declaredRevision.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.entryId": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.entryId.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.entryId.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.number": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.number.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.number.pattern": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.number.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.numericValue": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.numericValue.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.numericValue.pattern": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.numericValue.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.numericValue.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.scope": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.scope.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.sourceSystem": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.sourceSystem.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.sourceSystem.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.sourceUrl": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.sourceUrl.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.sourceUrl.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.stableSourceId": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.stableSourceId.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.stableSourceId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.statement": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.statement.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.supersedesVersionId": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.supersedesVersionId.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.supersedesVersionId.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.supersedesVersionId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.units": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.units.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.units.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.updatedAt": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.updatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.updatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.updatedBy": [
+      "object"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.updatedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.updatedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.BasisVersionRow.properties.updatedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.required": [
+      "array"
+    ],
+    "$.components.schemas.BasisVersionRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisVersionRow.type": [
       "string"
     ],
     "$.components.schemas.BlockBody": [
@@ -15729,6 +17052,72 @@
       "string"
     ],
     "$.components.schemas.CompleteBody.type": [
+      "string"
+    ],
+    "$.components.schemas.ConflictSide": [
+      "object"
+    ],
+    "$.components.schemas.ConflictSide.properties": [
+      "object"
+    ],
+    "$.components.schemas.ConflictSide.properties.entryKey": [
+      "object"
+    ],
+    "$.components.schemas.ConflictSide.properties.entryKey.type": [
+      "string"
+    ],
+    "$.components.schemas.ConflictSide.properties.numericValue": [
+      "object"
+    ],
+    "$.components.schemas.ConflictSide.properties.numericValue.format": [
+      "string"
+    ],
+    "$.components.schemas.ConflictSide.properties.numericValue.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ConflictSide.properties.numericValue.type": [
+      "array"
+    ],
+    "$.components.schemas.ConflictSide.properties.numericValue.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ConflictSide.properties.scope": [
+      "object"
+    ],
+    "$.components.schemas.ConflictSide.properties.scope.type": [
+      "string"
+    ],
+    "$.components.schemas.ConflictSide.properties.statement": [
+      "object"
+    ],
+    "$.components.schemas.ConflictSide.properties.statement.type": [
+      "string"
+    ],
+    "$.components.schemas.ConflictSide.properties.units": [
+      "object"
+    ],
+    "$.components.schemas.ConflictSide.properties.units.type": [
+      "array"
+    ],
+    "$.components.schemas.ConflictSide.properties.units.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ConflictSide.properties.versionId": [
+      "object"
+    ],
+    "$.components.schemas.ConflictSide.properties.versionId.format": [
+      "string"
+    ],
+    "$.components.schemas.ConflictSide.properties.versionId.type": [
+      "string"
+    ],
+    "$.components.schemas.ConflictSide.required": [
+      "array"
+    ],
+    "$.components.schemas.ConflictSide.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ConflictSide.type": [
       "string"
     ],
     "$.components.schemas.ConstraintBody": [
@@ -26979,6 +28368,81 @@
       "string"
     ],
     "$.components.schemas.PageOfActivityEntry.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfBasisRegisterRow": [
+      "object"
+    ],
+    "$.components.schemas.PageOfBasisRegisterRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.PageOfBasisRegisterRow.properties.filters": [
+      "object"
+    ],
+    "$.components.schemas.PageOfBasisRegisterRow.properties.items": [
+      "object"
+    ],
+    "$.components.schemas.PageOfBasisRegisterRow.properties.items.items": [
+      "object"
+    ],
+    "$.components.schemas.PageOfBasisRegisterRow.properties.items.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.PageOfBasisRegisterRow.properties.items.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfBasisRegisterRow.properties.page": [
+      "object"
+    ],
+    "$.components.schemas.PageOfBasisRegisterRow.properties.page.format": [
+      "string"
+    ],
+    "$.components.schemas.PageOfBasisRegisterRow.properties.page.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PageOfBasisRegisterRow.properties.page.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfBasisRegisterRow.properties.pageSize": [
+      "object"
+    ],
+    "$.components.schemas.PageOfBasisRegisterRow.properties.pageSize.format": [
+      "string"
+    ],
+    "$.components.schemas.PageOfBasisRegisterRow.properties.pageSize.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PageOfBasisRegisterRow.properties.pageSize.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfBasisRegisterRow.properties.sort": [
+      "object"
+    ],
+    "$.components.schemas.PageOfBasisRegisterRow.properties.sort.type": [
+      "array"
+    ],
+    "$.components.schemas.PageOfBasisRegisterRow.properties.sort.type[]": [
+      "string"
+    ],
+    "$.components.schemas.PageOfBasisRegisterRow.properties.totalCount": [
+      "object"
+    ],
+    "$.components.schemas.PageOfBasisRegisterRow.properties.totalCount.format": [
+      "string"
+    ],
+    "$.components.schemas.PageOfBasisRegisterRow.properties.totalCount.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PageOfBasisRegisterRow.properties.totalCount.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfBasisRegisterRow.required": [
+      "array"
+    ],
+    "$.components.schemas.PageOfBasisRegisterRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.PageOfBasisRegisterRow.type": [
       "string"
     ],
     "$.components.schemas.PageOfDeletedItem": [
@@ -57989,6 +59453,9 @@
     "$.paths./api/v1/projects/{projectId}/design-basis.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/projects/{projectId}/design-basis.get.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/projects/{projectId}/design-basis.get.responses.200.description": [
       "string"
     ],
@@ -58234,6 +59701,9 @@
     ],
     "$.paths./api/v1/projects/{projectId}/design-basis/{id}.get.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/projects/{projectId}/design-basis/{id}.get.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/projects/{projectId}/design-basis/{id}.get.responses.200.description": [
       "string"
@@ -77452,8 +78922,116 @@
     "$.conflicts": [
       "array"
     ],
+    "$.conflicts[]": [
+      "object"
+    ],
+    "$.conflicts[].id": [
+      "string"
+    ],
+    "$.conflicts[].left": [
+      "object"
+    ],
+    "$.conflicts[].left.entryKey": [
+      "string"
+    ],
+    "$.conflicts[].left.numericValue": [
+      "number"
+    ],
+    "$.conflicts[].left.scope": [
+      "string"
+    ],
+    "$.conflicts[].left.statement": [
+      "string"
+    ],
+    "$.conflicts[].left.units": [
+      "string"
+    ],
+    "$.conflicts[].left.versionId": [
+      "string"
+    ],
+    "$.conflicts[].resolved": [
+      "boolean"
+    ],
+    "$.conflicts[].right": [
+      "object"
+    ],
+    "$.conflicts[].right.entryKey": [
+      "string"
+    ],
+    "$.conflicts[].right.numericValue": [
+      "number"
+    ],
+    "$.conflicts[].right.scope": [
+      "string"
+    ],
+    "$.conflicts[].right.statement": [
+      "string"
+    ],
+    "$.conflicts[].right.units": [
+      "string"
+    ],
+    "$.conflicts[].right.versionId": [
+      "string"
+    ],
+    "$.conflicts[].rowVersion": [
+      "number"
+    ],
     "$.dispositions": [
       "array"
+    ],
+    "$.dispositions[]": [
+      "object"
+    ],
+    "$.dispositions[].approvedBy": [
+      "string"
+    ],
+    "$.dispositions[].auditKey": [
+      "null"
+    ],
+    "$.dispositions[].auditName": [
+      "null"
+    ],
+    "$.dispositions[].auditProjectId": [
+      "string"
+    ],
+    "$.dispositions[].auditType": [
+      "string"
+    ],
+    "$.dispositions[].createdAt": [
+      "string"
+    ],
+    "$.dispositions[].createdBy": [
+      "string"
+    ],
+    "$.dispositions[].expiresOn": [
+      "string"
+    ],
+    "$.dispositions[].id": [
+      "string"
+    ],
+    "$.dispositions[].ownerId": [
+      "string"
+    ],
+    "$.dispositions[].projectId": [
+      "string"
+    ],
+    "$.dispositions[].reason": [
+      "string"
+    ],
+    "$.dispositions[].rowVersion": [
+      "number"
+    ],
+    "$.dispositions[].scope": [
+      "string"
+    ],
+    "$.dispositions[].updatedAt": [
+      "string"
+    ],
+    "$.dispositions[].updatedBy": [
+      "string"
+    ],
+    "$.dispositions[].versionId": [
+      "string"
     ],
     "$.entry": [
       "object"
@@ -77480,6 +79058,7 @@
       "string"
     ],
     "$.entry.currentVersionId": [
+      "null",
       "string"
     ],
     "$.entry.deletedAt": [
@@ -77567,6 +79146,7 @@
       "string"
     ],
     "$.impacts[].newVersionId": [
+      "null",
       "string"
     ],
     "$.impacts[].oldVersionId": [
@@ -77595,7 +79175,8 @@
       "string"
     ],
     "$.impacts[].withdrawalVersionId": [
-      "null"
+      "null",
+      "string"
     ],
     "$.uses": [
       "array"
@@ -77655,12 +79236,15 @@
       "string"
     ],
     "$.versions[].version.confirmationRationale": [
+      "null",
       "string"
     ],
     "$.versions[].version.confirmedAt": [
+      "null",
       "string"
     ],
     "$.versions[].version.confirmedBy": [
+      "null",
       "string"
     ],
     "$.versions[].version.createdAt": [
@@ -77673,6 +79257,7 @@
       "null"
     ],
     "$.versions[].version.declaredRevision": [
+      "null",
       "string"
     ],
     "$.versions[].version.entryId": [
@@ -77685,6 +79270,7 @@
       "number"
     ],
     "$.versions[].version.numericValue": [
+      "null",
       "number"
     ],
     "$.versions[].version.projectId": [
@@ -77697,12 +79283,15 @@
       "string"
     ],
     "$.versions[].version.sourceSystem": [
+      "null",
       "string"
     ],
     "$.versions[].version.sourceUrl": [
+      "null",
       "string"
     ],
     "$.versions[].version.stableSourceId": [
+      "null",
       "string"
     ],
     "$.versions[].version.statement": [
@@ -77716,6 +79305,7 @@
       "string"
     ],
     "$.versions[].version.units": [
+      "null",
       "string"
     ],
     "$.versions[].version.updatedAt": [

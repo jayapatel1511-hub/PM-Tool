@@ -31,6 +31,7 @@
     "time.fixture.cjs",
     "submissions.fixture.cjs",
     "search.fixture.cjs",
-    "coordination.fixture.cjs"
+    "coordination.fixture.cjs",
+    "design-basis.fixture.cjs"
   ]
 }

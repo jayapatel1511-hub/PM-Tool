@@ -7,6 +7,7 @@ const { decisionRow, externalParty } = require('./decisions.fixture.cjs');
 const { commitmentRow, commitmentList } = require('./weekly-commitments.fixture.cjs');
 const { attentionList } = require('./evaluation.fixture.cjs');
 const { submissionListRow, submissionPage } = require('./submissions.fixture.cjs');
+const { basisRegisterRow, basisPage, basisEntryRow, basisVersionItem, basisUseRow, basisImpactRow, basisDetail } = require('./design-basis.fixture.cjs');
 const { coordinationUseRow, coordinationChangeRow, coordinationReviewRow, coordinationIssueRow, coordinationSubmissionRow, coordinationStaffingRow, coordinationProjection } = require('./coordination.fixture.cjs');
 const port = process.env.PORT ?? '5176', base = `http://127.0.0.1:${port}`;
 const id = n => `00000000-0000-0000-0000-${String(n).padStart(12, '0')}`;
@@ -27,17 +28,16 @@ const me = () => ({ id: actor(), displayName: who, email: `${who}@hub.test`, rol
 const options = () => ({ actorId: actor(), canWrite: true, manageDisciplineIds: who === 'consumer' ? [] : [civil], people: [{ id: consumer, displayName: 'Alex Consumer' }, { id: lead, displayName: 'Marc Lead' }],
   disciplines: [{ id: civil, name: 'Civil' }], sources: [], heads: [], deliverables: [],
   tasks: [{ id: task, key: 'P-DEMO-T0001', name: 'Watermain layout', projectDisciplineId: civil, ownerId: consumer, rowVersion: 3, status: 'In Progress' }] });
-const version = (vid, entryId, number, status, extra = {}) => ({ id: vid, entryId, number, status, scope: 'Site - watermain', statement: 'Minimum cover', numericValue: 1.5, units: 'm', sourceSystem: 'DMS', declaredRevision: 'A', sourceUrl: 'https://example.test/a', rowVersion: 1, ...extra });
-const row = (eid, key, current, latest) => ({ id: eid, key, title: `Entry ${key}`, kind: 'Criterion', ownerId: consumer, projectDisciplineId: civil, currentVersionId: current, rowVersion: 2, currentStatus: current ? 'Confirmed' : undefined, latestStatus: latest, conflictCount: 0 });
+const version = (vid, entryId, number, status, extra = {}) => basisVersionItem({ id: vid, entryId, number, status, ...extra });
+const row = (eid, key, current, latest) => basisRegisterRow({ id: eid, key, title: `Entry ${key}`, ownerId: consumer, projectDisciplineId: civil, currentVersionId: current, currentStatus: current ? 'Confirmed' : null, latestStatus: latest });
+const entry = (eid, key, current) => basisEntryRow({ id: eid, key, title: `Entry ${key}`, ownerId: consumer, projectDisciplineId: civil, currentVersionId: current });
 const detail = eid => eid === e1
-  ? { entry: row(e1, 'P-DEMO-B001', v12, 'Confirmed'), versions: [version(v11, e1, 1, 'Superseded'), version(v12, e1, 2, 'Confirmed', { supersedesVersionId: v11, numericValue: 1.8 })].map(v => ({ version: v, sourceMissing: false })),
-    uses: [{ id: u1, versionId: v11, targetType: 'Task', targetId: task, intendedUse: 'Cover check', ownerId: consumer, rowVersion: 1, isCurrent: true }],
-    impacts: [{ id: i1, basisUseId: u1, oldVersionId: v11, newVersionId: v12, status: 'Pending Assessment', ownerId: consumer, rowVersion: 1 }], conflicts: [], dispositions: [],
-    canManage: who === 'lead', canEditProposed: false, canConfirm: false }
-  : { entry: row(e2, 'P-DEMO-B002', null, 'Withdrawn'), versions: [{ version: version(v21, e2, 1, 'Withdrawn'), sourceMissing: false }],
-    uses: [{ id: u2, versionId: v21, targetType: 'Task', targetId: task, intendedUse: 'Profile check', ownerId: consumer, rowVersion: 1, isCurrent: true }],
-    impacts: [{ id: i2, basisUseId: u2, oldVersionId: v21, withdrawalVersionId: v21, status: 'Pending Assessment', ownerId: consumer, rowVersion: 1 }], conflicts: [], dispositions: [],
-    canManage: who === 'lead', canEditProposed: false, canConfirm: false };
+  ? basisDetail({ entry: entry(e1, 'P-DEMO-B001', v12), versions: [version(v11, e1, 1, 'Superseded'), version(v12, e1, 2, 'Confirmed', { supersedesVersionId: v11, numericValue: 1.8 })],
+    uses: [basisUseRow({ id: u1, versionId: v11, targetId: task, ownerId: consumer })],
+    impacts: [basisImpactRow({ id: i1, basisUseId: u1, oldVersionId: v11, newVersionId: v12, ownerId: consumer })], canManage: who === 'lead' })
+  : basisDetail({ entry: entry(e2, 'P-DEMO-B002', null), versions: [version(v21, e2, 1, 'Withdrawn')],
+    uses: [basisUseRow({ id: u2, versionId: v21, targetId: task, intendedUse: 'Profile check', ownerId: consumer })],
+    impacts: [basisImpactRow({ id: i2, basisUseId: u2, oldVersionId: v21, withdrawalVersionId: v21, ownerId: consumer })], canManage: who === 'lead' });
 // Reuse the consuming task, with the real TaskRow and TaskDetailData contracts used by the register and panel.
 const taskRow = () => ({ id: task, key: options().tasks[0].key, name: options().tasks[0].name, projectDisciplineId: civil,
   projectId: pid, projectNumber: 'P-DEMO', projectName: 'Basis checks', projectStatus: 'Active', status: 'In Progress', lane: 'In Progress',
@@ -118,7 +118,7 @@ let server, browser;
     else if (p === `tasks/${task}/dependencies`) data = { dependsOn: [], blocks: [] };
     else if (p === `items/Task/${task}/comments`) data = { items: [], canComment: true };
     else if (p === `items/Task/${task}/links`) data = { links: [], inherited: [], canAdd: true };
-    else if (p === `projects/${pid}/design-basis`) { lists.push(u.search); data = { items: [row(e1, 'P-DEMO-B001', v12, 'Confirmed'), row(e2, 'P-DEMO-B002', null, 'Withdrawn')], pageSize: 50, totalCount: 101 } }
+    else if (p === `projects/${pid}/design-basis`) { lists.push(u.search); data = basisPage([row(e1, 'P-DEMO-B001', v12, 'Confirmed'), row(e2, 'P-DEMO-B002', null, 'Withdrawn')], { total: 101, page: Number(u.searchParams.get('page') ?? 1) }) }
     else if (p === `projects/${pid}/submissions`) { registerQueries.push({ list: 'submissions', params: Object.fromEntries(u.searchParams) }); data = submissionPage([submissionListRow({ id: id(100), key: 'P-DEMO-SUB0001', title: 'Synthetic permit', coordinatorId: consumer, targetDate: '2026-10-05', status: 'Checking', blockerCount: 2 })], { total: 101, page: Number(u.searchParams.get('page') ?? 1) }) }
     else if (p === `projects/${pid}/allocations`) { registerQueries.push({ list: 'allocations', params: Object.fromEntries(u.searchParams) }); data = { items: [{ id: id(110), personName: 'Alex Consumer', purpose: 'Production', fromDate: '2026-10-01', throughDate: '2026-10-05', plannedHours: 8, status: 'Proposed' }], pageSize: 50, totalCount: 101 } }
     else if (p === `projects/${pid}/open-roles`) data = [];
@@ -139,7 +139,7 @@ let server, browser;
   await page.getByRole('dialog', { name: 'Filters' }).getByLabel('Affected task or deliverable', { exact: true }).selectOption({ label: 'P-DEMO-T0001 · Watermain layout' });
   await page.waitForFunction(() => location.search.includes('affectedWorkId='));
   await page.waitForTimeout(200);
-  assert.ok(lists.some(q => new URLSearchParams(q).get('affectedWorkId') === task), `list queries: ${lists.join(' ')}`);
+  assert.ok(lists.some(q => new URLSearchParams(q).get('AffectedWorkId') === task), `list queries: ${lists.join(' ')}`);
   await page.goto(`${base}/projects/P-DEMO/design-basis`); await page.getByRole('heading', { name: 'Design basis and assumptions' }).waitFor();
 
   // D3: Escape returns focus to the control that opened the dialog.

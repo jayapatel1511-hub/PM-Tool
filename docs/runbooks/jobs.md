@@ -9,7 +9,7 @@ not hold up email, digests or the watchdog. Admins see the same information unde
 | Job | Schedule | What it does | If it stops |
 |---|---|---|---|
 | Evaluation worker (hosted service) | continuously, a moment after each save | Re-evaluates changed projects from the outbox (`hub.outbox_event`): task, deliverable, milestone and decision states, health, attention | Indicators go stale; `EvaluationDelayed` alert after 10 minutes; `/health` reports Degraded |
-| `evaluation-retry` | every 15 minutes | Retries failed outbox events; evaluates Active projects that have no state yet | Failures stay unretried |
+| `evaluation-retry` | every 15 minutes | Retries failed outbox events below 10 attempts; evaluates Active projects that have no state yet | Failures stay unretried |
 | `nightly-evaluation` | daily after 00:15 organisation time | Date rollover (overdue, due soon), health snapshots with the day's counts, override and snooze expiry; prunes job records older than 90 days | Overdue flags lag a day; `NightlyMissed` alert after 26 hours |
 | `directory-sync` | daily after 01:00 | Leavers become Inactive; job title, office and manager follow Entra ID (when `Graph:DirectorySync` is on) | Leavers keep access until the next run |
 | `daily-digest` | every 5 minutes | Builds each person's digest once their digest time has passed (default 07:00) | `DigestLate` alert after 08:00 |
@@ -27,7 +27,8 @@ group.
 
 | Alert | Signal | First response |
 |---|---|---|
-| Hub operations alert — `EvaluationDelayed` | oldest unprocessed outbox event older than 10 minutes | Check the app is running (`/health`); look for repeated evaluation errors in the logs (`traces` where message contains "Evaluation"); restart the app if the worker is stuck. Events are kept, so nothing is lost; evaluation catches up after the restart |
+| Hub operations alert — `EvaluationDelayed` | oldest unprocessed outbox event older than 10 minutes (dead-lettered events excluded) | Check the app is running (`/health`); look for repeated evaluation errors in the logs (`traces` where message contains "Evaluation"); restart the app if the worker is stuck. Waiting events are kept and evaluation catches up after the restart, but an event that has already failed 10 times is dead-lettered and needs the retry below |
+| Hub operations alert — `OutboxDeadLettered` | at least one unprocessed outbox event failed evaluation 10 times and was set aside (`dead_lettered_at`) | Its project's indicators stay stale and it no longer counts towards `/health` lag or `EvaluationDelayed`; nothing retries it automatically. Admin → Operations lists each failed change with its project, attempts and last error. Fix the cause from the logs ("Evaluation failed for project"), then choose **Retry** on one change or **Retry all**: the attempt count resets and the worker runs at once. The upgrade that adds migration `20261018214033_OutboxDeadLetter` dead-letters events already stuck at 10 attempts, so this alert can fire as soon as that upgrade lands |
 | `NightlyMissed` | no successful `nightly-evaluation` for 26 hours | Admin → Operations shows the last run; check the job's error in the logs. After fixing, the run starts on its own within a minute (it is due while no success exists for today) |
 | `JobFailed` | any job run recorded as Failed since the last check | Read the exception in the logs (`exceptions` table, "Job {Job} failed"). Transient database or mail errors recover on the next run; repeated failures need a fix |
 | `DigestLate` | after 08:00 on a digest day, digests due by 08:00 not built, or built but not sent | Check `email-send` failures and the mail route (Graph or SMTP relay credentials in Key Vault). Unsent mail retries on its own once the route works |

@@ -21,6 +21,14 @@ Homedev hosts review, company pilot and production under Jay's 2026-10-01 clarif
 
 Steps 3–5 are scripted: from `releases/<full-sha>` on homedev run `bash scripts/activate-homedev-review.sh <full-sha> [--install-timer]` in your own terminal (sudo prompts there). It builds the image, dumps the database, starts the API on the existing volume, prints migration/error log lines without secrets, runs `scripts/verify-homedev-review.py` (health, anonymous/Host/Origin denial, wrong-password denial, individual sign-in, `/me`, sign-out) and only then moves `current`. `--install-timer` also installs the daily dump timer, runs it once and restores that dump in an isolated drill database. `python3 scripts/verify-homedev-review.py https://pm.engcalchub.com` repeats the probes through the tunnel; the user unit is `hosting/pm-tool-tunnel.service`. Sign-in throttling behind the tunnel is keyed on Cloudflare's client address only when the request comes from the trusted bridge gateway.
 
+Before activating, count evaluation events already stuck at the worker's 10-attempt limit:
+
+```bash
+sudo docker exec pm-tool-review-db-1 psql -U hub_review -d hub_review -Atc "SELECT count(*) FROM hub.outbox_event WHERE processed_at IS NULL AND attempts >= 10;" </dev/null
+```
+
+The first release with migration `20261018214033_OutboxDeadLetter` dead-letters those events while it starts, so a nonzero count means the `OutboxDeadLettered` problem appears on Admin → Operations as soon as the upgrade lands. That is expected, not a failed release: follow the `OutboxDeadLettered` row in `docs/runbooks/jobs.md` and retry after reading the errors. Record the count with the release.
+
 ### Tuesday hosted review fixture activation
 
 Local-password sessions live in `hub.local_auth_session` on the existing review database. Tickets are protected with
@@ -71,6 +79,26 @@ systemctl list-timers pm-tool-review-backup.timer --all
 Check that the new archive is nonempty, owner-only, and listed by `pg_restore`; then restore **that archive** into an isolated temporary review database with the drill script. Confirm the timer's next run and inspect the first automatic run. Keep manual pre-release dumps regardless of the timer. The existing Mac restic job is currently failing, so fix and recheck that job and retrieve a newly scheduled dump from the encrypted repository before counting off-host backup as operational. Preserve archives until a retention policy and recovery point target are approved; do not copy them into production.
 
 At the first private activation, revision `1c59e334b42822510dd0181f83e5dadc7bbe8282` started the API on loopback port 3080 and a healthy dedicated PostgreSQL container. The named Cloudflare tunnel configuration was validated, but the tunnel was not started and DNS was not routed. Three synthetic verifier mappings and a temporary private handoff file were prepared afterward; the API still needs a restart to load them. Recheck this state before using the runbook.
+
+## Verifiable activity log (packet 048)
+
+`flag.verifiable_log` stays **off** on the review stack. Turning it on is Jay's decision and is one-way: once a chain exists the Admin setting refuses to turn it off. The Admin setting also refuses to turn it on while older activity-log rows are unsealed, so the switch-on is the one-off migration-only run in `specs/048-verifiable-records/audit-initialization.md`. The compose file has no service for it; run it from the release that is currently active (`current`), with the same `RELEASE_SHA`, in Jay's own terminal. With social sign-in active, add `-f hosting/social-auth.override.yml` to `compose` and `--social` to the probe.
+
+```bash
+revision=$(basename "$PWD")
+compose=(sudo env RELEASE_SHA="$revision" docker compose --env-file .runtime/review.env -f hosting/homedev.compose.yml)
+sudo systemctl stop pm-tool-review-deploy.timer   # only if the CI-image timer is installed
+bash scripts/backup-homedev-review.sh             # verify the dump is nonempty
+"${compose[@]}" stop api </dev/null
+"${compose[@]}" run --rm -e Db__MigrateOnly=true -e Db__InitializeAuditChains=true api </dev/null
+"${compose[@]}" up -d --no-build --no-deps api </dev/null
+python3 scripts/verify-homedev-review.py http://127.0.0.1:3080 --expect-build "$revision"
+sudo systemctl start pm-tool-review-deploy.timer  # only if it was stopped above
+```
+
+The run migrates and seeds as a normal start would, then turns the setting on and seals existing rows in one transaction and exits without serving requests; a failed seal rolls back and leaves the flag off. Afterwards Admin → Operations must show no `AuditChainBroken` problem.
+
+Limitation: the review stack has one database role, `hub_review`, which owns the tables and is used by migrations, the API and backups alike. The separation the procedure assumes (a migration identity that may UPDATE `hub.activity_log`, and a runtime role limited to SELECT and INSERT) does not exist here, so the review API itself could alter or delete sealed rows. Treat a review-stack chain as a rehearsal of the procedure, not as tamper evidence. The pilot stack's separate runtime role (`hosting/pilot-runtime-role.sql`) is where that boundary holds.
 
 ## Rollback and recovery
 
@@ -129,10 +157,14 @@ five-minute timer. The review user list and key ring are linked to the release's
 copied, so a reviewer added later reaches the next timer deployment, which recreates the API container. This needs
 Jay's sudo and is a deployment action, outside local source verification.
 The ordinary activation path and existing `--install-timer` daily backup option keep their previous meaning.
+The installer refuses to continue until the daily backup helper is installed (`--install-timer`, in the same or an
+earlier run), because the timer uses it for every pre-deployment dump.
 
 The timer verifies CI provenance for the exact digest, installed compose/probe hashes and any newest contract
-migration before pulling. It preserves the running immutable image under a separate rollback tag, takes a
-verified dump, starts only review API without building, then runs the installed private probe. A failed
+migration before pulling. It takes a verified dump, preserves the running immutable image under a separate
+rollback tag, pulls, starts only review API without building, then runs the installed private probe. After a
+successful deployment it deletes older `pm-tool-review` images beyond the newest three (the running image, its
+rollback image and one more); images with any other tag are kept. A failed
 candidate is recorded and never retried; a different digest can deploy after rollback. Root-owned state at
 `/var/lib/pm-tool-review-deploy/state.json` is readable by Jay and records SHA, digest and UTC time. `current`
 continues to mean the last manual activation. No database volume or down migration is used by rollback.

@@ -10575,69 +10575,6 @@
     "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndGuidAndGuidAndGuidAndbooleanAnddecimalAndbooleanAndDateTimeOffsetAndintAndIEnumerableOfAnonymousTypeOfstringAndstring.type": [
       "string"
     ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndint": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndint.properties": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndint.properties.displayName": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndint.properties.displayName.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndint.properties.displayName.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndint.properties.hrPersonKey": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndint.properties.hrPersonKey.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndint.properties.hrPersonKey.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndint.properties.hrSourceSystem": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndint.properties.hrSourceSystem.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndint.properties.hrSourceSystem.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndint.properties.id": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndint.properties.id.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndint.properties.id.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndint.properties.rowVersion": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndint.properties.rowVersion.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndint.properties.rowVersion.pattern": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndint.properties.rowVersion.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndint.required": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndint.required[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndint.type": [
-      "string"
-    ],
     "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring": [
       "object"
     ],
@@ -11949,6 +11886,249 @@
     "$.components.schemas.AvailabilityBody.type": [
       "string"
     ],
+    "$.components.schemas.AvailabilityConcern": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityConcern.properties": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityConcern.properties.concern": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityConcern.properties.concern.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityConcern.properties.dueDate": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityConcern.properties.dueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityConcern.properties.dueDate.type": [
+      "array"
+    ],
+    "$.components.schemas.AvailabilityConcern.properties.dueDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityConcern.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityConcern.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityConcern.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityConcern.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityConcern.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityConcern.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityConcern.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityConcern.properties.personId": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityConcern.properties.personId.format": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityConcern.properties.personId.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityConcern.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityConcern.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityConcern.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityConcern.properties.role": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityConcern.properties.role.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityConcern.properties.type": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityConcern.properties.type.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityConcern.required": [
+      "array"
+    ],
+    "$.components.schemas.AvailabilityConcern.required[]": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityConcern.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityDay": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityDay.properties": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityDay.properties.available": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityDay.properties.available.format": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityDay.properties.available.pattern": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityDay.properties.available.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityDay.properties.date": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityDay.properties.date.format": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityDay.properties.date.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityDay.properties.holiday": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityDay.properties.holiday.format": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityDay.properties.holiday.pattern": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityDay.properties.holiday.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityDay.properties.leave": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityDay.properties.leave.format": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityDay.properties.leave.pattern": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityDay.properties.leave.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityDay.properties.normal": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityDay.properties.normal.format": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityDay.properties.normal.pattern": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityDay.properties.normal.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityDay.properties.provisional": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityDay.properties.provisional.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityDay.required": [
+      "array"
+    ],
+    "$.components.schemas.AvailabilityDay.required[]": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityDay.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityHoliday": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityHoliday.properties": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityHoliday.properties.date": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityHoliday.properties.date.format": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityHoliday.properties.date.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityHoliday.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityHoliday.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityHoliday.properties.officeId": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityHoliday.properties.officeId.format": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityHoliday.properties.officeId.type": [
+      "array"
+    ],
+    "$.components.schemas.AvailabilityHoliday.properties.officeId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityHoliday.required": [
+      "array"
+    ],
+    "$.components.schemas.AvailabilityHoliday.required[]": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityHoliday.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityImport": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityImport.properties": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityImport.properties.importedAt": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityImport.properties.importedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityImport.properties.importedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityImport.properties.sourceSystem": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityImport.properties.sourceSystem.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityImport.properties.sourceUpdatedAt": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityImport.properties.sourceUpdatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityImport.properties.sourceUpdatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityImport.required": [
+      "array"
+    ],
+    "$.components.schemas.AvailabilityImport.required[]": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityImport.type": [
+      "string"
+    ],
     "$.components.schemas.AvailabilityImportRow": [
       "object"
     ],
@@ -12061,6 +12241,369 @@
       "string"
     ],
     "$.components.schemas.AvailabilityImportRow.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityLeave": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.canEdit": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.canEdit.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.externalId": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.externalId.type": [
+      "array"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.externalId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.fromDate": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.fromDate.format": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.fromDate.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.hoursPerDay": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.hoursPerDay.format": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.hoursPerDay.pattern": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.hoursPerDay.type": [
+      "array"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.hoursPerDay.type[]": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.importedAt": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.importedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.importedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.sourceKind": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.sourceKind.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.sourceSystem": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.sourceSystem.type": [
+      "array"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.sourceSystem.type[]": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.sourceUpdatedAt": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.sourceUpdatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.sourceUpdatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.throughDate": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.throughDate.format": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityLeave.properties.throughDate.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityLeave.required": [
+      "array"
+    ],
+    "$.components.schemas.AvailabilityLeave.required[]": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityLeave.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityPerson": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityPerson.properties": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityPerson.properties.canManage": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityPerson.properties.canManage.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityPerson.properties.days": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityPerson.properties.days.items": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityPerson.properties.days.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityPerson.properties.days.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityPerson.properties.displayName": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityPerson.properties.displayName.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityPerson.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityPerson.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityPerson.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityPerson.properties.leave": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityPerson.properties.leave.items": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityPerson.properties.leave.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityPerson.properties.leave.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityPerson.properties.schedules": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityPerson.properties.schedules.items": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityPerson.properties.schedules.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityPerson.properties.schedules.type": [
+      "array"
+    ],
+    "$.components.schemas.AvailabilityPerson.properties.schedules.type[]": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityPerson.properties.unverified": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityPerson.properties.unverified.items": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityPerson.properties.unverified.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityPerson.properties.unverified.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityPerson.properties.weeklyHours": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityPerson.properties.weeklyHours.format": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityPerson.properties.weeklyHours.pattern": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityPerson.properties.weeklyHours.type": [
+      "array"
+    ],
+    "$.components.schemas.AvailabilityPerson.properties.weeklyHours.type[]": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityPerson.required": [
+      "array"
+    ],
+    "$.components.schemas.AvailabilityPerson.required[]": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityPerson.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityRead": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityRead.properties": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityRead.properties.canImport": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityRead.properties.canImport.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityRead.properties.coverage": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityRead.properties.coverage.items": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityRead.properties.coverage.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityRead.properties.coverage.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityRead.properties.from": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityRead.properties.from.format": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityRead.properties.from.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityRead.properties.holidays": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityRead.properties.holidays.items": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityRead.properties.holidays.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityRead.properties.holidays.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityRead.properties.imports": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityRead.properties.imports.items": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityRead.properties.imports.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityRead.properties.imports.type": [
+      "array"
+    ],
+    "$.components.schemas.AvailabilityRead.properties.imports.type[]": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityRead.properties.people": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityRead.properties.people.items": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityRead.properties.people.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityRead.properties.people.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityRead.properties.through": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityRead.properties.through.format": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityRead.properties.through.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityRead.required": [
+      "array"
+    ],
+    "$.components.schemas.AvailabilityRead.required[]": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityRead.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityUnverified": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityUnverified.properties": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityUnverified.properties.availableHours": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityUnverified.properties.availableHours.format": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityUnverified.properties.availableHours.pattern": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityUnverified.properties.availableHours.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityUnverified.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityUnverified.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityUnverified.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityUnverified.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityUnverified.properties.workDate": [
+      "object"
+    ],
+    "$.components.schemas.AvailabilityUnverified.properties.workDate.format": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityUnverified.properties.workDate.type": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityUnverified.required": [
+      "array"
+    ],
+    "$.components.schemas.AvailabilityUnverified.required[]": [
+      "string"
+    ],
+    "$.components.schemas.AvailabilityUnverified.type": [
       "string"
     ],
     "$.components.schemas.AwaitingRow": [
@@ -27654,6 +28197,93 @@
     "$.components.schemas.HolidayBody.type": [
       "string"
     ],
+    "$.components.schemas.HrIdentity": [
+      "object"
+    ],
+    "$.components.schemas.HrIdentity.properties": [
+      "object"
+    ],
+    "$.components.schemas.HrIdentity.properties.displayName": [
+      "object"
+    ],
+    "$.components.schemas.HrIdentity.properties.displayName.type": [
+      "string"
+    ],
+    "$.components.schemas.HrIdentity.properties.hrPersonKey": [
+      "object"
+    ],
+    "$.components.schemas.HrIdentity.properties.hrPersonKey.type": [
+      "array"
+    ],
+    "$.components.schemas.HrIdentity.properties.hrPersonKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.HrIdentity.properties.hrSourceSystem": [
+      "object"
+    ],
+    "$.components.schemas.HrIdentity.properties.hrSourceSystem.type": [
+      "array"
+    ],
+    "$.components.schemas.HrIdentity.properties.hrSourceSystem.type[]": [
+      "string"
+    ],
+    "$.components.schemas.HrIdentity.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.HrIdentity.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.HrIdentity.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.HrIdentity.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.HrIdentity.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.HrIdentity.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.HrIdentity.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.HrIdentity.required": [
+      "array"
+    ],
+    "$.components.schemas.HrIdentity.required[]": [
+      "string"
+    ],
+    "$.components.schemas.HrIdentity.type": [
+      "string"
+    ],
+    "$.components.schemas.HrIdentitySaved": [
+      "object"
+    ],
+    "$.components.schemas.HrIdentitySaved.properties": [
+      "object"
+    ],
+    "$.components.schemas.HrIdentitySaved.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.HrIdentitySaved.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.HrIdentitySaved.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.HrIdentitySaved.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.HrIdentitySaved.required": [
+      "array"
+    ],
+    "$.components.schemas.HrIdentitySaved.required[]": [
+      "string"
+    ],
+    "$.components.schemas.HrIdentitySaved.type": [
+      "string"
+    ],
     "$.components.schemas.IdentityBody": [
       "object"
     ],
@@ -29281,6 +29911,321 @@
       "string"
     ],
     "$.components.schemas.LeadUnitResponse.type": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportApplied": [
+      "object"
+    ],
+    "$.components.schemas.LeaveImportApplied.properties": [
+      "object"
+    ],
+    "$.components.schemas.LeaveImportApplied.properties.applied": [
+      "object"
+    ],
+    "$.components.schemas.LeaveImportApplied.properties.applied.format": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportApplied.properties.applied.pattern": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportApplied.properties.applied.type": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportApplied.properties.importedAt": [
+      "object"
+    ],
+    "$.components.schemas.LeaveImportApplied.properties.importedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportApplied.properties.importedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportApplied.properties.unchanged": [
+      "object"
+    ],
+    "$.components.schemas.LeaveImportApplied.properties.unchanged.format": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportApplied.properties.unchanged.pattern": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportApplied.properties.unchanged.type": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportApplied.required": [
+      "array"
+    ],
+    "$.components.schemas.LeaveImportApplied.required[]": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportApplied.type": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportError": [
+      "object"
+    ],
+    "$.components.schemas.LeaveImportError.properties": [
+      "object"
+    ],
+    "$.components.schemas.LeaveImportError.properties.error": [
+      "object"
+    ],
+    "$.components.schemas.LeaveImportError.properties.error.type": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportError.properties.row": [
+      "object"
+    ],
+    "$.components.schemas.LeaveImportError.properties.row.format": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportError.properties.row.pattern": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportError.properties.row.type": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportError.required": [
+      "array"
+    ],
+    "$.components.schemas.LeaveImportError.required[]": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportError.type": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead": [
+      "object"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties": [
+      "object"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.affectedWeeks": [
+      "object"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.affectedWeeks.items": [
+      "object"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.affectedWeeks.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.affectedWeeks.type": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.canApply": [
+      "object"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.canApply.type": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.cancellations": [
+      "object"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.cancellations.format": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.cancellations.pattern": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.cancellations.type": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.creates": [
+      "object"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.creates.format": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.creates.pattern": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.creates.type": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.errors": [
+      "object"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.errors.items": [
+      "object"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.errors.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.errors.type": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.manualMatches": [
+      "object"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.manualMatches.format": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.manualMatches.pattern": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.manualMatches.type": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.previewId": [
+      "object"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.previewId.format": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.previewId.type": [
+      "array"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.previewId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.rows": [
+      "object"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.rows.items": [
+      "object"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.rows.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.rows.type": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.unchanged": [
+      "object"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.unchanged.format": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.unchanged.pattern": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.unchanged.type": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.updates": [
+      "object"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.updates.format": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.updates.pattern": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.properties.updates.type": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.required": [
+      "array"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.required[]": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportPreviewRead.type": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportWeek": [
+      "object"
+    ],
+    "$.components.schemas.LeaveImportWeek.properties": [
+      "object"
+    ],
+    "$.components.schemas.LeaveImportWeek.properties.fromWeek": [
+      "object"
+    ],
+    "$.components.schemas.LeaveImportWeek.properties.fromWeek.format": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportWeek.properties.fromWeek.type": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportWeek.properties.personId": [
+      "object"
+    ],
+    "$.components.schemas.LeaveImportWeek.properties.personId.format": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportWeek.properties.personId.type": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportWeek.properties.throughWeek": [
+      "object"
+    ],
+    "$.components.schemas.LeaveImportWeek.properties.throughWeek.format": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportWeek.properties.throughWeek.type": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportWeek.required": [
+      "array"
+    ],
+    "$.components.schemas.LeaveImportWeek.required[]": [
+      "string"
+    ],
+    "$.components.schemas.LeaveImportWeek.type": [
+      "string"
+    ],
+    "$.components.schemas.LeaveReconciled": [
+      "object"
+    ],
+    "$.components.schemas.LeaveReconciled.properties": [
+      "object"
+    ],
+    "$.components.schemas.LeaveReconciled.properties.count": [
+      "object"
+    ],
+    "$.components.schemas.LeaveReconciled.properties.count.format": [
+      "string"
+    ],
+    "$.components.schemas.LeaveReconciled.properties.count.pattern": [
+      "string"
+    ],
+    "$.components.schemas.LeaveReconciled.properties.count.type": [
+      "string"
+    ],
+    "$.components.schemas.LeaveReconciled.required": [
+      "array"
+    ],
+    "$.components.schemas.LeaveReconciled.required[]": [
+      "string"
+    ],
+    "$.components.schemas.LeaveReconciled.type": [
+      "string"
+    ],
+    "$.components.schemas.LeaveSaved": [
+      "object"
+    ],
+    "$.components.schemas.LeaveSaved.properties": [
+      "object"
+    ],
+    "$.components.schemas.LeaveSaved.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.LeaveSaved.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.LeaveSaved.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.LeaveSaved.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.LeaveSaved.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.LeaveSaved.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.LeaveSaved.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.LeaveSaved.required": [
+      "array"
+    ],
+    "$.components.schemas.LeaveSaved.required[]": [
+      "string"
+    ],
+    "$.components.schemas.LeaveSaved.type": [
       "string"
     ],
     "$.components.schemas.LevelBody": [
@@ -42793,6 +43738,204 @@
       "string"
     ],
     "$.components.schemas.ScheduleBody.type": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleRow": [
+      "object"
+    ],
+    "$.components.schemas.ScheduleRow.anyOf": [
+      "array"
+    ],
+    "$.components.schemas.ScheduleRow.anyOf[]": [
+      "object"
+    ],
+    "$.components.schemas.ScheduleRow.anyOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleRow.type": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleRowWeekdaySchedule": [
+      "object"
+    ],
+    "$.components.schemas.ScheduleRowWeekdaySchedule.properties": [
+      "object"
+    ],
+    "$.components.schemas.ScheduleRowWeekdaySchedule.properties.fromDate": [
+      "object"
+    ],
+    "$.components.schemas.ScheduleRowWeekdaySchedule.properties.fromDate.format": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleRowWeekdaySchedule.properties.fromDate.type": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleRowWeekdaySchedule.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.ScheduleRowWeekdaySchedule.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleRowWeekdaySchedule.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleRowWeekdaySchedule.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleRowWeekdaySchedule.properties.weekdayHours": [
+      "object"
+    ],
+    "$.components.schemas.ScheduleRowWeekdaySchedule.properties.weekdayHours.items": [
+      "object"
+    ],
+    "$.components.schemas.ScheduleRowWeekdaySchedule.properties.weekdayHours.items.format": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleRowWeekdaySchedule.properties.weekdayHours.items.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleRowWeekdaySchedule.properties.weekdayHours.items.type": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleRowWeekdaySchedule.properties.weekdayHours.type": [
+      "array"
+    ],
+    "$.components.schemas.ScheduleRowWeekdaySchedule.properties.weekdayHours.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleRowWeekdaySchedule.properties.weeklyHours": [
+      "object"
+    ],
+    "$.components.schemas.ScheduleRowWeekdaySchedule.properties.weeklyHours.format": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleRowWeekdaySchedule.properties.weeklyHours.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleRowWeekdaySchedule.properties.weeklyHours.type": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleRowWeekdaySchedule.properties.workingDays": [
+      "object"
+    ],
+    "$.components.schemas.ScheduleRowWeekdaySchedule.properties.workingDays.items": [
+      "object"
+    ],
+    "$.components.schemas.ScheduleRowWeekdaySchedule.properties.workingDays.items.format": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleRowWeekdaySchedule.properties.workingDays.items.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleRowWeekdaySchedule.properties.workingDays.items.type": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleRowWeekdaySchedule.properties.workingDays.type": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleRowWeekdaySchedule.required": [
+      "array"
+    ],
+    "$.components.schemas.ScheduleRowWeekdaySchedule.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleRowWeeklySchedule": [
+      "object"
+    ],
+    "$.components.schemas.ScheduleRowWeeklySchedule.properties": [
+      "object"
+    ],
+    "$.components.schemas.ScheduleRowWeeklySchedule.properties.fromDate": [
+      "object"
+    ],
+    "$.components.schemas.ScheduleRowWeeklySchedule.properties.fromDate.format": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleRowWeeklySchedule.properties.fromDate.type": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleRowWeeklySchedule.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.ScheduleRowWeeklySchedule.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleRowWeeklySchedule.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleRowWeeklySchedule.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleRowWeeklySchedule.properties.weeklyHours": [
+      "object"
+    ],
+    "$.components.schemas.ScheduleRowWeeklySchedule.properties.weeklyHours.format": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleRowWeeklySchedule.properties.weeklyHours.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleRowWeeklySchedule.properties.weeklyHours.type": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleRowWeeklySchedule.properties.workingDays": [
+      "object"
+    ],
+    "$.components.schemas.ScheduleRowWeeklySchedule.properties.workingDays.items": [
+      "object"
+    ],
+    "$.components.schemas.ScheduleRowWeeklySchedule.properties.workingDays.items.format": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleRowWeeklySchedule.properties.workingDays.items.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleRowWeeklySchedule.properties.workingDays.items.type": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleRowWeeklySchedule.properties.workingDays.type": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleRowWeeklySchedule.required": [
+      "array"
+    ],
+    "$.components.schemas.ScheduleRowWeeklySchedule.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleSaved": [
+      "object"
+    ],
+    "$.components.schemas.ScheduleSaved.properties": [
+      "object"
+    ],
+    "$.components.schemas.ScheduleSaved.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.ScheduleSaved.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleSaved.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleSaved.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.ScheduleSaved.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleSaved.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleSaved.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleSaved.required": [
+      "array"
+    ],
+    "$.components.schemas.ScheduleSaved.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ScheduleSaved.type": [
       "string"
     ],
     "$.components.schemas.SearchAllocationHit": [
@@ -62811,6 +63954,9 @@
     "$.paths./api/v1/planning/availability.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/planning/availability.get.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/planning/availability.get.responses.200.description": [
       "string"
     ],
@@ -63594,6 +64740,18 @@
     "$.paths./api/v1/planning/hr-identities/{id}.put.responses.200": [
       "object"
     ],
+    "$.paths./api/v1/planning/hr-identities/{id}.put.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/hr-identities/{id}.put.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/hr-identities/{id}.put.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/hr-identities/{id}.put.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/planning/hr-identities/{id}.put.responses.200.description": [
       "string"
     ],
@@ -63645,6 +64803,9 @@
     "$.paths./api/v1/planning/leave/import-preview.post.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/planning/leave/import-preview.post.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/planning/leave/import-preview.post.responses.200.description": [
       "string"
     ],
@@ -63680,6 +64841,18 @@
     ],
     "$.paths./api/v1/planning/leave/import.post.responses.200": [
       "object"
+    ],
+    "$.paths./api/v1/planning/leave/import.post.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/leave/import.post.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/leave/import.post.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/leave/import.post.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/planning/leave/import.post.responses.200.description": [
       "string"
@@ -63720,6 +64893,18 @@
     "$.paths./api/v1/planning/leave/manual.post.responses.200": [
       "object"
     ],
+    "$.paths./api/v1/planning/leave/manual.post.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/leave/manual.post.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/leave/manual.post.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/leave/manual.post.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/planning/leave/manual.post.responses.200.description": [
       "string"
     ],
@@ -63758,6 +64943,18 @@
     ],
     "$.paths./api/v1/planning/leave/reconcile.post.responses.200": [
       "object"
+    ],
+    "$.paths./api/v1/planning/leave/reconcile.post.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/leave/reconcile.post.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/leave/reconcile.post.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/leave/reconcile.post.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/planning/leave/reconcile.post.responses.200.description": [
       "string"
@@ -63821,6 +65018,18 @@
     ],
     "$.paths./api/v1/planning/schedules/{personId}.put.responses.200": [
       "object"
+    ],
+    "$.paths./api/v1/planning/schedules/{personId}.put.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/schedules/{personId}.put.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/schedules/{personId}.put.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/schedules/{personId}.put.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/planning/schedules/{personId}.put.responses.200.description": [
       "string"
@@ -79309,6 +80518,7 @@
       "string"
     ],
     "$.coverage[].dueDate": [
+      "null",
       "string"
     ],
     "$.coverage[].id": [
@@ -79354,6 +80564,18 @@
     "$.imports": [
       "array",
       "null"
+    ],
+    "$.imports[]": [
+      "object"
+    ],
+    "$.imports[].importedAt": [
+      "string"
+    ],
+    "$.imports[].sourceSystem": [
+      "string"
+    ],
+    "$.imports[].sourceUpdatedAt": [
+      "string"
     ],
     "$.people": [
       "array"
@@ -79453,7 +80675,8 @@
       "number"
     ],
     "$.people[].schedules[].weekdayHours": [
-      "array"
+      "array",
+      "null"
     ],
     "$.people[].schedules[].weekdayHours[]": [
       "number"
@@ -79470,11 +80693,55 @@
     "$.people[].unverified": [
       "array"
     ],
+    "$.people[].unverified[]": [
+      "object"
+    ],
+    "$.people[].unverified[].availableHours": [
+      "number"
+    ],
+    "$.people[].unverified[].rowVersion": [
+      "number"
+    ],
+    "$.people[].unverified[].workDate": [
+      "string"
+    ],
     "$.people[].weeklyHours": [
       "null",
       "number"
     ],
     "$.through": [
+      "string"
+    ]
+  },
+  "GET /api/v1/planning/availability/export 400": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.errors": [
+      "object"
+    ],
+    "$.errors.throughDate": [
+      "array"
+    ],
+    "$.errors.throughDate[]": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
       "string"
     ]
   },
@@ -80709,16 +81976,41 @@
       "string"
     ],
     "$[].hrPersonKey": [
-      "null"
+      "null",
+      "string"
     ],
     "$[].hrSourceSystem": [
-      "null"
+      "null",
+      "string"
     ],
     "$[].id": [
       "string"
     ],
     "$[].rowVersion": [
       "number"
+    ]
+  },
+  "GET /api/v1/planning/hr-identities 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
     ]
   },
   "GET /api/v1/planning/week-preview 200": {
@@ -115196,6 +116488,29 @@
       "number"
     ]
   },
+  "PUT /api/v1/planning/hr-identities/{id} 409": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "PUT /api/v1/planning/schedules/{personId} 200": {
     "$": [
       "object"
@@ -115205,6 +116520,52 @@
     ],
     "$.rowVersion": [
       "number"
+    ]
+  },
+  "PUT /api/v1/planning/schedules/{personId} 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "PUT /api/v1/planning/schedules/{personId} 409": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
     ]
   },
   "PUT /api/v1/projects/{id}/board-order 400": {

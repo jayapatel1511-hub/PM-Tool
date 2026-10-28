@@ -2,9 +2,11 @@ using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic.FileIO;
 
@@ -21,18 +23,47 @@ public static class AvailabilityEndpoints
     public sealed record ManualBody(Guid PersonId, string SourceSystem, string ExternalId, DateOnly FromDate, DateOnly ThroughDate, decimal? HoursPerDay, string Status, int RowVersion);
     public sealed record IdentityBody(string? SourceSystem, string? PersonKey, int RowVersion);
     public sealed record ScheduleBody(DateOnly FromDate, decimal WeeklyHours, int[] WorkingDays, int RowVersion, decimal[]? WeekdayHours = null);
+    public sealed record HrIdentity(Guid Id, string DisplayName, string? HrSourceSystem, string? HrPersonKey, int RowVersion);
+    public sealed record HrIdentitySaved(int RowVersion);
+    public sealed record AvailabilityRead(DateOnly From, DateOnly Through, bool CanImport, List<AvailabilityPerson> People, List<AvailabilityHoliday> Holidays, List<AvailabilityConcern> Coverage, List<AvailabilityImport>? Imports);
+    /// Schedules are null for a caller who does not manage the person; the source system and reference are null for the same caller.
+    public sealed record AvailabilityPerson(Guid Id, string DisplayName, bool CanManage, decimal? WeeklyHours, List<AvailabilityDay> Days, List<ScheduleRow>? Schedules, List<AvailabilityLeave> Leave, List<AvailabilityUnverified> Unverified);
+    public sealed record AvailabilityDay(DateOnly Date, decimal Normal, decimal Available, decimal Leave, decimal Holiday, bool Provisional);
+    public sealed record AvailabilityLeave(Guid Id, DateOnly FromDate, DateOnly ThroughDate, decimal? HoursPerDay, string Status, string SourceKind, DateTimeOffset SourceUpdatedAt, DateTimeOffset ImportedAt, int RowVersion,
+        string? SourceSystem, string? ExternalId, bool CanEdit);
+    public sealed record AvailabilityUnverified(DateOnly WorkDate, decimal AvailableHours, int RowVersion);
+    /// A schedule: the weekly hours and working days, and with the capacity polish flag on also its per-weekday hours (null when it has none).
+    [JsonDerivedType(typeof(WeeklySchedule))]
+    [JsonDerivedType(typeof(WeekdaySchedule))]
+    public abstract record ScheduleRow;
+    public sealed record WeeklySchedule(DateOnly FromDate, decimal WeeklyHours, int[] WorkingDays, int RowVersion) : ScheduleRow;
+    public sealed record WeekdaySchedule(DateOnly FromDate, decimal WeeklyHours, int[] WorkingDays, int RowVersion, decimal[]? WeekdayHours) : ScheduleRow;
+    public sealed record AvailabilityHoliday(DateOnly Date, string Name, Guid? OfficeId);
+    /// Planned work that falls on a day the person is away; Concern is Unknown for undated work, Unavailable or PartialAbsence.
+    public sealed record AvailabilityConcern(Guid PersonId, Guid Id, string Key, string Name, string Type, Guid ProjectId, DateOnly? DueDate, string Role, string Concern);
+    public sealed record AvailabilityImport(string SourceSystem, DateTimeOffset ImportedAt, DateTimeOffset SourceUpdatedAt);
+    public sealed record LeaveImportPreviewRead(Guid? PreviewId, List<ImportRow> Rows, List<LeaveImportError> Errors, bool CanApply, int Creates, int Updates, int Cancellations, int Unchanged, int ManualMatches, List<LeaveImportWeek> AffectedWeeks);
+    public sealed record LeaveImportError(int Row, string Error);
+    public sealed record LeaveImportWeek(Guid PersonId, DateOnly FromWeek, DateOnly ThroughWeek);
+    public sealed record LeaveImportApplied(int Applied, int Unchanged, DateTimeOffset ImportedAt);
+    public sealed record LeaveSaved(Guid Id, int RowVersion);
+    public sealed record LeaveReconciled(int Count);
+    public sealed record ScheduleSaved(Guid Id, int RowVersion);
+    sealed record TaskLoad(Guid Id, string Key, string Name, Guid ProjectId, Guid? AssigneeId, Guid? ReviewerId, DateOnly? DueDate);
+    sealed record DeliverableLoad(Guid Id, string Key, string Name, Guid ProjectId, Guid? OwnerId, Guid? ReviewerId, DateOnly? DueDate);
+    sealed record ReviewLoad(Guid ReviewerId, Guid ProjectId, DateOnly DueDate, Guid PackageId, string Package);
     public static readonly string[] Headers = ["source_system", "external_id", "person_key", "status", "start_date", "end_date", "hours_per_day", "source_updated_at"];
 
     public static void Map(RouteGroupBuilder api)
     {
         api.MapGet("/planning/availability", View);
         api.MapGet("/planning/availability/export", Export);
-        api.MapGet("/planning/hr-identities", async (Access access, HubDb db) => {
+        api.MapGet("/planning/hr-identities", async Task<Ok<List<HrIdentity>>> (Access access, HubDb db) => {
             Access.Demand(Permissions.Administer(access.Actor));
-            return await db.Users.AsNoTracking().Where(u => u.IsActive).OrderBy(u => u.DisplayName)
-                .Select(u => new { u.Id, u.DisplayName, u.HrSourceSystem, u.HrPersonKey, u.RowVersion }).ToListAsync();
+            return TypedResults.Ok(await db.Users.AsNoTracking().Where(u => u.IsActive).OrderBy(u => u.DisplayName)
+                .Select(u => new HrIdentity(u.Id, u.DisplayName, u.HrSourceSystem, u.HrPersonKey, u.RowVersion)).ToListAsync());
         });
-        api.MapPut("/planning/hr-identities/{id:guid}", async (Guid id, IdentityBody body, Access access, HubDb db) => {
+        api.MapPut("/planning/hr-identities/{id:guid}", async Task<Ok<HrIdentitySaved>> (Guid id, IdentityBody body, Access access, HubDb db) => {
             Access.Demand(Permissions.Administer(access.Actor));
             var user = await db.Users.SingleOrDefaultAsync(u => u.Id == id && u.IsActive) ?? throw ApiException.NotFound();
             Version(user.RowVersion, body.RowVersion);
@@ -40,7 +71,7 @@ public static class AvailabilityEndpoints
             Check.That((user.HrSourceSystem == null) == (user.HrPersonKey == null), "personKey", "availability.identity_pair");
             if (user.HrSourceSystem != null && await db.Users.AnyAsync(u => u.Id != id && u.HrSourceSystem == user.HrSourceSystem && u.HrPersonKey == user.HrPersonKey))
                 throw ApiException.Invalid("personKey", "availability.identity_duplicate");
-            await db.SaveChangesAsync(); return Results.Ok(new { user.RowVersion });
+            await db.SaveChangesAsync(); return TypedResults.Ok(new HrIdentitySaved(user.RowVersion));
         });
         api.MapPost("/planning/leave/import-preview", Preview);
         api.MapPost("/planning/leave/import", Apply);
@@ -77,7 +108,9 @@ public static class AvailabilityEndpoints
 
     static bool Manage(Access access, AppUser user) => access.Actor.Admin || access.Actor.Supervisor && user.SupervisorId == access.Actor.Id;
 
-    static async Task<object> View(DateOnly from, DateOnly through, Guid? personId, Guid? unitId, Access access, HubDb db, SettingsStore store)
+    static async Task<Ok<AvailabilityRead>> View(DateOnly from, DateOnly through, Guid? personId, Guid? unitId, Access access, HubDb db, SettingsStore store) => TypedResults.Ok(await Read(from, through, personId, unitId, access, db, store));
+
+    static async Task<AvailabilityRead> Read(DateOnly from, DateOnly through, Guid? personId, Guid? unitId, Access access, HubDb db, SettingsStore store)
     {
         Dates(from, through); var settings = await store.Get(db); var people = await VisiblePeople(db, access);
         if (unitId is { } unit && settings.IsFlagOn("org_structure"))
@@ -96,42 +129,39 @@ public static class AvailabilityEndpoints
         var pids = access.VisibleProjectIds();
         var tasks = await db.Tasks.AsNoTracking().Where(t => pids.Contains(t.ProjectId) && t.DeletedAt == null && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled
             && (ids.Contains(t.AssigneeId ?? Guid.Empty) || ids.Contains(t.ReviewerId ?? Guid.Empty)) && (t.DueDate == null || t.DueDate >= from && t.DueDate <= through))
-            .Select(t => new { t.Id, t.Key, t.Name, t.ProjectId, t.AssigneeId, t.ReviewerId, t.DueDate }).ToListAsync();
+            .Select(t => new TaskLoad(t.Id, t.Key, t.Name, t.ProjectId, t.AssigneeId, t.ReviewerId, t.DueDate)).ToListAsync();
         var deliverables = await db.Deliverables.AsNoTracking().Where(d => pids.Contains(d.ProjectId) && d.DeletedAt == null && d.Status != DeliverableStatus.Cancelled && d.Status != DeliverableStatus.Accepted && d.Status != DeliverableStatus.Issued
             && (ids.Contains(d.OwnerId ?? Guid.Empty) || ids.Contains(d.ReviewerId ?? Guid.Empty)) && (d.DueDate == null || d.DueDate >= from && d.DueDate <= through))
-            .Select(d => new { d.Id, d.Key, d.Name, d.ProjectId, d.OwnerId, d.ReviewerId, d.DueDate }).ToListAsync();
-        var concerns = new List<object>();
+            .Select(d => new DeliverableLoad(d.Id, d.Key, d.Name, d.ProjectId, d.OwnerId, d.ReviewerId, d.DueDate)).ToListAsync();
+        var concerns = new List<AvailabilityConcern>();
         void Concern(Guid person, Guid id, string key, string name, string type, Guid project, DateOnly? due, string role)
         {
             if (!ids.Contains(person)) return;
             var day = due is { } date ? capacity.GetValueOrDefault((person, date)) : null;
             if (due != null && (day == null || day.Leave <= 0 && day.Holiday <= 0)) return;
-            concerns.Add(new { PersonId = person, Id = id, Key = key, Name = name, Type = type, ProjectId = project, DueDate = due, Role = role,
-                Concern = due == null ? "Unknown" : day!.Available == 0 ? "Unavailable" : "PartialAbsence" });
+            concerns.Add(new(person, id, key, name, type, project, due, role, due == null ? "Unknown" : day!.Available == 0 ? "Unavailable" : "PartialAbsence"));
         }
         foreach (var t in tasks) { if (t.AssigneeId is { } a) Concern(a, t.Id, t.Key, t.Name, "Task", t.ProjectId, t.DueDate, "Assignee"); if (t.ReviewerId is { } r) Concern(r, t.Id, t.Key, t.Name, "Task", t.ProjectId, t.DueDate, "Reviewer"); }
         foreach (var d in deliverables) { if (d.OwnerId is { } a) Concern(a, d.Id, d.Key, d.Name, "Deliverable", d.ProjectId, d.DueDate, "Owner"); if (d.ReviewerId is { } r) Concern(r, d.Id, d.Key, d.Name, "Deliverable", d.ProjectId, d.DueDate, "Reviewer"); }
         var reviews = await db.DisciplineReviews.AsNoTracking().Where(r => ids.Contains(r.ReviewerId) && pids.Contains(r.ProjectId)
             && r.DueDate >= from && r.DueDate <= through && r.Status != DisciplineReviewStatus.Approved
             && db.ReviewPackages.Any(p => p.CurrentRoundId == r.RoundId && p.Status != ReviewStatus.Cancelled && p.Status != ReviewStatus.Superseded && p.Status != ReviewStatus.Draft))
-            .Select(r => new { r.ReviewerId, r.ProjectId, r.DueDate, PackageId = db.ReviewPackages.Where(p => p.CurrentRoundId == r.RoundId).Select(p => p.Id).First(), Package = db.ReviewPackages.Where(p => p.CurrentRoundId == r.RoundId).Select(p => p.Title).First() }).ToListAsync();
+            .Select(r => new ReviewLoad(r.ReviewerId, r.ProjectId, r.DueDate, db.ReviewPackages.Where(p => p.CurrentRoundId == r.RoundId).Select(p => p.Id).First(), db.ReviewPackages.Where(p => p.CurrentRoundId == r.RoundId).Select(p => p.Title).First())).ToListAsync();
         foreach (var review in reviews) Concern(review.ReviewerId, review.PackageId, "", review.Package, "Review", review.ProjectId, review.DueDate, "Reviewer");
-        return new {
-            From = from, Through = through, CanImport = access.Actor.Admin,
-            People = users.Select(u => new { u.Id, u.DisplayName, CanManage = Manage(access, u), WeeklyHours = u.WeeklyCapacityHours,
-                Days = capacity.Where(x => x.Key.Item1 == u.Id).Select(x => new { Date = x.Key.Item2, x.Value.Normal, x.Value.Available, x.Value.Leave, x.Value.Holiday, x.Value.Provisional }),
-                Schedules = Manage(access, u) ? schedules.Where(s => s.PersonId == u.Id).Select(s => ScheduleRow(s, settings.IsFlagOn("capacity_polish"))) : null,
-                Leave = leaves.Where(l => l.PersonId == u.Id).Select(l => new { l.Id, l.FromDate, l.ThroughDate, l.HoursPerDay, l.Status, l.SourceKind, l.SourceUpdatedAt, l.ImportedAt, l.RowVersion,
-                    SourceSystem = Manage(access, u) ? l.SourceSystem : null, ExternalId = Manage(access, u) ? l.ExternalId : null, CanEdit = Manage(access, u) && l.SourceKind == "ManualHR" }),
-                Unverified = legacy.Where(o => o.PersonId == u.Id).Select(o => new { o.WorkDate, o.AvailableHours, o.RowVersion }) }),
-            Holidays = holidays.Select(h => new { h.Date, h.Name, h.OfficeId }), Coverage = concerns,
-            Imports = access.Actor.Admin ? await db.LeaveImportStates.AsNoTracking().Select(s => new { s.SourceSystem, s.ImportedAt, s.SourceUpdatedAt }).ToListAsync() : null,
-        };
+        return new(from, through, access.Actor.Admin,
+            [.. users.Select(u => new AvailabilityPerson(u.Id, u.DisplayName, Manage(access, u), u.WeeklyCapacityHours,
+                [.. capacity.Where(x => x.Key.Item1 == u.Id).Select(x => new AvailabilityDay(x.Key.Item2, x.Value.Normal, x.Value.Available, x.Value.Leave, x.Value.Holiday, x.Value.Provisional))],
+                Manage(access, u) ? [.. schedules.Where(s => s.PersonId == u.Id).Select(s => Row(s, settings.IsFlagOn("capacity_polish")))] : null,
+                [.. leaves.Where(l => l.PersonId == u.Id).Select(l => new AvailabilityLeave(l.Id, l.FromDate, l.ThroughDate, l.HoursPerDay, l.Status, l.SourceKind, l.SourceUpdatedAt, l.ImportedAt, l.RowVersion,
+                    Manage(access, u) ? l.SourceSystem : null, Manage(access, u) ? l.ExternalId : null, Manage(access, u) && l.SourceKind == "ManualHR"))],
+                [.. legacy.Where(o => o.PersonId == u.Id).Select(o => new AvailabilityUnverified(o.WorkDate, o.AvailableHours, o.RowVersion))]))],
+            [.. holidays.Select(h => new AvailabilityHoliday(h.Date, h.Name, h.OfficeId))], concerns,
+            access.Actor.Admin ? await db.LeaveImportStates.AsNoTracking().Select(s => new AvailabilityImport(s.SourceSystem, s.ImportedAt, s.SourceUpdatedAt)).ToListAsync() : null);
     }
 
     static async Task<IResult> Export(DateOnly from, DateOnly through, Guid? personId, Guid? unitId, string? format, string? kind, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
-        var view = JsonSerializer.SerializeToNode(await View(from, through, personId, unitId, access, db, store), JsonOpts.Web)!;
+        var view = JsonSerializer.SerializeToNode(await Read(from, through, personId, unitId, access, db, store), JsonOpts.Web)!;
         var rows = new JsonArray();
         var leave = kind == "leave";
         foreach (var person in view["people"]!.AsArray())
@@ -143,7 +173,7 @@ public static class AvailabilityEndpoints
         return await ExportFile.Send(db, store, format, Text.Get("availability.export"), columns, rows, [("from", from.ToString("yyyy-MM-dd")), ("through", through.ToString("yyyy-MM-dd"))], null, leave ? "approved-leave" : "availability", clock);
     }
 
-    static async Task<object> Preview(CsvBody body, Access access, HubDb db, TimeProvider clock, SettingsStore store)
+    static async Task<Ok<LeaveImportPreviewRead>> Preview(CsvBody body, Access access, HubDb db, TimeProvider clock, SettingsStore store)
     {
         Access.Demand(Permissions.Administer(access.Actor));
         Check.That(body.Csv != null && Encoding.UTF8.GetByteCount(body.Csv) <= 256 * 1024, "csv", "error.too_long", 262144);
@@ -155,7 +185,7 @@ public static class AvailabilityEndpoints
         Check.That(header.SequenceEqual(Headers), "csv", "availability.csv_headers");
         var users = await db.Users.AsNoTracking().Where(u => u.IsActive && u.HrSourceSystem != null).ToListAsync();
         var records = await db.ApprovedLeaves.AsNoTracking().ToListAsync();
-        var rows = new List<ImportRow>(); var errors = new List<object>(); var identities = new Dictionary<(string, string), string>(); var line = 1;
+        var rows = new List<ImportRow>(); var errors = new List<LeaveImportError>(); var identities = new Dictionary<(string, string), string>(); var line = 1;
         while (!parser.EndOfData)
         {
             Check.That(++line <= 1001, "csv", "availability.csv_limit");
@@ -167,7 +197,7 @@ public static class AvailabilityEndpoints
                 if (identities.TryGetValue((source, external), out var prior)) { if (prior == signature) continue; throw new FormatException(); }
                 identities[(source, external)] = signature;
                 var person = users.SingleOrDefault(u => u.HrSourceSystem == source && u.HrPersonKey == key);
-                if (person == null) { errors.Add(new { Row = line, Error = "availability.unmapped" }); continue; }
+                if (person == null) { errors.Add(new(line, "availability.unmapped")); continue; }
                 var from = DateOnly.ParseExact(cells[4], "yyyy-MM-dd", CultureInfo.InvariantCulture);
                 var through = DateOnly.ParseExact(cells[5], "yyyy-MM-dd", CultureInfo.InvariantCulture);
                 decimal? hours = cells[6].Length == 0 ? null : decimal.Parse(cells[6], CultureInfo.InvariantCulture);
@@ -179,12 +209,12 @@ public static class AvailabilityEndpoints
                 var row = new ImportRow(source, external, key, person.Id, person.RowVersion, from, through, hours, cells[3], updated, current?.RowVersion ?? 0);
                 CheckCurrent(current, row); rows.Add(row);
             }
-            catch (Exception ex) when (ex is FormatException or OverflowException or MalformedLineException or ApiException) { errors.Add(new { Row = line, Error = "availability.invalid_row" }); }
+            catch (Exception ex) when (ex is FormatException or OverflowException or MalformedLineException or ApiException) { errors.Add(new(line, "availability.invalid_row")); }
         }
         Check.That(line > 1, "csv", "error.required");
         if (errors.Count == 0) {
             try { await ValidatePartial(db, rows, records, store); }
-            catch (ApiException ex) { errors.Add(new { Row = 0, Error = ex.Errors?.Values.SelectMany(v => v).FirstOrDefault() ?? ex.Message }); }
+            catch (ApiException ex) { errors.Add(new(0, ex.Errors?.Values.SelectMany(v => v).FirstOrDefault() ?? ex.Message)); }
         }
         Guid? previewId = null;
         if (errors.Count == 0) {
@@ -192,11 +222,11 @@ public static class AvailabilityEndpoints
             db.LeaveImportPreviews.Add(receipt); await db.SaveChangesAsync(); previewId = receipt.Id;
         }
         bool Unchanged(ImportRow row) => records.Any(l => l.SourceSystem == row.SourceSystem && l.ExternalId == row.ExternalId && l.SourceKind == "HRImport" && Same(l, row) && l.SourceUpdatedAt == row.SourceUpdatedAt);
-        return new { PreviewId = previewId, Rows = rows, Errors = errors, CanApply = errors.Count == 0,
-            Creates = rows.Count(r => r.RowVersion == 0), Updates = rows.Count(r => r.RowVersion > 0 && !Unchanged(r) && r.Status != "Cancelled"),
-            Cancellations = rows.Count(r => r.Status == "Cancelled" && !Unchanged(r)), Unchanged = rows.Count(Unchanged),
-            ManualMatches = rows.Count(r => records.Any(l => l.SourceSystem == r.SourceSystem && l.ExternalId == r.ExternalId && l.SourceKind == "ManualHR")),
-            AffectedWeeks = rows.Select(r => new { r.PersonId, FromWeek = Workload.WeekOf(r.FromDate), ThroughWeek = Workload.WeekOf(r.ThroughDate) }).Distinct() };
+        return TypedResults.Ok(new LeaveImportPreviewRead(previewId, rows, errors, errors.Count == 0,
+            rows.Count(r => r.RowVersion == 0), rows.Count(r => r.RowVersion > 0 && !Unchanged(r) && r.Status != "Cancelled"),
+            rows.Count(r => r.Status == "Cancelled" && !Unchanged(r)), rows.Count(Unchanged),
+            rows.Count(r => records.Any(l => l.SourceSystem == r.SourceSystem && l.ExternalId == r.ExternalId && l.SourceKind == "ManualHR")),
+            [.. rows.Select(r => new LeaveImportWeek(r.PersonId, Workload.WeekOf(r.FromDate), Workload.WeekOf(r.ThroughDate))).Distinct()]));
 
     }
 
@@ -229,7 +259,7 @@ public static class AvailabilityEndpoints
             throw ApiException.Conflict("stale_hr_record", "availability.stale_hr");
     }
 
-    static async Task<IResult> Apply(ImportBody body, Access access, HubDb db, TimeProvider clock, SettingsStore store)
+    static async Task<Ok<LeaveImportApplied>> Apply(ImportBody body, Access access, HubDb db, TimeProvider clock, SettingsStore store)
     {
         Access.Demand(Permissions.Administer(access.Actor));
         Check.That(body.Rows is { Length: > 0 and <= 1000 } && body.Rows.Select(r => (r.SourceSystem, r.ExternalId)).Distinct().Count() == body.Rows.Length, "rows", "error.invalid");
@@ -264,11 +294,11 @@ public static class AvailabilityEndpoints
                 var latest = body.Rows.Where(r => r.SourceSystem == source).Max(r => r.SourceUpdatedAt);
                 if (latest > state.SourceUpdatedAt) state.SourceUpdatedAt = latest;
             }
-            await db.SaveChangesAsync(); return Results.Ok(new { Applied = changed, Unchanged = body.Rows.Length - changed, ImportedAt = clock.GetUtcNow() });
+            await db.SaveChangesAsync(); return TypedResults.Ok(new LeaveImportApplied(changed, body.Rows.Length - changed, clock.GetUtcNow()));
         });
     }
 
-    static async Task<IResult> Manual(ManualBody body, Access access, HubDb db, TimeProvider clock, SettingsStore store)
+    static async Task<Ok<LeaveSaved>> Manual(ManualBody body, Access access, HubDb db, TimeProvider clock, SettingsStore store)
     {
         Validate(body.SourceSystem, body.ExternalId, body.FromDate, body.ThroughDate, body.HoursPerDay, body.Status);
         return await Tx.Run(db, async () => {
@@ -283,11 +313,11 @@ public static class AvailabilityEndpoints
             row.FromDate = body.FromDate; row.ThroughDate = body.ThroughDate; row.HoursPerDay = body.HoursPerDay; row.Status = body.Status;
             row.SourceUpdatedAt = row.ImportedAt = clock.GetUtcNow();
             await PersonCapacity.Touch(db, row.PersonId, row.FromDate, row.ThroughDate); await db.SaveChangesAsync();
-            return Results.Ok(new { row.Id, row.RowVersion });
+            return TypedResults.Ok(new LeaveSaved(row.Id, row.RowVersion));
         });
     }
 
-    static async Task<IResult> Reconcile(ReconcileBody body, Access access, HubDb db)
+    static async Task<Ok<LeaveReconciled>> Reconcile(ReconcileBody body, Access access, HubDb db)
     {
         Check.That(body.Dates is { Length: > 0 and <= 366 } && body.Dates.Select(d => d.WorkDate).Distinct().Count() == body.Dates.Length, "dates", "error.invalid");
         return await Tx.Run(db, async () => {
@@ -304,19 +334,14 @@ public static class AvailabilityEndpoints
                 row.ReconciledLeaveId = leave.Id; db.Audit.Note(row, reason: "Reconciled with an HR leave reference");
             }
             foreach (var date in dates) await PersonCapacity.Touch(db, person.Id, date, date);
-            await db.SaveChangesAsync(); return Results.Ok(new { Count = rows.Count });
+            await db.SaveChangesAsync(); return TypedResults.Ok(new LeaveReconciled(rows.Count));
         });
     }
 
-    static object ScheduleRow(PersonSchedule row, bool weekdayHours)
-    {
-        var result = new { row.FromDate, row.WeeklyHours, row.WorkingDays, row.RowVersion };
-        if (!weekdayHours) return result;
-        var json = System.Text.Json.JsonSerializer.SerializeToNode(result, JsonOpts.Web)!.AsObject();
-        json["weekdayHours"] = System.Text.Json.JsonSerializer.SerializeToNode(row.WeekdayHours, JsonOpts.Web); return json;
-    }
+    static ScheduleRow Row(PersonSchedule row, bool weekdayHours) =>
+        weekdayHours ? new WeekdaySchedule(row.FromDate, row.WeeklyHours, row.WorkingDays, row.RowVersion, row.WeekdayHours) : new WeeklySchedule(row.FromDate, row.WeeklyHours, row.WorkingDays, row.RowVersion);
 
-    static async Task<IResult> Schedule(Guid personId, ScheduleBody body, Access access, HubDb db, TimeProvider clock, SettingsStore store)
+    static async Task<Ok<ScheduleSaved>> Schedule(Guid personId, ScheduleBody body, Access access, HubDb db, TimeProvider clock, SettingsStore store)
     {
         var settings = await store.Get(db);
         var today = clock.Today(settings);
@@ -333,7 +358,7 @@ public static class AvailabilityEndpoints
             row.WeeklyHours = weekdayHours?.Sum() ?? body.WeeklyHours;
             var effectiveDays = weekdayHours is null ? body.WorkingDays.Order().ToArray() : Enumerable.Range(0, 7).Where(d => weekdayHours[d] > 0).ToArray();
             row.WorkingDays = effectiveDays.Length > 0 ? effectiveDays : row.WorkingDays; // Keep the legacy representation valid; effective days come from the vector.
-            await PersonCapacity.Touch(db, personId, body.FromDate, today.AddYears(2)); await db.SaveChangesAsync(); return Results.Ok(new { row.Id, row.RowVersion });
+            await PersonCapacity.Touch(db, personId, body.FromDate, today.AddYears(2)); await db.SaveChangesAsync(); return TypedResults.Ok(new ScheduleSaved(row.Id, row.RowVersion));
         });
     }
 }

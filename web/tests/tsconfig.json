@@ -41,6 +41,7 @@
     "dashboard.fixture.cjs",
     "me.fixture.cjs",
     "dependencies.fixture.cjs",
-    "team.fixture.cjs"
+    "team.fixture.cjs",
+    "availability.fixture.cjs"
   ]
 }

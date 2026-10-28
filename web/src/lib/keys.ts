@@ -28,7 +28,7 @@ export const itemKeys: Readonly<Record<string, readonly string[]>> = {
   Handoff: ['handoffs', 'handoff-detail', 'handoff-options', 'coord-options', 'workspace-coordination'],
   SubmissionPackage: ['submissions', 'submission-detail', 'submission-choices', 'coord-options', 'workspace-coordination'],
   DesignBasisEntry: ['design-basis', 'design-basis-detail'],
-  CalendarEvent: ['calendar'], TimeEntry: ['time'], User: ['me', 'staff', 'reference', 'admin', 'organisation', 'organisation-placements', 'workload', 'planning-grid'],
+  CalendarEvent: ['calendar'], TimeEntry: ['time'], User: ['me', 'staff', 'reference', 'admin', 'organisation', 'organisation-placements', 'workload', 'planning-grid', 'hr-identities'], // 'hr-identities' is the import dialog's HR source and key list
   Comment: ['history', 'comments', 'task'], DocumentLink: ['links', 'history', 'files'],
   TaskPickupOffer: ['pickup-offers', 'pickup-own-load', 'task', 'mywork-tasks', 'workload', 'planning-grid'],
   OrgLevel: ['admin', 'organisation', 'organisation-placements', 'staff', 'workload', 'planning-grid', 'report'],

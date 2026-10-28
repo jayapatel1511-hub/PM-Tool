@@ -5785,6 +5785,8 @@ namespace Hub.Api.Data.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_org_unit_parent_id_name");
 
+                    NpgsqlIndexBuilderExtensions.AreNullsDistinct(b.HasIndex("ParentId", "Name"), false);
+
                     b.ToTable("org_unit", "hub");
                 });
 

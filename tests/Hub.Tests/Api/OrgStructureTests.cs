@@ -31,6 +31,8 @@ public sealed class OrgStructureTests : IDisposable
             var region = levels.First(l => l!.S("name") == "Region")!;
             var team = levels.First(l => l!.S("name") == "Team")!;
             var root = await admin.Post("/api/v1/admin/organisation/units", new { name = "Atlantic", levelId = region.G("id") }).Result.Json(201);
+            // Names are unique under one parent, the top level included, so a group or filter keyed by name never merges two units.
+            Assert.Equal(System.Net.HttpStatusCode.Conflict, (await admin.Post("/api/v1/admin/organisation/units", new { name = "Atlantic", levelId = region.G("id") })).StatusCode);
             var child = await admin.Post("/api/v1/admin/organisation/units", new { name = "Civil", levelId = team.G("id"), parentId = root.G("id") }).Result.Json(201);
             var refused = await admin.Patch($"/api/v1/admin/organisation/units/{root.G("id")}", new { parentId = child.G("id"), levelId = region.G("id") }, root.I("rowVersion"));
             Assert.Equal(HttpStatusCode.BadRequest, refused.StatusCode);

@@ -6,12 +6,15 @@ const path = require('node:path');
 const fs = require('node:fs');
 const { deletedTasks } = require('./recovery.fixture.cjs');
 const { attentionRow, attentionList, attentionSnoozed, healthOverrideApplied, healthOverrideRemoved } = require('./evaluation.fixture.cjs');
+const { timeRow, timeView, entrySaved } = require('./time.fixture.cjs');
 const port = process.env.RECOVERY_TEST_PORT || '19504', base = `http://127.0.0.1:${port}`;
 const id = n => `00000000-0000-0000-0000-${String(n).padStart(12,'0')}`;
 const pid=id(1), person=id(2), civil=id(3), client=id(4), office=id(5), deleted=id(6), parent=id(7), template=id(8);
 const yes={ok:true}, no={ok:false};
 let flags={show_deleted:true,status_rollups:true,template_working_days:true}, restoreAllowed=true, restored=false, templateDraft=false;
 let evaluationFlows=false, snoozed=false, overridden=false; // 040-S15: the attention snooze and the health override
+// 040-S15: the Time page's entries; Add Time, a correction and a deletion change them
+const timeEntries=[timeRow({id:id(40),projectId:pid,taskId:id(41),userId:person,canEdit:false,rowVersion:3})], timeReads=[];
 const attentionItem=attentionRow({id:id(70),projectId:pid,itemId:id(71)});
 const me=()=>({id:person,displayName:'Synthetic PM',email:'pm@hub.test',roles:[],systemRoles:[],isTemplateEditor:true,
  capabilities:{createProject:true,createTask:true,portfolio:true,workload:false,staff:true,allStaff:true,admin:false,templates:true,readOnly:false,directReports:2},
@@ -55,7 +58,11 @@ let server,browser;const errors=[],requests=[],unknown=[];
   else if(p===`templates/${template}`)data={id:template,familyId:template,name:'Synthetic template',status:templateDraft?'Draft':'Published',version:1,canEdit:templateDraft,rowVersion:1,family:[],disciplines:[],milestones:[],deliverables:[],tasks:[],dependencies:[],basisSuggestions:[],...(flags.template_working_days?{offsetDayKind:'WorkingDays'}:{})};
   else if(p.endsWith('/preview')){requests.push({path:p,body:req.postDataJSON()});data={milestones:[],counts:{milestones:0,deliverables:0,tasks:0,dependencies:0},undated:{milestones:0,deliverables:0,tasks:0}};}
   else if(p==='staff')data={scope:'direct',canSeeAll:false,tiles:{staff:0,assignments:0,withOverdue:0,withBlocked:0,reviewsStalled:0},people:[]};
-  else if(p==='time')data={entries:[{id:id(40),taskId:id(41),projectId:pid,projectNumber:'SYN-RCV',projectName:'Synthetic project',taskKey:'SYN-T1',taskName:'Synthetic work',person:'Synthetic PM',userId:person,workDate:'2026-10-13',hours:3,canEdit:false}],total:3,byDay:[],byProject:[{projectId:pid,projectNumber:'SYN-RCV',projectName:'Synthetic project',hours:3}],byTask:[{taskId:id(41),taskKey:'SYN-T1',taskName:'Synthetic work',hours:3}],canReview:false};
+  else if(p==='time'&&req.method()==='POST'){const body=req.postDataJSON();requests.push({path:p,method:'POST',body,ifMatch:req.headers()['if-match'],source:req.headers()['x-hub-source']});timeEntries.push(timeRow({id:id(43),projectId:pid,taskId:body.taskId,userId:person,taskKey:'SYN-T2',taskName:'Synthetic second task',workDate:body.workDate,hours:body.hours,note:body.note}));status=201;data=entrySaved(id(43),1);}
+  else if(p==='time'){timeReads.push(Object.fromEntries(u.searchParams));data=timeView('2026-10-12','2026-10-18',timeEntries);}
+  else if(p.startsWith('time/')){const entry=timeEntries.find(e=>p===`time/${e.id}`),del=req.method()==='DELETE';requests.push({path:p,method:req.method(),body:req.postDataJSON(),ifMatch:req.headers()['if-match'],source:req.headers()['x-hub-source']});
+   if(del){timeEntries.splice(timeEntries.indexOf(entry),1);status=204;data=undefined}else{Object.assign(entry,{hours:req.postDataJSON().hours,rowVersion:entry.rowVersion+1});data=entrySaved(entry.id,entry.rowVersion)}}
+  else if(p==='tasks')data={items:[{id:id(42),key:'SYN-T2',name:'Synthetic second task',projectNumber:'SYN-RCV',status:'In Progress'}],totalCount:1,page:1,pageSize:20};
   else if(p==='users')data=[];
   else unknown.push(p);
   await route.fulfill({status,contentType:'application/json',body:JSON.stringify(data)});
@@ -107,6 +114,16 @@ let server,browser;const errors=[],requests=[],unknown=[];
  // AC-RCV-11/12: definitions are available on keyboard-focusable tile actions, totals link to the entries.
  await page.goto(`${base}/staff`);await page.getByRole('button',{name:/Reviews waiting too long/}).waitFor();assert.ok(await page.getByRole('button',{name:/Reviews waiting too long/}).getAttribute('aria-describedby'));await page.getByRole('button',{name:/Reviews waiting too long/}).click();await page.waitForURL(/indicator=reviewsStalled/);
  await page.goto(`${base}/time?from=2026-10-12&to=2026-10-18`);await page.getByRole('heading',{name:'By project',exact:true}).waitFor();const totals=page.locator('aside');assert.match(await totals.getByRole('link',{name:'3 h',exact:true}).first().getAttribute('href'),/projectId=/);const timeAxe=await axe();
+ assert.deepEqual(timeReads.at(-1),{from:'2026-10-12',to:'2026-10-18'},'the typed read keeps the lower-case query names');
+ // 040-S15: a correction, Add Time and a deletion call the typed helper with the same bodies, If-Match version and source as before.
+ timeEntries[0].canEdit=true;await page.reload();await page.getByRole('button',{name:'Edit the entry on SYN-T1',exact:true}).click();
+ let timeDialog=page.getByRole('dialog');await timeDialog.getByLabel('Hours',{exact:true}).fill('4');await timeDialog.getByRole('button',{name:'Save',exact:true}).click();await page.getByRole('link',{name:'4 h',exact:true}).first().waitFor();
+ assert.deepEqual(requests.at(-1),{path:`time/${id(40)}`,method:'PATCH',body:{workDate:'2026-10-13',hours:4,note:null},ifMatch:'"3"',source:'UI'});
+ await page.getByRole('button',{name:'Add time',exact:true}).click();timeDialog=page.getByRole('dialog');await timeDialog.getByRole('option',{name:/SYN-T2/}).click();
+ await timeDialog.getByLabel('Work date',{exact:true}).fill('2026-10-14');await timeDialog.getByLabel('Hours',{exact:true}).fill('1.25');await timeDialog.getByRole('button',{name:'Save',exact:true}).click();await page.getByText('Synthetic second task',{exact:true}).waitFor();
+ assert.deepEqual(requests.at(-1),{path:'time',method:'POST',body:{taskId:id(42),workDate:'2026-10-14',hours:1.25,note:null},ifMatch:undefined,source:'UI'});
+ await page.getByRole('button',{name:'Delete the entry on SYN-T1',exact:true}).click();await page.getByRole('button',{name:'Delete entry',exact:true}).click();await page.getByText('Entry deleted',{exact:true}).waitFor();await page.getByText('Synthetic work',{exact:true}).waitFor({state:'detached'});
+ assert.deepEqual(requests.at(-1),{path:`time/${id(40)}`,method:'DELETE',body:{reason:null,rowVersion:null},ifMatch:'"4"',source:'UI'});
  assert.deepEqual(errors,[]);for(const [name,value]of Object.entries({deletedAxe,rollupAxe,portfolioAxe,timeAxe}))assert.deepEqual(value,[],name);
  const result={scope:'Mocked synthetic API in Chromium; no server transaction or permission evidence',requests,errors,unknown,deletedAxe,rollupAxe,portfolioAxe,timeAxe};fs.mkdirSync(path.resolve(__dirname,'../test-results/recovery-counts'),{recursive:true});fs.writeFileSync(path.resolve(__dirname,'../test-results/recovery-counts/report.json'),JSON.stringify(result,null,2));console.log(JSON.stringify(result));
 })().catch(e=>{console.error(e);process.exitCode=1}).finally(async()=>{await browser?.close();server?.kill()});

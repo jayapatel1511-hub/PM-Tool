@@ -567,6 +567,93 @@
       "string"
     ]
   },
+  "DELETE /api/v1/time/{id} 400": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.errors": [
+      "object"
+    ],
+    "$.errors.reason": [
+      "array"
+    ],
+    "$.errors.reason[]": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "DELETE /api/v1/time/{id} 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "DELETE /api/v1/time/{id} 409": {
+    "$": [
+      "object"
+    ],
+    "$.changedAt": [
+      "string"
+    ],
+    "$.changedBy": [
+      "string"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.currentRowVersion": [
+      "number"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "DELETE /api/v1/views/{id} 403": {
     "$": [
       "object"
@@ -9256,153 +9343,6 @@
     "$.components.schemas.AnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndboolean.type": [
       "string"
     ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.properties": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.properties.byDay": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.properties.byDay.items": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.properties.byDay.items.$ref": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.properties.byDay.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.properties.byDay.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.properties.byProject": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.properties.byProject.items": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.properties.byProject.items.$ref": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.properties.byProject.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.properties.byProject.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.properties.byTask": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.properties.byTask.items": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.properties.byTask.items.$ref": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.properties.byTask.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.properties.byTask.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.properties.canReview": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.properties.canReview.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.properties.entries": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.properties.entries.items": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.properties.entries.items.$ref": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.properties.entries.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.properties.entries.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.properties.from": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.properties.from.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.properties.from.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.properties.to": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.properties.to.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.properties.to.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.properties.total": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.properties.total.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.properties.total.pattern": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.properties.total.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.required": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.required[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAndDateOnlyAndListOfRowAnddecimalAndIEnumerableOfAnonymousTypeOfDateOnlyAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAnddecimalAndIOrderedEnumerableOfAnonymousTypeOfGuidAndstringAndstringAnddecimalAndboolean.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAnddecimal": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAnddecimal.properties": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAnddecimal.properties.date": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAnddecimal.properties.date.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAnddecimal.properties.date.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAnddecimal.properties.hours": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAnddecimal.properties.hours.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAnddecimal.properties.hours.pattern": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAnddecimal.properties.hours.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAnddecimal.required": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAnddecimal.required[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfDateOnlyAnddecimal.type": [
-      "string"
-    ],
     "$.components.schemas.AnonymousTypeOfDateTimeOffsetAndListOfOpsProblemAndListOfObjectAndintAndListOfAnonymousTypeOfGuidAndstringAndstringAndintAndstringAndDateTimeOffsetAndDateTimeOffsetAndint": [
       "object"
     ],
@@ -10052,60 +9992,6 @@
       "string"
     ],
     "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndboolean.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAnddecimal": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAnddecimal.properties": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAnddecimal.properties.hours": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAnddecimal.properties.hours.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAnddecimal.properties.hours.pattern": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAnddecimal.properties.hours.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAnddecimal.properties.projectId": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAnddecimal.properties.projectId.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAnddecimal.properties.projectId.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAnddecimal.properties.projectName": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAnddecimal.properties.projectName.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAnddecimal.properties.projectName.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAnddecimal.properties.projectNumber": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAnddecimal.properties.projectNumber.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAnddecimal.properties.projectNumber.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAnddecimal.required": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAnddecimal.required[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAnddecimal.type": [
       "string"
     ],
     "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndintAndstringAndDateTimeOffsetAndDateTimeOffset": [
@@ -10766,69 +10652,6 @@
       "string"
     ],
     "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndbooleanAndint.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAnddecimal": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAnddecimal.properties": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAnddecimal.properties.hours": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAnddecimal.properties.hours.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAnddecimal.properties.hours.pattern": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAnddecimal.properties.hours.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAnddecimal.properties.projectNumber": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAnddecimal.properties.projectNumber.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAnddecimal.properties.projectNumber.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAnddecimal.properties.taskId": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAnddecimal.properties.taskId.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAnddecimal.properties.taskId.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAnddecimal.properties.taskKey": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAnddecimal.properties.taskKey.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAnddecimal.properties.taskKey.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAnddecimal.properties.taskName": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAnddecimal.properties.taskName.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAnddecimal.properties.taskName.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAnddecimal.required": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAnddecimal.required[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAnddecimal.type": [
       "string"
     ],
     "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndint": [
@@ -16903,6 +16726,42 @@
     "$.components.schemas.DateSuccessor.type": [
       "string"
     ],
+    "$.components.schemas.DayHours": [
+      "object"
+    ],
+    "$.components.schemas.DayHours.properties": [
+      "object"
+    ],
+    "$.components.schemas.DayHours.properties.date": [
+      "object"
+    ],
+    "$.components.schemas.DayHours.properties.date.format": [
+      "string"
+    ],
+    "$.components.schemas.DayHours.properties.date.type": [
+      "string"
+    ],
+    "$.components.schemas.DayHours.properties.hours": [
+      "object"
+    ],
+    "$.components.schemas.DayHours.properties.hours.format": [
+      "string"
+    ],
+    "$.components.schemas.DayHours.properties.hours.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DayHours.properties.hours.type": [
+      "string"
+    ],
+    "$.components.schemas.DayHours.required": [
+      "array"
+    ],
+    "$.components.schemas.DayHours.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DayHours.type": [
+      "string"
+    ],
     "$.components.schemas.DayInput": [
       "object"
     ],
@@ -20291,6 +20150,42 @@
       "string"
     ],
     "$.components.schemas.EntryBody.type": [
+      "string"
+    ],
+    "$.components.schemas.EntrySaved": [
+      "object"
+    ],
+    "$.components.schemas.EntrySaved.properties": [
+      "object"
+    ],
+    "$.components.schemas.EntrySaved.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.EntrySaved.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.EntrySaved.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.EntrySaved.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.EntrySaved.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.EntrySaved.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.EntrySaved.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.EntrySaved.required": [
+      "array"
+    ],
+    "$.components.schemas.EntrySaved.required[]": [
+      "string"
+    ],
+    "$.components.schemas.EntrySaved.type": [
       "string"
     ],
     "$.components.schemas.EventBody": [
@@ -28102,6 +27997,54 @@
     "$.components.schemas.ProjectEvaluation.type": [
       "string"
     ],
+    "$.components.schemas.ProjectHours": [
+      "object"
+    ],
+    "$.components.schemas.ProjectHours.properties": [
+      "object"
+    ],
+    "$.components.schemas.ProjectHours.properties.hours": [
+      "object"
+    ],
+    "$.components.schemas.ProjectHours.properties.hours.format": [
+      "string"
+    ],
+    "$.components.schemas.ProjectHours.properties.hours.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ProjectHours.properties.hours.type": [
+      "string"
+    ],
+    "$.components.schemas.ProjectHours.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.ProjectHours.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.ProjectHours.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.ProjectHours.properties.projectName": [
+      "object"
+    ],
+    "$.components.schemas.ProjectHours.properties.projectName.type": [
+      "string"
+    ],
+    "$.components.schemas.ProjectHours.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.ProjectHours.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.ProjectHours.required": [
+      "array"
+    ],
+    "$.components.schemas.ProjectHours.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ProjectHours.type": [
+      "string"
+    ],
     "$.components.schemas.ProjectImportBody": [
       "object"
     ],
@@ -32737,6 +32680,60 @@
     "$.components.schemas.TaskDetailWatcher.type": [
       "string"
     ],
+    "$.components.schemas.TaskHours": [
+      "object"
+    ],
+    "$.components.schemas.TaskHours.properties": [
+      "object"
+    ],
+    "$.components.schemas.TaskHours.properties.hours": [
+      "object"
+    ],
+    "$.components.schemas.TaskHours.properties.hours.format": [
+      "string"
+    ],
+    "$.components.schemas.TaskHours.properties.hours.pattern": [
+      "string"
+    ],
+    "$.components.schemas.TaskHours.properties.hours.type": [
+      "string"
+    ],
+    "$.components.schemas.TaskHours.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.TaskHours.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.TaskHours.properties.taskId": [
+      "object"
+    ],
+    "$.components.schemas.TaskHours.properties.taskId.format": [
+      "string"
+    ],
+    "$.components.schemas.TaskHours.properties.taskId.type": [
+      "string"
+    ],
+    "$.components.schemas.TaskHours.properties.taskKey": [
+      "object"
+    ],
+    "$.components.schemas.TaskHours.properties.taskKey.type": [
+      "string"
+    ],
+    "$.components.schemas.TaskHours.properties.taskName": [
+      "object"
+    ],
+    "$.components.schemas.TaskHours.properties.taskName.type": [
+      "string"
+    ],
+    "$.components.schemas.TaskHours.required": [
+      "array"
+    ],
+    "$.components.schemas.TaskHours.required[]": [
+      "string"
+    ],
+    "$.components.schemas.TaskHours.type": [
+      "string"
+    ],
     "$.components.schemas.TaskIn": [
       "object"
     ],
@@ -34949,6 +34946,105 @@
       "string"
     ],
     "$.components.schemas.TimeRow.type": [
+      "string"
+    ],
+    "$.components.schemas.TimeView": [
+      "object"
+    ],
+    "$.components.schemas.TimeView.properties": [
+      "object"
+    ],
+    "$.components.schemas.TimeView.properties.byDay": [
+      "object"
+    ],
+    "$.components.schemas.TimeView.properties.byDay.items": [
+      "object"
+    ],
+    "$.components.schemas.TimeView.properties.byDay.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.TimeView.properties.byDay.type": [
+      "string"
+    ],
+    "$.components.schemas.TimeView.properties.byProject": [
+      "object"
+    ],
+    "$.components.schemas.TimeView.properties.byProject.items": [
+      "object"
+    ],
+    "$.components.schemas.TimeView.properties.byProject.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.TimeView.properties.byProject.type": [
+      "string"
+    ],
+    "$.components.schemas.TimeView.properties.byTask": [
+      "object"
+    ],
+    "$.components.schemas.TimeView.properties.byTask.items": [
+      "object"
+    ],
+    "$.components.schemas.TimeView.properties.byTask.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.TimeView.properties.byTask.type": [
+      "string"
+    ],
+    "$.components.schemas.TimeView.properties.canReview": [
+      "object"
+    ],
+    "$.components.schemas.TimeView.properties.canReview.type": [
+      "string"
+    ],
+    "$.components.schemas.TimeView.properties.entries": [
+      "object"
+    ],
+    "$.components.schemas.TimeView.properties.entries.items": [
+      "object"
+    ],
+    "$.components.schemas.TimeView.properties.entries.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.TimeView.properties.entries.type": [
+      "string"
+    ],
+    "$.components.schemas.TimeView.properties.from": [
+      "object"
+    ],
+    "$.components.schemas.TimeView.properties.from.format": [
+      "string"
+    ],
+    "$.components.schemas.TimeView.properties.from.type": [
+      "string"
+    ],
+    "$.components.schemas.TimeView.properties.to": [
+      "object"
+    ],
+    "$.components.schemas.TimeView.properties.to.format": [
+      "string"
+    ],
+    "$.components.schemas.TimeView.properties.to.type": [
+      "string"
+    ],
+    "$.components.schemas.TimeView.properties.total": [
+      "object"
+    ],
+    "$.components.schemas.TimeView.properties.total.format": [
+      "string"
+    ],
+    "$.components.schemas.TimeView.properties.total.pattern": [
+      "string"
+    ],
+    "$.components.schemas.TimeView.properties.total.type": [
+      "string"
+    ],
+    "$.components.schemas.TimeView.required": [
+      "array"
+    ],
+    "$.components.schemas.TimeView.required[]": [
+      "string"
+    ],
+    "$.components.schemas.TimeView.type": [
       "string"
     ],
     "$.components.schemas.TimelineData": [
@@ -60892,10 +60988,22 @@
     "$.paths./api/v1/time.post.responses": [
       "object"
     ],
-    "$.paths./api/v1/time.post.responses.200": [
+    "$.paths./api/v1/time.post.responses.201": [
       "object"
     ],
-    "$.paths./api/v1/time.post.responses.200.description": [
+    "$.paths./api/v1/time.post.responses.201.content": [
+      "object"
+    ],
+    "$.paths./api/v1/time.post.responses.201.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/time.post.responses.201.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/time.post.responses.201.content.application/json.schema.$ref": [
+      "string"
+    ],
+    "$.paths./api/v1/time.post.responses.201.description": [
       "string"
     ],
     "$.paths./api/v1/time.post.tags": [
@@ -61003,10 +61111,10 @@
     "$.paths./api/v1/time/{id}.delete.responses": [
       "object"
     ],
-    "$.paths./api/v1/time/{id}.delete.responses.200": [
+    "$.paths./api/v1/time/{id}.delete.responses.204": [
       "object"
     ],
-    "$.paths./api/v1/time/{id}.delete.responses.200.description": [
+    "$.paths./api/v1/time/{id}.delete.responses.204.description": [
       "string"
     ],
     "$.paths./api/v1/time/{id}.delete.tags": [
@@ -61065,6 +61173,18 @@
     ],
     "$.paths./api/v1/time/{id}.patch.responses.200": [
       "object"
+    ],
+    "$.paths./api/v1/time/{id}.patch.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/time/{id}.patch.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/time/{id}.patch.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/time/{id}.patch.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/time/{id}.patch.responses.200.description": [
       "string"
@@ -77576,7 +77696,8 @@
       "boolean"
     ],
     "$.rows[].note": [
-      "null"
+      "null",
+      "string"
     ],
     "$.rows[].occurredAt": [
       "string"
@@ -81194,6 +81315,70 @@
       "number"
     ]
   },
+  "GET /api/v1/time 400": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.errors": [
+      "object"
+    ],
+    "$.errors.to": [
+      "array"
+    ],
+    "$.errors.to[]": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "GET /api/v1/time/export 400": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.errors": [
+      "object"
+    ],
+    "$.errors.to": [
+      "array"
+    ],
+    "$.errors.to[]": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "GET /api/v1/timeline 200": {
     "$": [
       "object"
@@ -84155,6 +84340,61 @@
     ]
   },
   "PATCH /api/v1/time/{id} 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "PATCH /api/v1/time/{id} 409": {
+    "$": [
+      "object"
+    ],
+    "$.changedAt": [
+      "string"
+    ],
+    "$.changedBy": [
+      "string"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.currentRowVersion": [
+      "number"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "PATCH /api/v1/time/{id} 428": {
     "$": [
       "object"
     ],

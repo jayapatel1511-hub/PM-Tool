@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using Hub.Api.Data;
 using Hub.Domain;
@@ -194,4 +195,118 @@ public sealed class TimeTests(HubFactory f)
             }
     }
 
+    static string[] Keys(JsonNode? n) => n!.AsObject().Select(x => x.Key).ToArray();
+
+    Task<HttpResponseMessage> Remove(string as_, string id, int rowVersion, string? reason = null)
+    {
+        var req = new HttpRequestMessage(HttpMethod.Delete, $"/api/v1/time/{id}") { Content = System.Net.Http.Json.JsonContent.Create(new { reason }) };
+        req.Headers.TryAddWithoutValidation("If-Match", $"\"{rowVersion}\"");
+        return f.As(as_).SendAsync(req);
+    }
+
+    [Fact]
+    public async Task Time_answers_keep_their_property_names_order_kinds_and_refusals() // the typed records must serialise to the bytes Time.tsx already reads
+    {
+        var p = await d.Project();
+        var me = await Member(p);
+        var mine = f.As(me.Email);
+        var survey = await d.NewTask(p.Id, TestData.Pm, new { name = "Survey" });
+        var report = await d.NewTask(p.Id, TestData.Pm, new { name = "Report" });
+        string[] entryKeys = ["id", "projectId", "projectNumber", "projectName", "taskId", "taskKey", "taskName", "userId", "person", "workDate", "hours", "note", "rowVersion", "canEdit", "editNeedsReason"];
+
+        var post = await Add(me.Email, survey, "2026-10-06", 2.5m, "Site notes");
+        Assert.Equal(HttpStatusCode.Created, post.StatusCode);
+        var created = await post.Json(201);
+        Assert.Equal($"/api/v1/time/{created.S("id")}", post.Headers.Location!.ToString());
+        Assert.Equal(["id", "rowVersion"], Keys(created));
+        var second = await Add(me.Email, report, "2026-10-08", 1m).Result.Json(201); // no note
+
+        var week = await mine.GetAsync("/api/v1/time?from=2026-10-05&to=2026-10-11").Result.Json();
+        Assert.Equal(["from", "to", "entries", "total", "byDay", "byTask", "byProject", "canReview"], Keys(week));
+        Assert.Equal(("2026-10-05", "2026-10-11", 3.5m, false), (week.S("from"), week.S("to"), week["total"]!.GetValue<decimal>(), week["canReview"]!.GetValue<bool>()));
+        var entries = week["entries"]!.AsArray().Select(e => e!).ToArray();
+        Assert.Equal([survey.S("key"), report.S("key")], entries.Select(e => e.S("taskKey"))); // by work date, then task key
+        Assert.All(entries, e =>
+        {
+            Assert.Equal(entryKeys, Keys(e));
+            Assert.All(new[] { "id", "projectId", "projectNumber", "projectName", "taskId", "taskKey", "taskName", "userId", "person", "workDate" }, k => Assert.Equal(JsonValueKind.String, e[k]!.GetValueKind()));
+            Assert.Equal(JsonValueKind.Number, e["hours"]!.GetValueKind());
+            Assert.Equal(JsonValueKind.Number, e["rowVersion"]!.GetValueKind());
+            Assert.Equal(JsonValueKind.True, e["canEdit"]!.GetValueKind());
+            Assert.Equal(JsonValueKind.False, e["editNeedsReason"]!.GetValueKind());
+        });
+        Assert.Equal(("Site notes", 2.5m, created.G("id"), me.Id, p.ProjectNumber, p.Name), (entries[0].S("note"), entries[0]["hours"]!.GetValue<decimal>(), entries[0].G("id"), entries[0].G("userId"), entries[0].S("projectNumber"), entries[0].S("projectName")));
+        Assert.Null(entries[1]["note"]); // present (the key order above) and null
+        string[] dayKeys = ["date", "hours"], taskKeys = ["taskId", "taskKey", "taskName", "projectNumber", "hours"], projectKeys = ["projectId", "projectNumber", "projectName", "hours"];
+        var byDay = week["byDay"]!.AsArray().Select(e => e!).ToArray();
+        Assert.All(byDay, e => Assert.Equal(dayKeys, Keys(e)));
+        Assert.Equal([("2026-10-06", 2.5m), ("2026-10-08", 1m)], byDay.Select(e => (e.S("date"), e["hours"]!.GetValue<decimal>())));
+        var byTask = week["byTask"]!.AsArray().Select(e => e!).ToArray();
+        Assert.All(byTask, e => Assert.Equal(taskKeys, Keys(e)));
+        Assert.Equal([(survey.S("key"), "Survey", 2.5m), (report.S("key"), "Report", 1m)], byTask.Select(e => (e.S("taskKey"), e.S("taskName"), e["hours"]!.GetValue<decimal>()))); // by task key
+        var byProject = week["byProject"]!.AsArray().Select(e => e!).ToArray();
+        Assert.Equal(projectKeys, Keys(Assert.Single(byProject)));
+        Assert.Equal((p.Id, p.ProjectNumber, p.Name, 3.5m), (byProject[0].G("projectId"), byProject[0].S("projectNumber"), byProject[0].S("projectName"), byProject[0]["hours"]!.GetValue<decimal>()));
+
+        var empty = await mine.GetAsync("/api/v1/time?from=2026-11-02&to=2026-11-08").Result.Json(); // an empty week is still the same envelope
+        Assert.Equal(["from", "to", "entries", "total", "byDay", "byTask", "byProject", "canReview"], Keys(empty));
+        Assert.Equal(0m, empty["total"]!.GetValue<decimal>());
+        Assert.All(new[] { "entries", "byDay", "byTask", "byProject" }, k => Assert.Empty(empty[k]!.AsArray()));
+        var dflt = await mine.GetAsync("/api/v1/time").Result.Json(); // no range: the current week
+        Assert.Equal(6, DateOnly.Parse(dflt.S("to")).DayNumber - DateOnly.Parse(dflt.S("from")).DayNumber);
+        foreach (var url in new[] { "/api/v1/time?from=2026-10-11&to=2026-10-05", "/api/v1/time?from=2025-01-01&to=2026-12-31", "/api/v1/time/export?format=csv&from=2026-10-11&to=2026-10-05" })
+            Assert.NotNull((await mine.GetAsync(url).Result.Json(400))["errors"]!["to"]); // the 370-day bound, on the view and its export
+
+        // PATCH answers the new version; a stale or missing If-Match is refused.
+        var edited = await mine.Patch($"/api/v1/time/{created.S("id")}", new { hours = 3 }, created.I("rowVersion")).Result.Json();
+        Assert.Equal(["id", "rowVersion"], Keys(edited));
+        Assert.Equal((created.G("id"), created.I("rowVersion") + 1), (edited.G("id"), edited.I("rowVersion")));
+        Assert.Equal(HttpStatusCode.Conflict, (await mine.Patch($"/api/v1/time/{created.S("id")}", new { hours = 4 }, created.I("rowVersion"))).StatusCode);
+        Assert.Equal(HttpStatusCode.PreconditionRequired, (await mine.Patch($"/api/v1/time/{created.S("id")}", new { hours = 4 })).StatusCode);
+
+        // DELETE: 404 for someone who cannot see the entry, a reason from a PM correcting it, a current version, then 204 with no body.
+        var id = created.S("id");
+        Assert.Equal(HttpStatusCode.NotFound, (await Remove(TestData.Jill, id, edited.I("rowVersion"))).StatusCode);
+        Assert.NotNull((await Remove(TestData.Pm, id, edited.I("rowVersion")).Result.Json(400))["errors"]!["reason"]);
+        Assert.Equal(HttpStatusCode.Conflict, (await Remove(me.Email, id, created.I("rowVersion"))).StatusCode);
+        var pmView = await f.As(TestData.Pm).GetAsync($"/api/v1/time?from=2026-10-05&to=2026-10-11&scope=all&projectId={p.Id}").Result.Json();
+        var seen = pmView["entries"]!.AsArray().Single(e => e!.S("id") == id)!;
+        Assert.Equal((true, true), (seen["canEdit"]!.GetValue<bool>(), seen["editNeedsReason"]!.GetValue<bool>())); // a PM sees the reason rule on someone else's entry
+        var gone = await Remove(TestData.Pm, id, edited.I("rowVersion"), "Entered on the wrong day");
+        Assert.Equal(HttpStatusCode.NoContent, gone.StatusCode);
+        Assert.Empty(await gone.Content.ReadAsByteArrayAsync());
+        Assert.Equal(HttpStatusCode.NotFound, (await Remove(me.Email, id, edited.I("rowVersion") + 1)).StatusCode);
+        var ownDelete = await Remove(me.Email, second.S("id"), second.I("rowVersion"));
+        Assert.Equal(HttpStatusCode.NoContent, ownDelete.StatusCode);
+        Assert.Empty(await ownDelete.Content.ReadAsByteArrayAsync());
+        Assert.Equal(0m, (await mine.GetAsync("/api/v1/time?from=2026-10-05&to=2026-10-11").Result.Json())["total"]!.GetValue<decimal>());
+    }
+
+    [Fact]
+    public async Task The_export_keeps_its_columns_row_order_total_and_file_names()
+    {
+        var p = await d.Project();
+        var me = await Member(p);
+        var mine = f.As(me.Email);
+        var survey = await d.NewTask(p.Id, TestData.Pm, new { name = "Survey" });
+        var report = await d.NewTask(p.Id, TestData.Pm, new { name = "Report" });
+        (await Add(me.Email, report, "2026-10-08", 1m)).EnsureSuccessStatusCode(); // no note
+        (await Add(me.Email, survey, "2026-10-06", 2.5m, "Site notes")).EnsureSuccessStatusCode();
+        var person = (await mine.GetAsync("/api/v1/time?from=2026-10-05&to=2026-10-11").Result.Json())["entries"]![0]!.S("person");
+
+        var csv = await mine.GetAsync("/api/v1/time/export?format=csv&from=2026-10-05&to=2026-10-11");
+        Assert.Equal(HttpStatusCode.OK, csv.StatusCode);
+        Assert.Equal("text/csv; charset=utf-8", csv.Content.Headers.ContentType!.ToString());
+        Assert.StartsWith("task-hours-", csv.Content.Headers.ContentDisposition!.FileName!.Trim('"'));
+        Assert.EndsWith(".csv", csv.Content.Headers.ContentDisposition!.FileName!.Trim('"'));
+        var lines = System.Text.Encoding.UTF8.GetString((await csv.Content.ReadAsByteArrayAsync())[3..]).Split('\n').Select(l => l.Trim()).Where(l => l.Length > 0).ToArray();
+        Assert.Equal(["Date,Person,Project,Key,Task,Hours,Note",
+            $"2026-10-06,{person},{p.ProjectNumber},{survey.S("key")},Survey,2.50,Site notes", // by work date, then task key
+            $"2026-10-08,{person},{p.ProjectNumber},{report.S("key")},Report,1.00,",
+            ",Total,,,,3.50,"], lines); // hours are written with two decimals, the total too
+
+        var xlsx = await mine.GetAsync("/api/v1/time/export?format=xlsx&from=2026-10-05&to=2026-10-11");
+        Assert.Equal("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", xlsx.Content.Headers.ContentType!.ToString());
+        Assert.EndsWith(".xlsx", xlsx.Content.Headers.ContentDisposition!.FileName!.Trim('"'));
+    }
 }

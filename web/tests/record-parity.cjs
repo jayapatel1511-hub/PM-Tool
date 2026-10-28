@@ -6,8 +6,9 @@
 //                           grouped, for the shared DataTable's group rows), the project Team tab, the Milestones list (a slipped milestone with a deliverable, for its expanded detail row), the open-roles tab of
 //                           the Active, Complete and empty-role projects, the Reviews and Changes registers, the workspace
 //                           Team page scoped to the Active project, the Portfolio (plain, and grouped by client, which
-//                           needs flag.status_rollups) and the Holidays admin list (compared as the administrator only: a
-//                           route under /admin/ runs for Jordan Lee and no other persona). {project}, {complete}, {empty} and
+//                           needs flag.status_rollups), the Holidays admin list and four Administration reference lists (the column
+//                           variants of the one table), all compared as the administrator only: a route under /admin/ runs for
+//                           Jordan Lee and no other persona). {project}, {complete}, {empty} and
 //                           {restricted} are synthetic project numbers, {projectId} the Active project's id,
 //                           {risk} the synthetic risk id
 //   TUESDAY_RECORD_FLAGS    flags already merged on those screens: the matrix runs with all off, then all on (§47.6)
@@ -35,6 +36,7 @@ const SCREENS = (process.env.TUESDAY_RECORD_SCREENS ?? [
   '/projects/{project}/reviews', '/projects/{project}/changes', '/team?projects={projectId}',
   '/portfolio', '/portfolio?group=client',
   '/admin/holidays',
+  '/admin/reference/disciplines', '/admin/reference/clients', '/admin/reference/offices', '/admin/reference/deliverableTypes',
 ].join(' ')).split(/\s+/).filter(Boolean)
 const FLAGS = (process.env.TUESDAY_RECORD_FLAGS ?? '').split(/[\s,]+/).filter(Boolean)
 // Project Manager, Discipline Lead, Team Member, Read Only, a user outside the Restricted project, and the administrator

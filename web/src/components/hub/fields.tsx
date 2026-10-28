@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useFlag, useMe } from '@/lib/auth'
 import { typedRequest, watchWrite, type ApiError, type WriteWatch } from '@/lib/api'
-import { dropPending, keepPending, peekPending } from '@/lib/drafts'
+import { dropPending, keepPending, peekPending, pendingRoute, registerForm } from '@/lib/drafts'
 import { ago, fmtDate, fmtTime } from '@/lib/format'
 import { invalidateChange } from '@/lib/keys'
 import { t , runtimeText } from '@/lib/i18n'
@@ -21,20 +21,22 @@ const FieldLabelContext = createContext<string | undefined>(undefined)
 /** The row's label when it is plain text: what names a field after sign-in expires (FR-SAV-05). */
 const FieldNameContext = createContext<string | undefined>(undefined)
 
-/** A labelled value in a detail panel: the label column sits beside the value from 640 px and above it on phones. */
-export function FieldRow({ label, children, className }: { label: ReactNode; children: ReactNode; className?: string }) {
+/** A labelled value in a detail panel: the label column sits beside the value from 640 px and above it on phones. `name` names the field
+ *  when the label is not plain text. */
+export function FieldRow({ label, name, children, className }: { label: ReactNode; name?: string; children: ReactNode; className?: string }) {
   const labelId = useId()
   return (
     <div className={cn('grid grid-cols-1 items-start gap-x-3 gap-y-1 py-1 text-sm sm:grid-cols-[8.5rem_1fr]', className)}>
       <div id={labelId} className="text-sm text-muted-foreground sm:pt-[calc((var(--control-row-h)_-_20px)/2)]">{label}</div>
       <div className="min-w-0">
-        <FieldLabelContext.Provider value={labelId}><FieldNameContext.Provider value={typeof label === 'string' ? label : undefined}>{children}</FieldNameContext.Provider></FieldLabelContext.Provider>
+        <FieldLabelContext.Provider value={labelId}><FieldNameContext.Provider value={name ?? (typeof label === 'string' ? label : undefined)}>{children}</FieldNameContext.Provider></FieldLabelContext.Provider>
       </div>
     </div>
   )
 }
 
-type SaveState = { status: 'saving' | 'saved' | 'failed' | 'conflict'; value: unknown; message?: string; who?: string; at?: string; version?: number }
+// `ifMatch`: the row version the field's write went on; `version`: the one a conflict names, for Keep mine.
+type SaveState = { status: 'saving' | 'saved' | 'failed' | 'conflict'; value: unknown; message?: string; who?: string; at?: string; version?: number; ifMatch?: number }
 const blank = (v: unknown) => (v === '' || v === undefined ? null : v)
 const why = (e: unknown) => {
   const x = e as ApiError
@@ -53,34 +55,44 @@ const since = (at?: string) => {
  *  dialog completed it) stops saying "Not saved" once the field shows the value. With `delayMs` (`autosave_delay_ms`, present only
  *  while `flag.data_entry_safety` is on) `schedule` also saves typed text after that long without typing, and `commit` (blur, Enter)
  *  does not send that value a second time. Those saves go one at a time: one sent before the previous save is back would carry the
- *  row version from before it and be refused as a conflict, so it waits and goes out from the render that brought the saved value
- *  back. Without `delayMs`, `commit` is the plain blur save it always was.
+ *  row version from before it and be refused as a conflict, so it waits and goes out when that answer comes, on the row version the
+ *  answer gives. Without `delayMs`, `commit` is the plain blur save it always was.
  *  FR-SAV-02 (unflagged, 051-D4) for a field that saves through `onSave` (`keep`; not a list row renamed in place): a save that fails
  *  never puts the server's copy back in the field. The field shows the value it sent (`kept`) with "Not saved", Retry (with the flag
- *  on) and "Discard my change"; a save that got no answer or found the server down or updating goes again after 2, 4 and 8 s from the newest render. A
- *  concurrency conflict brings the other value onto the screen beside this one and waits for "Keep mine" (sent on the row version the
- *  refusal names) or "Take theirs".
- *  FR-SAV-05 (flag on, `field` names the field): a save refused because sign-in expired (401) keeps its typed value in this tab before the
- *  sign-in flow runs; once the same field is on screen again after sign-in it shows that value and saves it once, on the fresh row version. */
+ *  on) and "Discard my change"; a save that got no answer or found the server down or updating goes again after 2, 4 and 8 s while the
+ *  field is on screen. Retries, and saves from a field still showing "Not saved", go on the row version the refused save went on, so a
+ *  change someone made meanwhile is a conflict, not overwritten. A concurrency conflict brings the other value onto the screen beside this
+ *  one and waits for "Keep mine" (sent on the row version the refusal names) or "Take theirs".
+ *  With the flag on, leaving a field that says "Not saved" or shows a conflict asks first (FR-SAV-04).
+ *  FR-SAV-05 (flag on, `field` names the field): a 401 from any request keeps the field's typed value in this tab, for the record the field
+ *  was opened on, before the sign-in flow runs; once the same field is on screen again after sign-in it shows that value and saves it once,
+ *  on the row version it was typed against. */
 function useAutosaveField(current?: unknown, onSave?: (v: string | null) => Promise<unknown>, { delayMs, keep = !!onSave, field }: { delayMs?: number; keep?: boolean; field?: string } = {}) {
   const qc = useQueryClient()
   const me = useMe()
-  const name = useFlag('data_entry_safety') && keep ? field : undefined
+  const on = useFlag('data_entry_safety') && keep
+  const name = on ? field : undefined
+  const [route] = useState(pendingRoute) // the record this field belongs to, whatever is on screen when a refusal comes back
   // Read, not removed, while rendering: the one retry is spent in the effect below, which runs once per mount.
   const [resumed] = useState(() => name ? peekPending(me.id, name, me.settings.draftKeepDays ?? 7) : null)
   const resume = useRef(resumed)
-  const [state, setState] = useState<SaveState | null>(resumed ? { status: 'saving', value: resumed.value } : null)
+  const [state, setState] = useState<SaveState | null>(resumed ? { status: 'saving', value: resumed.value, ifMatch: resumed.version } : null)
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
   const pause = useRef<ReturnType<typeof setTimeout>>(undefined)
   const again = useRef<ReturnType<typeof setTimeout>>(undefined)
   const sent = useRef<{ value: unknown } | undefined>(undefined)
   const held = useRef<{ value: unknown } | undefined>(undefined)
-  const live = useRef({ current, onSave, name, user: me.id })
-  useEffect(() => { live.current = { current, onSave, name, user: me.id } })
+  const typed = useRef<{ value: unknown } | undefined>(undefined) // the newest value put in the field, for a 401 to keep
+  const gone = useRef(false)
+  const landed = state != null && blank(state.value) === blank(current)
+  const shown = landed && (state.status === 'failed' || state.status === 'conflict') ? null : state
+  const unsaved = shown?.status === 'failed' || shown?.status === 'conflict'
+  const live = useRef({ current, onSave, name, user: me.id, shown, unsaved })
+  useEffect(() => { live.current = { current, onSave, name, user: me.id, shown, unsaved } })
   const track = async (save: unknown, value?: unknown, watch?: WriteWatch, tries = 0) => {
     clearTimeout(timer.current)
     clearTimeout(again.current)
-    setState({ status: 'saving', value })
+    setState({ status: 'saving', value, ifMatch: watch?.ifMatch })
     let error: unknown, thrown = false
     try {
       const r = await save
@@ -88,27 +100,32 @@ function useAutosaveField(current?: unknown, onSave?: (v: string | null) => Prom
         // undefined: the caller reports no outcome (it shows its own errors), so nothing is claimed.
         setState(r === undefined ? null : { status: 'saved', value })
         if (r !== undefined) timer.current = setTimeout(() => setState(null), 4000)
+        // The answer frees the next save, even when the refetch brings the field's value back unchanged (the server wrote "1.50" as
+        // "1.5"); a value typed while this one was out goes now, on the row version the answer gave.
+        const next = held.current
+        sent.current = held.current = undefined
+        if (next) { sent.current = next; void attempt(next.value, 0, watch?.saved) }
         return
       }
       error = watch?.error
     } catch (e) { error = e; thrown = true }
     // A refused or failed save never comes back, so the next one goes straight out; a value typed while it was out is the one kept.
-    // ponytail: a save that succeeds but whose refetch never brings the value back keeps the field's later saves held until the value
-    // next changes; add a way out if that shows up.
     const kept = held.current ? held.current.value : value
     sent.current = held.current = undefined
     const x = error as ApiError | undefined
+    const ifMatch = watch?.ifMatch
     if (keep && x?.code === 'concurrency_conflict') {
-      setState({ status: 'conflict', value: kept, who: x.body?.changedBy, at: x.body?.changedAt, version: x.body?.currentRowVersion })
+      setState({ status: 'conflict', value: kept, who: x.body?.changedBy, at: x.body?.changedAt, version: x.body?.currentRowVersion, ifMatch })
       void invalidateChange(qc) // brings the other value into `current`, so the field can show both
       return
     }
-    setState({ status: 'failed', value: kept, message: thrown ? why(error) : undefined })
-    if (keep && tries < RETRY_MS.length && x != null && (x.status === 0 || x.status >= 500)) again.current = setTimeout(() => resend(kept, tries + 1), RETRY_MS[tries])
+    setState({ status: 'failed', value: kept, message: thrown ? why(error) : undefined, ifMatch })
+    if (keep && !gone.current && tries < RETRY_MS.length && x != null && (x.status === 0 || x.status >= 500)) again.current = setTimeout(() => resend(kept, tries + 1, ifMatch), RETRY_MS[tries])
   }
-  // Reads `live` (the newest render, so the newest row version) because it also runs from the timers and the effect below.
-  const attempt = (value: unknown, tries = 0, version?: number) => {
-    const watch: WriteWatch = { ifMatch: version, signedOut: () => { const { name, user } = live.current; if (name) keepPending(user, name, value) } }
+  // Reads `live` (the newest render, so the newest row version) because it also runs from the timers and the effect below. A field
+  // still saying "Not saved" shows a value typed against the version its save went on, so that is the one it saves on.
+  const attempt = (value: unknown, tries = 0, version = live.current.shown?.status === 'failed' ? live.current.shown.ifMatch : undefined) => {
+    const watch: WriteWatch = { ifMatch: version, signedOut: () => { const { name, user } = live.current; if (name) keepPending(user, route, name, value, watch.ifMatch) } }
     return track(watchWrite(watch, () => live.current.onSave!(value as string | null)), value, watch, tries)
   }
   const already = (value: unknown) => sent.current !== undefined && blank(sent.current.value) === blank(value)
@@ -118,47 +135,55 @@ function useAutosaveField(current?: unknown, onSave?: (v: string | null) => Prom
     sent.current = { value }
     return attempt(value, tries, version)
   }
-  // Retry, Keep mine and the timed retries: nothing goes out once the field's value is the saved one.
+  // Retry, Keep mine, the timed retries and the retry after sign-in: nothing goes out once the field's value is the saved one.
   const resend = (value: unknown, tries = 0, version?: number) => {
+    typed.current = { value }
     if (blank(value) === blank(live.current.current)) { setState(null); return Promise.resolve() }
     return delayMs == null ? attempt(value, tries, version) : send(value, tries, version)
   }
-  // Once the saved value is back from the server, the field's own comparison takes over from `sent`, and a save held behind it goes now.
-  useEffect(() => {
-    sent.current = undefined
-    const next = held.current
-    held.current = undefined
-    if (next) send(next.value)
-  }, [current])
   useEffect(() => {
     const again = resume.current
     resume.current = null
     if (!again || !name) return
     dropPending(me.id, name)
-    void resend(again.value)
+    void resend(again.value, 0, again.version)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps -- once per mount: the one retry
   const commit = (value: unknown) => {
+    typed.current = { value }
     clearTimeout(pause.current)
     clearTimeout(again.current)
     return delayMs == null ? attempt(value) : send(value)
   }
   const schedule = (value: unknown) => {
+    typed.current = { value }
     clearTimeout(again.current) // typing on replaces a timed retry; leaving the field (or Escape) settles it
     if (delayMs == null) return
     clearTimeout(pause.current)
     pause.current = setTimeout(() => send(value), delayMs)
   }
-  const clear = () => { clearTimeout(timer.current); clearTimeout(pause.current); clearTimeout(again.current); held.current = undefined; setState(null) }
-  const landed = state != null && blank(state.value) === blank(current)
-  const shown = landed && (state.status === 'failed' || state.status === 'conflict') ? null : state
+  const clear = () => { clearTimeout(timer.current); clearTimeout(pause.current); clearTimeout(again.current); held.current = typed.current = undefined; setState(null) }
+  // The timed retries end with the field. With the flag on, the leave guard asks while it shows a value that is not saved, and a 401
+  // from any request keeps what was typed in it.
+  useEffect(() => {
+    gone.current = false
+    const off = on ? registerForm({
+      unsaved: () => live.current.unsaved,
+      discard: clear,
+      keep: () => {
+        const { name, user, current, shown } = live.current, v = typed.current
+        if (name && v && blank(v.value) !== blank(current)) keepPending(user, route, name, v.value, shown?.ifMatch)
+      },
+    }) : undefined
+    return () => { gone.current = true; clearTimeout(again.current); off?.() }
+  }, [on]) // eslint-disable-line react-hooks/exhaustive-deps -- `live` and the refs carry the rest
   return {
     state: shown, current, keep, track, commit, schedule, clear,
     /** The value the field shows instead of the server's while its save is out, failed or in conflict, and once saved until the
      *  refetch brings it back. */
     kept: keep && shown && !(shown.status === 'saved' && landed) ? { value: shown.value } : undefined,
     /** "Discard my change" and "Take theirs": the field goes back to the server's value. */
-    discard: () => { const pending = shown?.status === 'failed' || shown?.status === 'conflict'; if (pending) clear(); return pending },
-    retry: () => shown && resend(shown.value),
+    discard: () => { if (unsaved) clear(); return unsaved },
+    retry: () => shown && resend(shown.value, 0, shown.ifMatch),
     keepMine: () => shown && resend(shown.value, 0, shown.version),
   }
 }

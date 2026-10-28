@@ -14,7 +14,7 @@ Object.assign(globalThis, {
   },
   window: { addEventListener: () => {} },
 })
-const { clearDraft, discardUnsaved, draftStorageKey, dropPending, hasUnsaved, keepPending, leave, leaveQuestion, peekPending, pruneDrafts, readDraft, registerForm, writeDraft } = await import('./drafts.ts')
+const { clearDraft, discardUnsaved, draftStorageKey, dropPending, forgetDrafts, hasUnsaved, keepPending, keepUnsent, leave, leaveQuestion, peekPending, pendingRoute, pruneDrafts, readDraft, registerForm, writeDraft } = await import('./drafts.ts')
 
 const DAY = 86_400_000
 const ago = (days: number) => new Date(Date.now() - days * DAY).toISOString()
@@ -62,29 +62,56 @@ test('leaving asks only while something typed is neither saved nor drafted (FR-S
 })
 
 test('a save cut off by an expired sign-in waits for the same user, record and field, and is spent once (FR-SAV-05)', () => {
-  keepPending('u1', 'Description', 'typed')
-  keepPending('u1', 'Description', 'typed again') // the same field again replaces it
-  keepPending('u1', 'Name', null) // a cleared field is kept too
-  assert.deepEqual(peekPending('u1', 'Description', 7), { value: 'typed again' })
-  assert.deepEqual(peekPending('u1', 'Name', 7), { value: null })
+  const route = pendingRoute()
+  assert.equal(route, '/my-work?Task:t1')
+  keepPending('u1', route, 'Description', 'typed', 3)
+  keepPending('u1', route, 'Description', 'typed again', 4) // the same field again replaces it
+  keepPending('u1', route, 'Name', null) // a cleared field is kept too
+  assert.deepEqual(peekPending('u1', 'Description', 7), { value: 'typed again', version: 4 }, 'with the row version it was typed against')
+  assert.deepEqual(peekPending('u1', 'Name', 7), { value: null, version: undefined })
   assert.equal(peekPending('u2', 'Description', 7), null, 'another person who signs in does not get it')
   assert.equal(peekPending('u1', 'Owner', 7), null, 'nor does another field')
   Object.assign(globalThis.location, { search: '?view=all&panel=Task:t1' })
-  assert.deepEqual(peekPending('u1', 'Description', 7), { value: 'typed again' }, 'other query parameters changing do not matter')
+  assert.deepEqual(peekPending('u1', 'Description', 7), { value: 'typed again', version: 4 }, 'other query parameters changing do not matter')
   Object.assign(globalThis.location, { search: '?panel=Task:t2' })
   assert.equal(peekPending('u1', 'Description', 7), null, 'another record in the panel does not get it')
+  keepPending('u1', route, 'Name', 'typed for t1') // the refusal came back after the panel moved on to t2
+  assert.equal(peekPending('u1', 'Name', 7), null, 'kept for the record the field was opened on, not the one on screen')
   Object.assign(globalThis.location, { search: '?panel=Task:t1' })
+  assert.deepEqual(peekPending('u1', 'Name', 7), { value: 'typed for t1', version: undefined })
   dropPending('u1', 'Description')
   assert.equal(peekPending('u1', 'Description', 7), null, 'one retry')
-  assert.deepEqual(peekPending('u1', 'Name', 7), { value: null }, 'the other field still waits')
   dropPending('u1', 'Name')
   assert.equal(tab.has('hub.pendingFields'), false, 'nothing is left behind')
-  keepPending('u1', 'Description', 'old')
+  keepPending('u1', route, 'Description', 'old')
   const [kept] = JSON.parse(tab.get('hub.pendingFields')!)
   tab.set('hub.pendingFields', JSON.stringify([{ ...kept, at: ago(8) }]))
   assert.equal(peekPending('u1', 'Description', 7), null, 'older than draft_keep_days')
   tab.clear()
   full = true
-  assert.doesNotThrow(() => keepPending('u1', 'Description', 'x'), 'a browser that refuses the write loses nothing more')
+  assert.doesNotThrow(() => keepPending('u1', route, 'Description', 'x'), 'a browser that refuses the write loses nothing more')
   full = false
+})
+
+test('a 401 from any request asks every form to keep its typed input (FR-SAV-05)', () => {
+  let kept = 0
+  const off = registerForm({ unsaved: () => false, discard: () => {}, keep: () => { kept++ } })
+  const plain = registerForm({ unsaved: () => false, discard: () => {} }) // a form with a draft has nothing more to keep
+  keepUnsent()
+  assert.equal(kept, 1)
+  off(); plain()
+  keepUnsent()
+  assert.equal(kept, 1, 'a form that is gone keeps nothing')
+})
+
+test('an explicit sign-out drops the person\'s drafts and waiting fields, and only theirs (051-D2)', () => {
+  writeDraft(draftStorageKey('u1', 'task.new.p1'), { name: 'x' }); writeDraft(draftStorageKey('u2', 'task.new.p1'), { name: 'y' }); store.set('hub.rail', 'open')
+  keepPending('u1', pendingRoute(), 'Name', 'mine'); keepPending('u2', pendingRoute(), 'Name', 'theirs')
+  forgetDrafts('u1')
+  assert.deepEqual([...store.keys()].sort(), ['draft.u2.task.new.p1', 'hub.rail'])
+  assert.equal(peekPending('u1', 'Name', 7), null)
+  assert.deepEqual(peekPending('u2', 'Name', 7), { value: 'theirs', version: undefined })
+  forgetDrafts('u2')
+  assert.equal(tab.has('hub.pendingFields'), false)
+  store.clear()
 })

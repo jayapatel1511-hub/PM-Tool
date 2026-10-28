@@ -4,6 +4,7 @@ import { lazy, useEffect, useRef, useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { api, configureApi, get } from '@/lib/api'
+import { forgetDrafts } from '@/lib/drafts'
 import { setDateContext } from '@/lib/format'
 import { t , runtimeText } from '@/lib/i18n'
 import { lazyImport } from '@/lib/lazy'
@@ -157,7 +158,8 @@ function Signed({ children, onSignOut }: { children: ReactNode; onSignOut: () =>
   if (me.isPending) return <Splash text={t('app.loading')} />
   if (me.error) return <Splash text={(me.error as any)?.status === 403 ? t('auth.inactive') : t('app.error')} action={<Button variant="outline" onClick={onSignOut}>{t('auth.signOut')}</Button>} />
   setDateContext(me.data.settings.today, me.data.settings.dateFormat)
-  return <Ctx.Provider value={{ me: me.data, signOut: onSignOut }}>{children}</Ctx.Provider>
+  // An explicit sign-out leaves no drafts or waiting fields for the next person on this browser; the idle sign-out keeps them (051-D2).
+  return <Ctx.Provider value={{ me: me.data, signOut: () => { forgetDrafts(me.data.id); onSignOut() } }}>{children}</Ctx.Provider>
 }
 
 function touch() { localStorage.setItem(ACTIVITY_KEY, String(Date.now())) }

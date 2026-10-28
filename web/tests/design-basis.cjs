@@ -2,6 +2,7 @@
 // Regression for the 2026-10-01 rehearsal: impact decisions offered for "Pending Assessment" (D1), the affected-work
 // filter sends a bare id (D2), dialogs return focus to their opener (D3) and withdrawn-version uses are flagged (D4).
 const { chromium } = require('playwright');
+const { clientConfig } = require('./config.fixture.cjs');
 const path = require('path'), { spawn } = require('child_process'), assert = require('assert/strict');
 const { decisionRow, externalParty } = require('./decisions.fixture.cjs');
 const { commitmentRow, commitmentList } = require('./weekly-commitments.fixture.cjs');
@@ -73,7 +74,7 @@ let server, browser;
   await page.route('**/api/**', async route => {
     const req = route.request(), u = new URL(req.url()), p = u.pathname.replace('/api/v1/', ''), method = req.method(); let data = {};
     if (method !== 'GET' && p.startsWith(`tasks/${task}`)) taskWrites.push({ method, path: p });
-    if (p === 'config') data = { authMode: 'Development', entra: {} };
+    if (p === 'config') data = clientConfig();
     else if (p === 'me') data = me(); else if (p === 'me/sign-in') data = {}; else if (p === 'me/notifications/pulse') data = { stamp: '0' };
     else if (p === 'me/notifications/unread-count') data = { notifications: 0, following: 0 }; else if (p === 'workspaces') data = []; else if (p === 'views' && method === 'POST') { const body = req.postDataJSON(); savedViews.push({ ...body, id: id(300 + savedViews.length), scope: 'Personal', rowVersion: 1, dropped: [], canEdit: true }); data = savedViews.at(-1) }
     else if (p === 'views') data = { views: savedViews.filter(v => v.listType === u.searchParams.get('listType')), canShare: false };

@@ -1,6 +1,7 @@
 // Packet 047 mocked-browser workflows. These exercise rendered controls and network behaviour;
 // API contract and persistence rules remain covered by the server tests.
 const { chromium } = require('playwright')
+const { clientConfig } = require('./config.fixture.cjs')
 const assert = require('node:assert/strict')
 const { spawn } = require('node:child_process')
 const path = require('node:path')
@@ -32,7 +33,7 @@ const template = { id: id(10), familyId: id(11), name: 'Synthetic template', des
     await page.route('**/api/**', async route => {
       const req = route.request(), u = new URL(req.url()), p = u.pathname.replace('/api/v1/', ''), method = req.method()
       let status = 200, data = {}
-      if (p === 'config') data = { authMode: 'Development', entra: {} }
+      if (p === 'config') data = clientConfig()
       else if (p === 'me') data = me()
       else if (p === 'me/sign-in') data = {}
       else if (p === 'me/notifications/pulse') data = { stamp: '0' }

@@ -1,6 +1,7 @@
 // Packet 051 S10 (FR-ADR-07, FR-ADR-08): the Portfolio admin strip shows the last Admin review's date and counts to
 // Executives only while flag.admin_review is on; otherwise it is absent and never requested.
 const { chromium } = require('playwright')
+const { clientConfig } = require('./config.fixture.cjs')
 const assert = require('node:assert/strict')
 const { startPreview, mockPlatformApi } = require('./platform-fixtures.cjs')
 const { emptyPortfolio, lastReview: strip } = require('./portfolio.fixture.cjs')
@@ -20,7 +21,7 @@ const personId = '00000000-0000-0000-0000-000000000002'
   page.on('pageerror', e => errors.push(e.message))
   await page.route('**/api/**', async route => {
     const p = new URL(route.request().url()).pathname.replace('/api/v1/', ''); let data
-    if (p === 'config') data = { authMode: 'Development', entra: {} }
+    if (p === 'config') data = clientConfig()
     else if (p === 'me') data = { id: personId, displayName: 'Alex Chen', email: 'alex@hub.test', roles: [], systemRoles: roles, capabilities: { createProject: false, createTask: true, portfolio: true, workload: false, staff: false, allStaff: false, admin, templates: false, readOnly: false, directReports: 0 }, settings: { today: '2026-10-18', dateFormat: 'yyyy-MM-dd', orgTimeZone: 'America/Halifax', idleTimeoutHours: 8, restrictedProjectsEnabled: true }, preferences: { denseRows: true }, flags: { admin_review: flag } }
     else if (p === 'me/notifications/unread-count') data = { notifications: 0, following: 0 }
     else if (p === 'me/notifications/pulse') data = { stamp: '0' }

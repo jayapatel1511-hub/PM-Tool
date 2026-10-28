@@ -1921,34 +1921,6 @@
         ],
         "type": "object"
       },
-      "AnonymousTypeOfstringAndString[]AndAnonymousTypeOfstringAndstringAndstring": {
-        "properties": {
-          "authMode": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "entra": {
-            "$ref": "#/components/schemas/AnonymousTypeOfstringAndstringAndstring"
-          },
-          "providers": {
-            "items": {
-              "type": "string"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          }
-        },
-        "required": [
-          "authMode",
-          "providers",
-          "entra"
-        ],
-        "type": "object"
-      },
       "AnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndboolean": {
         "properties": {
           "app": {
@@ -2005,34 +1977,6 @@
         "required": [
           "role",
           "source"
-        ],
-        "type": "object"
-      },
-      "AnonymousTypeOfstringAndstringAndstring": {
-        "properties": {
-          "apiScope": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "clientId": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "tenantId": {
-            "type": [
-              "null",
-              "string"
-            ]
-          }
-        },
-        "required": [
-          "clientId",
-          "tenantId",
-          "apiScope"
         ],
         "type": "object"
       },
@@ -4439,6 +4383,28 @@
             ]
           }
         },
+        "type": "object"
+      },
+      "ClientConfig": {
+        "properties": {
+          "authMode": {
+            "type": "string"
+          },
+          "entra": {
+            "$ref": "#/components/schemas/EntraClientConfig"
+          },
+          "providers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "authMode",
+          "providers",
+          "entra"
+        ],
         "type": "object"
       },
       "Closeout": {
@@ -8379,6 +8345,34 @@
           "versionRowVersion",
           "version",
           "reason"
+        ],
+        "type": "object"
+      },
+      "EntraClientConfig": {
+        "properties": {
+          "apiScope": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "clientId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "tenantId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "clientId",
+          "tenantId",
+          "apiScope"
         ],
         "type": "object"
       },
@@ -21476,8 +21470,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -22947,7 +22941,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnonymousTypeOfstringAndString[]AndAnonymousTypeOfstringAndstringAndstring"
+                  "$ref": "#/components/schemas/ClientConfig"
                 }
               }
             },

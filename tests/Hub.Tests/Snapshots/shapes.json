@@ -11645,51 +11645,6 @@
     "$.components.schemas.AnonymousTypeOfintAndint.type": [
       "string"
     ],
-    "$.components.schemas.AnonymousTypeOfstringAndString[]AndAnonymousTypeOfstringAndstringAndstring": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndString[]AndAnonymousTypeOfstringAndstringAndstring.properties": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndString[]AndAnonymousTypeOfstringAndstringAndstring.properties.authMode": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndString[]AndAnonymousTypeOfstringAndstringAndstring.properties.authMode.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndString[]AndAnonymousTypeOfstringAndstringAndstring.properties.authMode.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndString[]AndAnonymousTypeOfstringAndstringAndstring.properties.entra": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndString[]AndAnonymousTypeOfstringAndstringAndstring.properties.entra.$ref": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndString[]AndAnonymousTypeOfstringAndstringAndstring.properties.providers": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndString[]AndAnonymousTypeOfstringAndstringAndstring.properties.providers.items": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndString[]AndAnonymousTypeOfstringAndstringAndstring.properties.providers.items.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndString[]AndAnonymousTypeOfstringAndstringAndstring.properties.providers.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndString[]AndAnonymousTypeOfstringAndstringAndstring.properties.providers.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndString[]AndAnonymousTypeOfstringAndstringAndstring.required": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndString[]AndAnonymousTypeOfstringAndstringAndstring.required[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndString[]AndAnonymousTypeOfstringAndstringAndstring.type": [
-      "string"
-    ],
     "$.components.schemas.AnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndboolean": [
       "object"
     ],
@@ -11781,48 +11736,6 @@
       "string"
     ],
     "$.components.schemas.AnonymousTypeOfstringAndstring.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstring": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.properties": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.properties.apiScope": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.properties.apiScope.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.properties.apiScope.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.properties.clientId": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.properties.clientId.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.properties.clientId.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.properties.tenantId": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.properties.tenantId.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.properties.tenantId.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.required": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.required[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndstringAndstring.type": [
       "string"
     ],
     "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfstring": [
@@ -15819,6 +15732,45 @@
       "string"
     ],
     "$.components.schemas.Client.type": [
+      "string"
+    ],
+    "$.components.schemas.ClientConfig": [
+      "object"
+    ],
+    "$.components.schemas.ClientConfig.properties": [
+      "object"
+    ],
+    "$.components.schemas.ClientConfig.properties.authMode": [
+      "object"
+    ],
+    "$.components.schemas.ClientConfig.properties.authMode.type": [
+      "string"
+    ],
+    "$.components.schemas.ClientConfig.properties.entra": [
+      "object"
+    ],
+    "$.components.schemas.ClientConfig.properties.entra.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ClientConfig.properties.providers": [
+      "object"
+    ],
+    "$.components.schemas.ClientConfig.properties.providers.items": [
+      "object"
+    ],
+    "$.components.schemas.ClientConfig.properties.providers.items.type": [
+      "string"
+    ],
+    "$.components.schemas.ClientConfig.properties.providers.type": [
+      "string"
+    ],
+    "$.components.schemas.ClientConfig.required": [
+      "array"
+    ],
+    "$.components.schemas.ClientConfig.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ClientConfig.type": [
       "string"
     ],
     "$.components.schemas.Closeout": [
@@ -22623,6 +22575,48 @@
       "string"
     ],
     "$.components.schemas.EditProposedBody.type": [
+      "string"
+    ],
+    "$.components.schemas.EntraClientConfig": [
+      "object"
+    ],
+    "$.components.schemas.EntraClientConfig.properties": [
+      "object"
+    ],
+    "$.components.schemas.EntraClientConfig.properties.apiScope": [
+      "object"
+    ],
+    "$.components.schemas.EntraClientConfig.properties.apiScope.type": [
+      "array"
+    ],
+    "$.components.schemas.EntraClientConfig.properties.apiScope.type[]": [
+      "string"
+    ],
+    "$.components.schemas.EntraClientConfig.properties.clientId": [
+      "object"
+    ],
+    "$.components.schemas.EntraClientConfig.properties.clientId.type": [
+      "array"
+    ],
+    "$.components.schemas.EntraClientConfig.properties.clientId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.EntraClientConfig.properties.tenantId": [
+      "object"
+    ],
+    "$.components.schemas.EntraClientConfig.properties.tenantId.type": [
+      "array"
+    ],
+    "$.components.schemas.EntraClientConfig.properties.tenantId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.EntraClientConfig.required": [
+      "array"
+    ],
+    "$.components.schemas.EntraClientConfig.required[]": [
+      "string"
+    ],
+    "$.components.schemas.EntraClientConfig.type": [
       "string"
     ],
     "$.components.schemas.EntryBody": [
@@ -44903,10 +44897,10 @@
     "$.paths./api/v1/admin/evaluate/{projectId}.post.responses": [
       "object"
     ],
-    "$.paths./api/v1/admin/evaluate/{projectId}.post.responses.200": [
+    "$.paths./api/v1/admin/evaluate/{projectId}.post.responses.204": [
       "object"
     ],
-    "$.paths./api/v1/admin/evaluate/{projectId}.post.responses.200.description": [
+    "$.paths./api/v1/admin/evaluate/{projectId}.post.responses.204.description": [
       "string"
     ],
     "$.paths./api/v1/admin/evaluate/{projectId}.post.tags": [

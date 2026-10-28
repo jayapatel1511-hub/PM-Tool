@@ -5,6 +5,7 @@ const { personTasks, capacitySet } = require('./workload.fixture.cjs')
 // (FR-CAP-04), negative remaining keeps its minus sign, person accents survive a re-sort, denied access, phones and a
 // refused capacity preview each get an explanation, and the screens pass axe.
 const { chromium } = require('playwright');
+const { clientConfig } = require('./config.fixture.cjs');
 const path = require('path'), { spawn } = require('child_process'), assert = require('assert/strict');
 const port = process.env.PORT ?? '5177', base = `http://127.0.0.1:${port}`;
 const id = n => `00000000-0000-0000-0000-${String(n).padStart(12, '0')}`;
@@ -54,7 +55,7 @@ let server, browser;
   await page.route('**/api/**', async route => {
     const u = new URL(route.request().url()), p = u.pathname.replace('/api/v1/', '')
     let data = {}, status = 200
-    if (p === 'config') data = { authMode: 'Development', entra: {} }
+    if (p === 'config') data = clientConfig()
     else if (p === 'me') data = { ...me, flags: { figure_names: figureNames, unfilled_beside_capacity: unassignedOn } }
     else if (p === 'me/sign-in') data = {}
     else if (p === 'me/notifications/pulse') data = { stamp: '0' }

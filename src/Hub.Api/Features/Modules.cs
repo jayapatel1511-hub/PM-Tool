@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Hub.Api.Infrastructure;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Hub.Api.Features;
 
@@ -87,11 +88,11 @@ public static class HubModules
         RecoveryEndpoints.Map(api);
         AdminReviewEndpoints.Map(api);
         // Support: an Admin can re-run a project's evaluation on demand.
-        api.MapPost("/admin/evaluate/{projectId:guid}", async (Guid projectId, CurrentUser me, EvaluationService eval) =>
+        api.MapPost("/admin/evaluate/{projectId:guid}", async Task<NoContent> (Guid projectId, CurrentUser me, EvaluationService eval) =>
         {
             Access.Demand(Hub.Domain.Permissions.Administer(me.Actor));
             await eval.EvaluateProject(projectId);
-            return Results.NoContent();
+            return TypedResults.NoContent();
         });
         api.MapPost("/client-errors", async (HttpContext ctx, CurrentUser me, ILoggerFactory logs) =>
         {
@@ -117,13 +118,15 @@ public static class HubModules
             return TypedResults.NoContent();
         }).RequireRateLimiting("client-errors");
         // Public client configuration for the SPA sign-in (no secrets: client and tenant IDs are public values).
-        api.MapGet("/config", (IConfiguration cfg, IHostEnvironment env) => new
-        {
-            authMode = AuthSetup.DevAuthAllowed(env, cfg) ? "Development" : AuthSetup.LocalAuthAllowed(env, cfg) ? "LocalPassword" : cfg["Auth:Mode"] == SocialAuth.Scheme ? "Social" : "Entra",
-            providers = cfg["Auth:Mode"] == SocialAuth.Scheme ? SocialAuth.Providers.Where(p => SocialAuth.Configured(cfg, p)).ToArray() : [],
-            entra = new { clientId = cfg["Auth:Entra:SpaClientId"], tenantId = cfg["Auth:Entra:TenantId"], apiScope = cfg["Auth:Entra:ApiScope"] },
-        }).AllowAnonymous();
+        api.MapGet("/config", Ok<ClientConfig> (IConfiguration cfg, IHostEnvironment env) => TypedResults.Ok(new ClientConfig(
+            AuthSetup.DevAuthAllowed(env, cfg) ? "Development" : AuthSetup.LocalAuthAllowed(env, cfg) ? "LocalPassword" : cfg["Auth:Mode"] == SocialAuth.Scheme ? "Social" : "Entra",
+            cfg["Auth:Mode"] == SocialAuth.Scheme ? SocialAuth.Providers.Where(p => SocialAuth.Configured(cfg, p)).ToArray() : [],
+            new EntraClientConfig(cfg["Auth:Entra:SpaClientId"], cfg["Auth:Entra:TenantId"], cfg["Auth:Entra:ApiScope"])))).AllowAnonymous();
     }
 
     public sealed record ClientErrorBody(string? Reference, string? Route, string? Build, string? Message, string? Kind = null, string? Name = null, string? StackFrame = null);
 }
+
+/// The public sign-in configuration the SPA reads before anyone is signed in. No secrets: the client and tenant ids are public values.
+public sealed record ClientConfig(string AuthMode, string[] Providers, EntraClientConfig Entra);
+public sealed record EntraClientConfig(string? ClientId, string? TenantId, string? ApiScope);

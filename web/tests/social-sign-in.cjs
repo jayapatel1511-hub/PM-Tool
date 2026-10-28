@@ -1,4 +1,5 @@
 const { chromium } = require('playwright');
+const { clientConfig } = require('./config.fixture.cjs');
 const { spawn } = require('child_process');
 const assert = require('node:assert/strict');
 const path = require('node:path');
@@ -25,7 +26,7 @@ let server, browser;
   const linkRequests = [];
   await page.route('**/api/**', async route => {
     const pathname = new URL(route.request().url()).pathname;
-    if (pathname === '/api/v1/config') return route.fulfill({ json: { authMode: 'Social', providers, entra: {} } });
+    if (pathname === '/api/v1/config') return route.fulfill({ json: clientConfig({ authMode: 'Social', providers }) });
     if (pathname === '/api/v1/me') return signedIn ? route.fulfill({ json: {
       id: '00000000-0000-0000-0000-000000000001', displayName: 'Synthetic Person', email: 'person@outside.example', roles: [], systemRoles: [],
       capabilities: { createProject: false, createTask: false, portfolio: false, workload: false, staff: false, allStaff: false, admin: false, templates: false, readOnly: false, directReports: 0 },

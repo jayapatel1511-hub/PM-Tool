@@ -1,6 +1,7 @@
 // Supervisor capacity signals and digest preference checks with mocked API responses.
 // The API rules and digest job are covered separately by server tests; this keeps the browser contract small.
 const { chromium } = require('playwright')
+const { clientConfig } = require('./config.fixture.cjs')
 const path = require('path')
 const { spawn } = require('child_process')
 const assert = require('node:assert/strict')
@@ -59,7 +60,7 @@ const prefs = holdDigestWhenAway => ({
       const url = new URL(request.url())
       const endpoint = url.pathname.replace('/api/v1/', '')
       let status = 200, data = {}
-      if (endpoint === 'config') data = { authMode: 'Development', entra: {} }
+      if (endpoint === 'config') data = clientConfig()
       else if (endpoint === 'me') data = { ...me, capabilities: { ...me.capabilities, workload }, flags: { figure_names: figureNames } }
       else if (endpoint === 'me/sign-in') data = {}
       else if (endpoint === 'me/notifications/pulse') data = { stamp: '0' }

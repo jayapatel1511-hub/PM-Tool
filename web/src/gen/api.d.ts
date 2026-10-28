@@ -882,8 +882,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -2653,7 +2653,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfstringAndString[]AndAnonymousTypeOfstringAndstringAndstring"];
+                        "application/json": components["schemas"]["ClientConfig"];
                     };
                 };
             };
@@ -16479,11 +16479,6 @@ export interface components {
             /** Format: int32 */
             notifications: number;
         };
-        "AnonymousTypeOfstringAndString[]AndAnonymousTypeOfstringAndstringAndstring": {
-            authMode: null | string;
-            entra: components["schemas"]["AnonymousTypeOfstringAndstringAndstring"];
-            providers: null | string[];
-        };
         AnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndboolean: {
             app: boolean;
             code: null | string;
@@ -16496,11 +16491,6 @@ export interface components {
         AnonymousTypeOfstringAndstring: {
             role: null | string;
             source: null | string;
-        };
-        AnonymousTypeOfstringAndstringAndstring: {
-            apiScope: null | string;
-            clientId: null | string;
-            tenantId: null | string;
         };
         AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfstring: {
             displayName: null | string;
@@ -17125,6 +17115,11 @@ export interface components {
             updatedAt?: string;
             /** Format: uuid */
             updatedBy?: null | string;
+        };
+        ClientConfig: {
+            authMode: string;
+            entra: components["schemas"]["EntraClientConfig"];
+            providers: string[];
         };
         Closeout: {
             decisions: null | string;
@@ -18172,6 +18167,11 @@ export interface components {
             version: components["schemas"]["VersionInput"];
             /** Format: int32 */
             versionRowVersion: number;
+        };
+        EntraClientConfig: {
+            apiScope: null | string;
+            clientId: null | string;
+            tenantId: null | string;
         };
         EntryBody: {
             /** Format: double */

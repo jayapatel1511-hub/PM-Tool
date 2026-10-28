@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { lazy, useEffect, useRef, useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import type { components } from '@/gen/api'
 import { api, configureApi, get } from '@/lib/api'
 import { setDateContext } from '@/lib/format'
 import { t , runtimeText } from '@/lib/i18n'
@@ -23,7 +24,8 @@ const DEV_KEY = 'hub.devUser'
 const ACTIVITY_KEY = 'hub.lastActivity'
 const SIGNIN_KEY = 'hub.signedIn'
 
-interface Config { authMode: 'Development' | 'LocalPassword' | 'Entra' | 'Social'; providers?: string[]; entra: { clientId?: string; tenantId?: string; apiScope?: string } }
+/** The contract's public sign-in configuration. It is read with `fetch`, not `api()`: it runs before sign-in is configured. */
+type Config = components['schemas']['ClientConfig'] & { authMode: 'Development' | 'LocalPassword' | 'Entra' | 'Social' }
 
 export function socialSignInError() {
   const reason = new URLSearchParams(window.location.search).get('authError')

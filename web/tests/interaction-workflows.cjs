@@ -1,5 +1,6 @@
 // Packet 046: focused saved-view, capacity-preview and Portfolio/Planner browser workflows.
 const { chromium } = require('playwright')
+const { clientConfig } = require('./config.fixture.cjs')
 const assert = require('node:assert/strict')
 const { startPreview, project: baseProject, task: baseTask, taskDetail, deliverableDetail, panelIds, mockPlatformApi } = require('./platform-fixtures.cjs')
 
@@ -27,7 +28,7 @@ const views = { allocations:[sharedView], staff: [{ id: viewId, name: 'Staff def
   await page.route('**/api/**', async route => {
     const req = route.request(); const url = new URL(req.url()); const p = url.pathname.replace('/api/v1/', ''); const method = req.method(); let status = 200; let data = {}
     if (method !== 'GET') writes.push({ method, path: p, body: req.postDataJSON?.() })
-    if (p === 'config') data = { authMode: 'Development', entra: {} }
+    if (p === 'config') data = clientConfig()
     else if (p === 'me') data = { id: personId, displayName: 'Alex Chen', email: 'alex@hub.test', roles: [], systemRoles: ['ProjectManager'], capabilities: { createProject: false, createTask: true, portfolio: true, workload, staff: true, allStaff: true, admin: true, templates: true, readOnly: false, directReports: 1 }, settings: { today: '2026-10-18', dateFormat: 'yyyy-MM-dd', orgTimeZone: 'America/Halifax', idleTimeoutHours: 8, restrictedProjectsEnabled: true }, preferences: { denseRows: true }, flags: { small_ux: true, allocation_preview: true, org_structure: true } }
     else if (p === 'me/notifications/unread-count') data = { notifications: 0, following: 0 }
     else if (p === 'me/notifications/pulse') data = { stamp: '0' }

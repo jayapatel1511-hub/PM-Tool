@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { ErrorBanner, Field, Loading, Notice } from '@/components/hub/common'
 import { Key, Pill, type Tone } from '@/components/hub/pills'
-import { ApiError, get } from '@/lib/api'
+import { ApiError, get, typedRequest } from '@/lib/api'
 import { itemHref } from '@/components/hub/search'
 import { fmtDate, fmtTime, today } from '@/lib/format'
 import { useSafeForm } from '@/hooks/drafts'
@@ -173,7 +173,7 @@ export function ReadinessInspector({ projectId, number, options, initial, close,
 }
 
 function LinkPrerequisite({ path, projectId, work, linked, close, done }: { path: string; projectId: string; work: WorkRef; linked: string[]; close: () => void; done: () => void }) {
-  const packages = useQuery({ queryKey: ['submission-choices', projectId], queryFn: () => get<{ items: PackageRef[] }>(`projects/${projectId}/submissions?pageSize=200`) })
+  const packages = useQuery({ queryKey: ['submission-choices', projectId], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/submissions', { params: { projectId }, query: { pageSize: 200 } }) })
   const [packageId, setPackage] = useState(''), [reason, setReason] = useState('')
   return <CommandForm path={path} title={t('readiness.addPrerequisite')} hint={t('readiness.prerequisitesHint')} onClose={close} onDone={done}
     submitLabel={t('readiness.addPrerequisite')} payload={() => ({ targetRowVersion: work.rowVersion, packageId, reason })}>

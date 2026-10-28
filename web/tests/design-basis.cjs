@@ -6,6 +6,7 @@ const path = require('path'), { spawn } = require('child_process'), assert = req
 const { decisionRow, externalParty } = require('./decisions.fixture.cjs');
 const { commitmentRow, commitmentList } = require('./weekly-commitments.fixture.cjs');
 const { attentionList } = require('./evaluation.fixture.cjs');
+const { submissionListRow, submissionPage } = require('./submissions.fixture.cjs');
 const port = process.env.PORT ?? '5176', base = `http://127.0.0.1:${port}`;
 const id = n => `00000000-0000-0000-0000-${String(n).padStart(12, '0')}`;
 const pid = id(1), consumer = id(2), lead = id(3), civil = id(4), task = id(7), e1 = id(20), e2 = id(21), v11 = id(30), v12 = id(31), v21 = id(32), u1 = id(40), u2 = id(41), i1 = id(50), i2 = id(51);
@@ -119,7 +120,7 @@ let server, browser;
     else if (p === `items/Task/${task}/comments`) data = { items: [], canComment: true };
     else if (p === `items/Task/${task}/links`) data = { links: [], inherited: [], canAdd: true };
     else if (p === `projects/${pid}/design-basis`) { lists.push(u.search); data = { items: [row(e1, 'P-DEMO-B001', v12, 'Confirmed'), row(e2, 'P-DEMO-B002', null, 'Withdrawn')], pageSize: 50, totalCount: 101 } }
-    else if (p === `projects/${pid}/submissions`) { registerQueries.push({ list: 'submissions', params: Object.fromEntries(u.searchParams) }); data = { items: [{ id: id(100), key: 'P-DEMO-SUB0001', title: 'Synthetic permit', coordinatorId: consumer, targetDate: '2026-10-05', status: 'Checking', blockerCount: 2 }], pageSize: 50, totalCount: 101 } }
+    else if (p === `projects/${pid}/submissions`) { registerQueries.push({ list: 'submissions', params: Object.fromEntries(u.searchParams) }); data = submissionPage([submissionListRow({ id: id(100), key: 'P-DEMO-SUB0001', title: 'Synthetic permit', coordinatorId: consumer, targetDate: '2026-10-05', status: 'Checking', blockerCount: 2 })], { total: 101, page: Number(u.searchParams.get('page') ?? 1) }) }
     else if (p === `projects/${pid}/allocations`) { registerQueries.push({ list: 'allocations', params: Object.fromEntries(u.searchParams) }); data = { items: [{ id: id(110), personName: 'Alex Consumer', purpose: 'Production', fromDate: '2026-10-01', throughDate: '2026-10-05', plannedHours: 8, status: 'Proposed' }], pageSize: 50, totalCount: 101 } }
     else if (p === `projects/${pid}/open-roles`) data = [];
     else if (p === `projects/${pid}/readiness/window`) { registerQueries.push({ list: 'window', params: Object.fromEntries(u.searchParams) }); data = { constraints: [{ id: id(130), targetType: 'Task', targetId: task, category: 'Handoff', description: 'Synthetic constraint', neededBy: '2026-10-05', sourceUrl: 'https://example.test/input' }], constraintsTotal: 101, constraintsTruncated: false, readyOutputs: [{ id: id(131), targetType: 'Task', targetId: task, key: 'P-DEMO-T0001', name: 'Watermain layout', dueDate: '2026-10-05', intendedOutput: 'Synthetic layout', completionCriteria: 'Checked', state: 'Ready' }], readyOutputsTotal: 101, readyOutputsTruncated: false, pageSize: 50 } }

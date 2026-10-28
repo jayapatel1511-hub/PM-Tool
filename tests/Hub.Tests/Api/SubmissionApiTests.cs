@@ -240,6 +240,94 @@ public sealed class SubmissionApiTests(HubFactory f)
     }
 
     [Fact]
+    public async Task List_and_detail_keep_their_property_names_order_nulls_and_flags() // the typed records must serialise to the bytes the Submissions page already reads
+    {
+        var project = await data.Project(); var root = $"/api/v1/projects/{project.Id}";
+        var civil = data.ProjectDiscipline(project.Id, "Civil");
+        var milestone = await Post(TestData.Pm, root + "/milestones", new MilestoneEndpoints.CreateBody("Shape milestone", MilestoneType.DesignSubmission, new DateOnly(2026, 10, 15), null, null, null, true), 201);
+        async Task<(Guid Package, Guid Revision)> Package(string name, bool requiresReview)
+        {
+            var deliverable = await Post(TestData.Marc, root + "/deliverables", new { name, projectDisciplineId = civil,
+                deliverableTypeId = await data.DeliverableType(), ownerId = data.User(TestData.Alex), revision = "A", requiresReview }, 201);
+            var did = deliverable.G("id");
+            var revision = await Post(TestData.Alex, root + "/source-revisions", new ChangeEndpoints.RegisterBody(Guid.NewGuid(), did, Version<Deliverable>(did), civil, data.User(TestData.Alex),
+                "Deliverable", name, name, "A", $"https://example.test/{did}.pdf", "Design team", "Submission", null, null, null, null, null, null));
+            var created = await Post(TestData.Marc, root + "/submissions", new SubmissionEndpoints.CreateBody(Guid.NewGuid(), name + " package", "Permit", "Municipality",
+                data.User(TestData.Marc), milestone.G("id"), new DateOnly(2026, 10, 15), [new(revision.G("id"))],
+                [new("Traffic control plan applies", data.User(TestData.Alex), civil)], null, null));
+            return (created.G("id"), revision.G("id"));
+        }
+        var (id, revision) = await Package("Shape target", false); var path = root + $"/submissions/{id}";
+
+        var draft = await Get(TestData.Pm, path);
+        Assert.Equal(DetailKeys, draft.AsObject().Select(x => x.Key));
+        Assert.Equal(PackageKeys, draft["package"]!.AsObject().Select(x => x.Key));
+        Assert.Equal(("Draft", "SubmissionPackage"), (draft["effectiveStatus"]!.GetValue<string>(), draft["package"]!.S("auditType"))); Assert.Null(draft["package"]!["supersedesPackageId"]);
+        Assert.Equal(["ready", "fingerprint", "blockers"], draft["readiness"]!.AsObject().Select(x => x.Key));
+        Assert.Equal(ManifestKeys, Assert.Single(draft["manifest"]!.AsArray())!.AsObject().Select(x => x.Key));
+        Assert.Equal(8, draft["checks"]!.AsArray().Count); Assert.Equal(CheckKeys, draft["checks"]![0]!.AsObject().Select(x => x.Key));
+        Assert.Empty(draft["evidence"]!.AsArray()); Assert.Null(draft["issue"]); // null, not omitted
+        Assert.Equal((false, true), (draft["canCoordinate"]!.GetValue<bool>(), draft["canAuthorise"]!.GetValue<bool>())); // the project manager authorises but does not coordinate
+        var list = await Get(TestData.Pm, root + "/submissions");
+        Assert.Equal(["items", "page", "pageSize", "totalCount", "sort", "filters"], list.AsObject().Select(x => x.Key));
+        Assert.Equal(ListKeys, list["items"]![0]!.AsObject().Select(x => x.Key));
+        Assert.Equal(("Marc Dubois", "Shape milestone", 0), (list["items"]![0]!.S("coordinatorName"), list["items"]![0]!.S("milestoneName"), list["items"]![0]!.I("blockerCount")));
+
+        await Post(TestData.Marc, path + "/start", new SubmissionEndpoints.StartBody(Guid.NewGuid(), Version<SubmissionPackage>(id), null));
+        var optional = f.Db(db => db.SubmissionChecks.Single(c => c.PackageId == id && c.Kind == SubmissionCheckKind.Applicability));
+        await Post(TestData.Alex, path + $"/checks/{optional.Id}", new SubmissionEndpoints.CheckBody(Guid.NewGuid(), Version<SubmissionPackage>(id), optional.RowVersion,
+            SubmissionCheckStatus.Fail, "https://example.test/fail-evidence", "Plan is outside the registered tolerance"));
+        var ready = await Get(TestData.Marc, path);
+        Assert.Equal(DetailKeys, ready.AsObject().Select(x => x.Key));
+        Assert.Equal("Ready", ready["effectiveStatus"]!.GetValue<string>());
+        var evidence = Assert.Single(ready["evidence"]!.AsArray())!;
+        Assert.Equal(EvidenceKeys, evidence.AsObject().Select(x => x.Key));
+        Assert.Equal(("https://example.test/fail-evidence", optional.Id), (evidence.S("evidenceUrl"), evidence.G("checkId")));
+        var failed = ready["checks"]!.AsArray().Single(c => c!.G("id") == optional.Id)!;
+        Assert.Equal(("Fail", "https://example.test/fail-evidence"), (failed.S("status"), failed.S("evidenceUrl"))); Assert.Null(failed["approvedAt"]);
+        Assert.Equal((true, false), (ready["canCoordinate"]!.GetValue<bool>(), ready["canAuthorise"]!.GetValue<bool>())); // the coordinator coordinates but does not authorise
+        var viewer = await Get(TestData.Alex, path);
+        Assert.Equal((false, false), (viewer["canCoordinate"]!.GetValue<bool>(), viewer["canAuthorise"]!.GetValue<bool>()));
+
+        var (blockedId, _) = await Package("Needs review", true);
+        await Post(TestData.Marc, root + $"/submissions/{blockedId}/start", new SubmissionEndpoints.StartBody(Guid.NewGuid(), Version<SubmissionPackage>(blockedId), null));
+        var blocked = await Get(TestData.Pm, root + $"/submissions/{blockedId}");
+        Assert.Equal("Checking", blocked["effectiveStatus"]!.GetValue<string>());
+        var blocker = blocked["readiness"]!["blockers"]!.AsArray().Single(b => b!.S("code") == "submission.review_not_current")!;
+        Assert.Equal(["kind", "sourceId", "disciplineId", "ownerId", "code", "message", "sourcePath"], blocker.AsObject().Select(x => x.Key));
+        Assert.NotNull(blocker["sourcePath"]); Assert.NotNull(blocker["message"]);
+        var checking = await Get(TestData.Pm, root + "/submissions?status=Checking");
+        var blockedRow = Assert.Single(checking["items"]!.AsArray())!;
+        Assert.Equal((blockedId, "Checking"), (blockedRow.G("id"), blockedRow.S("status"))); Assert.True(blockedRow.I("blockerCount") > 0);
+        var generated = await Get(TestData.Pm, root + $"/submissions?Status=Checking&Q=Needs&CoordinatorId={data.User(TestData.Marc)}&page=1"); // the names the generated client sends
+        Assert.Equal(blockedId, Assert.Single(generated["items"]!.AsArray())!.G("id"));
+
+        await Post(TestData.Pm, path + "/issue", new SubmissionEndpoints.IssueBody(Guid.NewGuid(), Version<SubmissionPackage>(id), 1,
+            ready["readiness"]!["fingerprint"]!.GetValue<string>(), "Municipality", "https://example.test/transmittal", null));
+        var issued = await Get(TestData.Pm, path);
+        Assert.Equal(DetailKeys, issued.AsObject().Select(x => x.Key));
+        Assert.Equal("Issued", issued["effectiveStatus"]!.GetValue<string>()); Assert.Null(issued["readiness"]); // null once issued, not omitted
+        var issue = issued["issue"]!;
+        Assert.Equal(IssueKeys, issue.AsObject().Select(x => x.Key));
+        Assert.Equal(("Municipality", "https://example.test/transmittal", "SubmissionIssue", id), (issue.S("destination"), issue.S("transmittalUrl"), issue.S("auditType"), issue.G("packageId")));
+        Assert.Equal(ManifestKeys, Assert.Single(issued["manifest"]!.AsArray())!.AsObject().Select(x => x.Key));
+        Assert.Equal(revision, issued["manifest"]![0]!.G("sourceRevisionId"));
+        var all = await Get(TestData.Pm, root + "/submissions");
+        Assert.Equal((2, "Issued"), (all.I("totalCount"), all["items"]!.AsArray().Single(r => r!.G("id") == id)!.S("status")));
+    }
+
+    static readonly string[] DetailKeys = ["package", "readiness", "effectiveStatus", "manifest", "checks", "evidence", "issue", "canCoordinate", "canAuthorise"];
+    static readonly string[] ListKeys = ["id", "key", "title", "purpose", "status", "coordinatorId", "coordinatorName", "milestoneId", "milestoneName", "targetDate", "manifestVersion", "rowVersion", "blockerCount"];
+    static readonly string[] PackageKeys = ["title", "purpose", "recipientReference", "coordinatorId", "milestoneId", "targetDate", "status", "manifestVersion", "supersedesPackageId", "auditType", "auditProjectId",
+        "auditKey", "auditName", "projectId", "key", "seq", "deletedAt", "deletedBy", "createdAt", "createdBy", "updatedAt", "updatedBy", "rowVersion", "id"];
+    static readonly string[] ManifestKeys = ["packageId", "manifestVersion", "deliverableId", "sourceRevisionId", "reviewRoundId", "required", "auditType", "projectId", "auditProjectId", "auditKey", "auditName",
+        "createdAt", "createdBy", "updatedAt", "updatedBy", "rowVersion", "id"];
+    static readonly string[] CheckKeys = ["packageId", "manifestVersion", "kind", "sourceId", "projectDisciplineId", "ownerId", "required", "status", "evidenceRule", "evidenceUrl", "reason", "approvedBy", "approvedAt",
+        "auditType", "projectId", "auditProjectId", "auditKey", "auditName", "createdAt", "createdBy", "updatedAt", "updatedBy", "rowVersion", "id"];
+    static readonly string[] EvidenceKeys = ["checkId", "evidenceUrl", "note", "auditType", "projectId", "auditProjectId", "auditKey", "auditName", "createdAt", "createdBy", "updatedAt", "updatedBy", "rowVersion", "id"];
+    static readonly string[] IssueKeys = ["projectId", "packageId", "manifestVersion", "manifestSnapshot", "checkSnapshot", "authorisedBy", "authorisedAt", "destination", "transmittalUrl", "auditType", "auditProjectId", "auditKey", "auditName", "id"];
+
+    [Fact]
     public async Task Required_review_edit_makes_a_stale_issue_request_refuse_finalization()
     {
         var project = await data.Project(); var root = $"/api/v1/projects/{project.Id}";

@@ -2,6 +2,7 @@ using System.Text.Json;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Api.Features;
@@ -23,8 +24,52 @@ public static class SubmissionEndpoints
     public sealed record Filter(string? Q, string? Status, Guid? CoordinatorId, Guid? MilestoneId, DateOnly? TargetFrom, DateOnly? TargetTo);
     static readonly Col[] ListColumns = Hub.Api.Records.SubmissionPackageRecord.SubmissionsListColumns;
 
-    sealed record ListRow(Guid Id, string Key, string Title, string Purpose, string Status, Guid CoordinatorId, string? CoordinatorName,
+    /// One package of the Submissions list; Status is the derived status (Checking or Ready from live readiness) and BlockerCount the blockers behind it.
+    public sealed record ListRow(Guid Id, string Key, string Title, string Purpose, string Status, Guid CoordinatorId, string? CoordinatorName,
         Guid MilestoneId, string? MilestoneName, DateOnly TargetDate, int ManifestVersion, int RowVersion, int BlockerCount);
+
+    // The rows below mirror the stored rows, audit fields included, in the order each row has always been written (the OrgStructure `*Response` precedent).
+    public sealed record SubmissionPackageRow(string Title, string Purpose, string RecipientReference, Guid CoordinatorId, Guid MilestoneId, DateOnly TargetDate,
+        string Status, int ManifestVersion, Guid? SupersedesPackageId, string AuditType, Guid? AuditProjectId, string? AuditKey, string? AuditName, Guid ProjectId,
+        string Key, int Seq, DateTimeOffset? DeletedAt, Guid? DeletedBy, DateTimeOffset CreatedAt, Guid? CreatedBy, DateTimeOffset UpdatedAt, Guid? UpdatedBy,
+        int RowVersion, Guid Id)
+    {
+        public static SubmissionPackageRow From(SubmissionPackage p) => new(p.Title, p.Purpose, p.RecipientReference, p.CoordinatorId, p.MilestoneId, p.TargetDate,
+            p.Status, p.ManifestVersion, p.SupersedesPackageId, p.AuditType, p.AuditProjectId, p.AuditKey, p.AuditName, p.ProjectId, p.Key, p.Seq, p.DeletedAt,
+            p.DeletedBy, p.CreatedAt, p.CreatedBy, p.UpdatedAt, p.UpdatedBy, p.RowVersion, p.Id);
+    }
+    public sealed record SubmissionManifestRow(Guid PackageId, int ManifestVersion, Guid DeliverableId, Guid SourceRevisionId, Guid? ReviewRoundId, bool Required,
+        string AuditType, Guid ProjectId, Guid? AuditProjectId, string? AuditKey, string? AuditName, DateTimeOffset CreatedAt, Guid? CreatedBy,
+        DateTimeOffset UpdatedAt, Guid? UpdatedBy, int RowVersion, Guid Id)
+    {
+        public static SubmissionManifestRow From(SubmissionManifestItem m) => new(m.PackageId, m.ManifestVersion, m.DeliverableId, m.SourceRevisionId, m.ReviewRoundId,
+            m.Required, m.AuditType, m.ProjectId, m.AuditProjectId, m.AuditKey, m.AuditName, m.CreatedAt, m.CreatedBy, m.UpdatedAt, m.UpdatedBy, m.RowVersion, m.Id);
+    }
+    public sealed record SubmissionCheckRow(Guid PackageId, int ManifestVersion, string Kind, Guid? SourceId, Guid? ProjectDisciplineId, Guid OwnerId, bool Required,
+        string Status, string? EvidenceRule, string? EvidenceUrl, string? Reason, Guid? ApprovedBy, DateTimeOffset? ApprovedAt, string AuditType, Guid ProjectId,
+        Guid? AuditProjectId, string? AuditKey, string? AuditName, DateTimeOffset CreatedAt, Guid? CreatedBy, DateTimeOffset UpdatedAt, Guid? UpdatedBy,
+        int RowVersion, Guid Id)
+    {
+        public static SubmissionCheckRow From(SubmissionCheck c) => new(c.PackageId, c.ManifestVersion, c.Kind, c.SourceId, c.ProjectDisciplineId, c.OwnerId, c.Required,
+            c.Status, c.EvidenceRule, c.EvidenceUrl, c.Reason, c.ApprovedBy, c.ApprovedAt, c.AuditType, c.ProjectId, c.AuditProjectId, c.AuditKey, c.AuditName,
+            c.CreatedAt, c.CreatedBy, c.UpdatedAt, c.UpdatedBy, c.RowVersion, c.Id);
+    }
+    public sealed record SubmissionEvidenceRow(Guid CheckId, string EvidenceUrl, string Note, string AuditType, Guid ProjectId, Guid? AuditProjectId, string? AuditKey,
+        string? AuditName, DateTimeOffset CreatedAt, Guid? CreatedBy, DateTimeOffset UpdatedAt, Guid? UpdatedBy, int RowVersion, Guid Id)
+    {
+        public static SubmissionEvidenceRow From(CheckEvidence e) => new(e.CheckId, e.EvidenceUrl, e.Note, e.AuditType, e.ProjectId, e.AuditProjectId, e.AuditKey,
+            e.AuditName, e.CreatedAt, e.CreatedBy, e.UpdatedAt, e.UpdatedBy, e.RowVersion, e.Id);
+    }
+    /// The frozen issue record; the two snapshots are JSON text written once at issue.
+    public sealed record SubmissionIssueRow(Guid ProjectId, Guid PackageId, int ManifestVersion, string ManifestSnapshot, string CheckSnapshot, Guid AuthorisedBy,
+        DateTimeOffset AuthorisedAt, string Destination, string TransmittalUrl, string AuditType, Guid? AuditProjectId, string? AuditKey, string? AuditName, Guid Id)
+    {
+        public static SubmissionIssueRow From(SubmissionIssue i) => new(i.ProjectId, i.PackageId, i.ManifestVersion, i.ManifestSnapshot, i.CheckSnapshot, i.AuthorisedBy,
+            i.AuthorisedAt, i.Destination, i.TransmittalUrl, i.AuditType, i.AuditProjectId, i.AuditKey, i.AuditName, i.Id);
+    }
+    /// One package as the detail panel reads it. Readiness is null once the package is issued, superseded or cancelled; Issue is null until it is issued.
+    public sealed record SubmissionDetail(SubmissionPackageRow Package, SubmissionReadinessResult? Readiness, string EffectiveStatus, IReadOnlyList<SubmissionManifestRow> Manifest,
+        IReadOnlyList<SubmissionCheckRow> Checks, IReadOnlyList<SubmissionEvidenceRow> Evidence, SubmissionIssueRow? Issue, bool CanCoordinate, bool CanAuthorise);
 
     public static void Map(RouteGroupBuilder api)
     {
@@ -374,19 +419,19 @@ public static class SubmissionEndpoints
         return await Rows(db, packages, filter.Status);
     }
 
-    static async Task<object> List(Guid projectId, [AsParameters] Filter filter, int? page, int? pageSize, Access access, HubDb db)
+    static async Task<Ok<Page<ListRow>>> List(Guid projectId, [AsParameters] Filter filter, int? page, int? pageSize, Access access, HubDb db)
     {
         var (pg, size) = Http.Paging(page, pageSize);
         if (filter.Status is SubmissionStatus.Ready or SubmissionStatus.Checking) {
             // ponytail: derived status evaluates at most 50,000 candidates; move the shared readiness projection into SQL if projects reach this ceiling.
             var filtered = await FilteredRows(projectId, filter, access, db);
-            return new Page<ListRow>(filtered.Skip((pg - 1) * size).Take(size).ToList(), pg, size, filtered.Count);
+            return TypedResults.Ok(new Page<ListRow>(filtered.Skip((pg - 1) * size).Take(size).ToList(), pg, size, filtered.Count));
         }
         await access.Project(projectId, false);
         Check.That(!filter.TargetFrom.HasValue || !filter.TargetTo.HasValue || filter.TargetTo >= filter.TargetFrom, "targetTo", "error.date_range");
         var query = Query(db, projectId, filter);
         var rows = await Rows(db, await query.Skip((pg - 1) * size).Take(size).ToListAsync(), filter.Status);
-        return new Page<ListRow>(rows, pg, size, await query.CountAsync());
+        return TypedResults.Ok(new Page<ListRow>(rows, pg, size, await query.CountAsync()));
     }
 
     static async Task<IResult> ExportRows(Guid projectId, [AsParameters] Filter filter, string? format, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock)
@@ -398,19 +443,20 @@ public static class SubmissionEndpoints
             $"{project.ProjectNumber}-submissions", clock);
     }
 
-    static async Task<object> Detail(Guid projectId, Guid id, Access access, HubDb db)
+    static async Task<Ok<SubmissionDetail>> Detail(Guid projectId, Guid id, Access access, HubDb db)
     {
         var (_, ctx) = await access.Project(projectId, false);
         var package = await Load(db, projectId, id);
         var readiness = package.Status is SubmissionStatus.Issued or SubmissionStatus.Superseded or SubmissionStatus.Cancelled ? null : await SubmissionReadiness.Evaluate(db, package);
-        return new { Package = package, Readiness = readiness,
-            EffectiveStatus = readiness is null || package.Status == SubmissionStatus.Draft ? package.Status : readiness.Ready ? SubmissionStatus.Ready : SubmissionStatus.Checking,
-            Manifest = await db.SubmissionManifestItems.Where(m => m.PackageId == id && m.ManifestVersion == package.ManifestVersion).ToListAsync(),
-            Checks = await db.SubmissionChecks.Where(c => c.PackageId == id && c.ManifestVersion == package.ManifestVersion).ToListAsync(),
-            Evidence = await db.CheckEvidences.Where(e => db.SubmissionChecks.Any(c => c.Id == e.CheckId && c.PackageId == id)).ToListAsync(),
-            Issue = await db.SubmissionIssues.SingleOrDefaultAsync(i => i.PackageId == id),
-            CanCoordinate = Permissions.CoordinateSubmission(access.Actor, ctx, package.CoordinatorId).Ok,
-            CanAuthorise = Permissions.AuthoriseSubmission(access.Actor, ctx).Ok };
+        var manifest = await db.SubmissionManifestItems.Where(m => m.PackageId == id && m.ManifestVersion == package.ManifestVersion).ToListAsync();
+        var checks = await db.SubmissionChecks.Where(c => c.PackageId == id && c.ManifestVersion == package.ManifestVersion).ToListAsync();
+        var evidence = await db.CheckEvidences.Where(e => db.SubmissionChecks.Any(c => c.Id == e.CheckId && c.PackageId == id)).ToListAsync();
+        var issue = await db.SubmissionIssues.SingleOrDefaultAsync(i => i.PackageId == id);
+        return TypedResults.Ok(new SubmissionDetail(SubmissionPackageRow.From(package), readiness,
+            readiness is null || package.Status == SubmissionStatus.Draft ? package.Status : readiness.Ready ? SubmissionStatus.Ready : SubmissionStatus.Checking,
+            manifest.Select(SubmissionManifestRow.From).ToList(), checks.Select(SubmissionCheckRow.From).ToList(), evidence.Select(SubmissionEvidenceRow.From).ToList(),
+            issue is null ? null : SubmissionIssueRow.From(issue),
+            Permissions.CoordinateSubmission(access.Actor, ctx, package.CoordinatorId).Ok, Permissions.AuthoriseSubmission(access.Actor, ctx).Ok));
     }
 
     static async Task<IResult> ExportSnapshot(Guid projectId, Guid id, Access access, HubDb db, TimeProvider clock)

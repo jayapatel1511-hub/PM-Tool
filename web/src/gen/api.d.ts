@@ -12750,7 +12750,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["PageOfListRow"];
                     };
                 };
             };
@@ -12856,7 +12856,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["SubmissionDetail"];
                     };
                 };
             };
@@ -18624,6 +18624,17 @@ export interface components {
             /** Format: int32 */
             totalCount: number;
         };
+        PageOfListRow: {
+            filters?: unknown;
+            items: components["schemas"]["SubmissionListRow"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            sort?: null | string;
+            /** Format: int32 */
+            totalCount: number;
+        };
         PageOfObject: {
             filters?: unknown;
             items: unknown[];
@@ -19492,12 +19503,65 @@ export interface components {
             /** Format: int32 */
             rowVersion: number;
         };
+        SubmissionBlocker: {
+            code: string;
+            /** Format: uuid */
+            disciplineId: null | string;
+            kind: string;
+            message: string;
+            /** Format: uuid */
+            ownerId: null | string;
+            /** Format: uuid */
+            sourceId: null | string;
+            sourcePath: null | string;
+        };
         SubmissionCancelBody: {
             reason: string;
             /** Format: uuid */
             requestId: string;
             /** Format: int32 */
             rowVersion: number;
+        };
+        SubmissionCheckRow: {
+            /** Format: date-time */
+            approvedAt: null | string;
+            /** Format: uuid */
+            approvedBy: null | string;
+            auditKey: null | string;
+            auditName: null | string;
+            /** Format: uuid */
+            auditProjectId: null | string;
+            auditType: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            evidenceRule: null | string;
+            evidenceUrl: null | string;
+            /** Format: uuid */
+            id: string;
+            kind: string;
+            /** Format: int32 */
+            manifestVersion: number;
+            /** Format: uuid */
+            ownerId: string;
+            /** Format: uuid */
+            packageId: string;
+            /** Format: uuid */
+            projectDisciplineId: null | string;
+            /** Format: uuid */
+            projectId: string;
+            reason: null | string;
+            required: boolean;
+            /** Format: int32 */
+            rowVersion: number;
+            /** Format: uuid */
+            sourceId: null | string;
+            status: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: uuid */
+            updatedBy: null | string;
         };
         SubmissionCreateBody: {
             /** Format: uuid */
@@ -19517,6 +19581,17 @@ export interface components {
             targetDate: string;
             title: string;
         };
+        SubmissionDetail: {
+            canAuthorise: boolean;
+            canCoordinate: boolean;
+            checks: components["schemas"]["SubmissionCheckRow"][];
+            effectiveStatus: string;
+            evidence: components["schemas"]["SubmissionEvidenceRow"][];
+            issue: null | components["schemas"]["SubmissionIssueRow"];
+            manifest: components["schemas"]["SubmissionManifestRow"][];
+            package: components["schemas"]["SubmissionPackageRow"];
+            readiness: null | components["schemas"]["SubmissionReadinessResult"];
+        };
         SubmissionEditBody: {
             /** Format: uuid */
             milestoneId: string;
@@ -19531,6 +19606,31 @@ export interface components {
             targetDate: string;
             title: string;
         };
+        SubmissionEvidenceRow: {
+            auditKey: null | string;
+            auditName: null | string;
+            /** Format: uuid */
+            auditProjectId: null | string;
+            auditType: string;
+            /** Format: uuid */
+            checkId: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            evidenceUrl: string;
+            /** Format: uuid */
+            id: string;
+            note: string;
+            /** Format: uuid */
+            projectId: string;
+            /** Format: int32 */
+            rowVersion: number;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: uuid */
+            updatedBy: null | string;
+        };
         SubmissionIssueBody: {
             destination: string;
             expectedFingerprint: string;
@@ -19542,6 +19642,130 @@ export interface components {
             /** Format: int32 */
             rowVersion: number;
             transmittalUrl: string;
+        };
+        SubmissionIssueRow: {
+            auditKey: null | string;
+            auditName: null | string;
+            /** Format: uuid */
+            auditProjectId: null | string;
+            auditType: string;
+            /** Format: date-time */
+            authorisedAt: string;
+            /** Format: uuid */
+            authorisedBy: string;
+            checkSnapshot: string;
+            destination: string;
+            /** Format: uuid */
+            id: string;
+            manifestSnapshot: string;
+            /** Format: int32 */
+            manifestVersion: number;
+            /** Format: uuid */
+            packageId: string;
+            /** Format: uuid */
+            projectId: string;
+            transmittalUrl: string;
+        };
+        SubmissionListRow: {
+            /** Format: int32 */
+            blockerCount: number;
+            /** Format: uuid */
+            coordinatorId: string;
+            coordinatorName: null | string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            /** Format: int32 */
+            manifestVersion: number;
+            /** Format: uuid */
+            milestoneId: string;
+            milestoneName: null | string;
+            purpose: string;
+            /** Format: int32 */
+            rowVersion: number;
+            status: string;
+            /** Format: date */
+            targetDate: string;
+            title: string;
+        };
+        SubmissionManifestRow: {
+            auditKey: null | string;
+            auditName: null | string;
+            /** Format: uuid */
+            auditProjectId: null | string;
+            auditType: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            /** Format: uuid */
+            deliverableId: string;
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            manifestVersion: number;
+            /** Format: uuid */
+            packageId: string;
+            /** Format: uuid */
+            projectId: string;
+            required: boolean;
+            /** Format: uuid */
+            reviewRoundId: null | string;
+            /** Format: int32 */
+            rowVersion: number;
+            /** Format: uuid */
+            sourceRevisionId: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: uuid */
+            updatedBy: null | string;
+        };
+        SubmissionPackageRow: {
+            auditKey: null | string;
+            auditName: null | string;
+            /** Format: uuid */
+            auditProjectId: null | string;
+            auditType: string;
+            /** Format: uuid */
+            coordinatorId: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            /** Format: date-time */
+            deletedAt: null | string;
+            /** Format: uuid */
+            deletedBy: null | string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            /** Format: int32 */
+            manifestVersion: number;
+            /** Format: uuid */
+            milestoneId: string;
+            /** Format: uuid */
+            projectId: string;
+            purpose: string;
+            recipientReference: string;
+            /** Format: int32 */
+            rowVersion: number;
+            /** Format: int32 */
+            seq: number;
+            status: string;
+            /** Format: uuid */
+            supersedesPackageId: null | string;
+            /** Format: date */
+            targetDate: string;
+            title: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: uuid */
+            updatedBy: null | string;
+        };
+        SubmissionReadinessResult: {
+            blockers: components["schemas"]["SubmissionBlocker"][];
+            fingerprint: string;
+            ready: boolean;
         };
         SubscriptionLink: {
             /** Format: int32 */

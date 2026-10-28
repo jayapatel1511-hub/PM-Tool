@@ -2,7 +2,7 @@
   "counters": {
     "anonymous_objects": {
       "ratchet": true,
-      "value": 717
+      "value": 716
     },
     "api_helpers_without_type": {
       "ratchet": true,
@@ -14,7 +14,7 @@
     },
     "direct_invalidate_queries": {
       "ratchet": true,
-      "value": 58
+      "value": 55
     },
     "html_tables": {
       "ratchet": true,
@@ -34,7 +34,7 @@
     },
     "task_object_handlers": {
       "ratchet": true,
-      "value": 66
+      "value": 64
     },
     "untyped_results": {
       "ratchet": true,

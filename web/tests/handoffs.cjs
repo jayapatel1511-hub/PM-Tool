@@ -1,5 +1,6 @@
 const { chromium } = require('playwright');
 const { clientConfig } = require('./config.fixture.cjs');
+const { viewList } = require('./views.fixture.cjs');
 const { handoffRow, handoffPage, handoffOptions, handoffSource, handoffTask, handoffPermission, handoffHistoryRow, handoffRevisionRow, handoffDetail, handoffCommand } = require('./handoffs.fixture.cjs');
 const fs = require('fs');
 const path = require('path');
@@ -33,7 +34,7 @@ const errors=[], unknown=[];
   else if(path==='me/notifications/pulse')data={stamp:'0'};
   else if(path==='me/notifications/unread-count')data={notifications:0,following:0};
   else if(path==='workspaces')data=[];
-  else if(path==='views')data={views:[],canShare:true};
+  else if(path==='views')data=viewList([],true);
   else if(path==='projects')data={items:[project],totalCount:1};
   else if(path.endsWith('/date-review'))data={window:null,tasks:[],deliverables:[]};
   else if(path.endsWith('/follow'))data={level:'My items only',source:'Assignment'};

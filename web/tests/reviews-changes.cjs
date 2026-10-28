@@ -1,6 +1,7 @@
 // Browser form/interaction checks use mocked API responses; API integration tests cover server decisions.
 const { chromium } = require('playwright');
 const { clientConfig } = require('./config.fixture.cjs');
+const { viewList } = require('./views.fixture.cjs');
 const { sourceRevisionRow, sourceHeadRow, coordinationSource, coordinationDeliverable, coordinationTask, coordinationOptions, reviewRow, reviewPage, reviewPackageRow, reviewRoundRow, reviewAssignmentRow, reviewManifestRow, reviewDetail } = require('./reviews.fixture.cjs');
 const fs = require('fs'), path = require('path'), { spawn } = require('child_process'), assert = require('assert/strict');
 const port=process.env.COORDINATION_TEST_PORT||'5174', base=`http://127.0.0.1:${port}`;
@@ -29,7 +30,7 @@ const requests=[],errors=[],violations=[];
  await page.route('**/api/**',async route=>{
   const req=route.request(),u=new URL(req.url()),p=u.pathname.replace('/api/v1/',''),method=req.method();let data={},status=200;const b=method==='POST'?req.postDataJSON():null;
   if(p==='config')data=clientConfig();
-  else if(p==='me')data=me;else if(p==='me/sign-in')data={};else if(p==='me/notifications/pulse')data={stamp:'0'};else if(p==='me/notifications/unread-count')data={notifications:0,following:0};else if(p==='workspaces')data=[];else if(p==='views')data={views:[],canShare:true};else if(p==='projects')data={items:[project],totalCount:1};else if(p.endsWith('/date-review'))data={window:null,tasks:[],deliverables:[]};else if(p.endsWith('/follow'))data={level:'My items only',source:'Assignment'};else if(p===`projects/${pid}`||p==='projects/P-DEMO')data=project;
+  else if(p==='me')data=me;else if(p==='me/sign-in')data={};else if(p==='me/notifications/pulse')data={stamp:'0'};else if(p==='me/notifications/unread-count')data={notifications:0,following:0};else if(p==='workspaces')data=[];else if(p==='views')data=viewList([],true);else if(p==='projects')data={items:[project],totalCount:1};else if(p.endsWith('/date-review'))data={window:null,tasks:[],deliverables:[]};else if(p.endsWith('/follow'))data={level:'My items only',source:'Assignment'};else if(p===`projects/${pid}`||p==='projects/P-DEMO')data=project;
   else if(p.endsWith('/changes/options'))data=options;
   else if(p===`projects/${pid}/reviews`&&b){requests.push(b);packageRow=reviewPackageRow({id:rid,key:'P-DEMO-RV001',title:b.title,purpose:b.purpose,coordinatorId:b.coordinatorId,projectDisciplineId:b.projectDisciplineId,requiredForIssue:b.requiredForIssue,status:'Draft',rowVersion:1,currentRoundId:round,roundNumber:1});assignments=b.assignments.map(a=>reviewAssignmentRow({id:aid,roundId:round,projectDisciplineId:a.projectDisciplineId,reviewerId:a.reviewerId,dueDate:a.dueDate,rowVersion:1,status:'Pending'}));rounds=[reviewRoundRow({id:round,packageId:rid,number:1,status:'Draft',purpose:b.purpose})];data={id:rid,rowVersion:1};}
   else if(p===`projects/${pid}/reviews`)data=reviewPage(packageRow?[reviewRow({id:packageRow.id,key:packageRow.key,title:packageRow.title,status:packageRow.status,coordinatorId:packageRow.coordinatorId,roundNumber:packageRow.roundNumber,rowVersion:packageRow.rowVersion,outstandingDisciplines:assignments.filter(a=>a.status!=='Approved').length,blockingFindings:0,waitingDays:1})]:[]);

@@ -3,6 +3,7 @@ const { spawn } = require('node:child_process')
 const assert = require('node:assert/strict')
 const { chromium } = require('playwright')
 const { clientConfig } = require('./config.fixture.cjs')
+const { viewList } = require('./views.fixture.cjs')
 const { coordinationOptions } = require('./reviews.fixture.cjs')
 const { myWork, myWorkPerson, myWorkProject } = require('./my-work.fixture.cjs')
 
@@ -12,7 +13,7 @@ const project = { id: '00000000-0000-0000-0000-000000000010', projectNumber: 'P-
 Object.assign(project, { client: 'Synthetic client', pmName: 'Alex Chen', phase: null, nextMilestone: null, starred: false, health: { computed: 'Green', reported: 'Green', overrideActive: false, reasons: [] }, permissions: { ...project.permissions, isPm: false, leadOf: [], createTaskIn: [] } })
 const task = { id: taskId, projectId: project.id, projectDisciplineId: '00000000-0000-0000-0000-000000000011', key: 'T-001', name: 'Synthetic task', status: 'Not Started', priority: 'Medium', rowVersion: 1, startDate: null, dueDate: null, assigneeId: null, assigneeName: null, reviewerId: null, reviewerName: null, reviewRound: 0, dueDateChangeCount: 0, effortHours: 0, state: { isWaiting: false, isBlocked: false, daysBlocked: 0, blockedBy: [], affectedMilestoneIds: [], isOverdue: false, isDueSoon: false, isBlocking: false, blockingCount: 0, isStale: false, isUnassigned: true, isMissingDueDate: true, isDateInconsistent: false, notes: [] } }
 const work = myWork({ person: myWorkPerson('00000000-0000-0000-0000-000000000002', 'Alex Chen'), today: '2026-10-03', tasks: [task], projects: [myWorkProject({ id: project.id, projectNumber: project.projectNumber, name: project.name, status: project.status })] })
-const views = { views: [], canShare: false }
+const views = viewList()
 const planningGrid = { weeks: [], currentWeek: '2026-10-03', partialView: false, draftAccess: false, settings: { horizonWeeks: 6, overPct: 1, underPct: 1, underWeeks: 1, staleDays: 14, maxHoursPerWeek: 40 }, people: [] }
 const { documentLinks: links } = require('./document-links.fixture.cjs')
 const { comments } = require('./comments.fixture.cjs')

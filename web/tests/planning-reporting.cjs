@@ -2,6 +2,7 @@
 // API contract and persistence rules remain covered by the server tests.
 const { chromium } = require('playwright')
 const { clientConfig } = require('./config.fixture.cjs')
+const { viewList } = require('./views.fixture.cjs')
 const { myWork, myWorkPerson } = require('./my-work.fixture.cjs')
 const assert = require('node:assert/strict')
 const { spawn } = require('node:child_process')
@@ -58,7 +59,7 @@ const template = { id: id(10), familyId: id(11), name: 'Synthetic template', des
       else if (p === 'projects/import') { imported = true; data = { rows: [], creates: 1, exists: 0, errors: 0, canApply: true } }
       else if (p === 'route-counts') data = null
       else if (p === 'settings') data = {}
-      else if (p === 'views') data = { views: [], canShare: true }
+      else if (p === 'views') data = viewList([], true)
       else if (p === 'workspaces') data = []
       else { unknown.push(`${method} ${p}`); data = {} }
       if (method !== 'GET' && method !== 'HEAD') posts.push({ path: p, body: req.postDataJSON?.() })

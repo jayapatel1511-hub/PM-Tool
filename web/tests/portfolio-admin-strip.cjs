@@ -2,6 +2,7 @@
 // Executives only while flag.admin_review is on; otherwise it is absent and never requested.
 const { chromium } = require('playwright')
 const { clientConfig } = require('./config.fixture.cjs')
+const { viewList } = require('./views.fixture.cjs')
 const assert = require('node:assert/strict')
 const { startPreview, mockPlatformApi } = require('./platform-fixtures.cjs')
 const { emptyPortfolio, lastReview: strip } = require('./portfolio.fixture.cjs')
@@ -28,7 +29,7 @@ const personId = '00000000-0000-0000-0000-000000000002'
     else if (p === 'reference') data = { disciplines: [], clients: [], offices: [], phases: [], projectTypes: [], limits: { roleLabel: 80 } }
     else if (p === 'organisation') data = { includeIndirectReports: false, units: [] }
     else if (p === 'workspaces') data = []
-    else if (p === 'views') data = { views: [], canShare: false }
+    else if (p === 'views') data = viewList()
     else if (p === 'portfolio') data = emptyPortfolio()
     else if (p === 'portfolio/admin-review') { stripGets.push(p); data = answer }
     else { await route.fallback(); return }

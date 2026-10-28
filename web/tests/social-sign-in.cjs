@@ -1,5 +1,6 @@
 const { chromium } = require('playwright');
 const { clientConfig } = require('./config.fixture.cjs');
+const { viewList } = require('./views.fixture.cjs');
 const { spawn } = require('child_process');
 const assert = require('node:assert/strict');
 const path = require('node:path');
@@ -43,7 +44,7 @@ let server, browser;
     if (pathname === '/api/v1/me/notifications/pulse') return route.fulfill({ json: { stamp: '0' } });
     if (pathname === '/api/v1/me/notifications/unread-count') return route.fulfill({ json: { notifications: 0, following: 0 } });
     if (pathname === '/api/v1/workspaces') return route.fulfill({ json: [] });
-    if (pathname === '/api/v1/views') return route.fulfill({ json: { views: [], canShare: false } });
+    if (pathname === '/api/v1/views') return route.fulfill({ json: viewList() });
     if (pathname === '/api/v1/projects') return route.fulfill({ json: { items: [], totalCount: 0 } });
     throw new Error(`Unexpected request: ${pathname}`);
   });

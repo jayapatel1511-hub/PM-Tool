@@ -10,12 +10,13 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
-import { ApiError, del, get, patch, post } from '@/lib/api'
+import type { components } from '@/gen/api'
+import { ApiError, typedRequest } from '@/lib/api'
 import { t , runtimeText } from '@/lib/i18n'
+import { invalidateChange } from '@/lib/keys'
 import { cn } from '@/lib/utils'
 
-interface SavedView { id: string; name: string; scope: 'Personal' | 'Project'; projectId?: string | null; isDefault: boolean; rowVersion: number; params: Record<string, string>; dropped: string[]; owner?: string; canEdit: boolean }
-interface ViewList { views: SavedView[]; canShare: boolean }
+type SavedView = components['schemas']['SavedViewRow']
 
 /** The URL parameters that make up the current view (everything but the open panel and the view marker). */
 function current(sp: URLSearchParams, extra?: Record<string, string | undefined>, panelParam = 'panel') {
@@ -31,7 +32,7 @@ export function ViewMenu({ listType, projectId, extra, fixed, panelParam = 'pane
   const [sp, setSp] = useSearchParams()
   const qc = useQueryClient()
   const key = ['views', listType, projectId ?? null]
-  const q = useQuery({ queryKey: key, queryFn: () => get<ViewList>(`views?listType=${listType}${projectId ? `&projectId=${projectId}` : ''}`) })
+  const q = useQuery({ queryKey: key, queryFn: () => typedRequest('get', '/api/v1/views', { query: { listType, projectId } }) })
   const small = useFlag('small_ux')
   const [saving, setSaving] = useState(false)
   const [copying, setCopying] = useState(false)
@@ -50,7 +51,7 @@ export function ViewMenu({ listType, projectId, extra, fixed, panelParam = 'pane
     const def = q.data.views.find((v) => v.isDefault)
     if (empty && def) apply(def, true)
   }, [q.data]) // eslint-disable-line react-hooks/exhaustive-deps
-  const refresh = () => qc.invalidateQueries({ queryKey: key })
+  const refresh = () => { void invalidateChange(qc, 'SavedView') }
   const run = async (work: () => Promise<unknown>, done: string) => { try { await work(); toast.success(done); refresh() } catch (e) { toast.error((e as ApiError).message) } }
   const personal = q.data?.views.filter((v) => v.scope === 'Personal') ?? []
   const shared = q.data?.views.filter((v) => v.scope === 'Project') ?? []
@@ -75,9 +76,9 @@ export function ViewMenu({ listType, projectId, extra, fixed, panelParam = 'pane
           <DropdownMenuSeparator />
           <DropdownMenuItem onSelect={() => { setCopying(false); setSaving(true) }}>{t('views.save')}</DropdownMenuItem>
           {active?.canEdit && <>
-            <DropdownMenuItem onSelect={() => run(() => patch(`views/${active.id}`, { params: current(sp, extra?.(), panelParam) }, active.rowVersion), t('views.updated', { name: active.name }))}>{t('views.update', { name: active.name })}</DropdownMenuItem>
-            {!active.isDefault && active.scope === 'Personal' && <DropdownMenuItem onSelect={() => run(() => patch(`views/${active.id}`, { isDefault: true }, active.rowVersion), t('views.madeDefault', { name: active.name }))}>{t('views.makeDefault')}</DropdownMenuItem>}
-            <DropdownMenuItem className="text-bad" onSelect={() => run(async () => { await del(`views/${active.id}`); const n = new URLSearchParams(sp); n.delete('view'); setSp(n, { replace: true }) }, t('views.deleted', { name: active.name }))}>{t('views.delete')}</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => run(() => typedRequest('patch', '/api/v1/views/{id}', { params: { id: active.id }, body: { params: current(sp, extra?.(), panelParam) }, ifMatch: active.rowVersion }), t('views.updated', { name: active.name }))}>{t('views.update', { name: active.name })}</DropdownMenuItem>
+            {!active.isDefault && active.scope === 'Personal' && <DropdownMenuItem onSelect={() => run(() => typedRequest('patch', '/api/v1/views/{id}', { params: { id: active.id }, body: { isDefault: true }, ifMatch: active.rowVersion }), t('views.madeDefault', { name: active.name }))}>{t('views.makeDefault')}</DropdownMenuItem>}
+            <DropdownMenuItem className="text-bad" onSelect={() => run(async () => { await typedRequest('delete', '/api/v1/views/{id}', { params: { id: active.id } }); const n = new URLSearchParams(sp); n.delete('view'); setSp(n, { replace: true }) }, t('views.deleted', { name: active.name }))}>{t('views.delete')}</DropdownMenuItem>
           </>}
           {small && active && <DropdownMenuItem onSelect={() => { setCopying(true); setSaving(true) }}>{t('views.copyPersonal')}</DropdownMenuItem>}
           {sp.get('view') && <DropdownMenuItem onSelect={() => { const n = new URLSearchParams(fixed); for (const key of new Set(['panel', panelParam])) { const panel = sp.get(key); if (panel) n.set(key, panel) } setSp(n) }}>{t('views.clear')}</DropdownMenuItem>}
@@ -98,7 +99,7 @@ function SaveDialog({ listType, projectId, canShare, initialName = '', params, o
   const submit = async () => {
     setBusy(true); setErr(null)
     try {
-      const r = await post<{ id: string }>('views', { name, listType, projectId, scope: share ? 'Project' : 'Personal', params, isDefault: isDefault && !share })
+      const r = await typedRequest('post', '/api/v1/views', { body: { name, listType, projectId: projectId ?? null, scope: share ? 'Project' : 'Personal', params, isDefault: isDefault && !share } })
       toast.success(t('views.saved', { name }))
       onClose(r.id)
     } catch (e) { setErr(e as ApiError) } finally { setBusy(false) }

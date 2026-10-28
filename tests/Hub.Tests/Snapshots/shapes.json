@@ -11663,36 +11663,6 @@
     "$.components.schemas.AnonymousTypeOfListOfObjectAndListOfObject.type": [
       "string"
     ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndboolean": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndboolean.properties": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndboolean.properties.canShare": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndboolean.properties.canShare.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndboolean.properties.views": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndboolean.properties.views.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndboolean.properties.views.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndboolean.required": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndboolean.required[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfObjectAndboolean.type": [
-      "string"
-    ],
     "$.components.schemas.AnonymousTypeOfListOfWidgetAndboolean": [
       "object"
     ],
@@ -39524,6 +39494,144 @@
     "$.components.schemas.RoundBody.type": [
       "string"
     ],
+    "$.components.schemas.SavedViewList": [
+      "object"
+    ],
+    "$.components.schemas.SavedViewList.properties": [
+      "object"
+    ],
+    "$.components.schemas.SavedViewList.properties.canShare": [
+      "object"
+    ],
+    "$.components.schemas.SavedViewList.properties.canShare.type": [
+      "string"
+    ],
+    "$.components.schemas.SavedViewList.properties.views": [
+      "object"
+    ],
+    "$.components.schemas.SavedViewList.properties.views.items": [
+      "object"
+    ],
+    "$.components.schemas.SavedViewList.properties.views.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.SavedViewList.properties.views.type": [
+      "string"
+    ],
+    "$.components.schemas.SavedViewList.required": [
+      "array"
+    ],
+    "$.components.schemas.SavedViewList.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SavedViewList.type": [
+      "string"
+    ],
+    "$.components.schemas.SavedViewRow": [
+      "object"
+    ],
+    "$.components.schemas.SavedViewRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.SavedViewRow.properties.canEdit": [
+      "object"
+    ],
+    "$.components.schemas.SavedViewRow.properties.canEdit.type": [
+      "string"
+    ],
+    "$.components.schemas.SavedViewRow.properties.dropped": [
+      "object"
+    ],
+    "$.components.schemas.SavedViewRow.properties.dropped.items": [
+      "object"
+    ],
+    "$.components.schemas.SavedViewRow.properties.dropped.items.type": [
+      "string"
+    ],
+    "$.components.schemas.SavedViewRow.properties.dropped.type": [
+      "string"
+    ],
+    "$.components.schemas.SavedViewRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.SavedViewRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.SavedViewRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.SavedViewRow.properties.isDefault": [
+      "object"
+    ],
+    "$.components.schemas.SavedViewRow.properties.isDefault.type": [
+      "string"
+    ],
+    "$.components.schemas.SavedViewRow.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.SavedViewRow.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.SavedViewRow.properties.owner": [
+      "object"
+    ],
+    "$.components.schemas.SavedViewRow.properties.owner.type": [
+      "array"
+    ],
+    "$.components.schemas.SavedViewRow.properties.owner.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SavedViewRow.properties.params": [
+      "object"
+    ],
+    "$.components.schemas.SavedViewRow.properties.params.additionalProperties": [
+      "object"
+    ],
+    "$.components.schemas.SavedViewRow.properties.params.additionalProperties.type": [
+      "string"
+    ],
+    "$.components.schemas.SavedViewRow.properties.params.type": [
+      "string"
+    ],
+    "$.components.schemas.SavedViewRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.SavedViewRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.SavedViewRow.properties.projectId.type": [
+      "array"
+    ],
+    "$.components.schemas.SavedViewRow.properties.projectId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SavedViewRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.SavedViewRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.SavedViewRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.SavedViewRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.SavedViewRow.properties.scope": [
+      "object"
+    ],
+    "$.components.schemas.SavedViewRow.properties.scope.type": [
+      "string"
+    ],
+    "$.components.schemas.SavedViewRow.required": [
+      "array"
+    ],
+    "$.components.schemas.SavedViewRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SavedViewRow.type": [
+      "string"
+    ],
     "$.components.schemas.ScheduleBody": [
       "object"
     ],
@@ -48819,6 +48927,42 @@
       "string"
     ],
     "$.components.schemas.ViewBody.type": [
+      "string"
+    ],
+    "$.components.schemas.ViewSaved": [
+      "object"
+    ],
+    "$.components.schemas.ViewSaved.properties": [
+      "object"
+    ],
+    "$.components.schemas.ViewSaved.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.ViewSaved.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.ViewSaved.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.ViewSaved.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.ViewSaved.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.ViewSaved.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ViewSaved.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.ViewSaved.required": [
+      "array"
+    ],
+    "$.components.schemas.ViewSaved.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ViewSaved.type": [
       "string"
     ],
     "$.components.schemas.VisibilityBody": [
@@ -60596,10 +60740,10 @@
     "$.paths./api/v1/projects/{id}/board-order.put.responses": [
       "object"
     ],
-    "$.paths./api/v1/projects/{id}/board-order.put.responses.200": [
+    "$.paths./api/v1/projects/{id}/board-order.put.responses.204": [
       "object"
     ],
-    "$.paths./api/v1/projects/{id}/board-order.put.responses.200.description": [
+    "$.paths./api/v1/projects/{id}/board-order.put.responses.204.description": [
       "string"
     ],
     "$.paths./api/v1/projects/{id}/board-order.put.tags": [
@@ -74084,10 +74228,22 @@
     "$.paths./api/v1/views.post.responses": [
       "object"
     ],
-    "$.paths./api/v1/views.post.responses.200": [
+    "$.paths./api/v1/views.post.responses.201": [
       "object"
     ],
-    "$.paths./api/v1/views.post.responses.200.description": [
+    "$.paths./api/v1/views.post.responses.201.content": [
+      "object"
+    ],
+    "$.paths./api/v1/views.post.responses.201.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/views.post.responses.201.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/views.post.responses.201.content.application/json.schema.$ref": [
+      "string"
+    ],
+    "$.paths./api/v1/views.post.responses.201.description": [
       "string"
     ],
     "$.paths./api/v1/views.post.tags": [
@@ -74129,10 +74285,10 @@
     "$.paths./api/v1/views/{id}.delete.responses": [
       "object"
     ],
-    "$.paths./api/v1/views/{id}.delete.responses.200": [
+    "$.paths./api/v1/views/{id}.delete.responses.204": [
       "object"
     ],
-    "$.paths./api/v1/views/{id}.delete.responses.200.description": [
+    "$.paths./api/v1/views/{id}.delete.responses.204.description": [
       "string"
     ],
     "$.paths./api/v1/views/{id}.delete.tags": [
@@ -74191,6 +74347,18 @@
     ],
     "$.paths./api/v1/views/{id}.patch.responses.200": [
       "object"
+    ],
+    "$.paths./api/v1/views/{id}.patch.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/views/{id}.patch.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/views/{id}.patch.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/views/{id}.patch.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/views/{id}.patch.responses.200.description": [
       "string"
@@ -97538,6 +97706,29 @@
       "string"
     ]
   },
+  "PATCH /api/v1/views/{id} 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "PATCH /api/v1/views/{id} 409": {
     "$": [
       "object"
@@ -108216,6 +108407,18 @@
       "array"
     ],
     "$.errors.group[]": [
+      "string"
+    ],
+    "$.errors.listType": [
+      "array"
+    ],
+    "$.errors.listType[]": [
+      "string"
+    ],
+    "$.errors.name": [
+      "array"
+    ],
+    "$.errors.name[]": [
       "string"
     ],
     "$.errors.scope": [

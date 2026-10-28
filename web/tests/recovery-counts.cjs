@@ -1,6 +1,7 @@
 // Packet 045: real browser interactions over labelled synthetic API responses.
 const { chromium } = require('playwright');
 const { clientConfig } = require('./config.fixture.cjs');
+const { viewList } = require('./views.fixture.cjs');
 const assert = require('node:assert/strict');
 const { spawn } = require('node:child_process');
 const path = require('node:path');
@@ -41,7 +42,7 @@ let server,browser;const errors=[],requests=[],unknown=[];
   else if(p==='me/notifications/pulse')data={stamp:'0'};
   else if(p==='me/notifications/unread-count')data={notifications:0,following:0};
   else if(p==='workspaces')data=[];
-  else if(p==='views')data={views:[],canShare:false};
+  else if(p==='views')data=viewList();
   else if(p==='reference')data={disciplines:[{id:civil,name:'Civil',isActive:true}],clients:[{id:client,name:'Synthetic client',isActive:true}],offices:[{id:office,name:'Synthetic office',isActive:true}],deliverableTypes:[],phases:[],projectTypes:[],limits:{roleLabel:80}};
   else if(p==='projects')data={items:[{...row(1),id:pid,projectNumber:'SYN-RCV'}],totalCount:1};
   else if(p===`projects/${pid}`||p==='projects/SYN-RCV')data=project();

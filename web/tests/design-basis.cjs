@@ -5,6 +5,7 @@ const { chromium } = require('playwright');
 const { clientConfig } = require('./config.fixture.cjs');
 const path = require('path'), { spawn } = require('child_process'), assert = require('assert/strict');
 const { decisionRow, externalParty } = require('./decisions.fixture.cjs');
+const { savedView, viewList, viewSaved } = require('./views.fixture.cjs');
 const { coordinationOptions, coordinationTask } = require('./reviews.fixture.cjs');
 const { commitmentRow, commitmentList } = require('./weekly-commitments.fixture.cjs');
 const { attentionList } = require('./evaluation.fixture.cjs');
@@ -77,8 +78,8 @@ let server, browser;
     if (method !== 'GET' && p.startsWith(`tasks/${task}`)) taskWrites.push({ method, path: p });
     if (p === 'config') data = clientConfig();
     else if (p === 'me') data = me(); else if (p === 'me/sign-in') data = {}; else if (p === 'me/notifications/pulse') data = { stamp: '0' };
-    else if (p === 'me/notifications/unread-count') data = { notifications: 0, following: 0 }; else if (p === 'workspaces') data = []; else if (p === 'views' && method === 'POST') { const body = req.postDataJSON(); savedViews.push({ ...body, id: id(300 + savedViews.length), scope: 'Personal', rowVersion: 1, dropped: [], canEdit: true }); data = savedViews.at(-1) }
-    else if (p === 'views') data = { views: savedViews.filter(v => v.listType === u.searchParams.get('listType')), canShare: false };
+    else if (p === 'me/notifications/unread-count') data = { notifications: 0, following: 0 }; else if (p === 'workspaces') data = []; else if (p === 'views' && method === 'POST') { const body = req.postDataJSON(); savedViews.push({ listType: body.listType, ...savedView({ id: id(300 + savedViews.length), name: body.name, params: body.params ?? {}, isDefault: body.isDefault ?? false }) }); data = viewSaved(savedViews.at(-1).id) }
+    else if (p === 'views') data = viewList(savedViews.filter(v => v.listType === u.searchParams.get('listType')).map(({ listType, ...v }) => v));
     else if (p === 'projects') data = { items: [project()], totalCount: 1 }; else if (p === `projects/${pid}` || p === 'projects/P-DEMO') data = project();
     else if (p === `projects/${pid}/coordination`) data = {
       window: { thisWeek: { from: '2026-10-01', to: '2026-10-07' }, nextWeek: { from: '2026-10-08', to: '2026-10-14' }, since: '2026-09-01', canMarkReviewed: false },

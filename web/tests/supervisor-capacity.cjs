@@ -2,6 +2,7 @@
 // The API rules and digest job are covered separately by server tests; this keeps the browser contract small.
 const { chromium } = require('playwright')
 const { clientConfig } = require('./config.fixture.cjs')
+const { viewList } = require('./views.fixture.cjs')
 const { myStaffPerson, myStaffList } = require('./my-work.fixture.cjs')
 const path = require('path')
 const { spawn } = require('child_process')
@@ -63,7 +64,7 @@ const prefs = holdDigestWhenAway => ({
       else if (endpoint === 'me/notifications/pulse') data = { stamp: '0' }
       else if (endpoint === 'me/notifications/unread-count') data = { notifications: 1, following: 1 }
       else if (endpoint === 'workspaces') data = []
-      else if (endpoint === 'views') data = { views: [], canShare: false }
+      else if (endpoint === 'views') data = viewList()
       else if (endpoint === 'reference') data = ref
       else if (endpoint === 'staff') data = emptyStaff(people)
       else if (endpoint === 'me/notifications' && request.method() === 'GET') data = { items: [personalNotification], page: 1, pageSize: 50, totalCount: 1 }

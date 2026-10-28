@@ -1,6 +1,7 @@
 // Packet 046: focused browser checks against deterministic mocked API contracts.
 const { chromium } = require('playwright')
 const { clientConfig } = require('./config.fixture.cjs')
+const { savedView, viewList } = require('./views.fixture.cjs')
 const assert = require('node:assert/strict')
 const { spawn } = require('node:child_process')
 const path = require('node:path')
@@ -47,7 +48,7 @@ let server, browser
     else if (p === 'me/sign-in') data = {}
     else if (p.startsWith('me/notifications/')) data = p.endsWith('unread-count') ? { notifications: 0, following: 0 } : { stamp: '0' }
     else if (p === 'workspaces') data = []
-    else if (p === 'views') data = { views: [{ id: id(8), name: 'My saved view', scope: 'Personal', isDefault: false, rowVersion: 1, params: { group: 'status' }, dropped: [], canEdit: true }], canShare: false }
+    else if (p === 'views') data = viewList([savedView({ id: id(8), name: 'My saved view', params: { group: 'status' } })])
     else if (p === 'reference') data = { disciplines: [{ id: discipline, name: 'Civil', isActive: true }], clients: [], offices: [], deliverableTypes: [{id:id(60),name:'Synthetic drawing',isActive:true}], phases: [], projectTypes: [], limits: { roleLabel: 80 } }
     else if (p === `projects/${pid}/activity` || p === `items/Task/${taskId}/activity`) data = activity
     else if (p === 'users') data = [{ id: person, displayName: 'Synthetic PM', isActive: true }]

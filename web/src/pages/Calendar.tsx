@@ -11,8 +11,10 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { ApiError, get, patch, post, qs } from '@/lib/api'
+import type { components } from '@/gen/api'
+import { ApiError, get, typedRequest } from '@/lib/api'
 import { addDays, daysBetween, fmtDate, shortDate, today } from '@/lib/format'
+import { invalidateChange } from '@/lib/keys'
 import { t, tv , runtimeText } from '@/lib/i18n'
 import type { Page as PageOf } from '@/lib/types'
 import { accentOf, cn } from '@/lib/utils'
@@ -20,13 +22,11 @@ import { useScope, WorkspaceTabs } from '@/components/hub/workspace'
 import { DraftNotice } from '@/components/hub/drafts'
 import { useSafeForm } from '@/hooks/drafts'
 
-interface Deadline { kind: 'deadline'; sourceType: 'Task' | 'Deliverable' | 'Milestone'; id: string; key: string; title: string; date: string; projectId: string; projectNumber: string; status?: string; overdue: boolean }
-interface CalEvent {
-  kind: 'event'; id: string; type: string; title: string; start: string; end: string; timeZone: string; projectId?: string | null; projectNumber?: string | null; projectName?: string | null
-  owner?: string; location?: string | null; description?: string | null; visibility: string; cancelled: boolean; rowVersion: number; canEdit: boolean
-}
+type Schemas = components['schemas']
+// The contract types `kind` and a deadline's `sourceType` as plain strings; the page narrows on them.
+type Deadline = Omit<Schemas['CalendarEntryCalendarDeadline'], 'kind' | 'sourceType'> & { kind: 'deadline'; sourceType: 'Task' | 'Deliverable' | 'Milestone' }
+type CalEvent = Omit<Schemas['CalendarEventRow'], 'kind'> & { kind: 'event' }
 type Entry = Deadline | CalEvent
-interface Range { timeZone: string; entries: Entry[] }
 
 // Types are told apart by icon and text; colour on an entry is its project's identity accent (design §3), never the type.
 const TYPES = [
@@ -61,11 +61,11 @@ export function CalendarPage() {
   const to = view === 'week' ? addDays(from, 6) : view === 'month' ? addDays(from, 41) : addDays(anchor, 30)
   const types = TYPES.map((x) => x.id).filter((x) => !hidden.includes(x))
   const q = useQuery({ queryKey: ['calendar', from, to, scope.api, types.join(',')], enabled: types.length > 0 && scope.ready,
-    queryFn: () => get<Range>(`calendar${qs({ from, to, projectIds: scope.api, types })}`) })
+    queryFn: () => typedRequest('get', '/api/v1/calendar', { query: { from, to, projectIds: scope.api, types: types.join(',') } }) })
   const step = (n: number) => set('date', view === 'week' ? addDays(anchor, 7 * n) : view === 'month' ? shiftMonth(anchor, n) : addDays(anchor, 30 * n))
   const toggle = (id: string) => set('hide', (hidden.includes(id) ? hidden.filter((x) => x !== id) : [...hidden, id]).join(',') || null)
   const open = (e: Entry) => (e.kind === 'deadline' ? openPanel(e.sourceType, e.id) : setEditing(e))
-  const entries = types.length === 0 ? [] : q.data?.entries ?? []
+  const entries = types.length === 0 ? [] : (q.data?.entries ?? []) as Entry[]
   const label = view === 'month' ? monthTitle(anchor) : `${fmtDate(from)} – ${fmtDate(to)}`
 
   return (
@@ -264,18 +264,18 @@ export function EventDialog({ event, anchor, onClose }: { event: CalEvent | null
   const safe = useSafeForm(event ? null : 'event.new', f, setF) // FR-SAV-03
   const projects = useQuery({ queryKey: ['projects-pick', ''], queryFn: () => get<PageOf<{ id: string; projectNumber: string; name: string }>>('projects?pageSize=200') })
   const fe = err?.fieldErrors ?? {}
-  const done = () => { qc.invalidateQueries({ queryKey: ['calendar'] }); onClose() }
+  const done = (projectId?: string | null) => { void invalidateChange(qc, 'CalendarEvent', projectId ?? undefined); onClose() }
   const save = async () => {
     setBusy(true); setErr(null)
-    const body = { ...f, projectId: f.projectId || null, location: f.location || null, description: f.description || null, visibility: f.projectId ? f.visibility : 'Private' }
+    const body = { type: f.type, title: f.title, projectId: f.projectId || null, start: f.start, end: f.end, location: f.location || null, description: f.description || null, visibility: f.projectId ? f.visibility : 'Private' }
     try {
-      if (event) await patch(`calendar/events/${event.id}`, body, event.rowVersion); else await post('calendar/events', body)
-      safe.clear(); toast.success(t('common.saved')); done()
+      if (event) await typedRequest('patch', '/api/v1/calendar/events/{id}', { params: { id: event.id }, body, ifMatch: event.rowVersion }); else await typedRequest('post', '/api/v1/calendar/events', { body })
+      safe.clear(); toast.success(t('common.saved')); done(body.projectId)
     } catch (e) { setErr(e as ApiError) } finally { setBusy(false) }
   }
   const cancel = async () => {
     if (!event) return
-    try { await post(`calendar/events/${event.id}/cancel`, { rowVersion: event.rowVersion }); toast.success(t('calendar.cancelled')); done() } catch (e) { setErr(e as ApiError) }
+    try { await typedRequest('post', '/api/v1/calendar/events/{id}/cancel', { params: { id: event.id }, body: { rowVersion: event.rowVersion } }); toast.success(t('calendar.cancelled')); done(event.projectId) } catch (e) { setErr(e as ApiError) }
   }
   const input = (k: string, props: Record<string, unknown> = {}) => ({ id: `ev-${k}`, value: f[k] ?? '', disabled: readOnly, onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setF({ ...f, [k]: e.target.value }), ...props })
   return (

@@ -2833,6 +2833,38 @@
       "string"
     ]
   },
+  "GET /api/v1/calendar 400": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.errors": [
+      "object"
+    ],
+    "$.errors.to": [
+      "array"
+    ],
+    "$.errors.to[]": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "GET /api/v1/calendar/events/{id} 200": {
     "$": [
       "object"
@@ -2844,7 +2876,8 @@
       "boolean"
     ],
     "$.description": [
-      "null"
+      "null",
+      "string"
     ],
     "$.end": [
       "string"
@@ -13019,6 +13052,492 @@
     "$.components.schemas.BulkLinkResult.type": [
       "string"
     ],
+    "$.components.schemas.CalendarEntry": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntry.anyOf": [
+      "array"
+    ],
+    "$.components.schemas.CalendarEntry.anyOf[]": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntry.anyOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntry.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarDeadline": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarDeadline.properties": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarDeadline.properties.date": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarDeadline.properties.date.format": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarDeadline.properties.date.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarDeadline.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarDeadline.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarDeadline.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarDeadline.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarDeadline.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarDeadline.properties.kind": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarDeadline.properties.kind.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarDeadline.properties.overdue": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarDeadline.properties.overdue.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarDeadline.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarDeadline.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarDeadline.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarDeadline.properties.projectName": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarDeadline.properties.projectName.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarDeadline.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarDeadline.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarDeadline.properties.sourceType": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarDeadline.properties.sourceType.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarDeadline.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarDeadline.properties.status.type": [
+      "array"
+    ],
+    "$.components.schemas.CalendarEntryCalendarDeadline.properties.status.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarDeadline.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarDeadline.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarDeadline.required": [
+      "array"
+    ],
+    "$.components.schemas.CalendarEntryCalendarDeadline.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.canEdit": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.canEdit.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.cancelled": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.cancelled.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.description": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.description.type": [
+      "array"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.description.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.end": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.end.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.endAt": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.endAt.format": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.endAt.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.kind": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.kind.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.location": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.location.type": [
+      "array"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.location.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.owner": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.owner.type": [
+      "array"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.owner.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.ownerId": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.ownerId.format": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.ownerId.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.projectId.type": [
+      "array"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.projectId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.projectName": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.projectName.type": [
+      "array"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.projectName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.projectNumber.type": [
+      "array"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.projectNumber.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.start": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.start.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.startAt": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.startAt.format": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.startAt.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.timeZone": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.timeZone.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.type": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.type.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.visibility": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.properties.visibility.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.required": [
+      "array"
+    ],
+    "$.components.schemas.CalendarEntryCalendarEventRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventCancelled": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEventCancelled.properties": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEventCancelled.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEventCancelled.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventCancelled.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventCancelled.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEventCancelled.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventCancelled.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventCancelled.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventCancelled.required": [
+      "array"
+    ],
+    "$.components.schemas.CalendarEventCancelled.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventCancelled.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventRow": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEventRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.canEdit": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.canEdit.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.cancelled": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.cancelled.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.description": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.description.type": [
+      "array"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.description.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.end": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.end.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.endAt": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.endAt.format": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.endAt.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.kind": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.kind.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.location": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.location.type": [
+      "array"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.location.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.owner": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.owner.type": [
+      "array"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.owner.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.ownerId": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.ownerId.format": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.ownerId.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.projectId.type": [
+      "array"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.projectId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.projectName": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.projectName.type": [
+      "array"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.projectName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.projectNumber.type": [
+      "array"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.projectNumber.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.start": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.start.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.startAt": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.startAt.format": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.startAt.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.timeZone": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.timeZone.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.type": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.type.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.visibility": [
+      "object"
+    ],
+    "$.components.schemas.CalendarEventRow.properties.visibility.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventRow.required": [
+      "array"
+    ],
+    "$.components.schemas.CalendarEventRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CalendarEventRow.type": [
+      "string"
+    ],
     "$.components.schemas.CalendarFeedVersionBody": [
       "object"
     ],
@@ -13044,6 +13563,57 @@
       "string"
     ],
     "$.components.schemas.CalendarFeedVersionBody.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarRange": [
+      "object"
+    ],
+    "$.components.schemas.CalendarRange.properties": [
+      "object"
+    ],
+    "$.components.schemas.CalendarRange.properties.entries": [
+      "object"
+    ],
+    "$.components.schemas.CalendarRange.properties.entries.items": [
+      "object"
+    ],
+    "$.components.schemas.CalendarRange.properties.entries.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CalendarRange.properties.entries.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarRange.properties.from": [
+      "object"
+    ],
+    "$.components.schemas.CalendarRange.properties.from.format": [
+      "string"
+    ],
+    "$.components.schemas.CalendarRange.properties.from.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarRange.properties.timeZone": [
+      "object"
+    ],
+    "$.components.schemas.CalendarRange.properties.timeZone.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarRange.properties.to": [
+      "object"
+    ],
+    "$.components.schemas.CalendarRange.properties.to.format": [
+      "string"
+    ],
+    "$.components.schemas.CalendarRange.properties.to.type": [
+      "string"
+    ],
+    "$.components.schemas.CalendarRange.required": [
+      "array"
+    ],
+    "$.components.schemas.CalendarRange.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CalendarRange.type": [
       "string"
     ],
     "$.components.schemas.Can": [
@@ -39782,6 +40352,9 @@
     "$.paths./api/v1/calendar.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/calendar.get.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/calendar.get.responses.200.description": [
       "string"
     ],
@@ -39818,10 +40391,22 @@
     "$.paths./api/v1/calendar/events.post.responses": [
       "object"
     ],
-    "$.paths./api/v1/calendar/events.post.responses.200": [
+    "$.paths./api/v1/calendar/events.post.responses.201": [
       "object"
     ],
-    "$.paths./api/v1/calendar/events.post.responses.200.description": [
+    "$.paths./api/v1/calendar/events.post.responses.201.content": [
+      "object"
+    ],
+    "$.paths./api/v1/calendar/events.post.responses.201.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/calendar/events.post.responses.201.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/calendar/events.post.responses.201.content.application/json.schema.$ref": [
+      "string"
+    ],
+    "$.paths./api/v1/calendar/events.post.responses.201.description": [
       "string"
     ],
     "$.paths./api/v1/calendar/events.post.tags": [
@@ -39874,6 +40459,9 @@
     ],
     "$.paths./api/v1/calendar/events/{id}.get.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/calendar/events/{id}.get.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/calendar/events/{id}.get.responses.200.description": [
       "string"
@@ -39934,6 +40522,18 @@
     ],
     "$.paths./api/v1/calendar/events/{id}.patch.responses.200": [
       "object"
+    ],
+    "$.paths./api/v1/calendar/events/{id}.patch.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/calendar/events/{id}.patch.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/calendar/events/{id}.patch.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/calendar/events/{id}.patch.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/calendar/events/{id}.patch.responses.200.description": [
       "string"
@@ -39997,6 +40597,18 @@
     ],
     "$.paths./api/v1/calendar/events/{id}/cancel.post.responses.200": [
       "object"
+    ],
+    "$.paths./api/v1/calendar/events/{id}/cancel.post.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/calendar/events/{id}/cancel.post.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/calendar/events/{id}/cancel.post.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/calendar/events/{id}/cancel.post.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/calendar/events/{id}/cancel.post.responses.200.description": [
       "string"
@@ -81637,7 +82249,8 @@
       "boolean"
     ],
     "$.description": [
-      "null"
+      "null",
+      "string"
     ],
     "$.end": [
       "string"
@@ -81697,6 +82310,61 @@
     ],
     "$.code": [
       "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "PATCH /api/v1/calendar/events/{id} 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "PATCH /api/v1/calendar/events/{id} 409": {
+    "$": [
+      "object"
+    ],
+    "$.changedAt": [
+      "string"
+    ],
+    "$.changedBy": [
+      "string"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.currentRowVersion": [
+      "number"
     ],
     "$.detail": [
       "string"
@@ -84346,6 +85014,29 @@
     ],
     "$.rowVersion": [
       "number"
+    ]
+  },
+  "POST /api/v1/calendar/events/{id}/cancel 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
     ]
   },
   "POST /api/v1/client-errors 400": {

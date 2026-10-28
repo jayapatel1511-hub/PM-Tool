@@ -2886,6 +2886,314 @@
         ],
         "type": "object"
       },
+      "CalendarEntry": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/CalendarEntryCalendarDeadline"
+          },
+          {
+            "$ref": "#/components/schemas/CalendarEntryCalendarEventRow"
+          }
+        ],
+        "type": "object"
+      },
+      "CalendarEntryCalendarDeadline": {
+        "properties": {
+          "date": {
+            "format": "date",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "overdue": {
+            "type": "boolean"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectName": {
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "status": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "sourceType",
+          "id",
+          "key",
+          "title",
+          "date",
+          "projectId",
+          "projectNumber",
+          "projectName",
+          "status",
+          "overdue"
+        ]
+      },
+      "CalendarEntryCalendarEventRow": {
+        "properties": {
+          "canEdit": {
+            "type": "boolean"
+          },
+          "cancelled": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "end": {
+            "type": "string"
+          },
+          "endAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "location": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "owner": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "ownerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "start": {
+            "type": "string"
+          },
+          "startAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "timeZone": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "visibility": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "id",
+          "type",
+          "title",
+          "start",
+          "end",
+          "startAt",
+          "endAt",
+          "timeZone",
+          "projectId",
+          "projectNumber",
+          "projectName",
+          "ownerId",
+          "owner",
+          "location",
+          "description",
+          "visibility",
+          "cancelled",
+          "rowVersion",
+          "canEdit"
+        ]
+      },
+      "CalendarEventCancelled": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
+      "CalendarEventRow": {
+        "properties": {
+          "canEdit": {
+            "type": "boolean"
+          },
+          "cancelled": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "end": {
+            "type": "string"
+          },
+          "endAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "location": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "owner": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "ownerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "start": {
+            "type": "string"
+          },
+          "startAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "timeZone": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "visibility": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "id",
+          "type",
+          "title",
+          "start",
+          "end",
+          "startAt",
+          "endAt",
+          "timeZone",
+          "projectId",
+          "projectNumber",
+          "projectName",
+          "ownerId",
+          "owner",
+          "location",
+          "description",
+          "visibility",
+          "cancelled",
+          "rowVersion",
+          "canEdit"
+        ],
+        "type": "object"
+      },
       "CalendarFeedVersionBody": {
         "properties": {
           "rowVersion": {
@@ -2896,6 +3204,34 @@
         },
         "required": [
           "rowVersion"
+        ],
+        "type": "object"
+      },
+      "CalendarRange": {
+        "properties": {
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/CalendarEntry"
+            },
+            "type": "array"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "timeZone": {
+            "type": "string"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "timeZone",
+          "from",
+          "to",
+          "entries"
         ],
         "type": "object"
       },
@@ -18507,7 +18843,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarRange"
+                }
               }
             },
             "description": "OK"
@@ -18552,8 +18890,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarEventRow"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -18578,7 +18923,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarEventRow"
+                }
               }
             },
             "description": "OK"
@@ -18612,6 +18959,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarEventRow"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -18645,6 +18999,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarEventCancelled"
+                }
+              }
+            },
             "description": "OK"
           }
         },

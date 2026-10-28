@@ -1,8 +1,10 @@
 using System.Globalization;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Api.Features;
@@ -14,20 +16,33 @@ public static class CalendarEndpoints
 {
     public sealed record EventBody(string Type, string Title, Guid? ProjectId, string Start, string End, string? Location, string? Description, string? Visibility);
 
+    /// One entry of a range, told apart by its kind: an all-day projection of a permitted item date, or an event.
+    [JsonDerivedType(typeof(CalendarDeadline))]
+    [JsonDerivedType(typeof(CalendarEventRow))]
+    public abstract record CalendarEntry;
+    public sealed record CalendarDeadline(string Kind, string SourceType, Guid Id, string Key, string Title, DateOnly Date, Guid ProjectId, string ProjectNumber, string ProjectName, string? Status, bool Overdue)
+        : CalendarEntry;
+    /// An event as the calendar, the New Event dialog and the editing answers show it: Start and End are local to the organisation's zone, StartAt and EndAt are instants.
+    public sealed record CalendarEventRow(string Kind, Guid Id, string Type, string Title, string Start, string End, DateTimeOffset StartAt, DateTimeOffset EndAt, string TimeZone, Guid? ProjectId,
+        string? ProjectNumber, string? ProjectName, Guid OwnerId, string? Owner, string? Location, string? Description, string Visibility, bool Cancelled, int RowVersion, bool CanEdit)
+        : CalendarEntry;
+    public sealed record CalendarRange(string TimeZone, DateOnly From, DateOnly To, List<CalendarEntry> Entries);
+    public sealed record CalendarEventCancelled(Guid Id, int RowVersion);
+
     public const string Deadlines = "Deadline";
 
     public static void Map(RouteGroupBuilder api)
     {
         api.MapGet("/calendar", Entries);
         api.MapPost("/calendar/events", Create);
-        api.MapGet("/calendar/events/{id:guid}", async (Guid id, Access access, HubDb db, CurrentUser me, SettingsStore store) =>
+        api.MapGet("/calendar/events/{id:guid}", async Task<Ok<CalendarEventRow>> (Guid id, Access access, HubDb db, CurrentUser me, SettingsStore store) =>
         {
             var e = await Visible(db, access, me, id);
             var s = await store.Get(db);
-            return await Row(db, access, me, e, s);
+            return TypedResults.Ok(await Row(db, access, me, e, s));
         });
         api.MapPatch("/calendar/events/{id:guid}", Edit);
-        api.MapPost("/calendar/events/{id:guid}/cancel", async (Guid id, JsonElement body, HttpContext http, Access access, HubDb db, CurrentUser me, TimeProvider clock) =>
+        api.MapPost("/calendar/events/{id:guid}/cancel", async Task<Ok<CalendarEventCancelled>> (Guid id, JsonElement body, HttpContext http, Access access, HubDb db, CurrentUser me, TimeProvider clock) =>
         {
             var e = await Visible(db, access, me, id, track: true);
             await Demand(db, access, e);
@@ -35,7 +50,7 @@ public static class CalendarEndpoints
             e.CancelledAt = clock.GetUtcNow();
             e.CancelledBy = me.Id;
             await db.SaveChangesAsync(); // logged as a status change (CancelledAt is in the allow-list)
-            return Results.Ok(new { e.Id, e.RowVersion });
+            return TypedResults.Ok(new CalendarEventCancelled(e.Id, e.RowVersion));
         });
     }
 
@@ -69,20 +84,17 @@ public static class CalendarEndpoints
 
     static async Task Demand(HubDb db, Access access, CalendarEvent e) => Access.Demand(await CanEdit(db, access, e));
 
-    static async Task<object> Row(HubDb db, Access access, CurrentUser me, CalendarEvent e, OrgSettings s)
+    static async Task<CalendarEventRow> Row(HubDb db, Access access, CurrentUser me, CalendarEvent e, OrgSettings s)
     {
         var zone = Clock.Zone(s);
         var number = e.ProjectId is { } pid ? await db.Projects.Where(p => p.Id == pid).Select(p => new { p.ProjectNumber, p.Name }).FirstOrDefaultAsync() : null;
         var owner = await db.Users.Where(u => u.Id == e.OwnerId).Select(u => u.DisplayName).FirstOrDefaultAsync();
-        return new
-        {
-            Kind = "event", e.Id, e.Type, e.Title, Start = Local(e.StartAt, zone), End = Local(e.EndAt, zone), e.StartAt, e.EndAt, TimeZone = s.OrgTimeZone,
-            e.ProjectId, ProjectNumber = number?.ProjectNumber, ProjectName = number?.Name, e.OwnerId, Owner = owner, e.Location, e.Description, e.Visibility,
-            Cancelled = e.CancelledAt is not null, e.RowVersion, CanEdit = (await CanEdit(db, access, e)).Ok,
-        };
+        return new CalendarEventRow("event", e.Id, e.Type, e.Title, Local(e.StartAt, zone), Local(e.EndAt, zone), e.StartAt, e.EndAt, s.OrgTimeZone,
+            e.ProjectId, number?.ProjectNumber, number?.Name, e.OwnerId, owner, e.Location, e.Description, e.Visibility,
+            e.CancelledAt is not null, e.RowVersion, (await CanEdit(db, access, e)).Ok);
     }
 
-    static async Task<object> Entries(DateOnly from, DateOnly to, string? projectIds, string? types, Access access, HubDb db, CurrentUser me, SettingsStore store)
+    static async Task<Ok<CalendarRange>> Entries(DateOnly from, DateOnly to, string? projectIds, string? types, Access access, HubDb db, CurrentUser me, SettingsStore store)
     {
         Check.That(to >= from && to.DayNumber - from.DayNumber <= 92, "to", "calendar.range");
         var s = await store.Get(db);
@@ -94,7 +106,7 @@ public static class CalendarEndpoints
         var scoped = !string.IsNullOrWhiteSpace(projectIds) && projectIds != Scope.All;
         var pids = projects.Select(p => p.Id);
         var numbers = await projects.Select(p => new { p.Id, p.ProjectNumber, p.Name }).ToDictionaryAsync(p => p.Id);
-        var entries = new List<object>();
+        var entries = new List<CalendarEntry>();
         if (Want(Deadlines))
         {
             var tasks = await db.Tasks.AsNoTracking().Where(t => pids.Contains(t.ProjectId) && t.DueDate >= from && t.DueDate <= to && t.Status != TaskStatuses.Cancelled && t.Status != TaskStatuses.Complete)
@@ -104,10 +116,8 @@ public static class CalendarEndpoints
                 .Select(d => new { d.Id, d.Key, d.Name, d.DueDate, d.ProjectId, d.Status, Overdue = db.DeliverableStates.Any(x => x.DeliverableId == d.Id && x.IsOverdue) }).ToListAsync();
             var ms = await db.Milestones.AsNoTracking().Where(m => pids.Contains(m.ProjectId) && m.Date >= from && m.Date <= to && !m.IsCancelled)
                 .Select(m => new { m.Id, m.Key, m.Name, m.Date, m.ProjectId, Status = m.IsComplete ? MilestoneStatus.Complete : db.MilestoneStates.Where(x => x.MilestoneId == m.Id).Select(x => x.Status).FirstOrDefault() }).ToListAsync();
-            object D(string type, Guid id, string key, string name, DateOnly date, Guid pid, string? status, bool overdue) => new
-            {
-                Kind = "deadline", SourceType = type, Id = id, Key = key, Title = name, Date = date, ProjectId = pid, numbers[pid].ProjectNumber, ProjectName = numbers[pid].Name, Status = status, Overdue = overdue,
-            };
+            CalendarDeadline D(string type, Guid id, string key, string name, DateOnly date, Guid pid, string? status, bool overdue) =>
+                new("deadline", type, id, key, name, date, pid, numbers[pid].ProjectNumber, numbers[pid].Name, status, overdue);
             entries.AddRange(tasks.Select(t => D(ItemType.Task, t.Id, t.Key, t.Name, t.DueDate!.Value, t.ProjectId, t.Status, t.Overdue)));
             entries.AddRange(dels.Select(d => D(ItemType.Deliverable, d.Id, d.Key, d.Name, d.DueDate!.Value, d.ProjectId, d.Status, d.Overdue)));
             entries.AddRange(ms.Select(m => D(ItemType.Milestone, m.Id, m.Key, m.Name, m.Date!.Value, m.ProjectId, m.Status, m.Status == MilestoneStatus.Overdue)));
@@ -121,10 +131,10 @@ public static class CalendarEndpoints
             if (scoped) q = q.Where(e => e.ProjectId == null || pids.Contains(e.ProjectId.Value)); // private project-less events stay in the owner's calendar
             foreach (var e in await q.OrderBy(e => e.StartAt).ToListAsync()) entries.Add(await Row(db, access, me, e, s));
         }
-        return new { TimeZone = s.OrgTimeZone, From = from, To = to, Entries = entries };
+        return TypedResults.Ok(new CalendarRange(s.OrgTimeZone, from, to, entries));
     }
 
-    static async Task<IResult> Create(EventBody body, Access access, HubDb db, CurrentUser me, SettingsStore store)
+    static async Task<Created<CalendarEventRow>> Create(EventBody body, Access access, HubDb db, CurrentUser me, SettingsStore store)
     {
         var s = await store.Get(db);
         var zone = Clock.Zone(s);
@@ -135,7 +145,7 @@ public static class CalendarEndpoints
         else Check.That(!access.Actor.ReadOnly, "projectId", "perm.read_only");
         db.CalendarEvents.Add(e);
         await db.SaveChangesAsync();
-        return Results.Created($"/api/v1/calendar/events/{e.Id}", await Row(db, access, me, e, s));
+        return TypedResults.Created($"/api/v1/calendar/events/{e.Id}", await Row(db, access, me, e, s));
     }
 
     /// §36.5: Meeting and Site Work need a project; an Internal Task without one is Private; the end follows the start.
@@ -156,7 +166,7 @@ public static class CalendarEndpoints
         e.Visibility = projectId is null ? EventVisibility.Private : vis;
     }
 
-    static async Task<IResult> Edit(Guid id, JsonElement body, HttpContext http, Access access, HubDb db, CurrentUser me, SettingsStore store)
+    static async Task<Ok<CalendarEventRow>> Edit(Guid id, JsonElement body, HttpContext http, Access access, HubDb db, CurrentUser me, SettingsStore store)
     {
         var e = await Visible(db, access, me, id, track: true);
         await Demand(db, access, e); // the owner or a PM of the event's project
@@ -171,6 +181,6 @@ public static class CalendarEndpoints
             patch.Has("visibility") ? patch.Str("visibility") : e.Visibility, zone);
         if (e.ProjectId is { } pid && patch.Has("projectId")) Access.Demand(Permissions.CreateProjectEvent(access.Actor, (await access.Project(pid, track: false)).Ctx));
         await db.SaveChangesAsync();
-        return Results.Ok(await Row(db, access, me, e, s));
+        return TypedResults.Ok(await Row(db, access, me, e, s));
     }
 }

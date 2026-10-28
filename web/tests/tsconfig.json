@@ -25,6 +25,7 @@
     "timeline.fixture.cjs",
     "weekly-commitments.fixture.cjs",
     "calendar-subscription.fixture.cjs",
+    "calendar.fixture.cjs",
     "workload.fixture.cjs"
   ]
 }

@@ -102,6 +102,8 @@ builder.Services.AddOpenApi(o =>
     if (type == typeof(decimal) || type == typeof(double) || type == typeof(float) || type == typeof(int) || type == typeof(long)
         || type == typeof(short) || type == typeof(byte) || type == typeof(uint) || type == typeof(ulong) || type == typeof(ushort))
         schema.Type &= ~Microsoft.OpenApi.JsonSchemaType.String;
+    // The framework names "$type" as the discriminator of any union of derived types; with no type discriminators on the derived types, nothing is written under it.
+    if (schema.Discriminator is { PropertyName: "$type" } && context.JsonTypeInfo.PolymorphismOptions?.DerivedTypes.All(d => d.TypeDiscriminator is null) == true) schema.Discriminator = null;
     return Task.CompletedTask;
     });
 });

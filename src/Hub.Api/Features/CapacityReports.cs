@@ -8,6 +8,11 @@ namespace Hub.Api.Features;
 
 public static partial class ReportEndpoints
 {
+    /// One planning entry with no project, as the Allocations by source report lists it.
+    sealed record UnlinkedEntryRow(string PersonName, string OwnerName, string Label, string Source, decimal HoursPerWeek, DateOnly StartWeek, DateOnly EndWeek, string Confidence, string Visibility);
+    /// One route's opens in one week, bucketed by how long the page took, as the pilot route use report lists it.
+    sealed record RouteUseRow(string RouteKey, DateOnly Week, int Opens, int Under500Ms, int From500To999Ms, int From1000To1999Ms, int From2000To4999Ms, int Over5000Ms);
+
     static Param[] CapacityParams => [new("supervisorId", "person"), Discipline, new("from", "date"), new("weeks", "number"), new("includeMyDrafts", "bool", Default: "true")];
 
     static async Task<PlanningEndpoints.GridResult> CapacityGrid(Ctx c)
@@ -97,9 +102,9 @@ public static partial class ReportEndpoints
         var grid = await CapacityGrid(c);
         if (c.Str("show") == "entries-without-project") {
             var entries = grid.People.SelectMany(p => p.Entries).Where(e => e.ProjectId == null && (c.Str("source") == null || e.SourceCategory == c.Str("source"))
-                && (c.Str("confidence") == null || e.Confidence == c.Str("confidence"))).Select(e => new { e.PersonName, e.OwnerName, e.Label,
-                    Source = Text.Get($"planning.source.{e.SourceCategory}"), e.HoursPerWeek, e.StartWeek, e.EndWeek, e.Confidence,
-                    Visibility = Text.Get(e.OwnerKind == "Self" ? "planning.visibility.Self" : $"planning.visibility.{e.Visibility}") });
+                && (c.Str("confidence") == null || e.Confidence == c.Str("confidence"))).Select(e => new UnlinkedEntryRow(e.PersonName, e.OwnerName, e.Label,
+                    Text.Get($"planning.source.{e.SourceCategory}"), e.HoursPerWeek, e.StartWeek, e.EndWeek, e.Confidence,
+                    Text.Get(e.OwnerKind == "Self" ? "planning.visibility.Self" : $"planning.visibility.{e.Visibility}")));
             return new(Json(entries), CapacityLink(c, "list", grid) + "&withoutProject=true", [new("personName", "person"), new("ownerName", "owner"), new("label", "label"),
                 new("source", "source"), new("hoursPerWeek", "hours", "number"), new("startWeek", "start", "date"), new("endWeek", "end", "date"), new("confidence", "confidence"), new("visibility", "visibility")]);
         }
@@ -129,10 +134,9 @@ public static partial class ReportEndpoints
         var weeks = c.Int("weeks") ?? 8; Check.That(weeks is >= 1 and <= 26, "weeks", "error.range");
         var first = Workload.WeekOf(c.Today).AddDays(-7 * (weeks - 1));
         var days = await c.Db.RouteCounts.AsNoTracking().Where(r => r.Day >= first && r.Day <= c.Today).ToListAsync();
-        return new(Json(days.GroupBy(r => new { r.RouteKey, Week = Workload.WeekOf(r.Day) }).OrderBy(g => g.Key.Week).ThenBy(g => g.Key.RouteKey)
-            .Select(g => new { g.Key.RouteKey, g.Key.Week, Opens = g.Sum(x => x.Opens), Under500Ms = g.Sum(x => x.Under500Ms),
-                From500To999Ms = g.Sum(x => x.From500To999Ms), From1000To1999Ms = g.Sum(x => x.From1000To1999Ms),
-                From2000To4999Ms = g.Sum(x => x.From2000To4999Ms), Over5000Ms = g.Sum(x => x.Over5000Ms) })));
+        return new(Json(days.GroupBy(r => (r.RouteKey, Week: Workload.WeekOf(r.Day))).OrderBy(g => g.Key.Week).ThenBy(g => g.Key.RouteKey)
+            .Select(g => new RouteUseRow(g.Key.RouteKey, g.Key.Week, g.Sum(x => x.Opens), g.Sum(x => x.Under500Ms),
+                g.Sum(x => x.From500To999Ms), g.Sum(x => x.From1000To1999Ms), g.Sum(x => x.From2000To4999Ms), g.Sum(x => x.Over5000Ms)))));
     }
 
 }

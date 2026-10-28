@@ -13,19 +13,21 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useReference } from '@/hooks/data'
-import { get, qs } from '@/lib/api'
+import type { components } from '@/gen/api'
+import { get, qs, typedRequest } from '@/lib/api'
 import { ChangeList, type ActivityRow } from '@/components/hub/activity'
 import { addDays, fmtDate, fmtTime, today } from '@/lib/format'
 import { plural, t, tv , runtimeText } from '@/lib/i18n'
 import type { Page as PageOf } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
-interface Param { key: string; label: string; type: string; default?: string | null; options?: { value: string; label: string }[] | null }
-interface Column { path: string; header: string; type: string }
-interface ReportDef { code: string; title: string; description: string; params: Param[]; columns: Column[]; itemType?: string | null }
-interface ReportRun { partialView?: boolean; code: string; title: string; itemType?: string | null; columns: Column[]; rows: Record<string, any>[]; total: number; totalIsLowerBound?: boolean; truncated: boolean; listLink?: string | null; parameters: { label: string; value: string }[] }
+type Schemas = components['schemas']
+type Param = Schemas['ReportParamView']
+type Column = Schemas['ReportColumn']
+/** The rows differ by report and are read through `columns`, so the contract leaves them free-form. */
+type ReportRun = Omit<Schemas['ReportView'], 'rows'> & { rows: Record<string, any>[] }
 
-const useCatalogue = () => useQuery({ queryKey: ['reports'], queryFn: () => get<ReportDef[]>('reports'), staleTime: 5 * 60_000 })
+const useCatalogue = () => useQuery({ queryKey: ['reports'], queryFn: () => typedRequest('get', '/api/v1/reports', {}), staleTime: 5 * 60_000 })
 const card = 'rounded-lg border bg-card'
 
 /** Reports catalogue (§13.18, §19, §41 R5): deterministic reports, one table row each with its description; the title
@@ -71,7 +73,8 @@ export function ReportPage() {
   }, [chosen, defaulted, code])
   const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); if (code === 'project-activity-log' && (k === 'from' || k === 'to')) n.set('history', 'all'); n.delete('panel'); setSp(n, { replace: true }) }
   const needsProject = def?.params.some((p) => p.type === 'project') && !params.projectId
-  const run = useQuery({ queryKey: ['report', code, params], queryFn: () => get<ReportRun>(`reports/${code}${qs(params)}`), enabled: !!def && !needsProject })
+  // Which parameters a report takes is the catalogue's to say (each report names its own), so the contract declares no query for the run.
+  const run = useQuery({ queryKey: ['report', code, params], queryFn: () => typedRequest('get', '/api/v1/reports/{code}', { params: { code: code! }, query: params as never }) as Promise<ReportRun>, enabled: !!def && !needsProject })
   if (cat.isPending) return <Page title={t('nav.reports')}><div className={card}><Loading rows={6} /></div></Page>
   if (!def) return <Page title={t('nav.reports')}>{cat.error ? <ErrorBanner error={cat.error} retry={() => cat.refetch()} /> : <div className={card}><Empty>{t('reports.unknown')}</Empty></div>}</Page>
   return (

@@ -13115,6 +13115,45 @@
     "$.components.schemas.CapacityBody.type": [
       "string"
     ],
+    "$.components.schemas.CapacitySet": [
+      "object"
+    ],
+    "$.components.schemas.CapacitySet.properties": [
+      "object"
+    ],
+    "$.components.schemas.CapacitySet.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.CapacitySet.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.CapacitySet.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.CapacitySet.properties.weeklyCapacityHours": [
+      "object"
+    ],
+    "$.components.schemas.CapacitySet.properties.weeklyCapacityHours.format": [
+      "string"
+    ],
+    "$.components.schemas.CapacitySet.properties.weeklyCapacityHours.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CapacitySet.properties.weeklyCapacityHours.type": [
+      "array"
+    ],
+    "$.components.schemas.CapacitySet.properties.weeklyCapacityHours.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CapacitySet.required": [
+      "array"
+    ],
+    "$.components.schemas.CapacitySet.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CapacitySet.type": [
+      "string"
+    ],
     "$.components.schemas.ChainVerification": [
       "object"
     ],
@@ -25215,6 +25254,246 @@
       "string"
     ],
     "$.components.schemas.Person.type": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskLoad": [
+      "object"
+    ],
+    "$.components.schemas.PersonTaskLoad.properties": [
+      "object"
+    ],
+    "$.components.schemas.PersonTaskLoad.properties.projects": [
+      "object"
+    ],
+    "$.components.schemas.PersonTaskLoad.properties.projects.items": [
+      "object"
+    ],
+    "$.components.schemas.PersonTaskLoad.properties.projects.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskLoad.properties.projects.type": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskLoad.properties.weeks": [
+      "object"
+    ],
+    "$.components.schemas.PersonTaskLoad.properties.weeks.items": [
+      "object"
+    ],
+    "$.components.schemas.PersonTaskLoad.properties.weeks.items.format": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskLoad.properties.weeks.items.type": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskLoad.properties.weeks.type": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskLoad.required": [
+      "array"
+    ],
+    "$.components.schemas.PersonTaskLoad.required[]": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskLoad.type": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskProject": [
+      "object"
+    ],
+    "$.components.schemas.PersonTaskProject.properties": [
+      "object"
+    ],
+    "$.components.schemas.PersonTaskProject.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.PersonTaskProject.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskProject.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskProject.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.PersonTaskProject.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskProject.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.PersonTaskProject.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskProject.properties.tasks": [
+      "object"
+    ],
+    "$.components.schemas.PersonTaskProject.properties.tasks.items": [
+      "object"
+    ],
+    "$.components.schemas.PersonTaskProject.properties.tasks.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskProject.properties.tasks.type": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskProject.required": [
+      "array"
+    ],
+    "$.components.schemas.PersonTaskProject.required[]": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskProject.type": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskRow": [
+      "object"
+    ],
+    "$.components.schemas.PersonTaskRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.canReassign": [
+      "object"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.canReassign.type": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.dueDate": [
+      "object"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.dueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.dueDate.type": [
+      "array"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.dueDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.estimatedHours": [
+      "object"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.estimatedHours.format": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.estimatedHours.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.estimatedHours.type": [
+      "array"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.estimatedHours.type[]": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.noDueDate": [
+      "object"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.noDueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.noDueDate.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.noDueDate.type": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.overdue": [
+      "object"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.overdue.type": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.progressPct": [
+      "object"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.progressPct.format": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.progressPct.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.progressPct.type": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.remaining": [
+      "object"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.remaining.format": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.remaining.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.remaining.type": [
+      "array"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.remaining.type[]": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.weeks": [
+      "object"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.weeks.items": [
+      "object"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.weeks.items.format": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.weeks.items.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.weeks.items.type": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskRow.properties.weeks.type": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskRow.required": [
+      "array"
+    ],
+    "$.components.schemas.PersonTaskRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.PersonTaskRow.type": [
       "string"
     ],
     "$.components.schemas.Phase": [
@@ -59729,6 +60008,18 @@
     "$.paths./api/v1/users/{id}/capacity.put.responses.200": [
       "object"
     ],
+    "$.paths./api/v1/users/{id}/capacity.put.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/users/{id}/capacity.put.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/users/{id}/capacity.put.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/users/{id}/capacity.put.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/users/{id}/capacity.put.responses.200.description": [
       "string"
     ],
@@ -60334,6 +60625,9 @@
     ],
     "$.paths./api/v1/workload/{userId}/tasks.get.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/workload/{userId}/tasks.get.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/workload/{userId}/tasks.get.responses.200.description": [
       "string"
@@ -80573,9 +80867,11 @@
       "boolean"
     ],
     "$.projects[].tasks[].dueDate": [
+      "null",
       "string"
     ],
     "$.projects[].tasks[].estimatedHours": [
+      "null",
       "number"
     ],
     "$.projects[].tasks[].id": [
@@ -80597,6 +80893,7 @@
       "number"
     ],
     "$.projects[].tasks[].remaining": [
+      "null",
       "number"
     ],
     "$.projects[].tasks[].rowVersion": [
@@ -80615,6 +80912,52 @@
       "array"
     ],
     "$.weeks[]": [
+      "string"
+    ]
+  },
+  "GET /api/v1/workload/{userId}/tasks 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "GET /api/v1/workload/{userId}/tasks 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
       "string"
     ]
   },
@@ -93788,10 +94131,66 @@
       "string"
     ],
     "$.weeklyCapacityHours": [
+      "null",
       "number"
     ]
   },
+  "PUT /api/v1/users/{id}/capacity 400": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.errors": [
+      "object"
+    ],
+    "$.errors.hours": [
+      "array"
+    ],
+    "$.errors.hours[]": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "PUT /api/v1/users/{id}/capacity 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "PUT /api/v1/users/{id}/capacity 404": {
     "$": [
       "object"
     ],

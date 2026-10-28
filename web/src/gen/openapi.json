@@ -2938,6 +2938,27 @@
         ],
         "type": "object"
       },
+      "CapacitySet": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "weeklyCapacityHours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "null",
+              "number"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "weeklyCapacityHours"
+        ],
+        "type": "object"
+      },
       "ChainVerification": {
         "properties": {
           "chain": {
@@ -10003,6 +10024,140 @@
         "required": [
           "id",
           "displayName"
+        ],
+        "type": "object"
+      },
+      "PersonTaskLoad": {
+        "properties": {
+          "projects": {
+            "items": {
+              "$ref": "#/components/schemas/PersonTaskProject"
+            },
+            "type": "array"
+          },
+          "weeks": {
+            "items": {
+              "format": "date",
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "weeks",
+          "projects"
+        ],
+        "type": "object"
+      },
+      "PersonTaskProject": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/PersonTaskRow"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "projectNumber",
+          "name",
+          "tasks"
+        ],
+        "type": "object"
+      },
+      "PersonTaskRow": {
+        "properties": {
+          "canReassign": {
+            "type": "boolean"
+          },
+          "dueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "estimatedHours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "null",
+              "number"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "noDueDate": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "overdue": {
+            "type": "boolean"
+          },
+          "progressPct": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "remaining": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "null",
+              "number"
+            ]
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "weeks": {
+            "items": {
+              "format": "double",
+              "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+              "type": "number"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "status",
+          "dueDate",
+          "estimatedHours",
+          "progressPct",
+          "remaining",
+          "overdue",
+          "noDueDate",
+          "rowVersion",
+          "weeks",
+          "canReassign"
         ],
         "type": "object"
       },
@@ -33950,6 +34105,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CapacitySet"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -34423,7 +34585,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/PersonTaskLoad"
+                }
               }
             },
             "description": "OK"

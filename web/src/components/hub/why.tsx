@@ -3,7 +3,7 @@ import { Fragment, type ReactNode } from 'react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { t , runtimeText } from '@/lib/i18n'
 
-export interface Reason { rule?: string; text: string; colour?: string | null; threshold?: string | number | null; values?: Record<string, unknown> | null }
+export interface Reason { rule?: string | null; text: string; colour?: string | null; threshold?: unknown; values?: Record<string, unknown> | null }
 
 /** "Why?" popover: every computed status, indicator and colour shows the rule, threshold and values that
  *  produced it (constitution II, §4 principle 6, AC-ATT-06). */

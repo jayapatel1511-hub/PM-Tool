@@ -7537,7 +7537,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["WeeklyCoordination"];
                     };
                 };
             };
@@ -7575,7 +7575,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["WeeklyReviewed"];
+                    };
                 };
             };
         };
@@ -7612,7 +7614,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["DashboardView"];
                     };
                 };
             };
@@ -17688,6 +17690,143 @@ export interface components {
             today: string;
             workingDaysEnabled: boolean;
         };
+        DashboardCount: {
+            link: string;
+            /** Format: int32 */
+            value: number;
+        };
+        DashboardDecisions: {
+            overdue: components["schemas"]["DashboardCount"];
+            pending: components["schemas"]["DashboardCount"];
+        };
+        DashboardDeliverables: {
+            atRisk: components["schemas"]["DashboardCount"];
+            issued: components["schemas"]["DashboardCount"];
+            total: components["schemas"]["DashboardCount"];
+            upcoming: components["schemas"]["DashboardCount"];
+        };
+        DashboardDiscipline: {
+            /** Format: int32 */
+            blocked: number;
+            /** Format: int32 */
+            deliverablesDue14: number;
+            /** Format: uuid */
+            disciplineId: string;
+            health: string;
+            /** Format: uuid */
+            leadId: null | string;
+            name: string;
+            /** Format: date */
+            nextDueDate: null | string;
+            /** Format: uuid */
+            nextDueId: null | string;
+            nextDueKey: null | string;
+            nextDueName: null | string;
+            nextDueType: null | string;
+            /** Format: int32 */
+            open: number;
+            /** Format: int32 */
+            overdue: number;
+            reasons: components["schemas"]["DisciplineReason"][];
+            /** Format: int32 */
+            sortOrder: number;
+            /** Format: int32 */
+            waiting: number;
+        };
+        DashboardIssues: {
+            /** Format: int32 */
+            high: number;
+            /** Format: int32 */
+            open: number;
+        };
+        DashboardMilestoneRow: {
+            /** Format: date */
+            date: string;
+            /** Format: int32 */
+            daysRemaining: number;
+            /** Format: int32 */
+            deliverableIssued: number;
+            /** Format: int32 */
+            deliverableTotal: number;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            milestoneType: string;
+            name: string;
+            /** Format: date */
+            originalDate: null | string;
+            /** Format: uuid */
+            projectDisciplineId: null | string;
+            reasons: null | components["schemas"]["JsonElement"];
+            status: null | string;
+            /** Format: int32 */
+            taskBlocked: number;
+            /** Format: int32 */
+            taskComplete: number;
+            /** Format: int32 */
+            taskOverdue: number;
+            /** Format: int32 */
+            taskTotal: number;
+        };
+        DashboardRegisters: {
+            issuesHigh: components["schemas"]["DashboardCount"];
+            issuesOpen: components["schemas"]["DashboardCount"];
+            risksHigh: components["schemas"]["DashboardCount"];
+        };
+        DashboardRisks: {
+            /** Format: int32 */
+            high: number;
+        };
+        DashboardState: {
+            /** Format: date-time */
+            evaluatedAt: string;
+        };
+        DashboardStatusSegments: {
+            inProgress: components["schemas"]["DashboardCount"];
+            issued: components["schemas"]["DashboardCount"];
+            notStarted: components["schemas"]["DashboardCount"];
+            onHold: components["schemas"]["DashboardCount"];
+        };
+        DashboardTaskList: {
+            items: components["schemas"]["TaskQueriesRow"][];
+            link: string;
+            /** Format: int32 */
+            total: number;
+        };
+        DashboardTasks: {
+            backlog?: null | components["schemas"]["DashboardCount"];
+            blocked: components["schemas"]["DashboardCount"];
+            complete: components["schemas"]["DashboardCount"];
+            inProgress: components["schemas"]["DashboardCount"];
+            overdue: components["schemas"]["DashboardCount"];
+            review: components["schemas"]["DashboardCount"];
+            total: components["schemas"]["DashboardCount"];
+            unassigned: components["schemas"]["DashboardCount"];
+            waiting: components["schemas"]["DashboardCount"];
+        };
+        DashboardView: {
+            activity: components["schemas"]["ActivityEntry"][];
+            blocked: components["schemas"]["DashboardTaskList"];
+            decisions: components["schemas"]["DashboardDecisions"];
+            deliverables: components["schemas"]["DashboardDeliverables"];
+            disciplineBacklog?: null | {
+                [key: string]: components["schemas"]["DashboardCount"];
+            };
+            disciplineDue14: {
+                [key: string]: components["schemas"]["DashboardCount"];
+            };
+            disciplineStatus?: null | {
+                [key: string]: components["schemas"]["DashboardStatusSegments"];
+            };
+            disciplines: components["schemas"]["DashboardDiscipline"][];
+            dueThisWeek: components["schemas"]["DashboardTaskList"];
+            issues: components["schemas"]["DashboardIssues"];
+            milestones: components["schemas"]["DashboardMilestoneRow"][];
+            registers: components["schemas"]["DashboardRegisters"];
+            risks: components["schemas"]["DashboardRisks"];
+            state: null | components["schemas"]["DashboardState"];
+            tasks: components["schemas"]["DashboardTasks"];
+        };
         DateBound: {
             /** Format: date */
             date: string;
@@ -18293,6 +18432,13 @@ export interface components {
             disciplineId: string;
             /** Format: uuid */
             leadUserId: null | string;
+        };
+        DisciplineReason: {
+            colour: null | string;
+            rule: null | string;
+            text: string;
+            threshold: unknown;
+            values: null | Record<string, never>;
         };
         DispositionBody: {
             /** Format: date */
@@ -22132,6 +22278,12 @@ export interface components {
             /** Format: date */
             week: string;
         };
+        WeekSpan: {
+            /** Format: date */
+            from: string;
+            /** Format: date */
+            to: string;
+        };
         WeeklyCommitmentsMoveBody: {
             evidenceUrl: null | string;
             /** Format: uuid */
@@ -22156,6 +22308,79 @@ export interface components {
             /** Format: date */
             weekStart: string;
         };
+        WeeklyCompleted: {
+            decisions: components["schemas"]["WeeklyDecided"][];
+            deliverables: components["schemas"]["DeliverableRow"][];
+            tasks: components["schemas"]["TaskQueriesRow"][];
+        };
+        WeeklyCoordination: {
+            blocked: components["schemas"]["TaskQueriesRow"][];
+            completed: components["schemas"]["WeeklyCompleted"];
+            decisions: components["schemas"]["WeeklyDecision"][];
+            deliverables: components["schemas"]["DeliverableRow"][];
+            disciplines: components["schemas"]["WeeklyRound"][];
+            dueThisWeek: components["schemas"]["TaskQueriesRow"][];
+            headline: components["schemas"]["WeeklyHeadline"];
+            held: components["schemas"]["WeeklyHeld"];
+            issues: components["schemas"]["WeeklyIssue"][];
+            milestones: components["schemas"]["DashboardMilestoneRow"][];
+            overdue: components["schemas"]["TaskQueriesRow"][];
+            risks: components["schemas"]["WeeklyRisk"][];
+            upcoming: components["schemas"]["WeeklyUpcoming"];
+            waiting: components["schemas"]["MeetingActionRow"][];
+            window: components["schemas"]["WeeklyWindow"];
+        };
+        WeeklyDecided: {
+            /** Format: date */
+            decisionDate: null | string;
+            decisionText: null | string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            subject: string;
+        };
+        WeeklyDecision: {
+            /** Format: int32 */
+            blocking: number;
+            /** Format: int32 */
+            daysOverdue: number;
+            /** Format: uuid */
+            id: string;
+            impactLevel: string;
+            isOverdue: boolean;
+            key: string;
+            ownerName: null | string;
+            /** Format: uuid */
+            ownerUserId: null | string;
+            /** Format: date */
+            requiredByDate: string;
+            status: string;
+            subject: string;
+        };
+        WeeklyHeadline: {
+            blockedTasks: components["schemas"]["DashboardCount"];
+            computedHealth: null | string;
+            /** Format: int32 */
+            decisionsOverdue: number;
+            deliverablesAtRisk: components["schemas"]["DashboardCount"];
+            healthReasons: null | components["schemas"]["JsonElement"];
+            nextMilestone: null | components["schemas"]["DashboardMilestoneRow"];
+            overdueTasks: components["schemas"]["DashboardCount"];
+        };
+        WeeklyHeld: {
+            deliverables: components["schemas"]["DeliverableRow"][];
+            tasks: components["schemas"]["TaskQueriesRow"][];
+        };
+        WeeklyIssue: {
+            /** Format: uuid */
+            id: string;
+            key: string;
+            severity: string;
+            status: string;
+            /** Format: date */
+            targetResolutionDate: null | string;
+            title: string;
+        };
         WeeklyPlanningBulkBody: {
             entries: components["schemas"]["Selection"][];
             operation: string;
@@ -22177,6 +22402,43 @@ export interface components {
             rowVersion: number;
             visibility: string;
             warnings: string[];
+        };
+        WeeklyReviewed: {
+            /** Format: date-time */
+            lastCoordinationReviewedAt: string;
+            /** Format: int32 */
+            rowVersion: number;
+        };
+        WeeklyRisk: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            impact: number;
+            key: string;
+            /** Format: int32 */
+            probability: number;
+            /** Format: date */
+            reviewDate: null | string;
+            status: string;
+            title: string;
+        };
+        WeeklyRound: {
+            discipline: components["schemas"]["DashboardDiscipline"];
+            top: components["schemas"]["TaskQueriesRow"][];
+        };
+        WeeklyUpcoming: {
+            deliverables: components["schemas"]["DeliverableRow"][];
+            tasks: components["schemas"]["TaskQueriesRow"][];
+        };
+        WeeklyWindow: {
+            canMarkReviewed: boolean;
+            /** Format: date-time */
+            lastCoordinationReviewedAt: null | string;
+            nextWeek: components["schemas"]["WeekSpan"];
+            reviewedBy: null | string;
+            /** Format: date-time */
+            since: string;
+            thisWeek: components["schemas"]["WeekSpan"];
         };
         Widget: {
             hidden: boolean;

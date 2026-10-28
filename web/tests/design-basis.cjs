@@ -12,6 +12,7 @@ const { attentionList } = require('./evaluation.fixture.cjs');
 const { submissionListRow, submissionPage } = require('./submissions.fixture.cjs');
 const { basisRegisterRow, basisPage, basisEntryRow, basisVersionItem, basisUseRow, basisImpactRow, basisDetail } = require('./design-basis.fixture.cjs');
 const { coordinationUseRow, coordinationChangeRow, coordinationReviewRow, coordinationIssueRow, coordinationSubmissionRow, coordinationStaffingRow, coordinationProjection } = require('./coordination.fixture.cjs');
+const { weeklyCoordination } = require('./dashboard.fixture.cjs');
 const port = process.env.PORT ?? '5176', base = `http://127.0.0.1:${port}`;
 const id = n => `00000000-0000-0000-0000-${String(n).padStart(12, '0')}`;
 const pid = id(1), consumer = id(2), lead = id(3), civil = id(4), task = id(7), e1 = id(20), e2 = id(21), v11 = id(30), v12 = id(31), v21 = id(32), u1 = id(40), u2 = id(41), i1 = id(50), i2 = id(51);
@@ -81,12 +82,7 @@ let server, browser;
     else if (p === 'me/notifications/unread-count') data = { notifications: 0, following: 0 }; else if (p === 'workspaces') data = []; else if (p === 'views' && method === 'POST') { const body = req.postDataJSON(); savedViews.push({ listType: body.listType, ...savedView({ id: id(300 + savedViews.length), name: body.name, params: body.params ?? {}, isDefault: body.isDefault ?? false }) }); data = viewSaved(savedViews.at(-1).id) }
     else if (p === 'views') data = viewList(savedViews.filter(v => v.listType === u.searchParams.get('listType')).map(({ listType, ...v }) => v));
     else if (p === 'projects') data = { items: [project()], totalCount: 1 }; else if (p === `projects/${pid}` || p === 'projects/P-DEMO') data = project();
-    else if (p === `projects/${pid}/coordination`) data = {
-      window: { thisWeek: { from: '2026-10-01', to: '2026-10-07' }, nextWeek: { from: '2026-10-08', to: '2026-10-14' }, since: '2026-09-01', canMarkReviewed: false },
-      headline: { computedHealth: 'Green', overdueTasks: { value: 0, link: '#' }, blockedTasks: { value: 0, link: '#' }, decisionsOverdue: 0, deliverablesAtRisk: { value: 0, link: '#' } },
-      milestones: [], deliverables: [], decisions: [], blocked: [], overdue: [], dueThisWeek: [], disciplines: [], issues: [], risks: [], waiting: [],
-      completed: { tasks: [], deliverables: [], decisions: [] }, upcoming: { tasks: [], deliverables: [] }, held: { tasks: [], deliverables: [] }
-    };
+    else if (p === `projects/${pid}/coordination`) data = weeklyCoordination();
     else if (p === `projects/${pid}/attention`) data = attentionList([]);
     else if (p === `projects/${pid}/discipline-coordination`) {
       const print = !u.searchParams.has('page') && !u.searchParams.has('pageSize');

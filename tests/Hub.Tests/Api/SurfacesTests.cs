@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json.Nodes;
+using Hub.Api.Data;
 using Hub.Domain;
 using Microsoft.EntityFrameworkCore;
 
@@ -112,6 +113,131 @@ public sealed class SurfacesTests(HubFactory f)
         Assert.Empty(scoped["blocked"]!.AsArray()); // the blocked tasks are Civil's
         Assert.All(scoped["overdue"]!.AsArray(), x => Assert.Equal(elec, x!.G("projectDisciplineId")));
         Assert.Single(scoped["disciplines"]!.AsArray());
+    }
+
+    static string[] Keys(JsonNode? node) => [.. node!.AsObject().Select(x => x.Key)];
+
+    [Fact]
+    public async Task Dashboard_and_coordination_keep_their_property_names_order_nulls_and_nesting() // the typed records must serialise to the bytes the Dashboard and Weekly Coordination pages already read
+    {
+        var p = await d.Project(); var pm = f.As(TestData.Pm); var alex = U(TestData.Alex); var marc = U(TestData.Marc); var omar = U(TestData.Omar);
+        Task<JsonNode> Add(object extra, string discipline = "Civil") => d.NewTask(p.Id, TestData.Pm, extra, discipline);
+        var pred = await Add(new { name = "Geotech recommendations", assigneeId = omar, dueDate = "2026-09-10" }, "Electrical");
+        var grading = await Add(new { name = "Grading", assigneeId = alex, dueDate = "2026-09-30", dependsOn = new[] { pred.G("id") } });
+        await Add(new { name = "Survey", assigneeId = alex, dueDate = "2026-09-15" });
+        await Add(new { name = "Next week", assigneeId = alex, dueDate = "2026-09-22" });
+        await Add(new { name = "Unassigned drawing" });
+        var parked = await Add(new { name = "Parked", assigneeId = alex });
+        var done = await Add(new { name = "Kickoff notes", assigneeId = alex }); await d.Move(TestData.Alex, done, TaskStatuses.Complete);
+        await f.DbAsync(db => db.Tasks.Where(x => x.Id == parked.G("id")).ExecuteUpdateAsync(x => x.SetProperty(y => y.Status, TaskStatuses.OnHold)));
+        async Task<JsonNode> Package(string name, string? due) => await f.As(TestData.Marc).Post($"/api/v1/projects/{p.Id}/deliverables",
+            new { name, projectDisciplineId = d.ProjectDiscipline(p.Id, "Civil"), deliverableTypeId = await d.DeliverableType(), requiresReview = false, dueDate = due }).Result.Json(201);
+        await Package("Civil package", "2026-09-20");
+        var issued = await Package("Issued package", "2026-09-12"); var held = await Package("Held package", null);
+        await f.DbAsync(async db =>
+        {
+            await db.Deliverables.Where(x => x.Id == issued.G("id")).ExecuteUpdateAsync(x => x.SetProperty(y => y.Status, DeliverableStatus.Issued));
+            await db.Deliverables.Where(x => x.Id == held.G("id")).ExecuteUpdateAsync(x => x.SetProperty(y => y.Status, DeliverableStatus.OnHold));
+            db.DeliverableIssues.Add(new DeliverableIssue { ProjectId = p.Id, DeliverableId = issued.G("id"), IssuedDate = new DateOnly(2026, 9, 12), IssuedBy = marc, CreatedAt = f.Clock.Now });
+            return await db.SaveChangesAsync();
+        });
+        async Task<JsonNode> Decision(string subject, string by, object[]? links = null) => await pm.Post($"/api/v1/projects/{p.Id}/decisions", new { subject, description = "What must be decided and the options",
+            ownerUserId = alex, requiredByDate = by, impactLevel = "High", impactDescription = "Drawings cannot progress", links }).Result.Json(201);
+        await Decision("Confirm pavement structure", "2026-09-13", [new { targetType = "Task", targetId = grading.G("id") }]);
+        var settled = await Decision("Pick the outfall", "2026-09-20");
+        foreach (var body in new object[] { new { toStatus = "Under Review" }, new { toStatus = "Decided", decisionText = "Use the east outfall", decisionDate = "2026-09-14" } })
+        {
+            var version = await f.DbAsync(db => db.Decisions.Where(x => x.Id == settled.G("id")).Select(x => x.RowVersion).FirstAsync());
+            var fields = body.GetType().GetProperties().ToDictionary(x => x.Name, x => x.GetValue(body)); fields["rowVersion"] = version;
+            (await f.As(TestData.Alex).Post($"/api/v1/decisions/{settled.S("id")}/transition", fields)).EnsureSuccessStatusCode();
+        }
+        (await f.As(TestData.Alex).Post($"/api/v1/projects/{p.Id}/issues", new { title = "Gate locked", description = "What happened", severity = "High", targetResolutionDate = "2026-09-12", ownerId = marc, dateRaised = "2026-09-08" })).EnsureSuccessStatusCode();
+        (await f.As(TestData.Alex).Post($"/api/v1/projects/{p.Id}/risks", new { title = "Permit may slip", description = "What could happen", probability = 3, impact = 3, reviewDate = "2026-09-21", ownerId = alex,
+            mitigation = "Book the meeting early", triggerIndicator = "No reply in two weeks" })).EnsureSuccessStatusCode();
+        await pm.Post($"/api/v1/projects/{p.Id}/milestones", new { name = "Late check", milestoneType = "Other", date = "2026-09-01" }).Result.Json(201);
+        await pm.Post($"/api/v1/projects/{p.Id}/milestones", new { name = "60% Submission", milestoneType = "Design Submission", date = "2026-09-21" }).Result.Json(201);
+        var meeting = await pm.Post($"/api/v1/projects/{p.Id}/meetings", new { title = "Client Progress Meeting", meetingDate = "2026-09-14", meetingType = "Client" }).Result.Json(201);
+        var client = (await pm.Post($"/api/v1/projects/{p.Id}/external-parties", new { name = "City of Hamilton", isClient = true }).Result.Json(201)).G("id");
+        await pm.Post($"/api/v1/meetings/{meeting.S("id")}/actions", new { text = "Provide the utility locates", ownerType = "External Party", ownerExternalPartyId = client, dueDate = "2026-09-21" }).Result.Json(201);
+        await f.Evaluate(p.Id);
+        var civil = d.ProjectDiscipline(p.Id, "Civil").ToString();
+        string[] count = ["value", "link"], list = ["items", "total", "link"];
+        string[] top = ["milestones", "tasks", "deliverables", "decisions", "issues", "risks", "registers", "disciplines", "disciplineDue14", "dueThisWeek", "blocked", "activity", "state"];
+        string[] tasks = ["total", "complete", "inProgress", "review", "overdue", "blocked", "waiting", "unassigned"];
+
+        async Task<JsonNode> Dash(string scope = "") => await pm.GetAsync($"/api/v1/projects/{p.Id}/dashboard{scope}").Result.Json();
+        void Shape(JsonNode dash, bool rollups, bool backlog)
+        {
+            Assert.Equal([.. top, .. rollups ? new[] { "disciplineStatus" } : [], .. backlog ? new[] { "disciplineBacklog" } : []], Keys(dash));
+            Assert.Equal([.. tasks, .. backlog ? new[] { "backlog" } : []], Keys(dash["tasks"]));
+            foreach (var c in dash["tasks"]!.AsObject().Select(x => x.Value).Concat(dash["deliverables"]!.AsObject().Select(x => x.Value)).Concat(dash["decisions"]!.AsObject().Select(x => x.Value))
+                .Concat(dash["registers"]!.AsObject().Select(x => x.Value))) Assert.Equal(count, Keys(c));
+            Assert.Equal(["upcoming", "atRisk", "issued", "total"], Keys(dash["deliverables"])); Assert.Equal(["pending", "overdue"], Keys(dash["decisions"]));
+            Assert.Equal(["open", "high"], Keys(dash["issues"])); Assert.Equal(["high"], Keys(dash["risks"])); Assert.Equal(["issuesOpen", "issuesHigh", "risksHigh"], Keys(dash["registers"]));
+            Assert.Equal(["id", "key", "name", "milestoneType", "date", "originalDate", "projectDisciplineId", "daysRemaining", "status", "deliverableTotal", "deliverableIssued", "taskTotal", "taskComplete",
+                "taskOverdue", "taskBlocked", "reasons"], Keys(dash["milestones"]![0]));
+            var rows = dash["disciplines"]!.AsArray(); Assert.Equal(2, rows.Count);
+            Assert.Equal(["name", "open", "health", "leadId", "blocked", "overdue", "reasons", "waiting", "nextDueId", "sortOrder", "nextDueKey", "nextDueDate", "nextDueName", "nextDueType", "disciplineId", "deliverablesDue14"],
+                Keys(rows[0])); // the stored document's own order: jsonb keeps the shortest names first
+            var reason = rows.SelectMany(x => x!["reasons"]!.AsArray()).FirstOrDefault(); Assert.NotNull(reason); Assert.Equal(["rule", "text", "colour", "values", "threshold"], Keys(reason));
+            Assert.Equal(rows.Select(x => x!.S("disciplineId")), Keys(dash["disciplineDue14"]));
+            Assert.All(dash["disciplineDue14"]!.AsObject().Select(x => x.Value), x => Assert.Equal(count, Keys(x)));
+            Assert.Equal(list, Keys(dash["dueThisWeek"])); Assert.Equal(list, Keys(dash["blocked"])); Assert.NotEmpty(dash["dueThisWeek"]!["items"]!.AsArray()); Assert.NotEmpty(dash["blocked"]!["items"]!.AsArray());
+            Assert.Equal(["evaluatedAt"], Keys(dash["state"])); Assert.NotEmpty(dash["activity"]!.AsArray());
+        }
+        var plain = await Dash(); Shape(plain, false, false);
+        var narrowed = await Dash($"?disciplineId={civil}"); Assert.Equal(top, Keys(narrowed)); Assert.Equal([civil], Keys(narrowed["disciplineDue14"])); // a scope keeps every key
+        (await f.As(TestData.Admin).Put("/api/v1/admin/settings/flag.status_rollups", new { value = true })).EnsureSuccessStatusCode();
+        (await f.As(TestData.Admin).Put("/api/v1/admin/settings/flag.backlog", new { value = true })).EnsureSuccessStatusCode();
+        try
+        {
+            var both = await Dash(); Shape(both, true, true);
+            Assert.Equal(["notStarted", "inProgress", "issued", "onHold"], Keys(both["disciplineStatus"]![civil]));
+            Assert.All(both["disciplineStatus"]![civil]!.AsObject().Select(x => x.Value), x => Assert.Equal(count, Keys(x)));
+            Assert.Equal(count, Keys(both["tasks"]!["backlog"])); Assert.Equal(count, Keys(both["disciplineBacklog"]![civil]));
+            Assert.Equal(both["disciplines"]!.AsArray().Select(x => x!.S("disciplineId")), Keys(both["disciplineBacklog"])); Assert.Equal(Keys(both["disciplineBacklog"]), Keys(both["disciplineStatus"]));
+        }
+        finally
+        {
+            (await f.As(TestData.Admin).Put("/api/v1/admin/settings/flag.status_rollups", new { value = false })).EnsureSuccessStatusCode();
+            (await f.As(TestData.Admin).Put("/api/v1/admin/settings/flag.backlog", new { value = false })).EnsureSuccessStatusCode();
+        }
+
+        var wc = await pm.GetAsync($"/api/v1/projects/{p.Id}/coordination").Result.Json();
+        Assert.Equal(["window", "headline", "milestones", "deliverables", "decisions", "blocked", "overdue", "dueThisWeek", "disciplines", "issues", "risks", "waiting", "completed", "upcoming", "held"], Keys(wc));
+        Assert.Equal(["thisWeek", "nextWeek", "since", "lastCoordinationReviewedAt", "reviewedBy", "canMarkReviewed"], Keys(wc["window"]));
+        Assert.Equal(["from", "to"], Keys(wc["window"]!["thisWeek"])); Assert.Equal(["from", "to"], Keys(wc["window"]!["nextWeek"]));
+        Assert.Equal(("2026-09-14", "2026-09-20", "2026-09-21", "2026-09-27", true), (wc["window"]!["thisWeek"]!.S("from"), wc["window"]!["thisWeek"]!.S("to"), wc["window"]!["nextWeek"]!.S("from"),
+            wc["window"]!["nextWeek"]!.S("to"), wc["window"]!["canMarkReviewed"]!.GetValue<bool>()));
+        Assert.Null(wc["window"]!["lastCoordinationReviewedAt"]); Assert.Null(wc["window"]!["reviewedBy"]); // null, not omitted
+        Assert.Equal(["computedHealth", "healthReasons", "overdueTasks", "blockedTasks", "decisionsOverdue", "deliverablesAtRisk", "nextMilestone"], Keys(wc["headline"]));
+        Assert.Equal(count, Keys(wc["headline"]!["overdueTasks"])); Assert.Equal(count, Keys(wc["headline"]!["deliverablesAtRisk"])); Assert.Equal(1, wc["headline"]!.I("decisionsOverdue"));
+        Assert.Equal("60% Submission", wc["headline"]!["nextMilestone"]!.S("name")); Assert.Equal(Keys(plain["milestones"]![0]), Keys(wc["headline"]!["nextMilestone"]));
+        Assert.Equal(Keys(plain["milestones"]![0]), Keys(wc["milestones"]![0]));
+        Assert.Equal("Civil package", Assert.Single(wc["deliverables"]!.AsArray())!.S("name"));
+        var decision = Assert.Single(wc["decisions"]!.AsArray())!;
+        Assert.Equal(["id", "key", "subject", "status", "requiredByDate", "impactLevel", "ownerUserId", "ownerName", "isOverdue", "daysOverdue", "blocking"], Keys(decision));
+        Assert.Equal(("Alex Chen", true, 1, 1), (decision.S("ownerName"), decision["isOverdue"]!.GetValue<bool>(), decision.I("daysOverdue"), decision.I("blocking")));
+        foreach (var section in new[] { "blocked", "overdue", "dueThisWeek" }) Assert.NotEmpty(wc[section]!.AsArray());
+        var round = wc["disciplines"]!.AsArray(); Assert.Equal(2, round.Count);
+        Assert.Equal(["discipline", "top"], Keys(round[0])); Assert.Equal(Keys(plain["disciplines"]![0]), Keys(round[0]!["discipline"])); Assert.NotEmpty(round.SelectMany(x => x!["top"]!.AsArray()));
+        Assert.Equal(["id", "key", "title", "status", "severity", "targetResolutionDate"], Keys(Assert.Single(wc["issues"]!.AsArray())));
+        Assert.Equal(["id", "key", "title", "status", "probability", "impact", "reviewDate"], Keys(Assert.Single(wc["risks"]!.AsArray())));
+        Assert.Equal("Provide the utility locates", Assert.Single(wc["waiting"]!.AsArray())!.S("text"));
+        Assert.Equal(["tasks", "deliverables", "decisions"], Keys(wc["completed"]));
+        Assert.Equal(["id", "key", "subject", "decisionText", "decisionDate"], Keys(Assert.Single(wc["completed"]!["decisions"]!.AsArray())));
+        Assert.Equal("Issued package", Assert.Single(wc["completed"]!["deliverables"]!.AsArray())!.S("name")); Assert.Equal("Kickoff notes", Assert.Single(wc["completed"]!["tasks"]!.AsArray())!.S("name"));
+        Assert.Equal(["tasks", "deliverables"], Keys(wc["upcoming"])); Assert.Equal(["tasks", "deliverables"], Keys(wc["held"]));
+        Assert.Equal("Parked", Assert.Single(wc["held"]!["tasks"]!.AsArray())!.S("name")); Assert.Equal("Held package", Assert.Single(wc["held"]!["deliverables"]!.AsArray())!.S("name"));
+        Assert.NotEmpty(wc["upcoming"]!["tasks"]!.AsArray());
+
+        var reviewed = await pm.PostAsync($"/api/v1/projects/{p.Id}/coordination/reviewed", null).Result.Json();
+        Assert.Equal(["lastCoordinationReviewedAt", "rowVersion"], Keys(reviewed)); Assert.NotNull(reviewed["lastCoordinationReviewedAt"]);
+        var after = await pm.GetAsync($"/api/v1/projects/{p.Id}/coordination").Result.Json();
+        Assert.Equal("Priya Nair", after["window"]!.S("reviewedBy")); Assert.Equal(reviewed.S("lastCoordinationReviewedAt"), after["window"]!.S("lastCoordinationReviewedAt"));
+
+        // Later tests read capped lists (a person's attention list and following feed). A project that is no longer live leaves both, whatever the evaluation worker writes after this test.
+        await f.DbAsync(db => db.Projects.Where(x => x.Id == p.Id).ExecuteUpdateAsync(x => x.SetProperty(y => y.Status, ProjectStatus.Cancelled)));
     }
 
     [Fact]

@@ -3,6 +3,7 @@ using System.Text.Json.Nodes;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Api.Features;
@@ -28,6 +29,10 @@ public static class RecoveryEndpoints
         public int RowVersion { get; init; }
     }
 
+    /// One deleted task, deliverable or milestone as the Show deleted list and its export carry it; RestoreBlocked names the deleted parent to restore first.
+    public sealed record DeletedItem(Guid Id, string Key, string Name, string? Discipline, string? ParentKey, string? Status, DateTimeOffset DeletedAt, string? DeletedBy,
+        int RowVersion, string? RestoreBlocked);
+
     static readonly Col[] Cols =
     [
         new("key", "key", "key"), new("name", "name"), new("discipline", "discipline"), new("parentKey", "parent"), new("status", "status"),
@@ -38,14 +43,14 @@ public static class RecoveryEndpoints
     {
         foreach (var kind in Kinds)
         {
-            api.MapGet($"/projects/{{id:guid}}/{kind}/deleted", async (Guid id, string? q, int? page, int? pageSize, Access access, HubDb db) =>
+            api.MapGet($"/projects/{{id:guid}}/{kind}/deleted", async Task<Ok<Page<DeletedItem>>> (Guid id, string? q, int? page, int? pageSize, Access access, HubDb db) =>
             {
                 await Demand(access, id);
                 var (pg, size) = Http.Paging(page, pageSize ?? 200);
                 var rows = Query(db, kind, id, q);
                 var total = await rows.CountAsync();
                 var items = await rows.Skip((pg - 1) * size).Take(size).ToListAsync();
-                return new Page<object>(items.Select(Shape).ToList(), pg, size, total);
+                return TypedResults.Ok(new Page<DeletedItem>(items.Select(Shape).ToList(), pg, size, total));
             }).RequireFlag(Flag);
             api.MapGet($"/projects/{{id:guid}}/{kind}/deleted/export", async (Guid id, string? q, string? format, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock) =>
             {
@@ -66,11 +71,8 @@ public static class RecoveryEndpoints
         return p;
     }
 
-    static object Shape(Row r) => new
-    {
-        r.Id, r.Key, r.Name, r.Discipline, r.ParentKey, r.Status, r.DeletedAt, r.DeletedBy, r.RowVersion,
-        RestoreBlocked = r.ParentDeleted ? Text.Get("restore.parent_first", r.ParentKey!) : null,
-    };
+    static DeletedItem Shape(Row r) => new(r.Id, r.Key, r.Name, r.Discipline, r.ParentKey, r.Status, r.DeletedAt, r.DeletedBy, r.RowVersion,
+        r.ParentDeleted ? Text.Get("restore.parent_first", r.ParentKey!) : null);
 
     /// A plain projection over deleted rows. IgnoreQueryFilters covers the whole query, so a parent or person shows even when deleted.
     static IQueryable<Row> Query(HubDb db, string kind, Guid projectId, string? q)

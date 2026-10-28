@@ -7988,7 +7988,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["PageOfObject"];
+                        "application/json": components["schemas"]["PageOfDeletedItem"];
                     };
                 };
             };
@@ -8936,7 +8936,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["PageOfObject"];
+                        "application/json": components["schemas"]["PageOfDeletedItem"];
                     };
                 };
             };
@@ -9374,7 +9374,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["PageOfObject"];
+                        "application/json": components["schemas"]["PageOfDeletedItem"];
                     };
                 };
             };
@@ -17194,6 +17194,21 @@ export interface components {
             rowVersion: number;
             status: string;
         };
+        DeletedItem: {
+            /** Format: date-time */
+            deletedAt: string;
+            deletedBy: null | string;
+            discipline: null | string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            parentKey: null | string;
+            restoreBlocked: null | string;
+            /** Format: int32 */
+            rowVersion: number;
+            status: null | string;
+        };
         DeliverableBaseline: {
             /** Format: uuid */
             actorId?: string;
@@ -18379,6 +18394,17 @@ export interface components {
         PageOfActivityEntry: {
             filters?: unknown;
             items: components["schemas"]["ActivityEntry"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            sort?: null | string;
+            /** Format: int32 */
+            totalCount: number;
+        };
+        PageOfDeletedItem: {
+            filters?: unknown;
+            items: components["schemas"]["DeletedItem"][];
             /** Format: int32 */
             page: number;
             /** Format: int32 */

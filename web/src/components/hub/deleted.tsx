@@ -7,15 +7,16 @@ import { ExportMenu } from '@/components/hub/export'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
-import { ApiError, get, qs, typedRequest } from '@/lib/api'
+import type { components } from '@/gen/api'
+import { ApiError, typedRequest } from '@/lib/api'
 import { invalidateChange } from '@/lib/keys'
 import { useFlag } from '@/lib/auth'
 import { fmtTime } from '@/lib/format'
 import { t, tv  } from '@/lib/i18n'
-import type { Page, ProjectDetail } from '@/lib/types'
+import type { ProjectDetail } from '@/lib/types'
 
 type Kind = 'tasks' | 'deliverables' | 'milestones'
-interface DeletedRow { id: string; key: string; name: string; discipline?: string; parentKey?: string; status?: string; deletedAt: string; deletedBy?: string; restoreBlocked?: string; rowVersion: number }
+type DeletedRow = components['schemas']['DeletedItem']
 
 export function useShowDeleted(p: ProjectDetail) {
   const enabled = useFlag('show_deleted')
@@ -40,8 +41,7 @@ export function DeletedList({ project, kind }: { project: ProjectDetail; kind: K
   const [error, setError] = useState<unknown>(null)
   const page = Math.max(1, Number(sp.get('deletedPage')) || 1)
   const term = sp.get('q') ?? ''
-  const path = `projects/${project.id}/${kind}/deleted`
-  const q = useQuery({ queryKey: ['p', project.id, kind, 'deleted', page, term], queryFn: () => get<Page<DeletedRow>>(`${path}${qs({ page, q: term, pageSize: 200 })}`) })
+  const q = useQuery({ queryKey: ['p', project.id, kind, 'deleted', page, term], queryFn: () => typedRequest('get', `/api/v1/projects/{id}/${kind}/deleted`, { params: { id: project.id }, query: { page, q: term, pageSize: 200 } }) })
   const change = (key: string, value: string) => { const next = new URLSearchParams(sp); next.set(key, value); if (key === 'q') next.delete('deletedPage'); setSp(next, { replace: true }) }
   const restore = async (row: DeletedRow) => {
     if (busy) return
@@ -52,7 +52,7 @@ export function DeletedList({ project, kind }: { project: ProjectDetail; kind: K
   }
   const action = (r: DeletedRow, form: string) => <div><Button variant="outline" size="sm" disabled={!!busy || !!r.restoreBlocked} onClick={() => restore(r)} aria-describedby={r.restoreBlocked ? `restore-${form}-${r.id}` : undefined}>{t('rcv.restore')}</Button>{r.restoreBlocked && <p id={`restore-${form}-${r.id}`} className="mt-1 text-xs text-muted-foreground">{r.restoreBlocked}</p>}</div>
   return <div className="space-y-4">
-    <div className="flex flex-wrap items-end justify-between gap-3"><Field label={t('common.search')} htmlFor="deleted-search"><Input id="deleted-search" type="search" value={term} onChange={(e) => change('q', e.target.value)} /></Field><ExportMenu path={`${path}/export`} params={{ q: term }} name={`${project.projectNumber}-deleted-${kind}`} /></div>
+    <div className="flex flex-wrap items-end justify-between gap-3"><Field label={t('common.search')} htmlFor="deleted-search"><Input id="deleted-search" type="search" value={term} onChange={(e) => change('q', e.target.value)} /></Field><ExportMenu path={`projects/${project.id}/${kind}/deleted/export`} params={{ q: term }} name={`${project.projectNumber}-deleted-${kind}`} /></div>
     {error != null && <ErrorBanner error={error} />}{q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
     {q.isPending ? <Loading rows={4} /> : q.data && (q.data.items.length === 0 ? <Empty>{t('rcv.none')}</Empty> : <>
       <TableRegion className="hidden sm:block"><table className="w-full text-sm"><caption className="sr-only">{t('rcv.restoreTitle')}</caption><thead><tr>{(['milestone.key', 'common.name', 'common.discipline', 'rcv.parent', 'common.status', 'rcv.deletedAt', 'rcv.deletedBy', 'common.actions'] as const).map((key) => <th key={key} scope="col" className={thCls}>{t(key)}</th>)}</tr></thead><tbody>{q.data.items.map((r) => <tr key={r.id} className="border-t"><td className={tdCls}>{r.key}</td><td className={tdCls}>{r.name}</td><td className={tdCls}>{r.discipline}</td><td className={tdCls}>{r.parentKey}</td><td className={tdCls}>{r.status && tv(r.status)}</td><td className={tdCls}>{fmtTime(r.deletedAt)}</td><td className={tdCls}>{r.deletedBy ?? t('common.system')}</td><td className={tdCls}>{action(r, 'table')}</td></tr>)}</tbody></table></TableRegion>

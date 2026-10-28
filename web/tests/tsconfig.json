@@ -20,6 +20,7 @@
     "activity.fixture.cjs",
     "task-start.fixture.cjs",
     "portfolio.fixture.cjs",
-    "week-planning.fixture.cjs"
+    "week-planning.fixture.cjs",
+    "recovery.fixture.cjs"
   ]
 }

@@ -4968,6 +4968,72 @@
         ],
         "type": "object"
       },
+      "DeletedItem": {
+        "properties": {
+          "deletedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "deletedBy": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "discipline": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "parentKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "restoreBlocked": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "status": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "discipline",
+          "parentKey",
+          "status",
+          "deletedAt",
+          "deletedBy",
+          "rowVersion",
+          "restoreBlocked"
+        ],
+        "type": "object"
+      },
       "DeliverableBaseline": {
         "properties": {
           "actorId": {
@@ -9447,6 +9513,45 @@
           "items": {
             "items": {
               "$ref": "#/components/schemas/ActivityEntry"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "pageSize": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "sort": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "totalCount": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "totalCount"
+        ],
+        "type": "object"
+      },
+      "PageOfDeletedItem": {
+        "properties": {
+          "filters": {},
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DeletedItem"
             },
             "type": "array"
           },
@@ -23726,7 +23831,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PageOfObject"
+                  "$ref": "#/components/schemas/PageOfDeletedItem"
                 }
               }
             },
@@ -24967,7 +25072,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PageOfObject"
+                  "$ref": "#/components/schemas/PageOfDeletedItem"
                 }
               }
             },
@@ -25600,7 +25705,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PageOfObject"
+                  "$ref": "#/components/schemas/PageOfDeletedItem"
                 }
               }
             },

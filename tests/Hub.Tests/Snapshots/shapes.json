@@ -25660,6 +25660,81 @@
     "$.components.schemas.PageOfDeletedItem.type": [
       "string"
     ],
+    "$.components.schemas.PageOfListRow": [
+      "object"
+    ],
+    "$.components.schemas.PageOfListRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.PageOfListRow.properties.filters": [
+      "object"
+    ],
+    "$.components.schemas.PageOfListRow.properties.items": [
+      "object"
+    ],
+    "$.components.schemas.PageOfListRow.properties.items.items": [
+      "object"
+    ],
+    "$.components.schemas.PageOfListRow.properties.items.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.PageOfListRow.properties.items.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfListRow.properties.page": [
+      "object"
+    ],
+    "$.components.schemas.PageOfListRow.properties.page.format": [
+      "string"
+    ],
+    "$.components.schemas.PageOfListRow.properties.page.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PageOfListRow.properties.page.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfListRow.properties.pageSize": [
+      "object"
+    ],
+    "$.components.schemas.PageOfListRow.properties.pageSize.format": [
+      "string"
+    ],
+    "$.components.schemas.PageOfListRow.properties.pageSize.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PageOfListRow.properties.pageSize.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfListRow.properties.sort": [
+      "object"
+    ],
+    "$.components.schemas.PageOfListRow.properties.sort.type": [
+      "array"
+    ],
+    "$.components.schemas.PageOfListRow.properties.sort.type[]": [
+      "string"
+    ],
+    "$.components.schemas.PageOfListRow.properties.totalCount": [
+      "object"
+    ],
+    "$.components.schemas.PageOfListRow.properties.totalCount.format": [
+      "string"
+    ],
+    "$.components.schemas.PageOfListRow.properties.totalCount.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PageOfListRow.properties.totalCount.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfListRow.required": [
+      "array"
+    ],
+    "$.components.schemas.PageOfListRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.PageOfListRow.type": [
+      "string"
+    ],
     "$.components.schemas.PageOfObject": [
       "object"
     ],
@@ -31639,6 +31714,84 @@
     "$.components.schemas.SubmissionAssignBody.type": [
       "string"
     ],
+    "$.components.schemas.SubmissionBlocker": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionBlocker.properties": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionBlocker.properties.code": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionBlocker.properties.code.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionBlocker.properties.disciplineId": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionBlocker.properties.disciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionBlocker.properties.disciplineId.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionBlocker.properties.disciplineId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionBlocker.properties.kind": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionBlocker.properties.kind.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionBlocker.properties.message": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionBlocker.properties.message.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionBlocker.properties.ownerId": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionBlocker.properties.ownerId.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionBlocker.properties.ownerId.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionBlocker.properties.ownerId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionBlocker.properties.sourceId": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionBlocker.properties.sourceId.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionBlocker.properties.sourceId.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionBlocker.properties.sourceId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionBlocker.properties.sourcePath": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionBlocker.properties.sourcePath.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionBlocker.properties.sourcePath.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionBlocker.required": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionBlocker.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionBlocker.type": [
+      "string"
+    ],
     "$.components.schemas.SubmissionCancelBody": [
       "object"
     ],
@@ -31679,6 +31832,252 @@
       "string"
     ],
     "$.components.schemas.SubmissionCancelBody.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.approvedAt": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.approvedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.approvedAt.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.approvedAt.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.approvedBy": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.approvedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.approvedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.approvedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.auditKey": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.auditKey.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.auditKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.auditName": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.auditName.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.auditName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.auditProjectId": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.auditProjectId.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.auditProjectId.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.auditProjectId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.auditType": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.auditType.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.createdBy": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.createdBy.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.createdBy.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.createdBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.evidenceRule": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.evidenceRule.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.evidenceRule.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.evidenceUrl": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.evidenceUrl.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.evidenceUrl.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.kind": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.kind.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.manifestVersion": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.manifestVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.manifestVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.manifestVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.ownerId": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.ownerId.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.ownerId.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.packageId": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.packageId.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.packageId.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.projectDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.projectDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.projectDisciplineId.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.projectDisciplineId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.reason": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.reason.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.reason.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.required": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.required.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.sourceId": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.sourceId.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.sourceId.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.sourceId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.updatedAt": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.updatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.updatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.updatedBy": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.updatedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.updatedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionCheckRow.properties.updatedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.required": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionCheckRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionCheckRow.type": [
       "string"
     ],
     "$.components.schemas.SubmissionCreateBody": [
@@ -31795,6 +32194,111 @@
     "$.components.schemas.SubmissionCreateBody.type": [
       "string"
     ],
+    "$.components.schemas.SubmissionDetail": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionDetail.properties": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionDetail.properties.canAuthorise": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionDetail.properties.canAuthorise.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionDetail.properties.canCoordinate": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionDetail.properties.canCoordinate.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionDetail.properties.checks": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionDetail.properties.checks.items": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionDetail.properties.checks.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionDetail.properties.checks.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionDetail.properties.effectiveStatus": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionDetail.properties.effectiveStatus.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionDetail.properties.evidence": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionDetail.properties.evidence.items": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionDetail.properties.evidence.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionDetail.properties.evidence.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionDetail.properties.issue": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionDetail.properties.issue.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionDetail.properties.issue.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionDetail.properties.issue.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionDetail.properties.issue.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionDetail.properties.manifest": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionDetail.properties.manifest.items": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionDetail.properties.manifest.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionDetail.properties.manifest.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionDetail.properties.package": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionDetail.properties.package.$ref": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionDetail.properties.readiness": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionDetail.properties.readiness.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionDetail.properties.readiness.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionDetail.properties.readiness.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionDetail.properties.readiness.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionDetail.required": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionDetail.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionDetail.type": [
+      "string"
+    ],
     "$.components.schemas.SubmissionEditBody": [
       "object"
     ],
@@ -31873,6 +32377,150 @@
     "$.components.schemas.SubmissionEditBody.type": [
       "string"
     ],
+    "$.components.schemas.SubmissionEvidenceRow": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.auditKey": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.auditKey.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.auditKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.auditName": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.auditName.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.auditName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.auditProjectId": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.auditProjectId.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.auditProjectId.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.auditProjectId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.auditType": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.auditType.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.checkId": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.checkId.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.checkId.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.createdBy": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.createdBy.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.createdBy.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.createdBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.evidenceUrl": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.evidenceUrl.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.note": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.note.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.updatedAt": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.updatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.updatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.updatedBy": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.updatedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.updatedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.properties.updatedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.required": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionEvidenceRow.type": [
+      "string"
+    ],
     "$.components.schemas.SubmissionIssueBody": [
       "object"
     ],
@@ -31946,6 +32594,726 @@
       "string"
     ],
     "$.components.schemas.SubmissionIssueBody.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionIssueRow": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.auditKey": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.auditKey.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.auditKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.auditName": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.auditName.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.auditName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.auditProjectId": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.auditProjectId.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.auditProjectId.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.auditProjectId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.auditType": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.auditType.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.authorisedAt": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.authorisedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.authorisedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.authorisedBy": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.authorisedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.authorisedBy.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.checkSnapshot": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.checkSnapshot.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.destination": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.destination.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.manifestSnapshot": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.manifestSnapshot.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.manifestVersion": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.manifestVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.manifestVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.manifestVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.packageId": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.packageId.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.packageId.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.transmittalUrl": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionIssueRow.properties.transmittalUrl.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionIssueRow.required": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionIssueRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionIssueRow.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionListRow": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionListRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.blockerCount": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.blockerCount.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.blockerCount.pattern": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.blockerCount.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.coordinatorId": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.coordinatorId.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.coordinatorId.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.coordinatorName": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.coordinatorName.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.coordinatorName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.manifestVersion": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.manifestVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.manifestVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.manifestVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.milestoneId": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.milestoneId.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.milestoneId.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.milestoneName": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.milestoneName.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.milestoneName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.purpose": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.purpose.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.targetDate": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.targetDate.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.targetDate.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionListRow.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionListRow.required": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionListRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionListRow.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.auditKey": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.auditKey.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.auditKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.auditName": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.auditName.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.auditName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.auditProjectId": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.auditProjectId.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.auditProjectId.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.auditProjectId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.auditType": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.auditType.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.createdBy": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.createdBy.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.createdBy.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.createdBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.deliverableId": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.deliverableId.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.deliverableId.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.manifestVersion": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.manifestVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.manifestVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.manifestVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.packageId": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.packageId.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.packageId.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.required": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.required.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.reviewRoundId": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.reviewRoundId.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.reviewRoundId.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.reviewRoundId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.sourceRevisionId": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.sourceRevisionId.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.sourceRevisionId.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.updatedAt": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.updatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.updatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.updatedBy": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.updatedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.updatedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionManifestRow.properties.updatedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow.required": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionManifestRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionManifestRow.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.auditKey": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.auditKey.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.auditKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.auditName": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.auditName.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.auditName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.auditProjectId": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.auditProjectId.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.auditProjectId.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.auditProjectId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.auditType": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.auditType.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.coordinatorId": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.coordinatorId.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.coordinatorId.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.createdBy": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.createdBy.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.createdBy.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.createdBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.deletedAt": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.deletedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.deletedAt.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.deletedAt.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.deletedBy": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.deletedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.deletedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.deletedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.manifestVersion": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.manifestVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.manifestVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.manifestVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.milestoneId": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.milestoneId.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.milestoneId.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.purpose": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.purpose.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.recipientReference": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.recipientReference.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.seq": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.seq.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.seq.pattern": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.seq.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.supersedesPackageId": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.supersedesPackageId.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.supersedesPackageId.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.supersedesPackageId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.targetDate": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.targetDate.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.targetDate.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.updatedAt": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.updatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.updatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.updatedBy": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.updatedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.updatedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionPackageRow.properties.updatedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.required": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionPackageRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionPackageRow.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionReadinessResult": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionReadinessResult.properties": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionReadinessResult.properties.blockers": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionReadinessResult.properties.blockers.items": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionReadinessResult.properties.blockers.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionReadinessResult.properties.blockers.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionReadinessResult.properties.fingerprint": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionReadinessResult.properties.fingerprint.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionReadinessResult.properties.ready": [
+      "object"
+    ],
+    "$.components.schemas.SubmissionReadinessResult.properties.ready.type": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionReadinessResult.required": [
+      "array"
+    ],
+    "$.components.schemas.SubmissionReadinessResult.required[]": [
+      "string"
+    ],
+    "$.components.schemas.SubmissionReadinessResult.type": [
       "string"
     ],
     "$.components.schemas.SubscriptionLink": [
@@ -57157,6 +58525,9 @@
     "$.paths./api/v1/projects/{projectId}/submissions.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/projects/{projectId}/submissions.get.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/projects/{projectId}/submissions.get.responses.200.description": [
       "string"
     ],
@@ -57327,6 +58698,9 @@
     ],
     "$.paths./api/v1/projects/{projectId}/submissions/{id}.get.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/projects/{projectId}/submissions/{id}.get.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/projects/{projectId}/submissions/{id}.get.responses.200.description": [
       "string"
@@ -76057,7 +77431,50 @@
       "string"
     ],
     "$.issue": [
+      "null",
+      "object"
+    ],
+    "$.issue.auditKey": [
       "null"
+    ],
+    "$.issue.auditName": [
+      "string"
+    ],
+    "$.issue.auditProjectId": [
+      "string"
+    ],
+    "$.issue.auditType": [
+      "string"
+    ],
+    "$.issue.authorisedAt": [
+      "string"
+    ],
+    "$.issue.authorisedBy": [
+      "string"
+    ],
+    "$.issue.checkSnapshot": [
+      "string"
+    ],
+    "$.issue.destination": [
+      "string"
+    ],
+    "$.issue.id": [
+      "string"
+    ],
+    "$.issue.manifestSnapshot": [
+      "string"
+    ],
+    "$.issue.manifestVersion": [
+      "number"
+    ],
+    "$.issue.packageId": [
+      "string"
+    ],
+    "$.issue.projectId": [
+      "string"
+    ],
+    "$.issue.transmittalUrl": [
+      "string"
     ],
     "$.manifest": [
       "array"

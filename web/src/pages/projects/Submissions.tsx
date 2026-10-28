@@ -12,20 +12,21 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { download, get, qs } from '@/lib/api'
+import type { components } from '@/gen/api'
+import { download, get, typedRequest } from '@/lib/api'
+import { invalidateChange } from '@/lib/keys'
 import { useOffer, type Offer } from '@/lib/auth'
 import { fmtDate, today } from '@/lib/format'
 import { plural, t, tv , runtimeText } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { useCurrentProject } from './ProjectLayout'
-import { CommandForm, CoordStatus, Count, FieldsCommand, PersonLabel, RegisterPager, SelectField, discName, personName, peopleChoices, type CoordOptions, type RecordVersion } from './CoordinationForms'
+import { CommandForm, CoordStatus, Count, FieldsCommand, PersonLabel, RegisterPager, SelectField, discName, personName, peopleChoices, type CoordOptions } from './CoordinationForms'
 import { useSafeForm } from '@/hooks/drafts'
 
-type Package = RecordVersion & { key: string; title: string; purpose: string; recipientReference: string; coordinatorId: string; milestoneId: string; targetDate: string; status: string; manifestVersion: number; supersedesPackageId?: string }
-type Row = Pick<Package, 'id' | 'key' | 'title' | 'status' | 'coordinatorId' | 'targetDate' | 'manifestVersion' | 'rowVersion'> & { blockerCount: number }
-type Check = RecordVersion & { kind: string; sourceId?: string; projectDisciplineId?: string; ownerId: string; required: boolean; status: string; evidenceRule?: string; evidenceUrl?: string; reason?: string; approvedBy?: string }
-type Blocker = { kind: string; sourceId?: string; disciplineId?: string; ownerId?: string; code: string; message: string; sourcePath?: string }
-type Detail = { package: Package; effectiveStatus: string; readiness?: { ready: boolean; fingerprint: string; blockers: Blocker[] }; manifest: { deliverableId: string; sourceRevisionId: string; reviewRoundId?: string; manifestVersion: number }[]; checks: Check[]; evidence: { id: string; checkId: string; evidenceUrl: string; note: string }[]; issue?: { authorisedAt: string; authorisedBy: string; destination: string; transmittalUrl: string; manifestSnapshot: string }; canCoordinate: boolean; canAuthorise: boolean }
+type Schemas = components['schemas']
+type Check = Schemas['SubmissionCheckRow']
+type Blocker = Schemas['SubmissionBlocker']
+type Detail = Schemas['SubmissionDetail']
 type Milestone = { id: string; key: string; name: string; date?: string; isCancelled: boolean }
 type Action = { type: 'start' | 'manifest' | 'edit' | 'assign' | 'cancel' | 'issue' | 'check' | 'checkAssign' | 'supersede'; check?: Check; decision?: string }
 const fieldset = 'space-y-1 rounded-lg border p-4', legend = 'px-1 text-sm font-semibold', check = 'mt-0.5 size-4 shrink-0 accent-(--primary)'
@@ -38,8 +39,9 @@ export function SubmissionsTab() {
   const filters = Object.fromEntries(['q', 'status', 'coordinatorId', 'milestoneId', 'targetFrom', 'targetTo'].map(k => [k, sp.get(k) ?? '']))
   const options = useQuery({ queryKey: ['coord-options', project.id], queryFn: () => get<CoordOptions>(`projects/${project.id}/changes/options`) })
   const milestones = useQuery({ queryKey: ['submission-milestones', project.id], queryFn: () => get<Milestone[]>(`projects/${project.id}/milestones?showCompleted=true`) })
-  const list = useQuery({ queryKey: ['submissions', project.id, filters, page], queryFn: () => get<{ items: Row[]; pageSize: number; totalCount: number }>(`projects/${project.id}/submissions${qs({ ...filters, page })}`) })
-  const refresh = () => { qc.invalidateQueries({ queryKey: ['submissions', project.id] }); qc.invalidateQueries({ queryKey: ['submission-detail', project.id] }); qc.invalidateQueries({ queryKey: ['coord-options', project.id] }) }
+  const list = useQuery({ queryKey: ['submissions', project.id, filters, page], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/submissions', { params: { projectId: project.id },
+    query: { Q: filters.q, Status: filters.status, CoordinatorId: filters.coordinatorId, MilestoneId: filters.milestoneId, TargetFrom: filters.targetFrom, TargetTo: filters.targetTo, page } }) })
+  const refresh = () => { invalidateChange(qc, 'SubmissionPackage', project.id) }
   const open = (id?: string) => { const next = new URLSearchParams(sp); if (id) next.set('panel', `SubmissionPackage:${id}`); else next.delete('panel'); setSp(next) }
   const change = (key: string, value: string) => { const next = new URLSearchParams(sp); if (value) next.set(key, value); else next.delete(key); if (key !== 'page' && key !== 'panel') next.delete('page'); setSp(next) }
   const create = useOffer()(project.permissions.createSubmission, project.status) // FR-FIG-08 decision 9
@@ -126,7 +128,7 @@ function CheckStatus({ check, detail }: { check: Check; detail: Detail }) {
 }
 
 function SubmissionDetail({ projectId, number, id, options, milestones, supersede, close, onCreated, refresh }: { projectId: string; number: string; id: string; options: CoordOptions; milestones: Milestone[]; supersede: Offer; close: () => void; onCreated: (id: string) => void; refresh: () => void }) {
-  const q = useQuery({ queryKey: ['submission-detail', projectId, id], queryFn: () => get<Detail>(`projects/${projectId}/submissions/${id}`) })
+  const q = useQuery({ queryKey: ['submission-detail', projectId, id], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/submissions/{id}', { params: { projectId, id } }) })
   const [action, setAction] = useState<Action | null>(null), d = q.data, p = d?.package
   const done = () => { setAction(null); refresh(); q.refetch() }
   if (action?.type === 'manifest' && d) return <SubmissionForm mode="manifest" existing={d} projectId={projectId} options={options} milestones={milestones} onClose={() => setAction(null)} onDone={done} />

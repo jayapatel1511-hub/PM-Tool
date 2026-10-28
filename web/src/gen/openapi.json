@@ -10177,6 +10177,45 @@
         ],
         "type": "object"
       },
+      "PageOfListRow": {
+        "properties": {
+          "filters": {},
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SubmissionListRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "pageSize": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "sort": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "totalCount": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "totalCount"
+        ],
+        "type": "object"
+      },
       "PageOfObject": {
         "properties": {
           "filters": {},
@@ -13647,6 +13686,56 @@
         ],
         "type": "object"
       },
+      "SubmissionBlocker": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "disciplineId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "kind": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "ownerId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "sourceId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "sourcePath": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "kind",
+          "sourceId",
+          "disciplineId",
+          "ownerId",
+          "code",
+          "message",
+          "sourcePath"
+        ],
+        "type": "object"
+      },
       "SubmissionCancelBody": {
         "properties": {
           "reason": {
@@ -13666,6 +13755,162 @@
           "requestId",
           "rowVersion",
           "reason"
+        ],
+        "type": "object"
+      },
+      "SubmissionCheckRow": {
+        "properties": {
+          "approvedAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "approvedBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditProjectId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditType": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "evidenceRule": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "evidenceUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "manifestVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "ownerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "packageId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectDisciplineId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "sourceId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "packageId",
+          "manifestVersion",
+          "kind",
+          "sourceId",
+          "projectDisciplineId",
+          "ownerId",
+          "required",
+          "status",
+          "evidenceRule",
+          "evidenceUrl",
+          "reason",
+          "approvedBy",
+          "approvedAt",
+          "auditType",
+          "projectId",
+          "auditProjectId",
+          "auditKey",
+          "auditName",
+          "createdAt",
+          "createdBy",
+          "updatedAt",
+          "updatedBy",
+          "rowVersion",
+          "id"
         ],
         "type": "object"
       },
@@ -13737,6 +13982,72 @@
         ],
         "type": "object"
       },
+      "SubmissionDetail": {
+        "properties": {
+          "canAuthorise": {
+            "type": "boolean"
+          },
+          "canCoordinate": {
+            "type": "boolean"
+          },
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/SubmissionCheckRow"
+            },
+            "type": "array"
+          },
+          "effectiveStatus": {
+            "type": "string"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/SubmissionEvidenceRow"
+            },
+            "type": "array"
+          },
+          "issue": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/SubmissionIssueRow"
+              }
+            ]
+          },
+          "manifest": {
+            "items": {
+              "$ref": "#/components/schemas/SubmissionManifestRow"
+            },
+            "type": "array"
+          },
+          "package": {
+            "$ref": "#/components/schemas/SubmissionPackageRow"
+          },
+          "readiness": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/SubmissionReadinessResult"
+              }
+            ]
+          }
+        },
+        "required": [
+          "package",
+          "readiness",
+          "effectiveStatus",
+          "manifest",
+          "checks",
+          "evidence",
+          "issue",
+          "canCoordinate",
+          "canAuthorise"
+        ],
+        "type": "object"
+      },
       "SubmissionEditBody": {
         "properties": {
           "milestoneId": {
@@ -13781,6 +14092,94 @@
         ],
         "type": "object"
       },
+      "SubmissionEvidenceRow": {
+        "properties": {
+          "auditKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditProjectId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditType": {
+            "type": "string"
+          },
+          "checkId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "evidenceUrl": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "checkId",
+          "evidenceUrl",
+          "note",
+          "auditType",
+          "projectId",
+          "auditProjectId",
+          "auditKey",
+          "auditName",
+          "createdAt",
+          "createdBy",
+          "updatedAt",
+          "updatedBy",
+          "rowVersion",
+          "id"
+        ],
+        "type": "object"
+      },
       "SubmissionIssueBody": {
         "properties": {
           "destination": {
@@ -13821,6 +14220,437 @@
           "destination",
           "transmittalUrl",
           "reason"
+        ],
+        "type": "object"
+      },
+      "SubmissionIssueRow": {
+        "properties": {
+          "auditKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditProjectId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditType": {
+            "type": "string"
+          },
+          "authorisedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "authorisedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "checkSnapshot": {
+            "type": "string"
+          },
+          "destination": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "manifestSnapshot": {
+            "type": "string"
+          },
+          "manifestVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "packageId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "transmittalUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "projectId",
+          "packageId",
+          "manifestVersion",
+          "manifestSnapshot",
+          "checkSnapshot",
+          "authorisedBy",
+          "authorisedAt",
+          "destination",
+          "transmittalUrl",
+          "auditType",
+          "auditProjectId",
+          "auditKey",
+          "auditName",
+          "id"
+        ],
+        "type": "object"
+      },
+      "SubmissionListRow": {
+        "properties": {
+          "blockerCount": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "coordinatorId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "coordinatorName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "manifestVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "milestoneId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "milestoneName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "targetDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "title",
+          "purpose",
+          "status",
+          "coordinatorId",
+          "coordinatorName",
+          "milestoneId",
+          "milestoneName",
+          "targetDate",
+          "manifestVersion",
+          "rowVersion",
+          "blockerCount"
+        ],
+        "type": "object"
+      },
+      "SubmissionManifestRow": {
+        "properties": {
+          "auditKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditProjectId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditType": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "deliverableId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "manifestVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "packageId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "reviewRoundId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "sourceRevisionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "packageId",
+          "manifestVersion",
+          "deliverableId",
+          "sourceRevisionId",
+          "reviewRoundId",
+          "required",
+          "auditType",
+          "projectId",
+          "auditProjectId",
+          "auditKey",
+          "auditName",
+          "createdAt",
+          "createdBy",
+          "updatedAt",
+          "updatedBy",
+          "rowVersion",
+          "id"
+        ],
+        "type": "object"
+      },
+      "SubmissionPackageRow": {
+        "properties": {
+          "auditKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditProjectId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditType": {
+            "type": "string"
+          },
+          "coordinatorId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "deletedAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "deletedBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "manifestVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "milestoneId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "recipientReference": {
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "seq": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "supersedesPackageId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "targetDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "title",
+          "purpose",
+          "recipientReference",
+          "coordinatorId",
+          "milestoneId",
+          "targetDate",
+          "status",
+          "manifestVersion",
+          "supersedesPackageId",
+          "auditType",
+          "auditProjectId",
+          "auditKey",
+          "auditName",
+          "projectId",
+          "key",
+          "seq",
+          "deletedAt",
+          "deletedBy",
+          "createdAt",
+          "createdBy",
+          "updatedAt",
+          "updatedBy",
+          "rowVersion",
+          "id"
+        ],
+        "type": "object"
+      },
+      "SubmissionReadinessResult": {
+        "properties": {
+          "blockers": {
+            "items": {
+              "$ref": "#/components/schemas/SubmissionBlocker"
+            },
+            "type": "array"
+          },
+          "fingerprint": {
+            "type": "string"
+          },
+          "ready": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ready",
+          "fingerprint",
+          "blockers"
         ],
         "type": "object"
       },
@@ -32068,7 +32898,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/PageOfListRow"
+                }
               }
             },
             "description": "OK"
@@ -32219,7 +33051,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/SubmissionDetail"
+                }
               }
             },
             "description": "OK"

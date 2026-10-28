@@ -6,13 +6,13 @@ import { AlertTriangle, CheckCircle2, Ellipsis, Lock, Monitor, Plus, X } from 'l
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, useMatch, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import { ActiveFilters, ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Notice, Page, PageHelp, Segmented, Spinner, TableRegion, selectCls, tdCls as td, thCls as th } from '@/components/hub/common'
+import { ActiveFilters, ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Notice, Page, PageHelp, Segmented, Spinner, selectCls } from '@/components/hub/common'
 import { ExportMenu } from '@/components/hub/export'
 import { FieldRow, HistoryList, TabBar } from '@/components/hub/fields'
 import { useItemPanel, type PanelProps } from '@/components/hub/panel-host'
 import { Avatar } from '@/components/hub/people'
 import { Pill, type Tone } from '@/components/hub/pills'
-import { DataTable, FieldGroup, PanelHead, SELECTED_ROW, TITLE_LINK } from '@/components/hub/registers'
+import { DataTable, FieldGroup, PanelHead, TITLE_LINK } from '@/components/hub/registers'
 import { useTable, type Column } from '@/components/hub/table'
 import { ViewMenu } from '@/components/hub/views'
 import { Button } from '@/components/ui/button'
@@ -379,39 +379,32 @@ function OpenRoles({ roles, base, proposal, canFill, onAdd, onEdit, onCancel, on
   const additions = useFlag('record_engine_additions'), openPanel = useItemPanel(), [sp] = useSearchParams()
   const current = (r: OpenRole) => additions && sp.get('panel') === `OpenRole:${r.id}`
   const columns: Column<OpenRole>[] = [
-    { id: 'role', label: t('openRole.role'), fixed: true, sort: r => r.roleLabel.toLowerCase(), cell: r => <>
+    { id: 'role', label: t('openRole.role'), fixed: true, className: 'align-top', sort: r => r.roleLabel.toLowerCase(), cell: r => <>
       {additions ? <button type="button" className={cn(TITLE_LINK, 'block font-semibold')} aria-current={current(r) || undefined} onClick={() => openPanel('OpenRole', r.id)}>{r.roleLabel}</button>
         : <div className="break-words font-semibold">{r.roleLabel}</div>}
       {(r.disciplineName || r.note) && <div className="text-xs/[18px] text-muted-foreground">{[r.disciplineName, r.note].filter(Boolean).join(' · ')}</div>}</> },
-    { id: 'dates', label: t('allocation.dates'), fixed: true, sort: r => r.fromDate, className: 'whitespace-nowrap tabular-nums', cell: r => <>{fmtDate(r.fromDate)} – {fmtDate(r.throughDate)}</> },
-    { id: 'hours', label: t('allocation.plannedHours'), fixed: true, sort: r => r.plannedHours, className: 'text-right font-medium tabular-nums', cell: r => hours(r.plannedHours) },
-    { id: 'status', label: t('common.status'), fixed: true, sort: r => r.status, cell: r => <RoleStatus status={r.status} /> },
-    { id: 'filled', label: t('openRole.filledBy'), fixed: true, cell: r => r.filledAllocationId ? <FilledBy base={base} id={r.filledAllocationId} open={onOpenAllocation} /> : <span className="text-muted-foreground">{t('common.dash')}</span> },
+    { id: 'dates', label: t('allocation.dates'), fixed: true, sort: r => r.fromDate, className: 'whitespace-nowrap align-top tabular-nums', cell: r => <>{fmtDate(r.fromDate)} – {fmtDate(r.throughDate)}</> },
+    { id: 'hours', label: t('allocation.plannedHours'), fixed: true, sort: r => r.plannedHours, className: 'text-right align-top font-medium tabular-nums', cell: r => hours(r.plannedHours) },
+    { id: 'status', label: t('common.status'), fixed: true, sort: r => r.status, className: 'align-top', cell: r => <RoleStatus status={r.status} /> },
+    { id: 'filled', label: t('openRole.filledBy'), fixed: true, className: 'align-top', cell: r => r.filledAllocationId ? <FilledBy base={base} id={r.filledAllocationId} open={onOpenAllocation} /> : <span className="text-muted-foreground">{t('common.dash')}</span> },
+    { id: 'actions', label: t('common.actions'), fixed: true, srOnly: true, className: 'py-1 text-right align-top', cell: r => r.status === 'Open' && <div className="flex items-center justify-end gap-1">
+      {canFill && <Button size="sm" variant="outline" {...proposal.props} onClick={() => onFill(r)} aria-label={t('openRole.fillLabel', { role: r.roleLabel })}>{t('openRole.fill')}</Button>}
+      {r.canManage && <DropdownMenu>
+        <DropdownMenuTrigger asChild><Button size="icon-sm" variant="ghost" aria-label={t('openRole.actions', { role: r.roleLabel })}><Ellipsis className="size-4" aria-hidden /></Button></DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onSelect={() => onEdit(r)}>{t('common.edit')}</DropdownMenuItem>
+          <DropdownMenuItem className="text-bad" onSelect={() => onCancel(r)}>{t('openRole.cancel')}</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>}
+    </div> },
   ]
-  const table = useTable('hub.openRoleColumns', columns, roles.data ?? [], r => [r.fromDate, r.roleLabel], null) // `page` is the allocations list's
-  if (roles.isPending) return <div className="rounded-lg border bg-card"><Loading rows={3} /></div>
+  // Flag off: static headers and the API's order, as before; the sort functions apply only behind the flag. `page` is the allocations list's.
+  const table = useTable('hub.openRoleColumns', additions ? columns : columns.map(c => ({ ...c, sort: undefined })), roles.data ?? [], r => [r.fromDate, r.roleLabel], null)
   if (roles.error) return <ErrorBanner error={roles.error} retry={() => roles.refetch()} />
-  if (!roles.data.length) return <div className="rounded-lg border bg-card"><Empty title={t('openRole.empty')} action={proposal.shown && <Button variant="outline" {...proposal.props} onClick={onAdd}><Plus className="size-4" />{t('openRole.new')}</Button>}>{t('openRole.emptyHint')}</Empty></div>
-  return <TableRegion><table className="w-full text-left text-sm">
-    <caption className="sr-only">{t('openRole.tab')}</caption>
-    <thead className="bg-muted text-muted-foreground"><tr>
-      {columns.map(c => additions ? table.header(c) : <th key={c.id} scope="col" className={cn(th, c.className?.includes('text-right') && 'text-right')}>{c.label}</th>)}
-      <th scope="col" className={th}><span className="sr-only">{t('common.actions')}</span></th>
-    </tr></thead>
-    <tbody>{(additions ? table.sorted : roles.data).map(r => <tr key={r.id} className={cn('border-t hover:bg-muted', r.status === 'Cancelled' && 'text-muted-foreground', current(r) && SELECTED_ROW)}>
-      {columns.map(c => <td key={c.id} className={cn(td, c.className)}>{c.cell(r)}</td>)}
-      <td className={cn(td, 'py-1 text-right')}>{r.status === 'Open' && <div className="flex items-center justify-end gap-1">
-        {canFill && <Button size="sm" variant="outline" {...proposal.props} onClick={() => onFill(r)} aria-label={t('openRole.fillLabel', { role: r.roleLabel })}>{t('openRole.fill')}</Button>}
-        {r.canManage && <DropdownMenu>
-          <DropdownMenuTrigger asChild><Button size="icon-sm" variant="ghost" aria-label={t('openRole.actions', { role: r.roleLabel })}><Ellipsis className="size-4" aria-hidden /></Button></DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onSelect={() => onEdit(r)}>{t('common.edit')}</DropdownMenuItem>
-            <DropdownMenuItem className="text-bad" onSelect={() => onCancel(r)}>{t('openRole.cancel')}</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>}
-      </div>}</td>
-    </tr>)}</tbody>
-  </table></TableRegion>
+  // `wide` keeps the scrolling table below md, as before; open roles never had phone cards (FR-REC-14).
+  return <DataTable table={table} rows={table.sorted} loading={roles.isPending} wide caption={t('openRole.tab')} current={current}
+    rowClass={r => r.status === 'Cancelled' && 'text-muted-foreground'}
+    empty={<Empty title={t('openRole.empty')} action={proposal.shown && <Button variant="outline" {...proposal.props} onClick={onAdd}><Plus className="size-4" />{t('openRole.new')}</Button>}>{t('openRole.emptyHint')}</Empty>} />
 }
 
 function RoleStatus({ status }: { status: string }) { return <Pill tone={ROLE_TONE[status] ?? 'idle'}>{runtimeText(`openRole.status.${status}`)}</Pill> }

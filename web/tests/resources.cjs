@@ -1,6 +1,7 @@
 const { openRoles, contractExample } = require('./open-roles.fixture.cjs')
 const { coordinationOptions } = require('./reviews.fixture.cjs')
 const { personTasks, capacitySet } = require('./workload.fixture.cjs')
+const { allocationRow, allocationPage, allocationDetail, dayAvailability } = require('./allocations.fixture.cjs')
 // Resources workflow UI checks with mocked API responses (run after `npm run build`); API tests cover server rules.
 // Tuesday visual batch 1: a partial view never claims spare capacity (FR-CAP-06), proposed requests stay outside load
 // (FR-CAP-04), negative remaining keeps its minus sign, person accents survive a re-sort, denied access, phones and a
@@ -23,7 +24,8 @@ const cells = (set) => weeks.map((week, i) => { const c = { week, hours: 0, pct:
 const person = (pid_, name, extra) => ({ id: pid_, displayName: name, supervisorId: sam, supervisorName: 'Sam Supervisor', capacity: 40, capacityOverride: false, noDueDate: 0,
   openTasks: 2, unestimated: 0, overdue: 0, projects: 1, overAssigned: false, underAssigned: false, cluster: false, canSetCapacity: true, indicator: 'ok', ...extra });
 let partial = true, forbidden = false, figureNames = false, unassignedOn = false, assigned = false, assignmentConflict = true;
-let typedPatchHeaders, typedCapacity;
+let typedPatchHeaders, typedCapacity, typedAvailability, manageAllocations = false, typedClose;
+const availabilityReads = [];
 const taskDrillCalls = [];
 const assignmentCalls = [], capacityCalls = [];
 const taskId = id(90);
@@ -44,7 +46,7 @@ const refusedFlags = { proposeAllocation: pmOrDl, snooze: pmOrDl, manageExternal
 const project = { id: pid, projectNumber: 'P-DEMO', name: 'Synthetic resource checks', client: 'Pilot client', pmName: 'Pat PM', status: 'Active', visibility: 'Open', rowVersion: 1,
   links: [], disciplines: [], starred: false, myRoles: [], health: { computed: 'Green', reported: 'Green', overrideActive: false, reasons: [] },
   permissions: { edit: { ok: false }, healthOverride: { ok: false }, raiseRegister: { ok: false }, ...refusedFlags, isPm: false, leadOf: [], createTaskIn: [], createDeliverableIn: [], transitions: [], needsReason: false } };
-const allocation = (aid, status) => ({ id: aid, personId: jill, personName: 'Jill Partial', purpose: 'Production', fromDate: '2026-10-05', throughDate: '2026-10-09', plannedHours: 16, status, rowVersion: 0, personState: 'Eligible' });
+const allocation = (aid, status) => allocationRow({ id: aid, personId: jill, status });
 const errors = [], unknown = [];
 let server, browser;
 (async () => {
@@ -75,6 +77,8 @@ let server, browser;
     }
     else if (p === `workload/${alex}/tasks`) { taskDrillCalls.push(Object.fromEntries(u.searchParams)); data = personTasks(weeks, project) }
     else if (p === `users/${alex}/capacity` && route.request().method() === 'PUT') { const body = route.request().postDataJSON(); typedCapacity = { body, headers: route.request().headers() }; data = capacitySet(alex, body.hours) }
+    else if (p === `users/${alex}/availability`) { availabilityReads.push(Object.fromEntries(u.searchParams)); data = [dayAvailability({ workDate: u.searchParams.get('from') ?? '', rowVersion: 3 })] }
+    else if (p.startsWith(`users/${alex}/availability/`) && route.request().method() === 'PUT') { const body = route.request().postDataJSON(); typedAvailability = { path: p, body, headers: route.request().headers() }; data = dayAvailability({ workDate: p.split('/').pop() ?? '', rowVersion: 4, availableHours: body.availableHours, category: body.category }) }
     else if (p === 'workload') [status, data] = forbidden ? [403, { code: 'forbidden', detail: 'You cannot open the workload view.' }] : [200, grid(u.searchParams.get('sort'))]
     else if (p === 'projects/P-DEMO' || p === `projects/${pid}`) data = project
     else if (p.endsWith('/date-review')) data = { window: null, tasks: [], deliverables: [] }
@@ -82,13 +86,14 @@ let server, browser;
     else if (p === `projects/${pid}/changes/options`) data = coordinationOptions({ actorId: sam, canWrite: true, people: [{ id: jill, displayName: 'Jill Partial' }] })
     else if (p === `projects/${pid}/open-roles`) data = openRoles
     else if (p === `open-roles/${contractExample.id}` && route.request().method() === 'PATCH') { typedPatchHeaders = route.request().headers(); data = { ...contractExample, rowVersion: contractExample.rowVersion + 1 } }
-    else if (p === `projects/${pid}/allocations`) data = { items: [allocation(proposed, 'Proposed'), allocation(confirmed, 'Confirmed')], page: 1, pageSize: 50, totalCount: 2 }
+    else if (p === `projects/${pid}/allocations`) data = allocationPage([allocation(proposed, 'Proposed'), allocation(confirmed, 'Confirmed')])
     else if (p === `projects/${pid}/allocations/${proposed}/confirmation-preview`) [status, data] = [403, { code: 'forbidden', detail: 'You cannot open the workload view.' }]
     else if (p === `projects/${pid}/allocations/review-options`) data = [] // the proposal form's reviewer list (an array, as the server returns)
+    else if (p === `projects/${pid}/allocations/${confirmed}/cancel` && route.request().method() === 'POST') { typedClose = { body: route.request().postDataJSON(), headers: route.request().headers() }; data = { id: confirmed, rowVersion: 1 } }
     else if (p.startsWith(`projects/${pid}/allocations/`)) {
       const aid = p.split('/').pop()
-      data = { ...allocation(aid, aid === proposed ? 'Proposed' : 'Confirmed'), personEligible: true, links: [], days: [], overCapacityWarningRecorded: false,
-        confirmedAt: aid === confirmed ? '2026-10-02T12:00:00Z' : undefined, canConfirm: aid === proposed, canManage: false }
+      data = allocationDetail({ ...allocation(aid, aid === proposed ? 'Proposed' : 'Confirmed'), projectId: pid,
+        confirmedAt: aid === confirmed ? '2026-10-02T12:00:00Z' : null, canConfirm: aid === proposed, canManage: manageAllocations })
     } else unknown.push(p)
     await route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(data) })
   });
@@ -200,6 +205,14 @@ let server, browser;
   await page.getByLabel('Hours per week').fill(''); await page.getByRole('dialog').getByRole('button', { name: 'Save', exact: true }).click();
   await page.getByRole('dialog').waitFor({ state: 'detached' });
   assert.deepEqual(typedCapacity.body, { hours: null }, 'An empty field clears the override');
+  // S15 Allocations: the daily availability dialog reads and writes the day through the typed helper, on the version it read.
+  await page.getByRole('button', { name: 'Set daily availability for Alex Overloaded' }).click();
+  await page.getByText('Currently 4 h (Reduced)').waitFor();
+  const day = await page.getByLabel('Date').inputValue(); assert.deepEqual(availabilityReads.at(-1), { from: day, through: day }, 'The read asks for the one chosen day');
+  await page.getByLabel('Available hours').fill('6'); await page.getByLabel('Category').selectOption('Additional'); await page.getByRole('dialog').getByRole('button', { name: 'Save', exact: true }).click();
+  await page.getByRole('dialog').waitFor({ state: 'detached' });
+  assert.equal(typedAvailability.path, `users/${alex}/availability/${day}`); assert.deepEqual(typedAvailability.body, { expectedRowVersion: 3, availableHours: 6, category: 'Additional' });
+  assert.equal(typedAvailability.headers['x-hub-source'], 'UI');
 
   // Denied access explains itself and offers no export or saved views.
   forbidden = true; await page.reload();
@@ -222,6 +235,14 @@ let server, browser;
   await page.getByRole('dialog').getByText('Capacity can’t be checked with your access').waitFor();
   assert.equal(await page.getByText('You cannot open the workload view.').count(), 0, 'The refusal is explained in context');
   const panelViolations = await axe();
+  // S15 Allocations: a close command goes through the typed helper with a request id, the row version the panel read and the reason.
+  manageAllocations = true;
+  await page.goto(`${base}/projects/P-DEMO/allocations?allocation=${confirmed}`);
+  await page.getByRole('button', { name: 'Cancel allocation' }).click();
+  const closing = page.getByRole('dialog', { name: 'Cancel allocation' }); await closing.getByLabel('Reason').fill('Synthetic reason for closing');
+  await closing.getByRole('button', { name: 'Cancel allocation' }).click(); await closing.waitFor({ state: 'detached' });
+  assert.deepEqual({ ...typedClose.body, requestId: undefined }, { requestId: undefined, rowVersion: 0, reason: 'Synthetic reason for closing' }); assert.match(typedClose.body.requestId, /^[0-9a-f-]{36}$/);
+  assert.equal(typedClose.headers['x-hub-source'], 'UI'); manageAllocations = false;
 
   // FR-FIG-11, FR-FIG-12 (AC-FIG-10, AC-FIG-11): the role form asks for a reason exactly when the server's needsReason says so,
   // and takes its label limit from GET /reference.

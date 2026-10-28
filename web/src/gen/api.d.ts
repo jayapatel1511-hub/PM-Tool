@@ -9766,7 +9766,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["PageOfAllocationRow"];
                     };
                 };
             };
@@ -9894,7 +9894,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["ReviewOptionRow"][];
                     };
                 };
             };
@@ -9932,7 +9932,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["AllocationDetail"];
                     };
                 };
             };
@@ -10119,7 +10119,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["ConfirmationPreviewRead"];
                     };
                 };
             };
@@ -15574,7 +15574,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["DayAvailabilityRow"][];
                     };
                 };
             };
@@ -15617,7 +15617,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["DayAvailabilityRow"];
                     };
                 };
             };
@@ -16170,6 +16170,42 @@ export interface components {
             /** Format: date */
             workDate: string;
         };
+        AllocationDay: {
+            /** Format: double */
+            hours: number;
+            /** Format: date */
+            workDate: string;
+        };
+        AllocationDetail: {
+            canConfirm: boolean;
+            canManage: boolean;
+            /** Format: date-time */
+            confirmedAt: null | string;
+            /** Format: uuid */
+            confirmedBy: null | string;
+            days: components["schemas"]["AllocationDay"][];
+            /** Format: date */
+            fromDate: string;
+            /** Format: uuid */
+            id: string;
+            links: components["schemas"]["AllocationLink"][];
+            overCapacityWarningRecorded: boolean;
+            personEligible: boolean;
+            /** Format: uuid */
+            personId: string;
+            personName: null | string;
+            personState: string;
+            /** Format: double */
+            plannedHours: number;
+            /** Format: uuid */
+            projectId: string;
+            purpose: string;
+            /** Format: int32 */
+            rowVersion: number;
+            status: string;
+            /** Format: date */
+            throughDate: string;
+        };
         AllocationEditBody: {
             days: components["schemas"]["DayInput"][];
             /** Format: date */
@@ -16188,6 +16224,17 @@ export interface components {
             /** Format: date */
             throughDate: string;
         };
+        AllocationLink: {
+            /** Format: double */
+            reviewHours: null | number;
+            /** Format: uuid */
+            reviewPackageId: null | string;
+            /** Format: date */
+            workDate: string;
+            /** Format: uuid */
+            workId: string;
+            workType: string;
+        };
         AllocationLinkInput: {
             /** Format: double */
             reviewHours?: null | number;
@@ -16196,6 +16243,24 @@ export interface components {
             /** Format: uuid */
             workId: string;
             workType: string;
+        };
+        AllocationRow: {
+            /** Format: date */
+            fromDate: string;
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            personId: string;
+            personName: null | string;
+            personState: string;
+            /** Format: double */
+            plannedHours: number;
+            purpose: string;
+            /** Format: int32 */
+            rowVersion: number;
+            status: string;
+            /** Format: date */
+            throughDate: string;
         };
         Allowed: {
             assign: boolean;
@@ -16941,6 +17006,22 @@ export interface components {
             /** Format: double */
             hours: null | number;
         };
+        CapacityDay: {
+            /** Format: double */
+            availableHours: number;
+            /** Format: double */
+            confirmedHours: number;
+            /** Format: date */
+            date: string;
+            /** Format: int32 */
+            dateVersion: number;
+            /** Format: double */
+            overByHours: number;
+            /** Format: double */
+            proposedHours: number;
+            /** Format: double */
+            resultingHours: number;
+        };
         CapacitySet: {
             /** Format: uuid */
             id: string;
@@ -17400,6 +17481,13 @@ export interface components {
             confirm: null | boolean;
             /** Format: int32 */
             rowVersion: null | number;
+        };
+        ConfirmationPreviewRead: {
+            days: components["schemas"]["CapacityDay"][];
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
         };
         ConflictSide: {
             entryKey: string;
@@ -17935,6 +18023,15 @@ export interface components {
             id: string;
             key: string;
             reason: components["schemas"]["Reason"];
+        };
+        DayAvailabilityRow: {
+            /** Format: double */
+            availableHours: number;
+            category: string;
+            /** Format: int32 */
+            rowVersion: number;
+            /** Format: date */
+            workDate: string;
         };
         DayHours: {
             /** Format: date */
@@ -20138,6 +20235,17 @@ export interface components {
             /** Format: int32 */
             totalCount: number;
         };
+        PageOfAllocationRow: {
+            filters?: unknown;
+            items: components["schemas"]["AllocationRow"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            sort?: null | string;
+            /** Format: int32 */
+            totalCount: number;
+        };
         PageOfBasisRegisterRow: {
             filters?: unknown;
             items: components["schemas"]["BasisRegisterRow"][];
@@ -21098,6 +21206,18 @@ export interface components {
             source: components["schemas"]["SourceRevisionRow"];
             /** Format: uuid */
             sourceRevisionId: string;
+        };
+        ReviewOptionRow: {
+            /** Format: date */
+            dueDate: string;
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            packageId: string;
+            packageKey: string;
+            packageTitle: string;
+            /** Format: uuid */
+            reviewerId: string;
         };
         ReviewPackageRow: {
             /** Format: uuid */

@@ -19,7 +19,7 @@ import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useReference } from '@/hooks/data'
-import { ApiError, get, patch, put, qs, typedRequest } from '@/lib/api'
+import { ApiError, get, patch, typedRequest } from '@/lib/api'
 import { useFlag } from '@/lib/auth'
 import { addDays, fmtDate, hours, shortDate, today } from '@/lib/format'
 import { runtimeText, t } from '@/lib/i18n'
@@ -467,8 +467,7 @@ function AvailabilityDialog({ p, onClose }: { p: PersonRow; onClose: (ok: boolea
   const [date, setDate] = useState(today())
   const [hoursValue, setHours] = useState('')
   const [category, setCategory] = useState('Reduced')
-  const q = useQuery({ queryKey: ['availability', p.id, date], queryFn: () => get<{ workDate: string; availableHours: number; category: string; rowVersion: number }[]>(
-    `users/${p.id}/availability${qs({ from: date, through: date })}`), enabled: !!date })
+  const q = useQuery({ queryKey: ['availability', p.id, date], queryFn: () => typedRequest('get', '/api/v1/users/{personId}/availability', { params: { personId: p.id }, query: { from: date, through: date } }), enabled: !!date })
   const existing = q.data?.[0]
   const invalid = hoursValue !== '' && !(Number(hoursValue) >= 0 && Number(hoursValue) <= 24)
   const chooseDate = (value: string) => { setDate(value); setHours(''); setCategory('Reduced') }
@@ -476,8 +475,8 @@ function AvailabilityDialog({ p, onClose }: { p: PersonRow; onClose: (ok: boolea
     confirmLabel={t('common.save')} body={t('workload.dayAvailabilityHint')} busy={invalid}
     onConfirm={async () => {
       if (!date || hoursValue === '') throw new Error(t('workload.dayRequired'))
-      await put(`users/${p.id}/availability/${date}`, { expectedRowVersion: existing?.rowVersion ?? 0,
-        availableHours: Number(hoursValue), category })
+      await typedRequest('put', '/api/v1/users/{personId}/availability/{date}', { params: { personId: p.id, date }, body: { expectedRowVersion: existing?.rowVersion ?? 0,
+        availableHours: Number(hoursValue), category } })
       toast.success(t('common.saved')); onClose(true)
     }}>
     <Field label={t('workload.dayDate')} htmlFor="availability-date"><Input id="availability-date" type="date" required value={date} onChange={e => chooseDate(e.target.value)} /></Field>

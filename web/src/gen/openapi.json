@@ -394,6 +394,133 @@
         ],
         "type": "object"
       },
+      "AllocationDay": {
+        "properties": {
+          "hours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "workDate": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workDate",
+          "hours"
+        ],
+        "type": "object"
+      },
+      "AllocationDetail": {
+        "properties": {
+          "canConfirm": {
+            "type": "boolean"
+          },
+          "canManage": {
+            "type": "boolean"
+          },
+          "confirmedAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "confirmedBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "days": {
+            "items": {
+              "$ref": "#/components/schemas/AllocationDay"
+            },
+            "type": "array"
+          },
+          "fromDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "links": {
+            "items": {
+              "$ref": "#/components/schemas/AllocationLink"
+            },
+            "type": "array"
+          },
+          "overCapacityWarningRecorded": {
+            "type": "boolean"
+          },
+          "personEligible": {
+            "type": "boolean"
+          },
+          "personId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "personName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "personState": {
+            "type": "string"
+          },
+          "plannedHours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "throughDate": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "projectId",
+          "personId",
+          "personName",
+          "personState",
+          "personEligible",
+          "purpose",
+          "fromDate",
+          "throughDate",
+          "plannedHours",
+          "status",
+          "confirmedBy",
+          "confirmedAt",
+          "overCapacityWarningRecorded",
+          "rowVersion",
+          "canConfirm",
+          "canManage",
+          "days",
+          "links"
+        ],
+        "type": "object"
+      },
       "AllocationEditBody": {
         "properties": {
           "days": {
@@ -455,6 +582,44 @@
         ],
         "type": "object"
       },
+      "AllocationLink": {
+        "properties": {
+          "reviewHours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "null",
+              "number"
+            ]
+          },
+          "reviewPackageId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "workDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "workId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "workType": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "workType",
+          "workId",
+          "workDate",
+          "reviewHours",
+          "reviewPackageId"
+        ],
+        "type": "object"
+      },
       "AllocationLinkInput": {
         "properties": {
           "reviewHours": {
@@ -481,6 +646,64 @@
           "workType",
           "workId",
           "workDate"
+        ],
+        "type": "object"
+      },
+      "AllocationRow": {
+        "properties": {
+          "fromDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "personId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "personName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "personState": {
+            "type": "string"
+          },
+          "plannedHours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "throughDate": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "personId",
+          "personName",
+          "purpose",
+          "fromDate",
+          "throughDate",
+          "plannedHours",
+          "status",
+          "rowVersion",
+          "personState"
         ],
         "type": "object"
       },
@@ -3421,6 +3644,54 @@
         ],
         "type": "object"
       },
+      "CapacityDay": {
+        "properties": {
+          "availableHours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "confirmedHours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "date": {
+            "format": "date",
+            "type": "string"
+          },
+          "dateVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "overByHours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "proposedHours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "resultingHours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          }
+        },
+        "required": [
+          "date",
+          "availableHours",
+          "confirmedHours",
+          "proposedHours",
+          "resultingHours",
+          "overByHours",
+          "dateVersion"
+        ],
+        "type": "object"
+      },
       "CapacitySet": {
         "properties": {
           "id": {
@@ -5159,6 +5430,31 @@
           "completedDate",
           "confirm",
           "rowVersion"
+        ],
+        "type": "object"
+      },
+      "ConfirmationPreviewRead": {
+        "properties": {
+          "days": {
+            "items": {
+              "$ref": "#/components/schemas/CapacityDay"
+            },
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "rowVersion",
+          "days"
         ],
         "type": "object"
       },
@@ -7181,6 +7477,34 @@
           "id",
           "key",
           "reason"
+        ],
+        "type": "object"
+      },
+      "DayAvailabilityRow": {
+        "properties": {
+          "availableHours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "category": {
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "workDate": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workDate",
+          "availableHours",
+          "category",
+          "rowVersion"
         ],
         "type": "object"
       },
@@ -15571,6 +15895,45 @@
         ],
         "type": "object"
       },
+      "PageOfAllocationRow": {
+        "properties": {
+          "filters": {},
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AllocationRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "pageSize": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "sort": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "totalCount": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "totalCount"
+        ],
+        "type": "object"
+      },
       "PageOfBasisRegisterRow": {
         "properties": {
           "filters": {},
@@ -19310,6 +19673,41 @@
           "sourceRevisionId",
           "authorIds",
           "source"
+        ],
+        "type": "object"
+      },
+      "ReviewOptionRow": {
+        "properties": {
+          "dueDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "packageId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "packageKey": {
+            "type": "string"
+          },
+          "packageTitle": {
+            "type": "string"
+          },
+          "reviewerId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "reviewerId",
+          "dueDate",
+          "packageId",
+          "packageKey",
+          "packageTitle"
         ],
         "type": "object"
       },
@@ -37948,7 +38346,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/PageOfAllocationRow"
+                }
               }
             },
             "description": "OK"
@@ -38176,7 +38576,12 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ReviewOptionRow"
+                  },
+                  "type": "array"
+                }
               }
             },
             "description": "OK"
@@ -38213,7 +38618,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/AllocationDetail"
+                }
               }
             },
             "description": "OK"
@@ -38484,7 +38891,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/ConfirmationPreviewRead"
+                }
               }
             },
             "description": "OK"
@@ -45021,7 +45430,12 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DayAvailabilityRow"
+                  },
+                  "type": "array"
+                }
               }
             },
             "description": "OK"
@@ -45068,7 +45482,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/DayAvailabilityRow"
+                }
               }
             },
             "description": "OK"

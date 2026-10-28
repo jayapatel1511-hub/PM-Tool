@@ -9810,6 +9810,225 @@
     "$.components.schemas.AllocationDateVersionInput.type": [
       "string"
     ],
+    "$.components.schemas.AllocationDay": [
+      "object"
+    ],
+    "$.components.schemas.AllocationDay.properties": [
+      "object"
+    ],
+    "$.components.schemas.AllocationDay.properties.hours": [
+      "object"
+    ],
+    "$.components.schemas.AllocationDay.properties.hours.format": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDay.properties.hours.pattern": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDay.properties.hours.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDay.properties.workDate": [
+      "object"
+    ],
+    "$.components.schemas.AllocationDay.properties.workDate.format": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDay.properties.workDate.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDay.required": [
+      "array"
+    ],
+    "$.components.schemas.AllocationDay.required[]": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDay.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail": [
+      "object"
+    ],
+    "$.components.schemas.AllocationDetail.properties": [
+      "object"
+    ],
+    "$.components.schemas.AllocationDetail.properties.canConfirm": [
+      "object"
+    ],
+    "$.components.schemas.AllocationDetail.properties.canConfirm.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail.properties.canManage": [
+      "object"
+    ],
+    "$.components.schemas.AllocationDetail.properties.canManage.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail.properties.confirmedAt": [
+      "object"
+    ],
+    "$.components.schemas.AllocationDetail.properties.confirmedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail.properties.confirmedAt.type": [
+      "array"
+    ],
+    "$.components.schemas.AllocationDetail.properties.confirmedAt.type[]": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail.properties.confirmedBy": [
+      "object"
+    ],
+    "$.components.schemas.AllocationDetail.properties.confirmedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail.properties.confirmedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.AllocationDetail.properties.confirmedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail.properties.days": [
+      "object"
+    ],
+    "$.components.schemas.AllocationDetail.properties.days.items": [
+      "object"
+    ],
+    "$.components.schemas.AllocationDetail.properties.days.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail.properties.days.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail.properties.fromDate": [
+      "object"
+    ],
+    "$.components.schemas.AllocationDetail.properties.fromDate.format": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail.properties.fromDate.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.AllocationDetail.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail.properties.links": [
+      "object"
+    ],
+    "$.components.schemas.AllocationDetail.properties.links.items": [
+      "object"
+    ],
+    "$.components.schemas.AllocationDetail.properties.links.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail.properties.links.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail.properties.overCapacityWarningRecorded": [
+      "object"
+    ],
+    "$.components.schemas.AllocationDetail.properties.overCapacityWarningRecorded.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail.properties.personEligible": [
+      "object"
+    ],
+    "$.components.schemas.AllocationDetail.properties.personEligible.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail.properties.personId": [
+      "object"
+    ],
+    "$.components.schemas.AllocationDetail.properties.personId.format": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail.properties.personId.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail.properties.personName": [
+      "object"
+    ],
+    "$.components.schemas.AllocationDetail.properties.personName.type": [
+      "array"
+    ],
+    "$.components.schemas.AllocationDetail.properties.personName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail.properties.personState": [
+      "object"
+    ],
+    "$.components.schemas.AllocationDetail.properties.personState.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail.properties.plannedHours": [
+      "object"
+    ],
+    "$.components.schemas.AllocationDetail.properties.plannedHours.format": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail.properties.plannedHours.pattern": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail.properties.plannedHours.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.AllocationDetail.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail.properties.purpose": [
+      "object"
+    ],
+    "$.components.schemas.AllocationDetail.properties.purpose.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.AllocationDetail.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.AllocationDetail.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail.properties.throughDate": [
+      "object"
+    ],
+    "$.components.schemas.AllocationDetail.properties.throughDate.format": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail.properties.throughDate.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail.required": [
+      "array"
+    ],
+    "$.components.schemas.AllocationDetail.required[]": [
+      "string"
+    ],
+    "$.components.schemas.AllocationDetail.type": [
+      "string"
+    ],
     "$.components.schemas.AllocationEditBody": [
       "object"
     ],
@@ -9921,6 +10140,72 @@
     "$.components.schemas.AllocationEditBody.type": [
       "string"
     ],
+    "$.components.schemas.AllocationLink": [
+      "object"
+    ],
+    "$.components.schemas.AllocationLink.properties": [
+      "object"
+    ],
+    "$.components.schemas.AllocationLink.properties.reviewHours": [
+      "object"
+    ],
+    "$.components.schemas.AllocationLink.properties.reviewHours.format": [
+      "string"
+    ],
+    "$.components.schemas.AllocationLink.properties.reviewHours.pattern": [
+      "string"
+    ],
+    "$.components.schemas.AllocationLink.properties.reviewHours.type": [
+      "array"
+    ],
+    "$.components.schemas.AllocationLink.properties.reviewHours.type[]": [
+      "string"
+    ],
+    "$.components.schemas.AllocationLink.properties.reviewPackageId": [
+      "object"
+    ],
+    "$.components.schemas.AllocationLink.properties.reviewPackageId.format": [
+      "string"
+    ],
+    "$.components.schemas.AllocationLink.properties.reviewPackageId.type": [
+      "array"
+    ],
+    "$.components.schemas.AllocationLink.properties.reviewPackageId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.AllocationLink.properties.workDate": [
+      "object"
+    ],
+    "$.components.schemas.AllocationLink.properties.workDate.format": [
+      "string"
+    ],
+    "$.components.schemas.AllocationLink.properties.workDate.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationLink.properties.workId": [
+      "object"
+    ],
+    "$.components.schemas.AllocationLink.properties.workId.format": [
+      "string"
+    ],
+    "$.components.schemas.AllocationLink.properties.workId.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationLink.properties.workType": [
+      "object"
+    ],
+    "$.components.schemas.AllocationLink.properties.workType.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationLink.required": [
+      "array"
+    ],
+    "$.components.schemas.AllocationLink.required[]": [
+      "string"
+    ],
+    "$.components.schemas.AllocationLink.type": [
+      "string"
+    ],
     "$.components.schemas.AllocationLinkInput": [
       "object"
     ],
@@ -9973,6 +10258,108 @@
       "string"
     ],
     "$.components.schemas.AllocationLinkInput.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationRow": [
+      "object"
+    ],
+    "$.components.schemas.AllocationRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.AllocationRow.properties.fromDate": [
+      "object"
+    ],
+    "$.components.schemas.AllocationRow.properties.fromDate.format": [
+      "string"
+    ],
+    "$.components.schemas.AllocationRow.properties.fromDate.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.AllocationRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.AllocationRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationRow.properties.personId": [
+      "object"
+    ],
+    "$.components.schemas.AllocationRow.properties.personId.format": [
+      "string"
+    ],
+    "$.components.schemas.AllocationRow.properties.personId.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationRow.properties.personName": [
+      "object"
+    ],
+    "$.components.schemas.AllocationRow.properties.personName.type": [
+      "array"
+    ],
+    "$.components.schemas.AllocationRow.properties.personName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.AllocationRow.properties.personState": [
+      "object"
+    ],
+    "$.components.schemas.AllocationRow.properties.personState.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationRow.properties.plannedHours": [
+      "object"
+    ],
+    "$.components.schemas.AllocationRow.properties.plannedHours.format": [
+      "string"
+    ],
+    "$.components.schemas.AllocationRow.properties.plannedHours.pattern": [
+      "string"
+    ],
+    "$.components.schemas.AllocationRow.properties.plannedHours.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationRow.properties.purpose": [
+      "object"
+    ],
+    "$.components.schemas.AllocationRow.properties.purpose.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.AllocationRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.AllocationRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.AllocationRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationRow.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.AllocationRow.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationRow.properties.throughDate": [
+      "object"
+    ],
+    "$.components.schemas.AllocationRow.properties.throughDate.format": [
+      "string"
+    ],
+    "$.components.schemas.AllocationRow.properties.throughDate.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationRow.required": [
+      "array"
+    ],
+    "$.components.schemas.AllocationRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.AllocationRow.type": [
       "string"
     ],
     "$.components.schemas.Allowed": [
@@ -14844,6 +15231,102 @@
     "$.components.schemas.CapacityBody.type": [
       "string"
     ],
+    "$.components.schemas.CapacityDay": [
+      "object"
+    ],
+    "$.components.schemas.CapacityDay.properties": [
+      "object"
+    ],
+    "$.components.schemas.CapacityDay.properties.availableHours": [
+      "object"
+    ],
+    "$.components.schemas.CapacityDay.properties.availableHours.format": [
+      "string"
+    ],
+    "$.components.schemas.CapacityDay.properties.availableHours.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CapacityDay.properties.availableHours.type": [
+      "string"
+    ],
+    "$.components.schemas.CapacityDay.properties.confirmedHours": [
+      "object"
+    ],
+    "$.components.schemas.CapacityDay.properties.confirmedHours.format": [
+      "string"
+    ],
+    "$.components.schemas.CapacityDay.properties.confirmedHours.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CapacityDay.properties.confirmedHours.type": [
+      "string"
+    ],
+    "$.components.schemas.CapacityDay.properties.date": [
+      "object"
+    ],
+    "$.components.schemas.CapacityDay.properties.date.format": [
+      "string"
+    ],
+    "$.components.schemas.CapacityDay.properties.date.type": [
+      "string"
+    ],
+    "$.components.schemas.CapacityDay.properties.dateVersion": [
+      "object"
+    ],
+    "$.components.schemas.CapacityDay.properties.dateVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.CapacityDay.properties.dateVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CapacityDay.properties.dateVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.CapacityDay.properties.overByHours": [
+      "object"
+    ],
+    "$.components.schemas.CapacityDay.properties.overByHours.format": [
+      "string"
+    ],
+    "$.components.schemas.CapacityDay.properties.overByHours.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CapacityDay.properties.overByHours.type": [
+      "string"
+    ],
+    "$.components.schemas.CapacityDay.properties.proposedHours": [
+      "object"
+    ],
+    "$.components.schemas.CapacityDay.properties.proposedHours.format": [
+      "string"
+    ],
+    "$.components.schemas.CapacityDay.properties.proposedHours.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CapacityDay.properties.proposedHours.type": [
+      "string"
+    ],
+    "$.components.schemas.CapacityDay.properties.resultingHours": [
+      "object"
+    ],
+    "$.components.schemas.CapacityDay.properties.resultingHours.format": [
+      "string"
+    ],
+    "$.components.schemas.CapacityDay.properties.resultingHours.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CapacityDay.properties.resultingHours.type": [
+      "string"
+    ],
+    "$.components.schemas.CapacityDay.required": [
+      "array"
+    ],
+    "$.components.schemas.CapacityDay.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CapacityDay.type": [
+      "string"
+    ],
     "$.components.schemas.CapacitySet": [
       "object"
     ],
@@ -17794,6 +18277,54 @@
       "string"
     ],
     "$.components.schemas.CompleteBody.type": [
+      "string"
+    ],
+    "$.components.schemas.ConfirmationPreviewRead": [
+      "object"
+    ],
+    "$.components.schemas.ConfirmationPreviewRead.properties": [
+      "object"
+    ],
+    "$.components.schemas.ConfirmationPreviewRead.properties.days": [
+      "object"
+    ],
+    "$.components.schemas.ConfirmationPreviewRead.properties.days.items": [
+      "object"
+    ],
+    "$.components.schemas.ConfirmationPreviewRead.properties.days.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ConfirmationPreviewRead.properties.days.type": [
+      "string"
+    ],
+    "$.components.schemas.ConfirmationPreviewRead.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.ConfirmationPreviewRead.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.ConfirmationPreviewRead.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.ConfirmationPreviewRead.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.ConfirmationPreviewRead.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.ConfirmationPreviewRead.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ConfirmationPreviewRead.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.ConfirmationPreviewRead.required": [
+      "array"
+    ],
+    "$.components.schemas.ConfirmationPreviewRead.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ConfirmationPreviewRead.type": [
       "string"
     ],
     "$.components.schemas.ConflictSide": [
@@ -21340,6 +21871,60 @@
       "string"
     ],
     "$.components.schemas.DateSuccessor.type": [
+      "string"
+    ],
+    "$.components.schemas.DayAvailabilityRow": [
+      "object"
+    ],
+    "$.components.schemas.DayAvailabilityRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.DayAvailabilityRow.properties.availableHours": [
+      "object"
+    ],
+    "$.components.schemas.DayAvailabilityRow.properties.availableHours.format": [
+      "string"
+    ],
+    "$.components.schemas.DayAvailabilityRow.properties.availableHours.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DayAvailabilityRow.properties.availableHours.type": [
+      "string"
+    ],
+    "$.components.schemas.DayAvailabilityRow.properties.category": [
+      "object"
+    ],
+    "$.components.schemas.DayAvailabilityRow.properties.category.type": [
+      "string"
+    ],
+    "$.components.schemas.DayAvailabilityRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.DayAvailabilityRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.DayAvailabilityRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DayAvailabilityRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.DayAvailabilityRow.properties.workDate": [
+      "object"
+    ],
+    "$.components.schemas.DayAvailabilityRow.properties.workDate.format": [
+      "string"
+    ],
+    "$.components.schemas.DayAvailabilityRow.properties.workDate.type": [
+      "string"
+    ],
+    "$.components.schemas.DayAvailabilityRow.required": [
+      "array"
+    ],
+    "$.components.schemas.DayAvailabilityRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DayAvailabilityRow.type": [
       "string"
     ],
     "$.components.schemas.DayHours": [
@@ -35634,6 +36219,81 @@
     "$.components.schemas.PageOfActivityEntry.type": [
       "string"
     ],
+    "$.components.schemas.PageOfAllocationRow": [
+      "object"
+    ],
+    "$.components.schemas.PageOfAllocationRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.PageOfAllocationRow.properties.filters": [
+      "object"
+    ],
+    "$.components.schemas.PageOfAllocationRow.properties.items": [
+      "object"
+    ],
+    "$.components.schemas.PageOfAllocationRow.properties.items.items": [
+      "object"
+    ],
+    "$.components.schemas.PageOfAllocationRow.properties.items.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.PageOfAllocationRow.properties.items.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfAllocationRow.properties.page": [
+      "object"
+    ],
+    "$.components.schemas.PageOfAllocationRow.properties.page.format": [
+      "string"
+    ],
+    "$.components.schemas.PageOfAllocationRow.properties.page.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PageOfAllocationRow.properties.page.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfAllocationRow.properties.pageSize": [
+      "object"
+    ],
+    "$.components.schemas.PageOfAllocationRow.properties.pageSize.format": [
+      "string"
+    ],
+    "$.components.schemas.PageOfAllocationRow.properties.pageSize.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PageOfAllocationRow.properties.pageSize.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfAllocationRow.properties.sort": [
+      "object"
+    ],
+    "$.components.schemas.PageOfAllocationRow.properties.sort.type": [
+      "array"
+    ],
+    "$.components.schemas.PageOfAllocationRow.properties.sort.type[]": [
+      "string"
+    ],
+    "$.components.schemas.PageOfAllocationRow.properties.totalCount": [
+      "object"
+    ],
+    "$.components.schemas.PageOfAllocationRow.properties.totalCount.format": [
+      "string"
+    ],
+    "$.components.schemas.PageOfAllocationRow.properties.totalCount.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PageOfAllocationRow.properties.totalCount.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfAllocationRow.required": [
+      "array"
+    ],
+    "$.components.schemas.PageOfAllocationRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.PageOfAllocationRow.type": [
+      "string"
+    ],
     "$.components.schemas.PageOfBasisRegisterRow": [
       "object"
     ],
@@ -42082,6 +42742,69 @@
       "string"
     ],
     "$.components.schemas.ReviewManifestRow.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewOptionRow": [
+      "object"
+    ],
+    "$.components.schemas.ReviewOptionRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.ReviewOptionRow.properties.dueDate": [
+      "object"
+    ],
+    "$.components.schemas.ReviewOptionRow.properties.dueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewOptionRow.properties.dueDate.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewOptionRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.ReviewOptionRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewOptionRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewOptionRow.properties.packageId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewOptionRow.properties.packageId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewOptionRow.properties.packageId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewOptionRow.properties.packageKey": [
+      "object"
+    ],
+    "$.components.schemas.ReviewOptionRow.properties.packageKey.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewOptionRow.properties.packageTitle": [
+      "object"
+    ],
+    "$.components.schemas.ReviewOptionRow.properties.packageTitle.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewOptionRow.properties.reviewerId": [
+      "object"
+    ],
+    "$.components.schemas.ReviewOptionRow.properties.reviewerId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReviewOptionRow.properties.reviewerId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReviewOptionRow.required": [
+      "array"
+    ],
+    "$.components.schemas.ReviewOptionRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ReviewOptionRow.type": [
       "string"
     ],
     "$.components.schemas.ReviewPackageRow": [
@@ -69639,6 +70362,9 @@
     "$.paths./api/v1/projects/{projectId}/allocations.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/projects/{projectId}/allocations.get.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/projects/{projectId}/allocations.get.responses.200.description": [
       "string"
     ],
@@ -69945,6 +70671,15 @@
     "$.paths./api/v1/projects/{projectId}/allocations/review-options.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/projects/{projectId}/allocations/review-options.get.responses.200.content.application/json.schema.items": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{projectId}/allocations/review-options.get.responses.200.content.application/json.schema.items.$ref": [
+      "string"
+    ],
+    "$.paths./api/v1/projects/{projectId}/allocations/review-options.get.responses.200.content.application/json.schema.type": [
+      "string"
+    ],
     "$.paths./api/v1/projects/{projectId}/allocations/review-options.get.responses.200.description": [
       "string"
     ],
@@ -69998,6 +70733,9 @@
     ],
     "$.paths./api/v1/projects/{projectId}/allocations/{id}.get.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/projects/{projectId}/allocations/{id}.get.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/projects/{projectId}/allocations/{id}.get.responses.200.description": [
       "string"
@@ -70412,6 +71150,9 @@
     ],
     "$.paths./api/v1/projects/{projectId}/allocations/{id}/confirmation-preview.get.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/projects/{projectId}/allocations/{id}/confirmation-preview.get.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/projects/{projectId}/allocations/{id}/confirmation-preview.get.responses.200.description": [
       "string"
@@ -79473,6 +80214,15 @@
     "$.paths./api/v1/users/{personId}/availability.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/users/{personId}/availability.get.responses.200.content.application/json.schema.items": [
+      "object"
+    ],
+    "$.paths./api/v1/users/{personId}/availability.get.responses.200.content.application/json.schema.items.$ref": [
+      "string"
+    ],
+    "$.paths./api/v1/users/{personId}/availability.get.responses.200.content.application/json.schema.type": [
+      "string"
+    ],
     "$.paths./api/v1/users/{personId}/availability.get.responses.200.description": [
       "string"
     ],
@@ -79544,6 +80294,9 @@
     ],
     "$.paths./api/v1/users/{personId}/availability/{date}.put.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/users/{personId}/availability/{date}.put.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/users/{personId}/availability/{date}.put.responses.200.description": [
       "string"
@@ -91167,6 +91920,15 @@
     "$.days": [
       "array"
     ],
+    "$.days[]": [
+      "object"
+    ],
+    "$.days[].hours": [
+      "number"
+    ],
+    "$.days[].workDate": [
+      "string"
+    ],
     "$.fromDate": [
       "string"
     ],
@@ -102633,6 +103395,38 @@
       "number"
     ],
     "$[].workDate": [
+      "string"
+    ]
+  },
+  "GET /api/v1/users/{personId}/availability 400": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.errors": [
+      "object"
+    ],
+    "$.errors.through": [
+      "array"
+    ],
+    "$.errors.through[]": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
       "string"
     ]
   },

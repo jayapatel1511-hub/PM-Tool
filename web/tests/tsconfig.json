@@ -35,6 +35,7 @@
     "design-basis.fixture.cjs",
     "config.fixture.cjs",
     "handoffs.fixture.cjs",
-    "reviews.fixture.cjs"
+    "reviews.fixture.cjs",
+    "my-work.fixture.cjs"
   ]
 }

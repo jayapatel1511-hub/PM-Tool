@@ -3,6 +3,7 @@ const { chromium } = require('playwright')
 const { clientConfig } = require('./config.fixture.cjs')
 const assert = require('node:assert/strict')
 const { coordinationOptions, coordinationTask } = require('./reviews.fixture.cjs')
+const { myWork, myWorkPerson, myStaffPerson, myStaffList } = require('./my-work.fixture.cjs')
 const { startPreview, project: baseProject, task: baseTask, taskDetail, deliverableDetail, panelIds, mockPlatformApi } = require('./platform-fixtures.cjs')
 
 const port = Number(process.env.WORKFLOW_TEST_PORT || '19508')
@@ -33,7 +34,7 @@ const views = { allocations:[sharedView], staff: [{ id: viewId, name: 'Staff def
     else if (p === 'me') data = { id: personId, displayName: 'Alex Chen', email: 'alex@hub.test', roles: [], systemRoles: ['ProjectManager'], capabilities: { createProject: false, createTask: true, portfolio: true, workload, staff: true, allStaff: true, admin: true, templates: true, readOnly: false, directReports: 1 }, settings: { today: '2026-10-18', dateFormat: 'yyyy-MM-dd', orgTimeZone: 'America/Halifax', idleTimeoutHours: 8, restrictedProjectsEnabled: true }, preferences: { denseRows: true }, flags: { small_ux: true, allocation_preview: true, org_structure: true } }
     else if (p === 'me/notifications/unread-count') data = { notifications: 0, following: 0 }
     else if (p === 'me/notifications/pulse') data = { stamp: '0' }
-    else if (p === 'me/work') data = { person: { id: personId, displayName: 'Alex Chen', isActive: true }, readOnly: false, today: '2026-10-18', attention: { items: [], total: 0 }, tasks: [task], reviews: { tasks: [], deliverables: [] }, deliverables: [], people: {}, successors: [], decisions: [], actions: [], projects: [], milestones: [], completed: [] }
+    else if (p === 'me/work') data = myWork({ person: myWorkPerson(personId, 'Alex Chen'), today: '2026-10-18', tasks: [task] })
     else if (p === 'reference') data = { disciplines: [{ id: disciplineId, name: 'Civil', isActive: true }], clients: [], offices: [], phases: [], projectTypes: [], limits: { roleLabel: 80 } }
     else if (p === 'organisation') data = { includeIndirectReports: false, units: [] }
     else if (p === 'workspaces') data=[]
@@ -52,7 +53,7 @@ const views = { allocations:[sharedView], staff: [{ id: viewId, name: 'Staff def
     else if (p === `projects/${projectId}/tasks`) data = { items: [task], page: 1, pageSize: 200, totalCount: 1 }
     else if (p === `projects/${projectId}/deliverables` || p === `projects/${projectId}/milestones`) data = []
     else if (p === 'portfolio') data = { ownOnly: false, tiles: { active: 1, red: 0, yellow: 0, green: 1, submissions14: 0, overdueDecisions: 0 }, projects: [{ id: projectId, projectNumber: project.projectNumber, name: project.name, status: 'Active', client: { id: id(50), name: 'Synthetic client' }, pm: { id: personId, displayName: 'Alex Chen' }, officeId: null, office: null, phase: null, projectTypeId: null, projectType: null, health: { computed: 'Green', reported: 'Green' }, trend: [], overdueDeliverables: 0, overdueTasks: 0, blockedTasks: 0, decisionsOverdue: 0, highIssues: 0, attention: 0 }] }
-    else if (p === 'staff') data = { scope: 'all', canSeeAll: true, tiles: { staff: 1, assignments: 1, withOverdue: 0, withBlocked: 0, reviewsStalled: 0 }, people: [{ id: personId, displayName: 'Alex Chen', isActive: true, projects: 1, roles: { pm: 1, dl: 0, team: 1, reviewer: 0, viewer: 0 }, open: 1, overdue: 0, blocked: 0, blocking: 0, reviews: 0, reviewsStalled: 0, deliverablesDue: 0 }] }
+    else if (p === 'staff') data = myStaffList([myStaffPerson({ id: personId, displayName: 'Alex Chen', roles: { pm: 1, dl: 0, team: 1, reviewer: 0, viewer: 0 }, open: 1 })], { scope: 'all', canSeeAll: true })
     else if (p.startsWith('staff/')) data = []
     else if (p === 'planning/grid') data = { weeks: [], currentWeek: '2026-10-12', evaluatedAt: '2026-10-18T00:00:00Z', partialView: false, draftAccess: false, settings: { horizonWeeks: 6, overPct: 110, underPct: 40, underWeeks: 1, staleDays: 14, maxHoursPerWeek: 40 }, people: [] }
     else if (method !== 'GET') data = {}

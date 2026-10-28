@@ -8,6 +8,7 @@ const fs = require('node:fs');
 const { deletedTasks } = require('./recovery.fixture.cjs');
 const { attentionRow, attentionList, attentionSnoozed, healthOverrideApplied, healthOverrideRemoved } = require('./evaluation.fixture.cjs');
 const { timeRow, timeView, entrySaved } = require('./time.fixture.cjs');
+const { myStaffList } = require('./my-work.fixture.cjs');
 const port = process.env.RECOVERY_TEST_PORT || '19504', base = `http://127.0.0.1:${port}`;
 const id = n => `00000000-0000-0000-0000-${String(n).padStart(12,'0')}`;
 const pid=id(1), person=id(2), civil=id(3), client=id(4), office=id(5), deleted=id(6), parent=id(7), template=id(8);
@@ -58,7 +59,7 @@ let server,browser;const errors=[],requests=[],unknown=[];
   else if(p==='templates')data={canEdit:false,templates:[{id:template,familyId:template,name:'Synthetic template',version:1,status:'Published',milestones:0,deliverables:0,tasks:0,roles:0,projects:0}]};
   else if(p===`templates/${template}`)data={id:template,familyId:template,name:'Synthetic template',status:templateDraft?'Draft':'Published',version:1,canEdit:templateDraft,rowVersion:1,family:[],disciplines:[],milestones:[],deliverables:[],tasks:[],dependencies:[],basisSuggestions:[],...(flags.template_working_days?{offsetDayKind:'WorkingDays'}:{})};
   else if(p.endsWith('/preview')){requests.push({path:p,body:req.postDataJSON()});data={milestones:[],counts:{milestones:0,deliverables:0,tasks:0,dependencies:0},undated:{milestones:0,deliverables:0,tasks:0}};}
-  else if(p==='staff')data={scope:'direct',canSeeAll:false,tiles:{staff:0,assignments:0,withOverdue:0,withBlocked:0,reviewsStalled:0},people:[]};
+  else if(p==='staff')data=myStaffList([]);
   else if(p==='time'&&req.method()==='POST'){const body=req.postDataJSON();requests.push({path:p,method:'POST',body,ifMatch:req.headers()['if-match'],source:req.headers()['x-hub-source']});timeEntries.push(timeRow({id:id(43),projectId:pid,taskId:body.taskId,userId:person,taskKey:'SYN-T2',taskName:'Synthetic second task',workDate:body.workDate,hours:body.hours,note:body.note}));status=201;data=entrySaved(id(43),1);}
   else if(p==='time'){timeReads.push(Object.fromEntries(u.searchParams));data=timeView('2026-10-12','2026-10-18',timeEntries);}
   else if(p.startsWith('time/')){const entry=timeEntries.find(e=>p===`time/${e.id}`),del=req.method()==='DELETE';requests.push({path:p,method:req.method(),body:req.postDataJSON(),ifMatch:req.headers()['if-match'],source:req.headers()['x-hub-source']});

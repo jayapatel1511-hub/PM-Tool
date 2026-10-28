@@ -19,6 +19,10 @@ public static class MeetingEndpoints
     public sealed record ConvertBody(Guid? ProjectDisciplineId, Guid? AssigneeId, Guid? DeliverableId, DateOnly? DueDate, int? RowVersion);
     public sealed record ReuseBody(Guid RequestId, int? RowVersion, DecisionEndpoints.LinkInput[]? Links, string? Reason);
     public sealed record ActionQuery(string? Status, string? OwnerType, Guid? OwnerId, Guid? MeetingId, string? Indicator, string? Q);
+    /// One action as the register, My Work and the coordination view read it: the stored action with the meeting, owner, lead and linked item names worked out beside it.
+    public sealed record MeetingActionRow(Guid Id, Guid ProjectId, string? ProjectNumber, string Key, Guid MeetingId, string? MeetingTitle, DateOnly MeetingDate, string Text, string OwnerType,
+        string OwnerTypeLabel, Guid? OwnerUserId, Guid? OwnerDisciplineId, Guid? OwnerExternalPartyId, string? OwnerName, Guid? LeadId, string? LeadName, bool NoLead, bool PartyIsClient,
+        DateOnly? DueDate, bool IsOverdue, int DaysOverdue, string Status, Guid? RelatedTaskId, string? TaskKey, Guid? RelatedDecisionId, string? DecisionKey, bool Converted, int RowVersion);
 
     static readonly string[] OwnerTypes = [ActionOwnerType.User, ActionOwnerType.Discipline, ActionOwnerType.ExternalParty];
     static readonly Col[] ActionCols = Hub.Api.Records.MeetingActionRecord.MeetingsActionCols;
@@ -136,7 +140,7 @@ public static class MeetingEndpoints
 
     // ---------- Actions (FR-002, FR-007) ----------
 
-    public static async Task<List<object>> List(Guid id, [AsParameters] ActionQuery f, Access access, HubDb db, SettingsStore store, TimeProvider clock)
+    public static async Task<List<MeetingActionRow>> List(Guid id, [AsParameters] ActionQuery f, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
         await access.Project(id, track: false);
         var today = clock.Today(await store.Get(db));
@@ -157,7 +161,7 @@ public static class MeetingEndpoints
     }
 
     /// Due date ascending (undated last), then key (§13.13); the screen groups them by meeting.
-    public static async Task<List<object>> Rows(HubDb db, IQueryable<MeetingAction> q, DateOnly today)
+    public static async Task<List<MeetingActionRow>> Rows(HubDb db, IQueryable<MeetingAction> q, DateOnly today)
     {
         var rows = await q.Select(a => new
         {
@@ -180,14 +184,11 @@ public static class MeetingEndpoints
         return [.. rows.OrderBy(r => r.DueDate ?? DateOnly.MaxValue).ThenBy(r => r.Seq).Select(r =>
         {
             var late = Registers.ActionOverdueDays(r.Status, r.DueDate, today);
-            return (object)new
-            {
-                r.Id, r.ProjectId, r.ProjectNumber, r.Key, r.MeetingId, r.MeetingTitle, r.MeetingDate, r.Text, r.OwnerType, OwnerTypeLabel = Text.Get($"opt.{r.OwnerType}"),
-                r.OwnerUserId, r.OwnerDisciplineId, r.OwnerExternalPartyId, OwnerName = r.UserName ?? r.DisciplineName ?? r.PartyName,
-                LeadId = r.LeadId, LeadName = r.LeadId is { } l ? leadNames.GetValueOrDefault(l) : null, NoLead = r.OwnerType == ActionOwnerType.Discipline && r.LeadId is null,
-                r.PartyIsClient, r.DueDate, IsOverdue = late > 0, DaysOverdue = late, r.Status, r.RelatedTaskId, r.TaskKey, r.RelatedDecisionId, r.DecisionKey,
-                r.Converted, r.RowVersion,
-            };
+            return new MeetingActionRow(r.Id, r.ProjectId, r.ProjectNumber, r.Key, r.MeetingId, r.MeetingTitle, r.MeetingDate, r.Text, r.OwnerType, Text.Get($"opt.{r.OwnerType}"),
+                r.OwnerUserId, r.OwnerDisciplineId, r.OwnerExternalPartyId, r.UserName ?? r.DisciplineName ?? r.PartyName,
+                r.LeadId, r.LeadId is { } l ? leadNames.GetValueOrDefault(l) : null, r.OwnerType == ActionOwnerType.Discipline && r.LeadId is null,
+                r.PartyIsClient, r.DueDate, late > 0, late, r.Status, r.RelatedTaskId, r.TaskKey, r.RelatedDecisionId, r.DecisionKey,
+                r.Converted, r.RowVersion);
         })];
     }
 

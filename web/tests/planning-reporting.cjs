@@ -2,6 +2,7 @@
 // API contract and persistence rules remain covered by the server tests.
 const { chromium } = require('playwright')
 const { clientConfig } = require('./config.fixture.cjs')
+const { myWork, myWorkPerson } = require('./my-work.fixture.cjs')
 const assert = require('node:assert/strict')
 const { spawn } = require('node:child_process')
 const path = require('node:path')
@@ -17,7 +18,7 @@ const me = () => ({ id: uid, displayName: readOnly ? 'Read Only' : 'Priya PM', e
   roles: [], systemRoles: readOnly ? ['ReadOnly'] : ['ProjectManager'], capabilities: { createProject: !readOnly, createTask: !readOnly, portfolio: true, workload: true, staff: true, allStaff: true, admin: !readOnly, templates: !readOnly, readOnly, directReports: 0 },
   settings: { today: '2026-10-18', dateFormat: 'yyyy-MM-dd', orgTimeZone: 'America/Halifax', idleTimeoutHours: 8, restrictedProjectsEnabled: false, allowSelfReview: false, taskDueSoonDays: 7, milestoneApproachingDays: 14, chainDepthLimit: 20, defaultWeeklyCapacityHours: 40, coordinationLookaheadWeeks: 4, workingDaysEnabled: true, routeCounterEnabled: routeEnabled },
   preferences: { digestEnabled: true, denseRows: false, weeklySummaryEnabled: true }, flags: { onboarding_card: flagEnabled, route_counter: flagEnabled, project_import: flagEnabled, my_work_follow_up: true, project_status_note: true, template_roles: true } })
-const work = { person: { id: uid, displayName: 'Priya PM', isActive: true }, readOnly: false, today: '2026-10-18', attention: { items: [], total: 0 }, tasks: [], reviews: { tasks: [], deliverables: [] }, deliverables: [], people: {}, successors: [], decisions: [], actions: [], projects: [], milestones: [], completed: [] }
+const work = myWork({ person: myWorkPerson(uid, 'Priya PM'), today: '2026-10-18' })
 const project = { id: pid, projectNumber: 'P-DEMO', name: 'Synthetic project', client: 'Pilot client', pmName: 'Priya PM', pm: { displayName: 'Priya PM' }, office: { name: 'Halifax' }, status: 'Active', visibility: 'Open', rowVersion: 1, links: [], disciplines: [], starred: false, myRoles: ['PM'], health: { computed: 'Green', reported: 'Green', overrideActive: false, reasons: [] }, statusNote: { text: 'Current note', at: '2026-10-17T12:00:00Z', author: 'Priya PM', header: { computedHealth: 'Green', reportedHealth: 'Green', openAttention: 0 } }, permissions: { edit: { ok: true }, needsReason: false, isPm: true, leadOf: [], createTaskIn: [], createDeliverableIn: [], transitions: [] } }
 const template = { id: id(10), familyId: id(11), name: 'Synthetic template', description: 'Browser fixture', status: 'Draft', rowVersion: 1, canEdit: true, family: [], disciplines: [], milestones: [{ ref: 'm1', name: 'Kickoff', milestoneType: 'Kickoff', anchor: 'ProjectStart', offset: 0, isClientFacing: true }], deliverables: [], tasks: [], dependencies: [], roles: [{ ref: 'r1', disciplineId: null, label: 'Project lead', startMilestoneRef: 'm1', startOffsetDays: 0, startOffsetDayKind: 'WorkingDay', endMilestoneRef: null, endOffsetDays: 0, endOffsetDayKind: 'WorkingDay', hours: 8, note: null }], basisSuggestions: [] }
 

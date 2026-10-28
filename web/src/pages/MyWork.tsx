@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { CheckCheck, ChevronDown, Plus } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router'
-import { AttentionRows, type AttentionList } from '@/components/hub/attention'
+import { AttentionRows } from '@/components/hub/attention'
 import { AccentDot, ActiveFilters, ChipToggle, Empty, ErrorBanner, Field, FilterBar, Loading, Page, Section, Segmented, selectCls } from '@/components/hub/common'
 import { NewTaskDialog } from '@/components/hub/new-item'
 import { NotificationItem, useMarkRead, useOpenNotification, type NotificationRow } from '@/components/hub/notifications'
@@ -16,7 +16,9 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
-import { get, qs } from '@/lib/api'
+import type { components } from '@/gen/api'
+import { get, qs, typedRequest } from '@/lib/api'
+import { invalidateChange } from '@/lib/keys'
 import { useMe } from '@/lib/auth-context'
 import { addDays, fmtDate, relative, today } from '@/lib/format'
 import { plural, t, tv , runtimeText } from '@/lib/i18n'
@@ -31,16 +33,10 @@ import { WorkspaceCoordination } from './WorkspaceCoordination'
 import { MyWeekStrip } from '@/components/planner/MyWeekStrip'
 import { OnboardingCard } from '@/components/hub/onboarding'
 
-interface Work {
-  person: { id: string; displayName: string; jobTitle?: string; isActive: boolean }; readOnly: boolean; today: string
-  attention: AttentionList; tasks: TaskRow[]; reviews: { tasks: TaskRow[]; deliverables: DeliverableRow[] }; deliverables: DeliverableRow[]
-  people: Record<string, string>; successors: { id: string; key: string; name: string; status: string; dueDate?: string; assigneeName?: string }[]
-  decisions: { id: string; projectId: string; projectNumber: string; key: string; subject: string; status: string; requiredByDate: string; impactLevel: string; role: string; isOverdue: boolean; isDueSoon: boolean }[]
-  actions: ActionRow[]
-  projects: { id: string; projectNumber: string; name: string; status: string; roles: string[]; leads: string[]; follow?: { level: string; source: string } | null
-    computedHealth: string; reportedHealth: string; nextMilestone?: { id: string; key: string; name: string; date: string } | null }[]
-  milestones: { id: string; projectId: string; projectNumber: string; key: string; name: string; milestoneType: string; date: string; status?: string }[]
-  completed: TaskRow[]
+type MyWorkView = components['schemas']['MyWorkView']
+/** My Work's own shapes come from the contract; the task, deliverable and action rows keep the page types of the files that own them. */
+interface Work extends Omit<MyWorkView, 'tasks' | 'reviews' | 'deliverables' | 'actions' | 'completed'> {
+  tasks: TaskRow[]; reviews: { tasks: TaskRow[]; deliverables: DeliverableRow[] }; deliverables: DeliverableRow[]; actions: ActionRow[]; completed: TaskRow[]
 }
 
 const SORTS = ['due', 'priority', 'project', 'activity']
@@ -136,12 +132,12 @@ function Overview({ focus }: { focus: boolean }) {
   const scope = useScope()
   const keep = (pid?: string | null) => !scope.ids || (!!pid && scope.ids.includes(pid))
   const userId = sp.get('userId') ?? undefined
-  const q = useQuery({ queryKey: ['mywork', userId], queryFn: () => get<Work>(`me/work${qs({ userId })}`) })
+  const q = useQuery({ queryKey: ['mywork', userId], queryFn: async () => (await typedRequest('get', '/api/v1/me/work', { query: { userId } })) as Work })
   const [creating, setCreating] = useState(false)
   const set = (k: string, v?: string) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
   const f = { project: sp.get('project') ?? '', discipline: sp.get('discipline') ?? '', status: sp.get('status') ?? '', priority: sp.get('priority') ?? '',
     from: sp.get('from') ?? '', to: sp.get('to') ?? '', hideWaiting: sp.get('hideWaiting') === '1', sort: sp.get('sort') ?? 'due' }
-  const reload = () => { qc.invalidateQueries({ queryKey: ['mywork'] }) }
+  const reload = () => { invalidateChange(qc, 'Task') }
   const actions = useTaskActions(reload)
   // A section chosen from the view switch: once the data is in, focus it (focusing also scrolls it into view).
   const location = useLocation()
@@ -361,7 +357,7 @@ function TaskView({ tab }: { tab: string }) {
     : tab === 'overdue' ? { overdue: true } : tab === 'nodate' ? { backlog: true } : { status: 'Complete', completedFrom: from, completedTo: to, sort: 'completed:desc' }
   const params = { projects: scope.api, ...whoParams, ...tabParams, pageSize: 200 }
   const q = useQuery({ queryKey: ['mywork-tasks', params], enabled: scope.ready, queryFn: () => get<PageOf<TaskRow>>(`tasks${qs(params)}`) })
-  const actions = useTaskActions(() => { q.refetch(); qc.invalidateQueries({ queryKey: ['mywork'] }) })
+  const actions = useTaskActions(() => { q.refetch(); invalidateChange(qc, 'Task') })
   const lane = useLaneDrop(actions)
   const rows = q.data?.items ?? []
   return (

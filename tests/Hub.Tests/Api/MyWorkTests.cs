@@ -93,4 +93,107 @@ public sealed class MyWorkTests(HubFactory f)
         }
         finally { await Backlog(false); }
     }
+
+    [Fact]
+    public async Task Work_staff_and_assignments_keep_their_property_names_order_nulls_and_nesting() // the typed records must serialise to the bytes My Work and My Staff already read
+    {
+        var p = await d.Project(); var quiet = await d.Project(); var pm = f.As(TestData.Pm);
+        var alex = d.User(TestData.Alex); var marc = d.User(TestData.Marc);
+        Task<JsonNode> Add(object extra) => d.NewTask(p.Id, TestData.Pm, extra);
+        await Add(new { name = "Soon", assigneeId = alex, dueDate = In(3) });
+        var predecessor = await Add(new { name = "Their work", assigneeId = d.User(TestData.Jill), dueDate = In(-1) });
+        await Add(new { name = "Waiting", assigneeId = alex, dueDate = In(5), dependsOn = new[] { predecessor.G("id") } });
+        var blocking = await Add(new { name = "Holds others", assigneeId = alex, dueDate = In(4) });
+        var successor = await Add(new { name = "Waits on Alex", assigneeId = marc, dependsOn = new[] { blocking.G("id") } });
+        var shared = await Add(new { name = "Shared", assigneeId = marc });
+        (await pm.Post($"/api/v1/tasks/{shared.S("id")}/collaborators", new { userId = alex })).EnsureSuccessStatusCode();
+        var late = await Add(new { name = "Overdue", assigneeId = alex, dueDate = In(-3) });
+        var review = await Add(new { name = "Check my markup", assigneeId = marc, reviewerId = alex, requiresReview = true });
+        await d.Move(TestData.Marc, review, TaskStatuses.InProgress); await d.Move(TestData.Marc, review, TaskStatuses.ReadyForReview);
+        var done = await Add(new { name = "Finished", assigneeId = alex, requiresReview = false });
+        await d.Move(TestData.Alex, done, TaskStatuses.InProgress); await d.Move(TestData.Alex, done, TaskStatuses.Complete);
+        async Task<JsonNode> Deliverable(string name, Guid owner, Guid? reviewer = null) => await f.As(TestData.Marc).Post($"/api/v1/projects/{p.Id}/deliverables",
+            new { name, projectDisciplineId = d.ProjectDiscipline(p.Id, "Civil"), deliverableTypeId = await d.DeliverableType(), ownerId = owner, reviewerId = reviewer, dueDate = In(6) }).Result.Json(201);
+        var owned = await Deliverable("Owned", alex); var inReview = await Deliverable("In review", marc, alex);
+        await f.DbAsync(db => db.Deliverables.Where(x => x.Id == inReview.G("id")).ExecuteUpdateAsync(x => x.SetProperty(y => y.Status, DeliverableStatus.InReview)));
+        var decision = await pm.Post($"/api/v1/projects/{p.Id}/decisions", new { subject = "Pick the outfall", description = "Options", ownerUserId = alex, requiredByDate = In(2),
+            impactLevel = "High", impactDescription = "Drawings wait" }).Result.Json(201);
+        var meeting = await pm.Post($"/api/v1/projects/{p.Id}/meetings", new { title = "Coordination", meetingDate = In(0), meetingType = "Coordination" }).Result.Json(201);
+        var action = await pm.Post($"/api/v1/meetings/{meeting.S("id")}/actions", new { text = "Send the survey", ownerType = "User", ownerUserId = alex, dueDate = In(1) }).Result.Json(201);
+        var milestone = await pm.Post($"/api/v1/projects/{p.Id}/milestones", new { name = "60% Submission", milestoneType = "Design Submission", date = In(10) }).Result.Json(201);
+        await f.Evaluate(p.Id); await f.Evaluate(quiet.Id);
+
+        var work = await f.As(TestData.Alex).GetAsync("/api/v1/me/work").Result.Json();
+        Assert.Equal(["person", "readOnly", "today", "attention", "tasks", "reviews", "deliverables", "people", "successors", "decisions", "actions", "projects", "milestones", "completed"],
+            work.AsObject().Select(x => x.Key));
+        Assert.Equal(["id", "displayName", "jobTitle", "isActive"], work["person"]!.AsObject().Select(x => x.Key));
+        Assert.Equal(("Alex Chen", false, In(0)), (work["person"]!.S("displayName"), work["readOnly"]!.GetValue<bool>(), work.S("today")));
+        Assert.Equal(["items", "snoozed", "total", "truncated"], work["attention"]!.AsObject().Select(x => x.Key));
+        Assert.Contains(work["attention"]!["items"]!.AsArray(), x => x!.G("itemId") == late.G("id"));
+        JsonNode[] Here(JsonNode? rows) => [.. rows!.AsArray().Where(x => x!.G("projectId") == p.Id)!]; // other tests leave Alex work on their own projects
+        var tasks = Here(work["tasks"]); Assert.Equal(5, tasks.Length); // assignee on four open ones, collaborator on one
+        Assert.Contains(tasks, x => x!.G("id") == shared.G("id"));
+        Assert.Equal(["tasks", "deliverables"], work["reviews"]!.AsObject().Select(x => x.Key));
+        Assert.Equal(review.G("id"), Assert.Single(Here(work["reviews"]!["tasks"]))!.G("id"));
+        Assert.Equal(inReview.G("id"), Assert.Single(Here(work["reviews"]!["deliverables"]))!.G("id"));
+        Assert.Equal(owned.G("id"), Assert.Single(Here(work["deliverables"]))!.G("id"));
+        Assert.Equal(done.G("id"), Assert.Single(Here(work["completed"]))!.G("id"));
+        Assert.Equal("Jill Martin", work["people"]![d.User(TestData.Jill).ToString()]!.GetValue<string>()); // the object is keyed by person id
+        var waiting = work["successors"]!.AsArray().Single(x => x!.G("id") == successor.G("id"))!;
+        Assert.Equal(["id", "key", "name", "status", "dueDate", "assigneeName"], waiting.AsObject().Select(x => x.Key));
+        Assert.Equal((successor.G("id"), "Marc Dubois"), (waiting.G("id"), waiting.S("assigneeName"))); Assert.Null(waiting["dueDate"]); // null, not omitted
+        var decided = Assert.Single(Here(work["decisions"]))!;
+        Assert.Equal(["id", "projectId", "projectNumber", "key", "subject", "status", "requiredByDate", "impactLevel", "role", "isOverdue", "isDueSoon"], decided.AsObject().Select(x => x.Key));
+        Assert.Equal((decision.G("id"), p.ProjectNumber, "Owner", In(2), "High"), (decided.G("id"), decided.S("projectNumber"), decided.S("role"), decided.S("requiredByDate"), decided.S("impactLevel")));
+        var agreed = Assert.Single(Here(work["actions"]))!;
+        Assert.Equal(["id", "projectId", "projectNumber", "key", "meetingId", "meetingTitle", "meetingDate", "text", "ownerType", "ownerTypeLabel", "ownerUserId", "ownerDisciplineId",
+            "ownerExternalPartyId", "ownerName", "leadId", "leadName", "noLead", "partyIsClient", "dueDate", "isOverdue", "daysOverdue", "status", "relatedTaskId", "taskKey",
+            "relatedDecisionId", "decisionKey", "converted", "rowVersion"], agreed.AsObject().Select(x => x.Key));
+        Assert.Equal((action.G("id"), "Alex Chen", "Coordination", In(1)), (agreed.G("id"), agreed.S("ownerName"), agreed.S("meetingTitle"), agreed.S("dueDate"))); Assert.Null(agreed["ownerDisciplineId"]);
+        var projects = work["projects"]!.AsArray(); Assert.Equal(2, projects.Count(x => x!.G("id") == p.Id || x.G("id") == quiet.Id));
+        var mine = projects.Single(x => x!.G("id") == p.Id)!;
+        Assert.Equal(["id", "projectNumber", "name", "status", "roles", "leads", "follow", "computedHealth", "reportedHealth", "nextMilestone"], mine.AsObject().Select(x => x.Key));
+        Assert.Equal(["level", "source"], mine["follow"]!.AsObject().Select(x => x.Key)); Assert.Equal(FollowLevel.AllActivity, mine["follow"]!.S("level"));
+        Assert.Equal(["id", "key", "name", "date"], mine["nextMilestone"]!.AsObject().Select(x => x.Key));
+        Assert.Equal((milestone.G("id"), In(10)), (mine["nextMilestone"]!.G("id"), mine["nextMilestone"]!.S("date")));
+        Assert.Equal("Active", mine.S("status")); Assert.Equal(mine.S("computedHealth"), mine.S("reportedHealth")); Assert.NotEqual(Health.Grey, mine.S("computedHealth")); // an active project shows its computed health
+        Assert.Empty(mine["leads"]!.AsArray()); Assert.Equal([ProjectRole.TeamMember], mine["roles"]!.AsArray().Select(x => x!.GetValue<string>()));
+        Assert.Null(projects.Single(x => x!.G("id") == quiet.Id)!["nextMilestone"]); // null, not omitted
+        var due = Assert.Single(work["milestones"]!.AsArray(), x => x!.G("id") == milestone.G("id"))!;
+        Assert.Equal(["id", "projectId", "projectNumber", "key", "name", "milestoneType", "date", "status"], due.AsObject().Select(x => x.Key));
+        Assert.Equal(("Design Submission", "60% Submission"), (due.S("milestoneType"), due.S("name")));
+
+        var lead = (await f.As(TestData.Marc).GetAsync("/api/v1/me/work").Result.Json())["projects"]!.AsArray().Single(x => x!.G("id") == p.Id)!;
+        Assert.Equal(["Civil"], lead["leads"]!.AsArray().Select(x => x!.GetValue<string>())); Assert.Contains("DisciplineLead", lead["roles"]!.AsArray().Select(x => x!.GetValue<string>()));
+        var seen = await f.As(TestData.Sam).GetAsync($"/api/v1/me/work?userId={alex}").Result.Json(); // Sam supervises Alex
+        Assert.True(seen["readOnly"]!.GetValue<bool>());
+        Assert.Equal(work.AsObject().Select(x => x.Key), seen.AsObject().Select(x => x.Key));
+
+        var sam = f.As(TestData.Sam);
+        var staff = await sam.GetAsync($"/api/v1/staff?projectId={p.Id}").Result.Json();
+        Assert.Equal(["scope", "canSeeAll", "tiles", "people"], staff.AsObject().Select(x => x.Key));
+        Assert.Equal(("direct", false), (staff.S("scope"), staff["canSeeAll"]!.GetValue<bool>()));
+        Assert.Equal(["staff", "assignments", "withOverdue", "withBlocked", "reviewsStalled"], staff["tiles"]!.AsObject().Select(x => x.Key));
+        var row = staff["people"]!.AsArray().Single(x => x!.G("id") == alex)!;
+        Assert.Equal(["id", "displayName", "jobTitle", "officeId", "isActive", "projects", "roles", "open", "overdue", "blocked", "blocking", "reviews", "reviewsStalled", "deliverablesDue", "lastActivityAt"],
+            row.AsObject().Select(x => x.Key));
+        Assert.Equal(["pm", "dl", "team", "reviewer", "viewer"], row["roles"]!.AsObject().Select(x => x.Key));
+        Assert.True(row["roles"]!.I("team") >= 2); Assert.True(row.I("deliverablesDue") >= 1); Assert.True(row.I("blocking") >= 1); Assert.NotNull(row["lastActivityAt"]);
+        Assert.Equal(staff["people"]!.AsArray().Count, staff["tiles"]!.I("staff"));
+
+        var rows = (await sam.GetAsync($"/api/v1/staff/{alex}/assignments").Result.Json()).AsArray();
+        var assignment = rows.Single(x => x!.G("projectId") == p.Id)!;
+        Assert.Equal(["memberId", "rowVersion", "projectId", "projectNumber", "name", "status", "reportedHealth", "roles", "leads", "primaryDiscipline", "addedAt", "open", "overdue", "nextDue", "canRemove"],
+            assignment.AsObject().Select(x => x.Key));
+        Assert.Equal((p.ProjectNumber, "Active", 4, 1, true), (assignment.S("projectNumber"), assignment.S("status"), assignment.I("open"), assignment.I("overdue"), assignment["canRemove"]!.GetValue<bool>()));
+        Assert.Equal([ProjectRole.TeamMember], assignment["roles"]!.AsArray().Select(x => x!.GetValue<string>()));
+        Assert.Equal(["id", "key", "name", "dueDate"], assignment["nextDue"]!.AsObject().Select(x => x.Key));
+        Assert.Equal((late.G("id"), In(-3)), (assignment["nextDue"]!.G("id"), assignment["nextDue"]!.S("dueDate")));
+        Assert.Null(rows.Single(x => x!.G("projectId") == quiet.Id)!["nextDue"]); // null, not omitted
+        var leading = (await f.As(TestData.Lena).GetAsync($"/api/v1/staff/{marc}/assignments?scope=all").Result.Json()).AsArray().Single(x => x!.G("projectId") == p.Id)!;
+        Assert.Equal(["Civil"], leading["leads"]!.AsArray().Select(x => x!.GetValue<string>())); Assert.Contains("DisciplineLead", leading["roles"]!.AsArray().Select(x => x!.GetValue<string>()));
+        Assert.False(leading["canRemove"]!.GetValue<bool>());
+        // Alex is Sam's report: a review left waiting would be counted as stalled by a later evaluation under another test's clock.
+        await f.DbAsync(db => db.Tasks.Where(x => x.Id == review.G("id")).ExecuteUpdateAsync(x => x.SetProperty(y => y.Status, TaskStatuses.Cancelled)));
+    }
 }

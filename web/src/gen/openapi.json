@@ -7756,6 +7756,506 @@
         ],
         "type": "object"
       },
+      "DeliverableRow": {
+        "properties": {
+          "baselineDueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "baselineSlipShown": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "baselineStartDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "canRebaseline": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "deliverableTypeId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "disciplineColour": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "disciplineName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "disciplineOrder": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "dueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "issuedDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "issuedTo": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "key": {
+            "type": "string"
+          },
+          "lastActivityAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "milestoneDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "milestoneId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "milestoneKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "milestoneName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "originalDueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "originalStartDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "ownerActive": {
+            "type": "boolean"
+          },
+          "ownerId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "ownerName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "priority": {
+            "type": "string"
+          },
+          "projectDisciplineId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "requiredReviewPackageId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "requiresReview": {
+            "type": "boolean"
+          },
+          "reviewerId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "reviewerName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "revision": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "sinceBaselineDays": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "slipShown": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "startDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "state": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/DeliverableStateRead"
+              }
+            ]
+          },
+          "status": {
+            "type": "string"
+          },
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/DeliverableTaskRead"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "typeName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "projectId",
+          "key",
+          "name",
+          "projectDisciplineId",
+          "deliverableTypeId",
+          "ownerId",
+          "reviewerId",
+          "milestoneId",
+          "startDate",
+          "dueDate",
+          "originalDueDate",
+          "originalStartDate",
+          "priority",
+          "status",
+          "revision",
+          "issuedDate",
+          "issuedTo",
+          "requiresReview",
+          "requiredReviewPackageId",
+          "rowVersion",
+          "createdAt",
+          "lastActivityAt",
+          "disciplineName",
+          "disciplineColour",
+          "disciplineOrder",
+          "typeName",
+          "ownerName",
+          "ownerActive",
+          "reviewerName",
+          "milestoneKey",
+          "milestoneName",
+          "milestoneDate",
+          "state",
+          "tasks",
+          "slipShown"
+        ],
+        "type": "object"
+      },
+      "DeliverableStateRead": {
+        "properties": {
+          "atRiskReasons": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/JsonElement"
+              }
+            ]
+          },
+          "blockedBy": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/JsonElement"
+              }
+            ]
+          },
+          "blockingCount": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "daysOverdue": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "derivedPredecessorIds": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "derivedSuccessorIds": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "estimatedHoursTotal": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "inconsistencyDetail": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/JsonElement"
+              }
+            ]
+          },
+          "isAtRisk": {
+            "type": "boolean"
+          },
+          "isBlocked": {
+            "type": "boolean"
+          },
+          "isDateInconsistent": {
+            "type": "boolean"
+          },
+          "isDueSoon": {
+            "type": "boolean"
+          },
+          "isInactiveOwner": {
+            "type": "boolean"
+          },
+          "isOverdue": {
+            "type": "boolean"
+          },
+          "isStale": {
+            "type": "boolean"
+          },
+          "isUnassigned": {
+            "type": "boolean"
+          },
+          "isWaiting": {
+            "type": "boolean"
+          },
+          "issuedWithOpenWork": {
+            "type": "boolean"
+          },
+          "milestoneCancelled": {
+            "type": "boolean"
+          },
+          "progressPct": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "remainingHours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "slipDays": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "taskBlocked": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "taskCancelled": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "taskComplete": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "taskOpen": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "taskOverdue": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "taskTotal": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "progressPct",
+          "taskTotal",
+          "taskComplete",
+          "taskCancelled",
+          "taskOpen",
+          "taskOverdue",
+          "taskBlocked",
+          "estimatedHoursTotal",
+          "remainingHours",
+          "isOverdue",
+          "daysOverdue",
+          "isDueSoon",
+          "isAtRisk",
+          "atRiskReasons",
+          "isUnassigned",
+          "isStale",
+          "isDateInconsistent",
+          "inconsistencyDetail",
+          "slipDays",
+          "isInactiveOwner",
+          "issuedWithOpenWork",
+          "milestoneCancelled",
+          "isWaiting",
+          "isBlocked",
+          "blockedBy",
+          "blockingCount",
+          "derivedPredecessorIds",
+          "derivedSuccessorIds"
+        ],
+        "type": "object"
+      },
+      "DeliverableTaskRead": {
+        "properties": {
+          "assignee": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "deliverableId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "status",
+          "dueDate",
+          "deliverableId",
+          "assignee"
+        ],
+        "type": "object"
+      },
       "DeliverableTransitionBody": {
         "properties": {
           "comment": {
@@ -11428,6 +11928,179 @@
         ],
         "type": "object"
       },
+      "MeetingActionRow": {
+        "properties": {
+          "converted": {
+            "type": "boolean"
+          },
+          "daysOverdue": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "decisionKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isOverdue": {
+            "type": "boolean"
+          },
+          "key": {
+            "type": "string"
+          },
+          "leadId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "leadName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "meetingDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "meetingId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "meetingTitle": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "noLead": {
+            "type": "boolean"
+          },
+          "ownerDisciplineId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "ownerExternalPartyId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "ownerName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "ownerType": {
+            "type": "string"
+          },
+          "ownerTypeLabel": {
+            "type": "string"
+          },
+          "ownerUserId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "partyIsClient": {
+            "type": "boolean"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "relatedDecisionId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "relatedTaskId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "taskKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "projectId",
+          "projectNumber",
+          "key",
+          "meetingId",
+          "meetingTitle",
+          "meetingDate",
+          "text",
+          "ownerType",
+          "ownerTypeLabel",
+          "ownerUserId",
+          "ownerDisciplineId",
+          "ownerExternalPartyId",
+          "ownerName",
+          "leadId",
+          "leadName",
+          "noLead",
+          "partyIsClient",
+          "dueDate",
+          "isOverdue",
+          "daysOverdue",
+          "status",
+          "relatedTaskId",
+          "taskKey",
+          "relatedDecisionId",
+          "decisionKey",
+          "converted",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
       "MeetingBody": {
         "properties": {
           "calendarEventId": {
@@ -11715,6 +12388,703 @@
           "category",
           "count",
           "commitments"
+        ],
+        "type": "object"
+      },
+      "MyStaffAssignment": {
+        "properties": {
+          "addedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "canRemove": {
+            "type": "boolean"
+          },
+          "leads": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "memberId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "nextDue": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/MyStaffNextDue"
+              }
+            ]
+          },
+          "open": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "overdue": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "primaryDiscipline": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "reportedHealth": {
+            "type": "string"
+          },
+          "roles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "memberId",
+          "rowVersion",
+          "projectId",
+          "projectNumber",
+          "name",
+          "status",
+          "reportedHealth",
+          "roles",
+          "leads",
+          "primaryDiscipline",
+          "addedAt",
+          "open",
+          "overdue",
+          "nextDue",
+          "canRemove"
+        ],
+        "type": "object"
+      },
+      "MyStaffList": {
+        "properties": {
+          "canSeeAll": {
+            "type": "boolean"
+          },
+          "people": {
+            "items": {
+              "$ref": "#/components/schemas/MyStaffPerson"
+            },
+            "type": "array"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "tiles": {
+            "$ref": "#/components/schemas/MyStaffTiles"
+          }
+        },
+        "required": [
+          "scope",
+          "canSeeAll",
+          "tiles",
+          "people"
+        ],
+        "type": "object"
+      },
+      "MyStaffNextDue": {
+        "properties": {
+          "dueDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "dueDate"
+        ],
+        "type": "object"
+      },
+      "MyStaffPerson": {
+        "properties": {
+          "blocked": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "blocking": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "deliverablesDue": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "jobTitle": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "lastActivityAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "officeId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "open": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "overdue": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "projects": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "reviews": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "reviewsStalled": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "roles": {
+            "$ref": "#/components/schemas/MyStaffRoles"
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "jobTitle",
+          "officeId",
+          "isActive",
+          "projects",
+          "roles",
+          "open",
+          "overdue",
+          "blocked",
+          "blocking",
+          "reviews",
+          "reviewsStalled",
+          "deliverablesDue",
+          "lastActivityAt"
+        ],
+        "type": "object"
+      },
+      "MyStaffRoles": {
+        "properties": {
+          "dl": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "pm": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "reviewer": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "team": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "viewer": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "pm",
+          "dl",
+          "team",
+          "reviewer",
+          "viewer"
+        ],
+        "type": "object"
+      },
+      "MyStaffTiles": {
+        "properties": {
+          "assignments": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "reviewsStalled": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "staff": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "withBlocked": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "withOverdue": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "staff",
+          "assignments",
+          "withOverdue",
+          "withBlocked",
+          "reviewsStalled"
+        ],
+        "type": "object"
+      },
+      "MyWorkDecision": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "impactLevel": {
+            "type": "string"
+          },
+          "isDueSoon": {
+            "type": "boolean"
+          },
+          "isOverdue": {
+            "type": "boolean"
+          },
+          "key": {
+            "type": "string"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "requiredByDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "projectId",
+          "projectNumber",
+          "key",
+          "subject",
+          "status",
+          "requiredByDate",
+          "impactLevel",
+          "role",
+          "isOverdue",
+          "isDueSoon"
+        ],
+        "type": "object"
+      },
+      "MyWorkFollow": {
+        "properties": {
+          "level": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "level",
+          "source"
+        ],
+        "type": "object"
+      },
+      "MyWorkMilestone": {
+        "properties": {
+          "date": {
+            "format": "date",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "milestoneType": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "status": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "projectId",
+          "projectNumber",
+          "key",
+          "name",
+          "milestoneType",
+          "date",
+          "status"
+        ],
+        "type": "object"
+      },
+      "MyWorkNextMilestone": {
+        "properties": {
+          "date": {
+            "format": "date",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "date"
+        ],
+        "type": "object"
+      },
+      "MyWorkPerson": {
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "jobTitle": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "jobTitle",
+          "isActive"
+        ],
+        "type": "object"
+      },
+      "MyWorkProject": {
+        "properties": {
+          "computedHealth": {
+            "type": "string"
+          },
+          "follow": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/MyWorkFollow"
+              }
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "leads": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          },
+          "nextMilestone": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/MyWorkNextMilestone"
+              }
+            ]
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "reportedHealth": {
+            "type": "string"
+          },
+          "roles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "projectNumber",
+          "name",
+          "status",
+          "roles",
+          "leads",
+          "follow",
+          "computedHealth",
+          "reportedHealth",
+          "nextMilestone"
+        ],
+        "type": "object"
+      },
+      "MyWorkReviews": {
+        "properties": {
+          "deliverables": {
+            "items": {
+              "$ref": "#/components/schemas/DeliverableRow"
+            },
+            "type": "array"
+          },
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/TaskQueriesRow"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "tasks",
+          "deliverables"
+        ],
+        "type": "object"
+      },
+      "MyWorkSuccessor": {
+        "properties": {
+          "assigneeName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "status",
+          "dueDate",
+          "assigneeName"
+        ],
+        "type": "object"
+      },
+      "MyWorkView": {
+        "properties": {
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/MeetingActionRow"
+            },
+            "type": "array"
+          },
+          "attention": {
+            "$ref": "#/components/schemas/AttentionList"
+          },
+          "completed": {
+            "items": {
+              "$ref": "#/components/schemas/TaskQueriesRow"
+            },
+            "type": "array"
+          },
+          "decisions": {
+            "items": {
+              "$ref": "#/components/schemas/MyWorkDecision"
+            },
+            "type": "array"
+          },
+          "deliverables": {
+            "items": {
+              "$ref": "#/components/schemas/DeliverableRow"
+            },
+            "type": "array"
+          },
+          "milestones": {
+            "items": {
+              "$ref": "#/components/schemas/MyWorkMilestone"
+            },
+            "type": "array"
+          },
+          "people": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "person": {
+            "$ref": "#/components/schemas/MyWorkPerson"
+          },
+          "projects": {
+            "items": {
+              "$ref": "#/components/schemas/MyWorkProject"
+            },
+            "type": "array"
+          },
+          "readOnly": {
+            "type": "boolean"
+          },
+          "reviews": {
+            "$ref": "#/components/schemas/MyWorkReviews"
+          },
+          "successors": {
+            "items": {
+              "$ref": "#/components/schemas/MyWorkSuccessor"
+            },
+            "type": "array"
+          },
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/TaskQueriesRow"
+            },
+            "type": "array"
+          },
+          "today": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "person",
+          "readOnly",
+          "today",
+          "attention",
+          "tasks",
+          "reviews",
+          "deliverables",
+          "people",
+          "successors",
+          "decisions",
+          "actions",
+          "projects",
+          "milestones",
+          "completed"
         ],
         "type": "object"
       },
@@ -27273,7 +28643,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/MyWorkView"
+                }
               }
             },
             "description": "OK"
@@ -30176,6 +31548,9 @@
             "content": {
               "application/json": {
                 "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MeetingActionRow"
+                  },
                   "type": "array"
                 }
               }
@@ -39017,7 +40392,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/MyStaffList"
+                }
               }
             },
             "description": "OK"
@@ -39052,7 +40429,12 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MyStaffAssignment"
+                  },
+                  "type": "array"
+                }
               }
             },
             "description": "OK"

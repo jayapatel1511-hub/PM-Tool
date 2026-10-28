@@ -4508,6 +4508,681 @@
         ],
         "type": "object"
       },
+      "CoordinationBlockerGroup": {
+        "properties": {
+          "handoffId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "handoffKey": {
+            "type": "string"
+          },
+          "taskIds": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "taskKeys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "handoffId",
+          "handoffKey",
+          "taskIds",
+          "taskKeys"
+        ],
+        "type": "object"
+      },
+      "CoordinationChangeRow": {
+        "properties": {
+          "acknowledgedPending": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "ownerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "pendingAssessments": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "projectPending": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "title",
+          "status",
+          "ownerId",
+          "pendingAssessments",
+          "acknowledgedPending",
+          "projectPending"
+        ],
+        "type": "object"
+      },
+      "CoordinationChangeTarget": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "changeNoticeId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "targetId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "targetType": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "changeNoticeId",
+          "targetType",
+          "targetId",
+          "available"
+        ],
+        "type": "object"
+      },
+      "CoordinationHandoffRow": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "neededBy": {
+            "format": "date",
+            "type": "string"
+          },
+          "promisedBy": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "receivingDisciplineId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "receivingOwnerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "sendingDisciplineId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "sendingOwnerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "targetDeliverableId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "targetTaskId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "title",
+          "status",
+          "neededBy",
+          "promisedBy",
+          "targetTaskId",
+          "targetDeliverableId",
+          "sendingOwnerId",
+          "receivingOwnerId",
+          "sendingDisciplineId",
+          "receivingDisciplineId"
+        ],
+        "type": "object"
+      },
+      "CoordinationInputUseRow": {
+        "properties": {
+          "adoptedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "adoptedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "intendedUse": {
+            "type": "string"
+          },
+          "ownerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "revision": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "sourceIdentity": {
+            "type": "string"
+          },
+          "sourceKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "sourceRevisionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "sourceUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "targetId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "targetKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "targetName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "targetType": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "targetType",
+          "targetId",
+          "ownerId",
+          "sourceIdentity",
+          "sourceRevisionId",
+          "intendedUse",
+          "adoptedAt",
+          "adoptedBy",
+          "rowVersion",
+          "targetKey",
+          "targetName",
+          "sourceUrl",
+          "sourceKey",
+          "revision"
+        ],
+        "type": "object"
+      },
+      "CoordinationIssueRow": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "ownerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ownerName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectDisciplineId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "title",
+          "status",
+          "ownerId",
+          "ownerName",
+          "projectDisciplineId"
+        ],
+        "type": "object"
+      },
+      "CoordinationLinkedAction": {
+        "properties": {
+          "dueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "sourceId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "text",
+          "status",
+          "dueDate",
+          "sourceType",
+          "sourceId"
+        ],
+        "type": "object"
+      },
+      "CoordinationProjection": {
+        "properties": {
+          "blockerGroups": {
+            "items": {
+              "$ref": "#/components/schemas/CoordinationBlockerGroup"
+            },
+            "type": "array"
+          },
+          "blockerGroupsPage": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "blockerGroupsTotal": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "changeTargets": {
+            "items": {
+              "$ref": "#/components/schemas/CoordinationChangeTarget"
+            },
+            "type": "array"
+          },
+          "changeTargetsTotal": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "changes": {
+            "items": {
+              "$ref": "#/components/schemas/CoordinationChangeRow"
+            },
+            "type": "array"
+          },
+          "changesPage": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "changesPageSize": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "changesTotal": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "evaluatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "handoffPage": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "handoffPageSize": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "handoffs": {
+            "items": {
+              "$ref": "#/components/schemas/CoordinationHandoffRow"
+            },
+            "type": "array"
+          },
+          "handoffsTotal": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "incoming": {
+            "items": {
+              "$ref": "#/components/schemas/CoordinationHandoffRow"
+            },
+            "type": "array"
+          },
+          "incomingPage": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "incomingTotal": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "linkedActions": {
+            "items": {
+              "$ref": "#/components/schemas/CoordinationLinkedAction"
+            },
+            "type": "array"
+          },
+          "linkedActionsTotal": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "linkedIssues": {
+            "items": {
+              "$ref": "#/components/schemas/CoordinationIssueRow"
+            },
+            "type": "array"
+          },
+          "linkedIssuesPage": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "linkedIssuesPageSize": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "linkedIssuesTotal": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "outgoing": {
+            "items": {
+              "$ref": "#/components/schemas/CoordinationHandoffRow"
+            },
+            "type": "array"
+          },
+          "outgoingPage": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "outgoingTotal": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "page": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "pageSize": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "reviews": {
+            "items": {
+              "$ref": "#/components/schemas/CoordinationReviewRow"
+            },
+            "type": "array"
+          },
+          "reviewsPage": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "reviewsPageSize": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "reviewsTotal": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "staffingConflicts": {
+            "items": {
+              "$ref": "#/components/schemas/StaffingContextRow"
+            },
+            "type": "array"
+          },
+          "staffingConflictsPage": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "staffingConflictsTotal": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "startability": {
+            "items": {
+              "$ref": "#/components/schemas/StartabilityRow"
+            },
+            "type": "array"
+          },
+          "startabilityFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "startabilityPage": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "startabilityPageSize": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "startabilityReadyTotal": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "startabilityTo": {
+            "format": "date",
+            "type": "string"
+          },
+          "startabilityTotal": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "unavailableChangeTargets": {
+            "items": {
+              "$ref": "#/components/schemas/CoordinationUnavailableTarget"
+            },
+            "type": "array"
+          },
+          "unavailableChangeTargetsTotal": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "upcomingSubmissions": {
+            "items": {
+              "$ref": "#/components/schemas/SubmissionContextRow"
+            },
+            "type": "array"
+          },
+          "upcomingSubmissionsPage": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "upcomingSubmissionsTotal": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "uses": {
+            "items": {
+              "$ref": "#/components/schemas/CoordinationInputUseRow"
+            },
+            "type": "array"
+          },
+          "usesPage": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "usesPageSize": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "usesTotal": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "evaluatedAt",
+          "handoffs",
+          "outgoing",
+          "incoming",
+          "outgoingPage",
+          "incomingPage",
+          "outgoingTotal",
+          "incomingTotal",
+          "handoffPage",
+          "handoffPageSize",
+          "changeTargets",
+          "unavailableChangeTargets",
+          "changeTargetsTotal",
+          "unavailableChangeTargetsTotal",
+          "reviews",
+          "reviewsPage",
+          "reviewsPageSize",
+          "uses",
+          "usesTotal",
+          "usesPage",
+          "usesPageSize",
+          "linkedIssues",
+          "linkedIssuesTotal",
+          "linkedIssuesPage",
+          "linkedIssuesPageSize",
+          "handoffsTotal",
+          "changes",
+          "changesTotal",
+          "changesPage",
+          "changesPageSize",
+          "reviewsTotal",
+          "blockerGroups",
+          "blockerGroupsTotal",
+          "startability",
+          "startabilityTotal",
+          "startabilityPage",
+          "startabilityPageSize",
+          "startabilityFrom",
+          "startabilityTo",
+          "startabilityReadyTotal",
+          "linkedActions",
+          "linkedActionsTotal",
+          "upcomingSubmissions",
+          "upcomingSubmissionsTotal",
+          "upcomingSubmissionsPage",
+          "staffingConflicts",
+          "staffingConflictsTotal",
+          "staffingConflictsPage",
+          "blockerGroupsPage",
+          "page",
+          "pageSize"
+        ],
+        "type": "object"
+      },
       "CoordinationResult": {
         "properties": {
           "id": {
@@ -4523,6 +5198,65 @@
         "required": [
           "id",
           "rowVersion"
+        ],
+        "type": "object"
+      },
+      "CoordinationReviewRow": {
+        "properties": {
+          "blockingFindings": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "coordinatorId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "outstandingDisciplines": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "title",
+          "status",
+          "coordinatorId",
+          "outstandingDisciplines",
+          "blockingFindings"
+        ],
+        "type": "object"
+      },
+      "CoordinationUnavailableTarget": {
+        "properties": {
+          "changeNoticeId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "count": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "changeNoticeId",
+          "count"
         ],
         "type": "object"
       },
@@ -14075,6 +14809,54 @@
         ],
         "type": "object"
       },
+      "StaffingContextRow": {
+        "properties": {
+          "affectedOwnerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "neededBy": {
+            "format": "date",
+            "type": "string"
+          },
+          "removalOwnerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "targetId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "targetType": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "targetType",
+          "targetId",
+          "description",
+          "neededBy",
+          "state",
+          "affectedOwnerId",
+          "removalOwnerId"
+        ],
+        "type": "object"
+      },
       "StartAuthorisationView": {
         "properties": {
           "authorisedBy": {
@@ -14130,6 +14912,74 @@
           "requestId",
           "rowVersion",
           "reason"
+        ],
+        "type": "object"
+      },
+      "StartabilityRow": {
+        "properties": {
+          "blocked": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "disciplineId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "dueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "state": {
+            "type": "string"
+          },
+          "targetId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "targetType": {
+            "type": "string"
+          },
+          "unknown": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "targetType",
+          "targetId",
+          "key",
+          "name",
+          "dueDate",
+          "ownerId",
+          "disciplineId",
+          "state",
+          "blocked",
+          "unknown"
         ],
         "type": "object"
       },
@@ -14622,6 +15472,51 @@
         ],
         "type": "object"
       },
+      "SubmissionContextRow": {
+        "properties": {
+          "coordinatorId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "effectiveStatus": {
+            "type": "string"
+          },
+          "failingChecks": {
+            "items": {
+              "$ref": "#/components/schemas/SubmissionFailingCheck"
+            },
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "targetDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "title",
+          "status",
+          "effectiveStatus",
+          "targetDate",
+          "coordinatorId",
+          "failingChecks"
+        ],
+        "type": "object"
+      },
       "SubmissionCreateBody": {
         "properties": {
           "coordinatorId": {
@@ -14885,6 +15780,40 @@
           "updatedBy",
           "rowVersion",
           "id"
+        ],
+        "type": "object"
+      },
+      "SubmissionFailingCheck": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "sourceId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "sourcePath": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "sourceId",
+          "kind",
+          "code",
+          "message",
+          "sourcePath"
         ],
         "type": "object"
       },
@@ -18672,6 +19601,144 @@
         ],
         "type": "object"
       },
+      "WorkspaceCoordinationProject": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/CoordinationProjection"
+          },
+          "disciplineId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "projectNumber",
+          "name",
+          "disciplineId",
+          "data"
+        ],
+        "type": "object"
+      },
+      "WorkspaceCoordinationProjection": {
+        "properties": {
+          "actorId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "disciplines": {
+            "items": {
+              "$ref": "#/components/schemas/WorkspaceDisciplineChoice"
+            },
+            "type": "array"
+          },
+          "evaluatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "owners": {
+            "items": {
+              "$ref": "#/components/schemas/WorkspaceOwnerChoice"
+            },
+            "type": "array"
+          },
+          "projectChoices": {
+            "items": {
+              "$ref": "#/components/schemas/WorkspaceProjectChoice"
+            },
+            "type": "array"
+          },
+          "projects": {
+            "items": {
+              "$ref": "#/components/schemas/WorkspaceCoordinationProject"
+            },
+            "type": "array"
+          },
+          "scope": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "evaluatedAt",
+          "actorId",
+          "projects",
+          "projectChoices",
+          "disciplines",
+          "owners",
+          "scope"
+        ],
+        "type": "object"
+      },
+      "WorkspaceDisciplineChoice": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object"
+      },
+      "WorkspaceOwnerChoice": {
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "displayName"
+        ],
+        "type": "object"
+      },
+      "WorkspaceProjectChoice": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "projectManagerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "projectNumber",
+          "name",
+          "projectManagerId"
+        ],
+        "type": "object"
+      },
       "WorkspaceRow": {
         "properties": {
           "hidden": {
@@ -21591,7 +22658,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/WorkspaceCoordinationProjection"
+                }
               }
             },
             "description": "OK"
@@ -31403,7 +32472,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/CoordinationProjection"
+                }
               }
             },
             "description": "OK"

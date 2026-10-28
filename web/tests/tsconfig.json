@@ -30,6 +30,7 @@
     "evaluation.fixture.cjs",
     "time.fixture.cjs",
     "submissions.fixture.cjs",
-    "search.fixture.cjs"
+    "search.fixture.cjs",
+    "coordination.fixture.cjs"
   ]
 }

@@ -7,10 +7,11 @@ const { decisionRow, externalParty } = require('./decisions.fixture.cjs');
 const { commitmentRow, commitmentList } = require('./weekly-commitments.fixture.cjs');
 const { attentionList } = require('./evaluation.fixture.cjs');
 const { submissionListRow, submissionPage } = require('./submissions.fixture.cjs');
+const { coordinationUseRow, coordinationChangeRow, coordinationReviewRow, coordinationIssueRow, coordinationSubmissionRow, coordinationStaffingRow, coordinationProjection } = require('./coordination.fixture.cjs');
 const port = process.env.PORT ?? '5176', base = `http://127.0.0.1:${port}`;
 const id = n => `00000000-0000-0000-0000-${String(n).padStart(12, '0')}`;
 const pid = id(1), consumer = id(2), lead = id(3), civil = id(4), task = id(7), e1 = id(20), e2 = id(21), v11 = id(30), v12 = id(31), v21 = id(32), u1 = id(40), u2 = id(41), i1 = id(50), i2 = id(51);
-const coordinationUses = Array.from({ length: 5 }, (_, n) => ({ id: id(600 + n), targetType: 'Task', targetId: id(610 + n), sourceRevisionId: id(620 + n), targetKey: `P-DEMO-T${String(n + 1).padStart(3, '0')}`, targetName: `Coordination target ${n + 1}`, sourceKey: `P-DEMO-B${String(n + 1).padStart(3, '0')}`, sourceUrl: `https://example.test/source/${n + 1}`, revision: `R${n + 1}`, intendedUse: `Input use ${n + 1}` }));
+const coordinationUses = Array.from({ length: 5 }, (_, n) => coordinationUseRow({ id: id(600 + n), targetType: 'Task', targetId: id(610 + n), sourceRevisionId: id(620 + n), targetKey: `P-DEMO-T${String(n + 1).padStart(3, '0')}`, targetName: `Coordination target ${n + 1}`, sourceKey: `P-DEMO-B${String(n + 1).padStart(3, '0')}`, sourceUrl: `https://example.test/source/${n + 1}`, revision: `R${n + 1}`, intendedUse: `Input use ${n + 1}` }));
 let who = 'consumer', needsReason = false;
 const actor = () => (who === 'consumer' ? consumer : lead);
 // FR-FIG-08: the project flags the server computes for a Team Member (refused) and the Civil Discipline Lead.
@@ -90,23 +91,21 @@ let server, browser;
       if (print) await new Promise(resolve => setTimeout(resolve, 100));
       const page = Number(u.searchParams.get('page') ?? 1);
       const uses = print ? coordinationUses : page === 2 ? coordinationUses.slice(4) : coordinationUses.slice(0, 4);
-      data = {
-        handoffs: [], outgoing: [], incoming: [], uses, usesTotal: 5, usesPage: print ? 1 : page, usesPageSize: print ? 5 : 4,
-        changes: [{ id: id(650), key: 'P-DEMO-C001', title: 'Revised input', status: 'Open', pendingAssessments: 1, acknowledgedPending: 0, projectPending: 1, ownerId: consumer }],
+      data = coordinationProjection({
+        uses, usesTotal: 5, usesPage: print ? 1 : page, usesPageSize: print ? 5 : 4,
+        changes: [coordinationChangeRow({ id: id(650), key: 'P-DEMO-C001', title: 'Revised input', ownerId: consumer })],
         changesTotal: 1, changesPage: 1, changesPageSize: 4,
-        reviews: [{ id: id(660), key: 'P-DEMO-R001', title: 'Pending package review', status: 'In Review', outstandingDisciplines: 1, blockingFindings: 0, coordinatorId: consumer }],
+        reviews: [coordinationReviewRow({ id: id(660), key: 'P-DEMO-R001', title: 'Pending package review', coordinatorId: consumer })],
         reviewsTotal: 1, reviewsPage: 1, reviewsPageSize: 4,
-        linkedIssues: [{ id: id(690), key: 'P-DEMO-I0001', title: 'Input coordination issue', status: 'Open', ownerId: consumer, ownerName: 'Alex Consumer', projectDisciplineId: civil }],
+        linkedIssues: [coordinationIssueRow({ id: id(690), key: 'P-DEMO-I0001', title: 'Input coordination issue', ownerId: consumer, ownerName: 'Alex Consumer', projectDisciplineId: civil })],
         linkedIssuesTotal: 1, linkedIssuesPage: 1, linkedIssuesPageSize: 4,
-        startability: [], startabilityReadyTotal: 0, startabilityFrom: '2026-10-01', startabilityTo: '2026-10-31', startabilityTotal: 0, startabilityPage: 1, startabilityPageSize: 4,
-        linkedActions: [], changeTargets: [], unavailableChangeTargets: [],
-        upcomingSubmissions: [{ id: id(670), key: 'P-DEMO-SUB0001', title: 'Permit package', status: 'Checking', effectiveStatus: 'Pending review', targetDate: '2026-10-05', coordinatorId: consumer, failingChecks: [{ sourceId: id(650), kind: 'Pending review', code: 'REVIEW', message: 'Review is pending', sourcePath: `/projects/P-DEMO/reviews?panel=ReviewPackage:${id(660)}` }] }],
+        startabilityPageSize: 4,
+        upcomingSubmissions: [coordinationSubmissionRow({ id: id(670), key: 'P-DEMO-SUB0001', title: 'Permit package', status: 'Checking', effectiveStatus: 'Pending review', targetDate: '2026-10-05', coordinatorId: consumer, failingChecks: [{ sourceId: id(650), kind: 'Pending review', code: 'REVIEW', message: 'Review is pending', sourcePath: `/projects/P-DEMO/reviews?panel=ReviewPackage:${id(660)}` }] })],
         upcomingSubmissionsTotal: 1, upcomingSubmissionsPage: 1,
-        staffingConflicts: [{ id: id(680), key: 'P-DEMO-T0001', targetType: 'Task', targetId: coordinationUses[0].targetId, description: 'Staffing confirmation pending', neededBy: '2026-10-05', state: 'Pending', affectedOwnerId: consumer, removalOwnerId: lead }],
+        staffingConflicts: [coordinationStaffingRow({ id: id(680), key: 'P-DEMO-T0001', targetId: coordinationUses[0].targetId, description: 'Staffing confirmation pending', neededBy: '2026-10-05', state: 'Pending', affectedOwnerId: consumer, removalOwnerId: lead })],
         staffingConflictsTotal: 1, staffingConflictsPage: 1,
-        blockerGroups: [], blockerGroupsPage: 1, blockerGroupsTotal: 0, handoffPage: 1, handoffPageSize: 4, outgoingPage: 1, incomingPage: 1, outgoingTotal: 0, incomingTotal: 0,
-        page, pageSize: print ? 5 : 4, evaluatedAt: '2026-10-01T12:00:00Z'
-      };
+        handoffPageSize: 4, page, pageSize: print ? 5 : 4
+      });
     }
     else if (p.endsWith('/date-review')) data = { window: null, tasks: [], deliverables: [] }; else if (p.endsWith('/follow')) data = { level: 'My items only', source: 'Assignment' };
     else if (p.endsWith('/changes/options')) data = options();

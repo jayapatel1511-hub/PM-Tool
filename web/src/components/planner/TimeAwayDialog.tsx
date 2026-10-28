@@ -5,10 +5,11 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input'
 import { DraftNotice } from '@/components/hub/drafts'
 import { useSafeForm } from '@/hooks/drafts'
-import { ApiError, api } from '@/lib/api'
+import type { components } from '@/gen/api'
+import { ApiError, typedRequest } from '@/lib/api'
 import { t } from '@/lib/i18n'
 
-export type LeaveRecord = { id: string; fromDate: string; throughDate: string; hoursPerDay: number | null; status: string; sourceKind: string; sourceSystem?: string; externalId?: string; sourceUpdatedAt: string; importedAt: string; rowVersion: number; canEdit: boolean }
+export type LeaveRecord = components['schemas']['AvailabilityLeave']
 export function TimeAwayDialog({ person, record, onClose, onChanged }: { person: { id: string; displayName: string } | null; record?: LeaveRecord; onClose: () => void; onChanged: () => void }) {
   const [from, setFrom] = useState(record?.fromDate ?? ''); const [through, setThrough] = useState(record?.throughDate ?? '')
   const [source, setSource] = useState(record?.sourceSystem ?? ''); const [reference, setReference] = useState(record?.externalId ?? '')
@@ -22,7 +23,7 @@ export function TimeAwayDialog({ person, record, onClose, onChanged }: { person:
     const body = { personId: person.id, sourceSystem: source.trim(), externalId: reference.trim(), fromDate: from, throughDate: through, hoursPerDay: fullDay ? null : Number(hours), status, rowVersion: record?.rowVersion ?? 0 }
     const signature = JSON.stringify(body); if (receipt.current.signature !== signature) receipt.current = { signature, key: crypto.randomUUID() }
     setBusy(true); setError(null)
-    try { await api('planning/leave/manual', { body, idempotencyKey: receipt.current.key }); safe.clear(); onChanged(); onClose() }
+    try { await typedRequest('post', '/api/v1/planning/leave/manual', { body, idempotencyKey: receipt.current.key }); safe.clear(); onChanged(); onClose() }
     catch (e) { setError(e); if (e instanceof ApiError && e.status === 409) setStale(true) }
     finally { setBusy(false) }
   }

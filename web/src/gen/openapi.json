@@ -855,45 +855,6 @@
         ],
         "type": "object"
       },
-      "AnonymousTypeOfGuidAndstringAndstringAndstringAndint": {
-        "properties": {
-          "displayName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "hrPersonKey": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "hrSourceSystem": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "id": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "rowVersion": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "id",
-          "displayName",
-          "hrSourceSystem",
-          "hrPersonKey",
-          "rowVersion"
-        ],
-        "type": "object"
-      },
       "AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring": {
         "properties": {
           "level": {
@@ -1681,6 +1642,141 @@
         ],
         "type": "object"
       },
+      "AvailabilityConcern": {
+        "properties": {
+          "concern": {
+            "type": "string"
+          },
+          "dueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "personId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "personId",
+          "id",
+          "key",
+          "name",
+          "type",
+          "projectId",
+          "dueDate",
+          "role",
+          "concern"
+        ],
+        "type": "object"
+      },
+      "AvailabilityDay": {
+        "properties": {
+          "available": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "date": {
+            "format": "date",
+            "type": "string"
+          },
+          "holiday": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "leave": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "normal": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "provisional": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "date",
+          "normal",
+          "available",
+          "leave",
+          "holiday",
+          "provisional"
+        ],
+        "type": "object"
+      },
+      "AvailabilityHoliday": {
+        "properties": {
+          "date": {
+            "format": "date",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "officeId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "date",
+          "name",
+          "officeId"
+        ],
+        "type": "object"
+      },
+      "AvailabilityImport": {
+        "properties": {
+          "importedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "sourceUpdatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sourceSystem",
+          "importedAt",
+          "sourceUpdatedAt"
+        ],
+        "type": "object"
+      },
       "AvailabilityImportRow": {
         "properties": {
           "externalId": {
@@ -1741,6 +1837,215 @@
           "hoursPerDay",
           "status",
           "sourceUpdatedAt",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
+      "AvailabilityLeave": {
+        "properties": {
+          "canEdit": {
+            "type": "boolean"
+          },
+          "externalId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "fromDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "hoursPerDay": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "null",
+              "number"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "importedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "sourceKind": {
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "sourceUpdatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "throughDate": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "fromDate",
+          "throughDate",
+          "hoursPerDay",
+          "status",
+          "sourceKind",
+          "sourceUpdatedAt",
+          "importedAt",
+          "rowVersion",
+          "sourceSystem",
+          "externalId",
+          "canEdit"
+        ],
+        "type": "object"
+      },
+      "AvailabilityPerson": {
+        "properties": {
+          "canManage": {
+            "type": "boolean"
+          },
+          "days": {
+            "items": {
+              "$ref": "#/components/schemas/AvailabilityDay"
+            },
+            "type": "array"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "leave": {
+            "items": {
+              "$ref": "#/components/schemas/AvailabilityLeave"
+            },
+            "type": "array"
+          },
+          "schedules": {
+            "items": {
+              "$ref": "#/components/schemas/ScheduleRow"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "unverified": {
+            "items": {
+              "$ref": "#/components/schemas/AvailabilityUnverified"
+            },
+            "type": "array"
+          },
+          "weeklyHours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "null",
+              "number"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "canManage",
+          "weeklyHours",
+          "days",
+          "schedules",
+          "leave",
+          "unverified"
+        ],
+        "type": "object"
+      },
+      "AvailabilityRead": {
+        "properties": {
+          "canImport": {
+            "type": "boolean"
+          },
+          "coverage": {
+            "items": {
+              "$ref": "#/components/schemas/AvailabilityConcern"
+            },
+            "type": "array"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "holidays": {
+            "items": {
+              "$ref": "#/components/schemas/AvailabilityHoliday"
+            },
+            "type": "array"
+          },
+          "imports": {
+            "items": {
+              "$ref": "#/components/schemas/AvailabilityImport"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "people": {
+            "items": {
+              "$ref": "#/components/schemas/AvailabilityPerson"
+            },
+            "type": "array"
+          },
+          "through": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "from",
+          "through",
+          "canImport",
+          "people",
+          "holidays",
+          "coverage",
+          "imports"
+        ],
+        "type": "object"
+      },
+      "AvailabilityUnverified": {
+        "properties": {
+          "availableHours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "workDate": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workDate",
+          "availableHours",
           "rowVersion"
         ],
         "type": "object"
@@ -10948,6 +11253,55 @@
         ],
         "type": "object"
       },
+      "HrIdentity": {
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "hrPersonKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "hrSourceSystem": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "hrSourceSystem",
+          "hrPersonKey",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
+      "HrIdentitySaved": {
+        "properties": {
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "rowVersion"
+        ],
+        "type": "object"
+      },
       "IdentityBody": {
         "properties": {
           "personKey": {
@@ -11906,6 +12260,170 @@
         },
         "required": [
           "leadUnitId"
+        ],
+        "type": "object"
+      },
+      "LeaveImportApplied": {
+        "properties": {
+          "applied": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "importedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "unchanged": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "applied",
+          "unchanged",
+          "importedAt"
+        ],
+        "type": "object"
+      },
+      "LeaveImportError": {
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "row": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "row",
+          "error"
+        ],
+        "type": "object"
+      },
+      "LeaveImportPreviewRead": {
+        "properties": {
+          "affectedWeeks": {
+            "items": {
+              "$ref": "#/components/schemas/LeaveImportWeek"
+            },
+            "type": "array"
+          },
+          "canApply": {
+            "type": "boolean"
+          },
+          "cancellations": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "creates": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "errors": {
+            "items": {
+              "$ref": "#/components/schemas/LeaveImportError"
+            },
+            "type": "array"
+          },
+          "manualMatches": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "previewId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/AvailabilityImportRow"
+            },
+            "type": "array"
+          },
+          "unchanged": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "updates": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "previewId",
+          "rows",
+          "errors",
+          "canApply",
+          "creates",
+          "updates",
+          "cancellations",
+          "unchanged",
+          "manualMatches",
+          "affectedWeeks"
+        ],
+        "type": "object"
+      },
+      "LeaveImportWeek": {
+        "properties": {
+          "fromWeek": {
+            "format": "date",
+            "type": "string"
+          },
+          "personId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "throughWeek": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "personId",
+          "fromWeek",
+          "throughWeek"
+        ],
+        "type": "object"
+      },
+      "LeaveReconciled": {
+        "properties": {
+          "count": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "count"
+        ],
+        "type": "object"
+      },
+      "LeaveSaved": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "rowVersion"
         ],
         "type": "object"
       },
@@ -19776,6 +20294,111 @@
           "fromDate",
           "weeklyHours",
           "workingDays",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
+      "ScheduleRow": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/ScheduleRowWeeklySchedule"
+          },
+          {
+            "$ref": "#/components/schemas/ScheduleRowWeekdaySchedule"
+          }
+        ],
+        "type": "object"
+      },
+      "ScheduleRowWeekdaySchedule": {
+        "properties": {
+          "fromDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "weekdayHours": {
+            "items": {
+              "format": "double",
+              "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+              "type": "number"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "weeklyHours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "workingDays": {
+            "items": {
+              "format": "int32",
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "fromDate",
+          "weeklyHours",
+          "workingDays",
+          "rowVersion",
+          "weekdayHours"
+        ]
+      },
+      "ScheduleRowWeeklySchedule": {
+        "properties": {
+          "fromDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "weeklyHours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "workingDays": {
+            "items": {
+              "format": "int32",
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "fromDate",
+          "weeklyHours",
+          "workingDays",
+          "rowVersion"
+        ]
+      },
+      "ScheduleSaved": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
           "rowVersion"
         ],
         "type": "object"
@@ -31633,7 +32256,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/AvailabilityRead"
+                }
               }
             },
             "description": "OK"
@@ -32696,7 +33321,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/AnonymousTypeOfGuidAndstringAndstringAndstringAndint"
+                    "$ref": "#/components/schemas/HrIdentity"
                   },
                   "type": "array"
                 }
@@ -32735,6 +33360,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HrIdentitySaved"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -32757,6 +33389,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaveImportApplied"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -32781,7 +33420,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/LeaveImportPreviewRead"
+                }
               }
             },
             "description": "OK"
@@ -32806,6 +33447,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaveSaved"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -32828,6 +33476,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaveReconciled"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -32861,6 +33516,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleSaved"
+                }
+              }
+            },
             "description": "OK"
           }
         },

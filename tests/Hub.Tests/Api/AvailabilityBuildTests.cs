@@ -222,6 +222,127 @@ public sealed class AvailabilityBuildTests(HubFactory f)
         var other = await Person(); Assert.Equal(HttpStatusCode.NotFound, (await f.As(other.Email).DeleteAsync($"{route}?rowVersion=0")).StatusCode); // nothing to revoke
     }
 
+    static string[] Keys(JsonNode? node) => [.. node!.AsObject().Select(x => x.Key)];
+    static bool IsNull(JsonNode? node, string key) => node!.AsObject().TryGetPropertyValue(key, out var value) && value is null; // written as null, not left out
+    async Task Flag(string name, bool on) => (await f.As(TestData.Admin).Put($"/api/v1/admin/settings/flag.{name}", new { value = on })).EnsureSuccessStatusCode();
+
+    [Fact]
+    public async Task Availability_read_keeps_its_property_names_order_and_nulls() // 040-S15: the typed records must serialise to the bytes the Vacation page already reads
+    {
+        var p = await Person(); var project = await d.Project(); var holiday = "Synthetic typed-contract holiday " + Guid.NewGuid().ToString("N")[..6];
+        await f.DbAsync(async db => {
+            db.ProjectMembers.Add(new ProjectMember { ProjectId = project.Id, UserId = p.Id, Roles = [ProjectRole.TeamMember], AddedAt = f.Clock.GetUtcNow() });
+            var office = new Office { Name = "Synthetic typed-contract office", Code = Guid.NewGuid().ToString("N") }; db.Offices.Add(office); (await db.Users.SingleAsync(u => u.Id == p.Id)).OfficeId = office.Id;
+            db.Holidays.Add(new Holiday { Date = W.AddDays(4), OfficeId = office.Id, Name = holiday });
+            db.AvailabilityOverrides.Add(new PersonAvailabilityOverride { PersonId = p.Id, WorkDate = W.AddDays(1), AvailableHours = 0, Category = AvailabilityCategory.Unavailable, RowVersion = 1 });
+            return await db.SaveChangesAsync();
+        });
+        var dated = await d.NewTask(project.Id, extra: new { assigneeId = p.Id, dueDate = W }); await d.NewTask(project.Id, extra: new { assigneeId = p.Id });
+        await Apply(await Preview(Csv(p.Source, hours: "4")));
+        await (await f.As(TestData.Sam).Put($"/api/v1/planning/schedules/{p.Id}", new { fromDate = W, weeklyHours = 40, workingDays = new[] { 1, 2, 3, 4, 5 }, rowVersion = 0 })).Json();
+
+        var view = await View(p.Id);
+        Assert.Equal(["from", "through", "canImport", "people", "holidays", "coverage", "imports"], Keys(view));
+        Assert.Equal(($"{W:yyyy-MM-dd}", $"{W.AddDays(6):yyyy-MM-dd}", false), (view.S("from"), view.S("through"), view["canImport"]!.GetValue<bool>()));
+        Assert.True(IsNull(view, "imports")); // the key is written, with null for a caller who is not an administrator
+        var person = view["people"]![0]!;
+        Assert.Equal(["id", "displayName", "canManage", "weeklyHours", "days", "schedules", "leave", "unverified"], Keys(person));
+        Assert.Equal((JsonValueKind.True, JsonValueKind.Number, 40m), (person["canManage"]!.GetValueKind(), person["weeklyHours"]!.GetValueKind(), person["weeklyHours"]!.GetValue<decimal>()));
+        Assert.Equal(7, person["days"]!.AsArray().Count);
+        var day = person["days"]![0]!; Assert.Equal(["date", "normal", "available", "leave", "holiday", "provisional"], Keys(day));
+        Assert.Equal(($"{W:yyyy-MM-dd}", JsonValueKind.Number, JsonValueKind.False), (day.S("date"), day["normal"]!.GetValueKind(), day["provisional"]!.GetValueKind()));
+        Assert.Equal(JsonValueKind.True, person["days"]![1]!["provisional"]!.GetValueKind()); // the legacy unavailable day stays provisional
+        var schedule = person["schedules"]![0]!; Assert.Equal(["fromDate", "weeklyHours", "workingDays", "rowVersion"], Keys(schedule)); // no weekdayHours with the flag off
+        Assert.Equal([1, 2, 3, 4, 5], schedule["workingDays"]!.AsArray().Select(x => x!.GetValue<int>()));
+        var leave = person["leave"]![0]!;
+        Assert.Equal(["id", "fromDate", "throughDate", "hoursPerDay", "status", "sourceKind", "sourceUpdatedAt", "importedAt", "rowVersion", "sourceSystem", "externalId", "canEdit"], Keys(leave));
+        Assert.Equal((p.Source, "L-1", 4m, "HRImport", false), (leave.S("sourceSystem"), leave.S("externalId"), leave["hoursPerDay"]!.GetValue<decimal>(), leave.S("sourceKind"), leave["canEdit"]!.GetValue<bool>()));
+        var unverified = person["unverified"]![0]!; Assert.Equal(["workDate", "availableHours", "rowVersion"], Keys(unverified)); Assert.Equal($"{W.AddDays(1):yyyy-MM-dd}", unverified.S("workDate"));
+        var holidayRow = view["holidays"]!.AsArray().Single(h => h!.S("name") == holiday)!; Assert.Equal(["date", "name", "officeId"], Keys(holidayRow)); Assert.Equal(JsonValueKind.String, holidayRow["officeId"]!.GetValueKind());
+        var coverage = view["coverage"]!.AsArray(); Assert.Equal(2, coverage.Count);
+        var concern = coverage.Single(c => c!.G("id") == dated.G("id"))!; Assert.Equal(["personId", "id", "key", "name", "type", "projectId", "dueDate", "role", "concern"], Keys(concern));
+        Assert.Equal(("Task", "Assignee", "PartialAbsence", $"{W:yyyy-MM-dd}"), (concern.S("type"), concern.S("role"), concern.S("concern"), concern.S("dueDate")));
+        var undated = coverage.Single(c => c!.G("id") != dated.G("id"))!; Assert.Equal("Unknown", undated.S("concern")); Assert.True(IsNull(undated, "dueDate")); // the due date is written as null
+
+        var admin = await View(p.Id, TestData.Admin); // the administrator also sees who may import and when each source last did
+        Assert.True(admin["canImport"]!.GetValue<bool>()); Assert.Equal(JsonValueKind.Array, admin["imports"]!.GetValueKind());
+        var mark = admin["imports"]!.AsArray().Single(x => x!.S("sourceSystem") == p.Source)!; Assert.Equal(["sourceSystem", "importedAt", "sourceUpdatedAt"], Keys(mark));
+        var own = await View(p.Id, p.Email); var ownPerson = own["people"]![0]!; Assert.True(IsNull(ownPerson, "schedules")); // schedules, the source and the reference are for those who manage the person
+        Assert.Equal(["id", "displayName", "canManage", "weeklyHours", "days", "schedules", "leave", "unverified"], Keys(ownPerson));
+        var hidden = ownPerson["leave"]![0]!; Assert.True(IsNull(hidden, "sourceSystem") && IsNull(hidden, "externalId"));
+    }
+
+    [Fact, Trait("flag-on", "capacity_polish")]
+    public async Task Availability_schedules_write_weekday_hours_only_with_the_flag_on_and_null_when_the_row_has_none()
+    {
+        var p = await Person(); var sam = f.As(TestData.Sam);
+        await (await sam.Put($"/api/v1/planning/schedules/{p.Id}", new { fromDate = W, weeklyHours = 40, workingDays = new[] { 1, 2, 3, 4, 5 }, rowVersion = 0 })).Json();
+        await Flag("capacity_polish", true);
+        try {
+            await (await sam.Put($"/api/v1/planning/schedules/{p.Id}", new { fromDate = W.AddDays(7), weeklyHours = 20, workingDays = new[] { 1, 2, 3 }, weekdayHours = new[] { 0m, 8m, 8m, 4m, 0m, 0m, 0m }, rowVersion = 0 })).Json();
+            var rows = (await View(p.Id))["people"]![0]!["schedules"]!.AsArray();
+            Assert.Equal(["fromDate", "weeklyHours", "workingDays", "rowVersion", "weekdayHours"], Keys(rows[0])); Assert.True(IsNull(rows[0], "weekdayHours")); // a row with no vector writes null
+            Assert.Equal(["fromDate", "weeklyHours", "workingDays", "rowVersion", "weekdayHours"], Keys(rows[1]));
+            Assert.Equal([0m, 8m, 8m, 4m, 0m, 0m, 0m], rows[1]!["weekdayHours"]!.AsArray().Select(x => x!.GetValue<decimal>()));
+        } finally { await Flag("capacity_polish", false); }
+        Assert.All((await View(p.Id))["people"]![0]!["schedules"]!.AsArray(), row => Assert.Equal(["fromDate", "weeklyHours", "workingDays", "rowVersion"], Keys(row)));
+    }
+
+    [Fact]
+    public async Task Hr_identities_and_leave_commands_keep_their_property_names_order_and_status() // 040-S15: the typed records must serialise to the bytes the import, reconcile and schedule dialogs already read
+    {
+        var p = await Person(); var admin = f.As(TestData.Admin); var sam = f.As(TestData.Sam);
+        var identities = await (await admin.GetAsync("/api/v1/planning/hr-identities")).Json(); var identity = identities.AsArray().Single(x => x!.G("id") == p.Id)!;
+        Assert.Equal(["id", "displayName", "hrSourceSystem", "hrPersonKey", "rowVersion"], Keys(identity)); Assert.Equal((p.Source, "employee-1"), (identity.S("hrSourceSystem"), identity.S("hrPersonKey")));
+        Assert.Equal(HttpStatusCode.Forbidden, (await sam.GetAsync("/api/v1/planning/hr-identities")).StatusCode);
+        var renamed = await admin.Put($"/api/v1/planning/hr-identities/{p.Id}", new { sourceSystem = p.Source, personKey = "employee-2", rowVersion = identity.I("rowVersion") });
+        Assert.Equal(HttpStatusCode.OK, renamed.StatusCode); var saved = await renamed.Json(); Assert.Equal(["rowVersion"], Keys(saved)); Assert.True(saved.I("rowVersion") > identity.I("rowVersion"));
+        Assert.Equal(HttpStatusCode.Conflict, (await admin.Put($"/api/v1/planning/hr-identities/{p.Id}", new { sourceSystem = p.Source, personKey = "employee-1", rowVersion = identity.I("rowVersion") })).StatusCode);
+        await f.DbAsync(async db => { (await db.Users.SingleAsync(u => u.Id == p.Id)).HrPersonKey = "employee-1"; return await db.SaveChangesAsync(); });
+
+        var preview = await Preview(Csv(p.Source, hours: "4"));
+        Assert.Equal(["previewId", "rows", "errors", "canApply", "creates", "updates", "cancellations", "unchanged", "manualMatches", "affectedWeeks"], Keys(preview));
+        Assert.Equal((JsonValueKind.String, JsonValueKind.True, 1, 0, 0, 0, 0), (preview["previewId"]!.GetValueKind(), preview["canApply"]!.GetValueKind(), preview.I("creates"), preview.I("updates"), preview.I("cancellations"), preview.I("unchanged"), preview.I("manualMatches")));
+        Assert.Equal(["sourceSystem", "externalId", "personKey", "personId", "personVersion", "fromDate", "throughDate", "hoursPerDay", "status", "sourceUpdatedAt", "rowVersion"], Keys(preview["rows"]![0]));
+        Assert.Equal(["personId", "fromWeek", "throughWeek"], Keys(preview["affectedWeeks"]![0])); Assert.Single(preview["affectedWeeks"]!.AsArray()); Assert.Empty(preview["errors"]!.AsArray());
+        var unmapped = await Preview(Csv(p.Source) + "\nunknown,L-2,employee-1,Approved,2026-09-14,2026-09-16,,2026-09-13T10:00:00Z");
+        Assert.True(IsNull(unmapped, "previewId")); Assert.False(unmapped["canApply"]!.GetValue<bool>());
+        Assert.Equal(["row", "error"], Keys(unmapped["errors"]![0])); Assert.Equal((3, "availability.unmapped"), (unmapped["errors"]![0]!.I("row"), unmapped["errors"]![0]!.S("error")));
+        var applied = await Apply(preview); Assert.Equal(["applied", "unchanged", "importedAt"], Keys(applied)); Assert.Equal((1, 0, JsonValueKind.String), (applied.I("applied"), applied.I("unchanged"), applied["importedAt"]!.GetValueKind()));
+        Assert.Equal(["applied", "unchanged", "importedAt"], Keys(await Apply(await Preview(Csv(p.Source, hours: "4"))))); // an unchanged row is counted and not applied
+
+        var manual = await sam.Post("/api/v1/planning/leave/manual", new { personId = p.Id, sourceSystem = p.Source, externalId = "M-1", fromDate = W.AddDays(3), throughDate = W.AddDays(3), status = "Approved", rowVersion = 0 });
+        Assert.Equal(HttpStatusCode.OK, manual.StatusCode); var made = await manual.Json(); Assert.Equal(["id", "rowVersion"], Keys(made)); Assert.Equal(1, made.I("rowVersion"));
+        var again = await (await sam.Post("/api/v1/planning/leave/manual", new { personId = p.Id, sourceSystem = p.Source, externalId = "M-1", fromDate = W.AddDays(3), throughDate = W.AddDays(4), status = "Approved", rowVersion = made.I("rowVersion") })).Json();
+        Assert.Equal((made.G("id"), made.I("rowVersion") + 1), (again.G("id"), again.I("rowVersion"))); // the same record, one version on
+        Assert.Equal(HttpStatusCode.Conflict, (await sam.Post("/api/v1/planning/leave/manual", new { personId = p.Id, sourceSystem = p.Source, externalId = "M-1", fromDate = W, throughDate = W, status = "Approved", rowVersion = made.I("rowVersion") })).StatusCode);
+
+        var leave = (await View(p.Id))["people"]![0]!["leave"]!.AsArray().Single(x => x!.S("externalId") == "L-1")!.G("id");
+        await f.DbAsync(async db => { db.AvailabilityOverrides.Add(new PersonAvailabilityOverride { PersonId = p.Id, WorkDate = W.AddDays(1), AvailableHours = 0, Category = AvailabilityCategory.Unavailable, RowVersion = 1 }); return await db.SaveChangesAsync(); });
+        var reconciled = await sam.Post("/api/v1/planning/leave/reconcile", new { personId = p.Id, leaveId = leave, dates = new[] { new { workDate = W.AddDays(1), rowVersion = 1 } } });
+        Assert.Equal(HttpStatusCode.OK, reconciled.StatusCode); var count = await reconciled.Json(); Assert.Equal(["count"], Keys(count)); Assert.Equal(1, count.I("count"));
+
+        var schedule = await sam.Put($"/api/v1/planning/schedules/{p.Id}", new { fromDate = W, weeklyHours = 40, workingDays = new[] { 1, 2, 3, 4, 5 }, rowVersion = 0 });
+        Assert.Equal(HttpStatusCode.OK, schedule.StatusCode); var row = await schedule.Json(); Assert.Equal(["id", "rowVersion"], Keys(row)); Assert.Equal(1, row.I("rowVersion"));
+        Assert.Equal(HttpStatusCode.Conflict, (await sam.Put($"/api/v1/planning/schedules/{p.Id}", new { fromDate = W, weeklyHours = 30, workingDays = new[] { 1, 2, 3, 4, 5 }, rowVersion = 0 })).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await sam.Put($"/api/v1/planning/schedules/{Guid.NewGuid()}", new { fromDate = W, weeklyHours = 30, workingDays = new[] { 1, 2, 3, 4, 5 }, rowVersion = 0 })).StatusCode);
+    }
+
+    [Fact]
+    public async Task Availability_export_keeps_its_columns_and_rows_for_days_and_for_leave() // 040-S15: the export reads the typed view, so what it writes must not move
+    {
+        var p = await Person(); await Apply(await Preview(Csv(p.Source, hours: "4"))); var sam = f.As(TestData.Sam);
+        var range = $"?from={W:yyyy-MM-dd}&through={W.AddDays(6):yyyy-MM-dd}&personId={p.Id}&format=csv";
+        var leave = (await sam.GetStringAsync("/api/v1/planning/availability/export" + range + "&kind=leave")).Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        Assert.Equal("Person,From,Through,Absent hours per day (blank = full day),Status,Type,Source updated,Imported", leave[0]);
+        Assert.Equal(2, leave.Length); Assert.Contains(",2026-09-14,2026-09-16,4.00,Approved,HRImport,2026-09-13T10:00:00+00:00,", leave[1]);
+        var days = (await sam.GetStringAsync("/api/v1/planning/availability/export" + range)).Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        Assert.Equal("Person,Date,Contracted hours,Available hours,Leave hours,Holiday hours,Provisional", days[0]);
+        Assert.Equal(8, days.Length); Assert.EndsWith(",2026-09-14,8.0,4.00,4.00,0,No", days[1]); Assert.EndsWith(",2026-09-19,0,0,0,0,No", days[6]);
+        var xlsx = await sam.GetAsync("/api/v1/planning/availability/export" + range.Replace("csv", "xlsx")); Assert.Equal(HttpStatusCode.OK, xlsx.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await sam.GetAsync($"/api/v1/planning/availability/export?from={W:yyyy-MM-dd}&through={W.AddDays(-1):yyyy-MM-dd}&format=csv")).StatusCode);
+    }
+
     [Fact]
     public async Task Coverage_exports_and_calendar_recheck_project_permissions()
     {

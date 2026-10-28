@@ -5803,7 +5803,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["AvailabilityRead"];
                     };
                 };
             };
@@ -6392,7 +6392,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfGuidAndstringAndstringAndstringAndint"][];
+                        "application/json": components["schemas"]["HrIdentity"][];
                     };
                 };
             };
@@ -6433,7 +6433,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["HrIdentitySaved"];
+                    };
                 };
             };
         };
@@ -6471,7 +6473,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["LeaveImportApplied"];
+                    };
                 };
             };
         };
@@ -6509,7 +6513,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["LeaveImportPreviewRead"];
                     };
                 };
             };
@@ -6547,7 +6551,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["LeaveSaved"];
+                    };
                 };
             };
         };
@@ -6584,7 +6590,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["LeaveReconciled"];
+                    };
                 };
             };
         };
@@ -6622,7 +6630,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ScheduleSaved"];
+                    };
                 };
             };
         };
@@ -16274,15 +16284,6 @@ export interface components {
             /** Format: double */
             weeklyCapacityHours: null | number;
         };
-        AnonymousTypeOfGuidAndstringAndstringAndstringAndint: {
-            displayName: null | string;
-            hrPersonKey: null | string;
-            hrSourceSystem: null | string;
-            /** Format: uuid */
-            id: string;
-            /** Format: int32 */
-            rowVersion: number;
-        };
         AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring: {
             level: null | string;
             name: null | string;
@@ -16469,6 +16470,48 @@ export interface components {
             /** Format: int32 */
             expectedRowVersion: number;
         };
+        AvailabilityConcern: {
+            concern: string;
+            /** Format: date */
+            dueDate: null | string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            /** Format: uuid */
+            personId: string;
+            /** Format: uuid */
+            projectId: string;
+            role: string;
+            type: string;
+        };
+        AvailabilityDay: {
+            /** Format: double */
+            available: number;
+            /** Format: date */
+            date: string;
+            /** Format: double */
+            holiday: number;
+            /** Format: double */
+            leave: number;
+            /** Format: double */
+            normal: number;
+            provisional: boolean;
+        };
+        AvailabilityHoliday: {
+            /** Format: date */
+            date: string;
+            name: string;
+            /** Format: uuid */
+            officeId: null | string;
+        };
+        AvailabilityImport: {
+            /** Format: date-time */
+            importedAt: string;
+            sourceSystem: string;
+            /** Format: date-time */
+            sourceUpdatedAt: string;
+        };
         AvailabilityImportRow: {
             externalId: string;
             /** Format: date */
@@ -16488,6 +16531,58 @@ export interface components {
             status: string;
             /** Format: date */
             throughDate: string;
+        };
+        AvailabilityLeave: {
+            canEdit: boolean;
+            externalId: null | string;
+            /** Format: date */
+            fromDate: string;
+            /** Format: double */
+            hoursPerDay: null | number;
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            importedAt: string;
+            /** Format: int32 */
+            rowVersion: number;
+            sourceKind: string;
+            sourceSystem: null | string;
+            /** Format: date-time */
+            sourceUpdatedAt: string;
+            status: string;
+            /** Format: date */
+            throughDate: string;
+        };
+        AvailabilityPerson: {
+            canManage: boolean;
+            days: components["schemas"]["AvailabilityDay"][];
+            displayName: string;
+            /** Format: uuid */
+            id: string;
+            leave: components["schemas"]["AvailabilityLeave"][];
+            schedules: null | components["schemas"]["ScheduleRow"][];
+            unverified: components["schemas"]["AvailabilityUnverified"][];
+            /** Format: double */
+            weeklyHours: null | number;
+        };
+        AvailabilityRead: {
+            canImport: boolean;
+            coverage: components["schemas"]["AvailabilityConcern"][];
+            /** Format: date */
+            from: string;
+            holidays: components["schemas"]["AvailabilityHoliday"][];
+            imports: null | components["schemas"]["AvailabilityImport"][];
+            people: components["schemas"]["AvailabilityPerson"][];
+            /** Format: date */
+            through: string;
+        };
+        AvailabilityUnverified: {
+            /** Format: double */
+            availableHours: number;
+            /** Format: int32 */
+            rowVersion: number;
+            /** Format: date */
+            workDate: string;
         };
         AwaitingRow: {
             canConfirm: boolean;
@@ -18902,6 +18997,19 @@ export interface components {
             /** Format: uuid */
             officeId: null | string;
         };
+        HrIdentity: {
+            displayName: string;
+            hrPersonKey: null | string;
+            hrSourceSystem: null | string;
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
+        };
+        HrIdentitySaved: {
+            /** Format: int32 */
+            rowVersion: number;
+        };
         IdentityBody: {
             personKey: null | string;
             /** Format: int32 */
@@ -19147,6 +19255,55 @@ export interface components {
         LeadUnitResponse: {
             /** Format: uuid */
             leadUnitId: null | string;
+        };
+        LeaveImportApplied: {
+            /** Format: int32 */
+            applied: number;
+            /** Format: date-time */
+            importedAt: string;
+            /** Format: int32 */
+            unchanged: number;
+        };
+        LeaveImportError: {
+            error: string;
+            /** Format: int32 */
+            row: number;
+        };
+        LeaveImportPreviewRead: {
+            affectedWeeks: components["schemas"]["LeaveImportWeek"][];
+            canApply: boolean;
+            /** Format: int32 */
+            cancellations: number;
+            /** Format: int32 */
+            creates: number;
+            errors: components["schemas"]["LeaveImportError"][];
+            /** Format: int32 */
+            manualMatches: number;
+            /** Format: uuid */
+            previewId: null | string;
+            rows: components["schemas"]["AvailabilityImportRow"][];
+            /** Format: int32 */
+            unchanged: number;
+            /** Format: int32 */
+            updates: number;
+        };
+        LeaveImportWeek: {
+            /** Format: date */
+            fromWeek: string;
+            /** Format: uuid */
+            personId: string;
+            /** Format: date */
+            throughWeek: string;
+        };
+        LeaveReconciled: {
+            /** Format: int32 */
+            count: number;
+        };
+        LeaveSaved: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
         };
         LevelBody: {
             name: string;
@@ -21190,6 +21347,32 @@ export interface components {
             /** Format: double */
             weeklyHours: number;
             workingDays: number[];
+        };
+        ScheduleRow: components["schemas"]["ScheduleRowWeeklySchedule"] | components["schemas"]["ScheduleRowWeekdaySchedule"];
+        ScheduleRowWeekdaySchedule: {
+            /** Format: date */
+            fromDate: string;
+            /** Format: int32 */
+            rowVersion: number;
+            weekdayHours: null | number[];
+            /** Format: double */
+            weeklyHours: number;
+            workingDays: number[];
+        };
+        ScheduleRowWeeklySchedule: {
+            /** Format: date */
+            fromDate: string;
+            /** Format: int32 */
+            rowVersion: number;
+            /** Format: double */
+            weeklyHours: number;
+            workingDays: number[];
+        };
+        ScheduleSaved: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
         };
         SearchAllocationHit: {
             /** Format: date */

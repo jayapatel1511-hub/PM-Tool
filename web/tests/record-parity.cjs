@@ -6,7 +6,7 @@
 //                           grouped, for the shared DataTable's group rows), the project Team tab, the Milestones list (a slipped milestone with a deliverable, for its expanded detail row), the open-roles tab of
 //                           the Active, Complete and empty-role projects, the Reviews and Changes registers, the workspace
 //                           Team page scoped to the Active project, the Portfolio (plain, and grouped by client, which
-//                           needs flag.status_rollups), the Project List (my projects, all grouped by status, all ungrouped),
+//                           needs flag.status_rollups), Vacation (its coverage concerns), the Project List (my projects, all grouped by status, all ungrouped),
 //                           the Holidays admin list and four Administration reference lists (the column
 //                           variants of the one table), all compared as the administrator only: a route under /admin/ runs for
 //                           Jordan Lee and no other persona). {project}, {complete}, {empty} and
@@ -36,6 +36,7 @@ const SCREENS = (process.env.TUESDAY_RECORD_SCREENS ?? [
   '/projects/{project}/allocations?tab=roles', '/projects/{complete}/allocations?tab=roles', '/projects/{empty}/allocations?tab=roles',
   '/projects/{project}/reviews', '/projects/{project}/changes', '/team?projects={projectId}',
   '/portfolio', '/portfolio?group=client',
+  '/vacation',
   '/projects', '/projects?mine=false', '/projects?mine=false&group=none',
   '/admin/holidays',
   '/admin/reference/disciplines', '/admin/reference/clients', '/admin/reference/offices', '/admin/reference/deliverableTypes',
@@ -147,7 +148,8 @@ async function fixtures() {
   }) })
   // Time away for the Team tab's away chip (flag.capacity_polish): leave that spans the current week whatever day the run is on.
   const day = offset => new Date(Date.now() + offset * 864e5).toISOString().slice(0, 10)
-  await api('planning/leave/manual', 'jordan', { method: 'POST', body: JSON.stringify({ personId: (await api('me', 'alex')).id, sourceSystem: 'Synthetic HR',
+  const alex = (await api('me', 'alex')).id
+  await api('planning/leave/manual', 'jordan', { method: 'POST', body: JSON.stringify({ personId: alex, sourceSystem: 'Synthetic HR',
     externalId: `PARITY-${runId}`, fromDate: day(-7), throughDate: day(7), hoursPerDay: null, status: 'Approved', rowVersion: 0 }) })
   const milestone = { milestoneType: 'Design Submission', isClientFacing: true }
   await api(`projects/${project.id}/milestones`, 'priya', { method: 'POST', body: JSON.stringify({ ...milestone, name: 'Synthetic parity milestone', date: '2027-03-15' }) })
@@ -155,6 +157,15 @@ async function fixtures() {
   await api(`milestones/${slipped.id}/change-date`, 'priya', { method: 'POST', body: JSON.stringify({ newDate: '2027-03-08', reason: 'Synthetic parity slip', rowVersion: slipped.rowVersion }) })
   await api(`projects/${project.id}/deliverables`, 'priya', { method: 'POST', body: JSON.stringify({ name: 'Synthetic milestone deliverable', projectDisciplineId: project.discipline,
     deliverableTypeId: reference.deliverableTypes[0].id, milestoneId: slipped.id, startDate: '2027-02-15', dueDate: '2027-03-05' }) })
+  // Vacation coverage concerns: leave on the current month's first Wednesday (the page shows the month), a task due that day and an undated one.
+  const { today } = (await api('me', 'priya')).settings, leaveDay = new Date(`${today.slice(0, 8)}01T00:00:00Z`)
+  while (leaveDay.getUTCDay() !== 3) leaveDay.setUTCDate(leaveDay.getUTCDate() + 1)
+  const dueDate = leaveDay.toISOString().slice(0, 10)
+  await api('planning/leave/manual', 'jordan', { method: 'POST', body: JSON.stringify({ personId: alex, sourceSystem: 'Synthetic HR',
+    externalId: `PARITY-VACATION-${runId}`, fromDate: dueDate, throughDate: dueDate, hoursPerDay: null, status: 'Approved', rowVersion: 0 }) })
+  for (const [name, due] of [['Synthetic parity coverage task', dueDate], ['Synthetic parity undated task', null]]) await api(`projects/${project.id}/tasks`, 'priya', { method: 'POST', body: JSON.stringify({
+    name, projectDisciplineId: project.discipline, assigneeId: alex, ...(due ? { dueDate: due } : {}),
+  }) })
   const openRole = await role(project, 'Synthetic parity role')
   await coordination(reference, project)
   const complete = await createProject(reference, 'C', 'Synthetic complete parity project')

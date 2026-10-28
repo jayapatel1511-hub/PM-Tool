@@ -12,34 +12,23 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { ApiError, get, post, qs } from '@/lib/api'
+import type { components } from '@/gen/api'
+import { ApiError, typedRequest } from '@/lib/api'
+import { invalidateChange } from '@/lib/keys'
 import { addDays, fmtDate, today } from '@/lib/format'
 import { t, tv , runtimeText } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { useCurrentProject } from './ProjectLayout'
-import { CoordStatus, RegisterPager, useCoordRefresh } from './CoordinationForms'
+import { CoordStatus, RegisterPager } from './CoordinationForms'
 import { DraftNotice } from '@/components/hub/drafts'
 import { useSafeForm } from '@/hooks/drafts'
 
 const STATUSES = ['Draft', 'Submitted', 'Clarification Requested', 'Returned', 'Accepted', 'Incorporated', 'Cancelled']
-type Person = { id: string; displayName: string }
-type Work = { id: string; key: string; name: string; projectDisciplineId: string; ownerId?: string; dueDate?: string }
-type Source = Work & { revision?: string; transmittalUrl?: string; rowVersion: number }
-type Options = { sources: Source[]; tasks: Work[]; people: Person[]; disciplines: { id: string; name: string }[]; canCreate: boolean }
-type Row = {
-  id: string; key: string; title: string; status: string; rowVersion: number; sourceDeliverableId: string; sourceRowVersion: number
-  declaredRevision: string; sourceUrl: string; sendingDisciplineId: string; receivingDisciplineId: string
-  sendingOwnerId: string; receivingOwnerId: string; targetTaskId?: string; targetDeliverableId?: string
-  intendedUse: string; acceptanceCriteria: string; neededBy: string; promisedBy?: string; currentRevisionId?: string; incorporatedRevisionId?: string
-  senderName: string; receiverName: string; sourceKey: string; targetKey: string; ownersAvailable: boolean; sourceChanged: boolean; dateMismatch: boolean; isOverdue: boolean
-}
-type Permit = { ok: boolean; reason?: string }
-type Detail = {
-  changeAssessments?: { id: string; status: string; changeNoticeId: string; key: string; title: string; noticeStatus: string }[]
-  row: Row; permissions: { edit: Permit; assign: Permit; transitions: { to: string; permission: Permit }[] }
-  history: { id: string; fromStatus: string; toStatus: string; reason?: string; criteriaOutcome?: string; actor: string; createdAt: string; revisionId?: string }[]
-  revisions: { id: string; intendedUse: string; acceptanceCriteria: string; createdAt: string; response?: string; source: { revision: string; url: string; sourceKey: string; createdAt: string } }[]
-}
+type Schemas = components['schemas']
+type Person = Schemas['HandoffPerson']
+type Work = Schemas['HandoffTask']
+type Options = Schemas['HandoffOptions']
+type Row = Schemas['HandoffRow']
 type Receipt = { signature: string; id: string }
 // Retain the command ID on network retry; changing any input creates a new command.
 function requestId(ref: { current: Receipt | null }, payload: unknown) {
@@ -60,15 +49,15 @@ export function HandoffsTab() {
   const p = useCurrentProject()
   const [sp, setSp] = useSearchParams()
   const qc = useQueryClient()
-  const refreshCoordination = useCoordRefresh(p.id)
   const [create, setCreate] = useState(sp.has('source') || sp.has('targetTask'))
   const filters = Object.fromEntries(['q', 'status', 'direction', 'disciplineId', 'overdue'].map(k => [k, sp.get(k) ?? '']))
   const page = Math.max(1, Number(sp.get('page')) || 1)
-  const list = useQuery({ queryKey: ['handoffs', p.id, filters, page], queryFn: () => get<{ items: Row[]; totalCount: number; pageSize: number }>(`projects/${p.id}/handoffs${qs({ ...filters, page })}`) })
-  const options = useQuery({ queryKey: ['handoff-options', p.id], queryFn: () => get<Options>(`projects/${p.id}/handoffs/options`) })
+  const list = useQuery({ queryKey: ['handoffs', p.id, filters, page], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/handoffs', { params: { projectId: p.id },
+    query: { Q: filters.q, Status: filters.status, Direction: filters.direction, DisciplineId: filters.disciplineId, Overdue: filters.overdue === 'true', page } }) })
+  const options = useQuery({ queryKey: ['handoff-options', p.id], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/handoffs/options', { params: { projectId: p.id } }) })
   const panel = sp.get('panel')?.startsWith('Handoff:') ? sp.get('panel')!.slice(8) : null
   const setFilter = (key: string, value: string) => { const next = new URLSearchParams(sp); if (value) next.set(key, value); else next.delete(key); next.delete('page'); setSp(next) }
-  const refresh = () => { refreshCoordination(); qc.invalidateQueries({ queryKey: ['handoffs', p.id] }); qc.invalidateQueries({ queryKey: ['handoff-detail', p.id] }); qc.invalidateQueries({ queryKey: ['handoff-options', p.id] }); qc.invalidateQueries({ queryKey: ['search'] }) }
+  const refresh = () => { invalidateChange(qc, 'Handoff', p.id) }
   const open = (id: string) => { const next = new URLSearchParams(sp); next.set('panel', `Handoff:${id}`); setSp(next) }
   const close = () => { const next = new URLSearchParams(sp); next.delete('panel'); setSp(next) }
   // Active filters as removable tokens (§13.0 Filters); the URL keeps the same parameters.
@@ -155,10 +144,12 @@ function HandoffForm({ projectId, options, existing, initialSource, initialTask,
   const save = async () => {
     setBusy(true); setError(null)
     try {
-      const payload = { ...values, sourceRowVersion: selected?.rowVersion ?? existing?.sourceRowVersion,
+      const payload = { ...values, sourceRowVersion: selected?.rowVersion ?? existing?.sourceRowVersion ?? 0,
         targetTaskId: values.target.startsWith('Task:') ? values.target.slice(5) : null, targetDeliverableId: values.target.startsWith('Deliverable:') ? values.target.slice(12) : null,
-        promisedBy: values.promisedBy || null, rowVersion: existing?.rowVersion }
-      const result = await post<{ id: string }>(`projects/${projectId}/handoffs${existing ? `/${existing.id}/draft` : ''}`, { ...payload, requestId: requestId(receipt, payload) })
+        promisedBy: values.promisedBy || null, rowVersion: existing?.rowVersion ?? null }
+      const body = { ...payload, requestId: requestId(receipt, payload) }
+      const result = existing ? await typedRequest('post', '/api/v1/projects/{projectId}/handoffs/{id}/draft', { params: { projectId, id: existing.id }, body })
+        : await typedRequest('post', '/api/v1/projects/{projectId}/handoffs', { params: { projectId }, body })
       safe.clear(); toast.success(t('handoff.saved')); onClose(result.id)
     } catch (e) { setError(e as ApiError) } finally { setBusy(false) }
   }
@@ -195,7 +186,7 @@ function HandoffForm({ projectId, options, existing, initialSource, initialTask,
 }
 
 function HandoffDetail({ projectId, projectNumber, id, options, onClose, refresh }: { projectId: string; projectNumber: string; id: string; options?: Options; onClose: () => void; refresh: () => void }) {
-  const query = useQuery({ queryKey: ['handoff-detail', projectId, id], queryFn: () => get<Detail>(`projects/${projectId}/handoffs/${id}`) })
+  const query = useQuery({ queryKey: ['handoff-detail', projectId, id], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/handoffs/{id}', { params: { projectId, id } }) })
   const [edit, setEdit] = useState(false)
   const [action, setAction] = useState<string | null>(null)
   const d = query.data
@@ -208,7 +199,7 @@ function HandoffDetail({ projectId, projectNumber, id, options, onClose, refresh
     {query.isPending ? <Loading rows={6} /> : query.error ? <ErrorBanner error={query.error} retry={() => query.refetch()} /> : d && <div className="space-y-5 text-sm">
       <div className="space-y-2">
         <div className="flex flex-wrap items-center gap-2"><CoordStatus status={d.row.status} /><span className="flex-1" />
-          {d.permissions.transitions.map(a => <Button size="sm" key={a.to} variant={a.to === next ? 'default' : a.to === 'Cancelled' ? 'ghost' : 'outline'} className={cn(a.to === 'Cancelled' && 'text-bad hover:text-bad')} disabled={!a.permission.ok} title={a.permission.reason} onClick={() => setAction(a.to)}>{runtimeText(`handoff.action.${a.to}`)}</Button>)}
+          {d.permissions.transitions.map(a => <Button size="sm" key={a.to} variant={a.to === next ? 'default' : a.to === 'Cancelled' ? 'ghost' : 'outline'} className={cn(a.to === 'Cancelled' && 'text-bad hover:text-bad')} disabled={!a.permission.ok} title={a.permission.reason ?? undefined} onClick={() => setAction(a.to)}>{runtimeText(`handoff.action.${a.to}`)}</Button>)}
           {d.permissions.edit.ok && options && <Button size="sm" variant="outline" onClick={() => setEdit(true)}>{t('handoff.edit')}</Button>}
           {d.permissions.assign.ok && options && !['Cancelled', 'Incorporated'].includes(d.row.status) && <Button size="sm" variant="outline" onClick={() => setAction('assign')}>{t('handoff.reassign')}</Button>}
         </div>
@@ -227,7 +218,7 @@ function HandoffDetail({ projectId, projectNumber, id, options, onClose, refresh
       <section className="space-y-1"><h3 className="font-semibold">{t('handoff.purpose')}</h3><p className="whitespace-pre-wrap text-base/6">{d.row.intendedUse}</p></section>
       <section className="space-y-1"><h3 className="font-semibold">{t('handoff.criteria')}</h3><p className="whitespace-pre-wrap text-base/6">{d.row.acceptanceCriteria}</p></section>
       <div className="space-y-1"><a href={d.row.sourceUrl} target="_blank" rel="noreferrer noopener" className="inline-flex items-center gap-1.5 text-primary underline underline-offset-4"><ExternalLink className="size-4" />{t('handoff.openSource')}</a><p className="text-xs/[18px] text-muted-foreground">{t('handoff.manualRevision')}</p></div>
-      {!!d.changeAssessments?.length && <section className="space-y-2 rounded-lg border p-4"><h3 className="font-semibold">{t('change.assessments')}</h3><p className="text-muted-foreground">{t('change.receiptPreserved')}</p><ul className="space-y-2">{d.changeAssessments.map(a => <li key={a.id} className="flex flex-wrap items-center gap-2"><Link className="text-primary underline underline-offset-4" to={`/projects/${projectNumber}/changes?panel=ChangeNotice:${a.changeNoticeId}`}><span className="key">{a.key}</span> · {a.title}</Link><CoordStatus status={a.status} /><CoordStatus status={a.noticeStatus} /></li>)}</ul></section>}
+      {!!d.changeAssessments.length && <section className="space-y-2 rounded-lg border p-4"><h3 className="font-semibold">{t('change.assessments')}</h3><p className="text-muted-foreground">{t('change.receiptPreserved')}</p><ul className="space-y-2">{d.changeAssessments.map(a => <li key={a.id} className="flex flex-wrap items-center gap-2"><Link className="text-primary underline underline-offset-4" to={`/projects/${projectNumber}/changes?panel=ChangeNotice:${a.changeNoticeId}`}><span className="key">{a.key}</span> · {a.title}</Link><CoordStatus status={a.status} /><CoordStatus status={a.noticeStatus} /></li>)}</ul></section>}
       <section className="space-y-2 border-t pt-4"><h3 className="text-base/6 font-semibold">{t('handoff.history')}</h3>{!d.history.length && <p className="text-muted-foreground">{t('handoff.noHistory')}</p>}
         <ol className="space-y-3">{d.history.map(e => <li key={e.id} className="space-y-1 rounded-lg border p-4"><div className="font-medium">{tv(e.fromStatus)} → {tv(e.toStatus)}</div><p className="text-xs/[18px] text-muted-foreground">{e.actor} · <span className="tabular-nums">{new Date(e.createdAt).toLocaleString()}</span></p>{e.reason && <p className="whitespace-pre-wrap">{e.reason}</p>}{e.criteriaOutcome && <p className="whitespace-pre-wrap">{e.criteriaOutcome}</p>}<p className="text-xs/[18px] text-muted-foreground">{t('handoff.revision')}: {d.revisions.find(r => r.id === e.revisionId)?.source.revision ?? '—'}</p></li>)}</ol>
       </section>
@@ -249,7 +240,9 @@ function ActionDialog({ projectId, row, action, people, onClose, onDone }: { pro
     setBusy(true); setError(null)
     try {
       const payload = { toStatus: action, rowVersion: row.rowVersion, reason, criteriaOutcome: outcome, sendingOwnerId: sender, receivingOwnerId: receiver }
-      await post(`projects/${projectId}/handoffs/${row.id}/${assign ? 'assign' : 'transition'}`, { ...payload, requestId: requestId(receipt, payload) })
+      const body = { ...payload, requestId: requestId(receipt, payload) }
+      if (assign) await typedRequest('post', '/api/v1/projects/{projectId}/handoffs/{id}/assign', { params: { projectId, id: row.id }, body })
+      else await typedRequest('post', '/api/v1/projects/{projectId}/handoffs/{id}/transition', { params: { projectId, id: row.id }, body })
       toast.success(t('handoff.saved')); onDone()
     } catch (e) { setError(e as ApiError) } finally { setBusy(false) }
   }

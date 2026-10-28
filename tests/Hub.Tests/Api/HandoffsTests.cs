@@ -558,4 +558,86 @@ public sealed class HandoffsTests(HubFactory f)
         Assert.Equal(SubmissionStatus.Checking, f.Db(db => db.SubmissionPackages.Single(p => p.Id == package).Status));
         Assert.All(f.Db(db => db.SubmissionChecks.Where(c => c.PackageId == package).ToList()), c => { Assert.Equal(SubmissionCheckStatus.Pending, c.Status); Assert.Null(c.EvidenceUrl); });
     }
+
+    [Fact]
+    public async Task List_options_detail_and_create_keep_their_property_names_order_nulls_and_flags() // the typed records must serialise to the bytes the Handoffs page already reads
+    {
+        var s = await New(); var root = Path(s.Project.Id);
+        var response = await f.As(TestData.Marc).Post(root, s.Body);
+        Assert.Equal(Path(s.Project.Id, Guid.Parse(response.Headers.Location!.OriginalString.Split('/')[^1])), response.Headers.Location!.OriginalString);
+        var created = await response.Json(201);
+        Assert.Equal(["id", "rowVersion"], created.AsObject().Select(x => x.Key)); var id = created.G("id");
+
+        var list = await (await f.As(TestData.Pm).GetAsync(root)).Json();
+        Assert.Equal(["items", "page", "pageSize", "totalCount", "sort", "filters"], list.AsObject().Select(x => x.Key));
+        Assert.Equal((1, 50, 1), (list.I("page"), list.I("pageSize"), list.I("totalCount"))); Assert.Null(list["sort"]); Assert.Null(list["filters"]); // null, not omitted
+        var row = Assert.Single(list["items"]!.AsArray())!;
+        Assert.Equal(RowKeys, row.AsObject().Select(x => x.Key));
+        Assert.Equal((id, "Draft", "Alex Chen", "Omar Haddad", s.Source.S("key"), "2026-09-16", "2026-09-18"), (row.G("id"), row.S("status"), row.S("senderName"), row.S("receiverName"), row.S("sourceKey"), row.S("neededBy"), row.S("promisedBy")));
+        Assert.Equal(s.Target.S("key"), row.S("targetKey")); Assert.Null(row["targetDeliverableId"]); Assert.Null(row["currentRevisionId"]); Assert.Null(row["incorporatedRevisionId"]);
+        Assert.Equal((true, false, true), (row["ownersAvailable"]!.GetValue<bool>(), row["sourceChanged"]!.GetValue<bool>(), row["dateMismatch"]!.GetValue<bool>()));
+        var generated = await (await f.As(TestData.Alex).GetAsync(root + $"?Status=Draft&Q=survey&Direction=outgoing&DisciplineId={data.ProjectDiscipline(s.Project.Id, "Electrical")}&Overdue=false&page=1")).Json(); // the names the generated client sends
+        Assert.Equal(id, Assert.Single(generated["items"]!.AsArray())!.G("id"));
+        Assert.Empty((await (await f.As(TestData.Alex).GetAsync(root + "?Direction=incoming")).Json())["items"]!.AsArray());
+
+        var options = await (await f.As(TestData.Marc).GetAsync(root + "/options")).Json();
+        Assert.Equal(["sources", "disciplines", "people", "tasks", "canCreate"], options.AsObject().Select(x => x.Key));
+        var source = Assert.Single(options["sources"]!.AsArray())!; Assert.Equal(["id", "key", "name", "projectDisciplineId", "ownerId", "revision", "transmittalUrl", "rowVersion", "dueDate"], source.AsObject().Select(x => x.Key));
+        Assert.Equal(("Survey basis", "A"), (source.S("name"), source.S("revision"))); Assert.Null(source["transmittalUrl"]); Assert.Null(source["dueDate"]); // null, not omitted
+        Assert.Equal(["id", "name"], options["disciplines"]![0]!.AsObject().Select(x => x.Key)); Assert.Equal(2, options["disciplines"]!.AsArray().Count);
+        Assert.Equal(["id", "displayName"], options["people"]![0]!.AsObject().Select(x => x.Key));
+        var task = Assert.Single(options["tasks"]!.AsArray())!; Assert.Equal(["id", "key", "name", "projectDisciplineId", "ownerId", "dueDate"], task.AsObject().Select(x => x.Key));
+        Assert.Equal((s.Target.G("id"), data.User(TestData.Omar), "2026-09-16"), (task.G("id"), task.G("ownerId"), task.S("dueDate")));
+        Assert.True(options["canCreate"]!.GetValue<bool>());
+
+        var draft = await Detail(s, id);
+        Assert.Equal(["row", "permissions", "changeAssessments", "history", "revisions"], draft.AsObject().Select(x => x.Key));
+        Assert.Equal(RowKeys, draft["row"]!.AsObject().Select(x => x.Key));
+        Assert.Equal(["edit", "assign", "transitions"], draft["permissions"]!.AsObject().Select(x => x.Key));
+        Assert.Equal(["ok", "reason"], draft["permissions"]!["edit"]!.AsObject().Select(x => x.Key));
+        Assert.Equal(["Submitted", "Cancelled"], draft["permissions"]!["transitions"]!.AsArray().Select(x => x!.S("to")));
+        Assert.Equal(["to", "permission"], draft["permissions"]!["transitions"]![0]!.AsObject().Select(x => x.Key));
+        Assert.Equal((true, true), (draft["permissions"]!["edit"]!["ok"]!.GetValue<bool>(), draft["permissions"]!["transitions"]![0]!["permission"]!["ok"]!.GetValue<bool>()));
+        Assert.Null(draft["permissions"]!["edit"]!["reason"]); // null, not omitted
+        Assert.Empty(draft["changeAssessments"]!.AsArray()); Assert.Empty(draft["history"]!.AsArray()); Assert.Empty(draft["revisions"]!.AsArray());
+        var receiver = await Detail(s, id, TestData.Omar); // the receiver may not submit; the refusal text is written beside the flag
+        Assert.False(receiver["permissions"]!["transitions"]![0]!["permission"]!["ok"]!.GetValue<bool>());
+        Assert.False(string.IsNullOrWhiteSpace(receiver["permissions"]!["transitions"]![0]!["permission"]!.S("reason")));
+
+        await Move(s, id, TestData.Alex, HandoffStatus.Submitted);
+        await Move(s, id, TestData.Omar, HandoffStatus.Accepted, outcome: "Survey criteria checked");
+        await Move(s, id, TestData.Omar, HandoffStatus.Incorporated, outcome: "Revision A incorporated into receiving design");
+        var head = f.Db(db => db.SourceHeads.AsNoTracking().Single(h => h.ProjectId == s.Project.Id));
+        var notice = await (await f.As(TestData.Alex).Post($"/api/v1/projects/{s.Project.Id}/source-revisions", new ChangeEndpoints.RegisterBody(
+            Guid.NewGuid(), s.Source.G("id"), f.Db(db => db.Deliverables.Single(d => d.Id == s.Source.G("id")).RowVersion),
+            data.ProjectDiscipline(s.Project.Id, "Civil"), data.User(TestData.Alex), "Deliverable", "survey", "Survey basis", "B", "https://example.test/survey-B.pdf", "Survey team", "Service corridor", null,
+            head.CurrentRevisionId, head.RowVersion, "Updated corridor tie-in", new DateOnly(2026, 9, 14), new DateOnly(2026, 9, 18)))).Json();
+        await (await f.As(TestData.Alex).Post($"/api/v1/projects/{s.Project.Id}/changes/{notice.G("id")}/publish", new ChangeEndpoints.PublishBody(Guid.NewGuid(), notice.I("rowVersion"), head.RowVersion, null))).Json();
+        var done = await Detail(s, id);
+        Assert.Equal(["row", "permissions", "changeAssessments", "history", "revisions"], done.AsObject().Select(x => x.Key));
+        Assert.Equal((HandoffStatus.Incorporated, done["row"]!.S("currentRevisionId")), (done["row"]!.S("status"), done["row"]!.S("incorporatedRevisionId")));
+        Assert.Empty(done["permissions"]!["transitions"]!.AsArray());
+        var assessment = Assert.Single(done["changeAssessments"]!.AsArray())!;
+        Assert.Equal(["id", "status", "changeNoticeId", "key", "title", "noticeStatus"], assessment.AsObject().Select(x => x.Key));
+        Assert.Equal((AssessmentStatus.Pending, notice.G("id")), (assessment.S("status"), assessment.G("changeNoticeId")));
+        Assert.Equal(["Draft", "Submitted", "Accepted"], done["history"]!.AsArray().Select(x => x!.S("fromStatus")));
+        var first = done["history"]![0]!; Assert.Equal(["id", "fromStatus", "toStatus", "revisionId", "reason", "criteriaOutcome", "createdAt", "createdBy", "actor"], first.AsObject().Select(x => x.Key));
+        Assert.Equal(("Alex Chen", data.User(TestData.Alex)), (first.S("actor"), first.G("createdBy"))); Assert.Null(first["reason"]); Assert.Null(first["criteriaOutcome"]);
+        Assert.Equal("Survey criteria checked", done["history"]![1]!.S("criteriaOutcome"));
+        var revision = Assert.Single(done["revisions"]!.AsArray())!;
+        Assert.Equal(["id", "previousRevisionId", "intendedUse", "acceptanceCriteria", "neededBy", "promisedBy", "sendingOwnerId", "receivingOwnerId", "targetTaskId", "targetDeliverableId",
+            "response", "createdAt", "createdBy", "source"], revision.AsObject().Select(x => x.Key));
+        Assert.Null(revision["previousRevisionId"]); Assert.Null(revision["targetDeliverableId"]); Assert.Null(revision["response"]);
+        Assert.Equal(["id", "sourceKey", "title", "revision", "url", "sourceRowVersion", "createdAt", "createdBy"], revision["source"]!.AsObject().Select(x => x.Key));
+        Assert.Equal(("A", "https://example.test/survey-A.pdf"), (revision["source"]!.S("revision"), revision["source"]!.S("url")));
+
+        var changed = await New(); var changedId = (await Create(changed)).G("id");
+        (await f.As(TestData.Alex).Patch($"/api/v1/deliverables/{changed.Source.G("id")}", new { revision = "B" }, f.Db(db => db.Deliverables.Single(d => d.Id == changed.Source.G("id")).RowVersion))).EnsureSuccessStatusCode();
+        Assert.True((await Detail(changed, changedId))["row"]!["sourceChanged"]!.GetValue<bool>());
+        Assert.True(Assert.Single((await (await f.As(TestData.Pm).GetAsync(Path(changed.Project.Id))).Json())["items"]!.AsArray())!["sourceChanged"]!.GetValue<bool>());
+    }
+
+    static readonly string[] RowKeys = ["id", "key", "title", "status", "rowVersion", "sourceDeliverableId", "sourceRowVersion", "declaredRevision", "sourceUrl", "sendingDisciplineId", "receivingDisciplineId",
+        "sendingOwnerId", "receivingOwnerId", "targetTaskId", "targetDeliverableId", "intendedUse", "acceptanceCriteria", "neededBy", "promisedBy", "currentRevisionId", "incorporatedRevisionId",
+        "senderName", "receiverName", "sourceKey", "targetKey", "ownersAvailable", "sourceChanged", "dateMismatch", "isOverdue"];
 }

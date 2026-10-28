@@ -1,5 +1,6 @@
 const { chromium } = require('playwright');
 const { clientConfig } = require('./config.fixture.cjs');
+const { handoffRow, handoffPage, handoffOptions, handoffSource, handoffTask, handoffPermission, handoffHistoryRow, handoffRevisionRow, handoffDetail, handoffCommand } = require('./handoffs.fixture.cjs');
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
@@ -14,7 +15,7 @@ const pid=id(1), sender=id(2), receiver=id(3), civil=id(4), electrical=id(5), so
 const permit={ok:true};
 const project={id:pid,projectNumber:'P-DEMO',name:'Harbour service coordination',client:'Pilot client',pmName:'Jay Patel',status:'Active',visibility:'Open',rowVersion:1,links:[],disciplines:[],starred:false,myRoles:['PM'],health:{computed:'Green',reported:'Green',overrideActive:false,reasons:[]},permissions:{edit:permit,healthOverride:{ok:false},proposeAllocation:{ok:true},snooze:{ok:true},manageExternalParties:{ok:true},reviewDates:{ok:true},captureWeeklyPlan:{ok:true},createSubmission:{ok:true},isPm:true,leadOf:[],createTaskIn:[civil],createDeliverableIn:[civil],transitions:[]}};
 const me={id:sender,displayName:'Alex Engineer',email:'alex@hub.test',roles:[],systemRoles:[],capabilities:{createProject:true,createTask:true,portfolio:true,workload:true,staff:true,admin:false,templates:true,readOnly:false,directReports:0},settings:{today:'2026-09-27',dateFormat:'yyyy-MM-dd',orgTimeZone:'America/Halifax',idleTimeoutHours:8},preferences:{denseRows:true,digestEnabled:true}};
-const options={canCreate:true,people:[{id:sender,displayName:'Alex Engineer'},{id:receiver,displayName:'Omar Electrical'}],disciplines:[{id:civil,name:'Civil'},{id:electrical,name:'Electrical'}],sources:[{id:source,key:'P-DEMO-D001',name:'Survey corridor',projectDisciplineId:civil,ownerId:sender,revision:'A',transmittalUrl:'https://example.test/survey-A.pdf',rowVersion:2}],tasks:[{id:target,key:'P-DEMO-T0001',name:'Service alignment',projectDisciplineId:electrical,ownerId:receiver,dueDate:'2026-09-29'}]};
+const options=handoffOptions({canCreate:true,people:[{id:sender,displayName:'Alex Engineer'},{id:receiver,displayName:'Omar Electrical'}],disciplines:[{id:civil,name:'Civil'},{id:electrical,name:'Electrical'}],sources:[handoffSource({id:source,key:'P-DEMO-D001',name:'Survey corridor',projectDisciplineId:civil,ownerId:sender,revision:'A',transmittalUrl:'https://example.test/survey-A.pdf',rowVersion:2})],tasks:[handoffTask({id:target,key:'P-DEMO-T0001',name:'Service alignment',projectDisciplineId:electrical,ownerId:receiver,dueDate:'2026-09-29'})]});
 let row=null, history=[], revisions=[], requests=[];
 const errors=[], unknown=[];
 (async()=>{
@@ -39,18 +40,18 @@ const errors=[], unknown=[];
   else if(path===`projects/${pid}`||path==='projects/P-DEMO')data=project;
   else if(path.endsWith('/handoffs/options'))data=options;
   else if(path===`projects/${pid}/handoffs`&&method==='POST'){
-   const b=req.postDataJSON();requests.push(b);row={...b,id:hid,key:'P-DEMO-H001',rowVersion:0,status:'Draft',sourceKey:'P-DEMO-D001',targetKey:'P-DEMO-T0001',senderName:'Alex Engineer',receiverName:'Omar Electrical',ownersAvailable:true,sourceChanged:false,dateMismatch:b.promisedBy>b.neededBy,isOverdue:false};data={id:hid,rowVersion:0};
-  } else if(path===`projects/${pid}/handoffs`)data={items:row?[row]:[],totalCount:row?1:0,page:1,pageSize:50};
+   const b=req.postDataJSON();requests.push(b);row=handoffRow({id:hid,key:'P-DEMO-H001',title:b.title,sourceDeliverableId:b.sourceDeliverableId,sourceRowVersion:b.sourceRowVersion,declaredRevision:b.declaredRevision,sourceUrl:b.sourceUrl,sendingDisciplineId:civil,receivingDisciplineId:b.receivingDisciplineId,sendingOwnerId:b.sendingOwnerId,receivingOwnerId:b.receivingOwnerId,targetTaskId:b.targetTaskId,targetDeliverableId:b.targetDeliverableId,intendedUse:b.intendedUse,acceptanceCriteria:b.acceptanceCriteria,neededBy:b.neededBy,promisedBy:b.promisedBy,sourceKey:'P-DEMO-D001',targetKey:'P-DEMO-T0001',senderName:'Alex Engineer',receiverName:'Omar Electrical',dateMismatch:b.promisedBy>b.neededBy});data=handoffCommand(hid,0);
+  } else if(path===`projects/${pid}/handoffs`)data=handoffPage(row?[row]:[]);
   else if(path.endsWith('/transition')){
    const b=req.postDataJSON();requests.push(b);
-   history.push({id:id(20+history.length),fromStatus:row.status,toStatus:b.toStatus,actor:b.toStatus==='Submitted'?'Alex Engineer':'Omar Electrical',createdAt:'2026-09-27T02:00:00Z',reason:b.reason,criteriaOutcome:b.criteriaOutcome,revisionId:id(9)});
+   history.push(handoffHistoryRow({id:id(20+history.length),fromStatus:row.status,toStatus:b.toStatus,actor:b.toStatus==='Submitted'?'Alex Engineer':'Omar Electrical',createdAt:'2026-09-27T02:00:00Z',reason:b.reason,criteriaOutcome:b.criteriaOutcome,revisionId:id(9)}));
    row.status=b.toStatus;row.rowVersion++;
-   if(b.toStatus==='Submitted'){row.currentRevisionId=id(9);revisions.push({id:id(9),intendedUse:row.intendedUse,acceptanceCriteria:row.acceptanceCriteria,createdAt:'2026-09-27T02:00:00Z',source:{sourceKey:row.sourceKey,revision:'A',url:row.sourceUrl}});}
+   if(b.toStatus==='Submitted'){row.currentRevisionId=id(9);revisions.push(handoffRevisionRow({id:id(9),intendedUse:row.intendedUse,acceptanceCriteria:row.acceptanceCriteria,createdAt:'2026-09-27T02:00:00Z',source:{sourceKey:row.sourceKey,revision:'A',url:row.sourceUrl}}));}
    if(b.toStatus==='Incorporated')row.incorporatedRevisionId=id(9);
-   data={id:hid,rowVersion:row.rowVersion};
+   data=handoffCommand(hid,row.rowVersion);
   } else if(path===`projects/${pid}/handoffs/${hid}`){
    const next={Draft:['Submitted','Cancelled'],Submitted:['Accepted','Clarification Requested','Returned','Cancelled'],Accepted:['Incorporated','Cancelled'],Incorporated:[]};
-   data={row,history,revisions,permissions:{edit:{ok:row.status==='Draft'},assign:permit,transitions:(next[row.status]||[]).map(to=>({to,permission:permit}))}};
+   data=handoffDetail({row,history,revisions,permissions:{edit:handoffPermission(row.status==='Draft'),assign:handoffPermission(),transitions:(next[row.status]||[]).map(to=>({to,permission:handoffPermission()}))}});
   } else {unknown.push(path); data={};}
   await route.fulfill({status:method==='POST'&&path===`projects/${pid}/handoffs`?201:200,contentType:'application/json',body:JSON.stringify(data)});
  });

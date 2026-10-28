@@ -22,6 +22,7 @@ REPOSITORY = 'jayapatel1511-hub/PM-Tool'
 IMAGE = 'ghcr.io/jayapatel1511-hub/pm-tool'
 REVISION = 'org.opencontainers.image.revision'
 KEEP_IMAGES = 3  # the running image, its rollback image and one older
+BACKUP = '/usr/local/libexec/pm-tool-review-backup'
 
 
 def prune(run, previous_id):
@@ -97,14 +98,16 @@ def deploy(root=ROOT, state_dir=STATE, run=command):
     previous_id = run(['docker', 'inspect', '--format', '{{.Image}}', 'pm-tool-review-api-1'])
     if not re.fullmatch(r'sha256:[0-9a-f]{64}', previous_id):
         raise RuntimeError('running image has no immutable image ID')
-    # Dump first: a missing or failing backup helper stops the run before any pull or tag.
-    dump = run(['/usr/local/libexec/pm-tool-review-backup'])
-    if not dump.startswith('Verified private dump: '):
-        raise RuntimeError('backup helper did not verify a nonempty dump')
+    # A missing backup helper stops the run before any tag or pull; the dump itself waits for a good pull, so a registry
+    # outage does not leave a new dump every five minutes.
+    run(['test', '-x', BACKUP])
     rollback_tag = 'rollback-'+previous_id.split(':')[1]
     run(['docker', 'tag', previous_id, 'pm-tool-review:'+rollback_tag])
     run(['docker', 'pull', ref])
     run(['docker', 'tag', ref, 'pm-tool-review:'+sha])
+    dump = run([BACKUP])
+    if not dump.startswith('Verified private dump: '):
+        raise RuntimeError('backup helper did not verify a nonempty dump')
     compose = ['docker', 'compose', '--env-file', '.runtime/review.env', '-f', 'hosting/homedev.compose.yml']
     if social:
         compose += ['-f', 'hosting/social-auth.override.yml']

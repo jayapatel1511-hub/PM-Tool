@@ -53,7 +53,7 @@ class ReviewDeployTests(unittest.TestCase):
         backup=next(i for i,c in enumerate(self.calls) if c[0].endswith('pm-tool-review-backup'))
         start=next(i for i,c in enumerate(self.calls) if 'up' in c)
         self.assertLess(backup,start)
-        self.assertLess(backup,next(i for i,c in enumerate(self.calls) if c[:2] in (['docker','tag'],['docker','pull'])))
+        self.assertLess(self.calls.index(['test','-x','/usr/local/libexec/pm-tool-review-backup']),next(i for i,c in enumerate(self.calls) if c[:2] in (['docker','tag'],['docker','pull'])))
         self.assertTrue(all('pilot' not in ' '.join(c) for c in self.calls))
         self.assertIn('--no-build',self.calls[start])
         self.assertEqual(os.stat(self.state/'state.json').st_mode&0o777,0o644)

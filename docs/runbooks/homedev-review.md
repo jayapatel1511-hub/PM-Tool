@@ -161,8 +161,9 @@ The installer refuses to continue until the daily backup helper is installed (`-
 earlier run), because the timer uses it for every pre-deployment dump.
 
 The timer verifies CI provenance for the exact digest, installed compose/probe hashes and any newest contract
-migration before pulling. It takes a verified dump, preserves the running immutable image under a separate
-rollback tag, pulls, starts only review API without building, then runs the installed private probe. After a
+migration before pulling. It checks the backup helper is installed, preserves the running immutable image under a
+separate rollback tag, pulls, takes a verified dump, starts only review API without building, then runs the installed
+private probe. The dump waits for a good pull, so a registry outage does not leave a new dump every five minutes. After a
 successful deployment it deletes older `pm-tool-review` images beyond the newest three (the running image, its
 rollback image and one more); images with any other tag are kept. A failed
 candidate is recorded and never retried; a different digest can deploy after rollback. Root-owned state at

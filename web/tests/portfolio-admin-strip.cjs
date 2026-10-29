@@ -7,6 +7,7 @@ const { meView, referenceData } = require('./me.fixture.cjs')
 const assert = require('node:assert/strict')
 const { startPreview, mockPlatformApi } = require('./platform-fixtures.cjs')
 const { emptyPortfolio, lastReview: strip } = require('./portfolio.fixture.cjs')
+const { pulse, unreadCount } = require('./notifications.fixture.cjs')
 
 const port = Number(process.env.ADMIN_STRIP_TEST_PORT || '7266')
 const personId = '00000000-0000-0000-0000-000000000002'
@@ -25,8 +26,8 @@ const personId = '00000000-0000-0000-0000-000000000002'
     const p = new URL(route.request().url()).pathname.replace('/api/v1/', ''); let data
     if (p === 'config') data = clientConfig()
     else if (p === 'me') data = meView({ id: personId, displayName: 'Alex Chen', email: 'alex@hub.test', systemRoles: roles, capabilities: { createTask: true, portfolio: true, admin }, settings: { today: '2026-10-18', restrictedProjectsEnabled: true }, flags: { admin_review: flag } })
-    else if (p === 'me/notifications/unread-count') data = { notifications: 0, following: 0 }
-    else if (p === 'me/notifications/pulse') data = { stamp: '0' }
+    else if (p === 'me/notifications/unread-count') data = unreadCount(0, 0)
+    else if (p === 'me/notifications/pulse') data = pulse('0')
     else if (p === 'reference') data = referenceData()
     else if (p === 'organisation') data = { includeIndirectReports: false, units: [] }
     else if (p === 'workspaces') data = []

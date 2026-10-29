@@ -2,19 +2,20 @@ import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { CheckCheck, Settings } from 'lucide-react'
 import { useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router'
-import { ChangeList, type ActivityRow } from '@/components/hub/activity'
+import { ChangeList } from '@/components/hub/activity'
 import { AccentDot, ActiveFilters, ChipToggle, Empty, ErrorBanner, Field, Loading, Page, selectCls } from '@/components/hub/common'
 import { TabBar } from '@/components/hub/fields'
-import { NotificationItem, useMarkRead, useOpenNotification, useUnread, type NotificationRow } from '@/components/hub/notifications'
+import { NotificationItem, useMarkRead, useOpenNotification, useUnread } from '@/components/hub/notifications'
 import { Avatar } from '@/components/hub/people'
 import { Key } from '@/components/hub/pills'
 import { itemHref } from '@/components/hub/search'
 import { Button } from '@/components/ui/button'
-import { get, post, qs } from '@/lib/api'
+import type { components } from '@/gen/api'
+import { typedRequest } from '@/lib/api'
 import { fmtDate, fmtTime, localIso, today, addDays } from '@/lib/format'
 import { en } from '@/i18n/en'
 import { t , runtimeText } from '@/lib/i18n'
-import type { Page as PageOf } from '@/lib/types'
+import { invalidateNotifications } from '@/lib/keys'
 import { cn } from '@/lib/utils'
 
 // Every event with a label (the same `event.*` table Preferences uses), so new events appear in the filter automatically.
@@ -55,7 +56,7 @@ function Personal() {
   const filters = { unread: sp.get('unread') === 'true', type: sp.get('type') ?? undefined, projectId: sp.get('projectId') ?? undefined }
   const q = useInfiniteQuery({
     queryKey: ['notifications', 'list', filters],
-    queryFn: ({ pageParam }) => get<PageOf<NotificationRow>>(`me/notifications${qs({ ...filters, page: pageParam, pageSize: 50 })}`),
+    queryFn: ({ pageParam }) => typedRequest('get', '/api/v1/me/notifications', { query: { ...filters, page: pageParam, pageSize: 50 } }),
     initialPageParam: 1, getNextPageParam: (last) => (last.page * last.pageSize < last.totalCount ? last.page + 1 : undefined),
   })
   const rows = useMemo(() => q.data?.pages.flatMap((p) => p.items) ?? [], [q.data])
@@ -108,8 +109,7 @@ function Personal() {
   )
 }
 
-interface FeedItem { entry: ActivityRow & { projectId: string }; count: number; projectNumber: string; projectName: string; notified: boolean; unread: boolean }
-interface Feed { projects: { projectId: string; projectNumber: string; name: string; status: string; unread: number }[]; items: FeedItem[]; totalCount: number; page: number; pageSize: number }
+type FeedItem = components['schemas']['FollowingItem']
 
 const PROJECT_ITEM = 'flex min-h-(--control-row-h) w-full items-center gap-2 rounded-md px-2.5 py-1 text-left hover:bg-muted'
 const PROJECT_ON = 'bg-accent font-semibold text-accent-foreground shadow-[inset_3px_0_0_var(--primary)] hover:bg-accent'
@@ -122,10 +122,10 @@ function Following() {
   const important = sp.get('important') === 'true'
   const set = (k: string, v?: string) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
   const q = useInfiniteQuery({ queryKey: ['following', projectId, important],
-    queryFn: ({ pageParam }) => get<Feed>(`me/following${qs({ projectId, importantOnly: important, page: pageParam, pageSize: 200 })}`),
+    queryFn: ({ pageParam }) => typedRequest('get', '/api/v1/me/following', { query: { projectId, importantOnly: important, page: pageParam, pageSize: 200 } }),
     initialPageParam: 1, getNextPageParam: (last) => last.page * last.pageSize < last.totalCount ? last.page + 1 : undefined,
   })
-  const markRead = async (id: string) => { await post(`me/following/${id}/read`); qc.invalidateQueries({ queryKey: ['following'] }); qc.invalidateQueries({ queryKey: ['unread'] }) }
+  const markRead = async (id: string) => { await typedRequest('post', '/api/v1/me/following/{projectId}/read', { params: { projectId: id } }); void invalidateNotifications(qc) }
   if (q.isPending) return <Loading rows={5} />
   if (q.error) return <div className="p-4"><ErrorBanner error={q.error} retry={() => q.refetch()} /></div>
   const projects = q.data.pages[0].projects

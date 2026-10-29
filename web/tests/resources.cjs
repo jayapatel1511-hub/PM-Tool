@@ -11,6 +11,7 @@ const { clientConfig } = require('./config.fixture.cjs');
 const { meView, referenceData } = require('./me.fixture.cjs');
 const { viewList } = require('./views.fixture.cjs');
 const path = require('path'), { spawn } = require('child_process'), assert = require('assert/strict');
+const { followRead, pulse, unreadCount } = require('./notifications.fixture.cjs')
 const port = process.env.PORT ?? '5177', base = `http://127.0.0.1:${port}`;
 const id = n => `00000000-0000-0000-0000-${String(n).padStart(12, '0')}`;
 const sam = id(1), alex = id(2), jill = id(3), pid = id(10), proposed = id(20), confirmed = id(21);
@@ -62,8 +63,8 @@ let server, browser;
     if (p === 'config') data = clientConfig()
     else if (p === 'me') data = { ...me, flags: { figure_names: figureNames, unfilled_beside_capacity: unassignedOn } }
     else if (p === 'me/sign-in') data = {}
-    else if (p === 'me/notifications/pulse') data = { stamp: '0' }
-    else if (p === 'me/notifications/unread-count') data = { notifications: 0, following: 0 }
+    else if (p === 'me/notifications/pulse') data = pulse('0')
+    else if (p === 'me/notifications/unread-count') data = unreadCount(0, 0)
     else if (p === 'workspaces') data = []
     else if (p === 'views') data = viewList()
     else if (p === 'reference') data = referenceData()
@@ -82,7 +83,7 @@ let server, browser;
     else if (p === 'workload') [status, data] = forbidden ? [403, { code: 'forbidden', detail: 'You cannot open the workload view.' }] : [200, grid(u.searchParams.get('sort'))]
     else if (p === 'projects/P-DEMO' || p === `projects/${pid}`) data = project
     else if (p.endsWith('/date-review')) data = { window: null, tasks: [], deliverables: [] }
-    else if (p.endsWith('/follow')) data = { level: 'My items only', source: 'Assignment' }
+    else if (p.endsWith('/follow')) data = followRead('MyItemsOnly', 'Assignment')
     else if (p === `projects/${pid}/changes/options`) data = coordinationOptions({ actorId: sam, canWrite: true, people: [{ id: jill, displayName: 'Jill Partial' }] })
     else if (p === `projects/${pid}/open-roles`) data = openRoles
     else if (p === `open-roles/${contractExample.id}` && route.request().method() === 'PATCH') { typedPatchHeaders = route.request().headers(); data = { ...contractExample, rowVersion: contractExample.rowVersion + 1 } }

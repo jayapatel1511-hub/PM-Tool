@@ -12,6 +12,7 @@ const results = path.resolve(__dirname, '../test-results/handoffs');
 fs.mkdirSync(results, { recursive: true });
 let server, browser;
 const assert = require('assert/strict');
+const { followRead, pulse, unreadCount } = require('./notifications.fixture.cjs')
 const id = n => `00000000-0000-0000-0000-${String(n).padStart(12,'0')}`;
 const pid=id(1), sender=id(2), receiver=id(3), civil=id(4), electrical=id(5), source=id(6), target=id(7), hid=id(8);
 const permit={ok:true};
@@ -32,13 +33,13 @@ const errors=[], unknown=[];
   if(path==='config')data=clientConfig();
   else if(path==='me')data=me;
   else if(path==='me/sign-in')data={};
-  else if(path==='me/notifications/pulse')data={stamp:'0'};
-  else if(path==='me/notifications/unread-count')data={notifications:0,following:0};
+  else if(path==='me/notifications/pulse')data=pulse('0');
+  else if(path==='me/notifications/unread-count')data=unreadCount(0, 0);
   else if(path==='workspaces')data=[];
   else if(path==='views')data=viewList([],true);
   else if(path==='projects')data={items:[project],totalCount:1};
   else if(path.endsWith('/date-review'))data={window:null,tasks:[],deliverables:[]};
-  else if(path.endsWith('/follow'))data={level:'My items only',source:'Assignment'};
+  else if(path.endsWith('/follow'))data=followRead('MyItemsOnly', 'Assignment');
   else if(path===`projects/${pid}`||path==='projects/P-DEMO')data=project;
   else if(path.endsWith('/handoffs/options'))data=options;
   else if(path===`projects/${pid}/handoffs`&&method==='POST'){

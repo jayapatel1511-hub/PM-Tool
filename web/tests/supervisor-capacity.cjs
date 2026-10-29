@@ -8,6 +8,7 @@ const { meView, referenceData } = require('./me.fixture.cjs')
 const path = require('path')
 const { spawn } = require('child_process')
 const assert = require('node:assert/strict')
+const { pulse, unreadCount, markedRead, notificationRow, notificationPage, preferences, followingProject, followingItem, followingFeed } = require('./notifications.fixture.cjs')
 
 const port = process.env.SUPERVISOR_CAPACITY_TEST_PORT ?? '5178'
 const base = `http://127.0.0.1:${port}`
@@ -31,10 +32,7 @@ const ref = referenceData()
 const emptyStaff = people => myStaffList(people, { canSeeAll: true, tiles: { staff: people.length, assignments: people.length, withOverdue: 0, withBlocked: 0, reviewsStalled: 0 } })
 const grid = people => ({ weeks: [monday], currentWeek: monday, evaluatedAt: '2027-01-03T00:00:00Z', partialView: false, draftAccess: false,
   settings: { horizonWeeks: 12, overPct: 105, underPct: 50, underWeeks: 2, staleDays: 28, maxHoursPerWeek: 80 }, people })
-const prefs = holdDigestWhenAway => ({
-  events: [], digest: { digestEnabled: true, holdDigestWhenAway, time: '08:00', orgTime: '08:00', weekendDigests: false,
-    sections: [], sectionsOff: [], weeklySummaryEnabled: false, managesProjects: false }, follows: [],
-})
+const prefs = holdDigestWhenAway => preferences({ digest: { holdDigestWhenAway } })
 
 ;(async () => {
   const server = spawn(process.execPath, ['node_modules/vite/bin/vite.js', 'preview', '--host', '127.0.0.1', '--port', port, '--strictPort'], { cwd: path.resolve(__dirname, '..'), stdio: 'inherit' })
@@ -44,8 +42,8 @@ const prefs = holdDigestWhenAway => ({
   let workload = true
   let digestHold = true
   let figureNames = false
-  const personalNotification = { id: id(80), eventType: 'TaskAssigned', title: 'Review the harbour task', body: 'A task needs your attention', count: 1, createdAt: '2027-01-03T09:00:00Z', updatedAt: '2027-01-03T09:00:00Z', readAt: null }
-  const feedItem = (n) => ({ entry: { id: id(90 + n), occurredAt: '2027-01-03T09:00:00Z', actorId: supervisor, actorName: 'Sam Supervisor', actorType: 'User', projectId: id(70), itemType: 'Task', itemId: id(71), itemKey: `P-DEMO-T${String(n).padStart(4, '0')}`, itemName: n === 201 ? 'Beyond first page' : `Feed item ${n}`, action: 'Updated', categories: [], changes: [], summary: '', source: 'Activity', ...(n === 1 || n === 201 ? { correlationId: 'corr-1' } : {}) }, count: 1, projectNumber: 'P-DEMO', projectName: 'Synthetic followed project', notified: false, unread: true })
+  const personalNotification = notificationRow({ id: id(80), title: 'Review the harbour task', body: 'A task needs your attention', createdAt: '2027-01-03T09:00:00Z', updatedAt: '2027-01-03T09:00:00Z' })
+  const feedItem = (n) => followingItem({ entry: { id: id(90 + n), occurredAt: '2027-01-03T09:00:00Z', actorId: supervisor, actorName: 'Sam Supervisor', actorType: 'User', projectId: id(70), itemType: 'Task', itemId: id(71), itemKey: `P-DEMO-T${String(n).padStart(4, '0')}`, itemName: n === 201 ? 'Beyond first page' : `Feed item ${n}`, action: 'Updated', categories: [], changes: [], summary: '', reason: null, source: 'Activity', correlationId: n === 1 || n === 201 ? 'corr-1' : null, snapshot: null, snapshotLabels: null }, projectNumber: 'P-DEMO', projectName: 'Synthetic followed project' })
   try {
     for (let i = 0; i < 60; i++) { try { if ((await fetch(base)).ok) break } catch {} await new Promise(r => setTimeout(r, 100)) }
     browser = await chromium.launch({ headless: true, ...(process.env.CHROME_EXECUTABLE_PATH ? { executablePath: process.env.CHROME_EXECUTABLE_PATH } : {}) })
@@ -60,17 +58,17 @@ const prefs = holdDigestWhenAway => ({
       if (endpoint === 'config') data = clientConfig()
       else if (endpoint === 'me') data = { ...me, capabilities: { ...me.capabilities, workload }, flags: { figure_names: figureNames } }
       else if (endpoint === 'me/sign-in') data = {}
-      else if (endpoint === 'me/notifications/pulse') data = { stamp: '0' }
-      else if (endpoint === 'me/notifications/unread-count') data = { notifications: 1, following: 1 }
+      else if (endpoint === 'me/notifications/pulse') data = pulse('0')
+      else if (endpoint === 'me/notifications/unread-count') data = unreadCount(1, 1)
       else if (endpoint === 'workspaces') data = []
       else if (endpoint === 'views') data = viewList()
       else if (endpoint === 'reference') data = ref
       else if (endpoint === 'staff') data = emptyStaff(people)
-      else if (endpoint === 'me/notifications' && request.method() === 'GET') data = { items: [personalNotification], page: 1, pageSize: 50, totalCount: 1 }
-      else if (endpoint === 'me/notifications/read' && request.method() === 'POST') { data = {}; assert.deepEqual(request.postDataJSON(), { ids: [personalNotification.id] }) }
+      else if (endpoint === 'me/notifications' && request.method() === 'GET') data = notificationPage([personalNotification])
+      else if (endpoint === 'me/notifications/read' && request.method() === 'POST') { data = markedRead(1); assert.deepEqual(request.postDataJSON(), { ids: [personalNotification.id] }) }
       else if (endpoint === 'me/following' && request.method() === 'GET') {
         const pageNumber = Number(url.searchParams.get('page') ?? '1')
-        data = { projects: [{ projectId: id(70), projectNumber: 'P-DEMO', name: 'Synthetic followed project', status: 'Active', unread: 1 }], items: pageNumber === 1 ? [feedItem(1), feedItem(2)] : [feedItem(201)], totalCount: 201, page: pageNumber, pageSize: 200 }
+        data = followingFeed([followingProject({ projectId: id(70), projectNumber: 'P-DEMO', name: 'Synthetic followed project', unread: 1 })], pageNumber === 1 ? [feedItem(1), feedItem(2)] : [feedItem(201)], { page: pageNumber, pageSize: 200, totalCount: 201 })
       }
       else if (endpoint === 'me/preferences' && request.method() === 'GET') data = prefs(digestHold)
       else if (endpoint === 'me/preferences/digest' && request.method() === 'PUT') { preferenceBodies.push(request.postDataJSON()); digestHold = preferenceBodies.at(-1).holdDigestWhenAway; data = {} }

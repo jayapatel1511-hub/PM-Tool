@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { invalidateChange, keysForChange, refreshProject } from './keys.ts'
+import { invalidateChange, invalidateNotifications, invalidatePreferences, keysForChange, refreshProject } from './keys.ts'
 import type { QueryClient } from '@tanstack/react-query'
 
 test('item changes keep the previous project and item-specific invalidations (AC-PLAT-19)', () => {
@@ -80,6 +80,16 @@ test('workload changes refresh the pickup own-load hint', () => {
     assert.ok(keysForChange(type, 'p1').some(key => key[0] === 'pickup-own-load'), type)
 })
 
+
+test('notification and preference commands refresh the bell, the centre, the Following tab and the preferences page', async () => {
+  const calls: string[] = []
+  const qc = { invalidateQueries: ({ queryKey }: { queryKey: string[] }) => { calls.push(queryKey.join('/')); return Promise.resolve() } } as unknown as QueryClient
+  await invalidateNotifications(qc)
+  assert.deepEqual(calls, ['notifications', 'following', 'unread']) // the queries' roots: ['notifications', 'list' | 'recent' | 'inbox'], ['following', id, important], ['unread', stamp]
+  calls.length = 0
+  await invalidatePreferences(qc)
+  assert.deepEqual(calls, ['preferences'])
+})
 
 test('new batch mutations refresh their mounted views and await active refetches', async () => {
   for (const [type, query] of [['OutputCommitment', ['commitment-reliability', 'p1']], ['OutputCommitment', ['weekly-promise', 'p1']], ['OutputCommitment', ['p', 'p1', 'readiness-window']], ['UserPreferences', ['onboarding', 'u1']]] as const)

@@ -4,7 +4,7 @@ import { selectCls } from '@/components/hub/common'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { useProjectRefresh } from '@/hooks/data'
-import { del, put } from '@/lib/api'
+import { typedRequest } from '@/lib/api'
 import { runtimeText, t } from '@/lib/i18n'
 import type { ProjectDetail } from '@/lib/types'
 import { cn } from '@/lib/utils'
@@ -12,8 +12,8 @@ import { cn } from '@/lib/utils'
 const LEVELS = ['AllActivity', 'MyItemsOnly', 'Muted'] as const
 
 async function change(projectId: string, level: string | null) {
-  if (level) await put(`projects/${projectId}/follow`, { level })
-  else await del(`projects/${projectId}/follow`)
+  if (level) await typedRequest('put', '/api/v1/projects/{id}/follow', { params: { id: projectId }, body: { level } })
+  else await typedRequest('delete', '/api/v1/projects/{id}/follow', { params: { id: projectId } })
 }
 /** Follow level for one project (§12.18 ASG-02): only the user sets their own; any change is a manual choice. Lists that
  *  show several projects pass `projectName`, so each select is named for its project ("Follow level for …"). */

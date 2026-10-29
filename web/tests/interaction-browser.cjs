@@ -30,6 +30,7 @@ const timeline = projectTimeline({ discipline, task: taskId, deliverable: delive
 
 const { activityPage } = require('./activity.fixture.cjs')
 const { startReadiness } = require('./task-start.fixture.cjs')
+const { followRead, pulse, unreadCount } = require('./notifications.fixture.cjs')
 const activity = activityPage(id, { actorId: person, itemId: taskId, itemKey: task.key, itemName: task.name })
 let server, browser
 ;(async () => {
@@ -50,7 +51,7 @@ let server, browser
     if (p === 'config') data = clientConfig()
     else if (p === 'me') data = me
     else if (p === 'me/sign-in') data = {}
-    else if (p.startsWith('me/notifications/')) data = p.endsWith('unread-count') ? { notifications: 0, following: 0 } : { stamp: '0' }
+    else if (p.startsWith('me/notifications/')) data = p.endsWith('unread-count') ? unreadCount(0, 0) : pulse('0')
     else if (p === 'workspaces') data = []
     else if (p === 'views') data = viewList([savedView({ id: id(8), name: 'My saved view', params: { group: 'status' } })])
     else if (p === 'reference') data = referenceData({ disciplines: [referenceDiscipline(discipline, 'Civil')], deliverableTypes: [referenceDeliverableType(id(60), 'Synthetic drawing')] })
@@ -76,7 +77,7 @@ let server, browser
     else if (p === `projects/${pid}/timeline`) data = timeline
     else if (p === `projects/${pid}/date-review`) data = { window: null, tasks: [], deliverables: [] }
     else if (p === `items/Task/${taskId}/date-context`) data = dateContextRead({ earliestStart: { date: '2026-10-22', reasons: [] }, earliestDue: { date: '2026-11-03', reasons: [] }, latestDue: { date: '2026-11-10', reasons: [] } })
-    else if (p.endsWith('/follow')) data = { level: 'My items only', source: 'Assignment' }
+    else if (p.endsWith('/follow')) data = followRead('MyItemsOnly', 'Assignment')
     else if (p === `tasks/${taskId}/transition`) { if (delayedTransition) await new Promise(resolve => { releaseTransition = resolve }); writes.push({ method, path: p, body: req.postDataJSON?.() }); data = delayedTransition ? { code:'forbidden',detail:'Synthetic transition refusal' } : { code: 'start_authorisation_required', detail: 'A start authorisation is required.' } }
     else if (method === 'POST' || method === 'PATCH' || method === 'DELETE') { writes.push({ method, path: p, body: req.postDataJSON?.() }); data = p === `tasks/${taskId}` ? { rowVersion: 3 } : {} }
     else { unknown.push(p); data = {} }

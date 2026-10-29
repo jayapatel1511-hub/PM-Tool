@@ -66,6 +66,19 @@ export function invalidateChange(qc: QueryClient, itemType?: string, projectId?:
   return Promise.all(keysForChange(itemType, projectId, itemId).map(queryKey => qc.invalidateQueries({ queryKey })))
 }
 
+/** What the bell, the Notifications page, My Work's inbox and the Following tab read: a changed pulse stamp, a read marker or a
+ *  mark-read reaches all of them; the count query is keyed by the pulse stamp, so its root is enough. */
+export const notificationRoots = [['notifications'], ['following'], ['unread']] as const
+
+export function invalidateNotifications(qc: QueryClient) {
+  return Promise.all(notificationRoots.map(queryKey => qc.invalidateQueries({ queryKey })))
+}
+
+/** The Preferences page's own read: channels per event, the digest and the follow levels. */
+export function invalidatePreferences(qc: QueryClient) {
+  return qc.invalidateQueries({ queryKey: ['preferences'] })
+}
+
 /** Keep both passes: derived project state lands after the command (§23.5). */
 export function refreshProject(qc: QueryClient, projectId?: string) {
   invalidateChange(qc, undefined, projectId)

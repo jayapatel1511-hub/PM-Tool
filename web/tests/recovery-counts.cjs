@@ -12,6 +12,7 @@ const { attentionRow, attentionList, attentionSnoozed, healthOverrideApplied, he
 const { timeRow, timeView, entrySaved } = require('./time.fixture.cjs');
 const { myStaffList } = require('./my-work.fixture.cjs');
 const { dashboardView, dashboardDiscipline } = require('./dashboard.fixture.cjs');
+const { followRead, pulse, unreadCount } = require('./notifications.fixture.cjs')
 const port = process.env.RECOVERY_TEST_PORT || '19504', base = `http://127.0.0.1:${port}`;
 const id = n => `00000000-0000-0000-0000-${String(n).padStart(12,'0')}`;
 const pid=id(1), person=id(2), civil=id(3), client=id(4), office=id(5), deleted=id(6), parent=id(7), template=id(8);
@@ -41,15 +42,15 @@ let server,browser;const errors=[],requests=[],unknown=[];
   if(p==='config')data=clientConfig();
   else if(p==='me')data=me();
   else if(p==='me/sign-in')data={};
-  else if(p==='me/notifications/pulse')data={stamp:'0'};
-  else if(p==='me/notifications/unread-count')data={notifications:0,following:0};
+  else if(p==='me/notifications/pulse')data=pulse('0');
+  else if(p==='me/notifications/unread-count')data=unreadCount(0, 0);
   else if(p==='workspaces')data=[];
   else if(p==='views')data=viewList();
   else if(p==='reference')data=referenceData({disciplines:[referenceDiscipline(civil,'Civil')],clients:[referenceClient(client,'Synthetic client')],offices:[referenceOffice(office,'Synthetic office')]});
   else if(p==='projects')data={items:[{...row(1),id:pid,projectNumber:'SYN-RCV'}],totalCount:1};
   else if(p===`projects/${pid}`||p==='projects/SYN-RCV')data=project();
   else if(p.endsWith('/date-review'))data={window:null,tasks:[],deliverables:[]};
-  else if(p.endsWith('/follow'))data={level:'My items only',source:'Assignment'};
+  else if(p.endsWith('/follow'))data=followRead('MyItemsOnly', 'Assignment');
   else if(p===`tasks/${deleted}/restore`){requests.push({path:p,ifMatch:req.headers()['if-match']});restored=true;data={id:deleted,rowVersion:5};}
   else if(p.endsWith('/deleted'))data=deletedTasks({deleted,parent,restored});
   else if(p===`projects/${pid}/tasks`)data={items:[],totalCount:0,page:1,pageSize:50};

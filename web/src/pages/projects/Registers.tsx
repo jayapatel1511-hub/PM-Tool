@@ -1,6 +1,6 @@
 import { UrlSearchInput } from '@/components/hub/url-search'
 import { ViewMenu } from '@/components/hub/views'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { ListPlus, Lock, OctagonAlert, Plus, ShieldAlert, Trash2 } from 'lucide-react'
 import { useId, useState, type ReactNode } from 'react'
 import { useSearchParams } from 'react-router'
@@ -19,7 +19,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useProject, useProjectRefresh } from '@/hooks/data'
 import { useFlag, useMe } from '@/lib/auth'
-import { ApiError, get, patch, post, qs, typedRequest } from '@/lib/api'
+import { ApiError, typedRequest } from '@/lib/api'
 import { fmtDate, fmtTime, today } from '@/lib/format'
 import { t, tv , runtimeText } from '@/lib/i18n'
 import type { ProjectDiscipline } from '@/lib/types'
@@ -37,23 +37,15 @@ import { useSafeForm } from '@/hooks/drafts'
 
 // Risk and Issue Registers (§12.10, §13.13, packet 014).
 
-export type RiskRow = components['schemas']['RiskListRow']
-export interface IssueRow {
-  id: string; projectId: string; key: string; title: string; status: string; issueType: string; raisedById: string; raisedByName?: string; ownerId: string; ownerName?: string
-  severity: string; dateRaised: string; targetResolutionDate?: string; isOverdue: boolean; daysOverdue: number; resolution?: string; resolvedDate?: string
-  originRiskId?: string; originRiskKey?: string; projectDisciplineId?: string; disciplineName?: string; rowVersion: number
-  locationSummary?: string; locationLabels?: string[]; affectedDisciplineIds?: string[]; affectedDisciplineNames?: string[]; affectedDisciplineSummary?: string
-  documentSummary?: string; documentIdentifiers?: string[]; documentRevisions?: string[]; verificationStatus?: string
-  groupLabel?: string
-}
-interface Perm { ok: boolean; reason?: string | null }
-interface LinkRow { id: string; targetType: string; targetId: string; key: string; name: string; status?: string | null; date?: string | null; person?: string | null }
-interface Detail { description?: string; project: { id: string; projectNumber: string; name: string }; links: LinkRow[]; permissions: { edit: Perm; changeType?: Perm; transitions: { to: string; ok: boolean; reason?: string | null }[]; comment: boolean } }
-interface RiskDetail extends Detail { risk: RiskRow; realisedIssue?: { id: string; key: string; title: string; status: string } | null }
-interface IssueDetail extends Detail { issue: IssueRow; originRisk?: { id: string; key: string; title: string; status: string } | null }
-interface IssueLocation { id: string; kind: string; siteArea?: string; building?: string; level?: string; room?: string; assetSystem?: string; alignment?: string; startStation?: number; endStation?: number; stationUnits?: string; coordinateX?: number; coordinateY?: number; coordinateZ?: number; coordinateReferenceSystem?: string; coordinateUnits?: string; rowVersion: number }
-interface IssueDocument { sourceSystem?: string; stableSourceId?: string; registeredBy?: string; registeredAt?: string; registrationMethod?: string; replacedById?: string | null; id: string; kind: string; identifier: string; revision: string; sourceUrl: string; externalTopicId?: string; modelElementGuid?: string; viewpointUrl?: string; isAvailable: boolean; rowVersion: number }
-interface IssueVerification { id: string; verifierId: string; status: string; evidenceUrl?: string; note?: string; verifiedAt?: string; rowVersion: number }
+type Schemas = components['schemas']
+export type RiskRow = Schemas['RiskListRow']
+/** The register's row; the table's grouping adds the label the row is shown under. */
+export type IssueRow = Schemas['IssueRow'] & { groupLabel?: string }
+type LinkRow = Schemas['ItemLinkRow']
+type IssueDocument = Schemas['IssueDocumentRow']
+type IssueVerification = Schemas['IssueVerificationRow']
+type LocationBody = Schemas['IssueLocationBody']
+type DocumentBody = Schemas['IssueDocumentBody']
 type IssueReferenceImpact = components['schemas']['ReferenceImpactRow']
 type Target = { type: 'Task' | 'Deliverable'; id: string; key: string; name: string }
 
@@ -72,16 +64,6 @@ function Severity({ level, score }: { level: string; score?: number }) {
   return <Chip tone={TONE[level as keyof typeof TONE] ?? 'idle'}>{tv(level)}{score != null && ` · ${score}`}</Chip>
 }
 
-function useRegisterRefresh() {
-  const qc = useQueryClient()
-  const refresh = useProjectRefresh()
-  return (projectId: string, kind?: 'risk' | 'issue', id?: string) => {
-    if (kind && id) qc.invalidateQueries({ queryKey: [kind, id] })
-    qc.invalidateQueries({ queryKey: ['coordination'] })
-    refresh(projectId)
-  }
-}
-
 // ---------- Register tables (FR-008) ----------
 
 function useFilters() {
@@ -93,6 +75,11 @@ function useFilters() {
 }
 
 type Token = { key: string; label: string; value: ReactNode }
+
+/** The register filters under the contract's names. */
+const registerQuery = (f: ReturnType<typeof useFilters>['filters']) => ({
+  Q: f.q ?? undefined, Status: f.status ?? undefined, Severity: f.severity ?? undefined, OwnerId: f.ownerId ?? undefined, DisciplineId: f.disciplineId ?? undefined, Indicator: f.indicator ?? undefined })
+const station = (v: string | null) => v && Number.isFinite(Number(v)) ? Number(v) : undefined
 
 /** Labelled register filters, the indicator as a quick chip and active filters as removable tokens (§13.0 Filters). */
 function RegisterFilters({ f, statuses, open, indicator, owners, disciplines, extra, extraTokens = [], onClear = f.clear }: {
@@ -160,7 +147,7 @@ export function RisksTab() {
   const panel = sp.get('panel')
   const [raising, setRaising] = useState(false)
   const views = useFlag('record_engine_additions') // §47.5 FR-REC-12: saved views as the Issues register has
-  const q = useQuery({ queryKey: ['p', p.id, 'risks', f.filters], queryFn: () => get<RiskRow[]>(`projects/${p.id}/risks${qs(f.filters)}`) })
+  const q = useQuery({ queryKey: ['p', p.id, 'risks', f.filters], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/risks', { params: { id: p.id }, query: registerQuery(f.filters) }) })
   const table = useTable<RiskRow>('hub.riskColumns', [
     { id: 'key', label: t('milestone.key'), fixed: true, sort: (r) => r.key, className: 'whitespace-nowrap', cell: (r) => <Key>{r.key}</Key> },
     { id: 'title', label: t('register.title'), fixed: true, sort: (r) => r.title.toLowerCase(), className: 'min-w-[14rem]',
@@ -219,7 +206,9 @@ export function IssuesTab() {
   const openPanel = useItemPanel()
   const panel = sp.get('panel')
   const [raising, setRaising] = useState(false)
-  const q = useQuery({ queryKey: ['p', p.id, 'issues', issueFilters], queryFn: () => get<IssueRow[]>(`projects/${p.id}/issues${qs(issueFilters)}`) })
+  const q = useQuery({ queryKey: ['p', p.id, 'issues', issueFilters], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/issues', { params: { id: p.id }, query: { ...registerQuery(f.filters), Location: issueFilters.location ?? undefined, Document: issueFilters.document ?? undefined,
+    Revision: issueFilters.revision ?? undefined, Verification: issueFilters.verification ?? undefined, Alignment: issueFilters.alignment ?? undefined, StationFrom: station(issueFilters.stationFrom),
+    StationTo: station(issueFilters.stationTo), StationUnits: issueFilters.stationUnits ?? undefined, IssueType: issueFilters.issueType ?? undefined } }) })
   const verificationLabel = (v: string) => v === 'None' ? t('issue.noVerification') : v === 'Stale' ? t('issue.staleVerification') : tv(v)
   const table = useTable<IssueRow>('hub.issueColumns', [
     { id: 'key', label: t('milestone.key'), fixed: true, sort: (r) => r.key, className: 'whitespace-nowrap', cell: (r) => <Key>{r.key}</Key> },
@@ -244,7 +233,7 @@ export function IssuesTab() {
   ], q.data ?? [], (r) => [r.targetResolutionDate, r.key])
   const group = sp.get('group')
   // An issue appears once under each of its locations, disciplines (primary and affected), documents or revisions.
-  const multiGroup: Record<string, [(r: IssueRow) => (string | undefined)[] | undefined, string]> = {
+  const multiGroup: Record<string, [(r: IssueRow) => (string | null | undefined)[] | undefined, string]> = {
     location: [(r) => r.locationLabels, t('issue.noLocationGroup')],
     discipline: [(r) => [r.disciplineName, ...(r.affectedDisciplineNames ?? [])], t('register.noDiscipline')],
     document: [(r) => r.documentIdentifiers, t('issue.noDocumentGroup')],
@@ -393,7 +382,7 @@ function DisciplineSelect({ id, projectId, value, onChange }: { id: string; proj
 }
 
 function RiskForm({ projectId, link, disciplineId, onClose }: { projectId: string; link?: Target; disciplineId?: string | null; onClose: () => void }) {
-  const done = useRegisterRefresh()
+  const done = useProjectRefresh()
   const openPanel = useItemPanel()
   const [f, setF] = useState<Record<string, any>>({ projectDisciplineId: disciplineId ?? null })
   const [err, setErr] = useState<ApiError | null>(null)
@@ -402,9 +391,9 @@ function RiskForm({ projectId, link, disciplineId, onClose }: { projectId: strin
   const submit = async () => {
     setErr(null); setBusy(true)
     try {
-      const r = await post(`projects/${projectId}/risks`, { title: f.title, description: f.description, probability: f.probability, impact: f.impact, ownerId: f.ownerId || null,
+      const r = await typedRequest('post', '/api/v1/projects/{id}/risks', { params: { id: projectId }, body: { title: f.title, description: f.description, probability: f.probability, impact: f.impact, ownerId: f.ownerId || null,
         reviewDate: f.reviewDate || null, mitigation: f.mitigation, triggerIndicator: f.triggerIndicator, projectDisciplineId: f.projectDisciplineId || null,
-        links: link ? [{ targetType: link.type, targetId: link.id }] : [] })
+        links: link ? [{ targetType: link.type, targetId: link.id, relation: null }] : [] } })
       toast.success(t('risk.raised', { key: r.key })); done(projectId); safe.clear(); onClose(); openPanel('Risk', r.id)
     } catch (e) { setErr(e as ApiError) } finally { setBusy(false) }
   }
@@ -490,20 +479,20 @@ const CHOICE_ON = 'border-primary bg-accent font-medium hover:bg-accent'
 const ISSUE_FORM_FIELDS = ['title', 'description', 'severity', 'ownerId', 'targetResolutionDate', 'dateRaised', 'projectDisciplineId', 'issueType', 'issueId']
 
 /** A Coordination issue is raised with its first location or drawing/model reference (FR-LOC-01); others can add them later. */
-const issueBody = (f: Record<string, any>) => {
+const issueBody = (f: Record<string, any>): Schemas['RegisterIssueBody'] => {
   const coordination = f.issueType === 'Coordination'
   const byLocation = (f.referenceKind ?? 'location') === 'location'
   const reference = coordination ? (byLocation ? locationBody(f.location ?? NEW_LOCATION) : documentBody(f.document ?? NEW_DOCUMENT)) : null
   if (typeof reference === 'string') throw new Error(runtimeText(reference))
   return {
-    title: f.title, description: f.description, severity: f.severity, ownerId: f.ownerId || null, targetResolutionDate: f.targetResolutionDate || null,
-    dateRaised: f.dateRaised || null, projectDisciplineId: f.projectDisciplineId || null, issueType: f.issueType ?? 'General',
-    locations: reference && byLocation ? [reference] : [], documents: reference && !byLocation ? [reference] : [],
+    title: f.title, description: f.description, severity: f.severity, raisedById: null, ownerId: f.ownerId || null, targetResolutionDate: f.targetResolutionDate || null,
+    dateRaised: f.dateRaised || null, projectDisciplineId: f.projectDisciplineId || null, issueType: f.issueType ?? 'General', links: [],
+    locations: reference && byLocation ? [reference as LocationBody] : [], documents: reference && !byLocation ? [reference as DocumentBody] : [],
   }
 }
 
 function IssueForm({ projectId, link, disciplineId, onClose }: { projectId: string; link?: Target; disciplineId?: string | null; onClose: () => void }) {
-  const done = useRegisterRefresh()
+  const done = useProjectRefresh()
   const openPanel = useItemPanel()
   const [f, setF] = useState<Record<string, any>>({ projectDisciplineId: disciplineId ?? null })
   const [err, setErr] = useState<ApiError | null>(null)
@@ -512,7 +501,7 @@ function IssueForm({ projectId, link, disciplineId, onClose }: { projectId: stri
   const submit = async () => {
     setErr(null); setBusy(true)
     try {
-      const r = await post(`projects/${projectId}/issues`, { ...issueBody(f), links: link ? [{ targetType: link.type, targetId: link.id }] : [] })
+      const r = await typedRequest('post', '/api/v1/projects/{id}/issues', { params: { id: projectId }, body: { ...issueBody(f), links: link ? [{ targetType: link.type, targetId: link.id, relation: null }] : [] } })
       toast.success(t('issue.raised', { key: r.key })); done(projectId); safe.clear(); onClose(); openPanel('Issue', r.id)
     } catch (e) { setErr(e as ApiError) } finally { setBusy(false) }
   }
@@ -561,20 +550,21 @@ export function RaiseMenu({ projectId, targetType, targetId, targetKey, targetNa
 
 /** RSK-03: Realised needs the issue it became — a new one, filled from the risk, or one already raised. */
 function RealiseDialog({ r, onClose }: { r: RiskRow; onClose: () => void }) {
-  const done = useRegisterRefresh()
+  const done = useProjectRefresh()
   const openPanel = useItemPanel()
   const [mode, setMode] = useState<'new' | 'existing'>('new')
   const [f, setF] = useState<Record<string, any>>({ title: r.title, severity: r.band, ownerId: r.ownerId, ownerName: r.ownerName, projectDisciplineId: r.projectDisciplineId ?? null })
   const [issueId, setIssueId] = useState('')
   const [err, setErr] = useState<ApiError | null>(null)
   const [busy, setBusy] = useState(false)
-  const issues = useQuery({ queryKey: ['p', r.projectId, 'issues', { pick: true }], queryFn: () => get<IssueRow[]>(`projects/${r.projectId}/issues`) })
+  const issues = useQuery({ queryKey: ['p', r.projectId, 'issues', { pick: true }], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/issues', { params: { id: r.projectId } }) })
   const choices = (issues.data ?? []).filter((x) => !x.originRiskId)
   const save = async () => {
     setErr(null); setBusy(true)
     try {
-      const res = await post(`risks/${r.id}/transition`, { toStatus: 'Realised', ...(mode === 'new' ? { issue: issueBody(f) } : { issueId }) }, r.rowVersion)
-      toast.success(t('risk.realisedToast', { key: r.key, issue: res.issueKey })); done(r.projectId, 'risk', r.id); onClose(); openPanel('Issue', res.issueId)
+      const res = await typedRequest('post', '/api/v1/risks/{id}/transition', { params: { id: r.id }, ifMatch: r.rowVersion,
+        body: { toStatus: 'Realised', reason: null, rowVersion: null, issue: mode === 'new' ? issueBody(f) : null, issueId: mode === 'new' ? null : issueId } })
+      toast.success(t('risk.realisedToast', { key: r.key, issue: res.issueKey ?? '' })); done(r.projectId); onClose(); if (res.issueId) openPanel('Issue', res.issueId)
     } catch (e) { setErr(e as ApiError) } finally { setBusy(false) }
   }
   const fe = err?.fieldErrors ?? {}
@@ -606,7 +596,7 @@ function RealiseDialog({ r, onClose }: { r: RiskRow; onClose: () => void }) {
 }
 
 function ResolveDialog({ i, onClose }: { i: IssueRow; onClose: () => void }) {
-  const done = useRegisterRefresh()
+  const done = useProjectRefresh()
   const [text, setText] = useState('')
   const [date, setDate] = useState(today())
   const [err, setErr] = useState<ApiError | null>(null)
@@ -614,8 +604,8 @@ function ResolveDialog({ i, onClose }: { i: IssueRow; onClose: () => void }) {
   const save = async () => {
     setErr(null); setBusy(true)
     try {
-      await post(`issues/${i.id}/transition`, { toStatus: 'Resolved', resolution: text, resolvedDate: date }, i.rowVersion)
-      toast.success(t('issue.resolvedToast', { key: i.key })); done(i.projectId, 'issue', i.id); onClose()
+      await typedRequest('post', '/api/v1/issues/{id}/transition', { params: { id: i.id }, ifMatch: i.rowVersion, body: { toStatus: 'Resolved', reason: null, rowVersion: null, resolution: text, resolvedDate: date } })
+      toast.success(t('issue.resolvedToast', { key: i.key })); done(i.projectId); onClose()
     } catch (e) { setErr(e as ApiError) } finally { setBusy(false) }
   }
   return (
@@ -671,7 +661,7 @@ function Links({ links, canEdit, projectId, onAdd, onChange }: { links: LinkRow[
   )
 }
 
-function Steps({ transitions, label, onStep }: { transitions: Detail['permissions']['transitions']; label: (to: string) => string; onStep: (to: string) => void }) {
+function Steps({ transitions, label, onStep }: { transitions: Schemas['RegisterTransition'][]; label: (to: string) => string; onStep: (to: string) => void }) {
   return (
     <div className="flex flex-wrap gap-2">
       {transitions.map((s) => <Button key={s.to} size="sm" variant={['Realised', 'Resolved'].includes(s.to) ? 'default' : 'outline'} disabled={!s.ok} title={s.reason ?? undefined} onClick={() => onStep(s.to)}>{label(s.to)}</Button>)}
@@ -683,8 +673,8 @@ function Steps({ transitions, label, onStep }: { transitions: Detail['permission
 const levelOptions = (name: 'probability' | 'impact') => LEVELS.map((n) => ({ value: String(n), label: `${n} · ${t(`risk.${name}.${n}`)}` }))
 
 export function RiskPanel({ id }: PanelProps) {
-  const q = useQuery({ queryKey: ['risk', id], queryFn: () => get<RiskDetail>(`risks/${id}`) })
-  const done = useRegisterRefresh()
+  const q = useQuery({ queryKey: ['risk', id], queryFn: () => typedRequest('get', '/api/v1/risks/{id}', { params: { id } }) })
+  const done = useProjectRefresh()
   const openPanel = useItemPanel()
   const project = useProject(q.data?.project.id)
   const [tab, setTab] = useState<'links' | 'comments' | 'history'>('links')
@@ -695,9 +685,10 @@ export function RiskPanel({ id }: PanelProps) {
   const can = perm.edit.ok
   // Typed text saves on blur only until the project says no reason is needed (FR-SAV-01).
   const needsReason = project.data?.permissions.needsReason !== false
-  const refresh = () => done(r.projectId, 'risk', r.id)
-  const save = (body: object) => patch(`risks/${r.id}`, body, r.rowVersion).then(() => { refresh(); return true }).catch((e) => { toast.error(errorText(e)); return false })
-  const go = (to: string, reason?: string) => post(`risks/${r.id}/transition`, { toStatus: to, reason }, r.rowVersion).then(refresh)
+  const refresh = () => done(r.projectId)
+  const save = (body: object) => typedRequest('patch', '/api/v1/risks/{id}', { params: { id: r.id }, body, ifMatch: r.rowVersion }).then(() => { refresh(); return true }).catch((e) => { toast.error(errorText(e)); return false })
+  const go = (to: string, reason?: string) => typedRequest('post', '/api/v1/risks/{id}/transition', { params: { id: r.id }, ifMatch: r.rowVersion,
+    body: { toStatus: to, reason: reason ?? null, rowVersion: null, issue: null, issueId: null } }).then(refresh)
   const onStep = async (to: string) => {
     if (to === 'Realised' || to === 'Closed') { setStep(to); return }
     try { await go(to) } catch (e) { toast.error(errorText(e)) }
@@ -730,7 +721,7 @@ export function RiskPanel({ id }: PanelProps) {
         <FieldRow label={t('risk.trigger')}><InlineText value={r.triggerIndicator ?? ''} disabled={!can} needsReason={needsReason} onSave={(v) => save({ triggerIndicator: v })} /></FieldRow>
       </FieldGroup>
       <TabBar tabs={[{ id: 'links' as const, label: t('decision.links'), count: q.data.links.length }, ...(ItemSlots.Comments ? [{ id: 'comments' as const, label: t('common.comments') }] : []), { id: 'history' as const, label: t('common.history') }]} value={tab} onChange={setTab} />
-      {tab === 'links' && <Links links={q.data.links} canEdit={can} projectId={r.projectId} onChange={refresh} onAdd={(x) => post(`risks/${r.id}/links`, { targetType: x.targetType, targetId: x.targetId })} />}
+      {tab === 'links' && <Links links={q.data.links} canEdit={can} projectId={r.projectId} onChange={refresh} onAdd={(x) => typedRequest('post', '/api/v1/risks/{id}/links', { params: { id: r.id }, body: { targetType: x.targetType, targetId: x.targetId, relation: null } })} />}
       {tab === 'comments' && <CommentsSlot type="Risk" id={r.id} projectId={r.projectId} />}
       {tab === 'history' && <HistoryList type="Risk" id={r.id} />}
       {step === 'Realised' && <RealiseDialog r={r} onClose={() => setStep(null)} />}
@@ -741,8 +732,8 @@ export function RiskPanel({ id }: PanelProps) {
 }
 
 export function IssuePanel({ id }: PanelProps) {
-  const q = useQuery({ queryKey: ['issue', id], queryFn: () => get<IssueDetail>(`issues/${id}`) })
-  const done = useRegisterRefresh()
+  const q = useQuery({ queryKey: ['issue', id], queryFn: () => typedRequest('get', '/api/v1/issues/{id}', { params: { id } }) })
+  const done = useProjectRefresh()
   const openPanel = useItemPanel()
   const project = useProject(q.data?.project.id)
   const [tab, setTab] = useState<'links' | 'comments' | 'history'>('links')
@@ -754,9 +745,10 @@ export function IssuePanel({ id }: PanelProps) {
   // Typed text saves on blur only until the project says no reason is needed (FR-SAV-01).
   const needsReason = project.data?.permissions.needsReason !== false
   const open = ['Open', 'In Progress'].includes(i.status)
-  const refresh = () => done(i.projectId, 'issue', i.id)
-  const save = (body: object) => patch(`issues/${i.id}`, body, i.rowVersion).then(() => { refresh(); return true }).catch((e) => { toast.error(errorText(e)); return false })
-  const go = (to: string, reason?: string) => post(`issues/${i.id}/transition`, { toStatus: to, reason }, i.rowVersion).then(refresh)
+  const refresh = () => done(i.projectId)
+  const save = (body: object) => typedRequest('patch', '/api/v1/issues/{id}', { params: { id: i.id }, body, ifMatch: i.rowVersion }).then(() => { refresh(); return true }).catch((e) => { toast.error(errorText(e)); return false })
+  const go = (to: string, reason?: string) => typedRequest('post', '/api/v1/issues/{id}/transition', { params: { id: i.id }, ifMatch: i.rowVersion,
+    body: { toStatus: to, reason: reason ?? null, rowVersion: null, resolution: null, resolvedDate: null } }).then(refresh)
   const reopening = (to: string) => to === 'In Progress' && i.status === 'Resolved'
   const onStep = async (to: string) => {
     if (to === 'Resolved' || to === 'Cancelled' || reopening(to)) { setStep(to); return }
@@ -813,7 +805,7 @@ export function IssuePanel({ id }: PanelProps) {
         <IssueReferenceImpacts issue={i} />
       </div>
       <TabBar tabs={[{ id: 'links' as const, label: t('decision.links'), count: q.data.links.length }, ...(ItemSlots.Comments ? [{ id: 'comments' as const, label: t('common.comments') }] : []), { id: 'history' as const, label: t('common.history') }]} value={tab} onChange={setTab} />
-      {tab === 'links' && <Links links={q.data.links} canEdit={can} projectId={i.projectId} onChange={refresh} onAdd={(x) => post(`issues/${i.id}/links`, { targetType: x.targetType, targetId: x.targetId })} />}
+      {tab === 'links' && <Links links={q.data.links} canEdit={can} projectId={i.projectId} onChange={refresh} onAdd={(x) => typedRequest('post', '/api/v1/issues/{id}/links', { params: { id: i.id }, body: { targetType: x.targetType, targetId: x.targetId, relation: null } })} />}
       {tab === 'comments' && <CommentsSlot type="Issue" id={i.id} projectId={i.projectId} />}
       {tab === 'history' && <HistoryList type="Issue" id={i.id} />}
       {step === 'Resolved' && <ResolveDialog i={i} onClose={() => setStep(null)} />}
@@ -836,7 +828,7 @@ function IssueReferenceImpacts({ issue }: { issue: IssueRow }) {
     try {
       const text = reason[impact.id]?.trim() ?? ''
       if (text.length < 5) { setError(new ApiError(400, { detail: t('issue.referenceImpactReasonRequired') })); return }
-      await post(`issues/${issue.id}/reference-impacts/${impact.id}`, { requestId: crypto.randomUUID(), rowVersion: impact.rowVersion, disposition, reason: text })
+      await typedRequest('post', '/api/v1/issues/{id}/reference-impacts/{impactId}', { params: { id: issue.id, impactId: impact.id }, body: { requestId: crypto.randomUUID(), rowVersion: impact.rowVersion, disposition, reason: text } })
       await q.refetch(); setReason((x) => ({ ...x, [impact.id]: '' })); toast.success(t('issue.referenceImpactSaved'))
     } catch (e) { setError(e) } finally { setBusy(null) }
   }
@@ -885,7 +877,7 @@ interface DocumentDraft { sourceSystem: string; stableSourceId: string; kind: st
 const NEW_DOCUMENT: DocumentDraft = { sourceSystem: '', stableSourceId: '', kind: 'Drawing', identifier: '', revision: '', sourceUrl: '', externalTopicId: '', modelElementGuid: '', viewpointUrl: '', available: true }
 
 /** The location's API body, or the message key for the first missing value; the server repeats every check. */
-function locationBody(l: LocationDraft): Record<string, unknown> | string {
+function locationBody(l: LocationDraft): LocationBody | string {
   const k = l.kind
   if (k === 'SiteArea' && !l.siteArea.trim()) return 'issue.locationRequired'
   if (k === 'Building' && !l.building.trim()) return 'issue.locationRequired'
@@ -894,7 +886,7 @@ function locationBody(l: LocationDraft): Record<string, unknown> | string {
   const numericValues = k === 'Coordinate' ? [l.coordinateX, l.coordinateY, l.coordinateZ] : k === 'Alignment' ? [l.start, l.end] : []
   if (numericValues.some((value) => value.trim() && !Number.isFinite(Number(value)))) return 'issue.numberRequired'
   const numberOrNull = (value: string) => value.trim() ? Number(value) : null
-  return { kind: k, siteArea: l.siteArea || null,
+  return { rowVersion: 0, kind: k, siteArea: l.siteArea || null,
     building: k === 'Building' ? l.building || null : null, level: k === 'Building' ? l.level || null : null, room: k === 'Building' ? l.room || null : null,
     assetSystem: l.assetSystem || null, alignment: k === 'Alignment' ? l.alignment || null : null,
     startStation: k === 'Alignment' ? numberOrNull(l.start) : null, endStation: k === 'Alignment' ? numberOrNull(l.end) : null, stationUnits: k === 'Alignment' ? l.units || null : null,
@@ -903,9 +895,9 @@ function locationBody(l: LocationDraft): Record<string, unknown> | string {
     coordinateUnits: k === 'Coordinate' ? l.coordinateUnits || null : null }
 }
 
-function documentBody(d: DocumentDraft): Record<string, unknown> | string {
+function documentBody(d: DocumentDraft): DocumentBody | string {
   if (!d.identifier.trim() || !d.revision.trim() || !d.sourceUrl.trim()) return 'issue.documentRequired'
-  return { kind: d.kind, identifier: d.identifier, revision: d.revision, sourceUrl: d.sourceUrl, sourceSystem: d.sourceSystem || null, stableSourceId: d.stableSourceId || null, externalTopicId: d.externalTopicId || null,
+  return { rowVersion: 0, kind: d.kind, identifier: d.identifier, revision: d.revision, sourceUrl: d.sourceUrl, sourceSystem: d.sourceSystem || null, stableSourceId: d.stableSourceId || null, externalTopicId: d.externalTopicId || null,
     modelElementGuid: d.modelElementGuid || null, viewpointUrl: d.viewpointUrl || null, isAvailable: d.available }
 }
 
@@ -947,17 +939,20 @@ function IssueMetadata({ issue, canEdit, onChanged }: { issue: IssueRow; canEdit
   const uid = useId()
   const eligible = useQuery({ queryKey: ['issue-verifier-eligible', issue.projectId],
     queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/changes/options', { params: { projectId: issue.projectId } }) })
-  const locations = useQuery({ queryKey: ['issue-locations', issue.id], queryFn: () => get<IssueLocation[]>(`issues/${issue.id}/locations`) })
-  const documents = useQuery({ queryKey: ['issue-documents', issue.id], queryFn: () => get<IssueDocument[]>(`issues/${issue.id}/documents`) })
-  const verification = useQuery({ queryKey: ['issue-verification', issue.id], queryFn: () => get<IssueVerification[]>(`issues/${issue.id}/verification`) })
+  const params = { id: issue.id }
+  const locations = useQuery({ queryKey: ['issue-locations', issue.id], queryFn: () => typedRequest('get', '/api/v1/issues/{id}/locations', { params }) })
+  const documents = useQuery({ queryKey: ['issue-documents', issue.id], queryFn: () => typedRequest('get', '/api/v1/issues/{id}/documents', { params }) })
+  const verification = useQuery({ queryKey: ['issue-verification', issue.id], queryFn: () => typedRequest('get', '/api/v1/issues/{id}/verification', { params }) })
   const [loc, setLoc] = useState(NEW_LOCATION); const [doc, setDoc] = useState(NEW_DOCUMENT)
   const [replacing, setReplacing] = useState<IssueDocument | null>(null), [replacementReason, setReplacementReason] = useState('')
   const [verifier, setVerifier] = useState<string | null>(null); const [note, setNote] = useState(''); const [evidence, setEvidence] = useState(''); const [busy, setBusy] = useState(false)
   const reload = async () => { await Promise.all([locations.refetch(), documents.refetch(), verification.refetch()]); onChanged() }
-  const submit = async (path: string, body: Record<string, unknown>) => { setBusy(true); try { await post(path, { ...body, rowVersion: issue.rowVersion }, issue.rowVersion); await reload(); toast.success(t('issue.metadataSaved')); return true } catch (e) { toast.error(errorText(e)); return false } finally { setBusy(false) } }
-  const add = (path: string, body: Record<string, unknown> | string) => { if (typeof body === 'string') toast.error(runtimeText(body)); else submit(path, body) }
-  const appoint = () => verifier && submit(`issues/${issue.id}/verification`, { verifierId: verifier, status: 'Proposed', note })
-  const decide = (v: IssueVerification, status: 'Verified' | 'Rejected') => submit(`issues/${issue.id}/verification`, { verifierId: v.verifierId, status, evidenceUrl: evidence || null, note })
+  const submit = async (send: () => Promise<unknown>) => { setBusy(true); try { await send(); await reload(); toast.success(t('issue.metadataSaved')); return true } catch (e) { toast.error(errorText(e)); return false } finally { setBusy(false) } }
+  const verify = (body: Omit<Schemas['IssueVerificationBody'], 'rowVersion'>) => submit(() => typedRequest('post', '/api/v1/issues/{id}/verification', { params, ifMatch: issue.rowVersion, body: { ...body, rowVersion: issue.rowVersion } }))
+  const addLocation = (body: LocationBody | string) => { if (typeof body === 'string') toast.error(runtimeText(body)); else submit(() => typedRequest('post', '/api/v1/issues/{id}/locations', { params, ifMatch: issue.rowVersion, body: { ...body, rowVersion: issue.rowVersion } })) }
+  const addDocument = (body: DocumentBody) => submit(() => typedRequest('post', '/api/v1/issues/{id}/documents', { params, ifMatch: issue.rowVersion, body: { ...body, rowVersion: issue.rowVersion } }))
+  const appoint = () => verifier && verify({ verifierId: verifier, status: 'Proposed', evidenceUrl: null, note })
+  const decide = (v: IssueVerification, status: 'Verified' | 'Rejected') => verify({ verifierId: v.verifierId, status, evidenceUrl: evidence || null, note })
   const replace = (x: IssueDocument) => {
     setReplacing(x); setReplacementReason(''); setDoc({ kind: x.kind, identifier: x.identifier, revision: x.revision,
       sourceUrl: x.sourceUrl, sourceSystem: x.sourceSystem ?? '', stableSourceId: x.stableSourceId ?? '',
@@ -966,10 +961,10 @@ function IssueMetadata({ issue, canEdit, onChanged }: { issue: IssueRow; canEdit
   const saveReference = async () => {
     const body = documentBody(doc)
     if (typeof body === 'string') { toast.error(runtimeText(body)); return }
-    if (!replacing) { add(`issues/${issue.id}/documents`, body); return }
+    if (!replacing) { addDocument(body); return }
     if (!replacementReason.trim()) { toast.error(t('coord.reasonRequired')); return }
-    if (await submit(`issues/${issue.id}/documents/${replacing.id}/replace`, { requestId: crypto.randomUUID(),
-      documentRowVersion: replacing.rowVersion, document: body, reason: replacementReason })) {
+    if (await submit(() => typedRequest('post', '/api/v1/issues/{id}/documents/{documentId}/replace', { params: { id: issue.id, documentId: replacing.id }, ifMatch: issue.rowVersion,
+      body: { requestId: crypto.randomUUID(), rowVersion: issue.rowVersion, documentRowVersion: replacing.rowVersion, document: body, reason: replacementReason } }))) {
       setReplacing(null); setReplacementReason(''); setDoc(NEW_DOCUMENT)
     }
   }
@@ -985,7 +980,7 @@ function IssueMetadata({ issue, canEdit, onChanged }: { issue: IssueRow; canEdit
         {!locations.data?.length && <p className="text-sm text-muted-foreground">{t('issue.noLocations')}</p>}
         {canEdit && <div className={form}>
           <LocationInputs value={loc} onChange={setLoc} />
-          <div className="flex items-end"><Button type="button" variant="outline" disabled={busy} onClick={() => add(`issues/${issue.id}/locations`, locationBody(loc))}>{t('common.add')}</Button></div>
+          <div className="flex items-end"><Button type="button" variant="outline" disabled={busy} onClick={() => addLocation(locationBody(loc))}>{t('common.add')}</Button></div>
         </div>}
       </div>
       <div className="space-y-2">

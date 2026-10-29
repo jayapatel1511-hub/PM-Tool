@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import type { components } from '@/gen/api'
-import { get, typedRequest } from '@/lib/api'
+import { typedRequest } from '@/lib/api'
 import { addDays, fmtDate, today } from '@/lib/format'
 import { t, tv , runtimeText } from '@/lib/i18n'
 import { CoordinationRegister, type RegisterContext } from './CoordinationRegister'
@@ -17,7 +17,6 @@ import { useSafeForm } from '@/hooks/drafts'
 type Schemas = components['schemas']
 type Assignment = Schemas['ReviewAssignmentRow']
 type Finding = Schemas['ReviewFindingRow']
-type ReviewIssue = { id: string; key: string; title: string; status: string; ownerName?: string }
 type Detail = Schemas['ReviewDetail']
 const reason: FormField = { name: 'reason', label: 'coord.reason', type: 'textarea' }
 const fieldset = 'space-y-1 rounded-lg border p-4', legend = 'px-1 text-sm font-semibold', check = 'mt-0.5 size-4 shrink-0 accent-(--primary)'
@@ -48,7 +47,7 @@ function ReviewForm({ options: o, projectId, refresh, open, close, existing }: R
 function ReviewDetail(c: RegisterContext & { id: string; close: () => void }) {
   const { options: o, projectId, number, id, close } = c
   const q = useQuery({ queryKey: ['review-detail', projectId, id], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/reviews/{id}', { params: { projectId, id } }) })
-  const issues = useQuery({ queryKey: ['review-issues', projectId], queryFn: () => get<ReviewIssue[]>(`projects/${projectId}/issues`), enabled: !!q.data?.findings.some(f => !!f.issueId), staleTime: 30_000 })
+  const issues = useQuery({ queryKey: ['review-issues', projectId], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/issues', { params: { id: projectId } }), enabled: !!q.data?.findings.some(f => !!f.issueId), staleTime: 30_000 })
   const [roundId, setRoundId] = useState(''), [action, setAction] = useState<{ type: string; assignment?: Assignment; finding?: Finding } | null>(null)
   const d = q.data, p = d?.package, round = d?.rounds.find(r => r.id === (roundId || p?.currentRoundId)), current = round?.id === p?.currentRoundId
   const live = d?.canWrite && current && p && !['Superseded', 'Cancelled'].includes(p.status)
@@ -97,7 +96,7 @@ function ReviewDetail(c: RegisterContext & { id: string; close: () => void }) {
 }
 function ReviewCommand({ c, d, action, close, done }: { c: RegisterContext & { id: string }; d: Detail; action: { type: string; assignment?: Assignment; finding?: Finding }; close: () => void; done: () => void }) {
   const { type, assignment: a, finding: f } = action, p = d.package, o = c.options, base = `projects/${c.projectId}/reviews/${p.id}`
-  const issues = useQuery({ queryKey: ['review-issues', c.projectId], queryFn: () => get<ReviewIssue[]>(`projects/${c.projectId}/issues`), enabled: type === 'finding', staleTime: 30_000 })
+  const issues = useQuery({ queryKey: ['review-issues', c.projectId], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/issues', { params: { id: c.projectId } }), enabled: type === 'finding', staleTime: 30_000 })
   let path = `${base}/action`, title = runtimeText(`review.command.${type}`), fields: FormField[] = [reason], initial: Record<string, string> = {}, build: (v: Record<string, string>) => object = v => ({ rowVersion: p.rowVersion, action: type, reason: v.reason })
   if (type === 'start') fields = []
   if (type === 'coordinator' || type === 'reviewer') { path = type === 'reviewer' ? `${base}/assignments/${a!.id}/assign` : `${base}/assign`; fields = [{ name: 'ownerId', label: type === 'reviewer' ? 'review.reviewer' : 'coord.coordinator', choices: peopleChoices(o) }, reason]; build = v => ({ ...v, rowVersion: a?.rowVersion ?? p.rowVersion }) }

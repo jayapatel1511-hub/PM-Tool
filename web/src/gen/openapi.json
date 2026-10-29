@@ -12889,6 +12889,50 @@
         ],
         "type": "object"
       },
+      "IssueDetailData": {
+        "properties": {
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "issue": {
+            "$ref": "#/components/schemas/IssueRow"
+          },
+          "links": {
+            "items": {
+              "$ref": "#/components/schemas/ItemLinkRow"
+            },
+            "type": "array"
+          },
+          "originRisk": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/IssueOriginRisk"
+              }
+            ]
+          },
+          "permissions": {
+            "$ref": "#/components/schemas/IssuePermissions"
+          },
+          "project": {
+            "$ref": "#/components/schemas/RegisterProject"
+          }
+        },
+        "required": [
+          "issue",
+          "description",
+          "project",
+          "originRisk",
+          "links",
+          "permissions"
+        ],
+        "type": "object"
+      },
       "IssueDocumentBody": {
         "properties": {
           "externalTopicId": {
@@ -12951,6 +12995,104 @@
           "modelElementGuid",
           "viewpointUrl",
           "isAvailable",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
+      "IssueDocumentRow": {
+        "properties": {
+          "externalTopicId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "identifier": {
+            "type": "string"
+          },
+          "isAvailable": {
+            "type": "boolean"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "modelElementGuid": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "registeredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "registeredBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "registrationMethod": {
+            "type": "string"
+          },
+          "replacedById": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "revision": {
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "sourceSystem": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "sourceUrl": {
+            "type": "string"
+          },
+          "stableSourceId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "viewpointUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "identifier",
+          "revision",
+          "sourceUrl",
+          "sourceSystem",
+          "stableSourceId",
+          "registeredBy",
+          "registeredAt",
+          "registrationMethod",
+          "externalTopicId",
+          "modelElementGuid",
+          "viewpointUrl",
+          "isAvailable",
+          "replacedById",
           "rowVersion"
         ],
         "type": "object"
@@ -13106,6 +13248,136 @@
         ],
         "type": "object"
       },
+      "IssueLocationRow": {
+        "properties": {
+          "alignment": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "assetSystem": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "building": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "coordinateReferenceSystem": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "coordinateUnits": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "coordinateX": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "null",
+              "number"
+            ]
+          },
+          "coordinateY": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "null",
+              "number"
+            ]
+          },
+          "coordinateZ": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "null",
+              "number"
+            ]
+          },
+          "endStation": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "null",
+              "number"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "level": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "room": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "siteArea": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "startStation": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "null",
+              "number"
+            ]
+          },
+          "stationUnits": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "siteArea",
+          "building",
+          "level",
+          "room",
+          "assetSystem",
+          "alignment",
+          "startStation",
+          "endStation",
+          "stationUnits",
+          "coordinateX",
+          "coordinateY",
+          "coordinateZ",
+          "coordinateReferenceSystem",
+          "coordinateUnits",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
       "IssueMarks": {
         "properties": {
           "id": {
@@ -13174,6 +13446,270 @@
         ],
         "type": "object"
       },
+      "IssueMoved": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
+      "IssueOriginRisk": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "title",
+          "status"
+        ],
+        "type": "object"
+      },
+      "IssuePermissions": {
+        "properties": {
+          "changeType": {
+            "$ref": "#/components/schemas/RegisterPermission"
+          },
+          "comment": {
+            "type": "boolean"
+          },
+          "edit": {
+            "$ref": "#/components/schemas/RegisterPermission"
+          },
+          "transitions": {
+            "items": {
+              "$ref": "#/components/schemas/RegisterTransition"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "edit",
+          "changeType",
+          "transitions",
+          "comment"
+        ],
+        "type": "object"
+      },
+      "IssueRow": {
+        "properties": {
+          "affectedDisciplineIds": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "affectedDisciplineNames": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "affectedDisciplineSummary": {
+            "type": "string"
+          },
+          "dateRaised": {
+            "format": "date",
+            "type": "string"
+          },
+          "daysOverdue": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "disciplineName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "documentIdentifiers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "documentRevisions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "documentSummary": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isOverdue": {
+            "type": "boolean"
+          },
+          "issueType": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "lastActivityAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "locationLabels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "locationSummary": {
+            "type": "string"
+          },
+          "originRiskId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "originRiskKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "ownerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ownerName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectDisciplineId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "raisedById": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "raisedByName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "resolution": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "resolvedDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "targetResolutionDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "verificationStatus": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "projectId",
+          "key",
+          "title",
+          "status",
+          "issueType",
+          "raisedById",
+          "raisedByName",
+          "ownerId",
+          "ownerName",
+          "severity",
+          "dateRaised",
+          "targetResolutionDate",
+          "isOverdue",
+          "daysOverdue",
+          "resolution",
+          "resolvedDate",
+          "originRiskId",
+          "originRiskKey",
+          "projectDisciplineId",
+          "disciplineName",
+          "locationLabels",
+          "locationSummary",
+          "affectedDisciplineIds",
+          "affectedDisciplineNames",
+          "affectedDisciplineSummary",
+          "documentSummary",
+          "documentIdentifiers",
+          "documentRevisions",
+          "verificationStatus",
+          "rowVersion",
+          "lastActivityAt"
+        ],
+        "type": "object"
+      },
       "IssueVerificationBody": {
         "properties": {
           "evidenceUrl": {
@@ -13206,6 +13742,55 @@
           "status",
           "evidenceUrl",
           "note",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
+      "IssueVerificationRow": {
+        "properties": {
+          "evidenceUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "verifiedAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "verifierId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "verifierId",
+          "status",
+          "evidenceUrl",
+          "note",
+          "verifiedAt",
           "rowVersion"
         ],
         "type": "object"
@@ -20492,6 +21077,28 @@
         ],
         "type": "object"
       },
+      "RegisterCreated": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
       "RegisterIssueBody": {
         "properties": {
           "affectedDisciplineIds": {
@@ -20616,6 +21223,48 @@
         "required": [
           "ok",
           "reason"
+        ],
+        "type": "object"
+      },
+      "RegisterProject": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "projectNumber",
+          "name",
+          "status"
+        ],
+        "type": "object"
+      },
+      "RegisterSaved": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "rowVersion"
         ],
         "type": "object"
       },
@@ -22135,7 +22784,7 @@
             "$ref": "#/components/schemas/RiskPermissions"
           },
           "project": {
-            "$ref": "#/components/schemas/RiskProject"
+            "$ref": "#/components/schemas/RegisterProject"
           },
           "realisedIssue": {
             "oneOf": [
@@ -22343,6 +22992,43 @@
         ],
         "type": "object"
       },
+      "RiskMoved": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "issueId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "issueKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "rowVersion",
+          "issueId",
+          "issueKey"
+        ],
+        "type": "object"
+      },
       "RiskPermissions": {
         "properties": {
           "comment": {
@@ -22362,30 +23048,6 @@
           "edit",
           "transitions",
           "comment"
-        ],
-        "type": "object"
-      },
-      "RiskProject": {
-        "properties": {
-          "id": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "projectNumber": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "projectNumber",
-          "name",
-          "status"
         ],
         "type": "object"
       },
@@ -32642,7 +33304,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/IssueDetailData"
+                }
               }
             },
             "description": "OK"
@@ -32676,6 +33340,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterSaved"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -32702,6 +33373,9 @@
             "content": {
               "application/json": {
                 "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/IssueDocumentRow"
+                  },
                   "type": "array"
                 }
               }
@@ -32736,8 +33410,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterSaved"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -32818,8 +33499,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecisionLinkMutation"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -32845,6 +33533,9 @@
             "content": {
               "application/json": {
                 "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/IssueLocationRow"
+                  },
                   "type": "array"
                 }
               }
@@ -32879,8 +33570,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterSaved"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -32995,6 +33693,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IssueMoved"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -33021,6 +33726,9 @@
             "content": {
               "application/json": {
                 "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/IssueVerificationRow"
+                  },
                   "type": "array"
                 }
               }
@@ -33055,8 +33763,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterSaved"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -38801,6 +39516,9 @@
             "content": {
               "application/json": {
                 "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/IssueRow"
+                  },
                   "type": "array"
                 }
               }
@@ -38809,7 +39527,7 @@
           }
         },
         "tags": [
-          "RegisterEndpoints"
+          "Hub.Api"
         ]
       },
       "post": {
@@ -38835,8 +39553,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterCreated"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -39761,8 +40486,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterCreated"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -45815,6 +46547,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterSaved"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -45847,8 +46586,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecisionLinkMutation"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -45881,6 +46627,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiskMoved"
+                }
+              }
+            },
             "description": "OK"
           }
         },

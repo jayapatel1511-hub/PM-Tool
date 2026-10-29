@@ -2,6 +2,7 @@ using System.Text.Json;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Api.Features;
@@ -34,13 +35,47 @@ public static class RegisterEndpoints
         int Probability, int Impact, int Score, string Band, string? Mitigation, string? TriggerIndicator, DateOnly? ReviewDate,
         bool IsReviewOverdue, int ReviewOverdueDays, Guid? ProjectDisciplineId, string? DisciplineName, Guid? RealisedIssueId,
         string? RealisedIssueKey, int RowVersion, DateTimeOffset LastActivityAt);
-    public sealed record RiskProject(Guid Id, string ProjectNumber, string Name, string Status);
+    public sealed record RegisterProject(Guid Id, string ProjectNumber, string Name, string Status);
     public sealed record RealisedRiskIssue(Guid Id, string Key, string Title, string Status);
     public sealed record RegisterPermission(bool Ok, string? Reason);
     public sealed record RegisterTransition(string To, bool Ok, string? Reason);
     public sealed record RiskPermissions(RegisterPermission Edit, IEnumerable<RegisterTransition> Transitions, bool Comment);
-    public sealed record RiskDetailData(RiskListRow Risk, string? Description, RiskProject Project, RealisedRiskIssue? RealisedIssue,
+    public sealed record RiskDetailData(RiskListRow Risk, string? Description, RegisterProject Project, RealisedRiskIssue? RealisedIssue,
         List<DecisionEndpoints.ItemLinkRow> Links, RiskPermissions Permissions);
+
+    /// A raised risk or issue: its id, key and first version.
+    public sealed record RegisterCreated(Guid Id, string Key, int RowVersion);
+    /// What an edit, or a location, document or verification added to an issue, answers: the id and the row's new version.
+    public sealed record RegisterSaved(Guid Id, int RowVersion);
+    /// The risk after a move, with the issue it became when it was realised.
+    public sealed record RiskMoved(Guid Id, string Status, int RowVersion, Guid? IssueId, string? IssueKey);
+    public sealed record IssueMoved(Guid Id, string Status, int RowVersion);
+    /// One issue in the register, with its locations, references, affected disciplines and verification worked out for the list.
+    public sealed record IssueRow(Guid Id, Guid ProjectId, string Key, string Title, string Status, string IssueType, Guid RaisedById, string? RaisedByName, Guid OwnerId, string? OwnerName,
+        string Severity, DateOnly DateRaised, DateOnly? TargetResolutionDate, bool IsOverdue, int DaysOverdue, string? Resolution, DateOnly? ResolvedDate, Guid? OriginRiskId,
+        string? OriginRiskKey, Guid? ProjectDisciplineId, string? DisciplineName, string[] LocationLabels, string LocationSummary, Guid[] AffectedDisciplineIds,
+        string[] AffectedDisciplineNames, string AffectedDisciplineSummary, string DocumentSummary, string[] DocumentIdentifiers, string[] DocumentRevisions,
+        string VerificationStatus, int RowVersion, DateTimeOffset LastActivityAt);
+    public sealed record IssueOriginRisk(Guid Id, string Key, string Title, string Status);
+    public sealed record IssuePermissions(RegisterPermission Edit, RegisterPermission ChangeType, IEnumerable<RegisterTransition> Transitions, bool Comment);
+    public sealed record IssueDetailData(IssueRow Issue, string? Description, RegisterProject Project, IssueOriginRisk? OriginRisk,
+        List<DecisionEndpoints.ItemLinkRow> Links, IssuePermissions Permissions);
+    public sealed record IssueLocationRow(Guid Id, string Kind, string? SiteArea, string? Building, string? Level, string? Room, string? AssetSystem, string? Alignment,
+        decimal? StartStation, decimal? EndStation, string? StationUnits, decimal? CoordinateX, decimal? CoordinateY, decimal? CoordinateZ, string? CoordinateReferenceSystem,
+        string? CoordinateUnits, int RowVersion);
+    public sealed record IssueDocumentRow(Guid Id, string Kind, string Identifier, string Revision, string SourceUrl, string? SourceSystem, string? StableSourceId, Guid? RegisteredBy,
+        DateTimeOffset RegisteredAt, string RegistrationMethod, string? ExternalTopicId, string? ModelElementGuid, string? ViewpointUrl, bool IsAvailable, Guid? ReplacedById, int RowVersion);
+    public sealed record IssueVerificationRow(Guid Id, Guid VerifierId, string Status, string? EvidenceUrl, string? Note, DateTimeOffset? VerifiedAt, int RowVersion);
+
+    /// What the risk register's query reads for each risk, before the names are put beside it.
+    sealed record RiskJoin(Guid Id, Guid ProjectId, string Key, int Seq, string Title, string Status, Guid OwnerId, int Probability, int Impact, string? Mitigation, string? TriggerIndicator,
+        DateOnly? ReviewDate, Guid? ProjectDisciplineId, Guid? RealisedIssueId, int RowVersion, DateTimeOffset LastActivityAt, string? OwnerName, string? DisciplineName, string? RealisedIssueKey);
+    /// The same for each issue.
+    sealed record IssueJoin(Guid Id, Guid ProjectId, string Key, int Seq, string Title, string Status, string IssueType, Guid RaisedById, Guid OwnerId, string Severity, DateOnly DateRaised,
+        DateOnly? TargetResolutionDate, string? Resolution, DateOnly? ResolvedDate, Guid? OriginRiskId, Guid? ProjectDisciplineId, int RowVersion, DateTimeOffset LastActivityAt,
+        string? RaisedByName, string? OwnerName, string? DisciplineName, string? OriginRiskKey);
+    sealed record AffectedName(Guid IssueId, Guid ProjectDisciplineId, string Name);
+    sealed record LatestVerification(string Status, Guid VerifierId);
 
     static readonly Col[] RiskCols = Hub.Api.Records.RiskRecord.RegistersRiskCols;
     static readonly Col[] IssueCols = Hub.Api.Records.IssueRecord.RegistersIssueCols;
@@ -54,13 +89,13 @@ public static class RegisterEndpoints
             TypedResults.Ok(await GetRisk(id, access, db, store, clock)));
         api.MapPatch("/risks/{id:guid}", EditRisk);
         api.MapPost("/risks/{id:guid}/transition", MoveRisk);
-        api.MapPost("/risks/{id:guid}/links", async (Guid id, DecisionEndpoints.LinkInput body, Access access, HubDb db) =>
+        api.MapPost("/risks/{id:guid}/links", async Task<Created<DecisionEndpoints.DecisionLinkMutation>> (Guid id, DecisionEndpoints.LinkInput body, Access access, HubDb db) =>
         {
             var (r, p, ctx) = await LoadRisk(db, access, id);
             Access.Demand(Permissions.EditRegisterItem(access.Actor, ctx, Facts(r)));
             var link = await DecisionEndpoints.NewLink(db, access, p, ItemType.Risk, r.Id, r.Key, body.TargetType, body.TargetId, ItemRelation.Related);
             await db.SaveChangesAsync();
-            return Results.Created($"/api/v1/item-links/{link.Id}", new { link.Id });
+            return TypedResults.Created($"/api/v1/item-links/{link.Id}", new DecisionEndpoints.DecisionLinkMutation(link.Id));
         });
         api.MapGet("/projects/{id:guid}/risks/export", async (Guid id, string? format, [AsParameters] RegisterQuery f, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock) =>
         {
@@ -69,7 +104,8 @@ public static class RegisterEndpoints
             return await ExportFile.Send(db, store, format, Text.Get("export.risks", p.ProjectNumber), RiskCols, rows, await ListExportEndpoints.Filters(db, http, access), p.Id, $"{p.ProjectNumber}-risks", clock);
         });
 
-        api.MapGet("/projects/{id:guid}/issues", IssueList);
+        api.MapGet("/projects/{id:guid}/issues", async (Guid id, [AsParameters] RegisterQuery f, Access access, HubDb db, SettingsStore store, TimeProvider clock) =>
+            TypedResults.Ok(await IssueList(id, f, access, db, store, clock)));
         api.MapPost("/projects/{id:guid}/issues", CreateIssue);
         api.MapGet("/issues/{id}", GetIssue);
         api.MapPatch("/issues/{id:guid}", EditIssue);
@@ -81,13 +117,13 @@ public static class RegisterEndpoints
         api.MapPost("/issues/{id:guid}/documents/{documentId:guid}/replace", ReplaceIssueDocument).WithMetadata(new Coordination.AtomicCommand());
         api.MapGet("/issues/{id:guid}/verification", ListIssueVerification);
         api.MapPost("/issues/{id:guid}/verification", AddIssueVerification);
-        api.MapPost("/issues/{id:guid}/links", async (Guid id, DecisionEndpoints.LinkInput body, Access access, HubDb db) =>
+        api.MapPost("/issues/{id:guid}/links", async Task<Created<DecisionEndpoints.DecisionLinkMutation>> (Guid id, DecisionEndpoints.LinkInput body, Access access, HubDb db) =>
         {
             var (i, p, ctx) = await LoadIssue(db, access, id);
             Access.Demand(Permissions.EditRegisterItem(access.Actor, ctx, Facts(i)));
             var link = await DecisionEndpoints.NewLink(db, access, p, ItemType.Issue, i.Id, i.Key, body.TargetType, body.TargetId, ItemRelation.Related);
             await db.SaveChangesAsync();
-            return Results.Created($"/api/v1/item-links/{link.Id}", new { link.Id });
+            return TypedResults.Created($"/api/v1/item-links/{link.Id}", new DecisionEndpoints.DecisionLinkMutation(link.Id));
         });
         api.MapGet("/projects/{id:guid}/issues/export", async (Guid id, string? format, [AsParameters] RegisterQuery f, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock) =>
         {
@@ -131,7 +167,7 @@ public static class RegisterEndpoints
         return id;
     }
 
-    static object Perm(Allow x, Project p) => new { x.Ok, Reason = x.Ok ? null : Text.Get(x.Why!, x.Arg ?? p.Status) };
+    static RegisterPermission Perm(Allow x, Project p) => new(x.Ok, x.Ok ? null : Text.Get(x.Why!, x.Arg ?? p.Status));
 
     // ---------- Risks ----------
 
@@ -164,14 +200,12 @@ public static class RegisterEndpoints
     /// Default sort (§13.13): severity descending, then review date, then key.
     public static async Task<List<RiskListRow>> RiskRows(HubDb db, IQueryable<Risk> q, DateOnly today)
     {
-        var rows = await q.Select(r => new
-        {
+        var rows = await q.Select(r => new RiskJoin(
             r.Id, r.ProjectId, r.Key, r.Seq, r.Title, r.Status, r.OwnerId, r.Probability, r.Impact, r.Mitigation, r.TriggerIndicator, r.ReviewDate,
             r.ProjectDisciplineId, r.RealisedIssueId, r.RowVersion, r.LastActivityAt,
-            OwnerName = db.Users.Where(u => u.Id == r.OwnerId).Select(u => u.IsActive ? u.DisplayName : u.DisplayName + " (Inactive)").FirstOrDefault(),
-            DisciplineName = db.ProjectDisciplines.Where(x => x.Id == r.ProjectDisciplineId).Select(x => x.Discipline!.Name).FirstOrDefault(),
-            RealisedIssueKey = db.Issues.Where(x => x.Id == r.RealisedIssueId).Select(x => x.Key).FirstOrDefault(),
-        }).ToListAsync();
+            db.Users.Where(u => u.Id == r.OwnerId).Select(u => u.IsActive ? u.DisplayName : u.DisplayName + " (Inactive)").FirstOrDefault(),
+            db.ProjectDisciplines.Where(x => x.Id == r.ProjectDisciplineId).Select(x => x.Discipline!.Name).FirstOrDefault(),
+            db.Issues.Where(x => x.Id == r.RealisedIssueId).Select(x => x.Key).FirstOrDefault())).ToListAsync();
         return [.. rows.Select(r => (r, score: Registers.Score(r.Probability, r.Impact))).OrderByDescending(x => x.score).ThenBy(x => x.r.ReviewDate ?? DateOnly.MaxValue).ThenBy(x => x.r.Seq)
             .Select(x =>
             {
@@ -183,7 +217,7 @@ public static class RegisterEndpoints
             })];
     }
 
-    static async Task<IResult> CreateRisk(Guid id, RiskBody body, Access access, HubDb db, TeamService team, TimeProvider clock, CurrentUser me)
+    static async Task<Created<RegisterCreated>> CreateRisk(Guid id, RiskBody body, Access access, HubDb db, TeamService team, TimeProvider clock, CurrentUser me)
     {
         var (p, ctx) = await access.Project(id);
         Access.Demand(Permissions.RaiseRegisterItem(access.Actor, ctx));
@@ -208,7 +242,7 @@ public static class RegisterEndpoints
             await db.SaveChangesAsync();
             return r;
         });
-        return Results.Created($"/api/v1/risks/{r.Id}", new { r.Id, r.Key, r.RowVersion });
+        return TypedResults.Created($"/api/v1/risks/{r.Id}", new RegisterCreated(r.Id, r.Key, r.RowVersion));
     }
 
     internal static async Task<RiskDetailData> GetRisk(string id, Access access, HubDb db, SettingsStore store, TimeProvider clock)
@@ -226,7 +260,7 @@ public static class RegisterEndpoints
                 Permissions.Comment(access.Actor, ctx).Ok));
     }
 
-    static async Task<IResult> EditRisk(Guid id, JsonElement body, HttpContext http, Access access, HubDb db, TeamService team, TimeProvider clock)
+    static async Task<Ok<RegisterSaved>> EditRisk(Guid id, JsonElement body, HttpContext http, Access access, HubDb db, TeamService team, TimeProvider clock)
     {
         var (r, p, ctx) = await LoadRisk(db, access, id);
         Access.Demand(Permissions.EditRegisterItem(access.Actor, ctx, Facts(r)));
@@ -252,11 +286,11 @@ public static class RegisterEndpoints
         r.LastActivityAt = clock.GetUtcNow();
         await db.SaveChangesAsync();
         Http.ETag(http, r);
-        return Results.Ok(new { r.Id, r.RowVersion });
+        return TypedResults.Ok(new RegisterSaved(r.Id, r.RowVersion));
     }
 
     /// RSK-03: Realised needs the issue it became, new or existing; the link is kept on both (realised issue, origin risk).
-    static async Task<IResult> MoveRisk(Guid id, RiskMove body, HttpContext http, Access access, HubDb db, TeamService team, SettingsStore store, TimeProvider clock, CurrentUser me, Notifier notify)
+    static async Task<Ok<RiskMoved>> MoveRisk(Guid id, RiskMove body, HttpContext http, Access access, HubDb db, TeamService team, SettingsStore store, TimeProvider clock, CurrentUser me, Notifier notify)
     {
         var (r, p, ctx) = await LoadRisk(db, access, id);
         await Http.CheckVersion(db, http, r, body.RowVersion);
@@ -286,12 +320,12 @@ public static class RegisterEndpoints
             await db.SaveChangesAsync();
             return issue;
         });
-        return Results.Ok(new { r.Id, r.Status, r.RowVersion, IssueId = issue?.Id, IssueKey = issue?.Key });
+        return TypedResults.Ok(new RiskMoved(r.Id, r.Status, r.RowVersion, issue?.Id, issue?.Key));
     }
 
     // ---------- Issues ----------
 
-    public static async Task<List<object>> IssueList(Guid id, [AsParameters] RegisterQuery f, Access access, HubDb db, SettingsStore store, TimeProvider clock)
+    public static async Task<List<IssueRow>> IssueList(Guid id, [AsParameters] RegisterQuery f, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
         await access.Project(id, track: false);
         var today = clock.Today(await store.Get(db));
@@ -350,23 +384,21 @@ public static class RegisterEndpoints
     }
 
     /// Default sort (§13.13): severity descending, then target resolution date, then key.
-    public static async Task<List<object>> IssueRows(HubDb db, IQueryable<Issue> q, DateOnly today, string[]? verification = null)
+    public static async Task<List<IssueRow>> IssueRows(HubDb db, IQueryable<Issue> q, DateOnly today, string[]? verification = null)
     {
-        var rows = await q.Select(i => new
-        {
+        var rows = await q.Select(i => new IssueJoin(
             i.Id, i.ProjectId, i.Key, i.Seq, i.Title, i.Status, i.IssueType, i.RaisedById, i.OwnerId, i.Severity, i.DateRaised, i.TargetResolutionDate, i.Resolution, i.ResolvedDate,
             i.OriginRiskId, i.ProjectDisciplineId, i.RowVersion, i.LastActivityAt,
-            RaisedByName = db.Users.Where(u => u.Id == i.RaisedById).Select(u => u.DisplayName).FirstOrDefault(),
-            OwnerName = db.Users.Where(u => u.Id == i.OwnerId).Select(u => u.IsActive ? u.DisplayName : u.DisplayName + " (Inactive)").FirstOrDefault(),
-            DisciplineName = db.ProjectDisciplines.Where(x => x.Id == i.ProjectDisciplineId).Select(x => x.Discipline!.Name).FirstOrDefault(),
-            OriginRiskKey = db.Risks.Where(x => x.Id == i.OriginRiskId).Select(x => x.Key).FirstOrDefault(),
-        }).ToListAsync();
+            db.Users.Where(u => u.Id == i.RaisedById).Select(u => u.DisplayName).FirstOrDefault(),
+            db.Users.Where(u => u.Id == i.OwnerId).Select(u => u.IsActive ? u.DisplayName : u.DisplayName + " (Inactive)").FirstOrDefault(),
+            db.ProjectDisciplines.Where(x => x.Id == i.ProjectDisciplineId).Select(x => x.Discipline!.Name).FirstOrDefault(),
+            db.Risks.Where(x => x.Id == i.OriginRiskId).Select(x => x.Key).FirstOrDefault())).ToListAsync();
         var issueIds = rows.Select(i => i.Id).ToArray();
         var locations = await db.IssueLocations.AsNoTracking().Where(x => issueIds.Contains(x.IssueId)).ToListAsync();
         var documents = await db.IssueDocumentReferences.AsNoTracking().Where(x => issueIds.Contains(x.IssueId)).ToListAsync();
         var verifications = await db.IssueVerifications.AsNoTracking().Where(x => issueIds.Contains(x.IssueId)).ToListAsync();
         var affectedByIssue = (await db.IssueAffectedDisciplines.AsNoTracking().Where(x => issueIds.Contains(x.IssueId))
-            .Select(x => new { x.IssueId, x.ProjectDisciplineId, Name = db.ProjectDisciplines.Where(pd => pd.Id == x.ProjectDisciplineId).Select(pd => pd.Discipline!.Name).FirstOrDefault() ?? "" })
+            .Select(x => new AffectedName(x.IssueId, x.ProjectDisciplineId, db.ProjectDisciplines.Where(pd => pd.Id == x.ProjectDisciplineId).Select(pd => pd.Discipline!.Name).FirstOrDefault() ?? ""))
             .ToListAsync()).OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase).ToLookup(x => x.IssueId);
         var locationsByIssue = locations.ToLookup(x => x.IssueId);
         var documentsByIssue = documents.ToLookup(x => x.IssueId);
@@ -386,27 +418,20 @@ public static class RegisterEndpoints
                 var locationLabels = issueLocations.Select(x => string.Join(" · ", new[] { x.Kind, x.SiteArea, x.Building, x.Level, x.Room, x.AssetSystem, x.Alignment,
                     x.StartStation is { } start ? $"{start}-{x.EndStation} {x.StationUnits}" : null, x.CoordinateX is { } coordinateX ? $"({coordinateX}, {x.CoordinateY}{(x.CoordinateZ is { } z ? $", {z}" : "")}) {x.CoordinateReferenceSystem} {x.CoordinateUnits}" : null }.Where(v => !string.IsNullOrWhiteSpace(v)))).ToArray();
                 var affected = affectedByIssue[i.Id].ToList();
-                return new { VerificationStatus = verificationStatus, Row = (object)new
-                {
-                    i.Id, i.ProjectId, i.Key, i.Title, i.Status, i.IssueType, i.RaisedById, i.RaisedByName, i.OwnerId, i.OwnerName, i.Severity, i.DateRaised, i.TargetResolutionDate,
-                    IsOverdue = late > 0, DaysOverdue = late, i.Resolution, i.ResolvedDate, i.OriginRiskId, i.OriginRiskKey, i.ProjectDisciplineId, i.DisciplineName,
-                    LocationLabels = locationLabels, LocationSummary = string.Join("; ", locationLabels),
-                    AffectedDisciplineIds = affected.Select(x => x.ProjectDisciplineId).ToArray(), AffectedDisciplineNames = affected.Select(x => x.Name).ToArray(),
-                    AffectedDisciplineSummary = string.Join("; ", affected.Select(x => x.Name)),
-                    DocumentSummary = string.Join("; ", issueDocuments.Select(x => $"{x.Kind} {x.Identifier} rev {x.Revision} · {(x.ReplacedById is null ? "current reference" : "historical replaced reference")} · manually registered · source {x.SourceSystem ?? "[unknown]"} · ID {x.StableSourceId ?? "[unknown]"} · {(x.IsAvailable ? x.SourceUrl : "[unavailable]")}")),
-                    DocumentIdentifiers = issueDocuments.Select(x => x.Identifier).Distinct(StringComparer.OrdinalIgnoreCase)
-                        .OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToArray(),
-                    DocumentRevisions = issueDocuments.Select(x => x.Revision).Distinct(StringComparer.OrdinalIgnoreCase)
-                        .OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToArray(),
-                    VerificationStatus = verificationStatus,
-                    i.RowVersion, i.LastActivityAt,
-                } };
+                return new IssueRow(i.Id, i.ProjectId, i.Key, i.Title, i.Status, i.IssueType, i.RaisedById, i.RaisedByName, i.OwnerId, i.OwnerName, i.Severity, i.DateRaised, i.TargetResolutionDate,
+                    late > 0, late, i.Resolution, i.ResolvedDate, i.OriginRiskId, i.OriginRiskKey, i.ProjectDisciplineId, i.DisciplineName,
+                    locationLabels, string.Join("; ", locationLabels),
+                    affected.Select(x => x.ProjectDisciplineId).ToArray(), affected.Select(x => x.Name).ToArray(), string.Join("; ", affected.Select(x => x.Name)),
+                    string.Join("; ", issueDocuments.Select(x => $"{x.Kind} {x.Identifier} rev {x.Revision} · {(x.ReplacedById is null ? "current reference" : "historical replaced reference")} · manually registered · source {x.SourceSystem ?? "[unknown]"} · ID {x.StableSourceId ?? "[unknown]"} · {(x.IsAvailable ? x.SourceUrl : "[unavailable]")}")),
+                    issueDocuments.Select(x => x.Identifier).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToArray(),
+                    issueDocuments.Select(x => x.Revision).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToArray(),
+                    verificationStatus, i.RowVersion, i.LastActivityAt);
             });
         return [.. results.Where(x => verification is null || verification.Length == 0 ||
-            verification.Contains(x.VerificationStatus, StringComparer.OrdinalIgnoreCase)).Select(x => x.Row)];
+            verification.Contains(x.VerificationStatus, StringComparer.OrdinalIgnoreCase))];
     }
 
-    static async Task<IResult> CreateIssue(Guid id, IssueBody body, Access access, HubDb db, TeamService team, SettingsStore store, TimeProvider clock, CurrentUser me, Notifier notify)
+    static async Task<Created<RegisterCreated>> CreateIssue(Guid id, IssueBody body, Access access, HubDb db, TeamService team, SettingsStore store, TimeProvider clock, CurrentUser me, Notifier notify)
     {
         var (p, ctx) = await access.Project(id);
         Access.Demand(Permissions.RaiseRegisterItem(access.Actor, ctx));
@@ -417,7 +442,7 @@ public static class RegisterEndpoints
             await db.SaveChangesAsync();
             return i;
         });
-        return Results.Created($"/api/v1/issues/{i.Id}", new { i.Id, i.Key, i.RowVersion });
+        return TypedResults.Created($"/api/v1/issues/{i.Id}", new RegisterCreated(i.Id, i.Key, i.RowVersion));
     }
 
     static async Task<Issue> NewIssue(HubDb db, Access access, TeamService team, Notifier notify, Project p, IssueBody b, Guid me, DateOnly today, DateTimeOffset now)
@@ -490,30 +515,22 @@ public static class RegisterEndpoints
     static async Task<bool> HasReference(HubDb db, Guid issueId) =>
         await db.IssueLocations.AnyAsync(x => x.IssueId == issueId) || await db.IssueDocumentReferences.AnyAsync(x => x.IssueId == issueId);
 
-    static async Task<object> GetIssue(string id, Access access, HubDb db, SettingsStore store, TimeProvider clock)
+    static async Task<Ok<IssueDetailData>> GetIssue(string id, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
         var i = (Guid.TryParse(id, out var g) ? await db.Issues.AsNoTracking().FirstOrDefaultAsync(x => x.Id == g)
             : await db.Issues.AsNoTracking().FirstOrDefaultAsync(x => x.Key == id)) ?? throw ApiException.NotFound();
         var (p, ctx) = await access.Project(i.ProjectId, track: false);
         var row = (await IssueRows(db, db.Issues.AsNoTracking().Where(x => x.Id == i.Id), clock.Today(await store.Get(db)))).Single();
         var edit = Permissions.EditRegisterItem(access.Actor, ctx, Facts(i));
-        return new
-        {
-            Issue = row, i.Description,
-            Project = new { p.Id, p.ProjectNumber, p.Name, p.Status },
-            OriginRisk = i.OriginRiskId is { } ri ? await db.Risks.Where(x => x.Id == ri).Select(x => new { x.Id, x.Key, x.Title, x.Status }).FirstOrDefaultAsync() : null,
-            Links = await DecisionEndpoints.LinkRows(db, i.Id),
-            Permissions = new
-            {
-                Edit = Perm(edit, p),
-                ChangeType = Perm(TypeChange(access, ctx, i), p),
-                Transitions = IssueStatus.All.Where(to => Workflow.IssueStep(i.Status, to)).Select(to => new { To = to, edit.Ok, Reason = edit.Ok ? null : Text.Get(edit.Why!, edit.Arg ?? p.Status) }),
-                Comment = Permissions.Comment(access.Actor, ctx).Ok,
-            },
-        };
+        return TypedResults.Ok(new IssueDetailData(row, i.Description, new(p.Id, p.ProjectNumber, p.Name, p.Status),
+            i.OriginRiskId is { } ri ? await db.Risks.Where(x => x.Id == ri).Select(x => new IssueOriginRisk(x.Id, x.Key, x.Title, x.Status)).FirstOrDefaultAsync() : null,
+            await DecisionEndpoints.LinkRows(db, i.Id),
+            new(Perm(edit, p), Perm(TypeChange(access, ctx, i), p),
+                IssueStatus.All.Where(to => Workflow.IssueStep(i.Status, to)).Select(to => new RegisterTransition(to, edit.Ok, edit.Ok ? null : Text.Get(edit.Why!, edit.Arg ?? p.Status))),
+                Permissions.Comment(access.Actor, ctx).Ok)));
     }
 
-    static async Task<IResult> EditIssue(Guid id, JsonElement body, HttpContext http, Access access, HubDb db, TeamService team, SettingsStore store, TimeProvider clock, Notifier notify)
+    static async Task<Ok<RegisterSaved>> EditIssue(Guid id, JsonElement body, HttpContext http, Access access, HubDb db, TeamService team, SettingsStore store, TimeProvider clock, Notifier notify)
     {
         var (i, p, ctx) = await LoadIssue(db, access, id);
         Access.Demand(Permissions.EditRegisterItem(access.Actor, ctx, Facts(i)));
@@ -590,11 +607,11 @@ public static class RegisterEndpoints
         i.LastActivityAt = clock.GetUtcNow();
         await db.SaveChangesAsync();
         Http.ETag(http, i);
-        return Results.Ok(new { i.Id, i.RowVersion });
+        return TypedResults.Ok(new RegisterSaved(i.Id, i.RowVersion));
     }
 
     /// ISS-02: Resolved needs the resolution and records the resolved date; cancelling and reopening need a reason.
-    static async Task<IResult> MoveIssue(Guid id, IssueMove body, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock)
+    static async Task<Ok<IssueMoved>> MoveIssue(Guid id, IssueMove body, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
         var (i, p, ctx) = await LoadIssue(db, access, id);
         await Http.CheckVersion(db, http, i, body.RowVersion);
@@ -639,17 +656,17 @@ public static class RegisterEndpoints
         i.LastActivityAt = now;
         db.Audit.Note(i, action: to == IssueStatus.Resolved ? "Resolved" : from == IssueStatus.Resolved ? "Reopened" : null, reason: reason);
         await db.SaveChangesAsync();
-        return Results.Ok(new { i.Id, i.Status, i.RowVersion });
+        return TypedResults.Ok(new IssueMoved(i.Id, i.Status, i.RowVersion));
     }
-    static async Task<List<object>> ListIssueLocations(Guid id, Access access, HubDb db)
+    static async Task<Ok<List<IssueLocationRow>>> ListIssueLocations(Guid id, Access access, HubDb db)
     {
         await LoadIssue(db, access, id);
-        return await db.IssueLocations.AsNoTracking().Where(x => x.IssueId == id).OrderBy(x => x.CreatedAt)
-            .Select(x => (object)new { x.Id, x.Kind, x.SiteArea, x.Building, x.Level, x.Room, x.AssetSystem, x.Alignment, x.StartStation, x.EndStation,
-                x.StationUnits, x.CoordinateX, x.CoordinateY, x.CoordinateZ, x.CoordinateReferenceSystem, x.CoordinateUnits, x.RowVersion }).ToListAsync();
+        return TypedResults.Ok(await db.IssueLocations.AsNoTracking().Where(x => x.IssueId == id).OrderBy(x => x.CreatedAt)
+            .Select(x => new IssueLocationRow(x.Id, x.Kind, x.SiteArea, x.Building, x.Level, x.Room, x.AssetSystem, x.Alignment, x.StartStation, x.EndStation,
+                x.StationUnits, x.CoordinateX, x.CoordinateY, x.CoordinateZ, x.CoordinateReferenceSystem, x.CoordinateUnits, x.RowVersion)).ToListAsync());
     }
 
-    static async Task<IResult> AddIssueLocation(Guid id, IssueLocationBody body, HttpContext http, Access access, HubDb db, TimeProvider clock)
+    static async Task<Created<RegisterSaved>> AddIssueLocation(Guid id, IssueLocationBody body, HttpContext http, Access access, HubDb db, TimeProvider clock)
     {
         var (issue, _, ctx) = await LoadIssue(db, access, id);
         Access.Demand(Permissions.EditRegisterItem(access.Actor, ctx, Facts(issue)));
@@ -657,7 +674,7 @@ public static class RegisterEndpoints
         var row = Location(issue, body, issue.RowVersion + 1);
         issue.LastActivityAt = clock.GetUtcNow(); db.Entry(issue).Property(x => x.LastActivityAt).IsModified = true;
         db.IssueLocations.Add(row); db.Audit.Note(row, key: issue.Key); await db.SaveChangesAsync();
-        return Results.Created($"/api/v1/issue-locations/{row.Id}", new { row.Id, row.RowVersion });
+        return TypedResults.Created($"/api/v1/issue-locations/{row.Id}", new RegisterSaved(row.Id, row.RowVersion));
     }
 
     /// FR-LOC-01/02: a validated location in the project's own station and coordinate convention; nothing is converted or inferred.
@@ -675,14 +692,14 @@ public static class RegisterEndpoints
             CoordinateUnits = Check.Optional(body.CoordinateUnits, "coordinateUnits", 40) };
     }
 
-    static async Task<List<object>> ListIssueDocuments(Guid id, Access access, HubDb db)
+    static async Task<Ok<List<IssueDocumentRow>>> ListIssueDocuments(Guid id, Access access, HubDb db)
     {
         await LoadIssue(db, access, id);
-        return await db.IssueDocumentReferences.AsNoTracking().Where(x => x.IssueId == id).OrderBy(x => x.CreatedAt)
-            .Select(x => (object)new { x.Id, x.Kind, x.Identifier, x.Revision, x.SourceUrl, x.SourceSystem, x.StableSourceId, RegisteredBy = x.CreatedBy, RegisteredAt = x.CreatedAt, RegistrationMethod = "Manual", x.ExternalTopicId, x.ModelElementGuid, x.ViewpointUrl, x.IsAvailable, x.ReplacedById, x.RowVersion }).ToListAsync();
+        return TypedResults.Ok(await db.IssueDocumentReferences.AsNoTracking().Where(x => x.IssueId == id).OrderBy(x => x.CreatedAt)
+            .Select(x => new IssueDocumentRow(x.Id, x.Kind, x.Identifier, x.Revision, x.SourceUrl, x.SourceSystem, x.StableSourceId, x.CreatedBy, x.CreatedAt, "Manual", x.ExternalTopicId, x.ModelElementGuid, x.ViewpointUrl, x.IsAvailable, x.ReplacedById, x.RowVersion)).ToListAsync());
     }
 
-    static async Task<IResult> AddIssueDocument(Guid id, IssueDocumentBody body, HttpContext http, Access access, HubDb db, TimeProvider clock)
+    static async Task<Created<RegisterSaved>> AddIssueDocument(Guid id, IssueDocumentBody body, HttpContext http, Access access, HubDb db, TimeProvider clock)
     {
         var (issue, _, ctx) = await LoadIssue(db, access, id);
         Access.Demand(Permissions.EditRegisterItem(access.Actor, ctx, Facts(issue)));
@@ -691,7 +708,7 @@ public static class RegisterEndpoints
         if (await db.IssueDocumentReferences.AnyAsync(x => x.IssueId == id && x.Identifier == row.Identifier && x.Revision == row.Revision && x.ReplacedById == null)) throw ApiException.Conflict("duplicate_reference", "error.duplicate");
         issue.LastActivityAt = clock.GetUtcNow(); db.Entry(issue).Property(x => x.LastActivityAt).IsModified = true;
         db.IssueDocumentReferences.Add(row); db.Audit.Note(row, key: issue.Key); await db.SaveChangesAsync();
-        return Results.Created($"/api/v1/issue-document-references/{row.Id}", new { row.Id, row.RowVersion });
+        return TypedResults.Created($"/api/v1/issue-document-references/{row.Id}", new RegisterSaved(row.Id, row.RowVersion));
     }
 
     // Recovery retains the old declared reference and invalidates its earlier verification (FR-MDC-03/05).
@@ -741,14 +758,14 @@ public static class RegisterEndpoints
             ViewpointUrl = string.IsNullOrWhiteSpace(body.ViewpointUrl) ? null : Coordination.Url(body.ViewpointUrl), IsAvailable = body.IsAvailable };
     }
 
-    static async Task<List<object>> ListIssueVerification(Guid id, Access access, HubDb db)
+    static async Task<Ok<List<IssueVerificationRow>>> ListIssueVerification(Guid id, Access access, HubDb db)
     {
         await LoadIssue(db, access, id);
-        return await db.IssueVerifications.AsNoTracking().Where(x => x.IssueId == id).OrderByDescending(x => x.IssueRowVersion)
-            .Select(x => (object)new { x.Id, x.VerifierId, x.Status, x.EvidenceUrl, x.Note, x.VerifiedAt, x.RowVersion }).ToListAsync();
+        return TypedResults.Ok(await db.IssueVerifications.AsNoTracking().Where(x => x.IssueId == id).OrderByDescending(x => x.IssueRowVersion)
+            .Select(x => new IssueVerificationRow(x.Id, x.VerifierId, x.Status, x.EvidenceUrl, x.Note, x.VerifiedAt, x.RowVersion)).ToListAsync());
     }
 
-    static async Task<IResult> AddIssueVerification(Guid id, IssueVerificationBody body, HttpContext http, Access access, HubDb db, TimeProvider clock, Notifier notify, SettingsStore store)
+    static async Task<Created<RegisterSaved>> AddIssueVerification(Guid id, IssueVerificationBody body, HttpContext http, Access access, HubDb db, TimeProvider clock, Notifier notify, SettingsStore store)
     {
         var (issue, project, ctx) = await LoadIssue(db, access, id);
         await Http.CheckVersion(db, http, issue, body.RowVersion);
@@ -768,7 +785,7 @@ public static class RegisterEndpoints
             Access.Demand(Permissions.Writable(access.Actor, ctx));
             Check.That(body.VerifierId == access.Me.Id, "verifierId", "issue.verifier_must_submit");
             var latest = await db.IssueVerifications.Where(x => x.IssueId == id)
-                .OrderByDescending(x => x.IssueRowVersion).Select(x => new { x.Status, x.VerifierId }).FirstOrDefaultAsync();
+                .OrderByDescending(x => x.IssueRowVersion).Select(x => new LatestVerification(x.Status, x.VerifierId)).FirstOrDefaultAsync();
             Check.That(latest?.Status == IssueVerificationStatus.Proposed && latest.VerifierId == access.Me.Id,
                 "verifierId", "issue.verifier_not_appointed");
         }
@@ -794,6 +811,6 @@ public static class RegisterEndpoints
             await db.SaveChangesAsync();
             return created;
         });
-        return Results.Created($"/api/v1/issue-verifications/{row.Id}", new { row.Id, row.RowVersion });
+        return TypedResults.Created($"/api/v1/issue-verifications/{row.Id}", new RegisterSaved(row.Id, row.RowVersion));
     }
 }

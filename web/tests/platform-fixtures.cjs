@@ -9,6 +9,7 @@ const { myWork, myWorkPerson, myWorkProject } = require('./my-work.fixture.cjs')
 const { meView, referenceData } = require('./me.fixture.cjs')
 const { taskDependencies } = require('./dependencies.fixture.cjs')
 const { actionRow, actionDetail: actionDetailOf } = require('./meetings.fixture.cjs')
+const { riskRow, riskDetail: riskDetailOf, issueRow, issueDetail: issueDetailOf } = require('./registers.fixture.cjs')
 const { deliverableRow, deliverableState, deliverableList, deliverableDetail: deliverableDetailOf } = require('./deliverables.fixture.cjs')
 
 const taskId = '00000000-0000-0000-0000-000000000001'
@@ -35,8 +36,10 @@ const actionDetail = actionDetailOf({
   action: actionRow({ id: panelIds.action, projectId: project.id, projectNumber: project.projectNumber, key: 'A-001', meetingId: '00000000-0000-0000-0000-000000000031', meetingTitle: 'Synthetic meeting',
     meetingDate: '2026-10-01', text: 'Synthetic action', ownerTypeLabel: 'User', dueDate: '2026-10-20' }),
   permissions: { edit: panelPermissions.edit, transitions: [], convert: false, comment: true } })
-const riskDetail = { risk: { id: panelIds.risk, projectId: project.id, key: 'R-001', title: 'Synthetic risk', status: 'Open', band: 'Medium', score: 4, probability: 2, impact: 2, ownerId: null, ownerName: 'Alex Chen', projectDisciplineId: project.projectDisciplines[0].id, reviewDate: '2026-10-20', isReviewOverdue: false, mitigation: 'Synthetic mitigation', triggerIndicator: 'Synthetic trigger', rowVersion: 1 }, description: 'Synthetic risk detail', project: { id: project.id, projectNumber: project.projectNumber, name: project.name }, permissions: { ...panelPermissions, transitions: [] }, links: [], realisedIssue: null }
-const issueDetail = { issue: { id: panelIds.issue, projectId: project.id, key: 'I-001', title: 'Synthetic issue', status: 'Open', issueType: 'General', raisedById: null, raisedByName: 'Alex Chen', ownerId: null, ownerName: 'Alex Chen', severity: 'Medium', dateRaised: '2026-10-01', targetResolutionDate: '2026-10-20', isOverdue: false, daysOverdue: 0, rowVersion: 1, affectedDisciplineIds: [] }, description: 'Synthetic issue detail', project: { id: project.id, projectNumber: project.projectNumber, name: project.name }, permissions: { ...panelPermissions, transitions: [], comment: true }, links: [], originRisk: null }
+const riskDetail = riskDetailOf({ risk: riskRow({ id: panelIds.risk, projectId: project.id, key: 'R-001', title: 'Synthetic risk', projectDisciplineId: project.projectDisciplines[0].id, reviewDate: '2026-10-20', mitigation: 'Synthetic mitigation', triggerIndicator: 'Synthetic trigger' }),
+  description: 'Synthetic risk detail', permissions: { edit: panelPermissions.edit, transitions: [], comment: true } })
+const issueDetail = issueDetailOf({ issue: issueRow({ id: panelIds.issue, projectId: project.id, key: 'I-001', title: 'Synthetic issue', targetResolutionDate: '2026-10-20' }),
+  description: 'Synthetic issue detail', permissions: { edit: panelPermissions.edit, changeType: { ok: false, reason: null }, transitions: [], comment: true } })
 
 async function startPreview(port = Number(process.env.TUESDAY_MOCK_PORT ?? 5189), { outDir } = {}) {
   port = Number(process.env.TUESDAY_MOCK_PORT ?? port)

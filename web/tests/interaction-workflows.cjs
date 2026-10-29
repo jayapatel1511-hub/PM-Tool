@@ -9,6 +9,7 @@ const { meView, referenceData, referenceDiscipline } = require('./me.fixture.cjs
 const { startPreview, project: baseProject, task: baseTask, taskDetail, deliverableDetail, panelIds, mockPlatformApi } = require('./platform-fixtures.cjs')
 const { deliverableList } = require('./deliverables.fixture.cjs')
 const { allocationRow, allocationPage, allocationDetail, allocationLink, capacityDay, confirmationPreview } = require('./allocations.fixture.cjs')
+const { pulse, unreadCount } = require('./notifications.fixture.cjs')
 
 const port = Number(process.env.WORKFLOW_TEST_PORT || '19508')
 const id = n => `00000000-0000-0000-0000-${String(n).padStart(12, '0')}`
@@ -37,8 +38,8 @@ const views = { allocations:[sharedView], staff: [staffView], portfolio: [savedV
     if (method !== 'GET') writes.push({ method, path: p, body: req.postDataJSON?.(), ifMatch: req.headers()['if-match'], source: req.headers()['x-hub-source'] })
     if (p === 'config') data = clientConfig()
     else if (p === 'me') data = meView({ id: personId, displayName: 'Alex Chen', email: 'alex@hub.test', systemRoles: ['ProjectManager'], capabilities: { createTask: true, portfolio: true, workload, staff: true, allStaff: true, admin: true, templates: true, directReports: 1 }, settings: { today: '2026-10-18', restrictedProjectsEnabled: true }, flags: { small_ux: true, allocation_preview: true, org_structure: true } })
-    else if (p === 'me/notifications/unread-count') data = { notifications: 0, following: 0 }
-    else if (p === 'me/notifications/pulse') data = { stamp: '0' }
+    else if (p === 'me/notifications/unread-count') data = unreadCount(0, 0)
+    else if (p === 'me/notifications/pulse') data = pulse('0')
     else if (p === 'me/work') data = myWork({ person: myWorkPerson(personId, 'Alex Chen'), today: '2026-10-18', tasks: [task] })
     else if (p === 'reference') data = referenceData({ disciplines: [referenceDiscipline(disciplineId, 'Civil')] })
     else if (p === 'organisation') data = { includeIndirectReports: false, units: [] }

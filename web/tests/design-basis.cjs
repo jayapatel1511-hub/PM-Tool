@@ -20,6 +20,7 @@ const { weeklyCoordination } = require('./dashboard.fixture.cjs');
 const { teamMember, projectTeam } = require('./team.fixture.cjs');
 const { allocationRow, allocationPage } = require('./allocations.fixture.cjs');
 const { issueRow } = require('./registers.fixture.cjs');
+const { followRead, pulse, unreadCount } = require('./notifications.fixture.cjs');
 const port = process.env.PORT ?? '5176', base = `http://127.0.0.1:${port}`;
 const id = n => `00000000-0000-0000-0000-${String(n).padStart(12, '0')}`;
 const pid = id(1), consumer = id(2), lead = id(3), civil = id(4), task = id(7), e1 = id(20), e2 = id(21), v11 = id(30), v12 = id(31), v21 = id(32), u1 = id(40), u2 = id(41), i1 = id(50), i2 = id(51);
@@ -84,8 +85,8 @@ let server, browser;
     const req = route.request(), u = new URL(req.url()), p = u.pathname.replace('/api/v1/', ''), method = req.method(); let data = {};
     if (method !== 'GET' && p.startsWith(`tasks/${task}`)) taskWrites.push({ method, path: p });
     if (p === 'config') data = clientConfig();
-    else if (p === 'me') data = me(); else if (p === 'me/sign-in') data = {}; else if (p === 'me/notifications/pulse') data = { stamp: '0' };
-    else if (p === 'me/notifications/unread-count') data = { notifications: 0, following: 0 }; else if (p === 'workspaces') data = []; else if (p === 'views' && method === 'POST') { const body = req.postDataJSON(); savedViews.push({ listType: body.listType, ...savedView({ id: id(300 + savedViews.length), name: body.name, params: body.params ?? {}, isDefault: body.isDefault ?? false }) }); data = viewSaved(savedViews.at(-1).id) }
+    else if (p === 'me') data = me(); else if (p === 'me/sign-in') data = {}; else if (p === 'me/notifications/pulse') data = pulse('0');
+    else if (p === 'me/notifications/unread-count') data = unreadCount(0, 0); else if (p === 'workspaces') data = []; else if (p === 'views' && method === 'POST') { const body = req.postDataJSON(); savedViews.push({ listType: body.listType, ...savedView({ id: id(300 + savedViews.length), name: body.name, params: body.params ?? {}, isDefault: body.isDefault ?? false }) }); data = viewSaved(savedViews.at(-1).id) }
     else if (p === 'views') data = viewList(savedViews.filter(v => v.listType === u.searchParams.get('listType')).map(({ listType, ...v }) => v));
     else if (p === 'projects') data = { items: [project()], totalCount: 1 }; else if (p === `projects/${pid}` || p === 'projects/P-DEMO') data = project();
     else if (p === `projects/${pid}/coordination`) data = weeklyCoordination();
@@ -112,7 +113,7 @@ let server, browser;
         handoffPageSize: 4, page, pageSize: print ? 5 : 4
       });
     }
-    else if (p.endsWith('/date-review')) data = { window: null, tasks: [], deliverables: [] }; else if (p.endsWith('/follow')) data = { level: 'My items only', source: 'Assignment' };
+    else if (p.endsWith('/date-review')) data = { window: null, tasks: [], deliverables: [] }; else if (p.endsWith('/follow')) data = followRead('MyItemsOnly', 'Assignment');
     else if (p.endsWith('/changes/options')) data = options();
     else if (p === `projects/${pid}/team`) data = projectTeam({ members: [teamMember({ id: id(700), userId: consumer, displayName: 'Alex Consumer', primaryDisciplineId: civil }), teamMember({ id: id(701), userId: lead, displayName: 'Marc Lead', primaryDisciplineId: civil })] });
     else if (p === `projects/${pid}/decisions`) data = [decisionRow];

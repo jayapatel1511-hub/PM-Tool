@@ -1,8 +1,10 @@
 using System.Globalization;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Api.Features;
@@ -10,17 +12,33 @@ namespace Hub.Api.Features;
 /// Notification centre, preferences, follows and the Following feed (§13.17, §17.4, §12.18, FR-NOT-01..03, FR-ASG-02/03).
 public static class NotificationEndpoints
 {
-    public sealed record ReadBody(Guid[]? Ids, bool? All);
+    public sealed record ReadBody(Guid[]? Ids = null, bool? All = null); // one or the other: the page sends only what it means
     public sealed record ChannelBody(bool App, bool Email);
-    public sealed record DigestBody(bool Enabled, string? Time, string[]? SectionsOff, bool? WeeklySummary, bool? HoldDigestWhenAway = null);
+    public sealed record DigestBody(bool Enabled, string? Time = null, string[]? SectionsOff = null, bool? WeeklySummary = null, bool? HoldDigestWhenAway = null); // each control saves its own field; the rest stay as stored
     public sealed record DensityBody(bool DenseRows);
     public sealed record FollowBody(string Level);
+
+    public sealed record NotificationRow(Guid Id, string EventType, Guid? ProjectId, string? ProjectNumber, string? ItemType, Guid? ItemId, string? ItemKey, string Title, string? Body,
+        string? LinkPath, Guid? ActorUserId, string? ActorName, int Count, DateTimeOffset CreatedAt, DateTimeOffset UpdatedAt, DateTimeOffset? ReadAt);
+    /// The project stamp is written only when the live-stamp flag is on and the project is visible (packet 042).
+    public sealed record NotificationPulse(string Stamp, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? ProjectStamp = null);
+    public sealed record UnreadCount(int Notifications, int Following);
+    public sealed record MarkedRead(int Marked);
+    public sealed record PreferenceEvent(string Code, bool App, bool Email, bool DefaultApp, bool DefaultEmail, bool Direct, bool Custom);
+    public sealed record PreferenceDigest(bool DigestEnabled, bool HoldDigestWhenAway, string Time, string OrgTime, bool WeekendDigests, IReadOnlyList<string> Sections,
+        string[] SectionsOff, bool WeeklySummaryEnabled, bool ManagesProjects);
+    public sealed record PreferenceFollow(Guid ProjectId, string ProjectNumber, string Name, string Status, string Level, string Source);
+    public sealed record PreferencesRead(IReadOnlyList<PreferenceEvent> Events, PreferenceDigest Digest, IReadOnlyList<PreferenceFollow> Follows);
+    public sealed record FollowRead(string Level, string Source);
+    public sealed record FollowingProject(Guid ProjectId, string ProjectNumber, string Name, string Status, DateTimeOffset? LastSeenAt, int Unread);
+    public sealed record FollowingItem(ActivityEndpoints.ActivityEntry Entry, int Count, string ProjectNumber, string ProjectName, bool Notified, bool Unread);
+    public sealed record FollowingFeed(IReadOnlyList<FollowingProject> Projects, IReadOnlyList<FollowingItem> Items, int Page, int PageSize, int TotalCount);
 
     public static void Map(RouteGroupBuilder api)
     {
         // ---------- Personal notifications ----------
 
-        api.MapGet("/me/notifications", async (HubDb db, Access access, CurrentUser me, bool? unread, string? type, Guid? projectId, int? page, int? pageSize) =>
+        api.MapGet("/me/notifications", async Task<Ok<Page<NotificationRow>>> (HubDb db, Access access, CurrentUser me, bool? unread, string? type, Guid? projectId, int? page, int? pageSize) =>
         {
             var (pg, size) = Http.Paging(page, pageSize ?? 50);
             var visible = access.VisibleProjectIds();
@@ -31,87 +49,80 @@ public static class NotificationEndpoints
             if (projectId is { } pid) q = q.Where(n => n.ProjectId == pid);
             var total = await q.CountAsync();
             var rows = await q.OrderByDescending(n => n.UpdatedAt).ThenByDescending(n => n.Id).Skip((pg - 1) * size).Take(size)
-                .Select(n => new
-                {
-                    n.Id, n.EventType, n.ProjectId, ProjectNumber = db.Projects.Where(p => p.Id == n.ProjectId).Select(p => p.ProjectNumber).FirstOrDefault(),
+                .Select(n => new NotificationRow(n.Id, n.EventType, n.ProjectId, db.Projects.Where(p => p.Id == n.ProjectId).Select(p => p.ProjectNumber).FirstOrDefault(),
                     n.ItemType, n.ItemId, n.ItemKey, n.Title, n.Body, n.LinkPath, n.ActorUserId,
-                    ActorName = db.Users.Where(u => u.Id == n.ActorUserId).Select(u => u.DisplayName).FirstOrDefault(), n.Count, n.CreatedAt, n.UpdatedAt, n.ReadAt,
-                }).ToListAsync();
-            return new Page<object>([.. rows], pg, size, total);
+                    db.Users.Where(u => u.Id == n.ActorUserId).Select(u => u.DisplayName).FirstOrDefault(), n.Count, n.CreatedAt, n.UpdatedAt, n.ReadAt)).ToListAsync();
+            return TypedResults.Ok(new Page<NotificationRow>(rows, pg, size, total));
         });
 
         // FR-003 (§17.6, packet 020): a cheap stamp the SPA polls every few seconds; it asks for the counts again only when
         // the stamp changes — a notification arrives or is read, a followed project changes, or a read marker moves.
-        api.MapGet("/me/notifications/pulse", async (HubDb db, Access access, CurrentUser me, SettingsStore store, Guid? projectId) =>
+        api.MapGet("/me/notifications/pulse", async Task<Ok<NotificationPulse>> (HubDb db, Access access, CurrentUser me, SettingsStore store, Guid? projectId) =>
         {
             var visible = access.VisibleProjectIds();
             var permitted = (await PlanningEndpoints.VisibleNotifications(db, access));
             var unread = await permitted.CountAsync(n => n.ReadAt == null);
             var latest = await permitted.MaxAsync(n => (DateTimeOffset?)n.CreatedAt);
-            var follows = await db.Follows.AsNoTracking().Where(f => f.UserId == me.Id && f.Level != FollowLevel.Muted && visible.Contains(f.ProjectId)).Select(f => new { f.ProjectId, f.LastSeenAt }).ToListAsync();
+            var follows = await db.Follows.AsNoTracking().Where(f => f.UserId == me.Id && f.Level != FollowLevel.Muted && visible.Contains(f.ProjectId)).Select(f => new FollowSeen(f.ProjectId, f.LastSeenAt)).ToListAsync();
             var ids = follows.Select(f => f.ProjectId).ToList();
             var activity = ids.Count == 0 ? null : await VisibleFollowed(db, access, ids, me.Id).MaxAsync(a => (DateTimeOffset?)a.OccurredAt);
             var seen = follows.Max(f => f.LastSeenAt);
             var stamp = $"{unread}:{latest?.UtcTicks}:{activity?.UtcTicks}:{seen?.UtcTicks}";
             if (!(await store.Get(db)).IsFlagOn("live_project_stamp") || projectId is not { } pid)
-                return new Dictionary<string, object?> { ["stamp"] = stamp };
+                return TypedResults.Ok(new NotificationPulse(stamp));
             // Check visibility before either source read so restricted and unknown projects remain indistinguishable.
             var visibleIds = await access.VisibleProjectIdSet();
-            if (!visibleIds.Contains(pid)) return new Dictionary<string, object?> { ["stamp"] = stamp };
+            if (!visibleIds.Contains(pid)) return TypedResults.Ok(new NotificationPulse(stamp));
             var projectActivity = await (await ActivityEndpoints.Visible(db, access, pid))
                 .Select(a => (DateTimeOffset?)a.OccurredAt).MaxAsync();
             var evaluated = await db.ProjectStates.AsNoTracking().Where(s => s.ProjectId == pid)
                 .Select(s => (DateTimeOffset?)s.EvaluatedAt).FirstOrDefaultAsync();
-            return new Dictionary<string, object?> { ["stamp"] = stamp, ["projectStamp"] = $"{projectActivity?.UtcTicks}:{evaluated?.UtcTicks}" };
+            return TypedResults.Ok(new NotificationPulse(stamp, $"{projectActivity?.UtcTicks}:{evaluated?.UtcTicks}"));
         });
 
         // The counts behind the bell and the Following tab; the SPA re-reads them when the pulse changes.
-        api.MapGet("/me/notifications/unread-count", async (HubDb db, Access access, CurrentUser me, TimeProvider clock) =>
+        api.MapGet("/me/notifications/unread-count", async Task<Ok<UnreadCount>> (HubDb db, Access access, CurrentUser me, TimeProvider clock) =>
         {
             var visible = access.VisibleProjectIds();
             var personal = await (await PlanningEndpoints.VisibleNotifications(db, access)).CountAsync(n => n.ReadAt == null);
             var following = (await FollowingUnread(db, access, me.Id)).Values.Sum();
-            return new { notifications = personal, following };
+            return TypedResults.Ok(new UnreadCount(personal, following));
         });
 
-        api.MapPost("/me/notifications/read", async (ReadBody body, HubDb db, CurrentUser me, TimeProvider clock, Access access) =>
+        api.MapPost("/me/notifications/read", async Task<Ok<MarkedRead>> (ReadBody body, HubDb db, CurrentUser me, TimeProvider clock, Access access) =>
         {
             var q = (await PlanningEndpoints.VisibleNotifications(db, access)).Where(n => n.ReadAt == null);
             if (body.All != true) { var ids = body.Ids ?? []; q = q.Where(n => ids.Contains(n.Id)); }
             var now = clock.GetUtcNow();
             var n = await q.ExecuteUpdateAsync(s => s.SetProperty(x => x.ReadAt, now));
-            return Results.Ok(new { marked = n });
+            return TypedResults.Ok(new MarkedRead(n));
         });
 
         // ---------- Preferences (§17.4) ----------
 
-        api.MapGet("/me/preferences", async (HubDb db, Access access, CurrentUser me, SettingsStore store) =>
+        api.MapGet("/me/preferences", async Task<Ok<PreferencesRead>> (HubDb db, Access access, CurrentUser me, SettingsStore store) =>
         {
             var s = await store.Get(db);
             var mine = await db.NotificationPreferences.AsNoTracking().Where(p => p.UserId == me.Id).ToDictionaryAsync(p => p.EventType);
             var set = await db.UserSettings.AsNoTracking().FirstOrDefaultAsync(x => x.UserId == me.Id) ?? new UserSetting { UserId = me.Id };
             var visible = access.VisibleProjects();
-            var follows = await db.Follows.AsNoTracking().Where(f => f.UserId == me.Id).Join(visible, f => f.ProjectId, p => p.Id,
-                (f, p) => new { f.ProjectId, p.ProjectNumber, p.Name, p.Status, f.Level, f.Source }).OrderBy(x => x.ProjectNumber).ToListAsync();
-            return new
+            var follows = await (from f in db.Follows.AsNoTracking().Where(f => f.UserId == me.Id)
+                join p in visible on f.ProjectId equals p.Id
+                orderby p.ProjectNumber
+                select new PreferenceFollow(f.ProjectId, p.ProjectNumber, p.Name, p.Status, f.Level, f.Source)).ToListAsync();
+            var events = NotificationEvents.All.Select(e =>
             {
-                Events = NotificationEvents.All.Select(e =>
-                {
-                    var d = s.NotificationDefaults.GetValueOrDefault(e.Code) ?? new Channels(e.App, e.Email);
-                    var p = mine.GetValueOrDefault(e.Code);
-                    return new { e.Code, App = p?.InApp ?? d.App, Email = p?.Email ?? d.Email, DefaultApp = d.App, DefaultEmail = d.Email, Direct = e.DirectAssignment, Custom = p is not null };
-                }),
-                Digest = new
-                {
-                    set.DigestEnabled, set.HoldDigestWhenAway, Time = set.DigestTimeLocal ?? s.DigestSendTimeLocal, OrgTime = s.DigestSendTimeLocal, s.WeekendDigests,
-                    Sections = Digest.SectionCodes, SectionsOff = JsonSerializer.Deserialize<string[]>(set.DigestSectionsOff) ?? [], // FR-002
-                    set.WeeklySummaryEnabled, ManagesProjects = await WeeklySummary.Managed(db, me.Id).AnyAsync(), // FR-001
-                },
-                Follows = follows,
-            };
+                var d = s.NotificationDefaults.GetValueOrDefault(e.Code) ?? new Channels(e.App, e.Email);
+                var p = mine.GetValueOrDefault(e.Code);
+                return new PreferenceEvent(e.Code, p?.InApp ?? d.App, p?.Email ?? d.Email, d.App, d.Email, e.DirectAssignment, p is not null);
+            }).ToList();
+            var digest = new PreferenceDigest(set.DigestEnabled, set.HoldDigestWhenAway, set.DigestTimeLocal ?? s.DigestSendTimeLocal, s.DigestSendTimeLocal, s.WeekendDigests,
+                Digest.SectionCodes, JsonSerializer.Deserialize<string[]>(set.DigestSectionsOff) ?? [], // FR-002
+                set.WeeklySummaryEnabled, await WeeklySummary.Managed(db, me.Id).AnyAsync()); // FR-001
+            return TypedResults.Ok(new PreferencesRead(events, digest, follows));
         });
 
-        api.MapPut("/me/preferences/events/{code}", async (string code, ChannelBody body, HubDb db, CurrentUser me) =>
+        api.MapPut("/me/preferences/events/{code}", async Task<NoContent> (string code, ChannelBody body, HubDb db, CurrentUser me) =>
         {
             Check.OneOf(code, NotificationEvents.All.Select(e => e.Code).ToArray(), "code");
             var p = await db.NotificationPreferences.FirstOrDefaultAsync(x => x.UserId == me.Id && x.EventType == code);
@@ -119,16 +130,16 @@ public static class NotificationEndpoints
             p.InApp = body.App;
             p.Email = body.Email;
             await db.SaveChangesAsync();
-            return Results.NoContent();
+            return TypedResults.NoContent();
         });
 
-        api.MapDelete("/me/preferences/events/{code}", async (string code, HubDb db, CurrentUser me) =>
+        api.MapDelete("/me/preferences/events/{code}", async Task<NoContent> (string code, HubDb db, CurrentUser me) =>
         {
             await db.NotificationPreferences.Where(x => x.UserId == me.Id && x.EventType == code).ExecuteDeleteAsync(); // back to the organisation default
-            return Results.NoContent();
+            return TypedResults.NoContent();
         });
 
-        api.MapPut("/me/preferences/digest", async (DigestBody body, HubDb db, CurrentUser me) =>
+        api.MapPut("/me/preferences/digest", async Task<NoContent> (DigestBody body, HubDb db, CurrentUser me) =>
         {
             if (body.Time is { Length: > 0 } t) Check.That(TimeOnly.TryParseExact(t, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out _), "time", "setting.time");
             if (body.SectionsOff is { } sections) Check.That(sections.All(Digest.SectionCodes.Contains), "sectionsOff", "error.one_of", string.Join(", ", Digest.SectionCodes));
@@ -142,10 +153,10 @@ public static class NotificationEndpoints
             if (body.WeeklySummary is { } w) set.WeeklySummaryEnabled = w;
             if (body.HoldDigestWhenAway is { } hold) set.HoldDigestWhenAway = hold;
             await db.SaveChangesAsync();
-            return Results.NoContent();
+            return TypedResults.NoContent();
         });
 
-        api.MapPut("/me/preferences/density", async (DensityBody body, HubDb db, CurrentUser me) =>
+        api.MapPut("/me/preferences/density", async Task<NoContent> (DensityBody body, HubDb db, CurrentUser me) =>
         {
             var set = await UserPreferences.GetOrCreate(db, me.Id);
             set.DenseRows = body.DenseRows;
@@ -154,19 +165,20 @@ public static class NotificationEndpoints
         });
 
         // The weekly PM summary as it would be sent now (FR-001), so a PM can see it before Monday.
-        api.MapGet("/me/weekly-summary", async (HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock, IConfiguration cfg) =>
+        api.MapGet("/me/weekly-summary", async Task<Results<Ok<WeeklySummary.Result>, NoContent>> (HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock, IConfiguration cfg) =>
         {
             var s = await store.Get(db);
             var now = clock.GetUtcNow();
             var last = await db.UserSettings.Where(x => x.UserId == me.Id).Select(x => x.LastWeeklySummaryAt).FirstOrDefaultAsync();
             var name = await db.Users.Where(u => u.Id == me.Id).Select(u => u.DisplayName).FirstAsync();
             var r = await WeeklySummary.Build(db, me.Id, name.Split(' ')[0], clock.Today(s), last ?? now.AddDays(-7), now, s, (cfg["Email:BaseUrl"] ?? "").TrimEnd('/'));
-            return r is null ? Results.NoContent() : Results.Ok(r);
+            if (r is null) return TypedResults.NoContent();
+            return TypedResults.Ok(r);
         });
 
         // ---------- Following (§12.18 ASG-02, ASG-03) ----------
 
-        api.MapPut("/projects/{id:guid}/follow", async (Guid id, FollowBody body, Access access, HubDb db, CurrentUser me, TimeProvider clock) =>
+        api.MapPut("/projects/{id:guid}/follow", async Task<Ok<FollowRead>> (Guid id, FollowBody body, Access access, HubDb db, CurrentUser me, TimeProvider clock) =>
         {
             await access.Project(id, track: false); // ASG-03: only projects the user can view
             Check.OneOf(body.Level, FollowLevel.All, "level");
@@ -177,18 +189,18 @@ public static class NotificationEndpoints
             f.Source = FollowSource.Manual; // ASG-02: the user's choice sticks
             f.UpdatedAt = now;
             await db.SaveChangesAsync();
-            return Results.Ok(new { f.Level, f.Source });
+            return TypedResults.Ok(new FollowRead(f.Level, f.Source));
         });
 
-        api.MapDelete("/projects/{id:guid}/follow", async (Guid id, HubDb db, CurrentUser me) =>
+        api.MapDelete("/projects/{id:guid}/follow", async Task<NoContent> (Guid id, HubDb db, CurrentUser me) =>
         {
             await db.Follows.Where(x => x.ProjectId == id && x.UserId == me.Id).ExecuteDeleteAsync();
-            return Results.NoContent();
+            return TypedResults.NoContent();
         });
 
         // ---------- Following feed (ASG-05..ASG-07) ----------
 
-        api.MapGet("/me/following", async (HubDb db, Access access, CurrentUser me, Guid? projectId, bool? importantOnly, int? page, int? pageSize) =>
+        api.MapGet("/me/following", async Task<Ok<FollowingFeed>> (HubDb db, Access access, CurrentUser me, Guid? projectId, bool? importantOnly, int? page, int? pageSize) =>
         {
             var (pg, size) = Http.Paging(page, pageSize ?? 100);
             var followed = await Followed(db, access, me.Id);
@@ -207,39 +219,34 @@ public static class NotificationEndpoints
                     var (row, view) = g.First();
                     var f = byProject[row.ProjectId!.Value];
                     var isNotified = g.Any(x => notified.Contains(Key(x.First)));
-                    return new
-                    {
-                        Entry = view, Count = g.Count(), ProjectNumber = f.ProjectNumber, ProjectName = f.Name, Notified = isNotified,
-                        Unread = f.Status != ProjectStatus.Setup && !isNotified && row.OccurredAt > (f.LastSeenAt ?? DateTimeOffset.MinValue),
-                    };
+                    return new FollowingItem(view, g.Count(), f.ProjectNumber, f.Name, isNotified,
+                        f.Status != ProjectStatus.Setup && !isNotified && row.OccurredAt > (f.LastSeenAt ?? DateTimeOffset.MinValue));
                 }).ToList();
             var unread = await FollowingUnread(db, access, me.Id);
-            return new
-            {
-                Projects = followed.Select(f => new { f.ProjectId, f.ProjectNumber, f.Name, f.Status, f.LastSeenAt, Unread = unread.GetValueOrDefault(f.ProjectId) }),
-                Items = items, Page = pg, PageSize = size, TotalCount = total,
-            };
+            var projects = followed.Select(f => new FollowingProject(f.ProjectId, f.ProjectNumber, f.Name, f.Status, f.LastSeenAt, unread.GetValueOrDefault(f.ProjectId))).ToList();
+            return TypedResults.Ok(new FollowingFeed(projects, items, pg, size, total));
         });
 
-        api.MapPost("/me/following/{projectId:guid}/read", async (Guid projectId, HubDb db, CurrentUser me, TimeProvider clock) =>
+        api.MapPost("/me/following/{projectId:guid}/read", async Task<NoContent> (Guid projectId, HubDb db, CurrentUser me, TimeProvider clock) =>
         {
             var now = clock.GetUtcNow();
             await db.Follows.Where(f => f.UserId == me.Id && f.ProjectId == projectId).ExecuteUpdateAsync(s => s.SetProperty(f => f.LastSeenAt, now));
-            return Results.NoContent();
+            return TypedResults.NoContent();
         });
     }
 
     public sealed record FollowRow(Guid ProjectId, string ProjectNumber, string Name, string Status, DateTimeOffset? LastSeenAt);
+    sealed record FollowSeen(Guid ProjectId, DateTimeOffset? LastSeenAt);
 
     /// Projects followed at All activity that still produce a feed: not Archived or Cancelled, and still visible (ASG-04, ASG-07, E-28).
     public static async Task<List<FollowRow>> Followed(HubDb db, Access access, Guid userId)
     {
         var visible = access.VisibleProjects();
-        return await db.Follows.AsNoTracking().Where(f => f.UserId == userId && f.Level == FollowLevel.AllActivity)
-            .Join(visible, f => f.ProjectId, p => p.Id, (f, p) => new { f, p })
-            .Where(x => x.p.Status != ProjectStatus.Archived && x.p.Status != ProjectStatus.Cancelled)
-            .OrderBy(x => x.p.ProjectNumber)
-            .Select(x => new FollowRow(x.p.Id, x.p.ProjectNumber, x.p.Name, x.p.Status, x.f.LastSeenAt)).ToListAsync();
+        return await (from f in db.Follows.AsNoTracking().Where(f => f.UserId == userId && f.Level == FollowLevel.AllActivity)
+            join p in visible on f.ProjectId equals p.Id
+            where p.Status != ProjectStatus.Archived && p.Status != ProjectStatus.Cancelled
+            orderby p.ProjectNumber
+            select new FollowRow(p.Id, p.ProjectNumber, p.Name, p.Status, f.LastSeenAt)).ToListAsync();
     }
 
     static string Key(ActivityLog a) => a.CorrelationId?.ToString() ?? "";

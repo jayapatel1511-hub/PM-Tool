@@ -8088,6 +8088,7 @@
       "string"
     ],
     "$.projects[].follow": [
+      "null",
       "object"
     ],
     "$.projects[].follow.level": [
@@ -11480,69 +11481,6 @@
     "$.components.schemas.Allowed.type": [
       "string"
     ],
-    "$.components.schemas.AnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndboolean": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndboolean.properties": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndboolean.properties.count": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndboolean.properties.count.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndboolean.properties.count.pattern": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndboolean.properties.count.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndboolean.properties.entry": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndboolean.properties.entry.$ref": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndboolean.properties.notified": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndboolean.properties.notified.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndboolean.properties.projectName": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndboolean.properties.projectName.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndboolean.properties.projectName.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndboolean.properties.projectNumber": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndboolean.properties.projectNumber.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndboolean.properties.projectNumber.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndboolean.properties.unread": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndboolean.properties.unread.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndboolean.required": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndboolean.required[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndboolean.type": [
-      "string"
-    ],
     "$.components.schemas.AnonymousTypeOfGuidAndstringAndstring": [
       "object"
     ],
@@ -11583,474 +11521,6 @@
       "string"
     ],
     "$.components.schemas.AnonymousTypeOfGuidAndstringAndstring.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndint": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndint.properties": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndint.properties.lastSeenAt": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndint.properties.lastSeenAt.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndint.properties.lastSeenAt.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndint.properties.lastSeenAt.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndint.properties.name": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndint.properties.name.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndint.properties.name.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndint.properties.projectId": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndint.properties.projectId.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndint.properties.projectId.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndint.properties.projectNumber": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndint.properties.projectNumber.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndint.properties.projectNumber.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndint.properties.status": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndint.properties.status.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndint.properties.status.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndint.properties.unread": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndint.properties.unread.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndint.properties.unread.pattern": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndint.properties.unread.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndint.required": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndint.required[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndint.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.properties": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.properties.level": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.properties.level.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.properties.level.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.properties.name": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.properties.name.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.properties.name.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.properties.projectId": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.properties.projectId.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.properties.projectId.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.properties.projectNumber": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.properties.projectNumber.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.properties.projectNumber.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.properties.source": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.properties.source.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.properties.source.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.properties.status": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.properties.status.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.properties.status.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.required": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.required[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint.properties": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint.properties.items": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint.properties.items.items": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint.properties.items.items.$ref": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint.properties.items.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint.properties.items.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint.properties.page": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint.properties.page.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint.properties.page.pattern": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint.properties.page.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint.properties.pageSize": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint.properties.pageSize.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint.properties.pageSize.pattern": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint.properties.pageSize.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint.properties.projects": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint.properties.projects.items": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint.properties.projects.items.$ref": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint.properties.projects.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint.properties.projects.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint.properties.totalCount": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint.properties.totalCount.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint.properties.totalCount.pattern": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint.properties.totalCount.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint.required": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint.required[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndAnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndAnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.properties": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndAnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.properties.digest": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndAnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.properties.digest.$ref": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndAnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.properties.events": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndAnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.properties.events.items": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndAnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.properties.events.items.$ref": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndAnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.properties.events.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndAnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.properties.events.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndAnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.properties.follows": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndAnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.properties.follows.items": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndAnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.properties.follows.items.$ref": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndAnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.properties.follows.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndAnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.properties.follows.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndAnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.required": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndAnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.required[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndAnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean.properties": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean.properties.digestEnabled": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean.properties.digestEnabled.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean.properties.holdDigestWhenAway": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean.properties.holdDigestWhenAway.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean.properties.managesProjects": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean.properties.managesProjects.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean.properties.orgTime": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean.properties.orgTime.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean.properties.orgTime.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean.properties.sections": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean.properties.sections.items": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean.properties.sections.items.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean.properties.sections.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean.properties.sections.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean.properties.sectionsOff": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean.properties.sectionsOff.items": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean.properties.sectionsOff.items.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean.properties.sectionsOff.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean.properties.sectionsOff.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean.properties.time": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean.properties.time.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean.properties.time.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean.properties.weekendDigests": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean.properties.weekendDigests.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean.properties.weeklySummaryEnabled": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean.properties.weeklySummaryEnabled.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean.required": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean.required[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndint": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndint.properties": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndint.properties.following": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndint.properties.following.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndint.properties.following.pattern": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndint.properties.following.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndint.properties.notifications": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndint.properties.notifications.format": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndint.properties.notifications.pattern": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndint.properties.notifications.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndint.required": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndint.required[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfintAndint.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndboolean": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndboolean.properties": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndboolean.properties.app": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndboolean.properties.app.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndboolean.properties.code": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndboolean.properties.code.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndboolean.properties.code.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndboolean.properties.custom": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndboolean.properties.custom.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndboolean.properties.defaultApp": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndboolean.properties.defaultApp.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndboolean.properties.defaultEmail": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndboolean.properties.defaultEmail.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndboolean.properties.direct": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndboolean.properties.direct.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndboolean.properties.email": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndboolean.properties.email.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndboolean.required": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndboolean.required[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndboolean.type": [
       "string"
     ],
     "$.components.schemas.AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfstring": [
@@ -29045,6 +28515,33 @@
     "$.components.schemas.FollowBody.type": [
       "string"
     ],
+    "$.components.schemas.FollowRead": [
+      "object"
+    ],
+    "$.components.schemas.FollowRead.properties": [
+      "object"
+    ],
+    "$.components.schemas.FollowRead.properties.level": [
+      "object"
+    ],
+    "$.components.schemas.FollowRead.properties.level.type": [
+      "string"
+    ],
+    "$.components.schemas.FollowRead.properties.source": [
+      "object"
+    ],
+    "$.components.schemas.FollowRead.properties.source.type": [
+      "string"
+    ],
+    "$.components.schemas.FollowRead.required": [
+      "array"
+    ],
+    "$.components.schemas.FollowRead.required[]": [
+      "string"
+    ],
+    "$.components.schemas.FollowRead.type": [
+      "string"
+    ],
     "$.components.schemas.FollowUpItem": [
       "object"
     ],
@@ -29178,6 +28675,204 @@
       "string"
     ],
     "$.components.schemas.FollowUpResponse.type": [
+      "string"
+    ],
+    "$.components.schemas.FollowingFeed": [
+      "object"
+    ],
+    "$.components.schemas.FollowingFeed.properties": [
+      "object"
+    ],
+    "$.components.schemas.FollowingFeed.properties.items": [
+      "object"
+    ],
+    "$.components.schemas.FollowingFeed.properties.items.items": [
+      "object"
+    ],
+    "$.components.schemas.FollowingFeed.properties.items.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.FollowingFeed.properties.items.type": [
+      "string"
+    ],
+    "$.components.schemas.FollowingFeed.properties.page": [
+      "object"
+    ],
+    "$.components.schemas.FollowingFeed.properties.page.format": [
+      "string"
+    ],
+    "$.components.schemas.FollowingFeed.properties.page.pattern": [
+      "string"
+    ],
+    "$.components.schemas.FollowingFeed.properties.page.type": [
+      "string"
+    ],
+    "$.components.schemas.FollowingFeed.properties.pageSize": [
+      "object"
+    ],
+    "$.components.schemas.FollowingFeed.properties.pageSize.format": [
+      "string"
+    ],
+    "$.components.schemas.FollowingFeed.properties.pageSize.pattern": [
+      "string"
+    ],
+    "$.components.schemas.FollowingFeed.properties.pageSize.type": [
+      "string"
+    ],
+    "$.components.schemas.FollowingFeed.properties.projects": [
+      "object"
+    ],
+    "$.components.schemas.FollowingFeed.properties.projects.items": [
+      "object"
+    ],
+    "$.components.schemas.FollowingFeed.properties.projects.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.FollowingFeed.properties.projects.type": [
+      "string"
+    ],
+    "$.components.schemas.FollowingFeed.properties.totalCount": [
+      "object"
+    ],
+    "$.components.schemas.FollowingFeed.properties.totalCount.format": [
+      "string"
+    ],
+    "$.components.schemas.FollowingFeed.properties.totalCount.pattern": [
+      "string"
+    ],
+    "$.components.schemas.FollowingFeed.properties.totalCount.type": [
+      "string"
+    ],
+    "$.components.schemas.FollowingFeed.required": [
+      "array"
+    ],
+    "$.components.schemas.FollowingFeed.required[]": [
+      "string"
+    ],
+    "$.components.schemas.FollowingFeed.type": [
+      "string"
+    ],
+    "$.components.schemas.FollowingItem": [
+      "object"
+    ],
+    "$.components.schemas.FollowingItem.properties": [
+      "object"
+    ],
+    "$.components.schemas.FollowingItem.properties.count": [
+      "object"
+    ],
+    "$.components.schemas.FollowingItem.properties.count.format": [
+      "string"
+    ],
+    "$.components.schemas.FollowingItem.properties.count.pattern": [
+      "string"
+    ],
+    "$.components.schemas.FollowingItem.properties.count.type": [
+      "string"
+    ],
+    "$.components.schemas.FollowingItem.properties.entry": [
+      "object"
+    ],
+    "$.components.schemas.FollowingItem.properties.entry.$ref": [
+      "string"
+    ],
+    "$.components.schemas.FollowingItem.properties.notified": [
+      "object"
+    ],
+    "$.components.schemas.FollowingItem.properties.notified.type": [
+      "string"
+    ],
+    "$.components.schemas.FollowingItem.properties.projectName": [
+      "object"
+    ],
+    "$.components.schemas.FollowingItem.properties.projectName.type": [
+      "string"
+    ],
+    "$.components.schemas.FollowingItem.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.FollowingItem.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.FollowingItem.properties.unread": [
+      "object"
+    ],
+    "$.components.schemas.FollowingItem.properties.unread.type": [
+      "string"
+    ],
+    "$.components.schemas.FollowingItem.required": [
+      "array"
+    ],
+    "$.components.schemas.FollowingItem.required[]": [
+      "string"
+    ],
+    "$.components.schemas.FollowingItem.type": [
+      "string"
+    ],
+    "$.components.schemas.FollowingProject": [
+      "object"
+    ],
+    "$.components.schemas.FollowingProject.properties": [
+      "object"
+    ],
+    "$.components.schemas.FollowingProject.properties.lastSeenAt": [
+      "object"
+    ],
+    "$.components.schemas.FollowingProject.properties.lastSeenAt.format": [
+      "string"
+    ],
+    "$.components.schemas.FollowingProject.properties.lastSeenAt.type": [
+      "array"
+    ],
+    "$.components.schemas.FollowingProject.properties.lastSeenAt.type[]": [
+      "string"
+    ],
+    "$.components.schemas.FollowingProject.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.FollowingProject.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.FollowingProject.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.FollowingProject.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.FollowingProject.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.FollowingProject.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.FollowingProject.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.FollowingProject.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.FollowingProject.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.FollowingProject.properties.unread": [
+      "object"
+    ],
+    "$.components.schemas.FollowingProject.properties.unread.format": [
+      "string"
+    ],
+    "$.components.schemas.FollowingProject.properties.unread.pattern": [
+      "string"
+    ],
+    "$.components.schemas.FollowingProject.properties.unread.type": [
+      "string"
+    ],
+    "$.components.schemas.FollowingProject.required": [
+      "array"
+    ],
+    "$.components.schemas.FollowingProject.required[]": [
+      "string"
+    ],
+    "$.components.schemas.FollowingProject.type": [
       "string"
     ],
     "$.components.schemas.Group": [
@@ -35555,6 +35250,33 @@
     "$.components.schemas.ManualBody.type": [
       "string"
     ],
+    "$.components.schemas.MarkedRead": [
+      "object"
+    ],
+    "$.components.schemas.MarkedRead.properties": [
+      "object"
+    ],
+    "$.components.schemas.MarkedRead.properties.marked": [
+      "object"
+    ],
+    "$.components.schemas.MarkedRead.properties.marked.format": [
+      "string"
+    ],
+    "$.components.schemas.MarkedRead.properties.marked.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MarkedRead.properties.marked.type": [
+      "string"
+    ],
+    "$.components.schemas.MarkedRead.required": [
+      "array"
+    ],
+    "$.components.schemas.MarkedRead.required[]": [
+      "string"
+    ],
+    "$.components.schemas.MarkedRead.type": [
+      "string"
+    ],
     "$.components.schemas.MeCapabilities": [
       "object"
     ],
@@ -39179,6 +38901,204 @@
     "$.components.schemas.NoticeAction.type": [
       "string"
     ],
+    "$.components.schemas.NotificationPulse": [
+      "object"
+    ],
+    "$.components.schemas.NotificationPulse.properties": [
+      "object"
+    ],
+    "$.components.schemas.NotificationPulse.properties.projectStamp": [
+      "object"
+    ],
+    "$.components.schemas.NotificationPulse.properties.projectStamp.type": [
+      "array"
+    ],
+    "$.components.schemas.NotificationPulse.properties.projectStamp.type[]": [
+      "string"
+    ],
+    "$.components.schemas.NotificationPulse.properties.stamp": [
+      "object"
+    ],
+    "$.components.schemas.NotificationPulse.properties.stamp.type": [
+      "string"
+    ],
+    "$.components.schemas.NotificationPulse.required": [
+      "array"
+    ],
+    "$.components.schemas.NotificationPulse.required[]": [
+      "string"
+    ],
+    "$.components.schemas.NotificationPulse.type": [
+      "string"
+    ],
+    "$.components.schemas.NotificationRow": [
+      "object"
+    ],
+    "$.components.schemas.NotificationRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.NotificationRow.properties.actorName": [
+      "object"
+    ],
+    "$.components.schemas.NotificationRow.properties.actorName.type": [
+      "array"
+    ],
+    "$.components.schemas.NotificationRow.properties.actorName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.NotificationRow.properties.actorUserId": [
+      "object"
+    ],
+    "$.components.schemas.NotificationRow.properties.actorUserId.format": [
+      "string"
+    ],
+    "$.components.schemas.NotificationRow.properties.actorUserId.type": [
+      "array"
+    ],
+    "$.components.schemas.NotificationRow.properties.actorUserId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.NotificationRow.properties.body": [
+      "object"
+    ],
+    "$.components.schemas.NotificationRow.properties.body.type": [
+      "array"
+    ],
+    "$.components.schemas.NotificationRow.properties.body.type[]": [
+      "string"
+    ],
+    "$.components.schemas.NotificationRow.properties.count": [
+      "object"
+    ],
+    "$.components.schemas.NotificationRow.properties.count.format": [
+      "string"
+    ],
+    "$.components.schemas.NotificationRow.properties.count.pattern": [
+      "string"
+    ],
+    "$.components.schemas.NotificationRow.properties.count.type": [
+      "string"
+    ],
+    "$.components.schemas.NotificationRow.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.NotificationRow.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.NotificationRow.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.NotificationRow.properties.eventType": [
+      "object"
+    ],
+    "$.components.schemas.NotificationRow.properties.eventType.type": [
+      "string"
+    ],
+    "$.components.schemas.NotificationRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.NotificationRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.NotificationRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.NotificationRow.properties.itemId": [
+      "object"
+    ],
+    "$.components.schemas.NotificationRow.properties.itemId.format": [
+      "string"
+    ],
+    "$.components.schemas.NotificationRow.properties.itemId.type": [
+      "array"
+    ],
+    "$.components.schemas.NotificationRow.properties.itemId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.NotificationRow.properties.itemKey": [
+      "object"
+    ],
+    "$.components.schemas.NotificationRow.properties.itemKey.type": [
+      "array"
+    ],
+    "$.components.schemas.NotificationRow.properties.itemKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.NotificationRow.properties.itemType": [
+      "object"
+    ],
+    "$.components.schemas.NotificationRow.properties.itemType.type": [
+      "array"
+    ],
+    "$.components.schemas.NotificationRow.properties.itemType.type[]": [
+      "string"
+    ],
+    "$.components.schemas.NotificationRow.properties.linkPath": [
+      "object"
+    ],
+    "$.components.schemas.NotificationRow.properties.linkPath.type": [
+      "array"
+    ],
+    "$.components.schemas.NotificationRow.properties.linkPath.type[]": [
+      "string"
+    ],
+    "$.components.schemas.NotificationRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.NotificationRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.NotificationRow.properties.projectId.type": [
+      "array"
+    ],
+    "$.components.schemas.NotificationRow.properties.projectId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.NotificationRow.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.NotificationRow.properties.projectNumber.type": [
+      "array"
+    ],
+    "$.components.schemas.NotificationRow.properties.projectNumber.type[]": [
+      "string"
+    ],
+    "$.components.schemas.NotificationRow.properties.readAt": [
+      "object"
+    ],
+    "$.components.schemas.NotificationRow.properties.readAt.format": [
+      "string"
+    ],
+    "$.components.schemas.NotificationRow.properties.readAt.type": [
+      "array"
+    ],
+    "$.components.schemas.NotificationRow.properties.readAt.type[]": [
+      "string"
+    ],
+    "$.components.schemas.NotificationRow.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.NotificationRow.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.NotificationRow.properties.updatedAt": [
+      "object"
+    ],
+    "$.components.schemas.NotificationRow.properties.updatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.NotificationRow.properties.updatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.NotificationRow.required": [
+      "array"
+    ],
+    "$.components.schemas.NotificationRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.NotificationRow.type": [
+      "string"
+    ],
     "$.components.schemas.OfferBody": [
       "object"
     ],
@@ -41438,73 +41358,79 @@
     "$.components.schemas.PageOfListRow.type": [
       "string"
     ],
-    "$.components.schemas.PageOfObject": [
+    "$.components.schemas.PageOfNotificationRow": [
       "object"
     ],
-    "$.components.schemas.PageOfObject.properties": [
+    "$.components.schemas.PageOfNotificationRow.properties": [
       "object"
     ],
-    "$.components.schemas.PageOfObject.properties.filters": [
+    "$.components.schemas.PageOfNotificationRow.properties.filters": [
       "object"
     ],
-    "$.components.schemas.PageOfObject.properties.items": [
+    "$.components.schemas.PageOfNotificationRow.properties.items": [
       "object"
     ],
-    "$.components.schemas.PageOfObject.properties.items.type": [
-      "string"
-    ],
-    "$.components.schemas.PageOfObject.properties.page": [
+    "$.components.schemas.PageOfNotificationRow.properties.items.items": [
       "object"
     ],
-    "$.components.schemas.PageOfObject.properties.page.format": [
+    "$.components.schemas.PageOfNotificationRow.properties.items.items.$ref": [
       "string"
     ],
-    "$.components.schemas.PageOfObject.properties.page.pattern": [
+    "$.components.schemas.PageOfNotificationRow.properties.items.type": [
       "string"
     ],
-    "$.components.schemas.PageOfObject.properties.page.type": [
-      "string"
-    ],
-    "$.components.schemas.PageOfObject.properties.pageSize": [
+    "$.components.schemas.PageOfNotificationRow.properties.page": [
       "object"
     ],
-    "$.components.schemas.PageOfObject.properties.pageSize.format": [
+    "$.components.schemas.PageOfNotificationRow.properties.page.format": [
       "string"
     ],
-    "$.components.schemas.PageOfObject.properties.pageSize.pattern": [
+    "$.components.schemas.PageOfNotificationRow.properties.page.pattern": [
       "string"
     ],
-    "$.components.schemas.PageOfObject.properties.pageSize.type": [
+    "$.components.schemas.PageOfNotificationRow.properties.page.type": [
       "string"
     ],
-    "$.components.schemas.PageOfObject.properties.sort": [
+    "$.components.schemas.PageOfNotificationRow.properties.pageSize": [
       "object"
     ],
-    "$.components.schemas.PageOfObject.properties.sort.type": [
+    "$.components.schemas.PageOfNotificationRow.properties.pageSize.format": [
+      "string"
+    ],
+    "$.components.schemas.PageOfNotificationRow.properties.pageSize.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PageOfNotificationRow.properties.pageSize.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfNotificationRow.properties.sort": [
+      "object"
+    ],
+    "$.components.schemas.PageOfNotificationRow.properties.sort.type": [
       "array"
     ],
-    "$.components.schemas.PageOfObject.properties.sort.type[]": [
+    "$.components.schemas.PageOfNotificationRow.properties.sort.type[]": [
       "string"
     ],
-    "$.components.schemas.PageOfObject.properties.totalCount": [
+    "$.components.schemas.PageOfNotificationRow.properties.totalCount": [
       "object"
     ],
-    "$.components.schemas.PageOfObject.properties.totalCount.format": [
+    "$.components.schemas.PageOfNotificationRow.properties.totalCount.format": [
       "string"
     ],
-    "$.components.schemas.PageOfObject.properties.totalCount.pattern": [
+    "$.components.schemas.PageOfNotificationRow.properties.totalCount.pattern": [
       "string"
     ],
-    "$.components.schemas.PageOfObject.properties.totalCount.type": [
+    "$.components.schemas.PageOfNotificationRow.properties.totalCount.type": [
       "string"
     ],
-    "$.components.schemas.PageOfObject.required": [
+    "$.components.schemas.PageOfNotificationRow.required": [
       "array"
     ],
-    "$.components.schemas.PageOfObject.required[]": [
+    "$.components.schemas.PageOfNotificationRow.required[]": [
       "string"
     ],
-    "$.components.schemas.PageOfObject.type": [
+    "$.components.schemas.PageOfNotificationRow.type": [
       "string"
     ],
     "$.components.schemas.PageOfReviewRow": [
@@ -41655,6 +41581,153 @@
       "string"
     ],
     "$.components.schemas.PageOfRow.type": [
+      "string"
+    ],
+    "$.components.schemas.Part": [
+      "object"
+    ],
+    "$.components.schemas.Part.properties": [
+      "object"
+    ],
+    "$.components.schemas.Part.properties.attention": [
+      "object"
+    ],
+    "$.components.schemas.Part.properties.attention.items": [
+      "object"
+    ],
+    "$.components.schemas.Part.properties.attention.items.type": [
+      "string"
+    ],
+    "$.components.schemas.Part.properties.attention.type": [
+      "string"
+    ],
+    "$.components.schemas.Part.properties.blocked": [
+      "object"
+    ],
+    "$.components.schemas.Part.properties.blocked.format": [
+      "string"
+    ],
+    "$.components.schemas.Part.properties.blocked.pattern": [
+      "string"
+    ],
+    "$.components.schemas.Part.properties.blocked.type": [
+      "string"
+    ],
+    "$.components.schemas.Part.properties.changes": [
+      "object"
+    ],
+    "$.components.schemas.Part.properties.changes.format": [
+      "string"
+    ],
+    "$.components.schemas.Part.properties.changes.pattern": [
+      "string"
+    ],
+    "$.components.schemas.Part.properties.changes.type": [
+      "string"
+    ],
+    "$.components.schemas.Part.properties.changesByType": [
+      "object"
+    ],
+    "$.components.schemas.Part.properties.changesByType.additionalProperties": [
+      "object"
+    ],
+    "$.components.schemas.Part.properties.changesByType.additionalProperties.format": [
+      "string"
+    ],
+    "$.components.schemas.Part.properties.changesByType.additionalProperties.pattern": [
+      "string"
+    ],
+    "$.components.schemas.Part.properties.changesByType.additionalProperties.type": [
+      "string"
+    ],
+    "$.components.schemas.Part.properties.changesByType.type": [
+      "string"
+    ],
+    "$.components.schemas.Part.properties.computed": [
+      "object"
+    ],
+    "$.components.schemas.Part.properties.computed.type": [
+      "string"
+    ],
+    "$.components.schemas.Part.properties.decisionsOverdue": [
+      "object"
+    ],
+    "$.components.schemas.Part.properties.decisionsOverdue.format": [
+      "string"
+    ],
+    "$.components.schemas.Part.properties.decisionsOverdue.pattern": [
+      "string"
+    ],
+    "$.components.schemas.Part.properties.decisionsOverdue.type": [
+      "string"
+    ],
+    "$.components.schemas.Part.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.Part.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.Part.properties.nextSubmission": [
+      "object"
+    ],
+    "$.components.schemas.Part.properties.nextSubmission.type": [
+      "array"
+    ],
+    "$.components.schemas.Part.properties.nextSubmission.type[]": [
+      "string"
+    ],
+    "$.components.schemas.Part.properties.nextSubmissionDate": [
+      "object"
+    ],
+    "$.components.schemas.Part.properties.nextSubmissionDate.format": [
+      "string"
+    ],
+    "$.components.schemas.Part.properties.nextSubmissionDate.type": [
+      "array"
+    ],
+    "$.components.schemas.Part.properties.nextSubmissionDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.Part.properties.overdue": [
+      "object"
+    ],
+    "$.components.schemas.Part.properties.overdue.format": [
+      "string"
+    ],
+    "$.components.schemas.Part.properties.overdue.pattern": [
+      "string"
+    ],
+    "$.components.schemas.Part.properties.overdue.type": [
+      "string"
+    ],
+    "$.components.schemas.Part.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.Part.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.Part.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.Part.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.Part.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.Part.properties.reported": [
+      "object"
+    ],
+    "$.components.schemas.Part.properties.reported.type": [
+      "string"
+    ],
+    "$.components.schemas.Part.required": [
+      "array"
+    ],
+    "$.components.schemas.Part.required[]": [
+      "string"
+    ],
+    "$.components.schemas.Part.type": [
       "string"
     ],
     "$.components.schemas.PartyBody": [
@@ -42606,6 +42679,243 @@
       "string"
     ],
     "$.components.schemas.PortfolioView.type": [
+      "string"
+    ],
+    "$.components.schemas.PreferenceDigest": [
+      "object"
+    ],
+    "$.components.schemas.PreferenceDigest.properties": [
+      "object"
+    ],
+    "$.components.schemas.PreferenceDigest.properties.digestEnabled": [
+      "object"
+    ],
+    "$.components.schemas.PreferenceDigest.properties.digestEnabled.type": [
+      "string"
+    ],
+    "$.components.schemas.PreferenceDigest.properties.holdDigestWhenAway": [
+      "object"
+    ],
+    "$.components.schemas.PreferenceDigest.properties.holdDigestWhenAway.type": [
+      "string"
+    ],
+    "$.components.schemas.PreferenceDigest.properties.managesProjects": [
+      "object"
+    ],
+    "$.components.schemas.PreferenceDigest.properties.managesProjects.type": [
+      "string"
+    ],
+    "$.components.schemas.PreferenceDigest.properties.orgTime": [
+      "object"
+    ],
+    "$.components.schemas.PreferenceDigest.properties.orgTime.type": [
+      "string"
+    ],
+    "$.components.schemas.PreferenceDigest.properties.sections": [
+      "object"
+    ],
+    "$.components.schemas.PreferenceDigest.properties.sections.items": [
+      "object"
+    ],
+    "$.components.schemas.PreferenceDigest.properties.sections.items.type": [
+      "string"
+    ],
+    "$.components.schemas.PreferenceDigest.properties.sections.type": [
+      "string"
+    ],
+    "$.components.schemas.PreferenceDigest.properties.sectionsOff": [
+      "object"
+    ],
+    "$.components.schemas.PreferenceDigest.properties.sectionsOff.items": [
+      "object"
+    ],
+    "$.components.schemas.PreferenceDigest.properties.sectionsOff.items.type": [
+      "string"
+    ],
+    "$.components.schemas.PreferenceDigest.properties.sectionsOff.type": [
+      "string"
+    ],
+    "$.components.schemas.PreferenceDigest.properties.time": [
+      "object"
+    ],
+    "$.components.schemas.PreferenceDigest.properties.time.type": [
+      "string"
+    ],
+    "$.components.schemas.PreferenceDigest.properties.weekendDigests": [
+      "object"
+    ],
+    "$.components.schemas.PreferenceDigest.properties.weekendDigests.type": [
+      "string"
+    ],
+    "$.components.schemas.PreferenceDigest.properties.weeklySummaryEnabled": [
+      "object"
+    ],
+    "$.components.schemas.PreferenceDigest.properties.weeklySummaryEnabled.type": [
+      "string"
+    ],
+    "$.components.schemas.PreferenceDigest.required": [
+      "array"
+    ],
+    "$.components.schemas.PreferenceDigest.required[]": [
+      "string"
+    ],
+    "$.components.schemas.PreferenceDigest.type": [
+      "string"
+    ],
+    "$.components.schemas.PreferenceEvent": [
+      "object"
+    ],
+    "$.components.schemas.PreferenceEvent.properties": [
+      "object"
+    ],
+    "$.components.schemas.PreferenceEvent.properties.app": [
+      "object"
+    ],
+    "$.components.schemas.PreferenceEvent.properties.app.type": [
+      "string"
+    ],
+    "$.components.schemas.PreferenceEvent.properties.code": [
+      "object"
+    ],
+    "$.components.schemas.PreferenceEvent.properties.code.type": [
+      "string"
+    ],
+    "$.components.schemas.PreferenceEvent.properties.custom": [
+      "object"
+    ],
+    "$.components.schemas.PreferenceEvent.properties.custom.type": [
+      "string"
+    ],
+    "$.components.schemas.PreferenceEvent.properties.defaultApp": [
+      "object"
+    ],
+    "$.components.schemas.PreferenceEvent.properties.defaultApp.type": [
+      "string"
+    ],
+    "$.components.schemas.PreferenceEvent.properties.defaultEmail": [
+      "object"
+    ],
+    "$.components.schemas.PreferenceEvent.properties.defaultEmail.type": [
+      "string"
+    ],
+    "$.components.schemas.PreferenceEvent.properties.direct": [
+      "object"
+    ],
+    "$.components.schemas.PreferenceEvent.properties.direct.type": [
+      "string"
+    ],
+    "$.components.schemas.PreferenceEvent.properties.email": [
+      "object"
+    ],
+    "$.components.schemas.PreferenceEvent.properties.email.type": [
+      "string"
+    ],
+    "$.components.schemas.PreferenceEvent.required": [
+      "array"
+    ],
+    "$.components.schemas.PreferenceEvent.required[]": [
+      "string"
+    ],
+    "$.components.schemas.PreferenceEvent.type": [
+      "string"
+    ],
+    "$.components.schemas.PreferenceFollow": [
+      "object"
+    ],
+    "$.components.schemas.PreferenceFollow.properties": [
+      "object"
+    ],
+    "$.components.schemas.PreferenceFollow.properties.level": [
+      "object"
+    ],
+    "$.components.schemas.PreferenceFollow.properties.level.type": [
+      "string"
+    ],
+    "$.components.schemas.PreferenceFollow.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.PreferenceFollow.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.PreferenceFollow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.PreferenceFollow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.PreferenceFollow.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.PreferenceFollow.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.PreferenceFollow.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.PreferenceFollow.properties.source": [
+      "object"
+    ],
+    "$.components.schemas.PreferenceFollow.properties.source.type": [
+      "string"
+    ],
+    "$.components.schemas.PreferenceFollow.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.PreferenceFollow.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.PreferenceFollow.required": [
+      "array"
+    ],
+    "$.components.schemas.PreferenceFollow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.PreferenceFollow.type": [
+      "string"
+    ],
+    "$.components.schemas.PreferencesRead": [
+      "object"
+    ],
+    "$.components.schemas.PreferencesRead.properties": [
+      "object"
+    ],
+    "$.components.schemas.PreferencesRead.properties.digest": [
+      "object"
+    ],
+    "$.components.schemas.PreferencesRead.properties.digest.$ref": [
+      "string"
+    ],
+    "$.components.schemas.PreferencesRead.properties.events": [
+      "object"
+    ],
+    "$.components.schemas.PreferencesRead.properties.events.items": [
+      "object"
+    ],
+    "$.components.schemas.PreferencesRead.properties.events.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.PreferencesRead.properties.events.type": [
+      "string"
+    ],
+    "$.components.schemas.PreferencesRead.properties.follows": [
+      "object"
+    ],
+    "$.components.schemas.PreferencesRead.properties.follows.items": [
+      "object"
+    ],
+    "$.components.schemas.PreferencesRead.properties.follows.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.PreferencesRead.properties.follows.type": [
+      "string"
+    ],
+    "$.components.schemas.PreferencesRead.required": [
+      "array"
+    ],
+    "$.components.schemas.PreferencesRead.required[]": [
+      "string"
+    ],
+    "$.components.schemas.PreferencesRead.type": [
       "string"
     ],
     "$.components.schemas.PrerequisiteBody": [
@@ -44169,12 +44479,6 @@
       "array"
     ],
     "$.components.schemas.ReadBody.properties.ids.type[]": [
-      "string"
-    ],
-    "$.components.schemas.ReadBody.required": [
-      "array"
-    ],
-    "$.components.schemas.ReadBody.required[]": [
       "string"
     ],
     "$.components.schemas.ReadBody.type": [
@@ -60470,6 +60774,45 @@
     "$.components.schemas.UnitBody.type": [
       "string"
     ],
+    "$.components.schemas.UnreadCount": [
+      "object"
+    ],
+    "$.components.schemas.UnreadCount.properties": [
+      "object"
+    ],
+    "$.components.schemas.UnreadCount.properties.following": [
+      "object"
+    ],
+    "$.components.schemas.UnreadCount.properties.following.format": [
+      "string"
+    ],
+    "$.components.schemas.UnreadCount.properties.following.pattern": [
+      "string"
+    ],
+    "$.components.schemas.UnreadCount.properties.following.type": [
+      "string"
+    ],
+    "$.components.schemas.UnreadCount.properties.notifications": [
+      "object"
+    ],
+    "$.components.schemas.UnreadCount.properties.notifications.format": [
+      "string"
+    ],
+    "$.components.schemas.UnreadCount.properties.notifications.pattern": [
+      "string"
+    ],
+    "$.components.schemas.UnreadCount.properties.notifications.type": [
+      "string"
+    ],
+    "$.components.schemas.UnreadCount.required": [
+      "array"
+    ],
+    "$.components.schemas.UnreadCount.required[]": [
+      "string"
+    ],
+    "$.components.schemas.UnreadCount.type": [
+      "string"
+    ],
     "$.components.schemas.UseBody": [
       "object"
     ],
@@ -61968,6 +62311,60 @@
       "string"
     ],
     "$.components.schemas.WeeklyRound.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklySummaryResult": [
+      "object"
+    ],
+    "$.components.schemas.WeeklySummaryResult.properties": [
+      "object"
+    ],
+    "$.components.schemas.WeeklySummaryResult.properties.body": [
+      "object"
+    ],
+    "$.components.schemas.WeeklySummaryResult.properties.body.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklySummaryResult.properties.projects": [
+      "object"
+    ],
+    "$.components.schemas.WeeklySummaryResult.properties.projects.items": [
+      "object"
+    ],
+    "$.components.schemas.WeeklySummaryResult.properties.projects.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.WeeklySummaryResult.properties.projects.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklySummaryResult.properties.requiredProjectIds": [
+      "object"
+    ],
+    "$.components.schemas.WeeklySummaryResult.properties.requiredProjectIds.items": [
+      "object"
+    ],
+    "$.components.schemas.WeeklySummaryResult.properties.requiredProjectIds.items.format": [
+      "string"
+    ],
+    "$.components.schemas.WeeklySummaryResult.properties.requiredProjectIds.items.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklySummaryResult.properties.requiredProjectIds.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklySummaryResult.properties.subject": [
+      "object"
+    ],
+    "$.components.schemas.WeeklySummaryResult.properties.subject.type": [
+      "string"
+    ],
+    "$.components.schemas.WeeklySummaryResult.required": [
+      "array"
+    ],
+    "$.components.schemas.WeeklySummaryResult.required[]": [
+      "string"
+    ],
+    "$.components.schemas.WeeklySummaryResult.type": [
       "string"
     ],
     "$.components.schemas.WeeklyUpcoming": [
@@ -70118,10 +70515,10 @@
     "$.paths./api/v1/me/following/{projectId}/read.post.responses": [
       "object"
     ],
-    "$.paths./api/v1/me/following/{projectId}/read.post.responses.200": [
+    "$.paths./api/v1/me/following/{projectId}/read.post.responses.204": [
       "object"
     ],
-    "$.paths./api/v1/me/following/{projectId}/read.post.responses.200.description": [
+    "$.paths./api/v1/me/following/{projectId}/read.post.responses.204.description": [
       "string"
     ],
     "$.paths./api/v1/me/following/{projectId}/read.post.tags": [
@@ -70229,7 +70626,7 @@
     "$.paths./api/v1/me/notifications/pulse.get.responses.200.content.application/json.schema": [
       "object"
     ],
-    "$.paths./api/v1/me/notifications/pulse.get.responses.200.content.application/json.schema.type": [
+    "$.paths./api/v1/me/notifications/pulse.get.responses.200.content.application/json.schema.$ref": [
       "string"
     ],
     "$.paths./api/v1/me/notifications/pulse.get.responses.200.description": [
@@ -70270,6 +70667,18 @@
     ],
     "$.paths./api/v1/me/notifications/read.post.responses.200": [
       "object"
+    ],
+    "$.paths./api/v1/me/notifications/read.post.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/me/notifications/read.post.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/me/notifications/read.post.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/me/notifications/read.post.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/me/notifications/read.post.responses.200.description": [
       "string"
@@ -70493,10 +70902,10 @@
     "$.paths./api/v1/me/preferences/digest.put.responses": [
       "object"
     ],
-    "$.paths./api/v1/me/preferences/digest.put.responses.200": [
+    "$.paths./api/v1/me/preferences/digest.put.responses.204": [
       "object"
     ],
-    "$.paths./api/v1/me/preferences/digest.put.responses.200.description": [
+    "$.paths./api/v1/me/preferences/digest.put.responses.204.description": [
       "string"
     ],
     "$.paths./api/v1/me/preferences/digest.put.tags": [
@@ -70535,10 +70944,10 @@
     "$.paths./api/v1/me/preferences/events/{code}.delete.responses": [
       "object"
     ],
-    "$.paths./api/v1/me/preferences/events/{code}.delete.responses.200": [
+    "$.paths./api/v1/me/preferences/events/{code}.delete.responses.204": [
       "object"
     ],
-    "$.paths./api/v1/me/preferences/events/{code}.delete.responses.200.description": [
+    "$.paths./api/v1/me/preferences/events/{code}.delete.responses.204.description": [
       "string"
     ],
     "$.paths./api/v1/me/preferences/events/{code}.delete.tags": [
@@ -70592,10 +71001,10 @@
     "$.paths./api/v1/me/preferences/events/{code}.put.responses": [
       "object"
     ],
-    "$.paths./api/v1/me/preferences/events/{code}.put.responses.200": [
+    "$.paths./api/v1/me/preferences/events/{code}.put.responses.204": [
       "object"
     ],
-    "$.paths./api/v1/me/preferences/events/{code}.put.responses.200.description": [
+    "$.paths./api/v1/me/preferences/events/{code}.put.responses.204.description": [
       "string"
     ],
     "$.paths./api/v1/me/preferences/events/{code}.put.tags": [
@@ -70637,7 +71046,25 @@
     "$.paths./api/v1/me/weekly-summary.get.responses.200": [
       "object"
     ],
+    "$.paths./api/v1/me/weekly-summary.get.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/me/weekly-summary.get.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/me/weekly-summary.get.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/me/weekly-summary.get.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/me/weekly-summary.get.responses.200.description": [
+      "string"
+    ],
+    "$.paths./api/v1/me/weekly-summary.get.responses.204": [
+      "object"
+    ],
+    "$.paths./api/v1/me/weekly-summary.get.responses.204.description": [
       "string"
     ],
     "$.paths./api/v1/me/weekly-summary.get.tags": [
@@ -75920,10 +76347,10 @@
     "$.paths./api/v1/projects/{id}/follow.delete.responses": [
       "object"
     ],
-    "$.paths./api/v1/projects/{id}/follow.delete.responses.200": [
+    "$.paths./api/v1/projects/{id}/follow.delete.responses.204": [
       "object"
     ],
-    "$.paths./api/v1/projects/{id}/follow.delete.responses.200.description": [
+    "$.paths./api/v1/projects/{id}/follow.delete.responses.204.description": [
       "string"
     ],
     "$.paths./api/v1/projects/{id}/follow.delete.tags": [
@@ -75982,6 +76409,18 @@
     ],
     "$.paths./api/v1/projects/{id}/follow.put.responses.200": [
       "object"
+    ],
+    "$.paths./api/v1/projects/{id}/follow.put.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/follow.put.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/follow.put.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/follow.put.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/projects/{id}/follow.put.responses.200.description": [
       "string"
@@ -127924,6 +128363,44 @@
     "$.errors.sectionsOff[]": [
       "string"
     ],
+    "$.errors.time": [
+      "array"
+    ],
+    "$.errors.time[]": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "PUT /api/v1/me/preferences/events/{code} 400": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.errors": [
+      "object"
+    ],
+    "$.errors.code": [
+      "array"
+    ],
+    "$.errors.code[]": [
+      "string"
+    ],
     "$.status": [
       "number"
     ],
@@ -128088,6 +128565,61 @@
       "string"
     ],
     "$.source": [
+      "string"
+    ]
+  },
+  "PUT /api/v1/projects/{id}/follow 400": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.errors": [
+      "object"
+    ],
+    "$.errors.level": [
+      "array"
+    ],
+    "$.errors.level[]": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "PUT /api/v1/projects/{id}/follow 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
       "string"
     ]
   },

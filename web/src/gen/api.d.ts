@@ -4570,7 +4570,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint"];
+                        "application/json": components["schemas"]["FollowingFeed"];
                     };
                 };
             };
@@ -4603,8 +4603,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -4646,7 +4646,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["PageOfObject"];
+                        "application/json": components["schemas"]["PageOfNotificationRow"];
                     };
                 };
             };
@@ -4683,7 +4683,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": Record<string, never>;
+                        "application/json": components["schemas"]["NotificationPulse"];
                     };
                 };
             };
@@ -4723,7 +4723,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["MarkedRead"];
+                    };
                 };
             };
         };
@@ -4755,7 +4757,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfintAndint"];
+                        "application/json": components["schemas"]["UnreadCount"];
                     };
                 };
             };
@@ -4898,7 +4900,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfIEnumerableOfAnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndAnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring"];
+                        "application/json": components["schemas"]["PreferencesRead"];
                     };
                 };
             };
@@ -4969,8 +4971,8 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -5008,8 +5010,8 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -5029,8 +5031,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -5094,6 +5096,15 @@ export interface paths {
             responses: {
                 /** @description OK */
                 200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["WeeklySummaryResult"];
+                    };
+                };
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -8485,7 +8496,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["FollowRead"];
+                    };
                 };
             };
         };
@@ -8501,8 +8514,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -16559,81 +16572,11 @@ export interface components {
             pickUp: boolean;
             withdraw: boolean;
         };
-        AnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndboolean: {
-            /** Format: int32 */
-            count: number;
-            entry: components["schemas"]["ActivityEntry"];
-            notified: boolean;
-            projectName: null | string;
-            projectNumber: null | string;
-            unread: boolean;
-        };
         AnonymousTypeOfGuidAndstringAndstring: {
             displayName: null | string;
             source: null | string;
             /** Format: uuid */
             userId: string;
-        };
-        AnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndint: {
-            /** Format: date-time */
-            lastSeenAt: null | string;
-            name: null | string;
-            /** Format: uuid */
-            projectId: string;
-            projectNumber: null | string;
-            status: null | string;
-            /** Format: int32 */
-            unread: number;
-        };
-        AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring: {
-            level: null | string;
-            name: null | string;
-            /** Format: uuid */
-            projectId: string;
-            projectNumber: null | string;
-            source: null | string;
-            status: null | string;
-        };
-        AnonymousTypeOfIEnumerableOfAnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndintAndListOfAnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndbooleanAndintAndintAndint: {
-            items: null | components["schemas"]["AnonymousTypeOfActivityEntryAndintAndstringAndstringAndbooleanAndboolean"][];
-            /** Format: int32 */
-            page: number;
-            /** Format: int32 */
-            pageSize: number;
-            projects: null | components["schemas"]["AnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndint"][];
-            /** Format: int32 */
-            totalCount: number;
-        };
-        "AnonymousTypeOfIEnumerableOfAnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndAnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring": {
-            digest: components["schemas"]["AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean"];
-            events: null | components["schemas"]["AnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndboolean"][];
-            follows: null | components["schemas"]["AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring"][];
-        };
-        "AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean": {
-            digestEnabled: boolean;
-            holdDigestWhenAway: boolean;
-            managesProjects: boolean;
-            orgTime: null | string;
-            sections: null | string[];
-            sectionsOff: null | string[];
-            time: null | string;
-            weekendDigests: boolean;
-            weeklySummaryEnabled: boolean;
-        };
-        AnonymousTypeOfintAndint: {
-            /** Format: int32 */
-            following: number;
-            /** Format: int32 */
-            notifications: number;
-        };
-        AnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndboolean: {
-            app: boolean;
-            code: null | string;
-            custom: boolean;
-            defaultApp: boolean;
-            defaultEmail: boolean;
-            direct: boolean;
-            email: boolean;
         };
         AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfstring: {
             displayName: null | string;
@@ -18997,9 +18940,9 @@ export interface components {
         DigestBody: {
             enabled: boolean;
             holdDigestWhenAway?: null | boolean;
-            sectionsOff: null | string[];
-            time: null | string;
-            weeklySummary: null | boolean;
+            sectionsOff?: null | string[];
+            time?: null | string;
+            weeklySummary?: null | boolean;
         };
         DisciplineBody: {
             /** Format: uuid */
@@ -19250,6 +19193,10 @@ export interface components {
         FollowBody: {
             level: string;
         };
+        FollowRead: {
+            level: string;
+            source: string;
+        };
         FollowUpItem: {
             /** Format: date */
             dueDate: null | string;
@@ -19270,6 +19217,36 @@ export interface components {
             items: components["schemas"]["FollowUpItem"][];
             /** Format: int32 */
             total: number;
+        };
+        FollowingFeed: {
+            items: components["schemas"]["FollowingItem"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            projects: components["schemas"]["FollowingProject"][];
+            /** Format: int32 */
+            totalCount: number;
+        };
+        FollowingItem: {
+            /** Format: int32 */
+            count: number;
+            entry: components["schemas"]["ActivityEntry"];
+            notified: boolean;
+            projectName: string;
+            projectNumber: string;
+            unread: boolean;
+        };
+        FollowingProject: {
+            /** Format: date-time */
+            lastSeenAt: null | string;
+            name: string;
+            /** Format: uuid */
+            projectId: string;
+            projectNumber: string;
+            status: string;
+            /** Format: int32 */
+            unread: number;
         };
         Group: {
             role: string;
@@ -20246,6 +20223,10 @@ export interface components {
             /** Format: date */
             throughDate: string;
         };
+        MarkedRead: {
+            /** Format: int32 */
+            marked: number;
+        };
         MeCapabilities: {
             admin: boolean;
             allStaff: boolean;
@@ -20798,6 +20779,36 @@ export interface components {
             /** Format: int32 */
             rowVersion: number;
         };
+        NotificationPulse: {
+            projectStamp?: null | string;
+            stamp: string;
+        };
+        NotificationRow: {
+            actorName: null | string;
+            /** Format: uuid */
+            actorUserId: null | string;
+            body: null | string;
+            /** Format: int32 */
+            count: number;
+            /** Format: date-time */
+            createdAt: string;
+            eventType: string;
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            itemId: null | string;
+            itemKey: null | string;
+            itemType: null | string;
+            linkPath: null | string;
+            /** Format: uuid */
+            projectId: null | string;
+            projectNumber: null | string;
+            /** Format: date-time */
+            readAt: null | string;
+            title: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
         OfferBody: {
             /** Format: double */
             hoursRemaining: null | number;
@@ -21146,9 +21157,9 @@ export interface components {
             /** Format: int32 */
             totalCount: number;
         };
-        PageOfObject: {
+        PageOfNotificationRow: {
             filters?: unknown;
-            items: unknown[];
+            items: components["schemas"]["NotificationRow"][];
             /** Format: int32 */
             page: number;
             /** Format: int32 */
@@ -21178,6 +21189,29 @@ export interface components {
             sort?: null | string;
             /** Format: int32 */
             totalCount: number;
+        };
+        Part: {
+            attention: string[];
+            /** Format: int32 */
+            blocked: number;
+            /** Format: int32 */
+            changes: number;
+            changesByType: {
+                [key: string]: number;
+            };
+            computed: string;
+            /** Format: int32 */
+            decisionsOverdue: number;
+            name: string;
+            nextSubmission: null | string;
+            /** Format: date */
+            nextSubmissionDate: null | string;
+            /** Format: int32 */
+            overdue: number;
+            /** Format: uuid */
+            projectId: string;
+            projectNumber: string;
+            reported: string;
         };
         PartyBody: {
             email: null | string;
@@ -21320,6 +21354,40 @@ export interface components {
             ownOnly: boolean;
             projects: components["schemas"]["JsonArray"];
             tiles: components["schemas"]["PortfolioTiles"];
+        };
+        PreferenceDigest: {
+            digestEnabled: boolean;
+            holdDigestWhenAway: boolean;
+            managesProjects: boolean;
+            orgTime: string;
+            sections: string[];
+            sectionsOff: string[];
+            time: string;
+            weekendDigests: boolean;
+            weeklySummaryEnabled: boolean;
+        };
+        PreferenceEvent: {
+            app: boolean;
+            code: string;
+            custom: boolean;
+            defaultApp: boolean;
+            defaultEmail: boolean;
+            direct: boolean;
+            email: boolean;
+        };
+        PreferenceFollow: {
+            level: string;
+            name: string;
+            /** Format: uuid */
+            projectId: string;
+            projectNumber: string;
+            source: string;
+            status: string;
+        };
+        PreferencesRead: {
+            digest: components["schemas"]["PreferenceDigest"];
+            events: components["schemas"]["PreferenceEvent"][];
+            follows: components["schemas"]["PreferenceFollow"][];
         };
         PrerequisiteBody: {
             /** Format: uuid */
@@ -21545,8 +21613,8 @@ export interface components {
             week: string;
         };
         ReadBody: {
-            all: null | boolean;
-            ids: null | string[];
+            all?: null | boolean;
+            ids?: null | string[];
         };
         ReadinessAssessmentRead: {
             auditKey: null | string;
@@ -24044,6 +24112,12 @@ export interface components {
             /** Format: uuid */
             parentId: null | string;
         };
+        UnreadCount: {
+            /** Format: int32 */
+            following: number;
+            /** Format: int32 */
+            notifications: number;
+        };
         UseBody: {
             intendedUse: string;
             /** Format: uuid */
@@ -24263,6 +24337,12 @@ export interface components {
         WeeklyRound: {
             discipline: components["schemas"]["DashboardDiscipline"];
             top: components["schemas"]["TaskQueriesRow"][];
+        };
+        WeeklySummaryResult: {
+            body: string;
+            projects: components["schemas"]["Part"][];
+            requiredProjectIds?: string[];
+            subject: string;
         };
         WeeklyUpcoming: {
             deliverables: components["schemas"]["DeliverableRow"][];

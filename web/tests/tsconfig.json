@@ -50,6 +50,7 @@
     "meetings.fixture.cjs",
     "workspace.fixture.cjs",
     "registers.fixture.cjs",
-    "milestones.fixture.cjs"
+    "milestones.fixture.cjs",
+    "notifications.fixture.cjs"
   ]
 }

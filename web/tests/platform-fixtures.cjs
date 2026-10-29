@@ -23,6 +23,7 @@ const views = viewList()
 const planningGrid = { weeks: [], currentWeek: '2026-10-03', partialView: false, draftAccess: false, settings: { horizonWeeks: 6, overPct: 1, underPct: 1, underWeeks: 1, staleDays: 14, maxHoursPerWeek: 40 }, people: [] }
 const { documentLinks: links } = require('./document-links.fixture.cjs')
 const { comments } = require('./comments.fixture.cjs')
+const { pulse, unreadCount } = require('./notifications.fixture.cjs')
 const taskPage = { items: [], page: 1, pageSize: 200, totalCount: 0 }
 const me = meView({ id: '00000000-0000-0000-0000-000000000002', displayName: 'Alex Chen', email: 'alex@hub.test', systemRoles: ['StandardUser'], capabilities: { createTask: true, workload: true, admin: true }, settings: { today: '2026-10-03', restrictedProjectsEnabled: true }, flags: { live_events: true, live_project_stamp: true } })
 const taskDetail = { task, description: 'Synthetic fixture task', project: { id: project.id, projectNumber: project.projectNumber, name: project.name, status: project.status }, collaborators: [], watchers: [], permissions: { edit: { ok: true }, assign: { ok: true }, setReviewer: { ok: true }, dueDate: { ok: true }, dueNeedsReason: false, block: { ok: true }, delete: { ok: true }, restore: true, comment: true, transitions: [], dependencies: true, enterTime: true, needsReason: false, allowSelfReview: true } }
@@ -92,8 +93,8 @@ function mockPlatformApi(page, { build, buildIds = ['mock-build-a', 'mock-build-
     else if (/^items\/(Milestone|Deliverable|Decision|Action|Risk|Issue)\/[^/]+\/links$/.test(p)) data = links
     else if (p === 'reference') data = referenceData()
     else if (p === 'workspaces') data = []
-    else if (p === 'me/notifications/pulse') { pulseRequests.push(url.toString()); data = { stamp: String(pulseRequests.length), projectStamp: String(pulseRequests.length) } }
-    else if (p === 'me/notifications/unread-count') data = { notifications: 0, following: 0 }
+    else if (p === 'me/notifications/pulse') { pulseRequests.push(url.toString()); data = pulse(String(pulseRequests.length), String(pulseRequests.length)) }
+    else if (p === 'me/notifications/unread-count') data = unreadCount(0, 0)
     else if (p === 'me/sign-in' || p.startsWith('admin/settings/flag.')) data = {}
     else if (p === 'events') { eventRequests.push(request); if (events !== true) status = typeof events === 'number' ? events : 404; else { await route.fulfill({ status: 200, contentType: 'text/event-stream', headers: { 'cache-control': 'no-cache' }, body: ': heartbeat\n\ndata: {"topic":"project","projectId":"'+project.id+'","itemType":"Task","itemId":"'+taskId+'"}\n\n' }); return } }
     else if (request.method() !== 'GET') data = {}

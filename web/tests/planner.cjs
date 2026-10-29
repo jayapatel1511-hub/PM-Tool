@@ -13,6 +13,7 @@ const { availabilityDay, availabilityPerson, availabilityConcern, availabilityRe
 const { dayAvailability } = require('./allocations.fixture.cjs')
 const { calendarEvent, calendarDeadline, calendarRange, calendarCancelled } = require('./calendar.fixture.cjs')
 const { planningHit, searchResult } = require('./search.fixture.cjs')
+const { pulse, unreadCount } = require('./notifications.fixture.cjs')
 
 const port = process.env.PORT ?? '5194'
 const base = `http://127.0.0.1:${port}`
@@ -56,8 +57,8 @@ const pause = (ms = 100) => new Promise((r) => setTimeout(r, ms))
       else if (p === 'me') data = myWorkMode ? { ...me, id: alex, displayName: 'Alex Engineer', systemRoles: [], capabilities: { ...me.capabilities, workload: false } } : (adminMode ? { ...me, capabilities: { ...me.capabilities, admin: true } } : me)
       else if (p === 'me/work') data = myWork({ person: myWorkPerson(alex, 'Alex Engineer'), today: '2026-10-03' })
       else if (p === 'me/sign-in') data = {}
-      else if (p === 'me/notifications/pulse') data = { stamp: '0' }
-      else if (p === 'me/notifications/unread-count') data = { notifications: notifications.length, following: 0 }
+      else if (p === 'me/notifications/pulse') data = pulse('0')
+      else if (p === 'me/notifications/unread-count') data = unreadCount(notifications.length, 0)
       else if (p.startsWith('me/notifications')) data = notifications
       else if (p === 'views') data = viewList()
       else if (p === 'reference') data = referenceData({ disciplines: [referenceDiscipline(id(22), 'Global Civil')] })

@@ -7,7 +7,7 @@ import { Link, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { AttentionRows } from '@/components/hub/attention'
 import { AccentDot, ActiveFilters, ChipToggle, Empty, ErrorBanner, Field, FilterBar, Loading, Page, Section, Segmented, selectCls } from '@/components/hub/common'
 import { NewTaskDialog } from '@/components/hub/new-item'
-import { NotificationItem, useMarkRead, useOpenNotification, type NotificationRow } from '@/components/hub/notifications'
+import { NotificationItem, useMarkRead, useOpenNotification } from '@/components/hub/notifications'
 import { useItemPanel } from '@/components/hub/panel-host'
 import { Chip, HealthPill, Key, PriorityBadge, StatusPill } from '@/components/hub/pills'
 import { ViewMenu } from '@/components/hub/views'
@@ -413,7 +413,7 @@ function TaskView({ tab }: { tab: string }) {
 /** Inbox (FR-VIS-08): unread personal notifications in the selected scope; opening one marks it read. */
 function Inbox() {
   const scope = useScope()
-  const q = useQuery({ queryKey: ['notifications', 'inbox'], queryFn: () => get<PageOf<NotificationRow>>('me/notifications?unread=true&pageSize=100') })
+  const q = useQuery({ queryKey: ['notifications', 'inbox'], queryFn: () => typedRequest('get', '/api/v1/me/notifications', { query: { unread: true, pageSize: 100 } }) })
   const open = useOpenNotification()
   const markRead = useMarkRead()
   const rows = (q.data?.items ?? []).filter((n) => !scope.ids || !n.projectId || scope.ids.includes(n.projectId))

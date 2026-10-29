@@ -6,6 +6,7 @@ const { spawn } = require('child_process');
 const assert = require('node:assert/strict');
 const path = require('node:path');
 const fs = require('node:fs');
+const { pulse, unreadCount, preferences } = require('./notifications.fixture.cjs')
 
 const port = process.env.PORT ?? '5189';
 const origin = `http://127.0.0.1:${port}`;
@@ -38,10 +39,10 @@ let server, browser;
       linkRequests.push({ pathname, method: route.request().method() });
       return route.fulfill({ contentType: 'text/html', body: '<h1>Connect provider redirect reached</h1>' });
     }
-    if (pathname === '/api/v1/me/preferences') return route.fulfill({ json: { events: [], follows: [], digest: { digestEnabled: true, holdDigestWhenAway: true, time: '08:00', orgTime: '08:00', weekendDigests: false, sections: [], sectionsOff: [], weeklySummaryEnabled: false, managesProjects: false } } });
+    if (pathname === '/api/v1/me/preferences') return route.fulfill({ json: preferences({ digest: { holdDigestWhenAway: true } }) });
     if (pathname === '/api/v1/me/sign-in') return route.fulfill({ status: 204 });
-    if (pathname === '/api/v1/me/notifications/pulse') return route.fulfill({ json: { stamp: '0' } });
-    if (pathname === '/api/v1/me/notifications/unread-count') return route.fulfill({ json: { notifications: 0, following: 0 } });
+    if (pathname === '/api/v1/me/notifications/pulse') return route.fulfill({ json: pulse('0') });
+    if (pathname === '/api/v1/me/notifications/unread-count') return route.fulfill({ json: unreadCount(0, 0) });
     if (pathname === '/api/v1/workspaces') return route.fulfill({ json: [] });
     if (pathname === '/api/v1/views') return route.fulfill({ json: viewList() });
     if (pathname === '/api/v1/projects') return route.fulfill({ json: { items: [], totalCount: 0 } });

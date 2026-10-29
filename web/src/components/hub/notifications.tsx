@@ -9,20 +9,18 @@ import { toast } from 'sonner'
 import { Empty, Loading } from '@/components/hub/common'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { get, post, qs } from '@/lib/api'
+import type { components } from '@/gen/api'
+import { typedRequest } from '@/lib/api'
 import { useFlag } from '@/lib/auth'
 import { useProject, useProjectRefresh } from '@/hooks/data'
 import { ago, fmtTime } from '@/lib/format'
 import { t } from '@/lib/i18n'
-import type { Page } from '@/lib/types'
+import { invalidateNotifications } from '@/lib/keys'
 import { cn } from '@/lib/utils'
 
 // Notification centre entry point (§13.17, §17.6): unread count polled every 60 seconds (FR-015).
 
-export interface NotificationRow {
-  id: string; eventType: string; projectId?: string; projectNumber?: string; itemType?: string; itemId?: string; itemKey?: string
-  title: string; body?: string; linkPath?: string; actorName?: string; count: number; createdAt: string; updatedAt: string; readAt?: string | null
-}
+export type NotificationRow = components['schemas']['NotificationRow']
 const ICON: Record<string, LucideIcon> = {
   TaskAssigned: UserPlus, ReviewerSet: Eye, ReviewRequested: Eye, ReviewOutcome: CheckCircle2, TaskBlocked: Link2Off, TaskUnblocked: Unlock,
   BlockingOverdue: AlertTriangle, DueDateChanged: CalendarClock, CommentOnItem: MessageSquare, Mention: AtSign, DecisionAssigned: Scale,
@@ -44,14 +42,14 @@ export function useUnread() {
   const project = useProject(number)
   const refreshProject = useProjectRefresh()
   const projectId = liveStamp ? project.data?.id : undefined
-  const pulse = useQuery({ queryKey: projectId ? ['unread-pulse', projectId] : ['unread-pulse'], queryFn: () => get<{ stamp: string; projectStamp?: string }>(`me/notifications/pulse${qs({ projectId })}`), refetchInterval: 4_000 })
+  const pulse = useQuery({ queryKey: projectId ? ['unread-pulse', projectId] : ['unread-pulse'], queryFn: () => typedRequest('get', '/api/v1/me/notifications/pulse', { query: { projectId } }), refetchInterval: 4_000 })
   const stamp = pulse.data?.stamp
   const projectStamp = pulse.data?.projectStamp
   const seen = useRef(stamp)
   const seenProjectStamp = useRef(projectStamp)
   useEffect(() => {
     if (!stamp || seen.current === stamp) return
-    if (seen.current) { qc.invalidateQueries({ queryKey: ['notifications'] }); qc.invalidateQueries({ queryKey: ['following'] }) }
+    if (seen.current) void invalidateNotifications(qc)
     seen.current = stamp
   }, [stamp, qc])
   useEffect(() => {
@@ -59,16 +57,15 @@ export function useUnread() {
     if (seenProjectStamp.current) refreshProject(projectId)
     seenProjectStamp.current = projectStamp
   }, [projectId, projectStamp, refreshProject])
-  return useQuery({ queryKey: ['unread', stamp], queryFn: () => get<{ notifications: number; following: number }>('me/notifications/unread-count'),
+  return useQuery({ queryKey: ['unread', stamp], queryFn: () => typedRequest('get', '/api/v1/me/notifications/unread-count', {}),
     enabled: pulse.isFetched, placeholderData: keepPreviousData })
 }
 
 export function useMarkRead() {
   const qc = useQueryClient()
   return async (body: { ids?: string[]; all?: boolean }) => {
-    await post('me/notifications/read', body)
-    qc.invalidateQueries({ queryKey: ['unread'] })
-    qc.invalidateQueries({ queryKey: ['notifications'] })
+    await typedRequest('post', '/api/v1/me/notifications/read', { body })
+    void invalidateNotifications(qc)
   }
 }
 
@@ -112,7 +109,7 @@ export function BellButton() {
   const [open, setOpen] = useState(false)
   const count = unread.data?.notifications ?? 0
   useEffect(() => { document.title = count > 99 ? '(99+) Tuesday' : count > 0 ? `(${count}) Tuesday` : 'Tuesday' }, [count])
-  const recent = useQuery({ queryKey: ['notifications', 'recent'], queryFn: () => get<Page<NotificationRow>>('me/notifications?pageSize=8'), enabled: open })
+  const recent = useQuery({ queryKey: ['notifications', 'recent'], queryFn: () => typedRequest('get', '/api/v1/me/notifications', { query: { pageSize: 8 } }), enabled: open })
   const markRead = useMarkRead()
   const openItem = useOpenNotification()
   return (

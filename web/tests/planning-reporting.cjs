@@ -9,6 +9,7 @@ const assert = require('node:assert/strict')
 const { spawn } = require('node:child_process')
 const path = require('node:path')
 const fs = require('node:fs')
+const { pulse, unreadCount, preferences } = require('./notifications.fixture.cjs')
 
 const port = process.env.PORT || '19503'
 const base = `http://127.0.0.1:${port}`
@@ -39,11 +40,11 @@ const template = { id: id(10), familyId: id(11), name: 'Synthetic template', des
       if (p === 'config') data = clientConfig()
       else if (p === 'me') data = me()
       else if (p === 'me/sign-in') data = {}
-      else if (p === 'me/notifications/pulse') data = { stamp: '0' }
-      else if (p === 'me/notifications/unread-count') data = { notifications: 0, following: 0 }
+      else if (p === 'me/notifications/pulse') data = pulse('0')
+      else if (p === 'me/notifications/unread-count') data = unreadCount(0, 0)
       else if (p === 'me/work') data = work
       else if (p === 'me/work/watching' || p === 'me/work/requested') data = { total: 1, items: [{ id: id(30), itemType: 'Task', key: 'P-DEMO-T1', title: 'Synthetic follow-up', projectNumber: 'P-DEMO', status: 'Open', ownerName: 'Priya PM' }] }
-      else if (p === 'me/preferences') data = { events: [], digest: { digestEnabled: true, holdDigestWhenAway: false, time: '09:00', orgTime: 'America/Halifax', weekendDigests: false, sections: [], sectionsOff: [], weeklySummaryEnabled: true, managesProjects: true }, follows: [] }
+      else if (p === 'me/preferences') data = preferences({ digest: { time: '09:00', orgTime: 'America/Halifax', weeklySummaryEnabled: true, managesProjects: true } })
       else if (p === 'planning/grid') data = { weeks: [], people: [], today: '2026-10-18', currentWeek: '2026-10-12', defaultCapacity: 40, thresholds: { overPct: 110, amberPct: 90, underPct: 40 } }
       else if (p === 'me/onboarding') data = { hidden, done: false, completed: 0, total: 7, groups: [{ role: 'Everyone', steps: Array.from({ length: 7 }, (_, i) => ({ key: `step-${i}`, label: `Step ${i + 1}`, route: '/my-work', done: false })) }] }
       else if (p === 'me/onboarding/hide') { hidden = true; data = null }

@@ -287,9 +287,9 @@ export function Spinner({ className }: { className?: string }) {
 }
 
 /** A consequential action confirmed with its consequence stated, optionally with a reason (§13.0, G-09). */
-export function ConfirmDialog({ open, onOpenChange, title, body, confirmLabel, reason, onConfirm, destructive, children, busy, className }: {
+export function ConfirmDialog({ open, onOpenChange, title, body, confirmLabel, reason, onConfirm, destructive, children, busy, className, closeOnConfirm = true }: {
   open: boolean; onOpenChange: (o: boolean) => void; title: ReactNode; body?: ReactNode; confirmLabel?: string
-  reason?: boolean | 'optional'; onConfirm: (reason: string) => Promise<unknown> | void; destructive?: boolean; children?: ReactNode; busy?: boolean; className?: string
+  reason?: boolean | 'optional'; onConfirm: (reason: string) => Promise<unknown> | void; destructive?: boolean; children?: ReactNode; busy?: boolean; className?: string; closeOnConfirm?: boolean
 }) {
   const [text, setText] = useState('')
   const [err, setErr] = useState<unknown>(null)
@@ -320,7 +320,7 @@ export function ConfirmDialog({ open, onOpenChange, title, body, confirmLabel, r
           <Button variant={destructive ? 'destructive' : 'default'} disabled={!valid || working || busy}
             onClick={async () => {
               setWorking(true); setErr(null)
-              try { await onConfirm(text.trim()); setText(''); onOpenChange(false) } catch (e) { setErr(e) } finally { setWorking(false) }
+              try { await onConfirm(text.trim()); setText(''); if (closeOnConfirm) onOpenChange(false) } catch (e) { setErr(e) } finally { setWorking(false) }
             }}>
             {working && <Spinner />}{working ? t('common.saving') : confirmLabel ?? t('common.confirm')}
           </Button>

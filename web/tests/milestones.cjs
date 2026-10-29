@@ -63,6 +63,16 @@ Object.assign(project.permissions, { manageMilestones: { ok: true, reason: null 
       return route.fulfill({ json: milestoneVersion(rowId, version(rowId)) })
     })
 
+    await page.route(`**/api/v1/projects/${project.id}`, route => {
+      if (route.request().method() !== 'PATCH') return route.fallback()
+      writes.push(send(route.request()))
+      return route.fulfill({ json: { rowVersion: project.rowVersion + 1 } })
+    })
+    await page.route(`**/api/v1/projects/${project.id}/deliverables/bulk`, route => {
+      writes.push(send(route.request()))
+      return route.fulfill({ json: { updated: 1, skipped: [] } })
+    })
+
     const menu = async (key, item) => { await page.getByRole('button', { name: `Actions for ${key}` }).click(); await page.getByRole('menuitem', { name: item, exact: true }).click() }
     const lastRead = () => reads.filter(r => r.path === `/api/v1/projects/${project.id}/milestones`).at(-1)
 
@@ -120,7 +130,11 @@ Object.assign(project.permissions, { manageMilestones: { ok: true, reason: null 
     await page.getByRole('dialog').getByRole('button', { name: 'Mark complete', exact: true }).click()
     await page.getByText('Review the list and confirm again.').waitFor({ state: 'visible' })
     await page.getByRole('dialog').getByRole('button', { name: 'Mark complete', exact: true }).click()
+    const advance = page.getByRole('dialog', { name: 'Advance the project phase to Detailed Design?' })
+    await advance.waitFor({ state: 'visible', timeout: 8000 })
+    await advance.getByRole('button', { name: 'Yes', exact: true }).click()
     await page.getByRole('dialog').waitFor({ state: 'detached' })
+    assert.deepEqual(writes.at(-1), { method: 'PATCH', path: `/api/v1/projects/${project.id}`, query: {}, body: { phaseId: phase }, ifMatch: '\"1\"', source: 'UI' })
     const [asked, confirmed] = completeWrites()
     assert.deepEqual(asked.body, { completedDate: asked.body.completedDate, confirm: false, rowVersion: 2 })
     assert.deepEqual(confirmed.body, { completedDate: asked.body.completedDate, confirm: true, rowVersion: 2 })
@@ -137,15 +151,20 @@ Object.assign(project.permissions, { manageMilestones: { ok: true, reason: null 
     await menu('M-002', 'Cancel milestone')
     await page.locator('#confirm-reason').fill('Visit dropped')
     await page.getByRole('dialog').getByRole('button', { name: 'Cancel milestone', exact: true }).click()
-    await page.getByRole('dialog').waitFor({ state: 'detached' })
+    const retarget = page.getByRole('dialog', { name: 'Retarget 1 deliverables' })
+    await retarget.waitFor({ state: 'visible', timeout: 8000 })
     assert.deepEqual(writes.at(-1), { method: 'POST', path: `/api/v1/milestones/${m2}/cancel`, query: {}, body: { reason: 'Visit dropped', rowVersion: 2 }, ifMatch: null, source: 'UI' })
+    await retarget.locator('#mr-target').selectOption(m3)
+    await retarget.getByRole('button', { name: 'Retarget', exact: true }).click()
+    await page.getByRole('dialog').waitFor({ state: 'detached' })
+    assert.deepEqual(writes.at(-1), { method: 'POST', path: `/api/v1/projects/${project.id}/deliverables/bulk`, query: {}, body: { ids: [held], operation: 'setMilestone', params: { milestoneId: m3 }, reason: null }, ifMatch: null, source: 'UI' })
 
     // The panel reads the milestone from its contract path and shows what the detail carries.
     await page.getByRole('button', { name: 'Kickoff', exact: true }).first().click()
     await page.getByRole('heading', { name: 'Kickoff' }).waitFor({ state: 'visible' })
     assert.ok(reads.some(r => r.path === `/api/v1/milestones/${m3}`), 'the milestone is read from its contract path')
 
-    assert.equal(writes.length, 8)
+    assert.equal(writes.length, 10)
     assert.ok(writes.every(w => w.source === 'UI'), 'every write names its source')
     assert.deepEqual(ui.mock.unknownGets, [], 'no unmocked read')
     assert.deepEqual(ui.mock.apiErrors, [], 'no API error')

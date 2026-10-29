@@ -409,7 +409,7 @@ function CompleteDialog({ p, m, onClose, onDone }: { p: ProjectDetail; m: Milest
       onConfirm={async () => { await patch(`projects/${p.id}`, { phaseId: phase.id }, p.rowVersion); onDone() }} />
   )
   return (
-    <ConfirmDialog open onOpenChange={(o) => !o && onClose()} title={t('milestone.completeTitle', { key: m.key, name: m.name })} confirmLabel={t('milestone.complete')}
+    <ConfirmDialog open closeOnConfirm={false} onOpenChange={(o) => !o && onClose()} title={t('milestone.completeTitle', { key: m.key, name: m.name })} confirmLabel={t('milestone.complete')}
       body={confirmList ? t('milestone.openDeliverables', { n: confirmList.length }) : undefined}
       onConfirm={async () => {
         try {
@@ -444,7 +444,7 @@ function CancelDialog({ p, m, onClose, onDone }: { p: ProjectDetail; m: Mileston
     </ConfirmDialog>
   )
   return (
-    <ConfirmDialog open onOpenChange={(o) => !o && onClose()} destructive reason title={t('milestone.cancelTitle', { key: m.key, name: m.name })} body={t('milestone.cancelHint')}
+    <ConfirmDialog open closeOnConfirm={false} onOpenChange={(o) => !o && onClose()} destructive reason title={t('milestone.cancelTitle', { key: m.key, name: m.name })} body={t('milestone.cancelHint')}
       confirmLabel={t('milestone.cancel')}
       onConfirm={async (reason) => { const r = await typedRequest('post', '/api/v1/milestones/{id}/cancel', { params: { id: m.id }, body: { reason: reason ?? null, rowVersion: m.rowVersion } }); if (r.retarget.length) setRetarget(r.retarget); else onDone() }} />
   )

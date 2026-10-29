@@ -5935,7 +5935,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["CellDetail"];
+                    };
                 };
             };
         };
@@ -5989,7 +5991,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["PageOfEntryRow"];
+                    };
                 };
             };
         };
@@ -6007,12 +6011,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["EntryRow"];
+                    };
                 };
             };
         };
@@ -6099,12 +6105,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["EntryRow"];
+                    };
                 };
             };
         };
@@ -6139,7 +6147,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["EntryRow"];
+                    };
                 };
             };
         };
@@ -6159,8 +6169,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -6190,7 +6200,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["EntryRow"];
+                    };
                 };
             };
         };
@@ -6223,7 +6235,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["PageOfActivityEntry"];
+                    };
                 };
             };
         };
@@ -6264,7 +6278,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["EntryRow"];
+                    };
                 };
             };
         };
@@ -6303,7 +6319,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["EntryRow"];
+                    };
                 };
             };
         };
@@ -6355,7 +6373,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["GridResult"];
+                    };
                 };
             };
         };
@@ -16422,6 +16442,12 @@ export interface components {
             /** Format: date */
             throughDate: string;
         };
+        AllocationWeek: {
+            /** Format: double */
+            hours: number;
+            /** Format: date */
+            week: string;
+        };
         Allowed: {
             assign: boolean;
             pickUp: boolean;
@@ -16531,6 +16557,17 @@ export interface components {
             personId: string;
             /** Format: int32 */
             rowVersion: number;
+        };
+        ApprovedRow: {
+            /** Format: uuid */
+            allocationId: string;
+            approvalStatus: string;
+            canOpen: boolean;
+            /** Format: uuid */
+            projectId: string;
+            projectName: string;
+            projectNumber: string;
+            weeks: components["schemas"]["AllocationWeek"][];
         };
         AssessmentBody: {
             action: string;
@@ -17123,6 +17160,117 @@ export interface components {
             id: string;
             /** Format: double */
             weeklyCapacityHours: null | number;
+        };
+        CellApproved: {
+            /** Format: uuid */
+            allocationId: string;
+            approvalStatus: string;
+            canOpen: boolean;
+            /** Format: double */
+            hours: number;
+            /** Format: uuid */
+            projectId: string;
+            projectName: string;
+            projectNumber: string;
+        };
+        CellBands: {
+            /** Format: double */
+            confirmed: number;
+            /** Format: double */
+            expected: number;
+            /** Format: double */
+            possible: number;
+        };
+        CellCapacity: {
+            /** Format: double */
+            additionalAvailability: number;
+            /** Format: double */
+            capacity: number;
+            capacityOverride: boolean;
+            days: components["schemas"]["DayRow"][];
+            /** Format: double */
+            timeAway: number;
+            /** Format: double */
+            weeklyCapacity: number;
+            /** Format: int32 */
+            workingDays: number;
+        };
+        CellDetail: {
+            approvedAllocations: components["schemas"]["CellApproved"][];
+            bands: components["schemas"]["CellBands"];
+            capacity: components["schemas"]["CellCapacity"];
+            entries: components["schemas"]["EntryRow"][];
+            indicators: components["schemas"]["CellIndicator"][];
+            partialView: boolean;
+            /** Format: uuid */
+            personId: string;
+            personName: string;
+            projectContexts?: null | components["schemas"]["CellProjectContext"][];
+            /** Format: double */
+            remaining: number;
+            taskEstimates: components["schemas"]["CellTaskEstimates"];
+            /** Format: date */
+            week: string;
+        };
+        CellIndicator: {
+            active: boolean;
+            code: string;
+            evaluated: boolean;
+            explanation: string;
+            rule: string;
+            /** Format: int32 */
+            threshold: number;
+        };
+        CellProjectContext: {
+            /** Format: double */
+            plannedHours: number;
+            /** Format: uuid */
+            projectId: string;
+            projectName: string;
+            projectNumber: string;
+            /** Format: double */
+            taskEstimates: number;
+            /** Format: int32 */
+            unestimatedTasks: number;
+        };
+        CellRow: {
+            /** Format: double */
+            additionalAvailability: number;
+            /** Format: double */
+            approved: number;
+            /** Format: double */
+            capacity: number;
+            /** Format: double */
+            confirmed: number;
+            /** Format: double */
+            expected: number;
+            /** Format: double */
+            holidayHours: number;
+            overPlanned: boolean;
+            /** Format: double */
+            ownDraftHours: number;
+            /** Format: double */
+            possible: number;
+            provisional: boolean;
+            /** Format: double */
+            remaining: number;
+            /** Format: int32 */
+            staleEntries: number;
+            /** Format: double */
+            taskEstimates: number;
+            /** Format: double */
+            timeAway: number;
+            underPlanned: boolean;
+            /** Format: int32 */
+            unestimatedTasks: number;
+            /** Format: date */
+            week: string;
+        };
+        CellTaskEstimates: {
+            /** Format: double */
+            hours: number;
+            /** Format: int32 */
+            unestimatedTasks: number;
         };
         ChainStep: {
             /** Format: int32 */
@@ -18122,6 +18270,22 @@ export interface components {
             /** Format: date */
             workDate: string;
         };
+        DayRow: {
+            /** Format: double */
+            additional: number;
+            /** Format: double */
+            available: number;
+            category: null | string;
+            /** Format: date */
+            date: string;
+            /** Format: double */
+            holiday: number;
+            /** Format: double */
+            normal: number;
+            provisional: boolean;
+            /** Format: double */
+            timeAway: number;
+        };
         DecisionBody: {
             rationale: string;
             /** Format: uuid */
@@ -18952,6 +19116,51 @@ export interface components {
             /** Format: date */
             workDate: string;
         };
+        EntryRow: {
+            canChangeVisibility: boolean;
+            canEdit: boolean;
+            confidence: string;
+            correctionOnly: boolean;
+            /** Format: double */
+            countedHours: null | number;
+            /** Format: double */
+            coveredHours: null | number;
+            disciplineName: null | string;
+            /** Format: date */
+            endWeek: string;
+            /** Format: double */
+            hoursPerWeek: number;
+            /** Format: uuid */
+            id: string;
+            label: string;
+            /** Format: date-time */
+            lastValidatedAt: string;
+            matchesFilter: boolean;
+            notes: null | string;
+            /** Format: uuid */
+            ownerId: string;
+            ownerKind: string;
+            ownerName: string;
+            /** Format: uuid */
+            personId: string;
+            personName: string;
+            /** Format: uuid */
+            projectDisciplineId: null | string;
+            /** Format: uuid */
+            projectId: null | string;
+            projectName: null | string;
+            projectNumber: null | string;
+            /** Format: int32 */
+            rowVersion: number;
+            sourceCategory: string;
+            stale: boolean;
+            /** Format: date */
+            startWeek: string;
+            visibility: string;
+            warnings: string[];
+            /** Format: double */
+            weekHours: null | number;
+        };
         EntrySaved: {
             /** Format: uuid */
             id: string;
@@ -19063,6 +19272,18 @@ export interface components {
             items: components["schemas"]["FollowUpItem"][];
             /** Format: int32 */
             total: number;
+        };
+        GridResult: {
+            /** Format: date */
+            currentWeek: string;
+            draftAccess: boolean;
+            /** Format: date-time */
+            evaluatedAt: string;
+            partialView: boolean;
+            people: components["schemas"]["PlanningPersonRow"][];
+            settings: components["schemas"]["PlannerSettings"];
+            unfilledRoles?: null | components["schemas"]["UnfilledRole"][];
+            weeks: string[];
         };
         Group: {
             role: string;
@@ -20584,6 +20805,17 @@ export interface components {
             /** Format: int32 */
             totalCount: number;
         };
+        PageOfEntryRow: {
+            filters?: unknown;
+            items: components["schemas"]["EntryRow"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            sort?: null | string;
+            /** Format: int32 */
+            totalCount: number;
+        };
         PageOfHandoffRow: {
             filters?: unknown;
             items: components["schemas"]["HandoffRow"][];
@@ -20731,6 +20963,20 @@ export interface components {
             /** Format: date */
             targetDate: string;
         };
+        PlannerSettings: {
+            /** Format: int32 */
+            horizonWeeks: number;
+            /** Format: int32 */
+            maxHoursPerWeek: number;
+            /** Format: int32 */
+            overPct: number;
+            /** Format: int32 */
+            staleDays: number;
+            /** Format: int32 */
+            underPct: number;
+            /** Format: int32 */
+            underWeeks: number;
+        };
         PlanningCreateBody: {
             confidence?: null | string;
             /** Format: date */
@@ -20756,6 +21002,31 @@ export interface components {
             rowVersion: number;
             /** Format: date */
             workDate: string;
+        };
+        PlanningPersonRow: {
+            approvedAllocations: components["schemas"]["ApprovedRow"][];
+            canCreateManagerEntry: boolean;
+            canCreateSelfEntry: boolean;
+            canRecordTimeAway: boolean;
+            cells: components["schemas"]["CellRow"][];
+            displayName: string;
+            entries: components["schemas"]["EntryRow"][];
+            /** Format: uuid */
+            homeDisciplineId: null | string;
+            /** Format: uuid */
+            id: string;
+            indicators: string[];
+            jobTitle: null | string;
+            kept?: null | boolean;
+            /** Format: uuid */
+            officeId: null | string;
+            partial: boolean;
+            /** Format: uuid */
+            supervisorId: null | string;
+            supervisorName: null | string;
+            taskContexts?: null | components["schemas"]["ProjectTaskContext"][];
+            /** Format: double */
+            weeklyCapacity: number;
         };
         PlanningVersionBody: {
             reason?: null | string;
@@ -20934,6 +21205,21 @@ export interface components {
             projectNumber: string;
             /** Format: int32 */
             row: number;
+        };
+        ProjectTaskContext: {
+            /** Format: uuid */
+            projectId: string;
+            projectName: string;
+            projectNumber: string;
+            weeks: components["schemas"]["ProjectTaskWeek"][];
+        };
+        ProjectTaskWeek: {
+            /** Format: double */
+            hours: number;
+            /** Format: int32 */
+            unestimatedTasks: number;
+            /** Format: date */
+            week: string;
         };
         ProjectTeamDiscipline: {
             code: string;

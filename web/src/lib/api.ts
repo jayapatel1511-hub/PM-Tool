@@ -178,6 +178,9 @@ type TypedOptions<O> = Omit<ApiOptions, 'method' | 'body'> & {
   body?: JsonBody<O>
 } & ([ParametersOf<O, 'path'>] extends [never] ? { params?: never } : { params: ParametersOf<O, 'path'> })
 
+/** `qs` leaves a boolean `false` out, and the server reads an absent flag as its default. A typed query that must send `false` passes this text, which the server binds to the flag. */
+export const queryFalse = 'false' as never
+
 /** Generated contract, existing transport: authentication, source, version and retry headers stay in api(). */
 export function typedRequest<M extends HttpMethod, P extends PathsFor<M>>(method: M, path: P, options: TypedOptions<Operation<M, P>>): Promise<Reply<Operation<M, P>>> {
   const { params, query, ...rest } = options

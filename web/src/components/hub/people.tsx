@@ -1,11 +1,11 @@
 import { useQueries, useQuery } from '@tanstack/react-query'
 import { Check, ChevronsUpDown, X } from 'lucide-react'
 import { createContext, useContext, useId, useState, type ComponentProps } from 'react'
-import type { PlannerCell, PlannerGridData } from '@/components/planner/labels'
+import type { PlannerCell } from '@/components/planner/labels'
 import { Button } from '@/components/ui/button'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { get, qs } from '@/lib/api'
+import { get, qs, typedRequest } from '@/lib/api'
 import { useFlag, useMe } from '@/lib/auth'
 import { addDays, hours } from '@/lib/format'
 import { t } from '@/lib/i18n'
@@ -51,7 +51,7 @@ export function usePeopleCapacity(week: string | undefined, open: boolean, ids: 
     for (let i = 0; i < ids.length; i += 50) batches.push(ids.slice(i, i + 50))
   const results = useQueries({ queries: batches.map((batch) => ({
     queryKey: ['people-capacity', me.id, week, batch],
-    queryFn: () => get<PlannerGridData>(`planning/grid${qs({ personIds: batch.join(','), from: week, weeks: 1 })}`),
+    queryFn: () => typedRequest('get', '/api/v1/planning/grid', { query: { personIds: batch.join(','), from: week, weeks: 1 } as Record<string, string | number | undefined> }), // the contract spells these PersonIds and From; the server binds without regard to case
     staleTime: 60_000,
   })) })
   const cells: Record<string, CapacityCell> = Object.fromEntries(results.flatMap((r) =>

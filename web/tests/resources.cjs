@@ -2,6 +2,7 @@ const { openRoles, contractExample } = require('./open-roles.fixture.cjs')
 const { coordinationOptions } = require('./reviews.fixture.cjs')
 const { personTasks, capacitySet } = require('./workload.fixture.cjs')
 const { allocationRow, allocationPage, allocationDetail, dayAvailability } = require('./allocations.fixture.cjs')
+const { planningGrid, planningPerson, planningCell } = require('./planning.fixture.cjs')
 // Resources workflow UI checks with mocked API responses (run after `npm run build`); API tests cover server rules.
 // Tuesday visual batch 1: a partial view never claims spare capacity (FR-CAP-06), proposed requests stay outside load
 // (FR-CAP-04), negative remaining keeps its minus sign, person accents survive a re-sort, denied access, phones and a
@@ -69,7 +70,7 @@ let server, browser;
     else if (p === 'reference') data = referenceData()
     else if (p === 'projects') data = { items: [project], page: 1, pageSize: 200, totalCount: 1 }
     else if (p === 'users') data = [{ id: jill, displayName: 'Jill Partial', isActive: true }]
-    else if (p === 'planning/grid') { capacityCalls.push(Object.fromEntries(u.searchParams)); data = { weeks: ['2026-10-12'], people: [{ id: jill, partial: false, cells: [{ remaining: 12, timeAway: 8 }] }] } }
+    else if (p === 'planning/grid') { capacityCalls.push(Object.fromEntries(u.searchParams)); data = planningGrid({ weeks: ['2026-10-12'], people: [planningPerson({ id: jill, displayName: 'Jill Partial', cells: [planningCell({ week: '2026-10-12', remaining: 12, timeAway: 8 })] })] }) }
     else if (p === `tasks/${taskId}` && route.request().method() === 'PATCH') {
       assignmentCalls.push({ body: route.request().postDataJSON(), version: route.request().headers()['if-match'] });
       if (assignmentConflict) { assignmentConflict = false; status = 409; data = { code: 'concurrency_conflict', detail: 'Synthetic stale task version' } }

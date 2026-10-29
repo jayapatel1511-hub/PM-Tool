@@ -10,6 +10,7 @@ const assert = require('node:assert/strict')
 const { commitmentRow, commitmentList, commitmentDetail } = require('./weekly-commitments.fixture.cjs')
 const { readinessWindow } = require('./readiness.fixture.cjs')
 const { coordinationOptions } = require('./reviews.fixture.cjs')
+const { planningGrid, planningPerson, planningCell } = require('./planning.fixture.cjs')
 const { myWork: myWorkAnswer, myWorkPerson } = require('./my-work.fixture.cjs')
 const { meView, referenceData, referenceDiscipline, referenceOffice } = require('./me.fixture.cjs')
 
@@ -65,7 +66,7 @@ function responseFor(method, p, body, query) {
   if (p === 'notifications/pulse' || p === 'me/notifications/pulse' || p === 'notifications/unread-count' || p === 'me/notifications/unread-count') return p.endsWith('count') ? { notifications: 0, following: 0 } : { stamp: '0' }
   if (p === 'me/work') return myWork
   if (p === 'tasks') return { items: [], page: 1, pageSize: 200, totalCount: 0 }
-  if (p === 'planning/grid') return { weeks: ['2026-09-28', '2026-10-05', '2026-10-12', '2026-10-19', '2026-10-26', '2026-11-02'], currentWeek: '2026-09-28', people: [{ id: id(1), displayName: 'Sam Supervisor', canCreateSelfEntry: false, cells: [{ week: '2026-09-28', capacity: 40, timeAway: 0, additionalAvailability: 0, confirmed: 0, expected: 0, possible: 0, remaining: 40, taskEstimates: 0, unestimatedTasks: 0, staleEntries: 0, overPlanned: false, underPlanned: false }], entries: [] }] }
+  if (p === 'planning/grid') return planningGrid({ weeks: ['2026-09-28', '2026-10-05', '2026-10-12', '2026-10-19', '2026-10-26', '2026-11-02'], currentWeek: '2026-09-28', people: [planningPerson({ id: id(1), displayName: 'Sam Supervisor', cells: [planningCell({ week: '2026-09-28' })] })] })
   if (p === 'views') return viewList()
   if (p === 'projects') return { items: [project], page: 1, pageSize: 200, totalCount: 1 }
   return undefined

@@ -146,6 +146,14 @@ function useAutosaveField(current?: unknown, onSave?: (v: string | null) => Prom
     resume.current = null
     if (!again || !name) return
     dropPending(me.id, name)
+    // A notification/read request can expire the session before the delayed autosave
+    // ever starts. There is then no row version to pin the retry to. Keep the value
+    // visible as an explicit conflict, but never turn it into an unversioned write.
+    if (again.version == null) {
+      void invalidateChange(qc)
+      setState({ status: 'conflict', value: again.value })
+      return
+    }
     void resend(again.value, 0, again.version)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps -- once per mount: the one retry
   const commit = (value: unknown) => {
@@ -184,7 +192,7 @@ function useAutosaveField(current?: unknown, onSave?: (v: string | null) => Prom
     /** "Discard my change" and "Take theirs": the field goes back to the server's value. */
     discard: () => { if (unsaved) clear(); return unsaved },
     retry: () => shown && resend(shown.value, 0, shown.ifMatch),
-    keepMine: () => shown && resend(shown.value, 0, shown.version),
+    keepMine: () => shown?.version != null && resend(shown.value, 0, shown.version),
   }
 }
 type Autosave = ReturnType<typeof useAutosaveField>
@@ -208,7 +216,7 @@ function SaveNote({ save, show = asText }: { save: Autosave; show?: (v: unknown)
       {state?.status === 'conflict' && <><span aria-hidden>■ </span>{t('inline.notSaved')}
         <span className="block break-words text-foreground">{t('inline.theirs', { who: state.who ?? t('inline.someone'), when: since(state.at), value: show(save.current) })}</span>
         <span className="block break-words text-foreground">{t('inline.yours', { value: show(state.value) })}</span>
-        <NoteAction onClick={save.keepMine}>{t('inline.keepMine')}</NoteAction> · <NoteAction onClick={save.discard}>{t('inline.takeTheirs')}</NoteAction></>}
+        {state.version != null && <><NoteAction onClick={save.keepMine}>{t('inline.keepMine')}</NoteAction> · </>}<NoteAction onClick={save.discard}>{t('inline.takeTheirs')}</NoteAction></>}
     </span>
   )
 }

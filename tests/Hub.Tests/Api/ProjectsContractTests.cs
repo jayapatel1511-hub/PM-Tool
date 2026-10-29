@@ -173,6 +173,9 @@ public sealed class ProjectsContractTests(HubFactory f) : IClassFixture<HubFacto
     [Fact]
     public async Task Header_keeps_its_property_names_order_nulls_nesting_and_flag_gated_members()
     {
+        await Flag("project_status_note", false);
+        await Flag("schedule_baseline", false);
+        await Flag("show_deleted", false);
         var setup = await d.Project(activate: false);
         var p = await d.Project();
         var pm = f.As(TestData.Pm);

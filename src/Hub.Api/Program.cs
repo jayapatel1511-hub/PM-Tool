@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
 using Npgsql;
 using System.Net;
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 
 var builder = WebApplication.CreateBuilder(args);
 var cfg = builder.Configuration;
@@ -107,7 +109,19 @@ builder.Services.AddOpenApi(o =>
     return Task.CompletedTask;
     });
 });
-builder.Services.ConfigureHttpJsonOptions(o => o.SerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase);
+builder.Services.ConfigureHttpJsonOptions(o =>
+{
+    o.SerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+    var resolver = new DefaultJsonTypeInfoResolver();
+    resolver.Modifiers.Add(typeInfo =>
+    {
+        if (typeInfo.Type != typeof(ProjectEndpoints.ProjectDetail)) return;
+        var statusNote = typeInfo.Properties.FirstOrDefault(p => p.Name == nameof(ProjectEndpoints.ProjectDetail.StatusNote) || p.Name == "statusNote");
+        if (statusNote is null) return;
+        statusNote.ShouldSerialize = static (obj, value) => ((ProjectEndpoints.ProjectDetail)obj).StatusNoteEnabled || value is not null;
+    });
+    o.SerializerOptions.TypeInfoResolver = resolver;
+});
 
 var app = builder.Build();
 

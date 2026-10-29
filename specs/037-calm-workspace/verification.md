@@ -297,3 +297,8 @@ async () => {
 ### 2026-10-29 release regression follow-up
 
 The populated SYN fixture census found Planner chrome at 47 words against its unchanged 40-word limit for both measured personas. The subtitle is now “Planned work, capacity and confidence.” and the stale-only filter label is “Stale only”; neither behavior nor census thresholds changed. This retains the planning concepts while removing redundant chrome. The final release handoff records the rendered rerun; human visual acceptance stays pending.
+
+
+### Final local release evidence, 2026-10-29
+
+Final populated SYN census PASS for both measured personas with original control/word/fill/tab thresholds. Planner copy meets its budget. Empty Sam My Work/Boards/Projects/Tasks/Team first-row-height cases are explicitly unmeasured, not counted as visual acceptance. See [the release handoff](../../docs/handoffs/2026-10-29-packets-039-051-release-candidate.md) and its machine-readable evidence. No packet is marked Accepted.

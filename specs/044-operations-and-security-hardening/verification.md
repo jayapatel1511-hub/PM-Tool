@@ -170,3 +170,8 @@ AC IDs now make these executed checks discoverable by the ratchet; no asserted t
 ### 2026-10-29 final-suite isolation correction
 
 The first final coverage run exposed an OperationsTests assumption: its one-project dead-letter case inherited seven global SettingsChanged events from the shared fixture. With the corrected global retry behavior those events also reached dead-letter status, so the expected pending-count delta was wrong (expected 35, actual 28). The scenario now clears prior fixture outbox rows before inserting its own event. All retry/dead-letter, health, pending-count and watchdog assertions remain; EvaluationTests separately verifies global-event failure, healthy sibling progress and recovery. Independent source review found no weakened behavior assertion. The final release handoff records the rerun result.
+
+
+### Final local release evidence, 2026-10-29
+
+Final `2dcdaec4` local image upgrade/rollback/forward rehearsal PASS:38→42 migrations, baseline rows preserved except +53 settings/+53 Setting Created activity, four immutable-table triggers, NULLS NOT DISTINCT, seven fresh successful job types and zero dead letters/failed jobs. Mac-only root UID override and hosted/operator limits are in the release handoff. See [the release handoff](../../docs/handoffs/2026-10-29-packets-039-051-release-candidate.md) and its machine-readable evidence. No packet is marked Accepted.

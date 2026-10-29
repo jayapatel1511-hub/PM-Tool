@@ -112,3 +112,8 @@ Still open: AC-LIVE-17 hosted/tunnel run (HUMAN), S13 flag removal, wiring `test
 ## 2026-10-29 combined lifecycle rerun
 
 The S15 conversion removed the legacy get import used by the in-memory pre-live client builder. The adapter now calls typedRequest with required options while retaining the original pulse paths and 4-second cadence. The first two attempts timed out before the pulse after an incomplete adapter update; the final real-API run passes. Failure diagnostics now retain rendered state and partial request logs before stack cleanup. Evidence: 31 identical normalized flags-off requests; pulse gaps about 4.0 seconds; 1.5-second follow-up reads; silent stream closed at 60,998 ms and reconnected in 1,003 ms; hidden-tab stream closed/reopened, outage backoff 1/2/4/8/16/30 seconds and one read plus follow-up; sixth connection refused 429 and accepted after another closed. No hosted/tunnel acceptance. Assumption: the pre-live comparison changes only transport behavior; typed helper paths/headers preserve the same logical reads.
+
+
+### Final local release evidence, 2026-10-29
+
+Final real lifecycle gate PASS on the final application assets: 31 matching baseline/off reads, pulse ~4 seconds, follow-up ~1.5 seconds, silent stream close 60,998 ms/reconnect1,002 ms, hidden-tab close/reopen, 1/2/4/8/16/30-second outage backoff, sixth connection429 then200 after closing. No hosted/tunnel claim. See [the release handoff](../../docs/handoffs/2026-10-29-packets-039-051-release-candidate.md) and its machine-readable evidence. No packet is marked Accepted.

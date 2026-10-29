@@ -1,0 +1,545 @@
+{
+  "runtimeRelease": "2dcdaec424eba81998e0c125f2e29621c8df39b0",
+  "branch": "codex/integrate-039-050",
+  "recordHeadBeforeHandoff": "34d9f22abd1405b8e9884bb4c62ec184ed1844e8",
+  "boundary": {
+    "localOnly": true,
+    "pushedByThisSession": false,
+    "deployedToHomedev": false,
+    "accepted": false,
+    "applicationSourcesUnchangedAfterRuntimeRelease": true,
+    "laterChanges": "Verification tests, shape baseline and records only"
+  },
+  "toolchain": {
+    "dotnet": "10.0.400",
+    "node": "24.19.0",
+    "database": "PostgreSQL 17",
+    "browser": "Installed Chromium headless shell"
+  },
+  "backend": {
+    "total": 1649,
+    "passed": 1648,
+    "failed": 0,
+    "optInScaleSkippedInCoverage": 1,
+    "duration": "9m13s",
+    "rulesBranchCoveragePercent": 96.0,
+    "serviceLineCoveragePercent": 97.8
+  },
+  "scale": {
+    "result": "PASS",
+    "taskCount": 500,
+    "concurrentReaders": 100,
+    "poolLimit": 20,
+    "apiP95TargetMs": 500,
+    "scope": "Local warmed TestServer/PostgreSQL; excludes browser/corporate network and pilot infrastructure",
+    "phases": [
+      {
+        "scope": "Local warmed TestServer/PostgreSQL; excludes browser/corporate network and pilot infrastructure",
+        "taskCount": 500,
+        "concurrentUsers": 100,
+        "databasePoolLimit": 20,
+        "phase": 1,
+        "pairOrder": "OFF-ON",
+        "warmupBatches": 2,
+        "warmupRequests": 200,
+        "measuredBatches": 3,
+        "flagOn": false,
+        "request": "task-list-100-with-actor",
+        "samples": 300,
+        "p50Ms": 288.2002,
+        "p95Ms": 320.1389,
+        "maxMs": 326.3691,
+        "apiTargetMs": 500,
+        "meetsLocalApiTarget": true
+      },
+      {
+        "scope": "Local warmed TestServer/PostgreSQL; excludes browser/corporate network and pilot infrastructure",
+        "taskCount": 500,
+        "concurrentUsers": 100,
+        "databasePoolLimit": 20,
+        "phase": 1,
+        "pairOrder": "OFF-ON",
+        "warmupBatches": 2,
+        "warmupRequests": 200,
+        "measuredBatches": 3,
+        "flagOn": false,
+        "request": "project-ranked-picker-100",
+        "samples": 300,
+        "p50Ms": 38.6624,
+        "p95Ms": 48.8544,
+        "maxMs": 49.9463,
+        "apiTargetMs": 500,
+        "meetsLocalApiTarget": true
+      },
+      {
+        "scope": "Local warmed TestServer/PostgreSQL; excludes browser/corporate network and pilot infrastructure",
+        "taskCount": 500,
+        "concurrentUsers": 100,
+        "databasePoolLimit": 20,
+        "phase": 2,
+        "pairOrder": "OFF-ON",
+        "warmupBatches": 2,
+        "warmupRequests": 200,
+        "measuredBatches": 3,
+        "flagOn": true,
+        "request": "task-list-100-with-actor",
+        "samples": 300,
+        "p50Ms": 312.5481,
+        "p95Ms": 336.9318,
+        "maxMs": 342.4232,
+        "apiTargetMs": 500,
+        "meetsLocalApiTarget": true
+      },
+      {
+        "scope": "Local warmed TestServer/PostgreSQL; excludes browser/corporate network and pilot infrastructure",
+        "taskCount": 500,
+        "concurrentUsers": 100,
+        "databasePoolLimit": 20,
+        "phase": 2,
+        "pairOrder": "OFF-ON",
+        "warmupBatches": 2,
+        "warmupRequests": 200,
+        "measuredBatches": 3,
+        "flagOn": true,
+        "request": "project-ranked-picker-100",
+        "samples": 300,
+        "p50Ms": 78.5626,
+        "p95Ms": 90.7449,
+        "maxMs": 92.0477,
+        "apiTargetMs": 500,
+        "meetsLocalApiTarget": true
+      },
+      {
+        "scope": "Local warmed TestServer/PostgreSQL; excludes browser/corporate network and pilot infrastructure",
+        "taskCount": 500,
+        "concurrentUsers": 100,
+        "databasePoolLimit": 20,
+        "phase": 3,
+        "pairOrder": "ON-OFF",
+        "warmupBatches": 2,
+        "warmupRequests": 200,
+        "measuredBatches": 3,
+        "flagOn": true,
+        "request": "task-list-100-with-actor",
+        "samples": 300,
+        "p50Ms": 305.7771,
+        "p95Ms": 341.6442,
+        "maxMs": 346.7284,
+        "apiTargetMs": 500,
+        "meetsLocalApiTarget": true
+      },
+      {
+        "scope": "Local warmed TestServer/PostgreSQL; excludes browser/corporate network and pilot infrastructure",
+        "taskCount": 500,
+        "concurrentUsers": 100,
+        "databasePoolLimit": 20,
+        "phase": 3,
+        "pairOrder": "ON-OFF",
+        "warmupBatches": 2,
+        "warmupRequests": 200,
+        "measuredBatches": 3,
+        "flagOn": true,
+        "request": "project-ranked-picker-100",
+        "samples": 300,
+        "p50Ms": 82.1716,
+        "p95Ms": 92.6298,
+        "maxMs": 95.7684,
+        "apiTargetMs": 500,
+        "meetsLocalApiTarget": true
+      },
+      {
+        "scope": "Local warmed TestServer/PostgreSQL; excludes browser/corporate network and pilot infrastructure",
+        "taskCount": 500,
+        "concurrentUsers": 100,
+        "databasePoolLimit": 20,
+        "phase": 4,
+        "pairOrder": "ON-OFF",
+        "warmupBatches": 2,
+        "warmupRequests": 200,
+        "measuredBatches": 3,
+        "flagOn": false,
+        "request": "task-list-100-with-actor",
+        "samples": 300,
+        "p50Ms": 278.481,
+        "p95Ms": 303.3592,
+        "maxMs": 308.3067,
+        "apiTargetMs": 500,
+        "meetsLocalApiTarget": true
+      },
+      {
+        "scope": "Local warmed TestServer/PostgreSQL; excludes browser/corporate network and pilot infrastructure",
+        "taskCount": 500,
+        "concurrentUsers": 100,
+        "databasePoolLimit": 20,
+        "phase": 4,
+        "pairOrder": "ON-OFF",
+        "warmupBatches": 2,
+        "warmupRequests": 200,
+        "measuredBatches": 3,
+        "flagOn": false,
+        "request": "project-ranked-picker-100",
+        "samples": 300,
+        "p50Ms": 34.9641,
+        "p95Ms": 43.2144,
+        "maxMs": 43.707,
+        "apiTargetMs": 500,
+        "meetsLocalApiTarget": true
+      }
+    ]
+  },
+  "web": {
+    "groups": 39,
+    "passed": 39,
+    "commands": [
+      "test:handoffs",
+      "test:sign-in",
+      "test:coordination",
+      "test:design-basis",
+      "test:planner",
+      "test:resources",
+      "test:supervisor-capacity",
+      "test:ui-review",
+      "test:operations",
+      "test:client-errors",
+      "test:interaction",
+      "test:recovery-counts",
+      "test:planning-reporting",
+      "test:task-pickup",
+      "test:data-entry",
+      "test:recovery-state",
+      "test:dependencies",
+      "test:deliverables",
+      "test:readiness",
+      "test:team",
+      "test:meetings",
+      "test:workspace",
+      "test:registers",
+      "test:milestones",
+      "test:notifications",
+      "test:templates",
+      "test:admin",
+      "test:backlog-my-work",
+      "test:admin-review",
+      "test:portfolio-admin-strip",
+      "test:verifiable-records",
+      "test:schema-workflows",
+      "test:tasks",
+      "test:projects",
+      "test:registrations",
+      "test:browser-verification",
+      "test:keys",
+      "typecheck:tests",
+      "smoke-runner-unit"
+    ]
+  },
+  "pythonAndSpec": {
+    "groups": 28,
+    "passed": 28,
+    "commands": [
+      "trace",
+      "spec",
+      "ratchet",
+      "text-keys",
+      "test_fixture_api",
+      "test_refresh_fixture_copy",
+      "test_seed_resources",
+      "test_seed_staffing",
+      "test_auto_merge",
+      "test_backup_helpers",
+      "test_ci_tests",
+      "test_coverage_gate",
+      "test_decisions",
+      "test_pilot_initializer",
+      "test_pilot_operations",
+      "test_pilot_pitr",
+      "test_pr_checks",
+      "test_ratchet",
+      "test_review_deploy",
+      "test_served_assets",
+      "test_shapes",
+      "test_social_activation",
+      "test_text_keys",
+      "test_trace_report",
+      "test_check_live_stream",
+      "test_check_offhost_backup",
+      "test_extend_review_credentials",
+      "test_seed_homedev_tuesday_review"
+    ]
+  },
+  "contracts": {
+    "inventoryFilesConverted": 46,
+    "responseShapes": 1043,
+    "addedPaths": 13,
+    "removedPaths": 0,
+    "nonNullKindChanges": 0,
+    "previousNullableVariantsRetained": true,
+    "fullRun": "bbe10ac005b342419748d8e097a73a5f",
+    "generatedDrift": false,
+    "efModelDrift": false
+  },
+  "realBrowser": {
+    "smokeSuitesPassed": 9,
+    "countChecks": 1094,
+    "countMismatches": 0,
+    "missingAgreedCountTiles": 0,
+    "responsiveWidths": [
+      1440,
+      768,
+      390,
+      320
+    ],
+    "responsiveResult": "PASS",
+    "clutterResult": "PASS",
+    "clutterEmptyFirstRowUnmeasured": [
+      "sam /my-work",
+      "sam /boards",
+      "sam /projects",
+      "sam /tasks",
+      "sam /team"
+    ],
+    "verifiableACs": [
+      "AC-VER-02",
+      "AC-VER-07",
+      "AC-VER-09",
+      "AC-VER-11"
+    ]
+  },
+  "parity": {
+    "result": "PASS",
+    "base": "0ea492767db33f429b57c66931816f364c8d681d",
+    "candidate": "http://127.0.0.1:19902",
+    "sourceCandidate": "e4463524c8d0c190fee093593e1a05a05cbc5cfb",
+    "personaWidthPairs": 12,
+    "screenComparisons": 222,
+    "distinctRoutes": 27,
+    "additionsOffOn": "PASS",
+    "totalResults": 13,
+    "browserNegativeControls": "PASS",
+    "pairs": {
+      "marc/1600": true,
+      "priya/1600": true,
+      "alex/1600": true,
+      "marc/375": true,
+      "priya/375": true,
+      "alex/375": true,
+      "jordan/1600": true,
+      "jordan/375": true,
+      "rita/1600": true,
+      "jill/1600": true,
+      "rita/375": true,
+      "jill/375": true
+    },
+    "requestNormalization": "Case-insensitive query names; key order; only root Project List group=none omitted. Values and duplicate-key order preserved."
+  },
+  "lifecycle": {
+    "result": "PASS",
+    "sameAsBefore": 31,
+    "before": {
+      "pulseGaps": [
+        4030,
+        4016,
+        4024,
+        4022,
+        4018
+      ],
+      "followUpMs": 1504
+    },
+    "flagsOff": {
+      "pulseGaps": [
+        4014,
+        4015,
+        4011,
+        4017,
+        4011
+      ],
+      "followUpMs": 1505
+    },
+    "flagsOn": {
+      "pulseGaps": [
+        4013,
+        4012,
+        4021,
+        4018,
+        4023
+      ],
+      "followUpMs": 1502
+    },
+    "silence": {
+      "closedAfterMs": 60998,
+      "reconnectMs": 1002,
+      "projectReadsAfterReopen": 2,
+      "heartbeatGapsMs": [
+        25001,
+        25002,
+        25000
+      ]
+    },
+    "hidden": {
+      "closeMs": 105,
+      "hiddenMs": 6106,
+      "reopenMs": 4,
+      "projectReadsMs": [
+        4,
+        1504
+      ]
+    },
+    "outage": {
+      "projectReadsMs": [
+        1,
+        1503
+      ],
+      "hostExitMs": 24,
+      "exitCode": 0,
+      "exitSignal": null,
+      "heldStreamEndedMs": 1,
+      "backoffMs": [
+        1003,
+        2007,
+        4006,
+        8006,
+        16005,
+        30006
+      ]
+    },
+    "cap": {
+      "sixth": 429,
+      "afterClose": 200
+    }
+  },
+  "dependencyAudits": {
+    "npmProductionTotal": 0,
+    "dotnetVulnerableProjects": 0,
+    "additionalFullNpmScanHighDevOnly": 1,
+    "devPackage": "vite"
+  },
+  "rehearsal": {
+    "result": "PASS",
+    "release": "2dcdaec424eba81998e0c125f2e29621c8df39b0",
+    "migrationsBefore": 38,
+    "migrationsAfter": 42,
+    "baseline": {
+      "migrations": 38,
+      "users": 13,
+      "projects": 3,
+      "tasks": 6,
+      "comments": 1,
+      "activity": 196
+    },
+    "existingTableDeltasBeforeProbes": {
+      "__ef_migrations": 4,
+      "activity_log": 53,
+      "org_setting": 53
+    },
+    "triggers": [
+      "admin_review:admin_review_no_truncate",
+      "admin_review:admin_review_no_update",
+      "deliverable_baseline:deliverable_baseline_no_truncate",
+      "deliverable_baseline:deliverable_baseline_no_update"
+    ],
+    "unitIndexes": [
+      "CREATE INDEX ix_org_unit_discipline_id ON hub.org_unit USING btree (discipline_id)",
+      "CREATE INDEX ix_org_unit_leader_id ON hub.org_unit USING btree (leader_id)",
+      "CREATE INDEX ix_org_unit_level_id ON hub.org_unit USING btree (level_id)",
+      "CREATE INDEX ix_org_unit_office_id ON hub.org_unit USING btree (office_id)",
+      "CREATE UNIQUE INDEX ix_org_unit_parent_id_name ON hub.org_unit USING btree (parent_id, name) NULLS NOT DISTINCT",
+      "CREATE UNIQUE INDEX pk_org_unit ON hub.org_unit USING btree (id)"
+    ],
+    "jobs": [
+      {
+        "job_name": "daily-digest",
+        "status": "Succeeded"
+      },
+      {
+        "job_name": "directory-sync",
+        "status": "Succeeded"
+      },
+      {
+        "job_name": "email-send",
+        "status": "Succeeded"
+      },
+      {
+        "job_name": "evaluation-retry",
+        "status": "Succeeded"
+      },
+      {
+        "job_name": "nightly-evaluation",
+        "status": "Succeeded"
+      },
+      {
+        "job_name": "ops-watchdog",
+        "status": "Succeeded"
+      },
+      {
+        "job_name": "weekly-summary",
+        "status": "Succeeded"
+      }
+    ],
+    "deadLetters": 0,
+    "failedJobs": 0,
+    "upgradeBuild": "2dcdaec424eba81998e0c125f2e29621c8df39b0",
+    "rollback": "main-e4ca1661 PASS",
+    "forwardBuild": "2dcdaec424eba81998e0c125f2e29621c8df39b0",
+    "probeCommentsAdded": 3,
+    "macOnlyDifference": "arm64 Colima; compose UID override root; image remains1000:1000"
+  },
+  "cleanup": {
+    "worktreesRemoved": [
+      "/Users/jaypatel/.codex/worktrees/interim",
+      "/Users/jaypatel/.codex/worktrees/review-head",
+      "/Users/jaypatel/.codex/worktrees/review-fixes",
+      "/Users/jaypatel/.codex/worktrees/release-fixes",
+      "/Users/jaypatel/.codex/worktrees/fix-051-backlog",
+      "/Users/jaypatel/.codex/worktrees/fix-051-safety",
+      "/Users/jaypatel/.codex/worktrees/fix-deploy-docs",
+      "/Users/jaypatel/.codex/worktrees/b2-040-S15-Planning",
+      "/Users/jaypatel/.codex/worktrees/b2-040-S15-Projects",
+      "/Users/jaypatel/.codex/worktrees/b2-040-S15-Reports",
+      "/Users/jaypatel/.codex/worktrees/b2-040-S15-Tasks",
+      "/Users/jaypatel/.codex/worktrees/b2-040-S15-Templates",
+      "/Users/jaypatel/.codex/worktrees/b2-043-S29",
+      "/Users/jaypatel/.codex/worktrees/fasttrack/test"
+    ],
+    "volumesRemoved": [
+      "pm-tool-review-db",
+      "pm-tool-review-db-mainstate"
+    ],
+    "imagesRemoved": [
+      "pm-tool-review:main-e4ca1661",
+      "pm-tool-review:cf4864a0b4eef0c6a5ec381a28c2745308996aaf",
+      "pm-tool-review:ba0052663576fe1be1679e486cc5fcf957b72c37",
+      "pm-tool-review:29dd51328968a3e70f1a267166429a84de1233b8",
+      "pm-tool-review:2dcdaec424eba81998e0c125f2e29621c8df39b0"
+    ],
+    "rehearsalDirectoryRemoved": "/Users/jaypatel/.codex/worktrees/rehearsal",
+    "unrelatedReviewTagsRetained": [
+      "pm-tool-review:d9b3-final",
+      "pm-tool-review:d9b3-ready",
+      "pm-tool-review:smoke-211bd88",
+      "pm-tool-review:smoke-0ea033d",
+      "pm-tool-review:smoke-26c0ae1",
+      "pm-tool-review:smoke-6becc79",
+      "pm-tool-review:smoke-02ca7cd",
+      "pm-tool-review:smoke-7995e88",
+      "pm-tool-review:test-c845bea"
+    ],
+    "releaseImageMetadata": "sha256:d95d3ae02dffe1e19410b1d0f66f3b21cfc07ba1bb3fe2be8474ab650c8faee5|arm64|1000:1000|2dcdaec424eba81998e0c125f2e29621c8df39b0",
+    "branchesRetained": true,
+    "recoveryBranches": [
+      "codex/archive-interim-20261029",
+      "codex/archive-fasttrack-test-20261029"
+    ],
+    "primaryWorkingFilesEdited": false,
+    "historicalGeneratedEvidenceArchivedTo": "/private/tmp/pm-tool-release-20261029/historical-ci-artifacts/integration",
+    "inactiveOwnedSyntheticDatabasesRemoved": 15
+  },
+  "rawEvidenceRoot": "/private/tmp/pm-tool-release-20261029",
+  "remainingGates": [
+    "Hosted and human acceptance",
+    "Repository controls/Tier B",
+    "039 S18",
+    "040 S16 cohort and ruling",
+    "Flag retirement after approved activation/pilot",
+    "Seven For Jay items in handoff"
+  ],
+  "finalWorkingTreeCheck": "Run after committing these record files; must be empty"
+}

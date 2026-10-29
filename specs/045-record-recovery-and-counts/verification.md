@@ -117,3 +117,8 @@ The authoritative four-width run exposed a measurement race in the first focused
 
 
 The subsequent full run passed picker geometry and exposed a second pre-existing measurement race at 768 px: the focus wait matched “New event” anywhere in the active element's text, so the body could satisfy it before FocusScope restored the opener. The wait now requires the exact opener element; the final focus assertion remains unchanged. This strengthens the wait condition and retains a two-second deadline.
+
+
+### Final local release evidence, 2026-10-29
+
+Final real count census PASS: 1,094 reconciliations, zero mismatches/missing agreed tiles. Full responsive helper/error/focus/scrolling sweep PASS at1440/768/390/320 px, including480 px height, using maintained SYN fixtures. Exact-condition waits retain all original geometry/focus assertions. Final39 web groups PASS, including10/10 recovery-state cases. See [the release handoff](../../docs/handoffs/2026-10-29-packets-039-051-release-candidate.md) and its machine-readable evidence. No packet is marked Accepted.

@@ -76,3 +76,8 @@ Still open: Tier B migration approval, flag flips, hosted checks, human keyboard
 - Fixed: `/admin/audit-chains/{id}/verify` is a POST. As a GET it ran on a plain link, outside the Origin check, so a link sent to an Admin could record a false break against a caller-supplied head hash and email every Admin. `AuditChainApiTests` checks that a GET no longer runs a verify and records nothing.
 - Not changed: a break cleared by a later full verify leaves `alerted_broken_seq` set, so a new break at the same entry raises no second alert; alert emails are de-duplicated per entry, so changing it needs more than resetting the marker. Low risk while the flag is off.
 - AC-VER-09: the dialog shows the app's existing band label "over capacity" where the AC writes "Over" (row updated).
+
+
+### Final local release evidence, 2026-10-29
+
+Final real-browser AC-VER-02/-07/-09/-11 PASS on a fresh synthetic database. The release-style test initialization is isolated from review; optional irreversible log activation on the review stack was not performed. See [the release handoff](../../docs/handoffs/2026-10-29-packets-039-051-release-candidate.md) and its machine-readable evidence. No packet is marked Accepted.

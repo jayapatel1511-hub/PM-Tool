@@ -227,3 +227,8 @@ The complete default real-API matrix can run up to three personas concurrently w
 ### 2026-10-29 parity request semantics
 
 The first final comparison against the pre-conversion release-fixes build reported raw query spelling differences on the Project List: generated PascalCase names versus the old camelCase names, and removal of `group=none`. ASP.NET binds these names case-insensitively; `Projects.ProjectQuery` never accepts Group, so that value was UI state sent redundantly by the old client. The harness canonicalizes query names/order and omits only `group=none` on the root Project List. It preserves all paths, values and other parameters. Selfchecks reject changed status values, any other grouping value, and group=none on another endpoint. The 1,094-count real-API census independently found zero mismatches. The final release handoff records the complete rerun against the same pre-conversion base.
+
+
+### Final local release evidence, 2026-10-29
+
+Final fallback/harness gate PASS: 13/13 results, 12 persona/width pairs across 27 default routes (222 role-appropriate screen comparisons), plus AC-REC-09 off/on. Base `0ea4927`, candidate `e446352` has the same application sources as `2dcdaec4`. Actual browser selfcheck PASS: identical builds at both widths; removed header, untabbed Columns and changed disabled-field title are detected. S01 is checked; KILL and human/hosted gates are unchanged. See [the release handoff](../../docs/handoffs/2026-10-29-packets-039-051-release-candidate.md) and its machine-readable evidence. No packet is marked Accepted.

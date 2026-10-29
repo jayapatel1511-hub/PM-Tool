@@ -10,6 +10,7 @@ using Hub.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.OpenApi;
 using Npgsql;
 using System.Net;
 
@@ -105,6 +106,19 @@ builder.Services.AddOpenApi(o =>
     // The framework names "$type" as the discriminator of any union of derived types; with no type discriminators on the derived types, nothing is written under it.
     if (schema.Discriminator is { PropertyName: "$type" } && context.JsonTypeInfo.PolymorphismOptions?.DerivedTypes.All(d => d.TypeDiscriminator is null) == true) schema.Discriminator = null;
     return Task.CompletedTask;
+    });
+    // The task row is polymorphic only so the activity list always writes `lastActivityActorName` (even as null); the document describes it as its one base row,
+    // whose numbers are JSON numbers, so the generated client reads a task row as one type (040-S15-Tasks).
+    o.AddDocumentTransformer((document, context, cancellationToken) =>
+    {
+        var schemas = document.Components?.Schemas;
+        if (schemas is null || !schemas.TryGetValue("TaskQueriesRowBase", out var basis) || basis.Properties is null) return Task.CompletedTask;
+        foreach (var property in basis.Properties.Values.OfType<OpenApiSchema>())
+            if (property.Type is { } type && type.HasFlag(JsonSchemaType.String) && (type.HasFlag(JsonSchemaType.Integer) || type.HasFlag(JsonSchemaType.Number)))
+                property.Type = type & ~JsonSchemaType.String;
+        schemas["TaskQueriesRow"] = new OpenApiSchemaReference("TaskQueriesRowBase", document);
+        schemas.Remove("TaskQueriesRowActivityRow");
+        return Task.CompletedTask;
     });
 });
 builder.Services.ConfigureHttpJsonOptions(o => o.SerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase);

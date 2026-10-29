@@ -19,7 +19,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useProject, useProjectRefresh, useReference } from '@/hooks/data'
 import { useFlag } from '@/lib/auth'
-import { ApiError, patch, typedRequest } from '@/lib/api'
+import { ApiError, typedRequest } from '@/lib/api'
 import type { components } from '@/gen/api'
 import { daysBetween, fmtDate, relative, shortDate, today } from '@/lib/format'
 import { t, tv , runtimeText } from '@/lib/i18n'
@@ -406,7 +406,7 @@ function CompleteDialog({ p, m, onClose, onDone }: { p: ProjectDetail; m: Milest
   const [phase, setPhase] = useState<Schemas['MilestonePhase'] | null>(null)
   if (phase) return (
     <ConfirmDialog open onOpenChange={(o) => { if (!o) onDone() }} title={t('milestone.advancePhase', { phase: phase.name })} body={t('milestone.advancePhaseHint')} confirmLabel={t('common.yes')}
-      onConfirm={async () => { await patch(`projects/${p.id}`, { phaseId: phase.id }, p.rowVersion); onDone() }} />
+      onConfirm={async () => { await typedRequest('patch', '/api/v1/projects/{id}', { params: { id: p.id }, body: { phaseId: phase.id }, ifMatch: p.rowVersion }); onDone() }} />
   )
   return (
     <ConfirmDialog open closeOnConfirm={false} onOpenChange={(o) => !o && onClose()} title={t('milestone.completeTitle', { key: m.key, name: m.name })} confirmLabel={t('milestone.complete')}

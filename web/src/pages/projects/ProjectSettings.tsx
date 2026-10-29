@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { useProjectRefresh, useReference } from '@/hooks/data'
-import { ApiError, del, get, patch, post, typedRequest } from '@/lib/api'
+import { ApiError, get, typedRequest } from '@/lib/api'
 import { invalidateChange } from '@/lib/keys'
 import { runtimeText, t, tv } from '@/lib/i18n'
 import type { ProjectDetail } from '@/lib/types'
@@ -37,7 +37,7 @@ export function ProjectSettingsTab() {
   const [err, setErr] = useState<ApiError | null>(null)
   const [saving, setSaving] = useState(false)
   const [transition, setTransition] = useState<string | null>(null)
-  const v = (k: keyof ProjectDetail) => (k in f ? f[k] : (k === 'leadUnitId' && structureEnabled ? (leadUnit.data?.leadUnitId ?? '') : (p[k] ?? ''))) as string
+  const v = (k: keyof ProjectDetail | 'leadUnitId') => (k in f ? f[k] : (k === 'leadUnitId' ? (structureEnabled ? (leadUnit.data?.leadUnitId ?? '') : '') : (p[k] ?? ''))) as string
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => setF({ ...f, [k]: e.target.value })
   const dirty = Object.keys(f).length > 0
   const save = async () => {
@@ -46,7 +46,7 @@ export function ProjectSettingsTab() {
       const body: Record<string, unknown> = {}
       for (const [k, val] of Object.entries(f)) body[k] = val === '' ? null : val
       if (p.permissions.needsReason) body.reason = reason
-      const res = await patch(`projects/${p.id}`, body, p.rowVersion)
+      const res = await typedRequest('patch', '/api/v1/projects/{id}', { params: { id: p.id }, body, ifMatch: p.rowVersion })
       toast.success(t('common.saved'))
       setF({}); setReason('')
       if (body.projectNumber) navigate(`/projects/${encodeURIComponent(String(body.projectNumber))}/settings`, { replace: true })
@@ -188,7 +188,7 @@ function LinksSection({ p, onChange }: { p: ProjectDetail; onChange: () => void 
   const removeLink = async (id: string) => {
     if (removing) return
     setRemoveErr(null); setRemoveErrId(null); setRemoving(id)
-    try { await del(`projects/${p.id}/links/${id}`, undefined, p.links.find((l) => l.id === id)?.rowVersion); onChange() } catch (e) { setRemoveErr(e); setRemoveErrId(id) } finally { setRemoving(null) }
+    try { await typedRequest('delete', '/api/v1/projects/{id}/links/{linkId}', { params: { id: p.id, linkId: id }, ifMatch: p.links.find((l) => l.id === id)?.rowVersion }); onChange() } catch (e) { setRemoveErr(e); setRemoveErrId(id) } finally { setRemoving(null) }
   }
   return (
     <Section title={t('settings.links')} count={p.links.length}>
@@ -209,7 +209,7 @@ function LinksSection({ p, onChange }: { p: ProjectDetail; onChange: () => void 
       {canEdit && (
         <form className="grid gap-3 border-t px-5 py-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,11rem)_auto] sm:items-end" onSubmit={async (e) => {
           e.preventDefault(); if (adding) return; setErr(null); setAdding(true)
-          try { await post(`projects/${p.id}/links`, { url, title }); setUrl(''); setTitle(''); onChange() } catch (x) { setErr(x) } finally { setAdding(false) }
+          try { await typedRequest('post', '/api/v1/projects/{id}/links', { params: { id: p.id }, body: { url, title, linkType: null } }); setUrl(''); setTitle(''); onChange() } catch (x) { setErr(x) } finally { setAdding(false) }
         }}>
           <Field label={t('field.Url')} htmlFor="s-link-url"><Input id="s-link-url" placeholder={t('links.urlPlaceholder')} value={url} disabled={adding} onChange={(e) => setUrl(e.target.value)} /></Field>
           <Field label={t('field.Title')} htmlFor="s-link-title" optional><Input id="s-link-title" value={title} disabled={adding} onChange={(e) => setTitle(e.target.value)} /></Field>
@@ -223,7 +223,7 @@ function LinksSection({ p, onChange }: { p: ProjectDetail; onChange: () => void 
 
 /** Status change with consequence in numbers, reason (P-03) and the closeout checklist (P-04). */
 function TransitionDialog({ p, to, onClose }: { p: ProjectDetail; to: string; onClose: () => void }) {
-  const preview = useQuery({ queryKey: ['closeout', p.id], queryFn: () => get(`projects/${p.id}/closeout`) })
+  const preview = useQuery({ queryKey: ['closeout', p.id], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/closeout', { params: { id: p.id } }) })
   const [choices, setChoices] = useState<Record<string, 'cancel' | 'leave'>>({ tasks: 'leave', deliverables: 'leave', decisions: 'leave', registers: 'leave' })
   const needsReason = ['On Hold', 'Cancelled', 'Complete'].includes(to) || (p.status === 'Complete' && to === 'Active')
   const d = preview.data
@@ -239,7 +239,7 @@ function TransitionDialog({ p, to, onClose }: { p: ProjectDetail; to: string; on
   return (
     <ConfirmDialog open onOpenChange={(o) => !o && onClose()} title={t('settings.transitionTitle', { from: runtimeText(`value.${p.status}`), to: runtimeText(`value.${to}`) })}
       body={consequence} reason={needsReason ? true : 'optional'} destructive={to === 'Cancelled'} confirmLabel={runtimeText(`settings.to.${to}`, { from: '' })}
-      onConfirm={(reason) => post(`projects/${p.id}/transition`, { toStatus: to, reason, rowVersion: p.rowVersion, closeout: to === 'Complete' ? choices : undefined })}>
+      onConfirm={(reason) => typedRequest('post', '/api/v1/projects/{id}/transition', { params: { id: p.id }, body: { toStatus: to, reason, rowVersion: p.rowVersion, closeout: to === 'Complete' ? { tasks: choices.tasks, deliverables: choices.deliverables, decisions: choices.decisions, registers: choices.registers } : null } })}>
       {to === 'Complete' && d && (
         <div className="space-y-2 text-sm">
           <p className="font-semibold">{t('settings.closeout')}</p>

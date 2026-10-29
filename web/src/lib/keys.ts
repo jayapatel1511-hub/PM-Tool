@@ -37,7 +37,7 @@ export const itemKeys: Readonly<Record<string, readonly string[]>> = {
   AdminReview: ['admin'],
   UserPreferences: ['onboarding', 'me'], ReferenceData: ['reference', 'admin'], Setting: ['me', 'admin'], // 'admin' is the Administration lists: reference kinds, holidays, settings, users
   Holiday: ['admin', 'availability-view', 'planning-grid', 'my-week', 'workload'], // a statutory day changes every affected person's capacity
-  Project: ['projects-pick', 'planner-projects-filter', 'workspace-coordination', 'portfolio', 'workload'],
+  Project: ['projects-pick', 'projects-pick-ids', 'projects-mine-live', 'planner-projects', 'planner-projects-filter', 'scope-projects', 'workspace-coordination', 'portfolio', 'workload'], // the project lists behind the pickers, the planner entry panel and the project-scope menu
   Member: ['coord-options', 'staff', 'workload', 'workspace-coordination', 'open-items'],
   Discipline: ['planner-project-disciplines'], // a project's discipline list, lead or active flag changes the planner entry's picker; the Team tab is under ['p', projectId]
   SavedView: ['views'],

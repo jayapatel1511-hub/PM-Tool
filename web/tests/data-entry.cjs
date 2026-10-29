@@ -252,7 +252,7 @@ async function run(base, on) {
 
 const NOTICE_BUILD = 'mock-build-notice'
 const DAY = 86_400_000
-const discipline = project.projectDisciplines[0].id
+const discipline = project.disciplines[0].id
 const until = async (check, ms, what) => { const end = Date.now() + ms; while (!check()) { if (Date.now() > end) assert.fail(what); await new Promise(resolve => setTimeout(resolve, 50)) } }
 
 // Serious or critical WCAG A/AA findings inside one element.

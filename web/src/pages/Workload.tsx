@@ -19,11 +19,10 @@ import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useReference } from '@/hooks/data'
-import { ApiError, get, typedRequest } from '@/lib/api'
+import { ApiError, typedRequest } from '@/lib/api'
 import { useFlag } from '@/lib/auth'
 import { addDays, fmtDate, hours, shortDate, today } from '@/lib/format'
 import { runtimeText, t } from '@/lib/i18n'
-import type { Page as PageOf } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import type { SavedViewKeys } from '@/gen/registry.gen'
 import { GROUP_BY, GROUP_LABEL, groupPeople } from '@/components/planner/labels'
@@ -83,7 +82,7 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
   const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
   const filters = Object.fromEntries(FILTERS.map((k) => [k, sp.get(k)]))
   const q = useQuery({ queryKey: ['workload', filters], queryFn: () => typedRequest('get', '/api/v1/workload', { query: filters }) })
-  const projects = useQuery({ queryKey: ['projects-pick', ''], queryFn: () => get<PageOf<{ id: string; projectNumber: string; name: string }>>('projects?pageSize=200') })
+  const projects = useQuery({ queryKey: ['projects-pick', ''], queryFn: () => typedRequest('get', '/api/v1/projects', { query: { PageSize: 200 } }) })
   const forbidden = (q.error as ApiError | null)?.status === 403
   const toggle = (id: string) => setOpen((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n })
   const people = q.data?.people ?? []

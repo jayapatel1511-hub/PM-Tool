@@ -3,6 +3,7 @@ const { chromium } = require('playwright')
 const { clientConfig } = require('./config.fixture.cjs')
 const { savedView, viewList } = require('./views.fixture.cjs')
 const { meView, referenceData, referenceDiscipline, referenceDeliverableType } = require('./me.fixture.cjs')
+const { projectDetail, projectDiscipline, projectList, projectRow } = require('./projects.fixture.cjs')
 const { taskDependencies, dateContextRead } = require('./dependencies.fixture.cjs')
 const assert = require('node:assert/strict')
 const { spawn } = require('node:child_process')
@@ -19,7 +20,9 @@ const flags = { small_ux: true, row_quick_actions: true, date_context: true, tim
 const writes = []
 const dateContextRequests = []
 let viewerMode = false, renameConflict = false, releaseTransition = null, delayedTransition = false, related = false
-const project = { id: pid, projectNumber: 'SYN-046', name: 'Synthetic interaction project', client: 'Synthetic client', pmName: 'Synthetic PM', status: 'Active', visibility: 'Open', rowVersion: 1, links: [], disciplines: [{ id: discipline, name: 'Civil', code: 'C', colour: '#467762', isActive: true, leadUserId:person, leadName:'Synthetic PM' }], starred: false, myRoles: ['PM'], startDate: '2026-10-01', targetCompletionDate: '2026-11-30', health: { computed: 'Green', reported: 'Green', overrideActive: false, reasons: [] }, permissions: { edit: { ok: true }, healthOverride: { ok: false }, reviewDates: { ok: false }, snooze: { ok: false }, isPm: true, leadOf: [], createTaskIn: [discipline], createDeliverableIn: [discipline], transitions: [], manageMilestones: true } }
+const project = projectDetail({ id: pid, projectNumber: 'SYN-046', name: 'Synthetic interaction project', client: 'Synthetic client', pmName: 'Synthetic PM',
+  disciplines: [projectDiscipline({ id: discipline, name: 'Civil', code: 'C', colour: '#467762', leadUserId: person, leadName: 'Synthetic PM' })], myRoles: ['PM'], startDate: '2026-10-01', targetCompletionDate: '2026-11-30',
+  permissions: { edit: { ok: true }, isPm: true, createTaskIn: [discipline], createDeliverableIn: [discipline] } })
 const task = { milestoneId, id: taskId, projectId: pid, key: 'SYN-046-T001', name: 'Synthetic task', projectDisciplineId: discipline, disciplineName: 'Civil', disciplineColour: '#467762', status: 'Not Started', priority: 'Medium', progressPct: 0, startDate: '2026-10-20', dueDate: '2026-10-30', originalDueDate: null, dueDateChangeCount: 0, createdAt: '2026-10-18', lastActivityAt: '2026-10-18T12:00:00Z', assigneeId: person, assigneeName: 'Synthetic PM', assigneeActive: true, reviewerId: null, reviewerName: null, requiresReview: false, collaboratorIds: [], deliverableId, deliverableKey: 'SYN-046-D001', deliverableName: 'Synthetic deliverable', deliverableOrder: 1, rowVersion: 2, reviewRound: 0, can: { edit: true, assign: true, changeDue: true, block: true }, state: { isOverdue: false, isDueSoon: false, isBlocked: false, isWaiting: false, isBlocking: false, isStale: false, isUnassigned: false, isMissingDueDate: false, isDateInconsistent: false, isInactiveOwner: false, isHeldPastDue: false, isReviewStalled: false, blockingCount: 0, blockedBy: [], notes: [], inconsistencyDetail: [] }, manualBlockType: null }
 const deliverable = deliverableRow({ id: deliverableId, projectId: pid, key: 'SYN-046-D001', name: 'Synthetic deliverable', projectDisciplineId: discipline, status: 'In Progress', startDate: '2026-10-20', dueDate: '2026-10-30', rowVersion: 2,
   canRebaseline: true, baselineDueDate: '2026-10-28', sinceBaselineDays: 2, tasks: [{ id: taskId, key: task.key, name: task.name, assignee: 'Synthetic PM', dueDate: task.dueDate, status: task.status, deliverableId }], state: deliverableState({ taskOpen: 1 }) })
@@ -73,7 +76,7 @@ let server, browser
     else if (p === `milestones/${milestoneId}`) data = milestoneDetail({ milestone, project: { id: pid, projectNumber: project.projectNumber, name: project.name, status: project.status }, permissions: { manage: { ok: true, reason: null } } })
     else if (p === `milestones/${milestoneId}/history` || p === `deliverables/${deliverableId}/history` || p === `tasks/${taskId}/history`) data = []
     else if (p === 'timeline') data = ganttPage(project, timeline)
-    else if (p === 'projects') data = [project]
+    else if (p === 'projects') data = projectList([projectRow({ id: pid, projectNumber: project.projectNumber, name: project.name })])
     else if (p === `items/Deliverable/${deliverableId}/date-context`) data = dateContextRead({newInconsistencies:[{text:'Synthetic new date inconsistency'}],successors:[{id:id(61),key:'SYN-046-T061',reason:{text:'Synthetic successor moves out of sequence'}}]},{tasks:[{id:taskId,key:task.key,reason:{text:'Synthetic task lies outside deliverable dates'}}]})
     else if (p === `projects/${pid}/timeline`) data = timeline
     else if (p === `projects/${pid}/date-review`) data = { window: null, tasks: [], deliverables: [] }

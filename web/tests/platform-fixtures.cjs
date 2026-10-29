@@ -3,6 +3,7 @@ const { spawn } = require('node:child_process')
 const assert = require('node:assert/strict')
 const { chromium } = require('playwright')
 const { clientConfig } = require('./config.fixture.cjs')
+const { projectDetail, projectDiscipline, projectList, projectRow, dateReviewView } = require('./projects.fixture.cjs')
 const { viewList } = require('./views.fixture.cjs')
 const { coordinationOptions } = require('./reviews.fixture.cjs')
 const { myWork, myWorkPerson, myWorkProject } = require('./my-work.fixture.cjs')
@@ -17,8 +18,7 @@ const { taskRow, taskPage: taskPageOf, taskDetail: taskDetailOf } = require('./t
 
 const taskId = '00000000-0000-0000-0000-000000000001'
 const panelIds = { milestone: '00000000-0000-0000-0000-000000000021', deliverable: '00000000-0000-0000-0000-000000000022', decision: '00000000-0000-0000-0000-000000000023', action: '00000000-0000-0000-0000-000000000024', risk: '00000000-0000-0000-0000-000000000025', issue: '00000000-0000-0000-0000-000000000026' }
-const project = { id: '00000000-0000-0000-0000-000000000010', projectNumber: 'P-MOCK', name: 'Synthetic live project', status: 'Active', visibility: 'Open', rowVersion: 1, disciplines: [{ id: '00000000-0000-0000-0000-000000000011', disciplineId: '00000000-0000-0000-0000-000000000012', name: 'Civil', leadUserId: null }], projectDisciplines: [{ id: '00000000-0000-0000-0000-000000000011', disciplineId: '00000000-0000-0000-0000-000000000012', name: 'Civil', leadUserId: null }], links: [], permissions: { edit: { ok: true }, reviewDates: { ok: false }, isPm: true, needsReason: false } }
-Object.assign(project, { client: 'Synthetic client', pmName: 'Alex Chen', phase: null, nextMilestone: null, starred: false, health: { computed: 'Green', reported: 'Green', overrideActive: false, reasons: [] }, permissions: { ...project.permissions, isPm: false, leadOf: [], createTaskIn: [] } })
+const project = projectDetail({ id: '00000000-0000-0000-0000-000000000010', projectNumber: 'P-MOCK', name: 'Synthetic live project', pmName: 'Alex Chen', disciplines: [projectDiscipline({ id: '00000000-0000-0000-0000-000000000011', disciplineId: '00000000-0000-0000-0000-000000000012', name: 'Civil' })], permissions: { edit: true } })
 const task = taskRow({ id: taskId, projectId: project.id, key: 'T-001', name: 'Synthetic task' })
 const work = myWork({ person: myWorkPerson('00000000-0000-0000-0000-000000000002', 'Alex Chen'), today: '2026-10-03', tasks: [task], projects: [myWorkProject({ id: project.id, projectNumber: project.projectNumber, name: project.name, status: project.status })] })
 const views = viewList()
@@ -33,7 +33,7 @@ const panelPermissions = { edit: { ok: false, reason: 'Synthetic read-only panel
 const milestoneDetail = milestoneDetailOf({ milestone: milestoneRow({ id: panelIds.milestone, projectId: project.id, key: 'M-001', name: 'Synthetic milestone', description: 'Synthetic milestone detail' }),
   project: { id: project.id, projectNumber: project.projectNumber, name: project.name, status: project.status } })
 const deliverableDetail = deliverableDetailOf({
-  deliverable: deliverableRow({ id: panelIds.deliverable, projectId: project.id, key: 'D-001', name: 'Synthetic deliverable', projectDisciplineId: project.projectDisciplines[0].id, status: 'In Review', state: deliverableState(), tasks: [] }),
+  deliverable: deliverableRow({ id: panelIds.deliverable, projectId: project.id, key: 'D-001', name: 'Synthetic deliverable', projectDisciplineId: project.disciplines[0].id, status: 'In Review', state: deliverableState(), tasks: [] }),
   description: 'Synthetic deliverable detail', project: { id: project.id, projectNumber: project.projectNumber, name: project.name, status: project.status },
   permissions: { edit: { ok: false, reason: 'Synthetic read-only panel' }, comment: true } })
 const decisionDetail = { decision: { id: panelIds.decision, projectId: project.id, key: 'DEC-001', subject: 'Synthetic decision', status: 'Pending', impactLevel: 'Medium', impactDescription: '', blockingTaskIds: [], ownerUserId: null, ownerName: 'Alex Chen', requestedById: null, requestedByName: 'Alex Chen', dateRequested: '2026-10-01', requiredByDate: '2026-10-20', originalRequiredByDate: '2026-10-20', isOverdue: false, daysOverdue: 0, daysUntil: 1, isDueSoon: false, isInactiveOwner: false, rowVersion: 1 }, description: 'Synthetic decision detail', project: { id: project.id, projectNumber: project.projectNumber, name: project.name }, permissions: { ...panelPermissions, transitions: [] }, links: [], decidedBy: null, deferralReason: null, cancelledReason: null }
@@ -41,7 +41,7 @@ const actionDetail = actionDetailOf({
   action: actionRow({ id: panelIds.action, projectId: project.id, projectNumber: project.projectNumber, key: 'A-001', meetingId: '00000000-0000-0000-0000-000000000031', meetingTitle: 'Synthetic meeting',
     meetingDate: '2026-10-01', text: 'Synthetic action', ownerTypeLabel: 'User', dueDate: '2026-10-20' }),
   permissions: { edit: panelPermissions.edit, transitions: [], convert: false, comment: true } })
-const riskDetail = riskDetailOf({ risk: riskRow({ id: panelIds.risk, projectId: project.id, key: 'R-001', title: 'Synthetic risk', projectDisciplineId: project.projectDisciplines[0].id, reviewDate: '2026-10-20', mitigation: 'Synthetic mitigation', triggerIndicator: 'Synthetic trigger' }),
+const riskDetail = riskDetailOf({ risk: riskRow({ id: panelIds.risk, projectId: project.id, key: 'R-001', title: 'Synthetic risk', projectDisciplineId: project.disciplines[0].id, reviewDate: '2026-10-20', mitigation: 'Synthetic mitigation', triggerIndicator: 'Synthetic trigger' }),
   description: 'Synthetic risk detail', permissions: { edit: panelPermissions.edit, transitions: [], comment: true } })
 const issueDetail = issueDetailOf({ issue: issueRow({ id: panelIds.issue, projectId: project.id, key: 'I-001', title: 'Synthetic issue', targetResolutionDate: '2026-10-20' }),
   description: 'Synthetic issue detail', permissions: { edit: panelPermissions.edit, changeType: { ok: false, reason: null }, transitions: [], comment: true } })
@@ -83,9 +83,9 @@ function mockPlatformApi(page, { build, buildIds = ['mock-build-a', 'mock-build-
     else if (p === `projects/${project.projectNumber}/tasks` || p === `projects/${project.id}/tasks`) data = taskPage
     else if (p === `projects/${project.id}/milestones` || p === `projects/${project.projectNumber}/milestones`) data = []
     else if (p === `projects/${project.id}/deliverables` || p === `projects/${project.projectNumber}/deliverables`) data = deliverableList()
-    else if (p === `projects/${project.id}/date-review` || p === `projects/${project.projectNumber}/date-review`) data = { window: null, tasks: [], deliverables: [] }
+    else if (p === `projects/${project.id}/date-review` || p === `projects/${project.projectNumber}/date-review`) data = dateReviewView()
     else if (p === `tasks/${taskId}/dependencies`) data = taskDependencies()
-    else if (p === 'projects') data = { items: [project], page: 1, pageSize: 200, totalCount: 1 }
+    else if (p === 'projects') data = projectList([projectRow({ id: project.id, projectNumber: project.projectNumber, name: project.name, status: project.status })])
     else if (p === 'admin/users') data = []
     else if (p === 'views') data = views
     else if (p === 'planning/grid') data = planningGrid

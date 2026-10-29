@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
-import { ApiError, get, typedRequest } from '@/lib/api'
+import { ApiError, typedRequest } from '@/lib/api'
 import { fmtDate } from '@/lib/format'
 import { t , runtimeText } from '@/lib/i18n'
 import { SOURCE_OPTIONS, sourceLabel, type PlannerEntry, visibilityLabel } from './labels'
@@ -25,7 +25,7 @@ export function EntryPanel({ entry, open, readOnly, draftAccessReason, onClose, 
   const queryDenied = permissionDenied || (q.error instanceof ApiError && (q.error.status === 403 || q.error.status === 404))
   const editable = !readOnly && !queryDenied && !q.error && !q.isFetching && !reloadBusy && !needsReload && !!current?.canEdit
   const showEditorActions = !readOnly && !queryDenied && !!current?.canEdit
-  const projectsQ = useQuery({ queryKey: ['planner-projects'], queryFn: () => get<{ items: { id: string; projectNumber?: string; name: string; status?: string }[] }>('projects?pageSize=200'), enabled: open })
+  const projectsQ = useQuery({ queryKey: ['planner-projects'], queryFn: () => typedRequest('get', '/api/v1/projects', { query: { PageSize: 200 } }), enabled: open })
   const teamQ = useQuery({ queryKey: ['planner-project-disciplines', form?.projectId], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/team', { params: { id: form!.projectId } }), enabled: open && !!form?.projectId })
   const resetDraftRetry = () => { retryKey.current = null; if (!needsReload) { setError(null); retryAction.current = async () => {} } }
   const update = (k: keyof Form, v: string) => { resetDraftRetry(); setForm((old) => old ? { ...old, [k]: v } : old) }

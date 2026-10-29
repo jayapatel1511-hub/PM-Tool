@@ -7,18 +7,17 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { useProject } from '@/hooks/data'
-import { get } from '@/lib/api'
+import { typedRequest } from '@/lib/api'
 import { useMe } from '@/lib/auth'
 import { today } from '@/lib/format'
 import { t } from '@/lib/i18n'
-import type { Page as PageOf } from '@/lib/types'
 import { EventDialog } from '@/pages/Calendar'
 import { CreateProjectDialog } from '@/pages/projects/CreateProject'
 import { CreateTask, useProjectLists } from '@/pages/projects/Tasks'
 
 /** Create a task in a chosen project (§13.10, §36.1): only live projects the person is on, and only where they may create. */
 export function NewTaskDialog({ onClose, projectId }: { onClose: (created?: string) => void; projectId?: string }) {
-  const list = useQuery({ queryKey: ['projects-mine-live'], queryFn: () => get<PageOf<{ id: string; projectNumber: string; name: string }>>('projects?mine=true&pageSize=200') })
+  const list = useQuery({ queryKey: ['projects-mine-live'], queryFn: () => typedRequest('get', '/api/v1/projects', { query: { Mine: true, PageSize: 200 } }) })
   const live = list.data?.items ?? []
   const [picked, setPicked] = useState<string | undefined>(projectId)
   const number = live.find((p) => p.id === (picked ?? live[0]?.id))?.projectNumber

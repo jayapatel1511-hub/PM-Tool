@@ -64,6 +64,7 @@ test('invalidation prefixes match actual mounted screen query keys', () => {
     Deliverable: [['gantt', 'scope'], ['open-items', 'm1']], DocumentLink: [['files', 'scope']],
     ApprovedLeave: [['availability-view', '2026-10-01', '2026-10-31'], ['planning-grid', 'scope'], ['my-week', 'scope']], PersonSchedule: [['availability-view', '2026-10-01', '2026-10-31']], User: [['hr-identities'], ['admin', 'users', '', false, false], ['admin', 'users', 'all']],
     ReferenceData: [['admin', 'offices'], ['admin', 'disciplines'], ['reference']], Setting: [['admin', 'settings'], ['me']], Holiday: [['admin', 'holidays', 2026, ''], ['availability-view', '2026-10-01', '2026-10-31'], ['workload', 'scope']],
+    Project: [['projects', {}], ['projects-pick', ''], ['projects-pick-ids', 'p1'], ['projects-mine-live'], ['planner-projects'], ['planner-projects-filter'], ['scope-projects', 'mine'], ['p', 'p1', 'date-review'], ['closeout', 'p1']],
     Member: [['p', 'p1', 'team'], ['open-items', 'm1']], Discipline: [['p', 'p1', 'team'], ['planner-project-disciplines', 'p1']],
     Risk: [['search-counts', 'scope'], ['search-page', 'scope'], ['risk', 'i1'], ['p', 'p1', 'risks', {}], ['coordination']],
     Issue: [['issue', 'i1'], ['p', 'p1', 'issues', {}], ['issue-documents', 'i1'], ['issue-verification', 'i1'], ['issue-reference-impacts', 'i1'], ['review-issues', 'p1'], ['coordination']],

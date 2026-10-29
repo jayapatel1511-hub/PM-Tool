@@ -12,11 +12,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import type { components } from '@/gen/api'
-import { ApiError, get, typedRequest } from '@/lib/api'
+import { ApiError, typedRequest } from '@/lib/api'
 import { useMe, type Me } from '@/lib/auth-context'
 import { refreshWorkspaces } from '@/lib/keys'
 import { plural, t , runtimeText } from '@/lib/i18n'
-import type { Page as PageOf } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { ProjectsPicker } from '@/pages/Reports'
 
@@ -101,10 +100,10 @@ export function useSetScope() {
 
 /** The scope's live projects by number and name, for filters and labels (visibility applied by the server). */
 export function useScopeProjects(scope: Scope) {
-  const params = scope.kind === 'mine' ? 'mine=true' : scope.kind === 'all' ? 'mine=false' : `mine=false&ids=${scope.api}`
+  const which = scope.kind === 'mine' ? { Mine: true } : scope.kind === 'all' ? {} : { Ids: scope.api }
   return useQuery({
     queryKey: ['scope-projects', scope.api], enabled: scope.ready,
-    queryFn: async () => (await get<PageOf<{ id: string; projectNumber: string; name: string; status: string }>>(`projects?${params}&includeArchived=true&pageSize=200`)).items
+    queryFn: async () => (await typedRequest('get', '/api/v1/projects', { query: { ...which, IncludeArchived: true, PageSize: 200 } })).items
       .filter((p) => p.status !== 'Archived' && p.status !== 'Cancelled'),
   })
 }
@@ -124,7 +123,7 @@ async function share(scope: Scope) {
   url.searchParams.delete('panel')
   if (scope.kind === 'all') url.searchParams.set('projects', 'all')
   else {
-    const ids = scope.kind === 'mine' ? (await get<PageOf<{ id: string }>>('projects?mine=true&includeArchived=true&pageSize=200')).items.map((p) => p.id) : scope.ids ?? []
+    const ids = scope.kind === 'mine' ? (await typedRequest('get', '/api/v1/projects', { query: { Mine: true, IncludeArchived: true, PageSize: 200 } })).items.map((p) => p.id) : scope.ids ?? []
     url.searchParams.set('projects', ids.join(',') || 'none')
     if (scope.ws) url.searchParams.set('ws', scope.ws.id)
   }

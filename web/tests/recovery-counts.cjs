@@ -3,6 +3,7 @@ const { chromium } = require('playwright');
 const { clientConfig } = require('./config.fixture.cjs');
 const { viewList } = require('./views.fixture.cjs');
 const { meView, referenceData, referenceDiscipline, referenceClient, referenceOffice } = require('./me.fixture.cjs');
+const { projectDetail, projectDiscipline } = require('./projects.fixture.cjs');
 const assert = require('node:assert/strict');
 const { spawn } = require('node:child_process');
 const path = require('node:path');
@@ -26,8 +27,10 @@ const attentionItem=attentionRow({id:id(70),projectId:pid,itemId:id(71)});
 const me=()=>meView({id:person,displayName:'Synthetic PM',email:'pm@hub.test',isTemplateEditor:true,
  capabilities:{createProject:true,createTask:true,portfolio:true,staff:true,allStaff:true,templates:true,directReports:2},
  settings:{today:'2026-10-18',taskDueSoonDays:7,chainDepthLimit:20,coordinationLookaheadWeeks:6},flags});
-const project=()=>({id:pid,projectNumber:'SYN-RCV',name:'Synthetic recovery project',clientId:client,client:'Synthetic client',officeId:office,office:'Synthetic office',pmName:'Synthetic PM',status:'Active',visibility:'Open',rowVersion:overridden?2:1,links:[],disciplines:[{id:civil,disciplineId:civil,name:'Civil',code:'C',colour:'#467762',leadUserId:person,leadName:'Synthetic PM',isActive:true}],starred:false,myRoles:['PM'],
- health:{computed:'Green',reported:overridden?'Yellow':'Green',overrideActive:overridden,...(overridden?{healthOverride:'Yellow',overrideBy:'Synthetic PM',healthOverrideExpiresAt:'2026-10-30T12:00:00Z'}:{}),reasons:[]},permissions:{edit:yes,healthOverride:evaluationFlows?yes:no,reviewDates:no,snooze:evaluationFlows?yes:no,manageMilestones:no,raiseRegister:no,isPm:true,leadOf:[],createTaskIn:[],createDeliverableIn:[],transitions:[],restore:{ok:restoreAllowed}}});
+const project=()=>projectDetail({id:pid,projectNumber:'SYN-RCV',name:'Synthetic recovery project',clientId:client,client:'Synthetic client',officeId:office,office:'Synthetic office',pmName:'Synthetic PM',rowVersion:overridden?2:1,
+ disciplines:[projectDiscipline({id:civil,disciplineId:civil,name:'Civil',code:'C',colour:'#467762',leadUserId:person,leadName:'Synthetic PM'})],myRoles:['PM'],
+ health:{reported:overridden?'Yellow':'Green',overrideActive:overridden,...(overridden?{healthOverride:'Yellow',overrideBy:'Synthetic PM',healthOverrideExpiresAt:'2026-10-30T12:00:00Z'}:{})},
+ permissions:{edit:yes,healthOverride:evaluationFlows?yes:no,snooze:evaluationFlows?yes:no,isPm:true,restore:{ok:restoreAllowed}}});
 const row=(n)=>({id:id(20+n),projectNumber:`SYN-${n}`,name:`Synthetic project ${n}`,client:{id:client,name:'Synthetic client'},pm:{id:person,displayName:'Synthetic PM'},office:'Synthetic office',officeId:office,status:'Active',computedHealth:n===1?'Red':'Green',reportedHealth:n===1?'Red':'Green',healthReasons:[],overrideActive:false,trend:[],overdueTasks:n,blockedTasks:n,overdueDecisions:n,highIssues:0,attentionCritical:n,attentionWarning:0,overdueDeliverables:n+1,myRoles:[]});
 const count=(value=0,link='')=>({value,link});
 const dash=()=>dashboardView({disciplineDue14:{[civil]:count()},disciplines:[dashboardDiscipline({disciplineId:civil,name:'Civil',leadId:person})],...(flags.status_rollups?{disciplineStatus:{[civil]:{notStarted:count(2,`disciplineId=${civil}&status=Not+Started`),inProgress:count(3,`disciplineId=${civil}&status=In+Progress,In+Review`),issued:count(4,`disciplineId=${civil}&status=Issued,Accepted`),onHold:count(1,`disciplineId=${civil}&status=On+Hold`)}}}:{})}); // 040-S15: typed fixtures, so a renamed field fails typecheck:tests

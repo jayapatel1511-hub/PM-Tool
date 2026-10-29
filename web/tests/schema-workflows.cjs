@@ -14,6 +14,7 @@ const { planningGrid, planningPerson, planningCell } = require('./planning.fixtu
 const { myWork: myWorkAnswer, myWorkPerson } = require('./my-work.fixture.cjs')
 const { meView, referenceData, referenceDiscipline, referenceOffice } = require('./me.fixture.cjs')
 const { pulse, unreadCount } = require('./notifications.fixture.cjs')
+const { projectDetail, projectList, projectRow } = require('./projects.fixture.cjs')
 
 const port = process.env.PORT || '19505'
 const base = `http://127.0.0.1:${port}`
@@ -21,7 +22,7 @@ const out = path.resolve(__dirname, '../test-results/schema-workflows')
 fs.mkdirSync(out, { recursive: true })
 const id = n => `00000000-0000-0000-0000-${String(n).padStart(12, '0')}`
 const projectId = id(10), levelId = id(20), unitId = id(21), taskId = id(30), offerId = id(31), chainId = id(40), personId = id(50)
-const project = { id: projectId, projectNumber: 'P-DEMO', name: 'Synthetic workflow project', client: 'Pilot client', pmName: 'Pat PM', status: 'Active', visibility: 'Open', rowVersion: 1, links: [], disciplines: [], starred: false, myRoles: [], health: { computed: 'Green', reported: 'Green', overrideActive: false, reasons: [] }, permissions: { edit: { ok: false }, healthOverride: { ok: false }, reviewDates: { ok: false }, snooze: { ok: false }, captureWeeklyPlan: { ok: false }, raiseRegister: { ok: false }, isPm: false, leadOf: [], createTaskIn: [], createDeliverableIn: [], transitions: [], needsReason: false } }
+const project = projectDetail({ id: projectId, projectNumber: 'P-DEMO', name: 'Synthetic workflow project', client: 'Pilot client', pmName: 'Pat PM' })
 const me = meView({ id: id(1), displayName: 'Sam Supervisor', email: 'sam@hub.test', systemRoles: ['Admin'], capabilities: { createProject: true, createTask: true, portfolio: true, workload: true, staff: true, allStaff: true, admin: true, templates: true, directReports: 2 }, settings: { today: '2026-10-03', taskDueSoonDays: 7, chainDepthLimit: 100, coordinationLookaheadWeeks: 6, workingDaysEnabled: true }, flags: { task_pickup: false, org_structure: false, verifiable_log: false, commitment_reliability: false } })
 
 const errors = [], unknownGets = [], calls = [], axeReports = [], shots = []
@@ -69,7 +70,7 @@ function responseFor(method, p, body, query) {
   if (p === 'tasks') return { items: [], page: 1, pageSize: 200, totalCount: 0 }
   if (p === 'planning/grid') return planningGrid({ weeks: ['2026-09-28', '2026-10-05', '2026-10-12', '2026-10-19', '2026-10-26', '2026-11-02'], currentWeek: '2026-09-28', people: [planningPerson({ id: id(1), displayName: 'Sam Supervisor', cells: [planningCell({ week: '2026-09-28' })] })] })
   if (p === 'views') return viewList()
-  if (p === 'projects') return { items: [project], page: 1, pageSize: 200, totalCount: 1 }
+  if (p === 'projects') return projectList([projectRow({ id: projectId, projectNumber: 'P-DEMO', name: 'Synthetic workflow project' })])
   return undefined
 }
 

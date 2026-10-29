@@ -6,6 +6,7 @@ const { viewList } = require('./views.fixture.cjs')
 const { myWork, myWorkPerson } = require('./my-work.fixture.cjs')
 const { meView, referenceData, referenceClient, referenceOffice } = require('./me.fixture.cjs')
 const { templateRead, templateRow, templateList, templatePreview, previewMilestone, templateCreated } = require('./templates.fixture.cjs')
+const { projectDetail, projectList, projectRow } = require('./projects.fixture.cjs')
 const assert = require('node:assert/strict')
 const { spawn } = require('node:child_process')
 const path = require('node:path')
@@ -23,7 +24,9 @@ const me = () => meView({ id: uid, displayName: readOnly ? 'Read Only' : 'Priya 
   settings: { today: '2026-10-18', taskDueSoonDays: 7, chainDepthLimit: 20, coordinationLookaheadWeeks: 4, workingDaysEnabled: true, routeCounterEnabled: routeEnabled },
   preferences: { denseRows: false }, flags: { onboarding_card: flagEnabled, route_counter: flagEnabled, project_import: flagEnabled, my_work_follow_up: true, project_status_note: true, template_roles: true } })
 const work = myWork({ person: myWorkPerson(uid, 'Priya PM'), today: '2026-10-18' })
-const project = { id: pid, projectNumber: 'P-DEMO', name: 'Synthetic project', client: 'Pilot client', pmName: 'Priya PM', pm: { displayName: 'Priya PM' }, office: { name: 'Halifax' }, status: 'Active', visibility: 'Open', rowVersion: 1, links: [], disciplines: [], starred: false, myRoles: ['PM'], health: { computed: 'Green', reported: 'Green', overrideActive: false, reasons: [] }, statusNote: { text: 'Current note', at: '2026-10-17T12:00:00Z', author: 'Priya PM', header: { computedHealth: 'Green', reportedHealth: 'Green', openAttention: 0 } }, permissions: { edit: { ok: true }, needsReason: false, isPm: true, leadOf: [], createTaskIn: [], createDeliverableIn: [], transitions: [] } }
+const project = projectDetail({ id: pid, projectNumber: 'P-DEMO', name: 'Synthetic project', client: 'Pilot client', pmName: 'Priya PM', myRoles: ['PM'],
+  statusNote: { text: 'Current note', authorId: null, at: '2026-10-17T12:00:00Z', author: 'Priya PM', header: { computedHealth: 'Green', reportedHealth: 'Green', nextMilestone: null, openAttention: 0 } },
+  permissions: { edit: { ok: true }, isPm: true } })
 const template = templateRead({ id: id(10), familyId: id(11), name: 'Synthetic template', description: 'Browser fixture',
   milestones: [{ ref: 'm1', name: 'Kickoff', milestoneType: 'Kickoff', anchor: 'ProjectStart', offset: 0, completesPhaseId: null, isClientFacing: true }],
   roles: [{ ref: 'r1', disciplineId: null, label: 'Project lead', startMilestoneRef: 'm1', startOffsetDays: 0, endMilestoneRef: null, endOffsetDays: 0, hours: 8, note: null }] })
@@ -52,7 +55,7 @@ const template = templateRead({ id: id(10), familyId: id(11), name: 'Synthetic t
       else if (p === 'me/onboarding') data = { hidden, done: false, completed: 0, total: 7, groups: [{ role: 'Everyone', steps: Array.from({ length: 7 }, (_, i) => ({ key: `step-${i}`, label: `Step ${i + 1}`, route: '/my-work', done: false })) }] }
       else if (p === 'me/onboarding/hide') { hidden = true; data = null }
       else if (p === 'me/onboarding/show') { hidden = false; data = null }
-      else if (p === 'projects') data = { items: [project], totalCount: 1, page: 1, pageSize: 50 }
+      else if (p === 'projects') data = projectList([projectRow({ id: pid, projectNumber: 'P-DEMO', name: 'Synthetic project' })], { pageSize: 50 })
       else if (p === `projects/${pid}` || p === 'projects/P-DEMO') data = project
       else if (p === `projects/${pid}/status-note` || p === `projects/P-DEMO/status-note`) data = project.statusNote
       else if (p === 'reference') data = referenceData({ clients: [referenceClient(id(20), 'Pilot client')], offices: [referenceOffice(id(21), 'Halifax')] })

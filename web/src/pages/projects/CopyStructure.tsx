@@ -1,13 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 import { selectCls } from '@/components/hub/common'
 import { Label } from '@/components/ui/label'
-import { get } from '@/lib/api'
+import { typedRequest } from '@/lib/api'
 import { t } from '@/lib/i18n'
-import type { Page, ProjectRow } from '@/lib/types'
 
 /** §27.1: start from another project's structure (disciplines, undated milestones, deliverables, unassigned tasks, dependencies). */
 export function CopyFrom({ value, onChange }: { value?: string | null; onChange: (v: string | null) => void }) {
-  const q = useQuery({ queryKey: ['projects', 'copy-sources'], queryFn: () => get<Page<ProjectRow>>('projects?includeArchived=true&pageSize=200&sort=number:desc') })
+  const q = useQuery({ queryKey: ['projects', 'copy-sources'], queryFn: () => typedRequest('get', '/api/v1/projects', { query: { IncludeArchived: true, PageSize: 200, Sort: 'number:desc' } }) })
   return (
     <div className="space-y-1.5">
       <Label htmlFor="copy-from">{t('copy.label')}<span className="font-normal text-muted-foreground"> ({t('common.optional')})</span></Label>

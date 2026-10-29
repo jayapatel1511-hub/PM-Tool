@@ -12,12 +12,11 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import type { components } from '@/gen/api'
-import { ApiError, get, qs, typedRequest } from '@/lib/api'
+import { ApiError, qs, typedRequest } from '@/lib/api'
 import { useMe } from '@/lib/auth'
 import { addDays, fmtDate, today } from '@/lib/format'
 import { invalidateChange } from '@/lib/keys'
 import { t , runtimeText } from '@/lib/i18n'
-import type { Page as PageOf } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { DraftNotice } from '@/components/hub/drafts'
 import { useSafeForm } from '@/hooks/drafts'
@@ -42,7 +41,7 @@ export function TimePage() {
   // The contract names these From, To, Scope and so on; the server binds query names without regard to case, so the lower-case names stay on the wire.
   const query: Record<string, string | null | undefined> = filters
   const q = useQuery({ queryKey: ['time', filters], queryFn: () => typedRequest('get', '/api/v1/time', { query }) })
-  const projects = useQuery({ queryKey: ['projects-pick', ''], queryFn: () => get<PageOf<{ id: string; projectNumber: string; name: string }>>('projects?pageSize=200') })
+  const projects = useQuery({ queryKey: ['projects-pick', ''], queryFn: () => typedRequest('get', '/api/v1/projects', { query: { PageSize: 200 } }) })
   const [adding, setAdding] = useState(false)
   const [editing, setEditing] = useState<Entry | null>(null)
   const [removing, setRemoving] = useState<Entry | null>(null)

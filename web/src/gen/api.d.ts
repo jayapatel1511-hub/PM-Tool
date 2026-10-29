@@ -3504,7 +3504,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["IssueDetailData"];
                     };
                 };
             };
@@ -3534,7 +3534,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["RegisterSaved"];
+                    };
                 };
             };
         };
@@ -3564,7 +3566,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown[];
+                        "application/json": components["schemas"]["IssueDocumentRow"][];
                     };
                 };
             };
@@ -3585,12 +3587,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["RegisterSaved"];
+                    };
                 };
             };
         };
@@ -3666,12 +3670,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["DecisionLinkMutation"];
+                    };
                 };
             };
         };
@@ -3705,7 +3711,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown[];
+                        "application/json": components["schemas"]["IssueLocationRow"][];
                     };
                 };
             };
@@ -3726,12 +3732,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["RegisterSaved"];
+                    };
                 };
             };
         };
@@ -3849,7 +3857,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["IssueMoved"];
+                    };
                 };
             };
         };
@@ -3883,7 +3893,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown[];
+                        "application/json": components["schemas"]["IssueVerificationRow"][];
                     };
                 };
             };
@@ -3904,12 +3914,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["RegisterSaved"];
+                    };
                 };
             };
         };
@@ -8499,7 +8511,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown[];
+                        "application/json": components["schemas"]["IssueRow"][];
                     };
                 };
             };
@@ -8520,12 +8532,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["RegisterCreated"];
+                    };
                 };
             };
         };
@@ -9188,12 +9202,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["RegisterCreated"];
+                    };
                 };
             };
         };
@@ -13818,7 +13834,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["RegisterSaved"];
+                    };
                 };
             };
         };
@@ -13848,12 +13866,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["DecisionLinkMutation"];
+                    };
                 };
             };
         };
@@ -13892,7 +13912,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["RiskMoved"];
+                    };
                 };
             };
         };
@@ -19600,6 +19622,14 @@ export interface components {
             /** Format: int64 */
             verifiedEntries: number;
         };
+        IssueDetailData: {
+            description: null | string;
+            issue: components["schemas"]["IssueRow"];
+            links: components["schemas"]["ItemLinkRow"][];
+            originRisk: null | components["schemas"]["IssueOriginRisk"];
+            permissions: components["schemas"]["IssuePermissions"];
+            project: components["schemas"]["RegisterProject"];
+        };
         IssueDocumentBody: {
             externalTopicId: null | string;
             identifier: string;
@@ -19612,6 +19642,29 @@ export interface components {
             sourceSystem?: null | string;
             sourceUrl: string;
             stableSourceId?: null | string;
+            viewpointUrl: null | string;
+        };
+        IssueDocumentRow: {
+            externalTopicId: null | string;
+            /** Format: uuid */
+            id: string;
+            identifier: string;
+            isAvailable: boolean;
+            kind: string;
+            modelElementGuid: null | string;
+            /** Format: date-time */
+            registeredAt: string;
+            /** Format: uuid */
+            registeredBy: null | string;
+            registrationMethod: string;
+            /** Format: uuid */
+            replacedById: null | string;
+            revision: string;
+            /** Format: int32 */
+            rowVersion: number;
+            sourceSystem: null | string;
+            sourceUrl: string;
+            stableSourceId: null | string;
             viewpointUrl: null | string;
         };
         IssueImpactBody: {
@@ -19646,6 +19699,32 @@ export interface components {
             startStation: null | number;
             stationUnits: null | string;
         };
+        IssueLocationRow: {
+            alignment: null | string;
+            assetSystem: null | string;
+            building: null | string;
+            coordinateReferenceSystem: null | string;
+            coordinateUnits: null | string;
+            /** Format: double */
+            coordinateX: null | number;
+            /** Format: double */
+            coordinateY: null | number;
+            /** Format: double */
+            coordinateZ: null | number;
+            /** Format: double */
+            endStation: null | number;
+            /** Format: uuid */
+            id: string;
+            kind: string;
+            level: null | string;
+            room: null | string;
+            /** Format: int32 */
+            rowVersion: number;
+            siteArea: null | string;
+            /** Format: double */
+            startStation: null | number;
+            stationUnits: null | string;
+        };
         IssueMarks: {
             /** Format: uuid */
             id: string;
@@ -19661,12 +19740,91 @@ export interface components {
             rowVersion: null | number;
             toStatus: string;
         };
+        IssueMoved: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
+            status: string;
+        };
+        IssueOriginRisk: {
+            /** Format: uuid */
+            id: string;
+            key: string;
+            status: string;
+            title: string;
+        };
+        IssuePermissions: {
+            changeType: components["schemas"]["RegisterPermission"];
+            comment: boolean;
+            edit: components["schemas"]["RegisterPermission"];
+            transitions: components["schemas"]["RegisterTransition"][];
+        };
+        IssueRow: {
+            affectedDisciplineIds: string[];
+            affectedDisciplineNames: string[];
+            affectedDisciplineSummary: string;
+            /** Format: date */
+            dateRaised: string;
+            /** Format: int32 */
+            daysOverdue: number;
+            disciplineName: null | string;
+            documentIdentifiers: string[];
+            documentRevisions: string[];
+            documentSummary: string;
+            /** Format: uuid */
+            id: string;
+            isOverdue: boolean;
+            issueType: string;
+            key: string;
+            /** Format: date-time */
+            lastActivityAt: string;
+            locationLabels: string[];
+            locationSummary: string;
+            /** Format: uuid */
+            originRiskId: null | string;
+            originRiskKey: null | string;
+            /** Format: uuid */
+            ownerId: string;
+            ownerName: null | string;
+            /** Format: uuid */
+            projectDisciplineId: null | string;
+            /** Format: uuid */
+            projectId: string;
+            /** Format: uuid */
+            raisedById: string;
+            raisedByName: null | string;
+            resolution: null | string;
+            /** Format: date */
+            resolvedDate: null | string;
+            /** Format: int32 */
+            rowVersion: number;
+            severity: string;
+            status: string;
+            /** Format: date */
+            targetResolutionDate: null | string;
+            title: string;
+            verificationStatus: string;
+        };
         IssueVerificationBody: {
             evidenceUrl: null | string;
             note: null | string;
             /** Format: int32 */
             rowVersion: number;
             status: string;
+            /** Format: uuid */
+            verifierId: string;
+        };
+        IssueVerificationRow: {
+            evidenceUrl: null | string;
+            /** Format: uuid */
+            id: string;
+            note: null | string;
+            /** Format: int32 */
+            rowVersion: number;
+            status: string;
+            /** Format: date-time */
+            verifiedAt: null | string;
             /** Format: uuid */
             verifierId: string;
         };
@@ -21594,6 +21752,13 @@ export interface components {
             title: string;
             url: string;
         };
+        RegisterCreated: {
+            /** Format: uuid */
+            id: string;
+            key: string;
+            /** Format: int32 */
+            rowVersion: number;
+        };
         RegisterIssueBody: {
             affectedDisciplineIds?: null | string[];
             /** Format: date */
@@ -21617,6 +21782,19 @@ export interface components {
         RegisterPermission: {
             ok: boolean;
             reason: null | string;
+        };
+        RegisterProject: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            projectNumber: string;
+            status: string;
+        };
+        RegisterSaved: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
         };
         RegisterTransition: {
             ok: boolean;
@@ -22017,7 +22195,7 @@ export interface components {
             description: null | string;
             links: components["schemas"]["ItemLinkRow"][];
             permissions: components["schemas"]["RiskPermissions"];
-            project: components["schemas"]["RiskProject"];
+            project: components["schemas"]["RegisterProject"];
             realisedIssue: null | components["schemas"]["RealisedRiskIssue"];
             risk: components["schemas"]["RiskListRow"];
         };
@@ -22066,17 +22244,20 @@ export interface components {
             rowVersion: null | number;
             toStatus: string;
         };
+        RiskMoved: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            issueId: null | string;
+            issueKey: null | string;
+            /** Format: int32 */
+            rowVersion: number;
+            status: string;
+        };
         RiskPermissions: {
             comment: boolean;
             edit: components["schemas"]["RegisterPermission"];
             transitions: components["schemas"]["RegisterTransition"][];
-        };
-        RiskProject: {
-            /** Format: uuid */
-            id: string;
-            name: string;
-            projectNumber: string;
-            status: string;
         };
         RoleBody: {
             role: string;

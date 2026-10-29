@@ -3,6 +3,7 @@ const { chromium } = require('playwright');
 const { clientConfig } = require('./config.fixture.cjs');
 const { viewList } = require('./views.fixture.cjs');
 const { meView } = require('./me.fixture.cjs');
+const { issueRow, issueDetail, locationRow, registerCreated, registerSaved } = require('./registers.fixture.cjs');
 const { sourceRevisionRow, sourceHeadRow, coordinationSource, coordinationDeliverable, coordinationTask, coordinationOptions, reviewRow, reviewPage, reviewPackageRow, reviewRoundRow, reviewAssignmentRow, reviewManifestRow, reviewDetail, changeRow, changePage, changeNoticeRow, changeAssessmentRow, inputUseRow, inputUseAssessment, inputUsePage, changeDetail, referenceImpactRow } = require('./reviews.fixture.cjs');
 const fs = require('fs'), path = require('path'), { spawn } = require('child_process'), assert = require('assert/strict');
 const port=process.env.COORDINATION_TEST_PORT||'5174', base=`http://127.0.0.1:${port}`;
@@ -46,12 +47,12 @@ const requests=[],errors=[],violations=[];
   else if(p===`projects/${pid}/changes/${nid}/action`){requests.push(b);assert.equal(b.action,'close');if(assessment?.status==='Pending Assessment'){status=400;data={detail:'One or more fields are invalid.',code:'validation',errors:{assessments:['Every linked assessment needs an evidenced disposition, approved retention or adoption, and verified correction where required.']}};}else{notice.status='Closed';notice.rowVersion++;data={id:nid,rowVersion:notice.rowVersion};}}
   else if(p===`projects/${pid}/changes/${nid}`)data=changeDetail({notice,assessments:assessment?[assessment]:[],completeAssessmentIds:assessment?.status==='Unaffected'&&!assessment.retainOldRevision?[assessmentId]:[],oldRevision:source,newRevision:newSource,head,actorId:actor,canWrite:true,canPublish:true,canManage:true,uses});
   else if(p===`projects/${pid}/issues`&&b){
-   locatedIssue={...b,id:id(30),projectId:pid,key:'P-DEMO-I001',status:'Open',rowVersion:1,ownerId:actor,ownerName:me.displayName,raisedById:actor,dateRaised:'2026-09-27',isOverdue:false,daysOverdue:0};
-   locations=b.locations.map((x,i)=>({...x,id:id(31+i),rowVersion:1}));data={id:locatedIssue.id,key:locatedIssue.key};status=201;
+   locatedIssue=issueRow({id:id(30),projectId:pid,key:'P-DEMO-I001',title:b.title,severity:b.severity,issueType:b.issueType,projectDisciplineId:b.projectDisciplineId,ownerId:actor,ownerName:me.displayName,raisedById:actor,raisedByName:me.displayName,dateRaised:'2026-09-27'});
+   locations=b.locations.map((x,i)=>locationRow({...x,id:id(31+i),rowVersion:1}));data=registerCreated(locatedIssue.id,locatedIssue.key);status=201;
   }
   else if(p===`projects/${pid}/issues`)data=locatedIssue?[locatedIssue]:[];
-  else if(p===`issues/${id(30)}`)data={issue:locatedIssue,project,links:[],permissions:{edit:{ok:true},changeType:{ok:true},transitions:[],comment:true}};
-  else if(p===`issues/${id(30)}/locations`&&b){locations.push({...b,id:id(31+locations.length),rowVersion:1});locatedIssue.rowVersion++;data={id:locations.at(-1).id};status=201;}
+  else if(p===`issues/${id(30)}`)data=issueDetail({issue:locatedIssue,project:{id:pid,projectNumber:project.projectNumber,name:project.name,status:project.status}});
+  else if(p===`issues/${id(30)}/locations`&&b){locations.push(locationRow({...b,id:id(31+locations.length),rowVersion:1}));locatedIssue.rowVersion++;data=registerSaved(locations.at(-1).id,1);status=201;}
   else if(p===`issues/${id(30)}/locations`)data=locations;
   else if(p===`issues/${id(30)}/reference-impacts`)data=[referenceImpactRow({id:id(40),documentReferenceId:id(41),previousRevisionId:srcA,currentRevisionId:srcB,ownerId:actor,documentReference:{identifier:'survey',revision:'A',kind:'Drawing'},previousRevision:{sourceKey:'P-DEMO-D001',externalIdentifier:'survey',revision:'A'},currentRevision:{sourceKey:'P-DEMO-D001',externalIdentifier:'survey',revision:'B'}})];
   else if([`issues/${id(30)}/documents`,`issues/${id(30)}/verification`].includes(p))data=[];

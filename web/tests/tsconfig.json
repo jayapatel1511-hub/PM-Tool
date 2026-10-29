@@ -48,6 +48,7 @@
     "deliverables.fixture.cjs",
     "readiness.fixture.cjs",
     "meetings.fixture.cjs",
-    "workspace.fixture.cjs"
+    "workspace.fixture.cjs",
+    "registers.fixture.cjs"
   ]
 }

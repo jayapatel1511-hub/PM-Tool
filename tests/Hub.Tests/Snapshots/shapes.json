@@ -5588,6 +5588,29 @@
       "null"
     ]
   },
+  "GET /api/v1/issues/{id}/documents 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "GET /api/v1/issues/{id}/locations 200": {
     "$": [
       "array"
@@ -5753,6 +5776,33 @@
   "GET /api/v1/issues/{id}/verification 200": {
     "$": [
       "array"
+    ],
+    "$[]": [
+      "object"
+    ],
+    "$[].evidenceUrl": [
+      "null",
+      "string"
+    ],
+    "$[].id": [
+      "string"
+    ],
+    "$[].note": [
+      "null",
+      "string"
+    ],
+    "$[].rowVersion": [
+      "number"
+    ],
+    "$[].status": [
+      "string"
+    ],
+    "$[].verifiedAt": [
+      "null",
+      "string"
+    ],
+    "$[].verifierId": [
+      "string"
     ]
   },
   "GET /api/v1/items/{type}/{id}/activity 200": {
@@ -31940,6 +31990,75 @@
     "$.components.schemas.Integrity.type": [
       "string"
     ],
+    "$.components.schemas.IssueDetailData": [
+      "object"
+    ],
+    "$.components.schemas.IssueDetailData.properties": [
+      "object"
+    ],
+    "$.components.schemas.IssueDetailData.properties.description": [
+      "object"
+    ],
+    "$.components.schemas.IssueDetailData.properties.description.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueDetailData.properties.description.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueDetailData.properties.issue": [
+      "object"
+    ],
+    "$.components.schemas.IssueDetailData.properties.issue.$ref": [
+      "string"
+    ],
+    "$.components.schemas.IssueDetailData.properties.links": [
+      "object"
+    ],
+    "$.components.schemas.IssueDetailData.properties.links.items": [
+      "object"
+    ],
+    "$.components.schemas.IssueDetailData.properties.links.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.IssueDetailData.properties.links.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueDetailData.properties.originRisk": [
+      "object"
+    ],
+    "$.components.schemas.IssueDetailData.properties.originRisk.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.IssueDetailData.properties.originRisk.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.IssueDetailData.properties.originRisk.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.IssueDetailData.properties.originRisk.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.IssueDetailData.properties.permissions": [
+      "object"
+    ],
+    "$.components.schemas.IssueDetailData.properties.permissions.$ref": [
+      "string"
+    ],
+    "$.components.schemas.IssueDetailData.properties.project": [
+      "object"
+    ],
+    "$.components.schemas.IssueDetailData.properties.project.$ref": [
+      "string"
+    ],
+    "$.components.schemas.IssueDetailData.required": [
+      "array"
+    ],
+    "$.components.schemas.IssueDetailData.required[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueDetailData.type": [
+      "string"
+    ],
     "$.components.schemas.IssueDocumentBody": [
       "object"
     ],
@@ -32040,6 +32159,156 @@
       "string"
     ],
     "$.components.schemas.IssueDocumentBody.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueDocumentRow": [
+      "object"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.externalTopicId": [
+      "object"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.externalTopicId.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.externalTopicId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.identifier": [
+      "object"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.identifier.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.isAvailable": [
+      "object"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.isAvailable.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.kind": [
+      "object"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.kind.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.modelElementGuid": [
+      "object"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.modelElementGuid.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.modelElementGuid.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.registeredAt": [
+      "object"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.registeredAt.format": [
+      "string"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.registeredAt.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.registeredBy": [
+      "object"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.registeredBy.format": [
+      "string"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.registeredBy.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.registeredBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.registrationMethod": [
+      "object"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.registrationMethod.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.replacedById": [
+      "object"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.replacedById.format": [
+      "string"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.replacedById.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.replacedById.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.revision": [
+      "object"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.revision.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.sourceSystem": [
+      "object"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.sourceSystem.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.sourceSystem.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.sourceUrl": [
+      "object"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.sourceUrl.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.stableSourceId": [
+      "object"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.stableSourceId.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.stableSourceId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.viewpointUrl": [
+      "object"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.viewpointUrl.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueDocumentRow.properties.viewpointUrl.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueDocumentRow.required": [
+      "array"
+    ],
+    "$.components.schemas.IssueDocumentRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueDocumentRow.type": [
       "string"
     ],
     "$.components.schemas.IssueImpactBody": [
@@ -32279,6 +32548,204 @@
     "$.components.schemas.IssueLocationBody.type": [
       "string"
     ],
+    "$.components.schemas.IssueLocationRow": [
+      "object"
+    ],
+    "$.components.schemas.IssueLocationRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.alignment": [
+      "object"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.alignment.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.alignment.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.assetSystem": [
+      "object"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.assetSystem.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.assetSystem.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.building": [
+      "object"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.building.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.building.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.coordinateReferenceSystem": [
+      "object"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.coordinateReferenceSystem.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.coordinateReferenceSystem.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.coordinateUnits": [
+      "object"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.coordinateUnits.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.coordinateUnits.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.coordinateX": [
+      "object"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.coordinateX.format": [
+      "string"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.coordinateX.pattern": [
+      "string"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.coordinateX.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.coordinateX.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.coordinateY": [
+      "object"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.coordinateY.format": [
+      "string"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.coordinateY.pattern": [
+      "string"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.coordinateY.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.coordinateY.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.coordinateZ": [
+      "object"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.coordinateZ.format": [
+      "string"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.coordinateZ.pattern": [
+      "string"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.coordinateZ.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.coordinateZ.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.endStation": [
+      "object"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.endStation.format": [
+      "string"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.endStation.pattern": [
+      "string"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.endStation.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.endStation.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.kind": [
+      "object"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.kind.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.level": [
+      "object"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.level.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.level.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.room": [
+      "object"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.room.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.room.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.siteArea": [
+      "object"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.siteArea.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.siteArea.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.startStation": [
+      "object"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.startStation.format": [
+      "string"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.startStation.pattern": [
+      "string"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.startStation.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.startStation.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.stationUnits": [
+      "object"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.stationUnits.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueLocationRow.properties.stationUnits.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueLocationRow.required": [
+      "array"
+    ],
+    "$.components.schemas.IssueLocationRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueLocationRow.type": [
+      "string"
+    ],
     "$.components.schemas.IssueMarks": [
       "object"
     ],
@@ -32390,6 +32857,444 @@
     "$.components.schemas.IssueMove.type": [
       "string"
     ],
+    "$.components.schemas.IssueMoved": [
+      "object"
+    ],
+    "$.components.schemas.IssueMoved.properties": [
+      "object"
+    ],
+    "$.components.schemas.IssueMoved.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.IssueMoved.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.IssueMoved.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueMoved.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.IssueMoved.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.IssueMoved.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.IssueMoved.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueMoved.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.IssueMoved.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueMoved.required": [
+      "array"
+    ],
+    "$.components.schemas.IssueMoved.required[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueMoved.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueOriginRisk": [
+      "object"
+    ],
+    "$.components.schemas.IssueOriginRisk.properties": [
+      "object"
+    ],
+    "$.components.schemas.IssueOriginRisk.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.IssueOriginRisk.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.IssueOriginRisk.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueOriginRisk.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.IssueOriginRisk.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueOriginRisk.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.IssueOriginRisk.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueOriginRisk.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.IssueOriginRisk.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueOriginRisk.required": [
+      "array"
+    ],
+    "$.components.schemas.IssueOriginRisk.required[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueOriginRisk.type": [
+      "string"
+    ],
+    "$.components.schemas.IssuePermissions": [
+      "object"
+    ],
+    "$.components.schemas.IssuePermissions.properties": [
+      "object"
+    ],
+    "$.components.schemas.IssuePermissions.properties.changeType": [
+      "object"
+    ],
+    "$.components.schemas.IssuePermissions.properties.changeType.$ref": [
+      "string"
+    ],
+    "$.components.schemas.IssuePermissions.properties.comment": [
+      "object"
+    ],
+    "$.components.schemas.IssuePermissions.properties.comment.type": [
+      "string"
+    ],
+    "$.components.schemas.IssuePermissions.properties.edit": [
+      "object"
+    ],
+    "$.components.schemas.IssuePermissions.properties.edit.$ref": [
+      "string"
+    ],
+    "$.components.schemas.IssuePermissions.properties.transitions": [
+      "object"
+    ],
+    "$.components.schemas.IssuePermissions.properties.transitions.items": [
+      "object"
+    ],
+    "$.components.schemas.IssuePermissions.properties.transitions.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.IssuePermissions.properties.transitions.type": [
+      "string"
+    ],
+    "$.components.schemas.IssuePermissions.required": [
+      "array"
+    ],
+    "$.components.schemas.IssuePermissions.required[]": [
+      "string"
+    ],
+    "$.components.schemas.IssuePermissions.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.affectedDisciplineIds": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.affectedDisciplineIds.items": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.affectedDisciplineIds.items.format": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.affectedDisciplineIds.items.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.affectedDisciplineIds.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.affectedDisciplineNames": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.affectedDisciplineNames.items": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.affectedDisciplineNames.items.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.affectedDisciplineNames.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.affectedDisciplineSummary": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.affectedDisciplineSummary.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.dateRaised": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.dateRaised.format": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.dateRaised.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.daysOverdue": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.daysOverdue.format": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.daysOverdue.pattern": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.daysOverdue.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.disciplineName": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.disciplineName.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueRow.properties.disciplineName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.documentIdentifiers": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.documentIdentifiers.items": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.documentIdentifiers.items.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.documentIdentifiers.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.documentRevisions": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.documentRevisions.items": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.documentRevisions.items.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.documentRevisions.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.documentSummary": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.documentSummary.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.isOverdue": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.isOverdue.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.issueType": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.issueType.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.lastActivityAt": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.lastActivityAt.format": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.lastActivityAt.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.locationLabels": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.locationLabels.items": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.locationLabels.items.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.locationLabels.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.locationSummary": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.locationSummary.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.originRiskId": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.originRiskId.format": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.originRiskId.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueRow.properties.originRiskId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.originRiskKey": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.originRiskKey.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueRow.properties.originRiskKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.ownerId": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.ownerId.format": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.ownerId.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.ownerName": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.ownerName.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueRow.properties.ownerName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.projectDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.projectDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.projectDisciplineId.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueRow.properties.projectDisciplineId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.raisedById": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.raisedById.format": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.raisedById.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.raisedByName": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.raisedByName.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueRow.properties.raisedByName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.resolution": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.resolution.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueRow.properties.resolution.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.resolvedDate": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.resolvedDate.format": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.resolvedDate.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueRow.properties.resolvedDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.severity": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.severity.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.targetResolutionDate": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.targetResolutionDate.format": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.targetResolutionDate.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueRow.properties.targetResolutionDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.properties.verificationStatus": [
+      "object"
+    ],
+    "$.components.schemas.IssueRow.properties.verificationStatus.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.required": [
+      "array"
+    ],
+    "$.components.schemas.IssueRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueRow.type": [
+      "string"
+    ],
     "$.components.schemas.IssueVerificationBody": [
       "object"
     ],
@@ -32448,6 +33353,87 @@
       "string"
     ],
     "$.components.schemas.IssueVerificationBody.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueVerificationRow": [
+      "object"
+    ],
+    "$.components.schemas.IssueVerificationRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.IssueVerificationRow.properties.evidenceUrl": [
+      "object"
+    ],
+    "$.components.schemas.IssueVerificationRow.properties.evidenceUrl.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueVerificationRow.properties.evidenceUrl.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueVerificationRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.IssueVerificationRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.IssueVerificationRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueVerificationRow.properties.note": [
+      "object"
+    ],
+    "$.components.schemas.IssueVerificationRow.properties.note.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueVerificationRow.properties.note.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueVerificationRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.IssueVerificationRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.IssueVerificationRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.IssueVerificationRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueVerificationRow.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.IssueVerificationRow.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueVerificationRow.properties.verifiedAt": [
+      "object"
+    ],
+    "$.components.schemas.IssueVerificationRow.properties.verifiedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.IssueVerificationRow.properties.verifiedAt.type": [
+      "array"
+    ],
+    "$.components.schemas.IssueVerificationRow.properties.verifiedAt.type[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueVerificationRow.properties.verifierId": [
+      "object"
+    ],
+    "$.components.schemas.IssueVerificationRow.properties.verifierId.format": [
+      "string"
+    ],
+    "$.components.schemas.IssueVerificationRow.properties.verifierId.type": [
+      "string"
+    ],
+    "$.components.schemas.IssueVerificationRow.required": [
+      "array"
+    ],
+    "$.components.schemas.IssueVerificationRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.IssueVerificationRow.type": [
       "string"
     ],
     "$.components.schemas.ItemLinkRow": [
@@ -44999,6 +45985,48 @@
     "$.components.schemas.RegisterBody.type": [
       "string"
     ],
+    "$.components.schemas.RegisterCreated": [
+      "object"
+    ],
+    "$.components.schemas.RegisterCreated.properties": [
+      "object"
+    ],
+    "$.components.schemas.RegisterCreated.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.RegisterCreated.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.RegisterCreated.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.RegisterCreated.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.RegisterCreated.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.RegisterCreated.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.RegisterCreated.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.RegisterCreated.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.RegisterCreated.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.RegisterCreated.required": [
+      "array"
+    ],
+    "$.components.schemas.RegisterCreated.required[]": [
+      "string"
+    ],
+    "$.components.schemas.RegisterCreated.type": [
+      "string"
+    ],
     "$.components.schemas.RegisterIssueBody": [
       "object"
     ],
@@ -45198,6 +46226,84 @@
       "string"
     ],
     "$.components.schemas.RegisterPermission.type": [
+      "string"
+    ],
+    "$.components.schemas.RegisterProject": [
+      "object"
+    ],
+    "$.components.schemas.RegisterProject.properties": [
+      "object"
+    ],
+    "$.components.schemas.RegisterProject.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.RegisterProject.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.RegisterProject.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.RegisterProject.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.RegisterProject.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.RegisterProject.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.RegisterProject.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.RegisterProject.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.RegisterProject.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.RegisterProject.required": [
+      "array"
+    ],
+    "$.components.schemas.RegisterProject.required[]": [
+      "string"
+    ],
+    "$.components.schemas.RegisterProject.type": [
+      "string"
+    ],
+    "$.components.schemas.RegisterSaved": [
+      "object"
+    ],
+    "$.components.schemas.RegisterSaved.properties": [
+      "object"
+    ],
+    "$.components.schemas.RegisterSaved.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.RegisterSaved.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.RegisterSaved.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.RegisterSaved.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.RegisterSaved.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.RegisterSaved.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.RegisterSaved.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.RegisterSaved.required": [
+      "array"
+    ],
+    "$.components.schemas.RegisterSaved.required[]": [
+      "string"
+    ],
+    "$.components.schemas.RegisterSaved.type": [
       "string"
     ],
     "$.components.schemas.RegisterTransition": [
@@ -48086,6 +49192,69 @@
     "$.components.schemas.RiskMove.type": [
       "string"
     ],
+    "$.components.schemas.RiskMoved": [
+      "object"
+    ],
+    "$.components.schemas.RiskMoved.properties": [
+      "object"
+    ],
+    "$.components.schemas.RiskMoved.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.RiskMoved.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.RiskMoved.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.RiskMoved.properties.issueId": [
+      "object"
+    ],
+    "$.components.schemas.RiskMoved.properties.issueId.format": [
+      "string"
+    ],
+    "$.components.schemas.RiskMoved.properties.issueId.type": [
+      "array"
+    ],
+    "$.components.schemas.RiskMoved.properties.issueId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.RiskMoved.properties.issueKey": [
+      "object"
+    ],
+    "$.components.schemas.RiskMoved.properties.issueKey.type": [
+      "array"
+    ],
+    "$.components.schemas.RiskMoved.properties.issueKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.RiskMoved.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.RiskMoved.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.RiskMoved.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.RiskMoved.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.RiskMoved.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.RiskMoved.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.RiskMoved.required": [
+      "array"
+    ],
+    "$.components.schemas.RiskMoved.required[]": [
+      "string"
+    ],
+    "$.components.schemas.RiskMoved.type": [
+      "string"
+    ],
     "$.components.schemas.RiskPermissions": [
       "object"
     ],
@@ -48123,48 +49292,6 @@
       "string"
     ],
     "$.components.schemas.RiskPermissions.type": [
-      "string"
-    ],
-    "$.components.schemas.RiskProject": [
-      "object"
-    ],
-    "$.components.schemas.RiskProject.properties": [
-      "object"
-    ],
-    "$.components.schemas.RiskProject.properties.id": [
-      "object"
-    ],
-    "$.components.schemas.RiskProject.properties.id.format": [
-      "string"
-    ],
-    "$.components.schemas.RiskProject.properties.id.type": [
-      "string"
-    ],
-    "$.components.schemas.RiskProject.properties.name": [
-      "object"
-    ],
-    "$.components.schemas.RiskProject.properties.name.type": [
-      "string"
-    ],
-    "$.components.schemas.RiskProject.properties.projectNumber": [
-      "object"
-    ],
-    "$.components.schemas.RiskProject.properties.projectNumber.type": [
-      "string"
-    ],
-    "$.components.schemas.RiskProject.properties.status": [
-      "object"
-    ],
-    "$.components.schemas.RiskProject.properties.status.type": [
-      "string"
-    ],
-    "$.components.schemas.RiskProject.required": [
-      "array"
-    ],
-    "$.components.schemas.RiskProject.required[]": [
-      "string"
-    ],
-    "$.components.schemas.RiskProject.type": [
       "string"
     ],
     "$.components.schemas.RoleBody": [
@@ -65753,6 +66880,9 @@
     "$.paths./api/v1/issues/{id}.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/issues/{id}.get.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/issues/{id}.get.responses.200.description": [
       "string"
     ],
@@ -65813,6 +66943,18 @@
     "$.paths./api/v1/issues/{id}.patch.responses.200": [
       "object"
     ],
+    "$.paths./api/v1/issues/{id}.patch.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/issues/{id}.patch.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/issues/{id}.patch.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/issues/{id}.patch.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/issues/{id}.patch.responses.200.description": [
       "string"
     ],
@@ -65866,6 +67008,12 @@
     ],
     "$.paths./api/v1/issues/{id}/documents.get.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/issues/{id}/documents.get.responses.200.content.application/json.schema.items": [
+      "object"
+    ],
+    "$.paths./api/v1/issues/{id}/documents.get.responses.200.content.application/json.schema.items.$ref": [
+      "string"
     ],
     "$.paths./api/v1/issues/{id}/documents.get.responses.200.content.application/json.schema.type": [
       "string"
@@ -65927,10 +67075,22 @@
     "$.paths./api/v1/issues/{id}/documents.post.responses": [
       "object"
     ],
-    "$.paths./api/v1/issues/{id}/documents.post.responses.200": [
+    "$.paths./api/v1/issues/{id}/documents.post.responses.201": [
       "object"
     ],
-    "$.paths./api/v1/issues/{id}/documents.post.responses.200.description": [
+    "$.paths./api/v1/issues/{id}/documents.post.responses.201.content": [
+      "object"
+    ],
+    "$.paths./api/v1/issues/{id}/documents.post.responses.201.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/issues/{id}/documents.post.responses.201.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/issues/{id}/documents.post.responses.201.content.application/json.schema.$ref": [
+      "string"
+    ],
+    "$.paths./api/v1/issues/{id}/documents.post.responses.201.description": [
       "string"
     ],
     "$.paths./api/v1/issues/{id}/documents.post.tags": [
@@ -66065,10 +67225,22 @@
     "$.paths./api/v1/issues/{id}/links.post.responses": [
       "object"
     ],
-    "$.paths./api/v1/issues/{id}/links.post.responses.200": [
+    "$.paths./api/v1/issues/{id}/links.post.responses.201": [
       "object"
     ],
-    "$.paths./api/v1/issues/{id}/links.post.responses.200.description": [
+    "$.paths./api/v1/issues/{id}/links.post.responses.201.content": [
+      "object"
+    ],
+    "$.paths./api/v1/issues/{id}/links.post.responses.201.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/issues/{id}/links.post.responses.201.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/issues/{id}/links.post.responses.201.content.application/json.schema.$ref": [
+      "string"
+    ],
+    "$.paths./api/v1/issues/{id}/links.post.responses.201.description": [
       "string"
     ],
     "$.paths./api/v1/issues/{id}/links.post.tags": [
@@ -66121,6 +67293,12 @@
     ],
     "$.paths./api/v1/issues/{id}/locations.get.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/issues/{id}/locations.get.responses.200.content.application/json.schema.items": [
+      "object"
+    ],
+    "$.paths./api/v1/issues/{id}/locations.get.responses.200.content.application/json.schema.items.$ref": [
+      "string"
     ],
     "$.paths./api/v1/issues/{id}/locations.get.responses.200.content.application/json.schema.type": [
       "string"
@@ -66182,10 +67360,22 @@
     "$.paths./api/v1/issues/{id}/locations.post.responses": [
       "object"
     ],
-    "$.paths./api/v1/issues/{id}/locations.post.responses.200": [
+    "$.paths./api/v1/issues/{id}/locations.post.responses.201": [
       "object"
     ],
-    "$.paths./api/v1/issues/{id}/locations.post.responses.200.description": [
+    "$.paths./api/v1/issues/{id}/locations.post.responses.201.content": [
+      "object"
+    ],
+    "$.paths./api/v1/issues/{id}/locations.post.responses.201.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/issues/{id}/locations.post.responses.201.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/issues/{id}/locations.post.responses.201.content.application/json.schema.$ref": [
+      "string"
+    ],
+    "$.paths./api/v1/issues/{id}/locations.post.responses.201.description": [
       "string"
     ],
     "$.paths./api/v1/issues/{id}/locations.post.tags": [
@@ -66386,6 +67576,18 @@
     "$.paths./api/v1/issues/{id}/transition.post.responses.200": [
       "object"
     ],
+    "$.paths./api/v1/issues/{id}/transition.post.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/issues/{id}/transition.post.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/issues/{id}/transition.post.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/issues/{id}/transition.post.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/issues/{id}/transition.post.responses.200.description": [
       "string"
     ],
@@ -66439,6 +67641,12 @@
     ],
     "$.paths./api/v1/issues/{id}/verification.get.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/issues/{id}/verification.get.responses.200.content.application/json.schema.items": [
+      "object"
+    ],
+    "$.paths./api/v1/issues/{id}/verification.get.responses.200.content.application/json.schema.items.$ref": [
+      "string"
     ],
     "$.paths./api/v1/issues/{id}/verification.get.responses.200.content.application/json.schema.type": [
       "string"
@@ -66500,10 +67708,22 @@
     "$.paths./api/v1/issues/{id}/verification.post.responses": [
       "object"
     ],
-    "$.paths./api/v1/issues/{id}/verification.post.responses.200": [
+    "$.paths./api/v1/issues/{id}/verification.post.responses.201": [
       "object"
     ],
-    "$.paths./api/v1/issues/{id}/verification.post.responses.200.description": [
+    "$.paths./api/v1/issues/{id}/verification.post.responses.201.content": [
+      "object"
+    ],
+    "$.paths./api/v1/issues/{id}/verification.post.responses.201.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/issues/{id}/verification.post.responses.201.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/issues/{id}/verification.post.responses.201.content.application/json.schema.$ref": [
+      "string"
+    ],
+    "$.paths./api/v1/issues/{id}/verification.post.responses.201.description": [
       "string"
     ],
     "$.paths./api/v1/issues/{id}/verification.post.tags": [
@@ -72965,6 +74185,12 @@
     "$.paths./api/v1/projects/{id}/issues.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/projects/{id}/issues.get.responses.200.content.application/json.schema.items": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/issues.get.responses.200.content.application/json.schema.items.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/projects/{id}/issues.get.responses.200.content.application/json.schema.type": [
       "string"
     ],
@@ -73025,10 +74251,22 @@
     "$.paths./api/v1/projects/{id}/issues.post.responses": [
       "object"
     ],
-    "$.paths./api/v1/projects/{id}/issues.post.responses.200": [
+    "$.paths./api/v1/projects/{id}/issues.post.responses.201": [
       "object"
     ],
-    "$.paths./api/v1/projects/{id}/issues.post.responses.200.description": [
+    "$.paths./api/v1/projects/{id}/issues.post.responses.201.content": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/issues.post.responses.201.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/issues.post.responses.201.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/issues.post.responses.201.content.application/json.schema.$ref": [
+      "string"
+    ],
+    "$.paths./api/v1/projects/{id}/issues.post.responses.201.description": [
       "string"
     ],
     "$.paths./api/v1/projects/{id}/issues.post.tags": [
@@ -74072,10 +75310,22 @@
     "$.paths./api/v1/projects/{id}/risks.post.responses": [
       "object"
     ],
-    "$.paths./api/v1/projects/{id}/risks.post.responses.200": [
+    "$.paths./api/v1/projects/{id}/risks.post.responses.201": [
       "object"
     ],
-    "$.paths./api/v1/projects/{id}/risks.post.responses.200.description": [
+    "$.paths./api/v1/projects/{id}/risks.post.responses.201.content": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/risks.post.responses.201.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/risks.post.responses.201.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/risks.post.responses.201.content.application/json.schema.$ref": [
+      "string"
+    ],
+    "$.paths./api/v1/projects/{id}/risks.post.responses.201.description": [
       "string"
     ],
     "$.paths./api/v1/projects/{id}/risks.post.tags": [
@@ -82001,6 +83251,18 @@
     "$.paths./api/v1/risks/{id}.patch.responses.200": [
       "object"
     ],
+    "$.paths./api/v1/risks/{id}.patch.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/risks/{id}.patch.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/risks/{id}.patch.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/risks/{id}.patch.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/risks/{id}.patch.responses.200.description": [
       "string"
     ],
@@ -82061,10 +83323,22 @@
     "$.paths./api/v1/risks/{id}/links.post.responses": [
       "object"
     ],
-    "$.paths./api/v1/risks/{id}/links.post.responses.200": [
+    "$.paths./api/v1/risks/{id}/links.post.responses.201": [
       "object"
     ],
-    "$.paths./api/v1/risks/{id}/links.post.responses.200.description": [
+    "$.paths./api/v1/risks/{id}/links.post.responses.201.content": [
+      "object"
+    ],
+    "$.paths./api/v1/risks/{id}/links.post.responses.201.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/risks/{id}/links.post.responses.201.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/risks/{id}/links.post.responses.201.content.application/json.schema.$ref": [
+      "string"
+    ],
+    "$.paths./api/v1/risks/{id}/links.post.responses.201.description": [
       "string"
     ],
     "$.paths./api/v1/risks/{id}/links.post.tags": [
@@ -82126,6 +83400,18 @@
     ],
     "$.paths./api/v1/risks/{id}/transition.post.responses.200": [
       "object"
+    ],
+    "$.paths./api/v1/risks/{id}/transition.post.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/risks/{id}/transition.post.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/risks/{id}/transition.post.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/risks/{id}/transition.post.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/risks/{id}/transition.post.responses.200.description": [
       "string"
@@ -94848,6 +96134,29 @@
       "string"
     ]
   },
+  "GET /api/v1/projects/{id}/issues/export 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "GET /api/v1/projects/{id}/lead-unit 200": {
     "$": [
       "object"
@@ -95217,10 +96526,12 @@
       "string"
     ],
     "$[].realisedIssueId": [
-      "null"
+      "null",
+      "string"
     ],
     "$[].realisedIssueKey": [
-      "null"
+      "null",
+      "string"
     ],
     "$[].reviewDate": [
       "null",
@@ -95243,6 +96554,29 @@
     ],
     "$[].triggerIndicator": [
       "null",
+      "string"
+    ]
+  },
+  "GET /api/v1/projects/{id}/risks/export 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
       "string"
     ]
   },
@@ -104481,10 +105815,41 @@
       "object"
     ],
     "$.description": [
+      "null",
       "string"
     ],
     "$.links": [
       "array"
+    ],
+    "$.links[]": [
+      "object"
+    ],
+    "$.links[].date": [
+      "null"
+    ],
+    "$.links[].id": [
+      "string"
+    ],
+    "$.links[].key": [
+      "string"
+    ],
+    "$.links[].name": [
+      "string"
+    ],
+    "$.links[].person": [
+      "null"
+    ],
+    "$.links[].relation": [
+      "string"
+    ],
+    "$.links[].status": [
+      "string"
+    ],
+    "$.links[].targetId": [
+      "string"
+    ],
+    "$.links[].targetType": [
+      "string"
     ],
     "$.permissions": [
       "object"
@@ -104499,7 +105864,8 @@
       "boolean"
     ],
     "$.permissions.edit.reason": [
-      "null"
+      "null",
+      "string"
     ],
     "$.permissions.transitions": [
       "array"
@@ -104617,6 +105983,7 @@
       "string"
     ],
     "$.risk.triggerIndicator": [
+      "null",
       "string"
     ]
   },
@@ -110726,6 +112093,12 @@
     "$.errors.ownerId[]": [
       "string"
     ],
+    "$.errors.severity": [
+      "array"
+    ],
+    "$.errors.severity[]": [
+      "string"
+    ],
     "$.status": [
       "number"
     ],
@@ -110740,6 +112113,29 @@
     ]
   },
   "PATCH /api/v1/issues/{id} 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "PATCH /api/v1/issues/{id} 404": {
     "$": [
       "object"
     ],
@@ -110795,6 +112191,29 @@
     ]
   },
   "PATCH /api/v1/issues/{id} 422": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "PATCH /api/v1/issues/{id} 428": {
     "$": [
       "object"
     ],
@@ -111678,6 +113097,139 @@
     ],
     "$.rowVersion": [
       "number"
+    ]
+  },
+  "PATCH /api/v1/risks/{id} 400": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.errors": [
+      "object"
+    ],
+    "$.errors.probability": [
+      "array"
+    ],
+    "$.errors.probability[]": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "PATCH /api/v1/risks/{id} 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "PATCH /api/v1/risks/{id} 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "PATCH /api/v1/risks/{id} 409": {
+    "$": [
+      "object"
+    ],
+    "$.changedAt": [
+      "string"
+    ],
+    "$.changedBy": [
+      "string"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.currentRowVersion": [
+      "number"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "PATCH /api/v1/risks/{id} 428": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
     ]
   },
   "PATCH /api/v1/tasks/{id} 200": {
@@ -114842,6 +116394,61 @@
       "number"
     ]
   },
+  "POST /api/v1/issues/{id}/documents 400": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.errors": [
+      "object"
+    ],
+    "$.errors.document": [
+      "array"
+    ],
+    "$.errors.document[]": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "POST /api/v1/issues/{id}/documents 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "POST /api/v1/issues/{id}/documents 409": {
     "$": [
       "object"
@@ -114928,6 +116535,121 @@
       "string"
     ]
   },
+  "POST /api/v1/issues/{id}/links 201": {
+    "$": [
+      "object"
+    ],
+    "$.id": [
+      "string"
+    ]
+  },
+  "POST /api/v1/issues/{id}/links 400": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.errors": [
+      "object"
+    ],
+    "$.errors.targetId": [
+      "array"
+    ],
+    "$.errors.targetId[]": [
+      "string"
+    ],
+    "$.errors.targetType": [
+      "array"
+    ],
+    "$.errors.targetType[]": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "POST /api/v1/issues/{id}/links 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "POST /api/v1/issues/{id}/links 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "POST /api/v1/issues/{id}/links 409": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "POST /api/v1/issues/{id}/locations 201": {
     "$": [
       "object"
@@ -114962,6 +116684,12 @@
       "array"
     ],
     "$.errors.location[]": [
+      "string"
+    ],
+    "$.errors.siteArea": [
+      "array"
+    ],
+    "$.errors.siteArea[]": [
       "string"
     ],
     "$.status": [
@@ -115111,6 +116839,12 @@
     "$.errors.resolution[]": [
       "string"
     ],
+    "$.errors.toStatus": [
+      "array"
+    ],
+    "$.errors.toStatus[]": [
+      "string"
+    ],
     "$.errors.verification": [
       "array"
     ],
@@ -115176,6 +116910,12 @@
     ],
     "$.errors": [
       "object"
+    ],
+    "$.errors.evidenceUrl": [
+      "array"
+    ],
+    "$.errors.evidenceUrl[]": [
+      "string"
     ],
     "$.errors.verifierId": [
       "array"
@@ -122329,6 +124069,121 @@
       "string"
     ]
   },
+  "POST /api/v1/risks/{id}/links 201": {
+    "$": [
+      "object"
+    ],
+    "$.id": [
+      "string"
+    ]
+  },
+  "POST /api/v1/risks/{id}/links 400": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.errors": [
+      "object"
+    ],
+    "$.errors.targetId": [
+      "array"
+    ],
+    "$.errors.targetId[]": [
+      "string"
+    ],
+    "$.errors.targetType": [
+      "array"
+    ],
+    "$.errors.targetType[]": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "POST /api/v1/risks/{id}/links 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "POST /api/v1/risks/{id}/links 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "POST /api/v1/risks/{id}/links 409": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "POST /api/v1/risks/{id}/transition 200": {
     "$": [
       "object"
@@ -122374,6 +124229,35 @@
       "array"
     ],
     "$.errors.reference[]": [
+      "string"
+    ],
+    "$.errors.toStatus": [
+      "array"
+    ],
+    "$.errors.toStatus[]": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "POST /api/v1/risks/{id}/transition 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
       "string"
     ],
     "$.status": [

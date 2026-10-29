@@ -32,6 +32,7 @@
     "test:team": "node tests/team.cjs",
     "test:meetings": "node tests/meetings.cjs",
     "test:workspace": "node tests/workspace.cjs",
+    "test:registers": "node tests/registers.cjs",
     "test:admin": "node tests/admin.cjs",
     "test:backlog-my-work": "node tests/backlog-my-work.cjs",
     "test:admin-review": "node tests/admin-review.cjs",

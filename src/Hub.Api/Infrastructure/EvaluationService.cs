@@ -264,6 +264,7 @@ public sealed class EvaluationWorker(IServiceProvider root, EvaluationSignal sig
             }
             if (events.Any(e => e.EventType == "SettingsChanged")) // an Admin changed a setting the evaluator reads: every Active project
                 projects.UnionWith(await db.Projects.Where(p => p.Status == ProjectStatus.Active).Select(p => p.Id).ToListAsync(ct));
+            var failedGlobalEventIds = new HashSet<Guid>();
             foreach (var pid in projects)
             {
                 using var work = root.CreateScope();
@@ -276,11 +277,17 @@ public sealed class EvaluationWorker(IServiceProvider root, EvaluationSignal sig
                         e.Attempts++; e.LastError = ex.GetType().Name;
                         if (e.Attempts >= MaxAttempts) e.DeadLetteredAt = clock.GetUtcNow();
                     }
+                    foreach (var e in events.Where(e => e.ProjectId is null && e.EventType == "SettingsChanged")) failedGlobalEventIds.Add(e.Id);
                     events.RemoveAll(e => e.ProjectId == pid);
                 }
             }
+            foreach (var e in events.Where(e => failedGlobalEventIds.Contains(e.Id)))
+            {
+                e.Attempts++; e.LastError = "EvaluationFailed";
+                if (e.Attempts >= MaxAttempts) e.DeadLetteredAt = clock.GetUtcNow();
+            }
             var now = clock.GetUtcNow();
-            foreach (var e in events) e.ProcessedAt = now;
+            foreach (var e in events.Where(e => !failedGlobalEventIds.Contains(e.Id))) e.ProcessedAt = now;
             await db.SaveChangesAsync(ct);
             return projects.Count;
         }

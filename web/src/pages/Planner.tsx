@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input'
 import { UrlSearchInput } from '@/components/hub/url-search'
 import { useFlag, useMe } from '@/lib/auth'
 import { addDays, fmtDate, shortDate, today } from '@/lib/format'
-import { ApiError, api, get, qs, typedRequest } from '@/lib/api'
+import { ApiError, get, typedRequest } from '@/lib/api'
 import { invalidateChange } from '@/lib/keys'
 import { runtimeText, t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
@@ -25,12 +25,13 @@ import { PlannerGrid } from '@/components/planner/PlannerGrid'
 import { BulkWeekDialog } from '@/components/planner/BulkWeekDialog'
 import { ProjectPlanningGrid } from '@/components/planner/ProjectPlanningGrid'
 import { TimeAwayDialog } from '@/components/planner/TimeAwayDialog'
-import { GROUP_BY, GROUP_LABEL, SOURCE_OPTIONS, confidenceLabel, hoursLabel, sourceLabel, type PlannerEntry, type PlannerGridData, type PlannerPerson, visibilityLabel } from '@/components/planner/labels'
+import { GROUP_BY, GROUP_LABEL, SOURCE_OPTIONS, confidenceLabel, hoursLabel, sourceLabel, type PlannerEntry, type PlannerPerson, visibilityLabel } from '@/components/planner/labels'
 import { MenuSelect } from './projects/Tasks'
 import { descendantUnitIds, unitLabel, useOrgPlacement } from '@/hooks/useOrgPlacement'
 
 const FILTERS = ['supervisorId', 'disciplineId', 'officeId', 'personId', 'projectId', 'unitId', 'source', 'confidence', 'visibility', 'indicator', 'q', 'sort', 'week', 'from', 'to', 'weeks', 'withoutProject', 'stale', 'includeMyDrafts', 'draftAccessReason', 'page'] as const satisfies readonly (SavedViewKeys['planner'] | 'page' | 'panel' | 'draftAccessReason')[]
-type EntryPage = { items: PlannerEntry[]; page: number; pageSize: number; totalCount: number }
+// The filters are the page's URL text and keep their lower-case names on the wire: the contract spells them From, Weeks and so on, and the server binds without regard to case.
+const urlQuery = (filters: Record<string, string | undefined>, more: Record<string, string | undefined> = {}): Record<string, string | undefined> => ({ ...filters, ...more })
 
 export function PlannerPage() {
   return <DesktopOnly notice={<Page eyebrow={t('nav.resources')} title={t('planner.title')} subtitle={t('planner.subtitle')}><Notice icon={Monitor} title={t('app.phoneNotice')} action={<Button asChild variant="outline"><Link to="/my-work">{t('nav.myWork')}</Link></Button>}>{t('planner.phoneHint')}</Notice></Page>}><Planner /></DesktopOnly>
@@ -42,16 +43,16 @@ function Planner() {
   const set = (k: string, value?: string | null) => { const n = new URLSearchParams(sp); if (value) n.set(k, value); else n.delete(k); setSp(n, { replace: true }) }
   const filters = Object.fromEntries(FILTERS.map((k) => [k, sp.get(k) ?? undefined]))
   const entryId = sp.get('entry')
-  const entryQ = useQuery({ queryKey: ['planning-entry-deeplink', entryId, filters.draftAccessReason], queryFn: () => get<PlannerEntry>(`planning/entries/${entryId}${qs({ draftAccessReason: filters.draftAccessReason })}`), enabled: !!entryId && !entry })
+  const entryQ = useQuery({ queryKey: ['planning-entry-deeplink', entryId, filters.draftAccessReason], queryFn: () => typedRequest('get', '/api/v1/planning/entries/{id}', { params: { id: entryId! }, query: { draftAccessReason: filters.draftAccessReason } }), enabled: !!entryId && !entry })
   // §45.7 (flag.planner_kept_rows): ids the viewer edited stay on screen until the filters change or the page reloads.
   // Page state only, so exports, saved views and links never carry them.
   const keptOn = useFlag('planner_kept_rows'); const filterKey = JSON.stringify(filters)
   const [keepState, setKeepState] = useState<{ key: string; ids: string[] }>({ key: '', ids: [] })
   useEffect(() => { setKeepState((state) => state.key === filterKey ? state : { key: filterKey, ids: [] }) }, [filterKey])
   const keep = keptOn && keepState.key === filterKey ? keepState.ids : []
-  const gridQ = useQuery({ queryKey: ['planning-grid', filters, keep, view], queryFn: () => get<PlannerGridData>(`planning/grid${qs({ ...filters, keep: keep.join(','), includeOpenRoles: view === 'projects' ? 'true' : undefined })}`), enabled: view !== 'list',
+  const gridQ = useQuery({ queryKey: ['planning-grid', filters, keep, view], queryFn: () => typedRequest('get', '/api/v1/planning/grid', { query: urlQuery(filters, { keep: keep.join(','), includeOpenRoles: view === 'projects' ? 'true' : undefined }) }), enabled: view !== 'list',
     placeholderData: (previous, previousQuery) => previousQuery && JSON.stringify(previousQuery.queryKey[1]) === filterKey ? previous : undefined })
-  const listQ = useQuery({ queryKey: ['planning-entries', filters], queryFn: () => get<EntryPage>(`planning/entries${qs({ ...filters, pageSize: 50 })}`), enabled: view === 'list' })
+  const listQ = useQuery({ queryKey: ['planning-entries', filters], queryFn: () => typedRequest('get', '/api/v1/planning/entries', { query: urlQuery(filters, { pageSize: '50' }) }), enabled: view === 'list' })
   const data = gridQ.data; const editable = view !== 'list' && wide
   const projectsQ = useQuery({ queryKey: ['planner-projects-filter'], queryFn: () => get<{ items: { id: string; projectNumber?: string; name: string; status?: string }[] }>('projects?mine=true&pageSize=200') })
   const referenceQ = useQuery({ queryKey: ['planner-reference'], queryFn: () => typedRequest('get', '/api/v1/reference', {}) })
@@ -65,7 +66,7 @@ function Planner() {
   const changeWeek = (days: number) => set('from', addDays(data?.weeks[0] ?? today(), days))
   const refresh = () => { void invalidateChange(qc, 'PlanningEntry') }
   const keepIds = (ids: (string | undefined)[]) => { if (keptOn && view !== 'list' && activeTokens.length > 0) setKeepState((k) => ({ key: filterKey, ids: [...new Set([...(k.key === filterKey ? k.ids : []), ...ids.filter((x): x is string => !!x)])].slice(-50) })) }
-  const quickAdd = async (personId: string, week: string, text: string, idempotencyKey: string) => { try { const created = await api<{ id?: string }>('planning/entries/quick', { method: 'POST', idempotencyKey, body: { personId, week, text } }); keepIds([created?.id, personId]); toast.success(t('planner.quickAdded')); setAnnouncement(t('planner.quickAdded')); refresh() } catch (error) { setAnnouncement(t('planner.saveFailed')); throw error } }
+  const quickAdd = async (personId: string, week: string, text: string, idempotencyKey: string) => { try { const created = await typedRequest('post', '/api/v1/planning/entries/quick', { idempotencyKey, body: { personId, week, text } }); keepIds([created?.id, personId]); toast.success(t('planner.quickAdded')); setAnnouncement(t('planner.quickAdded')); refresh() } catch (error) { setAnnouncement(t('planner.saveFailed')); throw error } }
   const openEntry = (e: PlannerEntry) => { setEntry(e); const n = new URLSearchParams(sp); n.set('entry', e.id); setSp(n, { replace: true }) }
   const closeEntry = () => { setEntry(null); const n = new URLSearchParams(sp); n.delete('entry'); setSp(n, { replace: true }) }
   const openCell = (person: PlannerPerson, c: { week: string }) => setCell({ personId: person.id, week: c.week })

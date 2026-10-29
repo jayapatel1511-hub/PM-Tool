@@ -8,6 +8,7 @@ const { savedView, viewList, viewSaved } = require('./views.fixture.cjs')
 const { meView, referenceData, referenceDiscipline } = require('./me.fixture.cjs')
 const { startPreview, project: baseProject, task: baseTask, taskDetail, deliverableDetail, panelIds, mockPlatformApi } = require('./platform-fixtures.cjs')
 const { deliverableList } = require('./deliverables.fixture.cjs')
+const { planningGrid } = require('./planning.fixture.cjs')
 const { allocationRow, allocationPage, allocationDetail, allocationLink, capacityDay, confirmationPreview } = require('./allocations.fixture.cjs')
 const { pulse, unreadCount } = require('./notifications.fixture.cjs')
 
@@ -64,7 +65,7 @@ const views = { allocations:[sharedView], staff: [staffView], portfolio: [savedV
     else if (p === 'portfolio') data = { ownOnly: false, tiles: { active: 1, red: 0, yellow: 0, green: 1, submissions14: 0, overdueDecisions: 0 }, projects: [{ id: projectId, projectNumber: project.projectNumber, name: project.name, status: 'Active', client: { id: id(50), name: 'Synthetic client' }, pm: { id: personId, displayName: 'Alex Chen' }, officeId: null, office: null, phase: null, projectTypeId: null, projectType: null, health: { computed: 'Green', reported: 'Green' }, trend: [], overdueDeliverables: 0, overdueTasks: 0, blockedTasks: 0, decisionsOverdue: 0, highIssues: 0, attention: 0 }] }
     else if (p === 'staff') data = myStaffList([myStaffPerson({ id: personId, displayName: 'Alex Chen', roles: { pm: 1, dl: 0, team: 1, reviewer: 0, viewer: 0 }, open: 1 })], { scope: 'all', canSeeAll: true })
     else if (p.startsWith('staff/')) data = []
-    else if (p === 'planning/grid') data = { weeks: [], currentWeek: '2026-10-12', evaluatedAt: '2026-10-18T00:00:00Z', partialView: false, draftAccess: false, settings: { horizonWeeks: 6, overPct: 110, underPct: 40, underWeeks: 1, staleDays: 14, maxHoursPerWeek: 40 }, people: [] }
+    else if (p === 'planning/grid') data = planningGrid()
     else if (method !== 'GET') data = {}
     else {await route.fallback();return}
     await route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(data) })

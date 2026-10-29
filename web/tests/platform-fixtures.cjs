@@ -7,6 +7,7 @@ const { viewList } = require('./views.fixture.cjs')
 const { coordinationOptions } = require('./reviews.fixture.cjs')
 const { myWork, myWorkPerson, myWorkProject } = require('./my-work.fixture.cjs')
 const { meView, referenceData } = require('./me.fixture.cjs')
+const { planningGrid: planningFixtureGrid } = require('./planning.fixture.cjs')
 const { taskDependencies } = require('./dependencies.fixture.cjs')
 const { actionRow, actionDetail: actionDetailOf } = require('./meetings.fixture.cjs')
 const { riskRow, riskDetail: riskDetailOf, issueRow, issueDetail: issueDetailOf } = require('./registers.fixture.cjs')
@@ -20,7 +21,7 @@ Object.assign(project, { client: 'Synthetic client', pmName: 'Alex Chen', phase:
 const task = { id: taskId, projectId: project.id, projectDisciplineId: '00000000-0000-0000-0000-000000000011', key: 'T-001', name: 'Synthetic task', status: 'Not Started', priority: 'Medium', rowVersion: 1, startDate: null, dueDate: null, assigneeId: null, assigneeName: null, reviewerId: null, reviewerName: null, reviewRound: 0, dueDateChangeCount: 0, effortHours: 0, state: { isWaiting: false, isBlocked: false, daysBlocked: 0, blockedBy: [], affectedMilestoneIds: [], isOverdue: false, isDueSoon: false, isBlocking: false, blockingCount: 0, isStale: false, isUnassigned: true, isMissingDueDate: true, isDateInconsistent: false, notes: [] } }
 const work = myWork({ person: myWorkPerson('00000000-0000-0000-0000-000000000002', 'Alex Chen'), today: '2026-10-03', tasks: [task], projects: [myWorkProject({ id: project.id, projectNumber: project.projectNumber, name: project.name, status: project.status })] })
 const views = viewList()
-const planningGrid = { weeks: [], currentWeek: '2026-10-03', partialView: false, draftAccess: false, settings: { horizonWeeks: 6, overPct: 1, underPct: 1, underWeeks: 1, staleDays: 14, maxHoursPerWeek: 40 }, people: [] }
+const planningGrid = planningFixtureGrid({ currentWeek: '2026-10-03', settings: { horizonWeeks: 6, overPct: 1, underPct: 1, underWeeks: 1, staleDays: 14, maxHoursPerWeek: 40 } })
 const { documentLinks: links } = require('./document-links.fixture.cjs')
 const { comments } = require('./comments.fixture.cjs')
 const { pulse, unreadCount } = require('./notifications.fixture.cjs')

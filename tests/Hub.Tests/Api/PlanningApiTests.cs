@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using Hub.Api.Data;
 using Hub.Domain;
@@ -410,5 +411,98 @@ public sealed class PlanningApiTests(HubFactory f)
         Assert.Equal(beforeWorkload, afterWorkload);
         Assert.Equal(beforeExport, afterExport);
         Assert.Equal(beforeAllocations, afterAllocations);
+    }
+
+    // Property names in order, with each leaf's kind (s string, n number, b boolean, z null); an array of objects shows its first element and any other array is [].
+    static string Shape(JsonNode? n) => n switch
+    {
+        JsonObject o => "{" + string.Join(",", o.Select(kv => kv.Key + (kv.Value is JsonObject or JsonArray ? Shape(kv.Value) : ":" + Shape(kv.Value)))) + "}",
+        JsonArray a => a.Count == 0 || a[0] is not JsonObject ? "[]" : "[" + Shape(a[0]) + "]",
+        null => "z",
+        _ => n.GetValueKind() switch { JsonValueKind.String => "s", JsonValueKind.Number => "n", JsonValueKind.True or JsonValueKind.False => "b", _ => "?" },
+    };
+
+    const string EntryShape = "{id:s,personId:s,personName:s,ownerId:s,ownerName:s,ownerKind:s,label:s,sourceCategory:s,projectId:s,projectNumber:s,projectName:s,projectDisciplineId:z,disciplineName:z,hoursPerWeek:n,startWeek:s,endWeek:s,confidence:s,visibility:s,notes:s,lastValidatedAt:s,stale:b,warnings[],canEdit:b,canChangeVisibility:b,correctionOnly:b,rowVersion:n,matchesFilter:b,weekHours:z,countedHours:z,coveredHours:z}";
+    const string CellEntryShape = "{id:s,personId:s,personName:s,ownerId:s,ownerName:s,ownerKind:s,label:s,sourceCategory:s,projectId:s,projectNumber:s,projectName:s,projectDisciplineId:z,disciplineName:z,hoursPerWeek:n,startWeek:s,endWeek:s,confidence:s,visibility:s,notes:s,lastValidatedAt:s,stale:b,warnings[],canEdit:b,canChangeVisibility:b,correctionOnly:b,rowVersion:n,matchesFilter:b,weekHours:n,countedHours:n,coveredHours:n}";
+    const string GridHead = "{weeks[],currentWeek:s,evaluatedAt:s,partialView:b,draftAccess:b,settings{horizonWeeks:n,overPct:n,underPct:n,underWeeks:n,staleDays:n,maxHoursPerWeek:n},people[{id:s,displayName:s,supervisorId:s,supervisorName:s,weeklyCapacity:n,canCreateSelfEntry:b,canCreateManagerEntry:b,canRecordTimeAway:b,indicators[],cells[{week:s,capacity:n,timeAway:n,additionalAvailability:n,approved:n,confirmed:n,expected:n,possible:n,remaining:n,taskEstimates:n,unestimatedTasks:n,overPlanned:b,underPlanned:b,staleEntries:n,ownDraftHours:n,holidayHours:n,provisional:b}],entries[" + EntryShape + "],approvedAllocations[{allocationId:s,projectId:s,projectNumber:s,projectName:s,approvalStatus:s,canOpen:b,weeks[{week:s,hours:n}]}],officeId:z,jobTitle:z,homeDisciplineId:z,partial:b";
+    const string TaskContexts = "taskContexts[{projectId:s,projectNumber:s,projectName:s,weeks[{week:s,hours:n,unestimatedTasks:n}]}]";
+    const string CellHead = "{personId:s,personName:s,week:s,partialView:b,capacity{weeklyCapacity:n,capacityOverride:b,workingDays:n,capacity:n,timeAway:n,additionalAvailability:n,days[{date:s,normal:n,available:n,category:z,timeAway:n,additional:n,holiday:n,provisional:b}]},approvedAllocations[{allocationId:s,projectId:s,projectNumber:s,projectName:s,hours:n,approvalStatus:s,canOpen:b}],entries[" + CellEntryShape + "],bands{confirmed:n,expected:n,possible:n},remaining:n,taskEstimates{hours:n,unestimatedTasks:n},indicators[{code:s,rule:s,evaluated:b,active:b,threshold:n,explanation:s}]";
+
+    async Task Flag(string key, bool on) => (await f.As(TestData.Admin).Put($"/api/v1/admin/settings/flag.{key}", new { value = on })).EnsureSuccessStatusCode();
+
+    [Fact]
+    public async Task Planning_answers_keep_their_property_names_order_kinds_and_refusals() // the typed records must serialise to the bytes the planner already reads
+    {
+        var alex = await FreshReport();
+        var project = await d.Project();
+        await d.NewTask(project.Id, TestData.Pm, new { assigneeId = alex, estimatedHours = 10m, dueDate = Week.AddDays(4) });
+        await f.DbAsync(async db => {
+            db.Allocations.Add(new() { ProjectId = project.Id, PersonId = alex, FromDate = Week, ThroughDate = Week.AddDays(4), PlannedHours = 20m, Status = AllocationStatus.Confirmed,
+                CreatedBy = d.User(TestData.Pm), ConfirmedBy = d.User(TestData.Sam), ConfirmedAt = f.Clock.GetUtcNow() });
+            return await db.SaveChangesAsync();
+        });
+        await (await f.As(TestData.Pm).Post($"/api/v1/projects/{project.Id}/open-roles", new { roleLabel = "Civil reviewer", fromDate = Week, throughDate = Week.AddDays(4), plannedHours = 10m })).Json(201);
+        var sam = f.As(TestData.Sam);
+        var quickShape = EntryShape.Replace("projectId:s,projectNumber:s,projectName:s", "projectId:z,projectNumber:z,projectName:z").Replace("notes:s", "notes:z");
+        try
+        {
+            // The entry answers: create is a 201 with a Location, quick add the same row shape without a project.
+            var post = await sam.Post("/api/v1/planning/entries", new { personId = alex, hoursPerWeek = 8m, startWeek = Week, endWeek = Week, label = "Planned P work",
+                sourceCategory = PlanningSource.MajorProject, projectId = project.Id, confidence = PlanningConfidence.Expected, notes = "n" });
+            Assert.Equal(HttpStatusCode.Created, post.StatusCode);
+            var created = await post.Json(201);
+            Assert.Equal($"/api/v1/planning/entries/{created.G("id")}", post.Headers.Location!.ToString());
+            Assert.Equal(EntryShape, Shape(created));
+            var quick = await sam.Post("/api/v1/planning/entries/quick", new { personId = alex, week = Week, text = "7.5 h review" });
+            Assert.Equal(HttpStatusCode.Created, quick.StatusCode);
+            var quickRow = await quick.Json(201);
+            Assert.Equal(quickShape, Shape(quickRow));
+            var removed = await sam.DeleteAsync($"/api/v1/planning/entries/{quickRow.G("id")}?rowVersion={quickRow.I("rowVersion")}"); // 204 with no body; the lists below then hold one entry
+            Assert.Equal(HttpStatusCode.NoContent, removed.StatusCode);
+            Assert.Empty(await removed.Content.ReadAsByteArrayAsync());
+            Assert.Null(removed.Content.Headers.ContentType);
+            await (await sam.GetAsync($"/api/v1/planning/entries/{quickRow.G("id")}")).Json(404);
+            var id = created.G("id"); var path = $"/api/v1/planning/entries/{id}";
+            var detail = await (await sam.GetAsync(path)).Json();
+            Assert.Equal(EntryShape, Shape(detail));
+            var patched = await (await sam.Patch(path, new { rowVersion = detail.I("rowVersion"), label = "Updated" })).Json();
+            Assert.Equal(EntryShape, Shape(patched));
+            var published = await (await sam.Post(path + "/visibility", new { rowVersion = patched.I("rowVersion"), visibility = PlanningVisibility.Published })).Json();
+            Assert.Equal(EntryShape, Shape(published));
+            var validated = await (await sam.Post(path + "/still-valid", new { rowVersion = published.I("rowVersion") })).Json();
+            Assert.Equal(EntryShape, Shape(validated));
+            Assert.Equal(["Updated", PlanningVisibility.Published, "Updated"], [patched.S("label"), published.S("visibility"), validated.S("label")]);
+
+            // The list and activity pages share the paging envelope; sort and filters are present and null.
+            var list = await (await sam.GetAsync($"/api/v1/planning/entries?personId={alex}&from={Week:yyyy-MM-dd}&to={Week:yyyy-MM-dd}")).Json();
+            Assert.Equal("{items[" + EntryShape + "],page:n,pageSize:n,totalCount:n,sort:z,filters:z}", Shape(list));
+            Assert.Equal((1, 1), (list.I("page"), list.I("totalCount")));
+            var activity = await (await sam.GetAsync(path + "/activity")).Json();
+            Assert.Equal(["items", "page", "pageSize", "totalCount", "sort", "filters"], activity.AsObject().Select(x => x.Key));
+            Assert.Equal(["id", "occurredAt", "actorId", "actorName", "actorType", "projectId", "itemType", "itemId", "itemKey", "itemName", "action", "categories", "changes", "summary", "reason", "source", "correlationId", "snapshot", "snapshotLabels"],
+                activity["items"]![0]!.AsObject().Select(x => x.Key));
+
+            // Grid and cell with the gated parts off, then on.
+            var gridUrl = $"/api/v1/planning/grid?personId={alex}&from={Week:yyyy-MM-dd}&weeks=1"; var cellUrl = $"/api/v1/planning/cells/{alex}/{Week:yyyy-MM-dd}";
+            await Flag("capacity_polish", false);
+            Assert.Equal(GridHead + "}]}", Shape(await (await sam.GetAsync(gridUrl)).Json()));
+            Assert.Equal(CellHead + "}", Shape(await (await sam.GetAsync(cellUrl)).Json()));
+            await Flag("capacity_polish", true);
+            Assert.Equal(GridHead + "," + TaskContexts + "}]}", Shape(await (await sam.GetAsync(gridUrl + "&projectId=" + project.Id)).Json()));
+            Assert.Equal(CellHead + ",projectContexts[{projectId:s,projectNumber:s,projectName:s,plannedHours:n,taskEstimates:n,unestimatedTasks:n}]}", Shape(await (await sam.GetAsync(cellUrl)).Json()));
+            await Flag("unfilled_beside_capacity", true); await Flag("planner_kept_rows", true);
+            var unfilled = await (await f.As(TestData.Pm).GetAsync($"/api/v1/planning/grid?from={Week:yyyy-MM-dd}&weeks=1&includeOpenRoles=true&projectId={project.Id}")).Json();
+            Assert.EndsWith(",unfilledRoles[{id:s,projectId:s,projectNumber:s,projectName:s,roleLabel:s,projectDisciplineId:z,disciplineName:z,fromDate:s,throughDate:s,plannedHours:n,cells[{week:s,hours:n}],canFill:b,fillPath:s}]}", Shape(unfilled));
+            Assert.Equal(GridHead + ",kept:b," + TaskContexts + "}]}", Shape(await (await sam.GetAsync(gridUrl + $"&keep={id}&source=Training")).Json()));
+
+            // Delete: refusals before the 204 with no body. The plan's subject can read a published entry but not remove it.
+            var email = f.Db(db => db.Users.Single(u => u.Id == alex).Email);
+            Assert.Equal(HttpStatusCode.NotFound, (await sam.DeleteAsync($"/api/v1/planning/entries/{Guid.NewGuid()}?rowVersion=1")).StatusCode);
+            Assert.Equal(HttpStatusCode.Forbidden, (await f.As(email).DeleteAsync($"{path}?rowVersion={validated.I("rowVersion")}")).StatusCode);
+            Assert.Equal(HttpStatusCode.PreconditionRequired, (await sam.DeleteAsync(path)).StatusCode);
+            Assert.Equal(HttpStatusCode.Conflict, (await sam.DeleteAsync($"{path}?rowVersion={validated.I("rowVersion") - 1}")).StatusCode);
+            Assert.NotNull((await (await f.As(TestData.Admin).DeleteAsync($"{path}?rowVersion={validated.I("rowVersion")}&reason=no")).Json(400))["errors"]!["reason"]);
+        }
+        finally { await Flag("capacity_polish", false); await Flag("unfilled_beside_capacity", false); await Flag("planner_kept_rows", false); }
     }
 }

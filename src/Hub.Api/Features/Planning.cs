@@ -1,8 +1,10 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Api.Features;
@@ -33,12 +35,11 @@ public static class PlanningEndpoints
         string? ProjectName, Guid? ProjectDisciplineId, string? DisciplineName, decimal HoursPerWeek,
         DateOnly StartWeek, DateOnly EndWeek, string Confidence, string Visibility, string? Notes,
         DateTimeOffset LastValidatedAt, bool Stale, string[] Warnings, bool CanEdit, bool CanChangeVisibility,
-        bool CorrectionOnly, int RowVersion, bool MatchesFilter = true,
-        decimal? WeekHours = null, decimal? CountedHours = null, decimal? CoveredHours = null);
-    public sealed record DayRow(DateOnly Date, decimal Normal, decimal Available, string? Category, decimal TimeAway, decimal Additional, decimal Holiday = 0, bool Provisional = false);
+        bool CorrectionOnly, int RowVersion, bool MatchesFilter, decimal? WeekHours, decimal? CountedHours, decimal? CoveredHours);
+    public sealed record DayRow(DateOnly Date, decimal Normal, decimal Available, string? Category, decimal TimeAway, decimal Additional, decimal Holiday, bool Provisional);
     public sealed record CellRow(DateOnly Week, decimal Capacity, decimal TimeAway, decimal AdditionalAvailability,
         decimal Approved, decimal Confirmed, decimal Expected, decimal Possible, decimal Remaining,
-        decimal TaskEstimates, int UnestimatedTasks, bool OverPlanned, bool UnderPlanned, int StaleEntries, decimal OwnDraftHours, decimal HolidayHours = 0, bool Provisional = false);
+        decimal TaskEstimates, int UnestimatedTasks, bool OverPlanned, bool UnderPlanned, int StaleEntries, decimal OwnDraftHours, decimal HolidayHours, bool Provisional);
     public sealed record AllocationWeek(DateOnly Week, decimal Hours);
     public sealed record ApprovedRow(Guid AllocationId, Guid ProjectId, string ProjectNumber, string ProjectName,
         string ApprovalStatus, bool CanOpen, AllocationWeek[] Weeks);
@@ -47,15 +48,32 @@ public static class PlanningEndpoints
     public sealed record PersonRow(Guid Id, string DisplayName, Guid? SupervisorId, string? SupervisorName,
         decimal WeeklyCapacity, bool CanCreateSelfEntry, bool CanCreateManagerEntry, bool CanRecordTimeAway,
         string[] Indicators, CellRow[] Cells, EntryRow[] Entries, ApprovedRow[] ApprovedAllocations,
-        Guid? OfficeId = null, string? JobTitle = null, Guid? HomeDisciplineId = null, bool Partial = false,
-        [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] bool? Kept = null,
-        [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] ProjectTaskContext[]? TaskContexts = null);
+        Guid? OfficeId, string? JobTitle, Guid? HomeDisciplineId, bool Partial,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] bool? Kept = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] ProjectTaskContext[]? TaskContexts = null);
     public sealed record PlannerSettings(int HorizonWeeks, int OverPct, int UnderPct, int UnderWeeks, int StaleDays, int MaxHoursPerWeek);
     public sealed record GridResult(DateOnly[] Weeks, DateOnly CurrentWeek, DateTimeOffset EvaluatedAt,
         bool PartialView, bool DraftAccess, PlannerSettings Settings, PersonRow[] People,
-        [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] object[]? UnfilledRoles = null);
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] WorkloadEndpoints.UnfilledRole[]? UnfilledRoles = null);
+    /// One person-week: the capacity, the Approved allocations, the counted entries, the bands and the three indicator explanations (PLN-10 to PLN-12).
+    public sealed record CellDetail(Guid PersonId, string PersonName, DateOnly Week, bool PartialView, CellCapacity Capacity,
+        CellApproved[] ApprovedAllocations, EntryRow[] Entries, CellBands Bands, decimal Remaining, CellTaskEstimates TaskEstimates, CellIndicator[] Indicators,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] CellProjectContext[]? ProjectContexts = null);
+    public sealed record CellCapacity(decimal WeeklyCapacity, bool CapacityOverride, int WorkingDays, decimal Capacity, decimal TimeAway,
+        decimal AdditionalAvailability, DayRow[] Days);
+    public sealed record CellApproved(Guid AllocationId, Guid ProjectId, string ProjectNumber, string ProjectName, decimal Hours, string ApprovalStatus, bool CanOpen);
+    public sealed record CellBands(decimal Confirmed, decimal Expected, decimal Possible);
+    public sealed record CellTaskEstimates(decimal Hours, int UnestimatedTasks);
+    public sealed record CellIndicator(string Code, string Rule, bool Evaluated, bool Active, int Threshold, string Explanation);
+    public sealed record CellProjectContext(Guid ProjectId, string ProjectNumber, string ProjectName, decimal PlannedHours, decimal TaskEstimates, int UnestimatedTasks);
     internal const string KeptRowsFlag = "planner_kept_rows";
     sealed record ReadModel(GridResult Grid, Dictionary<(Guid, DateOnly), DayRow[]> Days);
+    sealed record AccessScope(Guid Id, string DisplayName); // the people a correction-mode read covered, stored as the access snapshot
+    sealed record DisciplineName(Guid Id, string Name);
+    sealed record HiddenWork(Guid PersonId, DateOnly From);
+    sealed record EntryExportRow(string PersonName, string OwnerName, string OwnerKind, string Label, string SourceCategory, string? ProjectNumber,
+        string? DisciplineName, decimal HoursPerWeek, DateOnly StartWeek, DateOnly EndWeek, string Confidence, string Visibility,
+        DateTimeOffset LastValidatedAt, bool Stale, string[] Warnings);
 
     public static void Map(RouteGroupBuilder api)
     {
@@ -117,7 +135,7 @@ public static class PlanningEndpoints
     internal static async Task LogAccess(HubDb db, Access access, string? reason, IEnumerable<Guid> people, TimeProvider clock, bool save = true)
     {
         if (reason is null) return;
-        var scope = await db.Users.AsNoTracking().Where(u => people.Contains(u.Id)).Select(u => new { u.Id, u.DisplayName }).ToListAsync();
+        var scope = await db.Users.AsNoTracking().Where(u => people.Contains(u.Id)).Select(u => new AccessScope(u.Id, u.DisplayName)).ToListAsync();
         db.ActivityLog.Add(new ActivityLog { ActorUserId = access.Actor.Id, ActorType = "Admin", ItemType = "PlanningDraftAccess",
             Action = "Viewed", Reason = reason.Trim(), Categories = ["admin"], Changes = "[]",
             Snapshot = JsonSerializer.Serialize(scope, JsonOpts.Web), Source = "API", OccurredAt = clock.GetUtcNow() });
@@ -152,7 +170,7 @@ public static class PlanningEndpoints
         var projectIds = entries.Select(e => e.ProjectId).OfType<Guid>().Distinct().ToArray();
         var projects = await db.Projects.AsNoTracking().Where(p => projectIds.Contains(p.Id)).ToDictionaryAsync(p => p.Id);
         var disciplines = await db.ProjectDisciplines.AsNoTracking().Where(d => projectIds.Contains(d.ProjectId))
-            .Select(d => new { d.Id, d.Discipline!.Name }).ToDictionaryAsync(d => d.Id, d => d.Name);
+            .Select(d => new DisciplineName(d.Id, d.Discipline!.Name)).ToDictionaryAsync(d => d.Id, d => d.Name);
         var from = entries.Min(e => e.StartWeek); var through = entries.Max(e => e.EndWeek).AddDays(6);
         var overrides = await PersonCapacity.Load(db, ids, from, through, settings);
         var now = clock.GetUtcNow(); var current = Workload.WeekOf(clock.Today(settings));
@@ -177,7 +195,7 @@ public static class PlanningEndpoints
                 e.ProjectDisciplineId is { } did ? disciplines.GetValueOrDefault(did) : null, e.HoursPerWeek, e.StartWeek,
                 e.EndWeek, e.Confidence, e.Visibility, e.Notes, e.LastValidatedAt,
                 PlanningRules.Stale(e.EndWeek, current, e.LastValidatedAt, now, settings.PlanningStaleDays), warnings.ToArray(),
-                canEdit, canEdit && !self, canEdit && owner.Id != access.Actor.Id, e.RowVersion);
+                canEdit, canEdit && !self, canEdit && owner.Id != access.Actor.Id, e.RowVersion, true, null, null, null);
         }).ToArray();
     }
 
@@ -240,11 +258,11 @@ public static class PlanningEndpoints
             .Where(e => ids.Contains(e.PersonId) && e.ProjectId != null && !visibleProjects.Contains(e.ProjectId.Value)
                 && (e.Visibility != PlanningVisibility.Draft || e.CreatedBy == viewer)
                 && e.StartWeek <= weeks[weeks.Length - 1] && e.EndWeek >= first)
-            .Select(e => new { e.PersonId, From = e.StartWeek }).ToListAsync();
+            .Select(e => new HiddenWork(e.PersonId, e.StartWeek)).ToListAsync();
         if (!access.SeesAllRestricted)
             hiddenWork.AddRange(await db.Allocations.AsNoTracking().Where(a => ids.Contains(a.PersonId) && a.Status == AllocationStatus.Confirmed
                 && !visibleProjects.Contains(a.ProjectId) && db.Projects.Any(p => p.Id == a.ProjectId && WorkloadEndpoints.LiveProjects.Contains(p.Status))
-                && a.FromDate <= weeks[weeks.Length - 1].AddDays(6) && a.ThroughDate >= first).Select(a => new { a.PersonId, From = a.FromDate }).ToListAsync());
+                && a.FromDate <= weeks[weeks.Length - 1].AddDays(6) && a.ThroughDate >= first).Select(a => new HiddenWork(a.PersonId, a.FromDate)).ToListAsync());
         var displayedThrough = weeks[displayCount - 1].AddDays(6);
         var hidden = hiddenWork.Where(w => w.From <= displayedThrough).Select(w => w.PersonId).ToHashSet();
         var hiddenLookahead = hiddenWork.Select(w => w.PersonId).ToHashSet();
@@ -332,7 +350,7 @@ public static class PlanningEndpoints
             _ => rows.OrderBy(p => SortCell(p).Remaining).ThenBy(p => p.DisplayName),
         };
         if (correction) await LogAccess(db, access, query.DraftAccessReason, ids, clock);
-        object[]? unfilled = null;
+        WorkloadEndpoints.UnfilledRole[]? unfilled = null;
         if (query.IncludeOpenRoles && settings.IsFlagOn("unfilled_beside_capacity"))
             unfilled = await WorkloadEndpoints.UnfilledRoles(new(query.SupervisorId, query.DisciplineId, query.OfficeId, query.ProjectId, null, query.From, query.Sort), weeks.Take(displayCount).ToList(), access, db, fillLinks: true);
         return new(new(weeks.Take(displayCount).ToArray(), current, clock.GetUtcNow(), partial, correction,
@@ -342,14 +360,16 @@ public static class PlanningEndpoints
     internal static async Task<GridResult> PreviewGrid(GridQuery query, Access access, HubDb db, SettingsStore store, TimeProvider clock)
         => (await Read(query, access, db, store, clock)).Grid;
 
-    static async Task<IResult> Grid([AsParameters] GridQuery query, Access access, HubDb db, SettingsStore store, TimeProvider clock)
-        => Results.Ok((await Read(query, access, db, store, clock)).Grid);
+    static async Task<Ok<GridResult>> Grid([AsParameters] GridQuery query, Access access, HubDb db, SettingsStore store, TimeProvider clock)
+        => TypedResults.Ok((await Read(query, access, db, store, clock)).Grid);
 
     /// Report consumers use the same privacy-scoped grid and never carry planner-only kept rows.
     internal static async Task<GridResult> ReportGrid(GridQuery query, Access access, HubDb db, SettingsStore store, TimeProvider clock)
         => (await Read(query with { Keep = null }, access, db, store, clock)).Grid;
 
-    static async Task<IResult> Cell(Guid personId, DateOnly week, bool? includeMyDrafts, string? draftAccessReason,
+    sealed record Planned(Guid ProjectId, string ProjectNumber, string ProjectName, decimal PlannedHours);
+
+    static async Task<Ok<CellDetail>> Cell(Guid personId, DateOnly week, bool? includeMyDrafts, string? draftAccessReason,
         Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
         Check.That(week.DayOfWeek == DayOfWeek.Monday, "week", "planning.week");
@@ -359,33 +379,32 @@ public static class PlanningEndpoints
         var raw = await (await VisibleEntries(db, access, includeMyDrafts ?? true, model.Grid.DraftAccess)).Where(e => e.PersonId == personId && e.StartWeek <= week && e.EndWeek >= week).ToListAsync();
         var approved = person.ApprovedAllocations.GroupBy(a => a.ProjectId).ToDictionary(g => g.Key, g => g.Sum(a => a.Weeks[0].Hours));
         var counts = PlanningRules.Combine(cell.Capacity, raw.Select(e => new EntryWeek(e.Id, e.ProjectId, e.Confidence, e.HoursPerWeek, e.StartWeek, e.CreatedAt)).ToArray(), approved).Entries.ToDictionary(e => e.Id);
-        var result = new { PersonId = personId, PersonName = person.DisplayName, Week = week, model.Grid.PartialView,
-            Capacity = new { person.WeeklyCapacity, CapacityOverride = await db.Users.AnyAsync(u => u.Id == personId && u.WeeklyCapacityHours != null),
-                WorkingDays = days.Count(d => d.Normal > 0), cell.Capacity, cell.TimeAway, cell.AdditionalAvailability, Days = days },
-            ApprovedAllocations = person.ApprovedAllocations.Where(a => a.Weeks[0].Hours > 0).Select(a => new { a.AllocationId, a.ProjectId, a.ProjectNumber, a.ProjectName, Hours = a.Weeks[0].Hours, a.ApprovalStatus, a.CanOpen }),
-            Entries = person.Entries.Where(e => counts.ContainsKey(e.Id)).Select(e => e with { WeekHours = e.HoursPerWeek, CountedHours = counts[e.Id].Counted, CoveredHours = counts[e.Id].Covered }),
-            Bands = new { cell.Confirmed, cell.Expected, cell.Possible }, cell.Remaining,
-            TaskEstimates = new { Hours = cell.TaskEstimates, cell.UnestimatedTasks },
-            Indicators = new[] {
-                new { Code = PlanningIndicator.OverPlanned, Rule = "PLN-10", Evaluated = true, Active = cell.OverPlanned, Threshold = settings.PlanningOverPct,
-                    Explanation = Text.Get("planning.explain_over", cell.Confirmed + cell.Expected, settings.PlanningOverPct, cell.Capacity, cell.Capacity * settings.PlanningOverPct / 100) },
-                new { Code = PlanningIndicator.UnderPlanned, Rule = "PLN-11", Evaluated = !model.Grid.PartialView && settings.PlanningUnderPct > 0, Active = cell.UnderPlanned, Threshold = settings.PlanningUnderPct,
-                    Explanation = Text.Get(model.Grid.PartialView ? "planning.explain_partial" : "planning.explain_under", settings.PlanningUnderPct, settings.PlanningUnderWeeks) },
-                new { Code = PlanningIndicator.StalePlan, Rule = "PLN-12", Evaluated = true, Active = cell.StaleEntries > 0, Threshold = settings.PlanningStaleDays,
-                    Explanation = Text.Get("planning.explain_stale", cell.StaleEntries, settings.PlanningStaleDays) } } };
-        if (!settings.IsFlagOn("capacity_polish")) return Results.Ok(result);
-        var taskContexts = person.TaskContexts ?? [];
-        var planned = person.ApprovedAllocations.Where(a => a.Weeks[0].Hours > 0).Select(a => new { a.ProjectId, a.ProjectNumber, a.ProjectName, PlannedHours = a.Weeks[0].Hours })
-            .Concat(person.Entries.Where(e => e.ProjectId is not null && counts.ContainsKey(e.Id)).GroupBy(e => new { ProjectId = e.ProjectId!.Value, e.ProjectNumber, ProjectName = e.ProjectName ?? "" })
-                .Select(g => new { g.Key.ProjectId, ProjectNumber = g.Key.ProjectNumber ?? "", g.Key.ProjectName, PlannedHours = g.Sum(e => counts[e.Id].Counted) }))
-            .Concat(taskContexts.Where(t => t.Weeks[0].Hours > 0 || t.Weeks[0].UnestimatedTasks > 0).Select(t => new { t.ProjectId, t.ProjectNumber, t.ProjectName, PlannedHours = 0m }));
-        var contextRows = planned.GroupBy(x => new { x.ProjectId, x.ProjectNumber, x.ProjectName }).Select(g => new {
-            g.Key.ProjectId, g.Key.ProjectNumber, g.Key.ProjectName, PlannedHours = g.Sum(x => x.PlannedHours),
-            TaskEstimates = taskContexts.FirstOrDefault(t => t.ProjectId == g.Key.ProjectId)?.Weeks[0].Hours ?? 0m,
-            UnestimatedTasks = taskContexts.FirstOrDefault(t => t.ProjectId == g.Key.ProjectId)?.Weeks[0].UnestimatedTasks ?? 0 });
-        var enriched = JsonSerializer.SerializeToNode(result, JsonOpts.Web)!.AsObject();
-        enriched["projectContexts"] = JsonSerializer.SerializeToNode(contextRows, JsonOpts.Web);
-        return Results.Ok(enriched);
+        var capacityOverride = await db.Users.AnyAsync(u => u.Id == personId && u.WeeklyCapacityHours != null);
+        CellProjectContext[]? projectContexts = null;
+        if (settings.IsFlagOn("capacity_polish"))
+        {
+            var taskContexts = person.TaskContexts ?? [];
+            var planned = person.ApprovedAllocations.Where(a => a.Weeks[0].Hours > 0).Select(a => new Planned(a.ProjectId, a.ProjectNumber, a.ProjectName, a.Weeks[0].Hours))
+                .Concat(person.Entries.Where(e => e.ProjectId is not null && counts.ContainsKey(e.Id)).GroupBy(e => (ProjectId: e.ProjectId!.Value, e.ProjectNumber, ProjectName: e.ProjectName ?? ""))
+                    .Select(g => new Planned(g.Key.ProjectId, g.Key.ProjectNumber ?? "", g.Key.ProjectName, g.Sum(e => counts[e.Id].Counted))))
+                .Concat(taskContexts.Where(t => t.Weeks[0].Hours > 0 || t.Weeks[0].UnestimatedTasks > 0).Select(t => new Planned(t.ProjectId, t.ProjectNumber, t.ProjectName, 0m)));
+            projectContexts = planned.GroupBy(x => (x.ProjectId, x.ProjectNumber, x.ProjectName)).Select(g => new CellProjectContext(g.Key.ProjectId, g.Key.ProjectNumber, g.Key.ProjectName,
+                g.Sum(x => x.PlannedHours), taskContexts.FirstOrDefault(t => t.ProjectId == g.Key.ProjectId)?.Weeks[0].Hours ?? 0m,
+                taskContexts.FirstOrDefault(t => t.ProjectId == g.Key.ProjectId)?.Weeks[0].UnestimatedTasks ?? 0)).ToArray();
+        }
+        return TypedResults.Ok(new CellDetail(personId, person.DisplayName, week, model.Grid.PartialView,
+            new(person.WeeklyCapacity, capacityOverride, days.Count(d => d.Normal > 0), cell.Capacity, cell.TimeAway, cell.AdditionalAvailability, days),
+            person.ApprovedAllocations.Where(a => a.Weeks[0].Hours > 0).Select(a => new CellApproved(a.AllocationId, a.ProjectId, a.ProjectNumber, a.ProjectName, a.Weeks[0].Hours, a.ApprovalStatus, a.CanOpen)).ToArray(),
+            person.Entries.Where(e => counts.ContainsKey(e.Id)).Select(e => e with { WeekHours = e.HoursPerWeek, CountedHours = counts[e.Id].Counted, CoveredHours = counts[e.Id].Covered }).ToArray(),
+            new(cell.Confirmed, cell.Expected, cell.Possible), cell.Remaining, new(cell.TaskEstimates, cell.UnestimatedTasks),
+            [
+                new(PlanningIndicator.OverPlanned, "PLN-10", true, cell.OverPlanned, settings.PlanningOverPct,
+                    Text.Get("planning.explain_over", cell.Confirmed + cell.Expected, settings.PlanningOverPct, cell.Capacity, cell.Capacity * settings.PlanningOverPct / 100)),
+                new(PlanningIndicator.UnderPlanned, "PLN-11", !model.Grid.PartialView && settings.PlanningUnderPct > 0, cell.UnderPlanned, settings.PlanningUnderPct,
+                    Text.Get(model.Grid.PartialView ? "planning.explain_partial" : "planning.explain_under", settings.PlanningUnderPct, settings.PlanningUnderWeeks)),
+                new(PlanningIndicator.StalePlan, "PLN-12", true, cell.StaleEntries > 0, settings.PlanningStaleDays,
+                    Text.Get("planning.explain_stale", cell.StaleEntries, settings.PlanningStaleDays)),
+            ], projectContexts));
     }
 
     static async Task<EntryRow[]> EntryRows(EntryQuery query, Access access, HubDb db, SettingsStore store, TimeProvider clock)
@@ -417,21 +436,21 @@ public static class PlanningEndpoints
             _ => rows.OrderBy(e => e.StartWeek).ThenBy(e => e.Id).ToArray() };
     }
 
-    static async Task<IResult> List([AsParameters] EntryQuery query, Access access, HubDb db, SettingsStore store, TimeProvider clock)
+    static async Task<Ok<Page<EntryRow>>> List([AsParameters] EntryQuery query, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
         var rows = await EntryRows(query, access, db, store, clock); var (page, size) = Http.Paging(query.Page, query.PageSize);
-        return Results.Ok(new Page<EntryRow>(rows.Skip((page - 1) * size).Take(size).ToArray(), page, size, rows.Length));
+        return TypedResults.Ok(new Page<EntryRow>(rows.Skip((page - 1) * size).Take(size).ToArray(), page, size, rows.Length));
     }
 
-    static async Task<IResult> Detail(Guid id, string? draftAccessReason, Access access, HubDb db, SettingsStore store, TimeProvider clock)
+    static async Task<Ok<EntryRow>> Detail(Guid id, string? draftAccessReason, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
         var correction = Correction(access, draftAccessReason);
         var entry = await (await VisibleEntries(db, access, true, correction)).SingleOrDefaultAsync(e => e.Id == id) ?? throw ApiException.NotFound();
         if (correction) await LogAccess(db, access, draftAccessReason, [entry.PersonId], clock);
-        return Results.Ok((await Rows(db, access, [entry], await store.Get(db), clock))[0]);
+        return TypedResults.Ok((await Rows(db, access, [entry], await store.Get(db), clock))[0]);
     }
 
-    static async Task<IResult> Activity(Guid id, string? draftAccessReason, int? page, int? pageSize,
+    static async Task<Ok<Page<ActivityEndpoints.ActivityEntry>>> Activity(Guid id, string? draftAccessReason, int? page, int? pageSize,
         Access access, HubDb db, TimeProvider clock)
     {
         var correction = Correction(access, draftAccessReason);
@@ -440,7 +459,7 @@ public static class PlanningEndpoints
         var (pg, size) = Http.Paging(page, pageSize);
         var q = db.ActivityLog.AsNoTracking().Where(a => a.ItemType == "PlanningEntry" && a.ItemId == id);
         var rows = await q.OrderByDescending(a => a.OccurredAt).ThenByDescending(a => a.Id).Skip((pg - 1) * size).Take(size).ToListAsync();
-        return Results.Ok(new Page<object>(await ActivityEndpoints.Render(db, rows), pg, size, await q.CountAsync()));
+        return TypedResults.Ok(new Page<ActivityEndpoints.ActivityEntry>(await ActivityEndpoints.Render(db, rows), pg, size, await q.CountAsync()));
     }
 
     static async Task Validate(HubDb db, Access access, PlanningEntry entry, OrgSettings settings, bool checkLink)
@@ -536,7 +555,7 @@ public static class PlanningEndpoints
             reason: entry.CreatedBy != access.Actor.Id ? reason?.Trim() : null,
             categories: entry.CreatedBy != access.Actor.Id ? ["admin", "data-correction"] : null);
 
-    static async Task<IResult> Create(CreateBody body, Access access, HubDb db, SettingsStore store, TimeProvider clock, Notifier notify)
+    static async Task<Created<EntryRow>> Create(CreateBody body, Access access, HubDb db, SettingsStore store, TimeProvider clock, Notifier notify)
     {
         var person = await db.Users.AsNoTracking().SingleOrDefaultAsync(u => u.Id == body.PersonId && u.IsActive) ?? throw ApiException.NotFound();
         Access.Demand(Permissions.CreatePlanningEntry(access.Actor, person.Id, person.SupervisorId));
@@ -549,10 +568,10 @@ public static class PlanningEndpoints
         db.PlanningEntries.Add(entry);
         await Notice(db, access, notify, entry, false, clock);
         await db.SaveChangesAsync(); // Entry, immutable audit, notice and email share this transaction.
-        return Results.Created($"/api/v1/planning/entries/{entry.Id}", (await Rows(db, access, [entry], settings, clock))[0]);
+        return TypedResults.Created($"/api/v1/planning/entries/{entry.Id}", (await Rows(db, access, [entry], settings, clock))[0]);
     }
 
-    static async Task<IResult> Quick(QuickBody body, Access access, HubDb db, SettingsStore store, TimeProvider clock, Notifier notify)
+    static async Task<Created<EntryRow>> Quick(QuickBody body, Access access, HubDb db, SettingsStore store, TimeProvider clock, Notifier notify)
     {
         var value = PlanningRules.ParseQuickAdd(body.Text, (await store.Get(db)).PlanningMaxHoursPerWeek);
         Check.That(value is not null, "text", "planning.quick_add_format");
@@ -561,7 +580,7 @@ public static class PlanningEndpoints
             Confidence: defaults.Confidence, Visibility: defaults.Visibility), access, db, store, clock, notify);
     }
 
-    static async Task<IResult> Edit(Guid id, JsonElement body, HttpContext http, Access access, HubDb db,
+    static async Task<Ok<EntryRow>> Edit(Guid id, JsonElement body, HttpContext http, Access access, HubDb db,
         SettingsStore store, TimeProvider clock, Notifier notify)
     {
         var patch = new Patch(body); var reason = patch.Str("reason");
@@ -599,10 +618,10 @@ public static class PlanningEndpoints
             await Notice(db, access, notify, moved, true, clock);
         }
         await Notice(db, access, notify, entry, wasVisible && originalPerson == entry.PersonId, clock);
-        await db.SaveChangesAsync(); return Results.Ok((await Rows(db, access, [entry], settings, clock))[0]);
+        await db.SaveChangesAsync(); return TypedResults.Ok((await Rows(db, access, [entry], settings, clock))[0]);
     }
 
-    static async Task<IResult> ChangeVisibility(Guid id, VisibilityBody body, HttpContext http, Access access, HubDb db,
+    static async Task<Ok<EntryRow>> ChangeVisibility(Guid id, VisibilityBody body, HttpContext http, Access access, HubDb db,
         SettingsStore store, TimeProvider clock, Notifier notify)
     {
         var entry = await Writable(id, body.Reason, access, db, store, clock);
@@ -611,26 +630,26 @@ public static class PlanningEndpoints
         var wasVisible = entry.Visibility != PlanningVisibility.Draft; entry.Visibility = body.Visibility;
         entry.LastValidatedAt = clock.GetUtcNow(); db.Entry(entry).Property(e => e.LastValidatedAt).IsModified = true;
         AuditChange(db, access, entry, "VisibilityChanged", body.Reason); await Notice(db, access, notify, entry, wasVisible, clock);
-        await db.SaveChangesAsync(); return Results.Ok((await Rows(db, access, [entry], await store.Get(db), clock))[0]);
+        await db.SaveChangesAsync(); return TypedResults.Ok((await Rows(db, access, [entry], await store.Get(db), clock))[0]);
     }
 
-    static async Task<IResult> StillValid(Guid id, VersionBody body, HttpContext http, Access access, HubDb db,
+    static async Task<Ok<EntryRow>> StillValid(Guid id, VersionBody body, HttpContext http, Access access, HubDb db,
         SettingsStore store, TimeProvider clock)
     {
         var entry = await Writable(id, body.Reason, access, db, store, clock); await Http.CheckVersion(db, http, entry, body.RowVersion);
         entry.LastValidatedAt = clock.GetUtcNow(); db.Entry(entry).Property(e => e.LastValidatedAt).IsModified = true;
         AuditChange(db, access, entry, "Validated", body.Reason); // PLN-12 only resets staleness; nothing changed for the person, so no notice.
-        await db.SaveChangesAsync(); return Results.Ok((await Rows(db, access, [entry], await store.Get(db), clock))[0]);
+        await db.SaveChangesAsync(); return TypedResults.Ok((await Rows(db, access, [entry], await store.Get(db), clock))[0]);
     }
 
-    static async Task<IResult> Delete(Guid id, int? rowVersion, string? reason, HttpContext http, Access access, HubDb db,
+    static async Task<NoContent> Delete(Guid id, int? rowVersion, string? reason, HttpContext http, Access access, HubDb db,
         SettingsStore store, TimeProvider clock, Notifier notify)
     {
         var entry = await Writable(id, reason, access, db, store, clock); await Http.CheckVersion(db, http, entry, rowVersion);
         var wasVisible = entry.Visibility != PlanningVisibility.Draft;
         entry.DeletedAt = clock.GetUtcNow(); entry.DeletedBy = access.Actor.Id;
         AuditChange(db, access, entry, "Deleted", reason); await Notice(db, access, notify, entry, wasVisible, clock, true);
-        await db.SaveChangesAsync(); return Results.NoContent();
+        await db.SaveChangesAsync(); return TypedResults.NoContent();
     }
 
     static async Task<IResult> TimeAway(TimeAwayBody body, Access access, HubDb db)
@@ -649,10 +668,10 @@ public static class PlanningEndpoints
     {
         await PeopleScope.DemandWorkload(db, access.Actor);
         var rows = await EntryRows(query, access, db, store, clock);
-        var data = rows.Select(e => new { e.PersonName, e.OwnerName, e.OwnerKind, e.Label,
-            SourceCategory = Text.Get($"planning.source.{e.SourceCategory}"), e.ProjectNumber, e.DisciplineName,
-            e.HoursPerWeek, e.StartWeek, e.EndWeek, Confidence = Text.Get($"planning.confidence.{e.Confidence}"),
-            Visibility = VisibilityLabel(e), e.LastValidatedAt, e.Stale, Warnings = e.Warnings.Select(w => Text.Get($"planning.warning.{w}")).ToArray() });
+        var data = rows.Select(e => new EntryExportRow(e.PersonName, e.OwnerName, e.OwnerKind, e.Label,
+            Text.Get($"planning.source.{e.SourceCategory}"), e.ProjectNumber, e.DisciplineName,
+            e.HoursPerWeek, e.StartWeek, e.EndWeek, Text.Get($"planning.confidence.{e.Confidence}"),
+            VisibilityLabel(e), e.LastValidatedAt, e.Stale, e.Warnings.Select(w => Text.Get($"planning.warning.{w}")).ToArray()));
         Col[] cols = [new("personName", Text.Get("common.person")), new("ownerName", Text.Get("col.owner")), new("ownerKind", Text.Get("planning.owner_kind")),
             new("label", Text.Get("planning.label")), new("sourceCategory", Text.Get("planning.source")), new("projectNumber", Text.Get("common.project")),
             new("disciplineName", Text.Get("common.discipline")), new("hoursPerWeek", Text.Get("planning.hours_per_week"), "number"),

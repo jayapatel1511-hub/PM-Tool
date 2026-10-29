@@ -479,6 +479,139 @@
       "string"
     ]
   },
+  "DELETE /api/v1/planning/entries/{id} 400": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.errors": [
+      "object"
+    ],
+    "$.errors.reason": [
+      "array"
+    ],
+    "$.errors.reason[]": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "DELETE /api/v1/planning/entries/{id} 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "DELETE /api/v1/planning/entries/{id} 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "DELETE /api/v1/planning/entries/{id} 409": {
+    "$": [
+      "object"
+    ],
+    "$.changedAt": [
+      "string"
+    ],
+    "$.changedBy": [
+      "string"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.currentRowVersion": [
+      "number"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "DELETE /api/v1/planning/entries/{id} 428": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "DELETE /api/v1/projects/{id}/disciplines/{pdId} 403": {
     "$": [
       "object"
@@ -11517,6 +11650,42 @@
     "$.components.schemas.AllocationRow.type": [
       "string"
     ],
+    "$.components.schemas.AllocationWeek": [
+      "object"
+    ],
+    "$.components.schemas.AllocationWeek.properties": [
+      "object"
+    ],
+    "$.components.schemas.AllocationWeek.properties.hours": [
+      "object"
+    ],
+    "$.components.schemas.AllocationWeek.properties.hours.format": [
+      "string"
+    ],
+    "$.components.schemas.AllocationWeek.properties.hours.pattern": [
+      "string"
+    ],
+    "$.components.schemas.AllocationWeek.properties.hours.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationWeek.properties.week": [
+      "object"
+    ],
+    "$.components.schemas.AllocationWeek.properties.week.format": [
+      "string"
+    ],
+    "$.components.schemas.AllocationWeek.properties.week.type": [
+      "string"
+    ],
+    "$.components.schemas.AllocationWeek.required": [
+      "array"
+    ],
+    "$.components.schemas.AllocationWeek.required[]": [
+      "string"
+    ],
+    "$.components.schemas.AllocationWeek.type": [
+      "string"
+    ],
     "$.components.schemas.Allowed": [
       "object"
     ],
@@ -12328,6 +12497,75 @@
       "string"
     ],
     "$.components.schemas.AppliedEntry.type": [
+      "string"
+    ],
+    "$.components.schemas.ApprovedRow": [
+      "object"
+    ],
+    "$.components.schemas.ApprovedRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.ApprovedRow.properties.allocationId": [
+      "object"
+    ],
+    "$.components.schemas.ApprovedRow.properties.allocationId.format": [
+      "string"
+    ],
+    "$.components.schemas.ApprovedRow.properties.allocationId.type": [
+      "string"
+    ],
+    "$.components.schemas.ApprovedRow.properties.approvalStatus": [
+      "object"
+    ],
+    "$.components.schemas.ApprovedRow.properties.approvalStatus.type": [
+      "string"
+    ],
+    "$.components.schemas.ApprovedRow.properties.canOpen": [
+      "object"
+    ],
+    "$.components.schemas.ApprovedRow.properties.canOpen.type": [
+      "string"
+    ],
+    "$.components.schemas.ApprovedRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.ApprovedRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.ApprovedRow.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.ApprovedRow.properties.projectName": [
+      "object"
+    ],
+    "$.components.schemas.ApprovedRow.properties.projectName.type": [
+      "string"
+    ],
+    "$.components.schemas.ApprovedRow.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.ApprovedRow.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.ApprovedRow.properties.weeks": [
+      "object"
+    ],
+    "$.components.schemas.ApprovedRow.properties.weeks.items": [
+      "object"
+    ],
+    "$.components.schemas.ApprovedRow.properties.weeks.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ApprovedRow.properties.weeks.type": [
+      "string"
+    ],
+    "$.components.schemas.ApprovedRow.required": [
+      "array"
+    ],
+    "$.components.schemas.ApprovedRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ApprovedRow.type": [
       "string"
     ],
     "$.components.schemas.AssessmentBody": [
@@ -14781,30 +15019,6 @@
     "$.components.schemas.BasisSuggestionBody.type": [
       "string"
     ],
-    "$.components.schemas.BasisSuggestionCreated": [
-      "object"
-    ],
-    "$.components.schemas.BasisSuggestionCreated.properties": [
-      "object"
-    ],
-    "$.components.schemas.BasisSuggestionCreated.properties.id": [
-      "object"
-    ],
-    "$.components.schemas.BasisSuggestionCreated.properties.id.format": [
-      "string"
-    ],
-    "$.components.schemas.BasisSuggestionCreated.properties.id.type": [
-      "string"
-    ],
-    "$.components.schemas.BasisSuggestionCreated.required": [
-      "array"
-    ],
-    "$.components.schemas.BasisSuggestionCreated.required[]": [
-      "string"
-    ],
-    "$.components.schemas.BasisSuggestionCreated.type": [
-      "string"
-    ],
     "$.components.schemas.BasisUseRow": [
       "object"
     ],
@@ -16096,6 +16310,711 @@
       "string"
     ],
     "$.components.schemas.CapacitySet.type": [
+      "string"
+    ],
+    "$.components.schemas.CellApproved": [
+      "object"
+    ],
+    "$.components.schemas.CellApproved.properties": [
+      "object"
+    ],
+    "$.components.schemas.CellApproved.properties.allocationId": [
+      "object"
+    ],
+    "$.components.schemas.CellApproved.properties.allocationId.format": [
+      "string"
+    ],
+    "$.components.schemas.CellApproved.properties.allocationId.type": [
+      "string"
+    ],
+    "$.components.schemas.CellApproved.properties.approvalStatus": [
+      "object"
+    ],
+    "$.components.schemas.CellApproved.properties.approvalStatus.type": [
+      "string"
+    ],
+    "$.components.schemas.CellApproved.properties.canOpen": [
+      "object"
+    ],
+    "$.components.schemas.CellApproved.properties.canOpen.type": [
+      "string"
+    ],
+    "$.components.schemas.CellApproved.properties.hours": [
+      "object"
+    ],
+    "$.components.schemas.CellApproved.properties.hours.format": [
+      "string"
+    ],
+    "$.components.schemas.CellApproved.properties.hours.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CellApproved.properties.hours.type": [
+      "string"
+    ],
+    "$.components.schemas.CellApproved.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.CellApproved.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.CellApproved.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.CellApproved.properties.projectName": [
+      "object"
+    ],
+    "$.components.schemas.CellApproved.properties.projectName.type": [
+      "string"
+    ],
+    "$.components.schemas.CellApproved.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.CellApproved.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.CellApproved.required": [
+      "array"
+    ],
+    "$.components.schemas.CellApproved.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CellApproved.type": [
+      "string"
+    ],
+    "$.components.schemas.CellBands": [
+      "object"
+    ],
+    "$.components.schemas.CellBands.properties": [
+      "object"
+    ],
+    "$.components.schemas.CellBands.properties.confirmed": [
+      "object"
+    ],
+    "$.components.schemas.CellBands.properties.confirmed.format": [
+      "string"
+    ],
+    "$.components.schemas.CellBands.properties.confirmed.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CellBands.properties.confirmed.type": [
+      "string"
+    ],
+    "$.components.schemas.CellBands.properties.expected": [
+      "object"
+    ],
+    "$.components.schemas.CellBands.properties.expected.format": [
+      "string"
+    ],
+    "$.components.schemas.CellBands.properties.expected.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CellBands.properties.expected.type": [
+      "string"
+    ],
+    "$.components.schemas.CellBands.properties.possible": [
+      "object"
+    ],
+    "$.components.schemas.CellBands.properties.possible.format": [
+      "string"
+    ],
+    "$.components.schemas.CellBands.properties.possible.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CellBands.properties.possible.type": [
+      "string"
+    ],
+    "$.components.schemas.CellBands.required": [
+      "array"
+    ],
+    "$.components.schemas.CellBands.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CellBands.type": [
+      "string"
+    ],
+    "$.components.schemas.CellCapacity": [
+      "object"
+    ],
+    "$.components.schemas.CellCapacity.properties": [
+      "object"
+    ],
+    "$.components.schemas.CellCapacity.properties.additionalAvailability": [
+      "object"
+    ],
+    "$.components.schemas.CellCapacity.properties.additionalAvailability.format": [
+      "string"
+    ],
+    "$.components.schemas.CellCapacity.properties.additionalAvailability.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CellCapacity.properties.additionalAvailability.type": [
+      "string"
+    ],
+    "$.components.schemas.CellCapacity.properties.capacity": [
+      "object"
+    ],
+    "$.components.schemas.CellCapacity.properties.capacity.format": [
+      "string"
+    ],
+    "$.components.schemas.CellCapacity.properties.capacity.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CellCapacity.properties.capacity.type": [
+      "string"
+    ],
+    "$.components.schemas.CellCapacity.properties.capacityOverride": [
+      "object"
+    ],
+    "$.components.schemas.CellCapacity.properties.capacityOverride.type": [
+      "string"
+    ],
+    "$.components.schemas.CellCapacity.properties.days": [
+      "object"
+    ],
+    "$.components.schemas.CellCapacity.properties.days.items": [
+      "object"
+    ],
+    "$.components.schemas.CellCapacity.properties.days.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CellCapacity.properties.days.type": [
+      "string"
+    ],
+    "$.components.schemas.CellCapacity.properties.timeAway": [
+      "object"
+    ],
+    "$.components.schemas.CellCapacity.properties.timeAway.format": [
+      "string"
+    ],
+    "$.components.schemas.CellCapacity.properties.timeAway.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CellCapacity.properties.timeAway.type": [
+      "string"
+    ],
+    "$.components.schemas.CellCapacity.properties.weeklyCapacity": [
+      "object"
+    ],
+    "$.components.schemas.CellCapacity.properties.weeklyCapacity.format": [
+      "string"
+    ],
+    "$.components.schemas.CellCapacity.properties.weeklyCapacity.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CellCapacity.properties.weeklyCapacity.type": [
+      "string"
+    ],
+    "$.components.schemas.CellCapacity.properties.workingDays": [
+      "object"
+    ],
+    "$.components.schemas.CellCapacity.properties.workingDays.format": [
+      "string"
+    ],
+    "$.components.schemas.CellCapacity.properties.workingDays.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CellCapacity.properties.workingDays.type": [
+      "string"
+    ],
+    "$.components.schemas.CellCapacity.required": [
+      "array"
+    ],
+    "$.components.schemas.CellCapacity.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CellCapacity.type": [
+      "string"
+    ],
+    "$.components.schemas.CellDetail": [
+      "object"
+    ],
+    "$.components.schemas.CellDetail.properties": [
+      "object"
+    ],
+    "$.components.schemas.CellDetail.properties.approvedAllocations": [
+      "object"
+    ],
+    "$.components.schemas.CellDetail.properties.approvedAllocations.items": [
+      "object"
+    ],
+    "$.components.schemas.CellDetail.properties.approvedAllocations.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CellDetail.properties.approvedAllocations.type": [
+      "string"
+    ],
+    "$.components.schemas.CellDetail.properties.bands": [
+      "object"
+    ],
+    "$.components.schemas.CellDetail.properties.bands.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CellDetail.properties.capacity": [
+      "object"
+    ],
+    "$.components.schemas.CellDetail.properties.capacity.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CellDetail.properties.entries": [
+      "object"
+    ],
+    "$.components.schemas.CellDetail.properties.entries.items": [
+      "object"
+    ],
+    "$.components.schemas.CellDetail.properties.entries.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CellDetail.properties.entries.type": [
+      "string"
+    ],
+    "$.components.schemas.CellDetail.properties.indicators": [
+      "object"
+    ],
+    "$.components.schemas.CellDetail.properties.indicators.items": [
+      "object"
+    ],
+    "$.components.schemas.CellDetail.properties.indicators.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CellDetail.properties.indicators.type": [
+      "string"
+    ],
+    "$.components.schemas.CellDetail.properties.partialView": [
+      "object"
+    ],
+    "$.components.schemas.CellDetail.properties.partialView.type": [
+      "string"
+    ],
+    "$.components.schemas.CellDetail.properties.personId": [
+      "object"
+    ],
+    "$.components.schemas.CellDetail.properties.personId.format": [
+      "string"
+    ],
+    "$.components.schemas.CellDetail.properties.personId.type": [
+      "string"
+    ],
+    "$.components.schemas.CellDetail.properties.personName": [
+      "object"
+    ],
+    "$.components.schemas.CellDetail.properties.personName.type": [
+      "string"
+    ],
+    "$.components.schemas.CellDetail.properties.projectContexts": [
+      "object"
+    ],
+    "$.components.schemas.CellDetail.properties.projectContexts.items": [
+      "object"
+    ],
+    "$.components.schemas.CellDetail.properties.projectContexts.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CellDetail.properties.projectContexts.type": [
+      "array"
+    ],
+    "$.components.schemas.CellDetail.properties.projectContexts.type[]": [
+      "string"
+    ],
+    "$.components.schemas.CellDetail.properties.remaining": [
+      "object"
+    ],
+    "$.components.schemas.CellDetail.properties.remaining.format": [
+      "string"
+    ],
+    "$.components.schemas.CellDetail.properties.remaining.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CellDetail.properties.remaining.type": [
+      "string"
+    ],
+    "$.components.schemas.CellDetail.properties.taskEstimates": [
+      "object"
+    ],
+    "$.components.schemas.CellDetail.properties.taskEstimates.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CellDetail.properties.week": [
+      "object"
+    ],
+    "$.components.schemas.CellDetail.properties.week.format": [
+      "string"
+    ],
+    "$.components.schemas.CellDetail.properties.week.type": [
+      "string"
+    ],
+    "$.components.schemas.CellDetail.required": [
+      "array"
+    ],
+    "$.components.schemas.CellDetail.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CellDetail.type": [
+      "string"
+    ],
+    "$.components.schemas.CellIndicator": [
+      "object"
+    ],
+    "$.components.schemas.CellIndicator.properties": [
+      "object"
+    ],
+    "$.components.schemas.CellIndicator.properties.active": [
+      "object"
+    ],
+    "$.components.schemas.CellIndicator.properties.active.type": [
+      "string"
+    ],
+    "$.components.schemas.CellIndicator.properties.code": [
+      "object"
+    ],
+    "$.components.schemas.CellIndicator.properties.code.type": [
+      "string"
+    ],
+    "$.components.schemas.CellIndicator.properties.evaluated": [
+      "object"
+    ],
+    "$.components.schemas.CellIndicator.properties.evaluated.type": [
+      "string"
+    ],
+    "$.components.schemas.CellIndicator.properties.explanation": [
+      "object"
+    ],
+    "$.components.schemas.CellIndicator.properties.explanation.type": [
+      "string"
+    ],
+    "$.components.schemas.CellIndicator.properties.rule": [
+      "object"
+    ],
+    "$.components.schemas.CellIndicator.properties.rule.type": [
+      "string"
+    ],
+    "$.components.schemas.CellIndicator.properties.threshold": [
+      "object"
+    ],
+    "$.components.schemas.CellIndicator.properties.threshold.format": [
+      "string"
+    ],
+    "$.components.schemas.CellIndicator.properties.threshold.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CellIndicator.properties.threshold.type": [
+      "string"
+    ],
+    "$.components.schemas.CellIndicator.required": [
+      "array"
+    ],
+    "$.components.schemas.CellIndicator.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CellIndicator.type": [
+      "string"
+    ],
+    "$.components.schemas.CellProjectContext": [
+      "object"
+    ],
+    "$.components.schemas.CellProjectContext.properties": [
+      "object"
+    ],
+    "$.components.schemas.CellProjectContext.properties.plannedHours": [
+      "object"
+    ],
+    "$.components.schemas.CellProjectContext.properties.plannedHours.format": [
+      "string"
+    ],
+    "$.components.schemas.CellProjectContext.properties.plannedHours.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CellProjectContext.properties.plannedHours.type": [
+      "string"
+    ],
+    "$.components.schemas.CellProjectContext.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.CellProjectContext.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.CellProjectContext.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.CellProjectContext.properties.projectName": [
+      "object"
+    ],
+    "$.components.schemas.CellProjectContext.properties.projectName.type": [
+      "string"
+    ],
+    "$.components.schemas.CellProjectContext.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.CellProjectContext.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.CellProjectContext.properties.taskEstimates": [
+      "object"
+    ],
+    "$.components.schemas.CellProjectContext.properties.taskEstimates.format": [
+      "string"
+    ],
+    "$.components.schemas.CellProjectContext.properties.taskEstimates.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CellProjectContext.properties.taskEstimates.type": [
+      "string"
+    ],
+    "$.components.schemas.CellProjectContext.properties.unestimatedTasks": [
+      "object"
+    ],
+    "$.components.schemas.CellProjectContext.properties.unestimatedTasks.format": [
+      "string"
+    ],
+    "$.components.schemas.CellProjectContext.properties.unestimatedTasks.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CellProjectContext.properties.unestimatedTasks.type": [
+      "string"
+    ],
+    "$.components.schemas.CellProjectContext.required": [
+      "array"
+    ],
+    "$.components.schemas.CellProjectContext.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CellProjectContext.type": [
+      "string"
+    ],
+    "$.components.schemas.CellRow": [
+      "object"
+    ],
+    "$.components.schemas.CellRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.CellRow.properties.additionalAvailability": [
+      "object"
+    ],
+    "$.components.schemas.CellRow.properties.additionalAvailability.format": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.additionalAvailability.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.additionalAvailability.type": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.approved": [
+      "object"
+    ],
+    "$.components.schemas.CellRow.properties.approved.format": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.approved.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.approved.type": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.capacity": [
+      "object"
+    ],
+    "$.components.schemas.CellRow.properties.capacity.format": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.capacity.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.capacity.type": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.confirmed": [
+      "object"
+    ],
+    "$.components.schemas.CellRow.properties.confirmed.format": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.confirmed.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.confirmed.type": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.expected": [
+      "object"
+    ],
+    "$.components.schemas.CellRow.properties.expected.format": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.expected.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.expected.type": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.holidayHours": [
+      "object"
+    ],
+    "$.components.schemas.CellRow.properties.holidayHours.format": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.holidayHours.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.holidayHours.type": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.overPlanned": [
+      "object"
+    ],
+    "$.components.schemas.CellRow.properties.overPlanned.type": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.ownDraftHours": [
+      "object"
+    ],
+    "$.components.schemas.CellRow.properties.ownDraftHours.format": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.ownDraftHours.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.ownDraftHours.type": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.possible": [
+      "object"
+    ],
+    "$.components.schemas.CellRow.properties.possible.format": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.possible.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.possible.type": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.provisional": [
+      "object"
+    ],
+    "$.components.schemas.CellRow.properties.provisional.type": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.remaining": [
+      "object"
+    ],
+    "$.components.schemas.CellRow.properties.remaining.format": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.remaining.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.remaining.type": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.staleEntries": [
+      "object"
+    ],
+    "$.components.schemas.CellRow.properties.staleEntries.format": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.staleEntries.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.staleEntries.type": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.taskEstimates": [
+      "object"
+    ],
+    "$.components.schemas.CellRow.properties.taskEstimates.format": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.taskEstimates.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.taskEstimates.type": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.timeAway": [
+      "object"
+    ],
+    "$.components.schemas.CellRow.properties.timeAway.format": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.timeAway.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.timeAway.type": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.underPlanned": [
+      "object"
+    ],
+    "$.components.schemas.CellRow.properties.underPlanned.type": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.unestimatedTasks": [
+      "object"
+    ],
+    "$.components.schemas.CellRow.properties.unestimatedTasks.format": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.unestimatedTasks.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.unestimatedTasks.type": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.week": [
+      "object"
+    ],
+    "$.components.schemas.CellRow.properties.week.format": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.properties.week.type": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.required": [
+      "array"
+    ],
+    "$.components.schemas.CellRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CellRow.type": [
+      "string"
+    ],
+    "$.components.schemas.CellTaskEstimates": [
+      "object"
+    ],
+    "$.components.schemas.CellTaskEstimates.properties": [
+      "object"
+    ],
+    "$.components.schemas.CellTaskEstimates.properties.hours": [
+      "object"
+    ],
+    "$.components.schemas.CellTaskEstimates.properties.hours.format": [
+      "string"
+    ],
+    "$.components.schemas.CellTaskEstimates.properties.hours.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CellTaskEstimates.properties.hours.type": [
+      "string"
+    ],
+    "$.components.schemas.CellTaskEstimates.properties.unestimatedTasks": [
+      "object"
+    ],
+    "$.components.schemas.CellTaskEstimates.properties.unestimatedTasks.format": [
+      "string"
+    ],
+    "$.components.schemas.CellTaskEstimates.properties.unestimatedTasks.pattern": [
+      "string"
+    ],
+    "$.components.schemas.CellTaskEstimates.properties.unestimatedTasks.type": [
+      "string"
+    ],
+    "$.components.schemas.CellTaskEstimates.required": [
+      "array"
+    ],
+    "$.components.schemas.CellTaskEstimates.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CellTaskEstimates.type": [
       "string"
     ],
     "$.components.schemas.ChainStep": [
@@ -22626,6 +23545,105 @@
     "$.components.schemas.DayInput.type": [
       "string"
     ],
+    "$.components.schemas.DayRow": [
+      "object"
+    ],
+    "$.components.schemas.DayRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.DayRow.properties.additional": [
+      "object"
+    ],
+    "$.components.schemas.DayRow.properties.additional.format": [
+      "string"
+    ],
+    "$.components.schemas.DayRow.properties.additional.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DayRow.properties.additional.type": [
+      "string"
+    ],
+    "$.components.schemas.DayRow.properties.available": [
+      "object"
+    ],
+    "$.components.schemas.DayRow.properties.available.format": [
+      "string"
+    ],
+    "$.components.schemas.DayRow.properties.available.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DayRow.properties.available.type": [
+      "string"
+    ],
+    "$.components.schemas.DayRow.properties.category": [
+      "object"
+    ],
+    "$.components.schemas.DayRow.properties.category.type": [
+      "array"
+    ],
+    "$.components.schemas.DayRow.properties.category.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DayRow.properties.date": [
+      "object"
+    ],
+    "$.components.schemas.DayRow.properties.date.format": [
+      "string"
+    ],
+    "$.components.schemas.DayRow.properties.date.type": [
+      "string"
+    ],
+    "$.components.schemas.DayRow.properties.holiday": [
+      "object"
+    ],
+    "$.components.schemas.DayRow.properties.holiday.format": [
+      "string"
+    ],
+    "$.components.schemas.DayRow.properties.holiday.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DayRow.properties.holiday.type": [
+      "string"
+    ],
+    "$.components.schemas.DayRow.properties.normal": [
+      "object"
+    ],
+    "$.components.schemas.DayRow.properties.normal.format": [
+      "string"
+    ],
+    "$.components.schemas.DayRow.properties.normal.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DayRow.properties.normal.type": [
+      "string"
+    ],
+    "$.components.schemas.DayRow.properties.provisional": [
+      "object"
+    ],
+    "$.components.schemas.DayRow.properties.provisional.type": [
+      "string"
+    ],
+    "$.components.schemas.DayRow.properties.timeAway": [
+      "object"
+    ],
+    "$.components.schemas.DayRow.properties.timeAway.format": [
+      "string"
+    ],
+    "$.components.schemas.DayRow.properties.timeAway.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DayRow.properties.timeAway.type": [
+      "string"
+    ],
+    "$.components.schemas.DayRow.required": [
+      "array"
+    ],
+    "$.components.schemas.DayRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DayRow.type": [
+      "string"
+    ],
     "$.components.schemas.DecisionBody": [
       "object"
     ],
@@ -28092,6 +29110,288 @@
     "$.components.schemas.EntryBody.type": [
       "string"
     ],
+    "$.components.schemas.EntryRow": [
+      "object"
+    ],
+    "$.components.schemas.EntryRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.EntryRow.properties.canChangeVisibility": [
+      "object"
+    ],
+    "$.components.schemas.EntryRow.properties.canChangeVisibility.type": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.canEdit": [
+      "object"
+    ],
+    "$.components.schemas.EntryRow.properties.canEdit.type": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.confidence": [
+      "object"
+    ],
+    "$.components.schemas.EntryRow.properties.confidence.type": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.correctionOnly": [
+      "object"
+    ],
+    "$.components.schemas.EntryRow.properties.correctionOnly.type": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.countedHours": [
+      "object"
+    ],
+    "$.components.schemas.EntryRow.properties.countedHours.format": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.countedHours.pattern": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.countedHours.type": [
+      "array"
+    ],
+    "$.components.schemas.EntryRow.properties.countedHours.type[]": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.coveredHours": [
+      "object"
+    ],
+    "$.components.schemas.EntryRow.properties.coveredHours.format": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.coveredHours.pattern": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.coveredHours.type": [
+      "array"
+    ],
+    "$.components.schemas.EntryRow.properties.coveredHours.type[]": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.disciplineName": [
+      "object"
+    ],
+    "$.components.schemas.EntryRow.properties.disciplineName.type": [
+      "array"
+    ],
+    "$.components.schemas.EntryRow.properties.disciplineName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.endWeek": [
+      "object"
+    ],
+    "$.components.schemas.EntryRow.properties.endWeek.format": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.endWeek.type": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.hoursPerWeek": [
+      "object"
+    ],
+    "$.components.schemas.EntryRow.properties.hoursPerWeek.format": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.hoursPerWeek.pattern": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.hoursPerWeek.type": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.EntryRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.label": [
+      "object"
+    ],
+    "$.components.schemas.EntryRow.properties.label.type": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.lastValidatedAt": [
+      "object"
+    ],
+    "$.components.schemas.EntryRow.properties.lastValidatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.lastValidatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.matchesFilter": [
+      "object"
+    ],
+    "$.components.schemas.EntryRow.properties.matchesFilter.type": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.notes": [
+      "object"
+    ],
+    "$.components.schemas.EntryRow.properties.notes.type": [
+      "array"
+    ],
+    "$.components.schemas.EntryRow.properties.notes.type[]": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.ownerId": [
+      "object"
+    ],
+    "$.components.schemas.EntryRow.properties.ownerId.format": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.ownerId.type": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.ownerKind": [
+      "object"
+    ],
+    "$.components.schemas.EntryRow.properties.ownerKind.type": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.ownerName": [
+      "object"
+    ],
+    "$.components.schemas.EntryRow.properties.ownerName.type": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.personId": [
+      "object"
+    ],
+    "$.components.schemas.EntryRow.properties.personId.format": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.personId.type": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.personName": [
+      "object"
+    ],
+    "$.components.schemas.EntryRow.properties.personName.type": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.projectDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.EntryRow.properties.projectDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.projectDisciplineId.type": [
+      "array"
+    ],
+    "$.components.schemas.EntryRow.properties.projectDisciplineId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.EntryRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.projectId.type": [
+      "array"
+    ],
+    "$.components.schemas.EntryRow.properties.projectId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.projectName": [
+      "object"
+    ],
+    "$.components.schemas.EntryRow.properties.projectName.type": [
+      "array"
+    ],
+    "$.components.schemas.EntryRow.properties.projectName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.EntryRow.properties.projectNumber.type": [
+      "array"
+    ],
+    "$.components.schemas.EntryRow.properties.projectNumber.type[]": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.EntryRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.sourceCategory": [
+      "object"
+    ],
+    "$.components.schemas.EntryRow.properties.sourceCategory.type": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.stale": [
+      "object"
+    ],
+    "$.components.schemas.EntryRow.properties.stale.type": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.startWeek": [
+      "object"
+    ],
+    "$.components.schemas.EntryRow.properties.startWeek.format": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.startWeek.type": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.visibility": [
+      "object"
+    ],
+    "$.components.schemas.EntryRow.properties.visibility.type": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.warnings": [
+      "object"
+    ],
+    "$.components.schemas.EntryRow.properties.warnings.items": [
+      "object"
+    ],
+    "$.components.schemas.EntryRow.properties.warnings.items.type": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.warnings.type": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.weekHours": [
+      "object"
+    ],
+    "$.components.schemas.EntryRow.properties.weekHours.format": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.weekHours.pattern": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.properties.weekHours.type": [
+      "array"
+    ],
+    "$.components.schemas.EntryRow.properties.weekHours.type[]": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.required": [
+      "array"
+    ],
+    "$.components.schemas.EntryRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.EntryRow.type": [
+      "string"
+    ],
     "$.components.schemas.EntrySaved": [
       "object"
     ],
@@ -28786,6 +30086,99 @@
       "string"
     ],
     "$.components.schemas.FollowUpResponse.type": [
+      "string"
+    ],
+    "$.components.schemas.GridResult": [
+      "object"
+    ],
+    "$.components.schemas.GridResult.properties": [
+      "object"
+    ],
+    "$.components.schemas.GridResult.properties.currentWeek": [
+      "object"
+    ],
+    "$.components.schemas.GridResult.properties.currentWeek.format": [
+      "string"
+    ],
+    "$.components.schemas.GridResult.properties.currentWeek.type": [
+      "string"
+    ],
+    "$.components.schemas.GridResult.properties.draftAccess": [
+      "object"
+    ],
+    "$.components.schemas.GridResult.properties.draftAccess.type": [
+      "string"
+    ],
+    "$.components.schemas.GridResult.properties.evaluatedAt": [
+      "object"
+    ],
+    "$.components.schemas.GridResult.properties.evaluatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.GridResult.properties.evaluatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.GridResult.properties.partialView": [
+      "object"
+    ],
+    "$.components.schemas.GridResult.properties.partialView.type": [
+      "string"
+    ],
+    "$.components.schemas.GridResult.properties.people": [
+      "object"
+    ],
+    "$.components.schemas.GridResult.properties.people.items": [
+      "object"
+    ],
+    "$.components.schemas.GridResult.properties.people.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.GridResult.properties.people.type": [
+      "string"
+    ],
+    "$.components.schemas.GridResult.properties.settings": [
+      "object"
+    ],
+    "$.components.schemas.GridResult.properties.settings.$ref": [
+      "string"
+    ],
+    "$.components.schemas.GridResult.properties.unfilledRoles": [
+      "object"
+    ],
+    "$.components.schemas.GridResult.properties.unfilledRoles.items": [
+      "object"
+    ],
+    "$.components.schemas.GridResult.properties.unfilledRoles.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.GridResult.properties.unfilledRoles.type": [
+      "array"
+    ],
+    "$.components.schemas.GridResult.properties.unfilledRoles.type[]": [
+      "string"
+    ],
+    "$.components.schemas.GridResult.properties.weeks": [
+      "object"
+    ],
+    "$.components.schemas.GridResult.properties.weeks.items": [
+      "object"
+    ],
+    "$.components.schemas.GridResult.properties.weeks.items.format": [
+      "string"
+    ],
+    "$.components.schemas.GridResult.properties.weeks.items.type": [
+      "string"
+    ],
+    "$.components.schemas.GridResult.properties.weeks.type": [
+      "string"
+    ],
+    "$.components.schemas.GridResult.required": [
+      "array"
+    ],
+    "$.components.schemas.GridResult.required[]": [
+      "string"
+    ],
+    "$.components.schemas.GridResult.type": [
       "string"
     ],
     "$.components.schemas.Group": [
@@ -38214,57 +39607,6 @@
     "$.components.schemas.Overview.type": [
       "string"
     ],
-    "$.components.schemas.PackAdded": [
-      "object"
-    ],
-    "$.components.schemas.PackAdded.properties": [
-      "object"
-    ],
-    "$.components.schemas.PackAdded.properties.deliverables": [
-      "object"
-    ],
-    "$.components.schemas.PackAdded.properties.deliverables.format": [
-      "string"
-    ],
-    "$.components.schemas.PackAdded.properties.deliverables.pattern": [
-      "string"
-    ],
-    "$.components.schemas.PackAdded.properties.deliverables.type": [
-      "string"
-    ],
-    "$.components.schemas.PackAdded.properties.dependencies": [
-      "object"
-    ],
-    "$.components.schemas.PackAdded.properties.dependencies.format": [
-      "string"
-    ],
-    "$.components.schemas.PackAdded.properties.dependencies.pattern": [
-      "string"
-    ],
-    "$.components.schemas.PackAdded.properties.dependencies.type": [
-      "string"
-    ],
-    "$.components.schemas.PackAdded.properties.tasks": [
-      "object"
-    ],
-    "$.components.schemas.PackAdded.properties.tasks.format": [
-      "string"
-    ],
-    "$.components.schemas.PackAdded.properties.tasks.pattern": [
-      "string"
-    ],
-    "$.components.schemas.PackAdded.properties.tasks.type": [
-      "string"
-    ],
-    "$.components.schemas.PackAdded.required": [
-      "array"
-    ],
-    "$.components.schemas.PackAdded.required[]": [
-      "string"
-    ],
-    "$.components.schemas.PackAdded.type": [
-      "string"
-    ],
     "$.components.schemas.PackBody": [
       "object"
     ],
@@ -38329,228 +39671,6 @@
       "string"
     ],
     "$.components.schemas.PackBody.type": [
-      "string"
-    ],
-    "$.components.schemas.PackDiscipline": [
-      "object"
-    ],
-    "$.components.schemas.PackDiscipline.properties": [
-      "object"
-    ],
-    "$.components.schemas.PackDiscipline.properties.deliverables": [
-      "object"
-    ],
-    "$.components.schemas.PackDiscipline.properties.deliverables.format": [
-      "string"
-    ],
-    "$.components.schemas.PackDiscipline.properties.deliverables.pattern": [
-      "string"
-    ],
-    "$.components.schemas.PackDiscipline.properties.deliverables.type": [
-      "string"
-    ],
-    "$.components.schemas.PackDiscipline.properties.disciplineId": [
-      "object"
-    ],
-    "$.components.schemas.PackDiscipline.properties.disciplineId.format": [
-      "string"
-    ],
-    "$.components.schemas.PackDiscipline.properties.disciplineId.type": [
-      "string"
-    ],
-    "$.components.schemas.PackDiscipline.properties.inProject": [
-      "object"
-    ],
-    "$.components.schemas.PackDiscipline.properties.inProject.type": [
-      "string"
-    ],
-    "$.components.schemas.PackDiscipline.properties.mapping": [
-      "object"
-    ],
-    "$.components.schemas.PackDiscipline.properties.mapping.items": [
-      "object"
-    ],
-    "$.components.schemas.PackDiscipline.properties.mapping.items.$ref": [
-      "string"
-    ],
-    "$.components.schemas.PackDiscipline.properties.mapping.type": [
-      "string"
-    ],
-    "$.components.schemas.PackDiscipline.properties.tasks": [
-      "object"
-    ],
-    "$.components.schemas.PackDiscipline.properties.tasks.format": [
-      "string"
-    ],
-    "$.components.schemas.PackDiscipline.properties.tasks.pattern": [
-      "string"
-    ],
-    "$.components.schemas.PackDiscipline.properties.tasks.type": [
-      "string"
-    ],
-    "$.components.schemas.PackDiscipline.required": [
-      "array"
-    ],
-    "$.components.schemas.PackDiscipline.required[]": [
-      "string"
-    ],
-    "$.components.schemas.PackDiscipline.type": [
-      "string"
-    ],
-    "$.components.schemas.PackMilestoneMap": [
-      "object"
-    ],
-    "$.components.schemas.PackMilestoneMap.properties": [
-      "object"
-    ],
-    "$.components.schemas.PackMilestoneMap.properties.name": [
-      "object"
-    ],
-    "$.components.schemas.PackMilestoneMap.properties.name.type": [
-      "string"
-    ],
-    "$.components.schemas.PackMilestoneMap.properties.projectMilestoneId": [
-      "object"
-    ],
-    "$.components.schemas.PackMilestoneMap.properties.projectMilestoneId.format": [
-      "string"
-    ],
-    "$.components.schemas.PackMilestoneMap.properties.projectMilestoneId.type": [
-      "array"
-    ],
-    "$.components.schemas.PackMilestoneMap.properties.projectMilestoneId.type[]": [
-      "string"
-    ],
-    "$.components.schemas.PackMilestoneMap.properties.templateMilestoneId": [
-      "object"
-    ],
-    "$.components.schemas.PackMilestoneMap.properties.templateMilestoneId.format": [
-      "string"
-    ],
-    "$.components.schemas.PackMilestoneMap.properties.templateMilestoneId.type": [
-      "string"
-    ],
-    "$.components.schemas.PackMilestoneMap.required": [
-      "array"
-    ],
-    "$.components.schemas.PackMilestoneMap.required[]": [
-      "string"
-    ],
-    "$.components.schemas.PackMilestoneMap.type": [
-      "string"
-    ],
-    "$.components.schemas.PackProjectMilestone": [
-      "object"
-    ],
-    "$.components.schemas.PackProjectMilestone.properties": [
-      "object"
-    ],
-    "$.components.schemas.PackProjectMilestone.properties.date": [
-      "object"
-    ],
-    "$.components.schemas.PackProjectMilestone.properties.date.format": [
-      "string"
-    ],
-    "$.components.schemas.PackProjectMilestone.properties.date.type": [
-      "array"
-    ],
-    "$.components.schemas.PackProjectMilestone.properties.date.type[]": [
-      "string"
-    ],
-    "$.components.schemas.PackProjectMilestone.properties.id": [
-      "object"
-    ],
-    "$.components.schemas.PackProjectMilestone.properties.id.format": [
-      "string"
-    ],
-    "$.components.schemas.PackProjectMilestone.properties.id.type": [
-      "string"
-    ],
-    "$.components.schemas.PackProjectMilestone.properties.key": [
-      "object"
-    ],
-    "$.components.schemas.PackProjectMilestone.properties.key.type": [
-      "string"
-    ],
-    "$.components.schemas.PackProjectMilestone.properties.name": [
-      "object"
-    ],
-    "$.components.schemas.PackProjectMilestone.properties.name.type": [
-      "string"
-    ],
-    "$.components.schemas.PackProjectMilestone.required": [
-      "array"
-    ],
-    "$.components.schemas.PackProjectMilestone.required[]": [
-      "string"
-    ],
-    "$.components.schemas.PackProjectMilestone.type": [
-      "string"
-    ],
-    "$.components.schemas.PackProposalRead": [
-      "object"
-    ],
-    "$.components.schemas.PackProposalRead.properties": [
-      "object"
-    ],
-    "$.components.schemas.PackProposalRead.properties.disciplines": [
-      "object"
-    ],
-    "$.components.schemas.PackProposalRead.properties.disciplines.items": [
-      "object"
-    ],
-    "$.components.schemas.PackProposalRead.properties.disciplines.items.$ref": [
-      "string"
-    ],
-    "$.components.schemas.PackProposalRead.properties.disciplines.type": [
-      "string"
-    ],
-    "$.components.schemas.PackProposalRead.properties.name": [
-      "object"
-    ],
-    "$.components.schemas.PackProposalRead.properties.name.type": [
-      "string"
-    ],
-    "$.components.schemas.PackProposalRead.properties.projectMilestones": [
-      "object"
-    ],
-    "$.components.schemas.PackProposalRead.properties.projectMilestones.items": [
-      "object"
-    ],
-    "$.components.schemas.PackProposalRead.properties.projectMilestones.items.$ref": [
-      "string"
-    ],
-    "$.components.schemas.PackProposalRead.properties.projectMilestones.type": [
-      "string"
-    ],
-    "$.components.schemas.PackProposalRead.properties.templateId": [
-      "object"
-    ],
-    "$.components.schemas.PackProposalRead.properties.templateId.format": [
-      "string"
-    ],
-    "$.components.schemas.PackProposalRead.properties.templateId.type": [
-      "string"
-    ],
-    "$.components.schemas.PackProposalRead.properties.version": [
-      "object"
-    ],
-    "$.components.schemas.PackProposalRead.properties.version.format": [
-      "string"
-    ],
-    "$.components.schemas.PackProposalRead.properties.version.pattern": [
-      "string"
-    ],
-    "$.components.schemas.PackProposalRead.properties.version.type": [
-      "string"
-    ],
-    "$.components.schemas.PackProposalRead.required": [
-      "array"
-    ],
-    "$.components.schemas.PackProposalRead.required[]": [
-      "string"
-    ],
-    "$.components.schemas.PackProposalRead.type": [
       "string"
     ],
     "$.components.schemas.PageOfActivityEntry": [
@@ -38926,6 +40046,81 @@
       "string"
     ],
     "$.components.schemas.PageOfDeletedItem.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfEntryRow": [
+      "object"
+    ],
+    "$.components.schemas.PageOfEntryRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.PageOfEntryRow.properties.filters": [
+      "object"
+    ],
+    "$.components.schemas.PageOfEntryRow.properties.items": [
+      "object"
+    ],
+    "$.components.schemas.PageOfEntryRow.properties.items.items": [
+      "object"
+    ],
+    "$.components.schemas.PageOfEntryRow.properties.items.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.PageOfEntryRow.properties.items.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfEntryRow.properties.page": [
+      "object"
+    ],
+    "$.components.schemas.PageOfEntryRow.properties.page.format": [
+      "string"
+    ],
+    "$.components.schemas.PageOfEntryRow.properties.page.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PageOfEntryRow.properties.page.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfEntryRow.properties.pageSize": [
+      "object"
+    ],
+    "$.components.schemas.PageOfEntryRow.properties.pageSize.format": [
+      "string"
+    ],
+    "$.components.schemas.PageOfEntryRow.properties.pageSize.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PageOfEntryRow.properties.pageSize.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfEntryRow.properties.sort": [
+      "object"
+    ],
+    "$.components.schemas.PageOfEntryRow.properties.sort.type": [
+      "array"
+    ],
+    "$.components.schemas.PageOfEntryRow.properties.sort.type[]": [
+      "string"
+    ],
+    "$.components.schemas.PageOfEntryRow.properties.totalCount": [
+      "object"
+    ],
+    "$.components.schemas.PageOfEntryRow.properties.totalCount.format": [
+      "string"
+    ],
+    "$.components.schemas.PageOfEntryRow.properties.totalCount.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PageOfEntryRow.properties.totalCount.type": [
+      "string"
+    ],
+    "$.components.schemas.PageOfEntryRow.required": [
+      "array"
+    ],
+    "$.components.schemas.PageOfEntryRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.PageOfEntryRow.type": [
       "string"
     ],
     "$.components.schemas.PageOfHandoffRow": [
@@ -39936,6 +41131,93 @@
     "$.components.schemas.PlannedTarget.type": [
       "string"
     ],
+    "$.components.schemas.PlannerSettings": [
+      "object"
+    ],
+    "$.components.schemas.PlannerSettings.properties": [
+      "object"
+    ],
+    "$.components.schemas.PlannerSettings.properties.horizonWeeks": [
+      "object"
+    ],
+    "$.components.schemas.PlannerSettings.properties.horizonWeeks.format": [
+      "string"
+    ],
+    "$.components.schemas.PlannerSettings.properties.horizonWeeks.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PlannerSettings.properties.horizonWeeks.type": [
+      "string"
+    ],
+    "$.components.schemas.PlannerSettings.properties.maxHoursPerWeek": [
+      "object"
+    ],
+    "$.components.schemas.PlannerSettings.properties.maxHoursPerWeek.format": [
+      "string"
+    ],
+    "$.components.schemas.PlannerSettings.properties.maxHoursPerWeek.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PlannerSettings.properties.maxHoursPerWeek.type": [
+      "string"
+    ],
+    "$.components.schemas.PlannerSettings.properties.overPct": [
+      "object"
+    ],
+    "$.components.schemas.PlannerSettings.properties.overPct.format": [
+      "string"
+    ],
+    "$.components.schemas.PlannerSettings.properties.overPct.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PlannerSettings.properties.overPct.type": [
+      "string"
+    ],
+    "$.components.schemas.PlannerSettings.properties.staleDays": [
+      "object"
+    ],
+    "$.components.schemas.PlannerSettings.properties.staleDays.format": [
+      "string"
+    ],
+    "$.components.schemas.PlannerSettings.properties.staleDays.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PlannerSettings.properties.staleDays.type": [
+      "string"
+    ],
+    "$.components.schemas.PlannerSettings.properties.underPct": [
+      "object"
+    ],
+    "$.components.schemas.PlannerSettings.properties.underPct.format": [
+      "string"
+    ],
+    "$.components.schemas.PlannerSettings.properties.underPct.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PlannerSettings.properties.underPct.type": [
+      "string"
+    ],
+    "$.components.schemas.PlannerSettings.properties.underWeeks": [
+      "object"
+    ],
+    "$.components.schemas.PlannerSettings.properties.underWeeks.format": [
+      "string"
+    ],
+    "$.components.schemas.PlannerSettings.properties.underWeeks.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PlannerSettings.properties.underWeeks.type": [
+      "string"
+    ],
+    "$.components.schemas.PlannerSettings.required": [
+      "array"
+    ],
+    "$.components.schemas.PlannerSettings.required[]": [
+      "string"
+    ],
+    "$.components.schemas.PlannerSettings.type": [
+      "string"
+    ],
     "$.components.schemas.PlanningCreateBody": [
       "object"
     ],
@@ -40090,6 +41372,198 @@
       "string"
     ],
     "$.components.schemas.PlanningDateVersionInput.type": [
+      "string"
+    ],
+    "$.components.schemas.PlanningPersonRow": [
+      "object"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.approvedAllocations": [
+      "object"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.approvedAllocations.items": [
+      "object"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.approvedAllocations.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.approvedAllocations.type": [
+      "string"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.canCreateManagerEntry": [
+      "object"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.canCreateManagerEntry.type": [
+      "string"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.canCreateSelfEntry": [
+      "object"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.canCreateSelfEntry.type": [
+      "string"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.canRecordTimeAway": [
+      "object"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.canRecordTimeAway.type": [
+      "string"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.cells": [
+      "object"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.cells.items": [
+      "object"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.cells.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.cells.type": [
+      "string"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.displayName": [
+      "object"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.displayName.type": [
+      "string"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.entries": [
+      "object"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.entries.items": [
+      "object"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.entries.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.entries.type": [
+      "string"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.homeDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.homeDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.homeDisciplineId.type": [
+      "array"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.homeDisciplineId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.indicators": [
+      "object"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.indicators.items": [
+      "object"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.indicators.items.type": [
+      "string"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.indicators.type": [
+      "string"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.jobTitle": [
+      "object"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.jobTitle.type": [
+      "array"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.jobTitle.type[]": [
+      "string"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.kept": [
+      "object"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.kept.type": [
+      "array"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.kept.type[]": [
+      "string"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.officeId": [
+      "object"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.officeId.format": [
+      "string"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.officeId.type": [
+      "array"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.officeId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.partial": [
+      "object"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.partial.type": [
+      "string"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.supervisorId": [
+      "object"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.supervisorId.format": [
+      "string"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.supervisorId.type": [
+      "array"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.supervisorId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.supervisorName": [
+      "object"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.supervisorName.type": [
+      "array"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.supervisorName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.taskContexts": [
+      "object"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.taskContexts.items": [
+      "object"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.taskContexts.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.taskContexts.type": [
+      "array"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.taskContexts.type[]": [
+      "string"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.weeklyCapacity": [
+      "object"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.weeklyCapacity.format": [
+      "string"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.weeklyCapacity.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PlanningPersonRow.properties.weeklyCapacity.type": [
+      "string"
+    ],
+    "$.components.schemas.PlanningPersonRow.required": [
+      "array"
+    ],
+    "$.components.schemas.PlanningPersonRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.PlanningPersonRow.type": [
       "string"
     ],
     "$.components.schemas.PlanningVersionBody": [
@@ -41308,6 +42782,102 @@
       "string"
     ],
     "$.components.schemas.ProjectImportImportRow.type": [
+      "string"
+    ],
+    "$.components.schemas.ProjectTaskContext": [
+      "object"
+    ],
+    "$.components.schemas.ProjectTaskContext.properties": [
+      "object"
+    ],
+    "$.components.schemas.ProjectTaskContext.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.ProjectTaskContext.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.ProjectTaskContext.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.ProjectTaskContext.properties.projectName": [
+      "object"
+    ],
+    "$.components.schemas.ProjectTaskContext.properties.projectName.type": [
+      "string"
+    ],
+    "$.components.schemas.ProjectTaskContext.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.ProjectTaskContext.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.ProjectTaskContext.properties.weeks": [
+      "object"
+    ],
+    "$.components.schemas.ProjectTaskContext.properties.weeks.items": [
+      "object"
+    ],
+    "$.components.schemas.ProjectTaskContext.properties.weeks.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ProjectTaskContext.properties.weeks.type": [
+      "string"
+    ],
+    "$.components.schemas.ProjectTaskContext.required": [
+      "array"
+    ],
+    "$.components.schemas.ProjectTaskContext.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ProjectTaskContext.type": [
+      "string"
+    ],
+    "$.components.schemas.ProjectTaskWeek": [
+      "object"
+    ],
+    "$.components.schemas.ProjectTaskWeek.properties": [
+      "object"
+    ],
+    "$.components.schemas.ProjectTaskWeek.properties.hours": [
+      "object"
+    ],
+    "$.components.schemas.ProjectTaskWeek.properties.hours.format": [
+      "string"
+    ],
+    "$.components.schemas.ProjectTaskWeek.properties.hours.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ProjectTaskWeek.properties.hours.type": [
+      "string"
+    ],
+    "$.components.schemas.ProjectTaskWeek.properties.unestimatedTasks": [
+      "object"
+    ],
+    "$.components.schemas.ProjectTaskWeek.properties.unestimatedTasks.format": [
+      "string"
+    ],
+    "$.components.schemas.ProjectTaskWeek.properties.unestimatedTasks.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ProjectTaskWeek.properties.unestimatedTasks.type": [
+      "string"
+    ],
+    "$.components.schemas.ProjectTaskWeek.properties.week": [
+      "object"
+    ],
+    "$.components.schemas.ProjectTaskWeek.properties.week.format": [
+      "string"
+    ],
+    "$.components.schemas.ProjectTaskWeek.properties.week.type": [
+      "string"
+    ],
+    "$.components.schemas.ProjectTaskWeek.required": [
+      "array"
+    ],
+    "$.components.schemas.ProjectTaskWeek.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ProjectTaskWeek.type": [
       "string"
     ],
     "$.components.schemas.ProjectTeamDiscipline": [
@@ -55713,786 +57283,6 @@
     "$.components.schemas.TaskTransitionBody.type": [
       "string"
     ],
-    "$.components.schemas.TemplateBasisRead": [
-      "object"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties": [
-      "object"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.declaredRevision": [
-      "object"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.declaredRevision.type": [
-      "array"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.declaredRevision.type[]": [
-      "string"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.disciplineId": [
-      "object"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.disciplineId.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.disciplineId.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.id": [
-      "object"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.id.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.id.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.kind": [
-      "object"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.kind.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.numericValue": [
-      "object"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.numericValue.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.numericValue.pattern": [
-      "string"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.numericValue.type": [
-      "array"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.numericValue.type[]": [
-      "string"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.scope": [
-      "object"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.scope.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.sourceSystem": [
-      "object"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.sourceSystem.type": [
-      "array"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.sourceSystem.type[]": [
-      "string"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.sourceUrl": [
-      "object"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.sourceUrl.type": [
-      "array"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.sourceUrl.type[]": [
-      "string"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.stableSourceId": [
-      "object"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.stableSourceId.type": [
-      "array"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.stableSourceId.type[]": [
-      "string"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.statement": [
-      "object"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.statement.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.title": [
-      "object"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.title.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.units": [
-      "object"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.units.type": [
-      "array"
-    ],
-    "$.components.schemas.TemplateBasisRead.properties.units.type[]": [
-      "string"
-    ],
-    "$.components.schemas.TemplateBasisRead.required": [
-      "array"
-    ],
-    "$.components.schemas.TemplateBasisRead.required[]": [
-      "string"
-    ],
-    "$.components.schemas.TemplateBasisRead.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateCreated": [
-      "object"
-    ],
-    "$.components.schemas.TemplateCreated.properties": [
-      "object"
-    ],
-    "$.components.schemas.TemplateCreated.properties.id": [
-      "object"
-    ],
-    "$.components.schemas.TemplateCreated.properties.id.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplateCreated.properties.id.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateCreated.properties.rowVersion": [
-      "object"
-    ],
-    "$.components.schemas.TemplateCreated.properties.rowVersion.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplateCreated.properties.rowVersion.pattern": [
-      "string"
-    ],
-    "$.components.schemas.TemplateCreated.properties.rowVersion.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateCreated.required": [
-      "array"
-    ],
-    "$.components.schemas.TemplateCreated.required[]": [
-      "string"
-    ],
-    "$.components.schemas.TemplateCreated.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateDisciplineRead": [
-      "object"
-    ],
-    "$.components.schemas.TemplateDisciplineRead.properties": [
-      "object"
-    ],
-    "$.components.schemas.TemplateDisciplineRead.properties.disciplineId": [
-      "object"
-    ],
-    "$.components.schemas.TemplateDisciplineRead.properties.disciplineId.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplateDisciplineRead.properties.disciplineId.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateDisciplineRead.properties.isDefaultIncluded": [
-      "object"
-    ],
-    "$.components.schemas.TemplateDisciplineRead.properties.isDefaultIncluded.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateDisciplineRead.properties.templateDisciplineId": [
-      "object"
-    ],
-    "$.components.schemas.TemplateDisciplineRead.properties.templateDisciplineId.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplateDisciplineRead.properties.templateDisciplineId.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateDisciplineRead.required": [
-      "array"
-    ],
-    "$.components.schemas.TemplateDisciplineRead.required[]": [
-      "string"
-    ],
-    "$.components.schemas.TemplateDisciplineRead.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateDraft": [
-      "object"
-    ],
-    "$.components.schemas.TemplateDraft.properties": [
-      "object"
-    ],
-    "$.components.schemas.TemplateDraft.properties.id": [
-      "object"
-    ],
-    "$.components.schemas.TemplateDraft.properties.id.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplateDraft.properties.id.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateDraft.properties.rowVersion": [
-      "object"
-    ],
-    "$.components.schemas.TemplateDraft.properties.rowVersion.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplateDraft.properties.rowVersion.pattern": [
-      "string"
-    ],
-    "$.components.schemas.TemplateDraft.properties.rowVersion.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateDraft.required": [
-      "array"
-    ],
-    "$.components.schemas.TemplateDraft.required[]": [
-      "string"
-    ],
-    "$.components.schemas.TemplateDraft.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateFamilyVersion": [
-      "object"
-    ],
-    "$.components.schemas.TemplateFamilyVersion.properties": [
-      "object"
-    ],
-    "$.components.schemas.TemplateFamilyVersion.properties.id": [
-      "object"
-    ],
-    "$.components.schemas.TemplateFamilyVersion.properties.id.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplateFamilyVersion.properties.id.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateFamilyVersion.properties.publishedAt": [
-      "object"
-    ],
-    "$.components.schemas.TemplateFamilyVersion.properties.publishedAt.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplateFamilyVersion.properties.publishedAt.type": [
-      "array"
-    ],
-    "$.components.schemas.TemplateFamilyVersion.properties.publishedAt.type[]": [
-      "string"
-    ],
-    "$.components.schemas.TemplateFamilyVersion.properties.status": [
-      "object"
-    ],
-    "$.components.schemas.TemplateFamilyVersion.properties.status.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateFamilyVersion.properties.version": [
-      "object"
-    ],
-    "$.components.schemas.TemplateFamilyVersion.properties.version.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplateFamilyVersion.properties.version.pattern": [
-      "string"
-    ],
-    "$.components.schemas.TemplateFamilyVersion.properties.version.type": [
-      "array"
-    ],
-    "$.components.schemas.TemplateFamilyVersion.properties.version.type[]": [
-      "string"
-    ],
-    "$.components.schemas.TemplateFamilyVersion.required": [
-      "array"
-    ],
-    "$.components.schemas.TemplateFamilyVersion.required[]": [
-      "string"
-    ],
-    "$.components.schemas.TemplateFamilyVersion.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateList": [
-      "object"
-    ],
-    "$.components.schemas.TemplateList.properties": [
-      "object"
-    ],
-    "$.components.schemas.TemplateList.properties.canEdit": [
-      "object"
-    ],
-    "$.components.schemas.TemplateList.properties.canEdit.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateList.properties.templates": [
-      "object"
-    ],
-    "$.components.schemas.TemplateList.properties.templates.items": [
-      "object"
-    ],
-    "$.components.schemas.TemplateList.properties.templates.items.$ref": [
-      "string"
-    ],
-    "$.components.schemas.TemplateList.properties.templates.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateList.required": [
-      "array"
-    ],
-    "$.components.schemas.TemplateList.required[]": [
-      "string"
-    ],
-    "$.components.schemas.TemplateList.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow": [
-      "object"
-    ],
-    "$.components.schemas.TemplateListRow.properties": [
-      "object"
-    ],
-    "$.components.schemas.TemplateListRow.properties.deliverables": [
-      "object"
-    ],
-    "$.components.schemas.TemplateListRow.properties.deliverables.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.deliverables.pattern": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.deliverables.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.description": [
-      "object"
-    ],
-    "$.components.schemas.TemplateListRow.properties.description.type": [
-      "array"
-    ],
-    "$.components.schemas.TemplateListRow.properties.description.type[]": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.disciplines": [
-      "object"
-    ],
-    "$.components.schemas.TemplateListRow.properties.disciplines.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.disciplines.pattern": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.disciplines.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.familyId": [
-      "object"
-    ],
-    "$.components.schemas.TemplateListRow.properties.familyId.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.familyId.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.id": [
-      "object"
-    ],
-    "$.components.schemas.TemplateListRow.properties.id.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.id.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.milestones": [
-      "object"
-    ],
-    "$.components.schemas.TemplateListRow.properties.milestones.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.milestones.pattern": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.milestones.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.name": [
-      "object"
-    ],
-    "$.components.schemas.TemplateListRow.properties.name.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.projectTypeId": [
-      "object"
-    ],
-    "$.components.schemas.TemplateListRow.properties.projectTypeId.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.projectTypeId.type": [
-      "array"
-    ],
-    "$.components.schemas.TemplateListRow.properties.projectTypeId.type[]": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.projects": [
-      "object"
-    ],
-    "$.components.schemas.TemplateListRow.properties.projects.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.projects.pattern": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.projects.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.publishedAt": [
-      "object"
-    ],
-    "$.components.schemas.TemplateListRow.properties.publishedAt.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.publishedAt.type": [
-      "array"
-    ],
-    "$.components.schemas.TemplateListRow.properties.publishedAt.type[]": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.roles": [
-      "object"
-    ],
-    "$.components.schemas.TemplateListRow.properties.roles.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.roles.pattern": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.roles.type": [
-      "array"
-    ],
-    "$.components.schemas.TemplateListRow.properties.roles.type[]": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.rowVersion": [
-      "object"
-    ],
-    "$.components.schemas.TemplateListRow.properties.rowVersion.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.rowVersion.pattern": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.rowVersion.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.status": [
-      "object"
-    ],
-    "$.components.schemas.TemplateListRow.properties.status.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.tasks": [
-      "object"
-    ],
-    "$.components.schemas.TemplateListRow.properties.tasks.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.tasks.pattern": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.tasks.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.updatedAt": [
-      "object"
-    ],
-    "$.components.schemas.TemplateListRow.properties.updatedAt.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.updatedAt.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.version": [
-      "object"
-    ],
-    "$.components.schemas.TemplateListRow.properties.version.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.version.pattern": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.properties.version.type": [
-      "array"
-    ],
-    "$.components.schemas.TemplateListRow.properties.version.type[]": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.required": [
-      "array"
-    ],
-    "$.components.schemas.TemplateListRow.required[]": [
-      "string"
-    ],
-    "$.components.schemas.TemplateListRow.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplatePublished": [
-      "object"
-    ],
-    "$.components.schemas.TemplatePublished.properties": [
-      "object"
-    ],
-    "$.components.schemas.TemplatePublished.properties.id": [
-      "object"
-    ],
-    "$.components.schemas.TemplatePublished.properties.id.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplatePublished.properties.id.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplatePublished.properties.rowVersion": [
-      "object"
-    ],
-    "$.components.schemas.TemplatePublished.properties.rowVersion.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplatePublished.properties.rowVersion.pattern": [
-      "string"
-    ],
-    "$.components.schemas.TemplatePublished.properties.rowVersion.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplatePublished.properties.status": [
-      "object"
-    ],
-    "$.components.schemas.TemplatePublished.properties.status.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplatePublished.properties.version": [
-      "object"
-    ],
-    "$.components.schemas.TemplatePublished.properties.version.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplatePublished.properties.version.pattern": [
-      "string"
-    ],
-    "$.components.schemas.TemplatePublished.properties.version.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplatePublished.required": [
-      "array"
-    ],
-    "$.components.schemas.TemplatePublished.required[]": [
-      "string"
-    ],
-    "$.components.schemas.TemplatePublished.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead": [
-      "object"
-    ],
-    "$.components.schemas.TemplateRead.properties": [
-      "object"
-    ],
-    "$.components.schemas.TemplateRead.properties.basisSuggestions": [
-      "object"
-    ],
-    "$.components.schemas.TemplateRead.properties.basisSuggestions.items": [
-      "object"
-    ],
-    "$.components.schemas.TemplateRead.properties.basisSuggestions.items.$ref": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.basisSuggestions.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.canEdit": [
-      "object"
-    ],
-    "$.components.schemas.TemplateRead.properties.canEdit.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.deliverables": [
-      "object"
-    ],
-    "$.components.schemas.TemplateRead.properties.deliverables.items": [
-      "object"
-    ],
-    "$.components.schemas.TemplateRead.properties.deliverables.items.$ref": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.deliverables.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.dependencies": [
-      "object"
-    ],
-    "$.components.schemas.TemplateRead.properties.dependencies.items": [
-      "object"
-    ],
-    "$.components.schemas.TemplateRead.properties.dependencies.items.$ref": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.dependencies.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.description": [
-      "object"
-    ],
-    "$.components.schemas.TemplateRead.properties.description.type": [
-      "array"
-    ],
-    "$.components.schemas.TemplateRead.properties.description.type[]": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.disciplines": [
-      "object"
-    ],
-    "$.components.schemas.TemplateRead.properties.disciplines.items": [
-      "object"
-    ],
-    "$.components.schemas.TemplateRead.properties.disciplines.items.$ref": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.disciplines.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.family": [
-      "object"
-    ],
-    "$.components.schemas.TemplateRead.properties.family.items": [
-      "object"
-    ],
-    "$.components.schemas.TemplateRead.properties.family.items.$ref": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.family.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.familyId": [
-      "object"
-    ],
-    "$.components.schemas.TemplateRead.properties.familyId.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.familyId.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.id": [
-      "object"
-    ],
-    "$.components.schemas.TemplateRead.properties.id.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.id.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.milestones": [
-      "object"
-    ],
-    "$.components.schemas.TemplateRead.properties.milestones.items": [
-      "object"
-    ],
-    "$.components.schemas.TemplateRead.properties.milestones.items.$ref": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.milestones.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.name": [
-      "object"
-    ],
-    "$.components.schemas.TemplateRead.properties.name.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.offsetDayKind": [
-      "object"
-    ],
-    "$.components.schemas.TemplateRead.properties.offsetDayKind.type": [
-      "array"
-    ],
-    "$.components.schemas.TemplateRead.properties.offsetDayKind.type[]": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.projectTypeId": [
-      "object"
-    ],
-    "$.components.schemas.TemplateRead.properties.projectTypeId.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.projectTypeId.type": [
-      "array"
-    ],
-    "$.components.schemas.TemplateRead.properties.projectTypeId.type[]": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.publishedAt": [
-      "object"
-    ],
-    "$.components.schemas.TemplateRead.properties.publishedAt.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.publishedAt.type": [
-      "array"
-    ],
-    "$.components.schemas.TemplateRead.properties.publishedAt.type[]": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.roles": [
-      "object"
-    ],
-    "$.components.schemas.TemplateRead.properties.roles.items": [
-      "object"
-    ],
-    "$.components.schemas.TemplateRead.properties.roles.items.$ref": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.roles.type": [
-      "array"
-    ],
-    "$.components.schemas.TemplateRead.properties.roles.type[]": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.rowVersion": [
-      "object"
-    ],
-    "$.components.schemas.TemplateRead.properties.rowVersion.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.rowVersion.pattern": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.rowVersion.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.status": [
-      "object"
-    ],
-    "$.components.schemas.TemplateRead.properties.status.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.tasks": [
-      "object"
-    ],
-    "$.components.schemas.TemplateRead.properties.tasks.items": [
-      "object"
-    ],
-    "$.components.schemas.TemplateRead.properties.tasks.items.$ref": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.tasks.type": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.version": [
-      "object"
-    ],
-    "$.components.schemas.TemplateRead.properties.version.format": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.version.pattern": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.properties.version.type": [
-      "array"
-    ],
-    "$.components.schemas.TemplateRead.properties.version.type[]": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.required": [
-      "array"
-    ],
-    "$.components.schemas.TemplateRead.required[]": [
-      "string"
-    ],
-    "$.components.schemas.TemplateRead.type": [
-      "string"
-    ],
     "$.components.schemas.TemplateRoleIn": [
       "object"
     ],
@@ -69825,6 +70615,18 @@
     "$.paths./api/v1/planning/cells/{personId}/{week}.get.responses.200": [
       "object"
     ],
+    "$.paths./api/v1/planning/cells/{personId}/{week}.get.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/cells/{personId}/{week}.get.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/cells/{personId}/{week}.get.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/cells/{personId}/{week}.get.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/planning/cells/{personId}/{week}.get.responses.200.description": [
       "string"
     ],
@@ -69873,6 +70675,18 @@
     "$.paths./api/v1/planning/entries.get.responses.200": [
       "object"
     ],
+    "$.paths./api/v1/planning/entries.get.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/entries.get.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/entries.get.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/entries.get.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/planning/entries.get.responses.200.description": [
       "string"
     ],
@@ -69906,10 +70720,22 @@
     "$.paths./api/v1/planning/entries.post.responses": [
       "object"
     ],
-    "$.paths./api/v1/planning/entries.post.responses.200": [
+    "$.paths./api/v1/planning/entries.post.responses.201": [
       "object"
     ],
-    "$.paths./api/v1/planning/entries.post.responses.200.description": [
+    "$.paths./api/v1/planning/entries.post.responses.201.content": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/entries.post.responses.201.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/entries.post.responses.201.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/entries.post.responses.201.content.application/json.schema.$ref": [
+      "string"
+    ],
+    "$.paths./api/v1/planning/entries.post.responses.201.description": [
       "string"
     ],
     "$.paths./api/v1/planning/entries.post.tags": [
@@ -69993,10 +70819,22 @@
     "$.paths./api/v1/planning/entries/quick.post.responses": [
       "object"
     ],
-    "$.paths./api/v1/planning/entries/quick.post.responses.200": [
+    "$.paths./api/v1/planning/entries/quick.post.responses.201": [
       "object"
     ],
-    "$.paths./api/v1/planning/entries/quick.post.responses.200.description": [
+    "$.paths./api/v1/planning/entries/quick.post.responses.201.content": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/entries/quick.post.responses.201.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/entries/quick.post.responses.201.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/entries/quick.post.responses.201.content.application/json.schema.$ref": [
+      "string"
+    ],
+    "$.paths./api/v1/planning/entries/quick.post.responses.201.description": [
       "string"
     ],
     "$.paths./api/v1/planning/entries/quick.post.tags": [
@@ -70041,10 +70879,10 @@
     "$.paths./api/v1/planning/entries/{id}.delete.responses": [
       "object"
     ],
-    "$.paths./api/v1/planning/entries/{id}.delete.responses.200": [
+    "$.paths./api/v1/planning/entries/{id}.delete.responses.204": [
       "object"
     ],
-    "$.paths./api/v1/planning/entries/{id}.delete.responses.200.description": [
+    "$.paths./api/v1/planning/entries/{id}.delete.responses.204.description": [
       "string"
     ],
     "$.paths./api/v1/planning/entries/{id}.delete.tags": [
@@ -70085,6 +70923,18 @@
     ],
     "$.paths./api/v1/planning/entries/{id}.get.responses.200": [
       "object"
+    ],
+    "$.paths./api/v1/planning/entries/{id}.get.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/entries/{id}.get.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/entries/{id}.get.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/entries/{id}.get.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/planning/entries/{id}.get.responses.200.description": [
       "string"
@@ -70146,6 +70996,18 @@
     "$.paths./api/v1/planning/entries/{id}.patch.responses.200": [
       "object"
     ],
+    "$.paths./api/v1/planning/entries/{id}.patch.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/entries/{id}.patch.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/entries/{id}.patch.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/entries/{id}.patch.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/planning/entries/{id}.patch.responses.200.description": [
       "string"
     ],
@@ -70193,6 +71055,18 @@
     ],
     "$.paths./api/v1/planning/entries/{id}/activity.get.responses.200": [
       "object"
+    ],
+    "$.paths./api/v1/planning/entries/{id}/activity.get.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/entries/{id}/activity.get.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/entries/{id}/activity.get.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/entries/{id}/activity.get.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/planning/entries/{id}/activity.get.responses.200.description": [
       "string"
@@ -70257,6 +71131,18 @@
     "$.paths./api/v1/planning/entries/{id}/still-valid.post.responses.200": [
       "object"
     ],
+    "$.paths./api/v1/planning/entries/{id}/still-valid.post.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/entries/{id}/still-valid.post.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/entries/{id}/still-valid.post.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/entries/{id}/still-valid.post.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/planning/entries/{id}/still-valid.post.responses.200.description": [
       "string"
     ],
@@ -70320,6 +71206,18 @@
     "$.paths./api/v1/planning/entries/{id}/visibility.post.responses.200": [
       "object"
     ],
+    "$.paths./api/v1/planning/entries/{id}/visibility.post.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/entries/{id}/visibility.post.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/entries/{id}/visibility.post.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/entries/{id}/visibility.post.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/planning/entries/{id}/visibility.post.responses.200.description": [
       "string"
     ],
@@ -70367,6 +71265,18 @@
     ],
     "$.paths./api/v1/planning/grid.get.responses.200": [
       "object"
+    ],
+    "$.paths./api/v1/planning/grid.get.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/grid.get.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/grid.get.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/planning/grid.get.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/planning/grid.get.responses.200.description": [
       "string"
@@ -75141,9 +76051,6 @@
     "$.paths./api/v1/projects/{id}/template-packs.get.responses.200.content.application/json.schema": [
       "object"
     ],
-    "$.paths./api/v1/projects/{id}/template-packs.get.responses.200.content.application/json.schema.$ref": [
-      "string"
-    ],
     "$.paths./api/v1/projects/{id}/template-packs.get.responses.200.description": [
       "string"
     ],
@@ -75212,9 +76119,6 @@
     ],
     "$.paths./api/v1/projects/{id}/template-packs.post.responses.200.content.application/json.schema": [
       "object"
-    ],
-    "$.paths./api/v1/projects/{id}/template-packs.post.responses.200.content.application/json.schema.$ref": [
-      "string"
     ],
     "$.paths./api/v1/projects/{id}/template-packs.post.responses.200.description": [
       "string"
@@ -84132,9 +85036,6 @@
     "$.paths./api/v1/templates.get.responses.200.content.application/json.schema": [
       "object"
     ],
-    "$.paths./api/v1/templates.get.responses.200.content.application/json.schema.$ref": [
-      "string"
-    ],
     "$.paths./api/v1/templates.get.responses.200.description": [
       "string"
     ],
@@ -84168,22 +85069,10 @@
     "$.paths./api/v1/templates.post.responses": [
       "object"
     ],
-    "$.paths./api/v1/templates.post.responses.201": [
+    "$.paths./api/v1/templates.post.responses.200": [
       "object"
     ],
-    "$.paths./api/v1/templates.post.responses.201.content": [
-      "object"
-    ],
-    "$.paths./api/v1/templates.post.responses.201.content.application/json": [
-      "object"
-    ],
-    "$.paths./api/v1/templates.post.responses.201.content.application/json.schema": [
-      "object"
-    ],
-    "$.paths./api/v1/templates.post.responses.201.content.application/json.schema.$ref": [
-      "string"
-    ],
-    "$.paths./api/v1/templates.post.responses.201.description": [
+    "$.paths./api/v1/templates.post.responses.200.description": [
       "string"
     ],
     "$.paths./api/v1/templates.post.tags": [
@@ -84225,10 +85114,10 @@
     "$.paths./api/v1/templates/{id}.delete.responses": [
       "object"
     ],
-    "$.paths./api/v1/templates/{id}.delete.responses.204": [
+    "$.paths./api/v1/templates/{id}.delete.responses.200": [
       "object"
     ],
-    "$.paths./api/v1/templates/{id}.delete.responses.204.description": [
+    "$.paths./api/v1/templates/{id}.delete.responses.200.description": [
       "string"
     ],
     "$.paths./api/v1/templates/{id}.delete.tags": [
@@ -84278,9 +85167,6 @@
     ],
     "$.paths./api/v1/templates/{id}.get.responses.200.content.application/json.schema": [
       "object"
-    ],
-    "$.paths./api/v1/templates/{id}.get.responses.200.content.application/json.schema.$ref": [
-      "string"
     ],
     "$.paths./api/v1/templates/{id}.get.responses.200.description": [
       "string"
@@ -84342,22 +85228,10 @@
     "$.paths./api/v1/templates/{id}/design-basis.post.responses": [
       "object"
     ],
-    "$.paths./api/v1/templates/{id}/design-basis.post.responses.201": [
+    "$.paths./api/v1/templates/{id}/design-basis.post.responses.200": [
       "object"
     ],
-    "$.paths./api/v1/templates/{id}/design-basis.post.responses.201.content": [
-      "object"
-    ],
-    "$.paths./api/v1/templates/{id}/design-basis.post.responses.201.content.application/json": [
-      "object"
-    ],
-    "$.paths./api/v1/templates/{id}/design-basis.post.responses.201.content.application/json.schema": [
-      "object"
-    ],
-    "$.paths./api/v1/templates/{id}/design-basis.post.responses.201.content.application/json.schema.$ref": [
-      "string"
-    ],
-    "$.paths./api/v1/templates/{id}/design-basis.post.responses.201.description": [
+    "$.paths./api/v1/templates/{id}/design-basis.post.responses.200.description": [
       "string"
     ],
     "$.paths./api/v1/templates/{id}/design-basis.post.tags": [
@@ -84399,10 +85273,10 @@
     "$.paths./api/v1/templates/{id}/design-basis/{suggestionId}.delete.responses": [
       "object"
     ],
-    "$.paths./api/v1/templates/{id}/design-basis/{suggestionId}.delete.responses.204": [
+    "$.paths./api/v1/templates/{id}/design-basis/{suggestionId}.delete.responses.200": [
       "object"
     ],
-    "$.paths./api/v1/templates/{id}/design-basis/{suggestionId}.delete.responses.204.description": [
+    "$.paths./api/v1/templates/{id}/design-basis/{suggestionId}.delete.responses.200.description": [
       "string"
     ],
     "$.paths./api/v1/templates/{id}/design-basis/{suggestionId}.delete.tags": [
@@ -84447,37 +85321,7 @@
     "$.paths./api/v1/templates/{id}/draft.post.responses.200": [
       "object"
     ],
-    "$.paths./api/v1/templates/{id}/draft.post.responses.200.content": [
-      "object"
-    ],
-    "$.paths./api/v1/templates/{id}/draft.post.responses.200.content.application/json": [
-      "object"
-    ],
-    "$.paths./api/v1/templates/{id}/draft.post.responses.200.content.application/json.schema": [
-      "object"
-    ],
-    "$.paths./api/v1/templates/{id}/draft.post.responses.200.content.application/json.schema.$ref": [
-      "string"
-    ],
     "$.paths./api/v1/templates/{id}/draft.post.responses.200.description": [
-      "string"
-    ],
-    "$.paths./api/v1/templates/{id}/draft.post.responses.201": [
-      "object"
-    ],
-    "$.paths./api/v1/templates/{id}/draft.post.responses.201.content": [
-      "object"
-    ],
-    "$.paths./api/v1/templates/{id}/draft.post.responses.201.content.application/json": [
-      "object"
-    ],
-    "$.paths./api/v1/templates/{id}/draft.post.responses.201.content.application/json.schema": [
-      "object"
-    ],
-    "$.paths./api/v1/templates/{id}/draft.post.responses.201.content.application/json.schema.$ref": [
-      "string"
-    ],
-    "$.paths./api/v1/templates/{id}/draft.post.responses.201.description": [
       "string"
     ],
     "$.paths./api/v1/templates/{id}/draft.post.tags": [
@@ -84630,9 +85474,6 @@
     "$.paths./api/v1/templates/{id}/publish.post.responses.200.content.application/json.schema": [
       "object"
     ],
-    "$.paths./api/v1/templates/{id}/publish.post.responses.200.content.application/json.schema.$ref": [
-      "string"
-    ],
     "$.paths./api/v1/templates/{id}/publish.post.responses.200.description": [
       "string"
     ],
@@ -84675,10 +85516,10 @@
     "$.paths./api/v1/templates/{id}/retire.post.responses": [
       "object"
     ],
-    "$.paths./api/v1/templates/{id}/retire.post.responses.204": [
+    "$.paths./api/v1/templates/{id}/retire.post.responses.200": [
       "object"
     ],
-    "$.paths./api/v1/templates/{id}/retire.post.responses.204.description": [
+    "$.paths./api/v1/templates/{id}/retire.post.responses.200.description": [
       "string"
     ],
     "$.paths./api/v1/templates/{id}/retire.post.tags": [
@@ -84749,9 +85590,6 @@
     ],
     "$.paths./api/v1/templates/{id}/structure.put.responses.200.content.application/json.schema": [
       "object"
-    ],
-    "$.paths./api/v1/templates/{id}/structure.put.responses.200.content.application/json.schema.$ref": [
-      "string"
     ],
     "$.paths./api/v1/templates/{id}/structure.put.responses.200.description": [
       "string"
@@ -87085,13 +87923,16 @@
       "null"
     ],
     "$.items[].projectId": [
-      "null"
+      "null",
+      "string"
     ],
     "$.items[].projectName": [
-      "null"
+      "null",
+      "string"
     ],
     "$.items[].projectNumber": [
-      "null"
+      "null",
+      "string"
     ],
     "$.items[].rowVersion": [
       "number"
@@ -87220,7 +88061,8 @@
       "boolean"
     ],
     "$.notes": [
-      "null"
+      "null",
+      "string"
     ],
     "$.ownerId": [
       "string"
@@ -87241,13 +88083,16 @@
       "null"
     ],
     "$.projectId": [
-      "null"
+      "null",
+      "string"
     ],
     "$.projectName": [
-      "null"
+      "null",
+      "string"
     ],
     "$.projectNumber": [
-      "null"
+      "null",
+      "string"
     ],
     "$.rowVersion": [
       "number"
@@ -117768,13 +118613,16 @@
       "null"
     ],
     "$.projectId": [
-      "null"
+      "null",
+      "string"
     ],
     "$.projectName": [
-      "null"
+      "null",
+      "string"
     ],
     "$.projectNumber": [
-      "null"
+      "null",
+      "string"
     ],
     "$.rowVersion": [
       "number"
@@ -117864,13 +118712,16 @@
       "null"
     ],
     "$.projectId": [
-      "null"
+      "null",
+      "string"
     ],
     "$.projectName": [
-      "null"
+      "null",
+      "string"
     ],
     "$.projectNumber": [
-      "null"
+      "null",
+      "string"
     ],
     "$.rowVersion": [
       "number"

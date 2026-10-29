@@ -52,6 +52,7 @@
     "registers.fixture.cjs",
     "milestones.fixture.cjs",
     "notifications.fixture.cjs",
-    "templates.fixture.cjs"
+    "templates.fixture.cjs",
+    "planning.fixture.cjs"
   ]
 }

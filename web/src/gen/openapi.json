@@ -1101,6 +1101,24 @@
         ],
         "type": "object"
       },
+      "AllocationWeek": {
+        "properties": {
+          "hours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "week": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "week",
+          "hours"
+        ],
+        "type": "object"
+      },
       "Allowed": {
         "properties": {
           "assign": {
@@ -1243,6 +1261,46 @@
           "id",
           "personId",
           "rowVersion"
+        ],
+        "type": "object"
+      },
+      "ApprovedRow": {
+        "properties": {
+          "allocationId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "approvalStatus": {
+            "type": "string"
+          },
+          "canOpen": {
+            "type": "boolean"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectName": {
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "weeks": {
+            "items": {
+              "$ref": "#/components/schemas/AllocationWeek"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "allocationId",
+          "projectId",
+          "projectNumber",
+          "projectName",
+          "approvalStatus",
+          "canOpen",
+          "weeks"
         ],
         "type": "object"
       },
@@ -3494,6 +3552,383 @@
         "required": [
           "id",
           "weeklyCapacityHours"
+        ],
+        "type": "object"
+      },
+      "CellApproved": {
+        "properties": {
+          "allocationId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "approvalStatus": {
+            "type": "string"
+          },
+          "canOpen": {
+            "type": "boolean"
+          },
+          "hours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectName": {
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "allocationId",
+          "projectId",
+          "projectNumber",
+          "projectName",
+          "hours",
+          "approvalStatus",
+          "canOpen"
+        ],
+        "type": "object"
+      },
+      "CellBands": {
+        "properties": {
+          "confirmed": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "expected": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "possible": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          }
+        },
+        "required": [
+          "confirmed",
+          "expected",
+          "possible"
+        ],
+        "type": "object"
+      },
+      "CellCapacity": {
+        "properties": {
+          "additionalAvailability": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "capacity": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "capacityOverride": {
+            "type": "boolean"
+          },
+          "days": {
+            "items": {
+              "$ref": "#/components/schemas/DayRow"
+            },
+            "type": "array"
+          },
+          "timeAway": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "weeklyCapacity": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "workingDays": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "weeklyCapacity",
+          "capacityOverride",
+          "workingDays",
+          "capacity",
+          "timeAway",
+          "additionalAvailability",
+          "days"
+        ],
+        "type": "object"
+      },
+      "CellDetail": {
+        "properties": {
+          "approvedAllocations": {
+            "items": {
+              "$ref": "#/components/schemas/CellApproved"
+            },
+            "type": "array"
+          },
+          "bands": {
+            "$ref": "#/components/schemas/CellBands"
+          },
+          "capacity": {
+            "$ref": "#/components/schemas/CellCapacity"
+          },
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/EntryRow"
+            },
+            "type": "array"
+          },
+          "indicators": {
+            "items": {
+              "$ref": "#/components/schemas/CellIndicator"
+            },
+            "type": "array"
+          },
+          "partialView": {
+            "type": "boolean"
+          },
+          "personId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "personName": {
+            "type": "string"
+          },
+          "projectContexts": {
+            "items": {
+              "$ref": "#/components/schemas/CellProjectContext"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "remaining": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "taskEstimates": {
+            "$ref": "#/components/schemas/CellTaskEstimates"
+          },
+          "week": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "personId",
+          "personName",
+          "week",
+          "partialView",
+          "capacity",
+          "approvedAllocations",
+          "entries",
+          "bands",
+          "remaining",
+          "taskEstimates",
+          "indicators"
+        ],
+        "type": "object"
+      },
+      "CellIndicator": {
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "code": {
+            "type": "string"
+          },
+          "evaluated": {
+            "type": "boolean"
+          },
+          "explanation": {
+            "type": "string"
+          },
+          "rule": {
+            "type": "string"
+          },
+          "threshold": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "code",
+          "rule",
+          "evaluated",
+          "active",
+          "threshold",
+          "explanation"
+        ],
+        "type": "object"
+      },
+      "CellProjectContext": {
+        "properties": {
+          "plannedHours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectName": {
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "taskEstimates": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "unestimatedTasks": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "projectId",
+          "projectNumber",
+          "projectName",
+          "plannedHours",
+          "taskEstimates",
+          "unestimatedTasks"
+        ],
+        "type": "object"
+      },
+      "CellRow": {
+        "properties": {
+          "additionalAvailability": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "approved": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "capacity": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "confirmed": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "expected": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "holidayHours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "overPlanned": {
+            "type": "boolean"
+          },
+          "ownDraftHours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "possible": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "provisional": {
+            "type": "boolean"
+          },
+          "remaining": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "staleEntries": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "taskEstimates": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "timeAway": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "underPlanned": {
+            "type": "boolean"
+          },
+          "unestimatedTasks": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "week": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "week",
+          "capacity",
+          "timeAway",
+          "additionalAvailability",
+          "approved",
+          "confirmed",
+          "expected",
+          "possible",
+          "remaining",
+          "taskEstimates",
+          "unestimatedTasks",
+          "overPlanned",
+          "underPlanned",
+          "staleEntries",
+          "ownDraftHours",
+          "holidayHours",
+          "provisional"
+        ],
+        "type": "object"
+      },
+      "CellTaskEstimates": {
+        "properties": {
+          "hours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "unestimatedTasks": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "hours",
+          "unestimatedTasks"
         ],
         "type": "object"
       },
@@ -7384,6 +7819,59 @@
         ],
         "type": "object"
       },
+      "DayRow": {
+        "properties": {
+          "additional": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "available": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "category": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "date": {
+            "format": "date",
+            "type": "string"
+          },
+          "holiday": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "normal": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "provisional": {
+            "type": "boolean"
+          },
+          "timeAway": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          }
+        },
+        "required": [
+          "date",
+          "normal",
+          "available",
+          "category",
+          "timeAway",
+          "additional",
+          "holiday",
+          "provisional"
+        ],
+        "type": "object"
+      },
       "DecisionBody": {
         "properties": {
           "rationale": {
@@ -10717,6 +11205,181 @@
         ],
         "type": "object"
       },
+      "EntryRow": {
+        "properties": {
+          "canChangeVisibility": {
+            "type": "boolean"
+          },
+          "canEdit": {
+            "type": "boolean"
+          },
+          "confidence": {
+            "type": "string"
+          },
+          "correctionOnly": {
+            "type": "boolean"
+          },
+          "countedHours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "null",
+              "number"
+            ]
+          },
+          "coveredHours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "null",
+              "number"
+            ]
+          },
+          "disciplineName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "endWeek": {
+            "format": "date",
+            "type": "string"
+          },
+          "hoursPerWeek": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "lastValidatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "matchesFilter": {
+            "type": "boolean"
+          },
+          "notes": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "ownerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ownerKind": {
+            "type": "string"
+          },
+          "ownerName": {
+            "type": "string"
+          },
+          "personId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "personName": {
+            "type": "string"
+          },
+          "projectDisciplineId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "sourceCategory": {
+            "type": "string"
+          },
+          "stale": {
+            "type": "boolean"
+          },
+          "startWeek": {
+            "format": "date",
+            "type": "string"
+          },
+          "visibility": {
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "weekHours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "null",
+              "number"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "personId",
+          "personName",
+          "ownerId",
+          "ownerName",
+          "ownerKind",
+          "label",
+          "sourceCategory",
+          "projectId",
+          "projectNumber",
+          "projectName",
+          "projectDisciplineId",
+          "disciplineName",
+          "hoursPerWeek",
+          "startWeek",
+          "endWeek",
+          "confidence",
+          "visibility",
+          "notes",
+          "lastValidatedAt",
+          "stale",
+          "warnings",
+          "canEdit",
+          "canChangeVisibility",
+          "correctionOnly",
+          "rowVersion",
+          "matchesFilter",
+          "weekHours",
+          "countedHours",
+          "coveredHours"
+        ],
+        "type": "object"
+      },
       "EntrySaved": {
         "properties": {
           "id": {
@@ -11384,6 +12047,59 @@
           "status",
           "lastSeenAt",
           "unread"
+        ],
+        "type": "object"
+      },
+      "GridResult": {
+        "properties": {
+          "currentWeek": {
+            "format": "date",
+            "type": "string"
+          },
+          "draftAccess": {
+            "type": "boolean"
+          },
+          "evaluatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "partialView": {
+            "type": "boolean"
+          },
+          "people": {
+            "items": {
+              "$ref": "#/components/schemas/PlanningPersonRow"
+            },
+            "type": "array"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/PlannerSettings"
+          },
+          "unfilledRoles": {
+            "items": {
+              "$ref": "#/components/schemas/UnfilledRole"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "weeks": {
+            "items": {
+              "format": "date",
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "weeks",
+          "currentWeek",
+          "evaluatedAt",
+          "partialView",
+          "draftAccess",
+          "settings",
+          "people"
         ],
         "type": "object"
       },
@@ -18745,6 +19461,45 @@
         ],
         "type": "object"
       },
+      "PageOfEntryRow": {
+        "properties": {
+          "filters": {},
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/EntryRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "pageSize": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "sort": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "totalCount": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "totalCount"
+        ],
+        "type": "object"
+      },
       "PageOfHandoffRow": {
         "properties": {
           "filters": {},
@@ -19399,6 +20154,49 @@
         ],
         "type": "object"
       },
+      "PlannerSettings": {
+        "properties": {
+          "horizonWeeks": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "maxHoursPerWeek": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "overPct": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "staleDays": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "underPct": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "underWeeks": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "horizonWeeks",
+          "overPct",
+          "underPct",
+          "underWeeks",
+          "staleDays",
+          "maxHoursPerWeek"
+        ],
+        "type": "object"
+      },
       "PlanningCreateBody": {
         "properties": {
           "confidence": {
@@ -19482,6 +20280,125 @@
         "required": [
           "workDate",
           "rowVersion"
+        ],
+        "type": "object"
+      },
+      "PlanningPersonRow": {
+        "properties": {
+          "approvedAllocations": {
+            "items": {
+              "$ref": "#/components/schemas/ApprovedRow"
+            },
+            "type": "array"
+          },
+          "canCreateManagerEntry": {
+            "type": "boolean"
+          },
+          "canCreateSelfEntry": {
+            "type": "boolean"
+          },
+          "canRecordTimeAway": {
+            "type": "boolean"
+          },
+          "cells": {
+            "items": {
+              "$ref": "#/components/schemas/CellRow"
+            },
+            "type": "array"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/EntryRow"
+            },
+            "type": "array"
+          },
+          "homeDisciplineId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "indicators": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "jobTitle": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "kept": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "officeId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "partial": {
+            "type": "boolean"
+          },
+          "supervisorId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "supervisorName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "taskContexts": {
+            "items": {
+              "$ref": "#/components/schemas/ProjectTaskContext"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "weeklyCapacity": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "supervisorId",
+          "supervisorName",
+          "weeklyCapacity",
+          "canCreateSelfEntry",
+          "canCreateManagerEntry",
+          "canRecordTimeAway",
+          "indicators",
+          "cells",
+          "entries",
+          "approvedAllocations",
+          "officeId",
+          "jobTitle",
+          "homeDisciplineId",
+          "partial"
         ],
         "type": "object"
       },
@@ -20336,6 +21253,57 @@
           "projectManagerEmail",
           "classification",
           "error"
+        ],
+        "type": "object"
+      },
+      "ProjectTaskContext": {
+        "properties": {
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectName": {
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "weeks": {
+            "items": {
+              "$ref": "#/components/schemas/ProjectTaskWeek"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "projectId",
+          "projectNumber",
+          "projectName",
+          "weeks"
+        ],
+        "type": "object"
+      },
+      "ProjectTaskWeek": {
+        "properties": {
+          "hours": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": "number"
+          },
+          "unestimatedTasks": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "week": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "week",
+          "hours",
+          "unestimatedTasks"
         ],
         "type": "object"
       },
@@ -38042,6 +39010,13 @@
         ],
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CellDetail"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -38210,6 +39185,13 @@
         ],
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageOfEntryRow"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -38229,8 +39211,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryRow"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -38426,8 +39415,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryRow"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -38465,8 +39461,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -38494,6 +39490,13 @@
         ],
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryRow"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -38525,6 +39528,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryRow"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -38573,6 +39583,13 @@
         ],
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageOfActivityEntry"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -38606,6 +39623,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryRow"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -38639,6 +39663,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryRow"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -38805,6 +39836,13 @@
         ],
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GridResult"
+                }
+              }
+            },
             "description": "OK"
           }
         },

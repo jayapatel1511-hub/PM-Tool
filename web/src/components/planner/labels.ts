@@ -1,33 +1,15 @@
+import type { components } from '@/gen/api'
 import { t, type TextKey } from '@/lib/i18n'
 
-export type PlannerEntry = {
-  id: string; personId: string; personName?: string; ownerId?: string; ownerName?: string; ownerKind?: string
-  label: string; sourceCategory: string; projectId?: string | null; projectNumber?: string | null; projectName?: string | null
-  projectDisciplineId?: string | null; disciplineName?: string | null; hoursPerWeek: number; startWeek: string; endWeek: string
-  confidence: string; visibility: string; notes?: string | null; lastValidatedAt?: string; stale?: boolean; warnings?: string[]
-  canEdit?: boolean; canChangeVisibility?: boolean; correctionOnly?: boolean; rowVersion: number; matchesFilter?: boolean
-}
-
-export type PlannerCell = {
-  week: string; capacity: number; timeAway: number; additionalAvailability?: number; approved: number; confirmed: number
-  expected: number; possible: number; remaining: number; taskEstimates: number; unestimatedTasks: number
-  overPlanned: boolean; underPlanned: boolean; staleEntries: number; ownDraftHours?: number
-}
-
-export type ApprovedAllocation = { allocationId: string; projectId?: string; projectNumber?: string; projectName?: string; canOpen: boolean; weeks: { week: string; hours: number }[] }
-export type PlannerPerson = {
-  id: string; displayName: string; supervisorId?: string; supervisorName?: string; weeklyCapacity: number
-  officeId?: string | null; jobTitle?: string | null; homeDisciplineId?: string | null
-  /** This person has planned work on projects the viewer cannot see (AC-PLN-12), so their totals are partial. */
-  partial?: boolean
-  /** §45.7 (flag.planner_kept_rows): returned only because the viewer just edited it; it no longer matches the filters. */
-  kept?: boolean
-  canCreateSelfEntry: boolean; canCreateManagerEntry: boolean; canRecordTimeAway: boolean; indicators: string[]
-  cells: PlannerCell[]; entries: PlannerEntry[]; approvedAllocations: ApprovedAllocation[]
-  taskContexts?: { projectId: string; projectNumber: string; projectName: string; weeks: { week: string; hours: number; unestimatedTasks: number }[] }[]
-}
-export type UnfilledRole = { id: string; projectId: string; projectNumber?: string; projectName: string; roleLabel: string; disciplineName?: string | null; plannedHours: number; canFill: boolean; fillPath: string; cells: { week: string; hours: number }[] }
-export type PlannerGridData = { weeks: string[]; currentWeek: string; evaluatedAt?: string; partialView: boolean; draftAccess: boolean; settings: { horizonWeeks: number; overPct: number; underPct: number; underWeeks: number; staleDays: number; maxHoursPerWeek: number }; people: PlannerPerson[]; unfilledRoles?: UnfilledRole[] }
+type Schemas = components['schemas']
+export type PlannerEntry = Schemas['EntryRow']
+export type PlannerCell = Schemas['CellRow']
+export type ApprovedAllocation = Schemas['ApprovedRow']
+/** `partial`: this person has planned work on projects the viewer cannot see (AC-PLN-12), so their totals are partial.
+ *  `kept`: §45.7 (flag.planner_kept_rows), returned only because the viewer just edited it; it no longer matches the filters. */
+export type PlannerPerson = Schemas['PlanningPersonRow']
+export type UnfilledRole = Schemas['UnfilledRole']
+export type PlannerGridData = Schemas['GridResult']
 
 export const CONFIDENCE_KEYS: Record<string, TextKey> = { Confirmed: 'planner.confidence.confirmed', Expected: 'planner.confidence.expected', Possible: 'planner.confidence.possible' }
 export const VISIBILITY_KEYS: Record<string, TextKey> = { Draft: 'planner.visibility.privateDraft', Published: 'planner.visibility.proposed', Confirmed: 'planner.visibility.confirmedAssignment', Self: 'planner.visibility.selfEntered' }

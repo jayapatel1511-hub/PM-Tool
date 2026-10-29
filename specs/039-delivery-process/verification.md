@@ -51,6 +51,16 @@ Left for Jay:
 - Make the size check a required status check on protected main (S05).
 - Create the `large` label in the repository.
 
+## Review deploy prune alias guard
+
+The review deploy helper now inspects each candidate image's complete `RepoTags` set before removal. The image-list
+query is repository-filtered, so checking only its displayed tag could remove an image that also carried an unrelated
+alias such as `local/manual-rollback:keep`. Only images whose tags are all exact managed `pm-tool-review:<sha>` or
+`pm-tool-review:rollback-<sha256>` tags are eligible; the running/previous image and newest three image IDs remain
+protected. `python3 -m unittest tools.test_review_deploy` passes 4/4, including the external-alias regression;
+`bash -n hosting/pm-tool-review-deploy-root.sh` and `git diff --check` pass. No Docker image deletion or homedev run
+was performed.
+
 ## Build 039-S10
 
 Checks on the merged tree: `python3 tools/test_decisions.py` 8/8 pass (the validator also caught three deliberate log edits in the builder run: a dropped source row, a renamed decision ID, a status left as "Open"); `dotnet build Hub.slnx` 0 errors; `python3 tools/trace_spec.py --check` clean; `python3 tools/build_spec.py --check` up to date. No flag: decision log and tooling only, no product behaviour change. Web not changed, so web build, lint and browser suites were not run.

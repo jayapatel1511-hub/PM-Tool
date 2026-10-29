@@ -26,12 +26,15 @@ BACKUP = '/usr/local/libexec/pm-tool-review-backup'
 
 
 def prune(run, previous_id):
-    # Newest first. Only images named solely by this helper or activation (<sha>, rollback-<id>) are removed; Docker
-    # refuses to delete the running image, and --force also drops the registry digest name that would keep it.
+    # Newest first. Inspect every candidate's complete tag set: image ls is filtered to this repository and would hide
+    # aliases such as local/manual-rollback:keep. Never remove an image with an external alias or an unmanaged review tag.
     rows = [line.split() for line in run(['docker', 'image', 'ls', '--no-trunc', '--format', '{{.ID}} {{.Tag}}', 'pm-tool-review']).splitlines()]
-    other = {image_id for image_id, tag in rows if not re.fullmatch(r'[0-9a-f]{40}|rollback-[0-9a-f]{64}', tag)}
     for image_id in list(dict.fromkeys(image_id for image_id, _ in rows))[KEEP_IMAGES:]:
-        if image_id != previous_id and image_id not in other:
+        if image_id == previous_id:
+            continue
+        tags = json.loads(run(['docker', 'image', 'inspect', '--format', '{{json .RepoTags}}', image_id])) or []
+        managed = [tag for tag in tags if re.fullmatch(r'pm-tool-review:(?:[0-9a-f]{40}|rollback-[0-9a-f]{64})', tag)]
+        if tags and len(managed) == len(tags):
             run(['docker', 'image', 'rm', '--force', image_id])
 
 

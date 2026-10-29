@@ -26,7 +26,7 @@ class ReviewDeployTests(unittest.TestCase):
         self.labels={'org.opencontainers.image.revision':self.sha,'hub.contract-migration':'none'}
         for name,path in [('compose','hosting/homedev.compose.yml'),('probe','scripts/verify-homedev-review.py')]:
             self.labels['hub.review-'+name+'-sha256']=hashlib.sha256((self.root/path).read_bytes()).hexdigest()
-        self.calls=[];self.reject='';self.failing_probe=False;self.current='b'*40;self.images=''
+        self.calls=[];self.reject='';self.failing_probe=False;self.current='b'*40;self.images='';self.repo_tags={}
 
     def fake_command(self,argv,**kw):
         self.calls.append(argv)
@@ -34,7 +34,9 @@ class ReviewDeployTests(unittest.TestCase):
         if 'imagetools' in argv:
             return json.dumps({'digest':self.digest}) if argv[-1]=='{{json .Manifest}}' else json.dumps({'config':{'Labels':self.labels}})
         if argv[:3]==['docker','image','ls']:return self.images
+        if argv[:3]==['docker','image','inspect'] and argv[4]=='{{json .RepoTags}}': return json.dumps(self.repo_tags.get(argv[-1], []))
         if argv[:2]==['docker','inspect']:
+            if argv[3]=='{{json .RepoTags}}': return json.dumps(self.repo_tags.get(argv[-1], []))
             return 'pm-tool-review-db' if argv[-1].endswith('db-1') else 'sha256:'+'b'*64 if argv[3]=='{{.Image}}' else 'pm-tool-review:'+self.current
         if 'psql' in argv:return ''
         if argv[0].endswith('pm-tool-review-backup'):return 'Verified private dump: /private/dump'
@@ -84,11 +86,13 @@ class ReviewDeployTests(unittest.TestCase):
     def test_success_prunes_only_old_deploy_images(self):
         image=lambda c:'sha256:'+c*64
         rows=[(image('9'),self.sha),(image('8'),'8'*40),(image('7'),'7'*40),(image('b'),'b'*40),(image('b'),'rollback-'+'b'*64),
-              (image('6'),'manual'),(image('5'),'5'*40)]
+              (image('6'),'manual'),(image('5'),'5'*40),(image('4'),'4'*40)]
         self.images='\n'.join(i+' '+t for i,t in rows)
+        self.repo_tags.update({i:['pm-tool-review:'+tag] for i,tag in rows})
+        self.repo_tags[image('5')]=['pm-tool-review:'+'5'*40, 'local/manual-rollback:keep']
         self.deploy()
-        # Newest three kept; the rollback image and a hand-named image are never removed.
-        self.assertEqual([c[-1] for c in self.calls if c[:3]==['docker','image','rm']],[image('5')])
+        # Newest three kept; rollback, hand-named, and externally aliased images are never removed.
+        self.assertEqual([c[-1] for c in self.calls if c[:3]==['docker','image','rm']],[image('4')])
 
 
 if __name__=='__main__':unittest.main()

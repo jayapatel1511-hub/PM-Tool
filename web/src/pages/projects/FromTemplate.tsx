@@ -1,5 +1,5 @@
 import { useFlag } from '@/lib/auth'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { ErrorBanner, Field, Section, Spinner, selectCls, tdCls, thCls } from '@/components/hub/common'
@@ -8,31 +8,27 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { useReference } from '@/hooks/data'
-import { ApiError, get, post } from '@/lib/api'
+import { useProjectRefresh, useReference } from '@/hooks/data'
+import type { components } from '@/gen/api'
+import { ApiError, typedRequest } from '@/lib/api'
 import { fmtDate } from '@/lib/format'
 import { runtimeText, plural, t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import type { ProjectDetail } from '@/lib/types'
 import type { CreateContext } from './CreateProject'
 
-export interface TemplateRow { id: string; familyId: string; name: string; description?: string; version?: number; status: string; milestones: number; deliverables: number; tasks: number; roles: number; projects: number }
-interface TemplateDetail { id: string; offsetDayKind?: string; disciplines: { disciplineId: string; isDefaultIncluded: boolean }[]; basisSuggestions: { disciplineId: string }[] }
-interface Preview {
-  milestones: { id: string; name: string; milestoneType: string; date?: string | null; source: 'Contract' | 'Offset' | 'None' }[]
-  roles: { id: string; label: string; disciplineId?: string | null; disciplineName?: string | null; from?: string | null; through?: string | null; hours: number; note?: string | null; skipReason?: string | null }[]
-  counts: { milestones: number; deliverables: number; tasks: number; dependencies: number; roles: number }; undated: { milestones: number; deliverables: number; tasks: number }
-}
+type Schemas = components['schemas']
+export type TemplateRow = Schemas['TemplateListRow']
 type Value = { templateId: string; dates: Record<string, string | null> } | null
 
 export function usePublishedTemplates() {
-  return useQuery({ queryKey: ['templates'], queryFn: () => get<{ canEdit: boolean; templates: TemplateRow[] }>('templates'), select: (d) => d.templates.filter((x) => x.status === 'Published') })
+  return useQuery({ queryKey: ['templates'], queryFn: () => typedRequest('get', '/api/v1/templates', {}), select: (d) => d.templates.filter((x) => x.status === 'Published') })
 }
 
 function usePreview(value: Value, ctx: CreateContext) {
   const body = value && { officeId: ctx.form.officeId || null, startDate: ctx.form.startDate || null, milestoneDates: value.dates, disciplineIds: ctx.disciplines.map((d) => d.disciplineId) }
   return useQuery({ queryKey: ['template-preview', body && { id: value!.templateId, ...body }], enabled: !!value,
-    queryFn: () => post<Preview>(`templates/${value!.templateId}/preview`, body) })
+    queryFn: () => typedRequest('post', '/api/v1/templates/{id}/preview', { params: { id: value!.templateId }, body: body! }) })
 }
 
 /** Step 1 (§12.14 steps 1–2, FR-004): choose a template; its default disciplines are ticked for step 2, and each
@@ -40,11 +36,11 @@ function usePreview(value: Value, ctx: CreateContext) {
 export function TemplateSource({ value, onChange, ctx }: { value: Value; onChange: (v: Value) => void; ctx: CreateContext }) {
   const list = usePublishedTemplates()
   const preview = usePreview(value, ctx)
-  const detail = useQuery({ queryKey: ['template', value?.templateId], enabled: !!value, queryFn: () => get<TemplateDetail>(`templates/${value!.templateId}`) })
+  const detail = useQuery({ queryKey: ['template', value?.templateId], enabled: !!value, queryFn: () => typedRequest('get', '/api/v1/templates/{id}', { params: { id: value!.templateId } }) })
   if (!list.data?.length) return null
   const choose = async (id: string) => {
     if (!id) { onChange(null); return }
-    const detail = await get<TemplateDetail>(`templates/${id}`)
+    const detail = await typedRequest('get', '/api/v1/templates/{id}', { params: { id } })
     ctx.setDisciplines(detail.disciplines.filter((d) => d.isDefaultIncluded).map((d) => ({ disciplineId: d.disciplineId, leadUserId: null })))
     onChange({ templateId: id, dates: {} })
   }
@@ -102,7 +98,7 @@ export function TemplateSource({ value, onChange, ctx }: { value: Value; onChang
 export function TemplateSummary({ value, ctx }: { value: Value; ctx: CreateContext }) {
   const rolesOn = useFlag('template_roles')
   const preview = usePreview(value, ctx)
-  const detail = useQuery({ queryKey: ['template', value?.templateId], enabled: !!value, queryFn: () => get<TemplateDetail>(`templates/${value!.templateId}`) })
+  const detail = useQuery({ queryKey: ['template', value?.templateId], enabled: !!value, queryFn: () => typedRequest('get', '/api/v1/templates/{id}', { params: { id: value!.templateId } }) })
   const p = preview.data
   if (!p) return null
   const undated = p.undated.milestones + p.undated.deliverables + p.undated.tasks
@@ -113,7 +109,7 @@ export function TemplateSummary({ value, ctx }: { value: Value; ctx: CreateConte
       <h3 id="tpl-summary" className="text-base/6 font-semibold">{t('tpl.summary')}</h3>
       {detail.data?.offsetDayKind === 'WorkingDays' && <p className="text-xs/[18px] text-muted-foreground">{t('rcv.workingDaysNote')}</p>}
       <p>{t('tpl.creates', { m: p.counts.milestones, d: p.counts.deliverables, k: p.counts.tasks, x: p.counts.dependencies })}{rolesOn && ` · ${t('tpl.roleCount', { count: p.counts.roles ?? 0 })}`}</p>
-      {rolesOn && (p.roles ?? []).length > 0 && <ul className="space-y-1 text-xs/[18px]">{p.roles.map(r => <li key={r.id} className={r.skipReason ? 'text-warn' : 'text-muted-foreground'}>{r.label} · {r.disciplineName ?? t('tpl.noDiscipline')} · {r.hours} h · {r.skipReason ? runtimeText(`tpl.roleSkip.${r.skipReason}`) : `${t('tpl.roleWillCreate')} ${fmtDate(r.from)} → ${fmtDate(r.through)}`}</li>)}</ul>}
+      {rolesOn && (p.roles ?? []).length > 0 && <ul className="space-y-1 text-xs/[18px]">{p.roles?.map(r => <li key={r.id} className={r.skipReason ? 'text-warn' : 'text-muted-foreground'}>{r.label} · {r.disciplineName ?? t('tpl.noDiscipline')} · {r.hours} h · {r.skipReason ? runtimeText(`tpl.roleSkip.${r.skipReason}`) : `${t('tpl.roleWillCreate')} ${fmtDate(r.from)} → ${fmtDate(r.through)}`}</li>)}</ul>}
       {basis.length > 0 && <p>{plural(copied, 'templates.basisCopiedOne', 'templates.basisCopied')}{copied < basis.length && ` ${t('templates.basisSkipped', { n: basis.length - copied })}`}</p>}
       {undated > 0 && <p className="text-warn" role="status"><span aria-hidden>▲ </span>{t('tpl.undatedWarning', { m: p.undated.milestones, d: p.undated.deliverables, k: p.undated.tasks })}</p>}
       <p className="text-xs/[18px] text-muted-foreground">{t('tpl.setupNote')}</p>
@@ -123,16 +119,11 @@ export function TemplateSummary({ value, ctx }: { value: Value; ctx: CreateConte
 
 // Templates are the recommended start once any is published (FR-009), so this source comes first.
 
-interface Proposal {
-  templateId: string; name: string; version: number; projectMilestones: { id: string; key: string; name: string; date?: string }[]
-  disciplines: { disciplineId: string; inProject: boolean; deliverables: number; tasks: number; mapping: { templateMilestoneId: string; name: string; projectMilestoneId?: string | null }[] }[]
-}
-
 /** Add a discipline pack from a template (FR-007, FR-TPL-02): its deliverables and tasks, dated from the project's own
  *  milestones matched by name — the PM confirms or changes each match first. */
 export function AddFromTemplateDialog({ projectId, onClose }: { projectId: string; onClose: (added: boolean) => void }) {
   const ref = useReference()
-  const qc = useQueryClient()
+  const refresh = useProjectRefresh() // the project refresh reaches the Team tab and everything the new items change, through keys.ts
   const list = usePublishedTemplates()
   const [templateId, setTemplateId] = useState('')
   const [disciplineId, setDisciplineId] = useState('')
@@ -141,7 +132,7 @@ export function AddFromTemplateDialog({ projectId, onClose }: { projectId: strin
   const [err, setErr] = useState<unknown>(null)
   const [busy, setBusy] = useState(false)
   const proposal = useQuery({ queryKey: ['template-pack', projectId, templateId], enabled: !!templateId,
-    queryFn: () => get<Proposal>(`projects/${projectId}/template-packs?templateId=${templateId}`) })
+    queryFn: () => typedRequest('get', '/api/v1/projects/{id}/template-packs', { params: { id: projectId }, query: { templateId } }) })
   const pack = proposal.data?.disciplines.find((d) => d.disciplineId === disciplineId)
   const name = (id: string) => ref.data?.disciplines.find((x) => x.id === id)?.name ?? ''
   const pick = (id: string) => {
@@ -152,9 +143,9 @@ export function AddFromTemplateDialog({ projectId, onClose }: { projectId: strin
   const add = async () => {
     setErr(null); setBusy(true)
     try {
-      const r = await post<{ deliverables: number; tasks: number }>(`projects/${projectId}/template-packs`, { templateId, disciplineId, leadUserId: lead, mapping })
+      const r = await typedRequest('post', '/api/v1/projects/{id}/template-packs', { params: { id: projectId }, body: { templateId, disciplineId, leadUserId: lead, mapping } })
       toast.success(t('tpl.packAdded', { d: r.deliverables, k: r.tasks, name: name(disciplineId) }))
-      qc.invalidateQueries({ queryKey: ['p', projectId] })
+      refresh(projectId)
       onClose(true)
     } catch (e) { setErr(e as ApiError) } finally { setBusy(false) }
   }

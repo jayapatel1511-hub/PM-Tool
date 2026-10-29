@@ -4,7 +4,7 @@ import type { QueryClient, QueryKey } from '@tanstack/react-query'
 export const roots = {
   project: ['project'], projects: ['projects'], myWork: ['mywork'], pulse: ['unread-pulse'],
   allocations: ['allocations'], workload: ['workload'], planningGrid: ['planning-grid'],
-  planningEntries: ['planning-entries'], myWeek: ['my-week'],
+  planningEntries: ['planning-entries'], myWeek: ['my-week'], templates: ['templates'],
 } as const
 
 const taskKeys = ['task', 'wtasks', 'wboard', 'gantt', 'coordination', 'workload', 'planning-grid', 'planning-entries', 'my-week', 'mywork-tasks', 'open-work', 'open-items'] as const
@@ -41,6 +41,7 @@ export const itemKeys: Readonly<Record<string, readonly string[]>> = {
   Member: ['coord-options', 'staff', 'workload', 'workspace-coordination', 'open-items'],
   Discipline: ['planner-project-disciplines'], // a project's discipline list, lead or active flag changes the planner entry's picker; the Team tab is under ['p', projectId]
   SavedView: ['views'],
+  Template: ['templates', 'template', 'template-preview', 'template-pack'], // the list, one template with its preview, the wizard's preview and an add-a-pack proposal; the audit type of every change to a template
 }
 
 const coordination = ['reviews', 'review-detail', 'changes', 'change-detail', 'coord-options', 'input-uses', 'handoffs', 'handoff-detail', 'submissions', 'submission-detail', 'submission-choices', 'deliverable', 'workspace-coordination', 'coordination']

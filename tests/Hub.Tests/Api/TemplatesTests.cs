@@ -548,4 +548,303 @@ public sealed class TemplatesTests(HubFactory f)
         (await admin.Put($"/api/v1/templates/{draft.S("id")}/structure", Body(draftBody.I("rowVersion"), DayKind.CalendarDays))).EnsureSuccessStatusCode();
         Assert.Equal(DayKind.WorkingDays, await f.DbAsync(db => db.Templates.Where(x => x.Id == draft.G("id")).Select(x => x.OffsetDayKind).SingleAsync()));
     });
+
+    // ---------- 040-S15-Templates: the typed records must serialise to the bytes the app already reads ----------
+
+    static string[] Keys(JsonNode? n) => [.. n!.AsObject().Select(x => x.Key)];
+    static readonly string[] ListRowKeys = ["id", "familyId", "name", "description", "projectTypeId", "version", "status", "publishedAt", "updatedAt", "rowVersion", "disciplines", "milestones", "deliverables", "tasks"];
+    static readonly string[] ReadHead = ["id", "familyId", "name", "description", "projectTypeId", "version", "status", "publishedAt", "rowVersion", "canEdit", "family", "disciplines", "basisSuggestions", "milestones", "deliverables", "tasks"];
+    static string[] ReadKeys(bool roles, bool workingDays) => [.. ReadHead, .. roles ? new[] { "roles" } : [], "dependencies", .. workingDays ? new[] { "offsetDayKind" } : []];
+
+    async Task Flag(string key, bool value) => (await f.As(TestData.Admin).Put($"/api/v1/admin/settings/flag.{key}", new { value })).EnsureSuccessStatusCode();
+
+    object Culverts(int rowVersion, string name, Guid civil, Guid geo, Guid report, string? offsetDayKind = null) => new
+    {
+        rowVersion, header = new { name, description = "Culverts", projectTypeId = (Guid?)null, offsetDayKind },
+        disciplines = new[] { new { disciplineId = civil, isDefaultIncluded = true }, new { disciplineId = geo, isDefaultIncluded = false } },
+        milestones = new[]
+        {
+            new { @ref = "m1", name = "Kickoff", milestoneType = "Kickoff", anchor = "ProjectStart", offset = (int?)5, completesPhaseId = (Guid?)null, isClientFacing = true },
+            new { @ref = "m2", name = "Design", milestoneType = "Design Submission", anchor = "PreviousMilestone", offset = (int?)30, completesPhaseId = (Guid?)null, isClientFacing = false },
+            new { @ref = "m3", name = "Undated", milestoneType = "Other", anchor = "None", offset = (int?)null, completesPhaseId = (Guid?)null, isClientFacing = false },
+        },
+        deliverables = new[]
+        {
+            new { @ref = "d1", disciplineId = civil, name = "Culvert design", deliverableTypeId = report, milestoneRef = (string?)"m2", offset = (int?)-5, requiresReview = true, description = (string?)"Drawings" },
+            new { @ref = "d2", disciplineId = geo, name = "Borehole report", deliverableTypeId = report, milestoneRef = (string?)null, offset = (int?)null, requiresReview = false, description = (string?)null },
+        },
+        tasks = new[]
+        {
+            new { @ref = "t1", disciplineId = civil, deliverableRef = (string?)"d1", name = "Draft", description = (string?)"First", requiresReview = true, priority = (string?)"High", estimatedHours = (decimal?)8.5m, offset = (int?)-3, assignTo = (string?)"DisciplineLead" },
+            new { @ref = "t2", disciplineId = civil, deliverableRef = (string?)null, name = "Check", description = (string?)null, requiresReview = false, priority = (string?)null, estimatedHours = (decimal?)null, offset = (int?)null, assignTo = (string?)null },
+        },
+        dependencies = new[] { new { predecessor = "t1", successor = "t2" } },
+        roles = new[]
+        {
+            new { @ref = "r1", disciplineId = (Guid?)civil, label = "Civil reviewer", startMilestoneRef = (string?)"m1", startOffsetDays = 0, endMilestoneRef = (string?)"m2", endOffsetDays = 3, hours = 12.5m, note = (string?)"Needed" },
+            new { @ref = "r2", disciplineId = (Guid?)null, label = "Open skipped", startMilestoneRef = (string?)"m3", startOffsetDays = 0, endMilestoneRef = (string?)"m2", endOffsetDays = 0, hours = 4m, note = (string?)null },
+        },
+    };
+
+    [Fact, Trait("flag-off", "template_roles"), Trait("flag-on", "template_roles"), Trait("flag-off", "template_working_days"), Trait("flag-on", "template_working_days")]
+    public async Task Template_create_read_save_and_list_keep_their_answers_and_shape() // 040-S15-Templates
+    {
+        var (admin, pm) = (f.As(TestData.Admin), f.As(TestData.Pm));
+        var (civil, geo, report) = (await d.Discipline("Civil"), await d.Discipline("Geotechnical"), await d.DeliverableType("Report"));
+        try
+        {
+            foreach (var (roles, workingDays) in new[] { (false, false), (true, false), (true, true), (false, true) })
+            {
+                await Flag("template_roles", roles); await Flag("template_working_days", workingDays);
+                var name = $"Shape {(roles ? "R" : "r")}{(workingDays ? "W" : "w")} " + Guid.NewGuid().ToString("N")[..6];
+
+                // Creating: 201 with a Location, the id and the version, nothing else.
+                var made = await admin.Post("/api/v1/templates", new { name, description = "Culverts", offsetDayKind = workingDays ? DayKind.WorkingDays : null });
+                var t = await made.Json(201);
+                var id = t.G("id");
+                Assert.Equal(["id", "rowVersion"], Keys(t));
+                Assert.Equal($"/api/v1/templates/{id}", made.Headers.Location!.OriginalString);
+                Assert.Equal(await f.DbAsync(db => db.Templates.Where(x => x.Id == id).Select(x => x.RowVersion).SingleAsync()), t.I("rowVersion"));
+                Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Alex).Post("/api/v1/templates", new { name })).StatusCode);
+                Assert.Equal(HttpStatusCode.BadRequest, (await admin.Post("/api/v1/templates", new { name = "" })).StatusCode);
+
+                // A new Draft: every property written, nulls included; the flag-gated ones present only while their flag is on.
+                var fresh = await Template(id, TestData.Admin);
+                Assert.Equal(ReadKeys(roles, workingDays), Keys(fresh));
+                Assert.Equal((name, "Draft", true, 0), (fresh.S("name"), fresh.S("status"), fresh["canEdit"]!.GetValue<bool>(), fresh["disciplines"]!.AsArray().Count));
+                Assert.Null(fresh["version"]); Assert.Null(fresh["publishedAt"]); Assert.Null(fresh["projectTypeId"]);
+                Assert.Equal(["id", "version", "status", "publishedAt"], Keys(Assert.Single(fresh["family"]!.AsArray())));
+                if (roles) Assert.Empty(fresh["roles"]!.AsArray());
+                if (workingDays) Assert.Equal(DayKind.WorkingDays, fresh.S("offsetDayKind"));
+                Assert.Equal(HttpStatusCode.NotFound, (await pm.GetAsync($"/api/v1/templates/{id}")).StatusCode); // drafts are for editors
+                Assert.Equal(HttpStatusCode.NotFound, (await admin.GetAsync($"/api/v1/templates/{Guid.NewGuid()}")).StatusCode);
+
+                // Saving: the answer is the read, byte for byte, with every nested row written in its order.
+                var structure = Culverts(t.I("rowVersion"), name, civil, geo, report, workingDays ? DayKind.WorkingDays : null);
+                Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Alex).Put($"/api/v1/templates/{id}/structure", structure)).StatusCode);
+                var saved = await (await admin.Put($"/api/v1/templates/{id}/structure", structure)).Json();
+                Assert.Equal(ReadKeys(roles, workingDays), Keys(saved));
+                Assert.Equal(saved.ToJsonString(), (await Template(id, TestData.Admin)).ToJsonString());
+                Assert.Equal(HttpStatusCode.Conflict, (await admin.Put($"/api/v1/templates/{id}/structure", structure)).StatusCode); // stale
+                Assert.Equal(["disciplineId", "isDefaultIncluded", "templateDisciplineId"], Keys(saved["disciplines"]![0]));
+                Assert.Equal([civil, geo], saved["disciplines"]!.AsArray().Select(x => x!.G("disciplineId")));
+                Assert.Equal(["ref", "name", "milestoneType", "anchor", "offset", "completesPhaseId", "isClientFacing"], Keys(saved["milestones"]![0]));
+                Assert.Equal(["ref", "disciplineId", "name", "deliverableTypeId", "milestoneRef", "offset", "requiresReview", "description"], Keys(saved["deliverables"]![0]));
+                Assert.Equal(["ref", "disciplineId", "deliverableRef", "name", "description", "requiresReview", "priority", "estimatedHours", "offset", "assignTo"], Keys(saved["tasks"]![0]));
+                Assert.Equal(["predecessor", "successor"], Keys(Assert.Single(saved["dependencies"]!.AsArray())));
+                var (m, dl, k) = (saved["milestones"]!.AsArray(), saved["deliverables"]!.AsArray(), saved["tasks"]!.AsArray());
+                Assert.True(Guid.TryParse(m[0]!.S("ref"), out _)); // refs are the stored ids, not the names the client sent
+                Assert.Equal(m[1]!.S("ref"), dl[0]!.S("milestoneRef"));
+                Assert.Null(dl[1]!["milestoneRef"]); Assert.Null(dl[1]!["offset"]); Assert.Null(dl[1]!["description"]);
+                Assert.Equal(dl[0]!.S("ref"), k[0]!.S("deliverableRef"));
+                Assert.Equal(("High", 8.5m, -3, "DisciplineLead"), (k[0]!.S("priority"), k[0]!["estimatedHours"]!.GetValue<decimal>(), k[0]!["offset"]!.GetValue<int>(), k[0]!.S("assignTo")));
+                Assert.Equal(("Medium", "Unassigned"), (k[1]!.S("priority"), k[1]!.S("assignTo"))); Assert.Null(k[1]!["estimatedHours"]); Assert.Null(k[1]!["offset"]);
+                Assert.Equal((k[0]!.S("ref"), k[1]!.S("ref")), (saved["dependencies"]![0]!.S("predecessor"), saved["dependencies"]![0]!.S("successor")));
+                if (roles)
+                {
+                    var r = saved["roles"]!.AsArray();
+                    Assert.Equal(["ref", "disciplineId", "label", "startMilestoneRef", "startOffsetDays", "endMilestoneRef", "endOffsetDays", "hours", "note"], Keys(r[0]));
+                    Assert.Equal((civil, "Civil reviewer", m[0]!.S("ref"), 12.5m, "Needed"), (r[0]!.G("disciplineId"), r[0]!.S("label"), r[0]!.S("startMilestoneRef"), r[0]!["hours"]!.GetValue<decimal>(), r[0]!.S("note")));
+                    Assert.Null(r[1]!["disciplineId"]); Assert.Null(r[1]!["note"]);
+                }
+
+                // The list: editors see every version and the structure counts; the roles count only while the flag is on.
+                var list = await (await admin.GetAsync("/api/v1/templates")).Json();
+                Assert.Equal(["canEdit", "templates"], Keys(list));
+                Assert.True(list["canEdit"]!.GetValue<bool>());
+                var row = list["templates"]!.AsArray().Single(x => x!.G("id") == id)!;
+                Assert.Equal([.. ListRowKeys, .. roles ? new[] { "roles" } : [], "projects"], Keys(row));
+                Assert.Equal((2, 3, 2, 2, 0), (row.I("disciplines"), row.I("milestones"), row.I("deliverables"), row.I("tasks"), row.I("projects")));
+                if (roles) Assert.Equal(2, row.I("roles"));
+                Assert.Equal((name, "Draft", "Culverts"), (row.S("name"), row.S("status"), row.S("description")));
+                Assert.Equal(saved.I("rowVersion"), row.I("rowVersion"));
+                var visible = await (await pm.GetAsync("/api/v1/templates")).Json();
+                Assert.False(visible["canEdit"]!.GetValue<bool>());
+                Assert.DoesNotContain(visible["templates"]!.AsArray(), x => x!.G("id") == id);
+            }
+        }
+        finally { await Flag("template_roles", false); await Flag("template_working_days", false); }
+    }
+
+    [Fact, Trait("flag-off", "template_roles"), Trait("flag-on", "template_roles")]
+    public async Task Template_preview_publish_and_draft_keep_their_answers_and_shape() // 040-S15-Templates
+    {
+        var (admin, pm, alex) = (f.As(TestData.Admin), f.As(TestData.Pm), f.As(TestData.Alex));
+        var (civil, geo, report) = (await d.Discipline("Civil"), await d.Discipline("Geotechnical"), await d.DeliverableType("Report"));
+        var name = "Lifecycle " + Guid.NewGuid().ToString("N")[..6];
+        var t = await (await admin.Post("/api/v1/templates", new { name })).Json(201);
+        var id = t.G("id");
+        Assert.Equal(HttpStatusCode.BadRequest, (await admin.Post($"/api/v1/templates/{id}/publish", new { rowVersion = t.I("rowVersion") })).StatusCode); // nothing to publish yet
+        try
+        {
+            await Flag("template_roles", true);
+            var saved = await (await admin.Put($"/api/v1/templates/{id}/structure", Culverts(t.I("rowVersion"), name, civil, geo, report))).Json();
+
+            // Preview: the dated milestones, what a project would get and what stays undated; roles only while their flag is on.
+            var on = await pm.Post($"/api/v1/templates/{id}/preview", new { startDate = "2026-10-05", disciplineIds = new[] { civil } }); // a Draft is not the PM's to see
+            Assert.Equal(HttpStatusCode.NotFound, on.StatusCode);
+            var preview = await (await admin.Post($"/api/v1/templates/{id}/preview", new { startDate = "2026-10-05", disciplineIds = new[] { civil } })).Json();
+            Assert.Equal(["milestones", "counts", "undated", "roles"], Keys(preview));
+            Assert.Equal(["id", "name", "milestoneType", "sortOrder", "date", "source"], Keys(preview["milestones"]![0]));
+            Assert.Equal(["2026-10-10", "2026-11-09", null], preview["milestones"]!.AsArray().Select(x => x!["date"]?.GetValue<string>()));
+            Assert.Equal(["Offset", "Offset", "None"], preview["milestones"]!.AsArray().Select(x => x!.S("source")));
+            Assert.Equal(["milestones", "deliverables", "tasks", "dependencies", "roles"], Keys(preview["counts"]));
+            Assert.Equal((3, 1, 2, 1, 2), (preview["counts"]!.I("milestones"), preview["counts"]!.I("deliverables"), preview["counts"]!.I("tasks"), preview["counts"]!.I("dependencies"), preview["counts"]!.I("roles")));
+            Assert.Equal(["milestones", "deliverables", "tasks"], Keys(preview["undated"]));
+            Assert.Equal(["id", "label", "disciplineId", "disciplineName", "from", "through", "hours", "note", "skipReason"], Keys(preview["roles"]![0]));
+            Assert.Equal(("2026-10-10", "2026-11-12", "Civil", null), (preview["roles"]![0]!.S("from"), preview["roles"]![0]!.S("through"), preview["roles"]![0]!.S("disciplineName"), preview["roles"]![0]!["skipReason"]?.GetValue<string>()));
+            Assert.Equal("start_milestone_undated", preview["roles"]![1]!.S("skipReason"));
+            Assert.Null(preview["roles"]![1]!["from"]); Assert.Null(preview["roles"]![1]!["disciplineName"]);
+            await Flag("template_roles", false);
+            var plain = await (await admin.Post($"/api/v1/templates/{id}/preview", new { startDate = "2026-10-05", disciplineIds = new[] { civil } })).Json();
+            Assert.Equal(["milestones", "counts", "undated"], Keys(plain));
+            Assert.Equal(["milestones", "deliverables", "tasks", "dependencies"], Keys(plain["counts"]));
+            Assert.Equal(HttpStatusCode.NotFound, (await admin.Post($"/api/v1/templates/{Guid.NewGuid()}/preview", new { startDate = "2026-10-05" })).StatusCode);
+
+            // Publishing: 200 with the id, the new version number, the status and the stored version; refusals as before.
+            Assert.Equal(HttpStatusCode.Forbidden, (await alex.Post($"/api/v1/templates/{id}/publish", new { rowVersion = saved.I("rowVersion") })).StatusCode);
+            Assert.Equal(HttpStatusCode.NotFound, (await admin.Post($"/api/v1/templates/{Guid.NewGuid()}/publish", new { rowVersion = 1 })).StatusCode);
+            Assert.Equal(428, (int)(await admin.Post($"/api/v1/templates/{id}/publish", new { })).StatusCode);
+            Assert.Equal("concurrency_conflict", (await (await admin.Post($"/api/v1/templates/{id}/publish", new { rowVersion = saved.I("rowVersion") + 50 })).Json(409)).S("code"));
+            var v1 = await (await admin.Post($"/api/v1/templates/{id}/publish", new { rowVersion = saved.I("rowVersion") })).Json();
+            Assert.Equal(["id", "version", "status", "rowVersion"], Keys(v1));
+            Assert.Equal((id, 1, "Published"), (v1.G("id"), v1.I("version"), v1.S("status")));
+            Assert.Equal(await f.DbAsync(db => db.Templates.Where(x => x.Id == id).Select(x => x.RowVersion).SingleAsync()), v1.I("rowVersion"));
+            Assert.Equal("template_not_draft", (await (await admin.Post($"/api/v1/templates/{id}/publish", new { rowVersion = v1.I("rowVersion") })).Json(422)).S("code"));
+
+            // A new Draft of a published version: 201 with a Location the first time, 200 with the same Draft after that.
+            Assert.Equal(HttpStatusCode.Forbidden, (await alex.Post($"/api/v1/templates/{id}/draft", new { })).StatusCode);
+            Assert.Equal(HttpStatusCode.NotFound, (await admin.Post($"/api/v1/templates/{Guid.NewGuid()}/draft", new { })).StatusCode);
+            var first = await admin.Post($"/api/v1/templates/{id}/draft", new { });
+            var draft = await first.Json(201);
+            Assert.Equal(["id", "rowVersion"], Keys(draft));
+            Assert.Equal($"/api/v1/templates/{draft.S("id")}", first.Headers.Location!.OriginalString);
+            Assert.NotEqual(id, draft.G("id"));
+            var again = await admin.Post($"/api/v1/templates/{draft.S("id")}/draft", new { }); // from the Draft itself, or any version of its family
+            var same = await again.Json();
+            Assert.Equal(["id", "rowVersion"], Keys(same));
+            Assert.Null(again.Headers.Location);
+            Assert.Equal((draft.G("id"), draft.I("rowVersion")), (same.G("id"), same.I("rowVersion")));
+            var copy = await Template(draft.G("id"), TestData.Admin);
+            Assert.Equal(("Draft", 2, 3, 2), (copy.S("status"), copy["family"]!.AsArray().Count, copy["milestones"]!.AsArray().Count, copy["tasks"]!.AsArray().Count));
+            Assert.Equal([null, 1], copy["family"]!.AsArray().Select(x => x!["version"]?.GetValue<int>()));
+        }
+        finally { await Flag("template_roles", false); }
+    }
+
+    [Fact]
+    public async Task Retiring_and_discarding_templates_answer_204_and_refuse_what_cannot_change() // POST retire and DELETE template were uncalled (040-S15-Templates)
+    {
+        var (admin, pm, alex) = (f.As(TestData.Admin), f.As(TestData.Pm), f.As(TestData.Alex));
+        var (civil, geo, report) = (await d.Discipline("Civil"), await d.Discipline("Geotechnical"), await d.DeliverableType("Report"));
+        async Task<(Guid Id, int Version)> Build(string tag)
+        {
+            var name = $"{tag} " + Guid.NewGuid().ToString("N")[..6];
+            var t = await (await admin.Post("/api/v1/templates", new { name })).Json(201);
+            var saved = await (await admin.Put($"/api/v1/templates/{t.S("id")}/structure", Culverts(t.I("rowVersion"), name, civil, geo, report))).Json();
+            return (t.G("id"), saved.I("rowVersion"));
+        }
+        Task<int> Rows(Guid id) => f.DbAsync(async db => await db.TemplateMilestones.CountAsync(x => x.TemplateId == id) + await db.TemplateTasks.CountAsync(x => x.TemplateId == id)
+            + await db.TemplateDeliverables.CountAsync(x => x.TemplateId == id) + await db.TemplateDisciplines.CountAsync(x => x.TemplateId == id) + await db.TemplateDependencies.CountAsync(x => x.TemplateId == id));
+        Task<bool> Logged(Guid id, string action) => f.DbAsync(db => db.ActivityLog.AnyAsync(a => a.ItemType == ItemType.Template && a.ItemId == id && a.Action == action));
+        Task<string> Status(Guid id) => f.DbAsync(db => db.Templates.Where(x => x.Id == id).Select(x => x.Status).SingleAsync());
+
+        // Retiring: only a published version, only an editor; 204 and no body, the version stays readable.
+        var (live, rv) = await Build("Retire");
+        Assert.Equal("template_not_published", (await (await admin.Post($"/api/v1/templates/{live}/retire", new { })).Json(422)).S("code")); // a Draft
+        (await admin.Post($"/api/v1/templates/{live}/publish", new { rowVersion = rv })).EnsureSuccessStatusCode();
+        Assert.Equal(HttpStatusCode.Forbidden, (await pm.Post($"/api/v1/templates/{live}/retire", new { })).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await alex.Post($"/api/v1/templates/{live}/retire", new { })).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await admin.Post($"/api/v1/templates/{Guid.NewGuid()}/retire", new { })).StatusCode);
+        Assert.Equal("Published", await Status(live));
+        var retired = await admin.Post($"/api/v1/templates/{live}/retire", new { });
+        Assert.Equal((HttpStatusCode.NoContent, ""), (retired.StatusCode, await retired.Content.ReadAsStringAsync()));
+        Assert.Equal("Retired", await Status(live));
+        Assert.True(await Logged(live, "Retired"));
+        Assert.Equal("template_not_published", (await (await admin.Post($"/api/v1/templates/{live}/retire", new { })).Json(422)).S("code")); // already retired
+        Assert.Equal("Retired", (await Template(live, TestData.Admin)).S("status"));
+        Assert.DoesNotContain((await (await pm.GetAsync("/api/v1/templates")).Json())["templates"]!.AsArray(), x => x!.G("id") == live);
+        Assert.Equal("template_unavailable", (await (await pm.Post("/api/v1/projects", new { projectNumber = TestData.Number(), name = "Retired source", clientId = await d.Client(), officeId = await d.Office(), startDate = "2026-10-05",
+            disciplines = new[] { new { disciplineId = civil, leadUserId = (Guid?)U(TestData.Marc) } }, templateId = live })).Json(422)).S("code")); // the wizard is refused
+
+        // Discarding: only a Draft, only an editor; 204 and no body, and the whole structure goes with it.
+        var (draft, _) = await Build("Discard");
+        Assert.True(await Rows(draft) > 0);
+        Assert.Equal(HttpStatusCode.Forbidden, (await pm.DeleteAsync($"/api/v1/templates/{draft}")).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await alex.DeleteAsync($"/api/v1/templates/{draft}")).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await admin.DeleteAsync($"/api/v1/templates/{Guid.NewGuid()}")).StatusCode);
+        Assert.Equal("template_not_draft", (await (await admin.DeleteAsync($"/api/v1/templates/{live}")).Json(422)).S("code")); // retired
+        var (published, prv) = await Build("Keep");
+        (await admin.Post($"/api/v1/templates/{published}/publish", new { rowVersion = prv })).EnsureSuccessStatusCode();
+        Assert.Equal("template_not_draft", (await (await admin.DeleteAsync($"/api/v1/templates/{published}")).Json(422)).S("code"));
+        Assert.True(await Rows(published) > 0);
+        var discarded = await admin.DeleteAsync($"/api/v1/templates/{draft}");
+        Assert.Equal((HttpStatusCode.NoContent, ""), (discarded.StatusCode, await discarded.Content.ReadAsStringAsync()));
+        Assert.Equal((0, false), (await Rows(draft), await f.DbAsync(db => db.Templates.AnyAsync(x => x.Id == draft))));
+        Assert.True(await Logged(draft, "Discarded"));
+        Assert.Equal(HttpStatusCode.NotFound, (await admin.DeleteAsync($"/api/v1/templates/{draft}")).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await admin.GetAsync($"/api/v1/templates/{draft}")).StatusCode);
+    }
+
+    [Fact]
+    public async Task Template_pack_and_basis_answers_keep_their_shape() // 040-S15-Templates
+    {
+        var (admin, pm) = (f.As(TestData.Admin), f.As(TestData.Pm));
+        var tid = await Reference();
+        var (res, _) = await FromTemplate(tid, ["Project Management", "Civil"]);
+        var pid = (await res.Json(201)).G("id");
+        var transport = await d.Discipline("Transportation"); var civil = await d.Discipline("Civil");
+        var root = $"/api/v1/projects/{pid}/template-packs";
+
+        // The proposal: the template, the project's milestones, and per template discipline what it adds and how its milestones map.
+        var proposal = await (await pm.GetAsync($"{root}?templateId={tid}")).Json();
+        Assert.Equal(["templateId", "name", "version", "projectMilestones", "disciplines"], Keys(proposal));
+        Assert.Equal((tid, ReferenceTemplate.Name, 1), (proposal.G("templateId"), proposal.S("name"), proposal.I("version")));
+        Assert.Equal(["id", "key", "name", "date"], Keys(proposal["projectMilestones"]![0]));
+        var packs = proposal["disciplines"]!.AsArray();
+        Assert.All(packs, x => Assert.Equal(["disciplineId", "inProject", "deliverables", "tasks", "mapping"], Keys(x)));
+        Assert.Equal(["templateMilestoneId", "name", "projectMilestoneId"], Keys(packs[0]!["mapping"]![0]));
+        Assert.True(packs.Single(x => x!.G("disciplineId") == civil)!["inProject"]!.GetValue<bool>());
+        var pack = packs.Single(x => x!.G("disciplineId") == transport)!;
+        Assert.False(pack["inProject"]!.GetValue<bool>());
+        var map = pack["mapping"]!.AsArray().Single()!;
+        Assert.Equal("85% Design Submission", map.S("name"));
+        Assert.NotNull(map["projectMilestoneId"]); // matched by name, as the PM would see it
+        Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Alex).GetAsync($"{root}?templateId={tid}")).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await pm.GetAsync($"/api/v1/projects/{Guid.NewGuid()}/template-packs?templateId={tid}")).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await pm.GetAsync($"{root}?templateId={Guid.NewGuid()}")).StatusCode);
+        var draft = await (await admin.Post("/api/v1/templates", new { name = "Pack draft " + Guid.NewGuid().ToString("N")[..6] })).Json(201);
+        Assert.Equal(HttpStatusCode.NotFound, (await pm.GetAsync($"{root}?templateId={draft.S("id")}")).StatusCode);
+        Assert.Equal("template_unavailable", (await (await admin.GetAsync($"{root}?templateId={draft.S("id")}")).Json(422)).S("code"));
+
+        // Adding: 200 with what was created, in that order; adding again reactivates the discipline and adds its items again.
+        var added = await (await pm.Post(root, new { templateId = tid, disciplineId = transport, leadUserId = U(TestData.Rita), mapping = new Dictionary<string, Guid?> { [map.S("templateMilestoneId")] = map.G("projectMilestoneId") } })).Json();
+        Assert.Equal(["deliverables", "tasks", "dependencies"], Keys(added));
+        Assert.Equal((1, 4, 3), (added.I("deliverables"), added.I("tasks"), added.I("dependencies")));
+        Assert.Equal("validation", (await (await pm.Post(root, new { templateId = tid, disciplineId = Guid.NewGuid() })).Json(400)).S("code"));
+        Assert.Equal("template_unavailable", (await (await pm.Post(root, new { templateId = draft.G("id"), disciplineId = transport })).Json(422)).S("code"));
+        Assert.Equal(HttpStatusCode.NotFound, (await pm.Post(root, new { templateId = Guid.NewGuid(), disciplineId = transport })).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Alex).Post(root, new { templateId = tid, disciplineId = transport })).StatusCode);
+        Assert.True((await (await pm.GetAsync($"{root}?templateId={tid}")).Json())["disciplines"]!.AsArray().Single(x => x!.G("disciplineId") == transport)!["inProject"]!.GetValue<bool>());
+
+        // Basis suggestions: 201 with a Location and the id alone; the read lists every property; the remove answers 204 and no body.
+        var (name, mine) = ("Basis shape " + Guid.NewGuid().ToString("N")[..6], await d.Discipline("Civil"));
+        var t = await (await admin.Post("/api/v1/templates", new { name })).Json(201);
+        var saved = await (await admin.Put($"/api/v1/templates/{t.S("id")}/structure", Culverts(t.I("rowVersion"), name, mine, await d.Discipline("Geotechnical"), await d.DeliverableType("Report")))).Json();
+        var td = saved["disciplines"]![0]!.G("templateDisciplineId");
+        var made = await admin.Post($"/api/v1/templates/{t.S("id")}/design-basis", new { templateDisciplineId = td, kind = "Criterion", title = "Design storm", scope = "Site", statement = "Return period", numericValue = 5m, units = "years",
+            sourceSystem = "Standard", stableSourceId = "S-1", sourceUrl = "https://example.test/standard", declaredRevision = "A" });
+        var b = await made.Json(201);
+        Assert.Equal(["id"], Keys(b));
+        Assert.Equal($"/api/v1/templates/{t.S("id")}/design-basis/{b.S("id")}", made.Headers.Location!.OriginalString);
+        var minimal = await (await admin.Post($"/api/v1/templates/{t.S("id")}/design-basis", new { templateDisciplineId = td, kind = "Assumption", title = "Water table", scope = "Site", statement = "Below 3 m" })).Json(201);
+        var listed = (await Template(t.G("id"), TestData.Admin))["basisSuggestions"]!.AsArray();
+        Assert.All(listed, x => Assert.Equal(["id", "disciplineId", "kind", "title", "scope", "statement", "numericValue", "units", "sourceSystem", "stableSourceId", "sourceUrl", "declaredRevision"], Keys(x)));
+        var full = listed.Single(x => x!.G("id") == b.G("id"))!;
+        Assert.Equal((mine, "Criterion", 5m, "years", "A"), (full.G("disciplineId"), full.S("kind"), full["numericValue"]!.GetValue<decimal>(), full.S("units"), full.S("declaredRevision")));
+        var bare = listed.Single(x => x!.G("id") == minimal.G("id"))!;
+        Assert.All(new[] { "numericValue", "units", "sourceSystem", "stableSourceId", "sourceUrl", "declaredRevision" }, key => { Assert.True(bare.AsObject().ContainsKey(key)); Assert.Null(bare[key]); });
+        var removed = await admin.DeleteAsync($"/api/v1/templates/{t.S("id")}/design-basis/{b.S("id")}");
+        Assert.Equal((HttpStatusCode.NoContent, ""), (removed.StatusCode, await removed.Content.ReadAsStringAsync()));
+    }
 }

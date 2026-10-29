@@ -18,6 +18,7 @@ const os = require('node:os')
 const path = require('node:path')
 const { startPreview, newMockPage, me, project, task, taskDetail, panelIds, deliverableDetail, links, comments } = require('./platform-fixtures.cjs')
 const { dependencyEdge, dependencyTask, taskDependencies } = require('./dependencies.fixture.cjs')
+const { templateList } = require('./templates.fixture.cjs')
 
 const delay = 300
 const port = Number(process.env.DATA_ENTRY_TEST_PORT ?? 7206)
@@ -475,7 +476,7 @@ async function runEditPrompt(base, on) {
   const milestone = { id: panelIds.milestone, projectId: project.id, key: 'M-001', name: 'Issue for review', milestoneType: 'Design Submission', date: '2026-11-02', originalDate: '2026-11-02', isClientFacing: true,
     isComplete: false, isCancelled: false, rowVersion: 1, isSubmission: false, status: 'Open', statusReasons: [], slipDays: 0, deliverableTotal: 0, deliverableIssued: 0, taskTotal: 0, taskComplete: 0, taskOpen: 0, taskOverdue: 0, taskBlocked: 0 }
   await page.route(new RegExp(`/api/v1/projects/${project.id}/milestones(\\?.*)?$`), route => route.request().method() === 'GET' ? route.fulfill({ json: [milestone] }) : route.fallback())
-  await page.route(/\/api\/v1\/templates$/, route => route.request().method() === 'GET' ? route.fulfill({ json: { canEdit: true, templates: [] } }) : route.fallback())
+  await page.route(/\/api\/v1\/templates$/, route => route.request().method() === 'GET' ? route.fulfill({ json: templateList([]) }) : route.fallback())
   try {
     await start(`/projects/${project.projectNumber}/milestones`)
     const edit = page.getByRole('dialog', { name: 'Edit M-001' })

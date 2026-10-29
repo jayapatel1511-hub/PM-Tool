@@ -5,6 +5,7 @@ const { clientConfig } = require('./config.fixture.cjs')
 const { viewList } = require('./views.fixture.cjs')
 const { myWork, myWorkPerson } = require('./my-work.fixture.cjs')
 const { meView, referenceData, referenceClient, referenceOffice } = require('./me.fixture.cjs')
+const { templateRead, templateRow, templateList, templatePreview, previewMilestone, templateCreated } = require('./templates.fixture.cjs')
 const assert = require('node:assert/strict')
 const { spawn } = require('node:child_process')
 const path = require('node:path')
@@ -22,7 +23,9 @@ const me = () => meView({ id: uid, displayName: readOnly ? 'Read Only' : 'Priya 
   preferences: { denseRows: false }, flags: { onboarding_card: flagEnabled, route_counter: flagEnabled, project_import: flagEnabled, my_work_follow_up: true, project_status_note: true, template_roles: true } })
 const work = myWork({ person: myWorkPerson(uid, 'Priya PM'), today: '2026-10-18' })
 const project = { id: pid, projectNumber: 'P-DEMO', name: 'Synthetic project', client: 'Pilot client', pmName: 'Priya PM', pm: { displayName: 'Priya PM' }, office: { name: 'Halifax' }, status: 'Active', visibility: 'Open', rowVersion: 1, links: [], disciplines: [], starred: false, myRoles: ['PM'], health: { computed: 'Green', reported: 'Green', overrideActive: false, reasons: [] }, statusNote: { text: 'Current note', at: '2026-10-17T12:00:00Z', author: 'Priya PM', header: { computedHealth: 'Green', reportedHealth: 'Green', openAttention: 0 } }, permissions: { edit: { ok: true }, needsReason: false, isPm: true, leadOf: [], createTaskIn: [], createDeliverableIn: [], transitions: [] } }
-const template = { id: id(10), familyId: id(11), name: 'Synthetic template', description: 'Browser fixture', status: 'Draft', rowVersion: 1, canEdit: true, family: [], disciplines: [], milestones: [{ ref: 'm1', name: 'Kickoff', milestoneType: 'Kickoff', anchor: 'ProjectStart', offset: 0, isClientFacing: true }], deliverables: [], tasks: [], dependencies: [], roles: [{ ref: 'r1', disciplineId: null, label: 'Project lead', startMilestoneRef: 'm1', startOffsetDays: 0, startOffsetDayKind: 'WorkingDay', endMilestoneRef: null, endOffsetDays: 0, endOffsetDayKind: 'WorkingDay', hours: 8, note: null }], basisSuggestions: [] }
+const template = templateRead({ id: id(10), familyId: id(11), name: 'Synthetic template', description: 'Browser fixture',
+  milestones: [{ ref: 'm1', name: 'Kickoff', milestoneType: 'Kickoff', anchor: 'ProjectStart', offset: 0, completesPhaseId: null, isClientFacing: true }],
+  roles: [{ ref: 'r1', disciplineId: null, label: 'Project lead', startMilestoneRef: 'm1', startOffsetDays: 0, endMilestoneRef: null, endOffsetDays: 0, hours: 8, note: null }] })
 
 ;(async () => {
   const server = spawn(process.execPath, ['node_modules/vite/bin/vite.js', 'preview', '--host', '127.0.0.1', '--port', port, '--strictPort'], { cwd: path.resolve(__dirname, '..'), stdio: 'inherit' })
@@ -52,10 +55,10 @@ const template = { id: id(10), familyId: id(11), name: 'Synthetic template', des
       else if (p === `projects/${pid}` || p === 'projects/P-DEMO') data = project
       else if (p === `projects/${pid}/status-note` || p === `projects/P-DEMO/status-note`) data = project.statusNote
       else if (p === 'reference') data = referenceData({ clients: [referenceClient(id(20), 'Pilot client')], offices: [referenceOffice(id(21), 'Halifax')] })
-      else if (p === 'templates') data = method === 'POST' ? { id: template.id } : { canEdit: true, templates: [{ ...template, milestones: 1, deliverables: 0, tasks: 0, projects: 0 }] }
+      else if (p === 'templates') data = method === 'POST' ? templateCreated(template.id) : templateList([templateRow({ id: template.id, familyId: template.familyId, name: template.name, description: template.description, milestones: 1 })])
       else if (p === `template/${template.id}` || p === `templates/${template.id}`) data = template
       else if (p === `templates/${template.id}/structure` && method === 'PUT') data = template
-      else if (p === `templates/${template.id}/preview`) data = { counts: { milestones: 1, deliverables: 0, tasks: 0, roles: 2 }, undated: { milestones: 1, deliverables: 0, tasks: 0 }, milestones: [{ id: 'm1', name: 'Kickoff', date: '2026-10-20', source: 'ProjectStart' }] }
+      else if (p === `templates/${template.id}/preview`) data = templatePreview({ counts: { milestones: 1, deliverables: 0, tasks: 0, dependencies: 0, roles: 2 }, undated: { milestones: 1, deliverables: 0, tasks: 0 }, milestones: [previewMilestone({ id: 'm1', name: 'Kickoff', date: '2026-10-20' })] })
       else if (p === 'projects/import-preview') { const body = req.postDataJSON(); data = { rows: [{ row: 2, projectNumber: 'P-NEW', name: 'New project', classification: body.csv.includes('Unknown') ? 'Error' : 'Create', error: body.csv.includes('Unknown') ? 'Client not found' : undefined }], creates: body.csv.includes('Unknown') ? 0 : 1, exists: 0, errors: body.csv.includes('Unknown') ? 1 : 0, canApply: !body.csv.includes('Unknown') } }
       else if (p === 'projects/import') { imported = true; data = { rows: [], creates: 1, exists: 0, errors: 0, canApply: true } }
       else if (p === 'route-counts') data = null

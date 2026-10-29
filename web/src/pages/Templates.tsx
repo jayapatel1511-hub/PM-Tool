@@ -13,37 +13,36 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useReference } from '@/hooks/data'
 import { useSafeForm } from '@/hooks/drafts'
-import { ApiError, del, get, post, put } from '@/lib/api'
+import type { components } from '@/gen/api'
+import { ApiError, typedRequest } from '@/lib/api'
 import { useMe, useFlag } from '@/lib/auth'
 import { fmtDate, fmtTime } from '@/lib/format'
 import { t, tv , runtimeText } from '@/lib/i18n'
+import { invalidateChange, roots } from '@/lib/keys'
 import { cn } from '@/lib/utils'
 import { FieldsCommand } from './projects/CoordinationForms'
-import type { TemplateRow } from './projects/FromTemplate'
 
 const MILESTONE_TYPES = ['Kickoff', 'Field Work', 'Design Submission', 'Client Workshop', 'Permit Submission', 'Tender', 'Construction', 'IFC', 'Record Drawings', 'Closeout', 'Other']
 const ANCHORS = ['ProjectStart', 'PreviousMilestone', 'None']
 const ROLES = ['Unassigned', 'DisciplineLead', 'PM']
 const PRIORITIES = ['Low', 'Medium', 'High', 'Critical']
 
-interface Ms { ref: string; name: string; milestoneType: string; anchor: string; offset?: number | null; completesPhaseId?: string | null; isClientFacing: boolean }
-interface Dl { ref: string; disciplineId: string; name: string; deliverableTypeId: string; milestoneRef?: string | null; offset?: number | null; requiresReview: boolean; description?: string | null }
-interface Tk { ref: string; disciplineId: string; deliverableRef?: string | null; name: string; description?: string | null; requiresReview: boolean; priority: string; estimatedHours?: number | null; offset?: number | null; assignTo: string }
-interface Dep { predecessor: string; successor: string }
-interface TplRole { ref: string; disciplineId?: string | null; label: string; startMilestoneRef?: string | null; startOffsetDays: number; endMilestoneRef?: string | null; endOffsetDays: number; hours: number; note?: string | null }
-interface Basis { id: string; disciplineId: string; kind: string; title: string; scope: string; statement: string; numericValue?: number | null; units?: string | null
-  sourceSystem?: string | null; stableSourceId?: string | null; sourceUrl?: string | null; declaredRevision?: string | null }
-interface Detail {
-  id: string; familyId: string; name: string; description?: string | null; projectTypeId?: string | null; version?: number | null; status: string; publishedAt?: string; rowVersion: number
-  offsetDayKind?: string; canEdit: boolean; family: { id: string; version?: number | null; status: string; publishedAt?: string }[]
-  disciplines: { disciplineId: string; isDefaultIncluded: boolean; templateDisciplineId?: string }[]; milestones: Ms[]; deliverables: Dl[]; tasks: Tk[]; dependencies: Dep[]; roles: TplRole[]
-  basisSuggestions: Basis[]
-}
+type Schemas = components['schemas']
+type Ms = Schemas['MilestoneIn']
+type Dl = Schemas['DeliverableIn']
+type Tk = Schemas['TaskIn']
+type Dep = Schemas['DependencyIn']
+type TplRole = Schemas['TemplateRoleIn']
+type Basis = Schemas['TemplateBasisRead']
+/** The template as the editor holds it: the read, with the roles always a list (the server leaves them out while flag.template_roles is off)
+ *  and a discipline ticked in the editor not yet saved, so without the row it will be given. */
+type Detail = Omit<Schemas['TemplateRead'], 'roles' | 'disciplines'> & { roles: TplRole[]; disciplines: (Pick<Schemas['TemplateDisciplineRead'], 'disciplineId' | 'isDefaultIncluded'> & { templateDisciplineId?: string })[] }
+const detailOf = (r: Schemas['TemplateRead']): Detail => ({ ...r, roles: r.roles ?? [] })
 
 const tone = (s: string) => (s === 'Published' ? 'ok' : s === 'Draft' ? 'work' : 'idle') as 'ok' | 'work' | 'idle'
 const newRef = () => `new-${Math.random().toString(36).slice(2, 10)}`
 const num = (v: string) => (v === '' ? null : Number(v))
-const versionLabel = (v: { version?: number | null; status: string }) => (v.version ? `v${v.version} · ${tv(v.status)}` : t('tpl.draft'))
+const versionLabel = (v: { version: number | null; status: string }) => (v.version ? `v${v.version} · ${tv(v.status)}` : t('tpl.draft'))
 
 /** Templates are desktop and tablet screens; phones get a notice instead (§13.0 Responsive). */
 function PhoneNotice() {
@@ -67,7 +66,7 @@ export function TemplatesPage() {
 }
 
 function Templates() {
-  const q = useQuery({ queryKey: ['templates'], queryFn: () => get<{ canEdit: boolean; templates: TemplateRow[] }>('templates') })
+  const q = useQuery({ queryKey: ['templates'], queryFn: () => typedRequest('get', '/api/v1/templates', {}) })
   const [creating, setCreating] = useState(false)
   const header = { title: t('nav.templates'), subtitle: t('tpl.subtitle') }
   if (q.isPending) return <Page {...header}><div className="rounded-lg border bg-card"><Loading rows={6} /></div></Page>
@@ -116,7 +115,7 @@ function NewTemplateDialog({ onClose }: { onClose: () => void }) {
   const create = async () => {
     if (busy) return
     setErr(null); setBusy(true)
-    try { const r = await post<{ id: string }>('templates', { name: name.trim() }); safe.clear(); navigate(`/templates/${r.id}`) }
+    try { const r = await typedRequest('post', '/api/v1/templates', { body: { name: name.trim(), description: null, projectTypeId: null } }); safe.clear(); navigate(`/templates/${r.id}`) }
     catch (e) { setErr(e) } finally { setBusy(false) }
   }
   return (
@@ -143,12 +142,12 @@ export function TemplatePage() {
 
 function TemplateEditor() {
   const rolesOn = useFlag('template_roles')
-  const { id } = useParams()
+  const id = useParams().id ?? ''
   const navigate = useNavigate()
   const qc = useQueryClient()
   const ref = useReference()
   const me = useMe()
-  const q = useQuery({ queryKey: ['template', id], queryFn: async () => { const result = await get<Detail>(`templates/${id}`); return { ...result, roles: result.roles ?? [] } } })
+  const q = useQuery({ queryKey: ['template', id], queryFn: async () => detailOf(await typedRequest('get', '/api/v1/templates/{id}', { params: { id } })) })
   const [d, setD] = useState<Detail | null>(null)
   const [dirty, setDirty] = useState(false)
   const [err, setErr] = useState<unknown>(null)
@@ -159,7 +158,7 @@ function TemplateEditor() {
   const [start, setStart] = useState('')
   useEffect(() => { if (q.data) { setD(q.data); setDirty(false) } }, [q.data])
   const preview = useQuery({ queryKey: ['template', id, 'preview', start], enabled: !!q.data,
-    queryFn: () => post<{ counts: Record<string, number>; undated: Record<string, number>; milestones: { id: string; name: string; date?: string; source: string }[] }>(`templates/${id}/preview`, { startDate: start || null }) })
+    queryFn: () => typedRequest('post', '/api/v1/templates/{id}/preview', { params: { id }, body: { startDate: start || null, milestoneDates: null, disciplineIds: null } }) })
   const disciplines = useMemo(() => new Map(ref.data?.disciplines.map((x) => [x.id, x.name])), [ref.data])
   // A failed load says so (it no longer spins forever); a failed refetch keeps the editor and its unsaved changes on screen.
   const header = { eyebrow: t('nav.templates'), title: t('nav.templates') }
@@ -168,14 +167,14 @@ function TemplateEditor() {
   const saved = q.data
   const edit = d.canEdit
   const change = (patch: Partial<Detail>) => { if (busy) return; setD({ ...d, ...patch }); setDirty(true) }
-  const refresh = () => { qc.invalidateQueries({ queryKey: ['template', id] }); qc.invalidateQueries({ queryKey: ['templates'] }) }
+  const refresh = () => { void invalidateChange(qc, 'Template', undefined, id) } // the template, its preview and the list; keys.ts
   const save = async () => {
     setErr(null)
     try {
-      const r = await put<Detail>(`templates/${id}/structure`, {
+      const r = detailOf(await typedRequest('put', '/api/v1/templates/{id}/structure', { params: { id }, body: {
         rowVersion: d.rowVersion, header: { name: d.name, description: d.description || null, projectTypeId: d.projectTypeId || null, ...(d.offsetDayKind ? { offsetDayKind: d.offsetDayKind } : {}) },
         disciplines: d.disciplines, milestones: d.milestones, deliverables: d.deliverables, tasks: d.tasks, dependencies: d.dependencies, ...(rolesOn ? { roles: d.roles } : {}),
-      })
+      } }))
       qc.setQueryData(['template', id], r); setD(r); setDirty(false); toast.success(t('tpl.saved')); refresh()
       return r
     } catch (e) { setErr(e as ApiError); return null }
@@ -183,14 +182,14 @@ function TemplateEditor() {
   const publish = async () => {
     const current = dirty ? await save() : d
     if (!current) return
-    try { const r = await post<{ version: number }>(`templates/${id}/publish`, { rowVersion: current.rowVersion }); toast.success(t('tpl.published', { v: r.version })); refresh() }
+    try { const r = await typedRequest('post', '/api/v1/templates/{id}/publish', { params: { id }, body: { rowVersion: current.rowVersion } }); toast.success(t('tpl.published', { v: r.version })); refresh() }
     catch (e) { setErr(e as ApiError) }
   }
   // Saving and publishing show their pending state and cannot be started twice.
   const run = (kind: 'save' | 'publish' | 'draft', fn: () => Promise<unknown>) => async () => { setBusy(kind); try { await fn() } finally { setBusy(null) } }
   const newDraft = async () => {
     setErr(null)
-    try { const r = await post<{ id: string }>(`templates/${id}/draft`, {}); navigate(`/templates/${r.id}`) }
+    try { const r = await typedRequest('post', '/api/v1/templates/{id}/draft', { params: { id }, body: {} }); navigate(`/templates/${r.id}`) }
     catch (e) { setErr(e) }
   }
   const inTemplate = d.disciplines.map((x) => x.disciplineId)
@@ -262,7 +261,7 @@ function TemplateEditor() {
         </ul>
       </Section>
 
-      <Section title={t('ptab.milestones')} count={d.milestones.length} actions={edit && <Button size="sm" variant="outline" disabled={!!busy} onClick={() => change({ milestones: [...d.milestones, { ref: newRef(), name: '', milestoneType: 'Other', anchor: 'PreviousMilestone', offset: 30, isClientFacing: false }] })}><Plus className="size-4" />{t('common.add')}</Button>}>
+      <Section title={t('ptab.milestones')} count={d.milestones.length} actions={edit && <Button size="sm" variant="outline" disabled={!!busy} onClick={() => change({ milestones: [...d.milestones, { ref: newRef(), name: '', milestoneType: 'Other', anchor: 'PreviousMilestone', offset: 30, completesPhaseId: null, isClientFacing: false }] })}><Plus className="size-4" />{t('common.add')}</Button>}>
         <Scroll label={t('ptab.milestones')}>
           <table className="w-full text-sm">
             {head(['#', 'name', 'type', 'anchor', 'offset', 'phase', 'client'], 'tpl.mcol', ['offset'])}
@@ -295,7 +294,7 @@ function TemplateEditor() {
       </Section>
 
       <Section title={t('ptab.deliverables')} count={d.deliverables.length} actions={edit && inTemplate.length > 0 && <Button size="sm" variant="outline"
-        disabled={!!busy} onClick={() => change({ deliverables: [...d.deliverables, { ref: newRef(), disciplineId: inTemplate[0], name: '', deliverableTypeId: ref.data?.deliverableTypes[0]?.id ?? '', milestoneRef: null, offset: 0, requiresReview: true }] })}><Plus className="size-4" />{t('common.add')}</Button>}>
+        disabled={!!busy} onClick={() => change({ deliverables: [...d.deliverables, { ref: newRef(), disciplineId: inTemplate[0], name: '', deliverableTypeId: ref.data?.deliverableTypes[0]?.id ?? '', milestoneRef: null, offset: 0, requiresReview: true, description: null }] })}><Plus className="size-4" />{t('common.add')}</Button>}>
         <Scroll label={t('ptab.deliverables')}>
           <table className="w-full text-sm">
             {head(['discipline', 'name', 'type', 'target', 'offset', 'review'], 'tpl.dcol', ['offset'])}
@@ -321,7 +320,7 @@ function TemplateEditor() {
       </Section>
 
       <Section title={t('ptab.tasks')} count={d.tasks.length} actions={edit && inTemplate.length > 0 && <Button size="sm" variant="outline"
-        disabled={!!busy} onClick={() => change({ tasks: [...d.tasks, { ref: newRef(), disciplineId: inTemplate[0], deliverableRef: null, name: '', requiresReview: false, priority: 'Medium', estimatedHours: null, offset: null, assignTo: 'Unassigned' }] })}><Plus className="size-4" />{t('common.add')}</Button>}>
+        disabled={!!busy} onClick={() => change({ tasks: [...d.tasks, { ref: newRef(), disciplineId: inTemplate[0], deliverableRef: null, name: '', description: null, requiresReview: false, priority: 'Medium', estimatedHours: null, offset: null, assignTo: 'Unassigned' }] })}><Plus className="size-4" />{t('common.add')}</Button>}>
         <Scroll label={t('ptab.tasks')} className="max-h-[32rem] overflow-auto">
           <table className="w-full text-sm">
             <thead className="sticky top-0 z-10 bg-muted"><tr>{['deliverable', 'name', 'discipline', 'assign', 'estimate', 'offset', 'review'].map((c) => <th key={c} scope="col" className={cn(thCls, ['estimate', 'offset'].includes(c) && 'text-right')}>{runtimeText(`tpl.tcol.${c}`)}</th>)}
@@ -335,11 +334,11 @@ function TemplateEditor() {
                       <option value="">{t('common.none')}</option>{d.deliverables.map((x) => <option key={x.ref} value={x.ref}>{x.name}</option>)}</select></td>
                     <td className={cell}>{edit ? <Input className={cn(inputCls, 'min-w-48')} aria-label={t('tpl.tcol.name')} value={k.name} disabled={!!busy} onChange={(e) => set({ name: e.target.value })} /> : <span className="block min-w-48 py-1">{k.name}</span>}</td>
                     <td className={cell}><select className={cls} aria-label={t('tpl.tcol.discipline')} value={k.disciplineId} disabled={!edit || !!busy} onChange={(e) => set({ disciplineId: e.target.value })}>{inTemplate.map((id) => <option key={id} value={id}>{disciplines.get(id)}</option>)}</select></td>
-                    <td className={cell}><select className={cls} aria-label={t('tpl.tcol.assign')} value={k.assignTo} disabled={!edit || !!busy} onChange={(e) => set({ assignTo: e.target.value })}>{ROLES.map((x) => <option key={x} value={x}>{runtimeText(`tpl.role.${x}`)}</option>)}</select></td>
+                    <td className={cell}><select className={cls} aria-label={t('tpl.tcol.assign')} value={k.assignTo ?? 'Unassigned'} disabled={!edit || !!busy} onChange={(e) => set({ assignTo: e.target.value })}>{ROLES.map((x) => <option key={x} value={x}>{runtimeText(`tpl.role.${x}`)}</option>)}</select></td>
                     <td className={cn(cell, 'text-right')}><Input type="number" className={cn(inputCls, 'w-20 text-right tabular-nums')} aria-label={t('tpl.tcol.estimate')} value={k.estimatedHours ?? ''} disabled={!edit || !!busy} onChange={(e) => set({ estimatedHours: num(e.target.value) })} /></td>
                     <td className={cn(cell, 'text-right')}><Input type="number" className={cn(inputCls, 'w-20 text-right tabular-nums')} aria-label={t('tpl.tcol.offset')} value={k.offset ?? ''} disabled={!edit || !!busy} onChange={(e) => set({ offset: num(e.target.value) })} /></td>
                     <td className={cell}><div className="flex items-center gap-2"><Checkbox aria-label={t('tpl.tcol.review')} checked={k.requiresReview} disabled={!edit || !!busy} onCheckedChange={(c) => set({ requiresReview: !!c })} />
-                      <select className={cls} aria-label={t('common.priority')} value={k.priority} disabled={!edit || !!busy} onChange={(e) => set({ priority: e.target.value })}>{PRIORITIES.map((x) => <option key={x} value={x}>{tv(x)}</option>)}</select></div></td>
+                      <select className={cls} aria-label={t('common.priority')} value={k.priority ?? 'Medium'} disabled={!edit || !!busy} onChange={(e) => set({ priority: e.target.value })}>{PRIORITIES.map((x) => <option key={x} value={x}>{tv(x)}</option>)}</select></div></td>
                     <td className={cell}>{edit && rowBtn(t('common.remove'), () => change({ tasks: d.tasks.filter((y) => y.ref !== k.ref), dependencies: d.dependencies.filter((x) => x.predecessor !== k.ref && x.successor !== k.ref) }), <Trash2 className="size-4" />)}</td>
                   </tr>
                 )
@@ -370,7 +369,7 @@ function TemplateEditor() {
       </Section>
 
       {rolesOn && <Section title={t('tpl.roles')} count={d.roles.length} actions={edit && <Button size="sm" variant="outline" disabled={!!busy}
-        onClick={() => change({ roles: [...d.roles, { ref: newRef(), disciplineId: null, label: '', startMilestoneRef: d.milestones[0]?.ref, startOffsetDays: 0, endMilestoneRef: d.milestones.at(-1)?.ref, endOffsetDays: 0, hours: 1 }] })}><Plus className="size-4" />{t('common.add')}</Button>}>
+        onClick={() => change({ roles: [...d.roles, { ref: newRef(), disciplineId: null, label: '', startMilestoneRef: d.milestones[0]?.ref ?? null, startOffsetDays: 0, endMilestoneRef: d.milestones.at(-1)?.ref ?? null, endOffsetDays: 0, hours: 1, note: null }] })}><Plus className="size-4" />{t('common.add')}</Button>}>
         {d.roles.length === 0 ? <Empty>{t('tpl.noRoles')}</Empty> : <ul className="divide-y">{d.roles.map((r, i) => {
           const set = (p: Partial<TplRole>) => change({ roles: d.roles.map((x, j) => j === i ? { ...x, ...p } : x) })
           return <li key={r.ref} className="grid gap-3 px-5 py-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -451,8 +450,8 @@ function TemplateEditor() {
           body={t(confirm === 'retire' ? 'tpl.retireBody' : 'tpl.discardBody')} confirmLabel={t(confirm === 'retire' ? 'tpl.retire' : 'tpl.discard')}
           onOpenChange={(o) => !o && setConfirm(null)}
           onConfirm={async () => {
-            if (confirm === 'retire') { await post(`templates/${id}/retire`, {}); refresh() }
-            else { await del(`templates/${id}`); qc.invalidateQueries({ queryKey: ['templates'] }); navigate('/templates') }
+            if (confirm === 'retire') { await typedRequest('post', '/api/v1/templates/{id}/retire', { params: { id }, body: {} }); refresh() }
+            else { await typedRequest('delete', '/api/v1/templates/{id}', { params: { id } }); void qc.invalidateQueries({ queryKey: roots.templates }); navigate('/templates') } // only the list: the template just discarded is not read again
             setConfirm(null)
           }} />
       )}
@@ -460,7 +459,7 @@ function TemplateEditor() {
         <ConfirmDialog open destructive title={t('templates.basisRemoveTitle', { name: removingBasis.title })} body={t('templates.basisRemoveBody')} confirmLabel={t('common.remove')}
           onOpenChange={(o) => !o && setRemovingBasis(null)}
           onConfirm={async () => {
-            await del(`templates/${id}/design-basis/${removingBasis.id}`)
+            await typedRequest('delete', '/api/v1/templates/{id}/design-basis/{suggestionId}', { params: { id, suggestionId: removingBasis.id } })
             setRemovingBasis(null)
             refresh()
           }} />

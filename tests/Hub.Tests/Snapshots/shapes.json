@@ -728,6 +728,75 @@
       "string"
     ]
   },
+  "DELETE /api/v1/templates/{id} 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "DELETE /api/v1/templates/{id} 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "DELETE /api/v1/templates/{id} 422": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "DELETE /api/v1/templates/{id}/design-basis/{suggestionId} 403": {
     "$": [
       "object"
@@ -14486,6 +14555,30 @@
       "string"
     ],
     "$.components.schemas.BasisSuggestionBody.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisSuggestionCreated": [
+      "object"
+    ],
+    "$.components.schemas.BasisSuggestionCreated.properties": [
+      "object"
+    ],
+    "$.components.schemas.BasisSuggestionCreated.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.BasisSuggestionCreated.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.BasisSuggestionCreated.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.BasisSuggestionCreated.required": [
+      "array"
+    ],
+    "$.components.schemas.BasisSuggestionCreated.required[]": [
+      "string"
+    ],
+    "$.components.schemas.BasisSuggestionCreated.type": [
       "string"
     ],
     "$.components.schemas.BasisUseRow": [
@@ -37897,6 +37990,57 @@
     "$.components.schemas.Overview.type": [
       "string"
     ],
+    "$.components.schemas.PackAdded": [
+      "object"
+    ],
+    "$.components.schemas.PackAdded.properties": [
+      "object"
+    ],
+    "$.components.schemas.PackAdded.properties.deliverables": [
+      "object"
+    ],
+    "$.components.schemas.PackAdded.properties.deliverables.format": [
+      "string"
+    ],
+    "$.components.schemas.PackAdded.properties.deliverables.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PackAdded.properties.deliverables.type": [
+      "string"
+    ],
+    "$.components.schemas.PackAdded.properties.dependencies": [
+      "object"
+    ],
+    "$.components.schemas.PackAdded.properties.dependencies.format": [
+      "string"
+    ],
+    "$.components.schemas.PackAdded.properties.dependencies.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PackAdded.properties.dependencies.type": [
+      "string"
+    ],
+    "$.components.schemas.PackAdded.properties.tasks": [
+      "object"
+    ],
+    "$.components.schemas.PackAdded.properties.tasks.format": [
+      "string"
+    ],
+    "$.components.schemas.PackAdded.properties.tasks.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PackAdded.properties.tasks.type": [
+      "string"
+    ],
+    "$.components.schemas.PackAdded.required": [
+      "array"
+    ],
+    "$.components.schemas.PackAdded.required[]": [
+      "string"
+    ],
+    "$.components.schemas.PackAdded.type": [
+      "string"
+    ],
     "$.components.schemas.PackBody": [
       "object"
     ],
@@ -37961,6 +38105,228 @@
       "string"
     ],
     "$.components.schemas.PackBody.type": [
+      "string"
+    ],
+    "$.components.schemas.PackDiscipline": [
+      "object"
+    ],
+    "$.components.schemas.PackDiscipline.properties": [
+      "object"
+    ],
+    "$.components.schemas.PackDiscipline.properties.deliverables": [
+      "object"
+    ],
+    "$.components.schemas.PackDiscipline.properties.deliverables.format": [
+      "string"
+    ],
+    "$.components.schemas.PackDiscipline.properties.deliverables.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PackDiscipline.properties.deliverables.type": [
+      "string"
+    ],
+    "$.components.schemas.PackDiscipline.properties.disciplineId": [
+      "object"
+    ],
+    "$.components.schemas.PackDiscipline.properties.disciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.PackDiscipline.properties.disciplineId.type": [
+      "string"
+    ],
+    "$.components.schemas.PackDiscipline.properties.inProject": [
+      "object"
+    ],
+    "$.components.schemas.PackDiscipline.properties.inProject.type": [
+      "string"
+    ],
+    "$.components.schemas.PackDiscipline.properties.mapping": [
+      "object"
+    ],
+    "$.components.schemas.PackDiscipline.properties.mapping.items": [
+      "object"
+    ],
+    "$.components.schemas.PackDiscipline.properties.mapping.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.PackDiscipline.properties.mapping.type": [
+      "string"
+    ],
+    "$.components.schemas.PackDiscipline.properties.tasks": [
+      "object"
+    ],
+    "$.components.schemas.PackDiscipline.properties.tasks.format": [
+      "string"
+    ],
+    "$.components.schemas.PackDiscipline.properties.tasks.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PackDiscipline.properties.tasks.type": [
+      "string"
+    ],
+    "$.components.schemas.PackDiscipline.required": [
+      "array"
+    ],
+    "$.components.schemas.PackDiscipline.required[]": [
+      "string"
+    ],
+    "$.components.schemas.PackDiscipline.type": [
+      "string"
+    ],
+    "$.components.schemas.PackMilestoneMap": [
+      "object"
+    ],
+    "$.components.schemas.PackMilestoneMap.properties": [
+      "object"
+    ],
+    "$.components.schemas.PackMilestoneMap.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.PackMilestoneMap.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.PackMilestoneMap.properties.projectMilestoneId": [
+      "object"
+    ],
+    "$.components.schemas.PackMilestoneMap.properties.projectMilestoneId.format": [
+      "string"
+    ],
+    "$.components.schemas.PackMilestoneMap.properties.projectMilestoneId.type": [
+      "array"
+    ],
+    "$.components.schemas.PackMilestoneMap.properties.projectMilestoneId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.PackMilestoneMap.properties.templateMilestoneId": [
+      "object"
+    ],
+    "$.components.schemas.PackMilestoneMap.properties.templateMilestoneId.format": [
+      "string"
+    ],
+    "$.components.schemas.PackMilestoneMap.properties.templateMilestoneId.type": [
+      "string"
+    ],
+    "$.components.schemas.PackMilestoneMap.required": [
+      "array"
+    ],
+    "$.components.schemas.PackMilestoneMap.required[]": [
+      "string"
+    ],
+    "$.components.schemas.PackMilestoneMap.type": [
+      "string"
+    ],
+    "$.components.schemas.PackProjectMilestone": [
+      "object"
+    ],
+    "$.components.schemas.PackProjectMilestone.properties": [
+      "object"
+    ],
+    "$.components.schemas.PackProjectMilestone.properties.date": [
+      "object"
+    ],
+    "$.components.schemas.PackProjectMilestone.properties.date.format": [
+      "string"
+    ],
+    "$.components.schemas.PackProjectMilestone.properties.date.type": [
+      "array"
+    ],
+    "$.components.schemas.PackProjectMilestone.properties.date.type[]": [
+      "string"
+    ],
+    "$.components.schemas.PackProjectMilestone.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.PackProjectMilestone.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.PackProjectMilestone.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.PackProjectMilestone.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.PackProjectMilestone.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.PackProjectMilestone.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.PackProjectMilestone.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.PackProjectMilestone.required": [
+      "array"
+    ],
+    "$.components.schemas.PackProjectMilestone.required[]": [
+      "string"
+    ],
+    "$.components.schemas.PackProjectMilestone.type": [
+      "string"
+    ],
+    "$.components.schemas.PackProposalRead": [
+      "object"
+    ],
+    "$.components.schemas.PackProposalRead.properties": [
+      "object"
+    ],
+    "$.components.schemas.PackProposalRead.properties.disciplines": [
+      "object"
+    ],
+    "$.components.schemas.PackProposalRead.properties.disciplines.items": [
+      "object"
+    ],
+    "$.components.schemas.PackProposalRead.properties.disciplines.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.PackProposalRead.properties.disciplines.type": [
+      "string"
+    ],
+    "$.components.schemas.PackProposalRead.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.PackProposalRead.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.PackProposalRead.properties.projectMilestones": [
+      "object"
+    ],
+    "$.components.schemas.PackProposalRead.properties.projectMilestones.items": [
+      "object"
+    ],
+    "$.components.schemas.PackProposalRead.properties.projectMilestones.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.PackProposalRead.properties.projectMilestones.type": [
+      "string"
+    ],
+    "$.components.schemas.PackProposalRead.properties.templateId": [
+      "object"
+    ],
+    "$.components.schemas.PackProposalRead.properties.templateId.format": [
+      "string"
+    ],
+    "$.components.schemas.PackProposalRead.properties.templateId.type": [
+      "string"
+    ],
+    "$.components.schemas.PackProposalRead.properties.version": [
+      "object"
+    ],
+    "$.components.schemas.PackProposalRead.properties.version.format": [
+      "string"
+    ],
+    "$.components.schemas.PackProposalRead.properties.version.pattern": [
+      "string"
+    ],
+    "$.components.schemas.PackProposalRead.properties.version.type": [
+      "string"
+    ],
+    "$.components.schemas.PackProposalRead.required": [
+      "array"
+    ],
+    "$.components.schemas.PackProposalRead.required[]": [
+      "string"
+    ],
+    "$.components.schemas.PackProposalRead.type": [
       "string"
     ],
     "$.components.schemas.PageOfActivityEntry": [
@@ -55121,6 +55487,786 @@
       "string"
     ],
     "$.components.schemas.TaskTransitionBody.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateBasisRead": [
+      "object"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties": [
+      "object"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.declaredRevision": [
+      "object"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.declaredRevision.type": [
+      "array"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.declaredRevision.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.disciplineId": [
+      "object"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.disciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.disciplineId.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.kind": [
+      "object"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.kind.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.numericValue": [
+      "object"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.numericValue.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.numericValue.pattern": [
+      "string"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.numericValue.type": [
+      "array"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.numericValue.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.scope": [
+      "object"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.scope.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.sourceSystem": [
+      "object"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.sourceSystem.type": [
+      "array"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.sourceSystem.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.sourceUrl": [
+      "object"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.sourceUrl.type": [
+      "array"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.sourceUrl.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.stableSourceId": [
+      "object"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.stableSourceId.type": [
+      "array"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.stableSourceId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.statement": [
+      "object"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.statement.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.units": [
+      "object"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.units.type": [
+      "array"
+    ],
+    "$.components.schemas.TemplateBasisRead.properties.units.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TemplateBasisRead.required": [
+      "array"
+    ],
+    "$.components.schemas.TemplateBasisRead.required[]": [
+      "string"
+    ],
+    "$.components.schemas.TemplateBasisRead.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateCreated": [
+      "object"
+    ],
+    "$.components.schemas.TemplateCreated.properties": [
+      "object"
+    ],
+    "$.components.schemas.TemplateCreated.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.TemplateCreated.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplateCreated.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateCreated.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.TemplateCreated.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplateCreated.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.TemplateCreated.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateCreated.required": [
+      "array"
+    ],
+    "$.components.schemas.TemplateCreated.required[]": [
+      "string"
+    ],
+    "$.components.schemas.TemplateCreated.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateDisciplineRead": [
+      "object"
+    ],
+    "$.components.schemas.TemplateDisciplineRead.properties": [
+      "object"
+    ],
+    "$.components.schemas.TemplateDisciplineRead.properties.disciplineId": [
+      "object"
+    ],
+    "$.components.schemas.TemplateDisciplineRead.properties.disciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplateDisciplineRead.properties.disciplineId.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateDisciplineRead.properties.isDefaultIncluded": [
+      "object"
+    ],
+    "$.components.schemas.TemplateDisciplineRead.properties.isDefaultIncluded.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateDisciplineRead.properties.templateDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.TemplateDisciplineRead.properties.templateDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplateDisciplineRead.properties.templateDisciplineId.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateDisciplineRead.required": [
+      "array"
+    ],
+    "$.components.schemas.TemplateDisciplineRead.required[]": [
+      "string"
+    ],
+    "$.components.schemas.TemplateDisciplineRead.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateDraft": [
+      "object"
+    ],
+    "$.components.schemas.TemplateDraft.properties": [
+      "object"
+    ],
+    "$.components.schemas.TemplateDraft.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.TemplateDraft.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplateDraft.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateDraft.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.TemplateDraft.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplateDraft.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.TemplateDraft.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateDraft.required": [
+      "array"
+    ],
+    "$.components.schemas.TemplateDraft.required[]": [
+      "string"
+    ],
+    "$.components.schemas.TemplateDraft.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateFamilyVersion": [
+      "object"
+    ],
+    "$.components.schemas.TemplateFamilyVersion.properties": [
+      "object"
+    ],
+    "$.components.schemas.TemplateFamilyVersion.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.TemplateFamilyVersion.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplateFamilyVersion.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateFamilyVersion.properties.publishedAt": [
+      "object"
+    ],
+    "$.components.schemas.TemplateFamilyVersion.properties.publishedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplateFamilyVersion.properties.publishedAt.type": [
+      "array"
+    ],
+    "$.components.schemas.TemplateFamilyVersion.properties.publishedAt.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TemplateFamilyVersion.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.TemplateFamilyVersion.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateFamilyVersion.properties.version": [
+      "object"
+    ],
+    "$.components.schemas.TemplateFamilyVersion.properties.version.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplateFamilyVersion.properties.version.pattern": [
+      "string"
+    ],
+    "$.components.schemas.TemplateFamilyVersion.properties.version.type": [
+      "array"
+    ],
+    "$.components.schemas.TemplateFamilyVersion.properties.version.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TemplateFamilyVersion.required": [
+      "array"
+    ],
+    "$.components.schemas.TemplateFamilyVersion.required[]": [
+      "string"
+    ],
+    "$.components.schemas.TemplateFamilyVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateList": [
+      "object"
+    ],
+    "$.components.schemas.TemplateList.properties": [
+      "object"
+    ],
+    "$.components.schemas.TemplateList.properties.canEdit": [
+      "object"
+    ],
+    "$.components.schemas.TemplateList.properties.canEdit.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateList.properties.templates": [
+      "object"
+    ],
+    "$.components.schemas.TemplateList.properties.templates.items": [
+      "object"
+    ],
+    "$.components.schemas.TemplateList.properties.templates.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.TemplateList.properties.templates.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateList.required": [
+      "array"
+    ],
+    "$.components.schemas.TemplateList.required[]": [
+      "string"
+    ],
+    "$.components.schemas.TemplateList.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow": [
+      "object"
+    ],
+    "$.components.schemas.TemplateListRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.TemplateListRow.properties.deliverables": [
+      "object"
+    ],
+    "$.components.schemas.TemplateListRow.properties.deliverables.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.deliverables.pattern": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.deliverables.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.description": [
+      "object"
+    ],
+    "$.components.schemas.TemplateListRow.properties.description.type": [
+      "array"
+    ],
+    "$.components.schemas.TemplateListRow.properties.description.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.disciplines": [
+      "object"
+    ],
+    "$.components.schemas.TemplateListRow.properties.disciplines.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.disciplines.pattern": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.disciplines.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.familyId": [
+      "object"
+    ],
+    "$.components.schemas.TemplateListRow.properties.familyId.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.familyId.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.TemplateListRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.milestones": [
+      "object"
+    ],
+    "$.components.schemas.TemplateListRow.properties.milestones.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.milestones.pattern": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.milestones.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.TemplateListRow.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.projectTypeId": [
+      "object"
+    ],
+    "$.components.schemas.TemplateListRow.properties.projectTypeId.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.projectTypeId.type": [
+      "array"
+    ],
+    "$.components.schemas.TemplateListRow.properties.projectTypeId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.projects": [
+      "object"
+    ],
+    "$.components.schemas.TemplateListRow.properties.projects.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.projects.pattern": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.projects.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.publishedAt": [
+      "object"
+    ],
+    "$.components.schemas.TemplateListRow.properties.publishedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.publishedAt.type": [
+      "array"
+    ],
+    "$.components.schemas.TemplateListRow.properties.publishedAt.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.roles": [
+      "object"
+    ],
+    "$.components.schemas.TemplateListRow.properties.roles.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.roles.pattern": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.roles.type": [
+      "array"
+    ],
+    "$.components.schemas.TemplateListRow.properties.roles.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.TemplateListRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.TemplateListRow.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.tasks": [
+      "object"
+    ],
+    "$.components.schemas.TemplateListRow.properties.tasks.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.tasks.pattern": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.tasks.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.updatedAt": [
+      "object"
+    ],
+    "$.components.schemas.TemplateListRow.properties.updatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.updatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.version": [
+      "object"
+    ],
+    "$.components.schemas.TemplateListRow.properties.version.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.version.pattern": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.properties.version.type": [
+      "array"
+    ],
+    "$.components.schemas.TemplateListRow.properties.version.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.required": [
+      "array"
+    ],
+    "$.components.schemas.TemplateListRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.TemplateListRow.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplatePublished": [
+      "object"
+    ],
+    "$.components.schemas.TemplatePublished.properties": [
+      "object"
+    ],
+    "$.components.schemas.TemplatePublished.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.TemplatePublished.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplatePublished.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplatePublished.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.TemplatePublished.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplatePublished.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.TemplatePublished.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplatePublished.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.TemplatePublished.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplatePublished.properties.version": [
+      "object"
+    ],
+    "$.components.schemas.TemplatePublished.properties.version.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplatePublished.properties.version.pattern": [
+      "string"
+    ],
+    "$.components.schemas.TemplatePublished.properties.version.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplatePublished.required": [
+      "array"
+    ],
+    "$.components.schemas.TemplatePublished.required[]": [
+      "string"
+    ],
+    "$.components.schemas.TemplatePublished.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead": [
+      "object"
+    ],
+    "$.components.schemas.TemplateRead.properties": [
+      "object"
+    ],
+    "$.components.schemas.TemplateRead.properties.basisSuggestions": [
+      "object"
+    ],
+    "$.components.schemas.TemplateRead.properties.basisSuggestions.items": [
+      "object"
+    ],
+    "$.components.schemas.TemplateRead.properties.basisSuggestions.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.basisSuggestions.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.canEdit": [
+      "object"
+    ],
+    "$.components.schemas.TemplateRead.properties.canEdit.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.deliverables": [
+      "object"
+    ],
+    "$.components.schemas.TemplateRead.properties.deliverables.items": [
+      "object"
+    ],
+    "$.components.schemas.TemplateRead.properties.deliverables.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.deliverables.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.dependencies": [
+      "object"
+    ],
+    "$.components.schemas.TemplateRead.properties.dependencies.items": [
+      "object"
+    ],
+    "$.components.schemas.TemplateRead.properties.dependencies.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.dependencies.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.description": [
+      "object"
+    ],
+    "$.components.schemas.TemplateRead.properties.description.type": [
+      "array"
+    ],
+    "$.components.schemas.TemplateRead.properties.description.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.disciplines": [
+      "object"
+    ],
+    "$.components.schemas.TemplateRead.properties.disciplines.items": [
+      "object"
+    ],
+    "$.components.schemas.TemplateRead.properties.disciplines.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.disciplines.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.family": [
+      "object"
+    ],
+    "$.components.schemas.TemplateRead.properties.family.items": [
+      "object"
+    ],
+    "$.components.schemas.TemplateRead.properties.family.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.family.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.familyId": [
+      "object"
+    ],
+    "$.components.schemas.TemplateRead.properties.familyId.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.familyId.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.TemplateRead.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.milestones": [
+      "object"
+    ],
+    "$.components.schemas.TemplateRead.properties.milestones.items": [
+      "object"
+    ],
+    "$.components.schemas.TemplateRead.properties.milestones.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.milestones.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.TemplateRead.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.offsetDayKind": [
+      "object"
+    ],
+    "$.components.schemas.TemplateRead.properties.offsetDayKind.type": [
+      "array"
+    ],
+    "$.components.schemas.TemplateRead.properties.offsetDayKind.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.projectTypeId": [
+      "object"
+    ],
+    "$.components.schemas.TemplateRead.properties.projectTypeId.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.projectTypeId.type": [
+      "array"
+    ],
+    "$.components.schemas.TemplateRead.properties.projectTypeId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.publishedAt": [
+      "object"
+    ],
+    "$.components.schemas.TemplateRead.properties.publishedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.publishedAt.type": [
+      "array"
+    ],
+    "$.components.schemas.TemplateRead.properties.publishedAt.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.roles": [
+      "object"
+    ],
+    "$.components.schemas.TemplateRead.properties.roles.items": [
+      "object"
+    ],
+    "$.components.schemas.TemplateRead.properties.roles.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.roles.type": [
+      "array"
+    ],
+    "$.components.schemas.TemplateRead.properties.roles.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.TemplateRead.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.TemplateRead.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.tasks": [
+      "object"
+    ],
+    "$.components.schemas.TemplateRead.properties.tasks.items": [
+      "object"
+    ],
+    "$.components.schemas.TemplateRead.properties.tasks.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.tasks.type": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.version": [
+      "object"
+    ],
+    "$.components.schemas.TemplateRead.properties.version.format": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.version.pattern": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.properties.version.type": [
+      "array"
+    ],
+    "$.components.schemas.TemplateRead.properties.version.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.required": [
+      "array"
+    ],
+    "$.components.schemas.TemplateRead.required[]": [
+      "string"
+    ],
+    "$.components.schemas.TemplateRead.type": [
       "string"
     ],
     "$.components.schemas.TemplateRoleIn": [
@@ -73771,6 +74917,9 @@
     "$.paths./api/v1/projects/{id}/template-packs.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/projects/{id}/template-packs.get.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/projects/{id}/template-packs.get.responses.200.description": [
       "string"
     ],
@@ -73839,6 +74988,9 @@
     ],
     "$.paths./api/v1/projects/{id}/template-packs.post.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/projects/{id}/template-packs.post.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/projects/{id}/template-packs.post.responses.200.description": [
       "string"
@@ -82756,6 +83908,9 @@
     "$.paths./api/v1/templates.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/templates.get.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/templates.get.responses.200.description": [
       "string"
     ],
@@ -82789,10 +83944,22 @@
     "$.paths./api/v1/templates.post.responses": [
       "object"
     ],
-    "$.paths./api/v1/templates.post.responses.200": [
+    "$.paths./api/v1/templates.post.responses.201": [
       "object"
     ],
-    "$.paths./api/v1/templates.post.responses.200.description": [
+    "$.paths./api/v1/templates.post.responses.201.content": [
+      "object"
+    ],
+    "$.paths./api/v1/templates.post.responses.201.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/templates.post.responses.201.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/templates.post.responses.201.content.application/json.schema.$ref": [
+      "string"
+    ],
+    "$.paths./api/v1/templates.post.responses.201.description": [
       "string"
     ],
     "$.paths./api/v1/templates.post.tags": [
@@ -82834,10 +84001,10 @@
     "$.paths./api/v1/templates/{id}.delete.responses": [
       "object"
     ],
-    "$.paths./api/v1/templates/{id}.delete.responses.200": [
+    "$.paths./api/v1/templates/{id}.delete.responses.204": [
       "object"
     ],
-    "$.paths./api/v1/templates/{id}.delete.responses.200.description": [
+    "$.paths./api/v1/templates/{id}.delete.responses.204.description": [
       "string"
     ],
     "$.paths./api/v1/templates/{id}.delete.tags": [
@@ -82887,6 +84054,9 @@
     ],
     "$.paths./api/v1/templates/{id}.get.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/templates/{id}.get.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/templates/{id}.get.responses.200.description": [
       "string"
@@ -82948,10 +84118,22 @@
     "$.paths./api/v1/templates/{id}/design-basis.post.responses": [
       "object"
     ],
-    "$.paths./api/v1/templates/{id}/design-basis.post.responses.200": [
+    "$.paths./api/v1/templates/{id}/design-basis.post.responses.201": [
       "object"
     ],
-    "$.paths./api/v1/templates/{id}/design-basis.post.responses.200.description": [
+    "$.paths./api/v1/templates/{id}/design-basis.post.responses.201.content": [
+      "object"
+    ],
+    "$.paths./api/v1/templates/{id}/design-basis.post.responses.201.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/templates/{id}/design-basis.post.responses.201.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/templates/{id}/design-basis.post.responses.201.content.application/json.schema.$ref": [
+      "string"
+    ],
+    "$.paths./api/v1/templates/{id}/design-basis.post.responses.201.description": [
       "string"
     ],
     "$.paths./api/v1/templates/{id}/design-basis.post.tags": [
@@ -82993,10 +84175,10 @@
     "$.paths./api/v1/templates/{id}/design-basis/{suggestionId}.delete.responses": [
       "object"
     ],
-    "$.paths./api/v1/templates/{id}/design-basis/{suggestionId}.delete.responses.200": [
+    "$.paths./api/v1/templates/{id}/design-basis/{suggestionId}.delete.responses.204": [
       "object"
     ],
-    "$.paths./api/v1/templates/{id}/design-basis/{suggestionId}.delete.responses.200.description": [
+    "$.paths./api/v1/templates/{id}/design-basis/{suggestionId}.delete.responses.204.description": [
       "string"
     ],
     "$.paths./api/v1/templates/{id}/design-basis/{suggestionId}.delete.tags": [
@@ -83041,7 +84223,37 @@
     "$.paths./api/v1/templates/{id}/draft.post.responses.200": [
       "object"
     ],
+    "$.paths./api/v1/templates/{id}/draft.post.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/templates/{id}/draft.post.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/templates/{id}/draft.post.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/templates/{id}/draft.post.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/templates/{id}/draft.post.responses.200.description": [
+      "string"
+    ],
+    "$.paths./api/v1/templates/{id}/draft.post.responses.201": [
+      "object"
+    ],
+    "$.paths./api/v1/templates/{id}/draft.post.responses.201.content": [
+      "object"
+    ],
+    "$.paths./api/v1/templates/{id}/draft.post.responses.201.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/templates/{id}/draft.post.responses.201.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/templates/{id}/draft.post.responses.201.content.application/json.schema.$ref": [
+      "string"
+    ],
+    "$.paths./api/v1/templates/{id}/draft.post.responses.201.description": [
       "string"
     ],
     "$.paths./api/v1/templates/{id}/draft.post.tags": [
@@ -83194,6 +84406,9 @@
     "$.paths./api/v1/templates/{id}/publish.post.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/templates/{id}/publish.post.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/templates/{id}/publish.post.responses.200.description": [
       "string"
     ],
@@ -83236,10 +84451,10 @@
     "$.paths./api/v1/templates/{id}/retire.post.responses": [
       "object"
     ],
-    "$.paths./api/v1/templates/{id}/retire.post.responses.200": [
+    "$.paths./api/v1/templates/{id}/retire.post.responses.204": [
       "object"
     ],
-    "$.paths./api/v1/templates/{id}/retire.post.responses.200.description": [
+    "$.paths./api/v1/templates/{id}/retire.post.responses.204.description": [
       "string"
     ],
     "$.paths./api/v1/templates/{id}/retire.post.tags": [
@@ -83310,6 +84525,9 @@
     ],
     "$.paths./api/v1/templates/{id}/structure.put.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/templates/{id}/structure.put.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/templates/{id}/structure.put.responses.200.description": [
       "string"
@@ -95208,6 +96426,75 @@
       "number"
     ]
   },
+  "GET /api/v1/projects/{id}/template-packs 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "GET /api/v1/projects/{id}/template-packs 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "GET /api/v1/projects/{id}/template-packs 422": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "GET /api/v1/projects/{id}/timeline 200": {
     "$": [
       "object"
@@ -106394,7 +107681,11 @@
       "number"
     ],
     "$.templates[].publishedAt": [
+      "null",
       "string"
+    ],
+    "$.templates[].roles": [
+      "number"
     ],
     "$.templates[].rowVersion": [
       "number"
@@ -106409,6 +107700,7 @@
       "string"
     ],
     "$.templates[].version": [
+      "null",
       "number"
     ]
   },
@@ -106477,7 +107769,8 @@
       "string"
     ],
     "$.deliverables[].description": [
-      "null"
+      "null",
+      "string"
     ],
     "$.deliverables[].disciplineId": [
       "string"
@@ -106655,7 +107948,8 @@
       "string"
     ],
     "$.tasks[].description": [
-      "null"
+      "null",
+      "string"
     ],
     "$.tasks[].disciplineId": [
       "string"
@@ -106683,6 +107977,29 @@
     "$.version": [
       "null",
       "number"
+    ]
+  },
+  "GET /api/v1/templates/{id} 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
     ]
   },
   "GET /api/v1/time 200": {
@@ -117428,7 +118745,85 @@
       "number"
     ]
   },
+  "POST /api/v1/projects/{id}/template-packs 400": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.errors": [
+      "object"
+    ],
+    "$.errors.disciplineId": [
+      "array"
+    ],
+    "$.errors.disciplineId[]": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "POST /api/v1/projects/{id}/template-packs 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "POST /api/v1/projects/{id}/template-packs 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "POST /api/v1/projects/{id}/template-packs 422": {
     "$": [
       "object"
     ],
@@ -122051,6 +123446,38 @@
       "number"
     ]
   },
+  "POST /api/v1/templates 400": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.errors": [
+      "object"
+    ],
+    "$.errors.name": [
+      "array"
+    ],
+    "$.errors.name[]": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "POST /api/v1/templates 403": {
     "$": [
       "object"
@@ -122182,6 +123609,52 @@
       "number"
     ]
   },
+  "POST /api/v1/templates/{id}/draft 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "POST /api/v1/templates/{id}/draft 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "POST /api/v1/templates/{id}/preview 200": {
     "$": [
       "object"
@@ -122281,6 +123754,29 @@
       "number"
     ]
   },
+  "POST /api/v1/templates/{id}/preview 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "POST /api/v1/templates/{id}/publish 200": {
     "$": [
       "object"
@@ -122296,6 +123792,231 @@
     ],
     "$.version": [
       "number"
+    ]
+  },
+  "POST /api/v1/templates/{id}/publish 400": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.errors": [
+      "object"
+    ],
+    "$.errors.structure": [
+      "array"
+    ],
+    "$.errors.structure[]": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "POST /api/v1/templates/{id}/publish 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "POST /api/v1/templates/{id}/publish 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "POST /api/v1/templates/{id}/publish 409": {
+    "$": [
+      "object"
+    ],
+    "$.changedAt": [
+      "string"
+    ],
+    "$.changedBy": [
+      "string"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.currentRowVersion": [
+      "number"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "POST /api/v1/templates/{id}/publish 422": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "POST /api/v1/templates/{id}/publish 428": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "POST /api/v1/templates/{id}/retire 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "POST /api/v1/templates/{id}/retire 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "POST /api/v1/templates/{id}/retire 422": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
     ]
   },
   "POST /api/v1/time 201": {
@@ -122957,7 +124678,8 @@
       "string"
     ],
     "$.deliverables[].description": [
-      "null"
+      "null",
+      "string"
     ],
     "$.deliverables[].disciplineId": [
       "string"
@@ -122992,7 +124714,8 @@
       "string"
     ],
     "$.description": [
-      "null"
+      "null",
+      "string"
     ],
     "$.disciplines": [
       "array"
@@ -123130,7 +124853,8 @@
       "string"
     ],
     "$.tasks[].description": [
-      "null"
+      "null",
+      "string"
     ],
     "$.tasks[].disciplineId": [
       "string"
@@ -123143,6 +124867,7 @@
       "string"
     ],
     "$.tasks[].offset": [
+      "null",
       "number"
     ],
     "$.tasks[].priority": [
@@ -123193,6 +124918,29 @@
       "array"
     ],
     "$.errors.offsetDayKind[]": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "PUT /api/v1/templates/{id}/structure 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
       "string"
     ],
     "$.status": [

@@ -115,12 +115,58 @@ public sealed class MyWorkTests(HubFactory f)
         async Task<JsonNode> Deliverable(string name, Guid owner, Guid? reviewer = null) => await f.As(TestData.Marc).Post($"/api/v1/projects/{p.Id}/deliverables",
             new { name, projectDisciplineId = d.ProjectDiscipline(p.Id, "Civil"), deliverableTypeId = await d.DeliverableType(), ownerId = owner, reviewerId = reviewer, dueDate = In(6) }).Result.Json(201);
         var owned = await Deliverable("Owned", alex); var inReview = await Deliverable("In review", marc, alex);
+        var dueMismatch = await Add(new { name = "Task due after package", assigneeId = alex, deliverableId = owned.G("id"), dueDate = In(8) });
+        var inactiveEmail = $"attention-inactive-{Guid.NewGuid():N}@hub.test";
+        var inactive = await f.As(inactiveEmail).GetAsync("/api/v1/me").Result.Json();
+        var inactiveId = inactive.G("id");
+        Assert.True(await f.DbAsync(db => db.Users.Where(x => x.Id == inactiveId).Select(x => x.IsActive).SingleAsync()));
+        await f.DbAsync(async db =>
+        {
+            var user = await db.Users.SingleAsync(x => x.Id == inactiveId);
+            user.SupervisorId = alex;
+            return await db.SaveChangesAsync();
+        });
+        // Assign while active through the normal task endpoint; only then make the owner inactive.
+        var inactiveTask = await Add(new { name = "Task with inactive owner", assigneeId = inactiveId, dueDate = In(6) });
+        await f.DbAsync(async db =>
+        {
+            (await db.Users.SingleAsync(x => x.Id == inactiveId)).IsActive = false;
+            return await db.SaveChangesAsync();
+        });
         await f.DbAsync(db => db.Deliverables.Where(x => x.Id == inReview.G("id")).ExecuteUpdateAsync(x => x.SetProperty(y => y.Status, DeliverableStatus.InReview)));
         var decision = await pm.Post($"/api/v1/projects/{p.Id}/decisions", new { subject = "Pick the outfall", description = "Options", ownerUserId = alex, requiredByDate = In(2),
             impactLevel = "High", impactDescription = "Drawings wait" }).Result.Json(201);
         var meeting = await pm.Post($"/api/v1/projects/{p.Id}/meetings", new { title = "Coordination", meetingDate = In(0), meetingType = "Coordination" }).Result.Json(201);
         var action = await pm.Post($"/api/v1/meetings/{meeting.S("id")}/actions", new { text = "Send the survey", ownerType = "User", ownerUserId = alex, dueDate = In(1) }).Result.Json(201);
         var milestone = await pm.Post($"/api/v1/projects/{p.Id}/milestones", new { name = "60% Submission", milestoneType = "Design Submission", date = In(10) }).Result.Json(201);
+        JsonNode attention;
+        try
+        {
+            await f.Evaluate(p.Id);
+            attention = (await f.As(TestData.Alex).GetAsync("/api/v1/me/work").Result.Json())["attention"]!.DeepClone();
+            var dueWhy = attention["items"]!.AsArray().Single(x => x!.G("itemId") == dueMismatch.G("id") && x.S("ruleId") == "A-16")!;
+            Assert.Equal("A-16", dueWhy.S("ruleId"));
+            Assert.Equal("Task", dueWhy.S("itemType"));
+            Assert.Equal(In(8), dueWhy["why"]!["values"]!.S("taskDue"));
+            Assert.Equal(In(6), dueWhy["why"]!["values"]!.S("deliverableDue"));
+            var inactiveWhy = attention["items"]!.AsArray().Single(x => x!.G("itemId") == inactiveTask.G("id") && x.S("ruleId") == "A-18")!;
+            Assert.Equal("A-18", inactiveWhy.S("ruleId"));
+            Assert.Equal("Task", inactiveWhy.S("itemType"));
+            Assert.Equal(inactive.S("displayName"), inactiveWhy["why"]!["values"]!.S("person"));
+        }
+        finally
+        {
+            await f.DbAsync(async db =>
+            {
+                var ids = new[] { dueMismatch.G("id"), inactiveTask.G("id") };
+                await db.TaskStates.Where(x => ids.Contains(x.TaskId)).ExecuteDeleteAsync();
+                await db.Tasks.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
+                var user = await db.Users.SingleAsync(x => x.Id == inactiveId);
+                user.IsActive = true;
+                user.SupervisorId = null;
+                return await db.SaveChangesAsync();
+            });
+        }
         await f.Evaluate(p.Id); await f.Evaluate(quiet.Id);
 
         var work = await f.As(TestData.Alex).GetAsync("/api/v1/me/work").Result.Json();

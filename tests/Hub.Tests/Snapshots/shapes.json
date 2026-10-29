@@ -7763,7 +7763,8 @@
       "string"
     ],
     "$.attention.items[].why.values.startDate": [
-      "null"
+      "null",
+      "string"
     ],
     "$.attention.items[].why.values.status": [
       "string"
@@ -8247,6 +8248,24 @@
     ],
     "$.deliverables[].state.inconsistencyDetail": [
       "array"
+    ],
+    "$.deliverables[].state.inconsistencyDetail[]": [
+      "object"
+    ],
+    "$.deliverables[].state.inconsistencyDetail[].colour": [
+      "null"
+    ],
+    "$.deliverables[].state.inconsistencyDetail[].rule": [
+      "string"
+    ],
+    "$.deliverables[].state.inconsistencyDetail[].text": [
+      "string"
+    ],
+    "$.deliverables[].state.inconsistencyDetail[].threshold": [
+      "null"
+    ],
+    "$.deliverables[].state.inconsistencyDetail[].values": [
+      "null"
     ],
     "$.deliverables[].state.isAtRisk": [
       "boolean"
@@ -9149,6 +9168,9 @@
     "$.tasks[].state.affectedMilestoneIds": [
       "array"
     ],
+    "$.tasks[].state.affectedMilestoneIds[]": [
+      "string"
+    ],
     "$.tasks[].state.blockedBy": [
       "array"
     ],
@@ -9159,6 +9181,7 @@
       "boolean"
     ],
     "$.tasks[].state.blockedBy[].due": [
+      "null",
       "string"
     ],
     "$.tasks[].state.blockedBy[].id": [
@@ -9174,6 +9197,7 @@
       "boolean"
     ],
     "$.tasks[].state.blockedBy[].ownerId": [
+      "null",
       "string"
     ],
     "$.tasks[].state.blockedBy[].reason": [

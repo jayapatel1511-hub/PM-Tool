@@ -148,3 +148,6 @@ The full passing suite initially recorded 1,043 shapes but missed three dynamic 
 
 
 Final combined backend/contract result: **1,648 passed, 0 failed, 1 opt-in scale skipped** (1,649 total, 9 m 13 s). Coverage gates PASS: rules branches **96.0%**, service lines **97.8%**. Fresh isolated full-suite shape run `bbe10ac005b342419748d8e097a73a5f` records **1,043 response shapes**. Snapshot diff has **13 path additions, zero removals and zero kind changes**: My Work inconsistency-detail structure and the organisation-unit conflict response. The deterministic A-16/A-18 reason values are retained. Updated snapshot and `tools/shapes.py check` PASS; generated contract/types remain unchanged. This is local automated evidence, not packet acceptance.
+
+
+The committed shape baseline also retains previously observed nullable/empty-collection variants. The current run cannot reveal children below an empty deliverable-inconsistency or milestone array; those old observed fields/kinds are retained as a union rather than pruned. All old snapshot paths/kinds are preserved, the 13 new paths are additive, and checking the current full run still passes under the tool's documented null/empty-parent rules.

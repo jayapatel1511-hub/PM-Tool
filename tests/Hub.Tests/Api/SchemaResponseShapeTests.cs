@@ -30,6 +30,25 @@ public sealed class SchemaResponseShapeTests
         Assert.True(change["new"]!.GetValue<bool>());
     }
 
+    /// Entries that share a correlation id collapse to their first row, and rows written in one test-clock instant have no fixed order,
+    /// so project creation shows its role list only by luck. A member added by its own request is its own entry, so the array shape is always recorded.
+    [Fact]
+    [Trait("shape", "integration")]
+    public async Task Following_feed_preserves_array_audit_change_values()
+    {
+        using var f = new HubFactory();
+        var d = new TestData(f);
+        var project = await d.Project();
+        var viewer = f.As(TestData.Alex);
+        await (await viewer.Put($"/api/v1/projects/{project.Id}/follow", new { level = FollowLevel.AllActivity })).Json();
+        await (await f.As(TestData.Pm).Post($"/api/v1/projects/{project.Id}/members", new { userId = d.User(TestData.Diane), roles = new[] { ProjectRole.Reviewer } })).Json(201);
+        var feed = await (await viewer.GetAsync($"/api/v1/me/following?projectId={project.Id}")).Json();
+        var roles = feed["items"]!.AsArray().SelectMany(row => row!["entry"]!["changes"]!.AsArray())
+            .Single(change => change!.S("field") == "Roles" && change["new"] is JsonArray { Count: 1 } list && list[0]!.GetValue<string>() == ProjectRole.Reviewer);
+        Assert.Null(roles!["old"]);
+        Assert.Equal(ProjectRole.Reviewer, roles["new"]![0]!.GetValue<string>());
+    }
+
     [Fact]
     [Trait("shape", "integration")]
     public async Task Audit_and_commitment_category_reads_record_full_shapes()

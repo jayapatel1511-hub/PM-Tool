@@ -24,9 +24,6 @@ import { ExportMenu } from '@/components/hub/export'
 import { CommitmentReliability } from './CommitmentReliability'
 
 type Commitment = components['schemas']['CommitmentRow']
-type Constraint = { id: string; targetType: string; targetId: string; description: string; category: string; neededBy: string; sourceUrl: string }
-type ReadyOutput = { id: string; targetType: string; targetId: string; key: string; name: string; dueDate: string | null; intendedOutput: string; completionCriteria: string; state: string }
-type Aggregate = { constraints: Constraint[]; constraintsTotal: number; constraintsTruncated: boolean; readyOutputs: ReadyOutput[]; readyOutputsTotal: number; readyOutputsTruncated: boolean; pageSize: number }
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 /** FR-RDY-05: promise weeks start on the project's coordination day (Monday when unset). */
@@ -71,7 +68,7 @@ export function ReadinessTab() {
   const promiseId = sp.get('promise') ?? (panel.startsWith('OutputCommitment:') ? panel.slice(17) : null)
   const constraintId = panel.startsWith('WorkConstraint:') ? panel.slice(15) : null
   const linked = useQuery({ queryKey: ['readiness-constraint', p.id, constraintId], enabled: !!constraintId,
-    queryFn: () => get<{ targetType: string; targetId: string }>(`projects/${p.id}/readiness/constraints/${constraintId}`) })
+    queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/readiness/constraints/{id}', { params: { projectId: p.id, id: constraintId ?? '' } }) })
   // The reliability panel reads the same records; with its flag off that query is disabled and refetches nothing.
   const done = () => { setProposing(false); setSnapshotWeek(null); invalidateChange(qc, 'OutputCommitment', p.id) } // ['p', id] covers the window; keys.ts adds the promise detail and reliability panel
   const weeks = useMemo(() => {
@@ -91,7 +88,7 @@ export function ReadinessTab() {
     queryFn: async () => {
       // A promise due in the window starts at most six days earlier; rows keep the week start they were recorded with.
       const [aggregate, weekly] = await Promise.all([
-        get<Aggregate>(`projects/${p.id}/readiness/window?from=${from}&to=${to}&constraintsPage=${constraintsPage}&readyPage=${readyPage}&pageSize=50`),
+        typedRequest('get', '/api/v1/projects/{projectId}/readiness/window', { params: { projectId: p.id }, query: { from, to, constraintsPage, readyPage, pageSize: 50 } }),
         typedRequest('get', '/api/v1/projects/{projectId}/weekly-commitments', { params: { projectId: p.id }, query: { from: addDays(from, -6), to, targetFrom: from, targetTo: to, page: promisePage } }),
       ])
       return { ...aggregate, ...weekly, pageSize: weekly.pageSize ?? aggregate.pageSize } // a paged read always answers its page size

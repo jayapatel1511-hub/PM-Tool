@@ -8,6 +8,7 @@ const fs = require('node:fs')
 const path = require('node:path')
 const assert = require('node:assert/strict')
 const { commitmentRow, commitmentList, commitmentDetail } = require('./weekly-commitments.fixture.cjs')
+const { readinessWindow } = require('./readiness.fixture.cjs')
 const { coordinationOptions } = require('./reviews.fixture.cjs')
 const { myWork: myWorkAnswer, myWorkPerson } = require('./my-work.fixture.cjs')
 const { meView, referenceData, referenceDiscipline, referenceOffice } = require('./me.fixture.cjs')
@@ -56,7 +57,7 @@ function responseFor(method, p, body, query) {
   if (p === `projects/${projectId}/weekly-commitments/${id(72)}`) return promiseDetail
   if (p === `projects/${projectId}/weekly-commitments/${confirmId}/confirm` && method === 'POST') return {}
   if (p.startsWith('tasks/') && p.endsWith('/pickup')) return {}
-  if (p === `projects/${projectId}/readiness/window`) return { constraints: [], constraintsTotal: 0, constraintsTruncated: false, readyOutputs: [], readyOutputsTotal: 0, readyOutputsTruncated: false, pageSize: 50, truncated: false, total: 0 }
+  if (p === `projects/${projectId}/readiness/window`) return readinessWindow()
   if (p === `projects/${projectId}/weekly-commitments`) return commitmentList([])
   if (p === 'admin/organisation/import/preview' && failImport) return { __status: 422, detail: 'CSV header is missing email.' }
   if (p === 'admin/organisation/import/preview' && method === 'POST') return { rows: 2, changes: [{ kind: 'create', unitPath: 'Design / Water' }, { kind: 'unchanged', email: 'alex@hub.test' }], creates: 1, applied: false }

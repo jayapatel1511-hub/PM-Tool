@@ -28,6 +28,7 @@
     "test:data-entry": "node tests/data-entry.cjs",
     "test:dependencies": "node tests/dependencies.cjs",
     "test:deliverables": "node tests/deliverables.cjs",
+    "test:readiness": "node tests/readiness.cjs",
     "test:team": "node tests/team.cjs",
     "test:admin": "node tests/admin.cjs",
     "test:backlog-my-work": "node tests/backlog-my-work.cjs",

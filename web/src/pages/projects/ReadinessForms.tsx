@@ -8,27 +8,21 @@ import { Textarea } from '@/components/ui/textarea'
 import { ErrorBanner, Field, Loading, Notice } from '@/components/hub/common'
 import { Key, Pill, type Tone } from '@/components/hub/pills'
 import type { components } from '@/gen/api'
-import { ApiError, get, typedRequest } from '@/lib/api'
+import { ApiError, typedRequest } from '@/lib/api'
 import { itemHref } from '@/components/hub/search'
 import { fmtDate, fmtTime, today } from '@/lib/format'
 import { useSafeForm } from '@/hooks/drafts'
 import { t, tv , runtimeText } from '@/lib/i18n'
 import { CommandForm, CoordStatus, PersonLabel, SelectField, personName, workChoices, workRef, type CoordOptions, type WorkRef } from './CoordinationForms'
 
-type Assessment = { id: string; rowVersion: number; ownerId: string; state: string; intendedOutput: string; completionCriteria: string; evaluatedAt: string }
-type Check = { id: string; rowVersion: number; code: string; applies: boolean | null; satisfied: boolean | null; reason?: string; evidenceUrl?: string; recordedBy?: string }
-type RdyException = { id: string; basisVersionId: string; approvedBy: string; verifierId: string; limitedWork: string; risk: string; expiresOn: string; createdAt: string }
-type Detail = { assessment: Assessment; checks: Check[]; unknown: string[]; blocked: string[]; exceptions: RdyException[]; sources: { code: string; record: LinkedRecord }[] }
-type BasisVersion = components['schemas']['BasisVersionRow']
+type Schemas = components['schemas']
+type Assessment = Schemas['ReadinessAssessmentRead']
+type Check = Schemas['ReadinessCheckRead']
+type BasisVersion = Schemas['BasisVersionRow']
 type Assumption = { key: string; title: string; version: BasisVersion; eligible: boolean; disposedUntil?: string }
-type LinkedRecord = { type: string; id: string; key: string; title: string; status: string }
-type Constraint = { id: string; key: string; rowVersion: number; category: string; description: string; removalOwnerId: string; affectedOwnerId: string;
-  neededBy: string; sourceUrl: string; state: string; resolutionEvidenceUrl?: string; verifiedBy?: string; verifiedAt?: string
-  linkedType?: string; linked?: LinkedRecord | null }
+type Constraint = Schemas['ReadinessConstraintRow']
 const LINK_TYPES = ['Decision', 'Issue', 'Handoff']
-type PackageRef = { id: string; key: string; title: string; status: string }
-type Prerequisite = { id: string; rowVersion: number; packageId: string; reason: string; createdAt: string; createdBy?: string; removedAt?: string
-  removedBy?: string; removalReason?: string; package: PackageRef; effective: PackageRef | null; listsOutput: boolean }
+type Prerequisite = Schemas['ReadinessPrerequisiteRow']
 const card = 'space-y-2 rounded-lg border p-4', subhead = 'text-base/6 font-semibold', link = 'text-primary underline underline-offset-4'
 const dl = 'grid grid-cols-[minmax(8rem,auto)_1fr] gap-x-4 gap-y-2'
 /** An unassessed answer stays visibly unknown (▲); it never reads as satisfied. */
@@ -41,13 +35,14 @@ export function ReadinessInspector({ projectId, number, options, initial, close,
   const [raising, setRaising] = useState(false), [moving, setMoving] = useState<{ row: Constraint; state: string } | null>(null)
   const [type, id] = target.split(':'), work = workRef(options, type, id)
   const path = `projects/${projectId}/readiness/${type}/${id}`
+  const params = { projectId, targetType: type, targetId: id }
   const q = useQuery({ queryKey: ['readiness-detail', projectId, type, id], enabled: !!work,
-    queryFn: async () => { try { return await get<Detail>(path) } catch (e) { if (e instanceof ApiError && e.status === 404) return null; throw e } } })
+    queryFn: async () => { try { return await typedRequest('get', '/api/v1/projects/{projectId}/readiness/{targetType}/{targetId}', { params }) } catch (e) { if (e instanceof ApiError && e.status === 404) return null; throw e } } })
   const constraints = useQuery({ queryKey: ['readiness-constraints', projectId, type, id], enabled: !!work,
-    queryFn: () => get<Constraint[]>(`${path}/constraints`) })
+    queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/readiness/{targetType}/{targetId}/constraints', { params }) })
   const [excepting, setExcepting] = useState(false), [linking, setLinking] = useState(false), [unlinking, setUnlinking] = useState<Prerequisite | null>(null)
   const prerequisites = useQuery({ queryKey: ['readiness-prerequisites', projectId, type, id], enabled: !!work,
-    queryFn: () => get<Prerequisite[]>(`${path}/submission-prerequisites`) })
+    queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/readiness/{targetType}/{targetId}/submission-prerequisites', { params }) })
   // The exception references a basis version; resolve keys, scope and eligibility from the design-basis register.
   const assumptions = useQuery({ queryKey: ['readiness-assumptions', projectId, type, id], enabled: !!q.data,
     queryFn: async () => {
@@ -196,7 +191,7 @@ function RaiseConstraint({ path, projectId, work, options, close, done }: { path
   const safe = useSafeForm(`constraint.new.${path}`, { category, description, removalOwnerId, neededBy, sourceUrl, linkedType, linkedId },
     (d) => { setCategory(d.category); setDescription(d.description); setOwner(d.removalOwnerId); setNeeded(d.neededBy); setSource(d.sourceUrl); setLinkedType(d.linkedType); setLinkedId(d.linkedId) }) // FR-SAV-03
   const records = useQuery({ queryKey: ['readiness-link-options', projectId, linkedType], enabled: !!linkedType,
-    queryFn: () => get<LinkedRecord[]>(`projects/${projectId}/readiness/link-options?type=${linkedType}`) })
+    queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/readiness/link-options', { params: { projectId }, query: { type: linkedType } }) })
   return <CommandForm path={path} title={t('readiness.raiseConstraint')} hint={t('readiness.constraintHint')} safe={safe} onClose={close} onDone={done}
     payload={() => ({ targetRowVersion: work.rowVersion, category, description, removalOwnerId, neededBy, sourceUrl,
       linkedType: linkedType || null, linkedId: linkedType ? linkedId : null })}>

@@ -4445,6 +4445,21 @@
         ],
         "type": "object"
       },
+      "CheckSource": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "record": {
+            "$ref": "#/components/schemas/LinkedRecord"
+          }
+        },
+        "required": [
+          "code",
+          "record"
+        ],
+        "type": "object"
+      },
       "ClientConfig": {
         "properties": {
           "authMode": {
@@ -18287,6 +18302,381 @@
         ],
         "type": "object"
       },
+      "ReadinessAssessmentRead": {
+        "properties": {
+          "auditKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditProjectId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditType": {
+            "type": "string"
+          },
+          "completionCriteria": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "evaluatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "intendedOutput": {
+            "type": "string"
+          },
+          "ownerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "state": {
+            "type": "string"
+          },
+          "targetId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "targetType": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "targetType",
+          "targetId",
+          "ownerId",
+          "intendedOutput",
+          "completionCriteria",
+          "state",
+          "evaluatedAt",
+          "auditType",
+          "projectId",
+          "auditProjectId",
+          "auditKey",
+          "auditName",
+          "createdAt",
+          "createdBy",
+          "updatedAt",
+          "updatedBy",
+          "rowVersion",
+          "id"
+        ],
+        "type": "object"
+      },
+      "ReadinessCheckRead": {
+        "properties": {
+          "applies": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "assessmentId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "auditKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditProjectId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditType": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "evidenceUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "recordedBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "satisfied": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "assessmentId",
+          "code",
+          "applies",
+          "satisfied",
+          "reason",
+          "evidenceUrl",
+          "recordedBy",
+          "auditType",
+          "projectId",
+          "auditProjectId",
+          "auditKey",
+          "auditName",
+          "createdAt",
+          "createdBy",
+          "updatedAt",
+          "updatedBy",
+          "rowVersion",
+          "id"
+        ],
+        "type": "object"
+      },
+      "ReadinessConstraintLocation": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "targetId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "targetType": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "targetType",
+          "targetId"
+        ],
+        "type": "object"
+      },
+      "ReadinessConstraintRow": {
+        "properties": {
+          "affectedOwnerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "linked": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/LinkedRecord"
+              }
+            ]
+          },
+          "linkedId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "linkedType": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "neededBy": {
+            "format": "date",
+            "type": "string"
+          },
+          "removalOwnerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "resolutionEvidenceUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "sourceUrl": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "targetId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "targetType": {
+            "type": "string"
+          },
+          "verifiedAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "verifiedBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "rowVersion",
+          "targetType",
+          "targetId",
+          "category",
+          "description",
+          "removalOwnerId",
+          "affectedOwnerId",
+          "neededBy",
+          "sourceUrl",
+          "state",
+          "resolutionEvidenceUrl",
+          "verifiedBy",
+          "verifiedAt",
+          "linkedType",
+          "linkedId",
+          "createdAt",
+          "createdBy",
+          "linked"
+        ],
+        "type": "object"
+      },
       "ReadinessCreateBody": {
         "properties": {
           "assessmentRowVersion": {
@@ -18324,6 +18714,560 @@
           "targetRowVersion",
           "intendedOutput",
           "completionCriteria"
+        ],
+        "type": "object"
+      },
+      "ReadinessDetail": {
+        "properties": {
+          "assessment": {
+            "$ref": "#/components/schemas/ReadinessAssessmentRead"
+          },
+          "blocked": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/ReadinessCheckRead"
+            },
+            "type": "array"
+          },
+          "exceptions": {
+            "items": {
+              "$ref": "#/components/schemas/ReadinessExceptionRead"
+            },
+            "type": "array"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/CheckSource"
+            },
+            "type": "array"
+          },
+          "unknown": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "assessment",
+          "checks",
+          "sources",
+          "unknown",
+          "blocked",
+          "exceptions"
+        ],
+        "type": "object"
+      },
+      "ReadinessExceptionRead": {
+        "properties": {
+          "approvedBy": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "assessmentId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "auditKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditProjectId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditType": {
+            "type": "string"
+          },
+          "basisVersionId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "expiresOn": {
+            "format": "date",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "limitedWork": {
+            "type": "string"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "risk": {
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "verifierId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "assessmentId",
+          "basisVersionId",
+          "approvedBy",
+          "verifierId",
+          "limitedWork",
+          "risk",
+          "expiresOn",
+          "auditType",
+          "projectId",
+          "auditProjectId",
+          "auditKey",
+          "auditName",
+          "createdAt",
+          "createdBy",
+          "updatedAt",
+          "updatedBy",
+          "rowVersion",
+          "id"
+        ],
+        "type": "object"
+      },
+      "ReadinessPackageRef": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "title",
+          "status"
+        ],
+        "type": "object"
+      },
+      "ReadinessPrerequisiteRow": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "effective": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ReadinessPackageRef"
+              }
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "listsOutput": {
+            "type": "boolean"
+          },
+          "package": {
+            "$ref": "#/components/schemas/ReadinessPackageRef"
+          },
+          "packageId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "removalReason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "removedAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "removedBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "rowVersion",
+          "packageId",
+          "reason",
+          "createdAt",
+          "createdBy",
+          "removedAt",
+          "removedBy",
+          "removalReason",
+          "package",
+          "effective",
+          "listsOutput"
+        ],
+        "type": "object"
+      },
+      "ReadinessWindow": {
+        "properties": {
+          "constraints": {
+            "items": {
+              "$ref": "#/components/schemas/ReadinessWindowConstraint"
+            },
+            "type": "array"
+          },
+          "constraintsPage": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "constraintsTotal": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "constraintsTruncated": {
+            "type": "boolean"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "pageSize": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "readyOutputs": {
+            "items": {
+              "$ref": "#/components/schemas/ReadyOutput"
+            },
+            "type": "array"
+          },
+          "readyOutputsTotal": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "readyOutputsTruncated": {
+            "type": "boolean"
+          },
+          "readyPage": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "constraints",
+          "constraintsTotal",
+          "constraintsPage",
+          "readyPage",
+          "pageSize",
+          "constraintsTruncated",
+          "readyOutputs",
+          "readyOutputsTotal",
+          "readyOutputsTruncated"
+        ],
+        "type": "object"
+      },
+      "ReadinessWindowConstraint": {
+        "properties": {
+          "affectedOwnerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "auditKey": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditProjectId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "auditType": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "linkedId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "linkedType": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "neededBy": {
+            "format": "date",
+            "type": "string"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "removalOwnerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "resolutionEvidenceUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "seq": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "sourceUrl": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "targetId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "targetType": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "verifiedAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "verifiedBy": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "seq",
+          "key",
+          "targetType",
+          "targetId",
+          "category",
+          "description",
+          "removalOwnerId",
+          "affectedOwnerId",
+          "neededBy",
+          "sourceUrl",
+          "state",
+          "resolutionEvidenceUrl",
+          "verifiedBy",
+          "verifiedAt",
+          "linkedType",
+          "linkedId",
+          "auditType",
+          "auditKey",
+          "auditName",
+          "projectId",
+          "auditProjectId",
+          "createdAt",
+          "createdBy",
+          "updatedAt",
+          "updatedBy",
+          "rowVersion",
+          "id"
+        ],
+        "type": "object"
+      },
+      "ReadyOutput": {
+        "properties": {
+          "completionCriteria": {
+            "type": "string"
+          },
+          "disciplineId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "dueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "intendedOutput": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ownerId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "state": {
+            "type": "string"
+          },
+          "targetId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "targetType": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "targetType",
+          "targetId",
+          "key",
+          "name",
+          "dueDate",
+          "ownerId",
+          "disciplineId",
+          "intendedOutput",
+          "completionCriteria",
+          "state"
         ],
         "type": "object"
       },
@@ -41656,7 +42600,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessConstraintLocation"
+                }
               }
             },
             "description": "OK"
@@ -41768,7 +42714,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessWindow"
+                }
               }
             },
             "description": "OK"
@@ -41867,7 +42815,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessDetail"
+                }
               }
             },
             "description": "OK"
@@ -42032,7 +42982,12 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ReadinessConstraintRow"
+                  },
+                  "type": "array"
+                }
               }
             },
             "description": "OK"
@@ -42255,7 +43210,12 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ReadinessPrerequisiteRow"
+                  },
+                  "type": "array"
+                }
               }
             },
             "description": "OK"

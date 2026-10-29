@@ -1,6 +1,8 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using System.Reflection;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
@@ -58,6 +60,7 @@ public static class ProjectEndpoints
         IReadOnlyList<Guid> CreateDeliverableIn, IReadOnlyList<Guid> CreateBasisIn, IReadOnlyList<Guid> AssignBasisIn, IReadOnlyList<Guid> LeadOf, bool IsPm, IReadOnlyList<string> Transitions,
         bool ChangeNumber, bool SetVisibility, bool NeedsReason, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] ProjectPermission? Restore = null);
     /// The project header (§12.1, P-09). `StatusNote` and `LatestPlanned` are sent only while `flag.project_status_note` and `flag.schedule_baseline` are on (and the planned date is past the target).
+    [JsonConverter(typeof(ProjectDetailJsonConverter))]
     public sealed record ProjectDetail(Guid Id, string ProjectNumber, string Name, Guid ClientId, string? ClientReference, Guid ProjectManagerId, string PmName, Guid OfficeId, Guid? ProjectTypeId,
         string? Description, string? Location, string Status, Guid? PhaseId, DateOnly? StartDate, DateOnly? TargetCompletionDate, string Priority, string Visibility, string? InternalNotes,
         string? CoordinationDay, bool AllowViewerComments, DateTimeOffset? LastCoordinationReviewedAt, string? LastCoordinationReviewedBy, DateTimeOffset? StatusChangedAt, DateTimeOffset? ActivatedAt,
@@ -65,7 +68,11 @@ public static class ProjectEndpoints
         IReadOnlyList<DocumentLinkEndpoints.LinkResponse> Links, IReadOnlyList<ProjectDisciplineRow> Disciplines, ProjectHealth Health, int? ProgressPct, ProjectHeaderMilestone? NextMilestone,
         ProjectHeaderMilestone? NextSubmission, IReadOnlyList<string> MyRoles, ProjectFollowState? Follow, bool Starred, SetupChecklist? SetupChecklist, bool SuggestArchive, int? EditWindowDaysLeft,
         ProjectPermissions Permissions, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] ProjectStatusNote.NoteView? StatusNote = null,
-        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] Evaluator.PlannedTarget? LatestPlanned = null);
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] Evaluator.PlannedTarget? LatestPlanned = null)
+    {
+        [JsonIgnore]
+        public bool StatusNoteEnabled { get; init; }
+    }
 
     /// An open item the closeout preview lists.
     public sealed record CloseoutItem(Guid Id, string Key, string Name, string Status);
@@ -376,7 +383,7 @@ public static class ProjectEndpoints
                 s.RestrictedProjectsEnabled && Permissions.EditProject(a, ctx).Ok,
                 ProjectStatus.NeedsCorrectionReason(p.Status),
                 s.IsFlagOn(RecoveryEndpoints.Flag) ? Perm(Permissions.RestoreItem(a, ctx), p.Status) : null),
-            note, latest));
+            note, latest) { StatusNoteEnabled = s.IsFlagOn("project_status_note") });
     }
 
     static ProjectPermission Perm(Allow a, string status) => new(a.Ok, a.Why is null ? null : Text.Get(a.Why, a.Arg ?? status));
@@ -562,5 +569,32 @@ public static class ProjectEndpoints
             return 0;
         });
         return TypedResults.Ok(new ProjectTransitioned(p.Id, p.Status, p.RowVersion));
+    }
+}
+
+sealed class ProjectDetailJsonConverter : JsonConverter<ProjectEndpoints.ProjectDetail>
+{
+    public override ProjectEndpoints.ProjectDetail Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        => throw new NotSupportedException();
+
+    public override void Write(Utf8JsonWriter writer, ProjectEndpoints.ProjectDetail value, JsonSerializerOptions options)
+    {
+        var json = new JsonObject();
+        foreach (var property in typeof(ProjectEndpoints.ProjectDetail).GetProperties(BindingFlags.Instance | BindingFlags.Public))
+        {
+            if (property.Name == nameof(ProjectEndpoints.ProjectDetail.StatusNoteEnabled)) continue;
+            var name = property.GetCustomAttribute<JsonPropertyNameAttribute>()?.Name
+                ?? options.PropertyNamingPolicy?.ConvertName(property.Name) ?? property.Name;
+            var propertyValue = property.GetValue(value);
+            if (property.Name == nameof(ProjectEndpoints.ProjectDetail.StatusNote))
+            {
+                if (propertyValue is null && !value.StatusNoteEnabled) continue;
+                json[name] = propertyValue is null ? null : JsonSerializer.SerializeToNode(propertyValue, property.PropertyType, options);
+                continue;
+            }
+            if (propertyValue is null && property.GetCustomAttribute<JsonIgnoreAttribute>()?.Condition == JsonIgnoreCondition.WhenWritingNull) continue;
+            json[name] = JsonSerializer.SerializeToNode(propertyValue, property.PropertyType, options);
+        }
+        writer.WriteRawValue(json.ToJsonString(options));
     }
 }

@@ -272,6 +272,9 @@ public sealed class ProjectsContractTests(HubFactory f) : IClassFixture<HubFacto
         {
             await f.DbAsync(async db => { db.Milestones.Add(new Milestone { ProjectId = p.Id, Seq = 907, Key = "M0907", Name = "Late gate", Date = new DateOnly(2027, 3, 1) }); return await db.SaveChangesAsync(); });
             await f.Evaluate(p.Id);
+            var enabledWithoutNote = await Header(TestData.Pm, p.Id);
+            Assert.Equal([.. DetailKeys, "statusNote"], Keys(enabledWithoutNote));
+            Assert.True(enabledWithoutNote.AsObject().ContainsKey("statusNote") && enabledWithoutNote["statusNote"] is null);
             (await pm.Patch($"/api/v1/projects/{p.Id}", new { statusNote = "On track", targetCompletionDate = "2026-12-15" }, d.Version(p.Id))).EnsureSuccessStatusCode();
             var on = await Header(TestData.Pm, p.Id);
             Assert.Equal([.. DetailKeys, "statusNote", "latestPlanned"], Keys(on));

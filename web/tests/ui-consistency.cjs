@@ -50,7 +50,9 @@ assert.ok(base && ['localhost', '127.0.0.1'].includes(new URL(base).hostname), '
         assert.ok(await page.evaluate(() => !!document.activeElement.closest('[role="dialog"]')), 'Dialog contains keyboard focus')
       }
       await page.keyboard.press('Escape'); await dialog.waitFor({ state: 'detached' })
-      await page.waitForFunction(() => document.activeElement?.textContent?.includes('New event'))
+      // FocusScope restores focus asynchronously after unmount. Matching body text can
+      // succeed before restoration; wait for the exact opener instead.
+      await page.waitForFunction(el => document.activeElement === el, await opener.elementHandle(), { timeout: 2000 })
       assert.ok(await opener.evaluate(el => document.activeElement === el), 'Escape returns focus to the opener')
       await page.close()
       const taskPage = await browser.newPage({ viewport: { width, height: 480 }, reducedMotion: 'reduce' })

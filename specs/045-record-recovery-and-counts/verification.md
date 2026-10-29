@@ -114,3 +114,6 @@ On the seeded integration at 1440 × 480, the task assignee list grew asynchrono
 
 
 The authoritative four-width run exposed a measurement race in the first focused evidence: immediately after network-idle/animation completion, the wrapper could still hold the old transform; 250 ms later it settled from y=297 to y=73, with bottom 411 in the 480 px viewport. The responsive test now waits up to two seconds for the actual containment condition before applying its unchanged geometry assertions. This is a condition wait, not a larger allowed viewport or a removed assertion. The earlier focused timing-dependent PASS is superseded by the full rendered rerun.
+
+
+The subsequent full run passed picker geometry and exposed a second pre-existing measurement race at 768 px: the focus wait matched “New event” anywhere in the active element's text, so the body could satisfy it before FocusScope restored the opener. The wait now requires the exact opener element; the final focus assertion remains unchanged. This strengthens the wait condition and retains a two-second deadline.

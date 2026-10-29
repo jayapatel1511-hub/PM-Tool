@@ -126,3 +126,7 @@ Merged Tasks frontend follow-up: the build exposed unused legacy imports in MyWo
 ## 2026-10-29 milestone follow-up correction
 
 The pre-existing completion/cancellation follow-up defect noted above is now fixed: initial milestone confirmations opt out of the shared automatic close; subsequent dialogs retain normal close behavior. Existing flows are restored without a feature flag (assumption: correction of existing behavior, not new scope). The new browser assertion first failed waiting for Advance the project phase; after the fix, `npm run build` and `test:milestones` pass (10 writes, 27 reads), including the phase PATCH and bulk retarget request. Independent source review found no new actionable findings. Broad shared-dialog regressions follow at checkpoint.
+
+## 2026-10-29 Projects integration checks
+
+Merged slice `e5607610` retains both the task-row schema transformer and project status-note metadata resolver. Helper regeneration reports contract test passes; merged build passes. ProjectsTests, ProjectsContractTests, ProjectImportTests, ContractTests and TemplatesTests: 122 passed, zero failed/skipped. Merged web build and typecheck:tests pass after removing obsolete imports from automatic merges. Independent review confirmed ProjectDetail retains 48 properties, nullable statusNote and no internal StatusNoteEnabled property. Assumptions: enabled no-note is explicit null, disabled no-note is omitted; metadata remains visible to OpenAPI. The rejected intermediate custom converter is replaced. Full combined checkpoint follows.

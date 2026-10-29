@@ -133,7 +133,10 @@ public sealed class OperationsTests(HubFactory f)
         var trigger = "fail_eval_" + p.Id.ToString("N")[^8..];
         var id = await f.DbAsync(async db =>
         {
-            await db.Outbox.Where(o => o.ProjectId == p.Id).ExecuteUpdateAsync(u => u.SetProperty(o => o.ProcessedAt, f.Clock.Now));
+            // This scenario owns one project-scoped event. Earlier shared-fixture settings
+            // events now correctly retry every failed project; isolate them from this case.
+            // EvaluationTests separately covers retaining and recovering the global event.
+            await db.Outbox.ExecuteDeleteAsync();
             var e = new OutboxEvent { ProjectId = p.Id, CreatedAt = past.AddMinutes(-20), Payload = "{}" };
             db.Outbox.Add(e);
             await db.SaveChangesAsync();

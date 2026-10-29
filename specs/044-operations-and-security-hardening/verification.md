@@ -165,3 +165,8 @@ Final web state: build, lint (existing warnings only), served-asset guard, `test
 multiline quotes, quote/URL ordering, string rejection, duplicate messages, and query/fragment slashes in stack
 paths. The final independent source review has **no open actionable findings**. The named test traits and full
 AC IDs now make these executed checks discoverable by the ratchet; no asserted test behavior was removed.
+
+
+### 2026-10-29 final-suite isolation correction
+
+The first final coverage run exposed an OperationsTests assumption: its one-project dead-letter case inherited seven global SettingsChanged events from the shared fixture. With the corrected global retry behavior those events also reached dead-letter status, so the expected pending-count delta was wrong (expected 35, actual 28). The scenario now clears prior fixture outbox rows before inserting its own event. All retry/dead-letter, health, pending-count and watchdog assertions remain; EvaluationTests separately verifies global-event failure, healthy sibling progress and recovery. Independent source review found no weakened behavior assertion. The final release handoff records the rerun result.

@@ -2380,7 +2380,7 @@ export const en = {
 
   // Integrated en-planner.ts
   'planner.title': 'Team Planner',
-  'planner.subtitle': 'See capacity, planned work and confidence across the people in your scope.',
+  'planner.subtitle': 'Planned work, capacity and confidence.',
   'planner.remainingBasis': 'Planned totals include Possible work. Remaining = capacity − Confirmed − Expected.',
   'planner.phoneHint': 'Team planning requires planning access and a tablet or desktop. Your own assignments are in My Work.',
   'planner.grid': 'Weekly planning grid',
@@ -2446,7 +2446,7 @@ export const en = {
   'planner.sortRemaining': 'Remaining capacity',
   'planner.sortName': 'Name',
   'planner.sortOver': 'Over-planned first',
-  'planner.stale': 'Stale entries only',
+  'planner.stale': 'Stale only',
   'planner.showMyDrafts': 'Show my private drafts',
   'planner.pageSummary': 'Page {page} · {total} entries',
   'planner.previousPage': 'Previous page',

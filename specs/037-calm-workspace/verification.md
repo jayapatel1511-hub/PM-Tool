@@ -292,3 +292,8 @@ async () => {
   return { path: location.pathname, chromeControls: chrome.filter(fold).length, filterFields: fields.length, chromeWords: cw, firstDataY: firstData == null ? null : Math.round(firstData), fills: fills.size };
 }
 ```
+
+
+### 2026-10-29 release regression follow-up
+
+The populated SYN fixture census found Planner chrome at 47 words against its unchanged 40-word limit for both measured personas. The subtitle is now “Planned work, capacity and confidence.” and the stale-only filter label is “Stale only”; neither behavior nor census thresholds changed. This retains the planning concepts while removing redundant chrome. The final release handoff records the rendered rerun; human visual acceptance stays pending.

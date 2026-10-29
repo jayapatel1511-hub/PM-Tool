@@ -5,7 +5,9 @@ using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.OpenApi;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi;
 
 namespace Hub.Api.Features;
 
@@ -18,14 +20,41 @@ public static class MilestoneEndpoints
     public sealed record ReasonBody(string? Reason, int? RowVersion);
     public sealed record RebaselineBody(string? Reason, bool? Clear, int? RowVersion);
     public sealed record RebaselineRead(Guid Id, int RowVersion);
+    public sealed record MilestoneCreated(Guid Id, string Key, int RowVersion);
+    /// The milestone's id and its new row version, as the edit, reopen and restore routes answer.
+    public sealed record MilestoneVersion(Guid Id, int RowVersion);
+    public sealed record MilestonePhase(Guid Id, string Name);
+    /// The milestone completed: the phase it completes, when that is not the project's phase, is only suggested (§9.3).
+    public sealed record MilestoneCompleted(Guid Id, int RowVersion, MilestonePhase? SuggestPhase);
+    public sealed record RetargetDeliverable(Guid Id, string Key, string Name, int RowVersion);
+    /// The milestone cancelled and the deliverables still aimed at it, for the retarget dialog.
+    public sealed record MilestoneCancelled(Guid Id, int RowVersion, IReadOnlyList<RetargetDeliverable> Retarget);
+    public sealed record OpenDeliverable(Guid Id, string Key, string Name, string Status);
+    /// The extra of the 409 problem that asks first: the deliverables not yet issued.
+    sealed record DeliverablesToConfirm(IReadOnlyList<OpenDeliverable> Deliverables);
+    public sealed record DateMove(string Key, string Name, DateOnly? OldDate, DateOnly NewDate, int SlipDays, int Delta);
+    public sealed record DeliverableShift(Guid Id, string Key, string Name, DateOnly? OldDue, DateOnly NewDue);
+    public sealed record TaskShift(Guid Id, string Key, string Name, DateOnly? OldDue, DateOnly? NewDue, DateOnly? OldStart, DateOnly? NewStart);
+    public sealed record DeliverableLeftBehind(string Key, string Name, DateOnly? DueDate);
+    /// What a date change would move. The shifted rows are enumerated when the response is written, as they always were: after a real move
+    /// they read the dates already moved (the app reads only the dry run).
+    public sealed record DatePreview(DateMove Milestone, IEnumerable<DeliverableShift> Deliverables, IEnumerable<TaskShift> Tasks, IReadOnlyList<DeliverableLeftBehind> Inconsistent);
+    public sealed record DateChanged(Guid Id, int RowVersion, int Shifted, DatePreview Preview);
+    public sealed record MilestoneTask(Guid Id, string Key, string Name, string Status, DateOnly? DueDate, Guid? AssigneeId);
+    public sealed record MilestoneProject(Guid Id, string ProjectNumber, string Name, string Status);
+    public sealed record MilestonePermissions(RegisterEndpoints.RegisterPermission Manage, bool Comment);
+    /// One milestone with its deliverables, the tasks aimed straight at it, the phase it completes and what the caller may do with it.
+    public sealed record MilestoneDetail(MilestoneRow Milestone, IReadOnlyList<DeliverableEndpoints.DeliverableRow> Deliverables, IReadOnlyList<MilestoneTask> DirectTasks,
+        MilestonePhase? CompletesPhase, MilestoneProject Project, MilestonePermissions Permissions);
 
     public static void Map(RouteGroupBuilder api)
     {
-        api.MapGet("/projects/{id:guid}/milestones", List);
+        api.MapGet("/projects/{id:guid}/milestones", async Task<Ok<List<MilestoneRow>>> (Guid id, [AsParameters] MilestoneQuery f, Access access, HubDb db, SettingsStore store) =>
+            TypedResults.Ok(await List(id, f, access, db, store)));
         api.MapPost("/projects/{id:guid}/milestones", Create);
         api.MapGet("/milestones/{id}", Get);
         api.MapPatch("/milestones/{id:guid}", Edit);
-        api.MapPost("/milestones/{id:guid}/change-date", ChangeDate);
+        api.MapPost("/milestones/{id:guid}/change-date", ChangeDate).AddOpenApiOperationTransformer(DescribeChangeDate);
         api.MapPost("/milestones/{id:guid}/rebaseline", Rebaseline);
         api.MapPost("/milestones/{id:guid}/complete", Complete);
         api.MapPost("/milestones/{id:guid}/reopen", Reopen);
@@ -46,13 +75,13 @@ public static class MilestoneEndpoints
         string? Description, Guid? ProjectDisciplineId, Guid? CompletesPhaseId, bool IsClientFacing, bool IsComplete, DateOnly? CompletedDate,
         bool IsCancelled, string? CancelledReason, int RowVersion, bool IsSubmission, string? Status, JsonElement? StatusReasons, int SlipDays,
         int? DaysRemaining, int DeliverableTotal, int DeliverableIssued, int TaskTotal, int TaskComplete, int TaskOpen, int TaskOverdue, int TaskBlocked,
-        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] bool? SlipShown,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] bool? SlipShown = null,
         [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] DateOnly? BaselineDate = null,
         [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? SinceBaselineDays = null,
         [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] bool? BaselineSlipShown = null,
         [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] bool? CanRebaseline = null);
 
-    public static async Task<List<object>> List(Guid id, [AsParameters] MilestoneQuery f, Access access, HubDb db, SettingsStore store)
+    public static async Task<List<MilestoneRow>> List(Guid id, [AsParameters] MilestoneQuery f, Access access, HubDb db, SettingsStore store)
     {
         var (type, status, disciplineId, showCompleted) = f;
         await access.Project(id, track: false);
@@ -62,21 +91,26 @@ public static class MilestoneEndpoints
         if (showCompleted != true) q = q.Where(m => !m.IsComplete && !m.IsCancelled);
         var rows = await Rows(db, q, await store.Get(db));
         var statuses = Http.List(status);
-        return statuses.Length == 0 ? rows : rows.Where(r => statuses.Contains((string)((dynamic)r).Status ?? "")).ToList();
+        return statuses.Length == 0 ? rows : rows.Where(r => statuses.Contains(r.Status ?? "")).ToList();
     }
 
-    public static async Task<List<object>> Rows(HubDb db, IQueryable<Milestone> q, OrgSettings? schedule = null)
+    /// What the register's query reads for each milestone, before the counts and the evaluated state are put beside it.
+    sealed record RowSource(Guid Id, Guid ProjectId, string Key, string Name, string MilestoneType, DateOnly? Date, DateOnly? OriginalDate, DateOnly? BaselineDate, string? Description,
+        Guid? ProjectDisciplineId, Guid? CompletesPhaseId, bool IsClientFacing, bool IsComplete, DateOnly? CompletedDate, bool IsCancelled, string? CancelledReason, int RowVersion,
+        StateSource? State, int Deliverables, int Issued);
+    sealed record StateSource(string? Status, string StatusReasons, int? DaysRemaining, int SlipDays, int DeliverableTotal, int DeliverableIssued, int TaskTotal, int TaskComplete, int TaskOpen,
+        int TaskOverdue, int TaskBlocked);
+
+    public static async Task<List<MilestoneRow>> Rows(HubDb db, IQueryable<Milestone> q, OrgSettings? schedule = null)
     {
-        var list = await q.OrderBy(m => m.Date == null).ThenBy(m => m.Date).ThenBy(m => m.SortOrder).Select(m => new
-        {
+        var list = await q.OrderBy(m => m.Date == null).ThenBy(m => m.Date).ThenBy(m => m.SortOrder).Select(m => new RowSource(
             m.Id, m.ProjectId, m.Key, m.Name, m.MilestoneType, m.Date, m.OriginalDate, m.BaselineDate, m.Description, m.ProjectDisciplineId, m.CompletesPhaseId,
             m.IsClientFacing, m.IsComplete, m.CompletedDate, m.IsCancelled, m.CancelledReason, m.RowVersion,
-            State = db.MilestoneStates.Where(s => s.MilestoneId == m.Id).Select(s => new { s.Status, s.StatusReasons, s.DaysRemaining, s.SlipDays, s.DeliverableTotal,
-                s.DeliverableIssued, s.TaskTotal, s.TaskComplete, s.TaskOpen, s.TaskOverdue, s.TaskBlocked }).FirstOrDefault(),
-            Deliverables = db.Deliverables.Count(d => d.MilestoneId == m.Id && d.Status != DeliverableStatus.Cancelled),
-            Issued = db.Deliverables.Count(d => d.MilestoneId == m.Id && (d.Status == DeliverableStatus.Issued || d.Status == DeliverableStatus.Accepted)),
-        }).ToListAsync();
-        return list.Select(m => (object)new MilestoneRow(
+            db.MilestoneStates.Where(s => s.MilestoneId == m.Id).Select(s => new StateSource(s.Status, s.StatusReasons, s.DaysRemaining, s.SlipDays, s.DeliverableTotal,
+                s.DeliverableIssued, s.TaskTotal, s.TaskComplete, s.TaskOpen, s.TaskOverdue, s.TaskBlocked)).FirstOrDefault(),
+            db.Deliverables.Count(d => d.MilestoneId == m.Id && d.Status != DeliverableStatus.Cancelled),
+            db.Deliverables.Count(d => d.MilestoneId == m.Id && (d.Status == DeliverableStatus.Issued || d.Status == DeliverableStatus.Accepted)))).ToListAsync();
+        return list.Select(m => new MilestoneRow(
             m.Id, m.ProjectId, m.Key, m.Name, m.MilestoneType, m.Date, m.OriginalDate, m.Description, m.ProjectDisciplineId, m.CompletesPhaseId,
             m.IsClientFacing, m.IsComplete, m.CompletedDate, m.IsCancelled, m.CancelledReason, m.RowVersion,
             MilestoneType.IsSubmission(m.MilestoneType),
@@ -90,7 +124,7 @@ public static class MilestoneEndpoints
             schedule?.IsFlagOn("schedule_baseline") == true && m.BaselineDate is not null ? Evaluator.SlipShown(null, m.Date, null, m.BaselineDate, schedule.SlipDisplayDays) : null)).ToList();
     }
 
-    static async Task<IResult> Create(Guid id, CreateBody body, Access access, HubDb db)
+    static async Task<Created<MilestoneCreated>> Create(Guid id, CreateBody body, Access access, HubDb db)
     {
         var (p, ctx) = await access.Project(id);
         Access.Demand(Permissions.ManageMilestones(access.Actor, ctx));
@@ -110,31 +144,27 @@ public static class MilestoneEndpoints
             await db.SaveChangesAsync();
             return m;
         });
-        return Results.Created($"/api/v1/milestones/{m.Id}", new { m.Id, m.Key, m.RowVersion });
+        return TypedResults.Created($"/api/v1/milestones/{m.Id}", new MilestoneCreated(m.Id, m.Key, m.RowVersion));
     }
 
-    static async Task<object> Get(string id, Access access, HubDb db, SettingsStore store)
+    static async Task<Ok<MilestoneDetail>> Get(string id, Access access, HubDb db, SettingsStore store)
     {
         var m = (Guid.TryParse(id, out var g) ? await db.Milestones.AsNoTracking().FirstOrDefaultAsync(x => x.Id == g)
             : await db.Milestones.AsNoTracking().FirstOrDefaultAsync(x => x.Key == id)) ?? throw ApiException.NotFound();
         var (p, ctx) = await access.Project(m.ProjectId, track: false);
         var settings = await store.Get(db);
-        var row = (MilestoneRow)(await Rows(db, db.Milestones.AsNoTracking().Where(x => x.Id == m.Id), settings)).Single();
+        var row = (await Rows(db, db.Milestones.AsNoTracking().Where(x => x.Id == m.Id), settings)).Single();
         row = row with { CanRebaseline = settings.IsFlagOn("schedule_baseline") ? Permissions.Rebaseline(access.Actor, ctx, m.IsComplete || m.IsCancelled).Ok : null };
         var deliverables = await DeliverableEndpoints.Rows(db, db.Deliverables.AsNoTracking().Where(d => d.MilestoneId == m.Id), schedule: settings);
         var directTasks = await db.Tasks.AsNoTracking().Where(t => t.MilestoneId == m.Id).OrderBy(t => t.Seq)
-            .Select(t => new { t.Id, t.Key, t.Name, t.Status, t.DueDate, t.AssigneeId }).ToListAsync();
-        var phase = m.CompletesPhaseId is { } ph ? await db.Phases.Where(x => x.Id == ph).Select(x => new { x.Id, x.Name }).FirstOrDefaultAsync() : null;
+            .Select(t => new MilestoneTask(t.Id, t.Key, t.Name, t.Status, t.DueDate, t.AssigneeId)).ToListAsync();
+        var phase = m.CompletesPhaseId is { } ph ? await db.Phases.Where(x => x.Id == ph).Select(x => new MilestonePhase(x.Id, x.Name)).FirstOrDefaultAsync() : null;
         var can = Permissions.ManageMilestones(access.Actor, ctx);
-        return new
-        {
-            Milestone = row, Deliverables = deliverables, DirectTasks = directTasks, CompletesPhase = phase,
-            Project = new { p.Id, p.ProjectNumber, p.Name, p.Status },
-            Permissions = new { Manage = new { can.Ok, Reason = can.Why is null ? null : Text.Get(can.Why, can.Arg ?? p.Status) }, Comment = Permissions.Comment(access.Actor, ctx).Ok },
-        };
+        return TypedResults.Ok(new MilestoneDetail(row, deliverables, directTasks, phase, new MilestoneProject(p.Id, p.ProjectNumber, p.Name, p.Status),
+            new MilestonePermissions(new RegisterEndpoints.RegisterPermission(can.Ok, can.Why is null ? null : Text.Get(can.Why, can.Arg ?? p.Status)), Permissions.Comment(access.Actor, ctx).Ok)));
     }
 
-    static async Task<IResult> Edit(Guid id, JsonElement body, HttpContext http, Access access, HubDb db)
+    static async Task<Ok<MilestoneVersion>> Edit(Guid id, JsonElement body, HttpContext http, Access access, HubDb db)
     {
         var (m, p, ctx) = await Load(db, access, id);
         Access.Demand(Permissions.ManageMilestones(access.Actor, ctx));
@@ -161,7 +191,7 @@ public static class MilestoneEndpoints
             m.OriginalDate ??= m.Date;
         }
         await db.SaveChangesAsync();
-        return Results.Ok(new { m.Id, m.RowVersion });
+        return TypedResults.Ok(new MilestoneVersion(m.Id, m.RowVersion));
     }
 
     static async Task<Ok<RebaselineRead>> Rebaseline(Guid id, RebaselineBody body, HttpContext http, Access access, HubDb db, SettingsStore store)
@@ -177,8 +207,16 @@ public static class MilestoneEndpoints
         return TypedResults.Ok(new RebaselineRead(m.Id, m.RowVersion));
     }
 
+    /// Both answers are a 200, so the generator keeps one: the document says either of the two.
+    static async Task DescribeChangeDate(OpenApiOperation operation, OpenApiOperationTransformerContext context, CancellationToken cancellationToken)
+    {
+        var preview = await context.GetOrCreateSchemaAsync(typeof(DatePreview), null, cancellationToken);
+        var changed = await context.GetOrCreateSchemaAsync(typeof(DateChanged), null, cancellationToken);
+        operation.Responses!["200"].Content!["application/json"].Schema = new OpenApiSchema { AnyOf = [preview, changed] };
+    }
+
     /// M-02..M-04, AC-MS-04, AC-MS-05, FR-MS-05; `includeTasks` extends the cascade to tasks (packet 018).
-    static async Task<IResult> ChangeDate(Guid id, ChangeDateBody body, HttpContext http, Access access, HubDb db, Notifier notify)
+    static async Task<Results<Ok<DatePreview>, Ok<DateChanged>>> ChangeDate(Guid id, ChangeDateBody body, HttpContext http, Access access, HubDb db, Notifier notify)
     {
         var (m, p, ctx) = await Load(db, access, id);
         Access.Demand(Permissions.ManageMilestones(access.Actor, ctx));
@@ -194,14 +232,12 @@ public static class MilestoneEndpoints
             ? await db.Tasks.Where(t => t.DeliverableId != null && dIds.Contains(t.DeliverableId.Value) && t.Status != TaskStatuses.Complete
                 && t.Status != TaskStatuses.Cancelled && (t.DueDate != null || t.StartDate != null)).OrderBy(t => t.Seq).ToListAsync()
             : [];
-        var preview = new
-        {
-            milestone = new { m.Key, m.Name, oldDate = old, newDate = body.NewDate, slipDays = m.OriginalDate is { } od ? body.NewDate.DayNumber - od.DayNumber : 0, delta },
-            deliverables = deliverables.Select(d => new { d.Id, d.Key, d.Name, oldDue = d.DueDate, newDue = d.DueDate!.Value.AddDays(delta) }),
-            tasks = tasks.Select(t => new { t.Id, t.Key, t.Name, oldDue = t.DueDate, newDue = t.DueDate?.AddDays(delta), oldStart = t.StartDate, newStart = t.StartDate?.AddDays(delta) }),
-            inconsistent = await db.Deliverables.Where(d => d.MilestoneId == id && d.DueDate > body.NewDate && !dIds.Contains(d.Id)).Select(d => new { d.Key, d.Name, d.DueDate }).ToListAsync(),
-        };
-        if (body.DryRun == true) return Results.Ok(preview);
+        var preview = new DatePreview(
+            new DateMove(m.Key, m.Name, old, body.NewDate, m.OriginalDate is { } od ? body.NewDate.DayNumber - od.DayNumber : 0, delta),
+            deliverables.Select(d => new DeliverableShift(d.Id, d.Key, d.Name, d.DueDate, d.DueDate!.Value.AddDays(delta))),
+            tasks.Select(t => new TaskShift(t.Id, t.Key, t.Name, t.DueDate, t.DueDate?.AddDays(delta), t.StartDate, t.StartDate?.AddDays(delta))),
+            await db.Deliverables.Where(d => d.MilestoneId == id && d.DueDate > body.NewDate && !dIds.Contains(d.Id)).Select(d => new DeliverableLeftBehind(d.Key, d.Name, d.DueDate)).ToListAsync());
+        if (body.DryRun == true) return TypedResults.Ok(preview);
         await Http.CheckVersion(db, http, m, body.RowVersion);
         var reason = Check.Reason(body.Reason); // G-09: milestone date change needs a reason
         db.Audit.Reason = reason;
@@ -214,10 +250,10 @@ public static class MilestoneEndpoints
         await notify.Send(NotificationEvents.MilestoneDateChanged, [p.ProjectManagerId, .. leads], Item(p, m),
             Text.Get("notify.milestone_moved", await notify.ActorName(), m.Key, m.Name, old?.ToString("yyyy-MM-dd") ?? "—", body.NewDate.ToString("yyyy-MM-dd"), (delta >= 0 ? "+" : "") + delta), reason);
         await db.SaveChangesAsync();
-        return Results.Ok(new { m.Id, m.RowVersion, shifted = deliverables.Count + tasks.Count, preview });
+        return TypedResults.Ok(new DateChanged(m.Id, m.RowVersion, deliverables.Count + tasks.Count, preview));
     }
 
-    static async Task<IResult> Complete(Guid id, CompleteBody body, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock)
+    static async Task<Ok<MilestoneCompleted>> Complete(Guid id, CompleteBody body, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
         var (m, p, ctx) = await Load(db, access, id);
         Access.Demand(Permissions.ManageMilestones(access.Actor, ctx));
@@ -228,19 +264,19 @@ public static class MilestoneEndpoints
         var completed = body.CompletedDate ?? today;
         Check.That(completed <= today, "completedDate", "milestone.future_completion"); // M-06
         var open = await db.Deliverables.Where(x => x.MilestoneId == id && x.Status != DeliverableStatus.Issued && x.Status != DeliverableStatus.Accepted && x.Status != DeliverableStatus.Cancelled)
-            .Select(x => new { x.Id, x.Key, x.Name, x.Status }).ToListAsync();
+            .Select(x => new OpenDeliverable(x.Id, x.Key, x.Name, x.Status)).ToListAsync();
         if (open.Count > 0 && body.Confirm != true) // M-05, AC-MS-06
-            throw ApiException.Conflict("confirm_open_deliverables", "milestone.open_deliverables", new { deliverables = open }, open.Count);
+            throw ApiException.Conflict("confirm_open_deliverables", "milestone.open_deliverables", new DeliverablesToConfirm(open), open.Count);
         ProjectEndpoints.CorrectionReason(p, null);
         m.IsComplete = true;
         m.CompletedDate = completed;
         if (open.Count > 0) db.Audit.Note(m, reason: Text.Get("milestone.completed_with_open", string.Join(", ", open.Select(o => o.Key))));
         await db.SaveChangesAsync();
-        var phase = m.CompletesPhaseId is { } ph && p.PhaseId != ph ? await db.Phases.Where(x => x.Id == ph).Select(x => new { x.Id, x.Name }).FirstOrDefaultAsync() : null;
-        return Results.Ok(new { m.Id, m.RowVersion, suggestPhase = phase }); // never advanced automatically (§9.3)
+        var phase = m.CompletesPhaseId is { } ph && p.PhaseId != ph ? await db.Phases.Where(x => x.Id == ph).Select(x => new MilestonePhase(x.Id, x.Name)).FirstOrDefaultAsync() : null;
+        return TypedResults.Ok(new MilestoneCompleted(m.Id, m.RowVersion, phase)); // never advanced automatically (§9.3)
     }
 
-    static async Task<IResult> Reopen(Guid id, ReasonBody body, HttpContext http, Access access, HubDb db)
+    static async Task<Ok<MilestoneVersion>> Reopen(Guid id, ReasonBody body, HttpContext http, Access access, HubDb db)
     {
         var (m, _, ctx) = await Load(db, access, id);
         Access.Demand(Permissions.ManageMilestones(access.Actor, ctx));
@@ -250,11 +286,11 @@ public static class MilestoneEndpoints
         m.IsComplete = false;
         m.CompletedDate = null;
         await db.SaveChangesAsync();
-        return Results.Ok(new { m.Id, m.RowVersion });
+        return TypedResults.Ok(new MilestoneVersion(m.Id, m.RowVersion));
     }
 
     /// M-07, E-17: links are kept; targeted deliverables are flagged for retargeting and listed for the bulk dialog.
-    static async Task<IResult> Cancel(Guid id, ReasonBody body, HttpContext http, Access access, HubDb db)
+    static async Task<Ok<MilestoneCancelled>> Cancel(Guid id, ReasonBody body, HttpContext http, Access access, HubDb db)
     {
         var (m, _, ctx) = await Load(db, access, id);
         Access.Demand(Permissions.ManageMilestones(access.Actor, ctx));
@@ -263,11 +299,11 @@ public static class MilestoneEndpoints
         m.CancelledReason = Check.Reason(body.Reason);
         db.Audit.Note(m, reason: m.CancelledReason);
         await db.SaveChangesAsync();
-        var retarget = await db.Deliverables.Where(d => d.MilestoneId == id && d.Status != DeliverableStatus.Cancelled).Select(d => new { d.Id, d.Key, d.Name, d.RowVersion }).ToListAsync();
-        return Results.Ok(new { m.Id, m.RowVersion, retarget });
+        var retarget = await db.Deliverables.Where(d => d.MilestoneId == id && d.Status != DeliverableStatus.Cancelled).Select(d => new RetargetDeliverable(d.Id, d.Key, d.Name, d.RowVersion)).ToListAsync();
+        return TypedResults.Ok(new MilestoneCancelled(m.Id, m.RowVersion, retarget));
     }
 
-    static async Task<IResult> Delete(Guid id, Access access, HubDb db, TimeProvider clock, CurrentUser me)
+    static async Task<NoContent> Delete(Guid id, Access access, HubDb db, TimeProvider clock, CurrentUser me)
     {
         var (m, _, ctx) = await Load(db, access, id);
         Access.Demand(Permissions.ManageMilestones(access.Actor, ctx));
@@ -276,11 +312,11 @@ public static class MilestoneEndpoints
         m.DeletedAt = clock.GetUtcNow();
         m.DeletedBy = me.Id;
         await db.SaveChangesAsync();
-        return Results.NoContent();
+        return TypedResults.NoContent();
     }
 
     /// FR-RCV-03: like the task restore; the save hook logs "Restored" and queues re-evaluation.
-    static async Task<IResult> Restore(Guid id, HttpContext http, Access access, HubDb db)
+    static async Task<Ok<MilestoneVersion>> Restore(Guid id, HttpContext http, Access access, HubDb db)
     {
         var m = await db.Milestones.IgnoreQueryFilters().FirstOrDefaultAsync(x => x.Id == id && x.DeletedAt != null) ?? throw ApiException.NotFound();
         var (_, ctx) = await access.Project(m.ProjectId);
@@ -289,7 +325,7 @@ public static class MilestoneEndpoints
         m.DeletedAt = null;
         m.DeletedBy = null;
         await db.SaveChangesAsync();
-        return Results.Ok(new { m.Id, m.RowVersion });
+        return TypedResults.Ok(new MilestoneVersion(m.Id, m.RowVersion));
     }
 
     public static NotifyItem Item(Project p, Milestone m) => new(p.Id, ItemType.Milestone, m.Id, m.Key, $"/projects/{p.ProjectNumber}/milestones?panel=Milestone:{m.Id}", p.ProjectNumber);

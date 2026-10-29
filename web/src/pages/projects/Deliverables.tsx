@@ -21,7 +21,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useProject, useProjectRefresh, useReference } from '@/hooks/data'
-import { ApiError, get, typedRequest } from '@/lib/api'
+import { ApiError, typedRequest } from '@/lib/api'
 import { fmtDate, fmtTime, hours, today } from '@/lib/format'
 import { runtimeText, t, tv } from '@/lib/i18n'
 import type { components } from '@/gen/api'
@@ -67,7 +67,7 @@ function LiveDeliverablesTab() {
   const revisionQ = useQuery({ queryKey: ['project', p.id, 'revision-check'], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/revision-check', { params: { projectId: p.id } }), enabled: revisionEnabled })
   const marks = new Map((revisionQ.data?.deliverables ?? []).map((x) => [x.id, [...x.marks, ...x.issues.flatMap((i) => i.marks)]]))
   const warningOnly = revisionEnabled && sp.get('revisionWarning') === 'true' // the filter exists only while flag.revision_check is on
-  const milestones = useQuery({ queryKey: ['p', p.id, 'milestones', false, ''], queryFn: () => get<MilestoneRow[]>(`projects/${p.id}/milestones`) })
+  const milestones = useQuery({ queryKey: ['p', p.id, 'milestones', false, ''], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/milestones', { params: { id: p.id } }) })
   const group = sp.get('group') ?? 'discipline'
   const panel = sp.get('panel')
   const table = useTable<DeliverableRow>('hub.deliverableColumns', [
@@ -331,7 +331,7 @@ export function DeliverablePanel({ id }: PanelProps) {
   const [issuing, setIssuing] = useState(false)
   const [err, setErr] = useState<unknown>(null)
   const project = useProject(q.data?.project.projectNumber)
-  const milestones = useQuery({ queryKey: ['p', q.data?.project.id, 'milestones', false, ''], queryFn: () => get<MilestoneRow[]>(`projects/${q.data!.project.id}/milestones`), enabled: !!q.data })
+  const milestones = useQuery({ queryKey: ['p', q.data?.project.id, 'milestones', false, ''], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/milestones', { params: { id: q.data!.project.id } }), enabled: !!q.data })
   const openPanel = useItemPanel()
   const baselineEnabled = useFlag('baseline_history')
   const revisionEnabled = useFlag('revision_check')

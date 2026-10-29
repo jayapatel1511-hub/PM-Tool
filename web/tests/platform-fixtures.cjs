@@ -9,6 +9,7 @@ const { myWork, myWorkPerson, myWorkProject } = require('./my-work.fixture.cjs')
 const { meView, referenceData } = require('./me.fixture.cjs')
 const { taskDependencies } = require('./dependencies.fixture.cjs')
 const { actionRow, actionDetail: actionDetailOf } = require('./meetings.fixture.cjs')
+const { milestoneRow, milestoneDetail: milestoneDetailOf } = require('./milestones.fixture.cjs')
 const { deliverableRow, deliverableState, deliverableList, deliverableDetail: deliverableDetailOf } = require('./deliverables.fixture.cjs')
 
 const taskId = '00000000-0000-0000-0000-000000000001'
@@ -25,7 +26,8 @@ const taskPage = { items: [], page: 1, pageSize: 200, totalCount: 0 }
 const me = meView({ id: '00000000-0000-0000-0000-000000000002', displayName: 'Alex Chen', email: 'alex@hub.test', systemRoles: ['StandardUser'], capabilities: { createTask: true, workload: true, admin: true }, settings: { today: '2026-10-03', restrictedProjectsEnabled: true }, flags: { live_events: true, live_project_stamp: true } })
 const taskDetail = { task, description: 'Synthetic fixture task', project: { id: project.id, projectNumber: project.projectNumber, name: project.name, status: project.status }, collaborators: [], watchers: [], permissions: { edit: { ok: true }, assign: { ok: true }, setReviewer: { ok: true }, dueDate: { ok: true }, dueNeedsReason: false, block: { ok: true }, delete: { ok: true }, restore: true, comment: true, transitions: [], dependencies: true, enterTime: true, needsReason: false, allowSelfReview: true } }
 const panelPermissions = { edit: { ok: false, reason: 'Synthetic read-only panel' }, manage: { ok: false }, comment: true, changeType: { ok: false }, transitions: [{ to: 'Open', ok: false }, { to: 'Closed', ok: false }] }
-const milestoneDetail = { milestone: { id: panelIds.milestone, projectId: project.id, key: 'M-001', name: 'Synthetic milestone', milestoneType: 'Design Submission', date: '2026-10-20', originalDate: '2026-10-20', description: 'Synthetic milestone detail', isClientFacing: true, isComplete: false, isCancelled: false, rowVersion: 1, isSubmission: false, status: 'Open', statusReasons: [], slipDays: 0, deliverableTotal: 0, deliverableIssued: 0, taskTotal: 0, taskComplete: 0, taskOpen: 0, taskOverdue: 0, taskBlocked: 0 }, permissions: { ...panelPermissions, manage: { ok: false } }, deliverables: [], completesPhase: null }
+const milestoneDetail = milestoneDetailOf({ milestone: milestoneRow({ id: panelIds.milestone, projectId: project.id, key: 'M-001', name: 'Synthetic milestone', description: 'Synthetic milestone detail' }),
+  project: { id: project.id, projectNumber: project.projectNumber, name: project.name, status: project.status } })
 const deliverableDetail = deliverableDetailOf({
   deliverable: deliverableRow({ id: panelIds.deliverable, projectId: project.id, key: 'D-001', name: 'Synthetic deliverable', projectDisciplineId: project.projectDisciplines[0].id, status: 'In Review', state: deliverableState(), tasks: [] }),
   description: 'Synthetic deliverable detail', project: { id: project.id, projectNumber: project.projectNumber, name: project.name, status: project.status },

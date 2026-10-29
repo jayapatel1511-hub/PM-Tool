@@ -217,3 +217,8 @@ Merge of `build2/043-S35` (Administration Users list onto `DataTable`, builder c
 - Fixed: with `flag.record_engine_additions` on, sorting an open-roles column reset the Allocations list's `?page=`; `useTable` now takes the list's own page parameter and open roles passes none.
 - Recorded, not changed (for Jay's visual review): FR-REC-14's "no visible change" is checked on accessibility trees, so styling drift does not fail parity. Visible differences: the Vacation coverage table now has the shared grey header, medium-weight muted header text, row hover and `--cell-*` padding (it had a plain header, bold headers and `p-3` cells); header padding is `py-2.5` not `py-3` on converted screens; Holidays and Reference cells lose `align-top`; loading skeletons show 6 rows (8 on Project List and Portfolio, 4 on Allocations before).
 - Parity does not cover loading and error states, widths between 375 and 1600 px, mutating row actions (reorder, Remove, Deactivate) or the flag-on additions (checked by the AC-REC-09 assertions only).
+
+
+### 2026-10-29 parity runner scheduling
+
+The complete default real-API matrix can run up to three personas concurrently with `TUESDAY_RECORD_CONCURRENCY=3` (default remains one). Both widths and base/candidate stay serial for each persona; all workers settle before any global flag changes, additions checks or restoration. Saved views are Personal and removed per worker. Every route, comparison and accessibility check is retained. An independent review identified the fail-fast flag-restoration race; waiting for all settled workers resolves it. This only changes test scheduling, not application behavior or packet acceptance.

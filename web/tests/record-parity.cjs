@@ -653,7 +653,13 @@ async function additionsCheck(ids) {
     const report = { candidate, base, apiBase, screens: SCREENS, flags: FLAGS, ids, runs: {}, at: new Date().toISOString() }
     for (const flagged of process.env.RECORD_PARITY_ADDITIONS_ONLY === '1' ? [] : FLAGS.length ? [false, true] : [false]) {
       for (const key of FLAGS) await setting(key, flagged)
-      for (const who of Object.keys(PERSONAS)) for (const width of WIDTHS) {
+      // Personas have separate saved views/preferences; keep each person's widths serial and
+      // finish every worker before changing global flags or running the additions check.
+      const concurrency = Number(process.env.TUESDAY_RECORD_CONCURRENCY ?? 1)
+      assert.ok(Number.isInteger(concurrency) && concurrency >= 1 && concurrency <= 3, 'record parity concurrency must be 1..3')
+      const queue = Object.keys(PERSONAS)
+      const workers = await Promise.allSettled(Array.from({ length: concurrency }, async () => {
+        for (let who; (who = queue.shift());) for (const width of WIDTHS) {
         const key = `${FLAGS.length ? `flags ${flagged ? 'on' : 'off'} ` : ''}${who}/${width}`
         const before = await browserSnapshot(base, who, width, ids)
         const after = await browserSnapshot(candidate, who, width, ids)
@@ -661,7 +667,10 @@ async function additionsCheck(ids) {
         const problems = [...before.problems.map(x => `base ${x}`), ...after.problems.map(x => `candidate ${x}`)]
         report.runs[key] = { pass: !differences.length && !problems.length, differences, problems, base: before, candidate: after }
         console.log(`${report.runs[key].pass ? 'PASS' : 'FAIL'} ${key}${report.runs[key].pass ? '' : ` (${[...problems, ...differences].slice(0, 4).join('; ')})`}`)
-      }
+        }
+      }))
+      const failure = workers.find(result => result.status === 'rejected')
+      if (failure) throw failure.reason
     }
     if (additions) {
       report.additions = await additionsCheck(ids)

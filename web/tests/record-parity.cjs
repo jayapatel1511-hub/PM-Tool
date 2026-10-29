@@ -59,6 +59,18 @@ const launch = () => chromium.launch({ headless: true, ...(process.env.CHROME_EX
 const clean = (value) => JSON.parse(JSON.stringify(value, (_, v) => typeof v === 'string' ? v.replace(/^https?:\/\/[^/]+/, '').replace(/^_r_[0-9a-v]+_$/, '_r_').replace(/\b\d{4}-\d{2}-\d{2} \d{2}:\d{2}\b/g, '<date time>') : v))
 const slug = route => route.replace(/\{(\w+)\}/g, '$1').replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '')
 
+// ASP.NET binds query names case-insensitively. Project grouping is local UI state;
+// the old client sent group=none even though Projects.ProjectQuery does not accept it.
+// Keep every API path, filter value, and other parameter in the comparison.
+function requestSignature(raw) {
+  const url = new URL(raw, 'http://parity.invalid/')
+  const entries = [...url.searchParams].map(([key, value]) => [key.toLowerCase(), value])
+    .filter(([key, value]) => !(url.pathname === '/projects' && key === 'group' && value === 'none'))
+    .sort(([ak], [bk]) => ak.localeCompare(bk))
+  const query = new URLSearchParams(entries).toString()
+  return url.pathname.slice(1) + (query ? '?' + query : '')
+}
+
 function diff(a, b, at = '$', out = []) {
   if (JSON.stringify(a) === JSON.stringify(b)) return out
   if (Array.isArray(a) && Array.isArray(b)) {
@@ -86,6 +98,12 @@ function selfCheck() {
   assert.throws(() => expand('/projects/{nope}', {}), /unknown placeholder/)
   assert.deepEqual(diff(clean({ field: '_r_20_', url: 'http://127.0.0.1:1/x' }), clean({ field: '_r_1m_', url: 'http://127.0.0.1:2/x' })), [])
   assert.ok(diff(clean({ field: '_r_20_' }), clean({ field: 'person' })).length, 'a named id must still be compared')
+  assert.equal(requestSignature('projects?Status=Active&PageSize=200'), requestSignature('projects?pageSize=200&status=Active'))
+  assert.equal(requestSignature('projects?group=none&pageSize=200'), requestSignature('projects?PageSize=200'))
+  assert.notEqual(requestSignature('projects?Status=Active'), requestSignature('projects?Status=On%20Hold'), 'filter values remain significant')
+  assert.notEqual(requestSignature('projects?q=Alpha&q=Beta'), requestSignature('projects?q=Beta&q=Alpha'), 'duplicate-key value order remains significant')
+  assert.notEqual(requestSignature('projects?group=owner'), requestSignature('projects'), 'other grouping values are not silently ignored')
+  assert.notEqual(requestSignature('projects/P/issues?group=none'), requestSignature('projects/P/issues'), 'the exception is limited to the root Project List')
   console.log('record parity selfcheck: PASS (identical passes; removed header fails)')
 }
 
@@ -240,7 +258,7 @@ async function browserSnapshot(origin, who, width, ids, { removeHeader = false, 
     page.on('request', request => {
       const url = request.url()
       if (!url.includes('/api/v1/')) return
-      if (request.method() === 'GET') gets.push(url.split('/api/v1/')[1])
+      if (request.method() === 'GET') gets.push(requestSignature(url.split('/api/v1/')[1]))
       if (!/\/api\/v1\/events(\?|$)/.test(url)) pending.add(request) // the live stream never finishes
       if (signedIn && !url.endsWith('/config') && request.headers()['x-dev-user'] !== `${who}@hub.test`) wrongPersona.push(url)
     })

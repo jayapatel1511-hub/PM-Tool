@@ -106,3 +106,8 @@ Still open: AC-RCV-11 screen-reader check (HUMAN); S12 flag removal for AC-RCV-1
 ### 2026-10-29 count census transport compatibility
 
 The generated client emits PascalCase query parameter names. The real count census now compares parameter names case-insensitively while preserving exact values and refusing unexpected filters. Pagination/plumbing names use the same normalization. `TUESDAY_COUNTS_PROJECTS` selects the disposable fixture's project numbers; the default remains SYN-101–103. This release uses the ReviewDemo fixture's DEMO-101–103 to exercise project/discipline dashboards and milestones rather than silently skipping nonexistent SYN projects. No product behavior changes.
+
+
+### 2026-10-29 constrained picker geometry
+
+On the seeded integration at 1440 × 480, the task assignee list grew asynchronously while its fixed-position wrapper stayed at y=297 with height 338 (bottom 635). The picker now requests continuous position updates while open, so collision handling recalculates after list growth. The focused reproduction passed after the correction. No generic popover CSS or viewport assertions were weakened. The release handoff records the full four-width helper/error/focus and scrolling rerun.

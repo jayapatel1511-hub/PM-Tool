@@ -105,7 +105,7 @@ export function PeoplePicker({ value, valueName, onChange, placeholder, allowCle
             <ChevronsUpDown className="size-3.5 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className={cn('p-0', week ? 'w-96' : 'w-72')} align="start">
+        <PopoverContent className={cn('p-0', week ? 'w-96' : 'w-72')} align="start" updatePositionStrategy="always">
           <Command shouldFilter={false}>
             <CommandInput placeholder={t('people.search')} value={q} onValueChange={setQ} />
             <CommandList>

@@ -30,6 +30,7 @@
     "test:deliverables": "node tests/deliverables.cjs",
     "test:readiness": "node tests/readiness.cjs",
     "test:team": "node tests/team.cjs",
+    "test:meetings": "node tests/meetings.cjs",
     "test:admin": "node tests/admin.cjs",
     "test:backlog-my-work": "node tests/backlog-my-work.cjs",
     "test:admin-review": "node tests/admin-review.cjs",

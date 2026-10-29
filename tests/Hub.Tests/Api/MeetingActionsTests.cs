@@ -145,6 +145,221 @@ public sealed class MeetingActionsTests(HubFactory f)
         Assert.Empty((await f.As(TestData.Pm).GetAsync($"/api/v1/reports/meeting-actions-outstanding?projectId={p.Id}&ownerType=External%20Party").Result.Json())["rows"]!.AsArray());
     }
 
+    static string[] Keys(JsonNode? n) => [.. n!.AsObject().Select(x => x.Key)];
+    static readonly string[] MeetingKeys = ["id", "projectId", "title", "meetingDate", "meetingType", "notesLink", "calendarEventId", "rowVersion"];
+    static readonly string[] ActionKeys = ["id", "projectId", "projectNumber", "key", "meetingId", "meetingTitle", "meetingDate", "text", "ownerType", "ownerTypeLabel", "ownerUserId",
+        "ownerDisciplineId", "ownerExternalPartyId", "ownerName", "leadId", "leadName", "noLead", "partyIsClient", "dueDate", "isOverdue", "daysOverdue", "status", "relatedTaskId",
+        "taskKey", "relatedDecisionId", "decisionKey", "converted", "rowVersion"];
+
+    [Fact]
+    public async Task Meeting_commands_and_list_keep_their_answers_and_shape() // the typed records must serialise to the bytes the app already reads (040-S15-Meetings); PATCH was uncalled
+    {
+        var p = await d.Project();
+        var (pm, alex) = (f.As(TestData.Pm), f.As(TestData.Alex));
+        var root = $"/api/v1/projects/{p.Id}";
+        int Mv(Guid id) => f.Db(db => db.Meetings.Where(x => x.Id == id).Select(x => x.RowVersion).First());
+        Assert.Equal("[]", (await alex.GetAsync($"{root}/meetings").Result.Content.ReadAsStringAsync()));
+
+        // Creating: 201 with a Location and the stored meeting, every property written, nulls included.
+        var ev = await pm.Post("/api/v1/calendar/events", new { type = "Meeting", title = "Coordination call", projectId = p.Id, start = "2026-09-14T09:00", end = "2026-09-14T10:00" }).Result.Json(201);
+        var made = await pm.Post($"{root}/meetings", new { title = "Client Progress Meeting #4", meetingDate = "2026-09-14", meetingType = "Client", notesLink = "https://contoso.sharepoint.com/minutes/4", calendarEventId = ev.G("id") });
+        var m = await made.Json(201);
+        Assert.Equal(MeetingKeys, Keys(m));
+        Assert.Equal($"/api/v1/meetings/{m.S("id")}", made.Headers.Location!.OriginalString);
+        Assert.Equal((p.Id, "Client Progress Meeting #4", "2026-09-14", "Client", "https://contoso.sharepoint.com/minutes/4", ev.G("id"), Mv(m.G("id"))),
+            (m.G("projectId"), m.S("title"), m.S("meetingDate"), m.S("meetingType"), m.S("notesLink"), m.G("calendarEventId"), m.I("rowVersion")));
+        var quick = await pm.Post($"{root}/meetings", new { title = "Quick sync" }).Result.Json(201); // type and date default
+        Assert.Equal(MeetingKeys, Keys(quick));
+        Assert.Equal(("Coordination", "2026-09-14"), (quick.S("meetingType"), quick.S("meetingDate")));
+        Assert.True(quick.AsObject().ContainsKey("notesLink")); Assert.Null(quick["notesLink"]);
+        Assert.True(quick.AsObject().ContainsKey("calendarEventId")); Assert.Null(quick["calendarEventId"]);
+        Assert.Equal(HttpStatusCode.BadRequest, (await pm.Post($"{root}/meetings", new { title = "Bad event", calendarEventId = Guid.NewGuid() })).StatusCode);
+
+        // Today's coordination meeting: 200, the same properties, and the same row for the next caller.
+        var current = await pm.Post($"{root}/meetings/current", new { }).Result.Json();
+        Assert.Equal(MeetingKeys, Keys(current));
+        Assert.Equal(quick.G("id"), current.G("id")); // today's coordination meeting already exists: the quick sync
+        Assert.Equal(current.G("id"), (await f.As(TestData.Marc).Post($"{root}/meetings/current", new { }).Result.Json()).G("id"));
+
+        // Editing (uncalled before): 200 with the same properties on the new version, nulls written for what was cleared.
+        var before = Mv(m.G("id"));
+        var edited = await pm.Patch($"/api/v1/meetings/{m.S("id")}", new { title = "Client Progress Meeting #4 (revised)", meetingDate = "2026-09-15", meetingType = "Design Review", notesLink = (string?)null, calendarEventId = (Guid?)null }, before).Result.Json();
+        Assert.Equal(MeetingKeys, Keys(edited));
+        Assert.Equal((m.G("id"), "Client Progress Meeting #4 (revised)", "2026-09-15", "Design Review", before + 1), (edited.G("id"), edited.S("title"), edited.S("meetingDate"), edited.S("meetingType"), edited.I("rowVersion")));
+        Assert.Null(edited["notesLink"]); Assert.Null(edited["calendarEventId"]);
+        Assert.Equal(428, (int)(await pm.Patch($"/api/v1/meetings/{m.S("id")}", new { title = "No version" })).StatusCode);
+        Assert.Equal("concurrency_conflict", (await pm.Patch($"/api/v1/meetings/{m.S("id")}", new { title = "Stale" }, before).Result.Json(409)).S("code"));
+        Assert.Equal(HttpStatusCode.Forbidden, (await alex.Patch($"/api/v1/meetings/{m.S("id")}", new { title = "Mine" }, Mv(m.G("id")))).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await pm.Patch($"/api/v1/meetings/{Guid.NewGuid()}", new { title = "Gone" }, 1)).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await pm.Patch($"/api/v1/meetings/{m.S("id")}", new { title = "", meetingType = "Nope" }, Mv(m.G("id")))).StatusCode);
+
+        // The list: the meeting with the event's title and how many actions are open and in all, newest date first.
+        await pm.Patch($"/api/v1/meetings/{m.S("id")}", new { title = "Client Progress Meeting #4", meetingDate = "2026-09-14", meetingType = "Client", calendarEventId = ev.G("id") }, Mv(m.G("id"))).Result.Json();
+        await Action(m, "Send the revised grading plan", "User", U(TestData.Alex));
+        var done = await Action(m, "Confirm catch basin spacing", "User", U(TestData.Alex));
+        (await Move(done, "Complete", as_: TestData.Alex)).EnsureSuccessStatusCode();
+        var list = (await alex.GetAsync($"{root}/meetings").Result.Json()).AsArray();
+        Assert.Equal(2, list.Count);
+        Assert.All(list, x => Assert.Equal([.. MeetingKeys, "calendarEventTitle", "open", "total"], Keys(x)));
+        var row = list.Single(x => x!.G("id") == m.G("id"))!;
+        Assert.Equal(("Coordination call", 1, 2), (row.S("calendarEventTitle"), row.I("open"), row.I("total")));
+        Assert.Equal(f.Db(db => db.Meetings.Where(x => x.Id == m.G("id")).Select(x => x.RowVersion).First()), row.I("rowVersion"));
+        var plain = list.Single(x => x!.G("id") == quick.G("id"))!;
+        Assert.True(plain.AsObject().ContainsKey("calendarEventTitle")); Assert.Null(plain["calendarEventTitle"]);
+        Assert.Equal((0, 0), (plain.I("open"), plain.I("total")));
+        Assert.Equal(list.Select(x => x!.S("meetingDate")).OrderDescending(StringComparer.Ordinal), list.Select(x => x!.S("meetingDate"))); // newest first
+    }
+
+    [Fact]
+    public async Task Action_commands_keep_their_answers_and_shape() // create, edit (uncalled), transition and convert (040-S15-Meetings)
+    {
+        var p = await d.Project();
+        var pm = f.As(TestData.Pm);
+        var m = await Meeting(p.Id);
+        var task = await d.NewTask(p.Id, TestData.Marc, new { name = "Storm sewer profile" });
+
+        // Creating: 201 with a Location, the key, the version and the warnings list (empty unless the discipline has no lead).
+        var made = await pm.Post($"/api/v1/meetings/{m.S("id")}/actions", new { text = "Send the revised grading plan", ownerType = "User", ownerUserId = U(TestData.Alex), dueDate = "2026-09-18", relatedTaskId = task.G("id") });
+        var a = await made.Json(201);
+        Assert.Equal(["id", "key", "rowVersion", "warnings"], Keys(a));
+        Assert.Equal($"/api/v1/actions/{a.S("id")}", made.Headers.Location!.OriginalString);
+        Assert.Matches(@"^\w+-A01$", a.S("key"));
+        Assert.Equal((0, 0), (a.I("rowVersion"), a["warnings"]!.AsArray().Count));
+        Assert.Equal(await Version(a), a.I("rowVersion"));
+        var geo = await d.Discipline("Geotechnical");
+        var q = await d.Project(tweak: b => { b["disciplines"] = new[] { new { disciplineId = geo, leadUserId = (Guid?)null } }; b["members"] = Array.Empty<object>(); });
+        var qm = await Meeting(q.Id);
+        var nolead = await pm.Post($"/api/v1/meetings/{qm.S("id")}/actions", new { text = "Borehole plan", ownerType = "Discipline", ownerDisciplineId = d.ProjectDiscipline(q.Id, "Geotechnical") }).Result.Json(201);
+        Assert.Equal(["id", "key", "rowVersion", "warnings"], Keys(nolead));
+        Assert.Equal(Hub.Api.Text.Get("action.no_lead_warning"), Assert.Single(nolead["warnings"]!.AsArray())!.GetValue<string>());
+        Assert.Equal(HttpStatusCode.NotFound, (await pm.Post($"/api/v1/meetings/{Guid.NewGuid()}/actions", new { text = "x", ownerType = "User", ownerUserId = U(TestData.Alex) })).StatusCode);
+
+        // Editing (uncalled before): 200 with the id and the new version, and the ETag header the page reads.
+        var v0 = await Version(a);
+        var edit = await pm.Patch($"/api/v1/actions/{a.S("id")}", new { text = "Send the revised grading plan v2", dueDate = "2026-09-19" }, v0);
+        var edited = await edit.Json();
+        Assert.Equal(["id", "rowVersion"], Keys(edited));
+        Assert.Equal((a.G("id"), v0 + 1), (edited.G("id"), edited.I("rowVersion")));
+        Assert.Equal($"\"{v0 + 1}\"", edit.Headers.ETag!.Tag);
+        var stored = await f.DbAsync(db => db.Actions.AsNoTracking().SingleAsync(x => x.Id == a.G("id")));
+        Assert.Equal(("Send the revised grading plan v2", new DateOnly(2026, 9, 19)), (stored.Text, stored.DueDate));
+        var m2 = await Meeting(p.Id, "Second meeting");
+        var moved = await pm.Patch($"/api/v1/actions/{a.S("id")}", new { meetingId = m2.G("id"), ownerType = "Discipline", ownerUserId = (Guid?)null, ownerDisciplineId = d.ProjectDiscipline(p.Id, "Civil"), ownerExternalPartyId = (Guid?)null, relatedTaskId = (Guid?)null }, await Version(a)).Result.Json();
+        Assert.Equal(["id", "rowVersion"], Keys(moved));
+        stored = await f.DbAsync(db => db.Actions.AsNoTracking().SingleAsync(x => x.Id == a.G("id")));
+        Assert.Equal((m2.G("id"), ActionOwnerType.Discipline, null, (Guid?)null), (stored.MeetingId, stored.OwnerType, stored.OwnerUserId, stored.RelatedTaskId));
+        Assert.Equal("concurrency_conflict", (await pm.Patch($"/api/v1/actions/{a.S("id")}", new { text = "Stale" }, v0).Result.Json(409)).S("code"));
+        Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Rita).Patch($"/api/v1/actions/{a.S("id")}", new { text = "No" }, await Version(a))).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await pm.Patch($"/api/v1/actions/{a.S("id")}", new { text = "" }, await Version(a))).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await pm.Patch($"/api/v1/actions/{a.S("id")}", new { meetingId = Guid.NewGuid() }, await Version(a))).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await pm.Patch($"/api/v1/actions/{Guid.NewGuid()}", new { text = "x" }, 1)).StatusCode);
+
+        // Transition: 200 with the id, the new status and the version, in that order.
+        var progressed = await Move(a, "In Progress", as_: TestData.Marc).Result.Json();
+        Assert.Equal(["id", "status", "rowVersion"], Keys(progressed));
+        Assert.Equal((a.G("id"), "In Progress", await Version(a)), (progressed.G("id"), progressed.S("status"), progressed.I("rowVersion")));
+
+        // Convert: 200 with the id, the action's status after following its task, the version, and the new task.
+        var other = await Action(m, "Ask for as-builts", "User", U(TestData.Alex));
+        var conv = await pm.Post($"/api/v1/actions/{other.S("id")}/convert", new { rowVersion = await Version(other) }).Result.Json();
+        Assert.Equal(["id", "status", "rowVersion", "taskId", "taskKey"], Keys(conv));
+        Assert.Equal((other.G("id"), "In Progress", await Version(other)), (conv.G("id"), conv.S("status"), conv.I("rowVersion")));
+        var taskRow = await f.DbAsync(db => db.Tasks.AsNoTracking().SingleAsync(x => x.Id == conv.G("taskId")));
+        Assert.Equal((taskRow.Key, "Ask for as-builts"), (conv.S("taskKey"), taskRow.Name));
+        Assert.Equal("already_converted", (await pm.Post($"/api/v1/actions/{other.S("id")}/convert", new { rowVersion = await Version(other) }).Result.Json(409)).S("code"));
+        Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Rita).Post($"/api/v1/actions/{a.S("id")}/convert", new { rowVersion = await Version(a) })).StatusCode);
+    }
+
+    [Fact]
+    public async Task Action_detail_keeps_its_nesting_nulls_and_permissions() // GET /actions/{id} was a Task<object> over anonymous objects (040-S15-Meetings)
+    {
+        var p = await d.Project();
+        var (pm, rita) = (f.As(TestData.Pm), f.As(TestData.Rita));
+        var m = await Meeting(p.Id);
+        var task = await d.NewTask(p.Id, TestData.Marc, new { name = "Storm sewer profile" });
+        var decision = await pm.Post($"/api/v1/projects/{p.Id}/decisions", new { subject = "Select pump supplier", description = "Options", ownerUserId = U(TestData.Alex), requiredByDate = "2026-09-20", impactLevel = "Medium", impactDescription = "Drawings cannot progress" }).Result.Json(201);
+        var a = await pm.Post($"/api/v1/meetings/{m.S("id")}/actions", new { text = "Send the revised grading plan", ownerType = "User", ownerUserId = U(TestData.Alex), dueDate = "2026-09-18",
+            relatedTaskId = task.G("id"), relatedDecisionId = decision.G("id"), links = new[] { new { targetType = "Task", targetId = task.G("id") } } }).Result.Json(201);
+
+        // The whole envelope for the person who can edit: every section written, the related task and decision, one link, the discipline a task would join.
+        var detail = await f.As(TestData.Alex).GetAsync($"/api/v1/actions/{a.S("id")}").Result.Json();
+        Assert.Equal(["action", "meeting", "project", "task", "decision", "links", "taskDisciplineId", "permissions"], Keys(detail));
+        Assert.Equal(ActionKeys, Keys(detail["action"]));
+        Assert.Equal((a.G("id"), a.S("key"), "Send the revised grading plan", "Open", "Alex Chen", task.S("key"), decision.S("key")),
+            (detail["action"]!.G("id"), detail["action"]!.S("key"), detail["action"]!.S("text"), detail["action"]!.S("status"), detail["action"]!.S("ownerName"), detail["action"]!.S("taskKey"), detail["action"]!.S("decisionKey")));
+        Assert.Equal(["id", "title", "meetingDate", "meetingType", "notesLink"], Keys(detail["meeting"]));
+        Assert.Equal((m.G("id"), "Client Progress Meeting #4", "2026-09-14", "Client", "https://contoso.sharepoint.com/minutes/4"),
+            (detail["meeting"]!.G("id"), detail["meeting"]!.S("title"), detail["meeting"]!.S("meetingDate"), detail["meeting"]!.S("meetingType"), detail["meeting"]!.S("notesLink")));
+        Assert.Equal(["id", "projectNumber", "name", "status"], Keys(detail["project"]));
+        Assert.Equal((p.Id, p.ProjectNumber, p.Status), (detail["project"]!.G("id"), detail["project"]!.S("projectNumber"), detail["project"]!.S("status")));
+        Assert.Equal(["id", "key", "name", "status"], Keys(detail["task"]));
+        Assert.Equal((task.G("id"), "Storm sewer profile", "Not Started"), (detail["task"]!.G("id"), detail["task"]!.S("name"), detail["task"]!.S("status")));
+        Assert.Equal(["id", "key", "subject", "status"], Keys(detail["decision"]));
+        Assert.Equal((decision.G("id"), "Select pump supplier", "Pending"), (detail["decision"]!.G("id"), detail["decision"]!.S("subject"), detail["decision"]!.S("status")));
+        var link = Assert.Single(detail["links"]!.AsArray())!;
+        Assert.Equal(["id", "targetType", "targetId", "relation", "key", "name", "status", "date", "person"], Keys(link));
+        Assert.Equal(("Task", task.G("id"), "related"), (link.S("targetType"), link.G("targetId"), link.S("relation")));
+        Assert.Equal(d.ProjectDiscipline(p.Id, "Civil"), detail.G("taskDisciplineId"));
+        var permissions = detail["permissions"]!;
+        Assert.Equal(["edit", "transitions", "convert", "comment"], Keys(permissions));
+        Assert.Equal(["ok", "reason"], Keys(permissions["edit"]));
+        Assert.True(permissions["edit"]!["ok"]!.GetValue<bool>()); Assert.Null(permissions["edit"]!["reason"]);
+        var transitions = permissions["transitions"]!.AsArray();
+        Assert.Equal(["In Progress", "Complete", "Cancelled"], transitions.Select(x => x!.S("to")));
+        Assert.All(transitions, x => Assert.Equal(["to", "ok", "reason"], Keys(x)));
+        Assert.True(permissions["convert"]!.GetValue<bool>()); Assert.True(permissions["comment"]!.GetValue<bool>());
+        Assert.Equal(detail["action"]!.S("key"), (await pm.GetAsync($"/api/v1/actions/{a.S("key")}").Result.Json())["action"]!.S("key")); // by key too
+
+        // The same action for a Read Only account: nothing to do, the refusal text where the null was, no task, decision, link or convert on a bare action.
+        var bare = await Action(m, "Provide the utility locates", "External Party", await Client(p.Id));
+        var view = await rita.GetAsync($"/api/v1/actions/{bare.S("id")}").Result.Json();
+        Assert.Equal(["action", "meeting", "project", "task", "decision", "links", "taskDisciplineId", "permissions"], Keys(view));
+        Assert.True(view.AsObject().ContainsKey("task")); Assert.Null(view["task"]);
+        Assert.True(view.AsObject().ContainsKey("decision")); Assert.Null(view["decision"]);
+        Assert.True(view.AsObject().ContainsKey("taskDisciplineId")); Assert.Null(view["taskDisciplineId"]);
+        Assert.Empty(view["links"]!.AsArray());
+        Assert.False(view["permissions"]!["edit"]!["ok"]!.GetValue<bool>());
+        var why = view["permissions"]!["edit"]!.S("reason");
+        Assert.False(string.IsNullOrEmpty(why));
+        Assert.All(view["permissions"]!["transitions"]!.AsArray(), x => Assert.Equal((false, why), (x!["ok"]!.GetValue<bool>(), x.S("reason"))));
+        Assert.False(view["permissions"]!["convert"]!.GetValue<bool>()); Assert.False(view["permissions"]!["comment"]!.GetValue<bool>());
+
+        // Converted: the task decides, so no transitions and no convert, and no discipline to join.
+        var conv = await pm.Post($"/api/v1/actions/{a.S("id")}/convert", new { rowVersion = await Version(a) }).Result.Json();
+        var after = await pm.GetAsync($"/api/v1/actions/{a.S("id")}").Result.Json();
+        Assert.Equal(conv.S("taskKey"), after["task"]!.S("key"));
+        Assert.Empty(after["permissions"]!["transitions"]!.AsArray());
+        Assert.False(after["permissions"]!["convert"]!.GetValue<bool>());
+        Assert.Null(after["taskDisciplineId"]);
+        Assert.Equal(HttpStatusCode.NotFound, (await pm.GetAsync($"/api/v1/actions/{Guid.NewGuid()}")).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await pm.GetAsync("/api/v1/actions/NO-SUCH-A99")).StatusCode);
+    }
+
+    [Fact]
+    public async Task Action_register_export_follows_the_register_filters() // GET actions/export was uncalled (040-S15-Meetings)
+    {
+        var p = await d.Project();
+        var m = await Meeting(p.Id);
+        var mine = await Action(m, "Send the revised grading plan", "User", U(TestData.Alex), due: "2026-09-18");
+        var civil = await Action(m, "Confirm catch basin spacing", "Discipline", d.ProjectDiscipline(p.Id, "Civil"), due: "2026-09-10");
+        (await Move(civil, "Complete", as_: TestData.Marc)).EnsureSuccessStatusCode();
+
+        var all = await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/actions/export?format=csv");
+        Assert.Equal(("text/csv", true), (all.Content.Headers.ContentType!.MediaType, all.Content.Headers.ContentDisposition!.FileName!.Contains("-actions-")));
+        var lines = (await all.Content.ReadAsStringAsync()).TrimEnd().Split('\n').Select(l => l.TrimEnd('\r')).ToArray();
+        Assert.Equal("Key,Action,Meeting,Meeting date,Owner,Owner type,Due,Days overdue,Status,Task", lines[0]);
+        Assert.Equal(3, lines.Length);
+        Assert.Equal($"{civil.S("key")},Confirm catch basin spacing,Client Progress Meeting #4,2026-09-14,Civil,Discipline,2026-09-10,0,Complete,", lines[1]); // by due date
+        Assert.Equal($"{mine.S("key")},Send the revised grading plan,Client Progress Meeting #4,2026-09-14,Alex Chen,Person,2026-09-18,0,Open,", lines[2]);
+
+        var open = (await f.As(TestData.Alex).GetAsync($"/api/v1/projects/{p.Id}/actions/export?format=csv&status=Open&ownerType=User").Result.Content.ReadAsStringAsync()).TrimEnd().Split('\n');
+        Assert.Equal(2, open.Length);
+        Assert.StartsWith(mine.S("key"), open[1]);
+        var xlsx = await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{p.Id}/actions/export?format=xlsx");
+        Assert.Equal("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", xlsx.Content.Headers.ContentType!.MediaType);
+        Assert.Equal(HttpStatusCode.NotFound, (await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{Guid.NewGuid()}/actions/export?format=csv")).StatusCode);
+    }
+
     // ---------- AC-DCV-05: capture reuses an existing action instead of creating duplicate work ----------
 
     sealed record Sources(Project P, Guid Meeting, Guid Notice, Guid NoticeTarget, Guid Handoff, Guid HandoffTask);

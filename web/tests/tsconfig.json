@@ -46,6 +46,7 @@
     "allocations.fixture.cjs",
     "admin.fixture.cjs",
     "deliverables.fixture.cjs",
-    "readiness.fixture.cjs"
+    "readiness.fixture.cjs",
+    "meetings.fixture.cjs"
   ]
 }

@@ -2,7 +2,7 @@
   "counters": {
     "anonymous_objects": {
       "ratchet": true,
-      "value": 273
+      "value": 260
     },
     "api_helpers_without_type": {
       "ratchet": true,

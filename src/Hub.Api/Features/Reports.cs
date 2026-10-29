@@ -40,6 +40,17 @@ public static partial class ReportEndpoints
     sealed record PickupRow(string Project, string Discipline, DateTimeOffset Offered, DateTimeOffset? Closed, string CloseCause, int DaysOpen);
     sealed record MissReportRow(string? Project, string? Discipline, string? Category, int Count);
     sealed record StaffRow(string Person, string ProjectNumber, string ProjectName, string ProjectStatus, string Roles, string? PrimaryDiscipline, DateOnly AddedAt, string? AddedBy, int OpenTasks, int OverdueTasks);
+    sealed record ProjectRef(Guid Id, string ProjectNumber);
+    sealed record SuccessorMilestone(Guid Id, Guid? Milestone);
+    sealed record HealthSnapshotRow(string ProjectNumber, string Name, DateOnly Date, string Computed, string Reported);
+    sealed record ReportSnapshotSource(Guid ProjectId, DateOnly SnapshotDate, string Counts);
+    sealed record ReviewMarker(Guid? ProjectId, DateTimeOffset OccurredAt);
+    sealed record StatusChangeMarker(Guid User, DateTimeOffset OccurredAt);
+    sealed record PickupProjection(string Project, string Discipline, DateTimeOffset Offered, DateTimeOffset? Closed, string? CloseCause);
+    sealed record CommitmentDimension(Guid ProjectId, Guid DisciplineId, Guid? CategoryId);
+    sealed record CommitmentGroupKey(Guid ProjectId, Guid DisciplineId, Guid? CategoryId);
+    sealed record StaffProject(string ProjectNumber, string Name, string Status);
+    sealed record StaffAssignmentSource(Guid UserId, Guid ProjectId, List<string> Roles, DateTimeOffset AddedAt, string Person, StaffProject Project, string? PrimaryDiscipline, string? AddedBy, int OpenTasks, int OverdueTasks);
     sealed record Def(string Code, Param[] Params, Col[] Cols, Func<Ctx, Task<Result>> Run, Func<Actor, bool>? Allowed = null, string? Flag = null);
     sealed record Result(JsonArray Rows, string? ListLink = null, Col[]? Columns = null);
 
@@ -212,7 +223,7 @@ public static partial class ReportEndpoints
         {
             var chosen = Ids("projectId");
             if (chosen.Length != 1) return null;
-            var p = await Projects().Select(p => new { p.Id, p.ProjectNumber }).FirstOrDefaultAsync();
+            var p = await Projects().Select(p => new ProjectRef(p.Id, p.ProjectNumber)).FirstOrDefaultAsync();
             return p is null ? null : (p.Id, p.ProjectNumber);
         }
 
@@ -244,7 +255,7 @@ public static partial class ReportEndpoints
             if (Partial) list.Add((Text.Get("planning.partial"), Text.Get("planning.partial_hint")));
             if (integrity && s.IsFlagOn("verifiable_log"))
             {
-                var projects = await Projects().Select(p => new { p.Id, p.ProjectNumber }).ToListAsync();
+                var projects = await Projects().Select(p => new ProjectRef(p.Id, p.ProjectNumber)).ToListAsync();
                 var ids = projects.Select(p => p.Id).ToArray();
                 var heads = await db.Set<ActivityChainHead>().AsNoTracking().Where(h => ids.Contains(h.ChainId)).ToDictionaryAsync(h => h.ChainId);
                 foreach (var project in projects)
@@ -374,7 +385,7 @@ public static partial class ReportEndpoints
         var rows = Json(await TaskQueries.Rows(c.Db, Tasks(c, new TaskFilter { Indicators = ["blocking"] }).OrderBy(t => t.DueDate).ThenBy(t => t.Seq).Take(Cap), c.Me.Actor));
         var succIds = rows.SelectMany(r => GuidList(r!["state"]?["blockingTaskIds"])).Distinct().ToList();
         var succ = await c.Db.Tasks.AsNoTracking().Where(t => succIds.Contains(t.Id))
-            .Select(t => new { t.Id, Milestone = t.MilestoneId ?? c.Db.Deliverables.Where(d => d.Id == t.DeliverableId).Select(d => d.MilestoneId).FirstOrDefault() }).ToListAsync();
+            .Select(t => new SuccessorMilestone(t.Id, t.MilestoneId ?? c.Db.Deliverables.Where(d => d.Id == t.DeliverableId).Select(d => d.MilestoneId).FirstOrDefault())).ToListAsync();
         var names = await MilestoneNames(c.Db, succ.Select(s => s.Milestone).OfType<Guid>());
         var byTask = succ.ToDictionary(s => s.Id, s => s.Milestone);
         foreach (var r in rows)
@@ -590,11 +601,14 @@ public static partial class ReportEndpoints
     /// §19 Health History from the nightly snapshots (§16.5).
     static async Task<Result> HealthHistory(Ctx c)
     {
-        var from = c.Date("from") ?? c.Today.AddDays(-56);
+        var rangeFrom = c.Date("from") ?? c.Today.AddDays(-56);
         var to = c.Date("to") ?? c.Today;
-        var rows = await c.Db.HealthSnapshots.AsNoTracking().Where(x => c.ProjectIds().Contains(x.ProjectId) && x.SnapshotDate >= from && x.SnapshotDate <= to)
-            .Join(c.Db.Projects, x => x.ProjectId, p => p.Id, (x, p) => new { p.ProjectNumber, p.Name, Date = x.SnapshotDate, Computed = x.ComputedHealth, Reported = x.ReportedHealth })
-            .OrderBy(x => x.ProjectNumber).ThenBy(x => x.Date).Take(Cap).ToListAsync();
+        var rows = await (from snapshot in c.Db.HealthSnapshots.AsNoTracking()
+            where c.ProjectIds().Contains(snapshot.ProjectId) && snapshot.SnapshotDate >= rangeFrom && snapshot.SnapshotDate <= to
+            join project in c.Db.Projects on snapshot.ProjectId equals project.Id
+            orderby project.ProjectNumber, snapshot.SnapshotDate
+            select new HealthSnapshotRow(project.ProjectNumber, project.Name, snapshot.SnapshotDate, snapshot.ComputedHealth, snapshot.ReportedHealth))
+            .Take(Cap).ToListAsync();
         return new(Json(rows.Select(x => new HealthRow(x.ProjectNumber, x.Name, x.Date, x.Computed, x.Reported))));
     }
 
@@ -610,10 +624,10 @@ public static partial class ReportEndpoints
         var zone = Clock.Zone(c.S);
         DateTimeOffset Utc(DateOnly d) { var t = d.ToDateTime(TimeOnly.MinValue); return new DateTimeOffset(t, zone.GetUtcOffset(t)).ToUniversalTime(); }
         var since = Utc(first);
-        var snaps = await c.Db.HealthSnapshots.AsNoTracking().Where(x => pids.Contains(x.ProjectId) && x.SnapshotDate >= first).Select(x => new { x.ProjectId, x.SnapshotDate, x.Counts }).ToListAsync();
+        var snaps = await c.Db.HealthSnapshots.AsNoTracking().Where(x => pids.Contains(x.ProjectId) && x.SnapshotDate >= first).Select(x => new ReportSnapshotSource(x.ProjectId, x.SnapshotDate, x.Counts)).ToListAsync();
         var log = c.Db.ActivityLog.AsNoTracking().Where(a => a.ProjectId != null && pids.Contains(a.ProjectId.Value) && a.OccurredAt >= since);
-        var reviews = await log.Where(a => a.Action == "CoordinationReviewed").Select(a => new { a.ProjectId, a.OccurredAt }).ToListAsync();
-        var changes = await log.Where(a => a.ItemType == ItemType.Task && a.Action == "StatusChanged" && a.ActorUserId != null).Select(a => new { User = a.ActorUserId!.Value, a.OccurredAt }).ToListAsync();
+        var reviews = await log.Where(a => a.Action == "CoordinationReviewed").Select(a => new ReviewMarker(a.ProjectId, a.OccurredAt)).ToListAsync();
+        var changes = await log.Where(a => a.ItemType == ItemType.Task && a.Action == "StatusChanged" && a.ActorUserId != null).Select(a => new StatusChangeMarker(a.ActorUserId!.Value, a.OccurredAt)).ToListAsync();
         var people = (await c.Db.Tasks.AsNoTracking().Where(t => pids.Contains(t.ProjectId) && t.AssigneeId != null && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled)
             .Select(t => t.AssigneeId!.Value).Distinct().ToListAsync()).ToHashSet();
         var rows = new List<object>();
@@ -640,12 +654,15 @@ public static partial class ReportEndpoints
         var zone = Clock.Zone(c.S);
         DateTimeOffset Utc(DateOnly d) { var t = d.ToDateTime(TimeOnly.MinValue); return new DateTimeOffset(t, zone.GetUtcOffset(t)).ToUniversalTime(); }
         var (start, end) = (Utc(from), Utc(to.AddDays(1)));
-        var rows = await offers.Where(o => o.OpenedAt >= start && o.OpenedAt < end)
-            .Join(c.Db.Tasks.IgnoreQueryFilters(), o => o.TaskId, t => t.Id, (o, t) => new { o, t })
-            .Where(r => c.ProjectIds().Contains(r.t.ProjectId) && (c.Id("disciplineId") == null || r.t.ProjectDisciplineId == c.Id("disciplineId")))
-            .OrderBy(r => r.o.OpenedAt).Take(Cap).Select(r => new { Project = c.Db.Projects.Where(p => p.Id == r.t.ProjectId).Select(p => p.ProjectNumber).First(),
-                Discipline = c.Db.ProjectDisciplines.Where(d => d.Id == r.t.ProjectDisciplineId).Select(d => d.Discipline!.Name).First(),
-                Offered = r.o.OpenedAt, Closed = r.o.ClosedAt, r.o.CloseCause }).ToListAsync();
+        var rows = await (from offer in offers
+            where offer.OpenedAt >= start && offer.OpenedAt < end
+            join task in c.Db.Tasks.IgnoreQueryFilters() on offer.TaskId equals task.Id
+            where c.ProjectIds().Contains(task.ProjectId) && (c.Id("disciplineId") == null || task.ProjectDisciplineId == c.Id("disciplineId"))
+            orderby offer.OpenedAt
+            select new PickupProjection(
+                c.Db.Projects.Where(p => p.Id == task.ProjectId).Select(p => p.ProjectNumber).First(),
+                c.Db.ProjectDisciplines.Where(d => d.Id == task.ProjectDisciplineId).Select(d => d.Discipline!.Name).First(),
+                offer.OpenedAt, offer.ClosedAt, offer.CloseCause)).Take(Cap).ToListAsync();
         return new(Json(rows.Select(r => new PickupRow(r.Project, r.Discipline, r.Offered, r.Closed, TaskPickupRules.CauseText(r.CloseCause),
             (int)((r.Closed ?? c.Now) - r.Offered).TotalDays))), "/pickup");
     }
@@ -664,9 +681,9 @@ public static partial class ReportEndpoints
         var tasks = await c.Db.Tasks.IgnoreQueryFilters().Where(t => targetIds.Contains(t.Id)).ToDictionaryAsync(t => t.Id, t => t.ProjectDisciplineId);
         var deliverables = await c.Db.Deliverables.IgnoreQueryFilters().Where(d => targetIds.Contains(d.Id)).ToDictionaryAsync(d => d.Id, d => d.ProjectDisciplineId);
         var disciplines = await c.Db.ProjectDisciplines.Include(d => d.Discipline).ToDictionaryAsync(d => d.Id, d => d.Discipline!.Name);
-        var data = commitments.Select(o => new { o.ProjectId, DisciplineId = o.TargetType == "Task" ? tasks.GetValueOrDefault(o.TargetId) : deliverables.GetValueOrDefault(o.TargetId),
-            CategoryId = events.FirstOrDefault(e => e.CommitmentId == o.Id)?.MissCategoryId }).Where(o => c.Id("disciplineId") == null || o.DisciplineId == c.Id("disciplineId"));
-        return new(Json(data.GroupBy(o => new { o.ProjectId, o.DisciplineId, o.CategoryId }).Select(g => new MissReportRow(projects.GetValueOrDefault(g.Key.ProjectId),
+        var data = commitments.Select(o => new CommitmentDimension(o.ProjectId, o.TargetType == "Task" ? tasks.GetValueOrDefault(o.TargetId) : deliverables.GetValueOrDefault(o.TargetId),
+            events.FirstOrDefault(e => e.CommitmentId == o.Id)?.MissCategoryId)).Where(o => c.Id("disciplineId") == null || o.DisciplineId == c.Id("disciplineId"));
+        return new(Json(data.GroupBy(o => new CommitmentGroupKey(o.ProjectId, o.DisciplineId, o.CategoryId)).Select(g => new MissReportRow(projects.GetValueOrDefault(g.Key.ProjectId),
             disciplines.GetValueOrDefault(g.Key.DisciplineId), g.Key.CategoryId is { } category ? categories.GetValueOrDefault(category) : Text.Get("report.notRecorded"), g.Count()))));
     }
 
@@ -683,16 +700,16 @@ public static partial class ReportEndpoints
         var members = c.Db.ProjectMembers.AsNoTracking().Where(m => m.RemovedAt == null && people.Any(u => u.Id == m.UserId) && projects.Any(p => p.Id == m.ProjectId));
         if (c.Str("role") is { } role) members = members.Where(m => m.Roles.Contains(role));
         if (c.Id("disciplineId") is { } d) members = members.Where(m => c.Db.ProjectDisciplines.Any(pd => pd.Id == m.PrimaryDisciplineId && pd.DisciplineId == d));
-        var rows = await members.Select(m => new
-        {
-            m.UserId, m.ProjectId, m.Roles, m.AddedAt,
-            Person = c.Db.Users.Where(u => u.Id == m.UserId).Select(u => u.DisplayName).First(),
-            Project = c.Db.Projects.Where(p => p.Id == m.ProjectId).Select(p => new { p.ProjectNumber, p.Name, p.Status }).First(),
-            PrimaryDiscipline = c.Db.ProjectDisciplines.Where(pd => pd.Id == m.PrimaryDisciplineId).Select(pd => pd.Discipline!.Name).FirstOrDefault(),
-            AddedBy = c.Db.Users.Where(u => u.Id == m.AddedBy).Select(u => u.DisplayName).FirstOrDefault(),
-            OpenTasks = c.Db.Tasks.Count(t => t.ProjectId == m.ProjectId && t.AssigneeId == m.UserId && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled),
-            OverdueTasks = c.Db.Tasks.Count(t => t.ProjectId == m.ProjectId && t.AssigneeId == m.UserId && c.Db.TaskStates.Any(s => s.TaskId == t.Id && s.IsOverdue)),
-        }).OrderBy(r => r.Person).ThenBy(r => r.Project.ProjectNumber).Take(Cap).ToListAsync();
+        var rows = await members.OrderBy(m => c.Db.Users.Where(u => u.Id == m.UserId).Select(u => u.DisplayName).First())
+            .ThenBy(m => c.Db.Projects.Where(p => p.Id == m.ProjectId).Select(p => p.ProjectNumber).First()).Take(Cap)
+            .Select(m => new StaffAssignmentSource(m.UserId, m.ProjectId, m.Roles, m.AddedAt,
+                c.Db.Users.Where(u => u.Id == m.UserId).Select(u => u.DisplayName).First(),
+                c.Db.Projects.Where(p => p.Id == m.ProjectId).Select(p => new StaffProject(p.ProjectNumber, p.Name, p.Status)).First(),
+                c.Db.ProjectDisciplines.Where(pd => pd.Id == m.PrimaryDisciplineId).Select(pd => pd.Discipline!.Name).FirstOrDefault(),
+                c.Db.Users.Where(u => u.Id == m.AddedBy).Select(u => u.DisplayName).FirstOrDefault(),
+                c.Db.Tasks.Count(t => t.ProjectId == m.ProjectId && t.AssigneeId == m.UserId && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled),
+                c.Db.Tasks.Count(t => t.ProjectId == m.ProjectId && t.AssigneeId == m.UserId && c.Db.TaskStates.Any(s => s.TaskId == t.Id && s.IsOverdue))))
+            .ToListAsync();
         var data = Json(rows.OrderBy(r => r.Person).ThenBy(r => r.Project.ProjectNumber).Select(r => new StaffRow(r.Person, r.Project.ProjectNumber, r.Project.Name, r.Project.Status,
             string.Join(", ", r.Roles.Select(x => Text.Get($"role.{x}"))), r.PrimaryDiscipline, Clock.LocalDate(r.AddedAt, c.S), r.AddedBy, r.OpenTasks, r.OverdueTasks)));
         if (!c.S.IsFlagOn("org_structure")) return new(data);

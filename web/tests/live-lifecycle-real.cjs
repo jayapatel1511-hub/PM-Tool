@@ -184,6 +184,7 @@ const signature = (log, phases) => log.filter(entry => phases.includes(entry.pha
       const context = await newContext(); const page = await context.newPage(); watch(page)
       await signIn(page, /Priya Nair/i)
       const rec = recorder(page, fixture)
+      evidence.beforeRequests = rec.log
       evidence.before = checkSession(rec, await session(page, fixture, rec), 'before')
       assert.equal(rec.log.filter(isEvents).length, 0)
       beforeLog = rec.log
@@ -306,6 +307,17 @@ const signature = (log, phases) => log.filter(entry => phases.includes(entry.pha
     fs.writeFileSync(path.join(output, 'evidence.json'), JSON.stringify(evidence, null, 2))
     console.log(JSON.stringify({ result: 'PASS', ...evidence }))
     await context.close()
+  } catch (error) {
+    // Preserve the failing rendered state and partial request log before the owned stack is stopped.
+    const failure = path.join(output, 'failure'); fs.mkdirSync(failure, { recursive: true })
+    fs.writeFileSync(path.join(failure, 'evidence.json'), JSON.stringify({ ...evidence, errors, failure: String(error) }, null, 2))
+    if (browser) for (const [i, page] of browser.contexts().flatMap(context => context.pages()).entries()) {
+      try {
+        await page.screenshot({ path: path.join(failure, `page-${i}.png`), fullPage: false })
+        fs.writeFileSync(path.join(failure, `page-${i}.txt`), await page.locator('body').innerText())
+      } catch { /* the tab may already have closed */ }
+    }
+    throw error
   } finally {
     if (browser) await browser.close()
     proxyServer.close()

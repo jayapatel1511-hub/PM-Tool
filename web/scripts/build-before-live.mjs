@@ -13,7 +13,7 @@ const outDir = path.resolve(process.argv[2])
 
 const BEFORE_UNREAD = `export function useUnread() {
   const qc = useQueryClient()
-  const pulse = useQuery({ queryKey: ['unread-pulse'], queryFn: () => typedRequest('get', '/api/v1/me/notifications/pulse'), refetchInterval: 4_000 })
+  const pulse = useQuery({ queryKey: ['unread-pulse'], queryFn: () => typedRequest('get', '/api/v1/me/notifications/pulse', {}), refetchInterval: 4_000 })
   const stamp = pulse.data?.stamp
   const seen = useRef(stamp)
   useEffect(() => {
@@ -21,7 +21,7 @@ const BEFORE_UNREAD = `export function useUnread() {
     if (seen.current) { qc.invalidateQueries({ queryKey: ['notifications'] }); qc.invalidateQueries({ queryKey: ['following'] }) }
     seen.current = stamp
   }, [stamp, qc])
-  return useQuery({ queryKey: ['unread', stamp], queryFn: () => typedRequest('get', '/api/v1/me/notifications/unread-count'),
+  return useQuery({ queryKey: ['unread', stamp], queryFn: () => typedRequest('get', '/api/v1/me/notifications/unread-count', {}),
     enabled: pulse.isFetched, placeholderData: keepPreviousData })
 }
 `

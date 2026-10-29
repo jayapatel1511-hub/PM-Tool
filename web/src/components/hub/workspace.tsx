@@ -11,14 +11,16 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
-import { ApiError, del, get, patch, post } from '@/lib/api'
+import type { components } from '@/gen/api'
+import { ApiError, get, typedRequest } from '@/lib/api'
 import { useMe, type Me } from '@/lib/auth-context'
+import { refreshWorkspaces } from '@/lib/keys'
 import { plural, t , runtimeText } from '@/lib/i18n'
 import type { Page as PageOf } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { ProjectsPicker } from '@/pages/Reports'
 
-export interface WorkspaceRow { id: string; name: string; projectIds: string[]; hidden: number; rowVersion: number }
+export type WorkspaceRow = components['schemas']['WorkspaceRow']
 interface Stored { ws?: string; projects?: string }
 
 /** The views that read the project scope (§36.1, FR-VIS-02); switching among them keeps it. */
@@ -37,7 +39,7 @@ function remember(s: Stored) {
 const subscribe = (l: () => void) => { listeners.add(l); return () => { listeners.delete(l) } }
 
 export function useWorkspaces() {
-  return useQuery({ queryKey: ['workspaces'], queryFn: () => get<WorkspaceRow[]>('workspaces'), staleTime: 60_000 })
+  return useQuery({ queryKey: ['workspaces'], queryFn: () => typedRequest('get', '/api/v1/workspaces', {}), staleTime: 60_000 })
 }
 
 export interface Scope {
@@ -186,8 +188,9 @@ function WorkspaceDialog({ m, initial, onClose }: { m: Mode; initial: string[] |
     if (!save) { setScope({ projects: ids }); onClose(); return }
     setBusy(true)
     try {
-      const row = ws ? await patch<WorkspaceRow>(`workspaces/${ws.id}`, { name: name.trim(), projectIds: chosen }, ws.rowVersion) : await post<WorkspaceRow>('workspaces', { name: name.trim(), projectIds: chosen })
-      await qc.invalidateQueries({ queryKey: ['workspaces'] })
+      const body = { name: name.trim(), projectIds: chosen }
+      const row = ws ? await typedRequest('patch', '/api/v1/workspaces/{id}', { params: { id: ws.id }, body, ifMatch: ws.rowVersion }) : await typedRequest('post', '/api/v1/workspaces', { body })
+      await refreshWorkspaces(qc)
       setScope({ ws: row.id })
       toast.success(t('scope.saved', { name: row.name }))
       onClose()
@@ -218,7 +221,7 @@ function WorkspaceDialog({ m, initial, onClose }: { m: Mode; initial: string[] |
       {deleting && ws && (
         <ConfirmDialog open destructive title={t('scope.deleteTitle', { name: ws.name })} body={t('scope.deleteBody')} confirmLabel={t('scope.delete')}
           onOpenChange={(o) => { if (!o) setDeleting(false) }}
-          onConfirm={async () => { await del(`workspaces/${ws.id}`, undefined, ws.rowVersion); await qc.invalidateQueries({ queryKey: ['workspaces'] }); setScope({ projects: 'mine' }); onClose() }} />
+          onConfirm={async () => { await typedRequest('delete', '/api/v1/workspaces/{id}', { params: { id: ws.id }, ifMatch: ws.rowVersion }); await refreshWorkspaces(qc); setScope({ projects: 'mine' }); onClose() }} />
       )}
     </>
   )

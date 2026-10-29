@@ -9,13 +9,11 @@ import { useTable } from '@/components/hub/table'
 import { useScope, WorkspaceTabs } from '@/components/hub/workspace'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { get, qs } from '@/lib/api'
+import type { components } from '@/gen/api'
+import { typedRequest } from '@/lib/api'
 import { plural, t , runtimeText } from '@/lib/i18n'
 
-interface Member {
-  userId: string; displayName: string; jobTitle?: string; email?: string
-  projects: { projectId: string; projectNumber: string; projectName: string; roles: string[]; leads: string[] }[]
-}
+type Member = components['schemas']['TeamPersonRow']
 
 type Row = Member & { id: string }
 
@@ -26,7 +24,7 @@ const tag = 'rounded-md bg-secondary px-2 py-0.5 text-xs/[18px] font-medium text
 export function WorkspaceTeamPage() {
   const scope = useScope()
   const [term, setTerm] = useState('')
-  const q = useQuery({ queryKey: ['wteam', scope.api], enabled: scope.ready, queryFn: () => get<{ people: Member[]; projects: number }>(`team${qs({ projects: scope.api })}`) })
+  const q = useQuery({ queryKey: ['wteam', scope.api], enabled: scope.ready, queryFn: () => typedRequest('get', '/api/v1/team', { query: { projects: scope.api } }) })
   const s = term.trim().toLowerCase()
   const people: Row[] = (q.data?.people ?? []).map((p) => ({ ...p, id: p.userId })).filter((p) => !s || p.displayName.toLowerCase().includes(s) || (p.jobTitle ?? '').toLowerCase().includes(s))
   const table = useTable<Row>('hub.teamColumns', [

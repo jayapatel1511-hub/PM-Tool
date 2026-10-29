@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { invalidateChange, keysForChange, refreshProject } from './keys.ts'
+import { invalidateChange, keysForChange, refreshHome, refreshProject, refreshWorkspaces } from './keys.ts'
 import type { QueryClient } from '@tanstack/react-query'
 
 test('item changes keep the previous project and item-specific invalidations (AC-PLAT-19)', () => {
@@ -72,6 +72,18 @@ test('invalidation prefixes match actual mounted screen query keys', () => {
   }
   for (const [type, queries] of Object.entries(mounted)) for (const query of queries)
     assert.ok(keysForChange(type, 'p1').some(prefix => prefix.every((part, i) => query[i] === part)), `${type}: ${query}`)
+})
+
+
+test('a person\'s own workspaces and dashboard layout refresh the screens that read them', async () => {
+  const calls: string[] = []
+  const qc = { invalidateQueries: ({ queryKey }: { queryKey: string[] }) => { calls.push(queryKey.join('/')); return Promise.resolve() } } as unknown as QueryClient
+  await refreshWorkspaces(qc); await refreshHome(qc)
+  assert.deepEqual(calls, ['workspaces', 'home'])
+  // Home is mounted under ['home', scope, from, to]; any item change reaches it, and so do the Files library and the project-scope menu's workspaces.
+  for (const type of ['Task', 'Deliverable', 'Milestone', 'Member', 'Project', 'Risk'])
+    assert.ok(keysForChange(type, 'p1').some(prefix => prefix.every((part, i) => ['home', 'mine', undefined, undefined][i] === part)), `${type}: home`)
+  assert.ok(keysForChange('DocumentLink', 'p1').some(prefix => prefix.every((part, i) => ['files', 'mine', {}][i] === part)), 'DocumentLink: files')
 })
 
 

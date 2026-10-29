@@ -1,6 +1,7 @@
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Api.Features;
@@ -33,6 +34,38 @@ public static class WorkspaceEndpoints
     public sealed record Row(Guid Id, string Name, List<Guid> ProjectIds, int Hidden, int RowVersion);
     public sealed record Widget(string Id, bool Hidden);
     public sealed record LayoutBody(Widget[] Widgets);
+    /// The saved layout a person's dashboard answers with, and whether it is still the default.
+    public sealed record LayoutAnswer(List<Widget> Layout, bool IsDefault);
+
+    /// One lane of the board, the statuses it counts and how many tasks are in it.
+    public sealed record HomeLane(string Lane, string Statuses, int Count);
+    public sealed record HomeOnTrack(int Green, int Evaluated, int? Pct);
+    public sealed record HomeMetrics(int ActiveProjects, int OpenTasks, int OverdueTasks, HomeOnTrack OnTrack, int TeamMembers);
+    public sealed record HomeOnHold(string Status, int Count);
+    public sealed record HomeProject(Guid ProjectId, string ProjectNumber, string Name, List<HomeLane> Lanes, int Total);
+    public sealed record HomeDeadline(string Type, Guid Id, Guid ProjectId, string? ProjectNumber, string Key, string Name, DateOnly Date, string? Status, string? Owner, bool Overdue);
+    public sealed record HomeDeadlines(int Total, bool Truncated, List<HomeDeadline> Items);
+    /// The overview: current totals for the scope, the lanes, each project's lanes, the deadlines in the range and the person's layout.
+    public sealed record HomeRead(DateOnly Today, DateOnly From, DateOnly To, DateTimeOffset AsOf, HomeMetrics Metrics, List<HomeLane> TasksByStatus, HomeOnHold OnHold,
+        List<HomeProject> TasksByProject, HomeDeadlines UpcomingDeadlines, List<Widget> Layout, bool IsDefault);
+
+    public sealed record FileLinkRow(Guid Id, string Title, string Url, string LinkType, bool IsNetworkPath, string? AddedBy, DateTimeOffset AddedAt);
+    public sealed record FileItemRow(string ItemType, Guid ItemId, string Key, string Name, List<FileLinkRow> Links);
+    public sealed record FileProjectRow(Guid ProjectId, string ProjectNumber, string Name, bool CanAdd, int Count, List<FileItemRow> Items);
+    public sealed record FilesRead(List<FileProjectRow> Projects, int Total, bool Truncated, IReadOnlyList<string> Types);
+
+    public sealed record TeamProjectRow(Guid ProjectId, string ProjectNumber, string ProjectName, List<string> Roles, List<string> Leads);
+    public sealed record TeamPersonRow(Guid UserId, string DisplayName, string? JobTitle, string Email, List<TeamProjectRow> Projects);
+    public sealed record TeamRead(List<TeamPersonRow> People, int Projects);
+
+    /// What the reads below take from the database before the names are put beside them.
+    sealed record Named(Guid Id, string ProjectNumber, string Name);
+    sealed record StatusCount(Guid ProjectId, string Status, int N);
+    sealed record Due(string Type, Guid Id, Guid ProjectId, string Key, string Name, DateOnly Date, string? Status, string? Owner, bool Overdue);
+    sealed record LinkJoin(Guid Id, Guid ProjectId, string ItemType, Guid ItemId, string Title, string Url, string LinkType, DateTimeOffset AddedAt, string? AddedBy);
+    sealed record ItemLabel(Guid Id, string Key, string Name);
+    sealed record MemberJoin(Guid Id, string DisplayName, string? JobTitle, string Email, Guid ProjectId, List<string> Roles);
+    sealed record LeadRow(Guid ProjectId, Guid Lead, string Name);
 
     /// The overview's fixed widgets in their default order (FR-VIS-07); a person may reorder or hide them, not redefine them.
     public static readonly string[] Widgets = ["metrics", "tasksByStatus", "tasksByProject", "upcomingDeadlines"];
@@ -40,13 +73,13 @@ public static class WorkspaceEndpoints
     public static void Map(RouteGroupBuilder api)
     {
         api.MapGet("/workspaces", (Access access, HubDb db) => List(access, db));
-        api.MapPost("/workspaces", async (Body body, Access access, HubDb db, TimeProvider clock) =>
+        api.MapPost("/workspaces", async Task<Created<Row>> (Body body, Access access, HubDb db, TimeProvider clock) =>
         {
             var ws = new Workspace { OwnerId = access.Me.Id, CreatedAt = clock.GetUtcNow() };
             await Apply(ws, body, access, db, creating: true);
             db.Workspaces.Add(ws);
             await db.SaveChangesAsync();
-            return Results.Created($"/api/v1/workspaces/{ws.Id}", (await List(access, db)).First(w => w.Id == ws.Id));
+            return TypedResults.Created($"/api/v1/workspaces/{ws.Id}", (await List(access, db)).First(w => w.Id == ws.Id));
         });
         api.MapPatch("/workspaces/{id:guid}", async (Guid id, Body body, HttpContext http, Access access, HubDb db) =>
         {
@@ -57,7 +90,7 @@ public static class WorkspaceEndpoints
             await db.SaveChangesAsync();
             return (await List(access, db)).First(w => w.Id == id);
         });
-        api.MapDelete("/workspaces/{id:guid}", async (Guid id, HttpContext http, Access access, HubDb db) =>
+        api.MapDelete("/workspaces/{id:guid}", async Task<NoContent> (Guid id, HttpContext http, Access access, HubDb db) =>
         {
             var ws = await Own(db, access, id);
             await Http.CheckVersion(db, http, ws);
@@ -67,10 +100,10 @@ public static class WorkspaceEndpoints
                 await db.SaveChangesAsync();
                 return await db.BoardOrders.Where(b => b.WorkspaceId == id).ExecuteDeleteAsync();
             });
-            return Results.NoContent();
+            return TypedResults.NoContent();
         });
         // §36.3 FR-VIS-04: a named workspace's board keeps its owner's own card order, separate from each project's.
-        api.MapPut("/workspaces/{id:guid}/board-order", async (Guid id, ViewEndpoints.OrderBody body, Access access, HubDb db) =>
+        api.MapPut("/workspaces/{id:guid}/board-order", async Task<NoContent> (Guid id, ViewEndpoints.OrderBody body, Access access, HubDb db) =>
         {
             await Own(db, access, id);
             var ids = body.TaskIds.Distinct().ToList();
@@ -84,11 +117,11 @@ public static class WorkspaceEndpoints
                 row.Position = i + 1;
             }
             await db.SaveChangesAsync();
-            return Results.NoContent();
+            return TypedResults.NoContent();
         });
 
         api.MapGet("/home", Home);
-        api.MapPut("/me/dashboard-layout", async (LayoutBody body, HubDb db, CurrentUser me, TimeProvider clock) =>
+        api.MapPut("/me/dashboard-layout", async Task<Ok<LayoutAnswer>> (LayoutBody body, HubDb db, CurrentUser me, TimeProvider clock) =>
         {
             var widgets = Normalise(body.Widgets);
             var row = await db.DashboardLayouts.FirstOrDefaultAsync(x => x.UserId == me.Id);
@@ -96,12 +129,12 @@ public static class WorkspaceEndpoints
             row.Widgets = System.Text.Json.JsonSerializer.Serialize(widgets, JsonOpts.Web);
             row.UpdatedAt = clock.GetUtcNow();
             await db.SaveChangesAsync();
-            return new { Layout = widgets, IsDefault = false };
+            return TypedResults.Ok(new LayoutAnswer(widgets, false));
         });
-        api.MapDelete("/me/dashboard-layout", async (HubDb db, CurrentUser me) =>
+        api.MapDelete("/me/dashboard-layout", async Task<Ok<LayoutAnswer>> (HubDb db, CurrentUser me) =>
         {
             await db.DashboardLayouts.Where(x => x.UserId == me.Id).ExecuteDeleteAsync();
-            return new { Layout = Normalise([]), IsDefault = true };
+            return TypedResults.Ok(new LayoutAnswer(Normalise([]), true));
         });
 
         api.MapGet("/files", Files);
@@ -158,7 +191,7 @@ public static class WorkspaceEndpoints
 
     /// Snapshot tiles and charts are current values for the scope; only Upcoming Deadlines follows the date range. Every
     /// task figure is the count of the cross-project list with the same filter, so a number always equals the list it opens.
-    static async Task<object> Home(string? projects, DateOnly? from, DateOnly? to, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock)
+    static async Task<Ok<HomeRead>> Home(string? projects, DateOnly? from, DateOnly? to, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock)
     {
         var s = await store.Get(db);
         var today = clock.Today(s);
@@ -175,71 +208,61 @@ public static class WorkspaceEndpoints
 
         var tasks = TaskEndpoints.InScope(access, db, projects);
         Task<int> Count(string key, string value) => TaskQueries.Apply(db, tasks, TaskFilter.Of(new Dictionary<string, string?> { [key] = value }), me.Id, today, s).CountAsync();
-        var byStatus = new List<object>();
+        var byStatus = new List<HomeLane>();
         foreach (var lane in Workflow.Lanes)
         {
             var statuses = string.Join(',', LaneStatuses(lane));
-            byStatus.Add(new { Lane = lane, Statuses = statuses, Count = await Count("status", statuses) });
+            byStatus.Add(new HomeLane(lane, statuses, await Count("status", statuses)));
         }
 
         var pids = scope.Select(p => p.Id);
-        var names = await scope.Select(p => new { p.Id, p.ProjectNumber, p.Name }).ToDictionaryAsync(p => p.Id);
+        var names = await scope.Select(p => new Named(p.Id, p.ProjectNumber, p.Name)).ToDictionaryAsync(p => p.Id);
         var counts = await tasks.Where(t => t.Status != TaskStatuses.Cancelled && t.Status != TaskStatuses.OnHold)
-            .GroupBy(t => new { t.ProjectId, t.Status }).Select(g => new { g.Key.ProjectId, g.Key.Status, N = g.Count() }).ToListAsync();
-        var byProject = counts.GroupBy(c => c.ProjectId).Select(g => new
-        {
-            ProjectId = g.Key, names[g.Key].ProjectNumber, names[g.Key].Name,
-            Lanes = Workflow.Lanes.Select(l => new { Lane = l, Statuses = string.Join(',', LaneStatuses(l)), Count = g.Where(c => Workflow.Lane(c.Status) == l).Sum(c => c.N) }).ToList(),
-            Total = g.Sum(c => c.N),
-        }).OrderByDescending(p => p.Total).ThenBy(p => p.ProjectNumber).ToList();
+            .GroupBy(t => new { t.ProjectId, t.Status }).Select(g => new StatusCount(g.Key.ProjectId, g.Key.Status, g.Count())).ToListAsync();
+        var byProject = counts.GroupBy(c => c.ProjectId).Select(g => new HomeProject(g.Key, names[g.Key].ProjectNumber, names[g.Key].Name,
+            Workflow.Lanes.Select(l => new HomeLane(l, string.Join(',', LaneStatuses(l)), g.Where(c => Workflow.Lane(c.Status) == l).Sum(c => c.N))).ToList(),
+            g.Sum(c => c.N))).OrderByDescending(p => p.Total).ThenBy(p => p.ProjectNumber).ToList();
 
         var members = await ActiveMembers(db, pids).Select(m => m.UserId).Distinct().CountAsync();
         var layout = await db.DashboardLayouts.AsNoTracking().FirstOrDefaultAsync(x => x.UserId == me.Id);
 
-        return new
-        {
-            Today = today, From = start, To = end, AsOf = clock.GetUtcNow(),
-            Metrics = new
-            {
-                ActiveProjects = activeCount, OpenTasks = await Count("open", "true"), OverdueTasks = await Count("overdue", "true"),
-                OnTrack = new { Green = green, Evaluated = evaluated, Pct = evaluated == 0 ? (int?)null : green * 100 / evaluated },
-                TeamMembers = members,
-            },
-            TasksByStatus = byStatus,
-            OnHold = new { Status = TaskStatuses.OnHold, Count = await Count("status", TaskStatuses.OnHold) }, // AC-CNT-05: the lanes plus this equal Open Tasks
-            TasksByProject = byProject,
-            UpcomingDeadlines = await Deadlines(db, pids, names.ToDictionary(n => n.Key, n => n.Value.ProjectNumber), start, end),
-            Layout = layout is null ? Normalise([]) : Normalise(System.Text.Json.JsonSerializer.Deserialize<Widget[]>(layout.Widgets, JsonOpts.Web) ?? []),
-            IsDefault = layout is null,
-        };
+        return TypedResults.Ok(new HomeRead(today, start, end, clock.GetUtcNow(),
+            new HomeMetrics(activeCount, await Count("open", "true"), await Count("overdue", "true"),
+                new HomeOnTrack(green, evaluated, evaluated == 0 ? null : green * 100 / evaluated), members),
+            byStatus,
+            new HomeOnHold(TaskStatuses.OnHold, await Count("status", TaskStatuses.OnHold)), // AC-CNT-05: the lanes plus this equal Open Tasks
+            byProject,
+            await Deadlines(db, pids, names.ToDictionary(n => n.Key, n => n.Value.ProjectNumber), start, end),
+            layout is null ? Normalise([]) : Normalise(System.Text.Json.JsonSerializer.Deserialize<Widget[]>(layout.Widgets, JsonOpts.Web) ?? []),
+            layout is null));
     }
 
     static IEnumerable<string> LaneStatuses(string lane) => TaskStatuses.All.Where(x => Workflow.Lane(x) == lane);
 
     /// Open task, deliverable and milestone due dates in the range, soonest first (the calendar's deadline projection).
     /// Each type is ordered before it is cut, so the soonest items are never dropped (AC-CNT-04).
-    static async Task<object> Deadlines(HubDb db, IQueryable<Guid> pids, Dictionary<Guid, string> numbers, DateOnly from, DateOnly to)
+    static async Task<HomeDeadlines> Deadlines(HubDb db, IQueryable<Guid> pids, Dictionary<Guid, string> numbers, DateOnly from, DateOnly to)
     {
         const int Max = 100;
         var tasks = await db.Tasks.AsNoTracking().Where(t => pids.Contains(t.ProjectId) && t.DueDate >= from && t.DueDate <= to && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled)
-            .Select(t => new { Type = ItemType.Task, t.Id, t.ProjectId, t.Key, t.Name, Date = t.DueDate!.Value, Status = (string?)t.Status,
-                Owner = db.Users.Where(u => u.Id == t.AssigneeId).Select(u => u.DisplayName).FirstOrDefault(),
-                Overdue = db.TaskStates.Any(x => x.TaskId == t.Id && x.IsOverdue) }).OrderBy(x => x.Date).ThenBy(x => x.Key).Take(Max + 1).ToListAsync();
+            .OrderBy(t => t.DueDate).ThenBy(t => t.Key).Take(Max + 1)
+            .Select(t => new Due(ItemType.Task, t.Id, t.ProjectId, t.Key, t.Name, t.DueDate!.Value, t.Status,
+                db.Users.Where(u => u.Id == t.AssigneeId).Select(u => u.DisplayName).FirstOrDefault(),
+                db.TaskStates.Any(x => x.TaskId == t.Id && x.IsOverdue))).ToListAsync();
         var dels = await db.Deliverables.AsNoTracking().Where(d => pids.Contains(d.ProjectId) && d.DueDate >= from && d.DueDate <= to
                 && d.Status != DeliverableStatus.Cancelled && d.Status != DeliverableStatus.Issued && d.Status != DeliverableStatus.Accepted)
-            .Select(d => new { Type = ItemType.Deliverable, d.Id, d.ProjectId, d.Key, d.Name, Date = d.DueDate!.Value, Status = (string?)d.Status,
-                Owner = db.Users.Where(u => u.Id == d.OwnerId).Select(u => u.DisplayName).FirstOrDefault(),
-                Overdue = db.DeliverableStates.Any(x => x.DeliverableId == d.Id && x.IsOverdue) }).OrderBy(x => x.Date).ThenBy(x => x.Key).Take(Max + 1).ToListAsync();
+            .OrderBy(d => d.DueDate).ThenBy(d => d.Key).Take(Max + 1)
+            .Select(d => new Due(ItemType.Deliverable, d.Id, d.ProjectId, d.Key, d.Name, d.DueDate!.Value, d.Status,
+                db.Users.Where(u => u.Id == d.OwnerId).Select(u => u.DisplayName).FirstOrDefault(),
+                db.DeliverableStates.Any(x => x.DeliverableId == d.Id && x.IsOverdue))).ToListAsync();
         var ms = await db.Milestones.AsNoTracking().Where(m => pids.Contains(m.ProjectId) && m.Date >= from && m.Date <= to && !m.IsCancelled && !m.IsComplete)
-            .Select(m => new { Type = ItemType.Milestone, m.Id, m.ProjectId, m.Key, m.Name, Date = m.Date!.Value,
-                Status = db.MilestoneStates.Where(x => x.MilestoneId == m.Id).Select(x => x.Status).FirstOrDefault(), Owner = (string?)null,
-                Overdue = db.MilestoneStates.Any(x => x.MilestoneId == m.Id && x.Status == MilestoneStatus.Overdue) }).OrderBy(x => x.Date).ThenBy(x => x.Key).Take(Max + 1).ToListAsync();
+            .OrderBy(m => m.Date).ThenBy(m => m.Key).Take(Max + 1)
+            .Select(m => new Due(ItemType.Milestone, m.Id, m.ProjectId, m.Key, m.Name, m.Date!.Value,
+                db.MilestoneStates.Where(x => x.MilestoneId == m.Id).Select(x => x.Status).FirstOrDefault(), null,
+                db.MilestoneStates.Any(x => x.MilestoneId == m.Id && x.Status == MilestoneStatus.Overdue))).ToListAsync();
         var all = tasks.Concat(dels).Concat(ms).OrderBy(x => x.Date).ThenBy(x => x.Key).ToList();
-        return new
-        {
-            Total = all.Count, Truncated = all.Count > Max,
-            Items = all.Take(Max).Select(x => new { x.Type, x.Id, x.ProjectId, ProjectNumber = numbers.GetValueOrDefault(x.ProjectId), x.Key, x.Name, x.Date, x.Status, x.Owner, x.Overdue }),
-        };
+        return new HomeDeadlines(all.Count, all.Count > Max,
+            [.. all.Take(Max).Select(x => new HomeDeadline(x.Type, x.Id, x.ProjectId, numbers.GetValueOrDefault(x.ProjectId), x.Key, x.Name, x.Date, x.Status, x.Owner, x.Overdue))]);
     }
 
     /// Known widgets in the person's order, unknown ones dropped, missing ones appended visible (so new widgets appear).
@@ -257,7 +280,7 @@ public static class WorkspaceEndpoints
     // ---------- Files (§36.8, FR-VIS-09) ----------
 
     /// Document links of the scope's projects grouped by project and linked item; a link library only, nothing is stored.
-    static async Task<object> Files(string? projects, string? q, string? type, Access access, HubDb db)
+    static async Task<Ok<FilesRead>> Files(string? projects, string? q, string? type, Access access, HubDb db)
     {
         const int Max = 2000;
         var list = await Scope.Projects(access, db, projects).AsNoTracking().OrderBy(p => p.ProjectNumber).ToListAsync();
@@ -266,55 +289,44 @@ public static class WorkspaceEndpoints
         if (!string.IsNullOrWhiteSpace(type)) links = links.Where(l => l.LinkType == type);
         if (!string.IsNullOrWhiteSpace(q)) { var term = $"%{q.Trim()}%"; links = links.Where(l => EF.Functions.ILike(l.Title, term) || EF.Functions.ILike(l.Url, term)); }
         var rows = await links.OrderBy(l => l.Title).Take(Max + 1)
-            .Select(l => new { l.Id, l.ProjectId, l.ItemType, l.ItemId, l.Title, l.Url, l.LinkType, l.AddedAt, AddedBy = db.Users.Where(u => u.Id == l.AddedBy).Select(u => u.DisplayName).FirstOrDefault() })
+            .Select(l => new LinkJoin(l.Id, l.ProjectId, l.ItemType, l.ItemId, l.Title, l.Url, l.LinkType, l.AddedAt, db.Users.Where(u => u.Id == l.AddedBy).Select(u => u.DisplayName).FirstOrDefault()))
             .ToListAsync();
         // Item labels; a link on a deleted task or deliverable is left out with its item.
         var taskIds = rows.Where(r => r.ItemType == ItemType.Task).Select(r => r.ItemId).ToList();
         var delIds = rows.Where(r => r.ItemType == ItemType.Deliverable).Select(r => r.ItemId).ToList();
-        var items = (await db.Tasks.AsNoTracking().Where(t => taskIds.Contains(t.Id)).Select(t => new { t.Id, t.Key, t.Name }).ToListAsync())
-            .Concat(await db.Deliverables.AsNoTracking().Where(d => delIds.Contains(d.Id)).Select(d => new { d.Id, d.Key, d.Name }).ToListAsync())
+        var items = (await db.Tasks.AsNoTracking().Where(t => taskIds.Contains(t.Id)).Select(t => new ItemLabel(t.Id, t.Key, t.Name)).ToListAsync())
+            .Concat(await db.Deliverables.AsNoTracking().Where(d => delIds.Contains(d.Id)).Select(d => new ItemLabel(d.Id, d.Key, d.Name)).ToListAsync())
             .ToDictionary(x => x.Id);
         var shown = rows.Take(Max).Where(r => r.ItemType == ItemType.Project || items.ContainsKey(r.ItemId)).ToList();
-        var result = new List<object>();
+        var result = new List<FileProjectRow>();
         foreach (var p in list)
         {
             var own = shown.Where(r => r.ProjectId == p.Id).ToList();
             var canAdd = Permissions.EditProject(access.Actor, await access.Context(p)).Ok; // project links belong to the PM (§12.7)
             if (own.Count == 0 && !canAdd) continue;
-            result.Add(new
-            {
-                ProjectId = p.Id, p.ProjectNumber, p.Name, CanAdd = canAdd, Count = own.Count,
-                Items = own.GroupBy(r => (r.ItemType, r.ItemId)).OrderBy(g => g.Key.ItemType == ItemType.Project ? 0 : 1).ThenBy(g => items.GetValueOrDefault(g.Key.ItemId)?.Key).Select(g => new
-                {
-                    g.Key.ItemType, g.Key.ItemId, Key = g.Key.ItemType == ItemType.Project ? p.ProjectNumber : items[g.Key.ItemId].Key,
-                    Name = g.Key.ItemType == ItemType.Project ? p.Name : items[g.Key.ItemId].Name,
-                    Links = g.Select(r => new { r.Id, r.Title, r.Url, r.LinkType, IsNetworkPath = Links.IsUnc(r.Url), r.AddedBy, r.AddedAt }),
-                }),
-            });
+            result.Add(new FileProjectRow(p.Id, p.ProjectNumber, p.Name, canAdd, own.Count,
+                [.. own.GroupBy(r => (r.ItemType, r.ItemId)).OrderBy(g => g.Key.ItemType == ItemType.Project ? 0 : 1).ThenBy(g => items.GetValueOrDefault(g.Key.ItemId)?.Key).Select(g => new FileItemRow(
+                    g.Key.ItemType, g.Key.ItemId, g.Key.ItemType == ItemType.Project ? p.ProjectNumber : items[g.Key.ItemId].Key,
+                    g.Key.ItemType == ItemType.Project ? p.Name : items[g.Key.ItemId].Name,
+                    [.. g.Select(r => new FileLinkRow(r.Id, r.Title, r.Url, r.LinkType, Links.IsUnc(r.Url), r.AddedBy, r.AddedAt))]))]));
         }
-        return new { Projects = result, Total = shown.Count, Truncated = rows.Count > Max, Types = LinkType.All };
+        return TypedResults.Ok(new FilesRead(result, shown.Count, rows.Count > Max, LinkType.All));
     }
 
     // ---------- Team (§36.1, FR-VIS-01) ----------
 
     /// Everyone with an active membership in the scope's projects, with their roles and led disciplines per project.
-    static async Task<object> Team(string? projects, Access access, HubDb db)
+    static async Task<Ok<TeamRead>> Team(string? projects, Access access, HubDb db)
     {
         var scope = Scope.Projects(access, db, projects);
         var pids = scope.Select(p => p.Id);
-        var names = await scope.Select(p => new { p.Id, p.ProjectNumber, p.Name }).ToDictionaryAsync(p => p.Id);
-        var members = await ActiveMembers(db, pids).Join(db.Users, m => m.UserId, u => u.Id, (m, u) => new { u.Id, u.DisplayName, u.JobTitle, u.Email, m.ProjectId, m.Roles }).ToListAsync();
+        var names = await scope.Select(p => new Named(p.Id, p.ProjectNumber, p.Name)).ToDictionaryAsync(p => p.Id);
+        var members = await ActiveMembers(db, pids).Join(db.Users, m => m.UserId, u => u.Id, (m, u) => new MemberJoin(u.Id, u.DisplayName, u.JobTitle, u.Email, m.ProjectId, m.Roles)).ToListAsync();
         var leads = await db.ProjectDisciplines.AsNoTracking().Where(d => pids.Contains(d.ProjectId) && d.LeadUserId != null && d.IsActive)
-            .Select(d => new { d.ProjectId, Lead = d.LeadUserId!.Value, d.Discipline!.Name }).ToListAsync();
-        var people = members.GroupBy(m => m.Id).Select(g => new
-        {
-            UserId = g.Key, g.First().DisplayName, g.First().JobTitle, g.First().Email,
-            Projects = g.OrderBy(m => names[m.ProjectId].ProjectNumber).Select(m => new
-            {
-                m.ProjectId, names[m.ProjectId].ProjectNumber, ProjectName = names[m.ProjectId].Name, m.Roles,
-                Leads = leads.Where(l => l.ProjectId == m.ProjectId && l.Lead == g.Key).Select(l => l.Name).OrderBy(n => n).ToList(),
-            }).ToList(),
-        }).OrderBy(p => p.DisplayName).ToList();
-        return new { People = people, Projects = names.Count };
+            .Select(d => new LeadRow(d.ProjectId, d.LeadUserId!.Value, d.Discipline!.Name)).ToListAsync();
+        var people = members.GroupBy(m => m.Id).Select(g => new TeamPersonRow(g.Key, g.First().DisplayName, g.First().JobTitle, g.First().Email,
+            [.. g.OrderBy(m => names[m.ProjectId].ProjectNumber).Select(m => new TeamProjectRow(m.ProjectId, names[m.ProjectId].ProjectNumber, names[m.ProjectId].Name, m.Roles,
+                leads.Where(l => l.ProjectId == m.ProjectId && l.Lead == g.Key).Select(l => l.Name).OrderBy(n => n).ToList()))])).OrderBy(p => p.DisplayName).ToList();
+        return TypedResults.Ok(new TeamRead(people, names.Count));
     }
 }

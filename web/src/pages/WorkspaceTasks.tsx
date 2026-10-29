@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
-import { get, put, qs } from '@/lib/api'
+import { get, qs, typedRequest } from '@/lib/api'
 import { useMe } from '@/lib/auth'
 import { addDays, fmtDate, today } from '@/lib/format'
 import { plural, t, tv , runtimeText } from '@/lib/i18n'
@@ -227,7 +227,7 @@ export function WorkspaceBoardPage() {
 
   const onReorder = async (ids: string[], snapBack: () => void) => {
     if (!manual) { snapBack(); toast.info(scope.ws ? t('board.manualHint') : t('ws.manualNeedsWorkspace')); return }
-    try { await put(`workspaces/${scope.ws!.id}/board-order`, { taskIds: ids }); q.refetch() } catch (e) { snapBack(); toast.error(errorText(e)) }
+    try { await typedRequest('put', '/api/v1/workspaces/{id}/board-order', { params: { id: scope.ws!.id }, body: { taskIds: ids } }); q.refetch() } catch (e) { snapBack(); toast.error(errorText(e)) }
   }
   return (
     <Page title={t('nav.boards')} subtitle={q.data ? t('board.count', { n: rows.length }) : scope.label}

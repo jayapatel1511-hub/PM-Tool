@@ -930,6 +930,29 @@
       "string"
     ]
   },
+  "DELETE /api/v1/workspaces/{id} 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "DELETE /api/v1/workspaces/{id} 409": {
     "$": [
       "object"
@@ -939,6 +962,29 @@
     ],
     "$.currentRowVersion": [
       "number"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "DELETE /api/v1/workspaces/{id} 428": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
     ],
     "$.detail": [
       "string"
@@ -11636,42 +11682,6 @@
       "string"
     ],
     "$.components.schemas.AnonymousTypeOfIEnumerableOfAnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndAnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndbooleanAndListOfAnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfWidgetAndboolean": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfWidgetAndboolean.properties": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfWidgetAndboolean.properties.isDefault": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfWidgetAndboolean.properties.isDefault.type": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfWidgetAndboolean.properties.layout": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfWidgetAndboolean.properties.layout.items": [
-      "object"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfWidgetAndboolean.properties.layout.items.$ref": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfWidgetAndboolean.properties.layout.type": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfWidgetAndboolean.properties.layout.type[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfWidgetAndboolean.required": [
-      "array"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfWidgetAndboolean.required[]": [
-      "string"
-    ],
-    "$.components.schemas.AnonymousTypeOfListOfWidgetAndboolean.type": [
       "string"
     ],
     "$.components.schemas.AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean": [
@@ -28159,6 +28169,249 @@
     "$.components.schemas.ExternalPartyRow.type": [
       "string"
     ],
+    "$.components.schemas.FileItemRow": [
+      "object"
+    ],
+    "$.components.schemas.FileItemRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.FileItemRow.properties.itemId": [
+      "object"
+    ],
+    "$.components.schemas.FileItemRow.properties.itemId.format": [
+      "string"
+    ],
+    "$.components.schemas.FileItemRow.properties.itemId.type": [
+      "string"
+    ],
+    "$.components.schemas.FileItemRow.properties.itemType": [
+      "object"
+    ],
+    "$.components.schemas.FileItemRow.properties.itemType.type": [
+      "string"
+    ],
+    "$.components.schemas.FileItemRow.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.FileItemRow.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.FileItemRow.properties.links": [
+      "object"
+    ],
+    "$.components.schemas.FileItemRow.properties.links.items": [
+      "object"
+    ],
+    "$.components.schemas.FileItemRow.properties.links.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.FileItemRow.properties.links.type": [
+      "string"
+    ],
+    "$.components.schemas.FileItemRow.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.FileItemRow.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.FileItemRow.required": [
+      "array"
+    ],
+    "$.components.schemas.FileItemRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.FileItemRow.type": [
+      "string"
+    ],
+    "$.components.schemas.FileLinkRow": [
+      "object"
+    ],
+    "$.components.schemas.FileLinkRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.FileLinkRow.properties.addedAt": [
+      "object"
+    ],
+    "$.components.schemas.FileLinkRow.properties.addedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.FileLinkRow.properties.addedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.FileLinkRow.properties.addedBy": [
+      "object"
+    ],
+    "$.components.schemas.FileLinkRow.properties.addedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.FileLinkRow.properties.addedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.FileLinkRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.FileLinkRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.FileLinkRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.FileLinkRow.properties.isNetworkPath": [
+      "object"
+    ],
+    "$.components.schemas.FileLinkRow.properties.isNetworkPath.type": [
+      "string"
+    ],
+    "$.components.schemas.FileLinkRow.properties.linkType": [
+      "object"
+    ],
+    "$.components.schemas.FileLinkRow.properties.linkType.type": [
+      "string"
+    ],
+    "$.components.schemas.FileLinkRow.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.FileLinkRow.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.FileLinkRow.properties.url": [
+      "object"
+    ],
+    "$.components.schemas.FileLinkRow.properties.url.type": [
+      "string"
+    ],
+    "$.components.schemas.FileLinkRow.required": [
+      "array"
+    ],
+    "$.components.schemas.FileLinkRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.FileLinkRow.type": [
+      "string"
+    ],
+    "$.components.schemas.FileProjectRow": [
+      "object"
+    ],
+    "$.components.schemas.FileProjectRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.FileProjectRow.properties.canAdd": [
+      "object"
+    ],
+    "$.components.schemas.FileProjectRow.properties.canAdd.type": [
+      "string"
+    ],
+    "$.components.schemas.FileProjectRow.properties.count": [
+      "object"
+    ],
+    "$.components.schemas.FileProjectRow.properties.count.format": [
+      "string"
+    ],
+    "$.components.schemas.FileProjectRow.properties.count.pattern": [
+      "string"
+    ],
+    "$.components.schemas.FileProjectRow.properties.count.type": [
+      "string"
+    ],
+    "$.components.schemas.FileProjectRow.properties.items": [
+      "object"
+    ],
+    "$.components.schemas.FileProjectRow.properties.items.items": [
+      "object"
+    ],
+    "$.components.schemas.FileProjectRow.properties.items.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.FileProjectRow.properties.items.type": [
+      "string"
+    ],
+    "$.components.schemas.FileProjectRow.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.FileProjectRow.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.FileProjectRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.FileProjectRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.FileProjectRow.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.FileProjectRow.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.FileProjectRow.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.FileProjectRow.required": [
+      "array"
+    ],
+    "$.components.schemas.FileProjectRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.FileProjectRow.type": [
+      "string"
+    ],
+    "$.components.schemas.FilesRead": [
+      "object"
+    ],
+    "$.components.schemas.FilesRead.properties": [
+      "object"
+    ],
+    "$.components.schemas.FilesRead.properties.projects": [
+      "object"
+    ],
+    "$.components.schemas.FilesRead.properties.projects.items": [
+      "object"
+    ],
+    "$.components.schemas.FilesRead.properties.projects.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.FilesRead.properties.projects.type": [
+      "string"
+    ],
+    "$.components.schemas.FilesRead.properties.total": [
+      "object"
+    ],
+    "$.components.schemas.FilesRead.properties.total.format": [
+      "string"
+    ],
+    "$.components.schemas.FilesRead.properties.total.pattern": [
+      "string"
+    ],
+    "$.components.schemas.FilesRead.properties.total.type": [
+      "string"
+    ],
+    "$.components.schemas.FilesRead.properties.truncated": [
+      "object"
+    ],
+    "$.components.schemas.FilesRead.properties.truncated.type": [
+      "string"
+    ],
+    "$.components.schemas.FilesRead.properties.types": [
+      "object"
+    ],
+    "$.components.schemas.FilesRead.properties.types.items": [
+      "object"
+    ],
+    "$.components.schemas.FilesRead.properties.types.items.type": [
+      "string"
+    ],
+    "$.components.schemas.FilesRead.properties.types.type": [
+      "string"
+    ],
+    "$.components.schemas.FilesRead.required": [
+      "array"
+    ],
+    "$.components.schemas.FilesRead.required[]": [
+      "string"
+    ],
+    "$.components.schemas.FilesRead.type": [
+      "string"
+    ],
     "$.components.schemas.FindingAction": [
       "object"
     ],
@@ -30157,6 +30410,510 @@
     "$.components.schemas.HolidayRow.type": [
       "string"
     ],
+    "$.components.schemas.HomeDeadline": [
+      "object"
+    ],
+    "$.components.schemas.HomeDeadline.properties": [
+      "object"
+    ],
+    "$.components.schemas.HomeDeadline.properties.date": [
+      "object"
+    ],
+    "$.components.schemas.HomeDeadline.properties.date.format": [
+      "string"
+    ],
+    "$.components.schemas.HomeDeadline.properties.date.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeDeadline.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.HomeDeadline.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.HomeDeadline.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeDeadline.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.HomeDeadline.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeDeadline.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.HomeDeadline.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeDeadline.properties.overdue": [
+      "object"
+    ],
+    "$.components.schemas.HomeDeadline.properties.overdue.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeDeadline.properties.owner": [
+      "object"
+    ],
+    "$.components.schemas.HomeDeadline.properties.owner.type": [
+      "array"
+    ],
+    "$.components.schemas.HomeDeadline.properties.owner.type[]": [
+      "string"
+    ],
+    "$.components.schemas.HomeDeadline.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.HomeDeadline.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.HomeDeadline.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeDeadline.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.HomeDeadline.properties.projectNumber.type": [
+      "array"
+    ],
+    "$.components.schemas.HomeDeadline.properties.projectNumber.type[]": [
+      "string"
+    ],
+    "$.components.schemas.HomeDeadline.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.HomeDeadline.properties.status.type": [
+      "array"
+    ],
+    "$.components.schemas.HomeDeadline.properties.status.type[]": [
+      "string"
+    ],
+    "$.components.schemas.HomeDeadline.properties.type": [
+      "object"
+    ],
+    "$.components.schemas.HomeDeadline.properties.type.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeDeadline.required": [
+      "array"
+    ],
+    "$.components.schemas.HomeDeadline.required[]": [
+      "string"
+    ],
+    "$.components.schemas.HomeDeadline.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeDeadlines": [
+      "object"
+    ],
+    "$.components.schemas.HomeDeadlines.properties": [
+      "object"
+    ],
+    "$.components.schemas.HomeDeadlines.properties.items": [
+      "object"
+    ],
+    "$.components.schemas.HomeDeadlines.properties.items.items": [
+      "object"
+    ],
+    "$.components.schemas.HomeDeadlines.properties.items.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.HomeDeadlines.properties.items.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeDeadlines.properties.total": [
+      "object"
+    ],
+    "$.components.schemas.HomeDeadlines.properties.total.format": [
+      "string"
+    ],
+    "$.components.schemas.HomeDeadlines.properties.total.pattern": [
+      "string"
+    ],
+    "$.components.schemas.HomeDeadlines.properties.total.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeDeadlines.properties.truncated": [
+      "object"
+    ],
+    "$.components.schemas.HomeDeadlines.properties.truncated.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeDeadlines.required": [
+      "array"
+    ],
+    "$.components.schemas.HomeDeadlines.required[]": [
+      "string"
+    ],
+    "$.components.schemas.HomeDeadlines.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeLane": [
+      "object"
+    ],
+    "$.components.schemas.HomeLane.properties": [
+      "object"
+    ],
+    "$.components.schemas.HomeLane.properties.count": [
+      "object"
+    ],
+    "$.components.schemas.HomeLane.properties.count.format": [
+      "string"
+    ],
+    "$.components.schemas.HomeLane.properties.count.pattern": [
+      "string"
+    ],
+    "$.components.schemas.HomeLane.properties.count.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeLane.properties.lane": [
+      "object"
+    ],
+    "$.components.schemas.HomeLane.properties.lane.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeLane.properties.statuses": [
+      "object"
+    ],
+    "$.components.schemas.HomeLane.properties.statuses.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeLane.required": [
+      "array"
+    ],
+    "$.components.schemas.HomeLane.required[]": [
+      "string"
+    ],
+    "$.components.schemas.HomeLane.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeMetrics": [
+      "object"
+    ],
+    "$.components.schemas.HomeMetrics.properties": [
+      "object"
+    ],
+    "$.components.schemas.HomeMetrics.properties.activeProjects": [
+      "object"
+    ],
+    "$.components.schemas.HomeMetrics.properties.activeProjects.format": [
+      "string"
+    ],
+    "$.components.schemas.HomeMetrics.properties.activeProjects.pattern": [
+      "string"
+    ],
+    "$.components.schemas.HomeMetrics.properties.activeProjects.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeMetrics.properties.onTrack": [
+      "object"
+    ],
+    "$.components.schemas.HomeMetrics.properties.onTrack.$ref": [
+      "string"
+    ],
+    "$.components.schemas.HomeMetrics.properties.openTasks": [
+      "object"
+    ],
+    "$.components.schemas.HomeMetrics.properties.openTasks.format": [
+      "string"
+    ],
+    "$.components.schemas.HomeMetrics.properties.openTasks.pattern": [
+      "string"
+    ],
+    "$.components.schemas.HomeMetrics.properties.openTasks.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeMetrics.properties.overdueTasks": [
+      "object"
+    ],
+    "$.components.schemas.HomeMetrics.properties.overdueTasks.format": [
+      "string"
+    ],
+    "$.components.schemas.HomeMetrics.properties.overdueTasks.pattern": [
+      "string"
+    ],
+    "$.components.schemas.HomeMetrics.properties.overdueTasks.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeMetrics.properties.teamMembers": [
+      "object"
+    ],
+    "$.components.schemas.HomeMetrics.properties.teamMembers.format": [
+      "string"
+    ],
+    "$.components.schemas.HomeMetrics.properties.teamMembers.pattern": [
+      "string"
+    ],
+    "$.components.schemas.HomeMetrics.properties.teamMembers.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeMetrics.required": [
+      "array"
+    ],
+    "$.components.schemas.HomeMetrics.required[]": [
+      "string"
+    ],
+    "$.components.schemas.HomeMetrics.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeOnHold": [
+      "object"
+    ],
+    "$.components.schemas.HomeOnHold.properties": [
+      "object"
+    ],
+    "$.components.schemas.HomeOnHold.properties.count": [
+      "object"
+    ],
+    "$.components.schemas.HomeOnHold.properties.count.format": [
+      "string"
+    ],
+    "$.components.schemas.HomeOnHold.properties.count.pattern": [
+      "string"
+    ],
+    "$.components.schemas.HomeOnHold.properties.count.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeOnHold.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.HomeOnHold.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeOnHold.required": [
+      "array"
+    ],
+    "$.components.schemas.HomeOnHold.required[]": [
+      "string"
+    ],
+    "$.components.schemas.HomeOnHold.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeOnTrack": [
+      "object"
+    ],
+    "$.components.schemas.HomeOnTrack.properties": [
+      "object"
+    ],
+    "$.components.schemas.HomeOnTrack.properties.evaluated": [
+      "object"
+    ],
+    "$.components.schemas.HomeOnTrack.properties.evaluated.format": [
+      "string"
+    ],
+    "$.components.schemas.HomeOnTrack.properties.evaluated.pattern": [
+      "string"
+    ],
+    "$.components.schemas.HomeOnTrack.properties.evaluated.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeOnTrack.properties.green": [
+      "object"
+    ],
+    "$.components.schemas.HomeOnTrack.properties.green.format": [
+      "string"
+    ],
+    "$.components.schemas.HomeOnTrack.properties.green.pattern": [
+      "string"
+    ],
+    "$.components.schemas.HomeOnTrack.properties.green.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeOnTrack.properties.pct": [
+      "object"
+    ],
+    "$.components.schemas.HomeOnTrack.properties.pct.format": [
+      "string"
+    ],
+    "$.components.schemas.HomeOnTrack.properties.pct.pattern": [
+      "string"
+    ],
+    "$.components.schemas.HomeOnTrack.properties.pct.type": [
+      "array"
+    ],
+    "$.components.schemas.HomeOnTrack.properties.pct.type[]": [
+      "string"
+    ],
+    "$.components.schemas.HomeOnTrack.required": [
+      "array"
+    ],
+    "$.components.schemas.HomeOnTrack.required[]": [
+      "string"
+    ],
+    "$.components.schemas.HomeOnTrack.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeProject": [
+      "object"
+    ],
+    "$.components.schemas.HomeProject.properties": [
+      "object"
+    ],
+    "$.components.schemas.HomeProject.properties.lanes": [
+      "object"
+    ],
+    "$.components.schemas.HomeProject.properties.lanes.items": [
+      "object"
+    ],
+    "$.components.schemas.HomeProject.properties.lanes.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.HomeProject.properties.lanes.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeProject.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.HomeProject.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeProject.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.HomeProject.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.HomeProject.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeProject.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.HomeProject.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeProject.properties.total": [
+      "object"
+    ],
+    "$.components.schemas.HomeProject.properties.total.format": [
+      "string"
+    ],
+    "$.components.schemas.HomeProject.properties.total.pattern": [
+      "string"
+    ],
+    "$.components.schemas.HomeProject.properties.total.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeProject.required": [
+      "array"
+    ],
+    "$.components.schemas.HomeProject.required[]": [
+      "string"
+    ],
+    "$.components.schemas.HomeProject.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeRead": [
+      "object"
+    ],
+    "$.components.schemas.HomeRead.properties": [
+      "object"
+    ],
+    "$.components.schemas.HomeRead.properties.asOf": [
+      "object"
+    ],
+    "$.components.schemas.HomeRead.properties.asOf.format": [
+      "string"
+    ],
+    "$.components.schemas.HomeRead.properties.asOf.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeRead.properties.from": [
+      "object"
+    ],
+    "$.components.schemas.HomeRead.properties.from.format": [
+      "string"
+    ],
+    "$.components.schemas.HomeRead.properties.from.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeRead.properties.isDefault": [
+      "object"
+    ],
+    "$.components.schemas.HomeRead.properties.isDefault.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeRead.properties.layout": [
+      "object"
+    ],
+    "$.components.schemas.HomeRead.properties.layout.items": [
+      "object"
+    ],
+    "$.components.schemas.HomeRead.properties.layout.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.HomeRead.properties.layout.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeRead.properties.metrics": [
+      "object"
+    ],
+    "$.components.schemas.HomeRead.properties.metrics.$ref": [
+      "string"
+    ],
+    "$.components.schemas.HomeRead.properties.onHold": [
+      "object"
+    ],
+    "$.components.schemas.HomeRead.properties.onHold.$ref": [
+      "string"
+    ],
+    "$.components.schemas.HomeRead.properties.tasksByProject": [
+      "object"
+    ],
+    "$.components.schemas.HomeRead.properties.tasksByProject.items": [
+      "object"
+    ],
+    "$.components.schemas.HomeRead.properties.tasksByProject.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.HomeRead.properties.tasksByProject.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeRead.properties.tasksByStatus": [
+      "object"
+    ],
+    "$.components.schemas.HomeRead.properties.tasksByStatus.items": [
+      "object"
+    ],
+    "$.components.schemas.HomeRead.properties.tasksByStatus.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.HomeRead.properties.tasksByStatus.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeRead.properties.to": [
+      "object"
+    ],
+    "$.components.schemas.HomeRead.properties.to.format": [
+      "string"
+    ],
+    "$.components.schemas.HomeRead.properties.to.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeRead.properties.today": [
+      "object"
+    ],
+    "$.components.schemas.HomeRead.properties.today.format": [
+      "string"
+    ],
+    "$.components.schemas.HomeRead.properties.today.type": [
+      "string"
+    ],
+    "$.components.schemas.HomeRead.properties.upcomingDeadlines": [
+      "object"
+    ],
+    "$.components.schemas.HomeRead.properties.upcomingDeadlines.$ref": [
+      "string"
+    ],
+    "$.components.schemas.HomeRead.required": [
+      "array"
+    ],
+    "$.components.schemas.HomeRead.required[]": [
+      "string"
+    ],
+    "$.components.schemas.HomeRead.type": [
+      "string"
+    ],
     "$.components.schemas.HrIdentity": [
       "object"
     ],
@@ -31818,6 +32575,39 @@
     ],
     "$.components.schemas.JsonElement": [
       "object"
+    ],
+    "$.components.schemas.LayoutAnswer": [
+      "object"
+    ],
+    "$.components.schemas.LayoutAnswer.properties": [
+      "object"
+    ],
+    "$.components.schemas.LayoutAnswer.properties.isDefault": [
+      "object"
+    ],
+    "$.components.schemas.LayoutAnswer.properties.isDefault.type": [
+      "string"
+    ],
+    "$.components.schemas.LayoutAnswer.properties.layout": [
+      "object"
+    ],
+    "$.components.schemas.LayoutAnswer.properties.layout.items": [
+      "object"
+    ],
+    "$.components.schemas.LayoutAnswer.properties.layout.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.LayoutAnswer.properties.layout.type": [
+      "string"
+    ],
+    "$.components.schemas.LayoutAnswer.required": [
+      "array"
+    ],
+    "$.components.schemas.LayoutAnswer.required[]": [
+      "string"
+    ],
+    "$.components.schemas.LayoutAnswer.type": [
+      "string"
     ],
     "$.components.schemas.LayoutBody": [
       "object"
@@ -55123,6 +55913,162 @@
     "$.components.schemas.TaskTransitionBody.type": [
       "string"
     ],
+    "$.components.schemas.TeamPersonRow": [
+      "object"
+    ],
+    "$.components.schemas.TeamPersonRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.TeamPersonRow.properties.displayName": [
+      "object"
+    ],
+    "$.components.schemas.TeamPersonRow.properties.displayName.type": [
+      "string"
+    ],
+    "$.components.schemas.TeamPersonRow.properties.email": [
+      "object"
+    ],
+    "$.components.schemas.TeamPersonRow.properties.email.type": [
+      "string"
+    ],
+    "$.components.schemas.TeamPersonRow.properties.jobTitle": [
+      "object"
+    ],
+    "$.components.schemas.TeamPersonRow.properties.jobTitle.type": [
+      "array"
+    ],
+    "$.components.schemas.TeamPersonRow.properties.jobTitle.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TeamPersonRow.properties.projects": [
+      "object"
+    ],
+    "$.components.schemas.TeamPersonRow.properties.projects.items": [
+      "object"
+    ],
+    "$.components.schemas.TeamPersonRow.properties.projects.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.TeamPersonRow.properties.projects.type": [
+      "string"
+    ],
+    "$.components.schemas.TeamPersonRow.properties.userId": [
+      "object"
+    ],
+    "$.components.schemas.TeamPersonRow.properties.userId.format": [
+      "string"
+    ],
+    "$.components.schemas.TeamPersonRow.properties.userId.type": [
+      "string"
+    ],
+    "$.components.schemas.TeamPersonRow.required": [
+      "array"
+    ],
+    "$.components.schemas.TeamPersonRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.TeamPersonRow.type": [
+      "string"
+    ],
+    "$.components.schemas.TeamProjectRow": [
+      "object"
+    ],
+    "$.components.schemas.TeamProjectRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.TeamProjectRow.properties.leads": [
+      "object"
+    ],
+    "$.components.schemas.TeamProjectRow.properties.leads.items": [
+      "object"
+    ],
+    "$.components.schemas.TeamProjectRow.properties.leads.items.type": [
+      "string"
+    ],
+    "$.components.schemas.TeamProjectRow.properties.leads.type": [
+      "string"
+    ],
+    "$.components.schemas.TeamProjectRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.TeamProjectRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.TeamProjectRow.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.TeamProjectRow.properties.projectName": [
+      "object"
+    ],
+    "$.components.schemas.TeamProjectRow.properties.projectName.type": [
+      "string"
+    ],
+    "$.components.schemas.TeamProjectRow.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.TeamProjectRow.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.TeamProjectRow.properties.roles": [
+      "object"
+    ],
+    "$.components.schemas.TeamProjectRow.properties.roles.items": [
+      "object"
+    ],
+    "$.components.schemas.TeamProjectRow.properties.roles.items.type": [
+      "string"
+    ],
+    "$.components.schemas.TeamProjectRow.properties.roles.type": [
+      "string"
+    ],
+    "$.components.schemas.TeamProjectRow.required": [
+      "array"
+    ],
+    "$.components.schemas.TeamProjectRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.TeamProjectRow.type": [
+      "string"
+    ],
+    "$.components.schemas.TeamRead": [
+      "object"
+    ],
+    "$.components.schemas.TeamRead.properties": [
+      "object"
+    ],
+    "$.components.schemas.TeamRead.properties.people": [
+      "object"
+    ],
+    "$.components.schemas.TeamRead.properties.people.items": [
+      "object"
+    ],
+    "$.components.schemas.TeamRead.properties.people.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.TeamRead.properties.people.type": [
+      "string"
+    ],
+    "$.components.schemas.TeamRead.properties.projects": [
+      "object"
+    ],
+    "$.components.schemas.TeamRead.properties.projects.format": [
+      "string"
+    ],
+    "$.components.schemas.TeamRead.properties.projects.pattern": [
+      "string"
+    ],
+    "$.components.schemas.TeamRead.properties.projects.type": [
+      "string"
+    ],
+    "$.components.schemas.TeamRead.required": [
+      "array"
+    ],
+    "$.components.schemas.TeamRead.required[]": [
+      "string"
+    ],
+    "$.components.schemas.TeamRead.type": [
+      "string"
+    ],
     "$.components.schemas.TemplateRoleIn": [
       "object"
     ],
@@ -64699,6 +65645,9 @@
     "$.paths./api/v1/files.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/files.get.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/files.get.responses.200.description": [
       "string"
     ],
@@ -64749,6 +65698,9 @@
     ],
     "$.paths./api/v1/home.get.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/home.get.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/home.get.responses.200.description": [
       "string"
@@ -82726,6 +83678,9 @@
     "$.paths./api/v1/team.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/team.get.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/team.get.responses.200.description": [
       "string"
     ],
@@ -84502,10 +85457,22 @@
     "$.paths./api/v1/workspaces.post.responses": [
       "object"
     ],
-    "$.paths./api/v1/workspaces.post.responses.200": [
+    "$.paths./api/v1/workspaces.post.responses.201": [
       "object"
     ],
-    "$.paths./api/v1/workspaces.post.responses.200.description": [
+    "$.paths./api/v1/workspaces.post.responses.201.content": [
+      "object"
+    ],
+    "$.paths./api/v1/workspaces.post.responses.201.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/workspaces.post.responses.201.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/workspaces.post.responses.201.content.application/json.schema.$ref": [
+      "string"
+    ],
+    "$.paths./api/v1/workspaces.post.responses.201.description": [
       "string"
     ],
     "$.paths./api/v1/workspaces.post.tags": [
@@ -84547,10 +85514,10 @@
     "$.paths./api/v1/workspaces/{id}.delete.responses": [
       "object"
     ],
-    "$.paths./api/v1/workspaces/{id}.delete.responses.200": [
+    "$.paths./api/v1/workspaces/{id}.delete.responses.204": [
       "object"
     ],
-    "$.paths./api/v1/workspaces/{id}.delete.responses.200.description": [
+    "$.paths./api/v1/workspaces/{id}.delete.responses.204.description": [
       "string"
     ],
     "$.paths./api/v1/workspaces/{id}.delete.tags": [
@@ -84682,10 +85649,10 @@
     "$.paths./api/v1/workspaces/{id}/board-order.put.responses": [
       "object"
     ],
-    "$.paths./api/v1/workspaces/{id}/board-order.put.responses.200": [
+    "$.paths./api/v1/workspaces/{id}/board-order.put.responses.204": [
       "object"
     ],
-    "$.paths./api/v1/workspaces/{id}/board-order.put.responses.200.description": [
+    "$.paths./api/v1/workspaces/{id}/board-order.put.responses.204.description": [
       "string"
     ],
     "$.paths./api/v1/workspaces/{id}/board-order.put.tags": [
@@ -111060,6 +112027,38 @@
     ],
     "$.rowVersion": [
       "number"
+    ]
+  },
+  "PATCH /api/v1/workspaces/{id} 400": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.errors": [
+      "object"
+    ],
+    "$.errors.projectIds": [
+      "array"
+    ],
+    "$.errors.projectIds[]": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
     ]
   },
   "PATCH /api/v1/workspaces/{id} 404": {

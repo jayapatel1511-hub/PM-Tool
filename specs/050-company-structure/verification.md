@@ -1,5 +1,7 @@
 # Verification: Company Structure
 
+**Current status (2026-10-29):** Implemented and checked locally behind flag.org_structure, including local API/browser and schema checks. Tier B, hosted, pilot and human acceptance remain pending. Final local release evidence and assumptions are in [the release candidate](../../docs/handoffs/2026-10-29-packets-039-051-release-candidate.md). Historical slice records below retain their original source boundaries. Nothing is pushed, hosted or Accepted by this session.
+
 Status (2026-10-25): S01–S06 implemented locally on `codex/integrate-039-050`, dark behind `flag.org_structure`. All nine ACs PASS (local); the three former PARTIAL rows closed in the 2026-10-26 gap run below. Not Accepted; hosted, pilot and human checks are open.
 
 Runtime source `566fe5187d72be56a14fd16d0428e8b8e6e34d72` passes **1,514/1,514 backend tests** (zero failures/skips). Rules branch coverage is **3,032/3,155 (96.1%)** and service line coverage **13,084/13,665 (95.7%)**. The 799-response shape gate passes from one full-run manifest. See the [acceptance follow-up](../../docs/handoffs/2026-10-19-039-050-acceptance-followup.md) and its hashed receipt for current browser, image and source boundaries. Earlier slice runs below are historical; their missing-schema/startup blockers are resolved by the combined run. Prior compatibility evidence retains source `1b649f5`; no schema changed afterward. No packet is Accepted; hosted, pilot and human gates remain separate.

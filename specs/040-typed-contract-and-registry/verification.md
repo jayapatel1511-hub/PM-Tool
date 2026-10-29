@@ -1,5 +1,7 @@
 # Verification: Typed Contract and Entity Registry
 
+**Current status (2026-10-29):** Implemented and checked locally (S01–S15.n, all 46 inventory files). S16 cohort measurement and Jay's ruling remain pending. Final local release evidence and assumptions are in [the release candidate](../../docs/handoffs/2026-10-29-packets-039-051-release-candidate.md). Historical slice records below retain their original source boundaries. Nothing is pushed, hosted or Accepted by this session.
+
 **Status: S01–S14 integrated locally on codex/integrate-039-050 (S13 with gaps noted; the S03, S04 and S06 gaps were closed locally in the 2026-10-25 gap run below); S15.n in progress under D8; S16 open. Not Accepted, not hosted.** Integrated locally through runtime source `1b649f57f4f6c28abeb36fabdd9607b51ae13dde`. Final combined verification passes: 1,491 backend tests, coverage gates, 798 observed response shapes, six affected mocked browser commands, real-API browser/live flow, final-image permission checks and 29 old/new/old compatibility checks. See [the integration handoff](../../docs/handoffs/2026-10-18-039-050-integration.md) and its hashed evidence receipt for precise source boundaries and limits. Earlier lane tables below are historical slice-level records; old missing-schema blockers are resolved by the combined runtime checks. No acceptance criterion or packet is marked Accepted; remaining hosted, human and broader workflow gates stay explicit.
 
 | Acceptance criterion | Slice | Status |

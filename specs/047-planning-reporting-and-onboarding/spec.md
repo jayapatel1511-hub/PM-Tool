@@ -1,7 +1,7 @@
 # Feature Specification: Planning, Reporting and Onboarding
 
 **Packet**: 047 | **Feature directory**: `specs/047-planning-reporting-and-onboarding` | **Date**: 2026-10-14
-**Status**: Implemented locally (S01 to S17) and checked; S18 flag cleanup, and hosted and human acceptance pending. Line of record: `codex/integrate-039-050`, not pushed.
+**Status**: Implemented and checked locally (S01–S17). S18 flag cleanup and hosted and human acceptance remain pending. Line of record: `codex/integrate-039-050`, committed locally and not pushed. Not Accepted.
 **Input**: Jay's 2026-10-14 instruction to build everything in the build-approach report, additive only, with no deadlines. This packet holds roadmap items 21, 23, 24, 25, 27, 28, 29, 34 and 35.
 **Source**: product specification §51 (§51.1 to §51.13) in `spec-parts/26-planning-reporting-and-onboarding.md`. Related contracts: §12.14 (templates), §12.15.2 and §37.6 FR-CAP-02 (daily capacity), §13.10 (My Work), §13.16 (Team), §19 (reports), §20.1 and §23.8 (logging), §39 (weekly planning, PLN-05, FR-PLN-14, FR-PLN-15), §40.2 (open roles, FR-ROLE-01 to FR-ROLE-05), §41 (calm layout, AC-CALM-01), §42 (FR-SUP-03), §43 (flags, packet 039), §45 (honest free hours, packet 041), §49 (template working-day offsets, packet 045).
 

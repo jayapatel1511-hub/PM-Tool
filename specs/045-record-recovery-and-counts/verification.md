@@ -1,5 +1,7 @@
 # Verification: Record Recovery and Counts
 
+**Current status (2026-10-29):** Implemented and checked locally (S01–S11), including local recovery/count checks. S12 flag cleanup and remaining manual, hosted and human acceptance remain pending. Final local release evidence and assumptions are in [the release candidate](../../docs/handoffs/2026-10-29-packets-039-051-release-candidate.md). Historical slice records below retain their original source boundaries. Nothing is pushed, hosted or Accepted by this session.
+
 Status: S01 to S11 built locally on `codex/integrate-039-050`; S12 gated on Jay's flag decisions. No AC is Accepted. Latest local evidence: runtime source `566fe5187d72be56a14fd16d0428e8b8e6e34d72`, full Release backend 1,514 passed, 0 failed, including all eight `RecoveryApiTests`, seven `CountLinkTests`, ten `TemplatePlannerTests`, twelve `ViewsTests` and the named `PortfolioTests`, `TimeTests` and `TemplatesTests` cases (`ci-artifacts/integration/final-566fe51-tests/final.trx`; [follow-up handoff](../../docs/handoffs/2026-10-19-039-050-acceptance-followup.md)). The mocked `test:recovery-counts` browser check passed in the final 1b649f5 run ([integration handoff](../../docs/handoffs/2026-10-18-039-050-integration.md)). The 2026-10-25 gap run below ran `npm run test:counts` against the packet 036 fixtures and moved AC-RCV-08, 09, 10 and 13 to PASS (local). Not run: a Down-migration rollback smoke, screen-reader and phone review, hosted or human checks. Earlier lane tables below are historical slice records.
 
 ## Current takeover evidence

@@ -1,7 +1,7 @@
 # Feature Specification: User Feedback Round 1
 
 **Packet**: 051 | **Feature directory**: `specs/051-user-feedback-round-1` | **Date**: 2026-10-24
-**Status**: Specified, not started. Scope approved by Jay on 2026-10-25 with the listed defaults (051-D1).
+**Status**: Implemented and checked locally (S01–S10), including save recovery, Backlog and admin review. S11 cleanup after pilot activation and hosted and human acceptance remain pending. Line of record: `codex/integrate-039-050`, committed locally and not pushed. Not Accepted.
 **Input**: the first handwritten feedback list from pilot users, "Things to add to Tuesday app" (twelve items), photographed on 2026-10-24 and transcribed in §55.1.
 **Source**: product specification §55 (§55.1 to §55.6) in `spec-parts/30-user-feedback-round-1.md`. Related contracts: §12.5 (tasks, rules T-01 to T-18), §13.3 (Task List and task panel autosave), §13.4 (Board), §13.5 (Timeline Unscheduled list), §13.10 and §36.7 (My Work), §13.15 (Administration), §17.3 (daily digest), §18.4 (saved views), §19 (reports), §20.1 (log), §25.6 (errors), §36.3 (manual card order), §38 (readiness), §43 (flags, packet 039), §46 FR-LIVE-03 (reload notice), §49.3 (every count opens its list), §54 (units, packet 050), FR-AUTH-03 and FR-AUTH-04 (roles, inactive users), FR-GRP-01 (home discipline), FR-TEAM-05 (discipline summary).
 

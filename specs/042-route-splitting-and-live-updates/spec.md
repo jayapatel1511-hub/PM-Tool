@@ -1,7 +1,7 @@
 # Feature Specification: Route Splitting and Live Updates
 
 **Packet**: 042 | **Feature directory**: `specs/042-route-splitting-and-live-updates` | **Date**: 2026-10-14
-**Status**: Implemented locally (S01 to S12) and checked; S13 flag cleanup, hosted and tunnel checks, and human acceptance pending. Line of record: `codex/integrate-039-050`, not pushed.
+**Status**: Implemented and checked locally (S01–S12), including the real-API lifecycle checks. S13 flag cleanup, hosted/tunnel checks and human acceptance remain pending. Line of record: `codex/integrate-039-050`, committed locally and not pushed. Not Accepted.
 **Input**: On 2026-10-14 Jay approved the build-approach report of that date (kept outside the repository) and directed building all of it: "We are building everything you suggested." Current features are fixed; additions only. This packet carries the report's sections 4.4 and 4.5 and its roadmap items 10, 16 and 33.
 **Source**: product specification §46 (§46.1 to §46.8) in `spec-parts/21-route-splitting-and-live-updates.md`. Builds on §23.4 (route-based code splitting per area), §22 (page-load target), §23.8 (`/health`), §13.0 (deep-linkable panels), §8.7 (visibility model), FR-ROLE-05 (open-role visibility) and FR-PLN-18 (private drafts). Amends §17.6 (in-app delivery) and §28 item 9 (server-sent events). Uses §43 flags (packet 039), the §44 query-key map (packet 040), and the §48 root error page and outbox dead-letter (packet 044).
 

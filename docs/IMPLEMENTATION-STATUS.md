@@ -1,5 +1,11 @@
 # Implementation status
 
+## 2026-10-29 packets 039–051 local release candidate
+
+Packets 039–042 and 044–051 are implemented and checked locally on `codex/integrate-039-050`; all 46 packet 040 conversion inventory files are integrated. Jay confirmed packet 043 KILL on 2026-10-25, and its existing-component fallback is built. The [release candidate](handoffs/2026-10-29-packets-039-051-release-candidate.md) records the exact runtime SHA, local checks, upgrade/rollback rehearsal, fixes, assumptions and For Jay list.
+
+Nothing is pushed or deployed. Tier B/repository controls, activation and flag retirement, packet 040 S16, remaining visual/manual/operator checks and hosted/human acceptance remain open. No packet is marked Accepted. Entries below are historical snapshots.
+
 ## 2026-10-25 packets 039–050 (local)
 
 The 12 October candidate (packets 025 to 038 and its review fixes) reached main through PR #37 (`e4ca1661`). Packets 039 to 042 and 044 to 050 are implemented locally on `codex/integrate-039-050` (base `cf3ce8ee`); packet 043 has only a spike, measured KILL and not integrated. A whole-codebase review on 25 October found twelve problems to fix first and further findings in six themes; all are fixed in local commits on that branch, and the backend suite then passed **1,515/1,516** with one on-request performance test skipped, which passes when run (`HUB_SCALE=1`). Nothing is pushed or deployed. See the [19 October acceptance follow-up](handoffs/2026-10-19-039-050-acceptance-followup.md), the [25 October review fixes](handoffs/2026-10-25-review-fixes.md) and each packet's verification record. Branch protection, Tier B review and merge, flag activation, and hosted and human acceptance remain open.

@@ -1,7 +1,7 @@
 # Feature Specification: Verifiable Records
 
 **Packet**: 048 | **Feature directory**: `specs/048-verifiable-records` | **Date**: 2026-10-18
-**Status**: Implemented locally (S01 to S09) and checked: 8 acceptance criteria pass locally and 4 are partial on browser scenarios; Tier B approval, flag activation, and hosted and human acceptance pending. Scope approved by Jay on 2026-10-18 with the listed defaults (048-D1). Line of record: `codex/integrate-039-050`, not pushed.
+**Status**: Implemented and checked locally (S01–S09), with API and local real-browser workflow evidence. Tier B approval, irreversible log activation if chosen, and hosted and human acceptance remain pending. Line of record: `codex/integrate-039-050`, committed locally and not pushed. Not Accepted.
 **Input**: Jay's 2026-10-18 request to add the mechanisms confirmed by the October 2026 product research. That research lives outside this repository; no third-party product is named here.
 **Source**: product specification §52 (§52.1 to §52.9) in `spec-parts/27-verifiable-records.md`. Related contracts: §12.4 (deliverables, DeliverableIssue), §13.14 (Activity History), §20.1 to §20.4 (audit), §37.4 (change records), §37.6 (allocations, FR-CAP-07), §38.2 (weekly commitments, FR-RDY-05, FR-RDY-06, FR-RDY-07, AC-RDY-04), §43 (flags, packet 039), §45.4 (load bands, packet 041), §48 (off-host backup, packet 044), §50.5 (re-baseline, FR-INT-13, FR-INT-14, packet 046).
 

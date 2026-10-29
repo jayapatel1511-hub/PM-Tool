@@ -1,7 +1,7 @@
 # Feature Specification: Delivery Process
 
 **Packet**: 039 | **Feature directory**: `specs/039-delivery-process` | **Date**: 2026-10-14
-**Status**: Implemented locally (S01 to S17) and checked; S18, GitHub protection and runs, homedev and human acceptance pending. Line of record: `codex/integrate-039-050`, not pushed.
+**Status**: Implemented and checked locally (S01–S17). S18, repository controls and release journey, activation, and hosted and human acceptance remain pending. Line of record: `codex/integrate-039-050`, committed locally and not pushed. Not Accepted.
 **Input**: Jay's 2026-10-14 instruction to build everything in the build-approach report (kept outside the repository): "We are building everything you suggested." Current features are fixed and additive only. This packet is the report's delivery-process section in full.
 **Source**: product specification §43 (§43.1 to §43.14) in `spec-parts/18-delivery-process.md`. It adds to §21 (dependency management), §22 (quality gates), §23.4 (feature flags), §23.7 (CI/CD and configuration) and §24.6 (migrations), and records Q15 (GitHub Actions) as decided. On Jay's direction the constitution's Development Workflow section is amended to version 1.1.0 (D11).
 

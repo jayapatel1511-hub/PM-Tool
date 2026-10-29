@@ -111,7 +111,7 @@ Every addition is deterministic and explainable. Nothing here scores or ranks pe
 
 - **AC-VER-08.** Given `commitment_met_confirmation` is on, when the performer records Met, then it reads "Met, awaiting confirmation" and is not counted; the performer cannot confirm it; the Discipline Lead confirms it and it counts.
 
-- **AC-VER-09.** Given an allocation edit that would raise a person-week from 32 to 46 of 40 h, when previewed, then the form shows "After this change: 46 of 40 h, Over" and nothing is written, logged or notified; the saved result equals the preview when nothing else changed.
+- **AC-VER-09.** Given an allocation edit that would raise a person-week from 32 to 46 of 40 h, when previewed, then the form shows "After this change: 46 of 40 h, over capacity" and nothing is written, logged or notified; the saved result equals the preview when nothing else changed.
 
 - **AC-VER-10.** Given a PM re-baselines a deliverable twice, then B1 and B2 both remain with dates, owner, estimate, remaining hours and reasons. The panel shows the change since B2 in hours, days and owner. "Use original dates" keeps both records.
 

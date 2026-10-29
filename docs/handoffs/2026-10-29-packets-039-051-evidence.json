@@ -8,7 +8,7 @@
     "deployedToHomedev": false,
     "accepted": false,
     "applicationSourcesUnchangedAfterRuntimeRelease": true,
-    "laterChanges": "Verification tests, shape baseline and records only"
+    "laterChanges": "Verification tests, shape baseline, specification wording/generated documents and review records only"
   },
   "toolchain": {
     "dotnet": "10.0.400",
@@ -539,7 +539,47 @@
     "039 S18",
     "040 S16 cohort and ruling",
     "Flag retirement after approved activation/pilot",
-    "Seven For Jay items in handoff"
+    "P2 inactive-assignee live pickup and manager pickup-assignment correction before task_pickup activation",
+    "Packet 043 visual acceptance/output preservation"
   ],
-  "finalWorkingTreeCheck": "Run after committing these record files; must be empty"
+  "finalWorkingTreeCheck": "Run after committing these record files; must be empty",
+  "localFollowup": {
+    "date": "2026-10-29",
+    "recordHeadBeforeFollowup": "86c00a8c0ea42bb98bfe785aa8ee1a7ed8422b19",
+    "document": "2026-10-29-packets-039-051-local-followup.md",
+    "scope": "Authorized local wording and review only; no runtime edits",
+    "wordingResolved": [
+      "FR-BKL-08: existing Task List export only",
+      "AC-VER-09: existing over capacity label"
+    ],
+    "reviewComplete": true,
+    "runtimeChanged": false,
+    "acceptanceChanged": false,
+    "openFindings": [
+      {
+        "priority": "P2",
+        "summary": "Deactivated assignee blocks eligible peer pickup and manager pickup assignment",
+        "basis": "Source-confirmed; no new runtime reproduction in this review",
+        "requiredBefore": "flag.task_pickup activation"
+      }
+    ],
+    "visualReview": {
+      "evidence": "Retained Vacation/Holidays/Clients normal-state PNGs; source-equivalent to runtime release",
+      "freshBrowserRun": false,
+      "cssPreservationProven": false,
+      "humanAccepted": false
+    },
+    "checks": {
+      "buildSpec": "PASS",
+      "trace": "PASS: 1343 IDs; 412 sections; zero gaps",
+      "decisions": "PASS: 8 tests",
+      "diffWhitespace": "PASS",
+      "runtimeSourceDiff": "empty"
+    },
+    "priorRuntimeSuitesRepeated": false,
+    "priorRuntimePassExcludesNewPickupScenario": true,
+    "recommendations": [
+      "Admin review exports: snapshot rule/settings at review time or label current-setting rule text; historical unknown values remain unknown"
+    ]
+  }
 }

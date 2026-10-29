@@ -1,8 +1,10 @@
 # Packets 039–051: local release candidate
 
+**Local follow-up:** [wording and review dispositions](2026-10-29-packets-039-051-local-followup.md) resolve the two wording items and identify a P2 inactive-assignee pickup defect. Runtime code is unchanged; fix and verify that defect before enabling `flag.task_pickup`. Visual acceptance remains open.
+
 **Release SHA:** `2dcdaec424eba81998e0c125f2e29621c8df39b0` on `codex/integrate-039-050`.
 
-This is the last application-code commit. Later commits add verification fixtures, bounded browser condition waits, response-shape evidence, status records and this handoff. The application, dependency manifests, migrations, hosting and operational scripts remain unchanged from this SHA. The local image was built from its `git archive`, identified itself with this exact build, and passed upgrade → rollback → forward rehearsal. Nothing was pushed, merged to main or deployed to homedev. No packet is marked Accepted.
+This is the last application-code commit. Later commits add verification fixtures, bounded browser condition waits, response-shape evidence, specification wording corrections, status records and this handoff. The application, dependency manifests, migrations, hosting and operational scripts remain unchanged from this SHA. The local image was built from its `git archive`, identified itself with this exact build, and passed upgrade → rollback → forward rehearsal. Nothing was pushed, merged to main or deployed to homedev. No packet is marked Accepted.
 
 ## What is in it
 
@@ -94,12 +96,13 @@ The optional verifiable activity log was not activated on this review stack. Its
 
 ## Assumptions
 
-Packet defaults and slice-specific assumptions remain in each packet's `verification.md`. This pass retains today's thresholds for Admin review export, export of only the latest review in the page, team ownership of inactive-assignee pickup offers, and the audit-chain already-alerted marker after a cleared break. No rates, client facts or operational data were invented; browser/rehearsal data is synthetic.
+Packet defaults and slice-specific assumptions remain in each packet's `verification.md`. The local follow-up confirms that Admin review exports reconstruct rule text from current settings, the page exposes the latest review's export while the API accepts a recorded ID, historical pickup report rows stay with the original assignee's team, and the audit-chain already-alerted marker is retained after a cleared break. It separately identifies the live inactive-assignee pickup/assignment defect; historical report retention is not proof of live eligibility. No rates, client facts or operational data were invented; browser/rehearsal data is synthetic.
 
 Local checks and image rollback do not prove human acceptance, hosted/tunnel behavior, real mail/directory integration, company pilot, scheduled off-host retrieval or recovery drills. The Mac-held-token exposure rule was observed; no credential-bearing remote operations were performed.
 
 ## Known limits and remaining gates
 
+- **P2 open:** assignee deactivation blocks active teammates’ pickup and the manager pickup-assignment path. Runtime code is unchanged by the local review. Fix and verify before enabling `flag.task_pickup`; the recorded passing suites do not cover this scenario.
 - Hosted activation, real tenant/provider behavior, tunnel/browser/operator checks, assistive-technology sessions and human/pilot acceptance remain open. No packet or whole specification is Accepted.
 - Repository controls/Tier B review, packet 039 S18, packet 040 S16 cohort measurement/Jay's ruling, and flag retirement after activation/pilot remain open.
 - The required production dependency scan is clean. The additional full npm scan reports **one high development-tool advisory for Vite**; it is recorded separately and no dependency upgrade was folded into this release.
@@ -142,26 +145,16 @@ Integration includes the five final conversion merges and their per-slice verifi
 
 All original named branches are retained. Detached interim/replay history is reachable as `codex/archive-interim-20261029` and `codex/archive-fasttrack-test-20261029`; dirty helper patches and the merge helper were preserved locally before cleanup. The uncommitted working files in `/Users/jaypatel/PM-Tool` were never edited.
 
-## For Jay
+## For Jay — current dispositions
 
-1. FR-BKL-08 names a "Tasks report" that does not exist. Name an existing task report, or drop the words. Recommended: drop them.
-2. AC-VER-09 says "Over", but the app shows its existing label "over capacity". Reword the AC, or change the label. Recommended: reword the AC.
-3. Packet 043 styling drift needs a visual review:
-   - The Vacation coverage table has a grey header, row hover and new padding.
-   - Header padding is `py-2.5`.
-   - Holidays and Reference cells lost `align-top`.
-   - Loading skeletons now show 6 rows.
-4. Changes that apply with flags off:
-   - A threshold or flag change re-evaluates every Active project at once (it used to wait for the nightly run).
-   - A Manual-order export now follows the board order.
-   - With `data_entry_safety` off, leaving a field that shows "Not saved" drops the typed value. There was no retry before this release; the leave prompt comes with the flag.
-   - A retry after your own edit to another field of the same record shows a conflict that names you.
-5. Internal-notes values are hidden in activity history for everyone, members included; the field shows as changed.
-6. Kept as assumptions:
-   - The admin review export uses today's thresholds.
-   - Only the latest review can be exported from the page.
-   - A since-deactivated assignee's pickup offers stay with their team.
-   - The audit-chain "already alerted" marker is not reset after a cleared break.
-7. Activation needs Jay's sudo on homedev. Turning on the verifiable activity log on the review stack is optional and cannot be undone.
+The [local follow-up](2026-10-29-packets-039-051-local-followup.md) reviews all seven original items. The original wording is preserved in the preceding release-record commit `86c00a8c`; the current dispositions are:
 
-Remaining governance/hosted/human gates above are separate from these seven decisions and observations; this session did not decide them for Jay.
+1. **Resolved:** FR-BKL-08 now names the existing Task List export only; no new report.
+2. **Resolved:** AC-VER-09 now uses the app's existing “over capacity” label.
+3. **Agent visual review complete; Jay's acceptance open.** The three retained normal-state screenshots are readable, but header/padding/alignment/loading differences remain. Parity PASS does not prove CSS preservation. No styling changed in this follow-up.
+4. **Reviewed; behavior retained.** Evaluator-relevant settings and `flag.backlog` queue reevaluation of Active projects asynchronously; Manual-order export follows board order. With `data_entry_safety` off, failed text survives blur/retry but may be lost on panel exit/unmount. Stale retries can conflict after the same actor's intervening edit. These replace the overbroad “any flag / at once” and “leaving a field” descriptions.
+5. **Reviewed; display redaction retained.** Internal-note values are hidden in activity for all readers; the field's change remains visible. Stored audit data is not erased.
+6. **Reviewed with one P2 gap.** Admin review exports use current settings for rule text beside recorded counts/notes (audit-fidelity limitation); only the page's latest review has an export button, while the API accepts a recorded ID. Historical pickup rows retain the original assignee's team, but live pickup/manager assignment is blocked after assignee deactivation. **Fix before enabling `task_pickup`.** Audit alerts intentionally retain the already-alerted marker after a cleared break.
+7. **Activation remains separate.** Jay's authorized operator session is required on homedev; optional verifiable-log activation is irreversible. No host actions were taken.
+
+Repository controls/Tier B, 039 S18, 040 S16, hosted/operator/human/pilot evidence, visual acceptance and later flag cleanup remain open. Local review completion does not grant acceptance or feature activation.

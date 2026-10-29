@@ -68,7 +68,7 @@ Where this section adds to §12.5 (tasks), §13.3 (Task List and task panel), §
 
 - **FR-BKL-07.** A Discipline Lead's per-discipline status summary (FR-TEAM-05) MUST add a Backlog count beside open, overdue, blocked and next due. The count opens the project Backlog filtered to that discipline.
 
-- **FR-BKL-08.** The Task List export and the Tasks report MUST add a `backlog` column (Yes or No) so a Backlog filter can be applied outside the Hub. No new report is added.
+- **FR-BKL-08.** The Task List export MUST add a `backlog` column (Yes or No) so a Backlog filter can be applied outside the Hub. No new report is added.
 
 - **FR-BKL-09.** Part B MUST merge dark behind `flag.backlog`. With the flag off, the Backlog view, column, count, quick add, No date view and export column are absent, and every existing count and indicator is unchanged.
 

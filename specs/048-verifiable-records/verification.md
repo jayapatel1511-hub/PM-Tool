@@ -18,7 +18,7 @@ Integrated locally through runtime source `1b649f57f4f6c28abeb36fabdd9607b51ae13
 | AC-VER-06 | PASS (local) | Half-up domain vectors, C=0 API null, Chromium Met 78 of 100 (78%) / Watch |
 | AC-VER-07 | PASS (local) | Required active category and immutable event ID. Real-API browser (2026-10-25 gap run): Record Not Met blocks submit without a category and without a reason (2 blocked, 0 POSTs); list matches active categories; event stores miss_category_id; 'Why commitments were missed' panel shows 'Missing input 1' and 'Met 0 of 1 (0%)' without a reload; after an Admin rename, panel and /reports/commitment-misses read [P#, Civil, Missing design input, 1]; axe clean. `VerifiableWorkflowTests` asserts the report title and the count across a rename. Defects fixed: reliability panel stale until reload; report title showed its raw text key |
 | AC-VER-08 | PASS (local) | Performer cannot confirm; PM confirms; mocked browser confirmation body includes version/requestId |
-| AC-VER-09 | PASS (local) | Real create/confirm preview rolls back, actual confirmation reuses same request. Real-API browser (2026-10-25 gap run): editing a confirmed 32 h person-week to 46 h shows 'After this change: 46 of 40 h, over capacity' (the app's existing load-band label; the AC writes 'Over', so the wording is for Jay to confirm or the AC to be reworded); two preview calls 200; allocation, days, links, activity log, notifications, email and chain head identical before and after; the save then logs and notifies; confirmation-preview reads back 40 h capacity, 46 h planned, over; axe clean on the dialog |
+| AC-VER-09 | PASS (local) | Real create/confirm preview rolls back, actual confirmation reuses same request. Real-API browser (2026-10-25 gap run): editing a confirmed 32 h person-week to 46 h shows 'After this change: 46 of 40 h, over capacity' (the app's existing load-band label; AC wording aligned in the authorized local follow-up on 2026-10-29); two preview calls 200; allocation, days, links, activity log, notifications, email and chain head identical before and after; the save then logs and notifies; confirmation-preview reads back 40 h capacity, 46 h planned, over; axe clean on the dialog |
 | AC-VER-10 | PASS (local) | B1/B2, captured effort, clear preserves history, application/SQL immutability, delta export exercised (`BaselineHistoryTests.cs`); Capture is now attached to the 046 re-baseline command (`src/Hub.Api/Features/Deliverables.cs`) |
 | AC-VER-11 | PASS (local) | Nonstandard issue saves, marks appear, clear removes. Real-API browser (2026-10-25 gap run): Admin sets the letters convention; Rev 1, C, B issued through the UI; Issues tab marks Rev 1 'Non-standard revision: expected A, B, C …', C none, B 'Out of sequence'; register revisionWarning filter and settings list agree; with the convention cleared, status, state, health and attention unchanged; axe clean on settings, detail and register. Defect fixed: the Issues tab showed every issue's mark count on every row; each issue now shows its own marks as text |
 | AC-VER-12 | PASS (local) | Dark endpoint/default metadata/source checks (`VerifiableWorkflowTests.New_workflow_routes_are_dark_by_default`); combined run with flags off passed 1,491 backend tests (integration handoff) |
@@ -75,9 +75,19 @@ Still open: Tier B migration approval, flag flips, hosted checks, human keyboard
 
 - Fixed: `/admin/audit-chains/{id}/verify` is a POST. As a GET it ran on a plain link, outside the Origin check, so a link sent to an Admin could record a false break against a caller-supplied head hash and email every Admin. `AuditChainApiTests` checks that a GET no longer runs a verify and records nothing.
 - Not changed: a break cleared by a later full verify leaves `alerted_broken_seq` set, so a new break at the same entry raises no second alert; alert emails are de-duplicated per entry, so changing it needs more than resetting the marker. Low risk while the flag is off.
-- AC-VER-09: the dialog shows the app's existing band label "over capacity" where the AC writes "Over" (row updated).
+- AC-VER-09: the original review recorded the app's "over capacity" label versus the AC's "Over". The local wording follow-up on 2026-10-29 aligns the AC with the existing label; runtime behavior is unchanged.
 
 
 ### Final local release evidence, 2026-10-29
 
 Final real-browser AC-VER-02/-07/-09/-11 PASS on a fresh synthetic database. The release-style test initialization is isolated from review; optional irreversible log activation on the review stack was not performed. See [the release handoff](../../docs/handoffs/2026-10-29-packets-039-051-release-candidate.md) and its machine-readable evidence. No packet is marked Accepted.
+
+
+### Authorized local wording follow-up, 2026-10-29
+
+Jay selected “Finish local wording and review items.” AC-VER-09 now names the existing “over capacity” label in `spec-parts/27-verifiable-records.md`. Capacity, preview rollback and the application label are unchanged. This resolves the wording mismatch, not hosted or human acceptance. Current review dispositions are in [the local follow-up](../../docs/handoffs/2026-10-29-packets-039-051-local-followup.md).
+
+
+### Authorized local audit-marker review, 2026-10-29
+
+Retain the existing alert marker: a full successful verify clears `FirstBrokenSeq` but preserves `AlertedBrokenSeq`, intentionally deduplicating another notification for the same chain/entry. This does not suppress every later break. No log activation, runtime change or acceptance decision is made in this review. See [the local follow-up](../../docs/handoffs/2026-10-29-packets-039-051-local-followup.md).

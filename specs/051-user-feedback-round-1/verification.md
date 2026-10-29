@@ -209,3 +209,15 @@ Final recovery correction UI check on the release-fixes tree: `npm run build` an
 - Assumption: one global settings event is the retry unit; if multiple active projects fail in one pass, its attempt counter advances once and the event is retried once, preserving existing backoff/dead-letter semantics without multiplying global retries.
 
 Integration proof for the settings retry correction: the new regression was executed against the previous evaluator and failed as expected (attempt count 0 instead of 1). The fixed source was restored, the healthy sibling is now explicitly asserted after the first batch, and the full EvaluationTests class passes 14/14 on the merged tree. This is local disposable-database evidence.
+
+
+### Authorized local wording follow-up, 2026-10-29
+
+Jay selected “Finish local wording and review items.” FR-BKL-08 now requires the Backlog column in the existing Task List export only. The nonexistent “Tasks report” reference is removed from `spec-parts/30-user-feedback-round-1.md`; no report or application behavior is added. This supersedes the earlier unresolved report-name wording notes, while preserving their historical review record. Current review dispositions are in [the local follow-up](../../docs/handoffs/2026-10-29-packets-039-051-local-followup.md).
+
+
+### Authorized local behavior review, 2026-10-29
+
+Current dispositions supersede the broad historical shorthand above. Changed settings in thresholds/health/rules/calendar and `flag.backlog` queue a `SettingsChanged` event for asynchronous reevaluation of Active projects; arbitrary flags do not, and “at once” does not mean synchronous completion. Manual-order export intentionally follows board order with the flag off. Failed text survives ordinary blur and timed retry; closing/leaving its panel or another unmount can lose it while `data_entry_safety` is off, since FR-SAV-08 gates the leave prompt. A version-pinned retry may conflict after the same actor's intervening edit; it must not silently overwrite.
+
+Admin review export stores counts/notes but reconstructs rule text with current settings. This is a disclosed audit-fidelity limitation and future snapshot/label recommendation, not an explicit FR-ADR-06 historical-snapshot requirement. The page exports the latest review; the API accepts a recorded review ID. Runtime behavior, flags, decision status and acceptance are unchanged. Full evidence/dispositions: [local follow-up](../../docs/handoffs/2026-10-29-packets-039-051-local-followup.md).

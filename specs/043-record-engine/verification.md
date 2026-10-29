@@ -232,3 +232,8 @@ The first final comparison against the pre-conversion release-fixes build report
 ### Final local release evidence, 2026-10-29
 
 Final fallback/harness gate PASS: 13/13 results, 12 persona/width pairs across 27 default routes (222 role-appropriate screen comparisons), plus AC-REC-09 off/on. Base `0ea4927`, candidate `e446352` has the same application sources as `2dcdaec4`. Actual browser selfcheck PASS: identical builds at both widths; removed header, untabbed Columns and changed disabled-field title are detected. S01 is checked; KILL and human/hosted gates are unchanged. See [the release handoff](../../docs/handoffs/2026-10-29-packets-039-051-release-candidate.md) and its machine-readable evidence. No packet is marked Accepted.
+
+
+### Authorized local review follow-up, 2026-10-29
+
+Agent visual review is complete using the retained Vacation/Holidays/Clients normal-state screenshots; their application source matches the rehearsed release. The inspected tables are readable, with no observed normal-state clipping. Header tone/padding, cell alignment and loading counts remain real styling differences. Hover/loading and wrapped-cell alignment were not demonstrated by these static captures. The shared loading count is six rows normally and four for `flush` tables, including Holidays; the earlier blanket six-row description is too broad. Parity PASS compares structure/controls/requests/permissions, not CSS; it does not grant FR-REC-14 output-preservation or Jay's visual acceptance. No styling or acceptance status changed. See [the local follow-up](../../docs/handoffs/2026-10-29-packets-039-051-local-followup.md) for evidence, recommendations and remaining boundaries.

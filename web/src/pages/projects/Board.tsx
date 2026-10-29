@@ -16,13 +16,13 @@ import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useProjectRefresh } from '@/hooks/data'
 import { ViewMenu } from '@/components/hub/views'
-import { ApiError, get, patch, qs, typedRequest } from '@/lib/api'
+import { ApiError, typedRequest } from '@/lib/api'
 import { useFlag } from '@/lib/auth'
 import { addDays, shortDate, today } from '@/lib/format'
 import { plural, t, tv , runtimeText } from '@/lib/i18n'
-import type { Page as PageOf } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { useCurrentProject } from './ProjectLayout'
+import { readTask, type TaskDetailData } from './TaskPanel'
 import { CreateTask, TaskFilterBar, ViewSwitch, errorText, moveFrom, useProjectLists, useTaskActions, useTaskFilters, type TaskRow, type Transition } from './Tasks'
 
 // Kanban board (§13.4, FR-VIS-04): four lanes that present canonical statuses; every drop is a guarded transition.
@@ -40,11 +40,12 @@ const SWIMLANES = ['none', 'discipline', 'deliverable', 'assignee']
 
 type Card = { id: string; name: string; column: string; r: TaskRow }
 
-export async function fetchUpTo(path: string, params: Record<string, unknown>, max: number) {
+/** Reads a task list page by page until `max` rows or the end; `read` is the typed call for one page. */
+export async function fetchUpTo(read: (page: number, pageSize: number) => Promise<{ items: TaskRow[]; totalCount: number }>, max: number) {
   const items: TaskRow[] = []
   let total = 0
   for (let page = 1; ; page++) {
-    const r = await get<PageOf<TaskRow>>(`${path}${qs({ ...params, page, pageSize: 200 })}`)
+    const r = await read(page, 200)
     items.push(...r.items)
     total = r.totalCount
     if (r.items.length === 0 || items.length >= Math.min(total, max)) break
@@ -62,7 +63,7 @@ export function BoardTab() {
   const swim = sp.get('swim') ?? 'none'
   const sort = sp.get('sort') === 'priority' ? 'priority' : sp.get('sort') === 'board' ? 'board' : 'dueDate'
   const params = { ...filters, sort, includeCancelled: side, doneSince: addDays(today(), -14) }
-  const q = useQuery({ queryKey: ['p', p.id, 'board', params], queryFn: () => fetchUpTo(`projects/${p.id}/tasks`, params, MAX_CARDS) })
+  const q = useQuery({ queryKey: ['p', p.id, 'board', params], queryFn: () => fetchUpTo((page, pageSize) => typedRequest('get', '/api/v1/projects/{id}/tasks', { params: { id: p.id }, query: { ...params, page, pageSize } }), MAX_CARDS) })
   const reload = () => { q.refetch(); refresh(p.id) }
   const actions = useTaskActions(reload)
   const { onDrop, dialog } = useLaneDrop(actions)
@@ -159,13 +160,13 @@ function ScheduleDialog({ r, lane, onClose }: { r: TaskRow; lane: string; onClos
   const [due, setDue] = useState('')
   const [asked, setAsked] = useState(false)
   const saved = useRef(false)
-  const detail = useQuery({ queryKey: ['task', r.id, 'schedule'], queryFn: () => get<{ permissions: { dueNeedsReason: boolean } }>(`tasks/${r.id}`) })
+  const detail = useQuery({ queryKey: ['task', r.id, 'schedule'], queryFn: () => readTask(r.id) })
   const reason = asked || detail.data?.permissions.dueNeedsReason === true // T-16: asked for up front, not after a refusal
   return (
     <ConfirmDialog open title={t('backlog.scheduleTitle', { key: r.key, name: r.name })} body={t('backlog.scheduleBody', { lane: runtimeText(`lane.${lane}`) })}
       confirmLabel={t('backlog.schedule')} busy={!due} reason={reason || undefined} onOpenChange={(o) => !o && onClose(saved.current)}
       onConfirm={async (why) => {
-        try { await patch<{ rowVersion: number }>(`tasks/${r.id}`, { dueDate: due, reason: why || undefined }, r.rowVersion); saved.current = true }
+        try { await typedRequest('patch', '/api/v1/tasks/{id}', { params: { id: r.id }, body: { dueDate: due, reason: why || undefined }, ifMatch: r.rowVersion }); saved.current = true }
         catch (e) { if (e instanceof ApiError && e.fieldErrors?.reason) setAsked(true); throw e }
       }}>
       <Field label={t('field.DueDate')} htmlFor="schedule-due"><Input id="schedule-due" type="date" autoFocus value={due} onChange={(e) => setDue(e.target.value)} /></Field>
@@ -191,11 +192,11 @@ function BoardSkeleton({ lanes }: { lanes: number }) {
  *  back, several possible statuses ask which one, and review guards and reason dialogs still apply. Board drops and My
  *  Work's completion checkbox both use it, so neither can skip a review. */
 export function useLaneDrop(actions: ReturnType<typeof useTaskActions>) {
-  const [choose, setChoose] = useState<{ detail: any; options: Transition[] } | null>(null)
+  const [choose, setChoose] = useState<{ detail: TaskDetailData; options: Transition[] } | null>(null)
   const onDrop = async (r: TaskRow, lane: string, snapBack: () => void) => {
     try {
-      const detail = await get(`tasks/${r.id}`)
-      const options = (detail.permissions.transitions as Transition[]).filter((x) => (TARGETS[lane] ?? []).includes(x.to))
+      const detail = await readTask(r.id)
+      const options = detail.permissions.transitions.filter((x) => (TARGETS[lane] ?? []).includes(x.to))
       const allowed = options.filter((x) => x.allowed)
       if (allowed.length === 0) {
         snapBack()
@@ -303,7 +304,7 @@ export function CardBody({ r, open, openDeliverable, showProject }: { r: TaskRow
       {(chips.length > 0 || r.deliverableId) && (
         <div className="flex flex-wrap items-center gap-1">
           {chips}
-          {r.deliverableId && <button type="button" className="key rounded-md border bg-muted px-1.5 py-px hover:bg-accent" title={r.deliverableName} onClick={() => openDeliverable(r.deliverableId!)}>{r.deliverableKey}</button>}
+          {r.deliverableId && <button type="button" className="key rounded-md border bg-muted px-1.5 py-px hover:bg-accent" title={r.deliverableName ?? undefined} onClick={() => openDeliverable(r.deliverableId!)}>{r.deliverableKey}</button>}
         </div>
       )}
       <div className="flex items-center gap-2 border-t pt-2 text-xs/[18px] text-muted-foreground">

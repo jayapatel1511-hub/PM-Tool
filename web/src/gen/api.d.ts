@@ -4201,7 +4201,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfGuidAndstringAndstring"][];
+                        "application/json": components["schemas"]["ItemWatcherRow"][];
                     };
                 };
             };
@@ -4223,8 +4223,8 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -4261,8 +4261,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -9378,7 +9378,51 @@ export interface paths {
         };
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    status?: string | string[];
+                    priority?: string | string[];
+                    indicator?: string | string[];
+                    assigneeId?: string | string[];
+                    reviewerId?: string | string[];
+                    disciplineId?: string | string[];
+                    deliverableId?: string | string[];
+                    milestoneId?: string | string[];
+                    projectId?: string | string[];
+                    createdBy?: string | string[];
+                    ids?: string | string[];
+                    dueFrom?: string;
+                    dueTo?: string;
+                    startFrom?: string;
+                    startTo?: string;
+                    completedFrom?: string;
+                    completedTo?: string;
+                    doneSince?: string;
+                    workspaceId?: string;
+                    q?: string;
+                    sort?: string;
+                    requiresReview?: boolean | string;
+                    hasDependencies?: boolean | string;
+                    mine?: boolean | string;
+                    includeCancelled?: boolean | string;
+                    onHold?: boolean | string;
+                    noDeliverable?: boolean | string;
+                    overdue?: boolean | string;
+                    blocked?: boolean | string;
+                    blocking?: boolean | string;
+                    waiting?: boolean | string;
+                    unassigned?: boolean | string;
+                    stale?: boolean | string;
+                    dueThisWeek?: boolean | string;
+                    readyForReview?: boolean | string;
+                    dateInconsistent?: boolean | string;
+                    noDueDate?: boolean | string;
+                    dueSoon?: boolean | string;
+                    heldPastDue?: boolean | string;
+                    open?: boolean | string;
+                    backlog?: boolean | string;
+                    page?: number | string;
+                    pageSize?: number | string;
+                };
                 header?: never;
                 path: {
                     id: string;
@@ -9414,12 +9458,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["TaskCreated"];
+                    };
                 };
             };
         };
@@ -9459,7 +9505,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["TaskBulkResult"];
                     };
                 };
             };
@@ -14094,6 +14140,49 @@ export interface paths {
             parameters: {
                 query?: {
                     projects?: string;
+                    status?: string | string[];
+                    priority?: string | string[];
+                    indicator?: string | string[];
+                    assigneeId?: string | string[];
+                    reviewerId?: string | string[];
+                    disciplineId?: string | string[];
+                    deliverableId?: string | string[];
+                    milestoneId?: string | string[];
+                    projectId?: string | string[];
+                    createdBy?: string | string[];
+                    ids?: string | string[];
+                    dueFrom?: string;
+                    dueTo?: string;
+                    startFrom?: string;
+                    startTo?: string;
+                    completedFrom?: string;
+                    completedTo?: string;
+                    doneSince?: string;
+                    workspaceId?: string;
+                    q?: string;
+                    sort?: string;
+                    requiresReview?: boolean | string;
+                    hasDependencies?: boolean | string;
+                    mine?: boolean | string;
+                    includeCancelled?: boolean | string;
+                    onHold?: boolean | string;
+                    noDeliverable?: boolean | string;
+                    overdue?: boolean | string;
+                    blocked?: boolean | string;
+                    blocking?: boolean | string;
+                    waiting?: boolean | string;
+                    unassigned?: boolean | string;
+                    stale?: boolean | string;
+                    dueThisWeek?: boolean | string;
+                    readyForReview?: boolean | string;
+                    dateInconsistent?: boolean | string;
+                    noDueDate?: boolean | string;
+                    dueSoon?: boolean | string;
+                    heldPastDue?: boolean | string;
+                    open?: boolean | string;
+                    backlog?: boolean | string;
+                    page?: number | string;
+                    pageSize?: number | string;
                 };
                 header?: never;
                 path?: never;
@@ -14167,7 +14256,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["TaskDeleted"];
+                    };
                 };
             };
         };
@@ -14193,7 +14284,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["TaskEdited"];
+                    };
                 };
             };
         };
@@ -14228,7 +14321,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["TaskVersion"];
+                    };
                 };
             };
         };
@@ -14301,8 +14396,8 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -14338,8 +14433,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -14376,7 +14471,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["TaskDeletePreview"];
                     };
                 };
             };
@@ -14679,7 +14774,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["TaskVersion"];
+                    };
                 };
             };
         };
@@ -14796,7 +14893,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["TaskTransitioned"];
+                    };
                 };
             };
         };
@@ -14831,7 +14930,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["TaskVersion"];
+                    };
                 };
             };
         };
@@ -16459,12 +16560,6 @@ export interface components {
             projectName: null | string;
             projectNumber: null | string;
             unread: boolean;
-        };
-        AnonymousTypeOfGuidAndstringAndstring: {
-            displayName: null | string;
-            source: null | string;
-            /** Format: uuid */
-            userId: string;
         };
         AnonymousTypeOfGuidAndstringAndstringAndstringAndDateTimeOffsetAndint: {
             /** Format: date-time */
@@ -19847,6 +19942,12 @@ export interface components {
             id: string;
             kind: string;
         };
+        ItemWatcherRow: {
+            displayName: string;
+            source: string;
+            /** Format: uuid */
+            userId: string;
+        };
         JsonArray: unknown[];
         JsonElement: unknown;
         LayoutAnswer: {
@@ -23041,6 +23142,18 @@ export interface components {
             reason: null | string;
             taskIds: string[];
         };
+        TaskBulkResult: {
+            skipped: components["schemas"]["TaskBulkSkipped"][];
+            /** Format: int32 */
+            updated: number;
+            warnings: string[];
+        };
+        TaskBulkSkipped: {
+            /** Format: uuid */
+            id: string;
+            key: string;
+            reason: string;
+        };
         TaskChain: {
             /** Format: int32 */
             depth: number;
@@ -23070,6 +23183,37 @@ export interface components {
             reviewerId: null | string;
             /** Format: date */
             startDate: null | string;
+        };
+        TaskCreated: {
+            /** Format: uuid */
+            id: string;
+            key: string;
+            /** Format: int32 */
+            rowVersion: number;
+            warnings: string[];
+        };
+        TaskDeleteLink: {
+            /** Format: uuid */
+            assigneeId: null | string;
+            direction: string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            /** Format: uuid */
+            predecessorTaskId: string;
+            /** Format: uuid */
+            successorTaskId: string;
+        };
+        TaskDeletePreview: {
+            canCancel: boolean;
+            canDelete: boolean;
+            dependencies: components["schemas"]["TaskDeleteLink"][];
+            suggestCancel: boolean;
+        };
+        TaskDeleted: {
+            /** Format: int32 */
+            removedDependencies: number;
         };
         TaskDependencyEdge: {
             /** Format: uuid */
@@ -23149,6 +23293,15 @@ export interface components {
             id: string;
             source: string;
         };
+        TaskEdited: {
+            /** Format: int32 */
+            dueDateChangeCount: number;
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
+            warnings: string[];
+        };
         TaskHours: {
             /** Format: double */
             hours: number;
@@ -23204,101 +23357,7 @@ export interface components {
             /** Format: uuid */
             taskId: string;
         };
-        TaskQueriesRow: components["schemas"]["TaskQueriesRowActivityRow"] | components["schemas"]["TaskQueriesRowBase"];
-        TaskQueriesRowActivityRow: {
-            assigneeActive?: boolean;
-            /** Format: uuid */
-            assigneeId?: null | string;
-            assigneeName?: null | string;
-            backlog?: null | boolean;
-            can?: null | components["schemas"]["Can"];
-            collaboratorIds?: string[];
-            /** Format: int32 */
-            commentCount?: number;
-            /** Format: date-time */
-            completedAt?: null | string;
-            /** Format: date-time */
-            createdAt?: string;
-            /** Format: uuid */
-            createdBy?: null | string;
-            createdByName?: null | string;
-            /** Format: date */
-            deliverableDueDate?: null | string;
-            /** Format: uuid */
-            deliverableId?: null | string;
-            deliverableKey?: null | string;
-            deliverableName?: null | string;
-            /** Format: int32 */
-            deliverableOrder?: null | number;
-            deliverableStatus?: null | string;
-            disciplineCode?: string;
-            disciplineColour?: null | string;
-            disciplineName?: string;
-            /** Format: int32 */
-            disciplineOrder?: number;
-            /** Format: date */
-            dueDate?: null | string;
-            /** Format: int32 */
-            dueDateChangeCount?: number;
-            /** Format: uuid */
-            effectiveMilestoneId?: null | string;
-            /** Format: double */
-            estimatedHours?: null | number;
-            /** Format: uuid */
-            id?: string;
-            key?: string;
-            lane?: string;
-            lastActivityActorName?: null | string;
-            /** Format: date-time */
-            lastActivityAt?: string;
-            manualBlockReason?: null | string;
-            /** Format: date-time */
-            manualBlockSetAt?: null | string;
-            manualBlockType?: null | string;
-            /** Format: date */
-            milestoneDate?: null | string;
-            milestoneDerived?: boolean;
-            /** Format: uuid */
-            milestoneId?: null | string;
-            milestoneKey?: null | string;
-            milestoneName?: null | string;
-            name?: string;
-            /** Format: date */
-            originalDueDate?: null | string;
-            /** Format: date */
-            originalStartDate?: null | string;
-            pickupOfferOpen?: null | boolean;
-            /** Format: int32 */
-            predecessorCount?: number;
-            priority?: string;
-            /** Format: int32 */
-            progressPct?: number;
-            /** Format: uuid */
-            projectDisciplineId?: string;
-            /** Format: uuid */
-            projectId?: string;
-            projectName?: string;
-            projectNumber?: string;
-            projectStatus?: string;
-            requiresReview?: boolean;
-            /** Format: int32 */
-            reviewRound?: number;
-            /** Format: uuid */
-            reviewerId?: null | string;
-            reviewerName?: null | string;
-            /** Format: int32 */
-            rowVersion?: number;
-            /** Format: int32 */
-            sortOrder?: number;
-            /** Format: date */
-            startDate?: null | string;
-            state?: null | components["schemas"]["State"];
-            status?: string;
-            /** Format: date-time */
-            statusChangedAt?: null | string;
-            /** Format: int32 */
-            successorCount?: number;
-        };
+        TaskQueriesRow: components["schemas"]["TaskQueriesRowBase"];
         TaskQueriesRowBase: {
             assigneeActive: boolean;
             /** Format: uuid */
@@ -23308,7 +23367,7 @@ export interface components {
             can: null | components["schemas"]["Can"];
             collaboratorIds: string[];
             /** Format: int32 */
-            commentCount: number | string;
+            commentCount: number;
             /** Format: date-time */
             completedAt: null | string;
             /** Format: date-time */
@@ -23323,21 +23382,21 @@ export interface components {
             deliverableKey: null | string;
             deliverableName: null | string;
             /** Format: int32 */
-            deliverableOrder: null | number | string;
+            deliverableOrder: null | number;
             deliverableStatus: null | string;
             disciplineCode: string;
             disciplineColour: null | string;
             disciplineName: string;
             /** Format: int32 */
-            disciplineOrder: number | string;
+            disciplineOrder: number;
             /** Format: date */
             dueDate: null | string;
             /** Format: int32 */
-            dueDateChangeCount: number | string;
+            dueDateChangeCount: number;
             /** Format: uuid */
             effectiveMilestoneId: null | string;
             /** Format: double */
-            estimatedHours: null | number | string;
+            estimatedHours: null | number;
             /** Format: uuid */
             id: string;
             key: string;
@@ -23363,10 +23422,10 @@ export interface components {
             originalStartDate: null | string;
             pickupOfferOpen?: null | boolean;
             /** Format: int32 */
-            predecessorCount: number | string;
+            predecessorCount: number;
             priority: string;
             /** Format: int32 */
-            progressPct: number | string;
+            progressPct: number;
             /** Format: uuid */
             projectDisciplineId: string;
             /** Format: uuid */
@@ -23376,14 +23435,14 @@ export interface components {
             projectStatus: string;
             requiresReview: boolean;
             /** Format: int32 */
-            reviewRound: number | string;
+            reviewRound: number;
             /** Format: uuid */
             reviewerId: null | string;
             reviewerName: null | string;
             /** Format: int32 */
-            rowVersion: number | string;
+            rowVersion: number;
             /** Format: int32 */
-            sortOrder: number | string;
+            sortOrder: number;
             /** Format: date */
             startDate: null | string;
             state: null | components["schemas"]["State"];
@@ -23391,7 +23450,7 @@ export interface components {
             /** Format: date-time */
             statusChangedAt: null | string;
             /** Format: int32 */
-            successorCount: number | string;
+            successorCount: number;
         };
         TaskRelatedDeliverable: {
             /** Format: uuid */
@@ -23424,6 +23483,24 @@ export interface components {
             /** Format: int32 */
             rowVersion: null | number;
             toStatus: string;
+        };
+        TaskTransitioned: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            progressPct: number;
+            /** Format: int32 */
+            reviewRound: number;
+            /** Format: int32 */
+            rowVersion: number;
+            status: string;
+            warnings: string[];
+        };
+        TaskVersion: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
         };
         TeamPersonRow: {
             displayName: string;

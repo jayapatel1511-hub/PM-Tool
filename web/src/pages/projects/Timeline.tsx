@@ -15,7 +15,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useProjectRefresh } from '@/hooks/data'
-import { get, patch, typedRequest } from '@/lib/api'
+import { get, typedRequest } from '@/lib/api'
 import { addDays, daysBetween, fmtDate, monthLabel, shortDate, today } from '@/lib/format'
 import { plural, t, tv , runtimeText } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
@@ -486,7 +486,7 @@ export function MoveDialog({ move, projectComplete, onClose }: { move: Move; pro
       onConfirm={async (why) => {
         const body: Record<string, unknown> = { dueDate: newDue, reason: why || undefined }
         if (newStart) body.startDate = newStart
-        if (move.kind === 'task') await patch(`tasks/${move.id}`, body, move.rowVersion)
+        if (move.kind === 'task') await typedRequest('patch', '/api/v1/tasks/{id}', { params: { id: move.id }, body, ifMatch: move.rowVersion })
         else await typedRequest('patch', '/api/v1/deliverables/{id}', { params: { id: move.id }, body, ifMatch: move.rowVersion })
         toast.success(t('timeline.moved', { key: move.key }))
         onClose(true)

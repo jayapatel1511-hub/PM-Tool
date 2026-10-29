@@ -22,37 +22,28 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useProject, useProjectRefresh } from '@/hooks/data'
 import type { components } from '@/gen/api'
-import { ApiError, del, get, post, typedRequest } from '@/lib/api'
+import { ApiError, typedRequest } from '@/lib/api'
 import { invalidateChange } from '@/lib/keys'
 import { useFlag, useMe } from '@/lib/auth'
 import { fmtDate, fmtTime, today } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { CommentsSlot, ItemSlots, LinksSlot, RaiseSlot } from './slots-items'
-import { PRIORITIES, TaskIndicators, errorText, moveFrom, readableDisabled, useProjectLists, useTaskActions, type Blocker, type TaskRow, type Transition } from './Tasks'
+import { PRIORITIES, TaskIndicators, blockersOf, errorText, moveFrom, readableDisabled, useProjectLists, useTaskActions, type Blocker, type TaskRow } from './Tasks'
 
 /** Sections added to the task panel by later packets (actual hours and Add Time, packet 024). */
 export const TASK_SECTIONS: { id: string; render: (d: TaskDetailData, reload: () => void) => ReactNode }[] = []
 
-export interface TaskDetailData {
-  relatedDeliverables?: {id:string;key:string;name:string}[];
-  task: TaskRow; description?: string; onHoldReason?: string; cancelledReason?: string; previousStatus?: string; reviewRequestedAt?: string
-  project: { id: string; projectNumber: string; name: string; status: string }
-  collaborators: { id: string; displayName: string; isActive: boolean }[]; watchers: { id: string; displayName: string; source: string }[]
-  permissions: {
-    edit: P; assign: P; setReviewer: P; dueDate: P; dueNeedsReason: boolean; block: P; delete: P; restore: boolean; comment: boolean
-    transitions: Transition[]; completeHint?: string; isReviewer: boolean; dependencies: boolean; enterTime: boolean; needsReason: boolean; allowSelfReview: boolean
-    authoriseStart?: boolean; offerPickup?: boolean
-  }
-}
-interface P { ok: boolean; reason?: string | null }
+export type TaskDetailData = components['schemas']['TaskDetailResponse']
+/** GET /tasks/{id}: the row, the people and every permission the panel and the status menu read. */
+export const readTask = (id: string) => typedRequest('get', '/api/v1/tasks/{id}', { params: { id } })
 
 const BLOCK_TYPES = ['Client', 'External Party', 'Internal', 'Decision', 'Information', 'Other']
 
 /** Task detail (§13.3.1): header, blockers, fields grouped by purpose (people, details, dates, progress and hours), description,
  *  dependencies, manual block, links, comments and history. Every field saves on its own and says so (design §8). */
 export function TaskDetail({ id, onClose, heading: Heading = 'h2' }: { id: string; onClose?: () => void; heading?: 'h1' | 'h2' }) {
-  const q = useQuery({ queryKey: ['task', id], queryFn: () => get<TaskDetailData>(`tasks/${id}`) })
+  const q = useQuery({ queryKey: ['task', id], queryFn: () => readTask(id) })
   const pickupEnabled = useFlag('task_pickup')
   const pickup = useQuery({ queryKey: ['pickup-offers', id], enabled: pickupEnabled, queryFn: () => typedRequest('get', '/api/v1/tasks/{id}/pickup-offer', { params: { id } }) })
   const qc = useQueryClient()
@@ -70,7 +61,7 @@ export function TaskDetail({ id, onClose, heading: Heading = 'h2' }: { id: strin
   const [keepWatching, setKeepWatching] = useState(true)
   const [assignTo, setAssignTo] = useState('')
   const [pickupHours, setPickupHours] = useState(''), [pickupNeededBy, setPickupNeededBy] = useState(''), [pickupNote, setPickupNote] = useState('')
-  const reload = () => { qc.invalidateQueries({ queryKey: ['task', id] }); refresh(q.data?.project.id) }
+  const reload = () => refresh(q.data?.project.id) // the project refresh reaches ['task', id] through keys.ts
   const small = useFlag('small_ux')
   const [creatingDeliverable, setCreatingDeliverable] = useState(false)
   const actions = useTaskActions(reload)
@@ -152,7 +143,7 @@ export function TaskDetail({ id, onClose, heading: Heading = 'h2' }: { id: strin
           <p className={cn('font-semibold', s.isBlocked ? 'text-bad' : 'text-warn')}>
             <span aria-hidden>{s.isBlocked ? '■ ' : '▲ '}</span>{s.isBlocked ? (s.daysBlocked > 0 ? t('task.blockedFor', { n: s.daysBlocked }) : t('task.blockedToday')) : t('task.waitingOn')}
           </p>
-          <ul className="space-y-1.5">{(s.blockedBy ?? []).map((b, i) => <BlockerLine key={i} b={b} open={openPanel} />)}</ul>
+          <ul className="space-y-1.5">{blockersOf(s).map((b, i) => <BlockerLine key={i} b={b} open={openPanel} />)}</ul>
           {r.status === 'Not Started' && <p className="text-xs/[18px] text-muted-foreground">{t('task.startAnyway')}</p>}
           {s.affectedMilestoneIds.length > 0 && (
             <p className="text-xs/[18px]">{t('task.affects')} {s.affectedMilestoneIds.map((mid) => milestoneName(mid)).filter(Boolean).map((m) => `${m!.key} ${m!.name} (${fmtDate(m!.date)})`).join(', ')}</p>
@@ -223,13 +214,13 @@ export function TaskDetail({ id, onClose, heading: Heading = 'h2' }: { id: strin
             <Chip tone="bad">{tv(r.manualBlockType)}</Chip>
             <span className="min-w-0 flex-1 break-words">{r.manualBlockReason}</span>
             <span className="text-xs/[18px] text-muted-foreground tabular-nums">{t('task.blockSince', { when: fmtTime(r.manualBlockSetAt) })}</span>
-            {perms.block.ok && <Button size="sm" variant="outline" onClick={() => run(() => post(`tasks/${r.id}/unblock`, {}, r.rowVersion))}>{t('task.clearBlock')}</Button>}
+            {perms.block.ok && <Button size="sm" variant="outline" onClick={() => run(() => typedRequest('post', '/api/v1/tasks/{id}/unblock', { params: { id: r.id }, body: {}, ifMatch: r.rowVersion }))}>{t('task.clearBlock')}</Button>}
           </div>
         ) : perms.block.ok ? <Button size="sm" variant="outline" onClick={() => setBlocking(true)}><Ban className="size-4" aria-hidden />{t('task.setBlock')}</Button>
           : <p className="text-sm text-muted-foreground">{t('common.none')}</p>}
       </FieldGroup>
 
-      {ItemSlots.Links && <FieldGroup title={t('common.links')}><LinksSlot type="Task" id={r.id} projectId={r.projectId} inheritedFrom={r.deliverableId} /></FieldGroup>}
+      {ItemSlots.Links && <FieldGroup title={t('common.links')}><LinksSlot type="Task" id={r.id} projectId={r.projectId} inheritedFrom={r.deliverableId ?? undefined} /></FieldGroup>}
 
       <div className="border-t">
         <TabBar tabs={[...(ItemSlots.Comments ? [{ id: 'comments', label: t('common.comments'), count: r.commentCount }] : []), { id: 'history', label: t('common.history') }]} value={tab} onChange={setTab} />
@@ -244,7 +235,7 @@ export function TaskDetail({ id, onClose, heading: Heading = 'h2' }: { id: strin
       )}
       {blocking && <BlockDialog r={r} onClose={(ok) => { setBlocking(false); if (ok) reload() }} />}
       {deleting && <DeleteDialog d={d} onMove={(m) => { setDeleting(false); actions.move(m) }} onClose={(gone) => { setDeleting(false); if (gone) { refresh(r.projectId); onClose?.() } }} />}
-      {creatingDeliverable && project.data && <CreateDeliverable p={project.data} milestones={lists.milestones} fromTask={r} onClose={()=>{setCreatingDeliverable(false);reload()}} />}
+      {creatingDeliverable && project.data && <CreateDeliverable p={project.data} milestones={lists.milestones} fromTask={{ ...r, milestoneId: r.milestoneId ?? undefined, startDate: r.startDate ?? undefined, dueDate: r.dueDate ?? undefined }} onClose={()=>{setCreatingDeliverable(false);reload()}} />}
       {actions.dialogs}
     </div></PickerProject.Provider>
   )
@@ -443,16 +434,16 @@ function People({ d, me, canManage, onChanged, onError }: { d: TaskDetailData; m
         <div className="flex min-h-(--control-row-h) flex-wrap items-center gap-1.5 px-2 py-1">
           {d.collaborators.length === 0 && <span className="text-muted-foreground">{t('common.none')}</span>}
           {d.collaborators.map((c) => chip(c.id, c.isActive ? c.displayName : t('common.inactiveSuffix', { name: c.displayName }), c.displayName,
-            canCollab || c.id === me ? () => run(() => del(`tasks/${r.id}/collaborators/${c.id}`)) : undefined))}
+            canCollab || c.id === me ? () => run(() => typedRequest('delete', '/api/v1/tasks/{id}/collaborators/{userId}', { params: { id: r.id, userId: c.id } })) : undefined))}
           {canCollab && <div className="w-48"><PeoplePicker compact value={null} placeholder={t('task.addCollaborator')} label={t('task.addCollaborator')}
-            exclude={[...d.collaborators.map((c) => c.id), ...(r.assigneeId ? [r.assigneeId] : [])]} onChange={(id) => id && run(() => post(`tasks/${r.id}/collaborators`, { userId: id }))} /></div>}
+            exclude={[...d.collaborators.map((c) => c.id), ...(r.assigneeId ? [r.assigneeId] : [])]} onChange={(id) => id && run(() => typedRequest('post', '/api/v1/tasks/{id}/collaborators', { params: { id: r.id }, body: { userId: id } }))} /></div>}
         </div>
         <p className="px-2 text-xs/[18px] text-muted-foreground">{t('task.collaboratorHint')}</p>
       </FieldRow>
       <FieldRow label={t('task.watchers')}>
         <div className="flex min-h-(--control-row-h) flex-wrap items-center gap-1.5 px-2 py-1">
           {d.watchers.length === 0 ? <span className="text-muted-foreground">{t('common.none')}</span> : d.watchers.map((w) => chip(w.id, w.displayName, w.displayName))}
-          <Button size="sm" variant="ghost" onClick={() => run(() => watching ? del(`items/Task/${r.id}/watchers/${me}`) : post(`items/Task/${r.id}/watchers`, { userId: me }))}>
+          <Button size="sm" variant="ghost" onClick={() => run(() => watching ? typedRequest('delete', '/api/v1/items/{type}/{id}/watchers/{userId}', { params: { type: 'Task', id: r.id, userId: me } }) : typedRequest('post', '/api/v1/items/{type}/{id}/watchers', { params: { type: 'Task', id: r.id }, body: { userId: me } }))}>
             {watching ? <><EyeOff className="size-4" aria-hidden />{t('task.unwatch')}</> : <><Eye className="size-4" aria-hidden />{t('task.watch')}</>}
           </Button>
         </div>
@@ -466,7 +457,7 @@ export function BlockDialog({ r, onClose }: { r: TaskRow; onClose: (ok: boolean)
   const [reason, setReason] = useState('')
   return (
     <ConfirmDialog open onOpenChange={(o) => !o && onClose(false)} title={t('task.setBlockTitle', { key: r.key })} body={t('task.setBlockBody')} busy={!reason.trim()} confirmLabel={t('task.setBlock')}
-      onConfirm={async () => { await post(`tasks/${r.id}/block`, { type, reason, rowVersion: r.rowVersion }); onClose(true) }}>
+      onConfirm={async () => { await typedRequest('post', '/api/v1/tasks/{id}/block', { params: { id: r.id }, body: { type, reason, rowVersion: r.rowVersion } }); onClose(true) }}>
       <Field label={t('common.type')} htmlFor="blk-type"><select id="blk-type" className={selectCls} value={type} onChange={(e) => setType(e.target.value)}>{BLOCK_TYPES.map((x) => <option key={x} value={x}>{tv(x)}</option>)}</select></Field>
       <Field label={t('common.reason')} htmlFor="blk-reason"><Textarea id="blk-reason" rows={3} value={reason} onChange={(e) => setReason(e.target.value)} /></Field>
     </ConfirmDialog>
@@ -476,7 +467,7 @@ export function BlockDialog({ r, onClose }: { r: TaskRow; onClose: (ok: boolean)
 /** Delete with the dependency list and a Cancel-first suggestion once work exists (FR-016, D-09, T-09). */
 function DeleteDialog({ d, onMove, onClose }: { d: TaskDetailData; onMove: (m: ReturnType<typeof moveFrom>) => void; onClose: (gone: boolean) => void }) {
   const r = d.task
-  const q = useQuery({ queryKey: ['task', r.id, 'delete-preview'], queryFn: () => get<{ dependencies: { id: string; key: string; name: string; direction: string }[]; suggestCancel: boolean; canDelete: boolean; canCancel: boolean }>(`tasks/${r.id}/delete-preview`) })
+  const q = useQuery({ queryKey: ['task', r.id, 'delete-preview'], queryFn: () => typedRequest('get', '/api/v1/tasks/{id}/delete-preview', { params: { id: r.id } }) })
   const cancel = d.permissions.transitions.find((x) => x.to === 'Cancelled' && x.allowed)
   return (
     <ConfirmDialog open destructive onOpenChange={(o) => !o && onClose(false)} title={t('task.deleteTitle', { key: r.key, name: r.name })} confirmLabel={t('common.delete')} busy={!q.data?.canDelete}
@@ -489,9 +480,9 @@ function DeleteDialog({ d, onMove, onClose }: { d: TaskDetailData; onMove: (m: R
         {q.data.suggestCancel && <p className="font-medium">{t('task.suggestCancel')}</p>}
       </>}
       onConfirm={async () => {
-        await del(`tasks/${r.id}`)
+        await typedRequest('delete', '/api/v1/tasks/{id}', { params: { id: r.id } })
         toast.success(t('task.deleted', { key: r.key }), d.permissions.restore
-          ? { action: { label: t('task.undo'), onClick: () => { post(`tasks/${r.id}/restore`).then(() => toast.success(t('task.restored', { key: r.key }))).catch((e) => toast.error(errorText(e))) } }, duration: 10000 }
+          ? { action: { label: t('task.undo'), onClick: () => { typedRequest('post', '/api/v1/tasks/{id}/restore', { params: { id: r.id }, body: {} }).then(() => toast.success(t('task.restored', { key: r.key }))).catch((e) => toast.error(errorText(e))) } }, duration: 10000 }
           : undefined)
         onClose(true)
       }}>

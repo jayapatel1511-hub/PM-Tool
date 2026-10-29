@@ -20,13 +20,13 @@ import { useFlag } from '@/lib/auth'
 import { ApiError, download, get, qs, typedRequest } from '@/lib/api'
 import { addDays, fmtDate, fmtTime, today } from '@/lib/format'
 import { plural, t, tv , runtimeText } from '@/lib/i18n'
-import type { Page as PageOf, ProjectDetail } from '@/lib/types'
+import type { ProjectDetail } from '@/lib/types'
 import type { components } from '@/gen/api'
 import { cn } from '@/lib/utils'
 import { invalidateChange } from '@/lib/keys'
 import type { MilestoneRow } from './Milestones'
 import { CommentsSlot, ItemSlots } from './slots-items'
-import { errorText, type TaskRow } from './Tasks'
+import { errorText } from './Tasks'
 import { useCurrentProject } from './ProjectLayout'
 import { ExportMenu } from '@/components/hub/export'
 import { useTable } from '@/components/hub/table'
@@ -421,7 +421,7 @@ export function ItemPicker({ projectId, exclude, onPick, selected, onPickAll }: 
   projectId: string; exclude: string[]; onPick: (x: Pick) => void; selected?: string[]; onPickAll?: (xs: Pick[]) => void
 }) {
   const [term, setTerm] = useState('')
-  const tasks = useQuery({ queryKey: ['p', projectId, 'tasks-pick', term], queryFn: () => get<PageOf<TaskRow>>(`projects/${projectId}/tasks${qs({ q: term, open: true, pageSize: 50 })}`) })
+  const tasks = useQuery({ queryKey: ['p', projectId, 'tasks-pick', term], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/tasks', { params: { id: projectId }, query: { q: term, open: true, pageSize: 50 } }) })
   const dels = useQuery({ queryKey: ['p', projectId, 'deliverables', {}], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/deliverables', { params: { id: projectId } }) })
   const ms = useQuery({ queryKey: ['p', projectId, 'milestones', false, ''], queryFn: () => get<MilestoneRow[]>(`projects/${projectId}/milestones`) })
   const match = (x: { key: string; name: string }) => !term || `${x.key} ${x.name}`.toLowerCase().includes(term.toLowerCase())

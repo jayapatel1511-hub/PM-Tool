@@ -2,7 +2,9 @@ using System.Text.Json;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.OpenApi;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi;
 
 namespace Hub.Api.Features;
 
@@ -20,6 +22,27 @@ public sealed class TaskFilter
     public string? Q, Sort;
     public int Page = 1, PageSize = 200;
 
+    /// The indicator keys a link may send as `key=true` (§13.1); `indicator=` takes the same keys as a list.
+    public static readonly string[] IndicatorFlags = ["overdue", "blocked", "blocking", "waiting", "unassigned", "stale", "dueThisWeek", "readyForReview", "dateInconsistent", "noDueDate", "dueSoon", "heldPastDue", "open", "backlog"];
+
+    /// Names the query keys `From` reads on the two task list routes, which bind them by hand, so the contract and its typed client name them (040-S15-Tasks).
+    /// Every value is query text: a list is comma-separated (or a list the client joins), a flag or a number may be sent as text; nothing here changes how they bind.
+    public static Task Describe(OpenApiOperation operation, OpenApiOperationTransformerContext context, CancellationToken cancellationToken)
+    {
+        operation.Parameters ??= [];
+        void Add(string name, OpenApiSchema schema)
+        {
+            if (operation.Parameters.All(x => x.Name != name)) operation.Parameters.Add(new OpenApiParameter { Name = name, In = ParameterLocation.Query, Schema = schema });
+        }
+        var text = () => new OpenApiSchema { Type = JsonSchemaType.String };
+        var list = () => new OpenApiSchema { AnyOf = [text(), new OpenApiSchema { Type = JsonSchemaType.Array, Items = text() }] };
+        foreach (var name in new[] { "status", "priority", "indicator", "assigneeId", "reviewerId", "disciplineId", "deliverableId", "milestoneId", "projectId", "createdBy", "ids" }) Add(name, list());
+        foreach (var name in new[] { "dueFrom", "dueTo", "startFrom", "startTo", "completedFrom", "completedTo", "doneSince", "workspaceId", "q", "sort" }) Add(name, text());
+        foreach (var name in (string[])["requiresReview", "hasDependencies", "mine", "includeCancelled", "onHold", "noDeliverable", .. IndicatorFlags]) Add(name, new OpenApiSchema { Type = JsonSchemaType.Boolean | JsonSchemaType.String });
+        foreach (var name in new[] { "page", "pageSize" }) Add(name, new OpenApiSchema { Type = JsonSchemaType.Integer | JsonSchemaType.String });
+        return Task.CompletedTask;
+    }
+
     /// A filter from query-string style values, for counts that must equal the list a link opens (§13.1).
     public static TaskFilter Of(IDictionary<string, string?> values) =>
         From(new QueryCollection(values.Where(v => v.Value is not null).ToDictionary(v => v.Key, v => new Microsoft.Extensions.Primitives.StringValues(v.Value))));
@@ -32,7 +55,7 @@ public sealed class TaskFilter
         bool? B(string k) => bool.TryParse(q[k], out var b) ? b : null;
         var f = new TaskFilter
         {
-            Status = L("status"), Priority = L("priority"), Indicators = [.. L("indicator"), .. new[] { "overdue", "blocked", "blocking", "waiting", "unassigned", "stale", "dueThisWeek", "readyForReview", "dateInconsistent", "noDueDate", "dueSoon", "heldPastDue", "open", "backlog" }.Where(k => B(k) == true)],
+            Status = L("status"), Priority = L("priority"), Indicators = [.. L("indicator"), .. IndicatorFlags.Where(k => B(k) == true)],
             AssigneeIds = I("assigneeId"), ReviewerIds = I("reviewerId"), DisciplineIds = I("disciplineId"), DeliverableIds = I("deliverableId"),
             MilestoneIds = I("milestoneId"), ProjectIds = I("projectId"), CreatedBy = I("createdBy"), Ids = I("ids"),
             DueFrom = D("dueFrom"), DueTo = D("dueTo"), StartFrom = D("startFrom"), StartTo = D("startTo"), CompletedFrom = D("completedFrom"), CompletedTo = D("completedTo"), DoneSince = D("doneSince"),

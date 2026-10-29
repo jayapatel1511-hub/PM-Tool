@@ -17,7 +17,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import type { components } from '@/gen/api'
-import { get, qs, typedRequest } from '@/lib/api'
+import { get, typedRequest } from '@/lib/api'
 import { invalidateChange } from '@/lib/keys'
 import { useMe } from '@/lib/auth-context'
 import { addDays, fmtDate, relative, today } from '@/lib/format'
@@ -28,7 +28,7 @@ import { useLaneDrop } from './projects/Board'
 import type { DeliverableRow } from './projects/Deliverables'
 import { ActionOwner, type ActionRow } from './projects/Meetings'
 import { FollowLevelSelect } from './projects/Follow'
-import { BUCKETS, PRIORITIES, StatusMenu, TASK_STATUSES, TaskIndicators, dueBucket, useTaskActions, type TaskRow } from './projects/Tasks'
+import { BUCKETS, PRIORITIES, StatusMenu, TASK_STATUSES, TaskIndicators, blockersOf, dueBucket, useTaskActions, type TaskRow } from './projects/Tasks'
 import { WorkspaceCoordination } from './WorkspaceCoordination'
 import { MyWeekStrip } from '@/components/planner/MyWeekStrip'
 import { OnboardingCard } from '@/components/hub/onboarding'
@@ -231,7 +231,7 @@ function Overview({ focus }: { focus: boolean }) {
       ...w.reviews.deliverables.map(delRow)], t('mywork.noReviews')) },
     { id: 'deliverables', title: t('mywork.deliverables'), count: w.deliverables.length, body: list(w.deliverables.map(delRow), t('mywork.noDeliverables')) },
     { id: 'waiting', title: t('mywork.waiting'), count: waiting.length, body: list(waiting.map((r) => taskRow(r, (
-      <span className="w-full text-xs/[18px] text-muted-foreground sm:w-auto">{(r.state?.blockedBy ?? []).map((b, i) => (
+      <span className="w-full text-xs/[18px] text-muted-foreground sm:w-auto">{blockersOf(r.state).map((b, i) => (
         <span key={i} className="mr-2">{b.type === 'manual' ? t('task.manualBlocker', { type: tv(b.name ?? ''), reason: b.reason ?? '' }) : `${b.key} ${b.name}`}{b.ownerId && ` · ${w.people[b.ownerId] ?? ''}`}</span>
       ))}</span>))), t('mywork.noWaiting')) },
     { id: 'blocking', title: t('mywork.blocking'), count: blocking.length, body: list(blocking.map((r) => taskRow(r, (
@@ -356,7 +356,7 @@ function TaskView({ tab }: { tab: string }) {
   const tabParams = tab === 'today' ? { dueFrom: now, dueTo: now, open: true } : tab === 'upcoming' ? { dueFrom: addDays(now, 1), open: true }
     : tab === 'overdue' ? { overdue: true } : tab === 'nodate' ? { backlog: true } : { status: 'Complete', completedFrom: from, completedTo: to, sort: 'completed:desc' }
   const params = { projects: scope.api, ...whoParams, ...tabParams, pageSize: 200 }
-  const q = useQuery({ queryKey: ['mywork-tasks', params], enabled: scope.ready, queryFn: () => get<PageOf<TaskRow>>(`tasks${qs(params)}`) })
+  const q = useQuery({ queryKey: ['mywork-tasks', params], enabled: scope.ready, queryFn: () => typedRequest('get', '/api/v1/tasks', { query: params }) })
   const actions = useTaskActions(() => { q.refetch(); invalidateChange(qc, 'Task') })
   const lane = useLaneDrop(actions)
   const rows = q.data?.items ?? []

@@ -200,7 +200,7 @@ function EntryDialog({ entry, onReload, onClose }: { entry?: Entry; onReload?: (
   const [reloading, setReloading] = useState(false)
   const [hasConflict, setHasConflict] = useState(false)
   const safe = useSafeForm(entry ? null : 'time.new', { task, f }, (d) => { setTask(d.task); setF(d.f) }) // FR-SAV-03
-  const tasks = useQuery({ queryKey: ['time-tasks', term], enabled: !entry, queryFn: () => get<PageOf<{ id: string; key: string; name: string; projectNumber: string; status: string }>>(`tasks${qs({ q: term, pageSize: 20 })}`) })
+  const tasks = useQuery({ queryKey: ['time-tasks', term], enabled: !entry, queryFn: () => typedRequest('get', '/api/v1/tasks', { query: { q: term, pageSize: 20 } }) })
   const fe = err?.fieldErrors ?? {}
   const reload = async () => {
     if (!currentEntry || !onReload) return

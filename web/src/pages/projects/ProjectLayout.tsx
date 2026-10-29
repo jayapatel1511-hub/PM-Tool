@@ -170,7 +170,7 @@ function DateReviewBanner({ p }: { p: ProjectDetail }) {
     setBusy(true)
     try {
       const reason = t('dateReview.reason', { from: fmtDate(r.window!.heldFrom), to: fmtDate(r.window!.resumedOn) })
-      if (r.tasks.length) await post(`projects/${p.id}/tasks/bulk`, { taskIds: r.tasks.map((x) => x.id), operation: 'shiftDueDates', params: { days: n }, reason })
+      if (r.tasks.length) await typedRequest('post', '/api/v1/projects/{id}/tasks/bulk', { params: { id: p.id }, body: { taskIds: r.tasks.map((x) => x.id), operation: 'shiftDueDates', params: { days: n }, reason } })
       if (r.deliverables.length) await typedRequest('post', '/api/v1/projects/{id}/deliverables/bulk', { params: { id: p.id }, body: { ids: r.deliverables.map((x) => x.id), operation: 'shiftDueDates', params: { days: n }, reason } })
       toast.success(t('dateReview.shifted', { n })); qc.invalidateQueries({ queryKey: ['p', p.id, 'date-review'] }); refresh(p.id)
     } catch (e) { toast.error((e as Error).message) } finally { setBusy(false) }

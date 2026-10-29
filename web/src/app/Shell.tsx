@@ -16,7 +16,7 @@ import { useProject } from '@/hooks/data'
 import { useLiveEvents } from '@/hooks/live'
 import { useAuth, useFlag } from '@/lib/auth-context'
 import { GUARD_TOASTS, pruneDrafts } from '@/lib/drafts'
-import { get } from '@/lib/api'
+import { typedRequest } from '@/lib/api'
 import { t , runtimeText } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { PROJECT_TABS } from '@/pages/projects/ProjectLayout'
@@ -201,7 +201,7 @@ function Breadcrumbs() {
   const project = useProject(number)
   const taskMatch = useMatch('/tasks/:id')
   const taskId = taskMatch?.params.id
-  const task = useQuery({ queryKey: ['task', taskId], enabled: !!taskId, queryFn: () => get<{ task: { key: string } }>(`tasks/${taskId}`) })
+  const task = useQuery({ queryKey: ['task', taskId], enabled: !!taskId, queryFn: () => typedRequest('get', '/api/v1/tasks/{id}', { params: { id: taskId! } }) })
   const crumbs: { label: string; to?: string; long?: boolean }[] = []
   if (number) {
     const tab = PROJECT_TABS.find((tb) => typeof tb.path === 'string' && tb.path === inProject.params['*']?.split('/')[0])

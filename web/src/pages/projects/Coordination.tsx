@@ -22,7 +22,7 @@ import { RecordDecisionDialog } from './Decisions'
 import type { DeliverableRow } from './Deliverables'
 import { ActionForm, ActionOwner, type ActionRow } from './Meetings'
 import { useCurrentProject } from './ProjectLayout'
-import { CreateTask, StatusMenu, TaskIndicators, useProjectLists, useTaskActions, useTaskHints, type Blocker, type TaskRow } from './Tasks'
+import { CreateTask, StatusMenu, TaskIndicators, blockersOf, useProjectLists, useTaskActions, useTaskHints, type Blocker, type TaskRow } from './Tasks'
 import { DisciplineCoordinationView } from './DisciplineCoordinationView'
 
 type Weekly = components['schemas']['WeeklyCoordination']
@@ -39,7 +39,7 @@ interface Coord extends Omit<Weekly, 'deliverables' | 'blocked' | 'overdue' | 'd
 function byBlocker(rows: TaskRow[]) {
   const groups = new Map<string, { label: string; blocker: Blocker; rows: TaskRow[] }>()
   for (const r of rows)
-    for (const b of (r.state?.blockedBy ?? []).filter((x) => x.blocking)) {
+    for (const b of blockersOf(r.state).filter((x) => x.blocking)) {
       const id = b.type === 'manual' ? `manual:${b.name}:${b.reason}` : `${b.type}:${b.id}`
       const label = b.type === 'manual' ? t('task.manualBlocker', { type: tv(b.name ?? ''), reason: b.reason ?? '' }) : `${b.key} ${b.name}`
       const g = groups.get(id) ?? { label, blocker: b, rows: [] }
@@ -237,7 +237,7 @@ export function CoordinationTab() {
     ]) },
     { id: 'upcoming', title: t('wc.s.upcoming'), count: c.upcoming.tasks.length + c.upcoming.deliverables.length, body: list([...c.upcoming.tasks.map((r) => row(r)), ...c.upcoming.deliverables.map((d) => delRow(d))]) },
     { id: 'held', title: t('wc.s.held'), count: c.held.tasks.length + c.held.deliverables.length, body: list([
-      ...c.held.tasks.map((r) => row(r, <span className="text-xs text-muted-foreground tabular-nums">{t('wc.heldDays', { n: daysSince(r.statusChangedAt) })}</span>)),
+      ...c.held.tasks.map((r) => row(r, <span className="text-xs text-muted-foreground tabular-nums">{t('wc.heldDays', { n: daysSince(r.statusChangedAt ?? undefined) })}</span>)),
       ...c.held.deliverables.map((d) => delRow(d)),
     ]) },
   ]

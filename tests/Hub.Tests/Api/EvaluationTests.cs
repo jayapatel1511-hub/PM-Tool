@@ -387,6 +387,55 @@ public sealed class EvaluationTests(HubFactory f)
     }
 
     [Fact]
+    public async Task Settings_change_is_retained_until_every_project_evaluates()
+    {
+        var failed = await d.Project();
+        var healthy = await d.Project();
+        var trigger = "fail_settings_eval_" + failed.Id.ToString("N")[^8..];
+        var eventId = await f.DbAsync(async db =>
+        {
+            await db.Outbox.ExecuteDeleteAsync();
+            await db.ProjectStates.Where(x => x.ProjectId == failed.Id || x.ProjectId == healthy.Id).ExecuteDeleteAsync();
+            var e = new OutboxEvent { EventType = "SettingsChanged", CreatedAt = f.Clock.Now, Payload = "{}" };
+            db.Outbox.Add(e);
+            await db.SaveChangesAsync();
+            await db.Database.ExecuteSqlRawAsync($"""
+                CREATE FUNCTION hub.{trigger}() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'test settings evaluation failure'; END $$;
+                CREATE TRIGGER {trigger} BEFORE INSERT OR UPDATE ON hub.project_state FOR EACH ROW WHEN (NEW.project_id = '{failed.Id}') EXECUTE FUNCTION hub.{trigger}();
+                """);
+            return e.Id;
+        });
+
+        try
+        {
+            await EvaluationWorker.ProcessOnce(f.Services, f.Clock, CancellationToken.None);
+            var first = await f.DbAsync(db => db.Outbox.AsNoTracking().SingleAsync(x => x.Id == eventId));
+            Assert.Equal(1, first.Attempts);
+            Assert.Null(first.ProcessedAt);
+            Assert.Null(first.DeadLetteredAt);
+            Assert.False(await f.DbAsync(db => db.ProjectStates.AnyAsync(x => x.ProjectId == failed.Id)));
+            Assert.True(await f.DbAsync(db => db.ProjectStates.AnyAsync(x => x.ProjectId == healthy.Id)));
+
+            await f.DbAsync(db => db.Database.ExecuteSqlRawAsync($"DROP TRIGGER IF EXISTS {trigger} ON hub.project_state; DROP FUNCTION IF EXISTS hub.{trigger}();"));
+            await EvaluationWorker.ProcessOnce(f.Services, f.Clock, CancellationToken.None);
+
+            var second = await f.DbAsync(db => db.Outbox.AsNoTracking().SingleAsync(x => x.Id == eventId));
+            Assert.NotNull(second.ProcessedAt);
+            Assert.Equal(1, second.Attempts);
+            Assert.True(await f.DbAsync(db => db.ProjectStates.AnyAsync(x => x.ProjectId == failed.Id)));
+            Assert.True(await f.DbAsync(db => db.ProjectStates.AnyAsync(x => x.ProjectId == healthy.Id)));
+        }
+        finally
+        {
+            await f.DbAsync(async db =>
+            {
+                await db.Database.ExecuteSqlRawAsync($"DROP TRIGGER IF EXISTS {trigger} ON hub.project_state; DROP FUNCTION IF EXISTS hub.{trigger}();");
+                return await db.Outbox.Where(x => x.Id == eventId).ExecuteDeleteAsync();
+            });
+        }
+    }
+
+    [Fact]
     public async Task Large_project_re_evaluates_within_two_seconds() // §22: 2,000 tasks
     {
         var p = await d.Project();

@@ -58,7 +58,7 @@ test('child audit types refresh mounted details and dependent pickers; reconnect
 
 test('invalidation prefixes match actual mounted screen query keys', () => {
   const mounted: Record<string, string[][]> = {
-    Task: [['wtasks', 'scope'], ['wboard', 'scope'], ['gantt', 'scope'], ['closeout', 'p1'], ['open-items', 'm1']],
+    Task: [['wtasks', 'scope'], ['wboard', 'scope'], ['gantt', 'scope'], ['closeout', 'p1'], ['open-items', 'm1'], ['p', 'p1', 'tasks', {}], ['p', 'p1', 'board', {}], ['task', 'i1'], ['task', 'i1', 'delete-preview'], ['task', 'i1', 'schedule'], ['mywork-tasks', {}]],
     Dependency: [['task', 'i1', 'deps', '3'], ['task', 'i1', 'chain'], ['task', 'i1', 'candidates', 'predecessor', ''], ['gantt', 'scope']],
     DeliverableDependency: [['deliverable', 'i1'], ['gantt', 'scope']],
     Deliverable: [['gantt', 'scope'], ['open-items', 'm1']], DocumentLink: [['files', 'scope']],

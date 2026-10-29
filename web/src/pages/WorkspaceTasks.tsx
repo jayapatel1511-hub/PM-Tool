@@ -14,11 +14,10 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
-import { get, qs, typedRequest } from '@/lib/api'
+import { typedRequest } from '@/lib/api'
 import { useMe } from '@/lib/auth'
 import { addDays, fmtDate, today } from '@/lib/format'
 import { plural, t, tv , runtimeText } from '@/lib/i18n'
-import type { Page as PageOf } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import type { SavedViewKeys } from '@/gen/registry.gen'
 import { CardBody, LANES, MAX_CARDS, SIDE, Swimlane, fetchUpTo, useLaneDrop } from './projects/Board'
@@ -113,7 +112,7 @@ export function WorkspaceTasksPage() {
   const page = Number(sp.get('page') ?? 1)
   const sort = sp.get('sort') ?? undefined
   const params = { projects: scope.api, ...filters, sort, page, pageSize: 100 }
-  const q = useQuery({ queryKey: ['wtasks', params], enabled: scope.ready, queryFn: () => get<PageOf<TaskRow>>(`tasks${qs(params)}`) })
+  const q = useQuery({ queryKey: ['wtasks', params], enabled: scope.ready, queryFn: () => typedRequest('get', '/api/v1/tasks', { query: params }) })
   const actions = useTaskActions(() => q.refetch())
   const [creating, setCreating] = useState(false)
   const [field, dir] = (sort ?? 'dueDate:asc').split(':')
@@ -207,7 +206,7 @@ export function WorkspaceBoardPage() {
   const manual = sp.get('sort') === 'board' && !!scope.ws
   const sort = manual ? 'board' : sp.get('sort') === 'priority' ? 'priority' : 'dueDate'
   const params = { projects: scope.api, ...filters, sort, includeCancelled: side, doneSince: addDays(today(), -14), workspaceId: manual ? scope.ws!.id : undefined }
-  const q = useQuery({ queryKey: ['wboard', params], enabled: scope.ready, queryFn: () => fetchUpTo('tasks', params, MAX_CARDS) })
+  const q = useQuery({ queryKey: ['wboard', params], enabled: scope.ready, queryFn: () => fetchUpTo((page, pageSize) => typedRequest('get', '/api/v1/tasks', { query: { ...params, page, pageSize } }), MAX_CARDS) })
   const actions = useTaskActions(() => q.refetch())
   const { onDrop, dialog } = useLaneDrop(actions)
   const [creating, setCreating] = useState(false)

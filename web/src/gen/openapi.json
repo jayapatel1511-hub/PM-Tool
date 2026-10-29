@@ -1138,32 +1138,6 @@
         ],
         "type": "object"
       },
-      "AnonymousTypeOfGuidAndstringAndstring": {
-        "properties": {
-          "displayName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "source": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "userId": {
-            "format": "uuid",
-            "type": "string"
-          }
-        },
-        "required": [
-          "userId",
-          "displayName",
-          "source"
-        ],
-        "type": "object"
-      },
       "AnonymousTypeOfstringAndstringAndstringAndIEnumerableOfstring": {
         "properties": {
           "displayName": {
@@ -14944,6 +14918,26 @@
         ],
         "type": "object"
       },
+      "ItemWatcherRow": {
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "userId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "userId",
+          "displayName",
+          "source"
+        ],
+        "type": "object"
+      },
       "JsonArray": {
         "type": "array"
       },
@@ -28392,6 +28386,53 @@
         ],
         "type": "object"
       },
+      "TaskBulkResult": {
+        "properties": {
+          "skipped": {
+            "items": {
+              "$ref": "#/components/schemas/TaskBulkSkipped"
+            },
+            "type": "array"
+          },
+          "updated": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "updated",
+          "skipped",
+          "warnings"
+        ],
+        "type": "object"
+      },
+      "TaskBulkSkipped": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "reason"
+        ],
+        "type": "object"
+      },
       "TaskChain": {
         "properties": {
           "depth": {
@@ -28528,6 +28569,116 @@
           "dueDate",
           "estimatedHours",
           "dependsOn"
+        ],
+        "type": "object"
+      },
+      "TaskCreated": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "rowVersion",
+          "warnings"
+        ],
+        "type": "object"
+      },
+      "TaskDeleteLink": {
+        "properties": {
+          "assigneeId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "direction": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "predecessorTaskId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "successorTaskId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "predecessorTaskId",
+          "successorTaskId",
+          "key",
+          "name",
+          "direction",
+          "assigneeId"
+        ],
+        "type": "object"
+      },
+      "TaskDeletePreview": {
+        "properties": {
+          "canCancel": {
+            "type": "boolean"
+          },
+          "canDelete": {
+            "type": "boolean"
+          },
+          "dependencies": {
+            "items": {
+              "$ref": "#/components/schemas/TaskDeleteLink"
+            },
+            "type": "array"
+          },
+          "suggestCancel": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "dependencies",
+          "suggestCancel",
+          "canDelete",
+          "canCancel"
+        ],
+        "type": "object"
+      },
+      "TaskDeleted": {
+        "properties": {
+          "removedDependencies": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "removedDependencies"
         ],
         "type": "object"
       },
@@ -28869,6 +29020,37 @@
         ],
         "type": "object"
       },
+      "TaskEdited": {
+        "properties": {
+          "dueDateChangeCount": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "rowVersion",
+          "dueDateChangeCount",
+          "warnings"
+        ],
+        "type": "object"
+      },
       "TaskHours": {
         "properties": {
           "hours": {
@@ -29081,17 +29263,9 @@
         "type": "object"
       },
       "TaskQueriesRow": {
-        "anyOf": [
-          {
-            "$ref": "#/components/schemas/TaskQueriesRowActivityRow"
-          },
-          {
-            "$ref": "#/components/schemas/TaskQueriesRowBase"
-          }
-        ],
-        "type": "object"
+        "$ref": "#/components/schemas/TaskQueriesRowBase"
       },
-      "TaskQueriesRowActivityRow": {
+      "TaskQueriesRowBase": {
         "properties": {
           "assigneeActive": {
             "type": "boolean"
@@ -29428,375 +29602,6 @@
             "format": "int32",
             "pattern": "^-?(?:0|[1-9]\\d*)$",
             "type": "integer"
-          }
-        }
-      },
-      "TaskQueriesRowBase": {
-        "properties": {
-          "assigneeActive": {
-            "type": "boolean"
-          },
-          "assigneeId": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "assigneeName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "backlog": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "can": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/Can"
-              }
-            ]
-          },
-          "collaboratorIds": {
-            "items": {
-              "format": "uuid",
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "commentCount": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ]
-          },
-          "completedAt": {
-            "format": "date-time",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "createdBy": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "createdByName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "deliverableDueDate": {
-            "format": "date",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "deliverableId": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "deliverableKey": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "deliverableName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "deliverableOrder": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "null",
-              "integer",
-              "string"
-            ]
-          },
-          "deliverableStatus": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "disciplineCode": {
-            "type": "string"
-          },
-          "disciplineColour": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "disciplineName": {
-            "type": "string"
-          },
-          "disciplineOrder": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ]
-          },
-          "dueDate": {
-            "format": "date",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "dueDateChangeCount": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ]
-          },
-          "effectiveMilestoneId": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "estimatedHours": {
-            "format": "double",
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
-            "type": [
-              "null",
-              "number",
-              "string"
-            ]
-          },
-          "id": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "key": {
-            "type": "string"
-          },
-          "lane": {
-            "type": "string"
-          },
-          "lastActivityActorName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "lastActivityAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "manualBlockReason": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "manualBlockSetAt": {
-            "format": "date-time",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "manualBlockType": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "milestoneDate": {
-            "format": "date",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "milestoneDerived": {
-            "type": "boolean"
-          },
-          "milestoneId": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "milestoneKey": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "milestoneName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "name": {
-            "type": "string"
-          },
-          "originalDueDate": {
-            "format": "date",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "originalStartDate": {
-            "format": "date",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "pickupOfferOpen": {
-            "type": [
-              "null",
-              "boolean"
-            ]
-          },
-          "predecessorCount": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ]
-          },
-          "priority": {
-            "type": "string"
-          },
-          "progressPct": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ]
-          },
-          "projectDisciplineId": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "projectId": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "projectName": {
-            "type": "string"
-          },
-          "projectNumber": {
-            "type": "string"
-          },
-          "projectStatus": {
-            "type": "string"
-          },
-          "requiresReview": {
-            "type": "boolean"
-          },
-          "reviewRound": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ]
-          },
-          "reviewerId": {
-            "format": "uuid",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "reviewerName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "rowVersion": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ]
-          },
-          "sortOrder": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ]
-          },
-          "startDate": {
-            "format": "date",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "state": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/State"
-              }
-            ]
-          },
-          "status": {
-            "type": "string"
-          },
-          "statusChangedAt": {
-            "format": "date-time",
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "successorCount": {
-            "format": "int32",
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ]
           }
         },
         "required": [
@@ -30059,6 +29864,65 @@
           "reason",
           "comment",
           "reviewerId",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
+      "TaskTransitioned": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "progressPct": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "reviewRound": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "rowVersion",
+          "progressPct",
+          "reviewRound",
+          "warnings"
+        ],
+        "type": "object"
+      },
+      "TaskVersion": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
           "rowVersion"
         ],
         "type": "object"
@@ -37078,7 +36942,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/AnonymousTypeOfGuidAndstringAndstring"
+                    "$ref": "#/components/schemas/ItemWatcherRow"
                   },
                   "type": "array"
                 }
@@ -37122,8 +36986,8 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -37162,8 +37026,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -44214,6 +44078,483 @@
               "format": "uuid",
               "type": "string"
             }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "priority",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "indicator",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "assigneeId",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "reviewerId",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "disciplineId",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "deliverableId",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "milestoneId",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "projectId",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "createdBy",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "ids",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "dueFrom",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dueTo",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "startFrom",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "startTo",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "completedFrom",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "completedTo",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "doneSince",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "workspaceId",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "requiresReview",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "hasDependencies",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "mine",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "includeCancelled",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "onHold",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "noDeliverable",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "overdue",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "blocked",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "blocking",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "waiting",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "unassigned",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "stale",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "dueThisWeek",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "readyForReview",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "dateInconsistent",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "noDueDate",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "dueSoon",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "heldPastDue",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "open",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "backlog",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": [
+                "integer",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": [
+                "integer",
+                "string"
+              ]
+            }
           }
         ],
         "responses": {
@@ -44255,8 +44596,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskCreated"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -44291,7 +44639,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/TaskBulkResult"
+                }
               }
             },
             "description": "OK"
@@ -50326,6 +50676,483 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "priority",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "indicator",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "assigneeId",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "reviewerId",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "disciplineId",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "deliverableId",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "milestoneId",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "projectId",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "createdBy",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "ids",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "dueFrom",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dueTo",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "startFrom",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "startTo",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "completedFrom",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "completedTo",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "doneSince",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "workspaceId",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "requiresReview",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "hasDependencies",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "mine",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "includeCancelled",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "onHold",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "noDeliverable",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "overdue",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "blocked",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "blocking",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "waiting",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "unassigned",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "stale",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "dueThisWeek",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "readyForReview",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "dateInconsistent",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "noDueDate",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "dueSoon",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "heldPastDue",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "open",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "backlog",
+            "schema": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": [
+                "integer",
+                "string"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": [
+                "integer",
+                "string"
+              ]
+            }
           }
         ],
         "responses": {
@@ -50360,6 +51187,13 @@
         ],
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskDeleted"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -50418,6 +51252,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskEdited"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -50451,6 +51292,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskVersion"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -50522,8 +51370,8 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -50554,8 +51402,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -50580,7 +51428,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/TaskDeletePreview"
+                }
               }
             },
             "description": "OK"
@@ -50890,6 +51740,13 @@
         ],
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskVersion"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -50993,6 +51850,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskTransitioned"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -51016,6 +51880,13 @@
         ],
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskVersion"
+                }
+              }
+            },
             "description": "OK"
           }
         },

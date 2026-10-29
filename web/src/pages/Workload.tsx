@@ -19,7 +19,7 @@ import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useReference } from '@/hooks/data'
-import { ApiError, get, patch, typedRequest } from '@/lib/api'
+import { ApiError, get, typedRequest } from '@/lib/api'
 import { useFlag } from '@/lib/auth'
 import { addDays, fmtDate, hours, shortDate, today } from '@/lib/format'
 import { runtimeText, t } from '@/lib/i18n'
@@ -401,7 +401,7 @@ function PersonTasksRows({ id, name, from, weeks, onChanged }: { id: string; nam
     if (!to) return
     setState((s) => ({ ...s, [task.id]: { status: 'saving' } }))
     try {
-      await patch(`tasks/${task.id}`, { assigneeId: to }, task.rowVersion)
+      await typedRequest('patch', '/api/v1/tasks/{id}', { params: { id: task.id }, body: { assigneeId: to }, ifMatch: task.rowVersion })
       toast.success(t('workload.reassigned', { key: task.key }))
       forget(task.id)
       void invalidateChange(qc, 'Task', projectId); onChanged()

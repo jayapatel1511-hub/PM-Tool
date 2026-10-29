@@ -8,13 +8,14 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { ApiError, post, typedRequest } from '@/lib/api'
+import { ApiError, typedRequest } from '@/lib/api'
+import { moveTask, type TransitionBody } from './Tasks'
 import { fmtDate } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
 
 /** A task start the server refused for readiness (with the transition `body` to retry), or, without one, a PM/lead
  *  recording a start authorisation for the performer (FR-RDY-02). */
-export interface StartRequest { id: string; key: string; to?: string; body?: Record<string, unknown> }
+export interface StartRequest { id: string; key: string; to?: string; body?: TransitionBody }
 
 /** Attention text keeps its ▲ symbol and tint, so the warning never rests on colour alone. */
 const warnBox = 'rounded-md border border-warn/40 bg-warn-bg px-4 py-3 text-warn'
@@ -32,7 +33,7 @@ export function StartAuthorisationDialog({ req, onClose }: { req: StartRequest; 
     setBusy(true); setErr(null)
     try { await f(); onClose(true) } catch (e) { setErr(e); q.refetch() } finally { setBusy(false) }
   }
-  const start = () => run(() => post(`tasks/${req.id}/transition`, r?.needsAuthorisation ? { ...req.body, acknowledgeReadiness: true, reason: reason.trim() } : req.body))
+  const start = () => run(() => moveTask(req.id, r?.needsAuthorisation ? { ...req.body!, acknowledgeReadiness: true, reason: reason.trim() } : req.body!))
   const record = () => run(async () => {
     const payload = { acknowledged: true, reason: reason.trim() }, signature = JSON.stringify(payload)
     if (receipt.current?.signature !== signature) receipt.current = { signature, id: crypto.randomUUID() }

@@ -36,6 +36,7 @@
     "test:milestones": "node tests/milestones.cjs",
     "test:notifications": "node tests/notifications.cjs",
     "test:templates": "node tests/templates.cjs",
+    "test:tasks": "node tests/tasks.cjs",
     "test:admin": "node tests/admin.cjs",
     "test:backlog-my-work": "node tests/backlog-my-work.cjs",
     "test:admin-review": "node tests/admin-review.cjs",

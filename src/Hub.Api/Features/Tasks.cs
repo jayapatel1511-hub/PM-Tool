@@ -3,6 +3,7 @@ using System.Text.Json.Nodes;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Api.Features;
@@ -33,6 +34,24 @@ public static class TaskEndpoints
     public sealed record BlockBody(string Type, string Reason, int? RowVersion);
     public sealed record UserBody(Guid UserId);
     public sealed record BulkBody(Guid[] TaskIds, string Operation, JsonElement? Params, string? Reason);
+    /// The answers of the task commands (040-S15-Tasks): each is the property names and order the app already reads.
+    public sealed record TaskCreated(Guid Id, string Key, int RowVersion, List<string> Warnings);
+    public sealed record TaskEdited(Guid Id, int RowVersion, int DueDateChangeCount, List<string> Warnings);
+    public sealed record TaskTransitioned(Guid Id, string Status, int RowVersion, int ProgressPct, int ReviewRound, List<string> Warnings);
+    /// The id and the version a block, unblock or restore leaves behind.
+    public sealed record TaskVersion(Guid Id, int RowVersion);
+    public sealed record TaskDeleted(int RemovedDependencies);
+    /// One link of the task about to be deleted, with the task at its other end (Direction is "blocks" or "dependsOn").
+    public sealed record TaskDeleteLink(Guid Id, Guid PredecessorTaskId, Guid SuccessorTaskId, string Key, string Name, string Direction, Guid? AssigneeId);
+    public sealed record TaskDeletePreview(IReadOnlyList<TaskDeleteLink> Dependencies, bool SuggestCancel, bool CanDelete, bool CanCancel);
+    public sealed record TaskBulkSkipped(Guid Id, string Key, string Reason);
+    public sealed record TaskBulkResult(int Updated, IReadOnlyList<TaskBulkSkipped> Skipped, IReadOnlyList<string> Warnings);
+    public sealed record ItemWatcherRow(Guid UserId, string DisplayName, string Source);
+    sealed record OtherEnd(string Key, string Name, Guid? AssigneeId);
+    sealed record LinkEnds(Guid Id, Guid PredecessorTaskId, Guid SuccessorTaskId, OtherEnd Other);
+    sealed record CollaboratorChange(string Field, Guid? Old, Guid? New);
+    sealed record RemovedLink(Guid Id, Guid PredecessorTaskId, Guid SuccessorTaskId);
+    sealed record DeletedSnapshot(string Key, string Name, string? Assignee, string Status, string? DueDate, IEnumerable<RemovedLink> RemovedDependencies);
 
     public static void Map(RouteGroupBuilder api)
     {
@@ -42,7 +61,7 @@ public static class TaskEndpoints
             var s = await store.Get(db);
             var f = TaskFilter.From(http.Request.Query);
             return await TaskQueries.Page(db, TaskQueries.Apply(db, db.Tasks.AsNoTracking().Where(t => t.ProjectId == id), f, me.Id, clock.Today(s), s), f, access.Actor, s.IsFlagOn("small_ux"));
-        });
+        }).AddOpenApiOperationTransformer(TaskFilter.Describe);
         // Cross-project task list for the workspace views (§36.1, §36.3): only projects the caller may see, within the
         // selected scope; a workspace's manual order applies only to its owner.
         api.MapGet("/tasks", async (string? projects, HttpContext http, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock) =>
@@ -51,7 +70,7 @@ public static class TaskEndpoints
             var f = TaskFilter.From(http.Request.Query);
             if (f.WorkspaceId is { } ws && !await db.Workspaces.AnyAsync(w => w.Id == ws && w.OwnerId == me.Id)) f.WorkspaceId = null;
             return await TaskQueries.Page(db, TaskQueries.Apply(db, InScope(access, db, projects), f, me.Id, clock.Today(s), s), f, access.Actor, s.IsFlagOn("small_ux"));
-        });
+        }).AddOpenApiOperationTransformer(TaskFilter.Describe);
         api.MapPost("/projects/{id:guid}/tasks", Create);
         api.MapPost("/projects/{id:guid}/tasks/bulk", Bulk);
         api.MapGet("/tasks/{id}", Get);
@@ -65,13 +84,13 @@ public static class TaskEndpoints
         api.MapGet("/tasks/{id:guid}/delete-preview", DeletePreview);
         api.MapDelete("/tasks/{id:guid}", Delete);
         api.MapPost("/tasks/{id:guid}/restore", Restore);
-        api.MapGet("/items/{type}/{id:guid}/watchers", async (string type, Guid id, HubDb db, Access access) =>
+        api.MapGet("/items/{type}/{id:guid}/watchers", async Task<Ok<List<ItemWatcherRow>>> (string type, Guid id, HubDb db, Access access) =>
         {
             var pid = await ActivityEndpoints.ItemProject(db, type, id) ?? throw ApiException.NotFound();
             await access.Project(pid, track: false);
-            return await db.Watchers.Where(w => w.ItemType == type && w.ItemId == id).Join(db.Users, w => w.UserId, u => u.Id, (w, u) => new { w.UserId, u.DisplayName, w.Source }).ToListAsync();
+            return TypedResults.Ok(await db.Watchers.Where(w => w.ItemType == type && w.ItemId == id).Join(db.Users, w => w.UserId, u => u.Id, (w, u) => new ItemWatcherRow(w.UserId, u.DisplayName, w.Source)).ToListAsync());
         });
-        api.MapPost("/items/{type}/{id:guid}/watchers", async (string type, Guid id, UserBody body, HubDb db, Access access) =>
+        api.MapPost("/items/{type}/{id:guid}/watchers", async Task<NoContent> (string type, Guid id, UserBody body, HubDb db, Access access) =>
         {
             var pid = await ActivityEndpoints.ItemProject(db, type, id) ?? throw ApiException.NotFound();
             var (_, ctx) = await access.Project(pid, track: false);
@@ -79,15 +98,15 @@ public static class TaskEndpoints
             if (!await EmailProjectAccess.Allowed(db, body.UserId, [pid])) throw ApiException.NotFound();
             await Watch(db, pid, type, id, body.UserId, "Manual");
             await db.SaveChangesAsync();
-            return Results.NoContent();
+            return TypedResults.NoContent();
         });
-        api.MapDelete("/items/{type}/{id:guid}/watchers/{userId:guid}", async (string type, Guid id, Guid userId, HubDb db, Access access) =>
+        api.MapDelete("/items/{type}/{id:guid}/watchers/{userId:guid}", async Task<NoContent> (string type, Guid id, Guid userId, HubDb db, Access access) =>
         {
             var pid = await ActivityEndpoints.ItemProject(db, type, id) ?? throw ApiException.NotFound();
             var (_, ctx) = await access.Project(pid, track: false);
             Access.Demand(userId == access.Me.Id ? Allow.Yes : Permissions.ManageTeam(access.Actor, ctx)); // one's own watch, or a PM's call
             await db.Watchers.Where(w => w.ItemType == type && w.ItemId == id && w.UserId == userId).ExecuteDeleteAsync();
-            return Results.NoContent();
+            return TypedResults.NoContent();
         });
     }
 
@@ -140,10 +159,10 @@ public static class TaskEndpoints
 
     // ---------- Create (FR-TSK-01, TM-06, R-02, Workflow 4) ----------
 
-    static async Task<IResult> Create(Guid id, CreateBody body, Access access, HubDb db, TeamService team, Notifier notify, SettingsStore store, CurrentUser me, TimeProvider clock)
+    static async Task<Created<TaskCreated>> Create(Guid id, CreateBody body, Access access, HubDb db, TeamService team, Notifier notify, SettingsStore store, CurrentUser me, TimeProvider clock)
     {
         var (t, warnings) = await NewTask(id, body, access, db, team, notify, store, me, clock);
-        return Results.Created($"/api/v1/tasks/{t.Id}", new { t.Id, t.Key, t.RowVersion, warnings });
+        return TypedResults.Created($"/api/v1/tasks/{t.Id}", new TaskCreated(t.Id, t.Key, t.RowVersion, warnings));
     }
 
     /// Creates a task with every creation rule (T-18, T-19, T-22, R-02, permissions, keys, notices); shared with converting a meeting action.
@@ -244,7 +263,7 @@ public static class TaskEndpoints
 
     // ---------- Edit (T-15..T-22, R-02, R-04, E-03) ----------
 
-    static async Task<IResult> Edit(Guid id, JsonElement body, HttpContext http, Access access, HubDb db, TeamService team, Notifier notify, SettingsStore store, TimeProvider clock)
+    static async Task<Ok<TaskEdited>> Edit(Guid id, JsonElement body, HttpContext http, Access access, HubDb db, TeamService team, Notifier notify, SettingsStore store, TimeProvider clock)
     {
         var (t, p, ctx) = await Load(db, access, id);
         var patch = new Patch(body);
@@ -363,12 +382,12 @@ public static class TaskEndpoints
         var warnings = new List<string>();
         if (t.DeliverableId is { } dId && await db.Deliverables.Where(d => d.Id == dId).Select(d => d.DueDate).FirstOrDefaultAsync() is { } ddue && t.DueDate > ddue)
             warnings.Add(Text.Get("task.after_deliverable", t.Key, "", ddue.ToString("yyyy-MM-dd")));
-        return Results.Ok(new { t.Id, t.RowVersion, t.DueDateChangeCount, warnings });
+        return TypedResults.Ok(new TaskEdited(t.Id, t.RowVersion, t.DueDateChangeCount, warnings));
     }
 
     // ---------- Transitions (T-10..T-14, R-01..R-04, C-07, C-08, DL-02) ----------
 
-    static async Task<IResult> Transition(Guid id, TransitionBody body, HttpContext http, Access access, HubDb db, Notifier notify, TeamService team, SettingsStore store, TimeProvider clock)
+    static async Task<Ok<TaskTransitioned>> Transition(Guid id, TransitionBody body, HttpContext http, Access access, HubDb db, Notifier notify, TeamService team, SettingsStore store, TimeProvider clock)
     {
         var (t, p, ctx) = await Load(db, access, id);
         await Http.CheckVersion(db, http, t, body.RowVersion);
@@ -381,7 +400,7 @@ public static class TaskEndpoints
         await db.SaveChangesAsync();
         if (t.Status != previousStatus) await TransitionNotices(notify, p, t, body.Comment);
         await db.SaveChangesAsync();
-        return Results.Ok(new { t.Id, t.Status, t.RowVersion, t.ProgressPct, t.ReviewRound, warnings });
+        return TypedResults.Ok(new TaskTransitioned(t.Id, t.Status, t.RowVersion, t.ProgressPct, t.ReviewRound, warnings));
     }
 
     public static async Task ApplyTransition(HubDb db, Access access, ProjectContext ctx, Project p, WorkTask t, string to, string? reason, string? comment,
@@ -488,7 +507,7 @@ public static class TaskEndpoints
 
     // ---------- Manual block (FR-TSK-07, D-14) ----------
 
-    static async Task<IResult> SetBlock(Guid id, BlockBody body, HttpContext http, Access access, HubDb db, TimeProvider clock, CurrentUser me)
+    static async Task<Ok<TaskVersion>> SetBlock(Guid id, BlockBody body, HttpContext http, Access access, HubDb db, TimeProvider clock, CurrentUser me)
     {
         var (t, p, ctx) = await Load(db, access, id);
         await Http.CheckVersion(db, http, t, body.RowVersion);
@@ -502,10 +521,10 @@ public static class TaskEndpoints
         t.LastActivityAt = clock.GetUtcNow();
         db.Audit.Note(t, action: "Blocked");
         await db.SaveChangesAsync();
-        return Results.Ok(new { t.Id, t.RowVersion });
+        return TypedResults.Ok(new TaskVersion(t.Id, t.RowVersion));
     }
 
-    static async Task<IResult> ClearBlock(Guid id, HttpContext http, Access access, HubDb db, TimeProvider clock)
+    static async Task<Ok<TaskVersion>> ClearBlock(Guid id, HttpContext http, Access access, HubDb db, TimeProvider clock)
     {
         var (t, _, ctx) = await Load(db, access, id);
         await Http.CheckVersion(db, http, t, null);
@@ -515,12 +534,12 @@ public static class TaskEndpoints
         t.LastActivityAt = clock.GetUtcNow();
         db.Audit.Note(t, action: "Unblocked");
         await db.SaveChangesAsync();
-        return Results.Ok(new { t.Id, t.RowVersion });
+        return TypedResults.Ok(new TaskVersion(t.Id, t.RowVersion));
     }
 
     // ---------- Collaborators (FR-TSK-08, T-15, E-07) ----------
 
-    static async Task<IResult> AddCollaborator(Guid id, UserBody body, Access access, HubDb db, TeamService team, Notifier notify, TimeProvider clock)
+    static async Task<NoContent> AddCollaborator(Guid id, UserBody body, Access access, HubDb db, TeamService team, Notifier notify, TimeProvider clock)
     {
         var (t, p, ctx) = await Load(db, access, id);
         Access.Demand(Permissions.Writable(access.Actor, ctx));
@@ -530,15 +549,15 @@ public static class TaskEndpoints
         if (!await db.Collaborators.AnyAsync(c => c.TaskId == id && c.UserId == body.UserId))
         {
             db.Collaborators.Add(new TaskCollaborator { TaskId = id, UserId = body.UserId, AddedAt = clock.GetUtcNow(), AddedBy = access.Me.Id });
-            db.LogEvent(ItemType.Task, t.Id, "CollaboratorAdded", "assignment", t.ProjectId, t.Key, t.Name, new[] { new { field = "Collaborator", old = (object?)null, @new = (object)body.UserId } }, disciplineId: t.ProjectDisciplineId);
+            db.LogEvent(ItemType.Task, t.Id, "CollaboratorAdded", "assignment", t.ProjectId, t.Key, t.Name, new[] { new CollaboratorChange("Collaborator", null, body.UserId) }, disciplineId: t.ProjectDisciplineId);
             await team.EnsureMember(p, body.UserId, ProjectRole.TeamMember);
             await notify.Send(NotificationEvents.TaskAssigned, body.UserId, Item(p, t), Text.Get("notify.collaborator_added", await notify.ActorName(), t.Key, t.Name));
             await db.SaveChangesAsync();
         }
-        return Results.NoContent();
+        return TypedResults.NoContent();
     }
 
-    static async Task<IResult> RemoveCollaborator(Guid id, Guid userId, Access access, HubDb db)
+    static async Task<NoContent> RemoveCollaborator(Guid id, Guid userId, Access access, HubDb db)
     {
         var (t, _, ctx) = await Load(db, access, id);
         Access.Demand(Permissions.Writable(access.Actor, ctx));
@@ -548,31 +567,31 @@ public static class TaskEndpoints
         if (c is not null)
         {
             db.Collaborators.Remove(c);
-            db.LogEvent(ItemType.Task, t.Id, "CollaboratorRemoved", "assignment", t.ProjectId, t.Key, t.Name, new[] { new { field = "Collaborator", old = (object)userId, @new = (object?)null } }, disciplineId: t.ProjectDisciplineId);
+            db.LogEvent(ItemType.Task, t.Id, "CollaboratorRemoved", "assignment", t.ProjectId, t.Key, t.Name, new[] { new CollaboratorChange("Collaborator", userId, null) }, disciplineId: t.ProjectDisciplineId);
             await db.SaveChangesAsync();
         }
-        return Results.NoContent();
+        return TypedResults.NoContent();
     }
 
     // ---------- Delete and restore (T-08, T-09, D-09, E-04, AC-TSK-09) ----------
 
-    static async Task<object> DeletePreview(Guid id, Access access, HubDb db)
+    static async Task<Ok<TaskDeletePreview>> DeletePreview(Guid id, Access access, HubDb db)
     {
         var (t, _, ctx) = await Load(db, access, id);
         var deps = await DependencyList(db, id);
         var hasWork = t.ProgressPct > 0 || await db.Comments.AnyAsync(c => c.ItemType == ItemType.Task && c.ItemId == id);
         var allow = Permissions.DeleteTask(access.Actor, ctx, await Facts(db, t));
         var cancel = Permissions.TaskTransition(access.Actor, ctx, await Facts(db, t), t.Status, TaskStatuses.Cancelled);
-        return new { dependencies = deps, suggestCancel = hasWork && !TaskStatuses.IsTerminal(t.Status), canDelete = allow.Ok, canCancel = cancel.Ok && !TaskStatuses.IsTerminal(t.Status) };
+        return TypedResults.Ok(new TaskDeletePreview(deps, hasWork && !TaskStatuses.IsTerminal(t.Status), allow.Ok, cancel.Ok && !TaskStatuses.IsTerminal(t.Status)));
     }
 
-    static async Task<List<object>> DependencyList(HubDb db, Guid id) =>
+    static async Task<List<TaskDeleteLink>> DependencyList(HubDb db, Guid id) =>
         (await db.Dependencies.Where(d => d.PredecessorTaskId == id || d.SuccessorTaskId == id)
-            .Select(d => new { d.Id, d.PredecessorTaskId, d.SuccessorTaskId,
-                Other = db.Tasks.Where(x => x.Id == (d.PredecessorTaskId == id ? d.SuccessorTaskId : d.PredecessorTaskId)).Select(x => new { x.Key, x.Name, x.AssigneeId }).First() })
-            .ToListAsync()).Select(d => (object)new { d.Id, d.PredecessorTaskId, d.SuccessorTaskId, d.Other.Key, d.Other.Name, Direction = d.PredecessorTaskId == id ? "blocks" : "dependsOn", d.Other.AssigneeId }).ToList();
+            .Select(d => new LinkEnds(d.Id, d.PredecessorTaskId, d.SuccessorTaskId,
+                db.Tasks.Where(x => x.Id == (d.PredecessorTaskId == id ? d.SuccessorTaskId : d.PredecessorTaskId)).Select(x => new OtherEnd(x.Key, x.Name, x.AssigneeId)).First()))
+            .ToListAsync()).Select(d => new TaskDeleteLink(d.Id, d.PredecessorTaskId, d.SuccessorTaskId, d.Other.Key, d.Other.Name, d.PredecessorTaskId == id ? "blocks" : "dependsOn", d.Other.AssigneeId)).ToList();
 
-    static async Task<IResult> Delete(Guid id, Access access, HubDb db, Notifier notify, TimeProvider clock, CurrentUser me)
+    static async Task<Ok<TaskDeleted>> Delete(Guid id, Access access, HubDb db, Notifier notify, TimeProvider clock, CurrentUser me)
     {
         var (t, p, ctx) = await Load(db, access, id);
         Access.Demand(Permissions.DeleteTask(access.Actor, ctx, await Facts(db, t)));
@@ -582,11 +601,8 @@ public static class TaskEndpoints
         var successorAssignees = await db.Tasks.Where(x => successorIds.Contains(x.Id)).Select(x => x.AssigneeId).ToListAsync();
         foreach (var e in edges) { e.DeletedAt = now; e.DeletedBy = me.Id; e.AuditKey = $"deleted with {t.Key}"; }
         var assignee = await db.Users.Where(u => u.Id == t.AssigneeId).Select(u => u.DisplayName).FirstOrDefaultAsync();
-        var snapshot = JsonSerializer.Serialize(new
-        {
-            t.Key, t.Name, Assignee = assignee, t.Status, DueDate = t.DueDate?.ToString("yyyy-MM-dd"),
-            RemovedDependencies = edges.Select(e => new { e.Id, e.PredecessorTaskId, e.SuccessorTaskId }),
-        }, JsonOpts.Web);
+        var snapshot = JsonSerializer.Serialize(new DeletedSnapshot(t.Key, t.Name, assignee, t.Status, t.DueDate?.ToString("yyyy-MM-dd"),
+            edges.Select(e => new RemovedLink(e.Id, e.PredecessorTaskId, e.SuccessorTaskId))), JsonOpts.Web);
         t.DeletedAt = now;
         t.DeletedBy = me.Id;
         db.Audit.Note(t, snapshot: snapshot);
@@ -595,10 +611,10 @@ public static class TaskEndpoints
         await notify.Send(NotificationEvents.DependencyRemoved, [.. successorAssignees, p.ProjectManagerId], Item(p, t) with { Link = null },
             Text.Get("notify.dependency_removed_deleted", actor, t.Key, t.Name));
         await db.SaveChangesAsync();
-        return Results.Ok(new { removedDependencies = edges.Count });
+        return TypedResults.Ok(new TaskDeleted(edges.Count));
     }
 
-    static async Task<IResult> Restore(Guid id, HttpContext http, Access access, HubDb db, SettingsStore store)
+    static async Task<Ok<TaskVersion>> Restore(Guid id, HttpContext http, Access access, HubDb db, SettingsStore store)
     {
         var t = await db.Tasks.IgnoreQueryFilters().FirstOrDefaultAsync(x => x.Id == id && x.DeletedAt != null) ?? throw ApiException.NotFound();
         var (_, ctx) = await access.Project(t.ProjectId);
@@ -615,12 +631,12 @@ public static class TaskEndpoints
         }
         db.Audit.Note(t, action: "Restored");
         await db.SaveChangesAsync();
-        return Results.Ok(new { t.Id, t.RowVersion });
+        return TypedResults.Ok(new TaskVersion(t.Id, t.RowVersion));
     }
 
     // ---------- Bulk (FR-TSK-09, T-23, E-20, AC-NOT-06) ----------
 
-    static async Task<object> Bulk(Guid id, BulkBody body, Access access, HubDb db, TeamService team, Notifier notify, SettingsStore store, TimeProvider clock)
+    static async Task<Ok<TaskBulkResult>> Bulk(Guid id, BulkBody body, Access access, HubDb db, TeamService team, Notifier notify, SettingsStore store, TimeProvider clock)
     {
         var (p, ctx) = await access.Project(id);
         var s = await store.Get(db);
@@ -628,7 +644,7 @@ public static class TaskEndpoints
         var tasks = await db.Tasks.Where(t => t.ProjectId == id && body.TaskIds.Contains(t.Id)).OrderBy(t => t.Seq).ToListAsync();
         var a = access.Actor;
         var updated = new List<WorkTask>();
-        var skipped = new List<object>();
+        var skipped = new List<TaskBulkSkipped>();
         var warnings = new List<string>();
         string? reason = body.Reason?.Trim();
         if (body.Operation is "shiftDueDates" or "hold" or "cancel") reason = Check.Reason(reason); // G-09 bulk date shift, hold, cancel
@@ -653,7 +669,7 @@ public static class TaskEndpoints
                 _ => throw ApiException.Invalid("operation", "error.one_of", "assign, setDueDate, shiftDueDates, setPriority, setDeliverable, hold, cancel, transition"),
             };
             if (allow && body.Operation is "setDueDate" or "shiftDueDates" && Permissions.DueChangeNeedsReason(a, ctx, facts) && string.IsNullOrWhiteSpace(reason)) allow = Allow.No("error.reason_required");
-            if (!allow) { skipped.Add(new { t.Id, t.Key, reason = Text.Get(allow.Why!, allow.Arg ?? (dname.TryGetValue(t.ProjectDisciplineId, out var n) ? n : dname[t.ProjectDisciplineId] = await DisciplineName(db, t.ProjectDisciplineId))) }); continue; }
+            if (!allow) { skipped.Add(new TaskBulkSkipped(t.Id, t.Key, Text.Get(allow.Why!, allow.Arg ?? (dname.TryGetValue(t.ProjectDisciplineId, out var n) ? n : dname[t.ProjectDisciplineId] = await DisciplineName(db, t.ProjectDisciplineId))))); continue; }
             try
             {
                 switch (body.Operation)
@@ -693,7 +709,7 @@ public static class TaskEndpoints
                 foreach (var x in db.ChangeTracker.Entries().Where(x => x.Entity == t
                     || x.Entity is TaskStartAuthorisation sa && sa.TaskId == t.Id && x.State != EntityState.Unchanged).ToList())
                     if (x.State == EntityState.Added) x.State = EntityState.Detached; else x.Reload();
-                skipped.Add(new { t.Id, t.Key, reason = e.Message });
+                skipped.Add(new TaskBulkSkipped(t.Id, t.Key, e.Message));
             }
         }
         if (updated.Count > 0 && assignee is { } newA) await team.EnsureMember(p, newA, ProjectRole.TeamMember);
@@ -707,7 +723,7 @@ public static class TaskEndpoints
             foreach (var g in updated.GroupBy(t => t.AssigneeId).Where(g => g.Key is not null))
                 await notify.Send(NotificationEvents.DueDateChanged, g.Key, item, Text.Get("notify.bulk_due", actor, g.Count(), p.ProjectNumber), reason);
         await db.SaveChangesAsync();
-        return new { updated = updated.Count, skipped, warnings };
+        return TypedResults.Ok(new TaskBulkResult(updated.Count, skipped, warnings));
     }
 
     public static NotifyItem Item(Project p, WorkTask t) => new(p.Id, ItemType.Task, t.Id, t.Key, $"/projects/{p.ProjectNumber}/tasks?panel=Task:{t.Id}", p.ProjectNumber);

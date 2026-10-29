@@ -19,17 +19,18 @@ import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMe
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useProjectRefresh } from '@/hooks/data'
-import { ApiError, download, get, patch, post, qs, typedRequest } from '@/lib/api'
+import type { components } from '@/gen/api'
+import { ApiError, download, get, qs, typedRequest } from '@/lib/api'
 import { useFlag, useMe } from '@/lib/auth'
 import { addDays, ago, fmtDate, hours, today } from '@/lib/format'
 import { runtimeText, plural, t, tv } from '@/lib/i18n'
-import type { Page as PageOf, ProjectDetail } from '@/lib/types'
+import type { ProjectDetail } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import type { SavedViewKeys } from '@/gen/registry.gen'
 import type { DeliverableRow } from './Deliverables'
 import type { MilestoneRow } from './Milestones'
 import { useCurrentProject } from './ProjectLayout'
-import { BlockDialog } from './TaskPanel'
+import { BlockDialog, readTask, type TaskDetailData } from './TaskPanel'
 import { showPhoneTaskField } from './phone-task-fields'
 import { NOTE_LABEL, OneSignal, type Signal } from '@/components/hub/indicators'
 import { ViewMenu } from '@/components/hub/views'
@@ -40,29 +41,25 @@ import { useSafeForm } from '@/hooks/drafts'
 
 // ---------- Shapes (GET /projects/{id}/tasks, /tasks/{id}) ----------
 
-export interface Blocker { type: string; id?: string; key?: string; name?: string; status?: string; due?: string; overdue: boolean; ownerId?: string; reason?: string; blocking: boolean }
-export interface TaskStateView {
-  isOverdue: boolean; daysOverdue: number; isDueSoon: boolean; isWaiting: boolean; isBlocked: boolean; blockedSince?: string; daysBlocked: number
-  blockedBy?: Blocker[] | null; isBlocking: boolean; blockingCount: number; blockingTaskIds: string[]; isStale: boolean; staleDays: number
-  isUnassigned: boolean; isMissingDueDate: boolean; isDateInconsistent: boolean; inconsistencyDetail?: { text: string }[] | null
-  isInactiveOwner: boolean; isHeldPastDue: boolean; isReviewStalled: boolean; affectedMilestoneIds: string[]; notes: string[]; evaluatedAt: string
-}
-export interface TaskRow {
-  id: string; projectId: string; projectNumber: string; projectName: string; projectStatus: string; key: string; name: string
-  projectDisciplineId: string; disciplineName: string; disciplineCode: string; disciplineColour?: string; disciplineOrder: number
-  deliverableId?: string; deliverableKey?: string; deliverableName?: string; deliverableDueDate?: string; deliverableStatus?: string; deliverableOrder?: number
-  milestoneId?: string; effectiveMilestoneId?: string; milestoneKey?: string; milestoneName?: string; milestoneDate?: string; milestoneDerived: boolean
-  assigneeId?: string; assigneeName?: string; assigneeActive: boolean; reviewerId?: string; reviewerName?: string; requiresReview: boolean
-  priority: string; startDate?: string; dueDate?: string; originalStartDate?: string; originalDueDate?: string; status: string; lane: string
-  progressPct: number; estimatedHours?: number | null; reviewRound: number; dueDateChangeCount: number; lastActivityAt: string; lastActivityActorName?: string; statusChangedAt?: string; completedAt?: string
-  createdAt: string; createdBy?: string; createdByName?: string; sortOrder: number; rowVersion: number
-  manualBlockType?: string; manualBlockReason?: string; manualBlockSetAt?: string; commentCount: number; predecessorCount: number; successorCount: number
-  collaboratorIds: string[]; can?: { assign: boolean; edit: boolean; changeDue: boolean; block: boolean } | null; state?: TaskStateView | null
-  pickupOfferOpen?: boolean
-  /** FR-BKL-01, sent only while `flag.backlog` is on: open, no due date and no start date. */
-  backlog?: boolean | null
-}
-export interface Transition { to: string; allowed: boolean; reason?: string | null; needsReason: boolean; via?: string | null }
+type Schemas = components['schemas']
+/** One blocker in a row's state. The contract carries `state.blockedBy` as free JSON, so it is read through `blockersOf`. */
+export interface Blocker { type: string; id?: string | null; key?: string | null; name?: string | null; status?: string | null; due?: string | null; overdue: boolean; ownerId?: string | null; reason?: string | null; blocking: boolean }
+export type TaskStateView = Schemas['State']
+/** The task row every list, board and panel reads. */
+export type TaskRow = Schemas['TaskQueriesRow']
+export const blockersOf = (s?: TaskStateView | null) => ((s?.blockedBy ?? []) as Blocker[])
+export const inconsistenciesOf = (s?: TaskStateView | null) => ((s?.inconsistencyDetail ?? []) as { text: string }[])
+export type Transition = Schemas['TaskDetailTransition']
+export type TransitionBody = Schemas['TaskTransitionBody']
+/** A status change as the contract takes it: every field named, the ones not given sent as null (the server reads null as absent). */
+export const transitionBody = (b: { toStatus: string; rowVersion: number | null; reason?: string; comment?: string; reviewerId?: string; acknowledgeReadiness?: boolean }): TransitionBody =>
+  ({ toStatus: b.toStatus, rowVersion: b.rowVersion, reason: b.reason ?? null, comment: b.comment ?? null, reviewerId: b.reviewerId ?? null, ...(b.acknowledgeReadiness ? { acknowledgeReadiness: true } : {}) })
+/** Create a task: the contract names every field, so the ones not given go as null (the server reads null as absent). */
+export const createTask = (projectId: string, b: Pick<Schemas['TaskCreateBody'], 'name' | 'projectDisciplineId'> & Partial<Schemas['TaskCreateBody']>) => typedRequest('post', '/api/v1/projects/{id}/tasks', {
+  params: { id: projectId },
+  body: { description: null, deliverableId: null, milestoneId: null, assigneeId: null, reviewerId: null, requiresReview: null, priority: null, startDate: null, dueDate: null, estimatedHours: null, dependsOn: null, ...b },
+})
+export const moveTask = (id: string, body: TransitionBody) => typedRequest('post', '/api/v1/tasks/{id}/transition', { params: { id }, body })
 export interface MoveRequest { id: string; key: string; rowVersion: number; to: string; needsReason: boolean; needsReviewer?: boolean; via?: string | null }
 
 export const TASK_STATUSES = ['Not Started', 'In Progress', 'Ready for Review', 'In Review', 'Revision Required', 'Complete', 'On Hold', 'Cancelled']
@@ -71,7 +68,7 @@ const PROGRESS = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
 /** Blockers as "Why?" reasons: the predecessor, decision or manual block and its state (§13.3.1 blockers box). */
 export function blockerReasons(s?: TaskStateView | null): Reason[] {
-  return (s?.blockedBy ?? []).map((b) => ({
+  return blockersOf(s).map((b) => ({
     text: b.type === 'manual' ? t('task.manualBlocker', { type: tv(b.name ?? ''), reason: b.reason ?? '' })
       : t('task.itemBlocker', { key: b.key ?? '', name: b.name ?? '', status: tv(b.status ?? ''), due: fmtDate(b.due) }) + (b.overdue ? ` · ${t('ind.overdue')}` : ''),
     colour: b.blocking ? 'Red' : 'Yellow', rule: b.blocking ? t('ind.blocked') : t('ind.waiting'),
@@ -93,7 +90,7 @@ function taskSignals(r: TaskRow) {
     s?.isStale && { key: 'stale', tone: 'idle', label: t('ind.staleD', { n: s.staleDays }) },
     s?.isUnassigned && { key: 'unassigned', tone: 'warn', label: t('ind.unassigned') },
     s?.isMissingDueDate && { key: 'noDueDate', tone: 'idle', label: t('ind.noDueDate') },
-    s?.isDateInconsistent && { key: 'dateInconsistent', tone: 'warn', label: t('ind.dateInconsistent'), title: s.inconsistencyDetail?.map((x) => x.text).join('\n') },
+    s?.isDateInconsistent && { key: 'dateInconsistent', tone: 'warn', label: t('ind.dateInconsistent'), title: inconsistenciesOf(s).map((x) => x.text).join('\n') },
     s?.isInactiveOwner && { key: 'inactiveOwner', tone: 'bad', label: t('ind.inactiveOwner') },
     s?.isHeldPastDue && { key: 'heldPastDue', tone: 'warn', label: t('ind.heldPastDue') },
     s?.isReviewStalled && { key: 'reviewStalled', tone: 'warn', label: t('ind.reviewStalled') },
@@ -162,10 +159,10 @@ export function useTaskActions(onChanged: () => void, onSaved?: (id: string, key
 
   const save = async (r: { id: string; key: string; rowVersion: number }, body: Record<string, unknown>): Promise<number | null | undefined> => {
     try {
-      const res = await patch(`tasks/${r.id}`, body, r.rowVersion)
+      const res = await typedRequest('patch', '/api/v1/tasks/{id}', { params: { id: r.id }, body, ifMatch: r.rowVersion })
       onSaved?.(r.id, r.key, describe(body))
       onChanged()
-      return res.rowVersion as number
+      return res.rowVersion
     } catch (e) {
       const err = e as ApiError
       if (err.fieldErrors?.reason && !body.reason) {
@@ -174,8 +171,8 @@ export function useTaskActions(onChanged: () => void, onSaved?: (id: string, key
           cancel: () => resolve(undefined),
           run: async (reason) => {
             try {
-              const result = await patch(`tasks/${r.id}`, { ...body, reason }, r.rowVersion)
-              onSaved?.(r.id, r.key, describe(body)); onChanged(); resolve(result.rowVersion as number); return result
+              const result = await typedRequest('patch', '/api/v1/tasks/{id}', { params: { id: r.id }, body: { ...body, reason }, ifMatch: r.rowVersion })
+              onSaved?.(r.id, r.key, describe(body)); onChanged(); resolve(result.rowVersion); return result
             } catch (reasonError) { resolve(null); throw reasonError }
           },
         }))
@@ -189,8 +186,8 @@ export function useTaskActions(onChanged: () => void, onSaved?: (id: string, key
   /** true when saved, false when refused, null when a dialog opened to collect what the move needs. */
   const move = async (m: MoveRequest): Promise<boolean | null> => {
     if (m.needsReason || m.to === 'Revision Required' || m.needsReviewer) { setMoving(m); return null }
-    const body = { toStatus: m.to, rowVersion: m.rowVersion }
-    try { await post(`tasks/${m.id}/transition`, body); onSaved?.(m.id, m.key, `→ ${tv(m.to)}`); onChanged(); return true }
+    const body = transitionBody({ toStatus: m.to, rowVersion: m.rowVersion })
+    try { await moveTask(m.id, body); onSaved?.(m.id, m.key, `→ ${tv(m.to)}`); onChanged(); return true }
     catch (e) {
       if (needsStartAuthorisation(e)) { setStarting({ id: m.id, key: m.key, to: m.to, body }); return null } // FR-RDY-02
       toast.error(Object.values((e as ApiError).fieldErrors ?? {})[0]?.[0] ?? errorText(e)); onChanged(); return false
@@ -225,7 +222,7 @@ export function useTaskActions(onChanged: () => void, onSaved?: (id: string, key
             const o = offer
             setOffer(null)
             if (o.to === 'Ready for Review') {
-              const d = await get(`tasks/${o.id}`)
+              const d = await readTask(o.id)
               await move({ id: o.id, key: o.key, rowVersion: d.task.rowVersion, to: o.to, needsReason: false, needsReviewer: !d.task.reviewerId })
             } else await move({ ...o, needsReason: false })
           }} />
@@ -243,7 +240,7 @@ function describe(body: Record<string, unknown>): string {
 }
 
 /** Status change with the reason, review comment, reviewer or status note it needs (R-03, AC-TSK-03, G-09, C-08). */
-export function TransitionDialog({ m, onClose, onStart }: { m: MoveRequest; onClose: (done: boolean) => void; onStart?: (body: Record<string, unknown>) => void }) {
+export function TransitionDialog({ m, onClose, onStart }: { m: MoveRequest; onClose: (done: boolean) => void; onStart?: (body: TransitionBody) => void }) {
   const revision = m.to === 'Revision Required'
   const [comment, setComment] = useState('')
   const [reviewer, setReviewer] = useState<string | null>(null)
@@ -252,8 +249,8 @@ export function TransitionDialog({ m, onClose, onStart }: { m: MoveRequest; onCl
       body={m.via ? t('task.via', { via: tv(m.via) }) : undefined} confirmLabel={tv(m.to)}
       reason={m.needsReason ? true : undefined} busy={(revision && !comment.trim()) || (!!m.needsReviewer && !reviewer)}
       onConfirm={async (reason) => {
-        const body = { toStatus: m.to, reason: reason || undefined, comment: comment.trim() || undefined, reviewerId: reviewer ?? undefined, rowVersion: m.rowVersion }
-        try { await post(`tasks/${m.id}/transition`, body) }
+        const body = transitionBody({ toStatus: m.to, reason: reason || undefined, comment: comment.trim() || undefined, reviewerId: reviewer ?? undefined, rowVersion: m.rowVersion })
+        try { await moveTask(m.id, body) }
         catch (e) { if (onStart && needsStartAuthorisation(e)) { onStart(body); return } throw e } // FR-RDY-02: the readiness dialog takes over
         onClose(true)
       }}>
@@ -265,7 +262,7 @@ export function TransitionDialog({ m, onClose, onStart }: { m: MoveRequest; onCl
   )
 }
 
-export function moveFrom(detail: any, x: Transition): MoveRequest {
+export function moveFrom(detail: Pick<TaskDetailData, 'task'>, x: Transition): MoveRequest {
   return { id: detail.task.id, key: detail.task.key, rowVersion: detail.task.rowVersion, to: x.to, needsReason: x.needsReason, via: x.via,
     needsReviewer: x.to === 'Ready for Review' && detail.task.requiresReview && !detail.task.reviewerId }
 }
@@ -279,7 +276,7 @@ export function StatusMenu({ r, onMove, disabled }: { r: TaskRow; onMove: (m: Mo
   const optimistic = useFlag('small_ux')
   const [pending, setPending] = useState<string | null>(null)
   const requestMove = async (m: MoveRequest) => { if (optimistic && (r.status !== 'Not Started' || readiness.data?.needsAuthorisation === false) && !m.needsReason && m.to !== 'Revision Required' && !m.needsReviewer) setPending(m.to); try { await onMove(m) } finally { setPending(null) } }
-  const q = useQuery({ queryKey: ['task', r.id, r.rowVersion], queryFn: () => get(`tasks/${r.id}`), enabled: open })
+  const q = useQuery({ queryKey: ['task', r.id, r.rowVersion], queryFn: () => readTask(r.id), enabled: open })
   const readiness = useQuery({ queryKey: ['task-start-readiness', r.id, r.rowVersion], enabled: optimistic && open && r.status === 'Not Started', queryFn: () => typedRequest('get', '/api/v1/tasks/{id}/start-readiness', { params: { id: r.id } }) })
   if (disabled) return <StatusPill status={r.status} />
   const list: Transition[] = q.data?.permissions.transitions ?? []
@@ -292,7 +289,7 @@ export function StatusMenu({ r, onMove, disabled }: { r: TaskRow; onMove: (m: Mo
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="max-w-80">
         {q.isPending ? <div role="status" aria-label={t('app.loading')} className="p-2"><Spinner /></div> : list.map((x) => (
-          <DropdownMenuItem key={x.to} disabled={!x.allowed} onSelect={() => requestMove(moveFrom(q.data, x))} className={cn('flex-col items-start gap-0', readableDisabled)}>
+          <DropdownMenuItem key={x.to} disabled={!x.allowed} onSelect={() => requestMove(moveFrom(q.data!, x))} className={cn('flex-col items-start gap-0', readableDisabled)}>
             <span>{tv(x.to)}{x.via && <span className="ml-1 text-xs text-muted-foreground">{t('task.viaShort', { via: tv(x.via) })}</span>}</span>
             {!x.allowed && x.reason && <span className="text-xs text-muted-foreground">{x.reason}</span>}
           </DropdownMenuItem>
@@ -528,7 +525,7 @@ function LiveTasksTab() {
   const params = { ...filters, backlog: backlog || undefined, sort: sort || undefined, pageSize: 200 }
   const q = useInfiniteQuery({
     queryKey: ['p', p.id, 'tasks', params],
-    queryFn: ({ pageParam }) => get<PageOf<TaskRow>>(`projects/${p.id}/tasks${qs({ ...params, page: pageParam })}`),
+    queryFn: ({ pageParam }) => typedRequest('get', '/api/v1/projects/{id}/tasks', { params: { id: p.id }, query: { ...params, page: pageParam } }),
     initialPageParam: 1,
     getNextPageParam: (last) => (last.page * last.pageSize < last.totalCount ? last.page + 1 : undefined),
   })
@@ -541,7 +538,7 @@ function LiveTasksTab() {
   const actions = useTaskActions(reload)
   const startTask = async (r: TaskRow) => {
     try {
-      const detail = await typedRequest('get', '/api/v1/tasks/{id}', { params: { id: r.id } })
+      const detail = await readTask(r.id)
       const transition = detail.permissions.transitions.find((x: Transition) => x.to === 'In Progress')
       if (!transition?.allowed) { toast.error(transition?.reason ?? t('app.error')); return }
       await actions.move({ ...moveFrom(detail, transition), needsReason: transition.needsReason || detail.permissions.needsReason })
@@ -582,7 +579,7 @@ function LiveTasksTab() {
       : <span className="flex min-h-(--control-row-h) items-center justify-end">{r.progressPct}%</span> },
     { id: 'estimate', label: 'task.estimate', sort: 'estimate', num: true, cls: 'whitespace-nowrap', cell: (r) => r.estimatedHours == null ? <span className="text-muted-foreground">{t('task.unestimated')}</span> : hours(r.estimatedHours) },
     { id: 'lastActivity', label: 'task.lastActivity', sort: 'lastActivity', cls: 'whitespace-nowrap text-muted-foreground', cell: (r) => <span title={r.lastActivityAt}>{ago(r.lastActivityAt)}{r.lastActivityActorName && ` · ${r.lastActivityActorName}`}</span> },
-    { id: 'milestone', label: 'field.MilestoneId', optional: true, cls: 'whitespace-nowrap', cell: (r) => r.milestoneKey ? <span title={r.milestoneName}><span className="key">{r.milestoneKey}</span>{r.milestoneDerived && <span className="text-muted-foreground"> ↳</span>}</span> : dash },
+    { id: 'milestone', label: 'field.MilestoneId', optional: true, cls: 'whitespace-nowrap', cell: (r) => r.milestoneKey ? <span title={r.milestoneName ?? undefined}><span className="key">{r.milestoneKey}</span>{r.milestoneDerived && <span className="text-muted-foreground"> ↳</span>}</span> : dash },
     { id: 'created', label: 'task.createdCol', sort: 'created', optional: true, cls: 'whitespace-nowrap tabular-nums', cell: (r) => fmtDate(r.createdAt) },
     { id: 'completed', label: 'task.completedCol', sort: 'completed', optional: true, cls: 'whitespace-nowrap tabular-nums', cell: (r) => fmtDate(r.completedAt) },
     { id: 'blocking', label: 'task.blockingCount', optional: true, num: true, cell: (r) => r.state?.blockingCount || dash },
@@ -732,7 +729,7 @@ function BacklogQuickAdd({ p, onCreated }: { p: ProjectDetail; onCreated: () => 
     if (busy || !name.trim() || !disciplineId) return
     setBusy(true)
     try {
-      const r = await post<{ id: string; key: string }>(`projects/${p.id}/tasks`, { name: name.trim(), projectDisciplineId: disciplineId, assigneeId: assignee.id, priority })
+      const r = await createTask(p.id, { name: name.trim(), projectDisciplineId: disciplineId, assigneeId: assignee.id, priority })
       toast.success(t('task.created', { key: r.key }))
       setName('')
       onCreated()
@@ -775,8 +772,8 @@ function TaskBulkDialog({ p, op, ids, deliverables, onClose }: { p: ProjectDetai
       onConfirm={async (reason) => {
         const params = op === 'assign' ? { assigneeId: v } : op === 'setDueDate' ? { dueDate: v } : op === 'shiftDueDates' ? { days: Number(v) }
           : op === 'setPriority' ? { priority: v } : op === 'setDeliverable' ? { deliverableId: v || null } : {}
-        const r = await post(`projects/${p.id}/tasks/bulk`, { taskIds: ids, operation: op, params, reason: reason || undefined })
-        const skipped = r.skipped as { key: string; reason: string }[]
+        const r = await typedRequest('post', '/api/v1/projects/{id}/tasks/bulk', { params: { id: p.id }, body: { taskIds: ids, operation: op, params, reason: reason || null } })
+        const skipped = r.skipped
         toast.success(t('bulk.result', { updated: r.updated, skipped: skipped.length }), { description: skipped.slice(0, 6).map((s) => `${s.key}: ${s.reason}`).join('\n') || undefined, duration: skipped.length ? 12000 : 4000 })
         onClose(true)
       }}>
@@ -813,7 +810,7 @@ export function CreateTask({ p, deliverables, milestones, defaults, onClose }: {
   const submit = async () => {
     setErr(null); setBusy(true)
     try {
-      const r = await post(`projects/${p.id}/tasks`, {
+      const r = await createTask(p.id, {
         name: f.name, description: f.description || null, projectDisciplineId: f.projectDisciplineId, deliverableId: f.deliverableId || null,
         milestoneId: f.deliverableId ? null : f.milestoneId || null, assigneeId: assignee, reviewerId: reviewer, requiresReview: f.requiresReview,
         priority: f.priority, startDate: f.startDate || null, dueDate: f.dueDate || null, estimatedHours: f.estimatedHours === '' || f.estimatedHours == null ? null : Number(f.estimatedHours),

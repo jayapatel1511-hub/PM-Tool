@@ -13,21 +13,22 @@ const { actionRow, actionDetail: actionDetailOf } = require('./meetings.fixture.
 const { riskRow, riskDetail: riskDetailOf, issueRow, issueDetail: issueDetailOf } = require('./registers.fixture.cjs')
 const { milestoneRow, milestoneDetail: milestoneDetailOf } = require('./milestones.fixture.cjs')
 const { deliverableRow, deliverableState, deliverableList, deliverableDetail: deliverableDetailOf } = require('./deliverables.fixture.cjs')
+const { taskRow, taskPage: taskPageOf, taskDetail: taskDetailOf } = require('./tasks.fixture.cjs')
 
 const taskId = '00000000-0000-0000-0000-000000000001'
 const panelIds = { milestone: '00000000-0000-0000-0000-000000000021', deliverable: '00000000-0000-0000-0000-000000000022', decision: '00000000-0000-0000-0000-000000000023', action: '00000000-0000-0000-0000-000000000024', risk: '00000000-0000-0000-0000-000000000025', issue: '00000000-0000-0000-0000-000000000026' }
 const project = { id: '00000000-0000-0000-0000-000000000010', projectNumber: 'P-MOCK', name: 'Synthetic live project', status: 'Active', visibility: 'Open', rowVersion: 1, disciplines: [{ id: '00000000-0000-0000-0000-000000000011', disciplineId: '00000000-0000-0000-0000-000000000012', name: 'Civil', leadUserId: null }], projectDisciplines: [{ id: '00000000-0000-0000-0000-000000000011', disciplineId: '00000000-0000-0000-0000-000000000012', name: 'Civil', leadUserId: null }], links: [], permissions: { edit: { ok: true }, reviewDates: { ok: false }, isPm: true, needsReason: false } }
 Object.assign(project, { client: 'Synthetic client', pmName: 'Alex Chen', phase: null, nextMilestone: null, starred: false, health: { computed: 'Green', reported: 'Green', overrideActive: false, reasons: [] }, permissions: { ...project.permissions, isPm: false, leadOf: [], createTaskIn: [] } })
-const task = { id: taskId, projectId: project.id, projectDisciplineId: '00000000-0000-0000-0000-000000000011', key: 'T-001', name: 'Synthetic task', status: 'Not Started', priority: 'Medium', rowVersion: 1, startDate: null, dueDate: null, assigneeId: null, assigneeName: null, reviewerId: null, reviewerName: null, reviewRound: 0, dueDateChangeCount: 0, effortHours: 0, state: { isWaiting: false, isBlocked: false, daysBlocked: 0, blockedBy: [], affectedMilestoneIds: [], isOverdue: false, isDueSoon: false, isBlocking: false, blockingCount: 0, isStale: false, isUnassigned: true, isMissingDueDate: true, isDateInconsistent: false, notes: [] } }
+const task = taskRow({ id: taskId, projectId: project.id, key: 'T-001', name: 'Synthetic task' })
 const work = myWork({ person: myWorkPerson('00000000-0000-0000-0000-000000000002', 'Alex Chen'), today: '2026-10-03', tasks: [task], projects: [myWorkProject({ id: project.id, projectNumber: project.projectNumber, name: project.name, status: project.status })] })
 const views = viewList()
 const planningGrid = planningFixtureGrid({ currentWeek: '2026-10-03', settings: { horizonWeeks: 6, overPct: 1, underPct: 1, underWeeks: 1, staleDays: 14, maxHoursPerWeek: 40 } })
 const { documentLinks: links } = require('./document-links.fixture.cjs')
 const { comments } = require('./comments.fixture.cjs')
 const { pulse, unreadCount } = require('./notifications.fixture.cjs')
-const taskPage = { items: [], page: 1, pageSize: 200, totalCount: 0 }
+const taskPage = taskPageOf([])
 const me = meView({ id: '00000000-0000-0000-0000-000000000002', displayName: 'Alex Chen', email: 'alex@hub.test', systemRoles: ['StandardUser'], capabilities: { createTask: true, workload: true, admin: true }, settings: { today: '2026-10-03', restrictedProjectsEnabled: true }, flags: { live_events: true, live_project_stamp: true } })
-const taskDetail = { task, description: 'Synthetic fixture task', project: { id: project.id, projectNumber: project.projectNumber, name: project.name, status: project.status }, collaborators: [], watchers: [], permissions: { edit: { ok: true }, assign: { ok: true }, setReviewer: { ok: true }, dueDate: { ok: true }, dueNeedsReason: false, block: { ok: true }, delete: { ok: true }, restore: true, comment: true, transitions: [], dependencies: true, enterTime: true, needsReason: false, allowSelfReview: true } }
+const taskDetail = taskDetailOf({ task, description: 'Synthetic fixture task' })
 const panelPermissions = { edit: { ok: false, reason: 'Synthetic read-only panel' }, manage: { ok: false }, comment: true, changeType: { ok: false }, transitions: [{ to: 'Open', ok: false }, { to: 'Closed', ok: false }] }
 const milestoneDetail = milestoneDetailOf({ milestone: milestoneRow({ id: panelIds.milestone, projectId: project.id, key: 'M-001', name: 'Synthetic milestone', description: 'Synthetic milestone detail' }),
   project: { id: project.id, projectNumber: project.projectNumber, name: project.name, status: project.status } })

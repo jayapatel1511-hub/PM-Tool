@@ -116,3 +116,5 @@ Open items seen while integrating, none caused by this slice: `tools/ratchet.py`
 ## 2026-10-29 Tasks integration checks
 
 The merged Tasks build and helper contract check pass. TasksTests, TaskQueriesTests, TasksContractTests, TaskStartTests and matching ContractTests: 112 passed, zero failed/skipped. Slice mocked Tasks browser rerun with installed Chromium passes (9 writes, 29 reads); merged browser/type/shape checks follow at the full checkpoint. Assumption: the task-row document transformer retains the base optional nullable activity-name property; the activity subtype changes only presence of null, with no new fields. Independent source/schema review found no broken references or missing row-version contract. No hosted or human acceptance.
+
+Merged Tasks frontend follow-up: the build exposed unused legacy imports in MyWork, Decisions and Timeline after automatic merging. Removed only those imports; merged `npm run build` now passes.

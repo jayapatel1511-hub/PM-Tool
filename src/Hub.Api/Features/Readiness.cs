@@ -2,6 +2,7 @@ using System.Text.Json;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Api.Features;
@@ -23,6 +24,54 @@ public static class ReadinessEndpoints
     static readonly string[] LinkTypes = [ItemType.Decision, ItemType.Issue, ItemType.Handoff];
     public sealed record LinkedRecord(string Type, Guid Id, string Key, string Title, string Status);
     public sealed record CheckSource(string Code, LinkedRecord Record);
+
+    // What the five reads answer, written flat in the order the entities and anonymous objects always serialised in: the record's own columns,
+    // then the audit identity, the stamps, the row version and the id. The contract no longer exposes the persistence classes.
+    /// The work's assessment as the inspector reads it.
+    public sealed record ReadinessAssessmentRead(string TargetType, Guid TargetId, Guid OwnerId, string IntendedOutput, string CompletionCriteria, string State, DateTimeOffset EvaluatedAt,
+        string AuditType, Guid ProjectId, Guid? AuditProjectId, string? AuditKey, string? AuditName, DateTimeOffset CreatedAt, Guid? CreatedBy, DateTimeOffset UpdatedAt, Guid? UpdatedBy, int RowVersion, Guid Id);
+    /// One canonical check of the assessment, with the applicability and satisfaction the current evaluation gave it.
+    public sealed record ReadinessCheckRead(Guid AssessmentId, string Code, bool? Applies, bool? Satisfied, string? Reason, string? EvidenceUrl, Guid? RecordedBy,
+        string AuditType, Guid ProjectId, Guid? AuditProjectId, string? AuditKey, string? AuditName, DateTimeOffset CreatedAt, Guid? CreatedBy, DateTimeOffset UpdatedAt, Guid? UpdatedBy, int RowVersion, Guid Id);
+    /// One approved assumption exception on the assessment.
+    public sealed record ReadinessExceptionRead(Guid AssessmentId, Guid BasisVersionId, Guid ApprovedBy, Guid VerifierId, string LimitedWork, string Risk, DateOnly ExpiresOn,
+        string AuditType, Guid ProjectId, Guid? AuditProjectId, string? AuditKey, string? AuditName, DateTimeOffset CreatedAt, Guid? CreatedBy, DateTimeOffset UpdatedAt, Guid? UpdatedBy, int RowVersion, Guid Id);
+    /// One work item's readiness: the assessment, its checks and the source records behind them, the codes still unknown or blocked, and its exceptions.
+    public sealed record ReadinessDetail(ReadinessAssessmentRead Assessment, IReadOnlyList<ReadinessCheckRead> Checks, IReadOnlyList<CheckSource> Sources,
+        string[] Unknown, string[] Blocked, IReadOnlyList<ReadinessExceptionRead> Exceptions);
+    /// One open constraint of the readiness window.
+    public sealed record ReadinessWindowConstraint(int Seq, string Key, string TargetType, Guid TargetId, string Category, string Description, Guid RemovalOwnerId, Guid AffectedOwnerId, DateOnly NeededBy,
+        string SourceUrl, string State, string? ResolutionEvidenceUrl, Guid? VerifiedBy, DateTimeOffset? VerifiedAt, string? LinkedType, Guid? LinkedId,
+        string AuditType, string? AuditKey, string? AuditName, Guid ProjectId, Guid? AuditProjectId, DateTimeOffset CreatedAt, Guid? CreatedBy, DateTimeOffset UpdatedAt, Guid? UpdatedBy, int RowVersion, Guid Id);
+    /// The readiness window behind the page: open constraints needed by its end and the Ready outputs due in it, each list with its own page.
+    public sealed record ReadinessWindow(DateOnly From, DateOnly To, IReadOnlyList<ReadinessWindowConstraint> Constraints, int ConstraintsTotal, int ConstraintsPage, int ReadyPage, int PageSize,
+        bool ConstraintsTruncated, IReadOnlyList<ReadyOutput> ReadyOutputs, int ReadyOutputsTotal, bool ReadyOutputsTruncated);
+    /// One constraint on a work item, with the decision, issue or handoff it links when that record still exists.
+    public sealed record ReadinessConstraintRow(Guid Id, string Key, int RowVersion, string TargetType, Guid TargetId, string Category, string Description, Guid RemovalOwnerId, Guid AffectedOwnerId,
+        DateOnly NeededBy, string SourceUrl, string State, string? ResolutionEvidenceUrl, Guid? VerifiedBy, DateTimeOffset? VerifiedAt, string? LinkedType, Guid? LinkedId,
+        DateTimeOffset CreatedAt, Guid? CreatedBy, LinkedRecord? Linked);
+    /// Where a constraint found by key or search lives, so its work's inspector can open.
+    public sealed record ReadinessConstraintLocation(Guid Id, string Key, string TargetType, Guid TargetId);
+    public sealed record ReadinessPackageRef(Guid Id, string Key, string Title, string Status);
+    /// One submission package the work waits on, the package that now governs it (a superseded one is followed), and whether that package lists the work's own output.
+    public sealed record ReadinessPrerequisiteRow(Guid Id, int RowVersion, Guid PackageId, string Reason, DateTimeOffset CreatedAt, Guid? CreatedBy, DateTimeOffset? RemovedAt, Guid? RemovedBy,
+        string? RemovalReason, ReadinessPackageRef Package, ReadinessPackageRef? Effective, bool ListsOutput);
+
+    // The queries' own projections and the export rows.
+    sealed record AllocationFacts(Guid Id, string Purpose, string Status, DateOnly FromDate, DateOnly ThroughDate);
+    sealed record WorkFacts(Guid Id, string Key, string Name, DateOnly? DueDate, Guid? OwnerId, Guid ProjectDisciplineId);
+    sealed record ReadyExportRow(string Key, string Name, string TargetType, string? Owner, string? Discipline, DateOnly? DueDate, string IntendedOutput, string CompletionCriteria, string State);
+    sealed record ConstraintExportRow(string Key, string? Work, string Category, string Description, string? RemovalOwner, string? AffectedOwner, DateOnly NeededBy, string State, string? Linked, string SourceUrl);
+
+    static ReadinessAssessmentRead Read(ReadinessAssessment a) => new(a.TargetType, a.TargetId, a.OwnerId, a.IntendedOutput, a.CompletionCriteria, a.State, a.EvaluatedAt,
+        a.AuditType, a.ProjectId, a.AuditProjectId, a.AuditKey, a.AuditName, a.CreatedAt, a.CreatedBy, a.UpdatedAt, a.UpdatedBy, a.RowVersion, a.Id);
+    static ReadinessCheckRead Read(ReadinessCheckRecord c) => new(c.AssessmentId, c.Code, c.Applies, c.Satisfied, c.Reason, c.EvidenceUrl, c.RecordedBy,
+        c.AuditType, c.ProjectId, c.AuditProjectId, c.AuditKey, c.AuditName, c.CreatedAt, c.CreatedBy, c.UpdatedAt, c.UpdatedBy, c.RowVersion, c.Id);
+    static ReadinessExceptionRead Read(ReadinessException e) => new(e.AssessmentId, e.BasisVersionId, e.ApprovedBy, e.VerifierId, e.LimitedWork, e.Risk, e.ExpiresOn,
+        e.AuditType, e.ProjectId, e.AuditProjectId, e.AuditKey, e.AuditName, e.CreatedAt, e.CreatedBy, e.UpdatedAt, e.UpdatedBy, e.RowVersion, e.Id);
+    static ReadinessWindowConstraint Read(WorkConstraint c) => new(c.Seq, c.Key, c.TargetType, c.TargetId, c.Category, c.Description, c.RemovalOwnerId, c.AffectedOwnerId, c.NeededBy, c.SourceUrl,
+        c.State, c.ResolutionEvidenceUrl, c.VerifiedBy, c.VerifiedAt, c.LinkedType, c.LinkedId,
+        c.AuditType, c.AuditKey, c.AuditName, c.ProjectId, c.AuditProjectId, c.CreatedAt, c.CreatedBy, c.UpdatedAt, c.UpdatedBy, c.RowVersion, c.Id);
 
     // FR-RDY-03: a constraint points at the same-project decision, issue or handoff that already represents it instead of
     // duplicating it. Deleted records drop out through the soft-deletion query filters, so a stale link reads as unavailable.
@@ -741,7 +790,7 @@ public static class ReadinessEndpoints
                 return row;
             });
 
-    static async Task<object> Detail(Guid projectId, string targetType, Guid targetId, Access access, HubDb db, TimeProvider clock,
+    static async Task<Ok<ReadinessDetail>> Detail(Guid projectId, string targetType, Guid targetId, Access access, HubDb db, TimeProvider clock,
         SettingsStore settings)
     {
         var (project, ctx) = await access.Project(projectId, false);
@@ -762,36 +811,35 @@ public static class ReadinessEndpoints
         var allocationSources = await AllocationEndpoints.VisibleQuery(db, access.Actor, managedProjects)
             .Where(a => a.ProjectId == projectId && (a.Status == AllocationStatus.Proposed || a.Status == AllocationStatus.Confirmed) &&
                 allocationLinks.Any(l => l.AllocationId == a.Id))
-            .Select(a => new { a.Id, a.Purpose, a.Status, a.FromDate, a.ThroughDate }).ToListAsync();
+            .Select(a => new AllocationFacts(a.Id, a.Purpose, a.Status, a.FromDate, a.ThroughDate)).ToListAsync();
         sources.AddRange(allocationSources.Select(a => new CheckSource(a.Purpose == AllocationPurpose.Review
             ? ReadinessCheckCode.ReviewCapacity : ReadinessCheckCode.ProductionCapacity,
             new LinkedRecord("ResourceAllocation", a.Id, "", $"{a.Purpose} · {a.FromDate:yyyy-MM-dd}–{a.ThroughDate:yyyy-MM-dd}", a.Status))));
-        return new { Assessment = assessment, Checks = checks, Sources = sources.Distinct().ToList(), result.Unknown, result.Blocked,
-            Exceptions = await db.ReadinessExceptions.AsNoTracking().Where(e => e.ProjectId == projectId &&
-                e.AssessmentId == assessment.Id).OrderBy(e => e.CreatedAt).ThenBy(e => e.Id).ToListAsync() };
+        return TypedResults.Ok(new ReadinessDetail(Read(assessment), [.. checks.Select(Read)], sources.Distinct().ToList(), result.Unknown, result.Blocked,
+            [.. (await db.ReadinessExceptions.AsNoTracking().Where(e => e.ProjectId == projectId &&
+                e.AssessmentId == assessment.Id).OrderBy(e => e.CreatedAt).ThenBy(e => e.Id).ToListAsync()).Select(Read)]));
     }
 
-    static async Task<object> Constraints(Guid projectId, string targetType, Guid targetId, Access access, HubDb db)
+    static async Task<Ok<List<ReadinessConstraintRow>>> Constraints(Guid projectId, string targetType, Guid targetId, Access access, HubDb db)
     {
         var (project, _) = await access.Project(projectId, false);
         await ReadTarget(db, project, targetType, targetId);
         var rows = await db.WorkConstraints.AsNoTracking().Where(c => c.ProjectId == projectId &&
             c.TargetType == targetType && c.TargetId == targetId).OrderBy(c => c.NeededBy).ThenBy(c => c.CreatedAt).ToListAsync();
-        var result = new List<object>();
+        var result = new List<ReadinessConstraintRow>();
         foreach (var c in rows)
-            result.Add(new { c.Id, c.Key, c.RowVersion, c.TargetType, c.TargetId, c.Category, c.Description, c.RemovalOwnerId,
+            result.Add(new(c.Id, c.Key, c.RowVersion, c.TargetType, c.TargetId, c.Category, c.Description, c.RemovalOwnerId,
                 c.AffectedOwnerId, c.NeededBy, c.SourceUrl, c.State, c.ResolutionEvidenceUrl, c.VerifiedBy, c.VerifiedAt,
                 c.LinkedType, c.LinkedId, c.CreatedAt, c.CreatedBy,
-                Linked = c.LinkedType is { } type ? await Linkable(db, projectId, type, c.LinkedId).FirstOrDefaultAsync() : null });
-        return result;
+                c.LinkedType is { } type ? await Linkable(db, projectId, type, c.LinkedId).FirstOrDefaultAsync() : null));
+        return TypedResults.Ok(result);
     }
 
-    /// Where a constraint found by key or search lives, so its work's inspector can open.
-    static async Task<object> ConstraintById(Guid projectId, Guid id, Access access, HubDb db)
+    static async Task<Ok<ReadinessConstraintLocation>> ConstraintById(Guid projectId, Guid id, Access access, HubDb db)
     {
         await access.Project(projectId, false);
-        return await db.WorkConstraints.AsNoTracking().Where(c => c.ProjectId == projectId && c.Id == id)
-            .Select(c => new { c.Id, c.Key, c.TargetType, c.TargetId }).SingleOrDefaultAsync() ?? throw ApiException.NotFound();
+        return TypedResults.Ok(await db.WorkConstraints.AsNoTracking().Where(c => c.ProjectId == projectId && c.Id == id)
+            .Select(c => new ReadinessConstraintLocation(c.Id, c.Key, c.TargetType, c.TargetId)).SingleOrDefaultAsync() ?? throw ApiException.NotFound());
     }
 
     static async Task<List<LinkedRecord>> LinkOptions(Guid projectId, string type, Access access, HubDb db)
@@ -823,11 +871,11 @@ public static class ReadinessEndpoints
 
         var tasks = await db.Tasks.AsNoTracking().Where(t => t.ProjectId == projectId && t.DeletedAt == null &&
             t.DueDate >= first && t.DueDate <= last && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled && t.Status != TaskStatuses.OnHold)
-            .Select(t => new { t.Id, t.Key, t.Name, t.DueDate, OwnerId = t.AssigneeId, t.ProjectDisciplineId })
+            .Select(t => new WorkFacts(t.Id, t.Key, t.Name, t.DueDate, t.AssigneeId, t.ProjectDisciplineId))
             .ToListAsync();
         var deliverables = await db.Deliverables.AsNoTracking().Where(d => d.ProjectId == projectId && d.DeletedAt == null &&
             d.DueDate >= first && d.DueDate <= last && d.Status != DeliverableStatus.Issued && d.Status != DeliverableStatus.Accepted && d.Status != DeliverableStatus.Cancelled && d.Status != DeliverableStatus.OnHold)
-            .Select(d => new { d.Id, d.Key, d.Name, d.DueDate, OwnerId = d.OwnerId, d.ProjectDisciplineId })
+            .Select(d => new WorkFacts(d.Id, d.Key, d.Name, d.DueDate, d.OwnerId, d.ProjectDisciplineId))
             .ToListAsync();
         var assessments = await db.ReadinessAssessments.AsNoTracking().Where(a => a.ProjectId == projectId &&
             ((a.TargetType == "Task" && tasks.Select(t => t.Id).Contains(a.TargetId)) ||
@@ -852,7 +900,7 @@ public static class ReadinessEndpoints
         return (first, last, constraints, [.. ready.OrderBy(r => r.DueDate).ThenBy(r => r.Key)]);
     }
 
-    static async Task<object> Window(Guid projectId, DateOnly? from, DateOnly? to, int? constraintsPage, int? readyPage, int? pageSize, Access access, HubDb db,
+    static async Task<Ok<ReadinessWindow>> Window(Guid projectId, DateOnly? from, DateOnly? to, int? constraintsPage, int? readyPage, int? pageSize, Access access, HubDb db,
         SettingsStore settings, TimeProvider clock)
     {
         var (project, _) = await access.Project(projectId, false);
@@ -864,11 +912,11 @@ public static class ReadinessEndpoints
         if (!paged) size = 500; // existing preview callers retain their bounded response
         var constraints = await window.Constraints.Skip((cp - 1) * size).Take(size).ToListAsync();
         var readyTotal = window.Ready.Count;
-        return new { From = window.First, To = window.Last, Constraints = constraints, ConstraintsTotal = constraintsTotal,
-            ConstraintsPage = cp, ReadyPage = rp, PageSize = size,
-            ConstraintsTruncated = !paged && constraintsTotal > constraints.Count,
-            ReadyOutputs = window.Ready.Skip((rp - 1) * size).Take(size),
-            ReadyOutputsTotal = readyTotal, ReadyOutputsTruncated = !paged && readyTotal > size };
+        return TypedResults.Ok(new ReadinessWindow(window.First, window.Last, [.. constraints.Select(Read)], constraintsTotal,
+            cp, rp, size,
+            !paged && constraintsTotal > constraints.Count,
+            [.. window.Ready.Skip((rp - 1) * size).Take(size)],
+            readyTotal, !paged && readyTotal > size));
     }
 
     static readonly Col[] ConstraintColumns = Hub.Api.Records.WorkConstraintRecord.ReadinessConstraintColumns;
@@ -892,8 +940,8 @@ public static class ReadinessEndpoints
             var users = await Names(window.Ready.Where(r => r.OwnerId != null).Select(r => r.OwnerId!.Value));
             var disciplines = await db.ProjectDisciplines.AsNoTracking().Where(d => d.ProjectId == projectId)
                 .Join(db.Disciplines, pd => pd.DisciplineId, d => d.Id, (pd, d) => new { pd.Id, d.Name }).ToDictionaryAsync(d => d.Id, d => d.Name);
-            var ready = window.Ready.Select(r => new { r.Key, r.Name, r.TargetType, Owner = r.OwnerId is { } o ? users.GetValueOrDefault(o) : null,
-                Discipline = disciplines.GetValueOrDefault(r.DisciplineId), r.DueDate, r.IntendedOutput, r.CompletionCriteria, r.State });
+            var ready = window.Ready.Select(r => new ReadyExportRow(r.Key, r.Name, r.TargetType, r.OwnerId is { } o ? users.GetValueOrDefault(o) : null,
+                disciplines.GetValueOrDefault(r.DisciplineId), r.DueDate, r.IntendedOutput, r.CompletionCriteria, r.State));
             return await ExportFile.Send(db, settings, format, Text.Get("export.readyOutputs", project.ProjectNumber), ReadyColumns,
                 JsonSerializer.SerializeToNode(ready, JsonOpts.Web)!.AsArray(), filters, project.Id, $"{project.ProjectNumber}-ready-outputs", clock);
         }
@@ -901,9 +949,9 @@ public static class ReadinessEndpoints
         var people = await Names(rows.SelectMany(r => new[] { r.RemovalOwnerId, r.AffectedOwnerId }));
         var work = await WorkLabels(db, projectId, rows.Select(r => r.TargetId).ToArray());
         var linked = await LinkedLabels(db, projectId, rows.Where(r => r.LinkedId != null).Select(r => r.LinkedId!.Value).ToArray());
-        var constraints = rows.Select(c => new { c.Key, Work = work.GetValueOrDefault(c.TargetId), c.Category, c.Description,
-            RemovalOwner = people.GetValueOrDefault(c.RemovalOwnerId), AffectedOwner = people.GetValueOrDefault(c.AffectedOwnerId), c.NeededBy, c.State,
-            Linked = c.LinkedId is { } id ? linked.GetValueOrDefault(id) ?? Text.Get("readiness.linked_unavailable") : null, c.SourceUrl });
+        var constraints = rows.Select(c => new ConstraintExportRow(c.Key, work.GetValueOrDefault(c.TargetId), c.Category, c.Description,
+            people.GetValueOrDefault(c.RemovalOwnerId), people.GetValueOrDefault(c.AffectedOwnerId), c.NeededBy, c.State,
+            c.LinkedId is { } id ? linked.GetValueOrDefault(id) ?? Text.Get("readiness.linked_unavailable") : null, c.SourceUrl));
         return await ExportFile.Send(db, settings, format, Text.Get("export.readinessConstraints", project.ProjectNumber), ConstraintColumns,
             JsonSerializer.SerializeToNode(constraints, JsonOpts.Web)!.AsArray(), filters, project.Id, $"{project.ProjectNumber}-readiness-constraints", clock);
     }
@@ -1003,25 +1051,25 @@ public static class ReadinessEndpoints
         notify.Send(eventType, recipients, new NotifyItem(project.Id, "WorkConstraint", row.Id, target.Key,
             $"/projects/{project.ProjectNumber}/readiness", project.ProjectNumber), title);
 
-    static async Task<object> Prerequisites(Guid projectId, string targetType, Guid targetId, Access access, HubDb db)
+    static async Task<Ok<List<ReadinessPrerequisiteRow>>> Prerequisites(Guid projectId, string targetType, Guid targetId, Access access, HubDb db)
     {
         var (project, _) = await access.Project(projectId, false);
         var target = await ReadTarget(db, project, targetType, targetId);
         var deliverableId = await OwnDeliverable(db, target.Type, target.Id);
         var links = await db.ReadinessSubmissionPrerequisites.AsNoTracking().Where(l => l.ProjectId == projectId &&
             l.TargetType == target.Type && l.TargetId == target.Id).OrderBy(l => l.CreatedAt).ThenBy(l => l.Id).ToListAsync();
-        var rows = new List<object>();
+        var rows = new List<ReadinessPrerequisiteRow>();
         foreach (var link in links)
         {
             var package = await db.SubmissionPackages.AsNoTracking().Where(p => p.ProjectId == projectId && p.Id == link.PackageId)
-                .Select(p => new { p.Id, p.Key, p.Title, p.Status }).SingleAsync();
+                .Select(p => new ReadinessPackageRef(p.Id, p.Key, p.Title, p.Status)).SingleAsync();
             var effective = await EffectivePackage(db, projectId, link.PackageId);
-            rows.Add(new { link.Id, link.RowVersion, link.PackageId, link.Reason, link.CreatedAt, link.CreatedBy,
-                link.RemovedAt, link.RemovedBy, link.RemovalReason, Package = package,
-                Effective = effective is null ? null : new { effective.Id, effective.Key, effective.Title, effective.Status },
-                ListsOutput = effective is not null && await ContainsOutput(db, effective, deliverableId) });
+            rows.Add(new(link.Id, link.RowVersion, link.PackageId, link.Reason, link.CreatedAt, link.CreatedBy,
+                link.RemovedAt, link.RemovedBy, link.RemovalReason, package,
+                effective is null ? null : new ReadinessPackageRef(effective.Id, effective.Key, effective.Title, effective.Status),
+                effective is not null && await ContainsOutput(db, effective, deliverableId)));
         }
-        return rows;
+        return TypedResults.Ok(rows);
     }
 
     static Task<Coordination.Result> AddPrerequisite(Guid projectId, string targetType, Guid targetId,

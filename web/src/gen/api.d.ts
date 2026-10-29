@@ -11657,7 +11657,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["ReadinessConstraintLocation"];
                     };
                 };
             };
@@ -11739,7 +11739,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["ReadinessWindow"];
                     };
                 };
             };
@@ -11818,7 +11818,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["ReadinessDetail"];
                     };
                 };
             };
@@ -11928,7 +11928,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["ReadinessConstraintRow"][];
                     };
                 };
             };
@@ -12081,7 +12081,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["ReadinessPrerequisiteRow"][];
                     };
                 };
             };
@@ -17270,6 +17270,10 @@ export interface components {
             link: string;
             name: string;
         };
+        CheckSource: {
+            code: string;
+            record: components["schemas"]["LinkedRecord"];
+        };
         ClientConfig: {
             authMode: string;
             entra: components["schemas"]["EntraClientConfig"];
@@ -20881,6 +20885,108 @@ export interface components {
             all: null | boolean;
             ids: null | string[];
         };
+        ReadinessAssessmentRead: {
+            auditKey: null | string;
+            auditName: null | string;
+            /** Format: uuid */
+            auditProjectId: null | string;
+            auditType: string;
+            completionCriteria: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            /** Format: date-time */
+            evaluatedAt: string;
+            /** Format: uuid */
+            id: string;
+            intendedOutput: string;
+            /** Format: uuid */
+            ownerId: string;
+            /** Format: uuid */
+            projectId: string;
+            /** Format: int32 */
+            rowVersion: number;
+            state: string;
+            /** Format: uuid */
+            targetId: string;
+            targetType: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: uuid */
+            updatedBy: null | string;
+        };
+        ReadinessCheckRead: {
+            applies: null | boolean;
+            /** Format: uuid */
+            assessmentId: string;
+            auditKey: null | string;
+            auditName: null | string;
+            /** Format: uuid */
+            auditProjectId: null | string;
+            auditType: string;
+            code: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            evidenceUrl: null | string;
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            projectId: string;
+            reason: null | string;
+            /** Format: uuid */
+            recordedBy: null | string;
+            /** Format: int32 */
+            rowVersion: number;
+            satisfied: null | boolean;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: uuid */
+            updatedBy: null | string;
+        };
+        ReadinessConstraintLocation: {
+            /** Format: uuid */
+            id: string;
+            key: string;
+            /** Format: uuid */
+            targetId: string;
+            targetType: string;
+        };
+        ReadinessConstraintRow: {
+            /** Format: uuid */
+            affectedOwnerId: string;
+            category: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            description: string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            linked: null | components["schemas"]["LinkedRecord"];
+            /** Format: uuid */
+            linkedId: null | string;
+            linkedType: null | string;
+            /** Format: date */
+            neededBy: string;
+            /** Format: uuid */
+            removalOwnerId: string;
+            resolutionEvidenceUrl: null | string;
+            /** Format: int32 */
+            rowVersion: number;
+            sourceUrl: string;
+            state: string;
+            /** Format: uuid */
+            targetId: string;
+            targetType: string;
+            /** Format: date-time */
+            verifiedAt: null | string;
+            /** Format: uuid */
+            verifiedBy: null | string;
+        };
         ReadinessCreateBody: {
             /** Format: int32 */
             assessmentRowVersion?: null | number;
@@ -20891,6 +20997,158 @@ export interface components {
             requestId: string;
             /** Format: int32 */
             targetRowVersion: number;
+        };
+        ReadinessDetail: {
+            assessment: components["schemas"]["ReadinessAssessmentRead"];
+            blocked: string[];
+            checks: components["schemas"]["ReadinessCheckRead"][];
+            exceptions: components["schemas"]["ReadinessExceptionRead"][];
+            sources: components["schemas"]["CheckSource"][];
+            unknown: string[];
+        };
+        ReadinessExceptionRead: {
+            /** Format: uuid */
+            approvedBy: string;
+            /** Format: uuid */
+            assessmentId: string;
+            auditKey: null | string;
+            auditName: null | string;
+            /** Format: uuid */
+            auditProjectId: null | string;
+            auditType: string;
+            /** Format: uuid */
+            basisVersionId: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            /** Format: date */
+            expiresOn: string;
+            /** Format: uuid */
+            id: string;
+            limitedWork: string;
+            /** Format: uuid */
+            projectId: string;
+            risk: string;
+            /** Format: int32 */
+            rowVersion: number;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: uuid */
+            updatedBy: null | string;
+            /** Format: uuid */
+            verifierId: string;
+        };
+        ReadinessPackageRef: {
+            /** Format: uuid */
+            id: string;
+            key: string;
+            status: string;
+            title: string;
+        };
+        ReadinessPrerequisiteRow: {
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            effective: null | components["schemas"]["ReadinessPackageRef"];
+            /** Format: uuid */
+            id: string;
+            listsOutput: boolean;
+            package: components["schemas"]["ReadinessPackageRef"];
+            /** Format: uuid */
+            packageId: string;
+            reason: string;
+            removalReason: null | string;
+            /** Format: date-time */
+            removedAt: null | string;
+            /** Format: uuid */
+            removedBy: null | string;
+            /** Format: int32 */
+            rowVersion: number;
+        };
+        ReadinessWindow: {
+            constraints: components["schemas"]["ReadinessWindowConstraint"][];
+            /** Format: int32 */
+            constraintsPage: number;
+            /** Format: int32 */
+            constraintsTotal: number;
+            constraintsTruncated: boolean;
+            /** Format: date */
+            from: string;
+            /** Format: int32 */
+            pageSize: number;
+            readyOutputs: components["schemas"]["ReadyOutput"][];
+            /** Format: int32 */
+            readyOutputsTotal: number;
+            readyOutputsTruncated: boolean;
+            /** Format: int32 */
+            readyPage: number;
+            /** Format: date */
+            to: string;
+        };
+        ReadinessWindowConstraint: {
+            /** Format: uuid */
+            affectedOwnerId: string;
+            auditKey: null | string;
+            auditName: null | string;
+            /** Format: uuid */
+            auditProjectId: null | string;
+            auditType: string;
+            category: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            description: string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            /** Format: uuid */
+            linkedId: null | string;
+            linkedType: null | string;
+            /** Format: date */
+            neededBy: string;
+            /** Format: uuid */
+            projectId: string;
+            /** Format: uuid */
+            removalOwnerId: string;
+            resolutionEvidenceUrl: null | string;
+            /** Format: int32 */
+            rowVersion: number;
+            /** Format: int32 */
+            seq: number;
+            sourceUrl: string;
+            state: string;
+            /** Format: uuid */
+            targetId: string;
+            targetType: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: uuid */
+            updatedBy: null | string;
+            /** Format: date-time */
+            verifiedAt: null | string;
+            /** Format: uuid */
+            verifiedBy: null | string;
+        };
+        ReadyOutput: {
+            completionCriteria: string;
+            /** Format: uuid */
+            disciplineId: string;
+            /** Format: date */
+            dueDate: null | string;
+            /** Format: uuid */
+            id: string;
+            intendedOutput: string;
+            key: string;
+            name: string;
+            /** Format: uuid */
+            ownerId: null | string;
+            state: string;
+            /** Format: uuid */
+            targetId: string;
+            targetType: string;
         };
         RealisedRiskIssue: {
             /** Format: uuid */

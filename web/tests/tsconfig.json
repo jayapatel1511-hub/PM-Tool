@@ -45,6 +45,7 @@
     "availability.fixture.cjs",
     "allocations.fixture.cjs",
     "admin.fixture.cjs",
-    "deliverables.fixture.cjs"
+    "deliverables.fixture.cjs",
+    "readiness.fixture.cjs"
   ]
 }

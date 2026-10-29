@@ -16728,6 +16728,33 @@
     "$.components.schemas.CheckRow.type": [
       "string"
     ],
+    "$.components.schemas.CheckSource": [
+      "object"
+    ],
+    "$.components.schemas.CheckSource.properties": [
+      "object"
+    ],
+    "$.components.schemas.CheckSource.properties.code": [
+      "object"
+    ],
+    "$.components.schemas.CheckSource.properties.code.type": [
+      "string"
+    ],
+    "$.components.schemas.CheckSource.properties.record": [
+      "object"
+    ],
+    "$.components.schemas.CheckSource.properties.record.$ref": [
+      "string"
+    ],
+    "$.components.schemas.CheckSource.required": [
+      "array"
+    ],
+    "$.components.schemas.CheckSource.required[]": [
+      "string"
+    ],
+    "$.components.schemas.CheckSource.type": [
+      "string"
+    ],
     "$.components.schemas.ClientConfig": [
       "object"
     ],
@@ -40446,6 +40473,609 @@
     "$.components.schemas.ReadBody.type": [
       "string"
     ],
+    "$.components.schemas.ReadinessAssessmentRead": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.auditKey": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.auditKey.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.auditKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.auditName": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.auditName.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.auditName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.auditProjectId": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.auditProjectId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.auditProjectId.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.auditProjectId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.auditType": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.auditType.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.completionCriteria": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.completionCriteria.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.createdBy": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.createdBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.createdBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.createdBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.evaluatedAt": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.evaluatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.evaluatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.intendedOutput": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.intendedOutput.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.ownerId": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.ownerId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.ownerId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.state": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.state.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.targetId": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.targetId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.targetId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.targetType": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.targetType.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.updatedAt": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.updatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.updatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.updatedBy": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.updatedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.updatedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.properties.updatedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.required": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessAssessmentRead.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessCheckRead": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.applies": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.applies.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.applies.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.assessmentId": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.assessmentId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.assessmentId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.auditKey": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.auditKey.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.auditKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.auditName": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.auditName.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.auditName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.auditProjectId": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.auditProjectId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.auditProjectId.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.auditProjectId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.auditType": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.auditType.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.code": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.code.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.createdBy": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.createdBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.createdBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.createdBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.evidenceUrl": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.evidenceUrl.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.evidenceUrl.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.reason": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.reason.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.reason.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.recordedBy": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.recordedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.recordedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.recordedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.satisfied": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.satisfied.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.satisfied.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.updatedAt": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.updatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.updatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.updatedBy": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.updatedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.updatedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessCheckRead.properties.updatedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessCheckRead.required": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessCheckRead.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessCheckRead.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintLocation": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessConstraintLocation.properties": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessConstraintLocation.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessConstraintLocation.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintLocation.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintLocation.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessConstraintLocation.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintLocation.properties.targetId": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessConstraintLocation.properties.targetId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintLocation.properties.targetId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintLocation.properties.targetType": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessConstraintLocation.properties.targetType.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintLocation.required": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessConstraintLocation.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintLocation.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.affectedOwnerId": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.affectedOwnerId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.affectedOwnerId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.category": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.category.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.createdBy": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.createdBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.createdBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.createdBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.description": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.description.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.linked": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.linked.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.linked.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.linked.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.linked.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.linkedId": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.linkedId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.linkedId.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.linkedId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.linkedType": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.linkedType.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.linkedType.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.neededBy": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.neededBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.neededBy.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.removalOwnerId": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.removalOwnerId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.removalOwnerId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.resolutionEvidenceUrl": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.resolutionEvidenceUrl.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.resolutionEvidenceUrl.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.sourceUrl": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.sourceUrl.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.state": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.state.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.targetId": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.targetId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.targetId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.targetType": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.targetType.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.verifiedAt": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.verifiedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.verifiedAt.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.verifiedAt.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.verifiedBy": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.verifiedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.verifiedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.properties.verifiedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.required": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessConstraintRow.type": [
+      "string"
+    ],
     "$.components.schemas.ReadinessCreateBody": [
       "object"
     ],
@@ -40516,6 +41146,933 @@
       "string"
     ],
     "$.components.schemas.ReadinessCreateBody.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessDetail": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessDetail.properties": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessDetail.properties.assessment": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessDetail.properties.assessment.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessDetail.properties.blocked": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessDetail.properties.blocked.items": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessDetail.properties.blocked.items.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessDetail.properties.blocked.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessDetail.properties.checks": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessDetail.properties.checks.items": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessDetail.properties.checks.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessDetail.properties.checks.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessDetail.properties.exceptions": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessDetail.properties.exceptions.items": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessDetail.properties.exceptions.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessDetail.properties.exceptions.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessDetail.properties.sources": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessDetail.properties.sources.items": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessDetail.properties.sources.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessDetail.properties.sources.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessDetail.properties.unknown": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessDetail.properties.unknown.items": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessDetail.properties.unknown.items.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessDetail.properties.unknown.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessDetail.required": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessDetail.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessDetail.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.approvedBy": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.approvedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.approvedBy.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.assessmentId": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.assessmentId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.assessmentId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.auditKey": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.auditKey.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.auditKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.auditName": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.auditName.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.auditName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.auditProjectId": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.auditProjectId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.auditProjectId.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.auditProjectId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.auditType": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.auditType.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.basisVersionId": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.basisVersionId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.basisVersionId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.createdBy": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.createdBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.createdBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.createdBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.expiresOn": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.expiresOn.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.expiresOn.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.limitedWork": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.limitedWork.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.risk": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.risk.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.updatedAt": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.updatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.updatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.updatedBy": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.updatedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.updatedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.updatedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.verifierId": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.verifierId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.properties.verifierId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.required": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessExceptionRead.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessPackageRef": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessPackageRef.properties": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessPackageRef.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessPackageRef.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessPackageRef.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessPackageRef.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessPackageRef.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessPackageRef.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessPackageRef.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessPackageRef.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessPackageRef.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessPackageRef.required": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessPackageRef.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessPackageRef.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.createdBy": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.createdBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.createdBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.createdBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.effective": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.effective.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.effective.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.effective.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.effective.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.listsOutput": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.listsOutput.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.package": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.package.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.packageId": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.packageId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.packageId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.reason": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.reason.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.removalReason": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.removalReason.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.removalReason.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.removedAt": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.removedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.removedAt.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.removedAt.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.removedBy": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.removedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.removedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.removedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.required": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessPrerequisiteRow.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindow": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindow.properties": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.constraints": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.constraints.items": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.constraints.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.constraints.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.constraintsPage": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.constraintsPage.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.constraintsPage.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.constraintsPage.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.constraintsTotal": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.constraintsTotal.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.constraintsTotal.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.constraintsTotal.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.constraintsTruncated": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.constraintsTruncated.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.from": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.from.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.from.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.pageSize": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.pageSize.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.pageSize.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.pageSize.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.readyOutputs": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.readyOutputs.items": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.readyOutputs.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.readyOutputs.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.readyOutputsTotal": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.readyOutputsTotal.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.readyOutputsTotal.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.readyOutputsTotal.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.readyOutputsTruncated": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.readyOutputsTruncated.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.readyPage": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.readyPage.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.readyPage.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.readyPage.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.to": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.to.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindow.properties.to.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindow.required": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessWindow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindow.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.affectedOwnerId": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.affectedOwnerId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.affectedOwnerId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.auditKey": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.auditKey.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.auditKey.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.auditName": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.auditName.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.auditName.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.auditProjectId": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.auditProjectId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.auditProjectId.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.auditProjectId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.auditType": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.auditType.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.category": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.category.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.createdAt": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.createdAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.createdAt.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.createdBy": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.createdBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.createdBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.createdBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.description": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.description.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.linkedId": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.linkedId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.linkedId.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.linkedId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.linkedType": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.linkedType.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.linkedType.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.neededBy": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.neededBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.neededBy.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.removalOwnerId": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.removalOwnerId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.removalOwnerId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.resolutionEvidenceUrl": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.resolutionEvidenceUrl.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.resolutionEvidenceUrl.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.seq": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.seq.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.seq.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.seq.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.sourceUrl": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.sourceUrl.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.state": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.state.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.targetId": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.targetId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.targetId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.targetType": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.targetType.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.updatedAt": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.updatedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.updatedAt.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.updatedBy": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.updatedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.updatedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.updatedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.verifiedAt": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.verifiedAt.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.verifiedAt.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.verifiedAt.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.verifiedBy": [
+      "object"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.verifiedBy.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.verifiedBy.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.properties.verifiedBy.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.required": [
+      "array"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadinessWindowConstraint.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadyOutput": [
+      "object"
+    ],
+    "$.components.schemas.ReadyOutput.properties": [
+      "object"
+    ],
+    "$.components.schemas.ReadyOutput.properties.completionCriteria": [
+      "object"
+    ],
+    "$.components.schemas.ReadyOutput.properties.completionCriteria.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadyOutput.properties.disciplineId": [
+      "object"
+    ],
+    "$.components.schemas.ReadyOutput.properties.disciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadyOutput.properties.disciplineId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadyOutput.properties.dueDate": [
+      "object"
+    ],
+    "$.components.schemas.ReadyOutput.properties.dueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadyOutput.properties.dueDate.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadyOutput.properties.dueDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadyOutput.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.ReadyOutput.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadyOutput.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadyOutput.properties.intendedOutput": [
+      "object"
+    ],
+    "$.components.schemas.ReadyOutput.properties.intendedOutput.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadyOutput.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.ReadyOutput.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadyOutput.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.ReadyOutput.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadyOutput.properties.ownerId": [
+      "object"
+    ],
+    "$.components.schemas.ReadyOutput.properties.ownerId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadyOutput.properties.ownerId.type": [
+      "array"
+    ],
+    "$.components.schemas.ReadyOutput.properties.ownerId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadyOutput.properties.state": [
+      "object"
+    ],
+    "$.components.schemas.ReadyOutput.properties.state.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadyOutput.properties.targetId": [
+      "object"
+    ],
+    "$.components.schemas.ReadyOutput.properties.targetId.format": [
+      "string"
+    ],
+    "$.components.schemas.ReadyOutput.properties.targetId.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadyOutput.properties.targetType": [
+      "object"
+    ],
+    "$.components.schemas.ReadyOutput.properties.targetType.type": [
+      "string"
+    ],
+    "$.components.schemas.ReadyOutput.required": [
+      "array"
+    ],
+    "$.components.schemas.ReadyOutput.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ReadyOutput.type": [
       "string"
     ],
     "$.components.schemas.RealisedRiskIssue": [
@@ -75084,6 +76641,9 @@
     "$.paths./api/v1/projects/{projectId}/readiness/constraints/{id}.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/projects/{projectId}/readiness/constraints/{id}.get.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/projects/{projectId}/readiness/constraints/{id}.get.responses.200.description": [
       "string"
     ],
@@ -75204,6 +76764,9 @@
     "$.paths./api/v1/projects/{projectId}/readiness/window.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/projects/{projectId}/readiness/window.get.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/projects/{projectId}/readiness/window.get.responses.200.description": [
       "string"
     ],
@@ -75302,6 +76865,9 @@
     ],
     "$.paths./api/v1/projects/{projectId}/readiness/{targetType}/{targetId}.get.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/projects/{projectId}/readiness/{targetType}/{targetId}.get.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/projects/{projectId}/readiness/{targetType}/{targetId}.get.responses.200.description": [
       "string"
@@ -75503,6 +77069,15 @@
     ],
     "$.paths./api/v1/projects/{projectId}/readiness/{targetType}/{targetId}/constraints.get.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/projects/{projectId}/readiness/{targetType}/{targetId}/constraints.get.responses.200.content.application/json.schema.items": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{projectId}/readiness/{targetType}/{targetId}/constraints.get.responses.200.content.application/json.schema.items.$ref": [
+      "string"
+    ],
+    "$.paths./api/v1/projects/{projectId}/readiness/{targetType}/{targetId}/constraints.get.responses.200.content.application/json.schema.type": [
+      "string"
     ],
     "$.paths./api/v1/projects/{projectId}/readiness/{targetType}/{targetId}/constraints.get.responses.200.description": [
       "string"
@@ -75779,6 +77354,15 @@
     ],
     "$.paths./api/v1/projects/{projectId}/readiness/{targetType}/{targetId}/submission-prerequisites.get.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/projects/{projectId}/readiness/{targetType}/{targetId}/submission-prerequisites.get.responses.200.content.application/json.schema.items": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{projectId}/readiness/{targetType}/{targetId}/submission-prerequisites.get.responses.200.content.application/json.schema.items.$ref": [
+      "string"
+    ],
+    "$.paths./api/v1/projects/{projectId}/readiness/{targetType}/{targetId}/submission-prerequisites.get.responses.200.content.application/json.schema.type": [
+      "string"
     ],
     "$.paths./api/v1/projects/{projectId}/readiness/{targetType}/{targetId}/submission-prerequisites.get.responses.200.description": [
       "string"
@@ -96775,6 +98359,38 @@
       "string"
     ]
   },
+  "GET /api/v1/projects/{projectId}/readiness/window 400": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.errors": [
+      "object"
+    ],
+    "$.errors.to": [
+      "array"
+    ],
+    "$.errors.to[]": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "GET /api/v1/projects/{projectId}/readiness/window 404": {
     "$": [
       "object"
@@ -97084,6 +98700,38 @@
       "string"
     ]
   },
+  "GET /api/v1/projects/{projectId}/readiness/{targetType}/{targetId} 400": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.errors": [
+      "object"
+    ],
+    "$.errors.targetType": [
+      "array"
+    ],
+    "$.errors.targetType[]": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "GET /api/v1/projects/{projectId}/readiness/{targetType}/{targetId} 404": {
     "$": [
       "object"
@@ -97196,6 +98844,38 @@
       "string"
     ]
   },
+  "GET /api/v1/projects/{projectId}/readiness/{targetType}/{targetId}/constraints 400": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.errors": [
+      "object"
+    ],
+    "$.errors.targetId": [
+      "array"
+    ],
+    "$.errors.targetId[]": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "GET /api/v1/projects/{projectId}/readiness/{targetType}/{targetId}/submission-prerequisites 200": {
     "$": [
       "array"
@@ -97265,6 +98945,38 @@
     ],
     "$[].rowVersion": [
       "number"
+    ]
+  },
+  "GET /api/v1/projects/{projectId}/readiness/{targetType}/{targetId}/submission-prerequisites 400": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.errors": [
+      "object"
+    ],
+    "$.errors.targetType": [
+      "array"
+    ],
+    "$.errors.targetType[]": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
     ]
   },
   "GET /api/v1/projects/{projectId}/reviews 200": {

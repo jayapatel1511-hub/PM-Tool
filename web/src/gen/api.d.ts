@@ -9770,7 +9770,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["PackProposalRead"];
                     };
                 };
             };
@@ -9797,7 +9797,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["PackAdded"];
                     };
                 };
             };
@@ -15021,7 +15021,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["TemplateList"];
                     };
                 };
             };
@@ -15040,12 +15040,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["TemplateCreated"];
+                    };
                 };
             };
         };
@@ -15079,7 +15081,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["TemplateRead"];
                     };
                 };
             };
@@ -15097,8 +15099,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -15135,12 +15137,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["BasisSuggestionCreated"];
+                    };
                 };
             };
         };
@@ -15172,8 +15176,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -15211,7 +15215,18 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["TemplateDraft"];
+                    };
+                };
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TemplateDraft"];
+                    };
                 };
             };
         };
@@ -15292,7 +15307,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["TemplatePublished"];
                     };
                 };
             };
@@ -15323,8 +15338,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -15367,7 +15382,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["TemplateRead"];
                     };
                 };
             };
@@ -16991,6 +17006,10 @@ export interface components {
             templateDisciplineId: string;
             title: string;
             units: null | string;
+        };
+        BasisSuggestionCreated: {
+            /** Format: uuid */
+            id: string;
         };
         BasisUseRow: {
             /** Format: uuid */
@@ -21069,6 +21088,14 @@ export interface components {
             last: null | components["schemas"]["ReviewRecord"];
             overdue: boolean;
         };
+        PackAdded: {
+            /** Format: int32 */
+            deliverables: number;
+            /** Format: int32 */
+            dependencies: number;
+            /** Format: int32 */
+            tasks: number;
+        };
         PackBody: {
             /** Format: uuid */
             disciplineId: string;
@@ -21079,6 +21106,40 @@ export interface components {
             };
             /** Format: uuid */
             templateId: string;
+        };
+        PackDiscipline: {
+            /** Format: int32 */
+            deliverables: number;
+            /** Format: uuid */
+            disciplineId: string;
+            inProject: boolean;
+            mapping: components["schemas"]["PackMilestoneMap"][];
+            /** Format: int32 */
+            tasks: number;
+        };
+        PackMilestoneMap: {
+            name: string;
+            /** Format: uuid */
+            projectMilestoneId: null | string;
+            /** Format: uuid */
+            templateMilestoneId: string;
+        };
+        PackProjectMilestone: {
+            /** Format: date */
+            date: null | string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+        };
+        PackProposalRead: {
+            disciplines: components["schemas"]["PackDiscipline"][];
+            name: string;
+            projectMilestones: components["schemas"]["PackProjectMilestone"][];
+            /** Format: uuid */
+            templateId: string;
+            /** Format: int32 */
+            version: number;
         };
         PageOfActivityEntry: {
             filters?: unknown;
@@ -23802,6 +23863,122 @@ export interface components {
             people: components["schemas"]["TeamPersonRow"][];
             /** Format: int32 */
             projects: number;
+        };
+        TemplateBasisRead: {
+            declaredRevision: null | string;
+            /** Format: uuid */
+            disciplineId: string;
+            /** Format: uuid */
+            id: string;
+            kind: string;
+            /** Format: double */
+            numericValue: null | number;
+            scope: string;
+            sourceSystem: null | string;
+            sourceUrl: null | string;
+            stableSourceId: null | string;
+            statement: string;
+            title: string;
+            units: null | string;
+        };
+        TemplateCreated: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
+        };
+        TemplateDisciplineRead: {
+            /** Format: uuid */
+            disciplineId: string;
+            isDefaultIncluded: boolean;
+            /** Format: uuid */
+            templateDisciplineId: string;
+        };
+        TemplateDraft: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
+        };
+        TemplateFamilyVersion: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            publishedAt: null | string;
+            status: string;
+            /** Format: int32 */
+            version: null | number;
+        };
+        TemplateList: {
+            canEdit: boolean;
+            templates: components["schemas"]["TemplateListRow"][];
+        };
+        TemplateListRow: {
+            /** Format: int32 */
+            deliverables: number;
+            description: null | string;
+            /** Format: int32 */
+            disciplines: number;
+            /** Format: uuid */
+            familyId: string;
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            milestones: number;
+            name: string;
+            /** Format: uuid */
+            projectTypeId: null | string;
+            /** Format: int32 */
+            projects: number;
+            /** Format: date-time */
+            publishedAt: null | string;
+            /** Format: int32 */
+            roles?: null | number;
+            /** Format: int32 */
+            rowVersion: number;
+            status: string;
+            /** Format: int32 */
+            tasks: number;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: int32 */
+            version: null | number;
+        };
+        TemplatePublished: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
+            status: string;
+            /** Format: int32 */
+            version: number;
+        };
+        TemplateRead: {
+            basisSuggestions: components["schemas"]["TemplateBasisRead"][];
+            canEdit: boolean;
+            deliverables: components["schemas"]["DeliverableIn"][];
+            dependencies: components["schemas"]["DependencyIn"][];
+            description: null | string;
+            disciplines: components["schemas"]["TemplateDisciplineRead"][];
+            family: components["schemas"]["TemplateFamilyVersion"][];
+            /** Format: uuid */
+            familyId: string;
+            /** Format: uuid */
+            id: string;
+            milestones: components["schemas"]["MilestoneIn"][];
+            name: string;
+            offsetDayKind?: null | string;
+            /** Format: uuid */
+            projectTypeId: null | string;
+            /** Format: date-time */
+            publishedAt: null | string;
+            roles?: null | components["schemas"]["TemplateRoleIn"][];
+            /** Format: int32 */
+            rowVersion: number;
+            status: string;
+            tasks: components["schemas"]["TaskIn"][];
+            /** Format: int32 */
+            version: null | number;
         };
         TemplateRoleIn: {
             /** Format: uuid */

@@ -2708,6 +2708,18 @@
         ],
         "type": "object"
       },
+      "BasisSuggestionCreated": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
       "BasisUseRow": {
         "properties": {
           "id": {
@@ -18351,6 +18363,31 @@
         ],
         "type": "object"
       },
+      "PackAdded": {
+        "properties": {
+          "deliverables": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "dependencies": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "tasks": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "deliverables",
+          "tasks",
+          "dependencies"
+        ],
+        "type": "object"
+      },
       "PackBody": {
         "properties": {
           "disciplineId": {
@@ -18387,6 +18424,129 @@
           "disciplineId",
           "leadUserId",
           "mapping"
+        ],
+        "type": "object"
+      },
+      "PackDiscipline": {
+        "properties": {
+          "deliverables": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "disciplineId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "inProject": {
+            "type": "boolean"
+          },
+          "mapping": {
+            "items": {
+              "$ref": "#/components/schemas/PackMilestoneMap"
+            },
+            "type": "array"
+          },
+          "tasks": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "disciplineId",
+          "inProject",
+          "deliverables",
+          "tasks",
+          "mapping"
+        ],
+        "type": "object"
+      },
+      "PackMilestoneMap": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "projectMilestoneId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "templateMilestoneId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "templateMilestoneId",
+          "name",
+          "projectMilestoneId"
+        ],
+        "type": "object"
+      },
+      "PackProjectMilestone": {
+        "properties": {
+          "date": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "date"
+        ],
+        "type": "object"
+      },
+      "PackProposalRead": {
+        "properties": {
+          "disciplines": {
+            "items": {
+              "$ref": "#/components/schemas/PackDiscipline"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          },
+          "projectMilestones": {
+            "items": {
+              "$ref": "#/components/schemas/PackProjectMilestone"
+            },
+            "type": "array"
+          },
+          "templateId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "version": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "templateId",
+          "name",
+          "version",
+          "projectMilestones",
+          "disciplines"
         ],
         "type": "object"
       },
@@ -29020,6 +29180,456 @@
         "required": [
           "people",
           "projects"
+        ],
+        "type": "object"
+      },
+      "TemplateBasisRead": {
+        "properties": {
+          "declaredRevision": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "disciplineId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "numericValue": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?$",
+            "type": [
+              "null",
+              "number"
+            ]
+          },
+          "scope": {
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "sourceUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "stableSourceId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "statement": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "units": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "disciplineId",
+          "kind",
+          "title",
+          "scope",
+          "statement",
+          "numericValue",
+          "units",
+          "sourceSystem",
+          "stableSourceId",
+          "sourceUrl",
+          "declaredRevision"
+        ],
+        "type": "object"
+      },
+      "TemplateCreated": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
+      "TemplateDisciplineRead": {
+        "properties": {
+          "disciplineId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isDefaultIncluded": {
+            "type": "boolean"
+          },
+          "templateDisciplineId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "disciplineId",
+          "isDefaultIncluded",
+          "templateDisciplineId"
+        ],
+        "type": "object"
+      },
+      "TemplateDraft": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
+      "TemplateFamilyVersion": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "publishedAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "type": "string"
+          },
+          "version": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "status",
+          "publishedAt"
+        ],
+        "type": "object"
+      },
+      "TemplateList": {
+        "properties": {
+          "canEdit": {
+            "type": "boolean"
+          },
+          "templates": {
+            "items": {
+              "$ref": "#/components/schemas/TemplateListRow"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "canEdit",
+          "templates"
+        ],
+        "type": "object"
+      },
+      "TemplateListRow": {
+        "properties": {
+          "deliverables": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "disciplines": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "familyId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "milestones": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "projectTypeId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projects": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "publishedAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "roles": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "tasks": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "familyId",
+          "name",
+          "description",
+          "projectTypeId",
+          "version",
+          "status",
+          "publishedAt",
+          "updatedAt",
+          "rowVersion",
+          "disciplines",
+          "milestones",
+          "deliverables",
+          "tasks",
+          "projects"
+        ],
+        "type": "object"
+      },
+      "TemplatePublished": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "version": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "status",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
+      "TemplateRead": {
+        "properties": {
+          "basisSuggestions": {
+            "items": {
+              "$ref": "#/components/schemas/TemplateBasisRead"
+            },
+            "type": "array"
+          },
+          "canEdit": {
+            "type": "boolean"
+          },
+          "deliverables": {
+            "items": {
+              "$ref": "#/components/schemas/DeliverableIn"
+            },
+            "type": "array"
+          },
+          "dependencies": {
+            "items": {
+              "$ref": "#/components/schemas/DependencyIn"
+            },
+            "type": "array"
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "disciplines": {
+            "items": {
+              "$ref": "#/components/schemas/TemplateDisciplineRead"
+            },
+            "type": "array"
+          },
+          "family": {
+            "items": {
+              "$ref": "#/components/schemas/TemplateFamilyVersion"
+            },
+            "type": "array"
+          },
+          "familyId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "milestones": {
+            "items": {
+              "$ref": "#/components/schemas/MilestoneIn"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          },
+          "offsetDayKind": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectTypeId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "publishedAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "roles": {
+            "items": {
+              "$ref": "#/components/schemas/TemplateRoleIn"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/TaskIn"
+            },
+            "type": "array"
+          },
+          "version": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "familyId",
+          "name",
+          "description",
+          "projectTypeId",
+          "version",
+          "status",
+          "publishedAt",
+          "rowVersion",
+          "canEdit",
+          "family",
+          "disciplines",
+          "basisSuggestions",
+          "milestones",
+          "deliverables",
+          "tasks",
+          "dependencies"
         ],
         "type": "object"
       },
@@ -42832,7 +43442,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/PackProposalRead"
+                }
               }
             },
             "description": "OK"
@@ -42868,7 +43480,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/PackAdded"
+                }
               }
             },
             "description": "OK"
@@ -49406,7 +50020,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/TemplateList"
+                }
               }
             },
             "description": "OK"
@@ -49428,8 +50044,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TemplateCreated"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -49451,8 +50074,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -49475,7 +50098,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/TemplateRead"
+                }
               }
             },
             "description": "OK"
@@ -49510,8 +50135,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasisSuggestionCreated"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -49542,8 +50174,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -49566,7 +50198,24 @@
         ],
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TemplateDraft"
+                }
+              }
+            },
             "description": "OK"
+          },
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TemplateDraft"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -49647,7 +50296,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/TemplatePublished"
+                }
               }
             },
             "description": "OK"
@@ -49672,8 +50323,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -49708,7 +50359,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/TemplateRead"
+                }
               }
             },
             "description": "OK"

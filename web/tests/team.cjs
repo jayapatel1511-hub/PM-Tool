@@ -7,6 +7,7 @@ const assert = require('node:assert/strict')
 const { startPreview, newMockPage, project } = require('./platform-fixtures.cjs')
 const { teamDiscipline, teamMember, projectTeam } = require('./team.fixture.cjs')
 const { referenceData, referenceDiscipline } = require('./me.fixture.cjs')
+const { templateList } = require('./templates.fixture.cjs')
 
 const port = Number(process.env.TEAM_TEST_PORT ?? 7372)
 const id = (n) => `00000000-0000-0000-0000-${String(n).padStart(12, '0')}`
@@ -29,7 +30,7 @@ const pat = id(811), diane = id(812), marc = id(813), newcomer = id(814)
     const bump = (list, rowId, change) => list.map(x => x.id === rowId ? { ...x, ...change, rowVersion: x.rowVersion + 1 } : x)
 
     await page.route('**/api/v1/reference', route => route.fulfill({ json: referenceData({ disciplines: [referenceDiscipline(id(901), 'Civil'), referenceDiscipline(id(902), 'Electrical'), referenceDiscipline(geotech, 'Geotechnical')] }) }))
-    await page.route('**/api/v1/templates', route => route.fulfill({ json: { canEdit: false, templates: [] } }))
+    await page.route('**/api/v1/templates', route => route.fulfill({ json: templateList([], false) }))
     await page.route('**/api/v1/users**', route => route.fulfill({ json: [
       { id: newcomer, displayName: 'Nia Newcomer', jobTitle: 'Designer', isActive: true, onProject: false },
       { id: marc, displayName: 'Marc Dubois', jobTitle: 'Senior Engineer', isActive: true, onProject: true },

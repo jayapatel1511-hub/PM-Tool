@@ -15,7 +15,7 @@ test('item changes keep the previous project and item-specific invalidations (AC
     ReviewRound: ['reviews', 'review-detail', 'changes', 'change-detail', 'coord-options', 'input-uses', 'handoffs', 'handoff-detail', 'submissions', 'submission-detail', 'workspace-coordination', 'deliverable'],
     PlanningEntry: ['planning-grid', 'planning-entries'], DesignBasisEntry: ['design-basis', 'design-basis-detail'], Member: ['staff'], SavedView: ['views'], ReferenceData: ['reference', 'admin'], Setting: ['me', 'admin'], Holiday: ['admin', 'availability-view', 'workload'],
     Dependency: ['task', 'gantt', 'coordination', 'workload', 'mywork-tasks'], DeliverableDependency: ['deliverable', 'gantt', 'coordination', 'coord-options'],
-    Discipline: ['planner-project-disciplines'],
+    Discipline: ['planner-project-disciplines'], Template: ['templates', 'template', 'template-preview', 'template-pack'],
     ApprovedLeave: ['availability-view', 'planning-grid', 'my-week'], PersonSchedule: ['availability-view', 'planning-grid', 'my-week'], // the Vacation page's own refresh after leave, schedule and import commands
   }
   for (const root of ['history', 'comments', 'links']) assert.ok(keysForChange('Risk', 'p1').some(k => k[0] === root))
@@ -69,6 +69,7 @@ test('invalidation prefixes match actual mounted screen query keys', () => {
     Issue: [['issue', 'i1'], ['p', 'p1', 'issues', {}], ['issue-documents', 'i1'], ['issue-verification', 'i1'], ['issue-reference-impacts', 'i1'], ['review-issues', 'p1'], ['coordination']],
     Action: [['action', 'i1'], ['p', 'p1', 'actions', {}], ['mywork']], Meeting: [['p', 'p1', 'meetings']],
     Milestone: [['milestone', 'i1'], ['p', 'p1', 'milestones', false, ''], ['p', 'p1', 'milestones', true, ''], ['submission-milestones', 'p1']],
+    Template: [['templates'], ['template', 'i1'], ['template', 'i1', 'preview', ''], ['template-preview', { id: 'i1' }], ['template-pack', 'p1', 'i1']],
     IssueLocation: [['issue-locations', 'i1']], ReadinessAssessment: [['readiness-detail', 'p1', 'i1']],
     ResourceAllocation: [['allocations', 'p1', {}, 1], ['allocation-detail', 'p1', 'i1'], ['allocation-review-options', 'p1'], ['workload', 'scope']],
   }

@@ -99,3 +99,8 @@ Rerun on the merged tree (2026-10-26): `dotnet build Hub.slnx` 0 errors; `dotnet
 Assumptions: defaults 045-D6, 045-D8, 045-D10, 045-D11, 045-D12 and 045-D13; `flag.status_rollups` was turned on only in the throwaway database.
 
 Still open: AC-RCV-11 screen-reader check (HUMAN); S12 flag removal for AC-RCV-17, 18 and 19, waiting on Jay's flag decisions; hosted checks. The throwaway databases are still on localhost:55432. No acceptance criterion or packet is Accepted.
+
+
+### 2026-10-29 count census transport compatibility
+
+The generated client emits PascalCase query parameter names. The real count census now compares parameter names case-insensitively while preserving exact values and refusing unexpected filters. Pagination/plumbing names use the same normalization. `TUESDAY_COUNTS_PROJECTS` selects the disposable fixture's project numbers; the default remains SYN-101–103. This release uses the ReviewDemo fixture's DEMO-101–103 to exercise project/discipline dashboards and milestones rather than silently skipping nonexistent SYN projects. No product behavior changes.

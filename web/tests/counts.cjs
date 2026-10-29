@@ -6,7 +6,8 @@
 // (AC-RCV-18), the Overdue deliverables column and Portfolio grouped by client, office and project type (AC-RCV-19) are
 // checked too; a summed figure (a group subtotal, "n of m issued") is compared with the sum of the figures it adds up.
 // Fails on any difference, on a list that drops the link's filters, and on a missing agreed tile.
-//   TUESDAY_UI_BASE_URL (default http://localhost:5173), COUNTS_REPORT (JSON report path).
+//   TUESDAY_UI_BASE_URL (default http://localhost:5173), COUNTS_REPORT (JSON report path),
+//   TUESDAY_COUNTS_PROJECTS (space-separated fixture project numbers; defaults SYN-101..103).
 const assert = require('node:assert/strict')
 const fs = require('node:fs')
 const path = require('node:path')
@@ -16,7 +17,8 @@ const base = process.env.TUESDAY_UI_BASE_URL ?? 'http://localhost:5173'
 assert.ok(['localhost', '127.0.0.1'].includes(new URL(base).hostname), 'TUESDAY_UI_BASE_URL must be a local Development preview')
 const reportPath = process.env.COUNTS_REPORT ?? require('node:path').join(require('node:os').tmpdir(), 'tuesday-counts-report.json')
 const PERSONAS = [['jordan', 'Jordan Lee'], ['priya', 'Priya Nair'], ['sam', 'Sam Patel'], ['omar', 'Omar Haddad']]
-const PROJECTS = ['SYN-101', 'SYN-102', 'SYN-103']
+const PROJECTS = (process.env.TUESDAY_COUNTS_PROJECTS ?? 'SYN-101 SYN-102 SYN-103').split(/[\s,]+/).filter(Boolean)
+assert.ok(PROJECTS.length > 0, 'at least one count-reconciliation project is required')
 // Agreed tile list (section 7). Lanes, project segments and discipline rows come from the page's own data.
 const AGREED = {
   home: ['Active Projects', 'Open Tasks', 'Overdue Tasks', 'On Track · Green', 'On Track · evaluated', 'Team Members'],
@@ -27,7 +29,12 @@ const AGREED = {
 }
 const VIEW = new Set(['panel', 'group', 'sort', 'view', 'tab', 'layout', 'page', 'side', 'swim', 'ws']) // link parameters that are layout, not filters
 const BUDGET = 300 // API requests per person per minute: half the API's 600, so other sessions as the same person keep working
-const PLUMBING = new Set(['page', 'pageSize', 'sort', 'includeTasks', 'projects', 'mine']) // request parameters that are not filters
+const PLUMBING = new Set(['page', 'pagesize', 'sort', 'includetasks', 'projects', 'mine']) // request parameters that are not filters
+
+// The generated client preserves the contract's PascalCase parameter names while links use the
+// product's lower-case URL names. Matching names case-insensitively keeps this reconciliation
+// about filter semantics; values are still compared exactly below.
+const queryValue = (params, key) => params.get([...params.keys()].find((k) => k.toLowerCase() === key.toLowerCase()) ?? key)
 
 const api = async (who, endpoint) => fetch(`${base}/api/v1/${endpoint}`, { headers: { 'X-Dev-User': `${who}@hub.test` } })
 
@@ -132,15 +139,15 @@ async function listTotal(page, href, attempt = 0) {
   // A Portfolio Attention figure opens the dashboard's attention panel at that severity; its list is the attention request.
   const list = u.pathname.endsWith('/dashboard') && u.searchParams.has('severity') ? u.pathname.replace(/dashboard$/, 'attention') : u.pathname
   const endpoint = new RegExp(`^${list.slice(1).replace(/^projects\/[^/]+\//, 'projects/[^/]+/')}$`)
-  const want = [...u.searchParams].filter(([k]) => !VIEW.has(k))
+  const want = [...u.searchParams].filter(([k]) => !VIEW.has(k)).map(([k, v]) => [k.toLowerCase(), v])
   const seen = []
   const match = (r) => {
     const a = new URL(r.url())
     if (!a.pathname.startsWith('/api/v1/') || r.request().method() !== 'GET' || !endpoint.test(a.pathname.slice(8))) return false
     seen.push(a.search)
-    const extra = [...a.searchParams.keys()].filter((k) => !PLUMBING.has(k) && !want.some(([w]) => w === k))
+    const extra = [...a.searchParams.keys()].filter((k) => !PLUMBING.has(k.toLowerCase()) && !want.some(([w]) => w === k.toLowerCase()))
     // The app's query helper leaves out false flags, the API's default, so mine=false may travel as nothing.
-    return want.every(([k, v]) => a.searchParams.get(k) === v || (v === 'false' && !a.searchParams.has(k))) && extra.length === 0 && (a.searchParams.get('page') ?? '1') === '1'
+    return want.every(([k, v]) => queryValue(a.searchParams, k) === v || (v === 'false' && queryValue(a.searchParams, k) == null)) && extra.length === 0 && (queryValue(a.searchParams, 'page') ?? '1') === '1'
   }
   const response = page.waitForResponse(match, { timeout: attempt ? 30000 : 10000 })
   if (attempt) await page.goto(u.href)

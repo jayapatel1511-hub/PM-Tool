@@ -124,4 +124,37 @@ public sealed class TaskQueriesTests(HubFactory f)
         }
         finally { await Backlog(false); }
     }
+
+    /// AC-BKL-03 (review fixes 2026-10-28): a task leaving the Backlog joins To Do after the cards arranged there, not at its Backlog
+    /// rank; one entering goes last even behind cards nobody arranged; and the export with `sort=board` keeps the list's order.
+    [Fact, Trait("flag-on", "backlog")]
+    [Trait("Spec", "AC-BKL-03")]
+    public async Task Leaving_the_Backlog_drops_its_place_and_entering_goes_last_in_the_list_and_the_export()
+    {
+        var p = await d.Project();
+        var pm = f.As(TestData.Pm);
+        var root = $"/api/v1/projects/{p.Id}";
+        var early = await Add(p.Id, new { dueDate = In(20) }); // the lowest key, so an unplaced card would sort it first
+        Guid[] todo = [await Add(p.Id, new { dueDate = In(10) }), await Add(p.Id, new { dueDate = In(12) })];
+        Guid[] backlog = [await Add(p.Id), await Add(p.Id)];
+        async Task<List<JsonNode>> Rows(string q) => (await pm.GetAsync($"{root}/tasks?pageSize=200&sort=board{q}").Result.Json())["items"]!.AsArray().Select(x => x!).ToList();
+        async Task Set(Guid id, object body) => (await pm.Patch($"/api/v1/tasks/{id}", body, await f.DbAsync(db => db.Tasks.Where(x => x.Id == id).Select(x => x.RowVersion).FirstAsync()))).EnsureSuccessStatusCode();
+        await Backlog(true);
+        try
+        {
+            (await pm.Put($"{root}/board-order", new { taskIds = todo })).EnsureSuccessStatusCode();
+            (await pm.Put($"{root}/board-order", new { taskIds = backlog })).EnsureSuccessStatusCode();
+            await Set(backlog[0], new { dueDate = In(5) }); // Backlog position 1 would put it ahead of To Do's arranged first card
+            Guid[] lane = [todo[0], todo[1], backlog[0], early];
+            Assert.Equal(lane, (await Rows("")).Select(x => x.G("id")).Where(lane.Contains));
+
+            var fresh = await Add(p.Id); // a Backlog card nobody arranged
+            await Set(early, new { dueDate = (string?)null });
+            var rows = await Rows("&backlog=true");
+            Assert.Equal([backlog[1], fresh, early], rows.Select(x => x.G("id")));
+            var keys = (await Csv($"{root}/tasks/export?format=csv&sort=board&backlog=true")).Split('\n', StringSplitOptions.RemoveEmptyEntries).Skip(1).Select(l => l.Split(',')[0]);
+            Assert.Equal(rows.Select(x => x.S("key")), keys);
+        }
+        finally { await Backlog(false); }
+    }
 }

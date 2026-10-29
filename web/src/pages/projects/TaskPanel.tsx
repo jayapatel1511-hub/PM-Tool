@@ -200,7 +200,7 @@ export function TaskDetail({ id, onClose, heading: Heading = 'h2' }: { id: strin
 
       <FieldGroup title={t('common.description')}>
         {/* The section title is the visible label; the field keeps its own name for the editor. */}
-        <FieldRow label={<span className="sr-only">{t('common.description')}</span>} className="gap-y-0 py-0 sm:grid-cols-1">
+        <FieldRow label={<span className="sr-only">{t('common.description')}</span>} name={t('common.description')} className="gap-y-0 py-0 sm:grid-cols-1">
           <div className="-mx-2"><InlineText value={d.description} multiline disabled={!perms.edit.ok} needsReason={perms.needsReason} placeholder={t('task.noDescription')}
             render={(v) => <RichText text={v} className="whitespace-normal" />} onSave={(v) => save({ description: v })} /></div>
         </FieldRow>

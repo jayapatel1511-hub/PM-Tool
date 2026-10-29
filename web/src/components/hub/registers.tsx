@@ -80,7 +80,8 @@ export function DataTable<T extends { id: string }>({ table, rows, loading, empt
   if (flush) return <div className="scroll-region overflow-x-auto">{grid}</div>
   return (<>
     {!wide && (cards === undefined ? <RegisterCards groups={groups.map((g) => ({ label: g.label, rows: g.items }))} columns={table.visible} current={current} /> : cards)}
-    <TableRegion className={wide ? undefined : 'hidden md:block'} {...(label && { role: 'region', 'aria-label': label })}>{grid}</TableRegion>
+    {/* With no cards the table is the only list, so it never hides below `md` (a rem breakpoint that a large default font moves past the px phone switch). */}
+    <TableRegion className={wide || cards === false ? undefined : 'hidden md:block'} {...(label && { role: 'region', 'aria-label': label })}>{grid}</TableRegion>
   </>)
 }
 

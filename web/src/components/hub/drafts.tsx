@@ -1,4 +1,4 @@
-import { useEffect, useSyncExternalStore } from 'react'
+import { useEffect, useRef, useSyncExternalStore } from 'react'
 import { useBlocker } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -22,14 +22,16 @@ export function DraftNotice({ form }: { form: Pick<SafeForm, 'restoredAt' | 'dis
 export function LeaveHost() {
   const ask = useSyncExternalStore(leaveQuestion.subscribe, leaveQuestion.get)
   const blocker = useBlocker(hasUnsaved)
+  const keep = useRef<HTMLButtonElement>(null)
   useEffect(() => { if (blocker.state === 'blocked') leaveQuestion.show({ proceed: () => { discardUnsaved(); blocker.proceed() }, cancel: blocker.reset }) }, [blocker])
   return (
     <Dialog open={!!ask} onOpenChange={(open) => !open && leaveQuestion.answer(false)}>
-      <DialogContent showCloseButton={false} className="sm:max-w-md">
+      {/* Keep editing takes the focus, so Enter never throws typed input away. */}
+      <DialogContent showCloseButton={false} className="sm:max-w-md" onOpenAutoFocus={(e) => { e.preventDefault(); keep.current?.focus() }}>
         <DialogHeader><DialogTitle>{t('draft.leaveTitle')}</DialogTitle><DialogDescription>{t('draft.leaveBody')}</DialogDescription></DialogHeader>
         <DialogFooter>
           <Button variant="outline" onClick={() => leaveQuestion.answer(true)}>{t('draft.leave')}</Button>
-          <Button onClick={() => leaveQuestion.answer(false)}>{t('draft.keep')}</Button>
+          <Button ref={keep} onClick={() => leaveQuestion.answer(false)}>{t('draft.keep')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

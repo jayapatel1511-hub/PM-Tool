@@ -75,6 +75,8 @@ if [[ "$install_deploy_timer" == 1 ]]; then
   # Explicit operator installation only; regular activation remains unchanged.
   target=/etc/pm-tool-review-deploy
   sudo test -s "$target/ghcr-token" || { echo 'Install a root-owned read-only GHCR token first (runbook).' >&2; exit 1; }
+  # Every timer run dumps the database with the daily backup helper before it pulls; without it each run would stop.
+  [[ -x /usr/local/libexec/pm-tool-review-backup ]] || { echo 'Install the daily backup helper first (--install-timer).' >&2; exit 1; }
   sudo install -d -o root -g root -m 0755 "$target" "$target/hosting" "$target/scripts"
   sudo install -d -o root -g root -m 0700 "$target/.runtime" "$target/docker"
   # Keep the registry password on stdin and root-owned, outside release trees.

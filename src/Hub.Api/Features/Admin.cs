@@ -39,6 +39,7 @@ public static class AdminEndpoints
     /// A setting with its default and current value; a flag row also names its packet (§43.4 FR-DLV-07), every other row leaves `packet` out.
     public sealed record SettingRow(string Key, string Kind, string Group, object Default, JsonElement Value, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Packet = null);
     public sealed record SettingSaved(string Key, JsonElement Value);
+    sealed record AdminSettingsChangedPayload(string Key);
 
     public sealed record OpsJob(string Job, DateTimeOffset StartedAt, DateTimeOffset? FinishedAt, string Status, DateTimeOffset? LastSuccess, int Failed24h);
     public sealed record OpsDeadLetter(Guid Id, string EventType, string? ProjectNumber, int Attempts, string? LastError, DateTimeOffset CreatedAt, DateTimeOffset DeadLetteredAt);
@@ -123,7 +124,7 @@ public static class AdminEndpoints
             }).ToList());
         });
 
-        g.MapPut("/settings/{key}", async Task<Ok<SettingSaved>> (string key, JsonElement body, HubDb db, SettingsStore store, TimeProvider clock) =>
+        g.MapPut("/settings/{key}", async Task<Ok<SettingSaved>> (string key, JsonElement body, HubDb db, SettingsStore store, TimeProvider clock, EvaluationSignal signal) =>
         {
             var def = OrgSettings.Def(key) ?? throw ApiException.Invalid("key", "setting.unknown");
             var value = body.ValueKind == JsonValueKind.Object && body.TryGetProperty("value", out var v) ? v : body;
@@ -136,9 +137,17 @@ public static class AdminEndpoints
                 throw ApiException.Invalid("value", "audit.initialize_required");
             var json = value.GetRawText();
             var row = await db.Settings.FirstOrDefaultAsync(s => s.Key == key) ?? throw ApiException.Invalid("key", "setting.unknown");
-            if (row.Value != json) { row.Value = json; row.UpdatedAt = clock.GetUtcNow(); row.UpdatedBy = db.Audit.ActorId; }
+            if (row.Value != json)
+            {
+                row.Value = json; row.UpdatedAt = clock.GetUtcNow(); row.UpdatedBy = db.Audit.ActorId;
+                // The evaluator reads thresholds, health, rules, the calendar and `flag.backlog` (FR-BKL-05): re-evaluate every Active
+                // project now, through the outbox, rather than leave health and milestone status stale until the nightly run (FR-BKL-09).
+                if (def.Group is "thresholds" or "health" or "rules" or "calendar" || key == $"flag.{TaskRules.BacklogFlag}")
+                    db.Outbox.Add(new OutboxEvent { EventType = "SettingsChanged", CreatedAt = clock.GetUtcNow(), Payload = JsonSerializer.Serialize(new AdminSettingsChangedPayload(key), JsonOpts.Web) });
+            }
             await db.SaveChangesAsync();
             store.Invalidate();
+            signal.Poke();
             return TypedResults.Ok(new SettingSaved(key, JsonDocument.Parse(row.Value).RootElement));
         });
 

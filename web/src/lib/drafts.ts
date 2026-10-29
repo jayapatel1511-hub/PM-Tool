@@ -44,33 +44,47 @@ export function pruneDrafts(keepDays: number) {
 }
 
 // ---- A save the sign-in refusal cut off (FR-SAV-05) ----
-// A comment or create form is already safe: its draft is in local storage. An edit-panel field has no draft, so a save refused with a
-// 401 keeps its typed value here, in this tab only (sign-in returns to the same tab), and the same field takes it up again once, when
-// it is on screen again after sign-in. The record is the route's path and `panel`, the field its label; other users' entries are left.
+// A comment or create form is already safe: its draft is in local storage. An edit-panel field has no draft, so a 401 keeps its typed value
+// here, in this tab only (sign-in returns to the same tab), and the same field takes it up again once, when it is on screen again after
+// sign-in. The record is the route's path and `panel`, the field its label; other users' entries are left.
 
 const PENDING = 'hub.pendingFields'
-type Pending = { user: string; route: string; field: string; value: unknown; at: string }
+type Pending = { user: string; route: string; field: string; value: unknown; version?: number; at: string }
 // ponytail: two fields with the same label in one panel share an entry (the first to mount takes it); key by field id if a panel ever has that.
-const where = () => `${location.pathname}?${new URLSearchParams(location.search).get('panel') ?? ''}`
+/** The record on screen. A field takes it when it mounts, so a refusal that comes back after the panel moved on is kept for its own record. */
+export const pendingRoute = () => `${location.pathname}?${new URLSearchParams(location.search).get('panel') ?? ''}`
 const stored = (): Pending[] => { try { const found = JSON.parse(sessionStorage.getItem(PENDING) ?? '[]'); return Array.isArray(found) ? found : [] } catch { return [] } }
-const isThis = (p: Pending, user: string, field: string) => p.user === user && p.field === field && p.route === where()
+const store = (rest: Pending[]) => { try { if (rest.length) sessionStorage.setItem(PENDING, JSON.stringify(rest)); else sessionStorage.removeItem(PENDING) } catch { /* storage unavailable */ } }
+const isThis = (p: Pending, user: string, field: string, route = pendingRoute()) => p.user === user && p.field === field && p.route === route
 
-/** Called before the sign-in flow runs: the field's typed value waits for the person to come back. */
-export function keepPending(user: string, field: string, value: unknown) {
-  const rest = stored().filter((p) => !isThis(p, user, field))
-  try { sessionStorage.setItem(PENDING, JSON.stringify([...rest, { user, route: where(), field, value, at: new Date().toISOString() }])) } catch { /* storage unavailable: nothing to keep it in */ }
+/** Called before the sign-in flow runs: the field's typed value waits for the person to come back, with the row version it was typed
+ *  against, so a record changed meanwhile is a conflict and not overwritten (FR-SAV-02). `route` is the field's record. */
+export function keepPending(user: string, route: string, field: string, value: unknown, version?: number) {
+  const rest = stored().filter((p) => !isThis(p, user, field, route))
+  try { sessionStorage.setItem(PENDING, JSON.stringify([...rest, { user, route, field, value, version, at: new Date().toISOString() }])) } catch { /* storage unavailable: nothing to keep it in */ }
 }
 
 /** The value this field was saving when sign-in expired, if it is still within `keepDays`; reading does not remove it. */
-export function peekPending(user: string, field: string, keepDays: number): { value: unknown } | null {
+export function peekPending(user: string, field: string, keepDays: number): { value: unknown; version?: number } | null {
   const found = stored().find((p) => isThis(p, user, field))
-  return found && Date.now() - Date.parse(found.at) <= keepDays * DAY ? { value: found.value } : null
+  return found && Date.now() - Date.parse(found.at) <= keepDays * DAY ? { value: found.value, version: found.version } : null
 }
 
 /** The field has taken its value up again (or it is stale): the one retry is spent. */
 export function dropPending(user: string, field: string) {
-  const rest = stored().filter((p) => !isThis(p, user, field))
-  try { if (rest.length) sessionStorage.setItem(PENDING, JSON.stringify(rest)); else sessionStorage.removeItem(PENDING) } catch { /* storage unavailable */ }
+  store(stored().filter((p) => !isThis(p, user, field)))
+}
+
+/** An explicit sign-out takes the person's drafts and waiting fields with it, so the next person on a shared browser finds none; an expired
+ *  session keeps them (051-D2). */
+export function forgetDrafts(user: string) {
+  try {
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i)
+      if (key?.startsWith(draftStorageKey(user, ''))) localStorage.removeItem(key)
+    }
+  } catch { /* storage unavailable */ }
+  store(stored().filter((p) => p.user !== user))
 }
 
 /** FR-SAV-06: with the flag on (the page frame sets this mark), the Reload of the build-update notice can be pressed while a dialog or
@@ -81,7 +95,7 @@ export const onToast = (target: EventTarget | null) =>
 
 // ---- The leave guard: forms holding typed input that nothing has saved ----
 
-type Form = { unsaved: () => boolean; discard: () => void }
+type Form = { unsaved: () => boolean; discard: () => void; /** FR-SAV-05: put typed input where it outlives the sign-in flow. */ keep?: () => void }
 const forms = new Set<Form>()
 let listening = false
 const warnOnUnload = (e: BeforeUnloadEvent) => { if (hasUnsaved()) { e.preventDefault(); e.returnValue = '' } }
@@ -95,6 +109,14 @@ export function registerForm(form: Form) {
 }
 
 export const hasUnsaved = () => { for (const f of forms) if (f.unsaved()) return true; return false }
+
+/** FR-SAV-06: Reload once the person has answered (or nothing needed asking); the browser's own prompt would ask a second time, before the
+ *  discarded forms have rendered empty. */
+export function reloadAnswered() { window.removeEventListener('beforeunload', warnOnUnload); listening = false; window.location.reload() }
+
+/** FR-SAV-05: any request refused for an expired sign-in (often the notification pulse, not the save) keeps every form's typed input
+ *  before the sign-in flow takes the page. */
+export const keepUnsent = () => { for (const f of forms) f.keep?.() }
 
 /** Leaving the page abandons what these forms hold; a form that stays on screen (the New dialogs live in the page frame) starts empty. */
 export const discardUnsaved = () => { for (const f of [...forms]) if (f.unsaved()) f.discard() }

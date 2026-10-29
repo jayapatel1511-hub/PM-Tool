@@ -1,7 +1,7 @@
 import type { paths } from '@/gen/api'
 import { toast } from 'sonner'
 import { t } from '@/lib/i18n'
-import { leave } from '@/lib/drafts'
+import { keepUnsent, leave, reloadAnswered } from '@/lib/drafts'
 
 /** RFC 9457 problem returned by the API (§25.6). */
 export class ApiError extends Error {
@@ -27,7 +27,8 @@ export const shouldRetryRead = (n: number, e: unknown) => !(e instanceof ApiErro
 type HeaderSource = () => Promise<Record<string, string>>
 let authHeaders: HeaderSource = async () => ({})
 let onUnauthorized: () => void = () => {}
-export function configureApi(h: HeaderSource, unauthorized: () => void) { authHeaders = h; onUnauthorized = unauthorized }
+// FR-SAV-05: whichever request meets the expired sign-in first, typed input is kept before the sign-in flow takes the page.
+export function configureApi(h: HeaderSource, unauthorized: () => void) { authHeaders = h; onUnauthorized = () => { keepUnsent(); unauthorized() } }
 
 /** Build embedded in the SPA by Vite; an unset value is the local development build. */
 export const HUB_BUILD = (import.meta.env.VITE_HUB_BUILD as string | undefined) || 'dev'
@@ -46,7 +47,7 @@ function observeBuild(res: Response) {
   try {
     sessionStorage.setItem(BUILD_NOTICE_KEY, JSON.stringify([...observedBuilds]))
   } catch { /* storage can be unavailable in a restricted browser context */ }
-  toast.info(t('app.updated'), { duration: Infinity, action: { label: t('common.reload'), onClick: (event) => { event.preventDefault(); leave(() => window.location.reload()) } } }) // FR-SAV-06: typed input is asked about or drafted first; Keep editing leaves the notice up
+  toast.info(t('app.updated'), { duration: Infinity, action: { label: t('common.reload'), onClick: (event) => { event.preventDefault(); leave(reloadAnswered) } } }) // FR-SAV-06: typed input is asked about or drafted first; Keep editing leaves the notice up
 }
 
 function requestHeaders(extra?: Record<string, string>) {
@@ -65,8 +66,16 @@ export interface ApiOptions {
 }
 
 /** FR-SAV-02: an autosave field watches the write its save makes, even when the panel's save catches the refusal itself, and can send
- *  that write on a newer row version (Keep mine). Only a write that starts synchronously inside `send` is watched. */
-export type WriteWatch = { error?: ApiError; ifMatch?: number; /** FR-SAV-05: the write was refused because sign-in expired; runs before the sign-in flow does. */ signedOut?: () => void }
+ *  that write on another row version (Keep mine, a retry). Only a write that starts synchronously inside `send` is watched. */
+export type WriteWatch = {
+  error?: ApiError
+  /** The row version the write goes on: the field's, else filled in with the caller's, so a refused write is retried on the version it went on. */
+  ifMatch?: number
+  /** The row version the server answered a saved write with. */
+  saved?: number
+  /** FR-SAV-05: the write was refused because sign-in expired; runs before the sign-in flow does. */
+  signedOut?: () => void
+}
 let watching: WriteWatch | undefined
 export function watchWrite<T>(watch: WriteWatch, send: () => T): T {
   const outer = watching
@@ -78,6 +87,7 @@ export async function api<T = any>(path: string, o: ApiOptions = {}): Promise<T>
   const method = o.method ?? (o.body !== undefined ? 'POST' : 'GET')
   // Read before the first await, while the watching save is still on the stack.
   const watch = method === 'GET' ? undefined : watching
+  if (watch && o.ifMatch != null) watch.ifMatch ??= o.ifMatch
   const fail = (e: ApiError) => { if (watch) watch.error = e; return e }
   const headers: Record<string, string> = await requestHeaders()
   if (o.body !== undefined) headers['Content-Type'] = 'application/json'
@@ -100,6 +110,7 @@ export async function api<T = any>(path: string, o: ApiOptions = {}): Promise<T>
   if (o.raw) return res as unknown as T
   if (res.status === 204) return undefined as T
   const data = await res.json()
+  if (watch && typeof data?.rowVersion === 'number') watch.saved = data.rowVersion
   if (!o.quiet && Array.isArray(data?.warnings)) data.warnings.forEach((w: string) => toast.warning(w))
   return data as T
 }

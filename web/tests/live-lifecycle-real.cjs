@@ -263,9 +263,12 @@ const signature = (log, phases) => log.filter(entry => phases.includes(entry.pha
     const visibleAt = Date.now(); await setHidden(false); await sleep(5000)
     const reopened = rec.log.filter(entry => isEvents(entry) && entry.at >= visibleAt)
     assert.equal(reopened.length, 1, 'one stream when visible again'); assert.ok(reopened[0].at - visibleAt < 1000, 'reopened at once')
-    const followUps = within(rec.log, isProject, visibleAt + 1300, visibleAt + 2400)
-    assert.equal(followUps.length, 1, 'one project refresh on becoming visible')
-    evidence.hidden = { closeMs, hiddenMs: visibleAt - hiddenAt, reopenMs: reopened[0].at - visibleAt }
+    // Every read since becoming visible. One refreshProject is a read at once and its follow-up 1.5 s later (for health the
+    // server is still evaluating); a focus refetch at the same moment shares the first. Anything more is a second refresh.
+    const focusReads = within(rec.log, isProject, visibleAt, visibleAt + 1000), followUps = within(rec.log, isProject, visibleAt + 1000, visibleAt + 5000)
+    assert.ok(focusReads.length <= 1, `one immediate project read; reads at ${focusReads.map(e => e.at - visibleAt)} ms`)
+    assert.equal(followUps.length, 1, `one project refresh follow-up on becoming visible; reads at ${followUps.map(e => e.at - visibleAt)} ms`)
+    evidence.hidden = { closeMs, hiddenMs: visibleAt - hiddenAt, reopenMs: reopened[0].at - visibleAt, projectReadsMs: [...focusReads, ...followUps].map(e => e.at - visibleAt) }
     assert.deepEqual(errors, [], `browser errors: ${errors.join(' | ')}`)
 
     // AC-LIVE-16 server stopping and outage: streams end, the host exits promptly, the client backs off 1, 2, 4, 8, 16, 30 s.
@@ -284,9 +287,12 @@ const signature = (log, phases) => log.filter(entry => phases.includes(entry.pha
     ;[1000, 2000, 4000, 8000, 16000, 30000].forEach((expected, i) => assert.ok(outageGaps[i] >= expected - 100 && outageGaps[i] <= expected + 1500, `backoff step ${i + 1}: ${outageGaps[i]} ms (${outageGaps})`))
     assert.equal(tries[5].status, 200, 'reconnected after the outage')
     await sleep(6000)
-    const afterOutage = within(rec.log, isProject, tries[5].respondedAt + 1300, tries[5].respondedAt + 2400)
-    assert.equal(afterOutage.length, 1, 'one project refresh after the outage reopen')
-    evidence.outage = { hostExitMs: exitMs, exitCode, exitSignal, heldStreamEndedMs: held.frames.endedAt - stopAt, backoffMs: outageGaps }
+    // Every read since the reopen: one refreshProject, as above (AC-LIVE-16 "invalidates the open project once").
+    const reopenAt = tries[5].respondedAt
+    const afterOutage = within(rec.log, isProject, reopenAt, reopenAt + 6000).map(e => e.at - reopenAt)
+    assert.equal(afterOutage.filter(ms => ms < 1000).length, 1, `one immediate project read after the outage reopen; reads at ${afterOutage} ms`)
+    assert.equal(afterOutage.filter(ms => ms >= 1000).length, 1, `one project refresh follow-up after the outage reopen; reads at ${afterOutage} ms`)
+    evidence.outage = { projectReadsMs: afterOutage, hostExitMs: exitMs, exitCode, exitSignal, heldStreamEndedMs: held.frames.endedAt - stopAt, backoffMs: outageGaps }
 
     // AC-LIVE-16 cap: a sixth stream for one user gets 429; closing one frees its place.
     const five = Array.from({ length: 5 }, () => stream('jordan'))

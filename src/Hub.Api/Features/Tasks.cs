@@ -268,7 +268,6 @@ public static class TaskEndpoints
         var (t, p, ctx) = await Load(db, access, id);
         var patch = new Patch(body);
         await Http.CheckVersion(db, http, t, patch.RowVersion);
-        var wasBacklog = TaskRules.IsBacklog(t.Status, t.StartDate, t.DueDate);
         var facts = await Facts(db, t);
         var a = access.Actor;
         var dname = await DisciplineName(db, t.ProjectDisciplineId);
@@ -367,10 +366,6 @@ public static class TaskEndpoints
                 t.ProjectDisciplineId = pd.Id;
             }
         }
-        // AC-BKL-03: clearing a task's dates returns it to the Backlog after the cards arranged there, not at its old place (§36.3).
-        // ponytail: this edit path only; the bulk edits cannot clear a date today.
-        if (!wasBacklog && s.IsFlagOn(TaskRules.BacklogFlag) && TaskRules.IsBacklog(t.Status, t.StartDate, t.DueDate))
-            db.BoardOrders.RemoveRange(await db.BoardOrders.Where(b => b.ProjectId == t.ProjectId && b.TaskId == t.Id).ToListAsync());
         // An edit that changes nothing writes nothing: unchanged fields skip the checks above, so they must not move the version.
         if (db.ChangeTracker.HasChanges())
         {
@@ -383,6 +378,31 @@ public static class TaskEndpoints
         if (t.DeliverableId is { } dId && await db.Deliverables.Where(d => d.Id == dId).Select(d => d.DueDate).FirstOrDefaultAsync() is { } ddue && t.DueDate > ddue)
             warnings.Add(Text.Get("task.after_deliverable", t.Key, "", ddue.ToString("yyyy-MM-dd")));
         return TypedResults.Ok(new TaskEdited(t.Id, t.RowVersion, t.DueDateChangeCount, warnings));
+    }
+
+    /// AC-BKL-03 (§36.3), from the save hook on every path (edit, bulk, transition) while `flag.backlog` is on. Board positions are
+    /// per lane, so a task leaving the Backlog drops its Backlog place and joins its new lane after the cards arranged there; a task
+    /// entering goes last in the Backlog, which is written in its shown order as a drag in that lane would write it.
+    public static async Task KeepBacklogOrder(HubDb db, CancellationToken ct)
+    {
+        var moved = db.ChangeTracker.Entries<WorkTask>().Where(e => e.State == EntityState.Modified
+            && TaskRules.IsBacklog(e.Property(x => x.Status).OriginalValue, e.Property(x => x.StartDate).OriginalValue, e.Property(x => x.DueDate).OriginalValue)
+                != TaskRules.IsBacklog(e.Entity.Status, e.Entity.StartDate, e.Entity.DueDate)).Select(e => e.Entity).ToList();
+        if (moved.Count == 0) return;
+        var leaving = moved.Where(t => !TaskRules.IsBacklog(t.Status, t.StartDate, t.DueDate)).Select(t => t.Id).ToList();
+        db.BoardOrders.RemoveRange(await db.BoardOrders.Where(b => b.ProjectId != null && leaving.Contains(b.TaskId)).ToListAsync(ct));
+        foreach (var entering in moved.Where(t => !leaving.Contains(t.Id)).GroupBy(t => t.ProjectId))
+        {
+            var lane = await TaskQueries.Sort(db.Tasks.Where(t => t.ProjectId == entering.Key && !leaving.Contains(t.Id)
+                && TaskRules.BacklogStatuses.Contains(t.Status) && t.StartDate == null && t.DueDate == null), "board", db).Select(t => t.Id).ToListAsync(ct);
+            var ids = lane.Concat(entering.OrderBy(t => t.Seq).Select(t => t.Id)).ToList();
+            var rows = await db.BoardOrders.Where(b => b.ProjectId == entering.Key && ids.Contains(b.TaskId)).ToDictionaryAsync(b => b.TaskId, ct);
+            for (var i = 0; i < ids.Count; i++)
+            {
+                if (!rows.TryGetValue(ids[i], out var row)) db.BoardOrders.Add(row = new BoardOrder { ProjectId = entering.Key, TaskId = ids[i] });
+                row.Position = i + 1;
+            }
+        }
     }
 
     // ---------- Transitions (T-10..T-14, R-01..R-04, C-07, C-08, DL-02) ----------

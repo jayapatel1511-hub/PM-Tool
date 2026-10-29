@@ -489,7 +489,11 @@ public static class ReadinessEndpoints
                     !(backlogOn && TaskRules.BacklogStatuses.Contains(t.Status) && t.StartDate == null && t.DueDate == null))
                 .Select(t => new LoadTask(t.Id, t.ProjectId, t.EstimatedHours, t.ProgressPct, t.StartDate, t.DueDate)).ToListAsync();
         if (sourceTasks.Count == 0 && targetType == "Deliverable")
-            return new(false, null, "Production capacity does not apply because this deliverable has no open production tasks.");
+            // A deliverable whose only open production work is in the Backlog still has work: unknown until it is dated, as with the flag off.
+            return backlogOn && await db.Tasks.AnyAsync(t => t.DeliverableId == targetId && t.AssigneeId == owner && t.DeletedAt == null &&
+                    t.Status == TaskStatuses.NotStarted && t.StartDate == null && t.DueDate == null)
+                ? new(true, null, "Production capacity is unknown until all required production work is dated within the target window.")
+                : new(false, null, "Production capacity does not apply because this deliverable has no open production tasks.");
         if (sourceTasks.Count == 0 || sourceTasks.Any(t => t.EstimatedHours is null))
             return new(true, null, "Production capacity is unknown until the required production estimate is recorded.");
 

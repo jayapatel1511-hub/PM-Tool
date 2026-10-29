@@ -14,7 +14,7 @@ export function AuditChains() {
   const list = useQuery({ queryKey: ['admin', 'audit-chains'], queryFn: () => typedRequest('get', '/api/v1/admin/audit-chains', {}) })
   // Verifying logs an entry and can alert Admins (FR-VER-04), so it runs only on an explicit press, never on focus or remount.
   const verify = useMutation({
-    mutationFn: (id: string) => typedRequest('get', '/api/v1/admin/audit-chains/{id}/verify', { params: { id } }),
+    mutationFn: (id: string) => typedRequest('post', '/api/v1/admin/audit-chains/{id}/verify', { params: { id } }),
     onSuccess: () => { void list.refetch() }, // the row's last-verified time changed
   })
   const runVerify = (id: string) => { setVerifyId(id); verify.mutate(id) }

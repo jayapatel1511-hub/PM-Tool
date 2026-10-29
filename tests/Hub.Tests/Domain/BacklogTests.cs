@@ -18,6 +18,9 @@ public sealed class BacklogTests
                 Assert.Equal(status is TaskStatuses.NotStarted or TaskStatuses.OnHold && start is null && due is null, TaskRules.IsBacklog(status, start, due));
     }
 
+    /// A pin of existing behaviour, not a test of slice code: undated work has no date to be late, due soon or inconsistent with,
+    /// and slip is measured from deliverable and milestone dates, so both halves pass without the S05 change, flag on or off.
+    /// The slice's own exclusions are tested below (health, milestone status) and in Api/ReadinessApiTests.
     [Theory, Trait("flag-off", "backlog"), Trait("flag-on", "backlog")]
     [InlineData(false), InlineData(true)]
     [Trait("Spec", "FR-BKL-05")]

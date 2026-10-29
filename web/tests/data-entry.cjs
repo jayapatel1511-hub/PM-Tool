@@ -4,13 +4,17 @@
 // field go one at a time, so a slow answer never sends an old row version; a field whose change needs a reason saves on blur only.
 // Packet 051 S02 (FR-SAV-02, unflagged): with either flag, a save with no answer keeps the typed value, says "Not saved" and goes
 // again on its own; a concurrency conflict shows both values and waits for "Keep mine" or "Take theirs". Retry shows with the flag.
-// A failed save stays with the record it was typed for: the open panel switching to another cached task never shows or writes it.
+// A failed save stays with the record it was typed for: the open panel switching to another cached task never shows or writes it, and its
+// timed retries end with it (flag on: leaving it asks first). A retry goes on the row version the refused save went on, so a change made
+// meanwhile is a conflict, never overwritten; a value the server normalises ("1.50" saved as 1.5) does not hold later saves back.
 // Packet 051 S03 (FR-SAV-03, FR-SAV-04, FR-SAV-06): a create dialog and a comment keep a local draft that Escape and reopening restore,
 // Discard and a successful submit drop, an empty form never writes and `draft_keep_days` prunes; without a draft (storage refusing
 // it) the leave prompt asks on close, on navigation and on tab close, and the build-update Reload goes through the same guard.
 // An edit form has no draft key but asks the same way once something is changed; the New template dialog keeps a draft.
 // Packet 051 S04 (FR-SAV-05, AC-SAV-04): when the sign-in session expires (401), a half-written comment is still in the editor on the
-// same item after sign-in, and an edit-panel field saves its typed value once on the fresh row version; the flag off keeps today's behaviour.
+// same item after sign-in, and an edit-panel field saves its typed value once on the row version it was typed against; the flag off keeps
+// today's behaviour. A refusal that comes back after the panel moved on is kept for its own record; the notification pulse meeting the expired
+// session first still keeps what was typed; an explicit sign-out drops the person's drafts and waiting fields (051-D2).
 const assert = require('node:assert/strict')
 const { execFileSync } = require('node:child_process')
 const fs = require('node:fs')
@@ -63,6 +67,8 @@ async function run(base, on) {
   }
   const wait = (ms) => page.waitForTimeout(ms)
   const until = async (check, ms, what) => { const end = Date.now() + ms; while (!check()) { if (Date.now() > end) assert.fail(what); await wait(50) } }
+  const prompt = page.getByRole('dialog', { name: 'Keep editing or discard?' })
+  const unload = () => page.evaluate(() => { const e = new Event('beforeunload', { cancelable: true }); window.dispatchEvent(e); return e.defaultPrevented })
   try {
     // Deliverable panel: two fields, typed with a pause and left by Tab.
     let box = await field('Deliverable', panelIds.deliverable, 'Name', 'Synthetic deliverable')
@@ -120,6 +126,16 @@ async function run(base, on) {
         [['Renamed again', 2], ['Renamed again twice', 3], ['Renamed again thrice', 4], [name, 5]], 'one save at a time, each with the row version before it')
       assert.equal(state.Task.task.name, name)
       assert.equal(await dialog.getByText(/Not saved/).count(), 0, 'no save was refused')
+      // The server keeps "1.50" as 1.5, so the refetch brings the field's value back unchanged: the answer, not a changed value, frees the
+      // next save, and a later change still goes out instead of waiting behind it and falling back to the server's copy.
+      state.Task.task.estimatedHours = 1.5
+      box = await field('Task', task.id, 'Estimated hours', '1.5')
+      await box.fill('1.50')
+      await wait(delay * 3)
+      await box.fill('2')
+      await box.press('Tab')
+      await until(() => state.Task.task.estimatedHours === 2, 3000, 'a change after a value the server normalised still saves')
+      assert.deepEqual(taskSaves().slice(-2).map(p => p.body), [{ estimatedHours: 1.5 }, { estimatedHours: 2 }])
     }
     // FR-SAV-02: the network drops while a deliverable field saves. The field keeps the typed value with "Not saved", the save goes
     // again on its own 2 s later and lands once (one activity entry), and the older value never shows in the field (AC-SAV-02).
@@ -194,9 +210,26 @@ async function run(base, on) {
     await wait(500)
     assert.equal(taskSaves().length, refused, `flag ${on}: Take theirs sends nothing`)
     name = 'Pat again'
-    // FR-SAV-02: a failed save belongs to the record it was typed for. Task A's save fails, the open panel moves on to task B (already
-    // cached, through the dependency link) and the network returns: B shows its own name with no "Not saved" and is never written to,
-    // while A's timed retry still lands on A.
+    // FR-SAV-02: Pat renames the task while Alex's save cannot get through; Alex's panel refetches after the failure. The timed retry goes on
+    // the row version Alex's save went on, so it is refused as a conflict and Alex chooses, instead of the retry overwriting Pat's name.
+    box = await field('Task', task.id, 'Name', name)
+    const typedOn = state.Task.task.rowVersion
+    seedConflict('Pat while Alex was offline')
+    offline = true
+    await box.fill('Alex while offline')
+    await box.press('Tab')
+    await note.waitFor({ state: 'visible' })
+    offline = false
+    await choice.getByText(/: Pat while Alex was offline$/).waitFor({ state: 'visible', timeout: 5000 })
+    await choice.getByText('Yours: Alex while offline', { exact: true }).waitFor({ state: 'visible' })
+    assert.equal(state.Task.task.name, 'Pat while Alex was offline', `flag ${on}: the timed retry did not overwrite Pat's change`)
+    assert.equal(taskSaves().at(-1).ifMatch, typedOn, `flag ${on}: the retry went on the version Alex's save went on`)
+    await choice.getByRole('button', { name: 'Take theirs' }).click()
+    name = 'Pat while Alex was offline'
+    await dialog.getByRole('button', { name, exact: true }).waitFor({ state: 'visible' })
+    // FR-SAV-02: a failed save belongs to the record it was typed for. Task A's save fails and the open panel moves on to task B (already
+    // cached, through the dependency link): B shows its own name with no "Not saved" and is never written to. With the flag on, leaving A
+    // asks first (FR-SAV-04) and Keep editing stays on A, where the retry lands; with it off, A's timed retries end when its panel goes.
     const taskB = structuredClone(taskDetail)
     Object.assign(taskB.task, { id: '00000000-0000-0000-0000-000000000042', key: 'T-002', name: 'Second task' })
     const savedB = []
@@ -221,15 +254,30 @@ async function run(base, on) {
     await box.fill('Typed for A')
     await box.press('Tab')
     await note.waitFor({ state: 'visible' })
+    if (on) {
+      assert.equal(await unload(), true, 'tab close and reload use the browser prompt while a field says "Not saved"')
+      await dialog.getByRole('button', { name: /^T-002 / }).click()
+      await prompt.waitFor({ state: 'visible' })
+      assert.equal(await page.evaluate(() => document.activeElement?.textContent), 'Keep editing', 'Keep editing has the focus, so Enter keeps the input')
+      await prompt.getByRole('button', { name: 'Keep editing' }).click()
+      await prompt.waitFor({ state: 'detached' })
+      offline = false
+      await until(() => state.Task.task.name === 'Typed for A', 15000, 'the retry saves the text on the task it was typed for')
+      name = 'Typed for A'
+      await nameButton(name).waitFor({ state: 'visible' })
+      assert.equal(await unload(), false, 'nothing is left to protect once it is saved')
+    }
+    const triedA = taskSaves().length
     await dialog.getByRole('button', { name: /^T-002 / }).click()
     offline = false
     await nameButton('Second task').waitFor({ state: 'visible', timeout: 2000 })
+    assert.equal(await prompt.count(), 0, `flag ${on}: nothing left unsaved, nothing asked`)
     assert.equal(await note.count(), 0, `flag ${on}: the other task does not say "Not saved"`)
-    await until(() => state.Task.task.name === 'Typed for A', 15000, `flag ${on}: the retry saves the text on the task it was typed for`)
-    await wait(1000)
+    await wait(2500)
+    assert.equal(taskSaves().length, triedA, `flag ${on}: no retry goes out once A's panel has gone`)
+    assert.equal(state.Task.task.name, name)
     assert.deepEqual(savedB, [], `flag ${on}: nothing is written to the other task`)
     assert.equal(await nameButton('Second task').count(), 1, `flag ${on}: the other task still shows its own name`)
-    name = 'Typed for A'
     // A Complete project needs a reason for the change (FR-SAV-01): no save after a pause, so the reason is asked once, on Tab.
     state.Task.permissions.needsReason = true
     const before = taskSaves().length
@@ -572,9 +620,12 @@ async function runReload(on, blocked) {
       await wait(300)
       assert.equal(await same(), true, 'Keep editing: the page did not reload')
       assert.equal(await newTask.locator('#t-name').inputValue(), 'Typed before the update')
+      const asked = []
+      page.on('dialog', dialog => { asked.push(dialog.type()); void dialog.accept() })
       await reload.click()
       await prompt.getByRole('button', { name: 'Discard', exact: true }).click()
       await page.waitForFunction(() => window.sameLoad !== true)
+      assert.deepEqual(asked, [], 'Discard reloads without the browser asking a second time')
     } else {
       assert.equal((await drafts()).length, 1)
       await reload.click()
@@ -614,6 +665,26 @@ async function runSignInExpiry(base, on) {
     deliverable.deliverable.rowVersion++
     return route.fulfill({ json: { ...deliverable.deliverable, warnings: [] } })
   })
+  // Task T-001 with a related deliverable, for a refusal that comes back after the panel moved on. Its saves can be held back and refused
+  // (`refuseTask`) or left without an answer (`hangTask`), and the notification pulse can meet the expired session first (`pulseExpired`).
+  const taskState = structuredClone({ ...taskDetail, relatedDeliverables: [{ id: panelIds.deliverable, key: 'D-001', name: 'Synthetic deliverable' }] })
+  const taskSaves = []
+  let refuseTask = null, hangTask = false, hung = false, pulseExpired = false
+  await page.route('**/api/v1/me/notifications/pulse**', route => pulseExpired ? route.fulfill({ status: 401, json: {} }) : route.fallback())
+  await page.route(new RegExp(`/api/v1/tasks/${task.id}$`), async route => {
+    const request = route.request()
+    if (request.method() === 'GET') return route.fulfill({ json: structuredClone(taskState) })
+    if (request.method() !== 'PATCH') return route.fallback()
+    if (hangTask) { hung = true; await new Promise(resolve => setTimeout(resolve, 8000)); return route.abort().catch(() => {}) }
+    if (refuseTask) { await refuseTask; return route.fulfill({ status: 401, json: {} }) }
+    const body = request.postDataJSON(), ifMatch = Number(request.headers()['if-match']?.replaceAll('"', ''))
+    taskSaves.push({ body, ifMatch })
+    if (ifMatch !== taskState.task.rowVersion) return route.fulfill({ status: 409, json: { code: 'concurrency_conflict', message: 'Changed by someone else',
+      changedBy: 'Pat Example', changedAt: new Date(Date.now() - 10000).toISOString(), currentRowVersion: taskState.task.rowVersion } })
+    if ('description' in body) taskState.description = body.description
+    Object.assign(taskState.task, Object.fromEntries(Object.entries(body).filter(([k]) => k !== 'description')), { rowVersion: taskState.task.rowVersion + 1 })
+    return route.fulfill({ json: { id: task.id, rowVersion: taskState.task.rowVersion, warnings: [] } })
+  })
   const pending = () => page.evaluate(() => JSON.parse(sessionStorage.getItem('hub.pendingFields') ?? 'null'))
   const panel = page.getByRole('dialog')
   // The sign-in picker comes up on the login route; choosing the person goes back to the route the work was on.
@@ -624,7 +695,7 @@ async function runSignInExpiry(base, on) {
     await whileSignedOut()
     expired = false
     await person.click()
-    await page.waitForURL(url => url.pathname + url.search === back, { timeout: 10000 })
+    await page.waitForURL(url => decodeURIComponent(url.pathname + url.search) === back, { timeout: 10000 }) // a panel opened by a click has its colon encoded
     await panel.waitFor({ state: 'visible', timeout: 20000 })
   }
   try {
@@ -667,7 +738,7 @@ async function runSignInExpiry(base, on) {
       if (!on) assert.equal(kept, null, 'flag off: nothing is stored')
       else {
         assert.equal(kept.length, 1)
-        assert.deepEqual({ ...kept[0], at: undefined }, { user: me.id, route: pendingKey, field: 'Description', value: 'Typed before the session expired', at: undefined }, 'the typed value waits, keyed by person, record and field')
+        assert.deepEqual({ ...kept[0], at: undefined }, { user: me.id, route: pendingKey, field: 'Description', value: 'Typed before the session expired', version: 1, at: undefined }, 'the typed value waits, keyed by person, record and field, with the row version it was typed against')
       }
     })
     if (!on) {
@@ -682,6 +753,80 @@ async function runSignInExpiry(base, on) {
       assert.equal(deliverable.description, 'Typed before the session expired')
       assert.equal(await pending(), null, 'the retry is spent')
       assert.equal(await panel.getByText(/Not saved/).count(), 0)
+
+      // The task's name is still being saved when the panel moves on to its related deliverable, and that save is then refused (401). The
+      // name waits for task T-001, not for the deliverable now on screen; Pat renames the task during sign-in, so the retry on T-001 goes
+      // on the row version Alex typed against and is a conflict, not an overwrite of Pat's name.
+      const taskRecord = `/my-work?panel=Task:${task.id}`, deliverableRecord = record
+      await start(taskRecord)
+      await panel.getByRole('button', { name: 'Synthetic task', exact: true }).first().click()
+      const nameBox = panel.getByRole('textbox', { name: 'Name', exact: true })
+      let release
+      refuseTask = new Promise(resolve => { release = resolve })
+      const typedOn = taskState.task.rowVersion
+      await nameBox.fill('Typed for the task')
+      await nameBox.press('Tab')
+      await panel.getByRole('button', { name: 'D-001 Synthetic deliverable' }).click()
+      await panel.getByRole('button', { name: 'Synthetic deliverable', exact: true }).first().waitFor({ state: 'visible' })
+      const deliverableSaves = saves.length
+      release()
+      await signIn(deliverableRecord, async () => {
+        const kept = await pending()
+        assert.deepEqual(kept.map(p => ({ ...p, at: undefined })), [{ user: me.id, route: `/my-work?Task:${task.id}`, field: 'Name', value: 'Typed for the task', version: typedOn, at: undefined }],
+          'kept for the task it was typed for')
+        refuseTask = null
+        Object.assign(taskState.task, { name: 'Renamed by Pat', rowVersion: taskState.task.rowVersion + 1 })
+      })
+      await wait(1500)
+      assert.equal(saves.length, deliverableSaves, 'nothing is written to the deliverable')
+      assert.equal(await panel.getByRole('button', { name: 'Synthetic deliverable', exact: true }).count(), 1, 'the deliverable keeps its own name')
+      await start(taskRecord)
+      const choice = panel.locator('span[aria-live="polite"]', { hasText: 'Keep mine' })
+      await choice.getByText(/: Renamed by Pat$/).waitFor({ state: 'visible' })
+      await choice.getByText('Yours: Typed for the task', { exact: true }).waitFor({ state: 'visible' })
+      assert.deepEqual(taskSaves, [{ body: { name: 'Typed for the task' }, ifMatch: typedOn }], 'one retry, on the version it was typed against')
+      assert.equal(taskState.task.name, 'Renamed by Pat', "Pat's change is not overwritten")
+      await choice.getByRole('button', { name: 'Take theirs' }).click()
+      await panel.getByRole('button', { name: 'Renamed by Pat', exact: true }).first().waitFor({ state: 'visible' })
+      assert.equal(await pending(), null)
+
+      // The notification pulse meets the expired session before the description's save gets an answer: what was typed is kept before the
+      // login page takes the panel, and saved once after sign-in.
+      await panel.getByRole('button', { name: 'Synthetic fixture task', exact: true }).click()
+      const description = panel.getByRole('textbox', { name: 'Description', exact: true })
+      hangTask = true
+      await description.fill('Typed as the session expired')
+      await until(() => hung, 3000, 'the save went out after the pause')
+      pulseExpired = true
+      await signIn(taskRecord, async () => {
+        const kept = await pending()
+        assert.deepEqual(kept?.map(p => ({ ...p, at: undefined })), [{ user: me.id, route: `/my-work?Task:${task.id}`, field: 'Description', value: 'Typed as the session expired', version: taskState.task.rowVersion, at: undefined }],
+          'the description is kept when the pulse gets the 401 first')
+        hangTask = pulseExpired = false
+      })
+      await until(() => taskState.description === 'Typed as the session expired', 5000, 'saved once after sign-in')
+      await panel.getByText('Saved', { exact: true }).first().waitFor({ state: 'visible' })
+      assert.equal(taskSaves.filter(p => 'description' in p.body).length, 1, 'one save')
+      assert.equal(await pending(), null)
+
+      // An explicit sign-out takes this person's drafts and waiting fields off the browser; another person's stay.
+      await panel.getByRole('textbox', { name: 'Comment', exact: true }).fill('Draft left behind')
+      await wait(100)
+      assert.equal((await drafts()).length, 1)
+      await page.evaluate((id) => {
+        localStorage.setItem('draft.someone-else.task.new.p1', JSON.stringify({ at: new Date().toISOString(), value: 'x' }))
+        sessionStorage.setItem('hub.pendingFields', JSON.stringify([{ user: id, route: '/x?', field: 'Name', value: 'a', at: new Date().toISOString() }, { user: 'someone-else', route: '/x?', field: 'Name', value: 'b', at: new Date().toISOString() }]))
+      }, me.id)
+      await page.keyboard.press('Escape')
+      await panel.waitFor({ state: 'detached' })
+      await page.evaluate(() => { window.beforeSignOut = true })
+      await page.getByRole('button', { name: 'Account' }).click()
+      await page.getByRole('menuitem', { name: 'Sign out' }).click()
+      await page.waitForFunction(() => window.beforeSignOut !== true)
+      await page.waitForURL('**/my-work') // this suite's browser signs straight back in
+      await page.getByRole('main').waitFor({ state: 'visible', timeout: 20000 })
+      assert.deepEqual(await drafts(), ['draft.someone-else.task.new.p1'], 'only the other person\'s draft is left')
+      assert.deepEqual((await pending()).map(p => p.user), ['someone-else'])
     }
     ui.mock.unknownGets.length = 0
     await ui.finish()

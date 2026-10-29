@@ -70,7 +70,11 @@ export function BoardTab() {
   const [creating, setCreating] = useState(false)
   const backlogOn = useFlag('backlog')
   const [collapsed, setCollapsedState] = useState(() => { try { return localStorage.getItem(BACKLOG_COLLAPSED) === '1' } catch { return false } })
-  const setCollapsed = (v: boolean) => { setCollapsedState(v); try { localStorage.setItem(BACKLOG_COLLAPSED, v ? '1' : '0') } catch { /* per-viewer convenience only */ } }
+  const setCollapsed = (v: boolean) => {
+    setCollapsedState(v); try { localStorage.setItem(BACKLOG_COLLAPSED, v ? '1' : '0') } catch { /* per-viewer convenience only */ }
+    // The pressed toggle unmounts: keyboard focus moves to its counterpart once that renders.
+    requestAnimationFrame(() => document.querySelector<HTMLElement>(v ? '#backlog-expand' : '[data-backlog-collapse]')?.focus())
+  }
   const [scheduling, setScheduling] = useState<{ r: TaskRow; lane: string; snapBack: () => void } | null>(null)
   const showBacklog = backlogOn && !collapsed
   const lanes = side ? [...LANES, ...SIDE] : LANES
@@ -121,7 +125,7 @@ export function BoardTab() {
       </>} />
       {q.data && q.data.total > MAX_CARDS && <p role="status" className="rounded-md border border-warn/40 bg-warn-bg px-4 py-3 text-sm text-warn"><span aria-hidden>▲ </span>{t('board.tooMany', { n: q.data.total, max: MAX_CARDS })}</p>}
       {hidden > 0 && !side && <p className="text-sm text-muted-foreground">{plural(hidden, 'board.hiddenOnHoldOne', 'board.hiddenOnHold', { n: hidden })}</p>}
-      {backlogOn && collapsed && <div><Button variant="outline" onClick={() => setCollapsed(false)}><ChevronRight className="size-4" aria-hidden />{t('backlog.expand', { n: all.filter(inBacklog).length })}</Button></div>}
+      {backlogOn && collapsed && <div><Button id="backlog-expand" variant="outline" onClick={() => setCollapsed(false)}><ChevronRight className="size-4" aria-hidden />{t('backlog.expand', { n: all.filter(inBacklog).length })}</Button></div>}
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
       {q.isPending ? <BoardSkeleton lanes={lanes.length} /> : (
         // Lanes keep their 248 px width and the board scrolls sideways inside its own region (design §5).
@@ -263,7 +267,7 @@ export function Swimlane({ rows, columns, onDrop, onReorder, onAdd, onCollapse, 
             <KanbanHeader>
               <span className="flex items-center gap-2">{col.name}<span className="rounded-md bg-card px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{count}</span></span>
               {col.id === 'To Do' && onAdd && <Button variant="ghost" size="icon-sm" aria-label={t('task.new')} onClick={onAdd}><Plus className="size-4" /></Button>}
-              {col.id === BACKLOG && onCollapse && <Button variant="ghost" size="icon-sm" aria-label={t('backlog.collapse')} title={t('backlog.collapse')} onClick={onCollapse}><ChevronLeft className="size-4" /></Button>}
+              {col.id === BACKLOG && onCollapse && <Button data-backlog-collapse variant="ghost" size="icon-sm" aria-label={t('backlog.collapse')} title={t('backlog.collapse')} onClick={onCollapse}><ChevronLeft className="size-4" /></Button>}
             </KanbanHeader>
             {col.id === BACKLOG && <p className="px-3 text-xs/[18px] text-muted-foreground">{t('backlog.rule')}</p>}
             <KanbanCards<Card> id={col.id} aria-label={col.name}>

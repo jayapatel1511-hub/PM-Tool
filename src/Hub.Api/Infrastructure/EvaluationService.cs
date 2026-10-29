@@ -262,6 +262,8 @@ public sealed class EvaluationWorker(IServiceProvider root, EvaluationSignal sig
                     .Union(db.Deliverables.Where(d => d.OwnerId == uid).Select(d => d.ProjectId)).Distinct().ToListAsync(ct))
                     projects.Add(pid);
             }
+            if (events.Any(e => e.EventType == "SettingsChanged")) // an Admin changed a setting the evaluator reads: every Active project
+                projects.UnionWith(await db.Projects.Where(p => p.Status == ProjectStatus.Active).Select(p => p.Id).ToListAsync(ct));
             foreach (var pid in projects)
             {
                 using var work = root.CreateScope();

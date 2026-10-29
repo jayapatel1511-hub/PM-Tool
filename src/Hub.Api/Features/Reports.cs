@@ -46,7 +46,7 @@ public static partial class ReportEndpoints
     sealed record ReportSnapshotSource(Guid ProjectId, DateOnly SnapshotDate, string Counts);
     sealed record ReviewMarker(Guid? ProjectId, DateTimeOffset OccurredAt);
     sealed record StatusChangeMarker(Guid User, DateTimeOffset OccurredAt);
-    sealed record PickupProjection(string Project, string Discipline, DateTimeOffset Offered, DateTimeOffset? Closed, string? CloseCause);
+    sealed record PickupProjection(Guid Assignee, Guid ProjectId, Guid ProjectDisciplineId, string Project, string Discipline, DateTimeOffset Offered, DateTimeOffset? Closed, string? CloseCause);
     sealed record CommitmentDimension(Guid ProjectId, Guid DisciplineId, Guid? CategoryId);
     sealed record CommitmentGroupKey(Guid ProjectId, Guid DisciplineId, Guid? CategoryId);
     sealed record StaffProject(string ProjectNumber, string Name, string Status);
@@ -647,22 +647,25 @@ public static partial class ReportEndpoints
     /// FR-ASG-08: Supervisors see their direct reports; Executives and Admins may ask for all staff.
     static async Task<Result> PickupOffers(Ctx c)
     {
-        var offers = TaskPickupReporting.Rows(c.Db, c.Access.VisibleProjectIds(), await c.Db.Users.AsNoTracking().SingleAsync(u => u.Id == c.Me.Id), c.S.IsFlagOn("org_structure"));
         var from = c.Date("from") ?? c.Today.AddDays(-42); var to = c.Date("to") ?? c.Today;
         Check.That(to >= from, "to", "error.invalid");
         // G-03: the range is organisation-time days, like the default "today", so an evening offer is in today's report.
         var zone = Clock.Zone(c.S);
         DateTimeOffset Utc(DateOnly d) { var t = d.ToDateTime(TimeOnly.MinValue); return new DateTimeOffset(t, zone.GetUtcOffset(t)).ToUniversalTime(); }
         var (start, end) = (Utc(from), Utc(to.AddDays(1)));
-        var rows = await (from offer in offers
-            where offer.OpenedAt >= start && offer.OpenedAt < end
+        var found = await (from offer in TaskPickupReporting.Rows(c.Db, c.Access.VisibleProjectIds())
+            where offer.OpenedAt >= start && offer.OpenedAt < end && offer.AssigneeId != null
             join task in c.Db.Tasks.IgnoreQueryFilters() on offer.TaskId equals task.Id
             where c.ProjectIds().Contains(task.ProjectId) && (c.Id("disciplineId") == null || task.ProjectDisciplineId == c.Id("disciplineId"))
             orderby offer.OpenedAt
-            select new PickupProjection(
+            select new PickupProjection(offer.AssigneeId!.Value, task.ProjectId, task.ProjectDisciplineId,
                 c.Db.Projects.Where(p => p.Id == task.ProjectId).Select(p => p.ProjectNumber).First(),
                 c.Db.ProjectDisciplines.Where(d => d.Id == task.ProjectDisciplineId).Select(d => d.Discipline!.Name).First(),
-                offer.OpenedAt, offer.ClosedAt, offer.CloseCause)).Take(Cap).ToListAsync();
+                offer.OpenedAt, offer.ClosedAt, offer.CloseCause)).ToListAsync();
+        // Filter through the list's visibility rule before the cap; limiting first can omit eligible offers.
+        var viewer = await c.Db.Users.AsNoTracking().SingleAsync(u => u.Id == c.Me.Id);
+        var rows = (await TaskPickupReporting.Visible(c.Db, c.Access, viewer, c.S.IsFlagOn("org_structure"), found,
+            r => (r.Assignee, r.ProjectId, r.ProjectDisciplineId))).Take(Cap).ToList();
         return new(Json(rows.Select(r => new PickupRow(r.Project, r.Discipline, r.Offered, r.Closed, TaskPickupRules.CauseText(r.CloseCause),
             (int)((r.Closed ?? c.Now) - r.Offered).TotalDays))), "/pickup");
     }

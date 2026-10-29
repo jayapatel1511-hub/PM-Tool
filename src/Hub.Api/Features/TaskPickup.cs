@@ -90,9 +90,7 @@ public static class TaskPickupEndpoints
         if (!await Enabled(db, store)) throw ApiException.NotFound();
         var (task, _, ctx) = await TaskEndpoints.Load(db, access, id);
         var offer = await db.Set<TaskPickupOffer>().FirstOrDefaultAsync(x => x.TaskId == id && x.ClosedAt == null) ?? throw ApiException.NotFound();
-        var assignee = task.AssigneeId is { } aid ? await db.Users.Where(u => u.Id == aid).Select(u => new { u.SupervisorId }).FirstOrDefaultAsync() : null;
-        Access.Demand(offer.OfferedById == me.Id || offer.AssigneeId == me.Id || TaskPickupRules.CanAssign(access.Actor, ctx, task.ProjectDisciplineId, assignee?.SupervisorId)
-            ? Allow.Yes : Allow.No("perm.pickup_withdraw"));
+        Access.Demand(TaskPickupRules.CanWithdraw(access.Actor, ctx, task.ProjectDisciplineId, offer) ? Allow.Yes : Allow.No("perm.pickup_withdraw"));
         offer.ClosedAt = clock.GetUtcNow(); offer.CloseCause = TaskPickupOffer.Withdrawn;
         var withdrawn = TaskPickupRules.CauseText(TaskPickupOffer.Withdrawn);
         db.Audit.Reason = withdrawn;
@@ -210,7 +208,7 @@ public static class TaskPickupEndpoints
         return TypedResults.Ok(new DetailResult(offer.Id, offer.Reason, offer.Note, offer.OpenedAt, offer.KeepWatching, task.RowVersion,
             new DetailTask(task.Key, task.Name, task.ProjectId, task.ProjectDisciplineId, task.DueDate),
             new Allowed(sameTeam && Permissions.Writable(access.Actor, ctx).Ok, canAssign && Permissions.Writable(access.Actor, ctx).Ok,
-                Permissions.Writable(access.Actor, ctx).Ok && (offer.OfferedById == me.Id || owner?.Id == me.Id || canAssign)),
+                Permissions.Writable(access.Actor, ctx).Ok && TaskPickupRules.CanWithdraw(access.Actor, ctx, task.ProjectDisciplineId, offer)),
             eligible.Select(u => new Candidate(u.Id, u.DisplayName)).ToList()));
     }
 
@@ -229,6 +227,10 @@ public static class TaskPickupRules
     /// FR-PKP-07: the assignee's direct manager, the project's PM or the task discipline's Lead may assign an offered task.
     public static bool CanAssign(Actor actor, ProjectContext ctx, Guid disciplineId, Guid? assigneeSupervisorId) =>
         Permissions.IsPM(actor, ctx) || Permissions.IsDL(ctx, disciplineId) || actor.Supervisor && assigneeSupervisorId == actor.Id;
+
+    /// FR-PKP-03: the offerer, the assignee, the PM or the Discipline Lead; a direct manager may assign an offer but not withdraw it.
+    public static bool CanWithdraw(Actor actor, ProjectContext ctx, Guid disciplineId, TaskPickupOffer offer) =>
+        offer.OfferedById == actor.Id || offer.AssigneeId == actor.Id || Permissions.IsPM(actor, ctx) || Permissions.IsDL(ctx, disciplineId);
 
     /// Fallback team rule for the pre-org-structure schema. Root can use the UnitId overload when enabled.
     public static bool SameTeam(bool orgStructureOn, Guid? assigneeUnitId, Guid? pickerUnitId, Guid? assigneeSupervisorId, Guid? pickerSupervisorId, bool assigneeActive, bool pickerActive)
@@ -280,11 +282,22 @@ public static class TaskPickupReporting
     public static IQueryable<TaskPickupOffer> Rows(HubDb db, IQueryable<Guid> visibleProjects) => db.Set<TaskPickupOffer>().AsNoTracking()
         .Where(o => visibleProjects.Contains(db.Tasks.IgnoreQueryFilters().Where(t => t.Id == o.TaskId).Select(t => t.ProjectId).FirstOrDefault()));
 
-    /// The team of the offer's assignee, not the task's current one: a pick-up or reassignment must not move an offer's history
-    /// away from the team that saw it in the list, or to a team that never could.
-    public static IQueryable<TaskPickupOffer> Rows(HubDb db, IQueryable<Guid> visibleProjects, AppUser viewer, bool orgStructureOn)
-        => Rows(db, visibleProjects).Where(o => o.AssigneeId != null && o.AssigneeId != viewer.Id && db.Users.Any(u => u.Id == o.AssigneeId && u.IsActive && viewer.IsActive
-            && (orgStructureOn && u.UnitId != null ? u.UnitId == viewer.UnitId : u.SupervisorId != null && u.SupervisorId == viewer.SupervisorId)));
+    /// FR-PKP-12 under the list's rules (FR-PKP-04): the team of the offer's assignee (not the task's current one, so a pick-up or
+    /// reassignment never moves an offer's history to a team that never saw it), and those who may assign it (direct manager, PM,
+    /// Discipline Lead). A since-deactivated assignee's offers stay with their team.
+    public static async Task<List<T>> Visible<T>(HubDb db, Access access, AppUser viewer, bool orgStructureOn, IReadOnlyList<T> rows, Func<T, (Guid Assignee, Guid Project, Guid Discipline)> key)
+    {
+        var keys = rows.Select(key).ToList();
+        var ids = keys.Select(k => k.Assignee).Distinct().ToArray();
+        var projectIds = keys.Select(k => k.Project).Distinct().ToArray();
+        var people = await db.Users.AsNoTracking().Where(u => ids.Contains(u.Id)).ToDictionaryAsync(u => u.Id);
+        var contexts = new Dictionary<Guid, ProjectContext>();
+        foreach (var project in await db.Projects.AsNoTracking().Where(p => projectIds.Contains(p.Id)).ToListAsync())
+            contexts[project.Id] = await access.Context(project);
+        return rows.Where((_, i) => keys[i] is var (a, p, d) && a != viewer.Id && people.TryGetValue(a, out var u)
+            && (TaskPickupRules.SameTeam(orgStructureOn, u.UnitId, viewer.UnitId, u.SupervisorId, viewer.SupervisorId, true, viewer.IsActive)
+                || contexts.TryGetValue(p, out var ctx) && TaskPickupRules.CanAssign(access.Actor, ctx, d, u.SupervisorId))).ToList();
+    }
 }
 
 /// Serialize offer state with task changes before handlers read either row; an offer never races a terminal save.

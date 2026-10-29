@@ -1,7 +1,8 @@
 // Packet 051 S07 (FR-BKL-06, FR-BKL-09, AC-BKL-04, AC-BKL-06): My Work -> No date, against a self-started production preview and the
 // mocked platform API. Flag off: the view menu has no No date, ?tab=nodate opens Today and asks for no Backlog list. Flag on: No date sits
 // between Overdue and Completed, lists the person's Backlog across projects with each project and the rule, asks the task list for
-// mine + backlog, is a saved view like the others, and Today no longer lists a blocked Backlog task.
+// mine + backlog, is a saved view like the others, and Today no longer lists a blocked Backlog task. Review fixes 2026-10-28: keyboard
+// focus moves between the Board's Backlog collapse and expand toggles, and back to quick add's name after an Add click.
 const assert = require('node:assert/strict')
 const { startPreview, newMockPage, me, work, task, project } = require('./platform-fixtures.cjs')
 const { savedView, viewList, viewSaved } = require('./views.fixture.cjs')
@@ -104,10 +105,43 @@ async function run(base, on) {
   } finally { await browser.close() }
 }
 
+// Each pressed control unmounts or is disabled, so focus must be moved for it, not left on the page body.
+async function focus(base) {
+  const { browser, page } = await newMockPage(base)
+  const errors = []
+  page.on('pageerror', error => errors.push(error.message))
+  const pd = { ...project.disciplines[0], isActive: true }
+  const focused = (test, what) => page.waitForFunction(test, null, { timeout: 5000 }).catch(() => assert.fail(`focus is not on ${what}`))
+  await page.route('**/api/v1/me', route => route.fulfill({ json: { ...me, flags: { ...me.flags, backlog: true } } }))
+  await page.route(new RegExp(`/api/v1/projects/(${project.id}|${project.projectNumber})(\\?|$)`), route =>
+    route.fulfill({ json: { ...project, disciplines: [pd], permissions: { ...project.permissions, createTaskIn: [pd.id] } } }))
+  await page.route(new RegExp(`/api/v1/projects/${project.id}/tasks(\\?|$)`), route => route.request().method() === 'POST'
+    ? route.fulfill({ status: 201, json: { id: row(9).id, key: 'T-209' } })
+    : route.fulfill({ json: { items: [row(8, 'Backlog card', { backlog: true })], page: 1, pageSize: 200, totalCount: 1 } }))
+  await page.route(/\/api\/v1\/users\?/, route => route.fulfill({ json: [{ id: me.id, homeDisciplineId: pd.disciplineId }] }))
+  try {
+    await page.goto(`${base}/projects/${project.projectNumber}/board`, { waitUntil: 'domcontentloaded' })
+    await page.getByRole('button', { name: 'Collapse the Backlog' }).focus()
+    await page.keyboard.press('Enter')
+    await focused(() => document.activeElement?.id === 'backlog-expand', 'Show the Backlog after collapsing')
+    await page.keyboard.press('Enter')
+    await focused(() => document.activeElement?.hasAttribute('data-backlog-collapse'), 'Collapse the Backlog after expanding')
+
+    await page.goto(`${base}/projects/${project.projectNumber}/tasks?backlog=true`, { waitUntil: 'domcontentloaded' })
+    await page.locator('#bq-name').fill('Check culvert sizing')
+    await page.getByRole('form', { name: 'Quick add to the Backlog' }).getByRole('button', { name: 'Add', exact: true }).click()
+    await page.getByText('T-209 created').waitFor({ timeout: 10000 })
+    await focused(() => document.activeElement?.id === 'bq-name', 'the quick add name after an Add click')
+    assert.equal(await page.locator('#bq-name').inputValue(), '')
+    assert.deepEqual(errors, [], `browser errors: ${errors.join('; ')}`)
+    return { focus: 'expand, collapse and quick add name' }
+  } finally { await browser.close() }
+}
+
 ;(async () => {
   const preview = await startPreview(port)
   try {
-    const results = [await run(preview.base, false), await run(preview.base, true)]
+    const results = [await run(preview.base, false), await run(preview.base, true), await focus(preview.base)]
     console.log(JSON.stringify({ result: 'PASS', results }))
   } finally { preview.child.kill() }
 })().catch(error => { console.error(error); process.exitCode = 1 })

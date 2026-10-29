@@ -39,6 +39,7 @@
     "test:tasks": "node tests/tasks.cjs",
     "test:projects": "node tests/projects.cjs",
     "test:admin": "node tests/admin.cjs",
+    "test:recovery-state": "node tests/recovery-state.cjs",
     "test:backlog-my-work": "node tests/backlog-my-work.cjs",
     "test:admin-review": "node tests/admin-review.cjs",
     "test:portfolio-admin-strip": "node tests/portfolio-admin-strip.cjs",

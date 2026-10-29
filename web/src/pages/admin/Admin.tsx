@@ -19,7 +19,7 @@ import type { components } from '@/gen/api'
 import { ApiError, typedRequest } from '@/lib/api'
 import { fmtTime } from '@/lib/format'
 import { invalidateChange } from '@/lib/keys'
-import { runtimeText, t } from '@/lib/i18n'
+import { runtimeText, settingLabel, t } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { useFlag } from '@/lib/auth'
 import { ADMIN_EXTRA } from '@/app/extension-slots'
@@ -195,9 +195,7 @@ export function Settings() {
   if (list.isPending) return <div className={card}><Loading /></div>
   if (list.error) return <ErrorBanner error={list.error} retry={() => list.refetch()} />
   const groups = [...new Set(list.data.map((s) => s.group))]
-  const label = (s: SettingRow) => s.key.startsWith('rule_enabled.') ? t('rule.enabled', { rule: s.key.slice(13), name: runtimeText(`rule.${s.key.slice(13)}`) })
-    : s.key.startsWith('notify_default.') ? runtimeText(`event.${s.key.slice(15)}`)
-    : s.key.startsWith('flag.') ? t('admin.flagLabel', { name: s.key.slice(5), packet: s.packet ?? '' }) : runtimeText(`setting.${s.key}`)
+  const label = (s: SettingRow) => settingLabel(s.key, s.packet ?? '')
   const fallback = (s: SettingRow) => s.default != null && typeof s.default === 'object'
     ? [(s.default as ChannelValue).app && t('pref.app'), (s.default as ChannelValue).email && t('pref.email')].filter(Boolean).join(' + ') : String(s.default)
   // Form page (design §5): a 760 px field region; each setting shows its current value, its default and its own error.

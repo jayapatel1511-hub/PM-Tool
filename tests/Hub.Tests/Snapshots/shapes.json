@@ -2049,94 +2049,6 @@
       "string"
     ]
   },
-  "GET /api/v1/admin/audit-chains/{id}/verify 200": {
-    "$": [
-      "object"
-    ],
-    "$.chain": [
-      "string"
-    ],
-    "$.firstBrokenSeq": [
-      "null",
-      "number"
-    ],
-    "$.from": [
-      "number"
-    ],
-    "$.headHash": [
-      "string"
-    ],
-    "$.headSeq": [
-      "number"
-    ],
-    "$.total": [
-      "number"
-    ],
-    "$.valid": [
-      "boolean"
-    ],
-    "$.verifiedAt": [
-      "string"
-    ],
-    "$.verifier": [
-      "string"
-    ]
-  },
-  "GET /api/v1/admin/audit-chains/{id}/verify 400": {
-    "$": [
-      "object"
-    ],
-    "$.code": [
-      "string"
-    ],
-    "$.detail": [
-      "string"
-    ],
-    "$.errors": [
-      "object"
-    ],
-    "$.errors.from": [
-      "array"
-    ],
-    "$.errors.from[]": [
-      "string"
-    ],
-    "$.status": [
-      "number"
-    ],
-    "$.title": [
-      "string"
-    ],
-    "$.traceId": [
-      "string"
-    ],
-    "$.type": [
-      "string"
-    ]
-  },
-  "GET /api/v1/admin/audit-chains/{id}/verify 403": {
-    "$": [
-      "object"
-    ],
-    "$.code": [
-      "string"
-    ],
-    "$.detail": [
-      "string"
-    ],
-    "$.status": [
-      "number"
-    ],
-    "$.title": [
-      "string"
-    ],
-    "$.traceId": [
-      "string"
-    ],
-    "$.type": [
-      "string"
-    ]
-  },
   "GET /api/v1/admin/clients 200": {
     "$": [
       "array"
@@ -68705,61 +68617,61 @@
     "$.paths./api/v1/admin/audit-chains/{id}/verify": [
       "object"
     ],
-    "$.paths./api/v1/admin/audit-chains/{id}/verify.get": [
+    "$.paths./api/v1/admin/audit-chains/{id}/verify.post": [
       "object"
     ],
-    "$.paths./api/v1/admin/audit-chains/{id}/verify.get.parameters": [
+    "$.paths./api/v1/admin/audit-chains/{id}/verify.post.parameters": [
       "array"
     ],
-    "$.paths./api/v1/admin/audit-chains/{id}/verify.get.parameters[]": [
+    "$.paths./api/v1/admin/audit-chains/{id}/verify.post.parameters[]": [
       "object"
     ],
-    "$.paths./api/v1/admin/audit-chains/{id}/verify.get.parameters[].in": [
+    "$.paths./api/v1/admin/audit-chains/{id}/verify.post.parameters[].in": [
       "string"
     ],
-    "$.paths./api/v1/admin/audit-chains/{id}/verify.get.parameters[].name": [
+    "$.paths./api/v1/admin/audit-chains/{id}/verify.post.parameters[].name": [
       "string"
     ],
-    "$.paths./api/v1/admin/audit-chains/{id}/verify.get.parameters[].required": [
+    "$.paths./api/v1/admin/audit-chains/{id}/verify.post.parameters[].required": [
       "boolean"
     ],
-    "$.paths./api/v1/admin/audit-chains/{id}/verify.get.parameters[].schema": [
+    "$.paths./api/v1/admin/audit-chains/{id}/verify.post.parameters[].schema": [
       "object"
     ],
-    "$.paths./api/v1/admin/audit-chains/{id}/verify.get.parameters[].schema.format": [
+    "$.paths./api/v1/admin/audit-chains/{id}/verify.post.parameters[].schema.format": [
       "string"
     ],
-    "$.paths./api/v1/admin/audit-chains/{id}/verify.get.parameters[].schema.pattern": [
+    "$.paths./api/v1/admin/audit-chains/{id}/verify.post.parameters[].schema.pattern": [
       "string"
     ],
-    "$.paths./api/v1/admin/audit-chains/{id}/verify.get.parameters[].schema.type": [
+    "$.paths./api/v1/admin/audit-chains/{id}/verify.post.parameters[].schema.type": [
       "string"
     ],
-    "$.paths./api/v1/admin/audit-chains/{id}/verify.get.responses": [
+    "$.paths./api/v1/admin/audit-chains/{id}/verify.post.responses": [
       "object"
     ],
-    "$.paths./api/v1/admin/audit-chains/{id}/verify.get.responses.200": [
+    "$.paths./api/v1/admin/audit-chains/{id}/verify.post.responses.200": [
       "object"
     ],
-    "$.paths./api/v1/admin/audit-chains/{id}/verify.get.responses.200.content": [
+    "$.paths./api/v1/admin/audit-chains/{id}/verify.post.responses.200.content": [
       "object"
     ],
-    "$.paths./api/v1/admin/audit-chains/{id}/verify.get.responses.200.content.application/json": [
+    "$.paths./api/v1/admin/audit-chains/{id}/verify.post.responses.200.content.application/json": [
       "object"
     ],
-    "$.paths./api/v1/admin/audit-chains/{id}/verify.get.responses.200.content.application/json.schema": [
+    "$.paths./api/v1/admin/audit-chains/{id}/verify.post.responses.200.content.application/json.schema": [
       "object"
     ],
-    "$.paths./api/v1/admin/audit-chains/{id}/verify.get.responses.200.content.application/json.schema.$ref": [
+    "$.paths./api/v1/admin/audit-chains/{id}/verify.post.responses.200.content.application/json.schema.$ref": [
       "string"
     ],
-    "$.paths./api/v1/admin/audit-chains/{id}/verify.get.responses.200.description": [
+    "$.paths./api/v1/admin/audit-chains/{id}/verify.post.responses.200.description": [
       "string"
     ],
-    "$.paths./api/v1/admin/audit-chains/{id}/verify.get.tags": [
+    "$.paths./api/v1/admin/audit-chains/{id}/verify.post.tags": [
       "array"
     ],
-    "$.paths./api/v1/admin/audit-chains/{id}/verify.get.tags[]": [
+    "$.paths./api/v1/admin/audit-chains/{id}/verify.post.tags[]": [
       "string"
     ],
     "$.paths./api/v1/admin/clients": [
@@ -122216,6 +122128,94 @@
     ]
   },
   "POST /api/v1/actions/{id}/transition 422": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "POST /api/v1/admin/audit-chains/{id}/verify 200": {
+    "$": [
+      "object"
+    ],
+    "$.chain": [
+      "string"
+    ],
+    "$.firstBrokenSeq": [
+      "null",
+      "number"
+    ],
+    "$.from": [
+      "number"
+    ],
+    "$.headHash": [
+      "string"
+    ],
+    "$.headSeq": [
+      "number"
+    ],
+    "$.total": [
+      "number"
+    ],
+    "$.valid": [
+      "boolean"
+    ],
+    "$.verifiedAt": [
+      "string"
+    ],
+    "$.verifier": [
+      "string"
+    ]
+  },
+  "POST /api/v1/admin/audit-chains/{id}/verify 400": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.errors": [
+      "object"
+    ],
+    "$.errors.from": [
+      "array"
+    ],
+    "$.errors.from[]": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "POST /api/v1/admin/audit-chains/{id}/verify 403": {
     "$": [
       "object"
     ],

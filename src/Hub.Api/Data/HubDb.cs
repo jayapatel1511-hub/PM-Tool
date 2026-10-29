@@ -1059,6 +1059,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         if (pickupOn) await Hub.Api.Features.TaskPickupLifecycle.BeforeSave(this, now, new Notifier(this, audit, settings, clock, configuration), ct); // FR-PKP-13
         ChangeTracker.DetectChanges();
         if (await FollowTasks(now, ct)) ChangeTracker.DetectChanges();
+        if (org.IsFlagOn(TaskRules.BacklogFlag)) await Hub.Api.Features.TaskEndpoints.KeepBacklogOrder(this, ct); // AC-BKL-03
         var comments = ChangeTracker.Entries<Comment>()
             .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified && e.Property(nameof(Comment.Body)).IsModified)
             .Select(e => (Comment)e.Entity).ToList();

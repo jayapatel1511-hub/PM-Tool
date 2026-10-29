@@ -66,6 +66,7 @@ test('invalidation prefixes match actual mounted screen query keys', () => {
     ReferenceData: [['admin', 'offices'], ['admin', 'disciplines'], ['reference']], Setting: [['admin', 'settings'], ['me']], Holiday: [['admin', 'holidays', 2026, ''], ['availability-view', '2026-10-01', '2026-10-31'], ['workload', 'scope']],
     Member: [['p', 'p1', 'team'], ['open-items', 'm1']], Discipline: [['p', 'p1', 'team'], ['planner-project-disciplines', 'p1']],
     Risk: [['search-counts', 'scope'], ['search-page', 'scope']],
+    Action: [['action', 'i1'], ['p', 'p1', 'actions', {}], ['mywork']], Meeting: [['p', 'p1', 'meetings']],
     IssueLocation: [['issue-locations', 'i1']], ReadinessAssessment: [['readiness-detail', 'p1', 'i1']],
     ResourceAllocation: [['allocations', 'p1', {}, 1], ['allocation-detail', 'p1', 'i1'], ['allocation-review-options', 'p1'], ['workload', 'scope']],
   }

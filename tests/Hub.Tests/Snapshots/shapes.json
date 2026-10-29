@@ -1017,9 +1017,11 @@
       "number"
     ],
     "$.action.decisionKey": [
-      "null"
+      "null",
+      "string"
     ],
     "$.action.dueDate": [
+      "null",
       "string"
     ],
     "$.action.id": [
@@ -1053,7 +1055,8 @@
       "null"
     ],
     "$.action.ownerExternalPartyId": [
-      "null"
+      "null",
+      "string"
     ],
     "$.action.ownerName": [
       "string"
@@ -1065,6 +1068,7 @@
       "string"
     ],
     "$.action.ownerUserId": [
+      "null",
       "string"
     ],
     "$.action.partyIsClient": [
@@ -1077,7 +1081,8 @@
       "string"
     ],
     "$.action.relatedDecisionId": [
-      "null"
+      "null",
+      "string"
     ],
     "$.action.relatedTaskId": [
       "null",
@@ -1097,7 +1102,20 @@
       "string"
     ],
     "$.decision": [
-      "null"
+      "null",
+      "object"
+    ],
+    "$.decision.id": [
+      "string"
+    ],
+    "$.decision.key": [
+      "string"
+    ],
+    "$.decision.status": [
+      "string"
+    ],
+    "$.decision.subject": [
+      "string"
     ],
     "$.links": [
       "array"
@@ -1169,7 +1187,8 @@
       "boolean"
     ],
     "$.permissions.edit.reason": [
-      "null"
+      "null",
+      "string"
     ],
     "$.permissions.transitions": [
       "array"
@@ -1181,7 +1200,8 @@
       "boolean"
     ],
     "$.permissions.transitions[].reason": [
-      "null"
+      "null",
+      "string"
     ],
     "$.permissions.transitions[].to": [
       "string"
@@ -1219,6 +1239,29 @@
     ],
     "$.taskDisciplineId": [
       "null",
+      "string"
+    ]
+  },
+  "GET /api/v1/actions/{id} 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
       "string"
     ]
   },
@@ -9282,6 +9325,351 @@
     "$.components.schemas": [
       "object"
     ],
+    "$.components.schemas.ActionConverted": [
+      "object"
+    ],
+    "$.components.schemas.ActionConverted.properties": [
+      "object"
+    ],
+    "$.components.schemas.ActionConverted.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.ActionConverted.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.ActionConverted.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionConverted.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.ActionConverted.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.ActionConverted.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ActionConverted.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionConverted.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.ActionConverted.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionConverted.properties.taskId": [
+      "object"
+    ],
+    "$.components.schemas.ActionConverted.properties.taskId.format": [
+      "string"
+    ],
+    "$.components.schemas.ActionConverted.properties.taskId.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionConverted.properties.taskKey": [
+      "object"
+    ],
+    "$.components.schemas.ActionConverted.properties.taskKey.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionConverted.required": [
+      "array"
+    ],
+    "$.components.schemas.ActionConverted.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ActionConverted.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionCreated": [
+      "object"
+    ],
+    "$.components.schemas.ActionCreated.properties": [
+      "object"
+    ],
+    "$.components.schemas.ActionCreated.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.ActionCreated.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.ActionCreated.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionCreated.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.ActionCreated.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionCreated.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.ActionCreated.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.ActionCreated.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ActionCreated.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionCreated.properties.warnings": [
+      "object"
+    ],
+    "$.components.schemas.ActionCreated.properties.warnings.items": [
+      "object"
+    ],
+    "$.components.schemas.ActionCreated.properties.warnings.items.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionCreated.properties.warnings.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionCreated.required": [
+      "array"
+    ],
+    "$.components.schemas.ActionCreated.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ActionCreated.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionDecisionRef": [
+      "object"
+    ],
+    "$.components.schemas.ActionDecisionRef.properties": [
+      "object"
+    ],
+    "$.components.schemas.ActionDecisionRef.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.ActionDecisionRef.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.ActionDecisionRef.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionDecisionRef.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.ActionDecisionRef.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionDecisionRef.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.ActionDecisionRef.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionDecisionRef.properties.subject": [
+      "object"
+    ],
+    "$.components.schemas.ActionDecisionRef.properties.subject.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionDecisionRef.required": [
+      "array"
+    ],
+    "$.components.schemas.ActionDecisionRef.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ActionDecisionRef.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionDetail": [
+      "object"
+    ],
+    "$.components.schemas.ActionDetail.properties": [
+      "object"
+    ],
+    "$.components.schemas.ActionDetail.properties.action": [
+      "object"
+    ],
+    "$.components.schemas.ActionDetail.properties.action.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ActionDetail.properties.decision": [
+      "object"
+    ],
+    "$.components.schemas.ActionDetail.properties.decision.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.ActionDetail.properties.decision.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.ActionDetail.properties.decision.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.ActionDetail.properties.decision.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.ActionDetail.properties.links": [
+      "object"
+    ],
+    "$.components.schemas.ActionDetail.properties.links.items": [
+      "object"
+    ],
+    "$.components.schemas.ActionDetail.properties.links.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ActionDetail.properties.links.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionDetail.properties.meeting": [
+      "object"
+    ],
+    "$.components.schemas.ActionDetail.properties.meeting.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ActionDetail.properties.permissions": [
+      "object"
+    ],
+    "$.components.schemas.ActionDetail.properties.permissions.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ActionDetail.properties.project": [
+      "object"
+    ],
+    "$.components.schemas.ActionDetail.properties.project.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ActionDetail.properties.task": [
+      "object"
+    ],
+    "$.components.schemas.ActionDetail.properties.task.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.ActionDetail.properties.task.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.ActionDetail.properties.task.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.ActionDetail.properties.task.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.ActionDetail.properties.taskDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.ActionDetail.properties.taskDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.ActionDetail.properties.taskDisciplineId.type": [
+      "array"
+    ],
+    "$.components.schemas.ActionDetail.properties.taskDisciplineId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ActionDetail.required": [
+      "array"
+    ],
+    "$.components.schemas.ActionDetail.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ActionDetail.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionDetailPermissions": [
+      "object"
+    ],
+    "$.components.schemas.ActionDetailPermissions.properties": [
+      "object"
+    ],
+    "$.components.schemas.ActionDetailPermissions.properties.comment": [
+      "object"
+    ],
+    "$.components.schemas.ActionDetailPermissions.properties.comment.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionDetailPermissions.properties.convert": [
+      "object"
+    ],
+    "$.components.schemas.ActionDetailPermissions.properties.convert.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionDetailPermissions.properties.edit": [
+      "object"
+    ],
+    "$.components.schemas.ActionDetailPermissions.properties.edit.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ActionDetailPermissions.properties.transitions": [
+      "object"
+    ],
+    "$.components.schemas.ActionDetailPermissions.properties.transitions.items": [
+      "object"
+    ],
+    "$.components.schemas.ActionDetailPermissions.properties.transitions.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.ActionDetailPermissions.properties.transitions.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionDetailPermissions.required": [
+      "array"
+    ],
+    "$.components.schemas.ActionDetailPermissions.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ActionDetailPermissions.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionMeetingRef": [
+      "object"
+    ],
+    "$.components.schemas.ActionMeetingRef.properties": [
+      "object"
+    ],
+    "$.components.schemas.ActionMeetingRef.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.ActionMeetingRef.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.ActionMeetingRef.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionMeetingRef.properties.meetingDate": [
+      "object"
+    ],
+    "$.components.schemas.ActionMeetingRef.properties.meetingDate.format": [
+      "string"
+    ],
+    "$.components.schemas.ActionMeetingRef.properties.meetingDate.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionMeetingRef.properties.meetingType": [
+      "object"
+    ],
+    "$.components.schemas.ActionMeetingRef.properties.meetingType.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionMeetingRef.properties.notesLink": [
+      "object"
+    ],
+    "$.components.schemas.ActionMeetingRef.properties.notesLink.type": [
+      "array"
+    ],
+    "$.components.schemas.ActionMeetingRef.properties.notesLink.type[]": [
+      "string"
+    ],
+    "$.components.schemas.ActionMeetingRef.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.ActionMeetingRef.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionMeetingRef.required": [
+      "array"
+    ],
+    "$.components.schemas.ActionMeetingRef.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ActionMeetingRef.type": [
+      "string"
+    ],
     "$.components.schemas.ActionMove": [
       "object"
     ],
@@ -9325,6 +9713,168 @@
       "string"
     ],
     "$.components.schemas.ActionMove.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionMoved": [
+      "object"
+    ],
+    "$.components.schemas.ActionMoved.properties": [
+      "object"
+    ],
+    "$.components.schemas.ActionMoved.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.ActionMoved.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.ActionMoved.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionMoved.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.ActionMoved.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.ActionMoved.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ActionMoved.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionMoved.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.ActionMoved.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionMoved.required": [
+      "array"
+    ],
+    "$.components.schemas.ActionMoved.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ActionMoved.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionMutation": [
+      "object"
+    ],
+    "$.components.schemas.ActionMutation.properties": [
+      "object"
+    ],
+    "$.components.schemas.ActionMutation.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.ActionMutation.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.ActionMutation.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionMutation.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.ActionMutation.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.ActionMutation.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.ActionMutation.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionMutation.required": [
+      "array"
+    ],
+    "$.components.schemas.ActionMutation.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ActionMutation.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionProject": [
+      "object"
+    ],
+    "$.components.schemas.ActionProject.properties": [
+      "object"
+    ],
+    "$.components.schemas.ActionProject.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.ActionProject.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.ActionProject.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionProject.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.ActionProject.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionProject.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.ActionProject.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionProject.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.ActionProject.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionProject.required": [
+      "array"
+    ],
+    "$.components.schemas.ActionProject.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ActionProject.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionTaskRef": [
+      "object"
+    ],
+    "$.components.schemas.ActionTaskRef.properties": [
+      "object"
+    ],
+    "$.components.schemas.ActionTaskRef.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.ActionTaskRef.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.ActionTaskRef.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionTaskRef.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.ActionTaskRef.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionTaskRef.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.ActionTaskRef.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionTaskRef.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.ActionTaskRef.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.ActionTaskRef.required": [
+      "array"
+    ],
+    "$.components.schemas.ActionTaskRef.required[]": [
+      "string"
+    ],
+    "$.components.schemas.ActionTaskRef.type": [
       "string"
     ],
     "$.components.schemas.ActivityEntry": [
@@ -33547,6 +34097,213 @@
       "string"
     ],
     "$.components.schemas.MeetingBody.type": [
+      "string"
+    ],
+    "$.components.schemas.MeetingListRow": [
+      "object"
+    ],
+    "$.components.schemas.MeetingListRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.MeetingListRow.properties.calendarEventId": [
+      "object"
+    ],
+    "$.components.schemas.MeetingListRow.properties.calendarEventId.format": [
+      "string"
+    ],
+    "$.components.schemas.MeetingListRow.properties.calendarEventId.type": [
+      "array"
+    ],
+    "$.components.schemas.MeetingListRow.properties.calendarEventId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MeetingListRow.properties.calendarEventTitle": [
+      "object"
+    ],
+    "$.components.schemas.MeetingListRow.properties.calendarEventTitle.type": [
+      "array"
+    ],
+    "$.components.schemas.MeetingListRow.properties.calendarEventTitle.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MeetingListRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.MeetingListRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.MeetingListRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.MeetingListRow.properties.meetingDate": [
+      "object"
+    ],
+    "$.components.schemas.MeetingListRow.properties.meetingDate.format": [
+      "string"
+    ],
+    "$.components.schemas.MeetingListRow.properties.meetingDate.type": [
+      "string"
+    ],
+    "$.components.schemas.MeetingListRow.properties.meetingType": [
+      "object"
+    ],
+    "$.components.schemas.MeetingListRow.properties.meetingType.type": [
+      "string"
+    ],
+    "$.components.schemas.MeetingListRow.properties.notesLink": [
+      "object"
+    ],
+    "$.components.schemas.MeetingListRow.properties.notesLink.type": [
+      "array"
+    ],
+    "$.components.schemas.MeetingListRow.properties.notesLink.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MeetingListRow.properties.open": [
+      "object"
+    ],
+    "$.components.schemas.MeetingListRow.properties.open.format": [
+      "string"
+    ],
+    "$.components.schemas.MeetingListRow.properties.open.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MeetingListRow.properties.open.type": [
+      "string"
+    ],
+    "$.components.schemas.MeetingListRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.MeetingListRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.MeetingListRow.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.MeetingListRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.MeetingListRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.MeetingListRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MeetingListRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.MeetingListRow.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.MeetingListRow.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.MeetingListRow.properties.total": [
+      "object"
+    ],
+    "$.components.schemas.MeetingListRow.properties.total.format": [
+      "string"
+    ],
+    "$.components.schemas.MeetingListRow.properties.total.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MeetingListRow.properties.total.type": [
+      "string"
+    ],
+    "$.components.schemas.MeetingListRow.required": [
+      "array"
+    ],
+    "$.components.schemas.MeetingListRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.MeetingListRow.type": [
+      "string"
+    ],
+    "$.components.schemas.MeetingRead": [
+      "object"
+    ],
+    "$.components.schemas.MeetingRead.properties": [
+      "object"
+    ],
+    "$.components.schemas.MeetingRead.properties.calendarEventId": [
+      "object"
+    ],
+    "$.components.schemas.MeetingRead.properties.calendarEventId.format": [
+      "string"
+    ],
+    "$.components.schemas.MeetingRead.properties.calendarEventId.type": [
+      "array"
+    ],
+    "$.components.schemas.MeetingRead.properties.calendarEventId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MeetingRead.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.MeetingRead.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.MeetingRead.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.MeetingRead.properties.meetingDate": [
+      "object"
+    ],
+    "$.components.schemas.MeetingRead.properties.meetingDate.format": [
+      "string"
+    ],
+    "$.components.schemas.MeetingRead.properties.meetingDate.type": [
+      "string"
+    ],
+    "$.components.schemas.MeetingRead.properties.meetingType": [
+      "object"
+    ],
+    "$.components.schemas.MeetingRead.properties.meetingType.type": [
+      "string"
+    ],
+    "$.components.schemas.MeetingRead.properties.notesLink": [
+      "object"
+    ],
+    "$.components.schemas.MeetingRead.properties.notesLink.type": [
+      "array"
+    ],
+    "$.components.schemas.MeetingRead.properties.notesLink.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MeetingRead.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.MeetingRead.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.MeetingRead.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.MeetingRead.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.MeetingRead.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.MeetingRead.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MeetingRead.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.MeetingRead.properties.title": [
+      "object"
+    ],
+    "$.components.schemas.MeetingRead.properties.title.type": [
+      "string"
+    ],
+    "$.components.schemas.MeetingRead.required": [
+      "array"
+    ],
+    "$.components.schemas.MeetingRead.required[]": [
+      "string"
+    ],
+    "$.components.schemas.MeetingRead.type": [
       "string"
     ],
     "$.components.schemas.MemberAdded": [
@@ -58641,6 +59398,9 @@
     "$.paths./api/v1/actions/{id}.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/actions/{id}.get.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/actions/{id}.get.responses.200.description": [
       "string"
     ],
@@ -58700,6 +59460,18 @@
     ],
     "$.paths./api/v1/actions/{id}.patch.responses.200": [
       "object"
+    ],
+    "$.paths./api/v1/actions/{id}.patch.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/actions/{id}.patch.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/actions/{id}.patch.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/actions/{id}.patch.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/actions/{id}.patch.responses.200.description": [
       "string"
@@ -58764,6 +59536,18 @@
     "$.paths./api/v1/actions/{id}/convert.post.responses.200": [
       "object"
     ],
+    "$.paths./api/v1/actions/{id}/convert.post.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/actions/{id}/convert.post.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/actions/{id}/convert.post.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/actions/{id}/convert.post.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/actions/{id}/convert.post.responses.200.description": [
       "string"
     ],
@@ -58826,6 +59610,18 @@
     ],
     "$.paths./api/v1/actions/{id}/transition.post.responses.200": [
       "object"
+    ],
+    "$.paths./api/v1/actions/{id}/transition.post.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/actions/{id}/transition.post.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/actions/{id}/transition.post.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/actions/{id}/transition.post.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/actions/{id}/transition.post.responses.200.description": [
       "string"
@@ -66555,6 +67351,9 @@
     "$.paths./api/v1/meetings/{id}.patch.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/meetings/{id}.patch.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/meetings/{id}.patch.responses.200.description": [
       "string"
     ],
@@ -66615,10 +67414,22 @@
     "$.paths./api/v1/meetings/{id}/actions.post.responses": [
       "object"
     ],
-    "$.paths./api/v1/meetings/{id}/actions.post.responses.200": [
+    "$.paths./api/v1/meetings/{id}/actions.post.responses.201": [
       "object"
     ],
-    "$.paths./api/v1/meetings/{id}/actions.post.responses.200.description": [
+    "$.paths./api/v1/meetings/{id}/actions.post.responses.201.content": [
+      "object"
+    ],
+    "$.paths./api/v1/meetings/{id}/actions.post.responses.201.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/meetings/{id}/actions.post.responses.201.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/meetings/{id}/actions.post.responses.201.content.application/json.schema.$ref": [
+      "string"
+    ],
+    "$.paths./api/v1/meetings/{id}/actions.post.responses.201.description": [
       "string"
     ],
     "$.paths./api/v1/meetings/{id}/actions.post.tags": [
@@ -71532,6 +72343,15 @@
     "$.paths./api/v1/projects/{id}/meetings.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/projects/{id}/meetings.get.responses.200.content.application/json.schema.items": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/meetings.get.responses.200.content.application/json.schema.items.$ref": [
+      "string"
+    ],
+    "$.paths./api/v1/projects/{id}/meetings.get.responses.200.content.application/json.schema.type": [
+      "string"
+    ],
     "$.paths./api/v1/projects/{id}/meetings.get.responses.200.description": [
       "string"
     ],
@@ -71589,10 +72409,22 @@
     "$.paths./api/v1/projects/{id}/meetings.post.responses": [
       "object"
     ],
-    "$.paths./api/v1/projects/{id}/meetings.post.responses.200": [
+    "$.paths./api/v1/projects/{id}/meetings.post.responses.201": [
       "object"
     ],
-    "$.paths./api/v1/projects/{id}/meetings.post.responses.200.description": [
+    "$.paths./api/v1/projects/{id}/meetings.post.responses.201.content": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/meetings.post.responses.201.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/meetings.post.responses.201.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/meetings.post.responses.201.content.application/json.schema.$ref": [
+      "string"
+    ],
+    "$.paths./api/v1/projects/{id}/meetings.post.responses.201.description": [
       "string"
     ],
     "$.paths./api/v1/projects/{id}/meetings.post.tags": [
@@ -71645,6 +72477,9 @@
     ],
     "$.paths./api/v1/projects/{id}/meetings/current.post.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/projects/{id}/meetings/current.post.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/projects/{id}/meetings/current.post.responses.200.description": [
       "string"
@@ -87080,6 +87915,29 @@
       "string"
     ]
   },
+  "GET /api/v1/projects/{id}/actions/export 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "GET /api/v1/projects/{id}/activity 200": {
     "$": [
       "object"
@@ -93039,10 +93897,12 @@
       "object"
     ],
     "$[].calendarEventId": [
-      "null"
+      "null",
+      "string"
     ],
     "$[].calendarEventTitle": [
-      "null"
+      "null",
+      "string"
     ],
     "$[].id": [
       "string"
@@ -93054,6 +93914,7 @@
       "string"
     ],
     "$[].notesLink": [
+      "null",
       "string"
     ],
     "$[].open": [
@@ -107188,6 +108049,133 @@
       "string"
     ]
   },
+  "PATCH /api/v1/actions/{id} 200": {
+    "$": [
+      "object"
+    ],
+    "$.id": [
+      "string"
+    ],
+    "$.rowVersion": [
+      "number"
+    ]
+  },
+  "PATCH /api/v1/actions/{id} 400": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.errors": [
+      "object"
+    ],
+    "$.errors.meetingId": [
+      "array"
+    ],
+    "$.errors.meetingId[]": [
+      "string"
+    ],
+    "$.errors.text": [
+      "array"
+    ],
+    "$.errors.text[]": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "PATCH /api/v1/actions/{id} 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "PATCH /api/v1/actions/{id} 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "PATCH /api/v1/actions/{id} 409": {
+    "$": [
+      "object"
+    ],
+    "$.changedAt": [
+      "string"
+    ],
+    "$.changedBy": [
+      "string"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.currentRowVersion": [
+      "number"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "PATCH /api/v1/admin/clients/{id} 200": {
     "$": [
       "object"
@@ -108908,6 +109896,169 @@
       "string"
     ]
   },
+  "PATCH /api/v1/meetings/{id} 200": {
+    "$": [
+      "object"
+    ],
+    "$.calendarEventId": [
+      "null",
+      "string"
+    ],
+    "$.id": [
+      "string"
+    ],
+    "$.meetingDate": [
+      "string"
+    ],
+    "$.meetingType": [
+      "string"
+    ],
+    "$.notesLink": [
+      "null"
+    ],
+    "$.projectId": [
+      "string"
+    ],
+    "$.rowVersion": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ]
+  },
+  "PATCH /api/v1/meetings/{id} 400": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.errors": [
+      "object"
+    ],
+    "$.errors.title": [
+      "array"
+    ],
+    "$.errors.title[]": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "PATCH /api/v1/meetings/{id} 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "PATCH /api/v1/meetings/{id} 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "PATCH /api/v1/meetings/{id} 409": {
+    "$": [
+      "object"
+    ],
+    "$.changedAt": [
+      "string"
+    ],
+    "$.changedBy": [
+      "string"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.currentRowVersion": [
+      "number"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "PATCH /api/v1/meetings/{id} 428": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "PATCH /api/v1/milestones/{id} 200": {
     "$": [
       "object"
@@ -110000,6 +111151,29 @@
       "string"
     ],
     "$.taskKey": [
+      "string"
+    ]
+  },
+  "POST /api/v1/actions/{id}/convert 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
       "string"
     ]
   },
@@ -113269,6 +114443,29 @@
       "string"
     ]
   },
+  "POST /api/v1/meetings/{id}/actions 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "POST /api/v1/milestones/{id}/change-date 200": {
     "$": [
       "object"
@@ -115761,7 +116958,8 @@
       "object"
     ],
     "$.calendarEventId": [
-      "null"
+      "null",
+      "string"
     ],
     "$.id": [
       "string"
@@ -115798,6 +116996,12 @@
     ],
     "$.errors": [
       "object"
+    ],
+    "$.errors.calendarEventId": [
+      "array"
+    ],
+    "$.errors.calendarEventId[]": [
+      "string"
     ],
     "$.errors.notesLink": [
       "array"

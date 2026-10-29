@@ -1,6 +1,208 @@
 {
   "components": {
     "schemas": {
+      "ActionConverted": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "taskId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "taskKey": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "rowVersion",
+          "taskId",
+          "taskKey"
+        ],
+        "type": "object"
+      },
+      "ActionCreated": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "rowVersion",
+          "warnings"
+        ],
+        "type": "object"
+      },
+      "ActionDecisionRef": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "subject",
+          "status"
+        ],
+        "type": "object"
+      },
+      "ActionDetail": {
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/MeetingActionRow"
+          },
+          "decision": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ActionDecisionRef"
+              }
+            ]
+          },
+          "links": {
+            "items": {
+              "$ref": "#/components/schemas/ItemLinkRow"
+            },
+            "type": "array"
+          },
+          "meeting": {
+            "$ref": "#/components/schemas/ActionMeetingRef"
+          },
+          "permissions": {
+            "$ref": "#/components/schemas/ActionDetailPermissions"
+          },
+          "project": {
+            "$ref": "#/components/schemas/ActionProject"
+          },
+          "task": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ActionTaskRef"
+              }
+            ]
+          },
+          "taskDisciplineId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "meeting",
+          "project",
+          "task",
+          "decision",
+          "links",
+          "taskDisciplineId",
+          "permissions"
+        ],
+        "type": "object"
+      },
+      "ActionDetailPermissions": {
+        "properties": {
+          "comment": {
+            "type": "boolean"
+          },
+          "convert": {
+            "type": "boolean"
+          },
+          "edit": {
+            "$ref": "#/components/schemas/RegisterPermission"
+          },
+          "transitions": {
+            "items": {
+              "$ref": "#/components/schemas/RegisterTransition"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "edit",
+          "transitions",
+          "convert",
+          "comment"
+        ],
+        "type": "object"
+      },
+      "ActionMeetingRef": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "meetingDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "meetingType": {
+            "type": "string"
+          },
+          "notesLink": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "meetingDate",
+          "meetingType",
+          "notesLink"
+        ],
+        "type": "object"
+      },
       "ActionMove": {
         "properties": {
           "reason": {
@@ -25,6 +227,94 @@
           "toStatus",
           "reason",
           "rowVersion"
+        ],
+        "type": "object"
+      },
+      "ActionMoved": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
+      "ActionMutation": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
+      "ActionProject": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "projectNumber",
+          "name",
+          "status"
+        ],
+        "type": "object"
+      },
+      "ActionTaskRef": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "status"
         ],
         "type": "object"
       },
@@ -14307,6 +14597,127 @@
           "meetingType",
           "notesLink",
           "calendarEventId"
+        ],
+        "type": "object"
+      },
+      "MeetingListRow": {
+        "properties": {
+          "calendarEventId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "calendarEventTitle": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "meetingDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "meetingType": {
+            "type": "string"
+          },
+          "notesLink": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "open": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "total": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "projectId",
+          "title",
+          "meetingDate",
+          "meetingType",
+          "notesLink",
+          "calendarEventId",
+          "rowVersion",
+          "calendarEventTitle",
+          "open",
+          "total"
+        ],
+        "type": "object"
+      },
+      "MeetingRead": {
+        "properties": {
+          "calendarEventId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "meetingDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "meetingType": {
+            "type": "string"
+          },
+          "notesLink": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "projectId",
+          "title",
+          "meetingDate",
+          "meetingType",
+          "notesLink",
+          "calendarEventId",
+          "rowVersion"
         ],
         "type": "object"
       },
@@ -29071,7 +29482,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/ActionDetail"
+                }
               }
             },
             "description": "OK"
@@ -29105,6 +29518,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionMutation"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -29138,6 +29558,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionConverted"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -29171,6 +29598,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionMoved"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -33768,7 +34202,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/MeetingRead"
+                }
               }
             },
             "description": "OK"
@@ -33803,8 +34239,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionCreated"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -38654,7 +39097,12 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MeetingListRow"
+                  },
+                  "type": "array"
+                }
               }
             },
             "description": "OK"
@@ -38687,8 +39135,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeetingRead"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -38713,7 +39168,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/MeetingRead"
+                }
               }
             },
             "description": "OK"

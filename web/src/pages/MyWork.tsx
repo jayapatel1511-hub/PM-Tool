@@ -51,7 +51,7 @@ const FOCUS = ['overdue', 'today', 'thisWeek']
 /** One readable list row (14 px, density-aware height) inside a section card. */
 const ROW = 'flex min-h-(--row-min) flex-wrap items-center gap-x-3 gap-y-1 px-5 py-(--cell-py) text-sm hover:bg-muted'
 /** A project's number with its stable identity mark. */
-const ProjectTag = ({ id, number, name }: { id: string; number: string; name?: string }) => (
+const ProjectTag = ({ id, number, name }: { id: string; number: string | null; name?: string }) => (
   <span className="inline-flex shrink-0 items-center gap-1.5" title={name}><AccentDot id={id} /><Key>{number}</Key></span>
 )
 

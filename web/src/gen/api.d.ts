@@ -63,7 +63,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["ActionDetail"];
                     };
                 };
             };
@@ -93,7 +93,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ActionMutation"];
+                    };
                 };
             };
         };
@@ -128,7 +130,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ActionConverted"];
+                    };
                 };
             };
         };
@@ -167,7 +171,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ActionMoved"];
+                    };
                 };
             };
         };
@@ -5232,7 +5238,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["MeetingRead"];
                     };
                 };
             };
@@ -5263,12 +5269,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ActionCreated"];
+                    };
                 };
             };
         };
@@ -8715,7 +8723,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["MeetingListRow"][];
                     };
                 };
             };
@@ -8736,12 +8744,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["MeetingRead"];
+                    };
                 };
             };
         };
@@ -8777,7 +8787,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["MeetingRead"];
                     };
                 };
             };
@@ -16114,11 +16124,89 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        ActionConverted: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
+            status: string;
+            /** Format: uuid */
+            taskId: string;
+            taskKey: string;
+        };
+        ActionCreated: {
+            /** Format: uuid */
+            id: string;
+            key: string;
+            /** Format: int32 */
+            rowVersion: number;
+            warnings: string[];
+        };
+        ActionDecisionRef: {
+            /** Format: uuid */
+            id: string;
+            key: string;
+            status: string;
+            subject: string;
+        };
+        ActionDetail: {
+            action: components["schemas"]["MeetingActionRow"];
+            decision: null | components["schemas"]["ActionDecisionRef"];
+            links: components["schemas"]["ItemLinkRow"][];
+            meeting: components["schemas"]["ActionMeetingRef"];
+            permissions: components["schemas"]["ActionDetailPermissions"];
+            project: components["schemas"]["ActionProject"];
+            task: null | components["schemas"]["ActionTaskRef"];
+            /** Format: uuid */
+            taskDisciplineId: null | string;
+        };
+        ActionDetailPermissions: {
+            comment: boolean;
+            convert: boolean;
+            edit: components["schemas"]["RegisterPermission"];
+            transitions: components["schemas"]["RegisterTransition"][];
+        };
+        ActionMeetingRef: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date */
+            meetingDate: string;
+            meetingType: string;
+            notesLink: null | string;
+            title: string;
+        };
         ActionMove: {
             reason: null | string;
             /** Format: int32 */
             rowVersion: null | number;
             toStatus: string;
+        };
+        ActionMoved: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
+            status: string;
+        };
+        ActionMutation: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
+        };
+        ActionProject: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            projectNumber: string;
+            status: string;
+        };
+        ActionTaskRef: {
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            status: string;
         };
         ActivityEntry: {
             action: string;
@@ -19844,6 +19932,41 @@ export interface components {
             meetingDate: null | string;
             meetingType: null | string;
             notesLink: null | string;
+            title: string;
+        };
+        MeetingListRow: {
+            /** Format: uuid */
+            calendarEventId: null | string;
+            calendarEventTitle: null | string;
+            /** Format: uuid */
+            id: string;
+            /** Format: date */
+            meetingDate: string;
+            meetingType: string;
+            notesLink: null | string;
+            /** Format: int32 */
+            open: number;
+            /** Format: uuid */
+            projectId: string;
+            /** Format: int32 */
+            rowVersion: number;
+            title: string;
+            /** Format: int32 */
+            total: number;
+        };
+        MeetingRead: {
+            /** Format: uuid */
+            calendarEventId: null | string;
+            /** Format: uuid */
+            id: string;
+            /** Format: date */
+            meetingDate: string;
+            meetingType: string;
+            notesLink: null | string;
+            /** Format: uuid */
+            projectId: string;
+            /** Format: int32 */
+            rowVersion: number;
             title: string;
         };
         MemberAdded: {

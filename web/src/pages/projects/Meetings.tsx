@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { Building2, CalendarDays, ExternalLink, ListPlus, Plus, Users } from 'lucide-react'
 import { useRef, useState, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router'
@@ -16,7 +16,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useProject, useProjectRefresh } from '@/hooks/data'
 import { useFlag } from '@/lib/auth'
 import type { components } from '@/gen/api'
-import { ApiError, get, patch, post, qs, typedRequest } from '@/lib/api'
+import { ApiError, typedRequest } from '@/lib/api'
 import { addDays, fmtDate, today } from '@/lib/format'
 import { t, tv , runtimeText } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
@@ -29,20 +29,9 @@ import { useSafeForm } from '@/hooks/drafts'
 
 // Meetings & Actions (§12.11, §13.13, packet 015). Agendas, minutes and attendance are not built.
 
-export interface ActionRow {
-  id: string; projectId: string; projectNumber: string; key: string; meetingId: string; meetingTitle: string; meetingDate: string; text: string
-  ownerType: 'User' | 'Discipline' | 'External Party'; ownerTypeLabel: string; ownerUserId?: string; ownerDisciplineId?: string; ownerExternalPartyId?: string
-  ownerName?: string; leadId?: string; leadName?: string; noLead: boolean; partyIsClient: boolean; dueDate?: string; isOverdue: boolean; daysOverdue: number
-  status: string; relatedTaskId?: string; taskKey?: string; relatedDecisionId?: string; decisionKey?: string; converted: boolean; rowVersion: number
-}
-interface MeetingRow { id: string; projectId: string; title: string; meetingDate: string; meetingType: string; notesLink?: string; calendarEventId?: string; calendarEventTitle?: string; open: number; total: number; rowVersion: number }
-interface Perm { ok: boolean; reason?: string | null }
-interface ActionDetail {
-  action: ActionRow; meeting: { id: string; title: string; meetingDate: string; meetingType: string; notesLink?: string }
-  task?: { id: string; key: string; name: string; status: string } | null; decision?: { id: string; key: string; subject: string; status: string } | null; taskDisciplineId?: string | null
-  links: { id: string; targetType: string; targetId: string; key: string; name: string; status?: string | null }[]
-  permissions: { edit: Perm; transitions: { to: string; ok: boolean; reason?: string | null }[]; convert: boolean; comment: boolean }
-}
+type Schemas = components['schemas']
+export type ActionRow = Schemas['MeetingActionRow']
+type MeetingRow = Schemas['MeetingListRow']
 const ACTION_LINK_ROUTES: Record<string, string> = { Task: 'tasks', Deliverable: 'deliverables', Milestone: 'milestones', Handoff: 'handoffs', ChangeNotice: 'changes' }
 
 const TYPES = ['Coordination', 'Client', 'Design Review', 'Site', 'Other']
@@ -51,14 +40,8 @@ const OWNER_TYPES = ['User', 'Discipline', 'External Party'] as const
 const FILTERS = ['q', 'status', 'ownerType', 'indicator'] as const
 
 function useActionRefresh() {
-  const qc = useQueryClient()
-  const refresh = useProjectRefresh()
-  return (projectId: string, id?: string) => {
-    if (id) qc.invalidateQueries({ queryKey: ['action', id] })
-    qc.invalidateQueries({ queryKey: ['coordination'] })
-    qc.invalidateQueries({ queryKey: ['mywork'] })
-    refresh(projectId)
-  }
+  const refresh = useProjectRefresh() // the project refresh reaches the action panels, the coordination views and My Work through keys.ts
+  return (projectId: string) => refresh(projectId)
 }
 
 /** Who owns the action, with discipline actions showing their lead and external ones set apart (MTG-01, MTG-02). */
@@ -129,9 +112,9 @@ export function ActionForm({ projectId, meetingId, related, links, linkedActionI
 }) {
   const done = useActionRefresh()
   const project = useProject(projectId)
-  const meetings = useQuery({ queryKey: ['p', projectId, 'meetings'], queryFn: () => get<MeetingRow[]>(`projects/${projectId}/meetings`), enabled: !meetingId })
+  const meetings = useQuery({ queryKey: ['p', projectId, 'meetings'], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/meetings', { params: { id: projectId } }), enabled: !meetingId })
   const canReuse = !!links?.some((l) => l.targetType === 'Handoff' || l.targetType === 'ChangeNotice')
-  const candidates = useQuery({ queryKey: ['p', projectId, 'actions', 'open'], queryFn: () => get<ActionRow[]>(`projects/${projectId}/actions?indicator=open`), enabled: canReuse })
+  const candidates = useQuery({ queryKey: ['p', projectId, 'actions', 'open'], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/actions', { params: { id: projectId }, query: { Indicator: 'open' } }), enabled: canReuse })
   const [reuse, setReuse] = useState(canReuse && !!linkedActionIds?.length) // never a silent duplicate of linked work
   const [reuseId, setReuseId] = useState(linkedActionIds?.[0] ?? '')
   const [reason, setReason] = useState('')
@@ -150,15 +133,15 @@ export function ActionForm({ projectId, meetingId, related, links, linkedActionI
     try {
       if (reuse) {
         if (!picked) return
-        const body = { rowVersion: picked.rowVersion, links, reason: reason || null }
+        const body = { rowVersion: picked.rowVersion, links: links?.map((l) => ({ ...l, relation: null })) ?? null, reason: reason || null }
         const signature = JSON.stringify([picked.id, body]) // a retry of the same choice replays; a changed one is a new request
         if (receipt.current?.signature !== signature) receipt.current = { signature, id: crypto.randomUUID() }
-        await post(`projects/${projectId}/actions/${picked.id}/reuse`, { ...body, requestId: receipt.current.id })
-        toast.success(t('dcv.reuseDone', { key: picked.key, what })); safe.clear(); done(projectId, picked.id); onClose({ id: picked.id, key: picked.key, text: picked.text, reused: true })
+        await typedRequest('post', '/api/v1/projects/{projectId}/actions/{id}/reuse', { params: { projectId, id: picked.id }, body: { ...body, requestId: receipt.current.id } })
+        toast.success(t('dcv.reuseDone', { key: picked.key, what })); safe.clear(); done(projectId); onClose({ id: picked.id, key: picked.key, text: picked.text, reused: true })
         return
       }
-      const mid = meeting === CURRENT ? (await post<MeetingRow>(`projects/${projectId}/meetings/current`)).id : meeting
-      const r = await post(`meetings/${mid}/actions`, { text, ...ownerBody(owner), dueDate: due || null, relatedTaskId: related?.taskId ?? null, relatedDecisionId: related?.decisionId ?? null, links })
+      const mid = meeting === CURRENT ? (await typedRequest('post', '/api/v1/projects/{id}/meetings/current', { params: { id: projectId }, body: {} })).id : meeting
+      const r = await typedRequest('post', '/api/v1/meetings/{id}/actions', { params: { id: mid }, body: { text, ...ownerBody(owner), dueDate: due || null, relatedTaskId: related?.taskId ?? null, relatedDecisionId: related?.decisionId ?? null, links: links?.map((l) => ({ ...l, relation: null })) ?? null } })
       safe.clear(); toast.success(t('action.added', { key: r.key })); done(projectId); onClose({ id: r.id, key: r.key, text })
     } catch (e) {
       setErr(e as ApiError)
@@ -237,7 +220,7 @@ function MeetingForm({ projectId, meeting, onClose }: { projectId: string; meeti
     setErr(null); setBusy(true)
     try {
       const body = { title: f.title, meetingDate: f.meetingDate, meetingType: f.meetingType, notesLink: f.notesLink || null, calendarEventId: f.calendarEventId || null }
-      if (meeting) await patch(`meetings/${meeting.id}`, body, meeting.rowVersion); else await post(`projects/${projectId}/meetings`, body)
+      if (meeting) await typedRequest('patch', '/api/v1/meetings/{id}', { params: { id: meeting.id }, body, ifMatch: meeting.rowVersion }); else await typedRequest('post', '/api/v1/projects/{id}/meetings', { params: { id: projectId }, body })
       safe.clear(); toast.success(t('common.saved')); done(projectId); onClose()
     } catch (e) { setErr(e as ApiError) } finally { setBusy(false) }
   }
@@ -282,8 +265,8 @@ export function MeetingsTab() {
   const filters = Object.fromEntries(FILTERS.map((k) => [k, sp.get(k)]))
   const active = FILTERS.some((k) => sp.has(k))
   const clear = () => setSp(new URLSearchParams(), { replace: true })
-  const meetings = useQuery({ queryKey: ['p', p.id, 'meetings'], queryFn: () => get<MeetingRow[]>(`projects/${p.id}/meetings`) })
-  const actions = useQuery({ queryKey: ['p', p.id, 'actions', filters], queryFn: () => get<ActionRow[]>(`projects/${p.id}/actions${qs(filters)}`) })
+  const meetings = useQuery({ queryKey: ['p', p.id, 'meetings'], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/meetings', { params: { id: p.id } }) })
+  const actions = useQuery({ queryKey: ['p', p.id, 'actions', filters], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/actions', { params: { id: p.id }, query: { Q: filters.q ?? undefined, Status: filters.status ?? undefined, OwnerType: filters.ownerType ?? undefined, Indicator: filters.indicator ?? undefined } }) })
   const canMeet = p.permissions.runCoordination.ok
   const canRaise = p.permissions.raiseRegister.ok
   const byMeeting = new Map<string, ActionRow[]>()
@@ -391,8 +374,8 @@ function ConvertDialog({ a, disciplineId, onClose }: { a: ActionRow; disciplineI
   const save = async () => {
     setErr(null); setBusy(true)
     try {
-      const r = await post(`actions/${a.id}/convert`, { assigneeId: f.assigneeId || null, dueDate: f.dueDate || null, projectDisciplineId: f.projectDisciplineId || null }, a.rowVersion)
-      toast.success(t('action.converted', { key: a.key, task: r.taskKey })); done(a.projectId, a.id); onClose(); openPanel('Task', r.taskId)
+      const r = await typedRequest('post', '/api/v1/actions/{id}/convert', { params: { id: a.id }, body: { assigneeId: f.assigneeId || null, deliverableId: null, dueDate: f.dueDate || null, projectDisciplineId: f.projectDisciplineId || null, rowVersion: null }, ifMatch: a.rowVersion })
+      toast.success(t('action.converted', { key: a.key, task: r.taskKey })); done(a.projectId); onClose(); openPanel('Task', r.taskId)
     } catch (e) { setErr(e as ApiError) } finally { setBusy(false) }
   }
   return (
@@ -425,9 +408,9 @@ function ConvertDialog({ a, disciplineId, onClose }: { a: ActionRow; disciplineI
 const STEP: Record<string, string> = { Open: 'register.toOpen', 'In Progress': 'action.start', Complete: 'action.complete', Cancelled: 'action.cancel' }
 
 export function ActionPanel({ id }: PanelProps) {
-  const q = useQuery({ queryKey: ['action', id], queryFn: () => get<ActionDetail>(`actions/${id}`) })
+  const q = useQuery({ queryKey: ['action', id], queryFn: () => typedRequest('get', '/api/v1/actions/{id}', { params: { id } }) })
   // The project says whether a change needs a reason; asked only while pause saves exist (flag.data_entry_safety).
-  const project = useProject(useFlag('data_entry_safety') ? q.data?.action.projectNumber : undefined)
+  const project = useProject(useFlag('data_entry_safety') ? q.data?.action.projectNumber ?? undefined : undefined)
   const done = useActionRefresh()
   const openPanel = useItemPanel()
   const [tab, setTab] = useState<'comments' | 'history'>(ItemSlots.Comments ? 'comments' : 'history')
@@ -439,9 +422,9 @@ export function ActionPanel({ id }: PanelProps) {
   const can = perm.edit.ok
   // Typed text saves on blur only until the project says no reason is needed (FR-SAV-01).
   const needsReason = project.data?.permissions.needsReason !== false
-  const refresh = () => done(a.projectId, a.id)
-  const save = (body: object) => patch(`actions/${a.id}`, body, a.rowVersion).then(() => { refresh(); return true }).catch((e) => { toast.error(errorText(e)); return false })
-  const go = (to: string, reason?: string) => post(`actions/${a.id}/transition`, { toStatus: to, reason }, a.rowVersion).then(refresh)
+  const refresh = () => done(a.projectId)
+  const save = (body: object) => typedRequest('patch', '/api/v1/actions/{id}', { params: { id: a.id }, body, ifMatch: a.rowVersion }).then(() => { refresh(); return true }).catch((e) => { toast.error(errorText(e)); return false })
+  const go = (to: string, reason?: string) => typedRequest('post', '/api/v1/actions/{id}/transition', { params: { id: a.id }, body: { toStatus: to, reason: reason ?? null, rowVersion: null }, ifMatch: a.rowVersion }).then(refresh)
   const onStep = async (to: string) => {
     if (to === 'Cancelled') { setStep(to); return }
     try { await go(to) } catch (e) { toast.error(errorText(e)) }
@@ -473,7 +456,7 @@ export function ActionPanel({ id }: PanelProps) {
           ) : (
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-2 py-1.5"><OwnerCell a={a} />
               {can && <button type="button" className="text-sm text-primary underline underline-offset-4 hover:text-foreground"
-                onClick={() => setOwner({ type: a.ownerType, userId: a.ownerUserId, userName: a.ownerType === 'User' ? a.ownerName : null, disciplineId: a.ownerDisciplineId, partyId: a.ownerExternalPartyId })}>{t('action.changeOwner')}</button>}</div>
+                onClick={() => setOwner({ type: a.ownerType as Owner['type'], userId: a.ownerUserId, userName: a.ownerType === 'User' ? a.ownerName : null, disciplineId: a.ownerDisciplineId, partyId: a.ownerExternalPartyId })}>{t('action.changeOwner')}</button>}</div>
           )}
         </FieldRow>
         <FieldRow label={t('common.due')}><InlineDate value={a.dueDate} disabled={!can} onSave={(v) => save({ dueDate: v })} /></FieldRow>

@@ -1788,10 +1788,12 @@
     "$.items[].changes[].new": [
       "array",
       "boolean",
+      "null",
       "number",
       "string"
     ],
     "$.items[].changes[].newLabel": [
+      "null",
       "string"
     ],
     "$.items[].changes[].new[]": [
@@ -7761,8 +7763,7 @@
       "string"
     ],
     "$.attention.items[].why.values.startDate": [
-      "null",
-      "string"
+      "null"
     ],
     "$.attention.items[].why.values.status": [
       "string"
@@ -8246,24 +8247,6 @@
     ],
     "$.deliverables[].state.inconsistencyDetail": [
       "array"
-    ],
-    "$.deliverables[].state.inconsistencyDetail[]": [
-      "object"
-    ],
-    "$.deliverables[].state.inconsistencyDetail[].colour": [
-      "null"
-    ],
-    "$.deliverables[].state.inconsistencyDetail[].rule": [
-      "string"
-    ],
-    "$.deliverables[].state.inconsistencyDetail[].text": [
-      "string"
-    ],
-    "$.deliverables[].state.inconsistencyDetail[].threshold": [
-      "null"
-    ],
-    "$.deliverables[].state.inconsistencyDetail[].values": [
-      "null"
     ],
     "$.deliverables[].state.isAtRisk": [
       "boolean"
@@ -9166,9 +9149,6 @@
     "$.tasks[].state.affectedMilestoneIds": [
       "array"
     ],
-    "$.tasks[].state.affectedMilestoneIds[]": [
-      "string"
-    ],
     "$.tasks[].state.blockedBy": [
       "array"
     ],
@@ -9179,7 +9159,6 @@
       "boolean"
     ],
     "$.tasks[].state.blockedBy[].due": [
-      "null",
       "string"
     ],
     "$.tasks[].state.blockedBy[].id": [
@@ -9195,7 +9174,6 @@
       "boolean"
     ],
     "$.tasks[].state.blockedBy[].ownerId": [
-      "null",
       "string"
     ],
     "$.tasks[].state.blockedBy[].reason": [
@@ -9231,6 +9209,24 @@
     ],
     "$.tasks[].state.inconsistencyDetail": [
       "array"
+    ],
+    "$.tasks[].state.inconsistencyDetail[]": [
+      "object"
+    ],
+    "$.tasks[].state.inconsistencyDetail[].colour": [
+      "null"
+    ],
+    "$.tasks[].state.inconsistencyDetail[].rule": [
+      "string"
+    ],
+    "$.tasks[].state.inconsistencyDetail[].text": [
+      "string"
+    ],
+    "$.tasks[].state.inconsistencyDetail[].threshold": [
+      "null"
+    ],
+    "$.tasks[].state.inconsistencyDetail[].values": [
+      "null"
     ],
     "$.tasks[].state.isBlocked": [
       "boolean"
@@ -98136,6 +98132,7 @@
     "$.items[].changes[].new": [
       "array",
       "boolean",
+      "null",
       "number",
       "string"
     ],
@@ -123276,6 +123273,29 @@
     ]
   },
   "POST /api/v1/admin/organisation/units 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "POST /api/v1/admin/organisation/units 409": {
     "$": [
       "object"
     ],

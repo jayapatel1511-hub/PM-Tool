@@ -64,6 +64,15 @@ assert.ok(base && ['localhost', '127.0.0.1'].includes(new URL(base).hostname), '
       await popover.waitFor()
       await taskPage.waitForLoadState('networkidle')
       await popover.evaluate(async el => { await Promise.all(el.getAnimations().map(animation => animation.finished.catch(() => undefined))) })
+      // The async people response can resize the dialog and move the anchor. Floating UI
+      // updates its fixed transform on a later animation frame, after networkidle/animations.
+      // Wait for that actual placement condition; the same bounds are asserted below.
+      await taskPage.waitForFunction(() => {
+        const el = document.querySelector('[data-slot="popover-content"]')
+        if (!el) return false
+        const box = el.getBoundingClientRect()
+        return box.x >= 15 && box.right <= innerWidth - 15 && box.y >= -1 && box.bottom <= innerHeight + 1
+      }, undefined, { timeout: 2000 })
       const pickerBox = await popover.boundingBox()
       assert.ok(pickerBox.x >= 15 && pickerBox.x + pickerBox.width <= width - 15 && pickerBox.y >= -1 && pickerBox.y + pickerBox.height <= 481, 'Picker stays inside a constrained viewport')
       const searchBox = await popover.locator('input').boundingBox()

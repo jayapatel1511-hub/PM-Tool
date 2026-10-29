@@ -111,3 +111,6 @@ The generated client emits PascalCase query parameter names. The real count cens
 ### 2026-10-29 constrained picker geometry
 
 On the seeded integration at 1440 × 480, the task assignee list grew asynchronously while its fixed-position wrapper stayed at y=297 with height 338 (bottom 635). The picker now requests continuous position updates while open, so collision handling recalculates after list growth. The focused reproduction passed after the correction. No generic popover CSS or viewport assertions were weakened. The release handoff records the full four-width helper/error/focus and scrolling rerun.
+
+
+The authoritative four-width run exposed a measurement race in the first focused evidence: immediately after network-idle/animation completion, the wrapper could still hold the old transform; 250 ms later it settled from y=297 to y=73, with bottom 411 in the 480 px viewport. The responsive test now waits up to two seconds for the actual containment condition before applying its unchanged geometry assertions. This is a condition wait, not a larger allowed viewport or a removed assertion. The earlier focused timing-dependent PASS is superseded by the full rendered rerun.

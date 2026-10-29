@@ -65,8 +65,8 @@ const since = (at?: string) => {
  *  one and waits for "Keep mine" (sent on the row version the refusal names) or "Take theirs".
  *  With the flag on, leaving a field that says "Not saved" or shows a conflict asks first (FR-SAV-04).
  *  FR-SAV-05 (flag on, `field` names the field): a 401 from any request keeps the field's typed value in this tab, for the record the field
- *  was opened on, before the sign-in flow runs; once the same field is on screen again after sign-in it shows that value and saves it once,
- *  on the row version it was typed against. */
+ *  was opened on, before the sign-in flow runs; after sign-in a captured row version is retried once. If expiry happened before the
+ *  first save captured a version, the field keeps both values for explicit review and never automatically overwrites the current value. */
 function useAutosaveField(current?: unknown, onSave?: (v: string | null) => Promise<unknown>, { delayMs, keep = !!onSave, field }: { delayMs?: number; keep?: boolean; field?: string } = {}) {
   const qc = useQueryClient()
   const me = useMe()
@@ -161,12 +161,12 @@ function useAutosaveField(current?: unknown, onSave?: (v: string | null) => Prom
     typed.current = { value }
     clearTimeout(pause.current)
     clearTimeout(again.current)
-    if (state?.status === 'conflict' && state.version == null) return Promise.resolve()
+    if (state?.status === 'conflict' && state.version == null) { setState({ ...state, value }); return Promise.resolve() }
     return delayMs == null ? attempt(value) : send(value)
   }
   const schedule = (value: unknown) => {
     typed.current = { value }
-    if (state?.status === 'conflict' && state.version == null) return
+    if (state?.status === 'conflict' && state.version == null) { setState({ ...state, value }); return }
     clearTimeout(again.current) // typing on replaces a timed retry; leaving the field (or Escape) settles it
     if (delayMs == null) return
     clearTimeout(pause.current)
@@ -195,7 +195,7 @@ function useAutosaveField(current?: unknown, onSave?: (v: string | null) => Prom
     /** "Discard my change" and "Take theirs": the field goes back to the server's value. */
     discard: () => { if (unsaved) clear(); return unsaved },
     retry: () => shown && resend(shown.value, 0, shown.ifMatch),
-    keepMine: () => shown && (shown.version != null ? resend(shown.value, 0, shown.version) : attempt(shown.value)),
+    keepMine: () => shown && resend(shown.value, 0, shown.version),
   }
 }
 type Autosave = ReturnType<typeof useAutosaveField>
@@ -219,7 +219,7 @@ function SaveNote({ save, show = asText }: { save: Autosave; show?: (v: unknown)
       {state?.status === 'conflict' && <><span aria-hidden>■ </span>{t('inline.notSaved')}
         <span className="block break-words text-foreground">{t('inline.theirs', { who: state.who ?? t('inline.someone'), when: since(state.at), value: show(save.current) })}</span>
         <span className="block break-words text-foreground">{t('inline.yours', { value: show(state.value) })}</span>
-        {state.version != null && <><NoteAction onClick={save.keepMine}>{t('inline.keepMine')}</NoteAction> · </>}<NoteAction onClick={save.discard}>{t('inline.takeTheirs')}</NoteAction></>}
+        <NoteAction onClick={save.keepMine}>{t('inline.keepMine')}</NoteAction> · <NoteAction onClick={save.discard}>{t('inline.takeTheirs')}</NoteAction></>}
     </span>
   )
 }

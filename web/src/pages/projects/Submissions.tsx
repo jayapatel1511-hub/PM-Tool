@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import type { components } from '@/gen/api'
-import { download, get, typedRequest } from '@/lib/api'
+import { download, typedRequest } from '@/lib/api'
 import { invalidateChange } from '@/lib/keys'
 import { useOffer, type Offer } from '@/lib/auth'
 import { fmtDate, today } from '@/lib/format'
@@ -27,7 +27,7 @@ type Schemas = components['schemas']
 type Check = Schemas['SubmissionCheckRow']
 type Blocker = Schemas['SubmissionBlocker']
 type Detail = Schemas['SubmissionDetail']
-type Milestone = { id: string; key: string; name: string; date?: string; isCancelled: boolean }
+type Milestone = Pick<components['schemas']['MilestoneMilestoneRow'], 'id' | 'key' | 'name' | 'date' | 'isCancelled'> // what the form's milestone picker reads of the register's row
 type Action = { type: 'start' | 'manifest' | 'edit' | 'assign' | 'cancel' | 'issue' | 'check' | 'checkAssign' | 'supersede'; check?: Check; decision?: string }
 const fieldset = 'space-y-1 rounded-lg border p-4', legend = 'px-1 text-sm font-semibold', check = 'mt-0.5 size-4 shrink-0 accent-(--primary)'
 const subhead = 'text-base/6 font-semibold'
@@ -38,7 +38,7 @@ export function SubmissionsTab() {
   const page = Math.max(1, Number(sp.get('page')) || 1), panel = sp.get('panel')?.startsWith('SubmissionPackage:') ? sp.get('panel')!.slice(18) : null
   const filters = Object.fromEntries(['q', 'status', 'coordinatorId', 'milestoneId', 'targetFrom', 'targetTo'].map(k => [k, sp.get(k) ?? '']))
   const options = useQuery({ queryKey: ['coord-options', project.id], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/changes/options', { params: { projectId: project.id } }) })
-  const milestones = useQuery({ queryKey: ['submission-milestones', project.id], queryFn: () => get<Milestone[]>(`projects/${project.id}/milestones?showCompleted=true`) })
+  const milestones = useQuery({ queryKey: ['submission-milestones', project.id], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/milestones', { params: { id: project.id }, query: { ShowCompleted: true } }) })
   const list = useQuery({ queryKey: ['submissions', project.id, filters, page], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/submissions', { params: { projectId: project.id },
     query: { Q: filters.q, Status: filters.status, CoordinatorId: filters.coordinatorId, MilestoneId: filters.milestoneId, TargetFrom: filters.targetFrom, TargetTo: filters.targetTo, page } }) })
   const refresh = () => { invalidateChange(qc, 'SubmissionPackage', project.id) }

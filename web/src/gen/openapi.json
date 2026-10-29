@@ -7425,6 +7425,34 @@
         ],
         "type": "object"
       },
+      "DateChanged": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "preview": {
+            "$ref": "#/components/schemas/DatePreview"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "shifted": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "rowVersion",
+          "shifted",
+          "preview"
+        ],
+        "type": "object"
+      },
       "DateContext": {
         "properties": {
           "earliestDue": {
@@ -7512,6 +7540,78 @@
         },
         "required": [
           "dates"
+        ],
+        "type": "object"
+      },
+      "DateMove": {
+        "properties": {
+          "delta": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "newDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "oldDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "slipDays": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "key",
+          "name",
+          "oldDate",
+          "newDate",
+          "slipDays",
+          "delta"
+        ],
+        "type": "object"
+      },
+      "DatePreview": {
+        "properties": {
+          "deliverables": {
+            "items": {
+              "$ref": "#/components/schemas/DeliverableShift"
+            },
+            "type": "array"
+          },
+          "inconsistent": {
+            "items": {
+              "$ref": "#/components/schemas/DeliverableLeftBehind"
+            },
+            "type": "array"
+          },
+          "milestone": {
+            "$ref": "#/components/schemas/DateMove"
+          },
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/TaskShift"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "milestone",
+          "deliverables",
+          "tasks",
+          "inconsistent"
         ],
         "type": "object"
       },
@@ -8977,6 +9077,29 @@
         ],
         "type": "object"
       },
+      "DeliverableLeftBehind": {
+        "properties": {
+          "dueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "name",
+          "dueDate"
+        ],
+        "type": "object"
+      },
       "DeliverableLinkRead": {
         "properties": {
           "dependencyId": {
@@ -9461,6 +9584,39 @@
           "milestoneDate",
           "state",
           "tasks"
+        ],
+        "type": "object"
+      },
+      "DeliverableShift": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "newDue": {
+            "format": "date",
+            "type": "string"
+          },
+          "oldDue": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "oldDue",
+          "newDue"
         ],
         "type": "object"
       },
@@ -15922,6 +16078,60 @@
         ],
         "type": "object"
       },
+      "MilestoneCancelled": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "retarget": {
+            "items": {
+              "$ref": "#/components/schemas/RetargetDeliverable"
+            },
+            "type": "array"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "rowVersion",
+          "retarget"
+        ],
+        "type": "object"
+      },
+      "MilestoneCompleted": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "suggestPhase": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/MilestonePhase"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "rowVersion",
+          "suggestPhase"
+        ],
+        "type": "object"
+      },
       "MilestoneCreateBody": {
         "properties": {
           "completesPhaseId": {
@@ -15975,6 +16185,72 @@
         ],
         "type": "object"
       },
+      "MilestoneCreated": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
+      "MilestoneDetail": {
+        "properties": {
+          "completesPhase": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/MilestonePhase"
+              }
+            ]
+          },
+          "deliverables": {
+            "items": {
+              "$ref": "#/components/schemas/DeliverableRow"
+            },
+            "type": "array"
+          },
+          "directTasks": {
+            "items": {
+              "$ref": "#/components/schemas/MilestoneTask"
+            },
+            "type": "array"
+          },
+          "milestone": {
+            "$ref": "#/components/schemas/MilestoneMilestoneRow"
+          },
+          "permissions": {
+            "$ref": "#/components/schemas/MilestonePermissions"
+          },
+          "project": {
+            "$ref": "#/components/schemas/MilestoneProject"
+          }
+        },
+        "required": [
+          "milestone",
+          "deliverables",
+          "directTasks",
+          "completesPhase",
+          "project",
+          "permissions"
+        ],
+        "type": "object"
+      },
       "MilestoneIn": {
         "properties": {
           "anchor": {
@@ -16019,6 +16295,274 @@
         ],
         "type": "object"
       },
+      "MilestoneMilestoneRow": {
+        "properties": {
+          "baselineDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "baselineSlipShown": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "canRebaseline": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "cancelledReason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "completedDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "completesPhaseId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "date": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "daysRemaining": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "deliverableIssued": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "deliverableTotal": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isCancelled": {
+            "type": "boolean"
+          },
+          "isClientFacing": {
+            "type": "boolean"
+          },
+          "isComplete": {
+            "type": "boolean"
+          },
+          "isSubmission": {
+            "type": "boolean"
+          },
+          "key": {
+            "type": "string"
+          },
+          "milestoneType": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "originalDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectDisciplineId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "sinceBaselineDays": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "slipDays": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "slipShown": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "status": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "statusReasons": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/JsonElement"
+              }
+            ]
+          },
+          "taskBlocked": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "taskComplete": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "taskOpen": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "taskOverdue": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "taskTotal": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "projectId",
+          "key",
+          "name",
+          "milestoneType",
+          "date",
+          "originalDate",
+          "description",
+          "projectDisciplineId",
+          "completesPhaseId",
+          "isClientFacing",
+          "isComplete",
+          "completedDate",
+          "isCancelled",
+          "cancelledReason",
+          "rowVersion",
+          "isSubmission",
+          "status",
+          "statusReasons",
+          "slipDays",
+          "daysRemaining",
+          "deliverableTotal",
+          "deliverableIssued",
+          "taskTotal",
+          "taskComplete",
+          "taskOpen",
+          "taskOverdue",
+          "taskBlocked"
+        ],
+        "type": "object"
+      },
+      "MilestonePermissions": {
+        "properties": {
+          "comment": {
+            "type": "boolean"
+          },
+          "manage": {
+            "$ref": "#/components/schemas/RegisterPermission"
+          }
+        },
+        "required": [
+          "manage",
+          "comment"
+        ],
+        "type": "object"
+      },
+      "MilestonePhase": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object"
+      },
+      "MilestoneProject": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "projectNumber",
+          "name",
+          "status"
+        ],
+        "type": "object"
+      },
       "MilestoneReasonBody": {
         "properties": {
           "reason": {
@@ -16038,6 +16582,64 @@
         },
         "required": [
           "reason",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
+      "MilestoneTask": {
+        "properties": {
+          "assigneeId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dueDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "status",
+          "dueDate",
+          "assigneeId"
+        ],
+        "type": "object"
+      },
+      "MilestoneVersion": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
           "rowVersion"
         ],
         "type": "object"
@@ -21989,6 +22591,32 @@
           "total",
           "completed",
           "groups"
+        ],
+        "type": "object"
+      },
+      "RetargetDeliverable": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "rowVersion"
         ],
         "type": "object"
       },
@@ -27967,6 +28595,58 @@
           "key",
           "name",
           "status"
+        ],
+        "type": "object"
+      },
+      "TaskShift": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "newDue": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "newStart": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "oldDue": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "oldStart": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "oldDue",
+          "newDue",
+          "oldStart",
+          "newStart"
         ],
         "type": "object"
       },
@@ -35493,8 +36173,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -35516,7 +36196,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/MilestoneDetail"
+                }
               }
             },
             "description": "OK"
@@ -35550,6 +36232,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MilestoneVersion"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -35583,6 +36272,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MilestoneCancelled"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -35616,6 +36312,375 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "properties": {
+                        "deliverables": {
+                          "items": {
+                            "properties": {
+                              "id": {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              "key": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "newDue": {
+                                "format": "date",
+                                "type": "string"
+                              },
+                              "oldDue": {
+                                "format": "date",
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "key",
+                              "name",
+                              "oldDue",
+                              "newDue"
+                            ],
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "inconsistent": {
+                          "items": {
+                            "properties": {
+                              "dueDate": {
+                                "format": "date",
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "key": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "key",
+                              "name",
+                              "dueDate"
+                            ],
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "milestone": {
+                          "properties": {
+                            "delta": {
+                              "format": "int32",
+                              "pattern": "^-?(?:0|[1-9]\\d*)$",
+                              "type": "integer"
+                            },
+                            "key": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "newDate": {
+                              "format": "date",
+                              "type": "string"
+                            },
+                            "oldDate": {
+                              "format": "date",
+                              "type": [
+                                "null",
+                                "string"
+                              ]
+                            },
+                            "slipDays": {
+                              "format": "int32",
+                              "pattern": "^-?(?:0|[1-9]\\d*)$",
+                              "type": "integer"
+                            }
+                          },
+                          "required": [
+                            "key",
+                            "name",
+                            "oldDate",
+                            "newDate",
+                            "slipDays",
+                            "delta"
+                          ],
+                          "type": "object"
+                        },
+                        "tasks": {
+                          "items": {
+                            "properties": {
+                              "id": {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              "key": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "newDue": {
+                                "format": "date",
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "newStart": {
+                                "format": "date",
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "oldDue": {
+                                "format": "date",
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              },
+                              "oldStart": {
+                                "format": "date",
+                                "type": [
+                                  "null",
+                                  "string"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "key",
+                              "name",
+                              "oldDue",
+                              "newDue",
+                              "oldStart",
+                              "newStart"
+                            ],
+                            "type": "object"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "required": [
+                        "milestone",
+                        "deliverables",
+                        "tasks",
+                        "inconsistent"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "preview": {
+                          "properties": {
+                            "deliverables": {
+                              "items": {
+                                "properties": {
+                                  "id": {
+                                    "format": "uuid",
+                                    "type": "string"
+                                  },
+                                  "key": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "newDue": {
+                                    "format": "date",
+                                    "type": "string"
+                                  },
+                                  "oldDue": {
+                                    "format": "date",
+                                    "type": [
+                                      "null",
+                                      "string"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "key",
+                                  "name",
+                                  "oldDue",
+                                  "newDue"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "inconsistent": {
+                              "items": {
+                                "properties": {
+                                  "dueDate": {
+                                    "format": "date",
+                                    "type": [
+                                      "null",
+                                      "string"
+                                    ]
+                                  },
+                                  "key": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "key",
+                                  "name",
+                                  "dueDate"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "milestone": {
+                              "properties": {
+                                "delta": {
+                                  "format": "int32",
+                                  "pattern": "^-?(?:0|[1-9]\\d*)$",
+                                  "type": "integer"
+                                },
+                                "key": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                },
+                                "newDate": {
+                                  "format": "date",
+                                  "type": "string"
+                                },
+                                "oldDate": {
+                                  "format": "date",
+                                  "type": [
+                                    "null",
+                                    "string"
+                                  ]
+                                },
+                                "slipDays": {
+                                  "format": "int32",
+                                  "pattern": "^-?(?:0|[1-9]\\d*)$",
+                                  "type": "integer"
+                                }
+                              },
+                              "required": [
+                                "key",
+                                "name",
+                                "oldDate",
+                                "newDate",
+                                "slipDays",
+                                "delta"
+                              ],
+                              "type": "object"
+                            },
+                            "tasks": {
+                              "items": {
+                                "properties": {
+                                  "id": {
+                                    "format": "uuid",
+                                    "type": "string"
+                                  },
+                                  "key": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "newDue": {
+                                    "format": "date",
+                                    "type": [
+                                      "null",
+                                      "string"
+                                    ]
+                                  },
+                                  "newStart": {
+                                    "format": "date",
+                                    "type": [
+                                      "null",
+                                      "string"
+                                    ]
+                                  },
+                                  "oldDue": {
+                                    "format": "date",
+                                    "type": [
+                                      "null",
+                                      "string"
+                                    ]
+                                  },
+                                  "oldStart": {
+                                    "format": "date",
+                                    "type": [
+                                      "null",
+                                      "string"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "key",
+                                  "name",
+                                  "oldDue",
+                                  "newDue",
+                                  "oldStart",
+                                  "newStart"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "required": [
+                            "milestone",
+                            "deliverables",
+                            "tasks",
+                            "inconsistent"
+                          ],
+                          "type": "object"
+                        },
+                        "rowVersion": {
+                          "format": "int32",
+                          "pattern": "^-?(?:0|[1-9]\\d*)$",
+                          "type": "integer"
+                        },
+                        "shifted": {
+                          "format": "int32",
+                          "pattern": "^-?(?:0|[1-9]\\d*)$",
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "rowVersion",
+                        "shifted",
+                        "preview"
+                      ],
+                      "type": "object"
+                    }
+                  ]
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -35649,6 +36714,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MilestoneCompleted"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -35722,6 +36794,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MilestoneVersion"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -35745,6 +36824,13 @@
         ],
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MilestoneVersion"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -40635,6 +41721,9 @@
             "content": {
               "application/json": {
                 "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MilestoneMilestoneRow"
+                  },
                   "type": "array"
                 }
               }
@@ -40643,7 +41732,7 @@
           }
         },
         "tags": [
-          "MilestoneEndpoints"
+          "Hub.Api"
         ]
       },
       "post": {
@@ -40669,8 +41758,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MilestoneCreated"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [

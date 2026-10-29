@@ -5322,7 +5322,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["MilestoneDetail"];
                     };
                 };
             };
@@ -5340,8 +5340,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -5371,7 +5371,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["MilestoneVersion"];
+                    };
                 };
             };
         };
@@ -5406,7 +5408,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["MilestoneCancelled"];
+                    };
                 };
             };
         };
@@ -5445,7 +5449,103 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": {
+                            deliverables: {
+                                /** Format: uuid */
+                                id: string;
+                                key: string;
+                                name: string;
+                                /** Format: date */
+                                newDue: string;
+                                /** Format: date */
+                                oldDue: null | string;
+                            }[];
+                            inconsistent: {
+                                /** Format: date */
+                                dueDate: null | string;
+                                key: string;
+                                name: string;
+                            }[];
+                            milestone: {
+                                /** Format: int32 */
+                                delta: number;
+                                key: string;
+                                name: string;
+                                /** Format: date */
+                                newDate: string;
+                                /** Format: date */
+                                oldDate: null | string;
+                                /** Format: int32 */
+                                slipDays: number;
+                            };
+                            tasks: {
+                                /** Format: uuid */
+                                id: string;
+                                key: string;
+                                name: string;
+                                /** Format: date */
+                                newDue: null | string;
+                                /** Format: date */
+                                newStart: null | string;
+                                /** Format: date */
+                                oldDue: null | string;
+                                /** Format: date */
+                                oldStart: null | string;
+                            }[];
+                        } | {
+                            /** Format: uuid */
+                            id: string;
+                            preview: {
+                                deliverables: {
+                                    /** Format: uuid */
+                                    id: string;
+                                    key: string;
+                                    name: string;
+                                    /** Format: date */
+                                    newDue: string;
+                                    /** Format: date */
+                                    oldDue: null | string;
+                                }[];
+                                inconsistent: {
+                                    /** Format: date */
+                                    dueDate: null | string;
+                                    key: string;
+                                    name: string;
+                                }[];
+                                milestone: {
+                                    /** Format: int32 */
+                                    delta: number;
+                                    key: string;
+                                    name: string;
+                                    /** Format: date */
+                                    newDate: string;
+                                    /** Format: date */
+                                    oldDate: null | string;
+                                    /** Format: int32 */
+                                    slipDays: number;
+                                };
+                                tasks: {
+                                    /** Format: uuid */
+                                    id: string;
+                                    key: string;
+                                    name: string;
+                                    /** Format: date */
+                                    newDue: null | string;
+                                    /** Format: date */
+                                    newStart: null | string;
+                                    /** Format: date */
+                                    oldDue: null | string;
+                                    /** Format: date */
+                                    oldStart: null | string;
+                                }[];
+                            };
+                            /** Format: int32 */
+                            rowVersion: number;
+                            /** Format: int32 */
+                            shifted: number;
+                        };
+                    };
                 };
             };
         };
@@ -5484,7 +5584,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["MilestoneCompleted"];
+                    };
                 };
             };
         };
@@ -5564,7 +5666,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["MilestoneVersion"];
+                    };
                 };
             };
         };
@@ -5599,7 +5703,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["MilestoneVersion"];
+                    };
                 };
             };
         };
@@ -8985,7 +9091,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown[];
+                        "application/json": components["schemas"]["MilestoneMilestoneRow"][];
                     };
                 };
             };
@@ -9006,12 +9112,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["MilestoneCreated"];
+                    };
                 };
             };
         };
@@ -18102,6 +18210,15 @@ export interface components {
             date: string;
             reasons: components["schemas"]["Reason"][];
         };
+        DateChanged: {
+            /** Format: uuid */
+            id: string;
+            preview: components["schemas"]["DatePreview"];
+            /** Format: int32 */
+            rowVersion: number;
+            /** Format: int32 */
+            shifted: number;
+        };
         DateContext: {
             earliestDue: null | components["schemas"]["DateBound"];
             earliestStart: null | components["schemas"]["DateBound"];
@@ -18114,6 +18231,24 @@ export interface components {
             availability?: null | components["schemas"]["UnavailableDate"][];
             dates: components["schemas"]["DateContext"];
             tasks?: null | components["schemas"]["DateSuccessor"][];
+        };
+        DateMove: {
+            /** Format: int32 */
+            delta: number;
+            key: string;
+            name: string;
+            /** Format: date */
+            newDate: string;
+            /** Format: date */
+            oldDate: null | string;
+            /** Format: int32 */
+            slipDays: number;
+        };
+        DatePreview: {
+            deliverables: components["schemas"]["DeliverableShift"][];
+            inconsistent: components["schemas"]["DeliverableLeftBehind"][];
+            milestone: components["schemas"]["DateMove"];
+            tasks: components["schemas"]["TaskShift"][];
         };
         DateSuccessor: {
             /** Format: uuid */
@@ -18476,6 +18611,12 @@ export interface components {
             rowVersion: number;
             status: string;
         };
+        DeliverableLeftBehind: {
+            /** Format: date */
+            dueDate: null | string;
+            key: string;
+            name: string;
+        };
         DeliverableLinkRead: {
             /** Format: uuid */
             dependencyId: string;
@@ -18594,6 +18735,16 @@ export interface components {
             status: string;
             tasks: null | components["schemas"]["DeliverableTaskRead"][];
             typeName: null | string;
+        };
+        DeliverableShift: {
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            /** Format: date */
+            newDue: string;
+            /** Format: date */
+            oldDue: null | string;
         };
         DeliverableStateRead: {
             atRiskReasons: null | components["schemas"]["JsonElement"];
@@ -20296,6 +20447,20 @@ export interface components {
             id: string;
             name: null | string;
         };
+        MilestoneCancelled: {
+            /** Format: uuid */
+            id: string;
+            retarget: components["schemas"]["RetargetDeliverable"][];
+            /** Format: int32 */
+            rowVersion: number;
+        };
+        MilestoneCompleted: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
+            suggestPhase: null | components["schemas"]["MilestonePhase"];
+        };
         MilestoneCreateBody: {
             /** Format: uuid */
             completesPhaseId: null | string;
@@ -20308,6 +20473,21 @@ export interface components {
             /** Format: uuid */
             projectDisciplineId: null | string;
         };
+        MilestoneCreated: {
+            /** Format: uuid */
+            id: string;
+            key: string;
+            /** Format: int32 */
+            rowVersion: number;
+        };
+        MilestoneDetail: {
+            completesPhase: null | components["schemas"]["MilestonePhase"];
+            deliverables: components["schemas"]["DeliverableRow"][];
+            directTasks: components["schemas"]["MilestoneTask"][];
+            milestone: components["schemas"]["MilestoneMilestoneRow"];
+            permissions: components["schemas"]["MilestonePermissions"];
+            project: components["schemas"]["MilestoneProject"];
+        };
         MilestoneIn: {
             anchor: string;
             /** Format: uuid */
@@ -20319,10 +20499,97 @@ export interface components {
             offset: null | number;
             ref: string;
         };
+        MilestoneMilestoneRow: {
+            /** Format: date */
+            baselineDate?: null | string;
+            baselineSlipShown?: null | boolean;
+            canRebaseline?: null | boolean;
+            cancelledReason: null | string;
+            /** Format: date */
+            completedDate: null | string;
+            /** Format: uuid */
+            completesPhaseId: null | string;
+            /** Format: date */
+            date: null | string;
+            /** Format: int32 */
+            daysRemaining: null | number;
+            /** Format: int32 */
+            deliverableIssued: number;
+            /** Format: int32 */
+            deliverableTotal: number;
+            description: null | string;
+            /** Format: uuid */
+            id: string;
+            isCancelled: boolean;
+            isClientFacing: boolean;
+            isComplete: boolean;
+            isSubmission: boolean;
+            key: string;
+            milestoneType: string;
+            name: string;
+            /** Format: date */
+            originalDate: null | string;
+            /** Format: uuid */
+            projectDisciplineId: null | string;
+            /** Format: uuid */
+            projectId: string;
+            /** Format: int32 */
+            rowVersion: number;
+            /** Format: int32 */
+            sinceBaselineDays?: null | number;
+            /** Format: int32 */
+            slipDays: number;
+            slipShown?: null | boolean;
+            status: null | string;
+            statusReasons: null | components["schemas"]["JsonElement"];
+            /** Format: int32 */
+            taskBlocked: number;
+            /** Format: int32 */
+            taskComplete: number;
+            /** Format: int32 */
+            taskOpen: number;
+            /** Format: int32 */
+            taskOverdue: number;
+            /** Format: int32 */
+            taskTotal: number;
+        };
+        MilestonePermissions: {
+            comment: boolean;
+            manage: components["schemas"]["RegisterPermission"];
+        };
+        MilestonePhase: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+        };
+        MilestoneProject: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            projectNumber: string;
+            status: string;
+        };
         MilestoneReasonBody: {
             reason: null | string;
             /** Format: int32 */
             rowVersion: null | number;
+        };
+        MilestoneTask: {
+            /** Format: uuid */
+            assigneeId: null | string;
+            /** Format: date */
+            dueDate: null | string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            status: string;
+        };
+        MilestoneVersion: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
         };
         MissCategoryRow: {
             /** Format: uuid */
@@ -21872,6 +22139,14 @@ export interface components {
             /** Format: int32 */
             total: number;
         };
+        RetargetDeliverable: {
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            /** Format: int32 */
+            rowVersion: number;
+        };
         RetryOutboxResponse: {
             /** Format: int32 */
             retried: number;
@@ -23399,6 +23674,20 @@ export interface components {
             key: string;
             name: string;
             status: string;
+        };
+        TaskShift: {
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            /** Format: date */
+            newDue: null | string;
+            /** Format: date */
+            newStart: null | string;
+            /** Format: date */
+            oldDue: null | string;
+            /** Format: date */
+            oldStart: null | string;
         };
         TaskStartStatus: {
             assessed: boolean;

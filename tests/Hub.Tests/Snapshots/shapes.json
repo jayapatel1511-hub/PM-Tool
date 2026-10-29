@@ -410,6 +410,75 @@
       "string"
     ]
   },
+  "DELETE /api/v1/milestones/{id} 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "DELETE /api/v1/milestones/{id} 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "DELETE /api/v1/milestones/{id} 422": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "DELETE /api/v1/projects/{id}/disciplines/{pdId} 403": {
     "$": [
       "object"
@@ -9072,7 +9141,14 @@
       "object"
     ],
     "$.completesPhase": [
-      "null"
+      "null",
+      "object"
+    ],
+    "$.completesPhase.id": [
+      "string"
+    ],
+    "$.completesPhase.name": [
+      "string"
     ],
     "$.deliverables": [
       "array"
@@ -9132,6 +9208,7 @@
       "string"
     ],
     "$.deliverables[].originalStartDate": [
+      "null",
       "string"
     ],
     "$.deliverables[].ownerActive": [
@@ -9174,6 +9251,7 @@
       "boolean"
     ],
     "$.deliverables[].startDate": [
+      "null",
       "string"
     ],
     "$.deliverables[].state": [
@@ -9237,6 +9315,7 @@
       "boolean"
     ],
     "$.deliverables[].state.progressPct": [
+      "null",
       "number"
     ],
     "$.deliverables[].state.remainingHours": [
@@ -9275,6 +9354,27 @@
     "$.directTasks": [
       "array"
     ],
+    "$.directTasks[]": [
+      "object"
+    ],
+    "$.directTasks[].assigneeId": [
+      "string"
+    ],
+    "$.directTasks[].dueDate": [
+      "string"
+    ],
+    "$.directTasks[].id": [
+      "string"
+    ],
+    "$.directTasks[].key": [
+      "string"
+    ],
+    "$.directTasks[].name": [
+      "string"
+    ],
+    "$.directTasks[].status": [
+      "string"
+    ],
     "$.milestone": [
       "object"
     ],
@@ -9294,7 +9394,8 @@
       "null"
     ],
     "$.milestone.completesPhaseId": [
-      "null"
+      "null",
+      "string"
     ],
     "$.milestone.date": [
       "string"
@@ -9310,7 +9411,8 @@
       "number"
     ],
     "$.milestone.description": [
-      "null"
+      "null",
+      "string"
     ],
     "$.milestone.id": [
       "string"
@@ -9340,7 +9442,8 @@
       "string"
     ],
     "$.milestone.projectDisciplineId": [
-      "null"
+      "null",
+      "string"
     ],
     "$.milestone.projectId": [
       "string"
@@ -9393,7 +9496,8 @@
       "boolean"
     ],
     "$.permissions.manage.reason": [
-      "null"
+      "null",
+      "string"
     ],
     "$.project": [
       "object"
@@ -9408,6 +9512,29 @@
       "string"
     ],
     "$.project.status": [
+      "string"
+    ]
+  },
+  "GET /api/v1/milestones/{id} 404": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
       "string"
     ]
   },
@@ -22060,6 +22187,60 @@
     "$.components.schemas.DateBound.type": [
       "string"
     ],
+    "$.components.schemas.DateChanged": [
+      "object"
+    ],
+    "$.components.schemas.DateChanged.properties": [
+      "object"
+    ],
+    "$.components.schemas.DateChanged.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.DateChanged.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.DateChanged.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.DateChanged.properties.preview": [
+      "object"
+    ],
+    "$.components.schemas.DateChanged.properties.preview.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DateChanged.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.DateChanged.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.DateChanged.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DateChanged.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.DateChanged.properties.shifted": [
+      "object"
+    ],
+    "$.components.schemas.DateChanged.properties.shifted.format": [
+      "string"
+    ],
+    "$.components.schemas.DateChanged.properties.shifted.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DateChanged.properties.shifted.type": [
+      "string"
+    ],
+    "$.components.schemas.DateChanged.required": [
+      "array"
+    ],
+    "$.components.schemas.DateChanged.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DateChanged.type": [
+      "string"
+    ],
     "$.components.schemas.DateContext": [
       "object"
     ],
@@ -22205,6 +22386,135 @@
       "string"
     ],
     "$.components.schemas.DateContextRead.type": [
+      "string"
+    ],
+    "$.components.schemas.DateMove": [
+      "object"
+    ],
+    "$.components.schemas.DateMove.properties": [
+      "object"
+    ],
+    "$.components.schemas.DateMove.properties.delta": [
+      "object"
+    ],
+    "$.components.schemas.DateMove.properties.delta.format": [
+      "string"
+    ],
+    "$.components.schemas.DateMove.properties.delta.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DateMove.properties.delta.type": [
+      "string"
+    ],
+    "$.components.schemas.DateMove.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.DateMove.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.DateMove.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.DateMove.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.DateMove.properties.newDate": [
+      "object"
+    ],
+    "$.components.schemas.DateMove.properties.newDate.format": [
+      "string"
+    ],
+    "$.components.schemas.DateMove.properties.newDate.type": [
+      "string"
+    ],
+    "$.components.schemas.DateMove.properties.oldDate": [
+      "object"
+    ],
+    "$.components.schemas.DateMove.properties.oldDate.format": [
+      "string"
+    ],
+    "$.components.schemas.DateMove.properties.oldDate.type": [
+      "array"
+    ],
+    "$.components.schemas.DateMove.properties.oldDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DateMove.properties.slipDays": [
+      "object"
+    ],
+    "$.components.schemas.DateMove.properties.slipDays.format": [
+      "string"
+    ],
+    "$.components.schemas.DateMove.properties.slipDays.pattern": [
+      "string"
+    ],
+    "$.components.schemas.DateMove.properties.slipDays.type": [
+      "string"
+    ],
+    "$.components.schemas.DateMove.required": [
+      "array"
+    ],
+    "$.components.schemas.DateMove.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DateMove.type": [
+      "string"
+    ],
+    "$.components.schemas.DatePreview": [
+      "object"
+    ],
+    "$.components.schemas.DatePreview.properties": [
+      "object"
+    ],
+    "$.components.schemas.DatePreview.properties.deliverables": [
+      "object"
+    ],
+    "$.components.schemas.DatePreview.properties.deliverables.items": [
+      "object"
+    ],
+    "$.components.schemas.DatePreview.properties.deliverables.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DatePreview.properties.deliverables.type": [
+      "string"
+    ],
+    "$.components.schemas.DatePreview.properties.inconsistent": [
+      "object"
+    ],
+    "$.components.schemas.DatePreview.properties.inconsistent.items": [
+      "object"
+    ],
+    "$.components.schemas.DatePreview.properties.inconsistent.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DatePreview.properties.inconsistent.type": [
+      "string"
+    ],
+    "$.components.schemas.DatePreview.properties.milestone": [
+      "object"
+    ],
+    "$.components.schemas.DatePreview.properties.milestone.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DatePreview.properties.tasks": [
+      "object"
+    ],
+    "$.components.schemas.DatePreview.properties.tasks.items": [
+      "object"
+    ],
+    "$.components.schemas.DatePreview.properties.tasks.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.DatePreview.properties.tasks.type": [
+      "string"
+    ],
+    "$.components.schemas.DatePreview.required": [
+      "array"
+    ],
+    "$.components.schemas.DatePreview.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DatePreview.type": [
       "string"
     ],
     "$.components.schemas.DateSuccessor": [
@@ -24652,6 +24962,45 @@
     "$.components.schemas.DeliverableIssueResult.type": [
       "string"
     ],
+    "$.components.schemas.DeliverableLeftBehind": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableLeftBehind.properties": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableLeftBehind.properties.dueDate": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableLeftBehind.properties.dueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableLeftBehind.properties.dueDate.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableLeftBehind.properties.dueDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableLeftBehind.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableLeftBehind.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableLeftBehind.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableLeftBehind.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableLeftBehind.required": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableLeftBehind.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableLeftBehind.type": [
+      "string"
+    ],
     "$.components.schemas.DeliverableLinkRead": [
       "object"
     ],
@@ -25433,6 +25782,63 @@
       "string"
     ],
     "$.components.schemas.DeliverableRow.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableShift": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableShift.properties": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableShift.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableShift.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableShift.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableShift.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableShift.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableShift.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableShift.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableShift.properties.newDue": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableShift.properties.newDue.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableShift.properties.newDue.type": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableShift.properties.oldDue": [
+      "object"
+    ],
+    "$.components.schemas.DeliverableShift.properties.oldDue.format": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableShift.properties.oldDue.type": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableShift.properties.oldDue.type[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableShift.required": [
+      "array"
+    ],
+    "$.components.schemas.DeliverableShift.required[]": [
+      "string"
+    ],
+    "$.components.schemas.DeliverableShift.type": [
       "string"
     ],
     "$.components.schemas.DeliverableStateRead": [
@@ -36439,6 +36845,105 @@
     "$.components.schemas.MentionRow.type": [
       "string"
     ],
+    "$.components.schemas.MilestoneCancelled": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneCancelled.properties": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneCancelled.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneCancelled.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneCancelled.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneCancelled.properties.retarget": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneCancelled.properties.retarget.items": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneCancelled.properties.retarget.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneCancelled.properties.retarget.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneCancelled.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneCancelled.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneCancelled.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneCancelled.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneCancelled.required": [
+      "array"
+    ],
+    "$.components.schemas.MilestoneCancelled.required[]": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneCancelled.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneCompleted": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneCompleted.properties": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneCompleted.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneCompleted.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneCompleted.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneCompleted.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneCompleted.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneCompleted.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneCompleted.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneCompleted.properties.suggestPhase": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneCompleted.properties.suggestPhase.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.MilestoneCompleted.properties.suggestPhase.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneCompleted.properties.suggestPhase.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneCompleted.properties.suggestPhase.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneCompleted.required": [
+      "array"
+    ],
+    "$.components.schemas.MilestoneCompleted.required[]": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneCompleted.type": [
+      "string"
+    ],
     "$.components.schemas.MilestoneCreateBody": [
       "object"
     ],
@@ -36520,6 +37025,120 @@
     "$.components.schemas.MilestoneCreateBody.type": [
       "string"
     ],
+    "$.components.schemas.MilestoneCreated": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneCreated.properties": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneCreated.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneCreated.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneCreated.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneCreated.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneCreated.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneCreated.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneCreated.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneCreated.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneCreated.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneCreated.required": [
+      "array"
+    ],
+    "$.components.schemas.MilestoneCreated.required[]": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneCreated.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneDetail": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneDetail.properties": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneDetail.properties.completesPhase": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneDetail.properties.completesPhase.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.MilestoneDetail.properties.completesPhase.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneDetail.properties.completesPhase.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneDetail.properties.completesPhase.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneDetail.properties.deliverables": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneDetail.properties.deliverables.items": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneDetail.properties.deliverables.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneDetail.properties.deliverables.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneDetail.properties.directTasks": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneDetail.properties.directTasks.items": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneDetail.properties.directTasks.items.$ref": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneDetail.properties.directTasks.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneDetail.properties.milestone": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneDetail.properties.milestone.$ref": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneDetail.properties.permissions": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneDetail.properties.permissions.$ref": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneDetail.properties.project": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneDetail.properties.project.$ref": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneDetail.required": [
+      "array"
+    ],
+    "$.components.schemas.MilestoneDetail.required[]": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneDetail.type": [
+      "string"
+    ],
     "$.components.schemas.MilestoneIn": [
       "object"
     ],
@@ -36592,6 +37211,459 @@
     "$.components.schemas.MilestoneIn.type": [
       "string"
     ],
+    "$.components.schemas.MilestoneMilestoneRow": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.baselineDate": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.baselineDate.format": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.baselineDate.type": [
+      "array"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.baselineDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.baselineSlipShown": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.baselineSlipShown.type": [
+      "array"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.baselineSlipShown.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.canRebaseline": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.canRebaseline.type": [
+      "array"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.canRebaseline.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.cancelledReason": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.cancelledReason.type": [
+      "array"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.cancelledReason.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.completedDate": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.completedDate.format": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.completedDate.type": [
+      "array"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.completedDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.completesPhaseId": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.completesPhaseId.format": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.completesPhaseId.type": [
+      "array"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.completesPhaseId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.date": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.date.format": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.date.type": [
+      "array"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.date.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.daysRemaining": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.daysRemaining.format": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.daysRemaining.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.daysRemaining.type": [
+      "array"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.daysRemaining.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.deliverableIssued": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.deliverableIssued.format": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.deliverableIssued.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.deliverableIssued.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.deliverableTotal": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.deliverableTotal.format": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.deliverableTotal.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.deliverableTotal.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.description": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.description.type": [
+      "array"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.description.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.isCancelled": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.isCancelled.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.isClientFacing": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.isClientFacing.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.isComplete": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.isComplete.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.isSubmission": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.isSubmission.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.milestoneType": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.milestoneType.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.originalDate": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.originalDate.format": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.originalDate.type": [
+      "array"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.originalDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.projectDisciplineId": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.projectDisciplineId.format": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.projectDisciplineId.type": [
+      "array"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.projectDisciplineId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.projectId": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.projectId.format": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.projectId.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.sinceBaselineDays": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.sinceBaselineDays.format": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.sinceBaselineDays.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.sinceBaselineDays.type": [
+      "array"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.sinceBaselineDays.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.slipDays": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.slipDays.format": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.slipDays.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.slipDays.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.slipShown": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.slipShown.type": [
+      "array"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.slipShown.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.status.type": [
+      "array"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.status.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.statusReasons": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.statusReasons.oneOf": [
+      "array"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.statusReasons.oneOf[]": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.statusReasons.oneOf[].$ref": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.statusReasons.oneOf[].type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.taskBlocked": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.taskBlocked.format": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.taskBlocked.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.taskBlocked.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.taskComplete": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.taskComplete.format": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.taskComplete.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.taskComplete.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.taskOpen": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.taskOpen.format": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.taskOpen.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.taskOpen.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.taskOverdue": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.taskOverdue.format": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.taskOverdue.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.taskOverdue.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.taskTotal": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.taskTotal.format": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.taskTotal.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.properties.taskTotal.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.required": [
+      "array"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.required[]": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneMilestoneRow.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestonePermissions": [
+      "object"
+    ],
+    "$.components.schemas.MilestonePermissions.properties": [
+      "object"
+    ],
+    "$.components.schemas.MilestonePermissions.properties.comment": [
+      "object"
+    ],
+    "$.components.schemas.MilestonePermissions.properties.comment.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestonePermissions.properties.manage": [
+      "object"
+    ],
+    "$.components.schemas.MilestonePermissions.properties.manage.$ref": [
+      "string"
+    ],
+    "$.components.schemas.MilestonePermissions.required": [
+      "array"
+    ],
+    "$.components.schemas.MilestonePermissions.required[]": [
+      "string"
+    ],
+    "$.components.schemas.MilestonePermissions.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestonePhase": [
+      "object"
+    ],
+    "$.components.schemas.MilestonePhase.properties": [
+      "object"
+    ],
+    "$.components.schemas.MilestonePhase.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.MilestonePhase.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.MilestonePhase.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestonePhase.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.MilestonePhase.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestonePhase.required": [
+      "array"
+    ],
+    "$.components.schemas.MilestonePhase.required[]": [
+      "string"
+    ],
+    "$.components.schemas.MilestonePhase.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneProject": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneProject.properties": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneProject.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneProject.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneProject.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneProject.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneProject.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneProject.properties.projectNumber": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneProject.properties.projectNumber.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneProject.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneProject.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneProject.required": [
+      "array"
+    ],
+    "$.components.schemas.MilestoneProject.required[]": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneProject.type": [
+      "string"
+    ],
     "$.components.schemas.MilestoneReasonBody": [
       "object"
     ],
@@ -36629,6 +37701,108 @@
       "string"
     ],
     "$.components.schemas.MilestoneReasonBody.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneTask": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneTask.properties": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneTask.properties.assigneeId": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneTask.properties.assigneeId.format": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneTask.properties.assigneeId.type": [
+      "array"
+    ],
+    "$.components.schemas.MilestoneTask.properties.assigneeId.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneTask.properties.dueDate": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneTask.properties.dueDate.format": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneTask.properties.dueDate.type": [
+      "array"
+    ],
+    "$.components.schemas.MilestoneTask.properties.dueDate.type[]": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneTask.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneTask.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneTask.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneTask.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneTask.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneTask.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneTask.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneTask.properties.status": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneTask.properties.status.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneTask.required": [
+      "array"
+    ],
+    "$.components.schemas.MilestoneTask.required[]": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneTask.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneVersion": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneVersion.properties": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneVersion.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneVersion.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneVersion.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneVersion.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.MilestoneVersion.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneVersion.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneVersion.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneVersion.required": [
+      "array"
+    ],
+    "$.components.schemas.MilestoneVersion.required[]": [
+      "string"
+    ],
+    "$.components.schemas.MilestoneVersion.type": [
       "string"
     ],
     "$.components.schemas.MissCategoryRow": [
@@ -46837,6 +48011,54 @@
     "$.components.schemas.Response.type": [
       "string"
     ],
+    "$.components.schemas.RetargetDeliverable": [
+      "object"
+    ],
+    "$.components.schemas.RetargetDeliverable.properties": [
+      "object"
+    ],
+    "$.components.schemas.RetargetDeliverable.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.RetargetDeliverable.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.RetargetDeliverable.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.RetargetDeliverable.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.RetargetDeliverable.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.RetargetDeliverable.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.RetargetDeliverable.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.RetargetDeliverable.properties.rowVersion": [
+      "object"
+    ],
+    "$.components.schemas.RetargetDeliverable.properties.rowVersion.format": [
+      "string"
+    ],
+    "$.components.schemas.RetargetDeliverable.properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.components.schemas.RetargetDeliverable.properties.rowVersion.type": [
+      "string"
+    ],
+    "$.components.schemas.RetargetDeliverable.required": [
+      "array"
+    ],
+    "$.components.schemas.RetargetDeliverable.required[]": [
+      "string"
+    ],
+    "$.components.schemas.RetargetDeliverable.type": [
+      "string"
+    ],
     "$.components.schemas.RetryOutboxResponse": [
       "object"
     ],
@@ -56840,6 +58062,90 @@
       "string"
     ],
     "$.components.schemas.TaskRelatedDeliverable.type": [
+      "string"
+    ],
+    "$.components.schemas.TaskShift": [
+      "object"
+    ],
+    "$.components.schemas.TaskShift.properties": [
+      "object"
+    ],
+    "$.components.schemas.TaskShift.properties.id": [
+      "object"
+    ],
+    "$.components.schemas.TaskShift.properties.id.format": [
+      "string"
+    ],
+    "$.components.schemas.TaskShift.properties.id.type": [
+      "string"
+    ],
+    "$.components.schemas.TaskShift.properties.key": [
+      "object"
+    ],
+    "$.components.schemas.TaskShift.properties.key.type": [
+      "string"
+    ],
+    "$.components.schemas.TaskShift.properties.name": [
+      "object"
+    ],
+    "$.components.schemas.TaskShift.properties.name.type": [
+      "string"
+    ],
+    "$.components.schemas.TaskShift.properties.newDue": [
+      "object"
+    ],
+    "$.components.schemas.TaskShift.properties.newDue.format": [
+      "string"
+    ],
+    "$.components.schemas.TaskShift.properties.newDue.type": [
+      "array"
+    ],
+    "$.components.schemas.TaskShift.properties.newDue.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TaskShift.properties.newStart": [
+      "object"
+    ],
+    "$.components.schemas.TaskShift.properties.newStart.format": [
+      "string"
+    ],
+    "$.components.schemas.TaskShift.properties.newStart.type": [
+      "array"
+    ],
+    "$.components.schemas.TaskShift.properties.newStart.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TaskShift.properties.oldDue": [
+      "object"
+    ],
+    "$.components.schemas.TaskShift.properties.oldDue.format": [
+      "string"
+    ],
+    "$.components.schemas.TaskShift.properties.oldDue.type": [
+      "array"
+    ],
+    "$.components.schemas.TaskShift.properties.oldDue.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TaskShift.properties.oldStart": [
+      "object"
+    ],
+    "$.components.schemas.TaskShift.properties.oldStart.format": [
+      "string"
+    ],
+    "$.components.schemas.TaskShift.properties.oldStart.type": [
+      "array"
+    ],
+    "$.components.schemas.TaskShift.properties.oldStart.type[]": [
+      "string"
+    ],
+    "$.components.schemas.TaskShift.required": [
+      "array"
+    ],
+    "$.components.schemas.TaskShift.required[]": [
+      "string"
+    ],
+    "$.components.schemas.TaskShift.type": [
       "string"
     ],
     "$.components.schemas.TaskStartStatus": [
@@ -69643,10 +70949,10 @@
     "$.paths./api/v1/milestones/{id}.delete.responses": [
       "object"
     ],
-    "$.paths./api/v1/milestones/{id}.delete.responses.200": [
+    "$.paths./api/v1/milestones/{id}.delete.responses.204": [
       "object"
     ],
-    "$.paths./api/v1/milestones/{id}.delete.responses.200.description": [
+    "$.paths./api/v1/milestones/{id}.delete.responses.204.description": [
       "string"
     ],
     "$.paths./api/v1/milestones/{id}.delete.tags": [
@@ -69693,6 +70999,9 @@
     ],
     "$.paths./api/v1/milestones/{id}.get.responses.200.content.application/json.schema": [
       "object"
+    ],
+    "$.paths./api/v1/milestones/{id}.get.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/milestones/{id}.get.responses.200.description": [
       "string"
@@ -69753,6 +71062,18 @@
     ],
     "$.paths./api/v1/milestones/{id}.patch.responses.200": [
       "object"
+    ],
+    "$.paths./api/v1/milestones/{id}.patch.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}.patch.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}.patch.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}.patch.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/milestones/{id}.patch.responses.200.description": [
       "string"
@@ -69817,6 +71138,18 @@
     "$.paths./api/v1/milestones/{id}/cancel.post.responses.200": [
       "object"
     ],
+    "$.paths./api/v1/milestones/{id}/cancel.post.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/cancel.post.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/cancel.post.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/cancel.post.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/milestones/{id}/cancel.post.responses.200.description": [
       "string"
     ],
@@ -69880,6 +71213,621 @@
     "$.paths./api/v1/milestones/{id}/change-date.post.responses.200": [
       "object"
     ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf": [
+      "array"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[]": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.deliverables": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.deliverables.items": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.deliverables.items.properties": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.deliverables.items.properties.id": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.deliverables.items.properties.id.format": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.deliverables.items.properties.id.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.deliverables.items.properties.key": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.deliverables.items.properties.key.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.deliverables.items.properties.name": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.deliverables.items.properties.name.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.deliverables.items.properties.newDue": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.deliverables.items.properties.newDue.format": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.deliverables.items.properties.newDue.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.deliverables.items.properties.oldDue": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.deliverables.items.properties.oldDue.format": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.deliverables.items.properties.oldDue.type": [
+      "array"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.deliverables.items.properties.oldDue.type[]": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.deliverables.items.required": [
+      "array"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.deliverables.items.required[]": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.deliverables.items.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.deliverables.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.id": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.id.format": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.id.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.inconsistent": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.inconsistent.items": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.inconsistent.items.properties": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.inconsistent.items.properties.dueDate": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.inconsistent.items.properties.dueDate.format": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.inconsistent.items.properties.dueDate.type": [
+      "array"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.inconsistent.items.properties.dueDate.type[]": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.inconsistent.items.properties.key": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.inconsistent.items.properties.key.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.inconsistent.items.properties.name": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.inconsistent.items.properties.name.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.inconsistent.items.required": [
+      "array"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.inconsistent.items.required[]": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.inconsistent.items.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.inconsistent.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.milestone": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.milestone.properties": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.milestone.properties.delta": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.milestone.properties.delta.format": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.milestone.properties.delta.pattern": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.milestone.properties.delta.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.milestone.properties.key": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.milestone.properties.key.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.milestone.properties.name": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.milestone.properties.name.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.milestone.properties.newDate": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.milestone.properties.newDate.format": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.milestone.properties.newDate.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.milestone.properties.oldDate": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.milestone.properties.oldDate.format": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.milestone.properties.oldDate.type": [
+      "array"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.milestone.properties.oldDate.type[]": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.milestone.properties.slipDays": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.milestone.properties.slipDays.format": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.milestone.properties.slipDays.pattern": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.milestone.properties.slipDays.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.milestone.required": [
+      "array"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.milestone.required[]": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.milestone.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.deliverables": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.deliverables.items": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.deliverables.items.properties": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.deliverables.items.properties.id": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.deliverables.items.properties.id.format": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.deliverables.items.properties.id.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.deliverables.items.properties.key": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.deliverables.items.properties.key.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.deliverables.items.properties.name": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.deliverables.items.properties.name.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.deliverables.items.properties.newDue": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.deliverables.items.properties.newDue.format": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.deliverables.items.properties.newDue.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.deliverables.items.properties.oldDue": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.deliverables.items.properties.oldDue.format": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.deliverables.items.properties.oldDue.type": [
+      "array"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.deliverables.items.properties.oldDue.type[]": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.deliverables.items.required": [
+      "array"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.deliverables.items.required[]": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.deliverables.items.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.deliverables.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.inconsistent": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.inconsistent.items": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.inconsistent.items.properties": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.inconsistent.items.properties.dueDate": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.inconsistent.items.properties.dueDate.format": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.inconsistent.items.properties.dueDate.type": [
+      "array"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.inconsistent.items.properties.dueDate.type[]": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.inconsistent.items.properties.key": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.inconsistent.items.properties.key.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.inconsistent.items.properties.name": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.inconsistent.items.properties.name.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.inconsistent.items.required": [
+      "array"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.inconsistent.items.required[]": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.inconsistent.items.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.inconsistent.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.milestone": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.milestone.properties": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.milestone.properties.delta": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.milestone.properties.delta.format": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.milestone.properties.delta.pattern": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.milestone.properties.delta.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.milestone.properties.key": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.milestone.properties.key.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.milestone.properties.name": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.milestone.properties.name.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.milestone.properties.newDate": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.milestone.properties.newDate.format": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.milestone.properties.newDate.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.milestone.properties.oldDate": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.milestone.properties.oldDate.format": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.milestone.properties.oldDate.type": [
+      "array"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.milestone.properties.oldDate.type[]": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.milestone.properties.slipDays": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.milestone.properties.slipDays.format": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.milestone.properties.slipDays.pattern": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.milestone.properties.slipDays.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.milestone.required": [
+      "array"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.milestone.required[]": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.milestone.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.tasks": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.tasks.items": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.tasks.items.properties": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.tasks.items.properties.id": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.tasks.items.properties.id.format": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.tasks.items.properties.id.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.tasks.items.properties.key": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.tasks.items.properties.key.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.tasks.items.properties.name": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.tasks.items.properties.name.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.tasks.items.properties.newDue": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.tasks.items.properties.newDue.format": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.tasks.items.properties.newDue.type": [
+      "array"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.tasks.items.properties.newDue.type[]": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.tasks.items.properties.newStart": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.tasks.items.properties.newStart.format": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.tasks.items.properties.newStart.type": [
+      "array"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.tasks.items.properties.newStart.type[]": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.tasks.items.properties.oldDue": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.tasks.items.properties.oldDue.format": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.tasks.items.properties.oldDue.type": [
+      "array"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.tasks.items.properties.oldDue.type[]": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.tasks.items.properties.oldStart": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.tasks.items.properties.oldStart.format": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.tasks.items.properties.oldStart.type": [
+      "array"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.tasks.items.properties.oldStart.type[]": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.tasks.items.required": [
+      "array"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.tasks.items.required[]": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.tasks.items.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.properties.tasks.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.required": [
+      "array"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.required[]": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.preview.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.rowVersion": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.rowVersion.format": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.rowVersion.pattern": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.rowVersion.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.shifted": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.shifted.format": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.shifted.pattern": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.shifted.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.tasks": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.tasks.items": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.tasks.items.properties": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.tasks.items.properties.id": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.tasks.items.properties.id.format": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.tasks.items.properties.id.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.tasks.items.properties.key": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.tasks.items.properties.key.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.tasks.items.properties.name": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.tasks.items.properties.name.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.tasks.items.properties.newDue": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.tasks.items.properties.newDue.format": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.tasks.items.properties.newDue.type": [
+      "array"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.tasks.items.properties.newDue.type[]": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.tasks.items.properties.newStart": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.tasks.items.properties.newStart.format": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.tasks.items.properties.newStart.type": [
+      "array"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.tasks.items.properties.newStart.type[]": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.tasks.items.properties.oldDue": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.tasks.items.properties.oldDue.format": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.tasks.items.properties.oldDue.type": [
+      "array"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.tasks.items.properties.oldDue.type[]": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.tasks.items.properties.oldStart": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.tasks.items.properties.oldStart.format": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.tasks.items.properties.oldStart.type": [
+      "array"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.tasks.items.properties.oldStart.type[]": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.tasks.items.required": [
+      "array"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.tasks.items.required[]": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.tasks.items.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].properties.tasks.type": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].required": [
+      "array"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].required[]": [
+      "string"
+    ],
+    "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.content.application/json.schema.anyOf[].type": [
+      "string"
+    ],
     "$.paths./api/v1/milestones/{id}/change-date.post.responses.200.description": [
       "string"
     ],
@@ -69942,6 +71890,18 @@
     ],
     "$.paths./api/v1/milestones/{id}/complete.post.responses.200": [
       "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/complete.post.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/complete.post.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/complete.post.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/complete.post.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/milestones/{id}/complete.post.responses.200.description": [
       "string"
@@ -70081,6 +72041,18 @@
     "$.paths./api/v1/milestones/{id}/reopen.post.responses.200": [
       "object"
     ],
+    "$.paths./api/v1/milestones/{id}/reopen.post.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/reopen.post.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/reopen.post.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/reopen.post.responses.200.content.application/json.schema.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/milestones/{id}/reopen.post.responses.200.description": [
       "string"
     ],
@@ -70125,6 +72097,18 @@
     ],
     "$.paths./api/v1/milestones/{id}/restore.post.responses.200": [
       "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/restore.post.responses.200.content": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/restore.post.responses.200.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/restore.post.responses.200.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/milestones/{id}/restore.post.responses.200.content.application/json.schema.$ref": [
+      "string"
     ],
     "$.paths./api/v1/milestones/{id}/restore.post.responses.200.description": [
       "string"
@@ -74974,6 +76958,12 @@
     "$.paths./api/v1/projects/{id}/milestones.get.responses.200.content.application/json.schema": [
       "object"
     ],
+    "$.paths./api/v1/projects/{id}/milestones.get.responses.200.content.application/json.schema.items": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/milestones.get.responses.200.content.application/json.schema.items.$ref": [
+      "string"
+    ],
     "$.paths./api/v1/projects/{id}/milestones.get.responses.200.content.application/json.schema.type": [
       "string"
     ],
@@ -75034,10 +77024,22 @@
     "$.paths./api/v1/projects/{id}/milestones.post.responses": [
       "object"
     ],
-    "$.paths./api/v1/projects/{id}/milestones.post.responses.200": [
+    "$.paths./api/v1/projects/{id}/milestones.post.responses.201": [
       "object"
     ],
-    "$.paths./api/v1/projects/{id}/milestones.post.responses.200.description": [
+    "$.paths./api/v1/projects/{id}/milestones.post.responses.201.content": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/milestones.post.responses.201.content.application/json": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/milestones.post.responses.201.content.application/json.schema": [
+      "object"
+    ],
+    "$.paths./api/v1/projects/{id}/milestones.post.responses.201.content.application/json.schema.$ref": [
+      "string"
+    ],
+    "$.paths./api/v1/projects/{id}/milestones.post.responses.201.description": [
       "string"
     ],
     "$.paths./api/v1/projects/{id}/milestones.post.tags": [
@@ -96300,12 +98302,14 @@
       "null"
     ],
     "$[].completesPhaseId": [
-      "null"
+      "null",
+      "string"
     ],
     "$[].date": [
       "string"
     ],
     "$[].daysRemaining": [
+      "null",
       "number"
     ],
     "$[].deliverableIssued": [
@@ -96315,7 +98319,8 @@
       "number"
     ],
     "$[].description": [
-      "null"
+      "null",
+      "string"
     ],
     "$[].id": [
       "string"
@@ -96345,7 +98350,8 @@
       "string"
     ],
     "$[].projectDisciplineId": [
-      "null"
+      "null",
+      "string"
     ],
     "$[].projectId": [
       "string"
@@ -96360,10 +98366,12 @@
       "boolean"
     ],
     "$[].status": [
+      "null",
       "string"
     ],
     "$[].statusReasons": [
-      "array"
+      "array",
+      "null"
     ],
     "$[].statusReasons[]": [
       "object"
@@ -112488,6 +114496,84 @@
       "string"
     ]
   },
+  "PATCH /api/v1/milestones/{id} 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "PATCH /api/v1/milestones/{id} 409": {
+    "$": [
+      "object"
+    ],
+    "$.changedAt": [
+      "string"
+    ],
+    "$.changedBy": [
+      "string"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.currentRowVersion": [
+      "number"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "PATCH /api/v1/milestones/{id} 428": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "PATCH /api/v1/open-roles/{id} 200": {
     "$": [
       "object"
@@ -117205,6 +119291,90 @@
       "string"
     ]
   },
+  "POST /api/v1/milestones/{id}/cancel 200": {
+    "$": [
+      "object"
+    ],
+    "$.id": [
+      "string"
+    ],
+    "$.retarget": [
+      "array"
+    ],
+    "$.retarget[]": [
+      "object"
+    ],
+    "$.retarget[].id": [
+      "string"
+    ],
+    "$.retarget[].key": [
+      "string"
+    ],
+    "$.retarget[].name": [
+      "string"
+    ],
+    "$.retarget[].rowVersion": [
+      "number"
+    ],
+    "$.rowVersion": [
+      "number"
+    ]
+  },
+  "POST /api/v1/milestones/{id}/cancel 400": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.errors": [
+      "object"
+    ],
+    "$.errors.reason": [
+      "array"
+    ],
+    "$.errors.reason[]": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "POST /api/v1/milestones/{id}/cancel 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "POST /api/v1/milestones/{id}/change-date 200": {
     "$": [
       "object"
@@ -117345,6 +119515,7 @@
       "string"
     ],
     "$.preview.tasks[].newDue": [
+      "null",
       "string"
     ],
     "$.preview.tasks[].newStart": [
@@ -117352,6 +119523,7 @@
       "string"
     ],
     "$.preview.tasks[].oldDue": [
+      "null",
       "string"
     ],
     "$.preview.tasks[].oldStart": [
@@ -117380,6 +119552,7 @@
       "string"
     ],
     "$.tasks[].newDue": [
+      "null",
       "string"
     ],
     "$.tasks[].newStart": [
@@ -117387,6 +119560,7 @@
       "string"
     ],
     "$.tasks[].oldDue": [
+      "null",
       "string"
     ],
     "$.tasks[].oldStart": [
@@ -117406,6 +119580,12 @@
     ],
     "$.errors": [
       "object"
+    ],
+    "$.errors.newDate": [
+      "array"
+    ],
+    "$.errors.newDate[]": [
+      "string"
     ],
     "$.errors.reason": [
       "array"
@@ -117449,6 +119629,29 @@
       "string"
     ]
   },
+  "POST /api/v1/milestones/{id}/change-date 428": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
   "POST /api/v1/milestones/{id}/complete 200": {
     "$": [
       "object"
@@ -117460,7 +119663,14 @@
       "number"
     ],
     "$.suggestPhase": [
-      "null"
+      "null",
+      "object"
+    ],
+    "$.suggestPhase.id": [
+      "string"
+    ],
+    "$.suggestPhase.name": [
+      "string"
     ]
   },
   "POST /api/v1/milestones/{id}/complete 409": {
@@ -117631,6 +119841,72 @@
     ],
     "$.currentRowVersion": [
       "number"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "POST /api/v1/milestones/{id}/reopen 200": {
+    "$": [
+      "object"
+    ],
+    "$.id": [
+      "string"
+    ],
+    "$.rowVersion": [
+      "number"
+    ]
+  },
+  "POST /api/v1/milestones/{id}/reopen 400": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.errors": [
+      "object"
+    ],
+    "$.errors.reason": [
+      "array"
+    ],
+    "$.errors.reason[]": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "POST /api/v1/milestones/{id}/reopen 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
     ],
     "$.detail": [
       "string"
@@ -119914,6 +122190,67 @@
     ],
     "$.rowVersion": [
       "number"
+    ]
+  },
+  "POST /api/v1/projects/{id}/milestones 400": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.errors": [
+      "object"
+    ],
+    "$.errors.date": [
+      "array"
+    ],
+    "$.errors.date[]": [
+      "string"
+    ],
+    "$.errors.milestoneType": [
+      "array"
+    ],
+    "$.errors.milestoneType[]": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
+    ]
+  },
+  "POST /api/v1/projects/{id}/milestones 403": {
+    "$": [
+      "object"
+    ],
+    "$.code": [
+      "string"
+    ],
+    "$.detail": [
+      "string"
+    ],
+    "$.status": [
+      "number"
+    ],
+    "$.title": [
+      "string"
+    ],
+    "$.traceId": [
+      "string"
+    ],
+    "$.type": [
+      "string"
     ]
   },
   "POST /api/v1/projects/{id}/risks 201": {

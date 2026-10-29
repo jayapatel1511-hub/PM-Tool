@@ -1,5 +1,5 @@
 import { PickerProject } from '@/components/hub/people'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { ChevronDown, ChevronRight, Lock, Monitor, MoreHorizontal, Plus } from 'lucide-react'
 import { Fragment, useState } from 'react'
 import { Link } from 'react-router'
@@ -10,7 +10,7 @@ import { useItemPanel, type PanelProps } from '@/components/hub/panel-host'
 import { Chip, Key, ProgressBar, StatusPill, toneOf } from '@/components/hub/pills'
 import { DataTable } from '@/components/hub/registers'
 import { useTable, type Column } from '@/components/hub/table'
-import { Why } from '@/components/hub/why'
+import { Why, type Reason } from '@/components/hub/why'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -19,7 +19,8 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useProject, useProjectRefresh, useReference } from '@/hooks/data'
 import { useFlag } from '@/lib/auth'
-import { ApiError, get, patch, post, qs, typedRequest } from '@/lib/api'
+import { ApiError, patch, typedRequest } from '@/lib/api'
+import type { components } from '@/gen/api'
 import { daysBetween, fmtDate, relative, shortDate, today } from '@/lib/format'
 import { t, tv , runtimeText } from '@/lib/i18n'
 import type { ProjectDetail } from '@/lib/types'
@@ -32,13 +33,10 @@ import { DeletedList, DeletedToggle, useShowDeleted } from '@/components/hub/del
 import { DraftNotice } from '@/components/hub/drafts'
 import { useSafeForm } from '@/hooks/drafts'
 
-export interface MilestoneRow {
-  id: string; projectId: string; key: string; name: string; milestoneType: string; date?: string; originalDate?: string; description?: string
-  projectDisciplineId?: string; completesPhaseId?: string; isClientFacing: boolean; isComplete: boolean; completedDate?: string; isCancelled: boolean
-  cancelledReason?: string; rowVersion: number; isSubmission: boolean; status?: string | null; statusReasons?: any[] | null; slipDays: number; baselineDate?: string; sinceBaselineDays?: number; canRebaseline?: boolean; baselineSlipShown?: boolean; slipShown?: boolean
-  daysRemaining?: number | null; deliverableTotal: number; deliverableIssued: number; taskTotal: number; taskComplete: number; taskOpen: number
-  taskOverdue: number; taskBlocked: number
-}
+type Schemas = components['schemas']
+export type MilestoneRow = Schemas['MilestoneMilestoneRow']
+/** The evaluated state's reasons are free JSON on the contract; the register has always read them as the shared reason list. */
+const reasonsOf = (m: Pick<MilestoneRow, 'statusReasons'>) => m.statusReasons as Reason[] | null
 
 const TYPES = ['Kickoff', 'Field Work', 'Design Submission', 'Client Workshop', 'Permit Submission', 'Tender', 'Construction', 'IFC', 'Record Drawings', 'Closeout', 'Other'] as const
 
@@ -98,10 +96,10 @@ function LiveMilestonesTab() {
   const [open, setOpen] = useState<Set<string>>(new Set())
   const [dialog, setDialog] = useState<{ kind: 'new' | 'edit' | 'date' | 'complete' | 'cancel' | 'reopen'; m?: MilestoneRow } | null>(null)
   const openPanel = useItemPanel()
-  const q = useQuery({ queryKey: ['p', p.id, 'milestones', showCompleted, type], queryFn: () => get<MilestoneRow[]>(`projects/${p.id}/milestones${qs({ showCompleted, type })}`) })
+  const q = useQuery({ queryKey: ['p', p.id, 'milestones', showCompleted, type], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/milestones', { params: { id: p.id }, query: { ShowCompleted: showCompleted, Type: type || undefined } }) })
   const can = p.permissions.manageMilestones.ok
   const rows = q.data ?? []
-  const disc = (id?: string) => p.disciplines.find((d) => d.id === id)?.name
+  const disc = (id?: string | null) => p.disciplines.find((d) => d.id === id)?.name
   const base = `/projects/${p.projectNumber}`
   const toggle = (id: string) => { const n = new Set(open); if (n.has(id)) n.delete(id); else n.add(id); setOpen(n) }
   // Every column is fixed and none sorts: the list keeps its columns, order and header text (FR-REC-14 adds no surface).
@@ -117,7 +115,7 @@ function LiveMilestonesTab() {
     { id: 'original', label: t('milestone.original'), className: 'whitespace-nowrap tabular-nums text-muted-foreground', cell: (m) => fmtDate(m.originalDate) },
     { id: 'slip', label: t('milestone.slip'), className: 'whitespace-nowrap text-right tabular-nums',
       cell: (m) => <span className={cn(m.slipDays > 0 && 'font-semibold text-warn')}>{m.slipDays > 0 && <span aria-hidden className="mr-1 text-xs">▲</span>}{slip(m.slipDays)}</span> },
-    { id: 'status', label: t('common.status'), cell: (m) => <Why reasons={m.statusReasons} title={t('milestone.statusWhy', { key: m.key })}><StatusPill status={milestoneStatusLabel(m)} /></Why> },
+    { id: 'status', label: t('common.status'), cell: (m) => <Why reasons={reasonsOf(m)} title={t('milestone.statusWhy', { key: m.key })}><StatusPill status={milestoneStatusLabel(m)} /></Why> },
     { id: 'remaining', label: t('milestone.remaining'), className: 'whitespace-nowrap tabular-nums', cell: (m) => m.isComplete ? fmtDate(m.completedDate) : m.date ? relative(m.date) : t('common.dash') },
     { id: 'deliverables', label: t('milestone.deliverables'), className: 'whitespace-nowrap', cell: (m) => <DeliverableCount m={m} base={base} /> },
     { id: 'tasks', label: t('milestone.tasks'), cell: (m) => <>
@@ -168,7 +166,7 @@ function LiveMilestonesTab() {
           </dl>
           <div className="mt-3 flex flex-wrap gap-2">
             <TaskChips m={m} base={base} />
-            <Why reasons={m.statusReasons} title={t('milestone.statusWhy', { key: m.key })}><span className="text-sm text-primary underline">{t('common.why')}</span></Why>
+            <Why reasons={reasonsOf(m)} title={t('milestone.statusWhy', { key: m.key })}><span className="text-sm text-primary underline">{t('common.why')}</span></Why>
           </div>
           <Button className="mt-3 h-auto min-h-(--control-h) max-w-full whitespace-normal text-left" variant="outline" aria-expanded={open.has(m.id)} onClick={() => toggle(m.id)}>{t('milestone.showDeliverables', { key: m.key })}</Button>
           {open.has(m.id) && <div className="mt-3 border-t pt-3"><TargetedDeliverables milestoneId={m.id} /></div>}
@@ -206,10 +204,10 @@ function MilestoneMenu({ m, onPick }: { m: MilestoneRow; onPick: (k: 'edit' | 'd
 
 function TargetedDeliverables({ milestoneId }: { milestoneId: string }) {
   const phone = useIsPhone()
-  const q = useQuery({ queryKey: ['milestone', milestoneId], queryFn: () => get(`milestones/${milestoneId}`) })
+  const q = useQuery({ queryKey: ['milestone', milestoneId], queryFn: () => typedRequest('get', '/api/v1/milestones/{id}', { params: { id: milestoneId } }) })
   const openPanel = useItemPanel()
   if (q.isPending) return <Loading rows={2} />
-  const list: any[] = q.data?.deliverables ?? []
+  const list = q.data?.deliverables ?? []
   if (!list.length) return <p className="py-1 text-sm text-muted-foreground">{t('milestone.noDeliverables')}</p>
   if (phone) return <ul className="divide-y rounded-md border bg-card">{list.map(d => <li key={d.id} className="space-y-2 p-3 text-sm"><Key>{d.key}</Key><button type="button" className="block break-words text-left font-semibold text-primary hover:underline" onClick={() => openPanel('Deliverable', d.id)}>{d.name}</button><StatusPill status={d.status} /><p>{t('common.owner')}: {d.ownerName || t('common.dash')}</p><p>{t('common.due')}: {fmtDate(d.dueDate)}</p><ProgressBar pct={d.state?.progressPct} />{d.state && <p className="text-xs/[18px] text-muted-foreground">{t('milestone.taskCounts', { open: d.state.taskOpen, overdue: d.state.taskOverdue, blocked: d.state.taskBlocked })}</p>}</li>)}</ul>
   return (
@@ -305,13 +303,12 @@ export function MilestoneStrip({ rows, onOpen, limit }: { rows: MilestoneRow[]; 
 
 function MilestoneDialogs({ p, kind, m, phases, onClose }: { p: ProjectDetail; kind: string; m?: MilestoneRow; phases: { id: string; name: string; isActive: boolean }[]; onClose: () => void }) {
   const refresh = useProjectRefresh()
-  const qc = useQueryClient()
-  const done = () => { qc.invalidateQueries({ queryKey: ['p', p.id] }); qc.invalidateQueries({ queryKey: ['milestone'] }); refresh(p.id); onClose() }
+  const done = () => { refresh(p.id); onClose() } // the project refresh reaches the register, the milestone panels and the strips through keys.ts
   if (kind === 'new' || kind === 'edit') return <MilestoneForm p={p} m={m} phases={phases} onClose={onClose} onDone={done} />
   if (kind === 'date') return <ChangeDateDialog m={m!} onClose={onClose} onDone={done} />
   if (kind === 'complete') return <CompleteDialog p={p} m={m!} onClose={onClose} onDone={done} />
   if (kind === 'reopen') return <ConfirmDialog open onOpenChange={(o) => !o && onClose()} title={t('milestone.reopenTitle', { key: m!.key })} reason
-    onConfirm={async (reason) => { await post(`milestones/${m!.id}/reopen`, { reason, rowVersion: m!.rowVersion }); done() }} />
+    onConfirm={async (reason) => { await typedRequest('post', '/api/v1/milestones/{id}/reopen', { params: { id: m!.id }, body: { reason: reason ?? null, rowVersion: m!.rowVersion } }); done() }} />
   return <CancelDialog p={p} m={m!} onClose={onClose} onDone={done} />
 }
 
@@ -325,7 +322,9 @@ function MilestoneForm({ p, m, phases, onClose, onDone }: { p: ProjectDetail; m?
     setErr(null); setBusy(true)
     try {
       const body: Record<string, any> = { ...f, projectDisciplineId: f.projectDisciplineId || null, completesPhaseId: f.completesPhaseId || null }
-      if (m) { if (m.date) delete body.date; await patch(`milestones/${m.id}`, body, m.rowVersion) } else await post(`projects/${p.id}/milestones`, body)
+      if (m) { if (m.date) delete body.date; await typedRequest('patch', '/api/v1/milestones/{id}', { params: { id: m.id }, body, ifMatch: m.rowVersion }) }
+      else await typedRequest('post', '/api/v1/projects/{id}/milestones', { params: { id: p.id }, body: { name: body.name, milestoneType: body.milestoneType, date: body.date ?? null, description: body.description ?? null,
+        projectDisciplineId: body.projectDisciplineId, completesPhaseId: body.completesPhaseId, isClientFacing: body.isClientFacing ?? null } })
       safe.clear(); toast.success(t('common.saved')); onDone()
     } catch (e) { setErr(e as ApiError) } finally { setBusy(false) }
   }
@@ -371,12 +370,15 @@ export function ChangeDateDialog({ m, onClose, onDone, initialDate }: { m: Miles
   const [cascade, setCascade] = useState(false)
   const [tasks, setTasks] = useState(false)
   const preview = useQuery({ queryKey: ['ms-preview', m.id, date, cascade, tasks], enabled: !!date && date !== m.date,
-    queryFn: () => post(`milestones/${m.id}/change-date`, { newDate: date, cascadeDeliverables: cascade, includeTasks: tasks, dryRun: true }) })
+    queryFn: async () => { // a dry run answers the preview itself; the union also carries the preview of a real move
+      const r = await typedRequest('post', '/api/v1/milestones/{id}/change-date', { params: { id: m.id }, body: { newDate: date, cascadeDeliverables: cascade, includeTasks: tasks, dryRun: true, reason: null, rowVersion: null } })
+      return 'preview' in r ? r.preview : r
+    } })
   const pv = preview.data
   return (
     <ConfirmDialog open onOpenChange={(o) => !o && onClose()} title={t('milestone.changeDateTitle', { key: m.key, name: m.name })} reason busy={!date || date === m.date}
       confirmLabel={t('milestone.changeDate')}
-      onConfirm={async (reason) => { await post(`milestones/${m.id}/change-date`, { newDate: date, reason, cascadeDeliverables: cascade, includeTasks: tasks, rowVersion: m.rowVersion }); onDone() }}>
+      onConfirm={async (reason) => { await typedRequest('post', '/api/v1/milestones/{id}/change-date', { params: { id: m.id }, body: { newDate: date, reason: reason ?? null, cascadeDeliverables: cascade, includeTasks: tasks, dryRun: null, rowVersion: m.rowVersion } }); onDone() }}>
       <div className="space-y-3 text-sm">
         <Field label={t('milestone.newDate')} htmlFor="md-date"><Input id="md-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} /></Field>
         {pv && <p className="rounded-md bg-muted px-3 py-2 tabular-nums">{t('milestone.slipPreview', { from: fmtDate(pv.milestone.oldDate), to: fmtDate(pv.milestone.newDate), delta: pv.milestone.delta, slip: pv.milestone.slipDays })}</p>}
@@ -386,8 +388,8 @@ export function ChangeDateDialog({ m, onClose, onDone, initialDate }: { m: Miles
           <div className={itemList}>
             {pv.deliverables.length + pv.tasks.length === 0 ? <p className="text-muted-foreground">{t('milestone.nothingToShift')}</p> : (
               <ul className="space-y-1 tabular-nums">
-                {pv.deliverables.map((x: any) => <li key={x.id}><span className="key">{x.key}</span> {x.name}: {fmtDate(x.oldDue)} → {fmtDate(x.newDue)}</li>)}
-                {pv.tasks.map((x: any) => <li key={x.id} className="pl-4"><span className="key">{x.key}</span> {x.name}: {fmtDate(x.oldDue)} → {fmtDate(x.newDue)}</li>)}
+                {pv.deliverables.map((x) => <li key={x.id}><span className="key">{x.key}</span> {x.name}: {fmtDate(x.oldDue)} → {fmtDate(x.newDue)}</li>)}
+                {pv.tasks.map((x) => <li key={x.id} className="pl-4"><span className="key">{x.key}</span> {x.name}: {fmtDate(x.oldDue)} → {fmtDate(x.newDue)}</li>)}
               </ul>
             )}
           </div>
@@ -400,8 +402,8 @@ export function ChangeDateDialog({ m, onClose, onDone, initialDate }: { m: Miles
 
 function CompleteDialog({ p, m, onClose, onDone }: { p: ProjectDetail; m: MilestoneRow; onClose: () => void; onDone: () => void }) {
   const [date, setDate] = useState(today())
-  const [confirmList, setConfirmList] = useState<any[] | null>(null)
-  const [phase, setPhase] = useState<{ id: string; name: string } | null>(null)
+  const [confirmList, setConfirmList] = useState<{ id: string; key: string; name: string; status: string }[] | null>(null) // the 409 that asks first lists the deliverables not yet issued
+  const [phase, setPhase] = useState<Schemas['MilestonePhase'] | null>(null)
   if (phase) return (
     <ConfirmDialog open onOpenChange={(o) => { if (!o) onDone() }} title={t('milestone.advancePhase', { phase: phase.name })} body={t('milestone.advancePhaseHint')} confirmLabel={t('common.yes')}
       onConfirm={async () => { await patch(`projects/${p.id}`, { phaseId: phase.id }, p.rowVersion); onDone() }} />
@@ -411,7 +413,7 @@ function CompleteDialog({ p, m, onClose, onDone }: { p: ProjectDetail; m: Milest
       body={confirmList ? t('milestone.openDeliverables', { n: confirmList.length }) : undefined}
       onConfirm={async () => {
         try {
-          const r = await post(`milestones/${m.id}/complete`, { completedDate: date, confirm: !!confirmList, rowVersion: m.rowVersion })
+          const r = await typedRequest('post', '/api/v1/milestones/{id}/complete', { params: { id: m.id }, body: { completedDate: date, confirm: !!confirmList, rowVersion: m.rowVersion } })
           toast.success(t('milestone.completed'))
           if (r.suggestPhase) setPhase(r.suggestPhase); else onDone()
         } catch (e) {
@@ -427,9 +429,9 @@ function CompleteDialog({ p, m, onClose, onDone }: { p: ProjectDetail; m: Milest
 
 /** M-07, E-17: cancel keeps links; the PM then retargets the deliverables in one dialog. */
 function CancelDialog({ p, m, onClose, onDone }: { p: ProjectDetail; m: MilestoneRow; onClose: () => void; onDone: () => void }) {
-  const [retarget, setRetarget] = useState<any[] | null>(null)
+  const [retarget, setRetarget] = useState<Schemas['RetargetDeliverable'][] | null>(null)
   const [target, setTarget] = useState('')
-  const others = useQuery({ queryKey: ['p', p.id, 'milestones', false, ''], queryFn: () => get<MilestoneRow[]>(`projects/${p.id}/milestones`) })
+  const others = useQuery({ queryKey: ['p', p.id, 'milestones', false, ''], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/milestones', { params: { id: p.id } }) })
   if (retarget && retarget.length > 0) return (
     <ConfirmDialog open onOpenChange={(o) => { if (!o) onDone() }} title={t('milestone.retargetTitle', { n: retarget.length })} confirmLabel={t('milestone.retarget')} busy={!target}
       onConfirm={async () => { await typedRequest('post', '/api/v1/projects/{id}/deliverables/bulk', { params: { id: p.id }, body: { ids: retarget.map((x) => x.id), operation: 'setMilestone', params: { milestoneId: target }, reason: null } }); onDone() }}>
@@ -444,14 +446,14 @@ function CancelDialog({ p, m, onClose, onDone }: { p: ProjectDetail; m: Mileston
   return (
     <ConfirmDialog open onOpenChange={(o) => !o && onClose()} destructive reason title={t('milestone.cancelTitle', { key: m.key, name: m.name })} body={t('milestone.cancelHint')}
       confirmLabel={t('milestone.cancel')}
-      onConfirm={async (reason) => { const r = await post(`milestones/${m.id}/cancel`, { reason, rowVersion: m.rowVersion }); if (r.retarget?.length) setRetarget(r.retarget); else onDone() }} />
+      onConfirm={async (reason) => { const r = await typedRequest('post', '/api/v1/milestones/{id}/cancel', { params: { id: m.id }, body: { reason: reason ?? null, rowVersion: m.rowVersion } }); if (r.retarget.length) setRetarget(r.retarget); else onDone() }} />
   )
 }
 
 // ---------- Milestone panel (§13.7) ----------
 
 export function MilestonePanel({ id }: PanelProps) {
-  const q = useQuery({ queryKey: ['milestone', id], queryFn: () => get(`milestones/${id}`) })
+  const q = useQuery({ queryKey: ['milestone', id], queryFn: () => typedRequest('get', '/api/v1/milestones/{id}', { params: { id } }) })
   // The project says whether a change needs a reason; asked only while pause saves exist (flag.data_entry_safety).
   const project = useProject(useFlag('data_entry_safety') ? q.data?.project.projectNumber : undefined)
   const [tab, setTab] = useState<'deliverables' | 'comments' | 'history'>('deliverables')
@@ -459,13 +461,13 @@ export function MilestonePanel({ id }: PanelProps) {
   const refresh = useProjectRefresh()
   if (q.isPending) return <Loading />
   if (q.error) return <div className="p-6"><ErrorBanner error={q.error} retry={() => q.refetch()} /></div>
-  const m: MilestoneRow = q.data.milestone
+  const m = q.data.milestone
   const can = q.data.permissions.manage.ok
   // Typed text saves on blur only until the project says no reason is needed (FR-SAV-01).
   const needsReason = project.data?.permissions.needsReason !== false
-  const save = (body: object) => patch(`milestones/${m.id}`, body, m.rowVersion).then(() => { refresh(m.projectId) })
+  const save = (body: object) => typedRequest('patch', '/api/v1/milestones/{id}', { params: { id: m.id }, body, ifMatch: m.rowVersion }).then(() => { refresh(m.projectId) })
   // Phones read the milestone; editing it is desktop/tablet only (§13.0).
-  const text = (value: string | undefined, onSave: (v: string | null) => Promise<unknown>, multiline?: boolean) => (
+  const text = (value: string | null | undefined, onSave: (v: string | null) => Promise<unknown>, multiline?: boolean) => (
     <DesktopOnly notice={<InlineText value={value} multiline={multiline} disabled onSave={onSave} />}><InlineText value={value} multiline={multiline} disabled={!can} needsReason={needsReason} onSave={onSave} /></DesktopOnly>
   )
   return (
@@ -473,7 +475,7 @@ export function MilestonePanel({ id }: PanelProps) {
       <div className="space-y-2 border-b px-6 py-5">
         <div className="flex flex-wrap items-center gap-2"><Key>{m.key}</Key><StatusPill status={milestoneStatusLabel(m)} /></div>
         <h2 className="break-words text-2xl/8 font-semibold tracking-[-0.4px]">{m.isSubmission && '◆ '}{m.name}</h2>
-        {m.statusReasons?.length ? <Why reasons={m.statusReasons} title={t('milestone.statusWhy', { key: m.key })}><span className="text-sm text-muted-foreground">{t('common.why')}</span></Why> : null}
+        {reasonsOf(m)?.length ? <Why reasons={reasonsOf(m)} title={t('milestone.statusWhy', { key: m.key })}><span className="text-sm text-muted-foreground">{t('common.why')}</span></Why> : null}
       </div>
       {can && <DesktopOnly notice={<PhoneNotice className="mx-6 mt-4" />}>{null}</DesktopOnly>}
       {m.canRebaseline && <div className="flex flex-wrap gap-2 px-6 pt-3"><Button size="sm" variant="outline" onClick={() => setBaseline('set')}>{t('baseline.rebaseline')}</Button>{m.baselineDate && <Button size="sm" variant="ghost" onClick={() => setBaseline('clear')}>{t('baseline.useOriginal')}</Button>}</div>}

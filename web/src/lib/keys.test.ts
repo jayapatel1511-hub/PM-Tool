@@ -68,6 +68,7 @@ test('invalidation prefixes match actual mounted screen query keys', () => {
     Risk: [['search-counts', 'scope'], ['search-page', 'scope'], ['risk', 'i1'], ['p', 'p1', 'risks', {}], ['coordination']],
     Issue: [['issue', 'i1'], ['p', 'p1', 'issues', {}], ['issue-documents', 'i1'], ['issue-verification', 'i1'], ['issue-reference-impacts', 'i1'], ['review-issues', 'p1'], ['coordination']],
     Action: [['action', 'i1'], ['p', 'p1', 'actions', {}], ['mywork']], Meeting: [['p', 'p1', 'meetings']],
+    Milestone: [['milestone', 'i1'], ['p', 'p1', 'milestones', false, ''], ['p', 'p1', 'milestones', true, ''], ['submission-milestones', 'p1']],
     IssueLocation: [['issue-locations', 'i1']], ReadinessAssessment: [['readiness-detail', 'p1', 'i1']],
     ResourceAllocation: [['allocations', 'p1', {}, 1], ['allocation-detail', 'p1', 'i1'], ['allocation-review-options', 'p1'], ['workload', 'scope']],
   }

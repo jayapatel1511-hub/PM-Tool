@@ -49,6 +49,7 @@
     "readiness.fixture.cjs",
     "meetings.fixture.cjs",
     "workspace.fixture.cjs",
-    "registers.fixture.cjs"
+    "registers.fixture.cjs",
+    "milestones.fixture.cjs"
   ]
 }

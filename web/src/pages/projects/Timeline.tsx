@@ -15,7 +15,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useProjectRefresh } from '@/hooks/data'
-import { get, patch, typedRequest } from '@/lib/api'
+import { patch, typedRequest } from '@/lib/api'
 import { addDays, daysBetween, fmtDate, monthLabel, shortDate, today } from '@/lib/format'
 import { plural, t, tv , runtimeText } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
@@ -98,7 +98,7 @@ export function TimelineTab() {
   const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); n.delete('panel'); setSp(n, { replace: true }) }
   const zoom = (sp.get('zoom') as Zoom | null) ?? 'month'
   const f = { disciplineId: sp.get('disciplineId'), milestoneId: sp.get('milestoneId'), status: sp.get('status'), hide: sp.get('hideCompleted') === 'true', from: sp.get('from'), to: sp.get('to') }
-  const ms = useQuery({ queryKey: ['p', p.id, 'milestones', true, ''], queryFn: () => get<MilestoneRow[]>(`projects/${p.id}/milestones?showCompleted=true`) })
+  const ms = useQuery({ queryKey: ['p', p.id, 'milestones', true, ''], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/milestones', { params: { id: p.id }, query: { ShowCompleted: true } }) })
   const dels = useQuery({ queryKey: ['p', p.id, 'deliverables', {}], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/deliverables', { params: { id: p.id } }) })
   const tl = useQuery({ queryKey: ['p', p.id, 'timeline'], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/timeline', { params: { id: p.id } }) })
   const header = { title: t('ptab.timeline'), subtitle: t('calm.timeline.scope') }

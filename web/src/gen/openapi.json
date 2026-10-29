@@ -1355,27 +1355,6 @@
         ],
         "type": "object"
       },
-      "AnonymousTypeOfListOfWidgetAndboolean": {
-        "properties": {
-          "isDefault": {
-            "type": "boolean"
-          },
-          "layout": {
-            "items": {
-              "$ref": "#/components/schemas/Widget"
-            },
-            "type": [
-              "null",
-              "array"
-            ]
-          }
-        },
-        "required": [
-          "layout",
-          "isDefault"
-        ],
-        "type": "object"
-      },
       "AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean": {
         "properties": {
           "digestEnabled": {
@@ -11126,6 +11105,145 @@
         ],
         "type": "object"
       },
+      "FileItemRow": {
+        "properties": {
+          "itemId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "itemType": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "links": {
+            "items": {
+              "$ref": "#/components/schemas/FileLinkRow"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "itemType",
+          "itemId",
+          "key",
+          "name",
+          "links"
+        ],
+        "type": "object"
+      },
+      "FileLinkRow": {
+        "properties": {
+          "addedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "addedBy": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isNetworkPath": {
+            "type": "boolean"
+          },
+          "linkType": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "url",
+          "linkType",
+          "isNetworkPath",
+          "addedBy",
+          "addedAt"
+        ],
+        "type": "object"
+      },
+      "FileProjectRow": {
+        "properties": {
+          "canAdd": {
+            "type": "boolean"
+          },
+          "count": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FileItemRow"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "projectId",
+          "projectNumber",
+          "name",
+          "canAdd",
+          "count",
+          "items"
+        ],
+        "type": "object"
+      },
+      "FilesRead": {
+        "properties": {
+          "projects": {
+            "items": {
+              "$ref": "#/components/schemas/FileProjectRow"
+            },
+            "type": "array"
+          },
+          "total": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "projects",
+          "total",
+          "truncated",
+          "types"
+        ],
+        "type": "object"
+      },
       "FindingAction": {
         "properties": {
           "action": {
@@ -12304,6 +12422,287 @@
         ],
         "type": "object"
       },
+      "HomeDeadline": {
+        "properties": {
+          "date": {
+            "format": "date",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "overdue": {
+            "type": "boolean"
+          },
+          "owner": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "projectId",
+          "projectNumber",
+          "key",
+          "name",
+          "date",
+          "status",
+          "owner",
+          "overdue"
+        ],
+        "type": "object"
+      },
+      "HomeDeadlines": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/HomeDeadline"
+            },
+            "type": "array"
+          },
+          "total": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "truncated": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "total",
+          "truncated",
+          "items"
+        ],
+        "type": "object"
+      },
+      "HomeLane": {
+        "properties": {
+          "count": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "lane": {
+            "type": "string"
+          },
+          "statuses": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "lane",
+          "statuses",
+          "count"
+        ],
+        "type": "object"
+      },
+      "HomeMetrics": {
+        "properties": {
+          "activeProjects": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "onTrack": {
+            "$ref": "#/components/schemas/HomeOnTrack"
+          },
+          "openTasks": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "overdueTasks": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "teamMembers": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "activeProjects",
+          "openTasks",
+          "overdueTasks",
+          "onTrack",
+          "teamMembers"
+        ],
+        "type": "object"
+      },
+      "HomeOnHold": {
+        "properties": {
+          "count": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "count"
+        ],
+        "type": "object"
+      },
+      "HomeOnTrack": {
+        "properties": {
+          "evaluated": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "green": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "pct": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ]
+          }
+        },
+        "required": [
+          "green",
+          "evaluated",
+          "pct"
+        ],
+        "type": "object"
+      },
+      "HomeProject": {
+        "properties": {
+          "lanes": {
+            "items": {
+              "$ref": "#/components/schemas/HomeLane"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "total": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "projectId",
+          "projectNumber",
+          "name",
+          "lanes",
+          "total"
+        ],
+        "type": "object"
+      },
+      "HomeRead": {
+        "properties": {
+          "asOf": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "isDefault": {
+            "type": "boolean"
+          },
+          "layout": {
+            "items": {
+              "$ref": "#/components/schemas/Widget"
+            },
+            "type": "array"
+          },
+          "metrics": {
+            "$ref": "#/components/schemas/HomeMetrics"
+          },
+          "onHold": {
+            "$ref": "#/components/schemas/HomeOnHold"
+          },
+          "tasksByProject": {
+            "items": {
+              "$ref": "#/components/schemas/HomeProject"
+            },
+            "type": "array"
+          },
+          "tasksByStatus": {
+            "items": {
+              "$ref": "#/components/schemas/HomeLane"
+            },
+            "type": "array"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "today": {
+            "format": "date",
+            "type": "string"
+          },
+          "upcomingDeadlines": {
+            "$ref": "#/components/schemas/HomeDeadlines"
+          }
+        },
+        "required": [
+          "today",
+          "from",
+          "to",
+          "asOf",
+          "metrics",
+          "tasksByStatus",
+          "onHold",
+          "tasksByProject",
+          "upcomingDeadlines",
+          "layout",
+          "isDefault"
+        ],
+        "type": "object"
+      },
       "HrIdentity": {
         "properties": {
           "displayName": {
@@ -13285,6 +13684,24 @@
         "type": "array"
       },
       "JsonElement": {},
+      "LayoutAnswer": {
+        "properties": {
+          "isDefault": {
+            "type": "boolean"
+          },
+          "layout": {
+            "items": {
+              "$ref": "#/components/schemas/Widget"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "layout",
+          "isDefault"
+        ],
+        "type": "object"
+      },
       "LayoutBody": {
         "properties": {
           "widgets": {
@@ -27018,6 +27435,94 @@
         ],
         "type": "object"
       },
+      "TeamPersonRow": {
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "jobTitle": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "projects": {
+            "items": {
+              "$ref": "#/components/schemas/TeamProjectRow"
+            },
+            "type": "array"
+          },
+          "userId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "userId",
+          "displayName",
+          "jobTitle",
+          "email",
+          "projects"
+        ],
+        "type": "object"
+      },
+      "TeamProjectRow": {
+        "properties": {
+          "leads": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectName": {
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "roles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "projectId",
+          "projectNumber",
+          "projectName",
+          "roles",
+          "leads"
+        ],
+        "type": "object"
+      },
+      "TeamRead": {
+        "properties": {
+          "people": {
+            "items": {
+              "$ref": "#/components/schemas/TeamPersonRow"
+            },
+            "type": "array"
+          },
+          "projects": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "people",
+          "projects"
+        ],
+        "type": "object"
+      },
       "TemplateRoleIn": {
         "properties": {
           "disciplineId": {
@@ -32573,7 +33078,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/FilesRead"
+                }
               }
             },
             "description": "OK"
@@ -32615,7 +33122,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/HomeRead"
+                }
               }
             },
             "description": "OK"
@@ -33676,7 +34185,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnonymousTypeOfListOfWidgetAndboolean"
+                  "$ref": "#/components/schemas/LayoutAnswer"
                 }
               }
             },
@@ -33703,7 +34212,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnonymousTypeOfListOfWidgetAndboolean"
+                  "$ref": "#/components/schemas/LayoutAnswer"
                 }
               }
             },
@@ -46799,7 +47308,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/TeamRead"
+                }
               }
             },
             "description": "OK"
@@ -48031,8 +48542,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkspaceRow"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -48054,8 +48572,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -48125,8 +48643,8 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [

@@ -10,23 +10,18 @@ import { scoped, useScope, WorkspaceTabs, type Scope } from '@/components/hub/wo
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { ApiError, del, get, put, qs } from '@/lib/api'
+import type { components } from '@/gen/api'
+import { ApiError, typedRequest } from '@/lib/api'
 import { useMe } from '@/lib/auth'
 import { fmtDate, fmtTime, relative } from '@/lib/format'
+import { refreshHome } from '@/lib/keys'
 import { plural, t, tv , runtimeText } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
-interface Lane { lane: string; statuses: string; count: number }
-interface Widget { id: string; hidden: boolean }
-interface HomeData {
-  today: string; from: string; to: string; asOf: string
-  metrics: { activeProjects: number; openTasks: number; overdueTasks: number; onTrack: { green: number; evaluated: number; pct: number | null }; teamMembers: number }
-  tasksByStatus: Lane[]
-  onHold: { status: string; count: number }
-  tasksByProject: { projectId: string; projectNumber: string; name: string; lanes: Lane[]; total: number }[]
-  upcomingDeadlines: { total: number; truncated: boolean; items: { type: string; id: string; projectId: string; projectNumber: string; key: string; name: string; date: string; status?: string; owner?: string; overdue: boolean }[] }
-  layout: Widget[]; isDefault: boolean
-}
+type Schemas = components['schemas']
+type Lane = Schemas['HomeLane']
+type Widget = Schemas['Widget']
+type HomeData = Schemas['HomeRead']
 
 /** The same four lanes as the board (§36.3), coloured with text beside every bar. */
 const LANE_TONE: Record<string, string> = { 'To Do': 'var(--idle)', 'In Progress': 'var(--work)', Review: 'var(--warn)', Done: 'var(--done)' }
@@ -54,20 +49,20 @@ export function HomePage() {
   const openPanel = useItemPanel()
   const from = sp.get('from') ?? undefined, to = sp.get('to') ?? undefined
   const key = ['home', scope.api, from, to]
-  const q = useQuery({ queryKey: key, enabled: scope.ready, queryFn: () => get<HomeData>(`home${qs({ projects: scope.api, from, to })}`) })
+  const q = useQuery({ queryKey: key, enabled: scope.ready, queryFn: () => typedRequest('get', '/api/v1/home', { query: { projects: scope.api, from, to } }) })
   const [editing, setEditing] = useState(false)
   const set = (k: string, v?: string) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
   const clearRange = () => { const n = new URLSearchParams(sp); n.delete('from'); n.delete('to'); setSp(n, { replace: true }) }
 
   const saveLayout = async (widgets: Widget[]) => {
     qc.setQueryData<HomeData>(key, (d) => d && { ...d, layout: widgets, isDefault: false })
-    try { await put('me/dashboard-layout', { widgets }) } catch (e) { toast.error((e as ApiError).message) }
-    qc.invalidateQueries({ queryKey: ['home'] })
+    try { await typedRequest('put', '/api/v1/me/dashboard-layout', { body: { widgets } }) } catch (e) { toast.error((e as ApiError).message) }
+    refreshHome(qc)
   }
   const restore = async () => {
-    const r = await del<{ layout: Widget[] }>('me/dashboard-layout')
+    const r = await typedRequest('delete', '/api/v1/me/dashboard-layout', {})
     qc.setQueryData<HomeData>(key, (d) => d && { ...d, layout: r.layout, isDefault: true })
-    qc.invalidateQueries({ queryKey: ['home'] })
+    refreshHome(qc)
     toast.success(t('home.restored'))
   }
 

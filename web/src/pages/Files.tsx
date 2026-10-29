@@ -9,16 +9,11 @@ import { Key } from '@/components/hub/pills'
 import { useScope, WorkspaceTabs } from '@/components/hub/workspace'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { get, qs } from '@/lib/api'
+import { typedRequest } from '@/lib/api'
 import { fmtDate } from '@/lib/format'
 import { plural, t , runtimeText } from '@/lib/i18n'
 import { accentOf } from '@/lib/utils'
 
-interface FileLink { id: string; title: string; url: string; linkType: string; isNetworkPath: boolean; addedBy?: string; addedAt: string }
-interface FileProject {
-  projectId: string; projectNumber: string; name: string; canAdd: boolean; count: number
-  items: { itemType: string; itemId: string; key: string; name: string; links: FileLink[] }[]
-}
 
 /** Files (§36.8, FR-VIS-09): the selected projects' document links grouped by project and linked item, with search, a type
  *  filter and Copy path for network folders. A link library only: nothing is uploaded or stored. */
@@ -32,7 +27,7 @@ export function FilesPage() {
   const [draft, setDraft] = useState<string | null>(null)
   const term = draft ?? f.q ?? ''
   const q = useQuery({ queryKey: ['files', scope.api, f], enabled: scope.ready,
-    queryFn: () => get<{ projects: FileProject[]; total: number; truncated: boolean; types: string[] }>(`files${qs({ projects: scope.api, ...f })}`) })
+    queryFn: () => typedRequest('get', '/api/v1/files', { query: { projects: scope.api, ...f } }) })
   const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
   const tokens = ([['q', t('common.search'), f.q && `“${f.q}”`], ['type', t('common.type'), f.type && runtimeText(`linkType.${f.type}`)]] as const).filter(([, , v]) => v)
   const clear = () => { const n = new URLSearchParams(sp); n.delete('q'); n.delete('type'); setSp(n, { replace: true }) }

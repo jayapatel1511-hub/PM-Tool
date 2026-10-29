@@ -4,7 +4,7 @@ import type { QueryClient, QueryKey } from '@tanstack/react-query'
 export const roots = {
   project: ['project'], projects: ['projects'], myWork: ['mywork'], pulse: ['unread-pulse'],
   allocations: ['allocations'], workload: ['workload'], planningGrid: ['planning-grid'],
-  planningEntries: ['planning-entries'], myWeek: ['my-week'],
+  planningEntries: ['planning-entries'], myWeek: ['my-week'], home: ['home'], workspaces: ['workspaces'],
 } as const
 
 const taskKeys = ['task', 'wtasks', 'wboard', 'gantt', 'coordination', 'workload', 'planning-grid', 'planning-entries', 'my-week', 'mywork-tasks', 'open-work', 'open-items'] as const
@@ -48,7 +48,7 @@ const readiness = ['commitment-reliability', 'weekly-promise', 'readiness-constr
 const basis = ['design-basis', 'design-basis-detail', 'readiness-assumptions', 'basis-decision-options']
 
 export function keysForChange(itemType?: string, projectId?: string, itemId?: string): QueryKey[] {
-  const keys: QueryKey[] = [roots.project, roots.projects, roots.myWork, ['home'], ['search'], ['search-counts'], ['search-page'], ['closeout'], ['history'], ['comments'], ['links']]
+  const keys: QueryKey[] = [roots.project, roots.projects, roots.myWork, roots.home, ['search'], ['search-counts'], ['search-page'], ['closeout'], ['history'], ['comments'], ['links']]
   if (projectId) keys.push(['p', projectId])
   if (!itemType) for (const root of new Set([...Object.values(itemKeys).flat(), ...coordination, ...readiness, ...basis])) keys.push([root])
   if (itemType && /^(Basis|DesignBasis)/.test(itemType)) for (const root of basis) keys.push([root])
@@ -65,6 +65,10 @@ export function keysForChange(itemType?: string, projectId?: string, itemId?: st
 export function invalidateChange(qc: QueryClient, itemType?: string, projectId?: string, itemId?: string) {
   return Promise.all(keysForChange(itemType, projectId, itemId).map(queryKey => qc.invalidateQueries({ queryKey })))
 }
+
+/** A person's own workspaces and dashboard layout have no item type, so the commands that change them name their roots here (FR-VIS-02, FR-VIS-07). */
+export const refreshWorkspaces = (qc: QueryClient) => qc.invalidateQueries({ queryKey: roots.workspaces })
+export const refreshHome = (qc: QueryClient) => qc.invalidateQueries({ queryKey: roots.home })
 
 /** Keep both passes: derived project state lands after the command (§23.5). */
 export function refreshProject(qc: QueryClient, projectId?: string) {

@@ -3428,7 +3428,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["FilesRead"];
                     };
                 };
             };
@@ -3467,7 +3467,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["HomeRead"];
                     };
                 };
             };
@@ -4500,7 +4500,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfListOfWidgetAndboolean"];
+                        "application/json": components["schemas"]["LayoutAnswer"];
                     };
                 };
             };
@@ -4521,7 +4521,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AnonymousTypeOfListOfWidgetAndboolean"];
+                        "application/json": components["schemas"]["LayoutAnswer"];
                     };
                 };
             };
@@ -14843,7 +14843,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["TeamRead"];
                     };
                 };
             };
@@ -15973,12 +15973,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["WorkspaceRow"];
+                    };
                 };
             };
         };
@@ -16009,8 +16011,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -16071,8 +16073,8 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -16476,10 +16478,6 @@ export interface components {
             digest: components["schemas"]["AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean"];
             events: null | components["schemas"]["AnonymousTypeOfstringAndbooleanAndbooleanAndbooleanAndbooleanAndbooleanAndboolean"][];
             follows: null | components["schemas"]["AnonymousTypeOfGuidAndstringAndstringAndstringAndstringAndstring"][];
-        };
-        AnonymousTypeOfListOfWidgetAndboolean: {
-            isDefault: boolean;
-            layout: null | components["schemas"]["Widget"][];
         };
         "AnonymousTypeOfbooleanAndbooleanAndstringAndstringAndbooleanAndString[]AndString[]AndbooleanAndboolean": {
             digestEnabled: boolean;
@@ -19013,6 +19011,42 @@ export interface components {
             /** Format: int32 */
             rowVersion: number;
         };
+        FileItemRow: {
+            /** Format: uuid */
+            itemId: string;
+            itemType: string;
+            key: string;
+            links: components["schemas"]["FileLinkRow"][];
+            name: string;
+        };
+        FileLinkRow: {
+            /** Format: date-time */
+            addedAt: string;
+            addedBy: null | string;
+            /** Format: uuid */
+            id: string;
+            isNetworkPath: boolean;
+            linkType: string;
+            title: string;
+            url: string;
+        };
+        FileProjectRow: {
+            canAdd: boolean;
+            /** Format: int32 */
+            count: number;
+            items: components["schemas"]["FileItemRow"][];
+            name: string;
+            /** Format: uuid */
+            projectId: string;
+            projectNumber: string;
+        };
+        FilesRead: {
+            projects: components["schemas"]["FileProjectRow"][];
+            /** Format: int32 */
+            total: number;
+            truncated: boolean;
+            types: string[];
+        };
         FindingAction: {
             action: string;
             evidenceUrl: null | string;
@@ -19328,6 +19362,83 @@ export interface components {
             /** Format: uuid */
             officeId: null | string;
         };
+        HomeDeadline: {
+            /** Format: date */
+            date: string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            overdue: boolean;
+            owner: null | string;
+            /** Format: uuid */
+            projectId: string;
+            projectNumber: null | string;
+            status: null | string;
+            type: string;
+        };
+        HomeDeadlines: {
+            items: components["schemas"]["HomeDeadline"][];
+            /** Format: int32 */
+            total: number;
+            truncated: boolean;
+        };
+        HomeLane: {
+            /** Format: int32 */
+            count: number;
+            lane: string;
+            statuses: string;
+        };
+        HomeMetrics: {
+            /** Format: int32 */
+            activeProjects: number;
+            onTrack: components["schemas"]["HomeOnTrack"];
+            /** Format: int32 */
+            openTasks: number;
+            /** Format: int32 */
+            overdueTasks: number;
+            /** Format: int32 */
+            teamMembers: number;
+        };
+        HomeOnHold: {
+            /** Format: int32 */
+            count: number;
+            status: string;
+        };
+        HomeOnTrack: {
+            /** Format: int32 */
+            evaluated: number;
+            /** Format: int32 */
+            green: number;
+            /** Format: int32 */
+            pct: null | number;
+        };
+        HomeProject: {
+            lanes: components["schemas"]["HomeLane"][];
+            name: string;
+            /** Format: uuid */
+            projectId: string;
+            projectNumber: string;
+            /** Format: int32 */
+            total: number;
+        };
+        HomeRead: {
+            /** Format: date-time */
+            asOf: string;
+            /** Format: date */
+            from: string;
+            isDefault: boolean;
+            layout: components["schemas"]["Widget"][];
+            metrics: components["schemas"]["HomeMetrics"];
+            onHold: components["schemas"]["HomeOnHold"];
+            tasksByProject: components["schemas"]["HomeProject"][];
+            tasksByStatus: components["schemas"]["HomeLane"][];
+            /** Format: date */
+            to: string;
+            /** Format: date */
+            today: string;
+            upcomingDeadlines: components["schemas"]["HomeDeadlines"];
+        };
         HrIdentity: {
             displayName: string;
             hrPersonKey: null | string;
@@ -19580,6 +19691,10 @@ export interface components {
         };
         JsonArray: unknown[];
         JsonElement: unknown;
+        LayoutAnswer: {
+            isDefault: boolean;
+            layout: components["schemas"]["Widget"][];
+        };
         LayoutBody: {
             widgets: components["schemas"]["Widget"][];
         };
@@ -23128,6 +23243,27 @@ export interface components {
             /** Format: int32 */
             rowVersion: null | number;
             toStatus: string;
+        };
+        TeamPersonRow: {
+            displayName: string;
+            email: string;
+            jobTitle: null | string;
+            projects: components["schemas"]["TeamProjectRow"][];
+            /** Format: uuid */
+            userId: string;
+        };
+        TeamProjectRow: {
+            leads: string[];
+            /** Format: uuid */
+            projectId: string;
+            projectName: string;
+            projectNumber: string;
+            roles: string[];
+        };
+        TeamRead: {
+            people: components["schemas"]["TeamPersonRow"][];
+            /** Format: int32 */
+            projects: number;
         };
         TemplateRoleIn: {
             /** Format: uuid */

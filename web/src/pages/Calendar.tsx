@@ -12,11 +12,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import type { components } from '@/gen/api'
-import { ApiError, get, typedRequest } from '@/lib/api'
+import { ApiError, typedRequest } from '@/lib/api'
 import { addDays, daysBetween, fmtDate, shortDate, today } from '@/lib/format'
 import { invalidateChange } from '@/lib/keys'
 import { t, tv , runtimeText } from '@/lib/i18n'
-import type { Page as PageOf } from '@/lib/types'
 import { accentOf, cn } from '@/lib/utils'
 import { useScope, WorkspaceTabs } from '@/components/hub/workspace'
 import { DraftNotice } from '@/components/hub/drafts'
@@ -262,7 +261,7 @@ export function EventDialog({ event, anchor, onClose }: { event: CalEvent | null
   const [err, setErr] = useState<ApiError | null>(null)
   const [busy, setBusy] = useState(false)
   const safe = useSafeForm(event ? null : 'event.new', f, setF) // FR-SAV-03
-  const projects = useQuery({ queryKey: ['projects-pick', ''], queryFn: () => get<PageOf<{ id: string; projectNumber: string; name: string }>>('projects?pageSize=200') })
+  const projects = useQuery({ queryKey: ['projects-pick', ''], queryFn: () => typedRequest('get', '/api/v1/projects', { query: { PageSize: 200 } }) })
   const fe = err?.fieldErrors ?? {}
   const done = (projectId?: string | null) => { void invalidateChange(qc, 'CalendarEvent', projectId ?? undefined); onClose() }
   const save = async () => {

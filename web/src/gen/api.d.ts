@@ -7000,7 +7000,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["PageOfProjectRow"];
                     };
                 };
             };
@@ -7019,12 +7019,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ProjectCreated"];
+                    };
                 };
             };
         };
@@ -7191,7 +7193,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["ProjectDetail"];
                     };
                 };
             };
@@ -7237,7 +7239,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ProjectSaved"];
+                    };
                 };
             };
         };
@@ -7562,7 +7566,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["CloseoutView"];
                     };
                 };
             };
@@ -7715,7 +7719,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": components["schemas"]["DateReviewView"];
                     };
                 };
             };
@@ -8648,12 +8652,14 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["LinkResponse"];
+                    };
                 };
             };
         };
@@ -8685,8 +8691,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -9275,8 +9281,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -9295,8 +9301,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -9737,7 +9743,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["ProjectTransitioned"];
+                    };
                 };
             };
         };
@@ -17395,6 +17403,23 @@ export interface components {
             registers: null | string;
             tasks: null | string;
         };
+        CloseoutItem: {
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            status: string;
+        };
+        CloseoutView: {
+            decisions: components["schemas"]["CloseoutItem"][];
+            deliverables: components["schemas"]["CloseoutItem"][];
+            /** Format: int32 */
+            openRegisterItems: number;
+            /** Format: int32 */
+            openTasks: number;
+            status: string;
+            tasks: components["schemas"]["CloseoutItem"][];
+        };
         CommandResult: {
             /** Format: uuid */
             id: string;
@@ -18092,6 +18117,19 @@ export interface components {
             availability?: null | components["schemas"]["UnavailableDate"][];
             dates: components["schemas"]["DateContext"];
             tasks?: null | components["schemas"]["DateSuccessor"][];
+        };
+        DateReviewView: {
+            deliverables: components["schemas"]["DeliverableRow"][];
+            tasks: components["schemas"]["TaskQueriesRow"][];
+            window: null | components["schemas"]["DateReviewWindow"];
+        };
+        DateReviewWindow: {
+            /** Format: int32 */
+            days: number;
+            /** Format: date */
+            heldFrom: string;
+            /** Format: date */
+            resumedOn: string;
         };
         DateSuccessor: {
             /** Format: uuid */
@@ -20363,6 +20401,27 @@ export interface components {
             /** Format: date */
             today: string;
         };
+        NextMilestone: {
+            /** Format: date */
+            date: null | string;
+            name: string;
+        };
+        NoteHeader: {
+            computedHealth: string;
+            nextMilestone: null | components["schemas"]["NextMilestone"];
+            /** Format: int32 */
+            openAttention: number;
+            reportedHealth: null | string;
+        };
+        NoteView: {
+            /** Format: date-time */
+            at: null | string;
+            author: null | string;
+            /** Format: uuid */
+            authorId: null | string;
+            header: components["schemas"]["NoteHeader"];
+            text: null | string;
+        };
         NoticeAction: {
             action: string;
             /** Format: uuid */
@@ -20732,6 +20791,17 @@ export interface components {
             /** Format: int32 */
             totalCount: number;
         };
+        PageOfProjectRow: {
+            filters?: unknown;
+            items: components["schemas"]["ProjectRow"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            sort?: null | string;
+            /** Format: int32 */
+            totalCount: number;
+        };
         PageOfReviewRow: {
             filters?: unknown;
             items: components["schemas"]["ReviewRow"][];
@@ -20975,6 +21045,11 @@ export interface components {
             /** Format: int32 */
             tasks: number;
         };
+        ProjectClientRef: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+        };
         ProjectCreateBody: {
             /** Format: uuid */
             clientId: string;
@@ -21001,9 +21076,97 @@ export interface components {
             /** Format: uuid */
             templateId: null | string;
         };
+        ProjectCreated: {
+            /** Format: uuid */
+            id: string;
+            projectNumber: string;
+        };
+        ProjectDetail: {
+            /** Format: date-time */
+            activatedAt: null | string;
+            allowViewerComments: boolean;
+            /** Format: date-time */
+            archivedAt: null | string;
+            client: string;
+            /** Format: uuid */
+            clientId: string;
+            clientReference: null | string;
+            /** Format: date-time */
+            completedAt: null | string;
+            coordinationDay: null | string;
+            /** Format: uuid */
+            createdFromTemplateId: null | string;
+            description: null | string;
+            disciplines: components["schemas"]["ProjectDisciplineRow"][];
+            /** Format: int32 */
+            editWindowDaysLeft: null | number;
+            follow: null | components["schemas"]["ProjectFollowState"];
+            health: components["schemas"]["ProjectHealth"];
+            /** Format: uuid */
+            id: string;
+            internalNotes: null | string;
+            /** Format: date-time */
+            lastCoordinationReviewedAt: null | string;
+            lastCoordinationReviewedBy: null | string;
+            latestPlanned?: null | components["schemas"]["PlannedTarget"];
+            links: components["schemas"]["LinkResponse"][];
+            location: null | string;
+            myRoles: string[];
+            name: string;
+            nextMilestone: null | components["schemas"]["ProjectHeaderMilestone"];
+            nextSubmission: null | components["schemas"]["ProjectHeaderMilestone"];
+            office: string;
+            /** Format: uuid */
+            officeId: string;
+            permissions: components["schemas"]["ProjectPermissions"];
+            phase: null | string;
+            /** Format: uuid */
+            phaseId: null | string;
+            pmName: string;
+            priority: string;
+            /** Format: int32 */
+            progressPct: null | number;
+            /** Format: uuid */
+            projectManagerId: string;
+            projectNumber: string;
+            /** Format: uuid */
+            projectTypeId: null | string;
+            /** Format: int32 */
+            rowVersion: number;
+            setupChecklist: null | components["schemas"]["SetupChecklist"];
+            starred: boolean;
+            /** Format: date */
+            startDate: null | string;
+            status: string;
+            /** Format: date-time */
+            statusChangedAt: null | string;
+            statusNote?: null | components["schemas"]["NoteView"];
+            suggestArchive: boolean;
+            /** Format: date */
+            targetCompletionDate: null | string;
+            templateName: null | string;
+            /** Format: int32 */
+            templateVersion: null | number;
+            visibility: string;
+        };
         ProjectDisciplineAdded: {
             /** Format: uuid */
             id: string;
+            /** Format: int32 */
+            rowVersion: number;
+        };
+        ProjectDisciplineRow: {
+            code: string;
+            colour: string;
+            /** Format: uuid */
+            disciplineId: string;
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+            leadName: null | string;
+            /** Format: uuid */
+            leadUserId: null | string;
+            name: string;
             /** Format: int32 */
             rowVersion: number;
         };
@@ -21021,6 +21184,39 @@ export interface components {
             nextSubmissionMilestoneId: null | string;
             /** Format: int32 */
             progressPct: null | number;
+        };
+        ProjectFollowState: {
+            level: string;
+            source: string;
+        };
+        ProjectHeaderMilestone: {
+            /** Format: date */
+            date: null | string;
+            /** Format: int32 */
+            deliverables: number;
+            /** Format: uuid */
+            id: string;
+            isComplete: boolean;
+            key: string;
+            milestoneType: string;
+            name: string;
+            status: null | string;
+        };
+        ProjectHealth: {
+            computed: string;
+            /** Format: date-time */
+            evaluatedAt: null | string;
+            healthOverride: null | string;
+            /** Format: date-time */
+            healthOverrideAt: null | string;
+            /** Format: date-time */
+            healthOverrideExpiresAt: null | string;
+            healthOverrideNote: null | string;
+            inputs: null | components["schemas"]["JsonElement"];
+            overrideActive: boolean;
+            overrideBy: null | string;
+            reasons: null | components["schemas"]["JsonElement"];
+            reported: string;
         };
         ProjectHours: {
             /** Format: double */
@@ -21049,6 +21245,109 @@ export interface components {
             projectNumber: string;
             /** Format: int32 */
             row: number;
+        };
+        ProjectMilestoneRef: {
+            /** Format: date */
+            date: null | string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            status: null | string;
+        };
+        ProjectPermission: {
+            ok: boolean;
+            reason: null | string;
+        };
+        ProjectPermissions: {
+            assignBasisIn: string[];
+            captureWeeklyPlan: components["schemas"]["ProjectPermission"];
+            changeNumber: boolean;
+            comment: components["schemas"]["ProjectPermission"];
+            createBasisIn: string[];
+            createDeliverableIn: string[];
+            createEvent: components["schemas"]["ProjectPermission"];
+            createSubmission: components["schemas"]["ProjectPermission"];
+            createTaskIn: string[];
+            edit: components["schemas"]["ProjectPermission"];
+            enterTime: components["schemas"]["ProjectPermission"];
+            healthOverride: components["schemas"]["ProjectPermission"];
+            isPm: boolean;
+            leadOf: string[];
+            manageExternalParties: components["schemas"]["ProjectPermission"];
+            manageMilestones: components["schemas"]["ProjectPermission"];
+            manageTeam: components["schemas"]["ProjectPermission"];
+            needsReason: boolean;
+            proposeAllocation: components["schemas"]["ProjectPermission"];
+            raiseRegister: components["schemas"]["ProjectPermission"];
+            restore?: null | components["schemas"]["ProjectPermission"];
+            reviewDates: components["schemas"]["ProjectPermission"];
+            runCoordination: components["schemas"]["ProjectPermission"];
+            setVisibility: boolean;
+            snooze: components["schemas"]["ProjectPermission"];
+            transitions: string[];
+        };
+        ProjectPmRef: {
+            displayName: string;
+            /** Format: uuid */
+            id: string;
+        };
+        ProjectRow: {
+            /** Format: int32 */
+            attentionCritical: number;
+            /** Format: int32 */
+            attentionWarning: number;
+            /** Format: int32 */
+            blockedTasks: number;
+            client: components["schemas"]["ProjectClientRef"];
+            computedHealth: string;
+            /** Format: date-time */
+            healthOverrideAt: null | string;
+            healthOverrideNote: null | string;
+            healthReasons: null | components["schemas"]["JsonElement"];
+            /** Format: int32 */
+            highIssues: number;
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            lastActivityAt: null | string;
+            myRoles: string[];
+            name: string;
+            nextMilestone: null | components["schemas"]["ProjectMilestoneRef"];
+            nextSubmission: null | components["schemas"]["ProjectMilestoneRef"];
+            office: string;
+            /** Format: uuid */
+            officeId: string;
+            /** Format: int32 */
+            overdueDecisions: number;
+            /** Format: int32 */
+            overdueTasks: number;
+            overrideActive: boolean;
+            overrideBy: null | string;
+            phase: null | string;
+            /** Format: uuid */
+            phaseId: null | string;
+            pm: components["schemas"]["ProjectPmRef"];
+            priority: string;
+            /** Format: int32 */
+            progressPct: null | number;
+            projectNumber: string;
+            /** Format: uuid */
+            projectTypeId: null | string;
+            reportedHealth: string;
+            starred: boolean;
+            /** Format: date */
+            startDate: null | string;
+            status: string;
+            /** Format: date */
+            targetCompletionDate: null | string;
+            visibility: string;
+        };
+        ProjectSaved: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
         };
         ProjectTeamDiscipline: {
             code: string;
@@ -21102,6 +21401,13 @@ export interface components {
             /** Format: int32 */
             rowVersion: null | number;
             toStatus: string;
+        };
+        ProjectTransitioned: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
+            status: string;
         };
         PublishBody: {
             additionalTargets: null | components["schemas"]["TargetRef"][];
@@ -22334,6 +22640,11 @@ export interface components {
         SettingSaved: {
             key: string;
             value: components["schemas"]["JsonElement"];
+        };
+        SetupChecklist: {
+            everyDisciplineHasLead: boolean;
+            everySubmissionHasDeliverable: boolean;
+            hasMilestone: boolean;
         };
         SkippedItem: {
             /** Format: uuid */

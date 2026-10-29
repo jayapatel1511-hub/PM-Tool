@@ -9,7 +9,7 @@ const { deliverableRow, deliverableState, deliverableList, deliverableDetail, de
 const { referenceData, referenceDeliverableType } = require('./me.fixture.cjs')
 
 const port = Number(process.env.DELIVERABLES_TEST_PORT ?? 7387)
-const civil = project.projectDisciplines[0]
+const civil = project.disciplines[0]
 const typeId = '00000000-0000-0000-0000-000000000030', createdId = '00000000-0000-0000-0000-0000000000e1', secondId = '00000000-0000-0000-0000-0000000000e2'
 const first = panelIds.deliverable
 const lead = { ...civil, code: 'CIV', colour: '#467762', isActive: true, leadUserId: me.id, leadName: 'Alex Chen' }

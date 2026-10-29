@@ -20,13 +20,13 @@ import { typedRequest } from '@/lib/api'
 import { useFlag, useMe } from '@/lib/auth'
 import { ago, fmtDate } from '@/lib/format'
 import { runtimeText, t, tv, type TextKey } from '@/lib/i18n'
-import type { ProjectRow } from '@/lib/types'
+import type { ProjectRow, ProjectStatusNoteData } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { ViewMenu } from '@/components/hub/views'
 import type { SavedViewKeys } from '@/gen/registry.gen'
 
-interface Row extends ProjectRow { officeId?: string; projectTypeId?: string; projectType?: string; overdueDeliverables?: number; office?: string; phase?: string; overrideBy?: string | null; overrideActive: boolean; trend: { weekEnding: string; computed?: string | null; reported?: string | null }[] }
-// The envelope and tiles are generated; the rows stay hand-typed until the Projects list row (their source) is a record.
+interface Row extends ProjectRow { statusNote?: ProjectStatusNoteData | null; projectType?: string; overdueDeliverables?: number; trend: { weekEnding: string; computed?: string | null; reported?: string | null }[] }
+// The envelope and tiles are generated; the rows are the Projects list row (their source) with the members Portfolio adds.
 type Portfolio = Omit<components['schemas']['PortfolioView'], 'projects'> & { projects: Row[] }
 
 const FILTERS = ['q', 'pmId', 'leadUnitId', 'disciplineId', 'clientId', 'officeId', 'status', 'phaseId', 'health', 'computedHealth', 'projectTypeId', 'submissionWithinDays', 'mine', 'overdueDecisions'] as const satisfies readonly (SavedViewKeys['portfolio'] | 'page' | 'panel' | 'draftAccessReason')[]

@@ -42,7 +42,7 @@ export function TimePage() {
   // The contract names these From, To, Scope and so on; the server binds query names without regard to case, so the lower-case names stay on the wire.
   const query: Record<string, string | null | undefined> = filters
   const q = useQuery({ queryKey: ['time', filters], queryFn: () => typedRequest('get', '/api/v1/time', { query }) })
-  const projects = useQuery({ queryKey: ['projects-pick', ''], queryFn: () => get<PageOf<{ id: string; projectNumber: string; name: string }>>('projects?pageSize=200') })
+  const projects = useQuery({ queryKey: ['projects-pick', ''], queryFn: () => typedRequest('get', '/api/v1/projects', { query: { PageSize: 200 } }) })
   const [adding, setAdding] = useState(false)
   const [editing, setEditing] = useState<Entry | null>(null)
   const [removing, setRemoving] = useState<Entry | null>(null)

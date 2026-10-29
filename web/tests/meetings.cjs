@@ -11,7 +11,7 @@ const { calendarEvent, calendarRange } = require('./calendar.fixture.cjs')
 
 const port = Number(process.env.MEETINGS_TEST_PORT ?? 7395)
 const id = (n) => `00000000-0000-0000-0000-${String(n).padStart(12, '0')}`
-const civil = project.projectDisciplines[0].id
+const civil = project.disciplines[0].id
 const m1 = id(901), m2 = id(902), newMeeting = id(903), a1 = id(911), a2 = id(912), newAction = id(913), event = id(921)
 
 // The project lets this caller run coordination and raise register items, and has one active discipline to own an action.

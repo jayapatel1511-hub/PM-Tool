@@ -12,11 +12,11 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { useReference } from '@/hooks/data'
-import { del, get, post, qs } from '@/lib/api'
+import { get, typedRequest } from '@/lib/api'
 import { useMe, useFlag } from '@/lib/auth'
 import { ago, fmtDate, relative } from '@/lib/format'
 import { t , runtimeText } from '@/lib/i18n'
-import type { Page as P, ProjectRow } from '@/lib/types'
+import type { ProjectRow } from '@/lib/types'
 import { accentOf, cn } from '@/lib/utils'
 import { CreateProjectDialog } from './CreateProject'
 import { ExportMenu } from '@/components/hub/export'
@@ -29,6 +29,15 @@ const DEFAULT_COLS: Col[] = ['client', 'pm', 'status', 'health', 'priority', 'du
 /** URL filters shown as removable tokens; scope (mine), grouping and sort are view choices, not filters. */
 const FILTERS = ['q', 'status', 'health', 'officeId', 'disciplineId', 'leadUnitId', 'includeArchived', 'ids', 'computedHealth'] as const satisfies readonly (SavedViewKeys['projects'] | 'page' | 'panel' | 'draftAccessReason')[]
 type ProjectCol = Column<ProjectRow> & { sortKey?: string; clearsSort?: boolean }
+/** The page's URL filters (and the scope and page size) as the list's query; the server reads names without regard to case and ignores the rest. */
+const projectQuery = (p: Record<string, string | boolean | number>) => ({
+  Q: str(p.q), Status: str(p.status), PmId: str(p.pmId), ClientId: str(p.clientId), OfficeId: str(p.officeId), PhaseId: str(p.phaseId), DisciplineId: str(p.disciplineId), Health: str(p.health),
+  ProjectTypeId: str(p.projectTypeId), IncludeArchived: flag(p.includeArchived), Mine: flag(p.mine), Starred: flag(p.starred), Priority: str(p.priority), Ids: str(p.ids), Sort: str(p.sort),
+  Page: num(p.page), PageSize: num(p.pageSize), SubmissionWithinDays: num(p.submissionWithinDays), ComputedHealth: str(p.computedHealth), LeadUnitId: str(p.leadUnitId),
+})
+const str = (v: unknown) => (typeof v === 'string' && v !== '' ? v : undefined)
+const flag = (v: unknown) => (v === true || v === 'true' ? true : v === 'false' ? false : undefined)
+const num = (v: unknown) => (v === '' || v == null || Number.isNaN(Number(v)) ? undefined : Number(v))
 const href = (r: ProjectRow) => `/projects/${encodeURIComponent(r.projectNumber)}`
 
 /** Project list and grouped board presentation (§13.2, FR-021, §36.2 FR-VIS-03). Filters live in the URL. */
@@ -46,7 +55,7 @@ export function ProjectListPage() {
   const filters = Object.fromEntries(sp.entries())
   const mine = sp.get('mine') !== 'false'
   const params = { ...filters, mine, pageSize: 200 }
-  const list = useQuery({ queryKey: ['projects', params], queryFn: () => get<P<ProjectRow>>(`projects${qs(params)}`) })
+  const list = useQuery({ queryKey: ['projects', params], queryFn: async () => (await typedRequest('get', '/api/v1/projects', { query: projectQuery(params) })) as { items: ProjectRow[] } })
   const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
   const toggleCol = (c: Col) => { const n = cols.includes(c) ? cols.filter((x) => x !== c) : [...cols, c]; setCols(n); localStorage.setItem('hub.projectCols', JSON.stringify(n)) }
   const groupBy = sp.get('group') ?? 'status'
@@ -278,7 +287,7 @@ function ProjectCard({ r, onStar }: { r: ProjectRow; onStar: () => void }) {
 function StarButton({ row, onDone }: { row: ProjectRow; onDone: () => void }) {
   return (
     <button type="button" aria-label={row.starred ? t('projects.unstar') : t('projects.star')} aria-pressed={row.starred}
-      onClick={async (e) => { e.stopPropagation(); await (row.starred ? del(`projects/${row.id}/star`) : post(`projects/${row.id}/star`)); onDone() }}
+      onClick={async (e) => { e.stopPropagation(); await typedRequest(row.starred ? 'delete' : 'post', '/api/v1/projects/{id}/star', { params: { id: row.id } }); onDone() }}
       className={cn('grid size-(--control-row-h) shrink-0 place-items-center rounded-md hover:bg-secondary', row.starred ? 'text-warn' : 'text-muted-foreground')}>
       <Star className={cn('size-4', row.starred && 'fill-current')} />
     </button>

@@ -12,7 +12,7 @@ const { readinessWindow, windowConstraint, readyOutput, readinessAssessment, rea
   readinessConstraintRow, readinessPackageRef, readinessPrerequisiteRow } = require('./readiness.fixture.cjs')
 
 const port = Number(process.env.READINESS_TEST_PORT ?? 7392)
-const civil = project.projectDisciplines[0]
+const civil = project.disciplines[0]
 const id = n => `00000000-0000-0000-0000-${String(n).padStart(12, '0')}`
 const taskId = id(500), assessmentId = id(501), constraintId = id(502), linkId = id(503), basisId = id(504), decisionId = id(505), packageId = id(506), successorId = id(507)
 const source = (request) => request.headers()['x-hub-source']

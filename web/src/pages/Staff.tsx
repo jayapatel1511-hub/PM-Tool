@@ -11,12 +11,11 @@ import { HealthPill, Key } from '@/components/hub/pills'
 import { Button } from '@/components/ui/button'
 import { useProject, useReference } from '@/hooks/data'
 import type { components } from '@/gen/api'
-import { get, qs, typedRequest } from '@/lib/api'
+import { get, typedRequest } from '@/lib/api'
 import { invalidateChange } from '@/lib/keys'
 import { useFlag, useMe } from '@/lib/auth'
 import { ago, fmtDate, shortDate, today } from '@/lib/format'
 import { runtimeText, t, tv, type TextKey } from '@/lib/i18n'
-import type { Page as PageOf, ProjectRow } from '@/lib/types'
 import { cn, type Accent } from '@/lib/utils'
 
 type StaffRow = components['schemas']['MyStaffPerson']
@@ -195,11 +194,11 @@ function Assignments({ person, scope, onChanged }: { person: StaffRow; scope?: s
 
 /** ASG-10: a supervisor adds a direct report to a Setup, Active or On Hold project they can view, as Team Member with a primary discipline. */
 function AssignDialog({ person, onClose }: { person: StaffRow; onClose: (ok: boolean) => void }) {
-  const projects = useQuery({ queryKey: ['projects', 'staffable'], queryFn: () => get<PageOf<ProjectRow> | ProjectRow[]>(`projects${qs({ status: 'Setup,Active,On Hold', pageSize: 200 })}`) })
+  const projects = useQuery({ queryKey: ['projects', 'staffable'], queryFn: () => typedRequest('get', '/api/v1/projects', { query: { Status: 'Setup,Active,On Hold', PageSize: 200 } }) })
   const [number, setNumber] = useState('')
   const [discipline, setDiscipline] = useState('')
   const detail = useProject(number || undefined)
-  const list: ProjectRow[] = Array.isArray(projects.data) ? projects.data : projects.data?.items ?? []
+  const list = projects.data?.items ?? []
   return (
     <ConfirmDialog open onOpenChange={(o) => !o && onClose(false)} title={t('staff.assignTitle', { name: person.displayName })} body={t('staff.assignBody')}
       confirmLabel={t('staff.assign')} busy={!number || !discipline}

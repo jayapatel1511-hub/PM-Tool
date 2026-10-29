@@ -1,8 +1,10 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Api.Features;
@@ -22,6 +24,56 @@ public static class ProjectEndpoints
     public sealed record Closeout(string? Tasks, string? Deliverables, string? Decisions, string? Registers);
     public sealed record LinkBody(string Title, string Url, string? LinkType);
 
+    /// The new project's id and the number as stored.
+    public sealed record ProjectCreated(Guid Id, string ProjectNumber);
+    /// An edit's answer: the project and its new row version.
+    public sealed record ProjectSaved(Guid Id, int RowVersion);
+    /// A lifecycle move's answer: the project, its new status and its new row version.
+    public sealed record ProjectTransitioned(Guid Id, string Status, int RowVersion);
+
+    /// A milestone as the list shows it (the next one and the next submission).
+    public sealed record ProjectMilestoneRef(Guid Id, string Key, string Name, DateOnly? Date, string? Status);
+    public sealed record ProjectClientRef(Guid Id, string Name);
+    public sealed record ProjectPmRef(Guid Id, string DisplayName);
+    /// One row of the project list (§13.2). `HealthReasons` is the evaluator's stored document, passed through.
+    public sealed record ProjectRow(Guid Id, string ProjectNumber, string Name, string Status, string Priority, string Visibility, DateOnly? StartDate, DateOnly? TargetCompletionDate,
+        ProjectClientRef Client, ProjectPmRef Pm, Guid OfficeId, string Office, Guid? PhaseId, string? Phase, Guid? ProjectTypeId, string ComputedHealth, string ReportedHealth,
+        JsonElement? HealthReasons, string? HealthOverrideNote, DateTimeOffset? HealthOverrideAt, string? OverrideBy, bool OverrideActive, int? ProgressPct, int OverdueTasks, int BlockedTasks,
+        int OverdueDecisions, int HighIssues, int AttentionCritical, int AttentionWarning, ProjectMilestoneRef? NextMilestone, ProjectMilestoneRef? NextSubmission,
+        IReadOnlyList<string> MyRoles, bool Starred, DateTimeOffset? LastActivityAt);
+
+    /// A permission verdict with the reason it was refused, null when allowed.
+    public sealed record ProjectPermission(bool Ok, string? Reason);
+    public sealed record ProjectDisciplineRow(Guid Id, Guid DisciplineId, string Name, string Code, string Colour, Guid? LeadUserId, bool IsActive, int RowVersion, string? LeadName);
+    public sealed record ProjectHeaderMilestone(Guid Id, string Key, string Name, DateOnly? Date, string MilestoneType, bool IsComplete, int Deliverables, string? Status);
+    /// `Reasons` and `Inputs` are the evaluator's stored documents, passed through.
+    public sealed record ProjectHealth(string Computed, string Reported, bool OverrideActive, string? HealthOverride, string? HealthOverrideNote, string? OverrideBy, DateTimeOffset? HealthOverrideAt,
+        DateTimeOffset? HealthOverrideExpiresAt, JsonElement? Reasons, JsonElement? Inputs, DateTimeOffset? EvaluatedAt);
+    public sealed record ProjectFollowState(string Level, string Source);
+    public sealed record SetupChecklist(bool HasMilestone, bool EveryDisciplineHasLead, bool EverySubmissionHasDeliverable);
+    /// `Restore` is sent only while `flag.show_deleted` is on (FR-RCV-01), so the block is unchanged with it off.
+    public sealed record ProjectPermissions(ProjectPermission Edit, ProjectPermission ManageTeam, ProjectPermission ManageMilestones, ProjectPermission HealthOverride, ProjectPermission Comment,
+        ProjectPermission RaiseRegister, ProjectPermission RunCoordination, ProjectPermission CreateEvent, ProjectPermission EnterTime, ProjectPermission ProposeAllocation, ProjectPermission Snooze,
+        ProjectPermission ManageExternalParties, ProjectPermission ReviewDates, ProjectPermission CaptureWeeklyPlan, ProjectPermission CreateSubmission, IReadOnlyList<Guid> CreateTaskIn,
+        IReadOnlyList<Guid> CreateDeliverableIn, IReadOnlyList<Guid> CreateBasisIn, IReadOnlyList<Guid> AssignBasisIn, IReadOnlyList<Guid> LeadOf, bool IsPm, IReadOnlyList<string> Transitions,
+        bool ChangeNumber, bool SetVisibility, bool NeedsReason, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] ProjectPermission? Restore = null);
+    /// The project header (§12.1, P-09). `StatusNote` and `LatestPlanned` are sent only while `flag.project_status_note` and `flag.schedule_baseline` are on (and the planned date is past the target).
+    public sealed record ProjectDetail(Guid Id, string ProjectNumber, string Name, Guid ClientId, string? ClientReference, Guid ProjectManagerId, string PmName, Guid OfficeId, Guid? ProjectTypeId,
+        string? Description, string? Location, string Status, Guid? PhaseId, DateOnly? StartDate, DateOnly? TargetCompletionDate, string Priority, string Visibility, string? InternalNotes,
+        string? CoordinationDay, bool AllowViewerComments, DateTimeOffset? LastCoordinationReviewedAt, string? LastCoordinationReviewedBy, DateTimeOffset? StatusChangedAt, DateTimeOffset? ActivatedAt,
+        DateTimeOffset? CompletedAt, DateTimeOffset? ArchivedAt, Guid? CreatedFromTemplateId, int? TemplateVersion, int RowVersion, string? TemplateName, string Client, string Office, string? Phase,
+        IReadOnlyList<DocumentLinkEndpoints.LinkResponse> Links, IReadOnlyList<ProjectDisciplineRow> Disciplines, ProjectHealth Health, int? ProgressPct, ProjectHeaderMilestone? NextMilestone,
+        ProjectHeaderMilestone? NextSubmission, IReadOnlyList<string> MyRoles, ProjectFollowState? Follow, bool Starred, SetupChecklist? SetupChecklist, bool SuggestArchive, int? EditWindowDaysLeft,
+        ProjectPermissions Permissions, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] ProjectStatusNote.NoteView? StatusNote = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] Evaluator.PlannedTarget? LatestPlanned = null);
+
+    /// An open item the closeout preview lists.
+    public sealed record CloseoutItem(Guid Id, string Key, string Name, string Status);
+    public sealed record CloseoutView(string Status, int OpenTasks, IReadOnlyList<CloseoutItem> Tasks, IReadOnlyList<CloseoutItem> Deliverables, IReadOnlyList<CloseoutItem> Decisions, int OpenRegisterItems);
+    /// The days an On Hold project was held and the work whose dates fell in them (E-05); no window when there is nothing to review.
+    public sealed record DateReviewWindow(DateOnly HeldFrom, DateOnly ResumedOn, int Days);
+    public sealed record DateReviewView(DateReviewWindow? Window, IReadOnlyList<TaskQueries.Row> Tasks, IReadOnlyList<DeliverableEndpoints.DeliverableRow> Deliverables);
+
     public static void Map(RouteGroupBuilder api)
     {
         api.MapGet("/projects", List);
@@ -31,28 +83,28 @@ public static class ProjectEndpoints
         api.MapGet("/projects/{id:guid}/closeout", CloseoutPreview);
         api.MapPost("/projects/{id:guid}/transition", Transition);
         api.MapGet("/projects/{id:guid}/date-review", DateReview);
-        api.MapPost("/projects/{id:guid}/star", async (Guid id, Access access, HubDb db, CurrentUser me, TimeProvider clock) =>
+        api.MapPost("/projects/{id:guid}/star", async Task<NoContent> (Guid id, Access access, HubDb db, CurrentUser me, TimeProvider clock) =>
         {
             await access.Project(id, track: false);
             if (!await db.ProjectStars.AnyAsync(s => s.ProjectId == id && s.UserId == me.Id))
                 db.ProjectStars.Add(new ProjectStar { ProjectId = id, UserId = me.Id, CreatedAt = clock.GetUtcNow() });
             await db.SaveChangesAsync();
-            return Results.NoContent();
+            return TypedResults.NoContent();
         });
-        api.MapDelete("/projects/{id:guid}/star", async (Guid id, HubDb db, CurrentUser me) =>
+        api.MapDelete("/projects/{id:guid}/star", async Task<NoContent> (Guid id, HubDb db, CurrentUser me) =>
         {
             await db.ProjectStars.Where(s => s.ProjectId == id && s.UserId == me.Id).ExecuteDeleteAsync();
-            return Results.NoContent();
+            return TypedResults.NoContent();
         });
         // Header links are document links on the project (§12.1, §12.7); the PM maintains them.
-        api.MapPost("/projects/{id:guid}/links", async (Guid id, LinkBody body, Access access, HubDb db, TimeProvider clock) =>
+        api.MapPost("/projects/{id:guid}/links", async Task<Created<DocumentLinkEndpoints.LinkResponse>> (Guid id, LinkBody body, Access access, HubDb db, TimeProvider clock) =>
         {
             var (p, ctx) = await access.Project(id);
             Access.Demand(Permissions.EditProject(access.Actor, ctx));
             var link = await DocumentLinkEndpoints.Add(db, id, ItemType.Project, id, p.ProjectNumber, new(body.Url, body.Title, body.LinkType), access.Me.Id, clock.GetUtcNow());
-            return Results.Created($"/api/v1/links/{link.Id}", new { link.Id, link.Title, link.Url, link.LinkType, link.RowVersion });
+            return TypedResults.Created($"/api/v1/links/{link.Id}", new DocumentLinkEndpoints.LinkResponse(link.Id, link.Title, link.Url, link.LinkType, link.RowVersion));
         });
-        api.MapDelete("/projects/{id:guid}/links/{linkId:guid}", async (Guid id, Guid linkId, Access access, HubDb db, TimeProvider clock, HttpContext http) =>
+        api.MapDelete("/projects/{id:guid}/links/{linkId:guid}", async Task<NoContent> (Guid id, Guid linkId, Access access, HubDb db, TimeProvider clock, HttpContext http) =>
         {
             var (p, ctx) = await access.Project(id);
             Access.Demand(Permissions.EditProject(access.Actor, ctx));
@@ -62,7 +114,7 @@ public static class ProjectEndpoints
             link.DeletedBy = access.Me.Id;
             link.AuditKey = p.ProjectNumber;
             await db.SaveChangesAsync();
-            return Results.NoContent();
+            return TypedResults.NoContent();
         });
     }
 
@@ -72,15 +124,22 @@ public static class ProjectEndpoints
         Guid? ProjectTypeId, bool? IncludeArchived, bool? Mine, bool? Starred, string? Priority, string? Ids, string? Sort, int? Page, int? PageSize, int? SubmissionWithinDays,
         string? ComputedHealth = null, Guid? LeadUnitId = null);
 
-    static async Task<object> List([AsParameters] ProjectQuery f, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock)
+    static async Task<Ok<Page<ProjectRow>>> List([AsParameters] ProjectQuery f, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock)
     {
         var items = await Sorted(f, access, db, me, store, clock);
         var (pg, size) = Http.Paging(f.Page, f.PageSize ?? 200);
-        return new Page<object>(items.Skip((pg - 1) * size).Take(size).ToList(), pg, size, items.Count, f.Sort);
+        return TypedResults.Ok(new Page<ProjectRow>(items.Skip((pg - 1) * size).Take(size).ToList(), pg, size, items.Count, f.Sort));
     }
 
+    sealed record ListState(string ComputedHealth, string HealthReasons, int? ProgressPct, int OverdueTasks, int BlockedTasks, int OverdueDecisions, int HighIssues, int AttentionCritical,
+        int AttentionWarning, Guid? NextMilestoneId, Guid? NextSubmissionMilestoneId);
+    sealed record ListSource(Guid Id, string ProjectNumber, string Name, string Status, string Priority, string Visibility, DateOnly? StartDate, DateOnly? TargetCompletionDate, Guid ClientId,
+        Guid OfficeId, Guid? PhaseId, Guid? ProjectTypeId, Guid ProjectManagerId, string? HealthOverride, string? HealthOverrideNote, DateTimeOffset? HealthOverrideAt,
+        DateTimeOffset? HealthOverrideExpiresAt, string? Client, string? Office, string? Phase, string? Pm, string? OverrideBy, ListState? State, List<string>? MyRoles, int Leads,
+        bool Starred, DateTimeOffset? LastActivityAt);
+
     /// The project list's rows in list order, unpaged (the list pages them; exports take them all).
-    public static async Task<List<object>> Sorted(ProjectQuery f, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock)
+    public static async Task<List<ProjectRow>> Sorted(ProjectQuery f, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock)
     {
         var (q, status, pmId, clientId, officeId, phaseId, disciplineId, health, projectTypeId, includeArchived, mine, starred, priority, ids, sort, _, _, submissionWithinDays, computedHealth, leadUnitId) = f;
         var s = await store.Get(db);
@@ -110,26 +169,24 @@ public static class ProjectEndpoints
             query = lead == Guid.Empty ? query.Where(p => p.LeadUnitId == null) : query.Where(p => p.LeadUnitId != null && descendants.Contains(p.LeadUnitId.Value));
         }
 
-        var rows = await query.Select(p => new
-        {
+        var rows = await query.Select(p => new ListSource(
             p.Id, p.ProjectNumber, p.Name, p.Status, p.Priority, p.Visibility, p.StartDate, p.TargetCompletionDate, p.ClientId, p.OfficeId, p.PhaseId,
-            p.ProjectTypeId, p.ProjectManagerId, p.HealthOverride, p.HealthOverrideNote, p.HealthOverrideAt, p.HealthOverrideExpiresAt, p.CreatedAt,
-            Client = db.Clients.Where(x => x.Id == p.ClientId).Select(x => x.Name).FirstOrDefault(),
-            Office = db.Offices.Where(x => x.Id == p.OfficeId).Select(x => x.Name).FirstOrDefault(),
-            Phase = db.Phases.Where(x => x.Id == p.PhaseId).Select(x => x.Name).FirstOrDefault(),
-            Pm = db.Users.Where(x => x.Id == p.ProjectManagerId).Select(x => x.DisplayName).FirstOrDefault(),
-            OverrideBy = db.Users.Where(x => x.Id == p.HealthOverrideBy).Select(x => x.DisplayName).FirstOrDefault(),
-            State = db.ProjectStates.Where(x => x.ProjectId == p.Id).Select(x => new { x.ComputedHealth, x.HealthReasons, x.ProgressPct, x.OverdueTasks, x.BlockedTasks,
-                x.OverdueDecisions, x.HighIssues, x.AttentionCritical, x.AttentionWarning, x.NextMilestoneId, x.NextSubmissionMilestoneId }).FirstOrDefault(),
-            MyRoles = db.ProjectMembers.Where(m => m.ProjectId == p.Id && m.UserId == me.Id && m.RemovedAt == null).Select(m => m.Roles).FirstOrDefault(),
-            Leads = db.ProjectDisciplines.Count(x => x.ProjectId == p.Id && x.LeadUserId == me.Id),
-            Starred = db.ProjectStars.Any(x => x.ProjectId == p.Id && x.UserId == me.Id),
-            LastActivityAt = db.ActivityLog.Where(a => a.ProjectId == p.Id).Max(a => (DateTimeOffset?)a.OccurredAt),
-        }).Take(5000).ToListAsync();
+            p.ProjectTypeId, p.ProjectManagerId, p.HealthOverride, p.HealthOverrideNote, p.HealthOverrideAt, p.HealthOverrideExpiresAt,
+            db.Clients.Where(x => x.Id == p.ClientId).Select(x => x.Name).FirstOrDefault(),
+            db.Offices.Where(x => x.Id == p.OfficeId).Select(x => x.Name).FirstOrDefault(),
+            db.Phases.Where(x => x.Id == p.PhaseId).Select(x => x.Name).FirstOrDefault(),
+            db.Users.Where(x => x.Id == p.ProjectManagerId).Select(x => x.DisplayName).FirstOrDefault(),
+            db.Users.Where(x => x.Id == p.HealthOverrideBy).Select(x => x.DisplayName).FirstOrDefault(),
+            db.ProjectStates.Where(x => x.ProjectId == p.Id).Select(x => new ListState(x.ComputedHealth, x.HealthReasons, x.ProgressPct, x.OverdueTasks, x.BlockedTasks,
+                x.OverdueDecisions, x.HighIssues, x.AttentionCritical, x.AttentionWarning, x.NextMilestoneId, x.NextSubmissionMilestoneId)).FirstOrDefault(),
+            db.ProjectMembers.Where(m => m.ProjectId == p.Id && m.UserId == me.Id && m.RemovedAt == null).Select(m => m.Roles).FirstOrDefault(),
+            db.ProjectDisciplines.Count(x => x.ProjectId == p.Id && x.LeadUserId == me.Id),
+            db.ProjectStars.Any(x => x.ProjectId == p.Id && x.UserId == me.Id),
+            db.ActivityLog.Where(a => a.ProjectId == p.Id).Max(a => (DateTimeOffset?)a.OccurredAt))).Take(5000).ToListAsync();
 
         var msIds = rows.SelectMany(r => new[] { r.State?.NextMilestoneId, r.State?.NextSubmissionMilestoneId }).OfType<Guid>().Distinct().ToList();
         var ms = await db.Milestones.AsNoTracking().Where(m => msIds.Contains(m.Id))
-            .Select(m => new { m.Id, m.Key, m.Name, m.Date, Status = db.MilestoneStates.Where(x => x.MilestoneId == m.Id).Select(x => x.Status).FirstOrDefault() })
+            .Select(m => new ProjectMilestoneRef(m.Id, m.Key, m.Name, m.Date, db.MilestoneStates.Where(x => x.MilestoneId == m.Id).Select(x => x.Status).FirstOrDefault()))
             .ToDictionaryAsync(m => m.Id);
         var now = clock.GetUtcNow();
         var list = rows.Select(r =>
@@ -140,19 +197,17 @@ public static class ProjectEndpoints
             var sub = r.State?.NextSubmissionMilestoneId is { } ns && ms.TryGetValue(ns, out var m2) ? m2 : null;
             var roles = (r.MyRoles ?? []).ToList();
             if (r.Leads > 0) roles.Add("DisciplineLead");
-            return new
-            {
+            return new ProjectRow(
                 r.Id, r.ProjectNumber, r.Name, r.Status, r.Priority, r.Visibility, r.StartDate, r.TargetCompletionDate,
-                Client = new { Id = r.ClientId, Name = r.Client }, Pm = new { Id = r.ProjectManagerId, DisplayName = r.Pm },
-                r.OfficeId, r.Office, r.PhaseId, r.Phase, r.ProjectTypeId,
-                ComputedHealth = computed, ReportedHealth = reported, HealthReasons = J.El(r.State?.HealthReasons),
+                new(r.ClientId, r.Client!), new(r.ProjectManagerId, r.Pm!),
+                r.OfficeId, r.Office!, r.PhaseId, r.Phase, r.ProjectTypeId,
+                computed, reported, J.El(r.State?.HealthReasons),
                 r.HealthOverrideNote, r.HealthOverrideAt, r.OverrideBy,
-                OverrideActive = r.HealthOverride is not null && r.HealthOverrideExpiresAt > now && r.Status == ProjectStatus.Active,
-                ProgressPct = r.State?.ProgressPct, OverdueTasks = r.State?.OverdueTasks ?? 0, BlockedTasks = r.State?.BlockedTasks ?? 0,
-                OverdueDecisions = r.State?.OverdueDecisions ?? 0, HighIssues = r.State?.HighIssues ?? 0,
-                AttentionCritical = r.State?.AttentionCritical ?? 0, AttentionWarning = r.State?.AttentionWarning ?? 0,
-                NextMilestone = next, NextSubmission = sub, MyRoles = roles, r.Starred, r.LastActivityAt,
-            };
+                r.HealthOverride is not null && r.HealthOverrideExpiresAt > now && r.Status == ProjectStatus.Active,
+                r.State?.ProgressPct, r.State?.OverdueTasks ?? 0, r.State?.BlockedTasks ?? 0,
+                r.State?.OverdueDecisions ?? 0, r.State?.HighIssues ?? 0,
+                r.State?.AttentionCritical ?? 0, r.State?.AttentionWarning ?? 0,
+                next, sub, roles, r.Starred, r.LastActivityAt);
         }).ToList();
         var healths = Http.List(health);
         if (healths.Length > 0) list = list.Where(r => healths.Contains(r.ReportedHealth) || healths.Contains(r.ComputedHealth)).ToList();
@@ -162,7 +217,7 @@ public static class ProjectEndpoints
         if (submissionWithinDays is { } within) list = list.Where(r => r.NextSubmission?.Date is { } sd && sd >= today && sd.DayNumber - today.DayNumber <= within).ToList();
 
         // Default sort: starred first, then health severity (Red, Yellow, Green, Grey), then next milestone date (§13.2).
-        IEnumerable<dynamic> sorted = (sort ?? "").Split(':') switch
+        IEnumerable<ProjectRow> sorted = (sort ?? "").Split(':') switch
         {
             ["number", var dir] => dir == "desc" ? list.OrderByDescending(r => r.ProjectNumber) : list.OrderBy(r => r.ProjectNumber),
             ["name", var dir] => dir == "desc" ? list.OrderByDescending(r => r.Name) : list.OrderBy(r => r.Name),
@@ -177,20 +232,25 @@ public static class ProjectEndpoints
             ["submission", _] => list.OrderBy(r => Health.Severity(r.ReportedHealth)).ThenBy(r => r.NextSubmission?.Date ?? DateOnly.MaxValue),
             _ => list.OrderByDescending(r => r.Starred).ThenBy(r => Health.Severity(r.ReportedHealth)).ThenBy(r => r.NextMilestone?.Date ?? DateOnly.MaxValue).ThenBy(r => r.ProjectNumber),
         };
-        return sorted.Cast<object>().ToList();
+        return sorted.ToList();
     }
 
     // ---------- Create (FR-001, FR-002, AC-PRJ-01, AC-PRJ-02, Workflow 1) ----------
 
-    static async Task<IResult> Create(CreateBody body, Access access, HubDb db, SettingsStore store, TeamService team, CurrentUser me, TimeProvider clock, IServiceProvider sp)
+    sealed record ExistingProject(Guid Id, string ProjectNumber, string Name);
+    /// The 409 body's extra members: the project that already holds the number.
+    sealed record DuplicateNumber(Guid ExistingProjectId, string ExistingProjectNumber);
+    sealed record BatchedAssignments(Guid? UserId, int N);
+
+    static async Task<Created<ProjectCreated>> Create(CreateBody body, Access access, HubDb db, SettingsStore store, TeamService team, CurrentUser me, TimeProvider clock, IServiceProvider sp)
     {
         Access.Demand(Permissions.CreateProject(access.Actor));
         var s = await store.Get(db);
         var number = Check.Required(body.ProjectNumber, "projectNumber", 32);
         Check.That(Regex.IsMatch(number, s.ProjectNumberFormat), "projectNumber", "project.number_format");
-        if (await db.Projects.Where(p => p.ProjectNumber == number).Select(p => new { p.Id, p.ProjectNumber, p.Name }).FirstOrDefaultAsync() is { } dup)
+        if (await db.Projects.Where(p => p.ProjectNumber == number).Select(p => new ExistingProject(p.Id, p.ProjectNumber, p.Name)).FirstOrDefaultAsync() is { } dup)
             throw new ApiException(409, "duplicate_project_number", Text.Get("project.duplicate", dup.ProjectNumber, dup.Name),
-                new Dictionary<string, string[]> { ["projectNumber"] = [Text.Get("project.duplicate", dup.ProjectNumber, dup.Name)] }, new { existingProjectId = dup.Id, existingProjectNumber = dup.ProjectNumber });
+                new Dictionary<string, string[]> { ["projectNumber"] = [Text.Get("project.duplicate", dup.ProjectNumber, dup.Name)] }, new DuplicateNumber(dup.Id, dup.ProjectNumber));
         Check.That(await db.Clients.AnyAsync(c => c.Id == body.ClientId && c.IsActive), "clientId", "error.required");
         Check.That(await db.Offices.AnyAsync(o => o.Id == body.OfficeId && o.IsActive), "officeId", "error.required");
         if (body.ProjectTypeId is { } pt) Check.That(await db.ProjectTypes.AnyAsync(x => x.Id == pt), "projectTypeId", "error.not_found");
@@ -224,12 +284,12 @@ public static class ProjectEndpoints
             foreach (var hook in sp.GetServices<IProjectCreateHook>()) await hook.AfterCreate(p, body);
             return 0;
         });
-        return Results.Created($"/api/v1/projects/{p.Id}", new { p.Id, p.ProjectNumber });
+        return TypedResults.Created($"/api/v1/projects/{p.Id}", new ProjectCreated(p.Id, p.ProjectNumber));
     }
 
     // ---------- Read (project header §12.1, Setup checklist P-09) ----------
 
-    static async Task<object> Get(string idOrNumber, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock, EvaluationService eval)
+    static async Task<Ok<ProjectDetail>> Get(string idOrNumber, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock, EvaluationService eval)
     {
         var (p, ctx) = await access.ProjectByKeyOrId(idOrNumber, track: false);
         await eval.EnsureFresh(p.Id);
@@ -242,116 +302,91 @@ public static class ProjectEndpoints
         var names = await db.Users.Where(u => u.Id == p.ProjectManagerId || u.Id == p.HealthOverrideBy || u.Id == p.LastCoordinationReviewedBy)
             .ToDictionaryAsync(u => u.Id, u => u.IsActive ? u.DisplayName : u.DisplayName + " (Inactive)");
         var disciplines = await db.ProjectDisciplines.AsNoTracking().Where(d => d.ProjectId == p.Id).OrderBy(d => d.SortOrder)
-            .Select(d => new { d.Id, d.DisciplineId, d.Discipline!.Name, d.Discipline.Code, d.Discipline.Colour, d.LeadUserId, d.IsActive, d.RowVersion,
-                LeadName = db.Users.Where(u => u.Id == d.LeadUserId).Select(u => u.DisplayName).FirstOrDefault() }).ToListAsync();
+            .Select(d => new ProjectDisciplineRow(d.Id, d.DisciplineId, d.Discipline!.Name, d.Discipline.Code, d.Discipline.Colour, d.LeadUserId, d.IsActive, d.RowVersion,
+                db.Users.Where(u => u.Id == d.LeadUserId).Select(u => u.DisplayName).FirstOrDefault())).ToListAsync();
         var milestones = await db.Milestones.AsNoTracking().Where(m => m.ProjectId == p.Id && !m.IsCancelled)
-            .Select(m => new { m.Id, m.Key, m.Name, m.Date, m.MilestoneType, m.IsComplete,
-                Deliverables = db.Deliverables.Count(d => d.MilestoneId == m.Id && d.Status != DeliverableStatus.Cancelled),
-                Status = db.MilestoneStates.Where(x => x.MilestoneId == m.Id).Select(x => x.Status).FirstOrDefault() }).ToListAsync();
+            .Select(m => new ProjectHeaderMilestone(m.Id, m.Key, m.Name, m.Date, m.MilestoneType, m.IsComplete,
+                db.Deliverables.Count(d => d.MilestoneId == m.Id && d.Status != DeliverableStatus.Cancelled),
+                db.MilestoneStates.Where(x => x.MilestoneId == m.Id).Select(x => x.Status).FirstOrDefault())).ToListAsync();
         var next = milestones.Where(m => !m.IsComplete && m.Date != null).OrderBy(m => m.Date).FirstOrDefault();
         var nextSub = milestones.Where(m => !m.IsComplete && m.Date != null && MilestoneType.IsSubmission(m.MilestoneType)).OrderBy(m => m.Date).FirstOrDefault();
-        var follow = await db.Follows.AsNoTracking().Where(f => f.ProjectId == p.Id && f.UserId == me.Id).Select(f => new { f.Level, f.Source }).FirstOrDefaultAsync();
+        var follow = await db.Follows.AsNoTracking().Where(f => f.ProjectId == p.Id && f.UserId == me.Id).Select(f => new ProjectFollowState(f.Level, f.Source)).FirstOrDefaultAsync();
         var myRoles = ctx.MemberRoles.ToList();
         if (ctx.LeadDisciplineIds.Count > 0) myRoles.Add("DisciplineLead");
         var today = clock.Today(s);
         var completeFor = p.CompletedAt is { } ca ? today.DayNumber - Clock.LocalDate(ca, s).DayNumber : 0;
-        var result = new
-        {
-            p.Id, p.ProjectNumber, p.Name, p.ClientId, p.ClientReference, p.ProjectManagerId, PmName = names.GetValueOrDefault(p.ProjectManagerId),
-            p.OfficeId, p.ProjectTypeId, p.Description, p.Location, p.Status, p.PhaseId, p.StartDate, p.TargetCompletionDate, p.Priority, p.Visibility,
-            InternalNotes = ctx.IsMember || a.Admin || a.Executive || a.Supervisor ? p.InternalNotes : null,
-            p.CoordinationDay, p.AllowViewerComments, p.LastCoordinationReviewedAt,
-            LastCoordinationReviewedBy = p.LastCoordinationReviewedBy is { } rb ? names.GetValueOrDefault(rb) : null,
-            p.StatusChangedAt, p.ActivatedAt, p.CompletedAt, p.ArchivedAt, p.CreatedFromTemplateId, p.TemplateVersion, p.RowVersion,
-            TemplateName = p.CreatedFromTemplateId is { } tid ? await db.Templates.Where(x => x.Id == tid).Select(x => x.Name).FirstOrDefaultAsync() : null, // FR-008
-            Client = await db.Clients.Where(c => c.Id == p.ClientId).Select(c => c.Name).FirstOrDefaultAsync(),
-            Office = await db.Offices.Where(o => o.Id == p.OfficeId).Select(o => o.Name).FirstOrDefaultAsync(),
-            Phase = await db.Phases.Where(x => x.Id == p.PhaseId).Select(x => x.Name).FirstOrDefaultAsync(),
-            Links = await DocumentLinkEndpoints.Of(db, ItemType.Project, p.Id).Select(l => new { l.Id, l.Title, l.Url, l.LinkType, l.RowVersion }).ToListAsync(),
-            Disciplines = disciplines,
-            Health = new
-            {
-                Computed = computed, Reported = overrideActive ? p.HealthOverride : computed, OverrideActive = overrideActive,
-                p.HealthOverride, p.HealthOverrideNote, OverrideBy = p.HealthOverrideBy is { } hb ? names.GetValueOrDefault(hb) : null,
-                p.HealthOverrideAt, p.HealthOverrideExpiresAt,
-                Reasons = J.El(state?.HealthReasons),
-                Inputs = J.El(state?.Inputs),
-                EvaluatedAt = state?.EvaluatedAt,
-            },
-            ProgressPct = state?.ProgressPct,
-            NextMilestone = next, NextSubmission = nextSub,
-            MyRoles = myRoles, Follow = follow,
-            Starred = await db.ProjectStars.AnyAsync(x => x.ProjectId == p.Id && x.UserId == me.Id),
-            SetupChecklist = p.Status == ProjectStatus.Setup ? new
-            {
-                HasMilestone = milestones.Count > 0,
-                EveryDisciplineHasLead = disciplines.Where(d => d.IsActive).All(d => d.LeadUserId != null),
-                EverySubmissionHasDeliverable = milestones.Where(m => MilestoneType.IsSubmission(m.MilestoneType)).All(m => m.Deliverables > 0),
-            } : null,
-            SuggestArchive = p.Status == ProjectStatus.Complete && completeFor > s.CompleteProjectEditWindowDays,
-            EditWindowDaysLeft = p.Status == ProjectStatus.Complete ? Math.Max(0, s.CompleteProjectEditWindowDays - completeFor) : (int?)null,
-            Permissions = WithRestore(new
-            {
-                Edit = Perm(Permissions.EditProject(a, ctx), p.Status),
-                ManageTeam = Perm(Permissions.ManageTeam(a, ctx), p.Status),
-                ManageMilestones = Perm(Permissions.ManageMilestones(a, ctx), p.Status),
-                HealthOverride = Perm(Permissions.HealthOverride(a, ctx), p.Status),
-                Comment = Perm(Permissions.Comment(a, ctx), p.Status),
-                RaiseRegister = Perm(Permissions.RaiseRegisterItem(a, ctx), p.Status),
-                RunCoordination = Perm(Permissions.RunCoordination(a, ctx), p.Status),
-                CreateEvent = Perm(Permissions.CreateProjectEvent(a, ctx), p.Status),
-                EnterTime = Perm(Permissions.EnterTime(a, ctx), p.Status),
-                // FR-FIG-08 decisions 1, 2, 3, 5, 6, 9 and 10: each flag is the function its endpoint enforces.
-                ProposeAllocation = Perm(Permissions.ProposeAllocation(a, ctx), p.Status),
-                Snooze = Perm(Permissions.Snooze(a, ctx), p.Status),
-                ManageExternalParties = Perm(Permissions.ManageExternalParties(a, ctx), p.Status),
-                ReviewDates = Perm(Permissions.ReviewDates(a, ctx), p.Status),
-                CaptureWeeklyPlan = Perm(Permissions.ManageCoordination(a, ctx, Guid.Empty), p.Status),
-                CreateSubmission = Perm(Permissions.CreateSubmission(a, ctx), p.Status),
-                CreateTaskIn = disciplines.Where(d => d.IsActive && Permissions.CreateTask(a, ctx, d.Id)).Select(d => d.Id),
-                CreateDeliverableIn = disciplines.Where(d => d.IsActive && Permissions.CreateDeliverable(a, ctx, d.Id)).Select(d => d.Id),
-                CreateBasisIn = disciplines.Where(d => d.IsActive && Permissions.CreateBasis(a, ctx, d.Id, a.Id, null).Ok).Select(d => d.Id),
-                AssignBasisIn = disciplines.Where(d => d.IsActive && Permissions.CreateBasis(a, ctx, d.Id, Guid.Empty, null).Ok).Select(d => d.Id),
-                LeadOf = ctx.LeadDisciplineIds,
-                IsPm = Permissions.IsPM(a, ctx),
-                Transitions = Workflow.ProjectNext(p.Status).Where(to => Permissions.ChangeProjectStatus(a, ctx, to).Ok),
-                ChangeNumber = a.Admin,
-                SetVisibility = s.RestrictedProjectsEnabled && Permissions.EditProject(a, ctx).Ok,
-                NeedsReason = ProjectStatus.NeedsCorrectionReason(p.Status),
-            }, s.IsFlagOn(RecoveryEndpoints.Flag) ? Perm(Permissions.RestoreItem(a, ctx), p.Status) : null),
-        };
-        if (!s.IsFlagOn("schedule_baseline") && !s.IsFlagOn("project_status_note")) return result;
-        var json = JsonSerializer.SerializeToNode(result, JsonOpts.Web)!.AsObject();
-        if (s.IsFlagOn("project_status_note")) json["statusNote"] = JsonSerializer.SerializeToNode(await ProjectStatusNote.Read(p, db, clock), JsonOpts.Web);
+        var note = s.IsFlagOn("project_status_note") ? await ProjectStatusNote.Read(p, db, clock) : null;
+        Evaluator.PlannedTarget? latest = null;
         if (s.IsFlagOn("schedule_baseline"))
-        {
-            var latest = Evaluator.LatestPlanned(p.Status, p.TargetCompletionDate,
+            latest = Evaluator.LatestPlanned(p.Status, p.TargetCompletionDate,
                 milestones.Select(m => new DateItem(m.Id, m.Key, null, m.Date, m.IsComplete))
                     .Concat(await db.Deliverables.AsNoTracking().Where(d => d.ProjectId == p.Id)
                         .Select(d => new DateItem(d.Id, d.Key, d.StartDate, d.DueDate,
                             d.Status == DeliverableStatus.Issued || d.Status == DeliverableStatus.Accepted || d.Status == DeliverableStatus.Cancelled)).ToListAsync()));
-            if (latest is not null) json["latestPlanned"] = JsonSerializer.SerializeToNode(latest, JsonOpts.Web);
-        }
-        return json;
+        return TypedResults.Ok(new ProjectDetail(
+            p.Id, p.ProjectNumber, p.Name, p.ClientId, p.ClientReference, p.ProjectManagerId, names.GetValueOrDefault(p.ProjectManagerId)!,
+            p.OfficeId, p.ProjectTypeId, p.Description, p.Location, p.Status, p.PhaseId, p.StartDate, p.TargetCompletionDate, p.Priority, p.Visibility,
+            ctx.IsMember || a.Admin || a.Executive || a.Supervisor ? p.InternalNotes : null,
+            p.CoordinationDay, p.AllowViewerComments, p.LastCoordinationReviewedAt,
+            p.LastCoordinationReviewedBy is { } rb ? names.GetValueOrDefault(rb) : null,
+            p.StatusChangedAt, p.ActivatedAt, p.CompletedAt, p.ArchivedAt, p.CreatedFromTemplateId, p.TemplateVersion, p.RowVersion,
+            p.CreatedFromTemplateId is { } tid ? await db.Templates.Where(x => x.Id == tid).Select(x => x.Name).FirstOrDefaultAsync() : null, // FR-008
+            (await db.Clients.Where(c => c.Id == p.ClientId).Select(c => c.Name).FirstOrDefaultAsync())!,
+            (await db.Offices.Where(o => o.Id == p.OfficeId).Select(o => o.Name).FirstOrDefaultAsync())!,
+            await db.Phases.Where(x => x.Id == p.PhaseId).Select(x => x.Name).FirstOrDefaultAsync(),
+            await DocumentLinkEndpoints.Of(db, ItemType.Project, p.Id).Select(l => new DocumentLinkEndpoints.LinkResponse(l.Id, l.Title, l.Url, l.LinkType, l.RowVersion)).ToListAsync(),
+            disciplines,
+            new ProjectHealth(computed, overrideActive ? p.HealthOverride! : computed, overrideActive, p.HealthOverride, p.HealthOverrideNote,
+                p.HealthOverrideBy is { } hb ? names.GetValueOrDefault(hb) : null, p.HealthOverrideAt, p.HealthOverrideExpiresAt, J.El(state?.HealthReasons), J.El(state?.Inputs), state?.EvaluatedAt),
+            state?.ProgressPct,
+            next, nextSub,
+            myRoles, follow,
+            await db.ProjectStars.AnyAsync(x => x.ProjectId == p.Id && x.UserId == me.Id),
+            p.Status == ProjectStatus.Setup ? new SetupChecklist(
+                milestones.Count > 0,
+                disciplines.Where(d => d.IsActive).All(d => d.LeadUserId != null),
+                milestones.Where(m => MilestoneType.IsSubmission(m.MilestoneType)).All(m => m.Deliverables > 0)) : null,
+            p.Status == ProjectStatus.Complete && completeFor > s.CompleteProjectEditWindowDays,
+            p.Status == ProjectStatus.Complete ? Math.Max(0, s.CompleteProjectEditWindowDays - completeFor) : null,
+            new ProjectPermissions(
+                Perm(Permissions.EditProject(a, ctx), p.Status),
+                Perm(Permissions.ManageTeam(a, ctx), p.Status),
+                Perm(Permissions.ManageMilestones(a, ctx), p.Status),
+                Perm(Permissions.HealthOverride(a, ctx), p.Status),
+                Perm(Permissions.Comment(a, ctx), p.Status),
+                Perm(Permissions.RaiseRegisterItem(a, ctx), p.Status),
+                Perm(Permissions.RunCoordination(a, ctx), p.Status),
+                Perm(Permissions.CreateProjectEvent(a, ctx), p.Status),
+                Perm(Permissions.EnterTime(a, ctx), p.Status),
+                // FR-FIG-08 decisions 1, 2, 3, 5, 6, 9 and 10: each flag is the function its endpoint enforces.
+                Perm(Permissions.ProposeAllocation(a, ctx), p.Status),
+                Perm(Permissions.Snooze(a, ctx), p.Status),
+                Perm(Permissions.ManageExternalParties(a, ctx), p.Status),
+                Perm(Permissions.ReviewDates(a, ctx), p.Status),
+                Perm(Permissions.ManageCoordination(a, ctx, Guid.Empty), p.Status),
+                Perm(Permissions.CreateSubmission(a, ctx), p.Status),
+                disciplines.Where(d => d.IsActive && Permissions.CreateTask(a, ctx, d.Id)).Select(d => d.Id).ToList(),
+                disciplines.Where(d => d.IsActive && Permissions.CreateDeliverable(a, ctx, d.Id)).Select(d => d.Id).ToList(),
+                disciplines.Where(d => d.IsActive && Permissions.CreateBasis(a, ctx, d.Id, a.Id, null).Ok).Select(d => d.Id).ToList(),
+                disciplines.Where(d => d.IsActive && Permissions.CreateBasis(a, ctx, d.Id, Guid.Empty, null).Ok).Select(d => d.Id).ToList(),
+                ctx.LeadDisciplineIds.ToList(),
+                Permissions.IsPM(a, ctx),
+                Workflow.ProjectNext(p.Status).Where(to => Permissions.ChangeProjectStatus(a, ctx, to).Ok).ToList(),
+                a.Admin,
+                s.RestrictedProjectsEnabled && Permissions.EditProject(a, ctx).Ok,
+                ProjectStatus.NeedsCorrectionReason(p.Status),
+                s.IsFlagOn(RecoveryEndpoints.Flag) ? Perm(Permissions.RestoreItem(a, ctx), p.Status) : null),
+            note, latest));
     }
 
-    /// FR-RCV-01: the `restore` field exists only while `flag.show_deleted` is on (FR-DLV-08), so the block is unchanged with it off.
-    static object WithRestore(object permissions, object? restore)
-    {
-        if (restore is null) return permissions;
-        var o = JsonSerializer.SerializeToNode(permissions, JsonOpts.Web)!.AsObject();
-        o["restore"] = JsonSerializer.SerializeToNode(restore, JsonOpts.Web);
-        return o;
-    }
-
-    static object Perm(Allow a, string status) => new { a.Ok, Reason = a.Why is null ? null : Text.Get(a.Why, a.Arg ?? status) };
+    static ProjectPermission Perm(Allow a, string status) => new(a.Ok, a.Why is null ? null : Text.Get(a.Why, a.Arg ?? status));
 
     /// P-05 / AC-PRJ-06: edits to a Complete project are corrections that need a reason.
     public static void CorrectionReason(Project p, string? reason) { if (ProjectStatus.NeedsCorrectionReason(p.Status)) Check.Reason(reason); }
 
     // ---------- Edit (FR-003, P-07, FR-016) ----------
 
-    static async Task<IResult> Edit(Guid id, JsonElement body, HttpContext http, Access access, HubDb db, TeamService team, SettingsStore store, TimeProvider clock)
+    static async Task<Ok<ProjectSaved>> Edit(Guid id, JsonElement body, HttpContext http, Access access, HubDb db, TeamService team, SettingsStore store, TimeProvider clock)
     {
         var (p, ctx) = await access.Project(id);
         var patch = new Patch(body);
@@ -415,30 +450,30 @@ public static class ProjectEndpoints
         }
         await db.SaveChangesAsync();
         Http.ETag(http, p);
-        return Results.Ok(new { p.Id, p.RowVersion });
+        return TypedResults.Ok(new ProjectSaved(p.Id, p.RowVersion));
     }
 
     // ---------- Lifecycle (P-02..P-06, AC-PRJ-03..06, ASG-07, AC-NOT-07) ----------
 
-    static async Task<object> CloseoutPreview(Guid id, Access access, HubDb db)
+    static async Task<Ok<CloseoutView>> CloseoutPreview(Guid id, Access access, HubDb db)
     {
         var (p, _) = await access.Project(id, track: false);
         var tasks = await db.Tasks.AsNoTracking().Where(t => t.ProjectId == id && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled)
-            .OrderBy(t => t.Seq).Select(t => new { t.Id, t.Key, t.Name, t.Status }).ToListAsync();
+            .OrderBy(t => t.Seq).Select(t => new CloseoutItem(t.Id, t.Key, t.Name, t.Status)).ToListAsync();
         var deliverables = await db.Deliverables.AsNoTracking().Where(d => d.ProjectId == id && d.Status != DeliverableStatus.Issued && d.Status != DeliverableStatus.Accepted && d.Status != DeliverableStatus.Cancelled)
-            .OrderBy(d => d.Seq).Select(d => new { d.Id, d.Key, d.Name, d.Status }).ToListAsync();
+            .OrderBy(d => d.Seq).Select(d => new CloseoutItem(d.Id, d.Key, d.Name, d.Status)).ToListAsync();
         var decisions = await db.Decisions.AsNoTracking().Where(d => d.ProjectId == id && (d.Status == DecisionStatus.Pending || d.Status == DecisionStatus.UnderReview || d.Status == DecisionStatus.Deferred))
-            .OrderBy(d => d.Seq).Select(d => new { d.Id, d.Key, Name = d.Subject, d.Status }).ToListAsync();
+            .OrderBy(d => d.Seq).Select(d => new CloseoutItem(d.Id, d.Key, d.Subject, d.Status)).ToListAsync();
         var registers = await db.Risks.CountAsync(r => r.ProjectId == id && (r.Status == RiskStatus.Open || r.Status == RiskStatus.Monitoring))
             + await db.Issues.CountAsync(i => i.ProjectId == id && (i.Status == IssueStatus.Open || i.Status == IssueStatus.InProgress))
             + await db.Actions.CountAsync(a => a.ProjectId == id && (a.Status == ActionStatus.Open || a.Status == ActionStatus.InProgress));
-        return new { p.Status, openTasks = tasks.Count, tasks, deliverables, decisions, openRegisterItems = registers };
+        return TypedResults.Ok(new CloseoutView(p.Status, tasks.Count, tasks, deliverables, decisions, registers));
     }
 
     /// E-05 (Rec): once an On Hold project is Active again, its open tasks and deliverables whose due dates fell while it was
     /// on hold, so the PM can shift them together with the bulk actions. Read from the logged status changes; nothing is
     /// listed once they have moved, or 30 days after the resume.
-    static async Task<object> DateReview(Guid id, Access access, HubDb db, SettingsStore store, TimeProvider clock)
+    static async Task<Ok<DateReviewView>> DateReview(Guid id, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
         var (p, ctx) = await access.Project(id, track: false);
         Access.Demand(Permissions.ReviewDates(access.Actor, ctx));
@@ -451,16 +486,16 @@ public static class ProjectEndpoints
         var from = back is { } b ? await log.Where(a => a.OccurredAt < b && EF.Functions.JsonContains(a.Changes, held)).OrderByDescending(a => a.OccurredAt)
             .Select(a => (DateTimeOffset?)a.OccurredAt).FirstOrDefaultAsync() : null;
         if (back is not { } resumedAt || from is not { } heldAt || Clock.LocalDate(resumedAt, s) < today.AddDays(-30))
-            return new { Window = (object?)null, Tasks = new List<object>(), Deliverables = new List<object>() };
+            return TypedResults.Ok(new DateReviewView(null, [], []));
         var (start, end) = (Clock.LocalDate(heldAt, s), Clock.LocalDate(resumedAt, s));
         var tasks = await TaskQueries.Rows(db, db.Tasks.AsNoTracking().Where(t => t.ProjectId == id && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled
             && t.DueDate >= start && t.DueDate <= end), access.Actor);
         var deliverables = await DeliverableEndpoints.Rows(db, db.Deliverables.AsNoTracking().Where(d => d.ProjectId == id && d.Status != DeliverableStatus.Issued
             && d.Status != DeliverableStatus.Accepted && d.Status != DeliverableStatus.Cancelled && d.DueDate >= start && d.DueDate <= end));
-        return new { Window = new { HeldFrom = start, ResumedOn = end, Days = end.DayNumber - start.DayNumber }, Tasks = tasks, Deliverables = deliverables };
+        return TypedResults.Ok(new DateReviewView(new(start, end, end.DayNumber - start.DayNumber), tasks, deliverables));
     }
 
-    static async Task<IResult> Transition(Guid id, TransitionBody body, HttpContext http, Access access, HubDb db, Notifier notify, TimeProvider clock, CurrentUser me)
+    static async Task<Ok<ProjectTransitioned>> Transition(Guid id, TransitionBody body, HttpContext http, Access access, HubDb db, Notifier notify, TimeProvider clock, CurrentUser me)
     {
         var (p, ctx) = await access.Project(id);
         await Http.CheckVersion(db, http, p, body.RowVersion);
@@ -518,7 +553,7 @@ public static class ProjectEndpoints
             {
                 // AC-NOT-07: one batched assignment notice per person for work assigned during set-up.
                 var counts = await db.Tasks.Where(t => t.ProjectId == id && t.AssigneeId != null && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled)
-                    .GroupBy(t => t.AssigneeId).Select(g => new { UserId = g.Key, N = g.Count() }).ToListAsync();
+                    .GroupBy(t => t.AssigneeId).Select(g => new BatchedAssignments(g.Key, g.Count())).ToListAsync();
                 foreach (var c in counts)
                     await notify.Send(NotificationEvents.TaskAssigned, c.UserId, TeamService.Item(p) with { Link = $"/my-work?tab=overview&project={p.Id}" },
                         Text.Get("notify.batched_assignments", c.N, p.ProjectNumber, p.Name));
@@ -526,6 +561,6 @@ public static class ProjectEndpoints
             await db.SaveChangesAsync();
             return 0;
         });
-        return Results.Ok(new { p.Id, p.Status, p.RowVersion });
+        return TypedResults.Ok(new ProjectTransitioned(p.Id, p.Status, p.RowVersion));
     }
 }

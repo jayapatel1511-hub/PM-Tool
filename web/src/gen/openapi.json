@@ -4877,6 +4877,74 @@
         ],
         "type": "object"
       },
+      "CloseoutItem": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "status"
+        ],
+        "type": "object"
+      },
+      "CloseoutView": {
+        "properties": {
+          "decisions": {
+            "items": {
+              "$ref": "#/components/schemas/CloseoutItem"
+            },
+            "type": "array"
+          },
+          "deliverables": {
+            "items": {
+              "$ref": "#/components/schemas/CloseoutItem"
+            },
+            "type": "array"
+          },
+          "openRegisterItems": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "openTasks": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/CloseoutItem"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "status",
+          "openTasks",
+          "tasks",
+          "deliverables",
+          "decisions",
+          "openRegisterItems"
+        ],
+        "type": "object"
+      },
       "CommandResult": {
         "properties": {
           "id": {
@@ -7512,6 +7580,61 @@
         },
         "required": [
           "dates"
+        ],
+        "type": "object"
+      },
+      "DateReviewView": {
+        "properties": {
+          "deliverables": {
+            "items": {
+              "$ref": "#/components/schemas/DeliverableRow"
+            },
+            "type": "array"
+          },
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/TaskQueriesRow"
+            },
+            "type": "array"
+          },
+          "window": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/DateReviewWindow"
+              }
+            ]
+          }
+        },
+        "required": [
+          "window",
+          "tasks",
+          "deliverables"
+        ],
+        "type": "object"
+      },
+      "DateReviewWindow": {
+        "properties": {
+          "days": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "heldFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "resumedOn": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "heldFrom",
+          "resumedOn",
+          "days"
         ],
         "type": "object"
       },
@@ -16210,6 +16333,101 @@
         ],
         "type": "object"
       },
+      "NextMilestone": {
+        "properties": {
+          "date": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "date"
+        ],
+        "type": "object"
+      },
+      "NoteHeader": {
+        "properties": {
+          "computedHealth": {
+            "type": "string"
+          },
+          "nextMilestone": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/NextMilestone"
+              }
+            ]
+          },
+          "openAttention": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "reportedHealth": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "computedHealth",
+          "reportedHealth",
+          "nextMilestone",
+          "openAttention"
+        ],
+        "type": "object"
+      },
+      "NoteView": {
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "author": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "authorId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "header": {
+            "$ref": "#/components/schemas/NoteHeader"
+          },
+          "text": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "text",
+          "authorId",
+          "author",
+          "at",
+          "header"
+        ],
+        "type": "object"
+      },
       "NoticeAction": {
         "properties": {
           "action": {
@@ -17577,6 +17795,45 @@
         ],
         "type": "object"
       },
+      "PageOfProjectRow": {
+        "properties": {
+          "filters": {},
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ProjectRow"
+            },
+            "type": "array"
+          },
+          "page": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "pageSize": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "sort": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "totalCount": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "totalCount"
+        ],
+        "type": "object"
+      },
       "PageOfReviewRow": {
         "properties": {
           "filters": {},
@@ -18494,6 +18751,22 @@
         ],
         "type": "object"
       },
+      "ProjectClientRef": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object"
+      },
       "ProjectCreateBody": {
         "properties": {
           "clientId": {
@@ -18625,6 +18898,355 @@
         ],
         "type": "object"
       },
+      "ProjectCreated": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "projectNumber"
+        ],
+        "type": "object"
+      },
+      "ProjectDetail": {
+        "properties": {
+          "activatedAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "allowViewerComments": {
+            "type": "boolean"
+          },
+          "archivedAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "client": {
+            "type": "string"
+          },
+          "clientId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "clientReference": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "completedAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "coordinationDay": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "createdFromTemplateId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "disciplines": {
+            "items": {
+              "$ref": "#/components/schemas/ProjectDisciplineRow"
+            },
+            "type": "array"
+          },
+          "editWindowDaysLeft": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "follow": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ProjectFollowState"
+              }
+            ]
+          },
+          "health": {
+            "$ref": "#/components/schemas/ProjectHealth"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "internalNotes": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "lastCoordinationReviewedAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "lastCoordinationReviewedBy": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "latestPlanned": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PlannedTarget"
+              }
+            ]
+          },
+          "links": {
+            "items": {
+              "$ref": "#/components/schemas/LinkResponse"
+            },
+            "type": "array"
+          },
+          "location": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "myRoles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          },
+          "nextMilestone": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ProjectHeaderMilestone"
+              }
+            ]
+          },
+          "nextSubmission": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ProjectHeaderMilestone"
+              }
+            ]
+          },
+          "office": {
+            "type": "string"
+          },
+          "officeId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "permissions": {
+            "$ref": "#/components/schemas/ProjectPermissions"
+          },
+          "phase": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "phaseId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "pmName": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "string"
+          },
+          "progressPct": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "projectManagerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "projectTypeId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "setupChecklist": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/SetupChecklist"
+              }
+            ]
+          },
+          "starred": {
+            "type": "boolean"
+          },
+          "startDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusChangedAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "statusNote": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/NoteView"
+              }
+            ]
+          },
+          "suggestArchive": {
+            "type": "boolean"
+          },
+          "targetCompletionDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "templateName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "templateVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "visibility": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "projectNumber",
+          "name",
+          "clientId",
+          "clientReference",
+          "projectManagerId",
+          "pmName",
+          "officeId",
+          "projectTypeId",
+          "description",
+          "location",
+          "status",
+          "phaseId",
+          "startDate",
+          "targetCompletionDate",
+          "priority",
+          "visibility",
+          "internalNotes",
+          "coordinationDay",
+          "allowViewerComments",
+          "lastCoordinationReviewedAt",
+          "lastCoordinationReviewedBy",
+          "statusChangedAt",
+          "activatedAt",
+          "completedAt",
+          "archivedAt",
+          "createdFromTemplateId",
+          "templateVersion",
+          "rowVersion",
+          "templateName",
+          "client",
+          "office",
+          "phase",
+          "links",
+          "disciplines",
+          "health",
+          "progressPct",
+          "nextMilestone",
+          "nextSubmission",
+          "myRoles",
+          "follow",
+          "starred",
+          "setupChecklist",
+          "suggestArchive",
+          "editWindowDaysLeft",
+          "permissions"
+        ],
+        "type": "object"
+      },
       "ProjectDisciplineAdded": {
         "properties": {
           "id": {
@@ -18640,6 +19262,60 @@
         "required": [
           "id",
           "rowVersion"
+        ],
+        "type": "object"
+      },
+      "ProjectDisciplineRow": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "colour": {
+            "type": "string"
+          },
+          "disciplineId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "leadName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "leadUserId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "disciplineId",
+          "name",
+          "code",
+          "colour",
+          "leadUserId",
+          "isActive",
+          "rowVersion",
+          "leadName"
         ],
         "type": "object"
       },
@@ -18724,6 +19400,156 @@
           "nextMilestoneId",
           "nextSubmissionMilestoneId",
           "progressPct",
+          "evaluatedAt"
+        ],
+        "type": "object"
+      },
+      "ProjectFollowState": {
+        "properties": {
+          "level": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "level",
+          "source"
+        ],
+        "type": "object"
+      },
+      "ProjectHeaderMilestone": {
+        "properties": {
+          "date": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "deliverables": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isComplete": {
+            "type": "boolean"
+          },
+          "key": {
+            "type": "string"
+          },
+          "milestoneType": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "date",
+          "milestoneType",
+          "isComplete",
+          "deliverables",
+          "status"
+        ],
+        "type": "object"
+      },
+      "ProjectHealth": {
+        "properties": {
+          "computed": {
+            "type": "string"
+          },
+          "evaluatedAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "healthOverride": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "healthOverrideAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "healthOverrideExpiresAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "healthOverrideNote": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "inputs": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/JsonElement"
+              }
+            ]
+          },
+          "overrideActive": {
+            "type": "boolean"
+          },
+          "overrideBy": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "reasons": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/JsonElement"
+              }
+            ]
+          },
+          "reported": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "computed",
+          "reported",
+          "overrideActive",
+          "healthOverride",
+          "healthOverrideNote",
+          "overrideBy",
+          "healthOverrideAt",
+          "healthOverrideExpiresAt",
+          "reasons",
+          "inputs",
           "evaluatedAt"
         ],
         "type": "object"
@@ -18827,6 +19653,452 @@
           "projectManagerEmail",
           "classification",
           "error"
+        ],
+        "type": "object"
+      },
+      "ProjectMilestoneRef": {
+        "properties": {
+          "date": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "date",
+          "status"
+        ],
+        "type": "object"
+      },
+      "ProjectPermission": {
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "ok",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "ProjectPermissions": {
+        "properties": {
+          "assignBasisIn": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "captureWeeklyPlan": {
+            "$ref": "#/components/schemas/ProjectPermission"
+          },
+          "changeNumber": {
+            "type": "boolean"
+          },
+          "comment": {
+            "$ref": "#/components/schemas/ProjectPermission"
+          },
+          "createBasisIn": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "createDeliverableIn": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "createEvent": {
+            "$ref": "#/components/schemas/ProjectPermission"
+          },
+          "createSubmission": {
+            "$ref": "#/components/schemas/ProjectPermission"
+          },
+          "createTaskIn": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "edit": {
+            "$ref": "#/components/schemas/ProjectPermission"
+          },
+          "enterTime": {
+            "$ref": "#/components/schemas/ProjectPermission"
+          },
+          "healthOverride": {
+            "$ref": "#/components/schemas/ProjectPermission"
+          },
+          "isPm": {
+            "type": "boolean"
+          },
+          "leadOf": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "manageExternalParties": {
+            "$ref": "#/components/schemas/ProjectPermission"
+          },
+          "manageMilestones": {
+            "$ref": "#/components/schemas/ProjectPermission"
+          },
+          "manageTeam": {
+            "$ref": "#/components/schemas/ProjectPermission"
+          },
+          "needsReason": {
+            "type": "boolean"
+          },
+          "proposeAllocation": {
+            "$ref": "#/components/schemas/ProjectPermission"
+          },
+          "raiseRegister": {
+            "$ref": "#/components/schemas/ProjectPermission"
+          },
+          "restore": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ProjectPermission"
+              }
+            ]
+          },
+          "reviewDates": {
+            "$ref": "#/components/schemas/ProjectPermission"
+          },
+          "runCoordination": {
+            "$ref": "#/components/schemas/ProjectPermission"
+          },
+          "setVisibility": {
+            "type": "boolean"
+          },
+          "snooze": {
+            "$ref": "#/components/schemas/ProjectPermission"
+          },
+          "transitions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "edit",
+          "manageTeam",
+          "manageMilestones",
+          "healthOverride",
+          "comment",
+          "raiseRegister",
+          "runCoordination",
+          "createEvent",
+          "enterTime",
+          "proposeAllocation",
+          "snooze",
+          "manageExternalParties",
+          "reviewDates",
+          "captureWeeklyPlan",
+          "createSubmission",
+          "createTaskIn",
+          "createDeliverableIn",
+          "createBasisIn",
+          "assignBasisIn",
+          "leadOf",
+          "isPm",
+          "transitions",
+          "changeNumber",
+          "setVisibility",
+          "needsReason"
+        ],
+        "type": "object"
+      },
+      "ProjectPmRef": {
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "displayName"
+        ],
+        "type": "object"
+      },
+      "ProjectRow": {
+        "properties": {
+          "attentionCritical": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "attentionWarning": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "blockedTasks": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "client": {
+            "$ref": "#/components/schemas/ProjectClientRef"
+          },
+          "computedHealth": {
+            "type": "string"
+          },
+          "healthOverrideAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "healthOverrideNote": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "healthReasons": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/JsonElement"
+              }
+            ]
+          },
+          "highIssues": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lastActivityAt": {
+            "format": "date-time",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "myRoles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          },
+          "nextMilestone": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ProjectMilestoneRef"
+              }
+            ]
+          },
+          "nextSubmission": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ProjectMilestoneRef"
+              }
+            ]
+          },
+          "office": {
+            "type": "string"
+          },
+          "officeId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "overdueDecisions": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "overdueTasks": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "overrideActive": {
+            "type": "boolean"
+          },
+          "overrideBy": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "phase": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "phaseId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "pm": {
+            "$ref": "#/components/schemas/ProjectPmRef"
+          },
+          "priority": {
+            "type": "string"
+          },
+          "progressPct": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer"
+            ]
+          },
+          "projectNumber": {
+            "type": "string"
+          },
+          "projectTypeId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "reportedHealth": {
+            "type": "string"
+          },
+          "starred": {
+            "type": "boolean"
+          },
+          "startDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "type": "string"
+          },
+          "targetCompletionDate": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "visibility": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "projectNumber",
+          "name",
+          "status",
+          "priority",
+          "visibility",
+          "startDate",
+          "targetCompletionDate",
+          "client",
+          "pm",
+          "officeId",
+          "office",
+          "phaseId",
+          "phase",
+          "projectTypeId",
+          "computedHealth",
+          "reportedHealth",
+          "healthReasons",
+          "healthOverrideNote",
+          "healthOverrideAt",
+          "overrideBy",
+          "overrideActive",
+          "progressPct",
+          "overdueTasks",
+          "blockedTasks",
+          "overdueDecisions",
+          "highIssues",
+          "attentionCritical",
+          "attentionWarning",
+          "nextMilestone",
+          "nextSubmission",
+          "myRoles",
+          "starred",
+          "lastActivityAt"
+        ],
+        "type": "object"
+      },
+      "ProjectSaved": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "rowVersion"
         ],
         "type": "object"
       },
@@ -19043,6 +20315,28 @@
           "toStatus",
           "reason",
           "closeout",
+          "rowVersion"
+        ],
+        "type": "object"
+      },
+      "ProjectTransitioned": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rowVersion": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status",
           "rowVersion"
         ],
         "type": "object"
@@ -23864,6 +25158,25 @@
         "required": [
           "key",
           "value"
+        ],
+        "type": "object"
+      },
+      "SetupChecklist": {
+        "properties": {
+          "everyDisciplineHasLead": {
+            "type": "boolean"
+          },
+          "everySubmissionHasDeliverable": {
+            "type": "boolean"
+          },
+          "hasMilestone": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "hasMilestone",
+          "everyDisciplineHasLead",
+          "everySubmissionHasDeliverable"
         ],
         "type": "object"
       },
@@ -37201,7 +38514,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/PageOfProjectRow"
+                }
               }
             },
             "description": "OK"
@@ -37223,8 +38538,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectCreated"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -37480,7 +38802,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectDetail"
+                }
               }
             },
             "description": "OK"
@@ -37516,6 +38840,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectSaved"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -37991,7 +39322,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/CloseoutView"
+                }
               }
             },
             "description": "OK"
@@ -38132,7 +39465,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/DateReviewView"
+                }
               }
             },
             "description": "OK"
@@ -39548,8 +40883,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkResponse"
+                }
+              }
+            },
+            "description": "Created"
           }
         },
         "tags": [
@@ -39580,8 +40922,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -40434,8 +41776,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -40455,8 +41797,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
           }
         },
         "tags": [
@@ -40876,6 +42218,13 @@
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectTransitioned"
+                }
+              }
+            },
             "description": "OK"
           }
         },

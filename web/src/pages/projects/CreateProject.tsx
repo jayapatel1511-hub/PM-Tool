@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useReference } from '@/hooks/data'
-import { ApiError, post } from '@/lib/api'
+import { ApiError, typedRequest } from '@/lib/api'
 import { t , runtimeText } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
@@ -49,12 +49,12 @@ export function CreateProjectDialog({ onClose }: { onClose: () => void }) {
     setBusy(true); setErr(null)
     try {
       const extra = Object.assign({}, ...CREATE_SOURCES.map((s) => s.body(source[s.id])))
-      const res = await post<{ id: string; projectNumber: string }>('projects', {
+      const res = await typedRequest('post', '/api/v1/projects', { body: {
         ...f, startDate: f.startDate || null, targetCompletionDate: f.targetCompletionDate || null, projectTypeId: f.projectTypeId || null,
         coordinationDay: f.coordinationDay || null,
         disciplines: disciplines.map((d) => ({ disciplineId: d.disciplineId, leadUserId: d.leadUserId })),
         members: members.map((m) => ({ userId: m.userId, roles: m.roles, disciplineId: m.disciplineId })), ...extra,
-      })
+      } })
       safe.clear()
       toast.success(t('projects.created', { number: res.projectNumber }))
       onClose()

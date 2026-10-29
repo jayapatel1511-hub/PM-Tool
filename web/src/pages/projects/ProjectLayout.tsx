@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { CalendarClock, ChevronDown, ExternalLink, FolderOpen, MoreHorizontal, Star } from 'lucide-react'
 import { createContext, useContext, useState } from 'react'
 import { Link, NavLink, Outlet, useMatch, useParams } from 'react-router'
@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 import { ErrorBanner, InProject, Loading, Spinner } from '@/components/hub/common'
 import { StatusPill } from '@/components/hub/pills'
 import { useProject, useProjectRefresh } from '@/hooks/data'
-import { del, get, post, typedRequest } from '@/lib/api'
+import { post, typedRequest } from '@/lib/api'
 import { fmtDate, relative } from '@/lib/format'
 import { plural, t , runtimeText } from '@/lib/i18n'
 import type { ProjectDetail } from '@/lib/types'
@@ -137,7 +137,7 @@ function ProjectHeader({ p }: { p: ProjectDetail }) {
             )}
             <div className="flex flex-wrap items-center gap-2 border-t px-4 py-3">
               <Button size="sm" variant="outline" aria-pressed={p.starred}
-                onClick={async () => { await (p.starred ? del(`projects/${p.id}/star`) : post(`projects/${p.id}/star`)); refresh(p.id) }}>
+                onClick={async () => { await typedRequest(p.starred ? 'delete' : 'post', '/api/v1/projects/{id}/star', { params: { id: p.id } }); refresh(p.id) }}>
                 <Star className={cn('size-4', p.starred && 'fill-current text-warn')} aria-hidden />{p.starred ? t('projects.unstar') : t('projects.star')}
               </Button>
               <ProjectSlots.Follow p={p} />
@@ -151,13 +151,10 @@ function ProjectHeader({ p }: { p: ProjectDetail }) {
 }
 
 /** Banners explaining why evaluation is paused, the Setup checklist, and the archive suggestion (§13.1, P-05, P-09, G-05). */
-interface DateReview { window: { heldFrom: string; resumedOn: string; days: number } | null; tasks: { id: string }[]; deliverables: { id: string }[] }
-
 /** E-05 (Rec): back from On Hold, the work whose dates fell during the hold, with one action to shift it all. */
 function DateReviewBanner({ p }: { p: ProjectDetail }) {
-  const qc = useQueryClient()
   const refresh = useProjectRefresh()
-  const q = useQuery({ queryKey: ['p', p.id, 'date-review'], queryFn: () => get<DateReview>(`projects/${p.id}/date-review`) })
+  const q = useQuery({ queryKey: ['p', p.id, 'date-review'], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/date-review', { params: { id: p.id } }) })
   const key = `hub.dateReview.${p.id}.${q.data?.window?.resumedOn}`
   const [, rerender] = useState(0)
   const hidden = (() => { try { return localStorage.getItem(key) === '1' } catch { return false } })()
@@ -172,7 +169,7 @@ function DateReviewBanner({ p }: { p: ProjectDetail }) {
       const reason = t('dateReview.reason', { from: fmtDate(r.window!.heldFrom), to: fmtDate(r.window!.resumedOn) })
       if (r.tasks.length) await post(`projects/${p.id}/tasks/bulk`, { taskIds: r.tasks.map((x) => x.id), operation: 'shiftDueDates', params: { days: n }, reason })
       if (r.deliverables.length) await typedRequest('post', '/api/v1/projects/{id}/deliverables/bulk', { params: { id: p.id }, body: { ids: r.deliverables.map((x) => x.id), operation: 'shiftDueDates', params: { days: n }, reason } })
-      toast.success(t('dateReview.shifted', { n })); qc.invalidateQueries({ queryKey: ['p', p.id, 'date-review'] }); refresh(p.id)
+      toast.success(t('dateReview.shifted', { n })); refresh(p.id) // the refresh covers the review under ['p', id]
     } catch (e) { toast.error((e as Error).message) } finally { setBusy(false) }
   }
   const dismiss = () => { try { localStorage.setItem(key, '1') } catch { /* per-viewer convenience only */ } rerender((x) => x + 1) }

@@ -4,6 +4,7 @@
 const { chromium } = require('playwright');
 const { clientConfig } = require('./config.fixture.cjs');
 const { meView } = require('./me.fixture.cjs');
+const { projectDetail, projectDiscipline, projectList, projectRow } = require('./projects.fixture.cjs');
 const { taskDependencies } = require('./dependencies.fixture.cjs');
 const { deliverableList } = require('./deliverables.fixture.cjs');
 const path = require('path'), { spawn } = require('child_process'), assert = require('assert/strict');
@@ -29,10 +30,10 @@ const actor = () => (who === 'consumer' ? consumer : lead);
 const pmOrDl = { ok: false, reason: 'Only the Project Manager or the Discipline Lead can do this.' }, pmOnly = { ok: false, reason: 'Only the Project Manager can do this.' };
 const flags = (member) => ({ proposeAllocation: member ? pmOrDl : { ok: true }, snooze: member ? pmOrDl : { ok: true }, manageExternalParties: pmOnly,
   reviewDates: member ? pmOrDl : { ok: true }, captureWeeklyPlan: pmOrDl, createSubmission: member ? pmOrDl : { ok: true } });
-const project = () => ({ id: pid, projectNumber: 'P-DEMO', name: 'Basis checks', client: 'Pilot client', pmName: 'Pat PM', status: 'Active', visibility: 'Open', rowVersion: 1, links: [], starred: false,
-  disciplines: [{ id: civil, disciplineId: id(5), name: 'Civil', code: 'CIV', colour: '#2563eb', leadUserId: lead, isActive: true, leadName: 'Marc Lead' }],
-  myRoles: who === 'consumer' ? ['TeamMember'] : ['DisciplineLead'], health: { computed: 'Green', reported: 'Green', overrideActive: false, reasons: [] },
-  permissions: { raiseRegister: { ok: false }, edit: { ok: false }, healthOverride: { ok: false }, ...flags(who === 'consumer'), isPm: false, leadOf: who === 'consumer' ? [] : [civil], createTaskIn: [civil], createDeliverableIn: [civil], createBasisIn: [civil], assignBasisIn: [civil], transitions: [], needsReason } });
+const project = () => projectDetail({ id: pid, projectNumber: 'P-DEMO', name: 'Basis checks', client: 'Pilot client', pmName: 'Pat PM',
+  disciplines: [projectDiscipline({ id: civil, disciplineId: id(5), name: 'Civil', code: 'CIV', colour: '#2563eb', leadUserId: lead, leadName: 'Marc Lead' })],
+  myRoles: who === 'consumer' ? ['TeamMember'] : ['DisciplineLead'],
+  permissions: { ...flags(who === 'consumer'), isPm: false, leadOf: who === 'consumer' ? [] : [civil], createTaskIn: [civil], createDeliverableIn: [civil], createBasisIn: [civil], assignBasisIn: [civil], needsReason } });
 const me = () => meView({ id: actor(), displayName: who, email: `${who}@hub.test`, capabilities: { createTask: true }, settings: { coordinationLookaheadWeeks: 6, today: '2026-10-01' } });
 const options = () => coordinationOptions({ actorId: actor(), canWrite: true, manageDisciplineIds: who === 'consumer' ? [] : [civil], people: [{ id: consumer, displayName: 'Alex Consumer' }, { id: lead, displayName: 'Marc Lead' }],
   disciplines: [{ id: civil, name: 'Civil' }], sources: [], heads: [], deliverables: [],
@@ -86,7 +87,7 @@ let server, browser;
     else if (p === 'me') data = me(); else if (p === 'me/sign-in') data = {}; else if (p === 'me/notifications/pulse') data = { stamp: '0' };
     else if (p === 'me/notifications/unread-count') data = { notifications: 0, following: 0 }; else if (p === 'workspaces') data = []; else if (p === 'views' && method === 'POST') { const body = req.postDataJSON(); savedViews.push({ listType: body.listType, ...savedView({ id: id(300 + savedViews.length), name: body.name, params: body.params ?? {}, isDefault: body.isDefault ?? false }) }); data = viewSaved(savedViews.at(-1).id) }
     else if (p === 'views') data = viewList(savedViews.filter(v => v.listType === u.searchParams.get('listType')).map(({ listType, ...v }) => v));
-    else if (p === 'projects') data = { items: [project()], totalCount: 1 }; else if (p === `projects/${pid}` || p === 'projects/P-DEMO') data = project();
+    else if (p === 'projects') data = projectList([projectRow({ id: pid, projectNumber: 'P-DEMO', name: 'Basis checks' })]); else if (p === `projects/${pid}` || p === 'projects/P-DEMO') data = project();
     else if (p === `projects/${pid}/coordination`) data = weeklyCoordination();
     else if (p === `projects/${pid}/attention`) data = attentionList([]);
     else if (p === `projects/${pid}/discipline-coordination`) {

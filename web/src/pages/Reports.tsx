@@ -14,11 +14,10 @@ import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useReference } from '@/hooks/data'
 import type { components } from '@/gen/api'
-import { get, qs, typedRequest } from '@/lib/api'
+import { typedRequest } from '@/lib/api'
 import { ChangeList, type ActivityRow } from '@/components/hub/activity'
 import { addDays, fmtDate, fmtTime, today } from '@/lib/format'
 import { plural, t, tv , runtimeText } from '@/lib/i18n'
-import type { Page as PageOf } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
 type Schemas = components['schemas']
@@ -123,9 +122,9 @@ function ParamInput({ p, value, onChange }: { p: Param; value?: string; onChange
 export function ProjectsPicker({ id, value, onChange, single, placeholder }: { id: string; value?: string; onChange: (v: string | null) => void; single?: boolean; placeholder?: string }) {
   const [term, setTerm] = useState('')
   const [open, setOpen] = useState(false)
-  const q = useQuery({ queryKey: ['projects-pick', term], queryFn: () => get<PageOf<{ id: string; projectNumber: string; name: string }>>(`projects${qs({ q: term, pageSize: 50 })}`) })
+  const q = useQuery({ queryKey: ['projects-pick', term], queryFn: () => typedRequest('get', '/api/v1/projects', { query: { Q: term, PageSize: 50 } }) })
   const chosen = (value ?? '').split(',').filter(Boolean)
-  const names = useQuery({ queryKey: ['projects-pick-ids', value], enabled: chosen.length > 0, queryFn: () => get<PageOf<{ id: string; projectNumber: string }>>(`projects${qs({ ids: value, includeArchived: true, pageSize: 50 })}`) })
+  const names = useQuery({ queryKey: ['projects-pick-ids', value], enabled: chosen.length > 0, queryFn: () => typedRequest('get', '/api/v1/projects', { query: { Ids: value, IncludeArchived: true, PageSize: 50 } }) })
   const label = chosen.length === 0 ? placeholder ?? (single ? t('reports.chooseProject') : t('reports.allProjects'))
     : (names.data?.items ?? []).filter((p) => chosen.includes(p.id)).map((p) => p.projectNumber).join(', ') || t('reports.nProjects', { n: chosen.length })
   const toggle = (pid: string) => {

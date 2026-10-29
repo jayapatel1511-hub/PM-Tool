@@ -404,7 +404,7 @@ function CompleteDialog({ p, m, onClose, onDone }: { p: ProjectDetail; m: Milest
   const [phase, setPhase] = useState<{ id: string; name: string } | null>(null)
   if (phase) return (
     <ConfirmDialog open onOpenChange={(o) => { if (!o) onDone() }} title={t('milestone.advancePhase', { phase: phase.name })} body={t('milestone.advancePhaseHint')} confirmLabel={t('common.yes')}
-      onConfirm={async () => { await patch(`projects/${p.id}`, { phaseId: phase.id }, p.rowVersion); onDone() }} />
+      onConfirm={async () => { await typedRequest('patch', '/api/v1/projects/{id}', { params: { id: p.id }, body: { phaseId: phase.id }, ifMatch: p.rowVersion }); onDone() }} />
   )
   return (
     <ConfirmDialog open onOpenChange={(o) => !o && onClose()} title={t('milestone.completeTitle', { key: m.key, name: m.name })} confirmLabel={t('milestone.complete')}

@@ -9,6 +9,7 @@ const { allocationRow, allocationPage, allocationDetail, dayAvailability } = req
 const { chromium } = require('playwright');
 const { clientConfig } = require('./config.fixture.cjs');
 const { meView, referenceData } = require('./me.fixture.cjs');
+const { projectDetail, projectList, projectRow } = require('./projects.fixture.cjs');
 const { viewList } = require('./views.fixture.cjs');
 const path = require('path'), { spawn } = require('child_process'), assert = require('assert/strict');
 const port = process.env.PORT ?? '5177', base = `http://127.0.0.1:${port}`;
@@ -43,9 +44,7 @@ const me = meView({ id: sam, displayName: 'Sam Supervisor', email: 'sam@hub.test
 // FR-FIG-08: Sam is neither PM nor Discipline Lead, so the server refuses every project-level flag.
 const pmOrDl = { ok: false, reason: 'Only the Project Manager or the Discipline Lead can do this.' }, pmOnly = { ok: false, reason: 'Only the Project Manager can do this.' };
 const refusedFlags = { proposeAllocation: pmOrDl, snooze: pmOrDl, manageExternalParties: pmOnly, reviewDates: pmOrDl, captureWeeklyPlan: pmOrDl, createSubmission: pmOrDl };
-const project = { id: pid, projectNumber: 'P-DEMO', name: 'Synthetic resource checks', client: 'Pilot client', pmName: 'Pat PM', status: 'Active', visibility: 'Open', rowVersion: 1,
-  links: [], disciplines: [], starred: false, myRoles: [], health: { computed: 'Green', reported: 'Green', overrideActive: false, reasons: [] },
-  permissions: { edit: { ok: false }, healthOverride: { ok: false }, raiseRegister: { ok: false }, ...refusedFlags, isPm: false, leadOf: [], createTaskIn: [], createDeliverableIn: [], transitions: [], needsReason: false } };
+const project = projectDetail({ id: pid, projectNumber: 'P-DEMO', name: 'Synthetic resource checks', client: 'Pilot client', pmName: 'Pat PM', permissions: { ...refusedFlags } });
 const allocation = (aid, status) => allocationRow({ id: aid, personId: jill, status });
 const errors = [], unknown = [];
 let server, browser;
@@ -67,7 +66,7 @@ let server, browser;
     else if (p === 'workspaces') data = []
     else if (p === 'views') data = viewList()
     else if (p === 'reference') data = referenceData()
-    else if (p === 'projects') data = { items: [project], page: 1, pageSize: 200, totalCount: 1 }
+    else if (p === 'projects') data = projectList([projectRow({ id: pid, projectNumber: 'P-DEMO', name: 'Synthetic resource checks' })])
     else if (p === 'users') data = [{ id: jill, displayName: 'Jill Partial', isActive: true }]
     else if (p === 'planning/grid') { capacityCalls.push(Object.fromEntries(u.searchParams)); data = { weeks: ['2026-10-12'], people: [{ id: jill, partial: false, cells: [{ remaining: 12, timeAway: 8 }] }] } }
     else if (p === `tasks/${taskId}` && route.request().method() === 'PATCH') {

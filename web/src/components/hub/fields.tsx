@@ -150,6 +150,7 @@ function useAutosaveField(current?: unknown, onSave?: (v: string | null) => Prom
     // ever starts. There is then no row version to pin the retry to. Keep the value
     // visible as an explicit conflict, but never turn it into an unversioned write.
     if (again.version == null) {
+      typed.current = { value: again.value }
       void invalidateChange(qc)
       setState({ status: 'conflict', value: again.value })
       return
@@ -160,10 +161,12 @@ function useAutosaveField(current?: unknown, onSave?: (v: string | null) => Prom
     typed.current = { value }
     clearTimeout(pause.current)
     clearTimeout(again.current)
+    if (state?.status === 'conflict' && state.version == null) return Promise.resolve()
     return delayMs == null ? attempt(value) : send(value)
   }
   const schedule = (value: unknown) => {
     typed.current = { value }
+    if (state?.status === 'conflict' && state.version == null) return
     clearTimeout(again.current) // typing on replaces a timed retry; leaving the field (or Escape) settles it
     if (delayMs == null) return
     clearTimeout(pause.current)
@@ -192,7 +195,7 @@ function useAutosaveField(current?: unknown, onSave?: (v: string | null) => Prom
     /** "Discard my change" and "Take theirs": the field goes back to the server's value. */
     discard: () => { if (unsaved) clear(); return unsaved },
     retry: () => shown && resend(shown.value, 0, shown.ifMatch),
-    keepMine: () => shown?.version != null && resend(shown.value, 0, shown.version),
+    keepMine: () => shown && (shown.version != null ? resend(shown.value, 0, shown.version) : attempt(shown.value)),
   }
 }
 type Autosave = ReturnType<typeof useAutosaveField>

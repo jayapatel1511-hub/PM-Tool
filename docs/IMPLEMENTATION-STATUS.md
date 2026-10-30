@@ -1,16 +1,16 @@
 # Implementation status
 
-## 2026-10-29 deployment preflight
+## 2026-10-29 public synthetic review deployed
 
-Jay requested deployment. Live inspection found the integration omitted the already-deployed Social-plus-tester login compatibility. That behavior is restored with focused auth/session/contract/browser verification; [the preflight](handoffs/2026-10-29-packets-039-051-deploy-preflight.md) records exact boundaries and the staged operator handoff. Activation still requires Jay's own homedev sudo terminal. The original full-suite/rehearsal SHA below remains historical evidence; it does not cover this auth correction. Pickup stays dark pending its P2 fix; no deployment or acceptance claim is made here.
+Jay requested deployment. Live inspection found the integration omitted the already-deployed Social-plus-tester login compatibility. That behavior is restored with focused auth/session/contract/browser verification; [the preflight](handoffs/2026-10-29-packets-039-051-deploy-preflight.md) records exact boundaries and the staged operator handoff. Jay completed activation in his own homedev sudo terminal. Review now runs `bf8a39d7290d8bad8f9138872582b164baaf1894`; [hosted verification](handoffs/2026-10-29-packets-039-051-hosted-verification.md) records PASS results and limits. The original full-suite/rehearsal SHA below remains historical evidence; it does not cover this auth correction. Pickup stays dark pending its P2 fix. This is public synthetic review deployment only; no pilot/production promotion or acceptance claim.
 
 ## 2026-10-29 packets 039–051 local release candidate
 
 Packets 039–042 and 044–051 are implemented and checked locally on `codex/integrate-039-050`; all 46 packet 040 conversion inventory files are integrated. Jay confirmed packet 043 KILL on 2026-10-25, and its existing-component fallback is built. The [release candidate](handoffs/2026-10-29-packets-039-051-release-candidate.md) records the exact runtime SHA, local checks, upgrade/rollback rehearsal, fixes, assumptions and For Jay list.
 
-Nothing is pushed or deployed. Tier B/repository controls, activation and flag retirement, packet 040 S16, remaining visual/manual/operator checks and hosted/human acceptance remain open. No packet is marked Accepted. Entries below are historical snapshots.
+Nothing is pushed. Public synthetic review is deployed; Tier B/repository controls, feature activation and flag retirement, packet 040 S16, remaining visual/manual/operator checks and full hosted-feature/human acceptance remain open. No packet is marked Accepted. Entries below are historical snapshots.
 
-**Local wording/review follow-up (2026-10-29):** both wording items are resolved. The [review record](handoffs/2026-10-29-packets-039-051-local-followup.md) identifies a P2: deactivating an offer’s assignee blocks eligible peers’ pickup and manager pickup assignment. Runtime is unchanged; fix and verify before enabling `flag.task_pickup`. Agent visual review is complete, while styling/output preservation and Jay’s acceptance remain open. Prior passing checks exclude the new deactivation scenario.
+**Local wording/review follow-up (2026-10-29):** both wording items are resolved. The [review record](handoffs/2026-10-29-packets-039-051-local-followup.md) identifies a P2: deactivating an offer’s assignee blocks eligible peers’ pickup and manager pickup assignment. That wording/review phase left runtime unchanged; fix and verify before enabling `flag.task_pickup`. Agent visual review is complete, while styling/output preservation and Jay’s acceptance remain open. Prior passing checks exclude the new deactivation scenario.
 
 ## 2026-10-25 packets 039–050 (local)
 

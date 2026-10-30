@@ -1,7 +1,7 @@
 # Feature Specification: Task and Timeline Interaction
 
 **Packet**: 046 | **Feature directory**: `specs/046-task-and-timeline-interaction` | **Date**: 2026-10-14
-**Status**: Implemented and checked locally (S01–S15). S16 flag cleanup, manual phone/keyboard review, and hosted and human acceptance remain pending. Line of record: `codex/integrate-039-050`, committed locally and not pushed. Not Accepted.
+**Status**: Implemented and checked locally (S01–S15). S16 flag cleanup, manual phone/keyboard review, and hosted and human acceptance remain pending. Line of record: `codex/integrate-039-050`, committed locally and not pushed. Not Accepted. Code is deployed in public synthetic review `bf8a39d7` with visible feature flags off; full hosted-feature/pilot/human acceptance remains separate.
 **Input**: Jay approved the 14 October build-approach report and directed building all of it ("We are building everything you suggested"). Current features are fixed: additions only, and today's behaviour stays the default wherever an addition touches it.
 **Source**: product specification §50 (§50.1 to §50.9) in `spec-parts/25-task-and-timeline-interaction.md`; roadmap items 18, 20, 22, 26, 30 and 32 of the report. Builds on §13.3, §13.3.1, §13.6.1, §13.7, §40.6, §12.3, §12.4, §12.6, §12.16, §13.5, §36.4, §37.2, §37.6, §18.4, §13.19, §13.14, §13.12 and §13.21. Amends §8.5.2, §10.4, §12.3, §12.16, §13.7 and §30 (amendment requests returned with this packet).
 

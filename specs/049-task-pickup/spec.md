@@ -1,7 +1,7 @@
 # Feature Specification: Task Pickup
 
 **Packet**: 049 | **Feature directory**: `specs/049-task-pickup` | **Date**: 2026-10-18
-**Status**: Implemented and checked locally behind its dark flag, with API, mocked-browser and local real-browser pickup evidence. Hosted, pilot and human acceptance remain pending. Line of record: `codex/integrate-039-050`, committed locally and not pushed. Not Accepted.
+**Status**: Implemented and checked locally behind its dark flag, with API, mocked-browser and local real-browser pickup evidence. Hosted, pilot and human acceptance remain pending. Line of record: `codex/integrate-039-050`, committed locally and not pushed. Not Accepted. Code is deployed in public synthetic review `bf8a39d7` with visible feature flags off; full hosted-feature/pilot/human acceptance remains separate.
 **Input**: Jay's 2026-10-18 request: "a ticketing system for overloaded personnel; they can have that task open for others to pick".
 **Source**: product specification §53 (§53.1 to §53.8) in `spec-parts/28-task-pickup.md`. Related contracts: §8.5 to §8.7 (permissions, ownership, visibility), §12.2 (team), §13.10 (My Work), §17 (notifications), §20.1 (log), §36.8 (time entries), §43 (flags, packet 039), §45.4 (load bands, packet 041).
 

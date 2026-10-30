@@ -2,7 +2,7 @@
 
 Date: 2026-10-29, America/Halifax. Target: **public synthetic review only**, `https://pm.engcalchub.com`, homedev port 3080, existing `pm-tool-review-db`. Pilot and production are separate. Jay requested “deploy and make tree clean”; this authorizes the deployment work but does not activate feature flags or mark packets Accepted.
 
-**State: awaiting operator activation.** Homedev requires interactive sudo in Jay's own terminal. The source is prepared for a committed archive and one-use operator handoff; the live `current` pointer remains `f6f31d7e4b7b24875371443ed222d994ee0a4330` until activation succeeds. The exact prepared SHA and source manifest are recorded under `/home/jaypatel04/Workspace/Projects/pm-tool/incoming/deploy-039-051-20261029/` after this record is committed.
+**State: operator activation PASS.** Public synthetic review now runs `bf8a39d7290d8bad8f9138872582b164baaf1894`. Jay completed the activation in his own homedev sudo terminal; current pointer, health/build, migrations, record counts, flags, triggers, index and public/auth probes passed. The [hosted verification](2026-10-29-packets-039-051-hosted-verification.md) records results and limits. Private source and operator provenance remain under `/home/jaypatel04/Workspace/Projects/pm-tool/incoming/deploy-039-051-20261029/`.
 
 ## Deployment compatibility correction
 
@@ -21,7 +21,7 @@ The known inactive-assignee pickup P2 remains open. The operator guard checks th
 | Built-app sign-in browser regression | PASS: provider-only and combined login, wrong/correct tester password, protected Preferences return, actual Account → Sign out and Social POST, provider linking; no page errors or detected WCAG AA violations. Synthetic API/provider fixtures; not real provider consent |
 | Web typecheck, lint and production build | PASS; existing lint/bundler warnings only |
 | Operator/probe tests | PASS, 8/8 `tools/test_social_activation.py` |
-| One-use activation guard | PASS, 3 synthetic flow tests: concurrent counts recorded without spurious rollback; public-probe failure restores Social image after readiness; missing tester login refuses success. Source independently reviewed; no real rollback claimed |
+| One-use activation guard | PASS, 6 synthetic flows: the three activation/rollback paths plus active/legacy-hostname, FQDN and wrong-host cases. A temporary PostgreSQL test also verifies the trigger catalog includes TRUNCATE protections. Source independently reviewed; no real rollback claimed |
 | Generated contract | PASS; public config boolean added, existing fields retained |
 | Ratchet / diff | PASS (exit 0); strict counters unchanged. Report-only `client_permission_derivations` is 63 against baseline 62 for the compatibility visibility check; baseline not raised. `git diff --check` passes |
 | Original full release gates | Historical PASS at `2dcdaec4`, as recorded in the release handoff. Full suite, coverage, all-browser/parity matrix, audits and exact-image rehearsal were not repeated for this auth preservation change |
@@ -30,7 +30,7 @@ During verification, the new long auth scenario initially met the unchanged five
 
 Local logs are under `/private/tmp/pm-tool-deploy-20261029/`. Earlier release evidence remains under `/private/tmp/pm-tool-release-20261029/`; it is not relabelled as a check of the new auth source.
 
-## Current host preflight
+## Host state before activation
 
 - Host identity `homedev`, user `jaypatel04`, Linux; correct review `current` pointer `f6f31d7e…`.
 - Private and public health respond Healthy. Public config reports Social, tester login enabled and both providers. Existing host-side provider/auth/logout/copied-cookie probes PASS; credentials stay on homedev.
@@ -39,9 +39,9 @@ Local logs are under `/private/tmp/pm-tool-deploy-20261029/`. Earlier release ev
 - 264 GiB disk available and approximately 4.0 GiB memory available at preflight. Runtime directory/key directory remain owner-only.
 - `sudo -n` is unavailable. The [server guide](</Users/jaypatel/Personal Server/AGENT-GUIDE.md>) and [review runbook](../runbooks/homedev-review.md) require the administrator to enter sudo in their own terminal; no permission weakening or password collection is used.
 
-## One operator command
+## Completed operator activation
 
-After the source archive and handoff have been staged, run in Jay's **homedev terminal**:
+Jay ran this command in his **homedev terminal** after the archive and handoff were staged:
 
 ```bash
 bash /home/jaypatel04/Workspace/Projects/pm-tool/incoming/deploy-039-051-20261029/activate.sh
@@ -51,4 +51,4 @@ The wrapper names the exact committed SHA; it never takes an uncommitted tree. I
 
 If verification fails, the guard restores the prior immutable image using its **Social override**, waits up to 120 seconds for readiness, verifies image identity and the old probes, then restores `current`. It keeps the migrated database and key/verifier files. It never runs a down migration or deletes a volume. The prior `f6f31d7e` image rollback is a prepared recovery path, not a completed host rehearsal.
 
-Private operator results will be written to `data/deploy-<prepared-sha>/{before,after,result}.json`. After operator completion, inspect those records and repeat public build/auth checks before reporting deployed. Actual migrations, post-upgrade flags/counts/triggers/index/jobs, host image identity and hosted/browser acceptance remain UNPROVEN until that happens. New provider consent, pilot/production promotion, Tier B/repository controls, human/visual acceptance, and the known pickup fix remain separate.
+Private operator results are in `data/deploy-bf8a39d7290d8bad8f9138872582b164baaf1894/{before,after,result}.json`, with result PASS. Independent public health/config, Admin operations and anonymous browser checks also pass; [the hosted verification](2026-10-29-packets-039-051-hosted-verification.md) records exact scope. Five jobs are confirmed after activation; two latest successful runs predate it. Host rollback, new provider consent, pilot/production promotion, full hosted feature workflows, Tier B/repository controls, human/visual acceptance and the known pickup fix remain separate.

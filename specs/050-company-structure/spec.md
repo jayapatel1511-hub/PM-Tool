@@ -1,7 +1,7 @@
 # Feature Specification: Company Structure
 
 **Packet**: 050 | **Feature directory**: `specs/050-company-structure` | **Date**: 2026-10-18
-**Status**: Implemented and checked locally behind flag.org_structure, including local API/browser and schema checks. Tier B, hosted, pilot and human acceptance remain pending. Line of record: `codex/integrate-039-050`, committed locally and not pushed. Not Accepted.
+**Status**: Implemented and checked locally behind flag.org_structure, including local API/browser and schema checks. Tier B, hosted, pilot and human acceptance remain pending. Line of record: `codex/integrate-039-050`, committed locally and not pushed. Not Accepted. Code is deployed in public synthetic review `bf8a39d7` with visible feature flags off; full hosted-feature/pilot/human acceptance remains separate.
 **Input**: Jay's 2026-10-18 request: "we will have to make company structure for managers", based on the organisation model chosen for the separate Friday capacity app (unit tree, named levels, unit leaders, one direct manager).
 **Source**: product specification §54 (§54.1 to §54.9) in `spec-parts/29-company-structure.md`. Related contracts: §8.2, §8.7, §8.8 (roles, visibility, Q19 supervised staff), §13.11 (Workload and Planner), §13.12 (Portfolio), §13.15 (Administration), §13.19 (My Staff), §19 and §51.3 (reports), §20.1 (log), §42 (supervisor capacity), FR-PLN-19 (partial view), §43 (flags, packet 039).
 

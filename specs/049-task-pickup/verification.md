@@ -1,6 +1,6 @@
 # Verification: Task Pickup
 
-**Current status (2026-10-29):** Implemented and checked locally behind its dark flag, with API, mocked-browser and local real-browser pickup evidence. Hosted, pilot and human acceptance remain pending. Final local release evidence and assumptions are in [the release candidate](../../docs/handoffs/2026-10-29-packets-039-051-release-candidate.md). Historical slice records below retain their original source boundaries. Nothing is pushed, hosted or Accepted by this session.
+**Current status (2026-10-29):** Implemented and checked locally behind its dark flag, with API, mocked-browser and local real-browser pickup evidence. Hosted, pilot and human acceptance remain pending. Final local release evidence and assumptions are in [the release candidate](../../docs/handoffs/2026-10-29-packets-039-051-release-candidate.md). Historical slice records below retain their original source boundaries. Public synthetic review deployment `bf8a39d7` passed the operator and independent checks in [the hosted verification](../../docs/handoffs/2026-10-29-packets-039-051-hosted-verification.md); visible feature flags are off. Nothing is pushed or Accepted; full hosted-feature, pilot and human gates remain separate.
 
 Status (2026-10-25): S01 to S04 built locally on `codex/integrate-039-050`, flag `task_pickup` dark. All AC rows pass locally at API level; UI is checked against mocked Chromium only. Not rerun on 2026-10-25 (local Docker daemon down); results below are the recorded runs. Hosted, human and pilot acceptance pending. Not Accepted.
 

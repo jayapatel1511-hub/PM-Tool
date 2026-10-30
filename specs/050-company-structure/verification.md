@@ -1,6 +1,6 @@
 # Verification: Company Structure
 
-**Current status (2026-10-29):** Implemented and checked locally behind flag.org_structure, including local API/browser and schema checks. Tier B, hosted, pilot and human acceptance remain pending. Final local release evidence and assumptions are in [the release candidate](../../docs/handoffs/2026-10-29-packets-039-051-release-candidate.md). Historical slice records below retain their original source boundaries. Nothing is pushed, hosted or Accepted by this session.
+**Current status (2026-10-29):** Implemented and checked locally behind flag.org_structure, including local API/browser and schema checks. Tier B, hosted, pilot and human acceptance remain pending. Final local release evidence and assumptions are in [the release candidate](../../docs/handoffs/2026-10-29-packets-039-051-release-candidate.md). Historical slice records below retain their original source boundaries. Public synthetic review deployment `bf8a39d7` passed the operator and independent checks in [the hosted verification](../../docs/handoffs/2026-10-29-packets-039-051-hosted-verification.md); visible feature flags are off. Nothing is pushed or Accepted; full hosted-feature, pilot and human gates remain separate.
 
 Status (2026-10-25): S01–S06 implemented locally on `codex/integrate-039-050`, dark behind `flag.org_structure`. All nine ACs PASS (local); the three former PARTIAL rows closed in the 2026-10-26 gap run below. Not Accepted; hosted, pilot and human checks are open.
 

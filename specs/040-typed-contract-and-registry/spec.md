@@ -1,7 +1,7 @@
 # Feature Specification: Typed Contract and Entity Registry
 
 **Packet**: 040 | **Feature directory**: `specs/040-typed-contract-and-registry` | **Date**: 2026-10-14
-**Status**: Implemented and checked locally (S01–S15.n, all 46 inventory files). S16 cohort measurement and Jay's ruling remain pending. Line of record: `codex/integrate-039-050`, committed locally and not pushed. Not Accepted.
+**Status**: Implemented and checked locally (S01–S15.n, all 46 inventory files). S16 cohort measurement and Jay's ruling remain pending. Line of record: `codex/integrate-039-050`, committed locally and not pushed. Not Accepted. Code is deployed in public synthetic review `bf8a39d7` with visible feature flags off; full hosted-feature/pilot/human acceptance remains separate.
 **Input**: Jay approved the 14 October build-approach report on 2026-10-14 and directed building all of it. This packet is items 2 and 3 of the report's hybrid (report section 4.3) and the seam defects of report section 2.3. Features are fixed; this packet adds and never removes, hides, narrows or freezes anything.
 **Source**: product specification §44 (§44.1 to §44.8) in `spec-parts/19-typed-contract-and-registry.md`. It finishes promises already in §23.4 (generated typed client, per-project cache keys) and §25.1 (OpenAPI document generated from code), and derives the per-entity allow-lists of §20.4. Related contracts: §13.14 and FR-AUD-01, FR-AUD-02 (Activity History); §18.4, §36.7, FR-VIEW-04 and FR-VIS-08 (saved views); §40.2 and §40.5 with FR-ROLE-04, FR-ROLE-05 and FR-GRP-02 (open roles, grouping); FR-PLN-24 (planner saved views); FR-SRCH-01 and FR-RPT-01 (search groups, export columns); §22 (localisation). Code citations are at `48586029`.
 

@@ -1,12 +1,14 @@
 # Packets 039–051: local release candidate
 
-**Deployment follow-up:** [current preflight and operator handoff](2026-10-29-packets-039-051-deploy-preflight.md) preserve the already-hosted tester login alongside Social sign-in. The original full gates below belong to `2dcdaec4`; the auth correction has focused verification. Host activation still requires Jay’s sudo terminal.
+**Hosted review deployed:** `bf8a39d7290d8bad8f9138872582b164baaf1894` is live at [pm.engcalchub.com](https://pm.engcalchub.com); operator and independent checks PASS. See [the hosted verification](2026-10-29-packets-039-051-hosted-verification.md). Flags remain off; no pilot/production or Accepted claim.
+
+**Deployment follow-up:** [current preflight and operator handoff](2026-10-29-packets-039-051-deploy-preflight.md) preserve the already-hosted tester login alongside Social sign-in. The original full gates below belong to `2dcdaec4`; the auth correction has focused verification. Jay completed host activation in his own sudo terminal; the hosted record above is current.
 
 **Local follow-up:** [wording and review dispositions](2026-10-29-packets-039-051-local-followup.md) resolve the two wording items and identify a P2 inactive-assignee pickup defect. Runtime code is unchanged; fix and verify that defect before enabling `flag.task_pickup`. Visual acceptance remains open.
 
 **Original rehearsed release SHA:** `2dcdaec424eba81998e0c125f2e29621c8df39b0` on `codex/integrate-039-050`.
 
-This was the application-code commit for the original full verification/rehearsal; the deployment follow-up adds the hosted-login preservation correction. Later commits add verification fixtures, bounded browser condition waits, response-shape evidence, specification wording corrections, status records and this handoff. Through the original local wording/review commit `56835986`, application sources, manifests, migrations, hosting and operational scripts were unchanged from this SHA. The later deployment follow-up changes auth source, the Social override, public config/client and the probe; it introduces no new migration. The original local image was built from the `2dcdaec4` archive, identified itself with that exact build, and passed upgrade → rollback → forward rehearsal. Nothing was pushed, merged to main or deployed to homedev. No packet is marked Accepted.
+This was the application-code commit for the original full verification/rehearsal; the deployment follow-up adds the hosted-login preservation correction. Later commits add verification fixtures, bounded browser condition waits, response-shape evidence, specification wording corrections, status records and this handoff. Through the original local wording/review commit `56835986`, application sources, manifests, migrations, hosting and operational scripts were unchanged from this SHA. The later deployment follow-up changes auth source, the Social override, public config/client and the probe; it introduces no new migration. The original local image was built from the `2dcdaec4` archive, identified itself with that exact build, and passed upgrade → rollback → forward rehearsal. The original local phase pushed, merged and deployed nothing. The later operator activation above deploys only public synthetic review; no packet is marked Accepted.
 
 ## What is in it
 
@@ -105,21 +107,15 @@ Local checks and image rollback do not prove human acceptance, hosted/tunnel beh
 ## Known limits and remaining gates
 
 - **P2 open:** assignee deactivation blocks active teammates’ pickup and the manager pickup-assignment path. Runtime code is unchanged by the local review. Fix and verify before enabling `flag.task_pickup`; the recorded passing suites do not cover this scenario.
-- Hosted activation, real tenant/provider behavior, tunnel/browser/operator checks, assistive-technology sessions and human/pilot acceptance remain open. No packet or whole specification is Accepted.
+- Review activation and basic tunnel/auth/operator/browser checks are recorded above. Real provider consent, full hosted feature workflows, assistive-technology sessions and human/pilot acceptance remain open. No packet or whole specification is Accepted.
 - Repository controls/Tier B review, packet 039 S18, packet 040 S16 cohort measurement/Jay's ruling, and flag retirement after activation/pilot remain open.
 - The required production dependency scan is clean. The additional full npm scan reports **one high development-tool advisory for Vite**; it is recorded separately and no dependency upgrade was folded into this release.
 - The exhaustive UI comparison captures controls/rows/requests/permissions/accessibility, not Jay's visual approval. The styling differences below remain for his eye.
 - The rehearsal proves a local main-to-final image switch on PostgreSQL 17. It does not prove homedev permissions, installed timers, off-host backups or hosted acceptance.
 
-## Activation steps
+## Completed review activation
 
-Use [the current deployment preflight](2026-10-29-packets-039-051-deploy-preflight.md), which preserves the live Social-plus-tester authentication mode. The earlier `2dcdaec4` activation commands are superseded by that prepared committed archive and its operator handoff. In Jay's homedev terminal, after staging:
-
-```bash
-bash /home/jaypatel04/Workspace/Projects/pm-tool/incoming/deploy-039-051-20261029/activate.sh
-```
-
-This is the remaining operator step, not an action completed by this preflight. It retains the database, checks a private dump, uses the Social override, verifies actual flag values and post-upgrade state, and retains a Social-aware previous-image rollback. No timer installation, fixture seeding, flag activation or irreversible log initialization is included.
+Jay ran the one-use operator handoff from his own homedev terminal. Public synthetic review now runs `bf8a39d7290d8bad8f9138872582b164baaf1894` with private/public probes PASS, 38 → 42 migrations, core counts unchanged and all visible feature flags off. The [hosted verification](2026-10-29-packets-039-051-hosted-verification.md) contains results and limitations. No timer installation, fixture seeding, feature-flag activation or irreversible log initialization was performed. Host rollback was prepared but not used.
 
 ## Rollback
 
@@ -143,6 +139,6 @@ The [local follow-up](2026-10-29-packets-039-051-local-followup.md) reviews all 
 4. **Reviewed; behavior retained.** Evaluator-relevant settings and `flag.backlog` queue reevaluation of Active projects asynchronously; Manual-order export follows board order. With `data_entry_safety` off, failed text survives blur/retry but may be lost on panel exit/unmount. Stale retries can conflict after the same actor's intervening edit. These replace the overbroad “any flag / at once” and “leaving a field” descriptions.
 5. **Reviewed; display redaction retained.** Internal-note values are hidden in activity for all readers; the field's change remains visible. Stored audit data is not erased.
 6. **Reviewed with one P2 gap.** Admin review exports use current settings for rule text beside recorded counts/notes (audit-fidelity limitation); only the page's latest review has an export button, while the API accepts a recorded ID. Historical pickup rows retain the original assignee's team, but live pickup/manager assignment is blocked after assignee deactivation. **Fix before enabling `task_pickup`.** Audit alerts intentionally retain the already-alerted marker after a cleared break.
-7. **Activation remains separate.** Jay's authorized operator session is required on homedev; optional verifiable-log activation is irreversible. No host actions were taken.
+7. **Review activation complete.** Jay completed it in his own homedev sudo terminal. Optional verifiable-log activation is irreversible and remains off; pilot/production promotion is separate.
 
-Repository controls/Tier B, 039 S18, 040 S16, hosted/operator/human/pilot evidence, visual acceptance and later flag cleanup remain open. Local review completion does not grant acceptance or feature activation.
+Repository controls/Tier B, 039 S18, 040 S16, full hosted feature workflows, human/pilot evidence, visual acceptance and later flag cleanup remain open. Local review completion does not grant acceptance or feature activation.

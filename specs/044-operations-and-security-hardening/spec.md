@@ -1,7 +1,7 @@
 # Feature Specification: Operations and Security Hardening
 
 **Packet**: 044 | **Feature directory**: `specs/044-operations-and-security-hardening` | **Date**: 2026-10-14
-**Status**: S01–S13 implemented and checked locally; S14/S15 scripts and local safety tests are present. Actual homedev backup runs, off-host retrieval, restore drills, and hosted and human acceptance remain pending. Line of record: `codex/integrate-039-050`, committed locally and not pushed. Not Accepted.
+**Status**: S01–S13 implemented and checked locally; S14/S15 scripts and local safety tests are present. The pre-upgrade review dump was observed and structurally checked during activation. A fresh scheduled run on this release, off-host retrieval, restore drills, full hosted workflows and human acceptance remain pending. Line of record: `codex/integrate-039-050`, committed locally and not pushed. Not Accepted. Code is deployed in public synthetic review `bf8a39d7` with visible feature flags off; full hosted-feature/pilot/human acceptance remains separate.
 **Input**: Jay's 2026-10-14 instruction to build everything in the build-approach report, additive only. This packet takes the report's roadmap items 1, 2, 6, 7, 8, 9, 11 and 17.
 **Source**: product specification §48 (§48.1 to §48.11) in `spec-parts/23-operations-and-security-hardening.md`. Related contracts: §13.0 (density), §13.15 (Admin screens), §17.6 (email), §21 (security), §22 (backup and recovery targets), §23.5 (outbox), §23.6 (session management), §23.8 (observability), §24.2 (`outbox_event`), §25.6 (errors), §25.10 (idempotency), §31.1 (AC-AUTH-04), FR-AUTH-01, FR-PLN-25 and AC-PLN-13.
 

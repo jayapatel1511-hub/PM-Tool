@@ -3,12 +3,13 @@
   "branch": "codex/integrate-039-050",
   "recordHeadBeforeHandoff": "34d9f22abd1405b8e9884bb4c62ec184ed1844e8",
   "boundary": {
-    "localOnly": true,
+    "localOnly": false,
     "pushedByThisSession": false,
-    "deployedToHomedev": false,
+    "deployedToHomedev": true,
     "accepted": false,
     "applicationSourcesUnchangedAfterRuntimeRelease": false,
-    "laterChanges": "Original verification/wording records through 56835986, then existing hosted hybrid-login preservation and focused checks; no new migrations"
+    "laterChanges": "Original verification/wording records through 56835986, then existing hosted hybrid-login preservation and focused checks; no new migrations",
+    "deploymentTarget": "public synthetic review only"
   },
   "toolchain": {
     "dotnet": "10.0.400",
@@ -585,9 +586,9 @@
   "deploymentPreflight": {
     "date": "2026-10-29 America/Halifax",
     "document": "2026-10-29-packets-039-051-deploy-preflight.md",
-    "state": "AWAITING_OPERATOR_ACTIVATION",
+    "state": "OPERATOR_ACTIVATION_PASS",
     "target": "homedev public synthetic review, pm.engcalchub.com:3080",
-    "observedCurrent": "f6f31d7e4b7b24875371443ed222d994ee0a4330",
+    "observedCurrent": "bf8a39d7290d8bad8f9138872582b164baaf1894",
     "authPreservation": "Social providers plus existing tester-password access, preserving profile/roles/session revocation",
     "runtimeChangedSinceOriginalRehearsal": true,
     "newMigrationsSinceOriginalRehearsal": false,
@@ -605,13 +606,356 @@
     "webTypecheckLintBuild": "PASS",
     "browserHybridAccountMenu": "PASS: synthetic API; zero errors/axe findings",
     "probeTestsPassed": 8,
-    "operatorGuardSyntheticFlowsPassed": 3,
+    "operatorGuardSyntheticFlowsPassed": 6,
     "guardedFlagsMustRemainOff": [
       "flag.task_pickup",
       "flag.verifiable_log"
     ],
     "pushed": false,
-    "deployed": false,
-    "accepted": false
-  }
+    "deployed": true,
+    "accepted": false,
+    "operatorGuardLocalPostgresCatalogProbe": "PASS"
+  },
+  "hostedDeployment": {
+    "result": "PASS",
+    "release": "bf8a39d7290d8bad8f9138872582b164baaf1894",
+    "previous": "f6f31d7e4b7b24875371443ed222d994ee0a4330",
+    "target": "public synthetic review only",
+    "url": "https://pm.engcalchub.com",
+    "activationVerifiedAtUtc": "2026-10-30T01:33:51.709978+00:00",
+    "activationVerifiedAtHalifax": "2026-10-29T22:33:51.709978-03:00",
+    "postApiCheckedAtUtc": "2026-10-30T01:49:29.805416+00:00",
+    "migrations": {
+      "before": 38,
+      "after": 42,
+      "added": [
+        "20261018214033_OutboxDeadLetter",
+        "20261018222421_TemplateOffsetDayKind",
+        "20261018232730_DeliveryWorkflowRecords",
+        "20261026012843_AdminReview"
+      ]
+    },
+    "coreRecordCountsBefore": {
+      "app_user": 15,
+      "project": 8,
+      "task": 46,
+      "comment": 8
+    },
+    "coreRecordCountsAfter": {
+      "app_user": 15,
+      "project": 8,
+      "task": 46,
+      "comment": 8
+    },
+    "coreRecordDeltas": {
+      "app_user": 0,
+      "project": 0,
+      "task": 0,
+      "comment": 0
+    },
+    "concurrentWritesExcluded": false,
+    "immutableTriggers": [
+      "admin_review_no_truncate",
+      "admin_review_no_update",
+      "deliverable_baseline_no_truncate",
+      "deliverable_baseline_no_update"
+    ],
+    "unitNullEqualityIndexes": [
+      "CREATE UNIQUE INDEX ix_org_unit_parent_id_name ON hub.org_unit USING btree (parent_id, name) NULLS NOT DISTINCT"
+    ],
+    "unprocessedAtAttemptLimitBefore": 0,
+    "unprocessedAtAttemptLimitAfter": 0,
+    "imageTagAndUidCheckedByOperatorGuard": true,
+    "candidateImmutableImageIdRecorded": false,
+    "privateAndPublicOperatorProbes": "PASS",
+    "independentPublicCurlHealthConfig": "PASS",
+    "macPythonUrllibPublicProbe": "HTTP403; curl and real browser succeeded; no protection changed",
+    "hostSideSyntheticAdminSignInAndSocialLogout": "PASS; copied cookie denied",
+    "credentialsCopiedToMac": false,
+    "browser": {
+      "scope": "Public anonymous desktop login after reload",
+      "result": "PASS",
+      "observedControls": [
+        "Microsoft",
+        "Google",
+        "User ID",
+        "Password",
+        "Sign in"
+      ],
+      "realProviderConsentRepeated": false,
+      "authenticatedBrowserSessionRepeated": false
+    },
+    "flags": {
+      "flag.verifiable_log": false,
+      "flag.commitment_reliability": false,
+      "flag.allocation_preview": false,
+      "flag.baseline_history": false,
+      "flag.revision_check": false,
+      "flag.task_pickup": false,
+      "flag.org_structure": false,
+      "flag.figure_names": false,
+      "flag.planner_kept_rows": false,
+      "flag.show_deleted": false,
+      "flag.template_working_days": false,
+      "flag.status_rollups": false,
+      "flag.picker_project_rank": false,
+      "flag.row_quick_actions": false,
+      "flag.date_context": false,
+      "flag.schedule_baseline": false,
+      "flag.small_ux": false,
+      "flag.timeline_handoffs_chain": false,
+      "flag.onboarding_card": false,
+      "flag.capacity_reports": false,
+      "flag.route_counter": false,
+      "flag.template_roles": false,
+      "flag.unfilled_beside_capacity": false,
+      "flag.project_status_note": false,
+      "flag.my_work_follow_up": false,
+      "flag.project_import": false,
+      "flag.capacity_polish": false,
+      "flag.record_engine_additions": false,
+      "flag.live_project_stamp": false,
+      "flag.live_events": false,
+      "flag.admin_review": false,
+      "flag.data_entry_safety": false,
+      "flag.backlog": false
+    },
+    "operations": {
+      "checkedAtUtc": "2026-10-30T01:49:29.805416+00:00",
+      "problemKinds": [],
+      "pendingChanges": 0,
+      "deadLetterCount": 0,
+      "jobs": [
+        {
+          "job": "daily-digest",
+          "status": "Succeeded",
+          "startedAt": "2026-10-30T01:45:26.578002+00:00",
+          "finishedAt": "2026-10-30T01:45:26.604468+00:00",
+          "failed24h": 0
+        },
+        {
+          "job": "directory-sync",
+          "status": "Succeeded",
+          "startedAt": "2026-10-29T04:00:19.46957+00:00",
+          "finishedAt": "2026-10-29T04:00:19.558731+00:00",
+          "failed24h": 0
+        },
+        {
+          "job": "email-send",
+          "status": "Succeeded",
+          "startedAt": "2026-10-30T01:49:06.578764+00:00",
+          "finishedAt": "2026-10-30T01:49:06.593229+00:00",
+          "failed24h": 0
+        },
+        {
+          "job": "evaluation-retry",
+          "status": "Succeeded",
+          "startedAt": "2026-10-30T01:45:46.576423+00:00",
+          "finishedAt": "2026-10-30T01:45:46.603552+00:00",
+          "failed24h": 0
+        },
+        {
+          "job": "nightly-evaluation",
+          "status": "Succeeded",
+          "startedAt": "2026-10-29T03:15:19.429189+00:00",
+          "finishedAt": "2026-10-29T03:15:20.983633+00:00",
+          "failed24h": 0
+        },
+        {
+          "job": "ops-watchdog",
+          "status": "Succeeded",
+          "startedAt": "2026-10-30T01:49:26.578844+00:00",
+          "finishedAt": "2026-10-30T01:49:26.644972+00:00",
+          "failed24h": 0
+        },
+        {
+          "job": "weekly-summary",
+          "status": "Succeeded",
+          "startedAt": "2026-10-30T01:45:26.578429+00:00",
+          "finishedAt": "2026-10-30T01:45:26.665307+00:00",
+          "failed24h": 0
+        }
+      ]
+    },
+    "jobsFreshAfterActivationVerification": [
+      "daily-digest",
+      "email-send",
+      "evaluation-retry",
+      "ops-watchdog",
+      "weekly-summary"
+    ],
+    "jobsLatestSuccessPredatesActivationVerification": [
+      "directory-sync",
+      "nightly-evaluation"
+    ],
+    "backup": {
+      "newPreUpgradeDumps": [
+        {
+          "name": "hub-review-20261030T013324507374556Z.dump",
+          "bytes": 4013982,
+          "mode": "0o600",
+          "atUtc": "2026-10-30T01:33:26.043334+00:00"
+        }
+      ],
+      "restoreDrillRepeated": false
+    },
+    "hostRollbackPerformed": false,
+    "accepted": false,
+    "pilotOrProductionPromoted": false,
+    "pushed": false,
+    "rawHostReceipts": "/home/jaypatel04/Workspace/Projects/pm-tool/data/deploy-bf8a39d7290d8bad8f9138872582b164baaf1894",
+    "rawMacMetadata": "/private/tmp/pm-tool-deploy-20261029",
+    "guardCorrections": {
+      "activeKernelHostnameInsteadOfLegacyStaticFile": true,
+      "pgTriggerCatalogIncludesTruncate": true,
+      "syntheticFlowsPassed": 6,
+      "localPostgresCatalogProbe": "PASS; temporary transaction rolled back"
+    },
+    "initialPostApiCheckedAtUtc": "2026-10-30T01:37:15.383559+00:00",
+    "initialOperations": {
+      "asOf": "2026-10-30T01:37:15.2108053+00:00",
+      "problemKinds": [],
+      "pendingChanges": 0,
+      "deadLetterCount": 0,
+      "jobs": [
+        {
+          "job": "daily-digest",
+          "startedAt": "2026-10-30T01:35:06.565112+00:00",
+          "finishedAt": "2026-10-30T01:35:06.663708+00:00",
+          "status": "Succeeded",
+          "lastSuccess": "2026-10-30T01:35:06.565112+00:00",
+          "failed24h": 0
+        },
+        {
+          "job": "directory-sync",
+          "startedAt": "2026-10-29T04:00:19.46957+00:00",
+          "finishedAt": "2026-10-29T04:00:19.558731+00:00",
+          "status": "Succeeded",
+          "lastSuccess": "2026-10-29T04:00:19.46957+00:00",
+          "failed24h": 0
+        },
+        {
+          "job": "email-send",
+          "startedAt": "2026-10-30T01:37:06.564759+00:00",
+          "finishedAt": "2026-10-30T01:37:06.572408+00:00",
+          "status": "Succeeded",
+          "lastSuccess": "2026-10-30T01:37:06.564759+00:00",
+          "failed24h": 0
+        },
+        {
+          "job": "evaluation-retry",
+          "startedAt": "2026-10-30T01:30:40.795019+00:00",
+          "finishedAt": "2026-10-30T01:30:40.808946+00:00",
+          "status": "Succeeded",
+          "lastSuccess": "2026-10-30T01:30:40.795019+00:00",
+          "failed24h": 0
+        },
+        {
+          "job": "nightly-evaluation",
+          "startedAt": "2026-10-29T03:15:19.429189+00:00",
+          "finishedAt": "2026-10-29T03:15:20.983633+00:00",
+          "status": "Succeeded",
+          "lastSuccess": "2026-10-29T03:15:19.429189+00:00",
+          "failed24h": 0
+        },
+        {
+          "job": "ops-watchdog",
+          "startedAt": "2026-10-30T01:34:06.575012+00:00",
+          "finishedAt": "2026-10-30T01:34:06.813958+00:00",
+          "status": "Succeeded",
+          "lastSuccess": "2026-10-30T01:34:06.575012+00:00",
+          "failed24h": 0
+        },
+        {
+          "job": "weekly-summary",
+          "startedAt": "2026-10-30T01:30:20.835023+00:00",
+          "finishedAt": "2026-10-30T01:30:20.859391+00:00",
+          "status": "Succeeded",
+          "lastSuccess": "2026-10-30T01:30:20.835023+00:00",
+          "failed24h": 0
+        }
+      ]
+    },
+    "finalSampledCheck": {
+      "checkedAtUtc": "2026-10-30T01:49:29.805416+00:00",
+      "secondsAfterActivationVerification": 938,
+      "sampledChecksNotContinuousMetrics": true,
+      "health": {
+        "status": "Healthy",
+        "build": "bf8a39d7290d8bad8f9138872582b164baaf1894"
+      },
+      "problemKinds": [],
+      "pendingChanges": 0,
+      "deadLetterCount": 0,
+      "flagsUnchangedAndOff": true,
+      "visibleFlagCount": 33,
+      "jobs": [
+        {
+          "job": "daily-digest",
+          "status": "Succeeded",
+          "startedAt": "2026-10-30T01:45:26.578002+00:00",
+          "finishedAt": "2026-10-30T01:45:26.604468+00:00",
+          "failed24h": 0
+        },
+        {
+          "job": "directory-sync",
+          "status": "Succeeded",
+          "startedAt": "2026-10-29T04:00:19.46957+00:00",
+          "finishedAt": "2026-10-29T04:00:19.558731+00:00",
+          "failed24h": 0
+        },
+        {
+          "job": "email-send",
+          "status": "Succeeded",
+          "startedAt": "2026-10-30T01:49:06.578764+00:00",
+          "finishedAt": "2026-10-30T01:49:06.593229+00:00",
+          "failed24h": 0
+        },
+        {
+          "job": "evaluation-retry",
+          "status": "Succeeded",
+          "startedAt": "2026-10-30T01:45:46.576423+00:00",
+          "finishedAt": "2026-10-30T01:45:46.603552+00:00",
+          "failed24h": 0
+        },
+        {
+          "job": "nightly-evaluation",
+          "status": "Succeeded",
+          "startedAt": "2026-10-29T03:15:19.429189+00:00",
+          "finishedAt": "2026-10-29T03:15:20.983633+00:00",
+          "failed24h": 0
+        },
+        {
+          "job": "ops-watchdog",
+          "status": "Succeeded",
+          "startedAt": "2026-10-30T01:49:26.578844+00:00",
+          "finishedAt": "2026-10-30T01:49:26.644972+00:00",
+          "failed24h": 0
+        },
+        {
+          "job": "weekly-summary",
+          "status": "Succeeded",
+          "startedAt": "2026-10-30T01:45:26.578429+00:00",
+          "finishedAt": "2026-10-30T01:45:26.665307+00:00",
+          "failed24h": 0
+        }
+      ],
+      "signInAndSocialLogoutCopiedCookieDenied": true
+    },
+    "publicFrontendAssets": {
+      "checkedAtUtc": "2026-10-30T01:47:09.689031+00:00",
+      "release": "bf8a39d7290d8bad8f9138872582b164baaf1894",
+      "entryPath": "/assets/index-BnCdr4Yf.js",
+      "entrySha256": "969ab9fa51bb31d4095069fbbc9799616f21b11f0333877c9fab07e1f7fe0482",
+      "buildStampChunk": {
+        "path": "/assets/common-DOJhtx8J.js",
+        "sha256": "b11d6817f202038ec586823b324d7dbce222d1328b9f99dfcff72979a93000fe",
+        "bytes": 298643
+      },
+      "chunksRead": 4,
+      "frontendBuildStampMatches": true
+    }
+  },
+  "currentRuntimeRelease": "bf8a39d7290d8bad8f9138872582b164baaf1894",
+  "runtimeReleaseEvidenceScope": "Original full local verification/rehearsal at 2dcdaec4; current deployed source is currentRuntimeRelease"
 }

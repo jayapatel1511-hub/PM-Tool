@@ -8,5 +8,5 @@
  * @param {Partial<Schemas['ClientConfig']>} [c]
  * @returns {Schemas['ClientConfig']}
  */
-const clientConfig = (c = {}) => ({ authMode: 'Development', providers: [], entra: { clientId: '', tenantId: '', apiScope: '' }, ...c })
+const clientConfig = (c = {}) => ({ authMode: 'Development', localPasswordEnabled: false, providers: [], entra: { clientId: '', tenantId: '', apiScope: '' }, ...c })
 module.exports = { clientConfig }

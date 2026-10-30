@@ -57,7 +57,7 @@ export function LandingPage() {
   return <ApprovedHero />
 }
 
-export function LoginPage({ mode, providers = [], onSignIn, onLocalSignIn, users, onPick, error, idle }: { mode: 'Development' | 'LocalPassword' | 'Entra' | 'Social'; providers?: string[]; onSignIn: (provider?: string) => void; onLocalSignIn: (userName: string, password: string) => Promise<void>; users?: DevUser[]; onPick: (email: string) => void; error?: string; idle?: boolean }) {
+export function LoginPage({ mode, providers = [], localPasswordEnabled = false, onSignIn, onLocalSignIn, users, onPick, error, idle }: { mode: 'Development' | 'LocalPassword' | 'Entra' | 'Social'; providers?: string[]; localPasswordEnabled?: boolean; onSignIn: (provider?: string) => void; onLocalSignIn: (userName: string, password: string) => Promise<void>; users?: DevUser[]; onPick: (email: string) => void; error?: string; idle?: boolean }) {
   const [userName, setUserName] = useState(''), [password, setPassword] = useState(''), [busy, setBusy] = useState(false)
   async function submit(e: FormEvent) { e.preventDefault(); setBusy(true); try { await onLocalSignIn(userName, password); setPassword('') } finally { setBusy(false) } }
   return <PublicShell>
@@ -98,6 +98,13 @@ export function LoginPage({ mode, providers = [], onSignIn, onLocalSignIn, users
                 </button>
               ))}</div>}
           </div>}
+        {mode === 'Social' && localPasswordEnabled &&
+          <form className="mt-6 space-y-4 border-t pt-6" onSubmit={submit}>
+            <p className="text-sm font-medium">{t('auth.existingTestAccount')}</p>
+            <div className="space-y-1.5"><Label htmlFor="review-user">{t('auth.userId')}</Label><Input id="review-user" autoComplete="username" required maxLength={64} value={userName} onChange={e => setUserName(e.target.value)} /></div>
+            <div className="space-y-1.5"><Label htmlFor="review-password">{t('auth.password')}</Label><Input id="review-password" type="password" autoComplete="current-password" required value={password} onChange={e => setPassword(e.target.value)} /></div>
+            <Button type="submit" size="lg" className="w-full" disabled={busy}>{t('auth.signIn')}<ArrowRight aria-hidden /></Button>
+          </form>}
         <div className="mt-8 flex items-center justify-center gap-2 border-t pt-4 text-center text-xs/[18px] text-muted-foreground"><ShieldCheck aria-hidden className="size-4 shrink-0" />{t(mode === 'Social' ? 'entrance.socialAssurance' : 'entrance.assurance')}</div>
       </section>
     </main>

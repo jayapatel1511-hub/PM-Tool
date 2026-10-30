@@ -1,5 +1,9 @@
 # Implementation status
 
+## 2026-10-29 deployment preflight
+
+Jay requested deployment. Live inspection found the integration omitted the already-deployed Social-plus-tester login compatibility. That behavior is restored with focused auth/session/contract/browser verification; [the preflight](handoffs/2026-10-29-packets-039-051-deploy-preflight.md) records exact boundaries and the staged operator handoff. Activation still requires Jay's own homedev sudo terminal. The original full-suite/rehearsal SHA below remains historical evidence; it does not cover this auth correction. Pickup stays dark pending its P2 fix; no deployment or acceptance claim is made here.
+
 ## 2026-10-29 packets 039–051 local release candidate
 
 Packets 039–042 and 044–051 are implemented and checked locally on `codex/integrate-039-050`; all 46 packet 040 conversion inventory files are integrated. Jay confirmed packet 043 KILL on 2026-10-25, and its existing-component fallback is built. The [release candidate](handoffs/2026-10-29-packets-039-051-release-candidate.md) records the exact runtime SHA, local checks, upgrade/rollback rehearsal, fixes, assumptions and For Jay list.

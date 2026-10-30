@@ -119,7 +119,8 @@ public static class HubModules
         }).RequireRateLimiting("client-errors");
         // Public client configuration for the SPA sign-in (no secrets: client and tenant IDs are public values).
         api.MapGet("/config", Ok<ClientConfig> (IConfiguration cfg, IHostEnvironment env) => TypedResults.Ok(new ClientConfig(
-            AuthSetup.DevAuthAllowed(env, cfg) ? "Development" : AuthSetup.LocalAuthAllowed(env, cfg) ? "LocalPassword" : cfg["Auth:Mode"] == SocialAuth.Scheme ? "Social" : "Entra",
+            AuthSetup.DevAuthAllowed(env, cfg) ? "Development" : cfg["Auth:Mode"] == SocialAuth.Scheme ? "Social" : AuthSetup.LocalAuthAllowed(env, cfg) ? "LocalPassword" : "Entra",
+            AuthSetup.LocalAuthAllowed(env, cfg),
             cfg["Auth:Mode"] == SocialAuth.Scheme ? SocialAuth.Providers.Where(p => SocialAuth.Configured(cfg, p)).ToArray() : [],
             new EntraClientConfig(cfg["Auth:Entra:SpaClientId"], cfg["Auth:Entra:TenantId"], cfg["Auth:Entra:ApiScope"])))).AllowAnonymous();
     }
@@ -128,5 +129,5 @@ public static class HubModules
 }
 
 /// The public sign-in configuration the SPA reads before anyone is signed in. No secrets: the client and tenant ids are public values.
-public sealed record ClientConfig(string AuthMode, string[] Providers, EntraClientConfig Entra);
+public sealed record ClientConfig(string AuthMode, bool LocalPasswordEnabled, string[] Providers, EntraClientConfig Entra);
 public sealed record EntraClientConfig(string? ClientId, string? TenantId, string? ApiScope);

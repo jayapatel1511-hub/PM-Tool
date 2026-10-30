@@ -117,3 +117,8 @@ The S15 conversion removed the legacy get import used by the in-memory pre-live 
 ### Final local release evidence, 2026-10-29
 
 Final real lifecycle gate PASS on the final application assets: 31 matching baseline/off reads, pulse ~4 seconds, follow-up ~1.5 seconds, silent stream close 60,998 ms/reconnect1,002 ms, hidden-tab close/reopen, 1/2/4/8/16/30-second outage backoff, sixth connection429 then200 after closing. No hosted/tunnel claim. See [the release handoff](../../docs/handoffs/2026-10-29-packets-039-051-release-candidate.md) and its machine-readable evidence. No packet is marked Accepted.
+
+
+### 2026-10-29 deployment compatibility follow-up
+
+Actual hosted preflight found `f6f31d7e` already serves Social providers plus existing tester-password access. Integration omitted that deployed compatibility change. The local correction restores its explicit default-off/non-Production option and the review override, preserves session revocation/verifier validation and existing profiles/roles, and adds `localPasswordEnabled` to the typed public config/client. No route-splitting/live-event behavior or migration changes. Focused auth/session/contract and built-app combined-login/account-menu checks are recorded in [the deployment preflight](../../docs/handoffs/2026-10-29-packets-039-051-deploy-preflight.md). Original full-suite/parity/image evidence is not claimed for this new auth source. Actual activation remains an operator step; no packet is Accepted.

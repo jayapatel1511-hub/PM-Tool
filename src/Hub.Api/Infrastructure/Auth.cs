@@ -63,7 +63,8 @@ public static class AuthSetup
     }
 
     public static bool LocalAuthAllowed(IHostEnvironment env, IConfiguration cfg) =>
-        (env.IsDevelopment() || env.IsStaging() || env.IsEnvironment("Testing")) && cfg["Auth:Mode"] == LocalScheme;
+        (env.IsDevelopment() || env.IsStaging() || env.IsEnvironment("Testing"))
+        && (cfg["Auth:Mode"] == LocalScheme || (cfg["Auth:Mode"] == SocialAuth.Scheme && cfg.GetValue<bool>("Auth:Social:AllowLocalPassword")));
 
     public static bool DevAuthAllowed(IHostEnvironment env, IConfiguration cfg) =>
         (env.IsDevelopment() || env.IsEnvironment("Testing")) && cfg["Auth:Mode"] == "Development";
@@ -73,27 +74,30 @@ public static class AuthSetup
         var dev = DevAuthAllowed(b.Environment, b.Configuration);
         var local = LocalAuthAllowed(b.Environment, b.Configuration);
         var social = b.Configuration["Auth:Mode"] == SocialAuth.Scheme;
-        if (b.Configuration["Auth:Mode"] == LocalScheme && !local)
+        if ((b.Configuration["Auth:Mode"] == LocalScheme || (social && b.Configuration.GetValue<bool>("Auth:Social:AllowLocalPassword"))) && !local)
             throw new InvalidOperationException("LocalPassword authentication is permitted only in Development, Staging or Testing.");
         if (local)
         {
             var file = b.Configuration["Auth:Local:UsersFile"];
             var json = b.Configuration["Auth:Local:UsersJson"];
             var keys = b.Configuration["Auth:Local:KeyDirectory"];
-            if (string.IsNullOrWhiteSpace(keys) || string.IsNullOrWhiteSpace(file) == string.IsNullOrWhiteSpace(json))
+            if ((!social && string.IsNullOrWhiteSpace(keys)) || string.IsNullOrWhiteSpace(file) == string.IsNullOrWhiteSpace(json))
                 throw new InvalidOperationException("LocalPassword requires exactly one credential source and a persistent data protection key directory.");
             b.Services.AddSingleton(new LocalPasswordStore(json ?? file!, json is not null));
-            Directory.CreateDirectory(keys);
-            if (!OperatingSystem.IsWindows()) File.SetUnixFileMode(keys, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
-            b.Services.AddDataProtection().PersistKeysToFileSystem(new DirectoryInfo(keys));
-            b.Services.AddSingleton<LocalSessionStore>();
-            b.Services.AddOptions<CookieAuthenticationOptions>(LocalScheme).Configure<LocalSessionStore, TimeProvider>((o, sessions, clock) =>
+            if (!social)
             {
-                o.SessionStore = sessions;
-                o.TimeProvider = clock;
-            });
+                Directory.CreateDirectory(keys!);
+                if (!OperatingSystem.IsWindows()) File.SetUnixFileMode(keys!, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+                b.Services.AddDataProtection().PersistKeysToFileSystem(new DirectoryInfo(keys!));
+                b.Services.AddSingleton<LocalSessionStore>();
+                b.Services.AddOptions<CookieAuthenticationOptions>(LocalScheme).Configure<LocalSessionStore, TimeProvider>((o, sessions, clock) =>
+                {
+                    o.SessionStore = sessions;
+                    o.TimeProvider = clock;
+                });
+            }
         }
-        var auth = b.Services.AddAuthentication(dev ? DevScheme : local ? LocalScheme : social ? SocialAuth.Scheme : JwtBearerDefaults.AuthenticationScheme);
+        var auth = b.Services.AddAuthentication(dev ? DevScheme : social ? SocialAuth.Scheme : local ? LocalScheme : JwtBearerDefaults.AuthenticationScheme);
         if (social)
             SocialAuth.Add(b, auth);
         else if (dev)
@@ -111,14 +115,7 @@ public static class AuthSetup
                 o.Events.OnRedirectToLogin = c => { c.Response.StatusCode = 401; return Task.CompletedTask; };
                 o.Events.OnRedirectToAccessDenied = c => { c.Response.StatusCode = 403; return Task.CompletedTask; };
                 // Rotating or removing a person's verifier ends their sessions: a cookie is only good with the stamp it was issued with.
-                o.Events.OnValidatePrincipal = async c =>
-                {
-                    var store = c.HttpContext.RequestServices.GetRequiredService<LocalPasswordStore>();
-                    if (Guid.TryParse(c.Principal?.FindFirst("local_user_id")?.Value, out var id)
-                        && c.Principal!.FindFirst(StampClaim)?.Value is { } stamp && store.Stamp(id) == stamp) return;
-                    c.RejectPrincipal();
-                    await c.HttpContext.SignOutAsync(LocalScheme);
-                };
+                o.Events.OnValidatePrincipal = ValidateLocalPrincipal;
             });
         else
             auth.AddJwtBearer(o =>
@@ -133,6 +130,15 @@ public static class AuthSetup
                 o.TokenValidationParameters.NameClaimType = "name";
             });
         b.Services.AddAuthorization(o => o.FallbackPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
+    }
+
+    public static async Task ValidateLocalPrincipal(CookieValidatePrincipalContext c)
+    {
+        var store = c.HttpContext.RequestServices.GetService<LocalPasswordStore>();
+        if (Guid.TryParse(c.Principal?.FindFirst("local_user_id")?.Value, out var id)
+            && c.Principal!.FindFirst(StampClaim)?.Value is { } stamp && store?.Stamp(id) == stamp) return;
+        c.RejectPrincipal();
+        await c.HttpContext.SignOutAsync(c.Scheme.Name);
     }
 
     /// One address with something either side of a single @ and no spaces: catches typos, not a full RFC 5322 check.
@@ -163,7 +169,7 @@ public static class AuthSetup
     {
         var spec = cfg["Auth:Local:BootstrapAdmins"];
         if (string.IsNullOrWhiteSpace(spec)) return;
-        if (!LocalAuthAllowed(env, cfg)) { log.LogWarning("Auth:Local:BootstrapAdmins is ignored: it applies only to local-password sign-in."); return; }
+        if (cfg["Auth:Mode"] != LocalScheme || !LocalAuthAllowed(env, cfg)) { log.LogWarning("Auth:Local:BootstrapAdmins is ignored: it applies only to local-password sign-in."); return; }
         db.Audit.AsSystem("LocalBootstrap");
         foreach (var (email, name) in ParseBootstrapAdmins(spec))
         {

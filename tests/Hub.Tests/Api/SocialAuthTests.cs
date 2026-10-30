@@ -1,14 +1,19 @@
 using System.Net;
+using System.Net.Http.Json;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Hub.Api.Data;
+using Hub.Api.Infrastructure;
 using Hub.Domain;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 
 namespace Hub.Tests.Api;
 
@@ -74,9 +79,10 @@ public sealed class SocialAuthTests : IDisposable
     static string Cookie(HttpResponseMessage r) => r.Headers.TryGetValues("Set-Cookie", out var values)
         ? string.Join("; ", values.Where(v => !v.StartsWith(".AspNetCore.Correlation") && !v.Contains("=;", StringComparison.Ordinal)).Select(v => v.Split(';')[0])) : "";
 
-    static Task<HttpResponseMessage> Send(HttpClient c, HttpMethod method, string path, string? cookie = null, string? origin = "https://localhost")
+    static Task<HttpResponseMessage> Send(HttpClient c, HttpMethod method, string path, string? cookie = null, string? origin = "https://localhost", object? body = null)
     {
         var request = new HttpRequestMessage(method, path);
+        if (body is not null) request.Content = JsonContent.Create(body);
         if (cookie is not null) request.Headers.Add("Cookie", cookie);
         if (method == HttpMethod.Post && origin is not null) request.Headers.Add("Origin", origin);
         return c.SendAsync(request);
@@ -98,6 +104,114 @@ public sealed class SocialAuthTests : IDisposable
     {
         var challenge = await Challenge(c, name, cookie, link);
         return await Send(c, HttpMethod.Get, challenge.Path, challenge.Cookie);
+    }
+
+    [Fact]
+    public void Existing_password_access_cannot_be_enabled_in_production()
+    {
+        var b = WebApplication.CreateBuilder(new WebApplicationOptions { EnvironmentName = "Production" });
+        b.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["Auth:Mode"] = "Social", ["Auth:Social:AllowLocalPassword"] = "true",
+        });
+        Assert.Throws<InvalidOperationException>(() => b.AddHubAuth());
+    }
+
+    [Fact]
+    public async Task Existing_test_accounts_keep_their_profile_and_can_connect_social_sign_in()
+    {
+        var id = Guid.NewGuid();
+        const string password = "synthetic existing tester password";
+        var salt = RandomNumberGenerator.GetBytes(16);
+        var hash = Rfc2898DeriveBytes.Pbkdf2(password, salt, LocalPasswordStore.Iterations, HashAlgorithmName.SHA256, 32);
+        var file = Path.Combine(dir, "users.json");
+        File.WriteAllText(file, JsonSerializer.Serialize(new { users = new[] { new
+        {
+            userId = id, userName = "existing.tester", salt = Convert.ToHexStringLower(salt), hash = Convert.ToHexStringLower(hash),
+        } } }));
+        if (!OperatingSystem.IsWindows()) File.SetUnixFileMode(file, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+        f.Settings["Auth:Social:AllowLocalPassword"] = "true";
+        f.Settings["Auth:Local:UsersFile"] = file;
+        var c = Start();
+        f.Db(db =>
+        {
+            db.Users.Add(new AppUser { Id = id, Email = "existing@hub.test", DisplayName = "Existing Tester", IsActive = true });
+            db.UserRoles.Add(new UserSystemRole { UserId = id, Role = SystemRole.Admin, Source = RoleSource.Manual });
+            db.SaveChanges();
+            return 0;
+        });
+        var config = await (await c.GetAsync("/api/v1/config")).Json();
+        Assert.Equal("Social", config["authMode"]!.GetValue<string>());
+        Assert.True(config["localPasswordEnabled"]!.GetValue<bool>());
+        Assert.Equal(HttpStatusCode.Unauthorized, (await Send(c, HttpMethod.Post, "/api/v1/auth/local/sign-in", body: new { userName = "wrong.tester", password = "wrong synthetic password" })).StatusCode);
+        async Task<string> ExistingSignIn(HttpClient? connection = null)
+        {
+            var signed = await Send(connection ?? c, HttpMethod.Post, "/api/v1/auth/local/sign-in", body: new { userName = "existing.tester", password });
+            Assert.Equal(HttpStatusCode.NoContent, signed.StatusCode);
+            Assert.Contains("__Host-hub-social=", Cookie(signed));
+            return Cookie(signed);
+        }
+        var old = await ExistingSignIn();
+        var linked = await SignIn(c, "Google", old, link: true);
+        Assert.Equal("/preferences?accountLinked=true", linked.Headers.Location?.ToString());
+        var social = Cookie(await SignIn(c, "Google"));
+        var me = await (await Send(c, HttpMethod.Get, "/api/v1/me", old)).Json();
+        Assert.Equal(id.ToString(), me["id"]!.ToString());
+        Assert.Contains("Admin", me["systemRoles"]!.AsArray().Select(v => v!.ToString()));
+        Assert.Equal(HttpStatusCode.NoContent, (await Send(c, HttpMethod.Post, "/api/v1/auth/local/sign-out", old)).StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await Send(c, HttpMethod.Get, "/api/v1/me", old)).StatusCode);
+        var connected = await (await Send(c, HttpMethod.Get, "/api/v1/me", social)).Json();
+        Assert.Equal(id.ToString(), connected["id"]!.ToString());
+        Assert.Equal("existing@hub.test", connected["email"]!.ToString());
+        Assert.Equal("Existing Tester", connected["displayName"]!.ToString());
+        Assert.Contains("Admin", connected["systemRoles"]!.AsArray().Select(v => v!.ToString()));
+        Assert.Equal(1, f.Db(db => db.Users.Count()));
+
+        // Linking and social challenges share the five-attempt sign-in limiter. Start a fresh host for
+        // the independent session-revocation checks; keep production limits unchanged and reuse keys/DB.
+        using var resumed = f.WithWebHostBuilder(_ => { });
+        using var resumedClient = resumed.CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://localhost"), HandleCookies = false });
+        var legacy = await ExistingSignIn(resumedClient);
+        Assert.Equal(HttpStatusCode.OK, (await Send(c, HttpMethod.Get, "/api/v1/me", legacy)).StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, (await Send(c, HttpMethod.Post, "/api/v1/auth/social/sign-out", legacy)).StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await Send(c, HttpMethod.Get, "/api/v1/me", legacy)).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await Send(c, HttpMethod.Get, "/api/v1/me", social)).StatusCode);
+
+        var rotated = await ExistingSignIn(resumedClient);
+        File.WriteAllText(file, JsonSerializer.Serialize(new { users = new[] { new
+        {
+            userId = id, userName = "existing.tester", salt = Convert.ToHexStringLower(salt), hash = Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(32)),
+        } } }));
+        File.SetLastWriteTimeUtc(file, DateTime.UtcNow.AddSeconds(1));
+        Assert.Equal(HttpStatusCode.Unauthorized, (await Send(c, HttpMethod.Get, "/api/v1/me", rotated)).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await Send(c, HttpMethod.Get, "/api/v1/me", social)).StatusCode);
+
+        File.WriteAllText(file, JsonSerializer.Serialize(new { users = new[] { new
+        {
+            userId = id, userName = "existing.tester", salt = Convert.ToHexStringLower(salt), hash = Convert.ToHexStringLower(hash),
+        } } }));
+        File.SetLastWriteTimeUtc(file, DateTime.UtcNow.AddSeconds(2));
+        using var beforeDisable = f.WithWebHostBuilder(_ => { });
+        using var beforeDisableClient = beforeDisable.CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://localhost"), HandleCookies = false });
+        var freshLocal = await Send(beforeDisableClient, HttpMethod.Post, "/api/v1/auth/local/sign-in", body: new { userName = "existing.tester", password });
+        Assert.Equal(HttpStatusCode.NoContent, freshLocal.StatusCode);
+        var freshLocalCookie = Cookie(freshLocal);
+        Assert.NotEmpty(freshLocalCookie);
+        Assert.Equal(HttpStatusCode.OK, (await Send(beforeDisableClient, HttpMethod.Get, "/api/v1/me", social)).StatusCode);
+
+        f.Settings["Auth:Social:AllowLocalPassword"] = "false";
+        using var next = f.WithWebHostBuilder(_ => { });
+        using var nextClient = next.CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://localhost"), HandleCookies = false });
+        var disabledConfig = await (await nextClient.GetAsync("/api/v1/config")).Json();
+        Assert.False(disabledConfig["localPasswordEnabled"]!.GetValue<bool>());
+        Assert.Equal(HttpStatusCode.Unauthorized, (await Send(nextClient, HttpMethod.Post, "/api/v1/auth/local/sign-in", body: new { userName = "existing.tester", password })).StatusCode);
+        // Sign-in POSTs deliberately ignore any existing cookie; a valid social GET proves the disabled route is absent.
+        Assert.Equal(HttpStatusCode.NotFound, (await Send(nextClient, HttpMethod.Get, "/api/v1/auth/local/sign-in", social)).StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await Send(nextClient, HttpMethod.Get, "/api/v1/me", freshLocalCookie)).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await Send(nextClient, HttpMethod.Get, "/api/v1/me", social)).StatusCode);
+        await f.DbAsync(async db => { var user = await db.Users.SingleAsync(); user.IsActive = false; await db.SaveChangesAsync(); return 0; });
+        Assert.Equal(HttpStatusCode.Unauthorized, (await Send(nextClient, HttpMethod.Get, "/api/v1/me", social)).StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await Send(nextClient, HttpMethod.Get, "/api/v1/me", legacy)).StatusCode);
     }
 
     [Theory]

@@ -151,3 +151,8 @@ Final combined backend/contract result: **1,648 passed, 0 failed, 1 opt-in scale
 
 
 The committed shape baseline also retains previously observed nullable/empty-collection variants. The current run cannot reveal children below an empty deliverable-inconsistency or milestone array; those old observed fields/kinds are retained as a union rather than pruned. All old snapshot paths/kinds are preserved, the 13 new paths are additive, and checking the current full run still passes under the tool's documented null/empty-parent rules.
+
+
+### 2026-10-29 hosted-login compatibility contract
+
+Deployment preflight restores the existing hosted Social-plus-tester login policy omitted from this integration base. `HubModules.ClientConfig` and generated OpenAPI/TypeScript add the public `localPasswordEnabled` boolean; existing config fields, order relative to one another and nested Entra values remain. Module contract tests explicitly check false outside opted-in review/test compatibility, and the auth test checks true for that mode. This is an additive config field for existing hosted behavior, with no new migration or S15.n inventory change. See [the deployment preflight](../../docs/handoffs/2026-10-29-packets-039-051-deploy-preflight.md) for checks and operator boundaries.

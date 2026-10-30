@@ -240,10 +240,10 @@ if (AuthSetup.LocalAuthAllowed(app.Environment, cfg))
         db.LogEvent(ItemType.User, user.Id, "SignedIn", "access", key: user.Email, name: user.DisplayName);
         await db.SaveChangesAsync(); // authentication must not succeed without its audit event
         var claims = new[] { new Claim("oid", $"local:{id}"), new Claim("local_user_id", id.ToString()!), new Claim(AuthSetup.StampClaim, stamp!) };
-        await ctx.SignInAsync(AuthSetup.LocalScheme, new ClaimsPrincipal(new ClaimsIdentity(claims, AuthSetup.LocalScheme)));
+        await ctx.SignInAsync(cfg["Auth:Mode"] == SocialAuth.Scheme ? SocialAuth.Scheme : AuthSetup.LocalScheme, new ClaimsPrincipal(new ClaimsIdentity(claims, AuthSetup.LocalScheme)));
         return Results.NoContent();
     }).AllowAnonymous().RequireRateLimiting("local-sign-in");
-    api.MapPost("/auth/local/sign-out", async (HttpContext ctx) => { await ctx.SignOutAsync(AuthSetup.LocalScheme); return Results.NoContent(); });
+    api.MapPost("/auth/local/sign-out", async (HttpContext ctx) => { await ctx.SignOutAsync(cfg["Auth:Mode"] == SocialAuth.Scheme ? SocialAuth.Scheme : AuthSetup.LocalScheme); return Results.NoContent(); });
 }
 if (app.Environment.IsDevelopment()) app.MapOpenApi("/api/v1/openapi.json").AllowAnonymous();
 else app.MapOpenApi("/api/v1/openapi.json");

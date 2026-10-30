@@ -13,9 +13,6 @@ const LandingPage = lazy(() => lazyImport(() => import('@/pages/Entrance').then(
 const LoginPage = lazy(() => lazyImport(() => import('@/pages/Entrance').then(module => ({ default: module.LoginPage }))))
 import { configureClientErrorReporter, disableClientErrorReporter } from '@/lib/client-errors'
 
-// Entra uses PKCE through MSAL. The isolated review deployment uses individual
-// password accounts and an HttpOnly cookie until company identity is ready.
-
 export type { Me, Offer } from './auth-context'
 export { Ctx, useFlag, useMe, useAuth, useOffer } from './auth-context'
 import { Ctx } from './auth-context'
@@ -41,6 +38,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
   const [signInError, setSignInError] = useState(socialSignInError)
   const [authMode, setAuthMode] = useState<Config['authMode']>('Entra')
   const [providers, setProviders] = useState<string[]>([])
+  const [localPasswordEnabled, setLocalPasswordEnabled] = useState(false)
   const cfg = useRef<Config | null>(null)
   const qc = useQueryClient()
 
@@ -52,6 +50,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
         cfg.current = c
         setAuthMode(c.authMode)
         setProviders(c.providers ?? [])
+        setLocalPasswordEnabled(c.localPasswordEnabled ?? false)
         if (idleExpired(8)) { sessionStorage.removeItem(DEV_KEY); setIdleNotice(true) }
         if (c.authMode === 'Development') {
           configureApi(async (): Promise<Record<string, string>> => { const u = sessionStorage.getItem(DEV_KEY); return u ? { 'X-Dev-User': u } : {} }, () => { sessionStorage.removeItem(DEV_KEY); preparePublicRoute(); setReady('public') })
@@ -93,7 +92,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
 
   if (ready === 'loading') return window.location.pathname === '/' ? <LandingPage /> : <Splash text={t('auth.signingIn')} />
   if (ready === 'error') return window.location.pathname === '/' ? <LandingPage /> : <Splash text={t('app.error')} />
-  if (ready === 'public') return window.location.pathname === '/' ? <LandingPage /> : <PublicLogin mode={authMode} providers={providers} idle={idleNotice} error={signInError} onSignIn={provider => {
+  if (ready === 'public') return window.location.pathname === '/' ? <LandingPage /> : <PublicLogin mode={authMode} providers={providers} localPasswordEnabled={localPasswordEnabled} idle={idleNotice} error={signInError} onSignIn={provider => {
     setSignInError('')
     if (authMode === 'Social' && provider && providers.includes(provider)) {
       window.location.assign(`/api/v1/auth/social/sign-in/${encodeURIComponent(provider)}`)
@@ -139,13 +138,13 @@ function finishSignIn() {
     window.location.replace(target?.startsWith('/') && !target.startsWith('//') && target !== '/login' ? target : '/my-work')
 }
 
-function PublicLogin({ mode, providers, onSignIn, onLocalSignIn, onPick, idle, error }: { mode: Config['authMode']; providers: string[]; onSignIn: (provider?: string) => void; onLocalSignIn: (userName: string, password: string) => Promise<void>; onPick: (email: string) => void; idle: boolean; error: string }) {
+function PublicLogin({ mode, providers, localPasswordEnabled, onSignIn, onLocalSignIn, onPick, idle, error }: { mode: Config['authMode']; providers: string[]; localPasswordEnabled: boolean; onSignIn: (provider?: string) => void; onLocalSignIn: (userName: string, password: string) => Promise<void>; onPick: (email: string) => void; idle: boolean; error: string }) {
   const users = useQuery({ queryKey: ['dev-users'], enabled: mode === 'Development', queryFn: async () => {
     const response = await fetch('/api/dev/users')
     if (!response.ok) throw new Error('Could not load test users')
     return response.json() as Promise<{ email: string; displayName: string; jobTitle?: string; roles: string[] }[]>
   } })
-  return <LoginPage mode={mode} providers={providers} onSignIn={onSignIn} onLocalSignIn={onLocalSignIn} users={mode === 'Development' ? users.data : undefined} onPick={onPick} idle={idle} error={error || (users.error ? 'Test users could not be loaded. Refresh to try again.' : undefined)} />
+  return <LoginPage mode={mode} providers={providers} localPasswordEnabled={localPasswordEnabled} onSignIn={onSignIn} onLocalSignIn={onLocalSignIn} users={mode === 'Development' ? users.data : undefined} onPick={onPick} idle={idle} error={error || (users.error ? 'Test users could not be loaded. Refresh to try again.' : undefined)} />
 }
 
 function Signed({ children, onSignOut }: { children: ReactNode; onSignOut: () => void }) {

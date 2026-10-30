@@ -163,7 +163,7 @@ class SocialActivationTests(unittest.TestCase):
     def test_social_probe_reports_copied_cookie_skip(self):
         code, output, _ = self.probe()
         self.assertEqual(code, 0, output)
-        self.assertRegex(output, r"(?m)^SKIP copied cookie after sign-out .*SocialAuthTests\.Logout_revokes_copied_cookie")
+        self.assertIn("SKIP existing local-password probes — config.localPasswordEnabled is not true", output)
 
     def test_activation_selects_social_override_and_verifier_only_when_requested(self):
         source = (ROOT / "scripts/activate-homedev-review.sh").read_text().split("\nlog() {", 1)[0]

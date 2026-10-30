@@ -7,8 +7,8 @@
     "pushedByThisSession": false,
     "deployedToHomedev": false,
     "accepted": false,
-    "applicationSourcesUnchangedAfterRuntimeRelease": true,
-    "laterChanges": "Verification tests, shape baseline, specification wording/generated documents and review records only"
+    "applicationSourcesUnchangedAfterRuntimeRelease": false,
+    "laterChanges": "Original verification/wording records through 56835986, then existing hosted hybrid-login preservation and focused checks; no new migrations"
   },
   "toolchain": {
     "dotnet": "10.0.400",
@@ -581,5 +581,37 @@
     "recommendations": [
       "Admin review exports: snapshot rule/settings at review time or label current-setting rule text; historical unknown values remain unknown"
     ]
+  },
+  "deploymentPreflight": {
+    "date": "2026-10-29 America/Halifax",
+    "document": "2026-10-29-packets-039-051-deploy-preflight.md",
+    "state": "AWAITING_OPERATOR_ACTIVATION",
+    "target": "homedev public synthetic review, pm.engcalchub.com:3080",
+    "observedCurrent": "f6f31d7e4b7b24875371443ed222d994ee0a4330",
+    "authPreservation": "Social providers plus existing tester-password access, preserving profile/roles/session revocation",
+    "runtimeChangedSinceOriginalRehearsal": true,
+    "newMigrationsSinceOriginalRehearsal": false,
+    "originalFullGatesReusedAsNewAuthEvidence": false,
+    "operatorHandoff": "/home/jaypatel04/Workspace/Projects/pm-tool/incoming/deploy-039-051-20261029/",
+    "sudoAvailableNoninteractively": false,
+    "hostedProbesBeforeActivation": "PASS",
+    "backendFocused": {
+      "passed": 83,
+      "failed": 0,
+      "skipped": 0,
+      "durationSeconds": 59,
+      "receipt": "/private/tmp/pm-tool-deploy-20261029/results/auth-deploy-final.trx"
+    },
+    "webTypecheckLintBuild": "PASS",
+    "browserHybridAccountMenu": "PASS: synthetic API; zero errors/axe findings",
+    "probeTestsPassed": 8,
+    "operatorGuardSyntheticFlowsPassed": 3,
+    "guardedFlagsMustRemainOff": [
+      "flag.task_pickup",
+      "flag.verifiable_log"
+    ],
+    "pushed": false,
+    "deployed": false,
+    "accepted": false
   }
 }

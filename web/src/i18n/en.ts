@@ -1031,6 +1031,7 @@ export const en = {
   'auth.password': 'Password',
   'auth.localFailed': 'User ID or password is incorrect.',
   'auth.continueWith': 'Continue with {provider}',
+  'auth.existingTestAccount': 'Already testing Tuesday? Use your existing test account.',
   'auth.connectProvider': 'Connect {provider}',
   'auth.providerConnected': '{provider} connected',
   'auth.signInMethods': 'Sign-in methods',

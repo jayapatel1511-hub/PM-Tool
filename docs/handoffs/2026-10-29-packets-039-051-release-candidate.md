@@ -1,10 +1,12 @@
 # Packets 039–051: local release candidate
 
+**Deployment follow-up:** [current preflight and operator handoff](2026-10-29-packets-039-051-deploy-preflight.md) preserve the already-hosted tester login alongside Social sign-in. The original full gates below belong to `2dcdaec4`; the auth correction has focused verification. Host activation still requires Jay’s sudo terminal.
+
 **Local follow-up:** [wording and review dispositions](2026-10-29-packets-039-051-local-followup.md) resolve the two wording items and identify a P2 inactive-assignee pickup defect. Runtime code is unchanged; fix and verify that defect before enabling `flag.task_pickup`. Visual acceptance remains open.
 
-**Release SHA:** `2dcdaec424eba81998e0c125f2e29621c8df39b0` on `codex/integrate-039-050`.
+**Original rehearsed release SHA:** `2dcdaec424eba81998e0c125f2e29621c8df39b0` on `codex/integrate-039-050`.
 
-This is the last application-code commit. Later commits add verification fixtures, bounded browser condition waits, response-shape evidence, specification wording corrections, status records and this handoff. The application, dependency manifests, migrations, hosting and operational scripts remain unchanged from this SHA. The local image was built from its `git archive`, identified itself with this exact build, and passed upgrade → rollback → forward rehearsal. Nothing was pushed, merged to main or deployed to homedev. No packet is marked Accepted.
+This was the application-code commit for the original full verification/rehearsal; the deployment follow-up adds the hosted-login preservation correction. Later commits add verification fixtures, bounded browser condition waits, response-shape evidence, specification wording corrections, status records and this handoff. Through the original local wording/review commit `56835986`, application sources, manifests, migrations, hosting and operational scripts were unchanged from this SHA. The later deployment follow-up changes auth source, the Social override, public config/client and the probe; it introduces no new migration. The original local image was built from the `2dcdaec4` archive, identified itself with that exact build, and passed upgrade → rollback → forward rehearsal. Nothing was pushed, merged to main or deployed to homedev. No packet is marked Accepted.
 
 ## What is in it
 
@@ -16,7 +18,7 @@ The merged review fixes cover Admin review visibility/validation/immutability, r
 
 The final verification pass also restored milestone advance/retarget confirmation, shortened Planner chrome without changing its word budget, and kept asynchronous people-picker placement current. Browser checks wait for actual placement and exact restored focus, retaining their geometry and accessibility assertions.
 
-## Checks
+## Original full checks at `2dcdaec4`
 
 The following preserves the 18-row shape of the 12 October release record. These are Mac-local equivalents, not a hosted CI/provenance claim. SDK **10.0.400**, Node **24.19.0**, local PostgreSQL 17 on port 55432, and the installed Chromium headless shell were used. No OS browser-dependency install, credentials or GitHub commands were needed.
 
@@ -98,7 +100,7 @@ The optional verifiable activity log was not activated on this review stack. Its
 
 Packet defaults and slice-specific assumptions remain in each packet's `verification.md`. The local follow-up confirms that Admin review exports reconstruct rule text from current settings, the page exposes the latest review's export while the API accepts a recorded ID, historical pickup report rows stay with the original assignee's team, and the audit-chain already-alerted marker is retained after a cleared break. It separately identifies the live inactive-assignee pickup/assignment defect; historical report retention is not proof of live eligibility. No rates, client facts or operational data were invented; browser/rehearsal data is synthetic.
 
-Local checks and image rollback do not prove human acceptance, hosted/tunnel behavior, real mail/directory integration, company pilot, scheduled off-host retrieval or recovery drills. The Mac-held-token exposure rule was observed; no credential-bearing remote operations were performed.
+Local checks and image rollback do not prove human acceptance, hosted/tunnel behavior, real mail/directory integration, company pilot, scheduled off-host retrieval or recovery drills. The original local phase performed no credential-bearing remote operations. The authorized deployment preflight subsequently ran host-side auth/logout probes on homedev without copying its credentials to the Mac; no Mac-held application/provider/registry token was used.
 
 ## Known limits and remaining gates
 
@@ -111,27 +113,13 @@ Local checks and image rollback do not prove human acceptance, hosted/tunnel beh
 
 ## Activation steps
 
-These are operator instructions from [the review runbook](../runbooks/homedev-review.md), **not actions performed in this session**. Jay owns host authorization and sudo. The CI-image timer stops at a contract migration until it is manually applied; do not bypass that stop or reuse exposed credentials.
+Use [the current deployment preflight](2026-10-29-packets-039-051-deploy-preflight.md), which preserves the live Social-plus-tester authentication mode. The earlier `2dcdaec4` activation commands are superseded by that prepared committed archive and its operator handoff. In Jay's homedev terminal, after staging:
 
-1. After review/authorization, prepare the committed release from a trusted Mac checkout:
-   ```bash
-   scripts/prepare-homedev-review.sh 2dcdaec424eba81998e0c125f2e29621c8df39b0
-   ```
-2. In Jay's homedev terminal:
-   ```bash
-   cd /home/jaypatel04/Workspace/Projects/pm-tool/releases/2dcdaec424eba81998e0c125f2e29621c8df39b0
-   bash scripts/activate-homedev-review.sh 2dcdaec424eba81998e0c125f2e29621c8df39b0 </dev/null
-   ```
-   The helper builds, takes the pre-upgrade dump, applies migrations on the existing volume, checks private probes and moves `current` only after success. Add `--install-timer` only when intentionally installing/proving the daily backup timer. The separate CI-image timer installation is an explicit later operator action.
-3. Compare the runbook's pre-upgrade query/row counts, migration history and post-upgrade state; verify the four immutable triggers, null-equality index, jobs and dead-letter count. Retain the previous image and verified dump.
-4. Run the private probe and tunnel probe, then approved review fixtures if needed:
-   ```bash
-   python3 scripts/verify-homedev-review.py
-   python3 scripts/verify-homedev-review.py https://pm.engcalchub.com
-   python3 scripts/seed-homedev-tuesday-review.py 2dcdaec424eba81998e0c125f2e29621c8df39b0
-   ```
-   Staffing fixtures remain opt-in (`--with-staffing-fixtures`) and change review calendar settings. Feature flags stay off until their audience and pilot are approved. Verifiable-log initialization follows the separate irreversible procedure in the runbook.
-5. Record hosted/operator/human evidence separately, including real backup retrieval/restore, rather than promoting these local results to acceptance.
+```bash
+bash /home/jaypatel04/Workspace/Projects/pm-tool/incoming/deploy-039-051-20261029/activate.sh
+```
+
+This is the remaining operator step, not an action completed by this preflight. It retains the database, checks a private dump, uses the Social override, verifies actual flag values and post-upgrade state, and retains a Social-aware previous-image rollback. No timer installation, fixture seeding, flag activation or irreversible log initialization is included.
 
 ## Rollback
 
@@ -141,7 +129,7 @@ The local rehearsal switched to main and back; actual operator rollback must use
 
 ## Commits and preservation
 
-Integration includes the five final conversion merges and their per-slice verification records; `cdcaa65` merges the release fixes, `63893c81` preserves aliased images during pruning, and `b4b7bba` fixes settings retry. `ba005266` records packet status, `bab887e7` isolates the dead-letter test/shortens Planner chrome, and `2dcdaec4` is the final application code. Subsequent commits contain verification fixtures/waits and release evidence only.
+Integration includes the five final conversion merges and their per-slice verification records; `cdcaa65` merges the release fixes, `63893c81` preserves aliased images during pruning, and `b4b7bba` fixes settings retry. `ba005266` records packet status, `bab887e7` isolates the dead-letter test/shortens Planner chrome, and `2dcdaec4` is the final application code. Commits through `56835986` subsequently added verification fixtures/waits, wording and release evidence. The current deployment follow-up additionally restores the already-hosted hybrid-login behavior with focused verification.
 
 All original named branches are retained. Detached interim/replay history is reachable as `codex/archive-interim-20261029` and `codex/archive-fasttrack-test-20261029`; dirty helper patches and the merge helper were preserved locally before cleanup. The uncommitted working files in `/Users/jaypatel/PM-Tool` were never edited.
 

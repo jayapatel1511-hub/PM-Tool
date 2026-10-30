@@ -25,15 +25,27 @@ let server, browser;
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
   let providers = ['Microsoft', 'Google'];
+  let localPasswordEnabled = false;
   let signedIn = false;
   const linkRequests = [];
+  const localRequests = [];
+  const logoutRequests = [];
   await page.route('**/api/**', async route => {
     const pathname = new URL(route.request().url()).pathname;
-    if (pathname === '/api/v1/config') return route.fulfill({ json: clientConfig({ authMode: 'Social', providers }) });
+    if (pathname === '/api/v1/config') return route.fulfill({ json: clientConfig({ authMode: 'Social', localPasswordEnabled, providers }) });
     if (pathname === '/api/v1/me') return signedIn ? route.fulfill({ json: meView({
       id: '00000000-0000-0000-0000-000000000001', displayName: 'Synthetic Person', email: 'person@outside.example', settings: { today: '2026-10-14' }, preferences: { denseRows: false },
     }) }) : route.fulfill({ status: 401, json: { detail: 'Signed out' } });
     if (pathname.startsWith('/api/v1/auth/social/sign-in/')) return route.fulfill({ contentType: 'text/html', body: '<h1>Provider redirect reached</h1>' });
+    if (pathname === '/api/v1/auth/social/sign-out') { logoutRequests.push(pathname); signedIn = false; return route.fulfill({ status: 204 }); }
+    if (pathname === '/api/v1/auth/local/sign-in') {
+      const body = route.request().postDataJSON();
+      localRequests.push(body);
+      if (body.password !== 'synthetic-password') return route.fulfill({ status: 401, json: { detail: 'Invalid credentials' } });
+      signedIn = true;
+      return route.fulfill({ status: 204 });
+    }
+    if (pathname === '/api/v1/auth/local/sign-out') { signedIn = false; return route.fulfill({ status: 204 }); }
     if (pathname === '/api/v1/auth/social/providers') return route.fulfill({ json: { available: providers, connected: ['Google'] } });
     if (pathname.startsWith('/api/v1/auth/social/link/')) {
       linkRequests.push({ pathname, method: route.request().method() });
@@ -41,6 +53,7 @@ let server, browser;
     }
     if (pathname === '/api/v1/me/preferences') return route.fulfill({ json: preferences({ digest: { holdDigestWhenAway: true } }) });
     if (pathname === '/api/v1/me/sign-in') return route.fulfill({ status: 204 });
+    if (pathname === '/api/v1/client-errors') return route.fulfill({ status: 204 });
     if (pathname === '/api/v1/me/notifications/pulse') return route.fulfill({ json: pulse('0') });
     if (pathname === '/api/v1/me/notifications/unread-count') return route.fulfill({ json: unreadCount(0, 0) });
     if (pathname === '/api/v1/workspaces') return route.fulfill({ json: [] });
@@ -75,6 +88,26 @@ let server, browser;
   providers = [];
   await page.goto(`${origin}/login`);
   await page.getByRole('alert').filter({ hasText: 'Sign-in is temporarily unavailable' }).waitFor();
+  providers = ['Microsoft', 'Google'];
+  localPasswordEnabled = true;
+  await page.goto(`${origin}/preferences`);
+  await page.getByLabel('User ID', { exact: true }).waitFor();
+  assert.equal(await page.getByRole('button', { name: 'Continue with Google', exact: true }).count(), 1);
+  await page.getByLabel('User ID', { exact: true }).fill('existing.tester');
+  await page.getByLabel('Password', { exact: true }).fill('wrong synthetic password');
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+  await page.getByRole('alert').filter({ hasText: 'User ID or password is incorrect.' }).waitFor();
+  await page.getByLabel('Password', { exact: true }).fill('synthetic-password');
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+  await page.waitForURL('**/preferences');
+  await page.getByRole('button', { name: 'Account', exact: true }).click();
+  await page.getByRole('menuitem', { name: 'Sign out', exact: true }).click();
+  await page.waitForURL('**/');
+  assert.deepEqual(logoutRequests, ['/api/v1/auth/social/sign-out']);
+  assert.deepEqual(localRequests, [
+    { userName: 'existing.tester', password: 'wrong synthetic password' },
+    { userName: 'existing.tester', password: 'synthetic-password' },
+  ]);
   providers = ['Microsoft', 'Google']; signedIn = true;
   await page.goto(`${origin}/preferences?accountLinked=true`);
   await page.getByRole('button', { name: 'Connect Microsoft', exact: true }).waitFor();
@@ -87,5 +120,5 @@ let server, browser;
   await page.waitForURL('**/api/v1/auth/social/link/Microsoft');
   assert.deepEqual(linkRequests, [{ pathname: '/api/v1/auth/social/link/Microsoft', method: 'POST' }]);
   assert.deepEqual(errors, []);
-  console.log(JSON.stringify({ scope: 'Built SPA with synthetic API responses; provider callbacks covered separately by PostgreSQL integration tests', checks: ['both provider buttons navigate', 'password form absent', 'protected-route return preserved', 'conflict error', 'phone overflow', 'configured providers only', 'missing-provider state', 'second-provider connect uses POST', 'connected provider disabled', 'connection feedback', 'desktop and account-method WCAG AA'], errors, accessibilityViolations: desktop.violations.length + methods.violations.length }));
+  console.log(JSON.stringify({ scope: 'Built SPA with synthetic API responses; provider callbacks covered separately by PostgreSQL integration tests', checks: ['both provider buttons navigate', 'password form absent', 'hybrid local-password form and wrong/success sign-in', 'account-menu Social logout POST', 'protected-route return preserved', 'conflict error', 'phone overflow', 'configured providers only', 'missing-provider state', 'second-provider connect uses POST', 'connected provider disabled', 'connection feedback', 'desktop and account-method WCAG AA'], errors, accessibilityViolations: desktop.violations.length + methods.violations.length }));
 })().catch(e => { console.error(e); process.exitCode = 1; }).finally(async () => { await browser?.close(); server?.kill(); });

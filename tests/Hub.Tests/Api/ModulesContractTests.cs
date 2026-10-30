@@ -10,7 +10,7 @@ namespace Hub.Tests.Api;
 public sealed class ModulesContractTests(HubFactory f)
 {
     static string[] Keys(JsonNode? n) => [.. n!.AsObject().Select(x => x.Key)];
-    static string[] Order = ["authMode", "providers", "entra"];
+    static string[] Order = ["authMode", "localPasswordEnabled", "providers", "entra"];
     static string[] EntraOrder = ["clientId", "tenantId", "apiScope"];
 
     static async Task<JsonNode> Config(HttpClient c)
@@ -27,6 +27,7 @@ public sealed class ModulesContractTests(HubFactory f)
         using var host = f.WithWebHostBuilder(b => { });
         var c = await Config(host.CreateClient()); // anonymous: no sign-in header
         Assert.Equal(Order, Keys(c));
+        Assert.False(c["localPasswordEnabled"]!.GetValue<bool>());
         Assert.Equal("Development", c.S("authMode"));
         Assert.Empty(c["providers"]!.AsArray()); // the empty array stays in the body
         Assert.Equal(EntraOrder, Keys(c["entra"]));
@@ -47,6 +48,7 @@ public sealed class ModulesContractTests(HubFactory f)
         });
         var c = await Config(host.CreateClient());
         Assert.Equal(Order, Keys(c));
+        Assert.False(c["localPasswordEnabled"]!.GetValue<bool>());
         Assert.Equal("Entra", c.S("authMode"));
         Assert.Empty(c["providers"]!.AsArray());
         Assert.Equal(EntraOrder, Keys(c["entra"]));
@@ -69,6 +71,7 @@ public sealed class ModulesContractTests(HubFactory f)
             var response = await host.CreateClient().GetAsync("/api/v1/config");
             var c = await response.Json();
             Assert.Equal(Order, Keys(c));
+            Assert.False(c["localPasswordEnabled"]!.GetValue<bool>());
             Assert.Equal("Social", c.S("authMode"));
             Assert.Equal(["Google"], c["providers"]!.AsArray().Select(x => x!.GetValue<string>()));
             Assert.Equal(EntraOrder, Keys(c["entra"]));

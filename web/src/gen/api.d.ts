@@ -17706,6 +17706,7 @@ export interface components {
         ClientConfig: {
             authMode: string;
             entra: components["schemas"]["EntraClientConfig"];
+            localPasswordEnabled: boolean;
             providers: string[];
         };
         ClientRow: {

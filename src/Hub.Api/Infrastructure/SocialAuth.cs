@@ -47,6 +47,8 @@ public static class SocialAuth
             o.Cookie.SameSite = SameSiteMode.Lax; // OAuth callbacks must receive the session when linking a second provider.
             o.ExpireTimeSpan = TimeSpan.FromHours(8);
             o.SlidingExpiration = false;
+            o.Events.OnValidatePrincipal = c => c.Principal?.Identity?.AuthenticationType == AuthSetup.LocalScheme
+                ? AuthSetup.ValidateLocalPrincipal(c) : Task.CompletedTask;
             o.Events.OnRedirectToLogin = c => { c.Response.StatusCode = 401; return Task.CompletedTask; };
             o.Events.OnRedirectToAccessDenied = c => { c.Response.StatusCode = 403; return Task.CompletedTask; };
         });

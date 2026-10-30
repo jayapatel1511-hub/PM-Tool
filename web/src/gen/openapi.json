@@ -4831,6 +4831,9 @@
           "entra": {
             "$ref": "#/components/schemas/EntraClientConfig"
           },
+          "localPasswordEnabled": {
+            "type": "boolean"
+          },
           "providers": {
             "items": {
               "type": "string"
@@ -4840,6 +4843,7 @@
         },
         "required": [
           "authMode",
+          "localPasswordEnabled",
           "providers",
           "entra"
         ],

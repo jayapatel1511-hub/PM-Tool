@@ -10,7 +10,7 @@ import argparse, http.client, json, sys, urllib.parse
 HOST = "pm.engcalchub.com"
 parser = argparse.ArgumentParser()
 parser.add_argument("base_url", nargs="?", default="http://127.0.0.1:3080")
-parser.add_argument("--social", action="store_true", help="Check Microsoft/Google redirects without reading password credentials")
+parser.add_argument("--social", action="store_true", help="Check Microsoft/Google redirects and enabled existing-tester login")
 parser.add_argument("--expect-build", help="Require /health to report this release SHA")
 args = parser.parse_args()
 if args.base_url.rstrip("/") not in {"http://127.0.0.1:3080", "https://pm.engcalchub.com"}:
@@ -65,10 +65,12 @@ if not public:
 s, _, _, _ = call("POST", "/api/v1/auth/social/sign-out" if args.social else "/api/v1/auth/local/sign-in", {"userName": "x", "password": "y"}, origin="https://evil.example")
 check("unsafe Origin POST denied", s == 403, f"HTTP {s}")
 
+social_local_enabled = False
 if args.social:
     s, d, _, _ = call("GET", "/api/v1/config")
     config = json.loads(d) if s == 200 else {}
     check("both social providers configured", config.get("authMode") == "Social" and set(config.get("providers", [])) == {"Microsoft", "Google"})
+    social_local_enabled = config.get("localPasswordEnabled") is True
     for provider, authority in (("Microsoft", "login.microsoftonline.com"), ("Google", "accounts.google.com")):
         s, _, _, headers = call("GET", "/api/v1/auth/social/sign-in/" + provider)
         location = urllib.parse.urlsplit(headers.get("location", ""))
@@ -78,11 +80,12 @@ if args.social:
               and query.get("code_challenge_method") == ["S256"] and bool(query.get("state")) and "client_secret" not in query)
         cookie = headers.get("set-cookie", "").lower()
         check(provider + " secure correlation cookie", "secure" in cookie and "httponly" in cookie and "samesite=none" in cookie)
-    print("SKIP copied cookie after sign-out — no password sign-in in social mode; covered by "
-          "SocialAuthTests.Logout_revokes_copied_cookie_and_inactive_users_cannot_sign_in_or_use_existing_sessions")
-    print("Real-account sign-in and consent require browser verification.")
-    print("RESULT", "PASS" if failures == 0 else f"FAIL ({failures})")
-    sys.exit(1 if failures else 0)
+    if not social_local_enabled:
+        print("SKIP existing local-password probes — config.localPasswordEnabled is not true")
+        print("Real-account sign-in and consent require browser verification.")
+        print("RESULT", "PASS" if failures == 0 else f"FAIL ({failures})")
+        sys.exit(1 if failures else 0)
+    check("existing local password enabled", social_local_enabled)
 
 try:
     creds = json.load(open(handoff))["credentials"]

@@ -8,7 +8,7 @@ import { Notice, Loading } from '@/components/hub/common'
 import { Chip } from '@/components/hub/pills'
 import { Button } from '@/components/ui/button'
 import { api, get, qs } from '@/lib/api'
-import { shortDate } from '@/lib/format'
+import { fmtDate } from '@/lib/format'
 import { t } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { PlannerGrid } from './PlannerGrid'
@@ -42,7 +42,7 @@ export function MyWeekStrip({ personId, canPlan: _canPlan, id }: { personId: str
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-5 py-2">
         <h2 id="my-week-h" className="text-base/6 font-semibold">{t('planner.myWeek')}</h2>
         <span className="text-sm text-muted-foreground tabular-nums">{q.isPending ? t('app.loading') : first
-          ? t('mywork.weekSummary', { week: shortDate(first.week), planned: hoursLabel(first.confirmed + first.expected + first.possible), capacity: hoursLabel(first.capacity) })
+          ? t('mywork.weekSummary', { week: fmtDate(first.week), planned: hoursLabel(first.confirmed + first.expected + first.possible), capacity: hoursLabel(first.capacity) })
           : t('planner.myWeekUnavailable')}</span>
         {signal}
         <Button variant="ghost" size="sm" className="ml-auto" aria-expanded={open} aria-controls="my-week-body" onClick={() => setOpen(!open)}>

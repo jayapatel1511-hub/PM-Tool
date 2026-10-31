@@ -27,7 +27,7 @@ export function GroupRow({ span, label, count }: { span: number; label: ReactNod
 export function RegisterCards<T extends { id: string }>({ groups, columns, current }: { groups: { label: string; rows: T[] }[]; columns: Column<T>[]; current: (r: T) => boolean }) {
   return <div className="space-y-4 md:hidden">
     {groups.map((g, i) => <div key={`${i}-${g.label}`} className="space-y-2">
-      {g.label && <h3 className="text-sm font-semibold">{g.label}<span className="ml-2 rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{g.rows.length}</span></h3>}
+      {g.label && <h3 className="text-sm font-semibold">{g.label}<span className="ml-2 font-normal text-muted-foreground tabular-nums">{g.rows.length}</span></h3>}
       <ul className="space-y-2">{g.rows.map((r) => <li key={r.id} className={cn('rounded-lg border bg-card p-4', current(r) && SELECTED_ROW)}>
         <dl className="grid grid-cols-[minmax(5.5rem,auto)_minmax(0,1fr)] items-start gap-x-3 gap-y-1.5 text-sm">
           {columns.map((c) => <Fragment key={c.id}><dt className="text-muted-foreground">{c.label}</dt><dd className="min-w-0 break-words">{c.cell(r)}</dd></Fragment>)}

@@ -133,7 +133,7 @@
   input::placeholder, textarea::placeholder { color: var(--placeholder); }
 
   .prose-body { font-size: 16px; line-height: 1.5; }
-  .key { font-family: var(--font-mono); font-size: 12px; letter-spacing: -0.01em; }
+  .key { font-family: var(--font-mono); font-size: 12px; }
 }
 
 /* Dense grids scroll inside their region; keep the scrollbar discoverable even where the OS uses overlay scrollbars.

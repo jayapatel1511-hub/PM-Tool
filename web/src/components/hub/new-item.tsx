@@ -62,7 +62,7 @@ function NewItemMenu() {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button className="gap-1.5" aria-label={t('new.label')}><Plus className="size-4" /><span className="hidden sm:inline">{t('new.label')}</span></Button>
+          <Button variant="outline" className="gap-1.5" aria-label={t('new.label')}><Plus className="size-4" /><span className="hidden sm:inline">{t('new.label')}</span></Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           {me.capabilities.createProject && <DropdownMenuItem onSelect={() => setOpen('project')}>{t('new.project')}</DropdownMenuItem>}

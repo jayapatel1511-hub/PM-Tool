@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { BellOff } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { ConfirmDialog, Empty, ErrorBanner, Field, Loading } from '@/components/hub/common'
+import { ConfirmDialog, ErrorBanner, Field, Loading } from '@/components/hub/common'
 import { useItemPanel } from '@/components/hub/panel-host'
 import { Key, Pill } from '@/components/hub/pills'
 import { Why, type Reason } from '@/components/hub/why'
@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { get, post, qs } from '@/lib/api'
 import { fmtDate } from '@/lib/format'
-import { t, tv } from '@/lib/i18n'
+import { plural, t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
 // Attention items (§12.12): ranked rule firings with the rule, threshold and values behind each (AC-ATT-06); never dismissible, only snoozed (ATT-03).
@@ -47,11 +47,12 @@ export function AttentionRows({ items, canSnooze, limit, onChanged, footer, show
   const shown = limit && !all ? items.slice(0, limit) : items
   return (
     <div>
-      {items.length === 0 ? <Empty>{t('attention.none')}</Empty> : (
+      {items.length === 0 ? <p className="px-5 py-3 text-sm text-muted-foreground">{t('attention.none')}</p> : (
         <ul className="divide-y">
           {shown.map((a) => (
             <li key={a.id} className={cn('flex flex-wrap items-start gap-3 px-5 py-3 text-sm', a.snoozed && 'text-muted-foreground')}>
-              <Pill tone={TONE[a.severity] ?? 'idle'} className="mt-0.5">{tv(a.severity)}</Pill>
+              {/* Severity is a mark and a word in one fixed column (no fill), so a long list still shows which rows are worst. */}
+              <Pill tone={TONE[a.severity] ?? 'idle'} className="mt-0.5 w-18 shrink-0 bg-transparent px-0">{tv(a.severity)}</Pill>
               <div className="min-w-0 flex-1 basis-48">
                 <div className="flex flex-wrap items-baseline gap-x-2">
                   {showProject && a.projectNumber && !a.itemKey?.startsWith(a.projectNumber) && <Key>{a.projectNumber}</Key>}
@@ -60,7 +61,7 @@ export function AttentionRows({ items, canSnooze, limit, onChanged, footer, show
                 </div>
                 <div className="text-sm text-muted-foreground">{a.message}</div>
                 <div className="text-xs/[18px] text-muted-foreground">
-                  {a.ownerName && <span>{a.ownerName} · </span>}{t('attention.age', { n: a.ageDays })}
+                  {a.ownerName && <span>{a.ownerName} · </span>}{a.ageDays === 0 ? t('attention.ageToday') : plural(a.ageDays, 'attention.ageOne', 'attention.age')}
                   {a.snoozed && <span> · {t('attention.snoozedUntil', { date: fmtDate(a.snoozedUntil), note: a.snoozeNote ?? '' })}</span>}
                 </div>
               </div>

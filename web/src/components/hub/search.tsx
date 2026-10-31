@@ -4,7 +4,6 @@ import { Briefcase, CalendarCheck, CheckSquare, Flag, FileText, Link2Off, Messag
 import { useEffect, useId, useMemo, useState, type RefObject } from 'react'
 import { useNavigate } from 'react-router'
 import { ShellSlots } from '@/app/slots'
-import { useIsPhone } from '@/components/hub/common'
 import { get, qs } from '@/lib/api'
 import { fmtDate } from '@/lib/format'
 import { t, tv } from '@/lib/i18n'
@@ -51,7 +50,6 @@ export const searchQuery = (q: string, extra: Record<string, unknown> = {}) => g
 
 /** Top-bar search (§18.1): top five per type as you type, arrow keys and Enter, "See all results" for the results page. */
 function SearchBox({ inputRef }: { inputRef: RefObject<HTMLInputElement | null> }) {
-  const phone = useIsPhone()
   const navigate = useNavigate()
   const listId = useId()
   const [q, setQ] = useState('')
@@ -78,7 +76,7 @@ function SearchBox({ inputRef }: { inputRef: RefObject<HTMLInputElement | null> 
       <label className="relative flex items-center">
         <Search aria-hidden className="pointer-events-none absolute left-3 size-4 text-muted-foreground" />
         <span className="sr-only">{t('common.search')}</span>
-        <input ref={inputRef} type="search" placeholder={t(phone ? 'common.search' : 'top.search')} title={t('top.searchShortcut')} value={q} autoComplete="off"
+        <input ref={inputRef} type="search" placeholder={t('common.search')} title={t('top.searchShortcut')} value={q} autoComplete="off"
           role="combobox" aria-expanded={show} aria-controls={listId} aria-autocomplete="list" aria-activedescendant={active >= 0 ? `${listId}-${active}` : undefined}
           onChange={(e) => { setQ(e.target.value); setOpen(true); setActive(-1) }} onFocus={() => setOpen(true)} onBlur={() => setTimeout(() => setOpen(false), 150)}
           onKeyDown={(e) => {

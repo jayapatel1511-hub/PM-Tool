@@ -19,7 +19,7 @@ import { useMe } from '@/lib/auth'
 import { addDays, fmtDate, relative, today } from '@/lib/format'
 import { plural, t, tv } from '@/lib/i18n'
 import type { Page as PageOf } from '@/lib/types'
-import { cn, type Accent } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 import { useLaneDrop } from './projects/Board'
 import type { DeliverableRow } from './projects/Deliverables'
 import { ActionOwner, type ActionRow } from './projects/Meetings'
@@ -97,7 +97,7 @@ function MyWorkViews({ sections }: { sections?: { id: string; title: string; cou
           {sections.map((s) => (
             <DropdownMenuItem key={s.id} onSelect={() => { toSection.current = true; navigate(link('overview', `#mw-${s.id}`)) }}>
               <span className="flex-1">{s.title}</span>
-              {(s.count ?? 0) > 0 && <span className="rounded-md bg-secondary px-1.5 text-xs/[18px] font-medium text-muted-foreground tabular-nums">{s.count}</span>}
+              {(s.count ?? 0) > 0 && <span className="text-muted-foreground tabular-nums">{s.count}</span>}
             </DropdownMenuItem>
           ))}
         </>}
@@ -184,7 +184,7 @@ function Overview({ focus }: { focus: boolean }) {
       <button type="button" className="hover:underline" onClick={() => openPanel('Task', r.id)}><Key>{r.key}</Key></button>
       <button type="button" className="min-w-[10rem] flex-1 break-words text-left font-medium hover:underline" onClick={() => openPanel('Task', r.id)}>{r.name}</button>
       {extra}
-      <span className={cn('tabular-nums', r.state?.isOverdue && 'font-semibold text-bad', r.state?.isDueSoon && !r.state.isOverdue && 'text-warn')}>{fmtDate(r.dueDate)}</span>
+      <span className={cn('tabular-nums', r.state?.isOverdue && 'font-medium text-bad', r.state?.isDueSoon && !r.state.isOverdue && 'text-warn')}>{fmtDate(r.dueDate)}</span>
       <StatusMenu r={r} onMove={actions.move} disabled={ro} />
       {!ro && r.status !== 'Complete' ? (
         <select className="h-(--control-row-h) rounded-md border border-input bg-card px-2 text-sm tabular-nums" value={r.progressPct}
@@ -200,26 +200,28 @@ function Overview({ focus }: { focus: boolean }) {
     <li key={d.id} className={ROW}>
       <button type="button" className="hover:underline" onClick={() => openPanel('Deliverable', d.id)}><Key>{d.key}</Key></button>
       <button type="button" className="min-w-[10rem] flex-1 break-words text-left font-medium hover:underline" onClick={() => openPanel('Deliverable', d.id)}>{d.name}</button>
-      <span className={cn('tabular-nums', d.state?.isOverdue && 'font-semibold text-bad')}>{fmtDate(d.dueDate)}</span><StatusPill status={d.status} />
+      <span className={cn('tabular-nums', d.state?.isOverdue && 'font-medium text-bad')}>{fmtDate(d.dueDate)}</span><StatusPill status={d.status} />
     </li>
   )
-  const list = (rows: ReactNode[], empty: string) => rows.length ? <ul className="divide-y">{rows}</ul> : <Empty>{empty}</Empty>
+  // An empty section is one quiet line under its header, so a page of empty sections stays short.
+  const none = (text: string, action?: ReactNode) => <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 text-sm text-muted-foreground"><p>{text}</p>{action}</div>
+  const list = (rows: ReactNode[], empty: string) => rows.length ? <ul className="divide-y">{rows}</ul> : none(empty)
   const bucketList = (groups: (readonly [string, TaskRow[]])[], empty: string) => groups.length === 0
-    ? <Empty action={tokens.length > 0 ? <Button variant="outline" onClick={clear}>{t('filters.clear')}</Button> : newTask}>{empty}</Empty>
+    ? none(empty, tokens.length > 0 ? <Button variant="outline" onClick={clear}>{t('filters.clear')}</Button> : newTask)
     : <div className="divide-y">{groups.map(([b, rows]) => (
       <div key={b}>
-        <h3 className={cn('border-b bg-muted px-5 py-2 text-xs/[18px] font-semibold', b === 'overdue' ? 'text-bad' : 'text-muted-foreground')}>
-          {b === 'overdue' && <span aria-hidden>■ </span>}{b === 'blocked' ? t('ind.blocked') : t(`tbucket.${b}`)} <span className="tabular-nums">({rows.length})</span>
+        <h3 className={cn('border-b bg-muted px-5 py-2 text-xs/[18px] font-medium', b === 'overdue' ? 'text-bad' : 'text-muted-foreground')}>
+          {b === 'overdue' && <span aria-hidden>■ </span>}{b === 'blocked' ? t('ind.blocked') : t(`tbucket.${b}`)}<span className="ml-2 font-normal text-muted-foreground tabular-nums">{rows.length}</span>
         </h3>
         <ul className="divide-y">{rows.map((r) => taskRow(r))}</ul>
       </div>))}</div>
-  const sections: { id: string; title: string; count?: number; body: ReactNode; open?: boolean; accent?: Accent }[] = [
-    { id: 'attention', title: t('mywork.attention'), count: w.attention.total, accent: 'peach', body: <>
+  const sections: { id: string; title: string; count?: number; body: ReactNode; open?: boolean }[] = [
+    { id: 'attention', title: t('mywork.attention'), count: w.attention.total, body: <>
       <AttentionRows items={w.attention.items} canSnooze={false} showProject onChanged={reload} />
       {w.attention.total > w.attention.items.length && <p className="border-t px-5 py-2.5 text-xs/[18px] text-muted-foreground">{t('mywork.attentionMore', { n: w.attention.items.length, total: w.attention.total })}</p>}
     </> },
-    { id: 'tasks', title: t('mywork.tasks'), count: tasks.length, accent: 'blue', body: bucketList([...buckets], t('mywork.noTasks')) },
-    { id: 'reviews', title: t('mywork.reviews'), count: w.reviews.tasks.length + w.reviews.deliverables.length, accent: 'lavender', body: list([
+    { id: 'tasks', title: t('mywork.tasks'), count: tasks.length, body: bucketList([...buckets], t('mywork.noTasks')) },
+    { id: 'reviews', title: t('mywork.reviews'), count: w.reviews.tasks.length + w.reviews.deliverables.length, body: list([
       ...w.reviews.tasks.map((r) => taskRow(r, !ro && r.status === 'Ready for Review' && <Button size="sm" variant="outline"
         onClick={() => actions.move({ id: r.id, key: r.key, rowVersion: r.rowVersion, to: 'In Review', needsReason: false })}>{t('task.startReview')}</Button>)),
       ...w.reviews.deliverables.map(delRow)], t('mywork.noReviews')) },
@@ -235,7 +237,7 @@ function Overview({ focus }: { focus: boolean }) {
         <ProjectTag id={d.projectId} number={d.projectNumber} />
         <button type="button" className="min-w-[10rem] flex-1 break-words text-left hover:underline" onClick={() => openPanel('Decision', d.id)}><Key>{d.key}</Key> <span className="font-medium">{d.subject}</span></button>
         <span className="text-xs/[18px] text-muted-foreground">{t(`mywork.role.${d.role}`)}</span>
-        <span className={cn('tabular-nums', d.isOverdue && 'font-semibold text-bad', d.isDueSoon && !d.isOverdue && 'text-warn')}>{t('wc.requiredBy', { date: fmtDate(d.requiredByDate) })}</span>
+        <span className={cn('tabular-nums', d.isOverdue && 'text-bad', d.isDueSoon && !d.isOverdue && 'text-warn')}>{t('wc.requiredBy', { date: fmtDate(d.requiredByDate) })}</span>
         {d.isOverdue ? <Chip tone="bad">{t('ind.overdue')}</Chip> : d.isDueSoon && <Chip tone="warn">{t('ind.dueSoon')}</Chip>}
         <StatusPill status={d.status} />
       </li>)), t('mywork.noDecisions')) },
@@ -245,11 +247,11 @@ function Overview({ focus }: { focus: boolean }) {
         <button type="button" className="min-w-[10rem] flex-1 break-words text-left hover:underline" onClick={() => openPanel('Action', a.id)}><Key>{a.key}</Key> <span className="font-medium">{a.text}</span></button>
         {a.ownerType !== 'User' && <ActionOwner a={a} />}
         <span className="text-xs/[18px] text-muted-foreground">{a.meetingTitle}</span>
-        <span className={cn('tabular-nums', a.isOverdue && 'font-semibold text-bad')}>{fmtDate(a.dueDate)}</span>
+        <span className={cn('tabular-nums', a.isOverdue && 'text-bad')}>{fmtDate(a.dueDate)}</span>
         {a.isOverdue && <Chip tone="bad">{t('ind.overdueD', { n: a.daysOverdue })}</Chip>}
         <StatusPill status={a.status} />
       </li>)), t('mywork.noActions')) },
-    { id: 'projects', title: t('mywork.projects'), count: w.projects.length, accent: 'mint', body: list(w.projects.map((p) => (
+    { id: 'projects', title: t('mywork.projects'), count: w.projects.length, body: list(w.projects.map((p) => (
       <li key={p.id} className={ROW}>
         <Link className="flex min-w-[10rem] flex-1 items-center gap-2 hover:underline" to={`/projects/${p.projectNumber}`}>
           <AccentDot id={p.id} /><Key>{p.projectNumber}</Key><span className="min-w-0 truncate font-medium">{p.name}</span>
@@ -268,7 +270,7 @@ function Overview({ focus }: { focus: boolean }) {
   ]
 
   // Today shows what needs the person now; the Overview shows every section. The view switch lists them all.
-  const shown: typeof sections = focus ? [sections.find((x) => x.id === 'attention')!, { id: 'today', title: t('mywork.focusTasks'), count: focusBuckets.reduce((n, [, rows]) => n + rows.length, 0), accent: 'blue' as Accent,
+  const shown: typeof sections = focus ? [sections.find((x) => x.id === 'attention')!, { id: 'today', title: t('mywork.focusTasks'), count: focusBuckets.reduce((n, [, rows]) => n + rows.length, 0),
     body: bucketList(focusBuckets, t('mywork.focusNoTasks')) }] : sections
   const menu = [...(!userId ? [{ id: 'my-week', title: t('planner.myWeek') }] : []), ...sections]
 
@@ -319,11 +321,11 @@ function Overview({ focus }: { focus: boolean }) {
       {shown.map((s) => s.open === false
         ? <details key={s.id} id={`mw-${s.id}`} className="overflow-hidden rounded-lg border bg-card">
             <summary className="cursor-pointer px-5 py-3 text-base/6 font-semibold hover:bg-muted">
-              {s.title}<span className="ml-2 rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{s.count}</span>
+              {s.title}<span className="ml-2 font-normal text-muted-foreground tabular-nums">{s.count}</span>
             </summary>
             <div className="border-t">{s.body}</div>
           </details>
-        : <Section key={s.id} id={`mw-${s.id}`} title={s.title} count={s.count} accent={s.accent}>{s.body}</Section>)}
+        : <Section key={s.id} id={`mw-${s.id}`} title={s.title} count={s.count}>{s.body}</Section>)}
       {creating && <NewTaskDialog onClose={() => { setCreating(false); reload() }} />}
       {actions.dialogs}
     </Page>
@@ -374,7 +376,7 @@ function TaskView({ tab }: { tab: string }) {
         </FilterBar>
       </div>
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
-      <Section title={t(`mywork.tab.${tab}`)} count={q.data?.totalCount} accent="blue">
+      <Section title={t(`mywork.tab.${tab}`)} count={q.data?.totalCount}>
         {q.isPending ? <Loading rows={5} /> : rows.length === 0
           ? <Empty action={me.capabilities.createTask && <Button variant="outline" onClick={() => setCreating(true)}><Plus className="size-4" />{t('task.new')}</Button>}>{t(`mywork.empty.${tab}`)}</Empty> : (
           <ul className="divide-y">
@@ -385,7 +387,7 @@ function TaskView({ tab }: { tab: string }) {
                 <button type="button" className="hover:underline" onClick={() => openPanel('Task', r.id)}><Key>{r.key}</Key></button>
                 <button type="button" className="min-w-[10rem] flex-1 break-words text-left font-medium hover:underline" onClick={() => openPanel('Task', r.id)}>{r.name}</button>
                 <ProjectTag id={r.projectId} number={r.projectNumber} name={r.projectName} />
-                <span className={cn('tabular-nums', r.state?.isOverdue && 'font-semibold text-bad')}>{tab === 'completed' ? fmtDate(r.completedAt?.slice(0, 10)) : fmtDate(r.dueDate)}</span>
+                <span className={cn('tabular-nums', r.state?.isOverdue && 'font-medium text-bad')}>{tab === 'completed' ? fmtDate(r.completedAt?.slice(0, 10)) : fmtDate(r.dueDate)}</span>
                 <PriorityBadge priority={r.priority} />
                 <StatusPill status={r.status} />
               </li>

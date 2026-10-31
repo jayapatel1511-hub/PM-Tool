@@ -45,7 +45,7 @@ export function Section({ title, count, actions, children, className, id, headin
     <section id={id} className={cn('overflow-hidden rounded-lg border bg-card', className)} aria-labelledby={headingId ?? (id ? `${id}-h` : undefined)}>
       <div data-accent={accent} className={cn('flex flex-wrap items-center justify-between gap-2 border-b px-5 py-3', accent && 'bg-(--acc-bg)')}>
         <Heading id={headingId ?? (id ? `${id}-h` : undefined)} className="text-base/6 font-semibold">
-          {title}{count != null && <span className="ml-2 rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{count}</span>}
+          {title}{count != null && <span className="ml-2 font-normal text-muted-foreground tabular-nums">{count}</span>}
         </Heading>
         {actions}
       </div>

@@ -1493,7 +1493,7 @@ export const en: Record<string, string> = {
   'health.whyTitle': 'Why is health {health}?', 'health.override': 'Override', 'health.changeOverride': 'Change override', 'health.overrideTitle': 'Report a different health',
   'health.overrideBody': 'Computed health is {computed}. Your reported colour is shown beside it, with your note, until it expires.',
   'health.overrideBy': 'reported by {name} until {date}', 'health.overrideSaved': 'Reported health saved', 'health.overrideCleared': 'Override removed', 'health.clearOverride': 'Remove override',
-  'attention.none': 'Nothing needs attention.', 'attention.age': 'first seen {n} days ago', 'attention.snoozedUntil': 'snoozed until {date}: {note}',
+  'attention.none': 'Nothing needs attention.', 'attention.age': 'first seen {n} days ago', 'attention.ageOne': 'first seen {n} day ago', 'attention.ageToday': 'first seen today','attention.snoozedUntil': 'snoozed until {date}: {note}',
   'attention.snooze': 'Snooze', 'attention.snoozeItem': 'Snooze {item}', 'attention.snoozeTitle': 'Snooze {item}', 'attention.snoozed': 'Snoozed for {n} days',
   'attention.snoozeBody': 'It leaves the list until then and comes back at once if it becomes more severe. The snooze is logged.',
   'attention.days': 'Days', 'attention.daysHint': '1 to 30 days', 'attention.showAll': 'Show all {n}', 'attention.showFewer': 'Show fewer',
@@ -2118,7 +2118,7 @@ export const en: Record<string, string> = {
   'home.subtitle': 'Welcome back, {name}. Every number below opens the records behind it.',
   'mywork.newTaskHint': 'Choose the project first; the task form opens next.',
   // 037 phase 2: My Work's Today view and My Week summary, page help and calm toolbars (§41 R1, R5, R8, R10).
-  'mywork.focusTasks': 'Overdue, due this week or blocked', 'mywork.focusNoTasks': 'Nothing here.',
+  'mywork.focusTasks': 'Overdue, due this week or blocked', 'mywork.focusNoTasks': 'None right now.',
   'mywork.weekSummary': 'Week of {week}: {planned} of {capacity} planned', 'mywork.weekShow': 'Show', 'mywork.weekHide': 'Hide',
   'reports.count': '{n} reports', 'reports.countOne': '1 report', 'reports.report': 'Report',
   'calendar.zoneShort': 'Times in {zone}', 'calendar.hiddenType': 'Hidden',

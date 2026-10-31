@@ -27,11 +27,11 @@ class FakeFixtureApi:
 
     def __init__(self, today="2026-10-12", present=False):
         self.today, self.calls, self.ids = today, [], itertools.count(1)
-        self.projects = {"SYN-101": "p1", "SYN-103": "p3"}
+        self.projects = {"250101": "p1", "250103": "p3"}
         self.tasks = {"p1": [{"id": "profiles", "name": PROFILES}]}
         self.entries, self.allocations = [], {}
         if present:
-            self.projects.update({"SYN-104": "p4", "SYN-105": "p5"})
+            self.projects.update({"260104": "p4", "260105": "p5"})
             self.tasks["p1"] += [{"id": "t21a", "name": "Utility conflict log"}, {"id": "hold", "name": "Culvert crossing options"}]
             self.entries.append({"label": "Proposal support", "startWeek": "2026-10-19"})
 
@@ -112,15 +112,15 @@ class SeedStaffingTests(unittest.TestCase):
         writes = api.writes()
         by = lambda path, method="POST": [(who, body) for p, who, m, body in writes if p == path and m == method]
         projects = {body["projectNumber"]: (who, body) for who, body in by("projects")}
-        self.assertEqual(projects["SYN-104"][1]["name"], "Lakeside subdivision servicing (proposal)")
+        self.assertEqual(projects["260104"][1]["name"], "Lakeside subdivision servicing (proposal)")
         self.assertEqual({who for who, _ in projects.values()}, {"priya"})
-        self.assertFalse(by(f"projects/{api.projects['SYN-104']}/transition"), "SYN-104 stays in Setup")
-        self.assertTrue(by(f"projects/{api.projects['SYN-105']}/transition"))
+        self.assertFalse(by(f"projects/{api.projects['260104']}/transition"), "260104 stays in Setup")
+        self.assertTrue(by(f"projects/{api.projects['260105']}/transition"))
         template = next(who for who, body in by("templates"))
         structure = next(body for p, who, m, body in writes if p.endswith("/structure"))
         self.assertEqual((template, structure["milestones"][0]["name"], structure["milestones"][0]["anchor"]), ("jordan", "Client workshop", "None"))
-        self.assertTrue(projects["SYN-105"][1]["templateId"], "the undated milestone comes from a template")
-        self.assertFalse([body for p, who, m, body in writes if p == f"projects/{api.projects['SYN-105']}/milestones"])
+        self.assertTrue(projects["260105"][1]["templateId"], "the undated milestone comes from a template")
+        self.assertFalse([body for p, who, m, body in writes if p == f"projects/{api.projects['260105']}/milestones"])
         roles = {body["roleLabel"]: (who, body) for p, who, m, body in writes if p.endswith("/open-roles")}
         self.assertEqual((roles["Civil technologist"][1]["fromDate"], roles["Civil technologist"][1]["throughDate"],
                           roles["Civil technologist"][1]["plannedHours"]), ("2026-10-26", "2026-11-20", 80))
@@ -145,7 +145,7 @@ class SeedStaffingTests(unittest.TestCase):
         self.assertNotIn("priya", starts, "assignees start their own work after the PM's authorisation")
 
     def test_an_existing_week_w_allocation_for_alex_is_kept(self):
-        # seed_resources.py run the same day already gives Alex a Confirmed SYN-101 allocation in week W (036-D4).
+        # seed_resources.py run the same day already gives Alex a Confirmed 250101 allocation in week W (036-D4).
         api = FakeFixtureApi()
         api.allocations["p1"] = [{"id": "a1", "personId": "alex-id", "status": "Confirmed", "fromDate": "2026-10-19", "throughDate": "2026-10-23"}]
         run(api)  # a refused step would raise SystemExit

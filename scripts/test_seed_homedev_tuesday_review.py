@@ -43,8 +43,8 @@ class SeedTuesdayReviewTests(unittest.TestCase):
         self.verifier.chmod(0o600)
         self.legacy = users
         self.events, self.sleeps = [], []
-        self.snapshot = {'projects': [{'id': str(uuid.uuid4()), 'number': n, 'visibility': 'Restricted' if n == 'SYN-103' else 'Open'}
-                                     for n in ('SYN-101', 'SYN-102', 'SYN-103')],
+        self.snapshot = {'projects': [{'id': str(uuid.uuid4()), 'number': n, 'visibility': 'Restricted' if n == '250103' else 'Open'}
+                                     for n in ('250101', '250102', '250103')],
                          'counts': {**module.FIXTURE_MINIMUMS, 'planning_entry': 7, 'project_template': 1}}
 
     def tearDown(self):

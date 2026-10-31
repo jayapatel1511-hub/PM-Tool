@@ -23,11 +23,11 @@ actor FixtureServer {
             database = try JSONDecoder().decode(Database.self, from: Data(contentsOf: file))
         } else {
             let harbour = Project.harbour, greenway = Project.greenway
-            let design = WorkTask(id: UUID(uuidString: "40000000-0000-0000-0000-000000000001")!, key: "SYN-2401-T001", name: "Check stormwater design", projectID: harbour.id, ownerID: Person.alex.id, reviewerID: Person.sam.id, status: .inProgress, due: OrgDate.today(), progress: 60)
-            let review = WorkTask(id: UUID(uuidString: "40000000-0000-0000-0000-000000000002")!, key: "SYN-2401-T002", name: "Review drainage calculations", projectID: harbour.id, ownerID: Person.alex.id, reviewerID: Person.sam.id, status: .ready, due: OrgDate.today(), progress: 100)
-            let blocked = WorkTask(key: "SYN-2401-T003", name: "Confirm pipe crossing levels", projectID: harbour.id, ownerID: Person.alex.id, due: nil, blocker: "Waiting for survey confirmation. Ask the survey lead before starting.")
+            let design = WorkTask(id: UUID(uuidString: "40000000-0000-0000-0000-000000000001")!, key: "250201-T001", name: "Check stormwater design", projectID: harbour.id, ownerID: Person.alex.id, reviewerID: Person.sam.id, status: .inProgress, due: OrgDate.today(), progress: 60)
+            let review = WorkTask(id: UUID(uuidString: "40000000-0000-0000-0000-000000000002")!, key: "250201-T002", name: "Review drainage calculations", projectID: harbour.id, ownerID: Person.alex.id, reviewerID: Person.sam.id, status: .ready, due: OrgDate.today(), progress: 100)
+            let blocked = WorkTask(key: "250201-T003", name: "Confirm pipe crossing levels", projectID: harbour.id, ownerID: Person.alex.id, due: nil, blocker: "Waiting for survey confirmation. Ask the survey lead before starting.")
             let more = (1...24).map { index in
-                WorkTask(key: "SYN-2402-T\(String(format: "%03d", index))", name: index == 1 ? "Coordinate accessible path grades" : "Check greenway design segment \(index)", projectID: greenway.id, ownerID: Person.alex.id, reviewerID: Person.sam.id, requiresReview: false, due: nil)
+                WorkTask(key: "250202-T\(String(format: "%03d", index))", name: index == 1 ? "Coordinate accessible path grades" : "Check greenway design segment \(index)", projectID: greenway.id, ownerID: Person.alex.id, reviewerID: Person.sam.id, requiresReview: false, due: nil)
             }
             database = Database(snapshot: Snapshot(projects: [harbour, greenway], tasks: [design, review, blocked] + more,
                 comments: [Comment(taskID: design.id, authorID: Person.sam.id, body: "Please include the survey datum in the review package.", mentionID: Person.alex.id)], time: [],

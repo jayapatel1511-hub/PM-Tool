@@ -9,32 +9,33 @@ BEGIN;
 CREATE TEMP TABLE planning_scope AS SELECT gen_random_uuid() id, g n FROM generate_series(0,11) g;
 INSERT INTO app_user(id,email,display_name,job_title,office_id,supervisor_id,is_active,is_template_editor,weekly_capacity_hours,created_at,updated_at,row_version)
 SELECT id, CASE WHEN n=0 THEN 'planning-scale-supervisor@hub.test' ELSE format('planning-scale-%s@hub.test',n) END,
-format('Synthetic planning scale person %s',n), 'Synthetic fixture', (SELECT office_id FROM app_user WHERE email='sam@hub.test'),
+(ARRAY['Hannah Osei','Mateo Alvarez','Grace Kim','Liam O''Connor','Aisha Rahman','Noah Fraser','Chloe Tremblay','Ethan Wong','Sofia Rossi','Daniel Mensah','Emma Novak','Lucas Bergeron'])[n+1],
+CASE WHEN n=0 THEN 'Civil Group Lead' ELSE (ARRAY['Civil Designer','Civil Engineer','Civil Technologist','Civil Designer (EIT)'])[1+n%4] END, (SELECT office_id FROM app_user WHERE email='sam@hub.test'),
 CASE WHEN n=0 THEN NULL ELSE (SELECT id FROM planning_scope WHERE n=0) END, true,false,40,now(),now(),1 FROM planning_scope
 ON CONFLICT (email) DO NOTHING;
 UPDATE planning_scope x SET id=u.id FROM app_user u WHERE u.email=CASE WHEN x.n=0 THEN 'planning-scale-supervisor@hub.test' ELSE format('planning-scale-%s@hub.test',x.n) END;
 INSERT INTO user_system_role(id,user_id,role,source,granted_at)
 SELECT gen_random_uuid(),id,'Supervisor','Manual',now() FROM planning_scope x WHERE n=0 AND NOT EXISTS(SELECT 1 FROM user_system_role r WHERE r.user_id=x.id AND r.role='Supervisor');
 INSERT INTO project_member(id,project_id,user_id,roles,added_at)
-SELECT gen_random_uuid(),p.id,x.id,'{TeamMember}',now() FROM planning_scope x CROSS JOIN project p WHERE p.project_number='SYN-101'
+SELECT gen_random_uuid(),p.id,x.id,'{TeamMember}',now() FROM planning_scope x CROSS JOIN project p WHERE p.project_number='250101'
 AND NOT EXISTS(SELECT 1 FROM project_member m WHERE m.project_id=p.id AND m.user_id=x.id);
--- Idempotent fixture marker; all records and people explicitly say synthetic.
+-- Idempotent: skipped once any scoped person has an entry or allocation.
 INSERT INTO planning_entry(id,person_id,hours_per_week,start_week,end_week,label,source_category,project_id,confidence,visibility,notes,last_validated_at,created_by,updated_by,created_at,updated_at,row_version)
 SELECT gen_random_uuid(),x.id,0.5+(g%8)*0.5,date_trunc('week',current_date)::date+(g%12)*7,date_trunc('week',current_date)::date+(g%12)*7,
-format('Synthetic planning scale entry %s',g),'MajorProject',p.id,(ARRAY['Confirmed','Expected','Possible'])[1+g%3],
-CASE WHEN x.n=0 THEN 'Confirmed' ELSE 'Published' END,'Synthetic packet 034 performance fixture',now(),sup.id,sup.id,now(),now(),1
+(ARRAY['Grading design','Storm sewer design','Watermain design','Road profiles','Drawing checks','Site servicing report','Utility coordination','Tender drawings'])[1+g%8],'MajorProject',p.id,(ARRAY['Confirmed','Expected','Possible'])[1+g%3],
+CASE WHEN x.n=0 THEN 'Confirmed' ELSE 'Published' END,NULL,now(),sup.id,sup.id,now(),now(),1
 FROM generate_series(1,500) g JOIN planning_scope x ON x.n=g%12 CROSS JOIN planning_scope sup CROSS JOIN project p
-WHERE sup.n=0 AND p.project_number='SYN-101' AND NOT EXISTS(SELECT 1 FROM planning_entry e WHERE e.label=format('Synthetic planning scale entry %s',g));
+WHERE sup.n=0 AND p.project_number='250101' AND NOT EXISTS(SELECT 1 FROM planning_entry e JOIN planning_scope s ON s.id=e.person_id);
 INSERT INTO resource_allocation(id,person_id,project_id,purpose,from_date,through_date,planned_hours,status,confirmed_by,confirmed_at,over_capacity_reason,created_by,updated_by,created_at,updated_at,row_version)
 SELECT gen_random_uuid(),x.id,p.id,'Production',date_trunc('week',current_date)::date+(g%12)*7,date_trunc('week',current_date)::date+(g%12)*7+4,
-5,'Confirmed',sup.id,now(),format('Synthetic planning scale allocation %s',g),sup.id,sup.id,now(),now(),1
+5,'Confirmed',sup.id,now(),'Covering the submission peak',sup.id,sup.id,now(),now(),1
 FROM generate_series(1,50) g JOIN planning_scope x ON x.n=g%12 CROSS JOIN planning_scope sup CROSS JOIN project p
-WHERE sup.n=0 AND p.project_number='SYN-101' AND NOT EXISTS(SELECT 1 FROM resource_allocation a WHERE a.over_capacity_reason=format('Synthetic planning scale allocation %s',g));
+WHERE sup.n=0 AND p.project_number='250101' AND NOT EXISTS(SELECT 1 FROM resource_allocation a JOIN planning_scope s ON s.id=a.person_id);
 COMMIT;
 ANALYZE hub.planning_entry;
 SELECT (SELECT count(*) FROM planning_scope) scoped_people,
-(SELECT count(*) FROM planning_entry WHERE label LIKE 'Synthetic planning scale entry %') entries,
-(SELECT count(*) FROM resource_allocation WHERE over_capacity_reason LIKE 'Synthetic planning scale allocation %') allocations;
+(SELECT count(*) FROM planning_entry e JOIN planning_scope s ON s.id=e.person_id) entries,
+(SELECT count(*) FROM resource_allocation a JOIN planning_scope s ON s.id=a.person_id) allocations;
 \else
 -- Full-scale synthetic data for the §22 performance check (packet 011 FR-013, US5):
 -- 480 more people, 600 projects (500 Active, 100 Setup), about 100,000 open tasks (one 5,000-task and one 2,000-task
@@ -55,21 +56,23 @@ CREATE TEMP TABLE one AS SELECT (SELECT id FROM office ORDER BY name LIMIT 1) AS
 
 -- People: 60 project managers (0..59) and 420 engineers (60..479).
 INSERT INTO app_user (id, email, display_name, job_title, office_id, is_active, is_template_editor, weekly_capacity_hours, created_at, updated_at, row_version)
-SELECT gen_random_uuid(), format('scale%s@hub.test', g), format('Scale Person %s', g), CASE WHEN g <= 60 THEN 'Project Manager' ELSE 'Engineer' END,
+SELECT gen_random_uuid(), format('scale%s@hub.test', g), (ARRAY['Olivia','James','Amelia','Benjamin','Isla','Henry','Ava','Samuel','Zoe','Owen','Leah','Gabriel','Nora','Ryan','Maya','Adam','Clara','Victor','Ruby','Felix','Ines','Kofi','Mei','Arjun'])[1 + g % 24]
+    || ' ' || (ARRAY['Tremblay','Singh','Martin','Nguyen','Roy','Campbell','Gagnon','Ahmed','Wilson','Morin','Taylor','Leblanc','Brown','Ali','Fortin','Kaur','Thompson','Pelletier','Reid','Cote'])[1 + (g / 24) % 20], CASE WHEN g <= 60 THEN 'Project Manager' ELSE 'Engineer' END,
   one.office, true, false, 37.5, now(), now(), 1
 FROM generate_series(1, 480) g, one;
 CREATE TEMP TABLE people AS SELECT id, (regexp_replace(email, '\D', '', 'g')::int - 1) AS n FROM app_user WHERE email LIKE 'scale%';
 CREATE UNIQUE INDEX ON people (n);
 
 -- Projects; Priya manages the two large ones.
-CREATE TEMP TABLE sp AS SELECT g AS n, gen_random_uuid() AS id, format('S%s', lpad(g::text, 4, '0')) AS number,
+CREATE TEMP TABLE sp AS SELECT g AS n, gen_random_uuid() AS id, CASE WHEN g <= 300 THEN '25' ELSE '26' END || (1000 + g)::text AS number,  -- YYNNNN: 251001..251300, 261301..261600
   CASE WHEN g = 1 THEN 5000 WHEN g = 2 THEN 2000 WHEN g <= 500 THEN 230 ELSE 20 END AS tasks
 FROM generate_series(1, 600) g;
 CREATE UNIQUE INDEX ON sp (id);
 INSERT INTO project (id, project_number, name, client_id, project_manager_id, office_id, status, priority, visibility, allow_viewer_comments,
   start_date, target_completion_date, activated_at, next_task_seq, next_deliverable_seq, next_milestone_seq, next_decision_seq, next_risk_seq,
   next_issue_seq, next_action_seq, created_at, updated_at, row_version)
-SELECT sp.id, sp.number, format('Scale project %s', sp.n), one.client, CASE WHEN sp.n <= 2 THEN one.priya ELSE pm.id END, one.office,
+SELECT sp.id, sp.number, (ARRAY['Harbour Road','Maple Creek','North Ridge','Cedar Hills','Lakeshore','Riverside','Westfield','Pine Grove','Elm Street','Bayview','Oakwood','Stonebridge','Millbrook','Kingsway','Fairview','Greenway','Highland Park','Willow Bend','Station Square','Brookside','Eastgate','Summit Heights','Old Mill','Sandy Point','Granite Falls'])[1 + sp.n % 25]
+  || ' ' || (ARRAY['Site Servicing','Road Reconstruction','Watermain Replacement','Stormwater Management','Subdivision Design','Culvert Replacement','Bridge Rehabilitation','Intersection Upgrade','Sanitary Sewer Upgrade','Grading and Drainage','Trail Extension','Parking Lot Expansion','Pumping Station Upgrade','Erosion Control','Streetscape Renewal','Retaining Wall Design','Transit Hub Access','School Site Plan','Industrial Park Servicing','Bike Lane Network','Flood Mitigation','Pond Retrofit','Lot Grading Review','Utility Relocation'])[1 + (sp.n / 25) % 24], one.client, CASE WHEN sp.n <= 2 THEN one.priya ELSE pm.id END, one.office,
   CASE WHEN sp.n <= 500 THEN 'Active' ELSE 'Setup' END, 'Medium', 'Open', true, current_date - 120, current_date + 240,
   CASE WHEN sp.n <= 500 THEN now() END, sp.tasks + 1, 11, 6, 1, 1, 1, 1, now() - interval '120 days', now(), 1
 FROM sp JOIN people pm ON pm.n = sp.n % 60, one;
@@ -94,12 +97,12 @@ SELECT DISTINCT ON (project_id, user_id) gen_random_uuid(), project_id, user_id,
 
 -- Milestones (5) and deliverables (10) per project.
 INSERT INTO milestone (id, name, milestone_type, date, original_date, is_client_facing, is_complete, is_cancelled, sort_order, created_at, updated_at, row_version, project_id, key, seq)
-SELECT gen_random_uuid(), format('Milestone %s', m), (ARRAY['Kickoff','Field Work','Design Submission','Permit Submission','Tender'])[m],
+SELECT gen_random_uuid(), (ARRAY['Project kickoff','Field work complete','60% design submission','Permit submission','Tender issue'])[m], (ARRAY['Kickoff','Field Work','Design Submission','Permit Submission','Tender'])[m],
   current_date - 60 + m * 45, current_date - 60 + m * 45, m >= 3, m = 1, false, m, now(), now(), 1, sp.id, format('%s-M%s', sp.number, lpad(m::text, 2, '0')), m
 FROM sp CROSS JOIN generate_series(1, 5) m;
 INSERT INTO deliverable (id, name, project_discipline_id, deliverable_type_id, owner_id, milestone_id, start_date, due_date, original_due_date, priority, status,
   requires_review, last_activity_at, sort_order, created_at, updated_at, row_version, project_id, key, seq)
-SELECT gen_random_uuid(), format('Deliverable %s', d), spd.id, one.dtype, spd.lead, ms.id, current_date - 30, current_date + d * 12, current_date + d * 12, 'Medium',
+SELECT gen_random_uuid(), (ARRAY['Topographic survey','Geotechnical report','Preliminary design drawings','Stormwater management report','Grading plan','Servicing plan','Erosion and sediment control plan','Specifications','Cost estimate','Issued-for-tender drawings'])[d], spd.id, one.dtype, spd.lead, ms.id, current_date - 30, current_date + d * 12, current_date + d * 12, 'Medium',
   CASE WHEN d <= 2 THEN 'In Progress' ELSE 'Not Started' END, false, now(), d, now(), now(), 1, sp.id, format('%s-D%s', sp.number, lpad(d::text, 3, '0')), d
 FROM sp CROSS JOIN generate_series(1, 10) d JOIN spd ON spd.project_id = sp.id AND spd.k = d % 3
   JOIN milestone ms ON ms.project_id = sp.id AND ms.seq = 1 + (d - 1) / 2, one;
@@ -116,7 +119,8 @@ FROM sp CROSS JOIN LATERAL generate_series(1, sp.tasks) AS g(s)
 INSERT INTO task (id, name, project_discipline_id, deliverable_id, assignee_id, reviewer_id, requires_review, priority, start_date, due_date, original_start_date,
   original_due_date, status, progress_pct, estimated_hours, review_round, due_date_change_count, last_activity_at, completed_at, status_changed_at, review_requested_at,
   sort_order, created_at, updated_at, row_version, project_id, key, seq)
-SELECT st.id, format('Scale task %s', st.seq), st.pd, CASE WHEN st.seq % 10 < 6 THEN dl.id END, st.assignee, CASE WHEN st.seq % 10 = 4 THEN st.lead END,
+SELECT st.id, (ARRAY['Draft','Check','Revise','Coordinate','Review','Update','Model','Prepare','Confirm','Mark up','Finalize','Issue'])[1 + st.seq % 12]
+  || ' ' || (ARRAY['road profiles','storm sewer layout','watermain alignment','grading plan','catch basin schedule','culvert sizing','pavement design','curb returns','utility crossings','sediment control details','pond outlet structure','service connections','drainage area plan','cross-sections','pipe crossing levels','quantity takeoff','specification sections','traffic staging plan','detail sheets','design brief'])[1 + (st.seq / 12) % 20], st.pd, CASE WHEN st.seq % 10 < 6 THEN dl.id END, st.assignee, CASE WHEN st.seq % 10 = 4 THEN st.lead END,
   st.seq % 10 = 4, CASE st.seq % 13 WHEN 0 THEN 'High' WHEN 1 THEN 'Critical' ELSE 'Medium' END,
   st.start_date, CASE WHEN st.seq % 29 = 0 THEN NULL ELSE st.start_date + 5 + st.seq % 20 END, st.start_date, CASE WHEN st.seq % 29 = 0 THEN NULL ELSE st.start_date + 5 + st.seq % 20 END,
   st.status, CASE st.status WHEN 'Complete' THEN 100 WHEN 'Not Started' THEN 0 ELSE 50 END, 4 + st.seq % 12, 0, 0,

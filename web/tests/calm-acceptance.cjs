@@ -21,7 +21,7 @@ const CHECKS = (process.env.CALM_CHECKS ?? 'crawl,reach,quick,filters,keyboard,a
 const out = process.env.CALM_OUT ?? fs.mkdtempSync(path.join(os.tmpdir(), 'calm-'))
 const root = path.resolve(__dirname, '../..')
 const axePath = require.resolve('axe-core/axe.min.js')
-const P = 'SYN-101'
+const P = '250101'
 const report = { base, baseUi: baseUi ?? null, commit: execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(), at: new Date().toISOString() }
 const failures = []
 const fail = (check, what) => { failures.push(`${check}: ${what}`); console.log(`  FAIL ${what}`) }
@@ -270,7 +270,7 @@ function rowCount() {
   while (tw.nextNode()) { const p = tw.currentNode.parentElement; if (p && vis(p) && !p.closest('select, header, nav, [role=dialog]')) text += ` ${tw.currentNode.textContent}` }
   return {
     rows: table ? [...table.querySelectorAll('tbody tr')].filter((r) => vis(r) && !r.querySelector('th[scope=rowgroup]')).length : 0,
-    keys: new Set(text.match(/\bSYN-\d{3}-T\d{4}\b/g) ?? []).size,
+    keys: new Set(text.match(/\b\d{6}-T\d{4}\b/g) ?? []).size,
     items: [...main.querySelectorAll('li')].filter(vis).length,
     entries: [...main.querySelectorAll('[role=region] button, [role=region] a')].filter(vis).length,
   }
@@ -492,7 +492,7 @@ async function signals() {
   console.log('\nAC-CALM-09 one signal per row')
   const weekLabels = [T('planner.indicator.over'), T('planner.indicator.under'), T('planner.indicator.stale'), T('workload.ind.over')]
   const PLAN = [['priya', '/planner'], ['lena', '/planner'], ['priya', '/workload'], ['sam', '/workload'], ['priya', '/tasks'], ['priya', '/my-work?tab=overdue'],
-    ['priya', `/projects/${P}/tasks`], ['priya', `/projects/${P}/deliverables`], ['priya', '/projects/SYN-105/tasks'], ['priya', '/projects/SYN-105/deliverables']]
+    ['priya', `/projects/${P}/tasks`], ['priya', `/projects/${P}/deliverables`], ['priya', '/projects/260105/tasks'], ['priya', '/projects/260105/deliverables']]
   const rows = []
   const pages = {}
   for (const [who, url] of PLAN) {
@@ -521,7 +521,7 @@ async function deeplinks() {
     ChangeNotice: ids.change, ReviewPackage: ids.review, SubmissionPackage: ids.submission, Action: ids.action }
   // Notification, digest and attention links built by the API (interpolated strings), then the app paths named in the docs.
   const code = grep(['\\$"/(projects|my-work|time|tasks|planner|workload|notifications)[^"]*"', '--', 'src/*.cs', ':!src/**/*Tests*']).map((s) => s.slice(2, -1))
-  const docs = grep(['/projects/(\\{id\\}|1234|SYN-[0-9]+)(/[a-z-]+)?(\\?[^ )"\'`<>]*)?', '--', 'docs', '*.md', ':!specs', ':!spec-parts', ':!Engineering-Project-Coordination-Hub-Specification.md'])
+  const docs = grep(['/projects/(\\{id\\}|1234|SYN-[0-9]+|[0-9]{6})(/[a-z-]+)?(\\?[^ )"\'`<>]*)?', '--', 'docs', '*.md', ':!specs', ':!spec-parts', ':!Engineering-Project-Coordination-Hub-Specification.md'])
   const fill = (s) => s.replace(/panel=\{type\}:\{id\}|panel=\{target\.Type\}:\{target\.Id\}/, `panel=Task:${ids.task}`)
     .replace(/panel=([A-Za-z]+):\{[^}]+\}/g, (_, type) => `panel=${type}:${panel[type] ?? 'unknown'}`)
     .replace(/allocation=\{[^}]+\}/, `allocation=${ids.allocation}`).replace(/basis=\{[^}]+\}/, `basis=${ids.basis}`)

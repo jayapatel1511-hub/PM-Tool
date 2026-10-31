@@ -55,7 +55,7 @@ assert.ok(base && ['localhost', '127.0.0.1'].includes(new URL(base).hostname), '
       await page.close()
       const taskPage = await browser.newPage({ viewport: { width, height: 480 }, reducedMotion: 'reduce' })
       await taskPage.addInitScript(() => { sessionStorage.setItem('hub.devUser', 'alex@hub.test'); sessionStorage.setItem('hub.signedIn', '1') })
-      await taskPage.goto(`${base}/projects/SYN-101/tasks`)
+      await taskPage.goto(`${base}/projects/250101/tasks`)
       await taskPage.getByRole('button', { name: 'New task', exact: true }).click()
       const assignee = taskPage.locator('#t-assignee')
       assert.equal(await assignee.getAttribute('aria-describedby'), 't-assignee-feedback', 'People picker forwards helper association')

@@ -46,9 +46,9 @@ Add `--with-staffing-fixtures` only before Jay's S1 (staffing) and S2 (dependenc
 python3 scripts/seed-homedev-tuesday-review.py <full-review-sha> --with-staffing-fixtures
 ```
 
-The flag runs `tools/preview/seed_staffing.py` through the same hosted transport after the three default seeds; on a release whose fixture manifest is already complete it runs only that seed, after the usual rerun checks, and records it in the manifest. It is off by default because it changes organisation-wide data: it turns on working days for the whole organisation and adds a Riverside office with one holiday, besides SYN-104, SYN-105, the open roles and the stalled items (verification section 8).
+The flag runs `tools/preview/seed_staffing.py` through the same hosted transport after the three default seeds; on a release whose fixture manifest is already complete it runs only that seed, after the usual rerun checks, and records it in the manifest. It is off by default because it changes organisation-wide data: it turns on working days for the whole organisation and adds a Riverside office with one holiday, besides 260104, 260105, the open roles and the stalled items (verification section 8).
 
-Run it on the day of S2, and hold S1 the same day where possible. SYN-105's lag states (section 8.2, browser version) are true only on the day it is seeded: every start and finish happens that day and the holiday falls two working days later. The seed creates SYN-104 and SYN-105 once per review database and a later run makes no writes, so a second run on another day does not refresh them: on any later day the states have moved on from the table.
+Run it on the day of S2, and hold S1 the same day where possible. 260105's lag states (section 8.2, browser version) are true only on the day it is seeded: every start and finish happens that day and the holiday falls two working days later. The seed creates 260104 and 260105 once per review database and a later run makes no writes, so a second run on another day does not refresh them: on any later day the states have moved on from the table.
 
 ## Daily review database dump
 

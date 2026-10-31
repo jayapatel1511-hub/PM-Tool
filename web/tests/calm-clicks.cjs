@@ -14,7 +14,7 @@ const base = process.env.TUESDAY_UI_BASE_URL ?? 'http://localhost:5173'
 assert.ok(['localhost', '127.0.0.1'].includes(new URL(base).hostname), 'TUESDAY_UI_BASE_URL must be a local Development preview')
 const v = process.env.CALM_VERSION
 assert.ok(['base', 'now'].includes(v), 'CALM_VERSION must be base or now')
-const P = 'SYN-101'
+const P = '250101'
 const nextWeek = (() => { const d = new Date(); d.setDate(d.getDate() - ((d.getDay() + 6) % 7) + 7); return d.toISOString().slice(0, 10) })()
 
 const side = (href) => `nav[aria-label="Main navigation"] a[href="${href}"]:visible`
@@ -27,19 +27,19 @@ const ROUTES = [
   ['1 Open my most overdue task from My Work', 'alex', 'My Work list', [
     ['click', `${v === 'base' ? '#mw-tasks' : '#mw-today'} li >> nth=0 >> button >> nth=1`, 'first task in the Overdue group'],
   ], async (p) => p.getByRole('button', { name: 'Open full page' }).isVisible()],
-  ['2 Show SYN-101 Civil tasks that are overdue', 'priya', 'dashboard discipline row', [
+  ['2 Show 250101 Civil tasks that are overdue', 'priya', 'dashboard discipline row', [
     ...toProject, ['click', 'main tr:has(a:text-is("Civil")) a[href$="&overdue=true"]', 'Civil row, Overdue count'],
   ], async (p) => /disciplineId=/.test(p.url()) && /overdue=true/.test(p.url())],
-  ['2 Show SYN-101 Civil tasks that are overdue', 'priya', 'Tasks filters', [
+  ['2 Show 250101 Civil tasks that are overdue', 'priya', 'Tasks filters', [
     ...toProject, ['click', tab('tasks'), v === 'base' ? 'Tasks tab' : 'Work group (opens Tasks)'],
     ...(v === 'now' ? [['click', filters, 'Filters']] : []),
     ['choose', '#tasks-discipline', 'Discipline: Civil', 'Civil'],
     ['click', `${v === 'base' ? 'main' : '[role=dialog]'} button[aria-pressed]:has-text("Overdue")`, 'Overdue chip'],
   ], async (p) => /disciplineId=/.test(p.url()) && /overdue=true/.test(p.url())],
-  ['3 Open SYN-101 high risks', 'priya', 'dashboard tile', [
+  ['3 Open 250101 high risks', 'priya', 'dashboard tile', [
     ...toProject, ['click', 'main a[href*="/risks?"][href*="severity=High"]', 'High risks count'],
   ], async (p) => /\/risks\?.*severity=High/.test(p.url())],
-  ['3 Open SYN-101 high risks', 'priya', 'Risks filters', [
+  ['3 Open 250101 high risks', 'priya', 'Risks filters', [
     ...toProject,
     ...(v === 'base' ? [['click', tab('risks'), 'Risks tab']] : [['click', tab('coordination'), 'Coordination group'], ['click', `main nav a[href="/projects/${P}/risks"]`, 'Risks page']]),
     ...(v === 'now' ? [['click', filters, 'Filters']] : []),
@@ -51,14 +51,14 @@ const ROUTES = [
     ['type', 'input[aria-label="Quick add planning entry"]', 'type the hours', '8 h'],
     ['key', 'Enter', 'Enter saves (not pressed)'],
   ], async (p) => p.locator('input[aria-label="Quick add planning entry"]').isVisible()],
-  ['5 Export SYN-101 deliverables', 'priya', 'Deliverables export', [
+  ['5 Export 250101 deliverables', 'priya', 'Deliverables export', [
     ...toProject, ['click', tab('deliverables'), v === 'base' ? 'Deliverables tab' : 'Deliverables group'],
     ['click', 'main button:has-text("Export")', 'Export'],
     ['last', '[role=menuitem]:has-text("CSV")', 'CSV (download not started)'],
   ], async () => true],
   ['6 Change a task\'s owner', 'priya', 'task panel', [
     ['click', side('/tasks'), 'sidebar Tasks'],
-    ['click', 'main button:has-text("SYN-101-T0001") >> nth=0', 'task SYN-101-T0001'],
+    ['click', 'main button:has-text("250101-T0001") >> nth=0', 'task 250101-T0001'],
     ['click', 'button[data-slot=popover-trigger]:has-text("Alex Chen") >> nth=-1', 'Owner field'],
     ['last', '[cmdk-item]:not(:has-text("Alex Chen")) >> nth=0', 'another person (not saved)'],
   ], async () => true],

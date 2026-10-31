@@ -72,7 +72,7 @@ def project(number):
     return call(f"projects?q={number}&mine=false&pageSize=5", "priya@hub.test")[1]["items"][0]
 
 
-big, two = project("S0001"), project("S0002")
+big, two = project("251001"), project("251002")
 some = [project(f"S{n:04d}") for n in (3, 50, 120, 250, 400)]
 task_ids = [t["id"] for t in call(f"projects/{big['id']}/tasks?pageSize=200", "priya@hub.test")[1]["items"][:50]]
 people = [f"scale{n}@hub.test" for n in range(61, 481)] + ["alex@hub.test", "marc@hub.test"]
@@ -91,7 +91,7 @@ def scenario(user):
     out.append(("List read: projects", timed("projects?pageSize=50", user)))
     out.append(("List read: tasks page", timed(f"projects/{p['id']}/tasks?pageSize=50", user)))
     out.append(("Item read: task", timed(f"tasks/{random.choice(task_ids)}", user)))
-    out.append(("Search", timed(f"search?q=Scale+task+{random.randint(1, 230)}", user)))
+    out.append(("Search", timed(f"search?q={random.choice(['grading', 'culvert', 'watermain', 'pavement', 'sediment'])}", user)))
     return out
 
 

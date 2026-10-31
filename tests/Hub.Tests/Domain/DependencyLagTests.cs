@@ -104,13 +104,13 @@ public sealed class DependencyLagTests
         Assert.DoesNotContain(working.Attention, x => x.RuleId == "A-02" && x.ItemId == blocked.Id);
     }
 
-    // ---------- Packet 036, verification.md §8.2: SYN-105 links L1–L6 on dates A, B and C (SC-003, AC-DEPT-02 to -04) ----------
+    // ---------- Packet 036, verification.md §8.2: 260105 links L1–L6 on dates A, B and C (SC-003, AC-DEPT-02 to -04) ----------
 
     static readonly WorkCalendar Nov11Holiday = new([D(2026, 11, 11)]); // organisation holiday, a Wednesday
     static readonly Dictionary<string, DateOnly> Dates = new() { ["A"] = D(2026, 11, 9), ["B"] = D(2026, 11, 12), ["C"] = D(2026, 11, 16) };
     const string L2Flag = "Starts 2026-11-12 before P2 is due 2026-11-13", L4Flag = "Starts 2026-11-12 before P4 starts 2026-11-13", L5Flag = "Due 2026-11-19 before P5 is due 2026-11-20";
 
-    /// SYN-105 as it stands on `today`, each item in the status the table gives it on that date. Returns the successors S1–S6.
+    /// 260105 as it stands on `today`, each item in the status the table gives it on that date. Returns the successors S1–S6.
     static (Scenario S, TaskSnap[] Successors, TaskSnap[] Predecessors) Syn105(DateOnly today, bool workingDays = true)
     {
         var s = new Scenario { Today = today, Calendar = Nov11Holiday };

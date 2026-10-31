@@ -63,7 +63,7 @@ final class TuesdayUITests: XCTestCase {
         (down ? upper : lower).press(forDuration: 0.05, thenDragTo: down ? lower : upper)
     }
     private func openDesign() {
-        tap(app.buttons["task-SYN-2401-T001"])
+        tap(app.buttons["task-250201-T001"])
         reveal(app.staticTexts["task-title"])
     }
     private func save() {
@@ -116,7 +116,7 @@ final class TuesdayUITests: XCTestCase {
         tap(app.buttons["Account and simulator settings"])
         tap(app.buttons["Sign out"])
         signIn("2")
-        tap(app.buttons["task-SYN-2401-T001"])
+        tap(app.buttons["task-250201-T001"])
         tap(app.buttons["transition-task"])
         save()
         for _ in 0..<12 where !app.staticTexts["task-status"].exists { scroll(down: true) }
@@ -128,8 +128,8 @@ final class TuesdayUITests: XCTestCase {
     func testDraftSurvivesTerminationWithoutAutomaticSubmission() {
         signIn()
         tap(app.tabBars.buttons["Projects"])
-        tap(app.buttons["project-SYN-2402"])
-        tap(app.buttons["task-SYN-2402-T001"])
+        tap(app.buttons["project-250202"])
+        tap(app.buttons["task-250202-T001"])
         tap(app.buttons["add-comment"])
         let comment = app.textFields["comment-field"]
         tap(comment); comment.typeText("Synthetic unsent draft survives restart")
@@ -171,8 +171,8 @@ final class TuesdayUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["No assigned work"].exists)
         XCTAssertFalse(app.buttons["new-task"].exists)
         tap(app.tabBars.buttons["Projects"])
-        tap(app.buttons["project-SYN-2401"])
-        tap(app.buttons["task-SYN-2401-T001"])
+        tap(app.buttons["project-250201"])
+        tap(app.buttons["task-250201-T001"])
         for _ in 0..<4 where !app.staticTexts["This account has read-only access."].isHittable { app.swipeUp() }
         XCTAssertTrue(app.staticTexts["This account has read-only access."].exists)
         XCTAssertFalse(app.buttons["edit-task"].exists)
@@ -184,10 +184,10 @@ final class TuesdayUITests: XCTestCase {
     func testProjectPaginationAndUnknownWeekCapacity() {
         signIn()
         tap(app.tabBars.buttons["Projects"])
-        tap(app.buttons["project-SYN-2402"])
+        tap(app.buttons["project-250202"])
         tap(app.buttons["load-more"])
-        for _ in 0..<8 where !app.buttons["task-SYN-2402-T020"].exists { app.swipeUp() }
-        XCTAssertTrue(app.buttons["task-SYN-2402-T020"].exists)
+        for _ in 0..<8 where !app.buttons["task-250202-T020"].exists { app.swipeUp() }
+        XCTAssertTrue(app.buttons["task-250202-T020"].exists)
         tap(app.tabBars.buttons["My Week"])
         tap(app.buttons["Next week"])
         XCTAssertTrue(app.staticTexts["Available hours, Unknown"].waitForExistence(timeout: 5))
@@ -240,7 +240,7 @@ final class TuesdayUITests: XCTestCase {
         XCUIDevice.shared.press(.home)
         app.activate()
         XCTAssertTrue(app.staticTexts["Workspace locked"].waitForExistence(timeout: 5))
-        XCTAssertFalse(app.buttons["task-SYN-2401-T001"].exists)
+        XCTAssertFalse(app.buttons["task-250201-T001"].exists)
         tap(app.buttons["Reconnect simulator"])
         XCTAssertTrue(app.tabBars.buttons["My Work"].waitForExistence(timeout: 5))
         attach("Foreground revalidation after reconnection")

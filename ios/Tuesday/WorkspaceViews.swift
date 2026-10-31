@@ -69,7 +69,7 @@ struct MyWorkView: View {
                 Section("Other owned work") {
                     VStack(alignment: .leading, spacing: 8) {
                         Label("Confirm utility coordination decision", systemImage: "arrow.triangle.branch").font(.headline)
-                        Text("SYN-2401 · Civil · Decision due this week").font(.caption).foregroundStyle(.secondary)
+                        Text("250201 · Civil · Decision due this week").font(.caption).foregroundStyle(.secondary)
                         Text("Decisions and formal review disposition continue in Tuesday web.").font(.footnote)
                         Link("Open in Tuesday web", destination: URL(string: "https://pm.engcalchub.com/projects/\(Project.harbour.id)/coordination")!).frame(minHeight: 44)
                         Text("Synthetic identity: this fixture has no matching hosted record.").font(.caption).foregroundStyle(.secondary)

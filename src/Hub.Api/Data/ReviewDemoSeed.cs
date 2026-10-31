@@ -151,11 +151,11 @@ public static class ReviewDemoSeed
                 });
         }
 
-        await Project("DEMO-101", "Community Facility Site Servicing", taylor, jay, yagmur,
+        await Project("260201", "Community Facility Site Servicing", taylor, jay, yagmur,
             "Site Servicing Concept Drawings", "Prepare preliminary servicing layout");
-        await Project("DEMO-102", "Harbour Road Civil Design", jay, jay, taylor,
+        await Project("260202", "Harbour Road Civil Design", jay, jay, taylor,
             "Road and Grading Concept Drawings", "Develop road and grading concept");
-        await Project("DEMO-103", "Waterfront Drainage Review", yagmur, yagmur, jay,
+        await Project("260203", "Waterfront Drainage Review", yagmur, yagmur, jay,
             "Drainage Concept Drawings", "Prepare drainage design inputs");
 
         await db.SaveChangesAsync();

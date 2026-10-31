@@ -7,7 +7,7 @@ const { chromium } = require('playwright')
 
 const base = process.env.TUESDAY_UI_BASE_URL ?? 'http://localhost:5173'
 assert.ok(['localhost', '127.0.0.1'].includes(new URL(base).hostname), 'TUESDAY_UI_BASE_URL must be a local Development preview')
-const project = 'SYN-101'
+const project = '250101'
 const personas = (process.env.CLUTTER_PERSONAS ?? 'priya,sam').split(',')
 const navPersonas = ['jordan', 'lena', 'sam', 'priya', 'alex', 'rita']
 // [path, baseline chrome words (section 2: 5800e3fc measured with this census, 2026-10-12), data selector for screens without table rows]

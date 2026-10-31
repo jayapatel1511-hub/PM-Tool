@@ -23,11 +23,11 @@ import uuid
 
 client = connect()
 BASE = client.base
-NUMBERS = ("SYN-101", "SYN-102", "SYN-103")
+NUMBERS = ("250101", "250102", "250103")
 DEV_USERS = ("jordan", "lena", "sam", "priya", "marc", "alex", "jill", "diane", "omar", "rita")
 P = ''
 URL = 'https://docs.example.test/project-docs/'  # reserved test domain: never a real site
-FOLDER = '\\\\project-docs-fs\\projects\\SYN-101'
+FOLDER = '\\\\project-docs-fs\\projects\\250101'
 refusals, skipped, missing_steps, created = [], [], [], {}
 
 # Work created by seed_resources.py (looked up by name, never changed here).
@@ -69,10 +69,10 @@ CAL_COORD, CAL_SITE, CAL_FOCUS, CAL_WATERFRONT, CAL_RESTRICTED = (P + s for s in
 H_ACCEPTED, H_SUBMITTED = (P + s for s in ("Groundwater and bedding inputs for storm sewer design",
                                            "Geotechnical constraints for the utility relocation register"))
 REVIEW, SUBMISSION = P + "60 % storm sewer drawings review", P + "60 % design submission package"
-STD_ID, STD_TITLE = "SYN-STD-01", P + 'Municipal drainage design standard'
+STD_ID, STD_TITLE = "MDS-01", P + 'Municipal drainage design standard'
 BASIS_STORM, BASIS_GROUNDWATER = P + "Minor storm design return period", P + "Groundwater stays below trench invert"
 TEMPLATE = P + "Small site servicing template"
-STORM_URL, MEMO_URL = f"{URL}SYN-101/SYN-101-C-201-P02.pdf", f"{URL}SYN-101/SYN-101-G-001-R0.pdf"
+STORM_URL, MEMO_URL = f"{URL}250101/250101-C-201-P02.pdf", f"{URL}250101/250101-G-001-R0.pdf"
 
 
 class Refused(Exception):
@@ -171,7 +171,7 @@ except Refused as e:
     sys.exit(f"Run tools/preview/seed_resources.py first ({e}).")
 p1, p2, p3 = (proj[n]["id"] for n in NUMBERS)
 pd = {n: {d["code"]: d["id"] for d in proj[n]["disciplines"]} for n in NUMBERS}
-c1, g1, c2, c3 = pd["SYN-101"]["CIV"], pd["SYN-101"]["GEO"], pd["SYN-102"]["CIV"], pd["SYN-103"]["CIV"]
+c1, g1, c2, c3 = pd["250101"]["CIV"], pd["250101"]["GEO"], pd["250102"]["CIV"], pd["250103"]["CIV"]
 people = call("users?limit=500", "jordan")
 uid = {u["email"].split("@")[0]: u["id"] for u in people}
 uname = {u["email"].split("@")[0]: u["displayName"] for u in people}
@@ -192,8 +192,8 @@ def milestones_and_deliverables():
         ms[name] = call(f"projects/{pid}/milestones", pm, "POST", {"name": name, "milestoneType": kind, "date": iso(date),
                                                                     "description": 'Coordinate the agreed design programme.'})
         made(mod, ms[name]["key"])
-    attempt("SYN-101 60 % submission moved five days later by Priya", lambda: call(f"milestones/{ms[SUB60]['id']}/change-date", "priya", "POST", {
-        "newDate": iso(ahead(11)), "reason": 'the client asked for five more days to return survey comments.',
+    attempt("250101 60 % submission moved five days later by Priya", lambda: call(f"milestones/{ms[SUB60]['id']}/change-date", "priya", "POST", {
+        "newDate": iso(ahead(11)), "reason": 'The client asked for five more days to return survey comments.',
         "rowVersion": ms[SUB60]["rowVersion"]}))
 
     def new(pid, pm, name, discipline, kind, owner, target, reviewer=None, review=True, revision=None, due=None):
@@ -226,19 +226,19 @@ def milestones_and_deliverables():
         return call(f"milestones/{m['id']}/complete", pm, "POST", {"completedDate": iso(ago(days_ago)),
                                                                      "rowVersion": call(f"milestones/{m['id']}", pm)["milestone"]["rowVersion"]})
 
-    attempt("SYN-101 drainage brief issued and accepted by Priya", lambda: move(
+    attempt("250101 drainage brief issued and accepted by Priya", lambda: move(
         issue(brief, "priya", 29, 'client contact'), "priya", "Accepted"))
-    attempt("SYN-101 kickoff completed by Priya", lambda: complete(ms[KICKOFF], "priya", 28))
-    attempt("SYN-101 storm drawings started and sent for review by Jill", lambda: move(
+    attempt("250101 kickoff completed by Priya", lambda: complete(ms[KICKOFF], "priya", 28))
+    attempt("250101 storm drawings started and sent for review by Jill", lambda: move(
         move(storm, "jill", "In Progress"), "jill", "In Review", comment='60 % sheets ready for review.'))
-    attempt("SYN-101 geotechnical memo started and issued by Omar", lambda: issue(
+    attempt("250101 geotechnical memo started and issued by Omar", lambda: issue(
         move(memo, "omar", "In Progress"), "omar", 2, 'civil design team (internal)'))
-    attempt("SYN-101 pavement recommendations put on hold by Omar", lambda: move(
-        pavement, "omar", "On Hold", reason='waiting for the borehole programme before pavement design starts.'))
-    attempt("SYN-102 site servicing plan started by Alex", lambda: move(site, "alex", "In Progress"))
-    attempt("SYN-102 servicing brief issued by Marc", lambda: issue(sbrief, "marc", 15, 'client contact'))
-    attempt("SYN-102 servicing brief milestone completed by Marc", lambda: complete(ms[BRIEF], "marc", 14))
-    attempt("SYN-103 options memo started by Jill", lambda: move(options, "jill", "In Progress"))
+    attempt("250101 pavement recommendations put on hold by Omar", lambda: move(
+        pavement, "omar", "On Hold", reason='Waiting for the borehole programme before pavement design starts.'))
+    attempt("250102 site servicing plan started by Alex", lambda: move(site, "alex", "In Progress"))
+    attempt("250102 servicing brief issued by Marc", lambda: issue(sbrief, "marc", 15, 'client contact'))
+    attempt("250102 servicing brief milestone completed by Marc", lambda: complete(ms[BRIEF], "marc", 14))
+    attempt("250103 options memo started by Jill", lambda: move(options, "jill", "In Progress"))
 
 
 def decisions():
@@ -252,7 +252,7 @@ def decisions():
         d = call(f"projects/{pid}/decisions", who, "POST", {
             "subject": subject, "description": 'Resolve the design question and record the agreed approach.', "ownerUserId": uid[owner],
             "dateRequested": iso(requested), "requiredByDate": iso(required), "impactLevel": impact,
-            "impactDescription": 'affects the design programme of this project.', "links": list(links)})
+            "impactDescription": 'Affects the design programme of this project.', "links": list(links)})
         made(mod, d["key"])
         return d
 
@@ -262,12 +262,12 @@ def decisions():
     # below still ties this decision to the task.
     new(p1, "marc", DEC_OUTFALL, "priya", ago(3), ahead(6), "High")
     standard = new(p1, "jill", DEC_STANDARD, "marc", ago(6), ahead(2), "Medium", [{"targetType": "Task", "targetId": drainage_task["id"]}])
-    attempt("SYN-101 drainage standard decided by Marc", lambda: call(f"decisions/{standard['id']}/transition", "marc", "POST", {
-        "toStatus": "Decided", "decisionText": 'size the minor system to the 2025 drainage standard.',
+    attempt("250101 drainage standard decided by Marc", lambda: call(f"decisions/{standard['id']}/transition", "marc", "POST", {
+        "toStatus": "Decided", "decisionText": 'Size the minor system to the 2025 drainage standard.',
         "decisionDate": iso(ago(1)), "rowVersion": standard["rowVersion"]}))
     backfill = new(p1, "alex", DEC_BACKFILL, "omar", ago(12), ago(5), "Medium",
                    [{"targetType": "Milestone", "targetId": sub60["id"]}] if sub60 else [])
-    attempt("SYN-101 overdue backfill decision put under review by Alex", lambda: call(
+    attempt("250101 overdue backfill decision put under review by Alex", lambda: call(
         f"decisions/{backfill['id']}/transition", "alex", "POST", {"toStatus": "Under Review", "rowVersion": backfill["rowVersion"]}))
     new(p2, "alex", DEC_HYDRANT, "marc", ago(2), ahead(10), "Low")
     new(p3, "jill", DEC_SHORTLIST, "marc", ago(1), ahead(12), "Medium")
@@ -281,8 +281,8 @@ def risks_and_issues():
     def risk(pid, who, title, owner, probability, impact, review, discipline=None):
         r = call(f"projects/{pid}/risks", who, "POST", {
             "title": title, "description": 'Track the design and programme impact.', "ownerId": uid[owner], "probability": probability,
-            "impact": impact, "mitigation": 'check early and keep the programme float.',
-            "triggerIndicator": 'the next survey or site visit shows the condition.', "reviewDate": iso(review),
+            "impact": impact, "mitigation": 'Check early and keep the programme float.',
+            "triggerIndicator": 'The next survey or site visit shows the condition.', "reviewDate": iso(review),
             "projectDisciplineId": discipline})
         made(mod, r["key"])
         return r
@@ -299,12 +299,12 @@ def risks_and_issues():
 
     risk(p1, "priya", RSK_UTILITIES, "marc", 3, 2, ahead(7), c1)
     groundwater = risk(p1, "omar", RSK_GROUNDWATER, "omar", 1, 2, ago(4), g1)
-    attempt("SYN-101 groundwater risk moved to Monitoring by Omar", lambda: move(
-        "risks", groundwater, "omar", "Monitoring", reason='watch the next borehole readings.'))
+    attempt("250101 groundwater risk moved to Monitoring by Omar", lambda: move(
+        "risks", groundwater, "omar", "Monitoring", reason='Watch the next borehole readings.'))
     client = risk(p1, "priya", RSK_CLIENT, "priya", 2, 2, ahead(3))
-    realised = attempt("SYN-101 client review risk realised as an issue by Priya", lambda: move(
-        "risks", client, "priya", "Realised", reason='the review comments arrived a week late.',
-        issue={"title": ISS_CLIENT, "description": 'issue raised from a realised risk.', "ownerId": uid["priya"],
+    realised = attempt("250101 client review risk realised as an issue by Priya", lambda: move(
+        "risks", client, "priya", "Realised", reason='The review comments arrived a week late.',
+        issue={"title": ISS_CLIENT, "description": 'Issue raised from a realised risk.', "ownerId": uid["priya"],
                "severity": "Medium", "targetResolutionDate": iso(ahead(4))}))
     if realised:
         made(mod, realised["issueKey"])
@@ -313,15 +313,15 @@ def risks_and_issues():
     conflict = issue(p1, "jill", ISS_CONFLICT, "marc", "High", ago(2), ahead(3), c1, issueType="Coordination", affectedDisciplineIds=[g1],
                      locations=[{"kind": "Alignment", "alignment": 'alignment SA-1', "startStation": 120.0, "endStation": 260.0,
                                  "stationUnits": "m", "assetSystem": 'storm sewer', "rowVersion": 0}],
-                     documents=[{"kind": "Drawing", "identifier": "SYN-101-C-201", "revision": "P02", "sourceUrl": STORM_URL,
+                     documents=[{"kind": "Drawing", "identifier": "250101-C-201", "revision": "P02", "sourceUrl": STORM_URL,
                                  "isAvailable": True, "rowVersion": 0}])
-    attempt("SYN-101 conflict issue started by Marc", lambda: move("issues", conflict, "marc", "In Progress"))
-    attempt("SYN-101 conflict issue verifier proposed by Jill", lambda: call(f"issues/{conflict['id']}/verification", "jill", "POST", {
+    attempt("250101 conflict issue started by Marc", lambda: move("issues", conflict, "marc", "In Progress"))
+    attempt("250101 conflict issue verifier proposed by Jill", lambda: call(f"issues/{conflict['id']}/verification", "jill", "POST", {
         "verifierId": uid["diane"], "status": "Proposed", "note": 'Diane checks the revised crossing against the drawing.',
         "rowVersion": call(f"issues/{conflict['id']}", "jill")["issue"]["rowVersion"]}))
     layers = issue(p1, "alex", ISS_LAYERS, "alex", "Low", ago(9), ago(2), c1)
-    attempt("SYN-101 layer issue resolved by Alex", lambda: move("issues", layers, "alex", "Resolved", resolvedDate=iso(ago(1)),
-                                                                   resolution='layer names aligned with the CAD standard.'))
+    attempt("250101 layer issue resolved by Alex", lambda: move("issues", layers, "alex", "Resolved", resolvedDate=iso(ago(1)),
+                                                                   resolution='Layer names aligned with the CAD standard.'))
     issue(p2, "alex", ISS_FLOWTEST, "jill", "Medium", ago(3), ago(1), c2)
 
 
@@ -345,23 +345,23 @@ def meetings():
     def move(a, who, to):
         return call(f"actions/{a['id']}/transition", who, "POST", {"toStatus": to, "rowVersion": a["rowVersion"]})
 
-    coord = meeting(p1, "priya", MTG_COORD, "Coordination", day(0, 1), f"{URL}SYN-101/meetings/coordination-notes")
-    action(coord, "priya", "send the updated survey gap list to the design team.", "alex", due=ago(2))
-    action(coord, "priya", "confirm borehole locations for the north tie-in.", discipline=g1, due=ahead(4))
-    hgl = action(coord, "priya", "circulate the HGL check summary.", "jill", due=ahead(2))
-    attempt("SYN-101 HGL action started by Jill", lambda: move(hgl, "jill", "In Progress"))
-    workshop = action(coord, "priya", "book the utility relocation workshop.", "marc", due=ago(3))
-    attempt("SYN-101 workshop action completed by Marc", lambda: move(workshop, "marc", "Complete"))
+    coord = meeting(p1, "priya", MTG_COORD, "Coordination", day(0, 1), f"{URL}250101/meetings/coordination-notes")
+    action(coord, "priya", "Send the updated survey gap list to the design team.", "alex", due=ago(2))
+    action(coord, "priya", "Confirm borehole locations for the north tie-in.", discipline=g1, due=ahead(4))
+    hgl = action(coord, "priya", "Circulate the HGL check summary.", "jill", due=ahead(2))
+    attempt("250101 HGL action started by Jill", lambda: move(hgl, "jill", "In Progress"))
+    workshop = action(coord, "priya", "Book the utility relocation workshop.", "marc", due=ago(3))
+    attempt("250101 workshop action completed by Marc", lambda: move(workshop, "marc", "Complete"))
     client = meeting(p1, "marc", MTG_CLIENT, "Client", day(0, 3))
-    action(client, "marc", 'issue the meeting notes to the client contact.', "priya", due=ahead(1))
+    action(client, "marc", 'Issue the meeting notes to the client contact.', "priya", due=ahead(1))
     servicing = meeting(p2, "marc", MTG_SERVICING, "Coordination", day(0, 2))
-    action(servicing, "marc", 'confirm hydrant flow test dates with the utility.', "alex", due=ahead(5))
+    action(servicing, "marc", 'Confirm hydrant flow test dates with the utility.', "alex", due=ahead(5))
 
 
 def comments():
     mod = "Comments"
     storm = deliverable(p1, D_STORM)
-    if any(natural_copy(c["body"]).endswith("please confirm the HGL check covers the 1-in-100-year event before the 60 % review.") for c in call(f"items/Deliverable/{storm['id']}/comments", "priya")["items"]):
+    if any(natural_copy(c["body"]).endswith("Please confirm the HGL check covers the 1-in-100-year event before the 60 % review.") for c in call(f"items/Deliverable/{storm['id']}/comments", "priya")["items"]):
         return skip(mod, 'comment on ' + storm["key"])
 
     def at(u):
@@ -401,7 +401,7 @@ def calendar_events():
 
 def links():
     mod = "Links"
-    if any(link["url"] in (FOLDER, r"\\synthetic-preview-fs\projects\SYN-101") for link in call(f"projects/{p1}", "priya")["links"]):
+    if any(link["url"] == FOLDER for link in call(f"projects/{p1}", "priya")["links"]):
         return skip(mod, FOLDER)
 
     def link(path, who, title, url, kind=None):
@@ -409,8 +409,8 @@ def links():
         made(mod, title.removeprefix(P))
 
     link(f"projects/{p1}/links", "priya", P + "Project network folder", FOLDER, "Network Folder")
-    link(f"projects/{p1}/links", "priya", P + "Project document library", f"{URL}SYN-101/library")
-    link(f"projects/{p2}/links", "marc", P + "Waterfront servicing document library", f"{URL}SYN-102/library")
+    link(f"projects/{p1}/links", "priya", P + "Project document library", f"{URL}250101/library")
+    link(f"projects/{p2}/links", "marc", P + "Waterfront servicing document library", f"{URL}250102/library")
     link(f"items/Deliverable/{deliverable(p1, D_STORM)['id']}/links", "jill", P + "60 % storm sewer sheet set", STORM_URL)
 
 
@@ -453,13 +453,13 @@ def handoffs():
         return call(f"projects/{p1}/handoffs/{h['id']}/transition", who, "POST", {"requestId": rid(), "toStatus": to, "rowVersion": h["rowVersion"], **extra})
 
     first = draft(H_ACCEPTED, "jill", {"targetTaskId": task(p1, T_STORM)["id"]}, ahead(1), today,
-                  "groundwater levels and bedding parameters for storm sewer sizing.", "the memo gives groundwater depth and bedding class for every run.")
-    attempt("SYN-101 groundwater handoff submitted by Omar and accepted by Jill", lambda: move(
-        move(first, "omar", "Submitted", reason='memo R0 issued.'), "jill", "Accepted",
-        criteriaOutcome='groundwater depth and bedding class are given for every run.'))
+                  "Groundwater levels and bedding parameters for storm sewer sizing.", "The memo gives groundwater depth and bedding class for every run.")
+    attempt("250101 groundwater handoff submitted by Omar and accepted by Jill", lambda: move(
+        move(first, "omar", "Submitted", reason='Memo R0 issued.'), "jill", "Accepted",
+        criteriaOutcome='Groundwater depth and bedding class are given for every run.'))
     second = draft(H_SUBMITTED, "alex", {"targetDeliverableId": deliverable(p1, D_REGISTER)["id"]}, ahead(3), ahead(5),
-                   "trench support limits for the conflict register.", "each conflict location has a trench support note.")
-    attempt("SYN-101 register handoff submitted by Omar", lambda: move(second, "omar", "Submitted"))
+                   "Trench support limits for the conflict register.", "Each conflict location has a trench support note.")
+    attempt("250101 register handoff submitted by Omar", lambda: move(second, "omar", "Submitted"))
 
 
 def review_package():
@@ -469,12 +469,12 @@ def review_package():
         return skip(mod, f"registered revision of {storm['key']}")
     revision = call(f"projects/{p1}/source-revisions", "jill", "POST", {
         "requestId": rid(), "deliverableId": storm["id"], "deliverableRowVersion": storm["rowVersion"], "projectDisciplineId": c1,
-        "ownerId": uid["jill"], "sourceSystem": 'document register', "externalIdentifier": "SYN-101-C-201", "title": D_STORM,
+        "ownerId": uid["jill"], "sourceSystem": 'document register', "externalIdentifier": "250101-C-201", "title": D_STORM,
         "revision": "P02", "url": STORM_URL, "issuer": 'civil design team',
         "scope": '60 % storm sewer plan and profile sheets.'})
     made(mod, f"revision P02 of {storm['key']} registered by jill")
     package = call(f"projects/{p1}/reviews", "marc", "POST", {
-        "requestId": rid(), "title": REVIEW, "purpose": 'independent 60 % review of the storm sewer sheets.',
+        "requestId": rid(), "title": REVIEW, "purpose": 'Independent 60 % review of the storm sewer sheets.',
         "projectDisciplineId": c1, "coordinatorId": uid["marc"], "sourceRevisionIds": [revision["id"]], "requiredForIssue": True,
         "assignments": [{"projectDisciplineId": c1, "reviewerId": uid["diane"], "dueDate": iso(ahead(5))},
                         {"projectDisciplineId": g1, "reviewerId": uid["omar"], "dueDate": iso(ahead(5))}]})
@@ -493,14 +493,14 @@ def review_package():
                                                                     "rationale": f"{rationale}"})
         made(mod, f"{status} by {who}")
 
-    attempt("SYN-101 review: Diane requires changes", lambda: decide("diane", c1, "Changes Required", "HGL is above the rim at two manholes."))
+    attempt("250101 review: Diane requires changes", lambda: decide("diane", c1, "Changes Required", "HGL is above the rim at two manholes."))
     conflict = find(f"projects/{p1}/issues", ISS_CONFLICT, "title")
-    if attempt("SYN-101 review: Diane raises a blocking finding", lambda: call(f"{root}/findings", "diane", "POST", {
+    if attempt("250101 review: Diane raises a blocking finding", lambda: call(f"{root}/findings", "diane", "POST", {
             "requestId": rid(), "rowVersion": call(root, "diane")["package"]["rowVersion"], "sourceRevisionId": revision["id"],
             "projectDisciplineId": c1, "resolverId": uid["jill"], "severity": "Blocking", "issueId": conflict["id"] if conflict else None,
-            "text": 'lower the outlet at the watermain crossing or add a drop structure.'})):
+            "text": 'Lower the outlet at the watermain crossing or add a drop structure.'})):
         made(mod, "blocking finding by diane")
-    attempt("SYN-101 review: Omar approves", lambda: decide("omar", g1, "Approved", "bedding and groundwater values match memo R0."))
+    attempt("250101 review: Omar approves", lambda: decide("omar", g1, "Approved", "Bedding and groundwater values match memo R0."))
 
 
 def change_notice():
@@ -508,7 +508,7 @@ def change_notice():
     if any(s["revision"]["externalIdentifier"] == STD_ID for s in call(f"projects/{p1}/changes/options", "jordan")["sources"]):
         return skip(mod, f"{STD_ID} source revision")
     source = {"projectDisciplineId": c1, "ownerId": uid["marc"], "sourceSystem": 'standards library', "externalIdentifier": STD_ID,
-              "title": STD_TITLE, "issuer": 'standards body', "scope": 'storm sewer sizing and HGL criteria.'}
+              "title": STD_TITLE, "issuer": 'standards body', "scope": 'Storm sewer sizing and HGL criteria.'}
     base = call(f"projects/{p1}/source-revisions", "marc", "POST", {"requestId": rid(), **source, "revision": "2025-A",
                                                                     "url": f"{URL}standards/{STD_ID}-2025-A.pdf"})
     made(mod, f"{STD_ID} revision 2025-A registered by marc")
@@ -516,13 +516,13 @@ def change_notice():
     call(f"projects/{p1}/input-uses", "alex", "POST", {
         "requestId": rid(), "targetType": "Task", "targetId": profiles["id"], "targetRowVersion": profiles["rowVersion"],
         "sourceRevisionId": base["id"], "expectedCurrentRevisionId": base["id"],
-        "intendedUse": 'HGL criteria for the storm sewer profiles.', "reason": 'recorded the revision used.'})
+        "intendedUse": 'HGL criteria for the storm sewer profiles.', "reason": 'Recorded the revision used.'})
     made(mod, f"input use on {profiles['key']} recorded by alex")
     head = need(next((h for h in call(f"projects/{p1}/changes/options", "marc")["heads"] if h["currentRevisionId"] == base["id"]), None),
                 f"the {STD_ID} source head")
     notice = call(f"projects/{p1}/source-revisions", "marc", "POST", {
         "requestId": rid(), **source, "revision": "2026-B", "url": f"{URL}standards/{STD_ID}-2026-B.pdf", "supersedesId": base["id"],
-        "headRowVersion": head["rowVersion"], "description": 'revision 2026-B raises the minimum HGL freeboard (change).',
+        "headRowVersion": head["rowVersion"], "description": 'Revision 2026-B raises the minimum HGL freeboard (change).',
         "effectiveDate": iso(today), "assessmentDueDate": iso(ahead(7))})
     root = f"projects/{p1}/changes/{notice['id']}"
     detail = call(root, "marc")
@@ -534,9 +534,9 @@ def change_notice():
     assessment = need(next((a for a in call(root, "alex")["assessments"] if a["targetId"] == profiles["id"]), None),
                       f"the assessment on {profiles['key']}")
     redlines = task(p1, T_REDLINES)
-    if attempt("SYN-101 change assessment recorded as Update Required by Alex", lambda: call(f"{root}/assessments/{assessment['id']}", "alex", "POST", {
+    if attempt("250101 change assessment recorded as Update Required by Alex", lambda: call(f"{root}/assessments/{assessment['id']}", "alex", "POST", {
             "requestId": rid(), "rowVersion": assessment["rowVersion"], "action": "disposition", "status": "Update Required",
-            "rationale": 'the higher freeboard changes three profile sheets.', "evidenceUrl": f"{URL}SYN-101/assessments/profiles",
+            "rationale": 'The higher freeboard changes three profile sheets.', "evidenceUrl": f"{URL}250101/assessments/profiles",
             "correctionTaskId": redlines["id"], "correctionTaskRowVersion": redlines["rowVersion"], "effortImpactHours": 6, "dateImpactDays": 2})):
         made(mod, "assessment Update Required by alex")
 
@@ -559,9 +559,9 @@ def submission():
     made(mod, "checking started by marc")
     detail = call(root, "alex")
     check = need(next((c for c in detail["checks"] if c["kind"] == "Applicability"), None), "the optional check")
-    if attempt("SYN-101 submission optional check passed by Alex", lambda: call(f"{root}/checks/{check['id']}", "alex", "POST", {
+    if attempt("250101 submission optional check passed by Alex", lambda: call(f"{root}/checks/{check['id']}", "alex", "POST", {
             "requestId": rid(), "packageRowVersion": detail["package"]["rowVersion"], "rowVersion": check["rowVersion"], "action": "Pass",
-            "evidenceUrl": f"{URL}SYN-101/traffic-management-plan", "reason": 'plan checked against the 60 % sheets.'})):
+            "evidenceUrl": f"{URL}250101/traffic-management-plan", "reason": 'Plan checked against the 60 % sheets.'})):
         made(mod, "optional check Pass by alex")
 
 
@@ -578,23 +578,23 @@ def design_basis():
         return e
 
     storm = entry("marc", "Criterion", BASIS_STORM, "jill", c1, {
-        "scope": 'storm sewer network', "statement": 'size the minor system for the 1-in-5-year storm.',
+        "scope": 'storm sewer network', "statement": 'Size the minor system for the 1-in-5-year storm.',
         "numericValue": 5, "units": "years", "sourceSystem": 'standards library', "stableSourceId": f"{STD_ID} §4.2",
         "sourceUrl": f"{URL}standards/{STD_ID}-2025-A.pdf", "declaredRevision": "2025-A", "confirmationDueDate": iso(ahead(5))})
     root = f"projects/{p1}/design-basis/{storm['id']}"
     detail = call(root, "marc")
     version = detail["versions"][0]["version"]
-    if attempt("SYN-101 storm criterion confirmed by Marc", lambda: call(f"{root}/versions/{version['id']}/confirm", "marc", "POST", {
+    if attempt("250101 storm criterion confirmed by Marc", lambda: call(f"{root}/versions/{version['id']}/confirm", "marc", "POST", {
             "requestId": rid(), "entryRowVersion": detail["entry"]["rowVersion"], "versionRowVersion": version["rowVersion"],
-            "rationale": 'matches the drainage standard.'})):
+            "rationale": 'Matches the drainage standard.'})):
         made(mod, "criterion confirmed by marc")
-        if attempt("SYN-101 storm criterion linked to Jill's task", lambda: call(f"{root}/uses", "jill", "POST", {
+        if attempt("250101 storm criterion linked to Jill's task", lambda: call(f"{root}/uses", "jill", "POST", {
                 "requestId": rid(), "versionId": version["id"], "targetType": "Task", "targetId": task(p1, T_STORM)["id"],
-                "intendedUse": 'pipe sizing for the 60 % sheets.'})):
+                "intendedUse": 'Pipe sizing for the 60 % sheets.'})):
             made(mod, "criterion used by jill's storm sewer task")
     entry("omar", "Assumption", BASIS_GROUNDWATER, "omar", g1, {
-        "scope": 'trench excavations', "statement": 'groundwater stays below the trench invert during construction.',
-        "sourceSystem": 'borehole logs', "stableSourceId": "SYN-BH-03", "sourceUrl": f"{URL}SYN-101/boreholes",
+        "scope": 'trench excavations', "statement": 'Groundwater stays below the trench invert during construction.',
+        "sourceSystem": 'borehole logs', "stableSourceId": "BH-03", "sourceUrl": f"{URL}250101/boreholes",
         "declaredRevision": "R0", "confirmationDueDate": iso(ago(2))}, approver="diane")
 
 
@@ -602,35 +602,35 @@ def readiness():
     mod = "Readiness constraints"
     storm = task(p1, T_STORM)
     base = f"projects/{p1}/readiness/Task"
-    if any(natural_copy(c["description"]) == "pipe sizing waits on the outfall decision." for c in call(f"{base}/{storm['id']}/constraints", "jordan")):
-        return skip(mod, f"Synthetic preview constraint on {storm['key']}")
+    if any(natural_copy(c["description"]) == "Pipe sizing waits on the outfall decision." for c in call(f"{base}/{storm['id']}/constraints", "jordan")):
+        return skip(mod, f"constraint on {storm['key']}")
     outfall = find(f"projects/{p1}/decisions", DEC_OUTFALL, "subject")
     call(f"{base}/{storm['id']}/constraints", "jill", "POST", {
         "requestId": rid(), "targetRowVersion": storm["rowVersion"], "category": "Decision",
-        "description": 'pipe sizing waits on the outfall decision.', "removalOwnerId": uid["priya"], "neededBy": iso(ahead(5)),
-        "sourceUrl": f"{URL}SYN-101/decisions/outfall", "linkedType": "Decision" if outfall else None, "linkedId": outfall["id"] if outfall else None})
+        "description": 'Pipe sizing waits on the outfall decision.', "removalOwnerId": uid["priya"], "neededBy": iso(ahead(5)),
+        "sourceUrl": f"{URL}250101/decisions/outfall", "linkedType": "Decision" if outfall else None, "linkedId": outfall["id"] if outfall else None})
     made(mod, f"Decision constraint on {storm['key']} by jill")
-    if attempt("SYN-101 storm task output defined by Jill", lambda: call(f"{base}/{storm['id']}", "jill", "POST", {
+    if attempt("250101 storm task output defined by Jill", lambda: call(f"{base}/{storm['id']}", "jill", "POST", {
             "requestId": rid(), "targetRowVersion": task(p1, T_STORM)["rowVersion"],
-            "intendedOutput": 'storm sewer design sheets with the HGL check.',
-            "completionCriteria": 'every run sized, HGL below the rims, sheets checked.'})):
+            "intendedOutput": 'Storm sewer design sheets with the HGL check.',
+            "completionCriteria": 'Every run sized, HGL below the rims, sheets checked.'})):
         made(mod, f"output defined for {storm['key']} by jill")
     profiles = task(p1, T_PROFILES)
     capacity = call(f"{base}/{profiles['id']}/constraints", "priya", "POST", {
         "requestId": rid(), "targetRowVersion": profiles["rowVersion"], "category": "Capacity",
         "description": 'Alex is over capacity next week; confirm cover before starting.', "removalOwnerId": uid["marc"],
-        "neededBy": iso(ahead(2)), "sourceUrl": f"{URL}SYN-101/workload"})
+        "neededBy": iso(ahead(2)), "sourceUrl": f"{URL}250101/workload"})
     made(mod, f"Capacity constraint on {profiles['key']} by priya")
-    if attempt("SYN-101 capacity constraint resolution proposed by Marc", lambda: call(
+    if attempt("250101 capacity constraint resolution proposed by Marc", lambda: call(
             f"{base}/{profiles['id']}/constraints/{capacity['id']}/transition", "marc", "POST", {
                 "requestId": rid(), "rowVersion": capacity["rowVersion"], "toState": "Resolution Proposed",
-                "reason": 'Jill covers the sanitary profiles next week.', "evidenceUrl": f"{URL}SYN-101/allocations"})):
+                "reason": 'Jill covers the sanitary profiles next week.', "evidenceUrl": f"{URL}250101/allocations"})):
         made(mod, "resolution proposed by marc")
 
 
 def weekly_commitments():
     mod = "Weekly commitments"
-    if any(natural_copy(c["intendedOutput"]) == "storm sewer profiles for sheets C-201 to C-204." for c in call(f"projects/{p1}/weekly-commitments", "jordan")["commitments"]):
+    if any(natural_copy(c["intendedOutput"]) == "Storm sewer profiles for sheets C-201 to C-204." for c in call(f"projects/{p1}/weekly-commitments", "jordan")["commitments"]):
         return skip(mod, 'promise')
 
     def propose(who, name, target, output, criteria):
@@ -640,8 +640,8 @@ def weekly_commitments():
             "intendedOutput": f"{output}", "completionCriteria": f"{criteria}"})
         made(mod, f"{t['key']} for the week of {day(1)} proposed by {who}")
 
-    propose("priya", T_PROFILES, day(1, 3), "storm sewer profiles for sheets C-201 to C-204.", "profiles drawn and checked against the HGL table.")
-    propose("jill", T_STORM, day(1, 4), "HGL check summary for the 60 % review.", "summary table issued to the design team.")
+    propose("priya", T_PROFILES, day(1, 3), "Storm sewer profiles for sheets C-201 to C-204.", "Profiles drawn and checked against the HGL table.")
+    propose("jill", T_STORM, day(1, 4), "HGL check summary for the 60 % review.", "Summary table issued to the design team.")
 
 
 def template():
@@ -676,7 +676,7 @@ for module in (milestones_and_deliverables, decisions, risks_and_issues, meeting
 
 if created:
     time.sleep(2)  # the evaluation worker recomputes milestone status a moment after each save
-print(f"Synthetic preview module data at {BASE} (organisation today {today}):")
+print(f"Preview module data at {BASE} (organisation today {today}):")
 for module, labels in created.items():
     print(f"  {module}: {len(labels)} created — {'; '.join(labels)}")
 if not created:

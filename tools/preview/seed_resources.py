@@ -11,8 +11,8 @@ fixture provenance is retained here and in the private deployment manifest.
 Every write uses the API as the person who would make it, preserving validation,
 permissions, audit and notifications. Dates follow the organisation's today.
 Existing fixture markers are preserved; refused API steps fail the process.
-SYN-101 already present means no resource writes; partial setup requires
-inspection. The Admin enables restricted projects for the SYN-103 scenario.
+250101 already present means no resource writes; partial setup requires
+inspection. The Admin enables restricted projects for the 250103 scenario.
 """
 from fixture_api import connect, FixtureError
 from fixture_copy import natural_copy
@@ -22,7 +22,7 @@ import uuid
 
 api_client = connect()
 BASE = api_client.base
-NUMBERS = ("SYN-101", "SYN-102", "SYN-103")
+NUMBERS = ("250101", "250102", "250103")
 refusals = []
 
 
@@ -61,7 +61,7 @@ def iso(d):
 
 
 def summary():
-    print(f"Synthetic preview data at {BASE} (organisation today {today}):")
+    print(f"Preview data at {BASE} (organisation today {today}):")
     for number in NUMBERS:
         p = call(f"projects/{number}", "jordan")
         print(f"  {number} {p['status']}, {p['visibility']}, PM {p['pmName']}: {p['name']}")
@@ -79,8 +79,8 @@ def summary():
 
 
 try:
-    call("projects/SYN-101", "jordan")
-    print("SYN-101 already exists; nothing created.")
+    call("projects/250101", "jordan")
+    print("250101 already exists; nothing created.")
     summary()
     sys.exit()
 except Refused as e:
@@ -110,11 +110,11 @@ def project(pm, number, name, members, leads, restricted=False):
     return pid, {d["code"]: d["id"] for d in p["disciplines"]}
 
 
-p1, d1 = project("priya", "SYN-101", "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase 2 detailed design)",
+p1, d1 = project("priya", "250101", "Harbour Road Rehabilitation, Stormwater Separation and Utility Relocation (Phase 2 detailed design)",
                  [("alex", "TeamMember", "CIV"), ("jill", "TeamMember", "CIV"), ("omar", "TeamMember", "GEO"), ("diane", "Reviewer", None)],
                  {"CIV": "marc", "GEO": "omar"})
-p2, d2 = project("marc", "SYN-102", "Waterfront site servicing", [("alex", "TeamMember", "CIV"), ("jill", "TeamMember", "CIV")], {"CIV": "marc"})
-p3, d3 = project("marc", "SYN-103", "Restricted client study", [("jill", "TeamMember", "CIV")], {"CIV": "marc"}, restricted=True)
+p2, d2 = project("marc", "250102", "Waterfront site servicing", [("alex", "TeamMember", "CIV"), ("jill", "TeamMember", "CIV")], {"CIV": "marc"})
+p3, d3 = project("marc", "250103", "Restricted client study", [("jill", "TeamMember", "CIV")], {"CIV": "marc"}, restricted=True)
 
 
 def task(pid, pd, pm, who, name, est, start=None, due=None, progress=0, code="CIV"):
@@ -126,7 +126,7 @@ def task(pid, pd, pm, who, name, est, start=None, due=None, progress=0, code="CI
 
 
 week_end = max(today, day(0, 4))  # this Friday, or today at a weekend, so the hours land in the current week
-# Alex: over-assigned this week (overdue + due-this-week work) and next week (confirmed reservation + SYN-102 work).
+# Alex: over-assigned this week (overdue + due-this-week work) and next week (confirmed reservation + 250102 work).
 task(p1, d1, "priya", "alex", "Survey base plan QA and topographic gap list", 20, today - dt.timedelta(days=10), today - dt.timedelta(days=3), 40)
 task(p2, d2, "marc", "alex", "Existing services review for the waterfront lots", 50, today, week_end, 20)
 a3 = task(p1, d1, "priya", "alex", "Harbour Road Phase 2 — storm sewer and sanitary profiles, utility relocation conflict resolution "
@@ -172,15 +172,15 @@ def finish(pid, a, user, verb, reason):
                 {"requestId": str(uuid.uuid4()), "rowVersion": a["rowVersion"], "reason": f"{reason}"})
 
 
-attempt("SYN-101 Alex 30 h next week, proposed by Priya, confirmed by Sam", lambda: confirm(p1, propose(p1, "priya", "alex", 1, 30, a3), "sam"))
-attempt("SYN-101 Jill 16 h next week, proposed by Priya", lambda: propose(p1, "priya", "jill", 1, 16, j2))
-attempt("SYN-101 Alex 12 h in two weeks, proposed by Priya, declined by Sam",
+attempt("250101 Alex 30 h next week, proposed by Priya, confirmed by Sam", lambda: confirm(p1, propose(p1, "priya", "alex", 1, 30, a3), "sam"))
+attempt("250101 Jill 16 h next week, proposed by Priya", lambda: propose(p1, "priya", "jill", 1, 16, j2))
+attempt("250101 Alex 12 h in two weeks, proposed by Priya, declined by Sam",
         lambda: finish(p1, propose(p1, "priya", "alex", 2, 12, a6), "sam", "decline", "Alex is already fully committed that week."))
-attempt("SYN-101 Jill 8 h in three weeks, proposed and cancelled by Priya",
-        lambda: finish(p1, propose(p1, "priya", "jill", 3, 8, j5), "priya", "cancel", "the conflict log moved to the next phase."))
-attempt("SYN-101 Omar 6 h next week, proposed by Priya, confirmed by Lena, completed by Priya",
-        lambda: finish(p1, confirm(p1, propose(p1, "priya", "omar", 1, 6, o3), "lena"), "priya", "complete", "trench support note delivered."))
-attempt("SYN-102 Alex 20 h in two weeks, proposed by Marc", lambda: propose(p2, "marc", "alex", 2, 20, a4))
+attempt("250101 Jill 8 h in three weeks, proposed and cancelled by Priya",
+        lambda: finish(p1, propose(p1, "priya", "jill", 3, 8, j5), "priya", "cancel", "The conflict log moved to the next phase."))
+attempt("250101 Omar 6 h next week, proposed by Priya, confirmed by Lena, completed by Priya",
+        lambda: finish(p1, confirm(p1, propose(p1, "priya", "omar", 1, 6, o3), "lena"), "priya", "complete", "Trench support note delivered."))
+attempt("250102 Alex 20 h in two weeks, proposed by Marc", lambda: propose(p2, "marc", "alex", 2, 20, a4))
 summary()
 
 if refusals:

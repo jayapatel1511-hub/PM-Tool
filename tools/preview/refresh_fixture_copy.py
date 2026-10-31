@@ -16,7 +16,7 @@ from typing import Any
 from fixture_api import FixtureError, connect
 from fixture_copy import natural_copy
 
-PROJECTS = ("SYN-101", "SYN-102", "SYN-103")
+PROJECTS = ("250101", "250102", "250103")
 ACTOR = "jordan"
 PEOPLE = ("jordan", "lena", "sam", "priya", "marc", "alex", "jill", "diane", "omar", "rita")
 PREFIXES = ("Synthetic preview",)
@@ -40,9 +40,9 @@ KNOWN_TARGETS = {
     "Synthetic preview fixture; fictional hours and work only.": "Coordinate weekly work and capacity with the team.",
 }
 PROJECT_DESCRIPTIONS = {
-    "SYN-101": "Road rehabilitation, stormwater separation and utility coordination.",
-    "SYN-102": "Waterfront site servicing and drainage coordination.",
-    "SYN-103": "Restricted study coordination and review.",
+    "250101": "Road rehabilitation, stormwater separation and utility coordination.",
+    "250102": "Waterfront site servicing and drainage coordination.",
+    "250103": "Restricted study coordination and review.",
 }
 
 
@@ -113,7 +113,7 @@ def refresh_fixture_copy(client: Any, *, apply: bool = False) -> list[dict[str, 
         project_description = PROJECT_DESCRIPTIONS[number]
         for field, target in (("name", project_name), ("description", project_description)):
             _plan(report, client, f"projects/{pid}", ACTOR, project, field, target, label=f"{number} project {field}")
-        _plan(report, client, f"projects/{pid}", ACTOR, project, "clientReference", "Harbour Road design programme" if number == "SYN-101" else "Project client", label=f"{number} client reference")
+        _plan(report, client, f"projects/{pid}", ACTOR, project, "clientReference", "Harbour Road design programme" if number == "250101" else "Project client", label=f"{number} client reference")
 
         collections = (
             (f"projects/{pid}/tasks?pageSize=200", "tasks", "tasks", ("name", "description")),

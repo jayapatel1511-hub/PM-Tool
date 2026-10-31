@@ -23,7 +23,7 @@ class FakeFixtureApi:
 
     def call(self, path, who, method="GET", body=None):
         self.calls.append((path, who, method, body))
-        if path == "projects/SYN-101":
+        if path == "projects/250101":
             raise FakeFixtureError(404, "not found")
         if path == "me":
             return {"settings": {"today": "2026-10-05"}}

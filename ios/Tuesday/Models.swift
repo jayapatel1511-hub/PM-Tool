@@ -20,8 +20,8 @@ struct Project: Identifiable, Codable, Equatable {
     let health: String
     let attention: String
     var archived = false
-    static let harbour = Project(id: UUID(uuidString: "20000000-0000-0000-0000-000000000001")!, number: "SYN-2401", name: "Harbour renewal", discipline: "Civil", disciplineID: UUID(uuidString: "30000000-0000-0000-0000-000000000001")!, deliverable: "60% design submission", health: "Attention needed", attention: "Drainage review is waiting for survey confirmation.")
-    static let greenway = Project(id: UUID(uuidString: "20000000-0000-0000-0000-000000000002")!, number: "SYN-2402", name: "Greenway connection", discipline: "Civil", disciplineID: UUID(uuidString: "30000000-0000-0000-0000-000000000002")!, deliverable: "Concept design", health: "On track", attention: "No current delivery concerns.")
+    static let harbour = Project(id: UUID(uuidString: "20000000-0000-0000-0000-000000000001")!, number: "250201", name: "Harbour renewal", discipline: "Civil", disciplineID: UUID(uuidString: "30000000-0000-0000-0000-000000000001")!, deliverable: "60% design submission", health: "Attention needed", attention: "Drainage review is waiting for survey confirmation.")
+    static let greenway = Project(id: UUID(uuidString: "20000000-0000-0000-0000-000000000002")!, number: "250202", name: "Greenway connection", discipline: "Civil", disciplineID: UUID(uuidString: "30000000-0000-0000-0000-000000000002")!, deliverable: "Concept design", health: "On track", attention: "No current delivery concerns.")
 }
 
 enum TaskStatus: String, Codable, CaseIterable {

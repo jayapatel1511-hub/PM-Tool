@@ -249,21 +249,21 @@ def dataset_snapshot(root: Path, runner: Callable[..., Any] = subprocess.run, *,
         fields.append("'%s', (SELECT count(*) FROM hub.%s WHERE project_id IN (SELECT id FROM fixture_projects)%s)" % (table, table, soft_delete))
     sql = """WITH fixture_projects AS (
         SELECT id, project_number, visibility FROM hub.project
-        WHERE project_number IN ('SYN-101','SYN-102','SYN-103')
+        WHERE project_number IN ('250101','250102','250103')
     ) SELECT json_build_object(
         'projects', (SELECT coalesce(json_agg(json_build_object('id', id, 'number', project_number, 'visibility', visibility) ORDER BY project_number), '[]'::json) FROM fixture_projects),
         'counts', json_build_object(""" + ",".join(fields) + """,
         'planning_entry', (SELECT count(*) FROM hub.planning_entry WHERE notes IN ('Coordinate weekly work and capacity with the team.', 'Synthetic preview fixture; fictional hours and work only.') AND deleted_at IS NULL),
         'project_template', (SELECT count(*) FROM hub.project_template WHERE name IN ('Small site servicing template', 'Synthetic preview — Small site servicing template')),
-        'staffing_projects', (SELECT count(*) FROM hub.project WHERE project_number IN ('SYN-104','SYN-105'))
+        'staffing_projects', (SELECT count(*) FROM hub.project WHERE project_number IN ('260104','260105'))
     ));"""
     result = run_checked([*COMPOSE, "exec", "-T", "db", "psql", "-U", "hub_review", "-d", "hub_review", "-At", "-c", sql], cwd=root, runner=runner)
     try:
         snapshot = json.loads(result.stdout)
         projects, counts = snapshot["projects"], snapshot["counts"]
-        if {row["number"] for row in projects} != {"SYN-101", "SYN-102", "SYN-103"} or len(projects) != 3:
+        if {row["number"] for row in projects} != {"250101", "250102", "250103"} or len(projects) != 3:
             raise ValueError
-        if next(row for row in projects if row["number"] == "SYN-103")["visibility"] != "Restricted":
+        if next(row for row in projects if row["number"] == "250103")["visibility"] != "Restricted":
             raise ValueError
         if any(counts.get(table, 0) < minimum for table, minimum in FIXTURE_MINIMUMS.items()):
             raise ValueError

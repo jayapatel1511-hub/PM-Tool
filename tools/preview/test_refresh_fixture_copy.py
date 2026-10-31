@@ -13,14 +13,14 @@ class FakeApi:
     def __init__(self):
         self.calls = []
         self.projects = {
-            "SYN-101": {
-                "id": "p101", "projectNumber": "SYN-101", "rowVersion": 3,
+            "250101": {
+                "id": "p101", "projectNumber": "250101", "rowVersion": 3,
                 "name": "Synthetic preview — Harbour Road Rehabilitation with a very long reviewer-facing label",
                 "description": "Reviewer wording stays exactly as entered",
                 "clientReference": "Synthetic, not a real client",
             },
-            "SYN-102": {"id": "p102", "projectNumber": "SYN-102", "rowVersion": 1, "name": "Waterfront site servicing", "description": "Good description", "clientReference": "Client 2"},
-            "SYN-103": {"id": "p103", "projectNumber": "SYN-103", "rowVersion": 1, "name": "Restricted client study", "description": "Good description", "clientReference": "Client 3"},
+            "250102": {"id": "p102", "projectNumber": "250102", "rowVersion": 1, "name": "Waterfront site servicing", "description": "Good description", "clientReference": "Client 2"},
+            "250103": {"id": "p103", "projectNumber": "250103", "rowVersion": 1, "name": "Restricted client study", "description": "Good description", "clientReference": "Client 3"},
         }
         self.rows = {"tasks": [{"id": "t1", "rowVersion": 2, "name": "Reviewer task", "description": "Synthetic preview task."}],
                      "milestones": [], "deliverables": [], "decisions": [], "risks": [], "issues": [],
@@ -90,7 +90,7 @@ class RefreshFixtureCopyTests(unittest.TestCase):
         self.assertTrue(any(x["kind"] == "update" and x["field"] == "clientReference" for x in report))
         self.assertTrue(any(x["kind"] == "update" and x["field"] == "description" for x in report))
         self.assertFalse(any(call[2] == "PATCH" for call in api.calls))
-        self.assertEqual(api.projects["SYN-101"]["description"], "Reviewer wording stays exactly as entered")
+        self.assertEqual(api.projects["250101"]["description"], "Reviewer wording stays exactly as entered")
         project_update = next(x for x in report if x.get("kind") == "update" and x.get("field") == "name")
         self.assertEqual(project_update["to"], "Harbour Road Rehabilitation with a very long reviewer-facing label")
 
@@ -147,8 +147,8 @@ class RefreshFixtureCopyTests(unittest.TestCase):
         api = FakeApi()
         refresh.refresh_fixture_copy(api)
         paths = [c[0] for c in api.calls]
-        self.assertFalse(any("SYN-104" in p for p in paths))
-        self.assertEqual({p for p in paths if p.startswith("projects/") and p.count("/") == 1}, {"projects/SYN-101", "projects/SYN-102", "projects/SYN-103"})
+        self.assertFalse(any("260104" in p for p in paths))
+        self.assertEqual({p for p in paths if p.startswith("projects/") and p.count("/") == 1}, {"projects/250101", "projects/250102", "projects/250103"})
 
 
 if __name__ == "__main__":

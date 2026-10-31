@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Idempotent, permissioned packet-034 examples for the guarded synthetic Tuesday preview."""
+"""Idempotent, permissioned packet-034 examples for the guarded Tuesday preview."""
 import datetime as dt
 from fixture_api import connect
 from fixture_copy import natural_copy
@@ -22,4 +22,4 @@ for who, person, label, hours, confidence, visibility, source in [
     existing=call('planning/entries?mine=true&pageSize=200',who)['items']
     if any(natural_copy(e['label'])==label for e in existing): continue
     call('planning/entries',who,'POST',{'personId':users[person],'hoursPerWeek':hours,'startWeek':week.isoformat(),'endWeek':(week+dt.timedelta(days=21)).isoformat(),'label':label,'sourceCategory':source,'confidence':confidence,'visibility':visibility,'notes':'Coordinate weekly work and capacity with the team.'})
-print('Synthetic planning examples ready; no real records were used.')
+print('Planning examples ready; no real records were used.')

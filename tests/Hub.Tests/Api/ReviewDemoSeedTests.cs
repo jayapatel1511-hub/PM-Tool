@@ -92,7 +92,7 @@ public sealed class ReviewDemoSeedTests
 
         var response = await f.As("taylor@hub.test").GetAsync("/api/v1/projects/REVIEW-101");
         Assert.True(response.IsSuccessStatusCode, await response.Content.ReadAsStringAsync());
-        var yagmurProject = await f.As("yagmur@hub.test").GetAsync("/api/v1/projects/DEMO-103");
+        var yagmurProject = await f.As("yagmur@hub.test").GetAsync("/api/v1/projects/260203");
         Assert.True(yagmurProject.IsSuccessStatusCode, await yagmurProject.Content.ReadAsStringAsync());
     }
 
@@ -101,14 +101,14 @@ public sealed class ReviewDemoSeedTests
     {
         using var f = new HubFactory { ReviewDemo = true };
         using var client = f.CreateClient();
-        var projectId = f.Db(db => db.Projects.Single(p => p.ExternalId == "DEMO-101").Id);
+        var projectId = f.Db(db => db.Projects.Single(p => p.ExternalId == "260201").Id);
         var clientId = f.Db(db => db.Projects.Single(p => p.Id == projectId).ClientId);
         await f.DbAsync(async db =>
         {
             var project = await db.Projects.SingleAsync(p => p.Id == projectId);
             project.Name += " (Demo)";
             project.Description = "SYNTHETIC DEMO DATA — fictional client, project and work for application review only.";
-            var other = await db.Projects.SingleAsync(p => p.ExternalId == "DEMO-102");
+            var other = await db.Projects.SingleAsync(p => p.ExternalId == "260202");
             other.Name = "Reviewer project name";
             other.Description = "Reviewer description";
             var customer = await db.Clients.SingleAsync(c => c.Id == clientId);
@@ -121,8 +121,8 @@ public sealed class ReviewDemoSeedTests
         });
         Assert.Equal("Community Facility Site Servicing", f.Db(db => db.Projects.Single(p => p.Id == projectId).Name));
         Assert.DoesNotContain("SYNTHETIC", f.Db(db => db.Projects.Single(p => p.Id == projectId).Description)!);
-        Assert.Equal("Reviewer project name", f.Db(db => db.Projects.Single(p => p.ExternalId == "DEMO-102").Name));
-        Assert.Equal("Reviewer description", f.Db(db => db.Projects.Single(p => p.ExternalId == "DEMO-102").Description));
+        Assert.Equal("Reviewer project name", f.Db(db => db.Projects.Single(p => p.ExternalId == "260202").Name));
+        Assert.Equal("Reviewer description", f.Db(db => db.Projects.Single(p => p.ExternalId == "260202").Description));
         Assert.Equal("Reviewer client name", f.Db(db => db.Clients.Single(c => c.Id == clientId).Name));
         Assert.Equal("Reviewer", f.Db(db => db.Clients.Single(c => c.Id == clientId).ShortName));
         Assert.Equal(1, f.Db(db => db.Clients.Count(c => c.Id == clientId)));

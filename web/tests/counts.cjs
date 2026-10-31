@@ -1,6 +1,6 @@
 // SC-002 count reconciliation (packet 036 verification.md section 7), read-only against the local Development preview
 // with the section 8 fixtures loaded. For Jordan, Priya and Sam (signed in through the development picker), every linked
-// count on Home, the SYN-101..103 Project Dashboards they can see and Portfolio is compared with the total of the list
+// count on Home, the 250101..103 Project Dashboards they can see and Portfolio is compared with the total of the list
 // request its destination page sends, as the same person. Fails on any difference, on a list that drops the link's
 // filters, and on a missing agreed tile.
 //   TUESDAY_UI_BASE_URL (default http://localhost:5173), COUNTS_REPORT (JSON report path).
@@ -13,7 +13,7 @@ const base = process.env.TUESDAY_UI_BASE_URL ?? 'http://localhost:5173'
 assert.ok(['localhost', '127.0.0.1'].includes(new URL(base).hostname), 'TUESDAY_UI_BASE_URL must be a local Development preview')
 const reportPath = process.env.COUNTS_REPORT ?? require('node:path').join(require('node:os').tmpdir(), 'tuesday-counts-report.json')
 const PERSONAS = [['jordan', 'Jordan Lee'], ['priya', 'Priya Nair'], ['sam', 'Sam Patel']]
-const PROJECTS = ['SYN-101', 'SYN-102', 'SYN-103']
+const PROJECTS = ['250101', '250102', '250103']
 // Agreed tile list (section 7). Lanes, project segments and discipline rows come from the page's own data.
 const AGREED = {
   home: ['Active Projects', 'Open Tasks', 'Overdue Tasks', 'On Track · Green', 'On Track · evaluated', 'Team Members'],

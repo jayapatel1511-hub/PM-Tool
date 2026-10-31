@@ -45,8 +45,8 @@ const { renderToStaticMarkup } = require('react-dom/server')
     assert.ok(namedPerson.includes('ProjectManager'), 'ordinary record names remain verbatim')
 
     const deleted = draw({ action: 'Deleted', snapshot: { PredecessorTaskId: guid, UnknownId: guid, DependencyType: 'StartToStart', Count: 0, Flag: false },
-      snapshotLabels: { PredecessorTaskId: 'SYN-101-T001 Survey' }, changes: [] })
-    assert.ok(deleted.includes('SYN-101-T001 Survey') && deleted.includes(guid), 'resolved and unresolved snapshot references survive')
+      snapshotLabels: { PredecessorTaskId: '250101-T001 Survey' }, changes: [] })
+    assert.ok(deleted.includes('250101-T001 Survey') && deleted.includes(guid), 'resolved and unresolved snapshot references survive')
     assert.ok(deleted.includes('Start-to-Start') && deleted.includes('false') && deleted.includes('Count:'), 'snapshot values keep their meaning')
 
     const task = { requiresReview: false, state: null, reviewRound: 0, dueDateChangeCount: 0, estimatedHours: null }

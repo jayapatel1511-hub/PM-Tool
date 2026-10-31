@@ -6,15 +6,15 @@ See fixture_api.py. Run seed_resources.py first.
 
 Every record is invented. Every write uses the API as the person who would make
 it, so validation, permissions, audit and notifications apply. Dates follow the
-organisation's today. SYN-105 is the relative-date browser version of the
+organisation's today. 260105 is the relative-date browser version of the
 section 8.2 worked example: everything happens today and the holiday falls two
 working days ahead, so today's state is the table's date B. The API has no
 clock override, so "25 days ago" and "created 10 days ago" cannot be seeded:
 the stalled items and the no-start task start their clocks today. Creating a
 deliverable always names an owner (the discipline lead by default) and creating
 a milestone needs a date; only a copied structure or a template leaves either
-blank. So SYN-105 comes from a one-milestone template ("Client workshop", no
-date), and the two unowned SYN-101 deliverables are left to the API tests.
+blank. So 260105 comes from a one-milestone template ("Client workshop", no
+date), and the two unowned 250101 deliverables are left to the API tests.
 Each module's marker record already present means no writes for that module;
 partially completed earlier runs require inspection. Refused API steps are
 reported and fail the process.
@@ -28,7 +28,7 @@ import uuid
 api_client = connect()
 BASE = api_client.base
 refusals, skipped = [], []
-REASON = "Work can start before a readiness assessment for this example."
+REASON = "Survey data is in hand; the readiness assessment follows this week."
 PROFILES = ("Harbour Road Phase 2 — storm sewer and sanitary profiles, utility relocation conflict resolution "
             "and sheet set coordination")  # seed_resources.py task for Alex in week W
 TEMPLATE = "Riverside workshop starter"
@@ -85,7 +85,7 @@ HOLIDAY = weekdays_after(today, 2)  # today + 2 working days (verification.md 8.
 
 
 def wd(n):
-    """The n-th working day after today, skipping weekends and the SYN-105 office holiday."""
+    """The n-th working day after today, skipping weekends and the 260105 office holiday."""
     return weekdays_after(today, n, {HOLIDAY})
 
 
@@ -103,12 +103,12 @@ def exists(number):
 
 
 try:
-    syn = {n: call(f"projects/{n}", "jordan") for n in ("SYN-101", "SYN-103")}
+    syn = {n: call(f"projects/{n}", "jordan") for n in ("250101", "250103")}
 except Refused as e:
     sys.exit(f"Run tools/preview/seed_resources.py first ({e}).")
-p1, p3 = syn["SYN-101"]["id"], syn["SYN-103"]["id"]
-d1 = {d["code"]: d["id"] for d in syn["SYN-101"]["disciplines"]}
-d3 = {d["code"]: d["id"] for d in syn["SYN-103"]["disciplines"]}
+p1, p3 = syn["250101"]["id"], syn["250103"]["id"]
+d1 = {d["code"]: d["id"] for d in syn["250101"]["disciplines"]}
+d3 = {d["code"]: d["id"] for d in syn["250103"]["disciplines"]}
 users = call("admin/users", "jordan")
 uid = {u["email"].split("@")[0]: u["id"] for u in users}
 ref = call("reference", "jordan")
@@ -185,52 +185,52 @@ def role(pid, pm, label, first, last, hours, discipline=None):
 
 
 def staffing():
-    """8.1: SYN-104 in Setup with open roles before names are known, and one restricted SYN-103 role."""
-    if exists("SYN-104"):
-        return skipped.append("8.1 staffing: SYN-104 already exists")
-    p4, d4 = project("priya", "SYN-104", "Lakeside subdivision servicing (proposal)", [("alex", "CIV"), ("jill", "CIV"), ("omar", "GEO")],
+    """8.1: 260104 in Setup with open roles before names are known, and one restricted 250103 role."""
+    if exists("260104"):
+        return skipped.append("8.1 staffing: 260104 already exists")
+    p4, d4 = project("priya", "260104", "Lakeside subdivision servicing (proposal)", [("alex", "CIV"), ("jill", "CIV"), ("omar", "GEO")],
                      {"CIV": "marc", "GEO": "omar"}, head_office, active=False)
     concept = task(p4, d4, "priya", "jill", "Servicing concept layout", start=day(2), due=day(5, 4), est=60)
     desktop = task(p4, d4, "priya", "omar", "Geotechnical desktop study", "GEO", start=day(2), due=day(3, 4), est=40)
-    attempt("SYN-104 Civil technologist role, by Priya", lambda: role(p4, "priya", "Civil technologist", day(2), day(5, 4), 80, d4["CIV"]))
-    attempt("SYN-104 Senior reviewer role, by Priya", lambda: role(p4, "priya", "Senior reviewer", day(3), day(4, 4), 20))
-    geo = attempt("SYN-104 Geotechnical engineer role, by Priya", lambda: role(p4, "priya", "Geotechnical engineer", day(2), day(3, 4), 40, d4["GEO"]))
+    attempt("260104 Civil technologist role, by Priya", lambda: role(p4, "priya", "Civil technologist", day(2), day(5, 4), 80, d4["CIV"]))
+    attempt("260104 Senior reviewer role, by Priya", lambda: role(p4, "priya", "Senior reviewer", day(3), day(4, 4), 20))
+    geo = attempt("260104 Geotechnical engineer role, by Priya", lambda: role(p4, "priya", "Geotechnical engineer", day(2), day(3, 4), 40, d4["GEO"]))
     if geo:
-        attempt("SYN-104 Geotechnical engineer filled by a Proposed allocation for Omar, by Priya",
+        attempt("260104 Geotechnical engineer filled by a Proposed allocation for Omar, by Priya",
                 lambda: propose(p4, "priya", "omar", day(2), day(3, 4), 40, desktop["id"], geo["id"]))
-    drafting = attempt("SYN-104 Drafting support role, by Priya", lambda: role(p4, "priya", "Drafting support", day(4), day(5, 4), 24, d4["CIV"]))
+    drafting = attempt("260104 Drafting support role, by Priya", lambda: role(p4, "priya", "Drafting support", day(4), day(5, 4), 24, d4["CIV"]))
 
     def declined():
         a = propose(p4, "priya", "jill", day(4), day(5, 4), 24, concept["id"], drafting["id"])
         return call(f"projects/{p4}/allocations/{a['id']}/decline", "sam", "POST",
                     {"requestId": rid(), "rowVersion": a["rowVersion"], "reason": "Jill is committed to the Harbour Road drawings those weeks."})
     if drafting:
-        attempt("SYN-104 Drafting support proposed for Jill by Priya, declined by Sam (role back to Open)", declined)
-    attempt("SYN-103 Hydraulic modeller role, by Marc", lambda: role(p3, "marc", "Hydraulic modeller", day(2), day(3, 4), 30, d3["CIV"]))
+        attempt("260104 Drafting support proposed for Jill by Priya, declined by Sam (role back to Open)", declined)
+    attempt("250103 Hydraulic modeller role, by Marc", lambda: role(p3, "marc", "Hydraulic modeller", day(2), day(3, 4), 30, d3["CIV"]))
 
 
 def stalled():
-    """8.3: stalled items on SYN-101 (their clocks start today; see the module note)."""
+    """8.3: stalled items on 250101 (their clocks start today; see the module note)."""
     if by_name(call(f"projects/{p1}/tasks?pageSize=200", "jordan"), "Utility conflict log"):
         return skipped.append("8.3 stalled items: 'Utility conflict log' already exists")
     a = start(task(p1, d1, "priya", "jill", "Utility conflict log", due=today + dt.timedelta(days=20), est=16), "jill")
-    call(f"items/Task/{a['id']}/comments", "priya", "POST", {"body": 'please add the two new crossings from the survey.'})
-    attempt("SYN-101 'Pavement design memo' started by Omar", lambda: start(
+    call(f"items/Task/{a['id']}/comments", "priya", "POST", {"body": 'Please add the two new crossings from the survey.'})
+    attempt("250101 'Pavement design memo' started by Omar", lambda: start(
         task(p1, d1, "priya", "omar", "Pavement design memo", "GEO", due=today + dt.timedelta(days=25), est=12), "omar"))
 
     def review():
         c = start(task(p1, d1, "priya", "alex", "Storm profiles review", due=today + dt.timedelta(days=10), est=8,
                        requiresReview=True, reviewerId=uid["diane"]), "alex")
         c = move(move(c, "alex", "Ready for Review"), "diane", "In Review")
-        call(f"items/Task/{c['id']}/comments", "diane", "POST", {"body": 'two profiles still show the old invert levels.'})
-    attempt("SYN-101 'Storm profiles review' started by Alex, review requested, taken into review by Diane", review)
+        call(f"items/Task/{c['id']}/comments", "diane", "POST", {"body": 'Two profiles still show the old invert levels.'})
+    attempt("250101 'Storm profiles review' started by Alex, review requested, taken into review by Diane", review)
 
     def report():
         r = dmove(dmove(deliverable(p1, d1, "priya", "Geotechnical report", "GEO", "Report", "omar", "diane", review=True,
                                     due=today + dt.timedelta(days=21)), "omar", "In Progress"), "omar", "In Review")
         call(f"deliverables/{r['id']}", "omar", "PATCH", {"description": 'Borehole summary and pavement recommendations, revised for review.',
                                                          "rowVersion": r["rowVersion"]})
-    attempt("SYN-101 'Geotechnical report' sent to review and edited by Omar", report)
+    attempt("250101 'Geotechnical report' sent to review and edited by Omar", report)
 
 
 def capacity():
@@ -244,17 +244,17 @@ def capacity():
         "personId": uid["alex"], "hoursPerWeek": 10, "startWeek": iso(day(1)), "endWeek": iso(day(1)), "label": "Possible proposal support",
         "sourceCategory": "Proposal", "confidence": "Possible", "visibility": "Draft", "notes": 'Private draft; not yet shared.'}))
     profiles = by_name(call(f"projects/{p1}/tasks?pageSize=200", "jordan"), PROFILES)
-    # seed_resources.py run on the same day already gives Alex a live SYN-101 allocation in week W, linked to the same
+    # seed_resources.py run on the same day already gives Alex a live 250101 allocation in week W, linked to the same
     # task days, so a second one is refused as a duplicate (036-D4); keep that one instead.
     held = next((a for a in call(f"projects/{p1}/allocations", "jordan")["items"] if a["personId"] == uid["alex"]
                  and a["status"] in ("Proposed", "Confirmed") and a["fromDate"] <= iso(day(1, 4)) and a["throughDate"] >= iso(day(1))), None)
     if held:
-        skipped.append(f"SYN-101 Alex in week W: his {held['status']} allocation {held['fromDate']}..{held['throughDate']} is already present")
+        skipped.append(f"250101 Alex in week W: his {held['status']} allocation {held['fromDate']}..{held['throughDate']} is already present")
     elif profiles:
-        attempt("SYN-101 Alex 20 h in week W, proposed by Priya, confirmed by Sam",
+        attempt("250101 Alex 20 h in week W, proposed by Priya, confirmed by Sam",
                 lambda: confirm(p1, propose(p1, "priya", "alex", day(1), day(1, 4), 20, profiles["id"]), "sam"))
     else:
-        refusals.append("SYN-101 Alex 20 h in week W: the seed_resources task for Alex was not found")
+        refusals.append("250101 Alex 20 h in week W: the seed_resources task for Alex was not found")
     for weekday in (0, 1):
         attempt(f"Jill unavailable {day(1, weekday)}, by Sam", lambda: call(
             f"users/{uid['jill']}/availability/{iso(day(1, weekday))}", "sam", "PUT", {"expectedRowVersion": 0, "availableHours": 0, "category": "Unavailable"}))
@@ -265,16 +265,16 @@ def capacity():
 
 
 def counts():
-    """8.5: the SYN-101 On Hold task (unowned deliverables cannot be created through the API; see the module note)."""
+    """8.5: the 250101 On Hold task (unowned deliverables cannot be created through the API; see the module note)."""
     if by_name(call(f"projects/{p1}/tasks?pageSize=200", "jordan"), "Culvert crossing options"):
         return skipped.append("8.5 counts: 'Culvert crossing options' already exists")
     move(task(p1, d1, "priya", "alex", "Culvert crossing options", est=10), "priya", "On Hold", reason="Waiting for the client's culvert survey.")
 
 
 def dependencies():
-    """8.2 (browser version) and the 8.5 timeline cases: SYN-105 in its own office, whose only holiday is HOLIDAY."""
-    if exists("SYN-105"):
-        return skipped.append("8.2 dependencies: SYN-105 already exists")
+    """8.2 (browser version) and the 8.5 timeline cases: 260105 in its own office, whose only holiday is HOLIDAY."""
+    if exists("260105"):
+        return skipped.append("8.2 dependencies: 260105 already exists")
     if not call("me", "jordan")["settings"]["workingDaysEnabled"]:
         call("admin/settings/working_days_enabled", "jordan", "PUT", {"value": True})
     # An office of its own keeps the holiday off every person's capacity and every other project.
@@ -290,7 +290,7 @@ def dependencies():
             "milestones": [{"ref": "m1", "name": "Client workshop", "milestoneType": "Client Workshop", "anchor": "None", "isClientFacing": True}],
             "deliverables": [], "tasks": [], "dependencies": []})
         call(f"templates/{template['id']}/publish", "jordan", "POST", {"rowVersion": call(f"templates/{template['id']}", "jordan")["rowVersion"]})
-    p5, d5 = project("priya", "SYN-105", "Riverside lane grading and drainage", [("alex", "CIV"), ("jill", "CIV")], {"CIV": "marc"},
+    p5, d5 = project("priya", "260105", "Riverside lane grading and drainage", [("alex", "CIV"), ("jill", "CIV")], {"CIV": "marc"},
                      office["id"], active=True, templateId=template["id"])
     t = today
     pairs = [  # link, type, lag, predecessor (name, start, due) by Alex, successor (name, start, due) by Jill
@@ -306,32 +306,32 @@ def dependencies():
         made[link] = (task(p5, d5, "priya", "alex", pn, start=ps, due=pdue, est=8, requiresReview=False),
                       task(p5, d5, "priya", "jill", sn, start=ss, due=sdue, est=8, requiresReview=False))
         call(f"tasks/{made[link][1]['id']}/dependencies", "priya", "POST",
-             {"predecessorTaskId": made[link][0]["id"], "lagDays": lag, "type": kind, "note": f"{link} worked example."})
+             {"predecessorTaskId": made[link][0]["id"], "lagDays": lag, "type": kind, "note": f"Waits on {pn.lower()}."})
     for link in ("L1", "L2"):  # predecessors finished today
-        attempt(f"SYN-105 {link} predecessor started and completed by Alex", lambda: move(start(made[link][0], "alex"), "alex", "Complete"))
+        attempt(f"260105 {link} predecessor started and completed by Alex", lambda: move(start(made[link][0], "alex"), "alex", "Complete"))
     for link in ("L3", "L4", "L5"):  # predecessors started today
-        attempt(f"SYN-105 {link} predecessor started by Alex", lambda: start(made[link][0], "alex"))
+        attempt(f"260105 {link} predecessor started by Alex", lambda: start(made[link][0], "alex"))
     for link in ("L5", "L6"):  # successors in progress
-        attempt(f"SYN-105 {link} successor started by Jill", lambda: start(made[link][1], "jill"))
+        attempt(f"260105 {link} successor started by Jill", lambda: start(made[link][1], "jill"))
     task(p5, d5, "priya", "jill", "No start date task", due=today + dt.timedelta(days=10), est=6)
     permit = deliverable(p5, d5, "priya", "Permit drawings", "CIV", "Permit Submission", "alex")
     task(p5, d5, "priya", "alex", "Permit drawing markups", start=wd(1), due=wd(6), est=12, deliverableId=permit["id"])
 
 
 def summary():
-    print(f"Packet 036 preview data at {BASE} (organisation today {today}, week W {day(1)}, SYN-105 holiday {HOLIDAY}):")
-    for number in ("SYN-104", "SYN-103"):
+    print(f"Packet 036 preview data at {BASE} (organisation today {today}, week W {day(1)}, 260105 holiday {HOLIDAY}):")
+    for number in ("260104", "250103"):
         p = exists(number)
         if p:
             roles = call(f"projects/{p['id']}/open-roles", "jordan")
             print(f"  {number} {p['status']}: " + "; ".join(
                 f"{r['roleLabel']} {r['fromDate']}..{r['throughDate']} {r['plannedHours']:g} h {r['status']}" for r in roles))
-    p5 = exists("SYN-105")
+    p5 = exists("260105")
     for row in call(f"projects/{p5['id']}/tasks?pageSize=200", "jordan")["items"] if p5 else []:
         deps = call(f"tasks/{row['id']}/dependencies", "jordan")["dependsOn"]
         flags = [k for k in ("isBlocked", "isWaiting", "isDateInconsistent") if (row.get("state") or {}).get(k)]
         link = "; ".join(f"after {d['task']['name']}, {d['type']} lag {d['lagDays']}, satisfied {d['satisfied']}" for d in deps)
-        print(f"    SYN-105 {row['name']} [{row['status']}] {', '.join(flags) or 'clear'}{(' — ' + link) if link else ''}")
+        print(f"    260105 {row['name']} [{row['status']}] {', '.join(flags) or 'clear'}{(' — ' + link) if link else ''}")
     print("  Home disciplines: " + ", ".join(f"{u['email'].split('@')[0]} {u['homeDisciplineId'] or 'not set'}"
                                              for u in call("admin/users", "jordan") if u["email"].split("@")[0] in ("alex", "jill", "omar", "diane")))
     for s in skipped:

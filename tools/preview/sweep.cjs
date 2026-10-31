@@ -22,7 +22,7 @@ const paceApi = () => {
   apiQueue = turn.catch(() => {});
   return turn;
 };
-const P = 'SYN-101';
+const P = '250101';
 const project = ['dashboard', 'coordination', 'readiness', 'handoffs', 'reviews', 'changes', 'submissions', 'allocations', 'design-basis', 'tasks', 'board',
   'milestones', 'timeline', 'deliverables', 'decisions', 'risks', 'issues', 'meetings', 'files', 'calendar', 'team', 'activity', 'settings'].map((t) => `/projects/${P}/${t}`);
 const common = ['/home', '/my-work', '/my-work?tab=today', '/my-work?tab=inbox', '/boards', '/tasks', '/timeline', '/calendar', '/calendar?mode=agenda', '/files', '/team', '/time', '/projects', '/notifications', '/search?q=synthetic', '/preferences', '/workload', '/planner', '/staff', '/portfolio', '/reports', '/reports/tasks-due-this-week', '/templates', '/admin', '/admin/users', '/admin/settings', '/admin/activity', '/admin/operations', '/admin/holidays', '/admin/reference/disciplines', ...['clients', 'offices', 'deliverableTypes', 'phases', 'projectTypes'].map(k => `/admin/reference/${k}`), '/missing-preview-route', ...project];

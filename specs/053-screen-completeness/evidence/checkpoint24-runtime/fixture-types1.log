@@ -1,0 +1,8 @@
+
+> web@0.0.0 typecheck:tests
+> tsc -p tests/tsconfig.json
+
+tests/deliverable-import.fixture.cjs(66,86): error TS2322: Type '{ code: string; severity: "Error"; message: string; sheet: null; sourceRow: null; column: null; }[]' is not assignable to type '{ code: string; column?: number | null | undefined; message: string; severity: number; sheet?: string | null | undefined; sourceRow?: number | null | undefined; }[]'.
+  Type '{ code: string; severity: "Error"; message: string; sheet: null; sourceRow: null; column: null; }' is not assignable to type '{ code: string; column?: number | null | undefined; message: string; severity: number; sheet?: string | null | undefined; sourceRow?: number | null | undefined; }'.
+    Types of property 'severity' are incompatible.
+      Type 'string' is not assignable to type 'number'.

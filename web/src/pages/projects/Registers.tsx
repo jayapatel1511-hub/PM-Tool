@@ -1,3 +1,6 @@
+import { RecordContext } from '@/components/hub/record-context'
+import { useWorkSeenDetailOwner, WorkSeenDetailNotice } from '@/components/hub/work-seen-detail-owner'
+import type { WorkSeenFields } from '@/components/hub/work-seen'
 import { UrlSearchInput } from '@/components/hub/url-search'
 import { ViewMenu } from '@/components/hub/views'
 import { useQuery } from '@tanstack/react-query'
@@ -7,7 +10,7 @@ import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { ActiveFilters, ChipToggle, ConfirmDialog, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Notice, Page, Section, Spinner, selectCls } from '@/components/hub/common'
 import { ExportMenu } from '@/components/hub/export'
-import { FieldRow, HistoryList, InlineDate, InlinePerson, InlineSelect, InlineText, TabBar } from '@/components/hub/fields'
+import { useRecordTab, FieldRow, HistoryList, InlineDate, InlinePerson, InlineSelect, InlineText, TabBar } from '@/components/hub/fields'
 import { useItemPanel, type PanelProps } from '@/components/hub/panel-host'
 import { PeoplePicker } from '@/components/hub/people'
 import { Chip, Key, StatusPill } from '@/components/hub/pills'
@@ -19,6 +22,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useProject, useProjectRefresh } from '@/hooks/data'
 import { useFlag, useMe } from '@/lib/auth'
+import { useProjectRelatedPanel } from './project-related-navigation'
 import { ApiError, typedRequest } from '@/lib/api'
 import { fmtDate, fmtTime, today } from '@/lib/format'
 import { t, tv , runtimeText } from '@/lib/i18n'
@@ -34,6 +38,7 @@ import type { components } from '@/gen/api'
 import type { SavedViewKeys } from '@/gen/registry.gen'
 import { DraftNotice } from '@/components/hub/drafts'
 import { useSafeForm } from '@/hooks/drafts'
+import { IssueRootCauseCounts, IssueRootCauseResolveDialog, issueRootCauseDrilldown, useIssueRootCauseChoices } from './issue-root-cause'
 
 // Risk and Issue Registers (§12.10, §13.13, packet 014).
 
@@ -185,12 +190,15 @@ export function RisksTab() {
 
 export function IssuesTab() {
   const p = useCurrentProject()
+  const rootCauseOn = useFlag('register_screens'), me = useMe()
+  const causes = useIssueRootCauseChoices(rootCauseOn)
   const f = useFilters()
   const [sp, setSp] = useSearchParams()
   const issueFilters = { ...f.filters, location: sp.get('location'), document: sp.get('document'),
     revision: sp.get('revision'), verification: sp.get('verification'), alignment: sp.get('alignment'),
-    stationFrom: sp.get('stationFrom'), stationTo: sp.get('stationTo'), stationUnits: sp.get('stationUnits'), issueType: sp.get('issueType') }
-  const sourceFilterActive = SOURCE_FILTERS.some((key) => sp.has(key))
+    stationFrom: sp.get('stationFrom'), stationTo: sp.get('stationTo'), stationUnits: sp.get('stationUnits'), issueType: sp.get('issueType'),
+    ...(rootCauseOn ? { rootCause: sp.get('rootCause') } : {}) }
+  const sourceFilterActive = SOURCE_FILTERS.some((key) => sp.has(key)) || (rootCauseOn && sp.has('rootCause'))
   const setSourceFilter = (key: string, value: string) => {
     const next = new URLSearchParams(sp)
     if (value) next.set(key, value); else next.delete(key)
@@ -200,21 +208,24 @@ export function IssuesTab() {
   // One Clear for both filter rows; grouping is a view choice and stays.
   const clearFilters = () => {
     const next = new URLSearchParams(sp)
-    for (const key of [...FILTERS, ...SOURCE_FILTERS, 'page']) next.delete(key)
+    for (const key of [...FILTERS, ...SOURCE_FILTERS, 'page', ...(rootCauseOn ? ['rootCause'] : [])]) next.delete(key)
     setSp(next, { replace: true })
   }
   const openPanel = useItemPanel()
   const panel = sp.get('panel')
   const [raising, setRaising] = useState(false)
-  const q = useQuery({ queryKey: ['p', p.id, 'issues', issueFilters], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/issues', { params: { id: p.id }, query: { ...registerQuery(f.filters), Location: issueFilters.location ?? undefined, Document: issueFilters.document ?? undefined,
+  const q = useQuery({ queryKey: ['p', p.id, 'issues', issueFilters, me.id, rootCauseOn], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/issues', { params: { id: p.id }, query: { ...registerQuery(f.filters), Location: issueFilters.location ?? undefined, Document: issueFilters.document ?? undefined,
     Revision: issueFilters.revision ?? undefined, Verification: issueFilters.verification ?? undefined, Alignment: issueFilters.alignment ?? undefined, StationFrom: station(issueFilters.stationFrom),
-    StationTo: station(issueFilters.stationTo), StationUnits: issueFilters.stationUnits ?? undefined, IssueType: issueFilters.issueType ?? undefined } }) })
+    StationTo: station(issueFilters.stationTo), StationUnits: issueFilters.stationUnits ?? undefined, IssueType: issueFilters.issueType ?? undefined,
+    ...(rootCauseOn ? { RootCause: sp.get('rootCause') ?? undefined } : {}) } }) })
   const verificationLabel = (v: string) => v === 'None' ? t('issue.noVerification') : v === 'Stale' ? t('issue.staleVerification') : tv(v)
   const table = useTable<IssueRow>('hub.issueColumns', [
     { id: 'key', label: t('milestone.key'), fixed: true, sort: (r) => r.key, className: 'whitespace-nowrap', cell: (r) => <Key>{r.key}</Key> },
     { id: 'title', label: t('register.title'), fixed: true, sort: (r) => r.title.toLowerCase(), className: 'min-w-[14rem]',
       cell: (r) => <button className={TITLE_LINK} aria-current={panel === `Issue:${r.id}` || undefined} onClick={() => openPanel('Issue', r.id)}>{r.title}</button> },
     { id: 'type', label: t('issue.type'), sort: (r) => r.issueType, className: 'whitespace-nowrap', cell: (r) => tv(r.issueType) },
+    ...(rootCauseOn ? [{ id: 'rootCause', label: t('issueRootCause.last'), sort: (r: IssueRow) => r.rootCause?.recordedName ?? '',
+      cell: (r: IssueRow) => r.rootCause?.recordedName ?? t('issueRootCause.notRecorded') }] : []),
     { id: 'severity', label: t('register.severity'), sort: (r) => SEVERITIES.indexOf(r.severity), cell: (r) => <Severity level={r.severity} /> },
     { id: 'status', label: t('common.status'), sort: (r) => r.status, cell: (r) => <StatusPill status={r.status} /> },
     { id: 'owner', label: t('common.owner'), sort: (r) => r.ownerName, className: 'whitespace-nowrap', cell: (r) => <Person id={r.ownerId} name={r.ownerName} /> },
@@ -223,7 +234,7 @@ export function IssuesTab() {
     { id: 'raised', label: t('issue.dateRaised'), sort: (r) => r.dateRaised, className: 'text-right', cell: (r) => <DateText date={r.dateRaised} /> },
     { id: 'target', label: t('issue.target'), sort: (r) => r.targetResolutionDate, className: 'whitespace-nowrap text-right',
       cell: (r) => <span className="inline-flex flex-wrap items-center justify-end gap-x-2 gap-y-1"><DateText date={r.targetResolutionDate} />{r.isOverdue && <Chip tone="bad">{t('ind.overdueD', { n: r.daysOverdue })}</Chip>}</span> },
-    { id: 'raisedBy', label: t('issue.raisedBy'), optional: true, sort: (r) => r.raisedByName, className: 'whitespace-nowrap', cell: (r) => r.raisedByName ?? <Missing /> },
+    { id: 'raisedBy', label: t('issue.raisedBy'), optional: true, sort: (r) => r.raisedByName, className: 'whitespace-nowrap', cell: (r) => <Person id={r.raisedById} name={r.raisedByName} focusKey={`issue:${r.id}:raised-by:table`} /> },
     { id: 'origin', label: t('issue.fromRisk'), optional: true, cell: (r) => r.originRiskId ? <button onClick={() => openPanel('Risk', r.originRiskId!)} className="hover:underline"><Key>{r.originRiskKey}</Key></button> : null },
     { id: 'location', label: t('issue.locations'), sort: (r) => r.locationSummary, className: 'min-w-48', cell: (r) => r.locationSummary || <Missing /> },
     { id: 'documents', label: t('issue.documentReferences'), optional: true, sort: (r) => r.documentSummary, className: 'min-w-48', cell: (r) => r.documentSummary || <Missing /> },
@@ -256,6 +267,7 @@ export function IssuesTab() {
   const displayRows = groupBy ? [...expandedRows].sort((a, b) => groupBy(a).localeCompare(groupBy(b))) : expandedRows
   const can = p.permissions.raiseRegister
   const sourceTokens = [
+    rootCauseOn && sp.get('rootCause') && { key: 'rootCause', label: t('issueRootCause.label'), value: sp.get('rootCause') === 'not-recorded' ? t('issueRootCause.notRecorded') : (!causes.isError && causes.data?.find(cause => cause.id === sp.get('rootCause'))?.name) || sp.get('rootCause')! },
     issueFilters.issueType && { key: 'issueType', label: t('issue.filterType'), value: tv(issueFilters.issueType) },
     issueFilters.location && { key: 'location', label: t('issue.filterLocation'), value: issueFilters.location },
     issueFilters.document && { key: 'document', label: t('issue.filterDocument'), value: issueFilters.document },
@@ -277,6 +289,7 @@ export function IssuesTab() {
         {can.ok && <Button onClick={() => setRaising(true)}><Plus className="size-4" />{t('issue.new')}</Button>}
       </>}>
       {!can.ok && can.reason && <Notice icon={Lock} title={can.reason} />}
+      {rootCauseOn && !q.isError && <IssueRootCauseCounts projectId={p.id} onOpen={cause => setSp(issueRootCauseDrilldown(sp, cause))} />}
       <RegisterFilters f={f} statuses={ISSUE_STATUSES} open="Open,In Progress" indicator={['overdue', 'ind.overdue']} owners={owners(q.data)} disciplines={p.disciplines}
         extraTokens={sourceTokens} onClear={clearFilters} extra={
           <div role="group" aria-labelledby="issue-source-filters" className="space-y-3 border-t pt-4">
@@ -596,6 +609,11 @@ function RealiseDialog({ r, onClose }: { r: RiskRow; onClose: () => void }) {
 }
 
 function ResolveDialog({ i, onClose }: { i: IssueRow; onClose: () => void }) {
+  const on = useFlag('register_screens')
+  return on ? <IssueRootCauseResolveDialog issue={i} onClose={onClose} /> : <LegacyResolveDialog i={i} onClose={onClose} />
+}
+
+function LegacyResolveDialog({ i, onClose }: { i: IssueRow; onClose: () => void }) {
   const done = useProjectRefresh()
   const [text, setText] = useState('')
   const [date, setDate] = useState(today())
@@ -637,7 +655,7 @@ const STEP: Record<string, import('@/lib/i18n').TextKey> = {
 }
 
 function Links({ links, canEdit, projectId, onAdd, onChange }: { links: LinkRow[]; canEdit: boolean; projectId: string; onAdd: (x: Pick) => Promise<unknown>; onChange: () => void }) {
-  const openPanel = useItemPanel()
+  const openRelatedPanel = useProjectRelatedPanel()
   const [adding, setAdding] = useState(false)
   return (
     <div className="space-y-3 p-4">
@@ -645,7 +663,7 @@ function Links({ links, canEdit, projectId, onAdd, onChange }: { links: LinkRow[
         <ul className="divide-y rounded-md border">{links.map((l) => (
           <li key={l.id} className="flex min-h-(--row-min) flex-wrap items-center gap-x-2.5 gap-y-1 px-3 py-1 text-sm">
             <span className="w-20 shrink-0 text-xs/[18px] text-muted-foreground">{runtimeText(`itemType.${l.targetType}`)}</span><Key>{l.key}</Key>
-            <button className="min-w-0 flex-1 truncate text-left hover:underline" onClick={() => openPanel(l.targetType, l.targetId)}>{l.name}</button>
+            <button className="min-w-0 flex-1 truncate text-left hover:underline" onClick={e => openRelatedPanel(l.targetType, l.targetId, e)}>{l.name}</button>
             {l.status && <StatusPill status={l.status} />}<DateText date={l.date} />
             {canEdit && <Button variant="ghost" size="icon-sm" aria-label={t('decision.unlink', { key: l.key })}
               onClick={async () => { try { await typedRequest('delete', '/api/v1/item-links/{id}', { params: { id: l.id } }); onChange() } catch (e) { toast.error(errorText(e)) } }}><Trash2 className="size-4" /></Button>}
@@ -673,12 +691,20 @@ function Steps({ transitions, label, onStep }: { transitions: Schemas['RegisterT
 const levelOptions = (name: 'probability' | 'impact') => LEVELS.map((n) => ({ value: String(n), label: `${n} · ${t(`risk.${name}.${n}`)}` }))
 
 export function RiskPanel({ id }: PanelProps) {
-  const q = useQuery({ queryKey: ['risk', id], queryFn: () => typedRequest('get', '/api/v1/risks/{id}', { params: { id } }) })
+  const me = useMe()
+  const workOn = useFlag('work_screens'), peopleOn = useFlag('people_screens')
+  const q = useQuery({ queryKey: ['risk', id, me.id, workOn, peopleOn], queryFn: async () => await typedRequest('get', '/api/v1/risks/{id}', { params: { id } }) as Schemas['RiskDetailData'] & WorkSeenFields })
   const done = useProjectRefresh()
   const openPanel = useItemPanel()
+  const openRelatedPanel = useProjectRelatedPanel()
   const project = useProject(q.data?.project.id)
-  const [tab, setTab] = useState<'links' | 'comments' | 'history'>('links')
+  const [tab, setTab] = useRecordTab('Risk', id, 'links', ['links', ...(ItemSlots.Comments ? ['comments'] : []), 'history'])
   const [step, setStep] = useState<string | null>(null)
+  const contextOn = useFlag('screen_patterns')
+  const [detailParams] = useSearchParams()
+  const seenOwner = useWorkSeenDetailOwner({ itemType: 'Risk', itemId: q.data?.risk.id ?? id,
+    sourceVersion: q.data?.risk.rowVersion, seen: q.data?.seen, read: q,
+    visible: detailParams.get('panel') === `Risk:${id}` && !step })
   if (q.isPending) return <Loading />
   if (q.error) return <div className="p-4"><ErrorBanner error={q.error} /></div>
   const { risk: r, permissions: perm } = q.data
@@ -695,14 +721,16 @@ export function RiskPanel({ id }: PanelProps) {
   }
   const disciplines = (project.data?.disciplines ?? []).filter((d) => d.isActive || d.id === r.projectDisciplineId).map((d) => ({ value: d.id, label: d.name }))
   return (
-    <div>
+    <div ref={seenOwner.surfaceRef}>
+      <WorkSeenDetailNotice state={seenOwner.state} />
       <PanelHead title={r.title} meta={<>
         <ShieldAlert className="size-4 text-muted-foreground" aria-hidden /><Key>{r.key}</Key><StatusPill status={r.status} /><Severity level={r.band} score={r.score} />
         {r.isReviewOverdue && <Chip tone="bad">{t('risk.reviewOverdue')}</Chip>}
       </>}>
-        {q.data.realisedIssue && <p className="text-sm">{t('risk.realisedAsLabel')} <button className="hover:underline" onClick={() => openPanel('Issue', q.data.realisedIssue!.id)}><Key>{q.data.realisedIssue.key}</Key> {q.data.realisedIssue.title}</button></p>}
+        {q.data.realisedIssue && <p className="text-sm">{t('risk.realisedAsLabel')} <button className="hover:underline" onClick={e => openRelatedPanel('Issue', q.data.realisedIssue!.id, e)}><Key>{q.data.realisedIssue.key}</Key> {q.data.realisedIssue.title}</button></p>}
         <Steps transitions={perm.transitions} label={(to) => runtimeText(to === 'Open' && r.status === 'Closed' ? 'risk.reopen' : STEP[to])} onStep={onStep} />
       </PanelHead>
+      {contextOn && <RecordContext context={q.data.context} projectNumber={q.data.project.projectNumber} meId={me.id} openPanel={openPanel} />}
       <FieldGroup title={t('common.details')}>
         <FieldRow label={t('register.title')}><InlineText value={r.title} disabled={!can} needsReason={needsReason} title={perm.edit.reason ?? undefined} onSave={(v) => save({ title: v })} /></FieldRow>
         <FieldRow label={t('common.description')}><InlineText value={q.data.description ?? ''} multiline disabled={!can} needsReason={needsReason} onSave={(v) => save({ description: v })} /></FieldRow>
@@ -712,7 +740,7 @@ export function RiskPanel({ id }: PanelProps) {
         <FieldRow label={t('risk.impact')}><InlineSelect value={String(r.impact)} options={levelOptions('impact')} disabled={!can} onSave={(v) => save({ impact: Number(v) })} title={t('risk.impact')} /></FieldRow>
       </FieldGroup>
       <FieldGroup title={t('register.group.ownership')}>
-        <FieldRow label={t('common.owner')}><InlinePerson value={r.ownerId} name={r.ownerName} disabled={!can} allowClear={false} onSave={(v) => save({ ownerId: v })} /></FieldRow>
+        <FieldRow label={t('common.owner')}><InlinePerson focusKey={`risk:${r.id}:owner`} value={r.ownerId} name={r.ownerName} disabled={!can} allowClear={false} onSave={(v) => save({ ownerId: v })} /></FieldRow>
         <FieldRow label={t('common.discipline')}><InlineSelect value={r.projectDisciplineId} allowEmpty options={disciplines} disabled={!can} onSave={(v) => save({ projectDisciplineId: v || null })} title={t('common.discipline')} /></FieldRow>
         <FieldRow label={t('risk.reviewDate')}><InlineDate value={r.reviewDate} disabled={!can} onSave={(v) => save({ reviewDate: v })} /></FieldRow>
       </FieldGroup>
@@ -732,12 +760,20 @@ export function RiskPanel({ id }: PanelProps) {
 }
 
 export function IssuePanel({ id }: PanelProps) {
-  const q = useQuery({ queryKey: ['issue', id], queryFn: () => typedRequest('get', '/api/v1/issues/{id}', { params: { id } }) })
+  const me = useMe()
+  const workOn = useFlag('work_screens'), peopleOn = useFlag('people_screens'), rootCauseOn = useFlag('register_screens')
+  const q = useQuery({ queryKey: ['issue', id, me.id, workOn, peopleOn, rootCauseOn], queryFn: async () => await typedRequest('get', '/api/v1/issues/{id}', { params: { id } }) as Schemas['IssueDetailData'] & WorkSeenFields })
   const done = useProjectRefresh()
   const openPanel = useItemPanel()
+  const openRelatedPanel = useProjectRelatedPanel()
   const project = useProject(q.data?.project.id)
-  const [tab, setTab] = useState<'links' | 'comments' | 'history'>('links')
+  const [tab, setTab] = useRecordTab('Issue', id, 'links', ['links', ...(ItemSlots.Comments ? ['comments'] : []), 'history'])
   const [step, setStep] = useState<string | null>(null)
+  const contextOn = useFlag('screen_patterns')
+  const [detailParams] = useSearchParams()
+  const seenOwner = useWorkSeenDetailOwner({ itemType: 'Issue', itemId: q.data?.issue.id ?? id,
+    sourceVersion: q.data?.issue.rowVersion, seen: q.data?.seen, read: q,
+    visible: detailParams.get('panel') === `Issue:${id}` && !step })
   if (q.isPending) return <Loading />
   if (q.error) return <div className="p-4"><ErrorBanner error={q.error} /></div>
   const { issue: i, permissions: perm } = q.data
@@ -756,16 +792,18 @@ export function IssuePanel({ id }: PanelProps) {
   }
   const disciplines = (project.data?.disciplines ?? []).filter((d) => d.isActive || d.id === i.projectDisciplineId).map((d) => ({ value: d.id, label: d.name }))
   return (
-    <div>
+    <div ref={seenOwner.surfaceRef}>
+      <WorkSeenDetailNotice state={seenOwner.state} />
       <PanelHead title={i.title} meta={<>
         <OctagonAlert className="size-4 text-muted-foreground" aria-hidden /><Key>{i.key}</Key><StatusPill status={i.status} /><Severity level={i.severity} />
         {i.issueType === 'Coordination' && <Chip tone="idle">{tv(i.issueType)}</Chip>}
         {i.isOverdue && <Chip tone="bad">{t('ind.overdueD', { n: i.daysOverdue })}</Chip>}
         {i.severity === 'High' && open && <Chip tone="bad">{t('issue.attention')}</Chip>}
       </>}>
-        {q.data.originRisk && <p className="text-sm">{t('issue.fromRiskLabel')} <button className="hover:underline" onClick={() => openPanel('Risk', q.data.originRisk!.id)}><Key>{q.data.originRisk.key}</Key> {q.data.originRisk.title}</button></p>}
+        {q.data.originRisk && <p className="text-sm">{t('issue.fromRiskLabel')} <button className="hover:underline" onClick={e => openRelatedPanel('Risk', q.data.originRisk!.id, e)}><Key>{q.data.originRisk.key}</Key> {q.data.originRisk.title}</button></p>}
         <Steps transitions={perm.transitions} label={(to) => runtimeText(reopening(to) ? 'issue.reopen' : STEP[to])} onStep={onStep} />
       </PanelHead>
+      {contextOn && <RecordContext context={q.data.context} projectNumber={q.data.project.projectNumber} meId={me.id} openPanel={openPanel} />}
       {i.status === 'Resolved' && (
         <div className="mx-4 mb-4 rounded-md border border-done/30 bg-done-bg px-4 py-3 text-sm">
           <div className="text-xs/[18px] text-muted-foreground">{t('issue.resolvedOn', { date: fmtDate(i.resolvedDate) })}</div>
@@ -778,10 +816,11 @@ export function IssuePanel({ id }: PanelProps) {
         <FieldRow label={t('register.severity')}><InlineSelect value={i.severity} options={SEVERITIES.map((x) => ({ value: x, label: tv(x) }))} disabled={!can} onSave={(v) => save({ severity: v })} title={t('register.severity')} /></FieldRow>
         <FieldRow label={t('issue.type')}><InlineSelect value={i.issueType} options={ISSUE_TYPES.map((x) => ({ value: x, label: tv(x) }))} disabled={!perm.changeType?.ok}
           onSave={(v) => save({ issueType: v })} title={perm.changeType?.ok ? t('issue.type') : perm.changeType?.reason ?? t('issue.type')} /></FieldRow>
+        {rootCauseOn && <FieldRow label={t('issueRootCause.last')}>{i.rootCause?.recordedName ?? t('issueRootCause.notRecorded')}</FieldRow>}
       </FieldGroup>
       <FieldGroup title={t('register.group.ownership')}>
-        <FieldRow label={t('common.owner')}><InlinePerson value={i.ownerId} name={i.ownerName} disabled={!can} allowClear={false} onSave={(v) => save({ ownerId: v })} /></FieldRow>
-        <FieldRow label={t('issue.raisedBy')}><InlinePerson value={i.raisedById} name={i.raisedByName} disabled={!can} allowClear={false} onSave={(v) => save({ raisedById: v })} /></FieldRow>
+        <FieldRow label={t('common.owner')}><InlinePerson focusKey={`issue:${i.id}:owner`} value={i.ownerId} name={i.ownerName} disabled={!can} allowClear={false} onSave={(v) => save({ ownerId: v })} /></FieldRow>
+        <FieldRow label={t('issue.raisedBy')}><InlinePerson focusKey={`issue:${i.id}:raised-by`} value={i.raisedById} name={i.raisedByName} disabled={!can} allowClear={false} onSave={(v) => save({ raisedById: v })} /></FieldRow>
         <FieldRow label={t('common.discipline')}><InlineSelect value={i.projectDisciplineId} allowEmpty options={disciplines} disabled={!can} onSave={(v) => save({ projectDisciplineId: v || null })} title={t('common.discipline')} /></FieldRow>
         <FieldRow label={t('issue.affectedDisciplines')}>
           <fieldset className="flex flex-wrap gap-x-4 gap-y-1 px-2 py-1.5 text-sm" disabled={!can} title={perm.edit.reason ?? undefined}>

@@ -1,0 +1,366 @@
+{
+  "mode": "generation63_local_checkpoint_commit",
+  "coordinatorThreadId": "01a192dd-0b3b-7d31-81f0-69243cd8be2c",
+  "buildRoot": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053",
+  "generation": 63,
+  "instruction": "User authorized local commit of completed packet052/053 source/spec/tests/evidence. All maintained writers HOLD. No push, deployment, maintained flag activation, Accepted or full-goal claim. New report-membership choice is confirmed but implementation remains a follow-up.",
+  "checkpoint": 35,
+  "sourceLoans": {
+    "A": [
+      "web/src/components/planner/time-week.css",
+      "web/tests/capacity-time-week.cjs",
+      "web/src/components/planner/PlannerGrid.tsx",
+      "web/src/components/planner/PlannerMonthGrid.tsx",
+      "web/src/components/planner/labels.ts",
+      "web/src/components/hub/team-organisation-controls.tsx",
+      "web/src/components/hub/team-organisation.ts",
+      "web/src/components/hub/person-panel.tsx",
+      "web/src/components/hub/registers.tsx",
+      "web/src/pages/projects/Team.tsx",
+      "web/src/pages/WorkspaceTeam.tsx",
+      "web/src/pages/Organisation.tsx",
+      "web/src/pages/admin/Admin.tsx",
+      "web/src/pages/admin/Structure.tsx",
+      "web/src/pages/Vacation.tsx",
+      "web/src/pages/Time.tsx",
+      "web/src/pages/Workload.tsx",
+      "web/src/pages/Portfolio.tsx",
+      "web/src/pages/projects/Dashboard.tsx",
+      "web/tests/person-organisation-surfaces.cjs",
+      "web/tests/person-organisation-surfaces.fixture.cjs",
+      "web/src/pages/MyWork.tsx",
+      "web/src/components/hub/work-seen.tsx",
+      "web/tests/work-seen-state.cjs",
+      "web/tests/work-seen-state.fixture.cjs",
+      "web/src/components/hub/search.tsx",
+      "web/src/pages/Search.tsx",
+      "web/src/pages/ReassignWork.tsx",
+      "web/tests/person-search-reassign.cjs",
+      "web/tests/person-search-reassign.fixture.cjs",
+      "web/tests/deliverable-import.cjs",
+      "web/tests/deliverable-import.fixture.cjs"
+    ],
+    "B": [
+      "src/Hub.Api/Infrastructure/WorkAssignmentPublication.cs",
+      "src/Hub.Api/Features/WorkSeenEligibility.cs",
+      "src/Hub.Api/Features/WorkSeenReads.cs",
+      "src/Hub.Api/Features/MyWorkSeen.cs",
+      "src/Hub.Api/Features/WorkActivityFacts.cs",
+      "src/Hub.Api/Features/WorkSeenContracts.cs",
+      "tests/Hub.Tests/Api/WorkAssignmentPublicationTests.cs",
+      "tests/Hub.Tests/Api/MyWorkSeenTests.cs",
+      "tests/Hub.Tests/Api/MyWorkSeenRaceTests.cs",
+      "tests/Hub.Tests/Api/WorkSeenEligibilityTests.cs",
+      "tests/Hub.Tests/Api/WorkActivityCoverageTests.cs",
+      "src/Hub.Api/Features/WorkScreenReads.cs",
+      "tests/Hub.Tests/Api/WorkScreenReadEnvelopeTests.cs",
+      "tests/Hub.Tests/Api/WorkAssignmentProducerPathsTests.cs",
+      "src/Hub.Api/Features/Search.cs",
+      "tests/Hub.Tests/Api/SearchPersonReferencesTests.cs",
+      "src/Hub.Api/Features/Workspace.cs",
+      "tests/Hub.Tests/Api/WorkspaceFilePersonTests.cs"
+    ],
+    "C": [
+      "src/Hub.Api/Features/DeliverableClientExport.cs",
+      "tests/Hub.Tests/Api/DeliverableClientExportTests.cs",
+      "web/src/pages/projects/deliverable-client-export.tsx",
+      "src/Hub.Api/Features/DrawingImportFormat.cs",
+      "tests/Hub.Tests/Api/DrawingImportFormatTests.cs",
+      "src/Hub.Api/Features/DrawingImport.cs",
+      "src/Hub.Api/Features/DrawingImportRows.cs",
+      "tests/Hub.Tests/Api/DrawingImportTests.cs"
+    ],
+    "D": [
+      "web/src/components/hub/activity.tsx",
+      "web/src/components/hub/fields.tsx",
+      "web/src/components/hub/comments.tsx",
+      "web/src/components/hub/richtext.tsx",
+      "web/src/pages/Notifications.tsx",
+      "web/src/pages/WorkspaceTasks.tsx",
+      "web/src/components/planner/EntryPanel.tsx",
+      "web/src/components/planner/AllocationShiftDialog.tsx",
+      "web/src/components/planner/ProjectPlanningGrid.tsx",
+      "web/src/components/planner/ContributionList.tsx",
+      "web/src/components/planner/BulkWeekDialog.tsx",
+      "web/src/components/planner/FindRoomDialog.tsx",
+      "web/src/pages/projects/CoordinationForms.tsx",
+      "web/src/pages/projects/CoordinationRegister.tsx",
+      "web/src/pages/projects/Changes.tsx",
+      "web/src/pages/projects/Reviews.tsx",
+      "web/src/pages/projects/Submissions.tsx",
+      "web/src/pages/projects/delivery-presentation.tsx",
+      "web/src/pages/projects/ReadinessForms.tsx",
+      "web/src/pages/projects/Readiness.tsx",
+      "web/src/pages/projects/readiness-delivery-presentation.tsx",
+      "web/src/pages/projects/DesignBasis.tsx",
+      "web/src/pages/projects/TaskPanel.tsx",
+      "web/src/pages/projects/Board.tsx",
+      "web/src/pages/projects/board-screen-presentation.tsx",
+      "web/src/pages/projects/Coordination.tsx",
+      "web/src/pages/projects/Handoffs.tsx",
+      "web/src/pages/projects/Milestones.tsx",
+      "web/src/pages/projects/Registers.tsx",
+      "web/src/pages/projects/Meetings.tsx",
+      "web/tests/person-surface-completeness.cjs",
+      "web/tests/person-surface-completeness.fixture.cjs",
+      "web/src/pages/projects/ProjectList.tsx",
+      "web/src/pages/Calendar.tsx",
+      "web/src/pages/Staff.tsx",
+      "web/src/components/planner/TimeAwayDialog.tsx",
+      "web/src/pages/projects/ProjectSettings.tsx",
+      "web/src/pages/Files.tsx",
+      "web/tests/person-remaining-surfaces.cjs",
+      "web/tests/person-remaining-surfaces.fixture.cjs"
+    ]
+  },
+  "documentationLoans": {
+    "A": "home-visual/requests/g51-visual-completion-plan.md",
+    "B": "work-delivery/requests/g51-seen-state-build-plan.md",
+    "C": "projects-reports/requests/g51-drawing-import-export-contract.md",
+    "D": "capacity-people/requests/g51-person-surface-completion.md"
+  },
+  "productChoices": {
+    "052-D11": "CONFIRMED Jay2026-11-01: separate Green/all-evaluated ratio links",
+    "052-D12": "CONFIRMED Jay2026-11-01: Search/Notifications/Preferences no sidebar item; Vacation\u2192Time unchanged",
+    "g61UserDecisions": {
+      "date": "2026-11-02",
+      "qa24Cleanup": "explicitly approved; API stopped and exact synthetic DB dropped; other4DB/sharedcontainer/previews preserved",
+      "legacyUnknownAuthors": "BLOCK; no attestation",
+      "templates": "align enforcement with \u00a78: Admin or effective non-ReadOnly SystemPM/TemplateEditor"
+    }
+  },
+  "draftLoans": {},
+  "activeSourceLoans": {
+    "A": [],
+    "B": [],
+    "C": [],
+    "D": [
+      "src/Hub.Domain/PermissionExplanationCatalog.cs",
+      "src/Hub.Api/Features/AdminRoleExplanations.cs"
+    ],
+    "root": [
+      "src/Hub.Api/Features/Availability.cs",
+      "src/Hub.Api/Features/Planning.cs",
+      "tests/Hub.Tests/Api/AdminRoleExplanationTests.cs",
+      "checker/manifest/evidence/locales"
+    ]
+  },
+  "verificationLoans": {
+    "A": [],
+    "D": []
+  },
+  "activeDocumentationLoans": {},
+  "pendingQuestions": [
+    "Undo scope/time window: preserved B1 brief and053-D9",
+    "Date cue/category/comparator choices: preserved gap brief and053-D13",
+    "Standard User report export scope: project membership per \u00a78 versus current visibility scope; explicit answer pending"
+  ],
+  "sourceHolds": {
+    "B": {
+      "generation": 60,
+      "status": "ROOT_INTEGRATED_LOCAL_VERIFICATION_PASS_HOLD",
+      "manifest": "checkpoint29-calendar-source-hold.json",
+      "repairManifest": "checkpoint29-calendar-provider-repair-hold.json",
+      "checkpoint": 32,
+      "evidence": "checkpoint32-runtime/verification-rollup1.json"
+    },
+    "C": {
+      "generation": 60,
+      "status": "ROOT_INTEGRATED_LOCAL_VERIFICATION_PASS_HOLD",
+      "manifest": "checkpoint29-review-defaults-repair-hold.json",
+      "checkpoint": 32,
+      "evidence": "checkpoint32-runtime/verification-rollup1.json"
+    },
+    "D": {
+      "generation": 60,
+      "status": "ROOT_INTEGRATED_LOCAL_VERIFICATION_PASS_HOLD",
+      "manifest": "checkpoint29-notification-repair-all-hold.json",
+      "checkpoint": 32,
+      "evidence": "checkpoint32-runtime/verification-rollup1.json"
+    },
+    "A": {
+      "generation": 60,
+      "status": "ROOT_INTEGRATED_LOCAL_VERIFICATION_PASS_HOLD",
+      "manifest": "checkpoint29-task-bulk-repair-all-hold.json",
+      "checkpoint": 32,
+      "evidence": "checkpoint32-runtime/verification-rollup1.json"
+    },
+    "D-csharp": {
+      "generation": 57,
+      "status": "REPAIR_CSHARP_READY_HASH_MATCH_HOLD_SOURCE_REVIEW_PASS_UNEXECUTED",
+      "manifest": "checkpoint29-notification-csharp-repair-hold.json"
+    },
+    "A-csharp": {
+      "generation": 57,
+      "status": "REPAIR_CSHARP_READY_HASH_MATCH_HOLD_UNEXECUTED",
+      "manifest": "checkpoint29-task-bulk-csharp-repair-hold.json"
+    },
+    "root-csharp": {
+      "generation": 58,
+      "status": "ALL_CSHARP_HOLD_FOR_API_BOOTSTRAP",
+      "manifest": "../evidence/checkpoint30-runtime/bootstrap-csharp-source1.json"
+    },
+    "G58": {
+      "generation": 58,
+      "status": "ALL_HELD_LOCAL_QA_PASS",
+      "aManifest": "checkpoint30-runtime/a-final-source-hold1.json",
+      "compiledCSharp": "checkpoint30-runtime/solution-csharp-source4.json",
+      "spa": "checkpoint30-runtime/web-source2.json",
+      "browserHelper": "checkpoint30-runtime/native-window-repair1.json"
+    },
+    "G59": {
+      "generation": 59,
+      "status": "ALL_SOURCE_HOLD_LOCAL_QA_PASS_S38",
+      "csharp": "checkpoint31-runtime/bootstrap-csharp-source1.json",
+      "rootModelReview": "PASS after two bounded contract repairs",
+      "AUI": "PASS after delayed read/full response/remount repairs; unmounted",
+      "BModelTests": "eb9265132774a2e4d0978b6d096407c59e4cfeaaa66e4dab4e68c68594038ec1",
+      "fixtureRepair": "CoordinationConsequenceAgendaTests.cs 4baf3f07e8e5733647347b91cab0c9ef5f164b599f95819ec9fe949dbb19d007"
+    },
+    "G60-A": {
+      "status": "READY_HOLD_UNCOMPILED",
+      "scope": "6 producer boundary files only"
+    },
+    "G60-B": {
+      "status": "READY_HOLD_SOURCE_REVIEW_PASS_UNCOMPILED",
+      "job": "3516f38e977029964e1e9f8f59964ea25e071a292aff7ea4884f7c9d38768ff4",
+      "test": "401ecfd064e2a3ec34c6789893c11d4b3b1cccb17589b0b77733797468bc0fb1"
+    },
+    "G60-C-initial": {
+      "status": "READY_HOLD_REVIEW_PENDING_UNCOMPILED",
+      "digest": "1d2e669e7055121c41fd4ce384383fbb5a5b1733318253de91fbf70357025677",
+      "types": "d4fe845e113987ca091425879976aebac760b419e24a86c1ba0d3c4a78046bdb",
+      "test": "a67b8b273f6874ae6ccfdd03178a0ad40d4b02bfcc3fb10b837bc73a1b353a53"
+    },
+    "G60-B-model": {
+      "status": "READY_HOLD_UNCOMPILED",
+      "hash": "d12ccd986bfc8614227e0a2a7138346c5cb71b2c3de2b099b6cc32264d783e54"
+    },
+    "G60-C-full": {
+      "status": "READY_HOLD_UNCOMPILED_REVIEW_PENDING",
+      "digest": "7c7e4a2d4b7dab6012bb401a9d5f4bad7e33f0a76905f58a21ac1d4cf2e8eb94",
+      "composition": "92a57b43e5e480e173865698dc880b1612b6777bfad67935b95572a1738f98e6",
+      "tests": "309b5598d0d0a68241e28c3b9071be3aa53196b1d46de48bf226ebb0df69f7d5"
+    }
+  },
+  "rootVerificationCurrent": {
+    "atUtc": "2026-11-03T00:14:05.753991+00:00",
+    "checkpoint": 32,
+    "generation": 60,
+    "localVerdict": "PASS_LOCAL_S45_S47",
+    "locallyChecked": 45,
+    "screenSlices": 49,
+    "remaining": [
+      "S12",
+      "S35",
+      "S37",
+      "S49"
+    ],
+    "dotnetDistinct": 127,
+    "providerBackedChecks": 114,
+    "pureChecks": 13,
+    "distinctFinalBrowserScenarios": 19,
+    "deliveryMatrixRows": 17,
+    "builds": [
+      "bootstrap-build1 PASS0errors22warnings",
+      "fixture-build1 FAIL2testaccesserrors",
+      "fixture-build2 PASS0errors1183warnings",
+      "fixture-build3 PASS0errors1183warnings",
+      "solution-build1 PASS0errors0warnings incremental"
+    ],
+    "focusedRepairs": [
+      "focused1 99/102 passed; three fixture defects recorded",
+      "focused2 only3failedcases passed;99passingcases not repeated; no production delta"
+    ],
+    "contract": "Producer expected1drift refusal; strict2casesPASS within25regressions; only NotificationScreenDelivery adds5optional properties",
+    "frontend": "Generated types/app-types2/fixture-types2/scoped-lint2/spa-build2 PASS",
+    "migration": "20261102234729_NoticeDeliveryPolicyWitness; generated/source reviewed and applied ONLY by fresh HubFactory databases",
+    "sourceCount": 697,
+    "webSourceCount": 274,
+    "bundleFiles": 143,
+    "priorOutputsPreserved": 4606,
+    "newReviewPublicFiles": 21,
+    "priorReviewImagesPreserved": 16,
+    "gallery": "http://127.0.0.1:8873/#addition-09",
+    "finalSPA": "http://127.0.0.1:8874",
+    "previewOnlyAPIOrigin": "http://127.0.0.1:5105 (no API listener)",
+    "boundaries": {
+      "committed": false,
+      "pushed": false,
+      "deployed": false,
+      "maintainedFlagsActivated": false,
+      "realExternalMailSent": false,
+      "humanAccepted": false,
+      "goalComplete": false
+    },
+    "limits": [
+      "Synthetic source/provider databases and recording/admission senders; actual SMTP/Graph delivery not exercised",
+      "Headless Chrome with actual tab visibility where required; screenshots do not prove human/device acceptance",
+      "Four screen slices and existing policy decisions remain open"
+    ],
+    "checkpoint33TemplatePolicy": "178 selected.NETPASS; APIcontract/registryunchanged",
+    "qa24Cleanup": "PASS approved: stopped4323, droppedonlyhub_qa_checkpoint24, other4DB/sharedcontainer/previewsintact",
+    "checkpoint34Status": "Source in progress; all newexternal review code UNCOMPILED"
+  },
+  "g62State": {
+    "compiled": "FULL_SOLUTION_PASS_707_INPUTS",
+    "modelInitialReview": "PASS after soft delete/restore serialization repair; later helper/guard changes require review",
+    "contextReview": "Final D3 independently source PASS",
+    "frontendReview": "4 P2 repairs independently source PASS; parser/lint exit0, browser unrun",
+    "retainedPreview": "G60 gallery8873 and SPA8874 unchanged",
+    "nextHandoff": "NEXT-checkpoint34.md",
+    "backendReview": "Final bounded source PASS including carry/nullable contract/R1 narrowing",
+    "rootSharedReview": "8 held reader diffs source PASS",
+    "canonicalReplaySeam": "Root Coordination.Run optional beforeReplay hook authored, uncompiled",
+    "migration": "Up and protectedDown source PASS; actual legacyDownUp + retainedauthor55000noeffects PASS",
+    "browser": "27finitePASS(10external+7R1+10R2)",
+    "fullScreenCount": "46/49",
+    "provider": "121distinctselected.NETPASS",
+    "appTypes": "PASS after honest input/outgoing generic",
+    "fixtureTypes": "PASS",
+    "generatedContract": "5paths/10schemas expected; explicitnull wire verified; finalstrict pending",
+    "gallery": "8877 addition11 final;23HTTPfilesmatch,20earlierimagesunchanged",
+    "status": "LOCAL_S35_PASS",
+    "evidence": "checkpoint34-runtime/verification-rollup1.json"
+  },
+  "activeDraftLoans": {
+    "C": [
+      ".review/checkpoint35-role-draft/tests/Hub.Tests/Domain/PermissionOperationExplanationTests.cs",
+      ".review/checkpoint35-role-draft/tests/Hub.Tests/Api/AdminRoleOperationExplanationTests.cs",
+      ".review/checkpoint35-role-draft/operation-test-notes.md"
+    ]
+  },
+  "g63State": {
+    "status": "FIRST_COMPILE_PASS_FOCUSED_REPAIR",
+    "baseline": ".review/checkpoint35-baseline/manifest.json",
+    "currentSources": 708,
+    "rows": 83,
+    "operations": 250,
+    "rowScenarios": 32,
+    "policyS21": "PENDING",
+    "coverageComplete": false,
+    "planningReplay": "Actual200reproducedunderRO; canonicalAvailability.Manage reused, pendingrerun",
+    "next": "NEXT-checkpoint35.md",
+    "firstSelected": {
+      "executed": 8,
+      "passed": 4,
+      "failed": 4
+    },
+    "roleRepairs": [
+      "legacycollaborator semantics",
+      "short semantic requirementIDs",
+      "mandatoryC16snapshot ModeAll"
+    ],
+    "inactiveScenario": "Intentional supported negative200; unknownscenario remains400; noeffects required"
+  },
+  "updatedAtUtc": "2026-11-03T12:02:08.381720+00:00",
+  "pendingUserChoices": [
+    "Undo scope/window",
+    "Date cue meanings"
+  ],
+  "confirmedNextChange": {
+    "choice": "Require project membership for Standard User report exports",
+    "implemented": false,
+    "currentExplainer": "S21 PolicyPending"
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "checkpoint": 20,
+  "generation": 44,
+  "mode": "closed-locally-verified",
+  "previous": "checkpoint19closed;S23checked;05322locallychecked",
+  "goal": "active/incomplete;no commit/push/deploy/pilotactivation",
+  "lanes": {
+    "A": "auditheld; followon24B Staff/TimeCountCards andoneDashboardtone implementation",
+    "B": "S11Bworkspacecolumns+newtestfiles",
+    "C": "S25reportFTE/months+newtests;stablecontractrequested",
+    "D": "S29FR50native/customnoticeUI+newtests"
+  },
+  "rootPending": [
+    "Select next bounded batches for every remaining unchecked slice; full goal active.",
+    "052 universal visual/CountCard acceptance and project-task424.5px density remain incomplete; utility nav choice pending."
+  ],
+  "services": "Owned API5088 and source dev8854 stopped; onlyQA20 DB dropped; noQA20/hub_test DBs remain. Preview8853 PID11091/session49446 and PostgreSQL55432 retained.",
+  "pendingUserAnswer": "utilitynav nonevsMyWork question stillpending",
+  "rootAuthored": [
+    "TaskSubmissionDates boundedpage2queryprojection; bothlistGET enabledRR; optionalRow.SubmissionDate/StateTargetDate",
+    "sixcandidateDTO/read bridges; ReviewsOptionsdelegate+PersonFactsDateOnlyoverload; exactexistingcohorts andoffomission",
+    "PersonFacts/User/Setting candidatecacheprefixes; Membercohortkeys; Submission/Deliverableworkspace-dateinvalidation; actualQueryClienttestauthored",
+    "RawDisciplineReport exactHours before unchanged legacyRound; wrapperretainsoldColsRows",
+    "ReportViewParameters entries-without-project rejectsnondefaultunit/period andstripirrelevantdefaults; CownsReportParams/Savedunion/optionalUnitView/exportheadercall",
+    "Bws.submissionDate/ws.noOpenSubmission2labelsmerged",
+    "ScreenLists staff.cardIndicators localview key+3enumvalues, noStaffAPI/countdefinition change",
+    "A24B9CountCardlabels merged; preserveStaffdensity<=405 actualnonemptyrow guard",
+    "C31server/12UIReportUnitslabels merged; zeroexistingconflicts",
+    "ExistingDashboardbrowser Openissuesexpectedtone amber->violet only; counts/routes/name/scopeassertionsretained",
+    "PersonLoad.JsonIgnoredProvisionalWeeks internalexactsourceflag array, onlycapacityon; noadditionalread orlegacyMath/DTOchange",
+    "Cparam.unit clarifiedReportunit(newkeyonly) +5finalUIunitselectionlabels merged",
+    "C26three server+three UI provisional/evidence labels merged",
+    "CUI structuralNotApplicable uses distinct accessible text/marker; browser asserts both matrix directions"
+  ],
+  "sourceStatus": {
+    "A": "Staff-only density repair36 reviewed/held; source CountCard and Staff-Time suites PASS on build2; real Staff399.5px PASS.",
+    "B": "ALL SOURCE READY held;11APIcases andcolumnbrowser authored; rootdateandfrontendindependentreviews noP1P2",
+    "C": "ALL SOURCE READY26; two backendP2s andoneUIaccessibilityP2 sourceclosed",
+    "D": "All nine Facts held; final two fixtures independently reviewed with no P1/P2 finding."
+  },
+  "rootReview": "canonical: rootBdate/B11cases+sixnoticebridges+BUI noP1P2; operational: rawDiscipline/Viewcrossfield/cache/labels+DUIinclHRdirtyversion noP1P2; allruntimeunverified; C26 two P2 repairs closed in source including root ProvisionalWeeks; A24B source closed",
+  "csharp_manifest": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint20-runtime/csharp-freeze-repair5.json",
+  "csharp_count": 550,
+  "pendingFreezeAck": "All four chats reported held; no source repair loan remains open.",
+  "reviewFindings": "All checkpoint20 reported material source/test findings were repaired and independently re-reviewed. Initial failed observations remain in logs/partial artifacts.",
+  "csharp_manifest_note": "Recreated durable manifest after host/runtime reset removed /private/tmp artifacts; generation27 source held. Original manifest2 no longer available; source review remains recorded.",
+  "verification": {
+    "cache": "Node13 PASS, durable evidence/checkpoint20-runtime/cache-keys.log. Re-run justified because runtime reset removed prior temporary evidence.",
+    "backend": "PASS133 distinct cases, final30 changed report/catalogue/golden cases freshly pass; final build0 errors/warnings retained.",
+    "frontend": "PASS forced app types, fixture types, lint/targeted lint and SSR; production builds1/2 passed. Existing warning debt retained.",
+    "spec": "PASS build_spec --check; trace1546 IDs/438 sections/zero unknown.",
+    "contracts": "PASS independent delta review, refreshed typed contracts and fresh golden cases in adjacent93.",
+    "adjacent": "Initial93 cases:86pass/7fail. Fresh contract/registry checks passed. Seven old enabled-state fixture assumptions need explicit new field/parameter/export assertions; test repairs under review, no production C# mutation.",
+    "browsers": "PASS all12 suites; see checkpoint20-findings.md and durable logs.",
+    "real": "PASS bounded normal-command/API/browser joins, final unit headers and visible1/.75/1.75, Staff399.5px and Time4h; exact limits recorded in checkpoint20-findings.md.",
+    "finalHashes": "PASS550 C# and393 web exact hashes after all checks; generated hashes and build2 manifest recorded."
+  },
+  "declaredRepairDelta": [
+    "src/Hub.Api/Features/CapacityReports.cs",
+    "src/Hub.Api/Features/ReportUnits.cs",
+    "src/Hub.Api/Features/Workload.cs",
+    "src/Hub.Api/Text.cs",
+    "tests/Hub.Tests/Api/CapacityPersonPickerNoticeTests.cs",
+    "tests/Hub.Tests/Api/ReportUnitsTests.cs"
+  ],
+  "web_manifest": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint20-runtime/web-source-freeze-repair5.json",
+  "status": "CLOSED",
+  "localCheckedSlices": [
+    "S11",
+    "S25",
+    "S29"
+  ],
+  "local053CheckedCount": 25
+}

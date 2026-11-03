@@ -1,0 +1,66 @@
+[
+  {
+    "args": [
+      "node",
+      "--check",
+      "tests/decision-metadata.cjs"
+    ],
+    "exitCode": 0
+  },
+  {
+    "args": [
+      "node",
+      "--check",
+      "tests/decision-metadata.fixture.cjs"
+    ],
+    "exitCode": 0
+  },
+  {
+    "args": [
+      "node",
+      "--check",
+      "tests/template-risk-provenance.cjs"
+    ],
+    "exitCode": 0
+  },
+  {
+    "args": [
+      "node",
+      "--check",
+      "tests/template-risk-provenance.fixture.cjs"
+    ],
+    "exitCode": 0
+  },
+  {
+    "args": [
+      "node",
+      "--check",
+      "tests/issue-root-cause.cjs"
+    ],
+    "exitCode": 0
+  },
+  {
+    "args": [
+      "node",
+      "--check",
+      "tests/issue-root-cause.fixture.cjs"
+    ],
+    "exitCode": 0
+  },
+  {
+    "args": [
+      "node",
+      "--check",
+      "tests/admin-screen.cjs"
+    ],
+    "exitCode": 0
+  },
+  {
+    "args": [
+      "node",
+      "--check",
+      "tests/admin-screen.fixture.cjs"
+    ],
+    "exitCode": 0
+  }
+]

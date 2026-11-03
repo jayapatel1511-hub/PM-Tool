@@ -1,0 +1,9 @@
+{
+  "exitCode": 0,
+  "args": [
+    "node",
+    "node_modules/oxlint/bin/oxlint",
+    "src/pages/Calendar.tsx"
+  ],
+  "atUtc": "2026-11-02T18:19:58.574361+00:00"
+}

@@ -1,0 +1,29 @@
+{
+  "atUtc": "2026-11-03T05:46:15.805607+00:00",
+  "screen": "S35",
+  "localVerdict": "PASS",
+  "locallyCheckedScreens": 46,
+  "totalScreens": 49,
+  "selectedDotnetDistinct": 121,
+  "browserDistinct": 27,
+  "browserSuites": {
+    "external": 10,
+    "register": 7,
+    "response": 10
+  },
+  "remaining": [
+    "S12",
+    "S37",
+    "S49"
+  ],
+  "gallery": "http://127.0.0.1:8877/#addition-11",
+  "earlierImagesUnchanged": 20,
+  "boundaries": {
+    "committed": false,
+    "pushed": false,
+    "deployed": false,
+    "maintainedFlagsActivated": false,
+    "humanAccepted": false,
+    "goalComplete": false
+  }
+}

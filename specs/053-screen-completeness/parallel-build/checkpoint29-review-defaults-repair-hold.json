@@ -1,0 +1,9 @@
+{
+  "status": "REPAIR_READY_HASH_MATCH_HOLD_UNEXECUTED",
+  "files": {
+    "web/src/pages/admin/deliverable-review-defaults.tsx": "8ce01481c9c0913b534cab99485a7ab4359faf1be5b8ae7d33e688f4001ed479",
+    "web/src/pages/admin/Admin.tsx": "45aafa2520c9e28327f254f0e5b5dbddc8c9e0a006702b7d27d5f8e5d84791bb",
+    "web/tests/review-discipline-patterns.cjs": "5a05bd3d5d2a37f5b94d0eeb045125d887414d1b373b9e9f0cadf9482e564acb",
+    "web/tests/review-discipline-patterns.fixture.cjs": "cb7c83d63e9bd00e96868949a50b04812180e65e2724da731a4825dfba6283eb"
+  }
+}

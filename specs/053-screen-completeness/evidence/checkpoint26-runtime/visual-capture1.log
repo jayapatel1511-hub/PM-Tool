@@ -1,0 +1,12 @@
+locator.waitFor: Error: strict mode violation: getByRole('dialog').filter({ has: getByRole('heading', { name: 'RV-A · Retained review package A', exact: true }) }).getByText('The proposed clearance would conflict with the accepted access envelope. The current detail is retained.', { exact: true }) resolved to 2 elements:
+    1) <p class="whitespace-pre-wrap">The proposed clearance would conflict with the ac…</p> aka getByRole('paragraph').filter({ hasText: 'The proposed clearance would' })
+    2) <p class="whitespace-pre-wrap">The proposed clearance would conflict with the ac…</p> aka locator('#review-finding-history-00000000-0000-0000-0000-000000009201-00000000-0000-0000-0000-000000015101').getByText('The proposed clearance would')
+
+Call log:
+[2m  - waiting for getByRole('dialog').filter({ has: getByRole('heading', { name: 'RV-A · Retained review package A', exact: true }) }).getByText('The proposed clearance would conflict with the accepted access envelope. The current detail is retained.', { exact: true }) to be visible[22m
+
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint26-runtime/capture-response1.cjs:51:77 {
+  log: [
+    "  - waiting for getByRole('dialog').filter({ has: getByRole('heading', { name: 'RV-A · Retained review package A', exact: true }) }).getByText('The proposed clearance would conflict with the accepted access envelope. The current detail is retained.', { exact: true }) to be visible"
+  ]
+}

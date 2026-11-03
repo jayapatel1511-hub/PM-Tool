@@ -1,3 +1,4 @@
+import { PersonPanelTrigger } from '@/components/hub/person-panel-trigger'
 import { KeyboardSensor, MouseSensor, TouchSensor, useSensor, useSensors, type Announcements } from '@dnd-kit/core'
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { useQuery } from '@tanstack/react-query'
@@ -6,6 +7,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { AccentDot, ConfirmDialog, ErrorBanner, Field, Page, selectCls } from '@/components/hub/common'
 import { useItemPanel } from '@/components/hub/panel-host'
+import { ItemMark } from '@/components/hub/identity-colour'
 import { Avatar } from '@/components/hub/people'
 import { Chip, Key, PriorityBadge, StatusPill } from '@/components/hub/pills'
 import { KanbanBoard, KanbanCard, KanbanCards, KanbanHeader, KanbanProvider } from '@/components/kibo-ui/kanban'
@@ -17,13 +19,15 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useProjectRefresh } from '@/hooks/data'
 import { ViewMenu } from '@/components/hub/views'
 import { ApiError, typedRequest } from '@/lib/api'
-import { useFlag } from '@/lib/auth'
+import { useFlag, useMe } from '@/lib/auth'
 import { addDays, shortDate, today } from '@/lib/format'
 import { plural, t, tv , runtimeText } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
+import { laneClass } from '@/components/hub/semantic-colours'
 import { useCurrentProject } from './ProjectLayout'
 import { readTask, type TaskDetailData } from './TaskPanel'
 import { CreateTask, TaskFilterBar, ViewSwitch, errorText, moveFrom, useProjectLists, useTaskActions, useTaskFilters, type TaskRow, type Transition } from './Tasks'
+import { BoardCardTotals, BoardFiguresScope, BoardReviewer, BoardReviewWaiting, BoardSwimlaneFacts, boardCardCount } from './board-screen-presentation'
 
 // Kanban board (§13.4, FR-VIS-04): four lanes that present canonical statuses; every drop is a guarded transition.
 export const LANES = ['To Do', 'In Progress', 'Review', 'Done']
@@ -54,6 +58,7 @@ export async function fetchUpTo(read: (page: number, pageSize: number) => Promis
 }
 
 export function BoardTab() {
+  const boardOn = useFlag('work_screens')
   const p = useCurrentProject()
   const openPanel = useItemPanel()
   const refresh = useProjectRefresh()
@@ -123,6 +128,7 @@ export function BoardTab() {
         </Field>
         <label className="flex min-h-(--control-h) items-center gap-2 text-sm"><Checkbox checked={side} onCheckedChange={(c) => set('side', c === true ? '1' : null)} />{t('board.showSide')}</label>
       </>} />
+      {boardOn && <BoardFiguresScope />}
       {q.data && q.data.total > MAX_CARDS && <p role="status" className="rounded-md border border-warn/40 bg-warn-bg px-4 py-3 text-sm text-warn"><span aria-hidden>▲ </span>{t('board.tooMany', { n: q.data.total, max: MAX_CARDS })}</p>}
       {hidden > 0 && !side && <p className="text-sm text-muted-foreground">{plural(hidden, 'board.hiddenOnHoldOne', 'board.hiddenOnHold', { n: hidden })}</p>}
       {backlogOn && collapsed && <div><Button id="backlog-expand" variant="outline" onClick={() => setCollapsed(false)}><ChevronRight className="size-4" aria-hidden />{t('backlog.expand', { n: all.filter(inBacklog).length })}</Button></div>}
@@ -133,11 +139,13 @@ export function BoardTab() {
           <div className="w-max min-w-full space-y-6">
             {groups.map((g) => (
               <section key={g.id} aria-label={g.label || t('ptab.board')} className="space-y-2">
-                {g.label && <h3 className="sticky left-0 flex w-fit items-center gap-2 text-base/6 font-semibold">{g.label}
-                  <span className="rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{g.rows.length}</span></h3>}
+                {g.label && (boardOn ? <div className="sticky left-0 w-fit max-w-[calc(100vw-4rem)] space-y-1"><h3 className="flex items-center gap-2 text-base/6 font-semibold">{swim === 'assignee' ? <AssigneeSwimlaneName rows={g.rows} id={g.id} label={g.label} focusKey={`project-board:${g.id}:assignee-group`} /> : g.label}
+                  <span aria-label={boardCardCount(g.rows.length)} className="rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{g.rows.length}</span></h3>
+                  <BoardSwimlaneFacts rows={g.rows} kind={swim} focusKey={`project-board:${g.id}:lead`} /></div> : <h3 className="sticky left-0 flex w-fit items-center gap-2 text-base/6 font-semibold">{swim === 'assignee' ? <AssigneeSwimlaneName rows={g.rows} id={g.id} label={g.label} focusKey={`project-board:${g.id}:assignee-group`} /> : g.label}
+                  <span className="rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{g.rows.length}</span></h3>)}
                 <Swimlane rows={g.rows} columns={columns} onDrop={drop} onReorder={onReorder} onAdd={p.permissions.createTaskIn.length > 0 ? () => setCreating(true) : undefined}
                   onCollapse={() => setCollapsed(true)}
-                  render={(r) => <CardBody r={r} open={() => openPanel('Task', r.id)} openDeliverable={(id) => openPanel('Deliverable', id)} />} />
+                  render={(r, overlay) => <CardBody r={r} personLinks={!overlay} open={() => openPanel('Task', r.id)} openDeliverable={(id) => openPanel('Deliverable', id)} />} />
               </section>
             ))}
           </div>
@@ -229,8 +237,9 @@ export function useLaneDrop(actions: ReturnType<typeof useTaskActions>) {
 
 export function Swimlane({ rows, columns, onDrop, onReorder, onAdd, onCollapse, render }: {
   rows: TaskRow[]; columns: { id: string; name: string }[]; onDrop: (r: TaskRow, lane: string, snapBack: () => void) => void
-  onReorder: (ids: string[], snapBack: () => void) => void; onAdd?: () => void; onCollapse?: () => void; render: (r: TaskRow) => React.ReactNode
+  onReorder: (ids: string[], snapBack: () => void) => void; onAdd?: () => void; onCollapse?: () => void; render: (r: TaskRow, overlay?: boolean) => React.ReactNode
 }) {
+  const boardOn = useFlag('work_screens')
   const hasBacklog = columns.some((c) => c.id === BACKLOG)
   const home = (r: TaskRow) => (hasBacklog && r.backlog ? BACKLOG : r.lane)
   const make = () => rows.map((r): Card => ({ id: r.id, name: r.name, column: home(r), r }))
@@ -261,17 +270,19 @@ export function Swimlane({ rows, columns, onDrop, onReorder, onAdd, onCollapse, 
         onReorder(next.filter((x) => x.column === c.column).map((x) => x.id), () => setData(make()))
       }}>
       {(col) => {
-        const count = data.filter((c) => c.column === col.id).length
+        const cards = data.filter((c) => c.column === col.id)
+        const count = cards.length
         return (
           <KanbanBoard key={col.id} id={col.id} className="max-h-[70dvh]">
-            <KanbanHeader>
-              <span className="flex items-center gap-2">{col.name}<span className="rounded-md bg-card px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{count}</span></span>
+            <KanbanHeader data-board-lane={boardOn ? col.id : undefined} className={cn('semantic-lane', laneClass(col.id))} aria-label={col.name}>
+              {boardOn ? <div className="min-w-0 space-y-1"><span className="flex items-center gap-2">{col.name}<span aria-label={boardCardCount(count)} className="rounded-md bg-card px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{count}</span></span>
+                <BoardCardTotals rows={cards.map(card => card.r)} /></div> : <span className="flex items-center gap-2">{col.name}<span className="rounded-md bg-card px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{count}</span></span>}
               {col.id === 'To Do' && onAdd && <Button variant="ghost" size="icon-sm" aria-label={t('task.new')} onClick={onAdd}><Plus className="size-4" /></Button>}
               {col.id === BACKLOG && onCollapse && <Button data-backlog-collapse variant="ghost" size="icon-sm" aria-label={t('backlog.collapse')} title={t('backlog.collapse')} onClick={onCollapse}><ChevronLeft className="size-4" /></Button>}
             </KanbanHeader>
             {col.id === BACKLOG && <p className="px-3 text-xs/[18px] text-muted-foreground">{t('backlog.rule')}</p>}
             <KanbanCards<Card> id={col.id} aria-label={col.name}>
-              {(c) => <KanbanCard key={c.id} id={c.id} name={c.name} column={c.column} handleLabel={t('board.moveCard', { key: c.r.key, name: c.name })} className="select-none">{render(c.r)}</KanbanCard>}
+              {(c) => <KanbanCard key={c.id} id={c.id} name={c.name} column={c.column} handleLabel={t('board.moveCard', { key: c.r.key, name: c.name })} className="select-none" overlayChildren={render(c.r, true)}>{render(c.r)}</KanbanCard>}
             </KanbanCards>
             {count === 0 && <p className="px-3 pb-4 text-center text-sm text-muted-foreground">{t('board.emptyLane')}</p>}
           </KanbanBoard>
@@ -284,10 +295,23 @@ export function Swimlane({ rows, columns, onDrop, onReorder, onAdd, onCollapse, 
 /** Card: key, name, exact review status, indicator chips, deliverable, assignee, due date and dependency/comment marks
  *  (§13.4); on a cross-project board also an unambiguous project label (FR-VIS-04). The first row leaves room for the
  *  drag handle in the card's corner. */
-export function CardBody({ r, open, openDeliverable, showProject }: { r: TaskRow; open: () => void; openDeliverable: (id: string) => void; showProject?: boolean }) {
+/** A group label must come from consistent actual User names, never an Unassigned fallback. */
+export function AssigneeSwimlaneName({ rows, id, label, focusKey }: { rows: TaskRow[]; id: string; label: string; focusKey: string }) {
+  const name = rows[0]?.assigneeName
+  return id && name?.trim() && rows.every(row => row.assigneeId === id && row.assigneeName === name)
+    ? <PersonPanelTrigger userId={id} name={name} focusKey={focusKey}>{label}</PersonPanelTrigger> : <>{id ? t('common.unavailable') : label}</>
+}
+
+export function CardBody({ r, open, openDeliverable, showProject, personLinks = true }: { r: TaskRow; open: () => void; openDeliverable: (id: string) => void; showProject?: boolean; personLinks?: boolean }) {
+  const patternsOn = useFlag('screen_patterns'), me = useMe()
+  const boardOn = useFlag('work_screens')
+  const waitingReview = boardOn && (r.status === 'Ready for Review' || r.status === 'In Review')
+  const visualSystem = useFlag('visual_system')
+  const reviewFacts = patternsOn && (r.requiresReview || r.lane === 'Review') || waitingReview
   const s = r.state
   const chips = [
     r.lane === 'Review' && <StatusPill key="status" status={r.status} />,
+    patternsOn && r.requiresReview && !r.reviewerId && <Chip key="reviewerMissing" tone="warn">{t('workReview.missing')}</Chip>,
     s?.isOverdue && <Chip key="overdue" tone="bad">{t('ind.overdueD', { n: s.daysOverdue })}</Chip>,
     s?.isDueSoon && !s.isOverdue && <Chip key="soon" tone="warn">{t('ind.dueSoon')}</Chip>,
     s?.isBlocked && <Chip key="blocked" tone="bad">{s.daysBlocked > 0 ? t('ind.blockedD', { n: s.daysBlocked }) : t('ind.blocked')}</Chip>,
@@ -303,7 +327,7 @@ export function CardBody({ r, open, openDeliverable, showProject }: { r: TaskRow
           <AccentDot id={r.projectId} /><span className="key shrink-0">{r.projectNumber}</span><span className="truncate">{r.projectName}</span>
         </div>
       )}
-      <div className={cn('flex min-h-6 items-center gap-2', !showProject && 'pr-7')}><Key>{r.key}</Key>{(r.priority === 'High' || r.priority === 'Critical') && <PriorityBadge priority={r.priority} />}</div>
+      <div data-visual-task-key={visualSystem ? r.id : undefined} className={cn('flex min-h-6 items-center gap-2', !showProject && 'pr-7')}><ItemMark kind="Task" />{visualSystem && <span className="sr-only">{t('itemType.Task')}: </span>}<Key>{r.key}</Key>{(r.priority === 'High' || r.priority === 'Critical') && <PriorityBadge priority={r.priority} />}</div>
       <button type="button" className="block w-full break-words text-left font-semibold leading-snug hover:underline" onClick={open}>{r.name}</button>
       {(chips.length > 0 || r.deliverableId) && (
         <div className="flex flex-wrap items-center gap-1">
@@ -311,10 +335,16 @@ export function CardBody({ r, open, openDeliverable, showProject }: { r: TaskRow
           {r.deliverableId && <button type="button" className="key rounded-md border bg-muted px-1.5 py-px hover:bg-accent" title={r.deliverableName ?? undefined} onClick={() => openDeliverable(r.deliverableId!)}>{r.deliverableKey}</button>}
         </div>
       )}
+      {reviewFacts && <dl className="grid gap-1 border-t pt-2 text-xs">
+        <div><dt className="text-muted-foreground">{t('workReview.performer')}</dt><dd>{personLinks && r.assigneeId && r.assigneeName ? <PersonPanelTrigger userId={r.assigneeId} name={r.assigneeName} active={r.assigneeActive} focusKey={`board-card:${r.id}:performer:facts`} /> : assignee ?? t('ind.unassigned')}</dd></div>
+        <div><dt className="text-muted-foreground">{t(me.settings.allowSelfReview ? 'field.ReviewerId' : 'workReview.reviewer')}</dt><dd>{waitingReview ? <BoardReviewer row={r} personLinks={personLinks} focusKey={`board-card:${r.id}:reviewer:facts`} /> : personLinks && r.reviewerId && r.reviewerName ? <PersonPanelTrigger userId={r.reviewerId} name={r.reviewerName} focusKey={`board-card:${r.id}:reviewer:facts`} /> : r.reviewerName ?? t('workReview.missing')}</dd></div>
+        {me.settings.allowSelfReview && r.assigneeId && r.reviewerId === r.assigneeId && <div><dt className="sr-only">{t('field.ReviewerId')}</dt><dd className="text-muted-foreground">{t('workReview.selfAllowed')}</dd></div>}
+      </dl>}
+      {waitingReview && <BoardReviewWaiting row={r} />}
       <div className="flex items-center gap-2 border-t pt-2 text-xs/[18px] text-muted-foreground">
-        {assignee
-          ? <><Avatar id={r.assigneeId} name={r.assigneeName} className="size-6" /><span className={cn('min-w-0 flex-1 truncate', r.assigneeActive && 'text-foreground')} title={assignee}>{assignee}</span></>
-          : <span className="flex-1 text-warn"><span aria-hidden>▲ </span>{t('ind.unassigned')}</span>}
+        {!reviewFacts && (assignee
+          ? <><Avatar id={r.assigneeId} name={r.assigneeName} className="size-6" /><span className={cn('min-w-0 flex-1 truncate', r.assigneeActive && 'text-foreground')} title={assignee}>{personLinks && r.assigneeId && r.assigneeName ? <PersonPanelTrigger userId={r.assigneeId} name={r.assigneeName} active={r.assigneeActive} focusKey={`board-card:${r.id}:assignee:footer`} /> : assignee}</span></>
+          : <span className="flex-1 text-warn"><span aria-hidden>▲ </span>{t('ind.unassigned')}</span>)}
         {r.dueDate && (
           <span className={cn('inline-flex shrink-0 items-center gap-1 tabular-nums', s?.isOverdue ? 'font-semibold text-bad' : s?.isDueSoon && 'text-warn')}>
             <CalendarDays className="size-3.5" aria-hidden /><span className="sr-only">{t('common.due')} </span>{shortDate(r.dueDate)}

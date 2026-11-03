@@ -1,0 +1,8 @@
+{
+  "projectBulk.hint": "Each selected project keeps its own permission and version checks. Results are listed separately for every project.",
+  "projectBulk.unknown": "Outcome unknown",
+  "projectBulk.unknownHint": "The server may have saved these changes. Refresh and check each project before selecting it again. No retry has been sent.",
+  "projectBulk.unconfirmedResponse": "The server response did not confirm this project's saved version.",
+  "projectBulk.refresh": "Refresh project list",
+  "projectBulk.summary": "{applied} applied · {unchanged} unchanged · {refused} refused · {unknown} unknown"
+}

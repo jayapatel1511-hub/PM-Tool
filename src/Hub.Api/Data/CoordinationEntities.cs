@@ -49,10 +49,26 @@ public class ReviewRound : CoordinationRecord
 public class ReviewManifestItem : CoordinationRecord
 {
     public Guid RoundId { get; set; }
-    public Guid SourceRevisionId { get; set; }
+    public Guid? SourceRevisionId { get; set; }
+    public Guid? DeliverableIssueId { get; set; }
     public Guid DeliverableId { get; set; }
     public Guid[] AuthorIds { get; set; } = [];
     public override string AuditType => "ReviewManifestItem";
+}
+// Incoming external-party fact. The recorder is CreatedBy; verifier designation remains a separate finding action.
+public class ExternalReview : CoordinationRecord
+{
+    public Guid PackageId { get; set; }
+    public Guid RoundId { get; set; }
+    public Guid DeliverableIssueId { get; set; }
+    public Guid ExternalPartyId { get; set; }
+    public DateOnly ReceivedDate { get; set; }
+    public Guid ReturnCodeId { get; set; }
+    public string ReturnCodeSnapshot { get; set; } = "";
+    public string ReturnLabelSnapshot { get; set; } = "";
+    public string PartyNameSnapshot { get; set; } = "";
+    public string? PartyOrganisationSnapshot { get; set; }
+    public override string AuditType => "ExternalReview";
 }
 public class DisciplineReview : CoordinationRecord
 {
@@ -72,15 +88,18 @@ public class ReviewFinding : CoordinationRecord
     public Guid RoundId { get; set; }
     public Guid? CarriedFromId { get; set; }
     public Guid? IssueId { get; set; }
-    public Guid SourceRevisionId { get; set; }
+    public Guid? SourceRevisionId { get; set; }
+    public Guid? DeliverableIssueId { get; set; }
     public Guid ProjectDisciplineId { get; set; }
-    public Guid OriginatorId { get; set; }
+    public Guid? OriginatorId { get; set; }
+    public Guid? ExternalReviewId { get; set; }
     public Guid ResolverId { get; set; }
-    public Guid VerifierId { get; set; }
+    public Guid? VerifierId { get; set; }
     public string Text { get; set; } = "";
     public string Severity { get; set; } = "Blocking";
     public string Status { get; set; } = FindingStatus.Open;
     public string? Response { get; set; }
+    public string? ResponseOutcome { get; set; }
     public string? EvidenceUrl { get; set; }
     public Guid? WithdrawalAcknowledgedBy { get; set; }
     public override string AuditType => "ReviewFinding";
@@ -92,6 +111,7 @@ public class FindingEvent : CoordinationRecord
     public string Action { get; set; } = "";
     public string Reason { get; set; } = "";
     public string? EvidenceUrl { get; set; }
+    public string? ResponseOutcome { get; set; }
     public override string AuditType => "FindingEvent";
 }
 public class SourceHead : CoordinationRecord

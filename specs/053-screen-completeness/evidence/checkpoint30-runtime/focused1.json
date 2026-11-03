@@ -1,0 +1,56 @@
+{
+  "exitCode": 1,
+  "args": [
+    "dotnet",
+    "test",
+    "tests/Hub.Tests/Hub.Tests.csproj",
+    "-c",
+    "Release",
+    "--no-build",
+    "--no-restore",
+    "--artifacts-path",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint30-artifacts",
+    "--filter",
+    "FullyQualifiedName~TaskContributionTests|FullyQualifiedName~TaskHistoryActorTests|FullyQualifiedName~ActivityScreenFlagProjectionTests",
+    "--logger",
+    "trx;LogFileName=focused1.trx",
+    "--results-directory",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint30-runtime/trx-focused1",
+    "-m:1",
+    "-p:UseSharedCompilation=false",
+    "-p:NuGetAudit=false"
+  ],
+  "atUtc": "2026-11-02T19:39:51.273779+00:00",
+  "selection": "New contribution/history +shared flag-projection privacy only",
+  "boundary": "Existing authorized PostgreSQL tunnel; HubFactory owns only fresh hub_test_* synthetic databases; retainedQA24 untouched",
+  "counters": {
+    "total": "32",
+    "executed": "32",
+    "passed": "30",
+    "failed": "2",
+    "error": "0",
+    "timeout": "0",
+    "aborted": "0",
+    "inconclusive": "0",
+    "passedButRunAborted": "0",
+    "notRunnable": "0",
+    "notExecuted": "0",
+    "disconnected": "0",
+    "warning": "0",
+    "completed": "0",
+    "inProgress": "0",
+    "pending": "0"
+  },
+  "failures": [
+    {
+      "name": "Hub.Tests.Api.TaskContributionTests.Read_only_inactive_and_current_hidden_project_memberships_are_refused_without_mutation",
+      "outcome": "Failed",
+      "message": "Expected 200 but got 400: {\"type\":\"https://hub.local/errors/validation\",\"title\":\"Validation failed\",\"status\":400,\"code\":\"validation\",\"detail\":\"One or more fields are invalid.\",\"traceId\":\"0HNPP33LF6O8I\",\"errors\":{\"visibility\":[\"Restricted projects are not enabled for this organisation.\"]}}"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskHistoryActorTests.Restricted_project_current_visibility_governs_actor_choices_and_history_without_directory_leakage",
+      "outcome": "Failed",
+      "message": "Expected 200 but got 400: {\"type\":\"https://hub.local/errors/validation\",\"title\":\"Validation failed\",\"status\":400,\"code\":\"validation\",\"detail\":\"One or more fields are invalid.\",\"traceId\":\"0HNPP33LF6O51\",\"errors\":{\"visibility\":[\"Restricted projects are not enabled for this organisation.\"]}}"
+    }
+  ]
+}

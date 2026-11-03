@@ -11,6 +11,7 @@ namespace Hub.Api.Features;
 /// Administration (§13.15, FR-ADM-01, FR-ADM-03, FR-ORG-01..07). Every route requires the Admin role.
 public static class AdminEndpoints
 {
+    public sealed record RegisterVocabularyCreateGuard;
     public sealed record RetryOutboxResponse(int Retried);
     public sealed record HolidayBody(Guid? OfficeId, DateOnly? Date, string Name);
 
@@ -30,6 +31,9 @@ public static class AdminEndpoints
     public sealed record DeliverableTypeRow(Guid? DefaultDisciplineId, string Name, bool IsActive, int SortOrder, string AuditType, Guid? AuditProjectId, string? AuditKey, string? AuditName,
         DateTimeOffset CreatedAt, Guid? CreatedBy, DateTimeOffset UpdatedAt, Guid? UpdatedBy, int RowVersion, Guid Id)
         : ReferenceRow(Name, IsActive, SortOrder, AuditType, AuditProjectId, AuditKey, AuditName, CreatedAt, CreatedBy, UpdatedAt, UpdatedBy, RowVersion, Id);
+    public sealed record IssueReturnCodeRow(string Code, string Name, bool IsActive, int SortOrder, string AuditType, Guid? AuditProjectId, string? AuditKey, string? AuditName,
+        DateTimeOffset CreatedAt, Guid? CreatedBy, DateTimeOffset UpdatedAt, Guid? UpdatedBy, int RowVersion, Guid Id)
+        : ReferenceRow(Name, IsActive, SortOrder, AuditType, AuditProjectId, AuditKey, AuditName, CreatedAt, CreatedBy, UpdatedAt, UpdatedBy, RowVersion, Id);
     /// How many projects use an entry (deactivating it asks first, FR-015).
     public sealed record ReferenceUsage(int Projects);
 
@@ -47,7 +51,9 @@ public static class AdminEndpoints
 
     public sealed record AdminUserRole(string Role, string Source);
     public sealed record AdminUserRow(Guid Id, string DisplayName, string Email, string? JobTitle, Guid? OfficeId, Guid? SupervisorId, Guid? HomeDisciplineId, bool IsActive,
-        decimal? WeeklyCapacityHours, bool IsTemplateEditor, DateTimeOffset? LastSignInAt, int RowVersion, List<AdminUserRole> Roles);
+        decimal? WeeklyCapacityHours, bool IsTemplateEditor, DateTimeOffset? LastSignInAt, int RowVersion, List<AdminUserRole> Roles,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] PersonFacts.Facts? PersonFacts = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] AdminUserScreen? Screen = null);
     /// The id and new row version of a person the Admin added or changed.
     public sealed record UserSaved(Guid Id, int RowVersion);
 
@@ -58,9 +64,28 @@ public static class AdminEndpoints
             Access.Demand(Permissions.Administer(ctx.HttpContext.RequestServices.GetRequiredService<CurrentUser>().Actor));
             return await next(ctx);
         });
+        AdminRoleExplanations.Map(g);
+        ReviewDisciplineDefaults.MapAdmin(g);
 
         Ref<CommitmentMissCategory, ReferenceRow>(g.MapGroup("").RequireFlag("commitment_reliability"), "commitmentMissCategories", Row,
             (db, id) => db.OutputCommitmentEvents.CountAsync(e => e.MissCategoryId == id), (_, _) => { });
+        MapCertificationTags(g.MapGroup("").RequireFlag("capacity_screens"));
+        var register = g.MapGroup("").RequireFlag("register_screens").WithMetadata(new RegisterVocabularyCreateGuard());
+        Ref<IssuePurpose, ReferenceRow>(register, "issuePurposes", Row,
+            (db, id) => db.DeliverableIssues.Where(issue => issue.PurposeOfIssueId == id).Select(issue => issue.ProjectId).Distinct().CountAsync(), (_, _) => { });
+        Ref<DecisionCategory, ReferenceRow>(register, "decisionCategories", Row,
+            (db, id) => db.Decisions.IgnoreQueryFilters().Where(decision => decision.CategoryId == id).Select(decision => decision.ProjectId).Distinct().CountAsync(),
+            (entry, _) => Check.That(!entry.Name.Any(ch => char.IsControl(ch) || ch is '\u2028' or '\u2029'), "name", "error.invalid"));
+        Ref<IssueRootCauseCategory, ReferenceRow>(register, "issueRootCauses", Row,
+            (db, id) => db.Issues.IgnoreQueryFilters().Where(issue => issue.RootCauseCategoryId == id).Select(issue => issue.ProjectId).Distinct().CountAsync(),
+            (entry, _) => Check.That(!entry.Name.Any(ch => char.IsControl(ch) || ch is '\u2028' or '\u2029'), "name", "error.invalid"));
+        Ref<IssueReturnCode, IssueReturnCodeRow>(register, "issueReturnCodes", Row,
+            (db, id) => db.DeliverableIssues.Where(issue => issue.ReturnCodeId == id).Select(issue => issue.ProjectId).Distinct().CountAsync(),
+            (entry, patch) =>
+            {
+                entry.Code = Check.Required(patch.Has("code") ? patch.Str("code") : entry.Code, "code", 10);
+                Check.That(!entry.Code.Any(char.IsControl), "code", "error.invalid");
+            });
         Ref<Discipline, DisciplineRow>(g, "disciplines", Row,
             (db, id) => db.ProjectDisciplines.Where(x => x.DisciplineId == id).Select(x => x.ProjectId).Distinct().CountAsync(),
             (e, p) => { if (p.Has("code")) e.Code = Check.Required(p.Str("code"), "code", 10); if (p.Has("colour")) e.Colour = Check.Required(p.Str("colour"), "colour", 20); });
@@ -117,7 +142,7 @@ public static class AdminEndpoints
         g.MapGet("/settings", async Task<Ok<List<SettingRow>>> (HubDb db) =>
         {
             var rows = await db.Settings.AsNoTracking().ToDictionaryAsync(r => r.Key, r => r.Value);
-            return TypedResults.Ok(OrgSettings.Defs.Where(d => !OrgSettings.ShownWithFlag.TryGetValue(d.Key, out var flag) || rows.GetValueOrDefault($"flag.{flag}") == "true").Select(d =>
+            return TypedResults.Ok(OrgSettings.Defs.Where(d => OrgSettings.SettingVisible(d.Key, flag => rows.GetValueOrDefault($"flag.{flag}") == "true")).Select(d =>
             {
                 var value = rows.TryGetValue(d.Key, out var v) ? JsonDocument.Parse(v).RootElement.Clone() : JsonSerializer.SerializeToElement(d.Default, JsonOpts.Web);
                 return new SettingRow(d.Key, d.Kind.ToString(), d.Group, d.Default, value, Flags.Find(d.Key)?.Packet);
@@ -127,6 +152,8 @@ public static class AdminEndpoints
         g.MapPut("/settings/{key}", async Task<Ok<SettingSaved>> (string key, JsonElement body, HubDb db, SettingsStore store, TimeProvider clock, EvaluationSignal signal) =>
         {
             var def = OrgSettings.Def(key) ?? throw ApiException.Invalid("key", "setting.unknown");
+            if (key is "certification_warn_days" or "availability_window_days")
+                Http.RequireFlag(await store.Get(db), "capacity_screens");
             var value = body.ValueKind == JsonValueKind.Object && body.TryGetProperty("value", out var v) ? v : body;
             if (OrgSettings.Validate(def, value) is { } err) throw ApiException.Invalid("value", err);
             if (key == "flag.verifiable_log" && value.ValueKind == JsonValueKind.False
@@ -140,6 +167,8 @@ public static class AdminEndpoints
             if (row.Value != json)
             {
                 row.Value = json; row.UpdatedAt = clock.GetUtcNow(); row.UpdatedBy = db.Audit.ActorId;
+                if (key == "flag.visual_system" && value.ValueKind == JsonValueKind.True)
+                    await BackfillIdentityColours(db);
                 // The evaluator reads thresholds, health, rules, the calendar and `flag.backlog` (FR-BKL-05): re-evaluate every Active
                 // project now, through the outbox, rather than leave health and milestone status stale until the nightly run (FR-BKL-09).
                 if (def.Group is "thresholds" or "health" or "rules" or "calendar" || key == $"flag.{TaskRules.BacklogFlag}")
@@ -189,16 +218,27 @@ public static class AdminEndpoints
         });
 
         // ---------- Users and roles (FR-004, FR-016, FR-017, FR-027, E-26) ----------
-        g.MapGet("/users", async Task<Ok<List<AdminUserRow>>> (HubDb db, string? q, bool? inactive, bool? noSupervisor, string? role) =>
+        g.MapGet("/users", async Task<Ok<List<AdminUserRow>>> (HubDb db, string? q, bool? inactive, bool? noSupervisor, string? role, SettingsStore store, TimeProvider clock) =>
         {
+            var settings = await store.Get(db);
+            await using var snapshot = settings.IsFlagOn("capacity_screens") || settings.IsFlagOn("people_screens")
+                ? await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead) : null;
             var query = db.Users.AsNoTracking().Include(u => u.Roles).AsQueryable();
             if (inactive != true) query = query.Where(u => u.IsActive);
             if (noSupervisor == true) query = query.Where(u => u.SupervisorId == null);
             if (!string.IsNullOrWhiteSpace(role)) query = query.Where(u => u.Roles.Any(r => r.Role == role));
             if (!string.IsNullOrWhiteSpace(q)) query = query.Where(u => EF.Functions.ILike(u.DisplayName, $"%{q.Trim()}%") || EF.Functions.ILike(u.Email, $"%{q.Trim()}%"));
-            return TypedResults.Ok(await query.OrderBy(u => u.DisplayName).Take(1000).Select(u => new AdminUserRow(
+            var rows = await query.OrderBy(u => u.DisplayName).Take(1000).Select(u => new AdminUserRow(
                 u.Id, u.DisplayName, u.Email, u.JobTitle, u.OfficeId, u.SupervisorId, u.HomeDisciplineId, u.IsActive, u.WeeklyCapacityHours, u.IsTemplateEditor,
-                u.LastSignInAt, u.RowVersion, u.Roles.Select(r => new AdminUserRole(r.Role, r.Source)).ToList())).ToListAsync());
+                u.LastSignInAt, u.RowVersion, u.Roles.Select(r => new AdminUserRole(r.Role, r.Source)).ToList(), null, null)).ToListAsync();
+            var facts = await PersonFacts.Read(db, rows.Select(row => row.Id).ToArray(), settings, clock);
+            if (facts.Count > 0) rows = rows.Select(row => row with { PersonFacts = facts.GetValueOrDefault(row.Id) }).ToList();
+            if (settings.IsFlagOn("people_screens"))
+            {
+                var screens = await AdminUserScreenReads.Read(db, rows.Select(row => row.Id).ToArray(), settings, clock);
+                rows = rows.Select(row => row with { Screen = screens.GetValueOrDefault(row.Id) }).ToList();
+            }
+            return TypedResults.Ok(rows);
         });
 
         // Local-password sign-in has no directory to add people at first sign-in, so an Admin adds them. Store the person's
@@ -287,7 +327,8 @@ public static class AdminEndpoints
         g.MapGet("/activity", async Task<Ok<Page<ActivityEndpoints.ActivityEntry>>> (HubDb db, DateOnly? from, DateOnly? to, Guid? actorId, string? itemType, string? category, string? excludeAction, int? page, int? pageSize) =>
         {
             var (pg, size) = Http.Paging(page, pageSize);
-            var q = db.ActivityLog.AsNoTracking().Where(a => a.ItemType != "PlanningEntry");
+            var screenFields = await ActivityScreenFields.Read(db);
+            var q = screenFields.Visible(db.ActivityLog.AsNoTracking().Where(a => a.ItemType != "PlanningEntry"));
             if (from is { } f) q = q.Where(a => a.OccurredAt >= f.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc));
             if (to is { } t) q = q.Where(a => a.OccurredAt < t.AddDays(1).ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc));
             if (actorId is { } aid) q = q.Where(a => a.ActorUserId == aid);
@@ -297,12 +338,65 @@ public static class AdminEndpoints
             else q = q.Where(a => a.ProjectId == null);
             var total = await q.CountAsync();
             var rows = await q.OrderByDescending(a => a.OccurredAt).ThenByDescending(a => a.Id).Skip((pg - 1) * size).Take(size).ToListAsync();
-            return TypedResults.Ok(new Page<ActivityEndpoints.ActivityEntry>(await ActivityEndpoints.Render(db, rows), pg, size, total));
+            return TypedResults.Ok(new Page<ActivityEndpoints.ActivityEntry>(await ActivityEndpoints.Render(db, rows, screenFields), pg, size, total));
         });
+    }
+
+    // FR-VSN-07: this runs as part of the same SaveChanges transaction as the
+    // flag setting. Existing values are never replaced, so retries are safe.
+    static async Task BackfillIdentityColours(HubDb db)
+    {
+        var projects = await db.Projects.Where(p => p.IdentityColour == null)
+            .OrderBy(p => p.ProjectNumber).ThenBy(p => p.Id).ToListAsync();
+        if (projects.Count == 0) return;
+        var used = await db.Projects.Where(p => (p.Status == ProjectStatus.Setup || p.Status == ProjectStatus.Active) && p.IdentityColour != null)
+            .Select(p => p.IdentityColour).ToListAsync();
+        foreach (var project in projects)
+        {
+            project.IdentityColour = IdentityColour.LeastUsed(used);
+            if (project.Status is ProjectStatus.Setup or ProjectStatus.Active)
+                used.Add(project.IdentityColour);
+        }
     }
 
     public sealed record RoleBody(string Role);
     public sealed record CreateUserBody(string? Email, string? DisplayName, string? JobTitle, Guid? OfficeId, Guid? SupervisorId);
+    public sealed record CertificationVocabularyCreateGuard;
+
+    // FR-SCR-49: vocabulary editing never reports how many people hold a tag.
+    // It deliberately does not use Ref(), whose usage route is project-count based.
+    static void MapCertificationTags(RouteGroupBuilder g)
+    {
+        g.MapGet("/certificationTags", async Task<Ok<List<ReferenceRow>>> (HubDb db) =>
+            TypedResults.Ok((await db.CertificationTags.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Name).ToListAsync())
+                .Select(x => Row((RefData)x)).ToList()));
+        g.MapPost("/certificationTags", async Task<Created<ReferenceRow>> (JsonElement body, HubDb db) => await Tx.Run(db, async () =>
+        {
+            var patch = new Patch(body);
+            var name = Check.Required(patch.Str("name"), "name", 120);
+            if (await db.CertificationTags.AnyAsync(x => x.Name == name)) throw ApiException.Conflict("certification_tag_exists", "error.duplicate");
+            var tag = new CertificationTag { Name = name, SortOrder = patch.Int("sortOrder") ?? await db.CertificationTags.CountAsync() };
+            db.CertificationTags.Add(tag);
+            await db.SaveChangesAsync();
+            return TypedResults.Created($"/api/v1/admin/certificationTags/{tag.Id}", Row((RefData)tag));
+        })).WithMetadata(new CertificationVocabularyCreateGuard());
+        g.MapPatch("/certificationTags/{id:guid}", async Task<Ok<ReferenceRow>> (Guid id, JsonElement body, HubDb db, HttpContext http) => await Tx.Run(db, async () =>
+        {
+            var patch = new Patch(body);
+            var tag = await db.CertificationTags.FirstOrDefaultAsync(x => x.Id == id) ?? throw ApiException.NotFound();
+            await Http.CheckVersion(db, http, tag, patch.RowVersion);
+            if (patch.Has("name"))
+            {
+                var name = Check.Required(patch.Str("name"), "name", 120);
+                if (await db.CertificationTags.AnyAsync(x => x.Id != id && x.Name == name)) throw ApiException.Conflict("certification_tag_exists", "error.duplicate");
+                tag.Name = name;
+            }
+            if (patch.Has("sortOrder")) tag.SortOrder = patch.Int("sortOrder") ?? tag.SortOrder;
+            if (patch.Has("isActive")) tag.IsActive = patch.Bool("isActive") ?? tag.IsActive;
+            await db.SaveChangesAsync();
+            return TypedResults.Ok(Row((RefData)tag));
+        }));
+    }
 
     static async Task EnsureAnotherAdmin(HubDb db, Guid userId)
     {
@@ -347,6 +441,7 @@ public static class AdminEndpoints
     static DisciplineRow Row(Discipline e) => new(e.Code, e.Colour, e.Name, e.IsActive, e.SortOrder, e.AuditType, e.AuditProjectId, e.AuditKey, e.AuditName, e.CreatedAt, e.CreatedBy, e.UpdatedAt, e.UpdatedBy, e.RowVersion, e.Id);
     static ClientRow Row(Client e) => new(e.ShortName, e.Name, e.IsActive, e.SortOrder, e.AuditType, e.AuditProjectId, e.AuditKey, e.AuditName, e.CreatedAt, e.CreatedBy, e.UpdatedAt, e.UpdatedBy, e.RowVersion, e.Id);
     static DeliverableTypeRow Row(DeliverableType e) => new(e.DefaultDisciplineId, e.Name, e.IsActive, e.SortOrder, e.AuditType, e.AuditProjectId, e.AuditKey, e.AuditName, e.CreatedAt, e.CreatedBy, e.UpdatedAt, e.UpdatedBy, e.RowVersion, e.Id);
+    static IssueReturnCodeRow Row(IssueReturnCode e) => new(e.Code, e.Name, e.IsActive, e.SortOrder, e.AuditType, e.AuditProjectId, e.AuditKey, e.AuditName, e.CreatedAt, e.CreatedBy, e.UpdatedAt, e.UpdatedBy, e.RowVersion, e.Id);
     /// The kinds with no columns of their own (phases, project types, missed-commitment categories).
     static ReferenceRow Row(RefData e) => new(e.Name, e.IsActive, e.SortOrder, e.AuditType, e.AuditProjectId, e.AuditKey, e.AuditName, e.CreatedAt, e.CreatedBy, e.UpdatedAt, e.UpdatedBy, e.RowVersion, e.Id);
 }

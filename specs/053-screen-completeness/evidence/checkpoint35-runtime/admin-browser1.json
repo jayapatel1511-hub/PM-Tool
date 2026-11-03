@@ -1,0 +1,191 @@
+{
+  "exitCode": 0,
+  "args": [
+    "node",
+    "tests/admin-screen.cjs"
+  ],
+  "base": "http://127.0.0.1:8881",
+  "visualSystem": false,
+  "atUtc": "2026-11-03T06:25:13.160889+00:00",
+  "scope": "Actual isolated SPA; finite synthetic intercepted HTTP; no real business writes or mail",
+  "driverSHA256": "2e9604b3efb24e7ab8d2e27bd026d37c673593190d0dbccc668048e02c5dc9a8",
+  "tail": [
+    "{\"status\":\"PASS\",\"scope\":\"Synthetic read-only UI against integrated draft DTOs; no canonical operation authorization, S21 policy resolution or S49 acceptance claim\",\"cases\":[\"AC-SCR-82 columns: true zero/base default/retired and unknown discipline/template boolean/current direct scope and inactive configured label\",\"All83 real matrix row identities rendered; system and project membership separate; system PM preserves None; a passing factor never becomes whole-command Allowed\",\"Operation-specific facts and unmet/live-check requirements stay visible; explicit project membership remains Conditional; S21 policy unresolved without own-project scope inference\",\"Initial/loading/pending results are withheld; a delayed old selection cannot replace current facts; mismatched membership payload is unavailable until explicit successful reread\",\"Existing User editor Cancel and known-person return preserve natural source focus; no user/role/deactivation write introduced\",\"Structure-on metadata has explicit basis/self; mismatched user version withholds capacity and count instead of fabricating values\",\"Current-key user/role refusal hides prior cached rows/examples and sends no command\",\"Tablet retains Admin table; 375px preserves existing phone notice and never mounts the new reads\",\"AC-SCR-84: new columns/examples/GET absent off while legacy user fields and Cancel remain available\"],\"userReads\":[{},{\"inactive\":\"true\"},{\"inactive\":\"true\"},{\"inactive\":\"true\"},{\"inactive\":\"true\"},{\"inactive\":\"true\"},{\"inactive\":\"true\"},{},{\"inactive\":\"true\"},{},{\"inactive\":\"true\"},{},{\"inactive\":\"true\"},{\"q\":\"refused\"},{},{\"inactive\":\"true\"},{},{\"inactive\":\"true\"},{},{\"inactive\":\"true\"},{},{\"inactive\":\"true\"},{},{\"inactive\":\"true\"}],\"roleReads\":[{\"role\":\"baseline-Standard\",\"scenario\":\"same-discipline\",\"membership\":\"none\",\"operation\":\"all\"},{\"role\":\"system-ProjectManager\",\"scenario\":\"same-discipline\",\"membership\":\"none\",\"operation\":\"all\"},{\"role\":\"system-ProjectManager\",\"scenario\":\"same-discipline\",\"membership\":\"none\",\"operation\":\"W15.operation-1\"},{\"role\":\"system-ProjectManager\",\"scenario\":\"same-discipline\",\"membership\":\"PM\",\"operation\":\"W15.operation-1\"},{\"role\":\"system-ProjectManager\",\"scenario\":\"same-discipline\",\"membership\":\"PM\",\"operation\":\"S21.export\"},{\"role\":\"system-ProjectManager\",\"scenario\":\"same-discipline\",\"membership\":\"PM\",\"operation\":\"all\"},{\"role\":\"system-ProjectManager\",\"scenario\":\"same-discipline\",\"membership\":\"TeamMember\",\"operation\":\"all\"},{\"role\":\"system-ProjectManager\",\"scenario\":\"same-discipline\",\"membership\":\"Viewer\",\"operation\":\"all\"},{\"role\":\"system-ProjectManager\",\"scenario\":\"same-discipline\",\"membership\":\"PM\",\"operation\":\"all\"},{\"role\":\"system-ProjectManager\",\"scenario\":\"same-discipline\",\"membership\":\"PM\",\"operation\":\"all\"},{\"role\":\"baseline-Standard\",\"scenario\":\"same-discipline\",\"membership\":\"none\",\"operation\":\"all\"},{\"role\":\"baseline-Standard\",\"scenario\":\"same-discipline\",\"membership\":\"none\",\"operation\":\"all\"},{\"role\":\"baseline-Standard\",\"scenario\":\"same-discipline\",\"membership\":\"none\",\"operation\":\"all\"},{\"role\":\"baseline-Standard\",\"scenario\":\"same-discipline\",\"membership\":\"none\",\"operation\":\"all\"},{\"role\":\"baseline-Standard\",\"scenario\":\"other-discipline\",\"membership\":\"none\",\"operation\":\"all\"},{\"role\":\"baseline-Standard\",\"scenario\":\"other-discipline\",\"membership\":\"none\",\"operation\":\"all\"},{\"role\":\"baseline-Standard\",\"scenario\":\"same-discipline\",\"membership\":\"none\",\"operation\":\"all\"}],\"writes\":[]}"
+  ],
+  "browserResult": {
+    "status": "PASS",
+    "scope": "Synthetic read-only UI against integrated draft DTOs; no canonical operation authorization, S21 policy resolution or S49 acceptance claim",
+    "cases": [
+      "AC-SCR-82 columns: true zero/base default/retired and unknown discipline/template boolean/current direct scope and inactive configured label",
+      "All83 real matrix row identities rendered; system and project membership separate; system PM preserves None; a passing factor never becomes whole-command Allowed",
+      "Operation-specific facts and unmet/live-check requirements stay visible; explicit project membership remains Conditional; S21 policy unresolved without own-project scope inference",
+      "Initial/loading/pending results are withheld; a delayed old selection cannot replace current facts; mismatched membership payload is unavailable until explicit successful reread",
+      "Existing User editor Cancel and known-person return preserve natural source focus; no user/role/deactivation write introduced",
+      "Structure-on metadata has explicit basis/self; mismatched user version withholds capacity and count instead of fabricating values",
+      "Current-key user/role refusal hides prior cached rows/examples and sends no command",
+      "Tablet retains Admin table; 375px preserves existing phone notice and never mounts the new reads",
+      "AC-SCR-84: new columns/examples/GET absent off while legacy user fields and Cancel remain available"
+    ],
+    "userReads": [
+      {},
+      {
+        "inactive": "true"
+      },
+      {
+        "inactive": "true"
+      },
+      {
+        "inactive": "true"
+      },
+      {
+        "inactive": "true"
+      },
+      {
+        "inactive": "true"
+      },
+      {
+        "inactive": "true"
+      },
+      {},
+      {
+        "inactive": "true"
+      },
+      {},
+      {
+        "inactive": "true"
+      },
+      {},
+      {
+        "inactive": "true"
+      },
+      {
+        "q": "refused"
+      },
+      {},
+      {
+        "inactive": "true"
+      },
+      {},
+      {
+        "inactive": "true"
+      },
+      {},
+      {
+        "inactive": "true"
+      },
+      {},
+      {
+        "inactive": "true"
+      },
+      {},
+      {
+        "inactive": "true"
+      }
+    ],
+    "roleReads": [
+      {
+        "role": "baseline-Standard",
+        "scenario": "same-discipline",
+        "membership": "none",
+        "operation": "all"
+      },
+      {
+        "role": "system-ProjectManager",
+        "scenario": "same-discipline",
+        "membership": "none",
+        "operation": "all"
+      },
+      {
+        "role": "system-ProjectManager",
+        "scenario": "same-discipline",
+        "membership": "none",
+        "operation": "W15.operation-1"
+      },
+      {
+        "role": "system-ProjectManager",
+        "scenario": "same-discipline",
+        "membership": "PM",
+        "operation": "W15.operation-1"
+      },
+      {
+        "role": "system-ProjectManager",
+        "scenario": "same-discipline",
+        "membership": "PM",
+        "operation": "S21.export"
+      },
+      {
+        "role": "system-ProjectManager",
+        "scenario": "same-discipline",
+        "membership": "PM",
+        "operation": "all"
+      },
+      {
+        "role": "system-ProjectManager",
+        "scenario": "same-discipline",
+        "membership": "TeamMember",
+        "operation": "all"
+      },
+      {
+        "role": "system-ProjectManager",
+        "scenario": "same-discipline",
+        "membership": "Viewer",
+        "operation": "all"
+      },
+      {
+        "role": "system-ProjectManager",
+        "scenario": "same-discipline",
+        "membership": "PM",
+        "operation": "all"
+      },
+      {
+        "role": "system-ProjectManager",
+        "scenario": "same-discipline",
+        "membership": "PM",
+        "operation": "all"
+      },
+      {
+        "role": "baseline-Standard",
+        "scenario": "same-discipline",
+        "membership": "none",
+        "operation": "all"
+      },
+      {
+        "role": "baseline-Standard",
+        "scenario": "same-discipline",
+        "membership": "none",
+        "operation": "all"
+      },
+      {
+        "role": "baseline-Standard",
+        "scenario": "same-discipline",
+        "membership": "none",
+        "operation": "all"
+      },
+      {
+        "role": "baseline-Standard",
+        "scenario": "same-discipline",
+        "membership": "none",
+        "operation": "all"
+      },
+      {
+        "role": "baseline-Standard",
+        "scenario": "other-discipline",
+        "membership": "none",
+        "operation": "all"
+      },
+      {
+        "role": "baseline-Standard",
+        "scenario": "other-discipline",
+        "membership": "none",
+        "operation": "all"
+      },
+      {
+        "role": "baseline-Standard",
+        "scenario": "same-discipline",
+        "membership": "none",
+        "operation": "all"
+      }
+    ],
+    "writes": []
+  }
+}

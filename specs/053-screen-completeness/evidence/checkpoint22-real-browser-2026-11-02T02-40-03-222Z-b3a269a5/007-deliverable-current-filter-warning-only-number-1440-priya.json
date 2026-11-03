@@ -1,0 +1,49 @@
+{
+  "name": "deliverable-current-filter-warning-only-number",
+  "actor": "priya@hub.test",
+  "width": 1440,
+  "status": "PASS",
+  "startedAtUtc": "2026-11-02T02:40:11.616Z",
+  "facts": {
+    "deliverableId": "01a19847-70b1-7952-af40-f0d9aeecef9a",
+    "status": "Issued",
+    "currentIssue": {
+      "id": "01a19847-7135-7dd3-88c3-b16af678d1dd",
+      "revision": "A",
+      "issuedDate": "2026-10-31",
+      "purposeOfIssueId": "01a19834-0b59-7b5e-8900-564db19b60dc",
+      "purpose": "For review",
+      "returnCodeId": "01a19834-0b62-7dba-9bfc-26a85161ace8",
+      "returnCode": "B",
+      "returnLabel": "Accepted with comments",
+      "responseDate": "2026-11-01"
+    },
+    "registerInfo": {
+      "clientDrawingNumber": "C12",
+      "numberPattern": "C-###",
+      "numberMatchesPattern": false,
+      "currentIssue": {
+        "id": "01a19847-7135-7dd3-88c3-b16af678d1dd",
+        "revision": "A",
+        "issuedDate": "2026-10-31",
+        "purposeOfIssueId": "01a19834-0b59-7b5e-8900-564db19b60dc",
+        "purpose": "For review",
+        "returnCodeId": "01a19834-0b62-7dba-9bfc-26a85161ace8",
+        "returnCode": "B",
+        "returnLabel": "Accepted with comments",
+        "responseDate": "2026-11-01"
+      }
+    },
+    "visibleText": "\t\tQA22-DLV-MVY51IDP-2DD0D2-D001\tSynthetic QA22 For review and B recipient response\tDrawing Package\t\nCivil\t\nAC\nAlex Chen\n\t—\nUnavailable\n\t—\nUnavailable\n\t—\nUnavailable\n\t\n✓\nIssued\t\n—\n\t\tA\t2026-10-31\t\nC12\nDoes not match C-###\n\tFor review\tB· Accepted with comments\t2026-11-01",
+    "contained": {
+      "viewport": 1440,
+      "document": 1440,
+      "content": {
+        "client": 1200,
+        "scroll": 1200
+      }
+    }
+  },
+  "screenshot": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint22-real-browser-2026-11-02T02-40-03-222Z-b3a269a5/009-priya-1440-deliverable-current-filter-warning-only-number.png",
+  "finishedAtUtc": "2026-11-02T02:40:12.575Z"
+}

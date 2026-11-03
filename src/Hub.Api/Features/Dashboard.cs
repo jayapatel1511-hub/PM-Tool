@@ -1,3 +1,4 @@
+using System.Data;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Hub.Api.Data;
@@ -28,7 +29,19 @@ public static class DashboardEndpoints
         DashboardRisks Risks, DashboardRegisters Registers, IReadOnlyList<DashboardDiscipline> Disciplines, IReadOnlyDictionary<string, DashboardCount> DisciplineDue14, DashboardTaskList DueThisWeek,
         DashboardTaskList Blocked, IReadOnlyList<ActivityEndpoints.ActivityEntry> Activity, DashboardState? State,
         [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyDictionary<string, DashboardStatusSegments>? DisciplineStatus = null,
-        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyDictionary<string, DashboardCount>? DisciplineBacklog = null);
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyDictionary<string, DashboardCount>? DisciplineBacklog = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] DateTimeOffset? AsOf = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] DashboardStaffing? Staffing = null);
+    public sealed record StaffingTarget(string Kind, Guid Id, string Key, string Name, DateOnly Date);
+    public sealed record StaffingDiscipline(Guid? ProjectDisciplineId, string? Name, bool Unattributed,
+        decimal? RemainingHours, decimal KnownRemainingHours, int UnestimatedTasks, int UndatedTasks,
+        decimal? ConfirmedHours, decimal KnownConfirmedHours, int UnavailableConfirmed,
+        decimal? OpenRoleHours, decimal KnownOpenRoleHours, int UnavailableOpenRoles,
+        decimal? ExcessHours, string ComparisonState);
+    public sealed record DashboardStaffing(DateOnly FromDate, DateOnly? ThroughDate, string State, StaffingTarget? Target,
+        string AllocationCoverage, decimal? UnattributedConfirmedHours, decimal? KnownUnattributedConfirmedHours, int? UnavailableUnattributed,
+        IReadOnlyList<StaffingDiscipline> Disciplines, DateTimeOffset AsOf);
+    sealed class DashboardReadClock(DateTimeOffset at) : TimeProvider { public override DateTimeOffset GetUtcNow() => at; }
     public sealed record DashboardTasks(DashboardCount Total, DashboardCount Complete, DashboardCount InProgress, DashboardCount Review, DashboardCount Overdue, DashboardCount Blocked,
         DashboardCount Waiting, DashboardCount Unassigned, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] DashboardCount? Backlog = null);
     public sealed record DashboardDeliverables(DashboardCount Upcoming, DashboardCount AtRisk, DashboardCount Issued, DashboardCount Total);
@@ -52,7 +65,10 @@ public static class DashboardEndpoints
     public sealed record WeeklyCoordination(WeeklyWindow Window, WeeklyHeadline Headline, IReadOnlyList<MilestoneRow> Milestones, IReadOnlyList<DeliverableEndpoints.DeliverableRow> Deliverables,
         IReadOnlyList<WeeklyDecision> Decisions, IReadOnlyList<TaskQueries.Row> Blocked, IReadOnlyList<TaskQueries.Row> Overdue, IReadOnlyList<TaskQueries.Row> DueThisWeek,
         IReadOnlyList<WeeklyRound> Disciplines, IReadOnlyList<WeeklyIssue> Issues, IReadOnlyList<WeeklyRisk> Risks, IReadOnlyList<MeetingEndpoints.MeetingActionRow> Waiting,
-        WeeklyCompleted Completed, WeeklyUpcoming Upcoming, WeeklyHeld Held);
+        WeeklyCompleted Completed, WeeklyUpcoming Upcoming, WeeklyHeld Held,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<WeeklyRecordContext>? Contexts = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<WorkReadinessTask>? ReadinessInputs = null);
+    public sealed record WeeklyRecordContext(string Kind, Guid Id, RecordContextView Context);
     /// This week starts on the project's coordination day; `Since` is the last review, or seven days back when there was none.
     public sealed record WeeklyWindow(WeekSpan ThisWeek, WeekSpan NextWeek, DateTimeOffset Since, DateTimeOffset? LastCoordinationReviewedAt, string? ReviewedBy, bool CanMarkReviewed);
     public sealed record WeekSpan(DateOnly From, DateOnly To);
@@ -111,10 +127,15 @@ public static class DashboardEndpoints
 
     static async Task<Ok<DashboardView>> Dashboard(Guid id, Guid? disciplineId, bool? importantOnly, Access access, HubDb db, EvaluationService eval, SettingsStore store, TimeProvider clock, CurrentUser me)
     {
-        var (p, _) = await access.Project(id, track: false);
+        var (p, ctx) = await access.Project(id, track: false);
         await eval.EnsureFresh(id);
         var s = await store.Get(db);
-        var today = clock.Today(s);
+        var screens = s.IsFlagOn("project_screens"); var visual = s.IsFlagOn("visual_system");
+        var asOf = clock.GetUtcNow();
+        var readClock = screens || visual ? new DashboardReadClock(asOf) : clock;
+        await using var snapshot = screens ? await db.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead) : null;
+        if (snapshot is not null) (p, ctx) = await access.Project(id, track: false);
+        var today = readClock.Today(s);
         var sc = new Scope(db, id, disciplineId, me.Id, today, s);
         var state = await db.ProjectStates.AsNoTracking().FirstOrDefaultAsync(x => x.ProjectId == id);
         var counts = JsonSerializer.Deserialize<Dictionary<string, int>>(state?.Counts ?? "{}") ?? [];
@@ -182,7 +203,9 @@ public static class DashboardEndpoints
             await ActivityEndpoints.Render(db, recent),
             state is null ? null : new DashboardState(state.EvaluatedAt),
             rollups ? status : null, // FR-DLV-08: each field exists only while its flag is on
-            backlogOn ? backlog : null));
+            backlogOn ? backlog : null,
+            screens || visual ? asOf : null,
+            screens ? await Staffing(id, disciplineId, ctx, access, db, me, s, readClock) : null));
     }
 
     public sealed record MilestoneRow(Guid Id, string Key, string Name, string MilestoneType, DateOnly Date, DateOnly? OriginalDate, Guid? ProjectDisciplineId,
@@ -197,6 +220,75 @@ public static class DashboardEndpoints
             x.Milestone.Date.Value.DayNumber - today.DayNumber, x.State?.Status, x.State?.DeliverableTotal ?? 0, x.State?.DeliverableIssued ?? 0, x.State?.TaskTotal ?? 0,
             x.State?.TaskComplete ?? 0, x.State?.TaskOverdue ?? 0, x.State?.TaskBlocked ?? 0, J.El(x.State?.StatusReasons))).ToList();
 
+    /// S22: exact-date facts, never a sum of estimates/reservations/open-role demand.
+    /// The existing package read is project-authorized, independent of screen_patterns.
+    static async Task<DashboardStaffing> Staffing(Guid projectId, Guid? disciplineId, ProjectContext context, Access access, HubDb db,
+        CurrentUser me, OrgSettings settings, TimeProvider clock)
+    {
+        var from = clock.Today(settings); var asOf = clock.GetUtcNow();
+        var disciplines = await db.ProjectDisciplines.AsNoTracking().Where(d => d.ProjectId == projectId)
+            .Select(d => new { d.Id, d.IsActive, d.SortOrder, d.Discipline!.Name }).ToDictionaryAsync(d => d.Id);
+        if (disciplineId is { } selected && !disciplines.ContainsKey(selected)) throw ApiException.NotFound();
+        // This is the package's own target, not the evaluator's submission milestone.
+        var package = await db.SubmissionPackages.AsNoTracking().Where(p => p.ProjectId == projectId
+            && (p.Status == SubmissionStatus.Draft || p.Status == SubmissionStatus.Checking || p.Status == SubmissionStatus.Ready))
+            .OrderBy(p => p.TargetDate).ThenBy(p => p.Key).ThenBy(p => p.Id)
+            .Select(p => new StaffingTarget("SubmissionPackage", p.Id, p.Key, p.Title, p.TargetDate)).FirstOrDefaultAsync();
+        var target = package ?? await db.Milestones.AsNoTracking().Where(m => m.ProjectId == projectId && !m.IsComplete && !m.IsCancelled && m.Date != null)
+            .OrderBy(m => m.Date).ThenBy(m => m.Key).ThenBy(m => m.Id)
+            .Select(m => new StaffingTarget("Milestone", m.Id, m.Key, m.Name, m.Date!.Value)).FirstOrDefaultAsync();
+        if (target is null || target.Date < from)
+            return new(from, target?.Date, target is null ? "NoTarget" : "OverdueTarget", target, "Unavailable", null, null, null, [], asOf);
+
+        var isPm = Permissions.IsPM(access.Actor, context);
+        var managed = db.Projects.Where(p => p.Id == projectId && isPm).Select(p => p.Id);
+        var allocations = AllocationEndpoints.VisibleQuery(db, access.Actor, managed).Where(a => a.ProjectId == projectId);
+        var reservations = await AllocationScreenReads.ConfirmedByDiscipline(projectId, from, target.Date, allocations, isPm || access.Actor.Admin, db, clock);
+        var unattributed = reservations.Disciplines.FirstOrDefault(d => d.Unattributed);
+        // A zero final Unattributed bucket is harmless; nonzero/unknown evidence is not.
+        var unattributedReservations = unattributed is not null && (unattributed.ConfirmedHours is null || unattributed.KnownConfirmedHours != 0 || unattributed.UnavailableConfirmed > 0);
+        var query = TaskQueries.Apply(db, db.Tasks.AsNoTracking().Where(t => t.ProjectId == projectId),
+            TaskFilter.Of(new Dictionary<string, string?> { ["open"] = "true", ["disciplineId"] = disciplineId?.ToString() }), me.Id, from, settings);
+        var tasks = await query.Where(t => t.DueDate == null || t.DueDate >= from && t.DueDate <= target.Date)
+            .Select(t => new { t.ProjectDisciplineId, t.DueDate, t.EstimatedHours, t.ProgressPct }).ToListAsync();
+        var roles = await db.OpenRoles.AsNoTracking().Where(r => r.ProjectId == projectId && r.Status == OpenRoleStatus.Open
+            && r.FromDate <= target.Date && r.ThroughDate >= from && (disciplineId == null || r.ProjectDisciplineId == disciplineId)).ToListAsync();
+        var calendars = await OpenRoleEndpoints.Calendars(db, [projectId]);
+        var roleHours = roles.Select(role => {
+            var spread = OpenRoleEndpoints.Spread(role, calendars(projectId));
+            var unavailable = role.PlannedHours <= 0 || spread.Count == 0;
+            return new { role.ProjectDisciplineId, Unavailable = unavailable,
+                Hours = unavailable ? 0m : spread.Where(day => day.Key >= from && day.Key <= target.Date).Sum(day => day.Value) };
+        }).ToArray();
+        Guid Key(Guid? id) => id is { } value && disciplines.ContainsKey(value) ? value : Guid.Empty;
+        var keys = disciplines.Values.Where(d => d.IsActive).Select(d => d.Id)
+            .Concat(tasks.Select(t => Key(t.ProjectDisciplineId))).Concat(roleHours.Select(r => Key(r.ProjectDisciplineId)))
+            .Concat(reservations.Disciplines.Select(r => Key(r.ProjectDisciplineId))).Distinct();
+        if (disciplineId is { } only) keys = keys.Where(id => id == only);
+        else if (!unattributedReservations && !tasks.Any(t => Key(t.ProjectDisciplineId) == Guid.Empty) && !roleHours.Any(r => Key(r.ProjectDisciplineId) == Guid.Empty)) keys = keys.Where(id => id != Guid.Empty);
+        var rows = keys.OrderBy(id => id == Guid.Empty).ThenBy(id => disciplines.GetValueOrDefault(id)?.SortOrder ?? int.MaxValue).ThenBy(id => id).Select(id => {
+            var ownTasks = tasks.Where(t => Key(t.ProjectDisciplineId) == id).ToArray();
+            var dated = ownTasks.Where(t => t.DueDate != null).ToArray();
+            var knownRemaining = dated.Sum(t => Workload.Remaining(t.EstimatedHours, t.ProgressPct) ?? 0m);
+            var unestimated = dated.Count(t => t.EstimatedHours == null); var undated = ownTasks.Count(t => t.DueDate == null);
+            decimal? remaining = unestimated > 0 || undated > 0 ? null : knownRemaining;
+            var reservation = reservations.Disciplines.FirstOrDefault(r => Key(r.ProjectDisciplineId) == id);
+            var knownConfirmed = reservation?.KnownConfirmedHours ?? 0m;
+            decimal? confirmed = reservations.AllocationCoverage != "Complete" || unattributedReservations || reservation?.UnavailableConfirmed > 0
+                ? null : reservation is null ? 0m : reservation.ConfirmedHours;
+            var ownRoles = roleHours.Where(r => Key(r.ProjectDisciplineId) == id).ToArray();
+            var knownRoles = ownRoles.Sum(r => r.Hours); var unavailableRoles = ownRoles.Count(r => r.Unavailable);
+            var comparison = remaining is not null && confirmed is not null && id != Guid.Empty;
+            return new StaffingDiscipline(id == Guid.Empty ? null : id, disciplines.GetValueOrDefault(id)?.Name, id == Guid.Empty,
+                remaining, knownRemaining, unestimated, undated, confirmed, knownConfirmed, reservation?.UnavailableConfirmed ?? 0,
+                unavailableRoles > 0 ? null : knownRoles, knownRoles, unavailableRoles,
+                comparison ? Math.Max(0m, remaining!.Value - confirmed!.Value) : null, comparison ? "Complete" : "Unavailable");
+        }).ToArray();
+        return new(from, target.Date, rows.Any(r => r.RemainingHours is null || r.ConfirmedHours is null || r.OpenRoleHours is null) ? "Partial" : "Complete", target,
+            reservations.AllocationCoverage, unattributed is null ? (reservations.AllocationCoverage == "Complete" ? 0m : null) : unattributed.ConfirmedHours,
+            unattributed?.KnownConfirmedHours ?? 0m, unattributed?.UnavailableConfirmed ?? 0, rows, asOf);
+    }
+
     // ---------- Weekly Coordination (§12.13) ----------
 
     static async Task<Ok<WeeklyCoordination>> Coordination(Guid id, Guid? disciplineId, Access access, HubDb db, EvaluationService eval, SettingsStore store, TimeProvider clock, CurrentUser me)
@@ -204,6 +296,11 @@ public static class DashboardEndpoints
         var (p, ctx) = await access.Project(id, track: false);
         await eval.EnsureFresh(id);
         var s = await store.Get(db);
+        // Evaluation owns its write transaction. Only the enabled read starts a new
+        // snapshot, then rechecks access so selected rows and context share permissions.
+        await using var snapshot = s.IsFlagOn("screen_patterns")
+            ? await db.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead) : null;
+        if (snapshot is not null) (p, ctx) = await access.Project(id, track: false);
         var today = clock.Today(s);
         var now = clock.GetUtcNow();
         var sc = new Scope(db, id, disciplineId, me.Id, today, s);
@@ -281,7 +378,7 @@ public static class DashboardEndpoints
             && (a.Status == ActionStatus.Open || a.Status == ActionStatus.InProgress)), today) : [];
 
         var reviewer = p.LastCoordinationReviewedBy is { } rb ? await db.Users.Where(u => u.Id == rb).Select(u => u.DisplayName).FirstOrDefaultAsync() : null;
-        return TypedResults.Ok(new WeeklyCoordination(
+        var response = new WeeklyCoordination(
             new WeeklyWindow(new WeekSpan(start, end), new WeekSpan(nextStart, nextEnd), since, p.LastCoordinationReviewedAt, reviewer, Permissions.RunCoordination(access.Actor, ctx).Ok),
             new WeeklyHeadline(state?.ComputedHealth, J.El(state?.HealthReasons), await Count(overdueTasks, sc.Link(("overdue", "true"))), await Count(blockedTasks, sc.Link(("blocked", "true"))),
                 decisions.Count(d => d.IsOverdue), await Count(atRisk, sc.Link(("indicator", "atRisk"))), milestones.FirstOrDefault(m => m.Date >= today)),
@@ -297,7 +394,34 @@ public static class DashboardEndpoints
             new WeeklyUpcoming(
                 await TaskQueries.Rows(db, sc.Tasks(("dueFrom", D(nextStart)), ("dueTo", D(nextEnd)), ("open", "true")), access.Actor),
                 await DeliverableRows(db, sc.Deliverables(dueFrom: end.AddDays(1), dueTo: end.AddDays(14), indicator: "open"))),
-            new WeeklyHeld(await TaskQueries.Rows(db, heldTasks, access.Actor), await DeliverableRows(db, heldDels))));
+            new WeeklyHeld(await TaskQueries.Rows(db, heldTasks, access.Actor), await DeliverableRows(db, heldDels)));
+        if (snapshot is null) return TypedResults.Ok(response);
+
+        // These are only the exact records already returned by the agenda. Shared row
+        // contracts, selection, counts, window math and command permissions stay intact.
+        var selected = new HashSet<(string Kind, Guid Id)>();
+        void Select(string kind, IEnumerable<Guid> ids) { foreach (var recordId in ids) selected.Add((kind, recordId)); }
+        Select(RecordContextKind.Task, response.Blocked.Concat(response.Overdue).Concat(response.DueThisWeek)
+            .Concat(response.Disciplines.SelectMany(d => d.Top)).Concat(response.Completed.Tasks)
+            .Concat(response.Upcoming.Tasks).Concat(response.Held.Tasks).Select(t => t.Id));
+        Select(RecordContextKind.Deliverable, response.Deliverables.Concat(response.Completed.Deliverables)
+            .Concat(response.Upcoming.Deliverables).Concat(response.Held.Deliverables).Select(d => d.Id));
+        Select(RecordContextKind.Milestone, response.Milestones.Select(m => m.Id));
+        if (response.Headline.NextMilestone is { } milestone) selected.Add((RecordContextKind.Milestone, milestone.Id));
+        Select(RecordContextKind.Decision, response.Decisions.Select(d => d.Id).Concat(response.Completed.Decisions.Select(d => d.Id)));
+        Select(RecordContextKind.Issue, response.Issues.Select(i => i.Id));
+        Select(RecordContextKind.Risk, response.Risks.Select(r => r.Id));
+        Select(RecordContextKind.Action, response.Waiting.Select(a => a.Id));
+        var reader = new RecordContextReader(db, p, s);
+        var contexts = new List<WeeklyRecordContext>();
+        var readinessInputs = new List<WorkReadinessTask>();
+        foreach (var (kind, recordId) in selected.OrderBy(x => x.Kind, StringComparer.Ordinal).ThenBy(x => x.Id))
+        {
+            if (await reader.ReadLoaded(kind, recordId) is { } context) contexts.Add(new(kind, recordId, context));
+            if (kind == RecordContextKind.Task && await WorkReadinessInputReader.Read(db, p, recordId, s, store, clock) is { } readiness)
+                readinessInputs.Add(new(recordId, readiness));
+        }
+        return TypedResults.Ok(response with { Contexts = contexts, ReadinessInputs = readinessInputs });
     }
 
     // The deliverable rows are already DeliverableRow records; their helper still lists them as objects.

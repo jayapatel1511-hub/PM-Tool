@@ -1,0 +1,3 @@
+# B browser repair independent source review
+
+Reviewer checkpoint24_import_backend_review: bounded source PASS. Both repaired CJS hashes match B-browser-source-ready2.json. Earlier gaps now have substantive, nonvacuous coverage: independent flags; stored-data restoration; actual creation wizard source GET and legacy preview plus Cancel/no project command; incomplete diff counts; distinct unknown baselines with nulls; partial-source Unavailable provenance and natural both-source-null no-read behavior. Existing refusal/version, stale-cache, phone and strict request guards remain. No concrete remaining source/coverage blocker. Syntax, types and Chrome UNRUN.

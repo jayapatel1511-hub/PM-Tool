@@ -1,0 +1,90 @@
+--- D-frozen-manifest
++++ root-reviewed-Admin-guard
+@@ -40,11 +40,11 @@
+         "8.5.2:Edit project information (name, client, description, dates, phase, links)",
+         "8.5.2:Change project status (Active, On Hold, Complete, Cancelled)",
+         "8.5.2:Archive project",
+-        "8.5.2:Manage project team and roles (Supervisors may also add or remove their direct reports as Team Members, §8.5.1)",
++        "8.5.2:Manage project team and roles (Supervisors may also add or remove their direct reports as Team Members, \u00a78.5.1)",
+         "8.5.2:Add/remove disciplines, set Discipline Lead",
+         "8.5.2:Set/clear health override",
+         "8.5.2:Create / edit / delete milestone; change milestone date",
+-        "8.5.2:Re-baseline a milestone or deliverable, or return it to its original dates, with a reason (§50.5)",
++        "8.5.2:Re-baseline a milestone or deliverable, or return it to its original dates, with a reason (\u00a750.5)",
+         "8.5.2:Mark milestone Complete",
+         "8.5.2:Create deliverable",
+         "8.5.2:Edit deliverable (fields, owner, dates)",
+@@ -97,16 +97,16 @@
+     "8.11": {
+       "fingerprint": "493cfe33bb48166099afa568e0e9946642d26ee797aa79b26119611009ca918a",
+       "rows": [
+-        "8.11:Open the Weekly Planner (§13.21)",
++        "8.11:Open the Weekly Planner (\u00a713.21)",
+         "8.11:See a person's Self-entered entries, Proposed and Confirmed assignments, approved project allocations, capacity and time away",
+         "8.11:See a Private draft",
+         "8.11:Create a self entry",
+         "8.11:Create a manager entry",
+         "8.11:Change, move, extend, mark Still valid or delete an entry; copy creates a new entry and needs the create right for its person",
+         "8.11:Change a manager entry's visibility",
+-        "8.11:Record or clear time away (availability overrides, §39.3)",
++        "8.11:Record or clear time away (availability overrides, \u00a739.3)",
+         "8.11:Export planner and entry lists; save personal planner views",
+-        "8.11:Change planning settings (§10.9)"
++        "8.11:Change planning settings (\u00a710.9)"
+       ]
+     }
+   },
+@@ -208,7 +208,7 @@
+       "binding": "Current transport/context/workflow source; independent compound evaluation still required"
+     },
+     "src/Hub.Api/Features/Admin.cs": {
+-      "sha256": "c92a1fe1edadcefde89f3f726a9fbcc790d99108d9b90a56d2b1449c4fe26961",
++      "sha256": "4b6560ba40be43bf78ac10129da1ce4e0f7d2235329b3d64be455afa210278d1",
+       "coverage": "Pending",
+       "binding": "Current transport/context/workflow source; independent compound evaluation still required"
+     },
+@@ -579,7 +579,7 @@
+       "coverage": "Pending",
+       "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+     },
+-    "8.5.2:Manage project team and roles (Supervisors may also add or remove their direct reports as Team Members, §8.5.1)": {
++    "8.5.2:Manage project team and roles (Supervisors may also add or remove their direct reports as Team Members, \u00a78.5.1)": {
+       "methods": [
+         "ManageTeam",
+         "StaffOnProject"
+@@ -620,7 +620,7 @@
+       "coverage": "Pending",
+       "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+     },
+-    "8.5.2:Re-baseline a milestone or deliverable, or return it to its original dates, with a reason (§50.5)": {
++    "8.5.2:Re-baseline a milestone or deliverable, or return it to its original dates, with a reason (\u00a750.5)": {
+       "methods": [
+         "Rebaseline"
+       ],
+@@ -1183,7 +1183,7 @@
+       "coverage": "Pending",
+       "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+     },
+-    "8.11:Open the Weekly Planner (§13.21)": {
++    "8.11:Open the Weekly Planner (\u00a713.21)": {
+       "methods": [
+         "ViewWorkload",
+         "ViewPersonWork"
+@@ -1262,7 +1262,7 @@
+       "coverage": "Pending",
+       "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+     },
+-    "8.11:Record or clear time away (availability overrides, §39.3)": {
++    "8.11:Record or clear time away (availability overrides, \u00a739.3)": {
+       "methods": [
+         "RecordTimeAway"
+       ],
+@@ -1285,7 +1285,7 @@
+       "coverage": "Pending",
+       "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+     },
+-    "8.11:Change planning settings (§10.9)": {
++    "8.11:Change planning settings (\u00a710.9)": {
+       "methods": [
+         "Administer"
+       ],

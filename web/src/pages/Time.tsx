@@ -1,10 +1,13 @@
+import { PersonPanelTrigger } from '@/components/hub/person-panel-trigger'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ChevronLeft, ChevronRight, Pencil, Plus, Trash2 } from 'lucide-react'
-import { useState, type ReactNode } from 'react'
-import { Link, useSearchParams } from 'react-router'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { Link, useLocation, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { AccentDot, ActiveFilters, ConfirmDialog, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Page, Segmented, Spinner, SummaryTile, TableRegion, selectCls, tdCls, thCls } from '@/components/hub/common'
 import { ExportMenu } from '@/components/hub/export'
+import { TitleBlock } from '@/components/hub/title-block'
+import { CountCard } from '@/components/hub/count-card'
 import { Avatar, PeoplePicker } from '@/components/hub/people'
 import { Key } from '@/components/hub/pills'
 import { Button } from '@/components/ui/button'
@@ -20,16 +23,33 @@ import { t , runtimeText } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { DraftNotice } from '@/components/hub/drafts'
 import { useSafeForm } from '@/hooks/drafts'
+import { useFlag } from '@/lib/auth-context'
+import { TimeWeekGrid } from '@/components/planner/TimeWeekGrid'
 
 type Entry = components['schemas']['TimeRow']
 const monday = (d: string) => addDays(d, -((new Date(d + 'T00:00:00Z').getUTCDay() + 6) % 7))
 const h = (n: number) => (Number.isInteger(n) ? String(n) : String(Number(n.toFixed(2))))
 const weekday = (d: string) => runtimeText(`calendar.dow.${new Date(d + 'T00:00:00Z').getUTCDay()}`)
 
+function actualTotals(entries: Entry[]): Pick<components['schemas']['TimeView'], 'total' | 'byTask' | 'byProject'> {
+  const byTask = new Map<string, components['schemas']['TimeView']['byTask'][number]>()
+  const byProject = new Map<string, components['schemas']['TimeView']['byProject'][number]>()
+  for (const entry of entries) {
+    const task = byTask.get(entry.taskId)
+    byTask.set(entry.taskId, { taskId: entry.taskId, taskKey: entry.taskKey, taskName: entry.taskName, projectNumber: entry.projectNumber, hours: (task?.hours ?? 0) + entry.hours })
+    const project = byProject.get(entry.projectId)
+    byProject.set(entry.projectId, { projectId: entry.projectId, projectNumber: entry.projectNumber, projectName: entry.projectName, hours: (project?.hours ?? 0) + entry.hours })
+  }
+  return { total: entries.reduce((sum, entry) => sum + entry.hours, 0), byTask: [...byTask.values()].sort((a, b) => a.taskKey.localeCompare(b.taskKey)), byProject: [...byProject.values()].sort((a, b) => a.projectNumber.localeCompare(b.projectNumber)) }
+}
+
 /** Time (§36.8, FR-VIS-10): my task hours by day and week, Add Time, corrections, and — for PMs, leads and supervisors —
  *  the entries they may review. Totals are sums of the entries shown; hours never change estimates or progress. */
 export function TimePage() {
-  const canEnter = !useMe().capabilities.readOnly // read-only people see hours but record none
+  const me = useMe(), capacityScreens = useFlag('capacity_screens')
+  const visualSystem = useFlag('visual_system')
+  const location = useLocation(), entriesRef = useRef<HTMLDivElement>(null)
+  const canEnter = !me.capabilities.readOnly // read-only people see hours but record none
   const [sp, setSp] = useSearchParams()
   const qc = useQueryClient()
   const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
@@ -41,11 +61,20 @@ export function TimePage() {
   // The contract names these From, To, Scope and so on; the server binds query names without regard to case, so the lower-case names stay on the wire.
   const query: Record<string, string | null | undefined> = filters
   const q = useQuery({ queryKey: ['time', filters], queryFn: () => typedRequest('get', '/api/v1/time', { query }) })
+  const ownWeek = capacityScreens && !scope && (!filters.userId || filters.userId === me.id) && from === monday(from) && to === addDays(from, 6)
+  const week = useQuery({ queryKey: ['time', 'week', filters, 'capacity_screens'], enabled: ownWeek, queryFn: () => typedRequest('get', '/api/v1/time/week', { query }) })
+  const weekTotals = ownWeek && week.data ? actualTotals(week.data.tasks.flatMap(task => task.entries)) : null
+  useEffect(() => {
+    if (visualSystem && location.hash === '#time-entries' && !q.isPending && (!ownWeek || !week.isPending)) {
+      entriesRef.current?.focus({ preventScroll: true })
+      entriesRef.current?.scrollIntoView({ block: 'start' })
+    }
+  }, [visualSystem, location.key, location.hash, q.isPending, ownWeek, week.isPending])
   const projects = useQuery({ queryKey: ['projects-pick', ''], queryFn: () => typedRequest('get', '/api/v1/projects', { query: { PageSize: 200 } }) })
   const [adding, setAdding] = useState(false)
   const [editing, setEditing] = useState<Entry | null>(null)
   const [removing, setRemoving] = useState<Entry | null>(null)
-  const refresh = () => { void invalidateChange(qc, 'TimeEntry') }
+  const refresh = () => invalidateChange(qc, 'TimeEntry')
   const reloadEntry = async (id: string) => {
     const next = await q.refetch()
     if (next.error) throw next.error
@@ -57,6 +86,15 @@ export function TimePage() {
   const now = today()
   // Filters a link may carry (a task's hours) show as removable tokens beside the visible ones (§13.0).
   const entry = (k: 'userId' | 'taskId') => q.data?.entries.find((e) => e[k] === filters[k])
+  const totalParams = new URLSearchParams(sp)
+  totalParams.set('from', from); totalParams.set('to', to)
+  const totalDestination = `${location.pathname}?${totalParams}#time-entries`
+  const shownTotal = ownWeek ? weekTotals?.total : q.data?.total
+  const knownTotal = typeof shownTotal === 'number' && Number.isFinite(shownTotal)
+  const totalBasis = [t('timeCards.where', { from: fmtDate(from), to: fmtDate(to), scope: t(scope ? 'time.scope.all' : 'time.scope.mine') }),
+    filters.userId && `${t('time.person')}: ${entry('userId')?.person ?? (filters.userId === me.id ? me.displayName : t('common.unavailable'))}`,
+    filters.projectId && `${t('calendar.project')}: ${projects.data?.items.find(project => project.id === filters.projectId)?.projectNumber ?? t('common.unavailable')}`,
+    filters.taskId && `${t('time.task')}: ${entry('taskId')?.taskKey ?? t('common.unavailable')}`].filter(Boolean).join(' · ')
   const tokens = ([
     ['projectId', t('calendar.project'), projects.data?.items.find((p) => p.id === filters.projectId)?.projectNumber],
     ['userId', t('time.person'), entry('userId')?.person],
@@ -64,22 +102,26 @@ export function TimePage() {
   ] as const).filter(([k]) => filters[k])
   const clear = () => { const n = new URLSearchParams(sp); for (const [k] of tokens) n.delete(k); setSp(n, { replace: true }) }
   const cols = scope ? 6 : 5
-  return (
-    <Page title={t('nav.time')} subtitle={t('time.subtitle')}
-      actions={<>
-        <Button variant="outline" asChild><Link to={`/reports/task-hours${qs({ from, to, scope: scope ? 'team' : undefined, projectId: filters.projectId })}`}>{t('time.report')}</Link></Button>
-        <ExportMenu path="time/export" params={filters} name="task-hours" />
-        {canEnter && <Button onClick={() => setAdding(true)}><Plus className="size-4" />{t('time.add')}</Button>}
-      </>}>
-      <div className="flex flex-wrap items-center gap-2">
+  const weekNavigation = (
+    <div className={cn('flex flex-wrap items-center gap-2', ownWeek && 'w-full min-w-0 sm:w-auto')}>
         <Button variant="outline" size="icon" aria-label={t('calendar.previous')} onClick={() => shift(-1)}><ChevronLeft className="size-5" /></Button>
         <span className="min-w-52 text-center text-sm font-semibold tabular-nums" aria-live="polite">{fmtDate(from)} – {fmtDate(to)}</span>
         <Button variant="outline" size="icon" aria-label={t('calendar.next')} onClick={() => shift(1)}><ChevronRight className="size-5" /></Button>
         <Button variant="outline" onClick={() => { const n = new URLSearchParams(sp); n.delete('from'); n.delete('to'); setSp(n, { replace: true }) }}>{t('time.thisWeek')}</Button>
       </div>
+  )
+  const whoseEntries = q.data?.canReview && <Segmented label={t('time.whose')} value={scope ?? 'mine'} onChange={(s) => set('scope', s === 'all' ? 'all' : null)}
+    options={[{ value: 'mine', label: t('time.scope.mine') }, { value: 'all', label: t('time.scope.all') }]} />
+  return (
+    <Page title={t('nav.time')} subtitle={t('time.subtitle')} titleBlock={q.data && <TitleBlock asOf={ownWeek && week.data ? week.data.asOf : (q.data as typeof q.data & { asOf?: string }).asOf} />}
+      actions={<>
+        <Button variant="outline" asChild><Link to={`/reports/task-hours${qs({ from, to, scope: scope ? 'team' : undefined, projectId: filters.projectId })}`}>{t('time.report')}</Link></Button>
+        <ExportMenu path="time/export" params={filters} name="task-hours" />
+        {canEnter && <Button onClick={() => setAdding(true)}><Plus className="size-4" />{t('time.add')}</Button>}
+      </>}>
+      {!ownWeek && weekNavigation}
       <FilterBar activeCount={tokens.length}
-        quick={q.data?.canReview && <Segmented label={t('time.whose')} value={scope ?? 'mine'} onChange={(s) => set('scope', s === 'all' ? 'all' : null)}
-          options={[{ value: 'mine', label: t('time.scope.mine') }, { value: 'all', label: t('time.scope.all') }]} />}
+        quick={ownWeek ? <>{weekNavigation}{whoseEntries}</> : whoseEntries}
         active={<ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value ?? <Missing /> }))} onRemove={(k) => set(k, null)} onClear={clear} />}>
         <div className="flex flex-wrap items-end gap-3">
           <Field label={t('calendar.project')} htmlFor="time-project" className="w-full sm:w-64">
@@ -93,9 +135,11 @@ export function TimePage() {
         </div>
       </FilterBar>
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
+      {ownWeek && week.error && <ErrorBanner error={week.error} retry={() => week.refetch()} />}
       {q.isPending ? <div className="rounded-lg border bg-card"><Loading rows={6} /></div> : q.data && (
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
-          <div className="min-w-0 space-y-4">
+        <div className={cn('grid gap-6', !ownWeek && 'lg:grid-cols-[minmax(0,1fr)_20rem]')}>
+          <div ref={entriesRef} id={visualSystem ? 'time-entries' : undefined} role={visualSystem ? 'region' : undefined} aria-label={visualSystem ? t('timeCards.entries') : undefined} tabIndex={visualSystem ? -1 : undefined} className="min-w-0 space-y-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
+            {ownWeek ? week.isPending ? <Loading rows={4} /> : week.data && <TimeWeekGrid key={`${from}:${to}:${filters.projectId}:${filters.taskId}`} data={week.data} onEdit={setEditing} onRemove={setRemoving} onSaved={refresh} /> : <>
             <ul aria-label={t('time.dailyTotals')} className="grid grid-cols-7 overflow-hidden rounded-lg border bg-card text-center">
               {days.map((d) => {
                 const hours = q.data!.byDay.find((x) => x.date === d)?.hours ?? 0
@@ -135,7 +179,7 @@ export function TimePage() {
                             <span className="inline-flex items-center gap-2"><AccentDot id={e.projectId} /><Key>{e.projectNumber}</Key></span>
                             <span className="block text-xs/[18px] text-muted-foreground">{e.projectName}</span>
                           </td>
-                          {scope && <td className={cn(tdCls, 'whitespace-nowrap')}><span className="inline-flex items-center gap-2"><Avatar id={e.userId} name={e.person} />{e.person}</span></td>}
+                          {scope && <td className={cn(tdCls, 'whitespace-nowrap')}><span className="inline-flex items-center gap-2"><Avatar id={e.userId} name={e.person} /><PersonPanelTrigger userId={e.userId} name={e.person} focusKey={`time:entry:${e.id}:person`} /></span></td>}
                           <td className={cn(tdCls, 'min-w-40 text-muted-foreground')}>{e.note}</td>
                           <td className={cn(tdCls, 'whitespace-nowrap text-right font-semibold tabular-nums')}>{h(e.hours)} h</td>
                           <td className={cn(tdCls, 'whitespace-nowrap py-1 text-right')}>{e.canEdit && <>
@@ -149,14 +193,17 @@ export function TimePage() {
                 </table>
               </TableRegion>
             )}
+            </>}
           </div>
-          <aside className="space-y-4" aria-label={t('time.totals')}>
-            <SummaryTile label={t('time.weekTotal')} value={`${h(q.data.total)} h`} accent="blue" hint={t('rcv.hoursDefinition')} />
-            {q.data.byProject.length > 0 && <Totals title={t('time.byProject')} rows={q.data.byProject.map((x) => ({ id: x.projectId, to: totalLink('projectId', x.projectId), title: `${x.projectNumber} ${x.projectName}`, hours: x.hours,
+          <aside className={ownWeek ? 'grid items-start gap-4 lg:grid-cols-3' : 'space-y-4'} aria-label={t('time.totals')}>
+            {visualSystem ? <CountCard label={t('time.weekTotal')} value={knownTotal ? `${h(shownTotal)} h` : <Missing />} valueText={knownTotal ? undefined : t('common.unavailable')}
+              tone="teal" definition={t('rcv.hoursDefinition')} where={totalBasis} to={totalDestination} />
+              : <SummaryTile label={t('time.weekTotal')} value={`${h((weekTotals ?? q.data).total)} h`} accent="blue" hint={t('rcv.hoursDefinition')} />}
+            {(weekTotals ?? q.data).byProject.length > 0 && <Totals title={t('time.byProject')} rows={(weekTotals ?? q.data).byProject.map((x) => ({ id: x.projectId, to: totalLink('projectId', x.projectId), title: `${x.projectNumber} ${x.projectName}`, hours: x.hours,
               label: <><AccentDot id={x.projectId} className="mr-2" /><Key>{x.projectNumber}</Key> {x.projectName}</> }))} />}
-            {q.data.byTask.length > 0 && <Totals title={t('time.byTask')} rows={q.data.byTask.map((x) => ({ id: x.taskId, to: totalLink('taskId', x.taskId), title: `${x.taskKey} ${x.taskName}`, hours: x.hours,
+            {(weekTotals ?? q.data).byTask.length > 0 && <Totals title={t('time.byTask')} rows={(weekTotals ?? q.data).byTask.map((x) => ({ id: x.taskId, to: totalLink('taskId', x.taskId), title: `${x.taskKey} ${x.taskName}`, hours: x.hours,
               label: <><Key>{x.taskKey}</Key> {x.taskName}</> }))} />}
-            <p className="text-xs/[18px] text-muted-foreground">{t('time.separate')}</p>
+            <p className={cn('text-xs/[18px] text-muted-foreground', ownWeek && 'lg:col-span-3')}>{t('time.separate')}</p>
           </aside>
         </div>
       )}

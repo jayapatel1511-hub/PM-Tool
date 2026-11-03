@@ -1,0 +1,118 @@
+{
+  "observedAtUtc": "2026-11-01T15:56:00.381Z",
+  "status": "FAIL_OR_UNPROVEN",
+  "fixture": {
+    "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+    "projectNumber": "QA21-REAL-001",
+    "taskIds": [
+      "01a197d2-986d-7dc9-8e06-3f76216fee08",
+      "01a197d2-9899-72ba-a182-963e99ee2847",
+      "01a197d2-98a9-7265-89ba-e5de3a283ee1",
+      "01a197d2-98b5-7b50-a4fe-7ff227951d8c",
+      "01a197d2-98c9-7ec0-a591-71911fcc3b99"
+    ],
+    "reviewerZeroTaskId": "01a197d2-98b5-7b50-a4fe-7ff227951d8c",
+    "reviewTaskId": "01a197d2-98c9-7ec0-a591-71911fcc3b99",
+    "reviewReady": {
+      "01a197d2-98b5-7b50-a4fe-7ff227951d8c": "2026-11-01T15:55:23.817916+00:00",
+      "01a197d2-98c9-7ec0-a591-71911fcc3b99": "2026-11-01T15:55:23.888077+00:00"
+    },
+    "personIds": {
+      "alex": "01a197bd-ba3c-7a2c-91b0-ae7a7140aeb9",
+      "jill": "01a197bd-ba3c-7024-a2a4-c6581e4b7428",
+      "marc": "01a197bd-ba3c-749e-a252-425184b403b0",
+      "priya": "01a197bd-ba3c-7004-8608-b9ff012100b9"
+    },
+    "today": "2026-11-01",
+    "week": "2026-10-26"
+  },
+  "joins": {
+    "boardCards": 5,
+    "boardHours": 12,
+    "overdue": null,
+    "currentDeliverable": 5,
+    "pmCards": 5,
+    "inReview": 1,
+    "reviewerZero": 1,
+    "projectTeamMembers": 4,
+    "workspaceTeamMembers": 4,
+    "openRoles": 2,
+    "gridPeople": 4
+  },
+  "browser": [
+    {
+      "route": "/boards",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "status": 200,
+      "overflow": true,
+      "textSample": "Skip to content\nt\nTuesday\nMy Work\nHome\nProjects\nTasks\nResources\nTime\nReports\nTeam\nFiles\nTuesday\nBoards\nSearch\n/\nMy projects\nNew\nPN\nBoards\n\n5 cards\n\nViews\nList\nBoard\nNew task\nDashboard\nBoard\nList\nTimeline\nCalendar\nFiles\nTeam\nWorkload\nMy projects\nCopy link\nSearch\nFilters\nMine\nOverdue\nBlocked\n\nFigures describe shown cards only; hidden or unloaded cards are excluded.\n\nTo Do\n0\n0 h estimated · 0 unestimated\n0 overdue\n\nNo tasks in this lane.\n\nIn Progress\n3\n8 h estimated · 0 unestimated\n0 overdue · 3 state unavailable\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTask:\nQA21-REAL-001-T0001\nQA21 overdue\nQA21-REAL-001-D001\nAC\nAlex Chen\nDue\nOct 20\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTask:\nQA21-REAL-001-T0003\nQA21 PM-owned\nQA21-REAL-001-D001\nPN\nPriya Nair\nDue\nNov 18\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTask:\nQA21-REAL-001-T0002\nQA21 current deliverable\nQA21-REAL-001-D001\nAC\nAlex Chen\nDue\nNov 20\nReview\n2\n4 h estimated · 0 unestimated\n0 overdue · 2 state unavailable\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTask:\nQA21-REAL-001-T0004\nQA21 reviewer zero-day\n◐\nReady for Review\nQA21-REAL-001-D001\nPerformer\nAlex Chen\nIndependent reviewer\nMarc Dubois\n\n0 days waiting\n\nDue\nNov 1\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTask:\nQA21-REAL-001-T0005\nQA21 review timestamp\n◐\nIn Review\nQA21-REAL-001-D001\nPerformer\nAlex Chen\nIndependent reviewer\nMarc Dubois\n\n0 days waiting\n\nDue\nNov 12\nDone (14 days)\n0\n0 h estimated · 0 unestimated\n0 overdue\n\nNo tasks in this lane.",
+      "errors": []
+    },
+    {
+      "route": "/boards",
+      "viewport": [
+        375,
+        812
+      ],
+      "status": 200,
+      "overflow": true,
+      "textSample": "Skip to content\nPN\nBoards\n\n5 cards\n\nViews\nList\nBoard\nNew task\nDashboard\nBoard\nList\nTimeline\nCalendar\nFiles\nTeam\nWorkload\nCopy link\nSearch\nFilters\nMine\nOverdue\nBlocked\n\nFigures describe shown cards only; hidden or unloaded cards are excluded.\n\nTo Do\n0\n0 h estimated · 0 unestimated\n0 overdue\n\nNo tasks in this lane.\n\nIn Progress\n3\n8 h estimated · 0 unestimated\n0 overdue · 3 state unavailable\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTask:\nQA21-REAL-001-T0001\nQA21 overdue\nQA21-REAL-001-D001\nAC\nAlex Chen\nDue\nOct 20\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTask:\nQA21-REAL-001-T0003\nQA21 PM-owned\nQA21-REAL-001-D001\nPN\nPriya Nair\nDue\nNov 18\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTask:\nQA21-REAL-001-T0002\nQA21 current deliverable\nQA21-REAL-001-D001\nAC\nAlex Chen\nDue\nNov 20\nReview\n2\n4 h estimated · 0 unestimated\n0 overdue · 2 state unavailable\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTask:\nQA21-REAL-001-T0004\nQA21 reviewer zero-day\n◐\nReady for Review\nQA21-REAL-001-D001\nPerformer\nAlex Chen\nIndependent reviewer\nMarc Dubois\n\n0 days waiting\n\nDue\nNov 1\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTask:\nQA21-REAL-001-T0005\nQA21 review timestamp\n◐\nIn Review\nQA21-REAL-001-D001\nPerformer\nAlex Chen\nIndependent reviewer\nMarc Dubois\n\n0 days waiting\n\nDue\nNov 12\nDone (14 days)\n0\n0 h estimated · 0 unestimated\n0 overdue\n\nNo tasks in this lane.\n\nMy Work\nSearch\nNotifications",
+      "errors": []
+    },
+    {
+      "route": "/team",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "status": 200,
+      "overflow": true,
+      "textSample": "Skip to content\nt\nTuesday\nMy Work\nHome\nProjects\nTasks\nResources\nTime\nReports\nTeam\nFiles\nTuesday\nTeam\nSearch\n/\nMy projects\nNew\nPN\nTeam\n\n4 people\n\nViews\nDashboard\nBoard\nList\nTimeline\nCalendar\nFiles\nTeam\nWorkload\nMy projects\nCopy link\nSearch\nGroup by\nNo grouping\nHome discipline\nOffice\nSupervisor\nCurrent unit\nFilters\nColumns\nTeam\nPerson\tHome discipline\tOffice\tSupervisor\tCurrent unit\tProjects and roles\n\nAC\nAlex Chen\nCivil Designer (EIT)\n\tNot set\tHead Office\tSam Patel\tNot set\t\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTeam Member\n\n\nJM\nJill Martin\nCivil Designer\n\tNot set\tHead Office\tSam Patel\tNot set\t\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTeam Member\n\n\nMD\nMarc Dubois\nSenior Civil Engineer\n\tNot set\tHead Office\tSam Patel\tNot set\t\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTeam Member\nLead: Civil\n\n\nPN\nPriya Nair\nProject Manager\n\tNot set\tHead Office\tLena Brooks\tNot set\t\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nProject Manager",
+      "errors": []
+    },
+    {
+      "route": "/team",
+      "viewport": [
+        375,
+        812
+      ],
+      "status": 200,
+      "overflow": true,
+      "textSample": "Skip to content\nPN\nTeam\n\n4 people\n\nViews\nDashboard\nBoard\nList\nTimeline\nCalendar\nFiles\nTeam\nWorkload\nCopy link\nSearch\nGroup by\nNo grouping\nHome discipline\nOffice\nSupervisor\nCurrent unit\nFilters\nColumns\nPerson\nAC\nAlex Chen\nCivil Designer (EIT)\nHome discipline\nNot set\nOffice\nHead Office\nSupervisor\nSam Patel\nCurrent unit\nNot set\nProjects and roles\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTeam Member\nPerson\nJM\nJill Martin\nCivil Designer\nHome discipline\nNot set\nOffice\nHead Office\nSupervisor\nSam Patel\nCurrent unit\nNot set\nProjects and roles\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTeam Member\nPerson\nMD\nMarc Dubois\nSenior Civil Engineer\nHome discipline\nNot set\nOffice\nHead Office\nSupervisor\nSam Patel\nCurrent unit\nNot set\nProjects and roles\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTeam Member\nLead: Civil\nPerson\nPN\nPriya Nair\nProject Manager\nHome discipline\nNot set\nOffice\nHead Office\nSupervisor\nLena Brooks\nCurrent unit\nNot set\nProjects and roles\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nProject Manager\nMy Work\nSearch\nNotifications",
+      "errors": []
+    },
+    {
+      "route": "/projects/QA21-REAL-001/team",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "status": 200,
+      "overflow": true,
+      "textSample": "Tuesday\nMy Work\nHome\nProjects\nTasks\nResources\nTime\nReports\nTeam\nFiles\nTuesday\nProjects\nQA21-REAL-001 Checkpoint 21 real Board Team project\nTeam & Disciplines\nSearch\n/\nMy projects\nNew\nPN\nQA21-REAL-001\nCheckpoint 21 real Board Team project\n◐\nActive\n○\nGrey\nOwner (PM): Priya Nair\nClient: Internal / TBD\nTarget date: 2026-11-30\nOverview\nWork\nDeliverables\nCoordination\nPeople\nFiles\nActivity\nSettings\nTeam & Disciplines\nAllocations\nWorkload\nTeam & Disciplines\nUnfilled roles2\n\nUnfilled roles are separate from people and capacity.\n\nQA21 Civil reviewer\n\nCivil · 2026-11-02 – 2026-11-06 · 10 h\n\nFill\n\nQA21 Civil technologist\n\nCivil · 2026-11-02 – 2026-11-06 · 20 h\n\nFill\nDisciplines1\nCivil\nMarc Dubois\nRemove\nAdd discipline\nChoose…\nProject Management\nSurvey\nGeotechnical\nElectrical\nEnvironmental\nStructural\nTransportation\nArchitecture\nAdd\nAdd from template\nMembers4\nCertification tag\nAll certification tags\nPerson\nAdd a person…\nRole\nTeam Member\nReviewer\nViewer\nProject Manager\nPrimary discipline\n(optional)\nNo primary discipline\nCivil\nAdd\nGroup by\nNo grouping\nHome discipline\nOffice\nSupervisor\nCurrent unit\nFilters\nColumns\nViews\n\n4 people shown\n\nMembers\nName\tHome discipline\tOffice\tSupervisor\tCurrent unit\tProject Manager\tTeam Member\tReviewer\tViewer\tPrimary discipline\tAdded\t\nActions\n\n\nAC\nAlex Chen\nCivil Designer (EIT)\n\tNot set\tHead Office\tSam Patel\tNot set\t\t\n\t\t\t\nNo primary discipline\nCivil\n\t2026-11-01\tRemove\n\nJM\nJill Martin\nCivil Designer\n\tNot set\tHead Office\tSam Patel\tNot set\t\t\n\t\t\t\nNo primary discipline\nCivil\n\t2026-11-01\tRemove\n\nMD\nMarc Dubois\nSenior Civil Engineer · Discipline Lead: Civil\n\tNot set\tHead Office\tSam Patel\tNot set\t\t\n\t\t\t\nNo primary discipline\nCivil\n\t2026-11-01\tRemove\n\nPN\nPriya Nair\nProject Manager\n\tNot set\tHead Office\tLena Brooks\tNot set\t\n\t\t\t\t\nNo primary discipline\nCivil\n\t2026-11-01\t",
+      "errors": []
+    },
+    {
+      "route": "/projects/QA21-REAL-001/team",
+      "viewport": [
+        375,
+        812
+      ],
+      "status": 200,
+      "overflow": true,
+      "textSample": "nation\nPeople\nFiles\nActivity\nSettings\nTeam & Disciplines\nAllocations\nWorkload\nTeam & Disciplines\nUnfilled roles2\n\nUnfilled roles are separate from people and capacity.\n\nQA21 Civil reviewer\n\nCivil · 2026-11-02 – 2026-11-06 · 10 h\n\nFill\n\nQA21 Civil technologist\n\nCivil · 2026-11-02 – 2026-11-06 · 20 h\n\nFill\nDisciplines1\nCivil\nMarc Dubois\nRemove\nAdd discipline\nChoose…\nProject Management\nSurvey\nGeotechnical\nElectrical\nEnvironmental\nStructural\nTransportation\nArchitecture\nAdd\nAdd from template\nMembers4\nCertification tag\nAll certification tags\nPerson\nAdd a person…\nRole\nTeam Member\nReviewer\nViewer\nProject Manager\nPrimary discipline\n(optional)\nNo primary discipline\nCivil\nAdd\nGroup by\nNo grouping\nHome discipline\nOffice\nSupervisor\nCurrent unit\nFilters\nColumns\nViews\n\n4 people shown\n\nAC\nAlex Chen\n\nCivil Designer (EIT)\n\nHome discipline\nNot set\nOffice\nHead Office\nSupervisor\nSam Patel\nCurrent unit\nNot set\nRole\nProject Manager\nTeam Member\nReviewer\nViewer\nPrimary discipline\nNo primary discipline\nCivil\n\nAdded: 2026-11-01\n\nRemove\nJM\nJill Martin\n\nCivil Designer\n\nHome discipline\nNot set\nOffice\nHead Office\nSupervisor\nSam Patel\nCurrent unit\nNot set\nRole\nProject Manager\nTeam Member\nReviewer\nViewer\nPrimary discipline\nNo primary discipline\nCivil\n\nAdded: 2026-11-01\n\nRemove\nMD\nMarc Dubois\n\nSenior Civil Engineer · Discipline Lead: Civil\n\nHome discipline\nNot set\nOffice\nHead Office\nSupervisor\nSam Patel\nCurrent unit\nNot set\nRole\nProject Manager\nTeam Member\nReviewer\nViewer\nPrimary discipline\nNo primary discipline\nCivil\n\nAdded: 2026-11-01\n\nRemove\nPN\nPriya Nair\n\nProject Manager\n\nHome discipline\nNot set\nOffice\nHead Office\nSupervisor\nLena Brooks\nCurrent unit\nNot set\nRole\nProject Manager\nTeam Member\nReviewer\nViewer\nPrimary discipline\nNo primary discipline\nCivil\n\nAdded: 2026-11-01\n\nMy Work\nSearch\nNotifications",
+      "errors": []
+    }
+  ],
+  "failures": [
+    {
+      "blocked": "canonical board State.IsOverdue unavailable after normal /attention EnsureFresh read"
+    }
+  ],
+  "limits": [
+    "QA21 disposable DB only; normal API commands; no SQL; browser contexts closed"
+  ]
+}

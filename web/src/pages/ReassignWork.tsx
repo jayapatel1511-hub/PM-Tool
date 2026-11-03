@@ -4,12 +4,14 @@ import { Link, useParams } from 'react-router'
 import { toast } from 'sonner'
 import { Empty, ErrorBanner, Loading, Missing, Page, Spinner } from '@/components/hub/common'
 import { PeoplePicker, weekOf } from '@/components/hub/people'
+import { PersonPanelTrigger } from '@/components/hub/person-panel-trigger'
 import { Key, StatusPill } from '@/components/hub/pills'
 import { itemHref } from '@/components/hub/search'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import type { components } from '@/gen/api'
 import { typedRequest } from '@/lib/api'
+import { useFlag, useMe } from '@/lib/auth'
 import { fmtDate, today } from '@/lib/format'
 import { t , runtimeText } from '@/lib/i18n'
 import { invalidateChange } from '@/lib/keys'
@@ -24,10 +26,12 @@ const id = (i: OpenItem) => `${i.kind}:${i.id}`
 /** Reassign work (FR-ADM-02, E-01, §13.15): everything one person owns across projects, reassigned one by one or all at once. */
 export function ReassignWorkPage() {
   const { id: userId } = useParams()
+  const me = useMe(), people = useFlag('people_screens')
+  const bulkTasks = useFlag('work_screens')
   const qc = useQueryClient()
-  const q = useQuery({ queryKey: ['open-work', userId], queryFn: () => typedRequest('get', '/api/v1/users/{id}/open-work', { params: { id: userId! } }) })
+  const q = useQuery({ queryKey: ['open-work', userId, me.id, people], queryFn: () => typedRequest('get', '/api/v1/users/{id}/open-work', { params: { id: userId! } }) })
   const [picked, setPicked] = useState<Set<string>>(new Set())
-  const [to, setTo] = useState<{ id: string; name?: string } | null>(null)
+  const [to, setTo] = useState<{ id: string; name?: string; active?: boolean } | null>(null)
   const [busy, setBusy] = useState(false)
   const byProject = useMemo(() => {
     const m = new Map<string, OpenItem[]>()
@@ -52,14 +56,16 @@ export function ReassignWorkPage() {
     } catch (e) { toast.error(errorText(e)) } finally { setBusy(false) }
   }
   return (
-    <Page {...header} title={t('reassign.title', { name: person.isActive ? person.displayName : t('common.inactiveSuffix', { name: person.displayName }) })}>
+    <Page {...header} title={people ? <>{t('reassign.title', { name: '' })}<PersonPanelTrigger userId={person.id} name={person.displayName} active={person.isActive} focusKey={`reassign:${person.id}:source:heading`} /></> : t('reassign.title', { name: person.isActive ? person.displayName : t('common.inactiveSuffix', { name: person.displayName }) })}>
+      {bulkTasks && <div><Button variant="outline" asChild><Link to={`/tasks?assigneeId=${encodeURIComponent(person.id)}&open=true&projects=all`}>{t('bulkCommand.departure')}</Link></Button></div>}
       {items.length === 0 ? <div className="rounded-lg border bg-card"><Empty>{t('reassign.nothing')}</Empty></div> : (
         <>
           <div className="sticky top-0 z-10 flex flex-wrap items-center gap-3 rounded-lg border bg-card p-4 shadow-popover">
             <label className="flex min-h-(--control-h) items-center gap-2 text-sm font-medium"><Checkbox checked={picked.size === items.length} onCheckedChange={(c) => setPicked(c ? new Set(items.map(id)) : new Set())} />{t('reassign.all', { n: items.length })}</label>
             <span className="text-sm text-muted-foreground tabular-nums" aria-live="polite">{t('bulk.selected', { n: picked.size })}</span>
             <div className="flex-1" />
-            <div className="w-60"><PeoplePicker value={to?.id} valueName={to?.name} exclude={[person.id]} onChange={(v, p) => setTo(v ? { id: v, name: p?.displayName } : null)} placeholder={t('reassign.to')} label={t('reassign.to')} capacityWeek={weekOf(today())} /></div>
+            <div className="w-60 max-w-full"><PeoplePicker value={to?.id} valueName={to?.name} exclude={[person.id]} onChange={(v, p) => setTo(v ? { id: v, name: p?.id === v ? p.displayName : undefined, active: p?.id === v ? p.isActive : undefined } : null)} placeholder={t('reassign.to')} label={t('reassign.to')} capacityWeek={weekOf(today())} /></div>
+            {people && to?.name && <PersonPanelTrigger userId={to.id} name={to.name} active={to.active} focusKey={`reassign:${person.id}:destination:${to.id}:details`} className="inline-flex min-h-9 items-center text-sm">{t('common.details')}: {to.name}</PersonPanelTrigger>}
             <Button disabled={!to || picked.size === 0 || busy} onClick={submit}>{busy && <Spinner />}{t('reassign.go', { n: picked.size })}</Button>
           </div>
           {byProject.map(([project, list]) => (

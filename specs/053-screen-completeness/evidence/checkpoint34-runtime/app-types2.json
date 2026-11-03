@@ -1,0 +1,12 @@
+{
+  "exitCode": 0,
+  "args": [
+    "web/node_modules/.bin/tsc",
+    "-b",
+    "web"
+  ],
+  "atUtc": "2026-11-03T05:05:44.999991+00:00",
+  "elapsedSeconds": 14.69,
+  "errors": [],
+  "tail": []
+}

@@ -1,0 +1,54 @@
+{
+  "checkpoint": 21,
+  "generation": 49,
+  "mode": "CLOSED",
+  "previous": "checkpoint20 closed;S11/S25/S29 checked;25 local053 slices",
+  "goal": "active;full052/053 remains;no commit/push/deploy/activation",
+  "lanes": {
+    "A": "A45 held; independent P2 phone differing-health-override composition; A46 bounded repair/test source loan active",
+    "B": "ALL SOURCE READY45; independent board+root bridge source PASS, execution pending",
+    "C": "C46 S24 Team Capacity comparison implementation active; reviewed uncertainty and2000 expanded-row cap contract",
+    "D": "S42 authoring; Workspace/Team DTO and view contracts approved; root shared integration authored"
+  },
+  "rootAuthored": [
+    "TaskQueries.Row optionalBoard typedBoardScreenReads.BoardFact",
+    "TaskQueries.Page boardSettings/boardNow optionalenrichment after final authorised ordered pages, datefactpreserved",
+    "Tasks two listGETs passcapturedsettings/instant behindwork_screens inexistingRR; genericRowsunchanged",
+    "Workspace.Team optional OrganisationFacts after final authorised cohort; people_screens RepeatableRead",
+    "Reports optional CapacityComparison and GET-only eligible CaptureCapacityComparison context bridge",
+    "Team saved-view list types with people_screens/project/personal guards and Team-only group/reference/sentinel validation",
+    "Shared useTable checkbox reflects current URL-visible columns; people_screens provisional CapacityFigure guard",
+    "Board/Team/candidate-capacity cache invalidation with actual QueryClient regression case; board+Team23 locale strings merged"
+  ],
+  "sourceStatus": "Finalproduct/testsourcefrozen and verified556backendrepair2/403webrepair4; allreviewsandchecksclosed. No sourcechangedafterbuild2exceptreviewedtwoCJSsynchronizationfixtures.",
+  "services": "OwnedAPI5088 PID47649/session22822 stoppedexit0; source8854 PID37994/session26450 stopped143; onlyhub_qa_checkpoint21 dropped; nohub_test_* remaining. TestPG55432 andproductionpreview8853 PID11091/session49446 retained. NoactiveQA actor/browser.",
+  "pendingUserAnswer": "utilitynav none vsMyWork still pending; no policy change",
+  "rootPending": [
+    "Nextbatch: all21remainingunchecked053 andremainingdark052work; no scope reduction",
+    "ReviewpreparedS10seen/S43personpanelcontracts; Aoverlapproposal remains",
+    "Utilitynavigationanswerpending; no policy/status/pilotchange"
+  ],
+  "checks": {
+    "nodeCache": "PASS14; actual QueryClient invalidation/refetch; physical SSE transport unproven",
+    "backendBuild": "PASS initial0errors/1147existingwarnings; exact test-repair1 compileFAIL1localshadowing; compiler-only rename -> repair2PASS0errors/1142warnings",
+    "focused": "PASS29 (B10,D8,C11), all product frozen hashes unchanged",
+    "adjacent": "PASS latest91/91 after independent test-only compatibility repairs; raw initial89pass/2fail preserved",
+    "contract": "Expected refreshFAIL2 byintent; reviewed6newschemas+4optionalproperties, no paths/requiredchanges; generatedTypes; normalgoldens passed within89adjacent",
+    "headerSource": "FAIL: grouped actualtask441.5 (summary404.5), longPM/clienttargetdate clipped. A47 fourfilecomposition repair active; no waiver",
+    "distinctDotnet": "PASS120 unique latest29focused+91adjacent; no skipped",
+    "appTypes": "InitialFAILoneoptionalrun.data callback; exactoptionalaccessreviewed, forcedrepair1PASS",
+    "fixtureTypes": "PASS",
+    "lint": "PASSwithpreexistingwarnings",
+    "ssr": "PASSui-review",
+    "productionBuild": "PASSbuild1, hashes556backend+403web verified beforebrowser; exactFieldmarkuprepair nowneedsbuild2",
+    "focusedBrowser": "PASS4 latestfullsuites: Aheader+Cchartbuild2repair1, Bboard+DTeambuild2repair2. Earlierfailuresretained; finalsource556backend/403webhashesmatch.",
+    "adjacentBrowser": "PASS7/7 targeted suites",
+    "realBoard": "PASSfinal4views/API5cards12h1canonicaloverdue/PriyaMarc/reviewzero; disabledworkerpartialpreserved thenQAworkertrueJobsfalse",
+    "realCapacity": "PASS4views/API/table/chart40/50/10/Possible20excluded/FTE1/1.25/.25/denom40/matrix379.5",
+    "realTeam": "PASSfinalworkspace2+project2views; actualAlexCivil/JillNotSet/2roles;Diane12free8away/Omarabsent/phoneviewport",
+    "spec": "PASS1546IDs/438sections/0unknown; combinedup-to-date"
+  },
+  "backend": "PASS120 unique latestcases, backend556repair2 unchanged, liveverifiedAPIbinary is same product source.",
+  "labels": "Merged57 UI labels (B11,D12,C34) and2 server labels",
+  "local053Checked": 28
+}

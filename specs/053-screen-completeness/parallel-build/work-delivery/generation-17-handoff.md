@@ -1,0 +1,33 @@
+# Generation17 — S10-A activity and exact Comments
+
+Status: ALL SOURCE READY/HELD. All named B application/test source is held, including the accepted narrow MyWork off-parity repair. No B source edit or lane process is in flight. Previous Work/Submissions/Readiness sources remain held; root's later Readiness script repairs are preserved.
+
+## Scope and implementation
+
+FR/AC-SCR15 only for actual TaskQueries-backed task streams under default-off `work_screens`. No seen/preference/New marker, S11 aggregate/grouping, schema, permission, command or stored task-state change. S10 stays incomplete.
+
+- `src/Hub.Api/Features/Tasks.cs`: exactly two existing Page actor-inclusion arguments become `small_ux || work_screens`. Existing small_ux inclusion and both-off omission remain; existing TaskQueries projection handles newest exact Task log/actor/count/time and all filter/scope/sort/page behavior unchanged.
+- `src/Hub.Api/Features/MyWork.cs`: exactly three existing Rows actor-inclusion arguments become `work_screens` only (assigned/collaborator, reviewer and completed). Root corrected the brief's OR instruction because this reader historically omitted actor even under small_ux. That off parity is retained. Query-backed Today/Upcoming/Overdue/Completed membership views use ordinary `/tasks` and its original flag behavior.
+- `tests/Hub.Tests/Api/WorkActivityCommentsTests.cs`: eight authored cases: four independent flag combinations with exact baseline response parity after removing declared actor additions and normal three-comment setup; normal assigned/collaborator/reviewer/completed streams with no GET writes;101 normal API-created tasks across page100 with exact count/sort; explicitly synthetic missing/system/equal-time legacy log fixtures; restricted/person/read-only access. Normal statuses/comments/ownership use existing commands. No per-row history/comment projection or new actor inference is introduced.
+- `web/src/pages/projects/work-activity-comments.tsx`: narrow display/navigation helper consuming existing row facts only. Named activity group exposes relative time and actual actor; missing/invalid time, absent actor and invalid comment count are separate unavailable states. System is shown only when supplied as the actual actor. Positive counts open exact Task+Comments atomically, capturing source URL/state/scroll with the existing record-context helper; no closed-row detail/history/comment request. Zero comment count has no invented action.
+- `web/src/pages/MyWork.tsx`: helper in shared Overview/Today task rows (including reviewer/completed sections) and query-backed TaskView rows. Existing filters, actions, priorities, performer/reviewer rules and other-person read-only handling remain.
+- `web/src/pages/WorkspaceTasks.tsx`: work_screens-only Last activity and Comments table cells, plus matching phone card facts/action. Last activity uses the existing sort key; source scope, filters and page100 behavior remain.
+- `web/src/pages/projects/Tasks.tsx`: narrow enabled-only positive comment-count button beside the existing task-name button, shared table/phone name cell. No new chooser column, grouping, action or existing LastActivity/small_ux change. Source correction: no comment cell existed before this increment; the initial proposal's statement otherwise was incorrect and root approved the name-cell integration.
+- `web/src/pages/projects/TaskPanel.tsx`: consume `taskSection=comments` only with work_screens and exact `panel=Task:<this id>`; select/focus/scroll the actual Comments section with sticky-header scroll margin. Manual Comments/History selection removes transient section key while preserving query/state/panel. Off keeps the previous CommentsSlot DOM and local-tab behavior. No section-strip/History actor filter from S16 is added.
+- `web/tests/work-activity-comments.cjs`: dedicated actual-app/mock-API browser acceptance authored;101 rows/page2, actor/time/count facts, no closed-row per-item reads, actual keyboard Comments open with exact query/path/source state, actual source scroll/focus return, manual tab cleanup, normal related-record key cleanup, all TaskQueries-backed MyWork stream/person-readonly paths,375/768/1280 cards/table/panel reflow, project name-cell integration, explicit unknowns, four flags and no seen/task writes.
+
+## Root integration and held seams
+
+Root owns `panel-host.tsx`: enabled ordinary useItemPanel opens delete transient taskSection before setting a record; non-origin close deletes it with panel. Exact Comments helper sets section itself atomically with captured origin. Existing origin-return close restores the source URL/state. Root reported this host cleanup and ScreenLists.NotKept rationale authored.
+
+Four locale keys: `requests/g17-work-activity-locales.json`. Root reported them merged. No DTO, saved-view, export, generated query or schema addition requested. Existing explicit filter/metadata whitelists exclude taskSection; browser case asserts it is absent from actual task endpoint queries. Root owns shared cache/metadata/contract verification; this lane does not claim an executed saved-view/export check.
+
+Exact remaining FR15 seam: generic follow_up Watching/Requested is a multi-kind list in `web/src/components/hub/my-work-follow-up.tsx` whose DTO has no task activity/comment facts. Its reader/component are outside this loan and held. Root explicitly accepted limiting S10-A to actual TaskQueries-backed task streams; the eventual overall FR15 census must revisit those multi-kind rows. Do not infer actor/count from another record or claim full S10 acceptance.
+
+## Verification boundary
+
+All runtime/check/build/type/lint/test/browser/generation execution is UNRUN in this lane per generation17. No syntax/parse PASS is claimed. Source inspection confirmed the backend diff contains only the five named actor-inclusion arguments; no backend permission/query/command rewrite. Meaningful API and browser cases are authored for root execution after freeze.
+
+Root focused candidates: `FullyQualifiedName~WorkActivityCommentsTests`, affected TaskQueriesTests/MyWorkTests/TasksTests/ActivityTests as proportionate to the exact patch. Browser after integration: from web, `CHROME_EXECUTABLE_PATH='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' TUESDAY_UI_BASE_URL=http://127.0.0.1:8853 node tests/work-activity-comments.cjs`; retain appropriate task panel/source-return and workspace responsive regressions. Root must run syntax/types/lint/build and independent review before executing/marking evidence.
+
+No helper/goal/migration/commit/push/deploy/activation. Flags remain default-off. S10 and formal decision statuses remain open.

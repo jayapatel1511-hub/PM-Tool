@@ -1,0 +1,11 @@
+locator.waitFor: Timeout 12000ms exceeded.
+Call log:
+[2m  - waiting for locator('[data-person-panel="00000000-0000-0000-0000-000000009104"]') to be visible[22m
+
+    at roundtrip (/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/person-search-reassign.cjs:62:86)
+    at async /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/person-search-reassign.cjs:186:5 {
+  log: [
+    `  - waiting for locator('[data-person-panel="00000000-0000-0000-0000-000000009104"]') to be visible`
+  ],
+  name: 'TimeoutError'
+}

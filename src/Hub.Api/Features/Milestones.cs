@@ -45,7 +45,7 @@ public static class MilestoneEndpoints
     public sealed record MilestonePermissions(RegisterEndpoints.RegisterPermission Manage, bool Comment);
     /// One milestone with its deliverables, the tasks aimed straight at it, the phase it completes and what the caller may do with it.
     public sealed record MilestoneDetail(MilestoneRow Milestone, IReadOnlyList<DeliverableEndpoints.DeliverableRow> Deliverables, IReadOnlyList<MilestoneTask> DirectTasks,
-        MilestonePhase? CompletesPhase, MilestoneProject Project, MilestonePermissions Permissions);
+        MilestonePhase? CompletesPhase, MilestoneProject Project, MilestonePermissions Permissions, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] RecordContextView? Context = null);
 
     public static void Map(RouteGroupBuilder api)
     {
@@ -161,7 +161,8 @@ public static class MilestoneEndpoints
         var phase = m.CompletesPhaseId is { } ph ? await db.Phases.Where(x => x.Id == ph).Select(x => new MilestonePhase(x.Id, x.Name)).FirstOrDefaultAsync() : null;
         var can = Permissions.ManageMilestones(access.Actor, ctx);
         return TypedResults.Ok(new MilestoneDetail(row, deliverables, directTasks, phase, new MilestoneProject(p.Id, p.ProjectNumber, p.Name, p.Status),
-            new MilestonePermissions(new RegisterEndpoints.RegisterPermission(can.Ok, can.Why is null ? null : Text.Get(can.Why, can.Arg ?? p.Status)), Permissions.Comment(access.Actor, ctx).Ok)));
+            new MilestonePermissions(new RegisterEndpoints.RegisterPermission(can.Ok, can.Why is null ? null : Text.Get(can.Why, can.Arg ?? p.Status)), Permissions.Comment(access.Actor, ctx).Ok),
+            await new RecordContextReader(db, p, settings).Read(RecordContextKind.Milestone, m.Id)));
     }
 
     static async Task<Ok<MilestoneVersion>> Edit(Guid id, JsonElement body, HttpContext http, Access access, HubDb db)
@@ -216,27 +217,39 @@ public static class MilestoneEndpoints
     }
 
     /// M-02..M-04, AC-MS-04, AC-MS-05, FR-MS-05; `includeTasks` extends the cascade to tasks (packet 018).
-    static async Task<Results<Ok<DatePreview>, Ok<DateChanged>>> ChangeDate(Guid id, ChangeDateBody body, HttpContext http, Access access, HubDb db, Notifier notify)
+    // Read-only core: callers authorize the actual source first. Existing command keeps its own version/reason/commit rules below.
+    internal static async Task<(DatePreview Preview, List<Deliverable> Deliverables, List<WorkTask> Tasks)> PreviewDateChange(
+        HubDb db, Milestone m, DateOnly newDate, bool cascadeDeliverables, bool includeTasks)
+    {
+        var id = m.Id;
+        var old = m.Date;
+        var delta = old is { } o ? newDate.DayNumber - o.DayNumber : 0;
+        var deliverables = cascadeDeliverables && delta != 0
+            ? await db.Deliverables.Where(d => d.MilestoneId == id && d.DueDate != null && d.Status != DeliverableStatus.Issued
+                && d.Status != DeliverableStatus.Accepted && d.Status != DeliverableStatus.Cancelled).OrderBy(d => d.Seq).ToListAsync()
+            : [];
+        var dIds = deliverables.Select(d => d.Id).ToList();
+        var tasks = includeTasks && dIds.Count > 0
+            ? await db.Tasks.Where(t => t.DeliverableId != null && dIds.Contains(t.DeliverableId.Value) && t.Status != TaskStatuses.Complete
+                && t.Status != TaskStatuses.Cancelled && (t.DueDate != null || t.StartDate != null)).OrderBy(t => t.Seq).ToListAsync()
+            : [];
+        var preview = new DatePreview(
+            new DateMove(m.Key, m.Name, old, newDate, m.OriginalDate is { } od ? newDate.DayNumber - od.DayNumber : 0, delta),
+            deliverables.Select(d => new DeliverableShift(d.Id, d.Key, d.Name, d.DueDate, d.DueDate!.Value.AddDays(delta))),
+            tasks.Select(t => new TaskShift(t.Id, t.Key, t.Name, t.DueDate, t.DueDate?.AddDays(delta), t.StartDate, t.StartDate?.AddDays(delta))),
+            await db.Deliverables.Where(d => d.MilestoneId == id && d.DueDate > newDate && !dIds.Contains(d.Id)).Select(d => new DeliverableLeftBehind(d.Key, d.Name, d.DueDate)).ToListAsync());
+        return (preview, deliverables, tasks);
+    }
+
+    static async Task<Results<Ok<DatePreview>, Ok<DateChanged>>> ChangeDate(Guid id, ChangeDateBody body, HttpContext http, Access access, HubDb db, Notifier notify, SettingsStore store)
+        => await Tx.Notice<Results<Ok<DatePreview>, Ok<DateChanged>>>(db, store, async () =>
     {
         var (m, p, ctx) = await Load(db, access, id);
         Access.Demand(Permissions.ManageMilestones(access.Actor, ctx));
         Check.That(!m.IsComplete && !m.IsCancelled, "newDate", "milestone.closed");
         var old = m.Date;
         var delta = old is { } o ? body.NewDate.DayNumber - o.DayNumber : 0;
-        var deliverables = body.CascadeDeliverables == true && delta != 0
-            ? await db.Deliverables.Where(d => d.MilestoneId == id && d.DueDate != null && d.Status != DeliverableStatus.Issued
-                && d.Status != DeliverableStatus.Accepted && d.Status != DeliverableStatus.Cancelled).OrderBy(d => d.Seq).ToListAsync()
-            : [];
-        var dIds = deliverables.Select(d => d.Id).ToList();
-        var tasks = body.IncludeTasks == true && dIds.Count > 0
-            ? await db.Tasks.Where(t => t.DeliverableId != null && dIds.Contains(t.DeliverableId.Value) && t.Status != TaskStatuses.Complete
-                && t.Status != TaskStatuses.Cancelled && (t.DueDate != null || t.StartDate != null)).OrderBy(t => t.Seq).ToListAsync()
-            : [];
-        var preview = new DatePreview(
-            new DateMove(m.Key, m.Name, old, body.NewDate, m.OriginalDate is { } od ? body.NewDate.DayNumber - od.DayNumber : 0, delta),
-            deliverables.Select(d => new DeliverableShift(d.Id, d.Key, d.Name, d.DueDate, d.DueDate!.Value.AddDays(delta))),
-            tasks.Select(t => new TaskShift(t.Id, t.Key, t.Name, t.DueDate, t.DueDate?.AddDays(delta), t.StartDate, t.StartDate?.AddDays(delta))),
-            await db.Deliverables.Where(d => d.MilestoneId == id && d.DueDate > body.NewDate && !dIds.Contains(d.Id)).Select(d => new DeliverableLeftBehind(d.Key, d.Name, d.DueDate)).ToListAsync());
+        var (preview, deliverables, tasks) = await PreviewDateChange(db, m, body.NewDate, body.CascadeDeliverables == true, body.IncludeTasks == true);
         if (body.DryRun == true) return TypedResults.Ok(preview);
         await Http.CheckVersion(db, http, m, body.RowVersion);
         var reason = Check.Reason(body.Reason); // G-09: milestone date change needs a reason
@@ -251,7 +264,7 @@ public static class MilestoneEndpoints
             Text.Get("notify.milestone_moved", await notify.ActorName(), m.Key, m.Name, old?.ToString("yyyy-MM-dd") ?? "—", body.NewDate.ToString("yyyy-MM-dd"), (delta >= 0 ? "+" : "") + delta), reason);
         await db.SaveChangesAsync();
         return TypedResults.Ok(new DateChanged(m.Id, m.RowVersion, deliverables.Count + tasks.Count, preview));
-    }
+    });
 
     static async Task<Ok<MilestoneCompleted>> Complete(Guid id, CompleteBody body, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {

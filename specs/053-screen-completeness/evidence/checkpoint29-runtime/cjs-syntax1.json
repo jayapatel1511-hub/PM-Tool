@@ -1,0 +1,42 @@
+[
+  {
+    "file": "tests/calendar-screen.cjs",
+    "exitCode": 0,
+    "output": ""
+  },
+  {
+    "file": "tests/calendar-screen.fixture.cjs",
+    "exitCode": 0,
+    "output": ""
+  },
+  {
+    "file": "tests/review-discipline-patterns.cjs",
+    "exitCode": 0,
+    "output": ""
+  },
+  {
+    "file": "tests/review-discipline-patterns.fixture.cjs",
+    "exitCode": 0,
+    "output": ""
+  },
+  {
+    "file": "tests/task-cross-project-bulk.cjs",
+    "exitCode": 0,
+    "output": ""
+  },
+  {
+    "file": "tests/task-cross-project-bulk.fixture.cjs",
+    "exitCode": 0,
+    "output": ""
+  },
+  {
+    "file": "tests/notification-screen.cjs",
+    "exitCode": 0,
+    "output": ""
+  },
+  {
+    "file": "tests/notification-screen.fixture.cjs",
+    "exitCode": 0,
+    "output": ""
+  }
+]

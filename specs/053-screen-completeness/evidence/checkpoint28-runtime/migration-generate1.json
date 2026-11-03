@@ -1,0 +1,10 @@
+{
+  "exitCode": 0,
+  "newFiles": [
+    "src/Hub.Api/Data/Migrations/20261102145256_RegisterMetadataAndTemplateLineage.Designer.cs",
+    "src/Hub.Api/Data/Migrations/20261102145256_RegisterMetadataAndTemplateLineage.cs"
+  ],
+  "atUtc": "2026-11-02T14:52:56.780460+00:00",
+  "configWatching": false,
+  "boundary": "Design generation only, Db.Migrate false, no DB/service action"
+}

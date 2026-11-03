@@ -1,0 +1,70 @@
+Test run for /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:10.84]     Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(code: "allocations-by-source", query: "from=2026-09-14&weeks=2&show=hours-by-source") [FAIL]
+  Failed Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(code: "allocations-by-source", query: "from=2026-09-14&weeks=2&show=hours-by-source") [10 s]
+  Error Message:
+   Assert.True() Failure
+Expected: True
+Actual:   False
+  Stack Trace:
+     at Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(String code, String query) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReportCapacityTaskInputsTests.cs:line 262
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:14.99]     Hub.Tests.Api.ReportCatalogueViewsTests.Additions_are_absent_off_and_do_not_change_existing_rows_parameters_or_export_bytes [FAIL]
+  Failed Hub.Tests.Api.ReportCatalogueViewsTests.Additions_are_absent_off_and_do_not_change_existing_rows_parameters_or_export_bytes [5 s]
+  Error Message:
+   Assert.True() Failure
+Expected: True
+Actual:   False
+  Stack Trace:
+     at Hub.Tests.Api.ReportCatalogueViewsTests.Additions_are_absent_off_and_do_not_change_existing_rows_parameters_or_export_bytes() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReportCatalogueViewsTests.cs:line 34
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:17.06]     Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(code: "workload-discipline", query: "") [FAIL]
+  Failed Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(code: "workload-discipline", query: "") [6 s]
+  Error Message:
+   Assert.True() Failure
+Expected: True
+Actual:   False
+  Stack Trace:
+     at Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(String code, String query) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReportCapacityTaskInputsTests.cs:line 262
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:20.15]     Hub.Tests.Api.ReportCatalogueViewsTests.Capture_uses_actual_supported_defaults_and_normalized_values_without_ui_state [FAIL]
+  Failed Hub.Tests.Api.ReportCatalogueViewsTests.Capture_uses_actual_supported_defaults_and_normalized_values_without_ui_state [5 s]
+  Error Message:
+   Assert.Equal() Failure: Collections differ
+                                                                      ↓ (pos 2)
+Expected: string[]                        ["from", "includeMyDrafts", "weeks"]
+Actual:   OrderedIterator<string, string> ["from", "includeMyDrafts", "period", "unit", "weeks"]
+                                                                      ↑ (pos 2)
+  Stack Trace:
+     at Hub.Tests.Api.ReportCatalogueViewsTests.Capture_uses_actual_supported_defaults_and_normalized_values_without_ui_state() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReportCatalogueViewsTests.cs:line 63
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:22.15]     Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(code: "team-capacity", query: "from=2026-09-14&weeks=2&includeMyDrafts=false") [FAIL]
+  Failed Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(code: "team-capacity", query: "from=2026-09-14&weeks=2&includeMyDrafts=false") [5 s]
+  Error Message:
+   Assert.True() Failure
+Expected: True
+Actual:   False
+  Stack Trace:
+     at Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(String code, String query) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReportCapacityTaskInputsTests.cs:line 262
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:27.21]     Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(code: "workload-employee", query: "") [FAIL]
+[xUnit.net 00:00:27.34]     Hub.Tests.Api.TaskGroupingTests.Disabled_group_parameter_preserves_legacy_bytes_and_enabled_ungrouped_shape [FAIL]
+  Failed Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(code: "workload-employee", query: "") [5 s]
+  Error Message:
+   Assert.True() Failure
+Expected: True
+Actual:   False
+  Stack Trace:
+     at Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(String code, String query) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReportCapacityTaskInputsTests.cs:line 262
+--- End of stack trace from previous location ---
+  Failed Hub.Tests.Api.TaskGroupingTests.Disabled_group_parameter_preserves_legacy_bytes_and_enabled_ungrouped_shape [5 s]
+  Error Message:
+   Assert.True() Failure
+Expected: True
+Actual:   False
+  Stack Trace:
+     at Hub.Tests.Api.TaskGroupingTests.Disabled_group_parameter_preserves_legacy_bytes_and_enabled_ungrouped_shape() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/TaskGroupingTests.cs:line 245
+--- End of stack trace from previous location ---
+Results File: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint20-runtime/checkpoint20-adjacent.trx
+
+Failed!  - Failed:     7, Passed:    86, Skipped:     0, Total:    93, Duration: 1 m 22 s - Hub.Tests.dll (net10.0)

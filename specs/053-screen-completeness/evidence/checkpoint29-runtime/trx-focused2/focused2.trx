@@ -1,0 +1,632 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="949693b7-ffd2-4234-9d5a-4eefcde1501e" name="@Jays-MacBook-Pro 2026-11-02 14:00:52" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-11-02T14:00:52.4799630-04:00" queuing="2026-11-02T14:00:52.4799630-04:00" start="2026-11-02T14:00:42.3359360-04:00" finish="2026-11-02T14:01:45.7589530-04:00" />
+  <TestSettings name="default" id="e3951183-f148-4f4f-a5b8-7fd80e63c24b">
+    <Deployment runDeploymentRoot="_Jays-MacBook-Pro_2026-11-02_14_00_52" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="709efc16-4458-42b4-9ee2-0fdbed309003" testId="eb3774d1-a5f3-220b-d3c0-7f41cbb07c81" testName="Hub.Tests.Api.TaskBulkCommandTests.Every_toolbar_operation_uses_a_versioned_canonical_command(operation: &quot;shiftDueDates&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:02.4286328" startTime="2026-11-02T14:01:20.0853320-04:00" endTime="2026-11-02T14:01:22.5139850-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="709efc16-4458-42b4-9ee2-0fdbed309003" />
+    <UnitTestResult executionId="f13cdaaf-58c8-4d63-a4ae-6232ba2ee3ce" testId="6d3019ee-72d5-b9f9-7d0b-5b7527afa6a4" testName="Hub.Tests.Api.TaskBulkCommandTests.Every_toolbar_operation_uses_a_versioned_canonical_command(operation: &quot;setDeliverable&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:02.3517088" startTime="2026-11-02T14:01:17.7334140-04:00" endTime="2026-11-02T14:01:20.0851350-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f13cdaaf-58c8-4d63-a4ae-6232ba2ee3ce" />
+    <UnitTestResult executionId="538a55bf-1ca2-4726-9c3b-931ea3693f4d" testId="e54721d9-30d7-9571-9c7f-c11e71ba624b" testName="Hub.Tests.Api.TaskBulkCommandTests.Replay_uses_current_visibility_without_requiring_lost_assignment_rights_and_hidden_rows_have_no_true_outcome" computerName="Jays-MacBook-Pro" duration="00:00:02.4126863" startTime="2026-11-02T14:01:29.8929930-04:00" endTime="2026-11-02T14:01:32.3056550-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="538a55bf-1ca2-4726-9c3b-931ea3693f4d" />
+    <UnitTestResult executionId="768ea1cb-70f1-434f-b5b3-28bac4caa0b2" testId="f3c92d27-c5ec-0044-df08-9bb518a43072" testName="Hub.Tests.Api.TaskBulkCommandTests.Keyed_preview_is_write_free_and_stale_noop_and_refused_results_never_revive" computerName="Jays-MacBook-Pro" duration="00:00:02.5387105" startTime="2026-11-02T14:01:24.9464120-04:00" endTime="2026-11-02T14:01:27.4851250-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="768ea1cb-70f1-434f-b5b3-28bac4caa0b2" />
+    <UnitTestResult executionId="3fe200b7-3868-4771-9845-7e25bec25ef3" testId="c332c3d8-8c7c-92b8-0b9e-303a1bc0671c" testName="Hub.Tests.Api.TaskBulkCommandTests.Every_toolbar_operation_uses_a_versioned_canonical_command(operation: &quot;assign&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:02.4613051" startTime="2026-11-02T14:01:12.7812310-04:00" endTime="2026-11-02T14:01:15.2425090-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3fe200b7-3868-4771-9845-7e25bec25ef3" />
+    <UnitTestResult executionId="45c21b94-7c8e-4061-954b-cd5f50ca90cc" testId="3585b58d-fe69-1b94-fe1a-b8dbbabf5663" testName="Hub.Tests.Api.TaskBulkCommandTests.Deliverable_mapping_order_is_canonical_but_input_row_order_is_significant" computerName="Jays-MacBook-Pro" duration="00:00:02.7555783" startTime="2026-11-02T14:01:42.9594540-04:00" endTime="2026-11-02T14:01:45.7150630-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="45c21b94-7c8e-4061-954b-cd5f50ca90cc" />
+    <UnitTestResult executionId="1344b919-11f8-4c4f-bbaf-f8aa348bd82a" testId="f165f249-d29c-f7ba-1379-c939871ead79" testName="Hub.Tests.Api.TaskBulkCommandTests.Every_toolbar_operation_uses_a_versioned_canonical_command(operation: &quot;hold&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:02.4320004" startTime="2026-11-02T14:01:22.5141750-04:00" endTime="2026-11-02T14:01:24.9461980-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1344b919-11f8-4c4f-bbaf-f8aa348bd82a" />
+    <UnitTestResult executionId="5bb997be-e6f8-49e9-82b4-3bfd7b38e58b" testId="00175fb6-ac6d-b93b-4786-e24615557ad3" testName="Hub.Tests.Api.TaskBulkCommandTests.Every_toolbar_operation_uses_a_versioned_canonical_command(operation: &quot;setDueDate&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:02.3424458" startTime="2026-11-02T14:01:10.4386000-04:00" endTime="2026-11-02T14:01:12.7809940-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5bb997be-e6f8-49e9-82b4-3bfd7b38e58b" />
+    <UnitTestResult executionId="01e98815-e226-4d74-9a09-78c1612ffbba" testId="ae7fd1c6-ed78-113b-ad88-4913aba832e2" testName="Hub.Tests.Api.TaskBulkCommandTests.Provider_failure_after_changes_rolls_back_the_whole_attempt_and_identical_retry_commits_once" computerName="Jays-MacBook-Pro" duration="00:00:02.4728328" startTime="2026-11-02T14:01:05.4868350-04:00" endTime="2026-11-02T14:01:07.9596730-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="01e98815-e226-4d74-9a09-78c1612ffbba" />
+    <UnitTestResult executionId="d546db79-bb0d-426e-955c-4ebda4af49b9" testId="d027e4cc-433a-b2c0-84d1-03322bef50b6" testName="Hub.Tests.Api.TaskBulkCommandTests.Current_discipline_reviewer_conflicts_are_refused_per_row_in_preview_and_mixed_apply(operation: &quot;assign&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:02.6097031" startTime="2026-11-02T14:01:40.3495330-04:00" endTime="2026-11-02T14:01:42.9592470-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d546db79-bb0d-426e-955c-4ebda4af49b9" />
+    <UnitTestResult executionId="78a0c03c-0df1-4b11-aecc-1b44a570c472" testId="9c4d2276-0b8c-faaf-ca8e-b0bcb787e3f3" testName="Hub.Tests.Api.TaskBulkCommandTests.New_summary_requires_all_projects_before_paging_count_pulse_and_mark_read_while_null_legacy_rows_remain_visible" computerName="Jays-MacBook-Pro" duration="00:00:02.4073872" startTime="2026-11-02T14:01:27.4853440-04:00" endTime="2026-11-02T14:01:29.8927420-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="78a0c03c-0df1-4b11-aecc-1b44a570c472" />
+    <UnitTestResult executionId="4bec321e-1fc2-4bb4-b2f4-aefcf605ee96" testId="f9fc3bab-76b5-bc5e-73e7-131becd58fa5" testName="Hub.Tests.Api.CalendarScreenTests.Calendar_view_update_delete_off_guards_and_current_visibility_clean_definitions_without_rewriting_stored_filters" computerName="Jays-MacBook-Pro" duration="00:00:09.4931530" startTime="2026-11-02T14:00:42.7687920-04:00" endTime="2026-11-02T14:00:52.2638420-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4bec321e-1fc2-4bb4-b2f4-aefcf605ee96" />
+    <UnitTestResult executionId="971485d0-928b-4f8a-ba98-daae290b9f3d" testId="7386437a-8a4b-67c9-5940-57e546839677" testName="Hub.Tests.Api.TaskBulkCommandTests.Complete_reasons_foreign_references_stale_versions_and_envelope_bounds_store_only_permitted_rows" computerName="Jays-MacBook-Pro" duration="00:00:02.4655197" startTime="2026-11-02T14:01:03.0211500-04:00" endTime="2026-11-02T14:01:05.4866240-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="971485d0-928b-4f8a-ba98-daae290b9f3d" />
+    <UnitTestResult executionId="6c8edc0f-4374-483a-99f4-182a0bdedd1b" testId="06db8c7f-2ff9-a85e-9795-97279aa5aef0" testName="Hub.Tests.Api.TaskBulkCommandTests.Current_discipline_reviewer_conflicts_are_refused_per_row_in_preview_and_mixed_apply(operation: &quot;setDeliverable&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:02.7332371" startTime="2026-11-02T14:01:37.6160890-04:00" endTime="2026-11-02T14:01:40.3493400-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6c8edc0f-4374-483a-99f4-182a0bdedd1b" />
+    <UnitTestResult executionId="f1cdae1d-cc9a-44b9-8439-554d5ecb1e96" testId="ec7af667-224a-f967-85b1-01fa63716107" testName="Hub.Tests.Api.TaskBulkCommandTests.Zero_shift_is_a_terminal_noop_without_offer_outbox_or_assignment_publication_side_effects" computerName="Jays-MacBook-Pro" duration="00:00:02.5187329" startTime="2026-11-02T14:01:00.5022350-04:00" endTime="2026-11-02T14:01:03.0208790-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f1cdae1d-cc9a-44b9-8439-554d5ecb1e96" />
+    <UnitTestResult executionId="e253fd76-542d-40c2-98eb-2c81bcbca624" testId="9c3f23ba-40a5-3706-cb0a-7aa4ac086681" testName="Hub.Tests.Api.TaskBulkCommandTests.Every_toolbar_operation_uses_a_versioned_canonical_command(operation: &quot;cancel&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:02.4784489" startTime="2026-11-02T14:01:07.9601540-04:00" endTime="2026-11-02T14:01:10.4383500-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e253fd76-542d-40c2-98eb-2c81bcbca624" />
+    <UnitTestResult executionId="5faf360b-98f7-472b-803a-de6e8b8d8b40" testId="f61c72f0-060f-26f3-4b63-c5d2f4de847c" testName="Hub.Tests.Api.TaskBulkCommandTests.Savehook_pickup_offer_closures_join_the_same_bulk_capture_and_receipt_without_duplicate_retry(operation: &quot;cancel&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:09.6950565" startTime="2026-11-02T14:00:42.7688060-04:00" endTime="2026-11-02T14:00:52.4654470-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5faf360b-98f7-472b-803a-de6e8b8d8b40" />
+    <UnitTestResult executionId="d842dacd-6196-4b73-b2dc-63331dd8fee9" testId="548b81b7-26da-a43d-7770-538aefd3554e" testName="Hub.Tests.Api.TaskBulkCommandTests.Real_new_task_zero_version_is_valid_but_missing_negative_and_stale_versions_are_not_promoted" computerName="Jays-MacBook-Pro" duration="00:00:02.5602708" startTime="2026-11-02T14:01:35.0555640-04:00" endTime="2026-11-02T14:01:37.6158630-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d842dacd-6196-4b73-b2dc-63331dd8fee9" />
+    <UnitTestResult executionId="b60aacae-3364-4b48-8ca4-4d1beb640714" testId="49ffbb51-b125-18fc-ff07-1628bdcaedea" testName="Hub.Tests.Api.ContractTests.Openapi_matches_the_committed_golden_document" computerName="Jays-MacBook-Pro" duration="00:00:09.1766525" startTime="2026-11-02T14:00:42.7688220-04:00" endTime="2026-11-02T14:00:51.9487680-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b60aacae-3364-4b48-8ca4-4d1beb640714" />
+    <UnitTestResult executionId="7d95e4b0-e828-4b42-b9d5-bc004e765826" testId="15ab2bea-8987-675a-739a-fce0624664c2" testName="Hub.Tests.Api.TaskBulkCommandTests.Every_toolbar_operation_uses_a_versioned_canonical_command(operation: &quot;setPriority&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:02.4905240" startTime="2026-11-02T14:01:15.2426910-04:00" endTime="2026-11-02T14:01:17.7332310-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7d95e4b0-e828-4b42-b9d5-bc004e765826" />
+    <UnitTestResult executionId="b2e00a18-1a49-4f9b-8274-fdf1ca4ff8a3" testId="5809eaba-2072-18a0-451e-dc49331eb28f" testName="Hub.Tests.Api.TaskBulkCommandTests.Eight_rows_three_projects_commit_six_changes_and_two_terminal_refusals_with_one_receipt_and_recipient_summaries" computerName="Jays-MacBook-Pro" duration="00:00:02.7494664" startTime="2026-11-02T14:01:32.3058700-04:00" endTime="2026-11-02T14:01:35.0553520-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b2e00a18-1a49-4f9b-8274-fdf1ca4ff8a3" />
+    <UnitTestResult executionId="6aa1b4e7-3787-4a70-b621-85c214485589" testId="a6f99383-0991-5bfe-022c-bdee3402bf5a" testName="Hub.Tests.Api.NotificationScreenTests.Unknown_mismatched_deleted_targets_stay_unknown_and_hidden_recipient_and_compound_scope_rows_are_excluded_before_counts" computerName="Jays-MacBook-Pro" duration="00:00:09.4935774" startTime="2026-11-02T14:00:42.7682520-04:00" endTime="2026-11-02T14:00:52.2645730-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6aa1b4e7-3787-4a70-b621-85c214485589" />
+    <UnitTestResult executionId="642247ca-9a53-4667-94c1-f340337b8714" testId="0cc3b6b6-1917-d23b-c3e2-85ca9c33a7d4" testName="Hub.Tests.Api.CalendarRescheduleTests.Foreign_scope_and_nonmember_sources_never_gain_preview_or_write_authority" computerName="Jays-MacBook-Pro" duration="00:00:09.4968017" startTime="2026-11-02T14:00:42.7688150-04:00" endTime="2026-11-02T14:00:52.2671600-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="642247ca-9a53-4667-94c1-f340337b8714" />
+    <UnitTestResult executionId="22afc595-445b-4ee0-99a6-5a5b8cabce15" testId="e9437966-e6b4-68d0-af61-a9f428355937" testName="Hub.Tests.Api.TaskBulkCommandTests.Actual_supervisor_summary_is_excluded_from_digest_build_and_queued_body_after_any_contributing_project_is_hidden" computerName="Jays-MacBook-Pro" duration="00:00:04.1356381" startTime="2026-11-02T14:00:56.3667820-04:00" endTime="2026-11-02T14:01:00.5019130-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="22afc595-445b-4ee0-99a6-5a5b8cabce15" />
+    <UnitTestResult executionId="6d2b7438-9582-4969-87be-e23a4f38786a" testId="a4374eaf-efd9-3c6c-8d4a-1fa2bbf28493" testName="Hub.Tests.Api.TaskBulkCommandTests.Savehook_pickup_offer_closures_join_the_same_bulk_capture_and_receipt_without_duplicate_retry(operation: &quot;assign&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:03.9002583" startTime="2026-11-02T14:00:52.4681070-04:00" endTime="2026-11-02T14:00:56.3659450-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6d2b7438-9582-4969-87be-e23a4f38786a" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="Hub.Tests.Api.CalendarScreenTests.Calendar_view_update_delete_off_guards_and_current_visibility_clean_definitions_without_rewriting_stored_filters" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint29-artifacts/bin/hub.tests/release/hub.tests.dll" id="f9fc3bab-76b5-bc5e-73e7-131becd58fa5">
+      <Execution id="4bec321e-1fc2-4bb4-b2f4-aefcf605ee96" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint29-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.CalendarScreenTests" name="Calendar_view_update_delete_off_guards_and_current_visibility_clean_definitions_without_rewriting_stored_filters" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TaskBulkCommandTests.Real_new_task_zero_version_is_valid_but_missing_negative_and_stale_versions_are_not_promoted" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint29-artifacts/bin/hub.tests/release/hub.tests.dll" id="548b81b7-26da-a43d-7770-538aefd3554e">
+      <Execution id="d842dacd-6196-4b73-b2dc-63331dd8fee9" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint29-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TaskBulkCommandTests" name="Real_new_task_zero_version_is_valid_but_missing_negative_and_stale_versions_are_not_promoted" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TaskBulkCommandTests.Provider_failure_after_changes_rolls_back_the_whole_attempt_and_identical_retry_commits_once" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint29-artifacts/bin/hub.tests/release/hub.tests.dll" id="ae7fd1c6-ed78-113b-ad88-4913aba832e2">
+      <Execution id="01e98815-e226-4d74-9a09-78c1612ffbba" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint29-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TaskBulkCommandTests" name="Provider_failure_after_changes_rolls_back_the_whole_attempt_and_identical_retry_commits_once" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TaskBulkCommandTests.Every_toolbar_operation_uses_a_versioned_canonical_command(operation: &quot;cancel&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint29-artifacts/bin/hub.tests/release/hub.tests.dll" id="9c3f23ba-40a5-3706-cb0a-7aa4ac086681">
+      <Execution id="e253fd76-542d-40c2-98eb-2c81bcbca624" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint29-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TaskBulkCommandTests" name="Every_toolbar_operation_uses_a_versioned_canonical_command" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TaskBulkCommandTests.Current_discipline_reviewer_conflicts_are_refused_per_row_in_preview_and_mixed_apply(operation: &quot;setDeliverable&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint29-artifacts/bin/hub.tests/release/hub.tests.dll" id="06db8c7f-2ff9-a85e-9795-97279aa5aef0">
+      <Execution id="6c8edc0f-4374-483a-99f4-182a0bdedd1b" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint29-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TaskBulkCommandTests" name="Current_discipline_reviewer_conflicts_are_refused_per_row_in_preview_and_mixed_apply" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TaskBulkCommandTests.Replay_uses_current_visibility_without_requiring_lost_assignment_rights_and_hidden_rows_have_no_true_outcome" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint29-artifacts/bin/hub.tests/release/hub.tests.dll" id="e54721d9-30d7-9571-9c7f-c11e71ba624b">
+      <Execution id="538a55bf-1ca2-4726-9c3b-931ea3693f4d" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint29-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TaskBulkCommandTests" name="Replay_uses_current_visibility_without_requiring_lost_assignment_rights_and_hidden_rows_have_no_true_outcome" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TaskBulkCommandTests.Every_toolbar_operation_uses_a_versioned_canonical_command(operation: &quot;hold&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint29-artifacts/bin/hub.tests/release/hub.tests.dll" id="f165f249-d29c-f7ba-1379-c939871ead79">
+      <Execution id="1344b919-11f8-4c4f-bbaf-f8aa348bd82a" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint29-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TaskBulkCommandTests" name="Every_toolbar_operation_uses_a_versioned_canonical_command" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TaskBulkCommandTests.Eight_rows_three_projects_commit_six_changes_and_two_terminal_refusals_with_one_receipt_and_recipient_summaries" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint29-artifacts/bin/hub.tests/release/hub.tests.dll" id="5809eaba-2072-18a0-451e-dc49331eb28f">
+      <Execution id="b2e00a18-1a49-4f9b-8274-fdf1ca4ff8a3" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint29-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TaskBulkCommandTests" name="Eight_rows_three_projects_commit_six_changes_and_two_terminal_refusals_with_one_receipt_and_recipient_summaries" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TaskBulkCommandTests.Savehook_pickup_offer_closures_join_the_same_bulk_capture_and_receipt_without_duplicate_retry(operation: &quot;cancel&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint29-artifacts/bin/hub.tests/release/hub.tests.dll" id="f61c72f0-060f-26f3-4b63-c5d2f4de847c">
+      <Execution id="5faf360b-98f7-472b-803a-de6e8b8d8b40" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint29-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TaskBulkCommandTests" name="Savehook_pickup_offer_closures_join_the_same_bulk_capture_and_receipt_without_duplicate_retry" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TaskBulkCommandTests.Every_toolbar_operation_uses_a_versioned_canonical_command(operation: &quot;setDueDate&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint29-artifacts/bin/hub.tests/release/hub.tests.dll" id="00175fb6-ac6d-b93b-4786-e24615557ad3">
+      <Execution id="5bb997be-e6f8-49e9-82b4-3bfd7b38e58b" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint29-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TaskBulkCommandTests" name="Every_toolbar_operation_uses_a_versioned_canonical_command" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.NotificationScreenTests.Unknown_mismatched_deleted_targets_stay_unknown_and_hidden_recipient_and_compound_scope_rows_are_excluded_before_counts" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint29-artifacts/bin/hub.tests/release/hub.tests.dll" id="a6f99383-0991-5bfe-022c-bdee3402bf5a">
+      <Execution id="6aa1b4e7-3787-4a70-b621-85c214485589" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint29-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.NotificationScreenTests" name="Unknown_mismatched_deleted_targets_stay_unknown_and_hidden_recipient_and_compound_scope_rows_are_excluded_before_counts" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TaskBulkCommandTests.Every_toolbar_operation_uses_a_versioned_canonical_command(operation: &quot;setPriority&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint29-artifacts/bin/hub.tests/release/hub.tests.dll" id="15ab2bea-8987-675a-739a-fce0624664c2">
+      <Execution id="7d95e4b0-e828-4b42-b9d5-bc004e765826" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint29-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TaskBulkCommandTests" name="Every_toolbar_operation_uses_a_versioned_canonical_command" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.Openapi_matches_the_committed_golden_document" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint29-artifacts/bin/hub.tests/release/hub.tests.dll" id="49ffbb51-b125-18fc-ff07-1628bdcaedea">
+      <Execution id="b60aacae-3364-4b48-8ca4-4d1beb640714" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint29-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="Openapi_matches_the_committed_golden_document" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.CalendarRescheduleTests.Foreign_scope_and_nonmember_sources_never_gain_preview_or_write_authority" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint29-artifacts/bin/hub.tests/release/hub.tests.dll" id="0cc3b6b6-1917-d23b-c3e2-85ca9c33a7d4">
+      <Execution id="642247ca-9a53-4667-94c1-f340337b8714" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint29-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.CalendarRescheduleTests" name="Foreign_scope_and_nonmember_sources_never_gain_preview_or_write_authority" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TaskBulkCommandTests.Zero_shift_is_a_terminal_noop_without_offer_outbox_or_assignment_publication_side_effects" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint29-artifacts/bin/hub.tests/release/hub.tests.dll" id="ec7af667-224a-f967-85b1-01fa63716107">
+      <Execution id="f1cdae1d-cc9a-44b9-8439-554d5ecb1e96" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint29-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TaskBulkCommandTests" name="Zero_shift_is_a_terminal_noop_without_offer_outbox_or_assignment_publication_side_effects" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TaskBulkCommandTests.Current_discipline_reviewer_conflicts_are_refused_per_row_in_preview_and_mixed_apply(operation: &quot;assign&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint29-artifacts/bin/hub.tests/release/hub.tests.dll" id="d027e4cc-433a-b2c0-84d1-03322bef50b6">
+      <Execution id="d546db79-bb0d-426e-955c-4ebda4af49b9" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint29-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TaskBulkCommandTests" name="Current_discipline_reviewer_conflicts_are_refused_per_row_in_preview_and_mixed_apply" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TaskBulkCommandTests.Every_toolbar_operation_uses_a_versioned_canonical_command(operation: &quot;assign&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint29-artifacts/bin/hub.tests/release/hub.tests.dll" id="c332c3d8-8c7c-92b8-0b9e-303a1bc0671c">
+      <Execution id="3fe200b7-3868-4771-9845-7e25bec25ef3" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint29-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TaskBulkCommandTests" name="Every_toolbar_operation_uses_a_versioned_canonical_command" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TaskBulkCommandTests.Every_toolbar_operation_uses_a_versioned_canonical_command(operation: &quot;shiftDueDates&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint29-artifacts/bin/hub.tests/release/hub.tests.dll" id="eb3774d1-a5f3-220b-d3c0-7f41cbb07c81">
+      <Execution id="709efc16-4458-42b4-9ee2-0fdbed309003" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint29-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TaskBulkCommandTests" name="Every_toolbar_operation_uses_a_versioned_canonical_command" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TaskBulkCommandTests.Savehook_pickup_offer_closures_join_the_same_bulk_capture_and_receipt_without_duplicate_retry(operation: &quot;assign&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint29-artifacts/bin/hub.tests/release/hub.tests.dll" id="a4374eaf-efd9-3c6c-8d4a-1fa2bbf28493">
+      <Execution id="6d2b7438-9582-4969-87be-e23a4f38786a" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint29-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TaskBulkCommandTests" name="Savehook_pickup_offer_closures_join_the_same_bulk_capture_and_receipt_without_duplicate_retry" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TaskBulkCommandTests.Keyed_preview_is_write_free_and_stale_noop_and_refused_results_never_revive" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint29-artifacts/bin/hub.tests/release/hub.tests.dll" id="f3c92d27-c5ec-0044-df08-9bb518a43072">
+      <Execution id="768ea1cb-70f1-434f-b5b3-28bac4caa0b2" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint29-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TaskBulkCommandTests" name="Keyed_preview_is_write_free_and_stale_noop_and_refused_results_never_revive" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TaskBulkCommandTests.New_summary_requires_all_projects_before_paging_count_pulse_and_mark_read_while_null_legacy_rows_remain_visible" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint29-artifacts/bin/hub.tests/release/hub.tests.dll" id="9c4d2276-0b8c-faaf-ca8e-b0bcb787e3f3">
+      <Execution id="78a0c03c-0df1-4b11-aecc-1b44a570c472" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint29-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TaskBulkCommandTests" name="New_summary_requires_all_projects_before_paging_count_pulse_and_mark_read_while_null_legacy_rows_remain_visible" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TaskBulkCommandTests.Actual_supervisor_summary_is_excluded_from_digest_build_and_queued_body_after_any_contributing_project_is_hidden" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint29-artifacts/bin/hub.tests/release/hub.tests.dll" id="e9437966-e6b4-68d0-af61-a9f428355937">
+      <Execution id="22afc595-445b-4ee0-99a6-5a5b8cabce15" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint29-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TaskBulkCommandTests" name="Actual_supervisor_summary_is_excluded_from_digest_build_and_queued_body_after_any_contributing_project_is_hidden" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TaskBulkCommandTests.Complete_reasons_foreign_references_stale_versions_and_envelope_bounds_store_only_permitted_rows" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint29-artifacts/bin/hub.tests/release/hub.tests.dll" id="7386437a-8a4b-67c9-5940-57e546839677">
+      <Execution id="971485d0-928b-4f8a-ba98-daae290b9f3d" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint29-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TaskBulkCommandTests" name="Complete_reasons_foreign_references_stale_versions_and_envelope_bounds_store_only_permitted_rows" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TaskBulkCommandTests.Deliverable_mapping_order_is_canonical_but_input_row_order_is_significant" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint29-artifacts/bin/hub.tests/release/hub.tests.dll" id="3585b58d-fe69-1b94-fe1a-b8dbbabf5663">
+      <Execution id="45c21b94-7c8e-4061-954b-cd5f50ca90cc" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint29-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TaskBulkCommandTests" name="Deliverable_mapping_order_is_canonical_but_input_row_order_is_significant" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TaskBulkCommandTests.Every_toolbar_operation_uses_a_versioned_canonical_command(operation: &quot;setDeliverable&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint29-artifacts/bin/hub.tests/release/hub.tests.dll" id="6d3019ee-72d5-b9f9-7d0b-5b7527afa6a4">
+      <Execution id="f13cdaaf-58c8-4d63-a4ae-6232ba2ee3ce" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint29-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TaskBulkCommandTests" name="Every_toolbar_operation_uses_a_versioned_canonical_command" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="eb3774d1-a5f3-220b-d3c0-7f41cbb07c81" executionId="709efc16-4458-42b4-9ee2-0fdbed309003" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6d3019ee-72d5-b9f9-7d0b-5b7527afa6a4" executionId="f13cdaaf-58c8-4d63-a4ae-6232ba2ee3ce" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e54721d9-30d7-9571-9c7f-c11e71ba624b" executionId="538a55bf-1ca2-4726-9c3b-931ea3693f4d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f3c92d27-c5ec-0044-df08-9bb518a43072" executionId="768ea1cb-70f1-434f-b5b3-28bac4caa0b2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c332c3d8-8c7c-92b8-0b9e-303a1bc0671c" executionId="3fe200b7-3868-4771-9845-7e25bec25ef3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3585b58d-fe69-1b94-fe1a-b8dbbabf5663" executionId="45c21b94-7c8e-4061-954b-cd5f50ca90cc" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f165f249-d29c-f7ba-1379-c939871ead79" executionId="1344b919-11f8-4c4f-bbaf-f8aa348bd82a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="00175fb6-ac6d-b93b-4786-e24615557ad3" executionId="5bb997be-e6f8-49e9-82b4-3bfd7b38e58b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ae7fd1c6-ed78-113b-ad88-4913aba832e2" executionId="01e98815-e226-4d74-9a09-78c1612ffbba" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d027e4cc-433a-b2c0-84d1-03322bef50b6" executionId="d546db79-bb0d-426e-955c-4ebda4af49b9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9c4d2276-0b8c-faaf-ca8e-b0bcb787e3f3" executionId="78a0c03c-0df1-4b11-aecc-1b44a570c472" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f9fc3bab-76b5-bc5e-73e7-131becd58fa5" executionId="4bec321e-1fc2-4bb4-b2f4-aefcf605ee96" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7386437a-8a4b-67c9-5940-57e546839677" executionId="971485d0-928b-4f8a-ba98-daae290b9f3d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="06db8c7f-2ff9-a85e-9795-97279aa5aef0" executionId="6c8edc0f-4374-483a-99f4-182a0bdedd1b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ec7af667-224a-f967-85b1-01fa63716107" executionId="f1cdae1d-cc9a-44b9-8439-554d5ecb1e96" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9c3f23ba-40a5-3706-cb0a-7aa4ac086681" executionId="e253fd76-542d-40c2-98eb-2c81bcbca624" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f61c72f0-060f-26f3-4b63-c5d2f4de847c" executionId="5faf360b-98f7-472b-803a-de6e8b8d8b40" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="548b81b7-26da-a43d-7770-538aefd3554e" executionId="d842dacd-6196-4b73-b2dc-63331dd8fee9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="49ffbb51-b125-18fc-ff07-1628bdcaedea" executionId="b60aacae-3364-4b48-8ca4-4d1beb640714" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="15ab2bea-8987-675a-739a-fce0624664c2" executionId="7d95e4b0-e828-4b42-b9d5-bc004e765826" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5809eaba-2072-18a0-451e-dc49331eb28f" executionId="b2e00a18-1a49-4f9b-8274-fdf1ca4ff8a3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a6f99383-0991-5bfe-022c-bdee3402bf5a" executionId="6aa1b4e7-3787-4a70-b621-85c214485589" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0cc3b6b6-1917-d23b-c3e2-85ca9c33a7d4" executionId="642247ca-9a53-4667-94c1-f340337b8714" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e9437966-e6b4-68d0-af61-a9f428355937" executionId="22afc595-445b-4ee0-99a6-5a5b8cabce15" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a4374eaf-efd9-3c6c-8d4a-1fa2bbf28493" executionId="6d2b7438-9582-4969-87be-e23a4f38786a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="25" executed="25" passed="25" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.11)
+[xUnit.net 00:00:00.10]   Discovering: Hub.Tests
+[xUnit.net 00:00:00.23]   Discovered:  Hub.Tests
+[xUnit.net 00:00:00.24]   Starting:    Hub.Tests
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+warn: Microsoft.EntityFrameworkCore.Query[10103]
+      The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (DbType = Int32), @p2='?', @p3='?', @p4='?' (DbType = DateTime), @p5='?', @p6='?', @p7='?', @p8='?' (DbType = DateTime), @p9='?' (DbType = Object), @p10='?' (DbType = Object), @p11='?' (DbType = DateTime), @p12='?', @p13='?' (DbType = DateTime), @p14='?', @p15='?' (DbType = Guid), @p16='?' (DbType = Guid), @p17='?' (DbType = Guid), @p18='?', @p19='?', @p20='?' (DbType = Guid), @p21='?' (DbType = Int32), @p22='?' (DbType = DateTime), @p23='?' (DbType = DateTime), @p24='?' (DbType = DateTime), @p25='?', @p26='?' (DbType = Guid), @p27='?', @p28='?', @p29='?', @p30='?' (DbType = Guid), @p31='?' (DbType = DateTime), @p32='?' (DbType = Object), @p33='?', @p34='?' (DbType = DateTime), @p35='?' (DbType = Guid), @p36='?' (DbType = Guid), @p37='?' (DbType = Guid), @p38='?', @p39='?', @p40='?' (DbType = Guid), @p41='?' (DbType = Int32), @p42='?' (DbType = DateTime), @p43='?' (DbType = DateTime), @p44='?' (DbType = DateTime), @p45='?', @p46='?' (DbType = Guid), @p47='?', @p48='?', @p49='?', @p50='?' (DbType = Guid), @p51='?' (DbType = DateTime), @p52='?' (DbType = Object), @p53='?', @p54='?' (DbType = DateTime), @p55='?' (DbType = Guid), @p56='?' (DbType = Guid), @p57='?' (DbType = Guid), @p58='?', @p59='?', @p60='?' (DbType = Guid), @p61='?' (DbType = Int32), @p62='?' (DbType = DateTime), @p63='?' (DbType = DateTime), @p64='?' (DbType = DateTime), @p65='?', @p66='?' (DbType = Guid), @p67='?', @p68='?', @p69='?', @p70='?' (DbType = Guid), @p71='?' (DbType = DateTime), @p72='?' (DbType = Object), @p73='?', @p74='?' (DbType = DateTime), @p75='?' (DbType = Guid), @p76='?' (DbType = Guid), @p77='?' (DbType = Guid), @p78='?' (DbType = DateTime), @p79='?' (DbType = DateTime), @p80='?' (DbType = Int32), @p81='?', @p82='?' (DbType = Object), @p83='?' (DbType = Guid), @p84='?' (DbType = Object)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO hub.email_message (id, attempts, body_html, body_text, created_at, dedup_key, kind, last_error, next_attempt_at, required_planning_entry_ids, required_project_ids, sent_at, subject, suppressed_at, to_address, user_id)
+      VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15);
+      INSERT INTO hub.notification (id, actor_user_id, body, collapse_key, correlation_id, count, created_at, digest_included_at, emailed_at, event_type, item_id, item_key, item_type, link_path, project_id, read_at, required_project_ids, title, updated_at, user_id)
+      VALUES (@p16, @p17, @p18, @p19, @p20, @p21, @p22, @p23, @p24, @p25, @p26, @p27, @p28, @p29, @p30, @p31, @p32, @p33, @p34, @p35);
+      INSERT INTO hub.notification (id, actor_user_id, body, collapse_key, correlation_id, count, created_at, digest_included_at, emailed_at, event_type, item_id, item_key, item_type, link_path, project_id, read_at, required_project_ids, title, updated_at, user_id)
+      VALUES (@p36, @p37, @p38, @p39, @p40, @p41, @p42, @p43, @p44, @p45, @p46, @p47, @p48, @p49, @p50, @p51, @p52, @p53, @p54, @p55);
+      INSERT INTO hub.notification (id, actor_user_id, body, collapse_key, correlation_id, count, created_at, digest_included_at, emailed_at, event_type, item_id, item_key, item_type, link_path, project_id, read_at, required_project_ids, title, updated_at, user_id)
+      VALUES (@p56, @p57, @p58, @p59, @p60, @p61, @p62, @p63, @p64, @p65, @p66, @p67, @p68, @p69, @p70, @p71, @p72, @p73, @p74, @p75);
+      INSERT INTO hub.task_bulk_command_receipt (id, actor_id, completed_at, created_at, hash_version, intent_hash, intent_json, request_id, response_json)
+      VALUES (@p76, @p77, @p78, @p79, @p80, @p81, @p82, @p83, @p84);
+fail: Microsoft.EntityFrameworkCore.Update[10000]
+      An exception occurred in the database while saving changes for context type 'Hub.Api.Data.HubDb'.
+      Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+       ---&gt; Npgsql.PostgresException (0x80004005): P0001: Synthetic bulk failure
+         at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource&lt;TResult&gt;.GetResult(Int16 token)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+        Exception data:
+          Severity: ERROR
+          SqlState: P0001
+          MessageText: Synthetic bulk failure
+          Where: PL/pgSQL function fail_bulk_receipt() line 1 at RAISE
+          File: pl_exec.c
+          Line: 3897
+          Routine: exec_stmt_raise
+         --- End of inner exception stack trace ---
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+         at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+      Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+       ---&gt; Npgsql.PostgresException (0x80004005): P0001: Synthetic bulk failure
+         at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource&lt;TResult&gt;.GetResult(Int16 token)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+        Exception data:
+          Severity: ERROR
+          SqlState: P0001
+          MessageText: Synthetic bulk failure
+          Where: PL/pgSQL function fail_bulk_receipt() line 1 at RAISE
+          File: pl_exec.c
+          Line: 3897
+          Routine: exec_stmt_raise
+         --- End of inner exception stack trace ---
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+         at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+fail: Hub.Api.Infrastructure.ProblemMiddleware[0]
+      Unhandled error 0HNPP1CTAIGSU
+      Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+       ---&gt; Npgsql.PostgresException (0x80004005): P0001: Synthetic bulk failure
+         at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource&lt;TResult&gt;.GetResult(Int16 token)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+        Exception data:
+          Severity: ERROR
+          SqlState: P0001
+          MessageText: Synthetic bulk failure
+          Where: PL/pgSQL function fail_bulk_receipt() line 1 at RAISE
+          File: pl_exec.c
+          Line: 3897
+          Routine: exec_stmt_raise
+         --- End of inner exception stack trace ---
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+         at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+         at Hub.Api.Data.HubDb.SaveChangesAsync(CancellationToken ct) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Data/HubDb.cs:line 1311
+         at Hub.Api.Features.TaskBulkCommandEndpoints.&lt;&gt;c__DisplayClass26_0.&lt;&lt;Execute&gt;b__0&gt;d.MoveNext() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Features/TaskBulkCommands.cs:line 174
+      --- End of stack trace from previous location ---
+         at Hub.Api.Infrastructure.Tx.Run[T](HubDb db, Func`1 work) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Infrastructure/Keys.cs:line 50
+         at Hub.Api.Infrastructure.Tx.Run[T](HubDb db, Func`1 work) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Infrastructure/Keys.cs:line 52
+         at Hub.Api.Features.TaskBulkCommandEndpoints.Execute(TaskBulkCommandBody body, Access access, HubDb db, SettingsStore store, Notifier notify, TeamService team, TimeProvider clock) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Features/TaskBulkCommands.cs:line 113
+         at Microsoft.AspNetCore.Http.RequestDelegateFactory.&lt;TaskOfTToValueTaskOfObject&gt;g__ExecuteAwaited|92_0[T](Task`1 task)
+         at Hub.Api.Infrastructure.Http.&lt;&gt;c__DisplayClass7_0`1.&lt;&lt;RequireFlag&gt;b__0&gt;d.MoveNext() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Infrastructure/Http.cs:line 53
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Http.RequestDelegateFactory.&lt;ExecuteValueTaskOfObject&gt;g__ExecuteAwaited|130_0(ValueTask`1 valueTask, HttpContext httpContext, JsonTypeInfo`1 jsonTypeInfo)
+         at Microsoft.AspNetCore.Http.RequestDelegateFactory.&lt;&gt;c__DisplayClass102_2.&lt;&lt;HandleRequestBodyAndCompileRequestDelegateForJson&gt;b__2&gt;d.MoveNext()
+      --- End of stack trace from previous location ---
+         at Hub.Api.Infrastructure.IdempotencyMiddleware.Invoke(HttpContext ctx, HubDb db, CurrentUser me, TimeProvider clock) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Infrastructure/Idempotency.cs:line 43
+         at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+         at Microsoft.AspNetCore.RateLimiting.RateLimitingMiddleware.InvokeInternal(HttpContext context, EnableRateLimitingAttribute enableRateLimitingAttribute)
+         at Hub.Api.Infrastructure.ProvisioningMiddleware.Invoke(HttpContext ctx, HubDb db, CurrentUser me, AuditContext audit) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Infrastructure/Auth.cs:line 282
+         at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+         at Program.&lt;&gt;c.&lt;&lt;&lt;Main&gt;$&gt;b__0_12&gt;d.MoveNext() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Program.cs:line 185
+      --- End of stack trace from previous location ---
+         at Hub.Api.Infrastructure.ProblemMiddleware.Invoke(HttpContext ctx) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Infrastructure/Errors.cs:line 57
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+[xUnit.net 00:01:03.20]   Finished:    Hub.Tests
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

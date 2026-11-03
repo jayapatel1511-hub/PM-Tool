@@ -1,8 +1,12 @@
+import { PersonPanelTrigger } from '@/components/hub/person-panel-trigger'
+import { ProjectAreaTabs } from '@/components/hub/workspace'
 import { ProjectStatusNote } from '@/components/hub/project-status-note'
+import { TitleBlock, formatReferenceTime } from '@/components/hub/title-block'
+import { CountCard } from '@/components/hub/count-card'
 import type { components } from '@/gen/api'
 import { useQuery } from '@tanstack/react-query'
-import { Monitor } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { Monitor, Printer } from 'lucide-react'
+import { useState, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { AccentDot, ActiveFilters, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Missing, Notice, Page, PageHelp, SummaryTile, selectCls, tdCls, thCls } from '@/components/hub/common'
 import { ExportMenu } from '@/components/hub/export'
@@ -19,17 +23,20 @@ import { useOrgPlacement } from '@/hooks/useOrgPlacement'
 import { typedRequest } from '@/lib/api'
 import { useFlag, useMe } from '@/lib/auth'
 import { ago, fmtDate } from '@/lib/format'
-import { runtimeText, t, tv, type TextKey } from '@/lib/i18n'
+import { plural, runtimeText, t, tv, type TextKey } from '@/lib/i18n'
 import type { ProjectRow, ProjectStatusNoteData } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { ViewMenu } from '@/components/hub/views'
+import { ProjectPlainProgress, ProjectStaffing } from './projects/project-list-details'
 import type { SavedViewKeys } from '@/gen/registry.gen'
+import './portfolio-review.css'
 
 interface Row extends ProjectRow { statusNote?: ProjectStatusNoteData | null; projectType?: string; overdueDeliverables?: number; trend: { weekEnding: string; computed?: string | null; reported?: string | null }[] }
 // The envelope and tiles are generated; the rows are the Projects list row (their source) with the members Portfolio adds.
 type Portfolio = Omit<components['schemas']['PortfolioView'], 'projects'> & { projects: Row[] }
 
 const FILTERS = ['q', 'pmId', 'leadUnitId', 'disciplineId', 'clientId', 'officeId', 'status', 'phaseId', 'health', 'computedHealth', 'projectTypeId', 'submissionWithinDays', 'mine', 'overdueDecisions'] as const satisfies readonly (SavedViewKeys['portfolio'] | 'page' | 'panel' | 'draftAccessReason')[]
+const VISUAL_FILTERS = [...FILTERS, 'ids', 'starred', 'priority'] as const
 const STATUSES = ['Setup', 'Active', 'On Hold', 'Complete']
 const HEALTHS = ['Red', 'Yellow', 'Green', 'Grey'] as const
 type Health = (typeof HEALTHS)[number]
@@ -42,6 +49,9 @@ const GROUP_OPTIONS = [
 ] as const
 /** Right-aligned figures. */
 const COUNT = 'text-right tabular-nums'
+/** Relative print widths: narrative facts have room to wrap, count columns stay compact. */
+const PRINT_WEIGHTS: Record<string, number> = { project: 14.5, pm: 5.5, client: 5.5, office: 4.5, phase: 4, health: 5.5, staffing: 15.5,
+  nextMilestone: 6.5, nextSubmission: 6.5, overdue: 4.5, blocked: 4.5, decisions: 5.5, issues: 4, deliverables: 6.5, attention: 5, trend: 4.5 }
 const SWATCH: Record<string, string> = { Red: 'var(--bad)', Yellow: 'var(--warn)', Green: 'var(--ok)', Grey: 'var(--idle)' }
 /** Health keeps its status symbol and colour (§13.0); the tiles' pastel accent only groups the three health counts. */
 const HEALTH_MARK: Record<Exclude<Health, 'Grey'>, [string, string]> = { Red: ['■', 'text-bad'], Yellow: ['▲', 'text-warn'], Green: ['●', 'text-ok'] }
@@ -50,7 +60,7 @@ const HEALTH_MARK: Record<Exclude<Health, 'Grey'>, [string, string]> = { Red: ['
 export function PortfolioPage() {
   const header = { title: t('nav.portfolio'), subtitle: <>{t('sig.pfScope')}<PageHelp>{t('sig.pfHelp')}</PageHelp></> }
   return (
-    <DesktopOnly notice={<Page {...header}><Notice icon={Monitor} title={t('app.phoneNotice')}
+    <DesktopOnly notice={<Page {...header} tabs={<ProjectAreaTabs />}><Notice icon={Monitor} title={t('app.phoneNotice')}
       action={<Button asChild variant="outline"><Link to="/my-work">{t('nav.myWork')}</Link></Button>}>{t('portfolio.phoneHint')}</Notice></Page>}>
       <Dashboard {...header} />
     </DesktopOnly>
@@ -59,6 +69,8 @@ export function PortfolioPage() {
 
 function Dashboard(header: { title: string; subtitle: ReactNode }) {
   const rollups = useFlag('status_rollups')
+  const visualSystem = useFlag('visual_system')
+  const projectScreens = useFlag('project_screens')
   const small = useFlag('small_ux')
   const me = useMe()
   const planner = me.capabilities.workload
@@ -69,7 +81,8 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
   const [sp, setSp] = useSearchParams()
   const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
   const group = rollups ? sp.get('group') ?? 'none' : 'none'
-  const filters = Object.fromEntries(FILTERS.map((k) => [k, sp.get(k)]))
+  const filterKeys = visualSystem ? VISUAL_FILTERS : FILTERS
+  const filters = Object.fromEntries(filterKeys.map((k) => [k, sp.get(k)]))
   const q = useQuery({ queryKey: ['portfolio', filters], queryFn: async () => await typedRequest('get', '/api/v1/portfolio', { query: filters }) as Portfolio })
   const refSelect = (key: string, label: string, items: { id: string; name: string; isActive?: boolean }[] | undefined, any: string) => (
     <Field label={label} htmlFor={`pf-${key}`} className="w-full sm:w-44">
@@ -82,7 +95,7 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
   const pmName = q.data?.projects.find((p) => p.pm.id === filters.pmId)?.pm.displayName
 
   // Active filters as removable tokens (§13.0 Filters); Clear empties the URL as before.
-  const tokens = ([
+  const tokens: [string, string, ReactNode?][] = ([
     ['q', t('common.search'), filters.q],
     ['pmId', t('portfolio.pm'), pmName ?? t('portfolio.selectedPm')],
     ['leadUnitId', t('org.leadUnit'), org.units.find(u => u.id === filters.leadUnitId)?.name],
@@ -97,12 +110,29 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
     ['submissionWithinDays', t('portfolio.within'), filters.submissionWithinDays],
     ['overdueDecisions', t('portfolio.decisions'), t('common.yes')],
     ['mine', t('portfolio.mine'), filters.mine === 'false' ? t('common.no') : filters.mine],
-  ] as const).filter(([k]) => filters[k])
+    ...(visualSystem ? [
+      ['ids', t('projects.filter.chosen'), filters.ids?.split(',').filter(Boolean).length],
+      ['starred', t('projects.star'), filters.starred === 'true' ? t('common.yes') : filters.starred],
+      ['priority', t('projects.col.priority'), filters.priority],
+    ] : []),
+  ] as [string, string, ReactNode?][]).filter(([k]) => !!filters[k])
   const clear = () => setSp(new URLSearchParams(), { replace: true })
   const healthLabel = (h: Exclude<Health, 'Grey'>, key: TextKey) => (
     <span className="inline-flex items-center gap-1.5"><span aria-hidden className={HEALTH_MARK[h][1]}>{HEALTH_MARK[h][0]}</span>{t(key)}</span>
   )
   const tiles = q.data?.tiles
+  const destination = (key: string, value: string) => { const n = new URLSearchParams(sp); n.set(key, value); return `?${n}` }
+  // A tighter existing date filter stays in force, so this card never widens its
+  // counted cohort while navigating to the within-fourteen-days intersection.
+  const existingWindow = Number(filters.submissionWithinDays)
+  const submissionWindow = Number.isInteger(existingWindow) && existingWindow > 0 ? Math.min(existingWindow, 14) : 14
+  const where = (key: string) => {
+    const facts = q.data?.cardFacts?.[key]
+    return facts ? t('portfolioScreens.where', {
+      projects: plural(facts.projects, 'scope.oneProject', 'scope.nProjects'),
+      clients: plural(facts.clients, 'scope.oneClient', 'scope.nClients'),
+    }) : t('portfolioScreens.whereUnavailable')
+  }
   // AC-CNT-01: a health tile counts Active projects by computed health, so it opens exactly those rows.
   const healthLink = (h: string) => { const n = new URLSearchParams(sp); n.set('computedHealth', h); n.set('status', 'Active'); return `?${n}` }
   const rowLinks = (r: Row) => {
@@ -124,6 +154,7 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
   // The columns, their order and header text are the list's own: every one is fixed and none sorts (FR-REC-14 adds no surface).
   const columns: Column<Row>[] = [
     { id: 'project', label: t('portfolio.project'), className: 'min-w-60', cell: (r) => <>
+      {projectScreens && <details className="mb-2"><summary>{t('projectScreens.progressFacts')}</summary><div className="pt-2"><ProjectPlainProgress row={r} /></div></details>}
       {r.statusNote && <details className="mb-2"><summary>{t('statusNote.title')}</summary><ProjectStatusNote note={r.statusNote} /></details>}
       <div className="flex items-start gap-2">
         <AccentDot id={r.id} className="mt-1.5" />
@@ -132,12 +163,14 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
           {r.status !== 'Active' && <div className="mt-1"><StatusPill status={r.status} /></div>}
         </div>
       </div>
+      {projectScreens && <div className="portfolio-print-only"><ProjectPlainProgress row={r} /></div>}
     </> },
-    { id: 'pm', label: t('portfolio.pm'), cell: (r) => <span className="flex items-center gap-2 whitespace-nowrap"><Avatar id={r.pm.id} name={r.pm.displayName} />{r.pm.displayName}</span> },
+    { id: 'pm', label: t('portfolio.pm'), cell: (r) => <span className="flex items-center gap-2 whitespace-nowrap"><Avatar id={r.pm.id} name={r.pm.displayName} /><PersonPanelTrigger userId={r.pm.id} name={r.pm.displayName} focusKey={`portfolio:project:${r.id}:pm:screen`} /></span> },
     { id: 'client', label: t('portfolio.client'), cell: (r) => r.client.name },
     { id: 'office', label: t('admin.office'), className: 'whitespace-nowrap', cell: (r) => r.office || <Missing /> },
     { id: 'phase', label: t('field.PhaseId'), className: 'whitespace-nowrap', cell: (r) => r.phase || <Missing /> },
     { id: 'health', label: t('portfolio.health'), className: 'min-w-44', cell: (r) => <Health r={r} /> },
+    ...(projectScreens ? [{ id: 'staffing', label: t('projectScreens.staffing'), cell: (r: Row) => <ProjectStaffing row={r} /> }] : []),
     { id: 'nextMilestone', label: t('portfolio.nextMilestone'), className: 'min-w-40', cell: (r) => r.nextMilestone ? <><div>{r.nextMilestone.name}</div>
       <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs/[18px] text-muted-foreground tabular-nums">{fmtDate(r.nextMilestone.date)} {r.nextMilestone.status && <StatusPill status={r.nextMilestone.status} />}</div></> : <Missing /> },
     { id: 'nextSubmission', label: t('portfolio.nextSubmission'), className: 'min-w-36', cell: (r) => r.nextSubmission ? <><div>{r.nextSubmission.name}</div><div className="mt-0.5 text-xs/[18px] text-muted-foreground tabular-nums">{fmtDate(r.nextSubmission.date)}</div></> : <Missing /> },
@@ -157,18 +190,59 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
     cell: (c: Column<Row>, r: Row) => <td key={c.id} className={cn(tdCls, c.className)}>{c.cell(r)}</td>,
   }
   const subtotal = (rows: Row[], column: 'overdueTasks' | 'blockedTasks' | 'overdueDecisions' | 'highIssues' | 'overdueDeliverables') => rows.reduce((sum, r) => sum + (r[column] ?? 0), 0)
-  const groupRow = (key: string) => {
+  const renderGroupRow = (key: string, activeColumns = columns) => {
     const rows = groups.get(key) ?? []
+    if (projectScreens) {
+      const countStart = activeColumns.findIndex(c => c.id === 'overdue')
+      const countFields = { overdue: 'overdueTasks', blocked: 'blockedTasks', decisions: 'overdueDecisions', issues: 'highIssues', deliverables: 'overdueDeliverables' } as const
+      return <tr className="border-t bg-muted" data-portfolio-group={key}>
+        <th scope="rowgroup" colSpan={countStart} className={thCls}>{groupName(rows[0])} · {key ? <Link to={groupLink(key)} className="underline underline-offset-2">{rows.length} {t('nav.projects')}</Link> : <span title={t('rcv.notSetDefinition')}>{rows.length} {t('nav.projects')}</span>}
+          <span className="ml-3 inline-flex flex-wrap gap-3">{(['Red', 'Yellow', 'Green'] as const).map(health => <span key={health}>{key ? <Link to={groupLink(key, health)}>{t(`health.${health}`)} {rows.filter(r => r.computedHealth === health).length}</Link> : <span>{t(`health.${health}`)} {rows.filter(r => r.computedHealth === health).length}</span>}</span>)}</span>
+        </th>
+        {activeColumns.slice(countStart).map(c => {
+          const field = countFields[c.id as keyof typeof countFields]
+          return <td key={c.id} className={cn(tdCls, COUNT)}>{field ? key ? <Link to={groupLink(key)} title={t('rcv.subtotalDefinition')}>{subtotal(rows, field)}</Link> : subtotal(rows, field)
+            : c.id === 'attention' ? <span>■ {rows.reduce((sum, r) => sum + r.attentionCritical, 0)} · ▲ {rows.reduce((sum, r) => sum + r.attentionWarning, 0)}</span> : null}</td>
+        })}
+      </tr>
+    }
     return <tr className="border-t bg-muted" data-portfolio-group={key}><th scope="rowgroup" colSpan={8} className={thCls}>
       {groupName(rows[0])} · {key ? <Link to={groupLink(key)} className="underline underline-offset-2">{rows.length} {t('nav.projects')}</Link> : <span title={t('rcv.notSetDefinition')}>{rows.length} {t('nav.projects')}</span>}
       <span className="ml-3 inline-flex gap-3">{(['Red', 'Yellow', 'Green'] as const).map((health) => <span key={health}>{key ? <Link to={groupLink(key, health)}>{t(`health.${health}`)} {rows.filter(r => r.computedHealth === health).length}</Link> : <span title={t('rcv.notSetDefinition')}>{t(`health.${health}`)} {rows.filter(r => r.computedHealth === health).length}</span>}</span>)}</span>
     </th>{(['overdueTasks', 'blockedTasks', 'overdueDecisions', 'highIssues', 'overdueDeliverables'] as const).map((column) => <td key={column} className={cn(tdCls, COUNT)}>{key ? <Link to={groupLink(key)} aria-label={`${subtotal(rows, column)} · ${t('rcv.subtotalDefinition')}`} title={t('rcv.subtotalDefinition')} className="underline underline-offset-2">{subtotal(rows, column)}</Link> : <span title={t('rcv.notSetDefinition')}>{subtotal(rows, column)}</span>}</td>)}
     <td className={cn(tdCls, COUNT)}><span title={t('rcv.subtotalDefinition')}>■ {rows.reduce((sum,r)=>sum+r.attentionCritical,0)} · ▲ {rows.reduce((sum,r)=>sum+r.attentionWarning,0)}</span></td><td colSpan={2} /></tr>
   }
+  const groupRow = (key: string) => renderGroupRow(key)
+  const printColumns = columns.filter(c => c.id !== 'coordination').map(column => column.id === 'pm' ? { ...column, cell: (r: Row) => <span className="flex items-center gap-2 whitespace-nowrap"><Avatar id={r.pm.id} name={r.pm.displayName} />{r.pm.displayName}</span> } : column)
+  const printDetail = (row: Row) => {
+    const healthNote = row.reportedHealth !== row.computedHealth && row.healthOverrideNote
+    if (!row.statusNote && !healthNote) return null
+    return <div className="space-y-2">
+      {row.statusNote && <ProjectStatusNote note={row.statusNote} />}
+      {healthNote && <section data-portfolio-health-note>
+        <p className="font-medium">{t('health.computed')}: {runtimeText(`health.${row.computedHealth}`)} · {t('health.reported')}: {runtimeText(`health.${row.reportedHealth}`)}</p>
+        <p>“{row.healthOverrideNote}” — {t('portfolio.noteBy', { name: row.overrideBy ?? '', when: ago(row.healthOverrideAt) })}</p>
+      </section>}
+    </div>
+  }
+  const printWeight = printColumns.reduce((sum, column) => sum + (PRINT_WEIGHTS[column.id] ?? 4), 0)
+  const printTable = {
+    visible: printColumns,
+    header: (column: Column<Row>) => <th key={column.id} scope="col" data-portfolio-column={column.id} className={cn(thCls, column.className?.includes('text-right') && 'text-right')}
+      style={{ width: `${(PRINT_WEIGHTS[column.id] ?? 4) / printWeight * 100}%` }}>{column.label}</th>,
+    cell: (column: Column<Row>, row: Row) => <td key={column.id} data-portfolio-column={column.id} className={cn(tdCls, column.className)}>{column.id === 'health' ? <PrintHealth r={row} /> : column.cell(row)}</td>,
+  }
+  const printScope = [q.data?.ownOnly ? t('portfolio.mine') : t('projects.all'), ...tokens.map(([, label, value]) => `${label}: ${typeof value === 'string' || typeof value === 'number' ? value : t('common.unavailable')}`)].join(' · ')
   return (
-    <Page {...header} actions={<>{small && planner && <Button asChild variant="outline"><Link to="/planner?groupBy=homeDiscipline">{t('interaction.capacityByDiscipline')}</Link></Button>}<ViewMenu listType="portfolio" /><ExportMenu path="portfolio/export" params={filters} name="portfolio" /></>}>
+    <Page {...header} className={projectScreens ? 'portfolio-review' : undefined} overlap={visualSystem} tabs={<ProjectAreaTabs />} titleBlock={q.data && <TitleBlock asOf={q.data.asOf} />} actions={<>{(small || projectScreens) && planner && <Button asChild variant="outline"><Link to="/planner?groupBy=homeDiscipline">{t('interaction.capacityByDiscipline')}</Link></Button>}{projectScreens && <Button variant="outline" disabled={!q.data || q.isFetching || !!q.error} onClick={() => window.print()}><Printer className="size-4" />{t('portfolioScreens.print')}</Button>}<ViewMenu listType="portfolio" /><ExportMenu path="portfolio/export" params={filters} name="portfolio" /></>}>
+      {projectScreens && !visualSystem && <div className="portfolio-print-only portfolio-print-band"><h1>{t('nav.portfolio')}</h1><dl aria-label={t('visual.currentValues')}><dt>{t('visual.currentValues')}</dt><dd>{q.data?.asOf ? <time dateTime={q.data.asOf}>{formatReferenceTime(q.data.asOf, me.settings.orgTimeZone) ?? t('common.unavailable')}</time> : t('common.unavailable')}</dd></dl></div>}
       {tiles && (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-6">
+        visualSystem ? <div className="home-count-cards portfolio-count-cards">
+          <CountCard label={t('portfolio.active')} value={tiles.active} tone="blue" definition={t('sig.def.pfActive')} where={where('active')} to={destination('status', 'Active')} />
+          {(['Red', 'Yellow', 'Green'] as const).map(h => <CountCard key={h} label={healthLabel(h, HEALTH_TILE_LABELS[h])} value={tiles[h.toLowerCase() as 'red']} tone={h === 'Red' ? 'red' : h === 'Yellow' ? 'amber' : 'green'} definition={t('sig.def.pfHealth', { health: runtimeText(`health.${h}`) })} where={where(h.toLowerCase())} to={healthLink(h)} />)}
+          <CountCard label={t('portfolio.submissions')} value={tiles.submissions14} tone="amber" definition={t('sig.def.pfSubmissions')} where={where('submissions14')} to={destination('submissionWithinDays', String(submissionWindow))} />
+          <CountCard label={t('portfolio.decisions')} value={tiles.overdueDecisions} tone="red" definition={t('sig.def.pfDecisions')} where={where('overdueDecisions')} to={destination('overdueDecisions', 'true')} />
+        </div> : <div className={cn('grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-6', projectScreens && 'portfolio-print-legacy-tiles')}>
           <SummaryTile label={t('portfolio.active')} value={tiles.active} accent="blue" hint={t('sig.def.pfActive')} onClick={() => set('status', 'Active')} />
           {(['Red', 'Yellow', 'Green'] as const).map((h) => (
             <SummaryTile key={h} label={healthLabel(h, HEALTH_TILE_LABELS[h])} value={tiles[h.toLowerCase() as 'red']} accent="lavender" hint={t('sig.def.pfHealth', { health: runtimeText(`health.${h}`) })} to={healthLink(h)} />
@@ -177,11 +251,11 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
           <SummaryTile label={t('portfolio.decisions')} value={tiles.overdueDecisions} accent="peach" hint={t('sig.def.pfDecisions')} onClick={() => set('overdueDecisions', 'true')} />
         </div>
       )}
-      {adminStrip && <AdminReviewStrip />}
-      {rollups && <Field label={t('rcv.group')} htmlFor="pf-group" className="w-48"><select id="pf-group" className={selectCls} value={group} onChange={(e) => set('group', e.target.value === 'none' ? null : e.target.value)}>
+      {adminStrip && <div className={projectScreens ? 'no-print' : undefined}><AdminReviewStrip /></div>}
+      {rollups && <Field label={t('rcv.group')} htmlFor="pf-group" className={cn('w-48', projectScreens && 'no-print')}><select id="pf-group" className={selectCls} value={group} onChange={(e) => set('group', e.target.value === 'none' ? null : e.target.value)}>
         {GROUP_OPTIONS.map(({ value, label }) => <option key={value} value={value}>{t(label)}</option>)}
       </select></Field>}
-      <FilterBar activeCount={tokens.length}
+      <div className={projectScreens ? 'no-print' : undefined}><FilterBar activeCount={tokens.length}
         search={<Field label={t('common.search')} htmlFor="pf-q">
           <Input id="pf-q" key={filters.q ? 'q' : 'empty'} type="search" placeholder={t('common.search')} defaultValue={filters.q ?? ''} onChange={(e) => set('q', e.target.value)} />
         </Field>}
@@ -213,13 +287,42 @@ function Dashboard(header: { title: string; subtitle: ReactNode }) {
             <label className="flex min-h-(--control-h) items-center gap-2 text-sm"><Checkbox checked={q.data.ownOnly} onCheckedChange={(c) => set('mine', c ? null : 'false')} />{t('portfolio.mine')}</label>
           )}
         </div>
-      </FilterBar>
+      </FilterBar></div>
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
-      {(q.isPending || q.data) && <DataTable table={table} rows={ordered} loading={q.isPending} caption={t('nav.portfolio')} current={() => false} cards={false} oneBody
+      {projectScreens && q.data?.changes && <PortfolioMoveLine data={q.data.changes} />}
+      {(q.isPending || q.data) && <div className="portfolio-screen-table"><DataTable table={table} rows={ordered} loading={q.isPending} caption={t('nav.portfolio')} current={() => false} cards={false} oneBody
         groupBy={group === 'none' ? undefined : groupKey} groupRow={groupRow}
-        empty={<Empty action={tokens.length > 0 && <Button variant="outline" onClick={clear}>{t('filters.clear')}</Button>}>{t('portfolio.empty')}</Empty>} />}
+        empty={<Empty action={tokens.length > 0 && <Button variant="outline" onClick={clear}>{t('filters.clear')}</Button>}>{t('portfolio.empty')}</Empty>} /></div>}
+      {projectScreens && q.data && <div className="portfolio-print-only portfolio-print-table">
+        <p className="portfolio-print-scope">{t('portfolioScreens.printScope', { scope: printScope, group: t(GROUP_OPTIONS.find(option => option.value === group)?.label ?? 'rcv.groupNone') })}</p>
+        <DataTable table={printTable} rows={ordered} loading={false} caption={t('nav.portfolio')} current={() => false} cards={false} oneBody wide
+          groupBy={group === 'none' ? undefined : groupKey} groupRow={key => renderGroupRow(key, printColumns)}
+          detail={printDetail} empty={<p>{t('portfolio.empty')}</p>} />
+      </div>}
     </Page>
   )
+}
+
+/** Exact scoped positive project lists stay inline; no derived-ID URL can truncate them. */
+function PortfolioMoveLine({ data }: { data: NonNullable<Portfolio['changes']> }) {
+  const [opened, setOpened] = useState<'health' | 'milestones' | 'status' | null>(null)
+  const fact = (key: 'health' | 'milestones' | 'status') => {
+    const metric = data[key], n = metric.count ?? metric.observed
+    if (metric.count == null && metric.observed === 0) return t(`portfolioScreens.${key}Unavailable`)
+    const text = t(`portfolioScreens.${key}${n === 1 ? 'One' : 'Many'}`, { n })
+    return metric.count == null ? t('portfolioScreens.atLeast', { fact: text }) : text
+  }
+  return <section className="portfolio-change-line no-print space-y-2 text-sm" aria-label={t('portfolioScreens.moved', { n: data.days })}>
+    <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1"><span>{t('portfolioScreens.moved', { n: data.days })}</span>{(['health', 'milestones', 'status'] as const).map(key => <button key={key} type="button" className="text-left underline underline-offset-4" aria-expanded={opened === key} aria-controls={opened === key ? `portfolio-moves-${key}` : undefined} onClick={() => setOpened(opened === key ? null : key)}>{fact(key)}</button>)}</p>
+    <p className="text-xs text-muted-foreground">{t('portfolioScreens.scope', { n: data.scopeProjects })} · {t('portfolioScreens.window', { from: fmtDate(data.fromDate) })}</p>
+    {data.scopeCeilingReached && <p>{t('portfolioScreens.ceiling')}</p>}
+    {(['health', 'milestones', 'status'] as const).some(key => data[key].count == null) && <p>{t('portfolioScreens.historyUnavailable')}</p>}
+    {opened && <div id={`portfolio-moves-${opened}`} className="space-y-2 rounded border p-4" role="region" aria-label={fact(opened)}>
+      <h3 className="font-medium">{fact(opened)}</h3><p>{t(`portfolioScreens.${opened}Definition`)}</p>
+      {data[opened].unavailableProjects > 0 && <p>{t('portfolioScreens.coverage', { n: data[opened].unavailableProjects })}</p>}
+      {data[opened].projects.length ? <ul className="max-h-80 space-y-1 overflow-y-auto">{data[opened].projects.map(project => <li key={project.id}><Link className="underline underline-offset-2" to={`/projects/${encodeURIComponent(project.projectNumber)}/dashboard`}><Key>{project.projectNumber}</Key> {project.name}</Link></li>)}</ul> : <p>{t('portfolioScreens.noConfirmed')}</p>}
+    </div>}
+  </section>
 }
 
 /** FR-ADR-07: the last recorded Admin review's date and counts, nothing else; it never opens a list. */
@@ -240,6 +343,17 @@ function AdminReviewStrip() {
 /** A count column: the figure links to its list; a non-zero overdue or blocked count is emphasised (its header names it). */
 function Count({ n, bad, to }: { n: number; bad?: boolean; to: string }) {
   return <Link to={to} className={cn('hover:underline', bad && n > 0 && 'font-semibold text-bad')}>{n}</Link>
+}
+
+/** Print labels use their own line so each symbol and short health value stays together. */
+function PrintHealth({ r }: { r: Row }) {
+  const differs = r.reportedHealth !== r.computedHealth
+  return <div className="portfolio-print-health space-y-1">
+    {differs ? <>
+      <div><span className="block">{t('health.computed')}</span><HealthPill health={r.computedHealth} /></div>
+      <div><span className="block">{t('health.reported')}</span><HealthPill health={r.reportedHealth} /></div>
+    </> : <HealthPill health={r.reportedHealth} />}
+  </div>
 }
 
 /** §16.4: when they differ, both values are shown, with the PM's note and its age. */

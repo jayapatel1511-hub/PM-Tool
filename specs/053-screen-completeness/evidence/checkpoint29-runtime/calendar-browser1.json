@@ -1,0 +1,11 @@
+{
+  "exitCode": 1,
+  "args": [
+    "node",
+    "tests/calendar-screen.cjs"
+  ],
+  "driverHash": "7a19f637a54ecd16eb48f95d519836526c23328d3c6e6e8cfe051e8e119df401",
+  "base": "http://127.0.0.1:8861",
+  "atUtc": "2026-11-02T18:13:07.056426+00:00",
+  "boundary": "Actual SPA, finite synthetic HTTP API interception; provider tests independently cover real DB semantics"
+}

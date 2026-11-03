@@ -14,7 +14,82 @@ Object.assign(globalThis, {
   },
   window: { addEventListener: () => {} },
 })
-const { clearDraft, discardUnsaved, draftStorageKey, dropPending, forgetDrafts, hasUnsaved, keepPending, keepUnsent, leave, leaveQuestion, peekPending, pendingRoute, pruneDrafts, readDraft, registerForm, writeDraft } = await import('./drafts.ts')
+const { blocksUnsavedNavigation, clearDraft, discardUnsaved, draftStorageKey, dropPending, forgetDrafts, hasUnsaved, keepPending, keepUnsent, leave, leaveQuestion, peekPending, pendingRoute, pruneDrafts, readDraft, registerForm, writeDraft } = await import('./drafts.ts')
+const { preservesTaskDetailNavigation, taskDetailReturnOrigin } = await import('./drafts.ts')
+
+test('Task preservation follows only its own presentation and captured Person chain, including nested return and paging', () => {
+  const actor = '00000000-0000-0000-0000-000000000123', taskId = 'synthetic-task'
+  const source = { pathname: '/projects/SYN/tasks', search: `?projects=all&page=2&panel=Task:${taskId}&taskSection=history&taskHistoryActor=${taskId}:${actor}`, hash: '' }
+  const sourceUrl = source.pathname + source.search
+  const origin = { url: sourceUrl, scrollTop: 400, surface: { slot: 'sheet-content', scrollTop: 600, scrollLeft: 0 } }
+  const person = { ...source, search: '?projects=all&page=2&panel=Person:person-a', state: { recordContextReturn: origin } }
+  const preserve = preservesTaskDetailNavigation(taskId)
+  assert.equal(preserve(source, { ...source, search: source.search + `&taskHistoryPage=${taskId}:2&groupChanges=true` }), true)
+  assert.equal(preserve(source, person), true); assert.equal(preserve(person, source), true)
+  const paged = { ...person, search: person.search + '&personProjectsPage=2' }
+  assert.equal(preserve(person, paged), true)
+  const nested = { ...person, search: '?projects=all&page=2&panel=Person:person-b', state: { recordContextReturn: { url: person.pathname + person.search, parent: origin, surface: { slot: 'sheet-content', scrollTop: 20, scrollLeft: 0 } } } }
+  assert.equal(preserve(person, nested), true); assert.equal(preserve(nested, person), true)
+  assert.equal(taskDetailReturnOrigin(nested.state, taskId)?.url, sourceUrl)
+  for (const refused of [
+    { ...source, search: source.search.replace('projects=all', 'projects=other') },
+    { ...source, search: source.search.replace(`panel=Task:${taskId}`, 'panel=Task:another-task') },
+    { ...source, search: source.search.replace(`taskHistoryActor=${taskId}:`, 'taskHistoryActor=another-task:') },
+    { ...source, search: source.search + `&taskHistoryActor=${taskId}:${actor}` },
+    { ...source, search: source.search.replace('taskSection=history', 'taskSection=unknown') },
+    { ...source, pathname: '/projects' },
+  ]) assert.equal(preserve(source, refused), false)
+  const modal = { ...person, state: { recordContextReturn: { ...origin, surface: { slot: 'dialog-content', scrollTop: 0, scrollLeft: 0 } } } }
+  assert.equal(preserve(source, modal), false); assert.equal(preserve(modal, source), false)
+  assert.equal(taskDetailReturnOrigin(modal.state, taskId), null)
+  assert.equal(preserve(source, { ...person, state: null }), false)
+  const alias = { pathname: '/tasks/SYN-T001', search: '?taskSection=details', hash: '' }
+  assert.equal(preservesTaskDetailNavigation(taskId, 'SYN-T001')(alias, { ...alias, search: '?taskSection=history' }), true)
+})
+
+test('Task presentation proof preserves only its mounted form; leaving, unload and another dirty form remain guarded', () => {
+  const source = { pathname: '/tasks/synthetic-task', search: '?taskSection=details', hash: '' }
+  const history = { ...source, search: '?taskSection=history' }
+  const off = registerForm({ unsaved: () => true, discard: () => {}, preservesNavigation: preservesTaskDetailNavigation('synthetic-task') })
+  try {
+    assert.equal(hasUnsaved(), true)
+    assert.equal(blocksUnsavedNavigation({ currentLocation: source, nextLocation: history }), false)
+    assert.equal(blocksUnsavedNavigation({ currentLocation: source, nextLocation: { pathname: '/tasks', search: '', hash: '' } }), true)
+    const other = registerForm({ unsaved: () => true, discard: () => {} })
+    try { assert.equal(blocksUnsavedNavigation({ currentLocation: source, nextLocation: history }), true) } finally { other() }
+    assert.equal(hasUnsaved(), true)
+  } finally { off() }
+})
+
+test('a preserved overlay bypasses only its own form, while unload, close, other navigation and other dirty forms stay guarded', () => {
+  const base = { pathname: '/projects/P/deliverables', search: '?group=none', hash: '' }
+  const overlay = { ...base, search: '?group=none&panel=Person:u1' }
+  const other = { pathname: '/projects', search: '', hash: '' }
+  let dirty = true
+  const off = registerForm({ unsaved: () => dirty, discard: () => { dirty = false },
+    preservesNavigation: (from, to) => from.pathname === base.pathname && to.pathname === base.pathname && (from.search === overlay.search || to.search === overlay.search) })
+  try {
+    assert.equal(blocksUnsavedNavigation({ currentLocation: base, nextLocation: overlay }), false)
+    assert.equal(blocksUnsavedNavigation({ currentLocation: overlay, nextLocation: base }), false)
+    let returned = 0
+    leave(() => { returned++ }, { currentLocation: overlay, nextLocation: base })
+    assert.equal(returned, 1, 'explicit Person close uses the same destination-aware form verdict')
+    assert.equal(leaveQuestion.get(), null)
+    leave(() => { returned++ })
+    assert.equal(returned, 1, 'closing the actual source form is still guarded')
+    leaveQuestion.answer(false)
+    assert.equal(blocksUnsavedNavigation({ currentLocation: overlay, nextLocation: other }), true)
+    assert.equal(hasUnsaved(), true, 'browser unload and explicit close still see the memory-only file')
+    const removeOther = registerForm({ unsaved: () => true, discard: () => {} })
+    try {
+      assert.equal(blocksUnsavedNavigation({ currentLocation: base, nextLocation: overlay }), true)
+      leave(() => { returned++ }, { currentLocation: overlay, nextLocation: base })
+      assert.equal(returned, 1, 'another dirty form still blocks explicit Person close')
+      leaveQuestion.answer(false)
+    } finally { removeOther() }
+    discardUnsaved(); assert.equal(blocksUnsavedNavigation({ currentLocation: base, nextLocation: other }), false)
+  } finally { off() }
+})
 
 const DAY = 86_400_000
 const ago = (days: number) => new Date(Date.now() - days * DAY).toISOString()

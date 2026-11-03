@@ -1,0 +1,13 @@
+{
+  "boardFacts.shownOnly": "Figures describe shown cards only; hidden or unloaded cards are excluded.",
+  "boardFacts.hours": "{hours} estimated · {n} unestimated",
+  "boardFacts.overdue": "{n} overdue",
+  "boardFacts.overdueUnknown": "{n} overdue · {unknown} state unavailable",
+  "boardFacts.disciplineLead": "Discipline Lead: {name}",
+  "boardFacts.projectManager": "Project Manager: {name}",
+  "boardFacts.cardOne": "{n} card shown",
+  "boardFacts.cardMany": "{n} cards shown",
+  "boardFacts.waitingOne": "{n} day waiting",
+  "boardFacts.waitingMany": "{n} days waiting",
+  "boardFacts.waitingUnavailable": "Waiting time unavailable"
+}

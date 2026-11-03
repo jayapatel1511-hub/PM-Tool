@@ -1,0 +1,585 @@
+{
+  "firstSix": [
+    {
+      "name": "compact visual report with overlapping inputs",
+      "code": "stale-work",
+      "compact": true,
+      "top": 363.5,
+      "height": 41
+    },
+    {
+      "name": "complex scoped overdue-tasks",
+      "code": "overdue-tasks",
+      "compact": true,
+      "top": 363.5,
+      "height": 77
+    },
+    {
+      "name": "complex scoped blocked-tasks",
+      "code": "blocked-tasks",
+      "compact": true,
+      "top": 363.5,
+      "height": 77
+    },
+    {
+      "name": "complex scoped tasks-blocking-others",
+      "code": "tasks-blocking-others",
+      "compact": true,
+      "top": 363.5,
+      "height": 77
+    },
+    {
+      "name": "complex scoped review-queue",
+      "code": "review-queue",
+      "compact": true,
+      "top": 363.5,
+      "height": 77
+    },
+    {
+      "name": "complex scoped tasks-due-this-week",
+      "code": "tasks-due-this-week",
+      "compact": true,
+      "top": 363.5,
+      "height": 76.5
+    },
+    {
+      "name": "expanded controls with visual system disabled",
+      "code": "stale-work",
+      "compact": false,
+      "top": 653.5,
+      "height": 41
+    },
+    {
+      "name": "compact visual system enabled",
+      "code": "stale-work",
+      "compact": true,
+      "top": 363.5,
+      "height": 41
+    }
+  ],
+  "remainingSix": [
+    {
+      "code": "workload-employee",
+      "form": "workload-employee",
+      "firstDataTop": 363.5,
+      "firstDataHeight": 56.5,
+      "measured": {
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "fonts": "loaded",
+        "main": {
+          "top": 56,
+          "height": 944,
+          "width": 1200,
+          "scrollTop": 0,
+          "scrollLeft": 0,
+          "scrollHeight": 944
+        },
+        "band": {
+          "top": 56,
+          "height": 156,
+          "width": 1200
+        },
+        "results": {
+          "top": 228,
+          "height": 193,
+          "width": 856
+        },
+        "counts": {
+          "top": 228,
+          "height": 40,
+          "width": 856
+        },
+        "inputs": {
+          "top": 272,
+          "height": 42,
+          "width": 856
+        },
+        "appliedTokens": [
+          {
+            "text": "Discipline: Civil ",
+            "top": 231,
+            "height": 16,
+            "width": 82.453125
+          }
+        ],
+        "notes": [],
+        "controlsOpen": false,
+        "table": {
+          "top": 319,
+          "height": 101,
+          "width": 9827.9375
+        },
+        "header": {
+          "top": 319,
+          "height": 44.5,
+          "width": 9827.9375
+        },
+        "firstRow": {
+          "top": 363.5,
+          "height": 56.5,
+          "width": 9827.9375
+        }
+      }
+    },
+    {
+      "code": "workload-discipline",
+      "form": "workload-discipline",
+      "firstDataTop": 379.5,
+      "firstDataHeight": 36.5,
+      "measured": {
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "fonts": "loaded",
+        "main": {
+          "top": 56,
+          "height": 944,
+          "width": 1200,
+          "scrollTop": 0,
+          "scrollLeft": 0,
+          "scrollHeight": 944
+        },
+        "band": {
+          "top": 56,
+          "height": 156,
+          "width": 1200
+        },
+        "results": {
+          "top": 228,
+          "height": 189,
+          "width": 856
+        },
+        "counts": {
+          "top": 228,
+          "height": 40,
+          "width": 856
+        },
+        "inputs": {
+          "top": 272,
+          "height": 58,
+          "width": 856
+        },
+        "appliedTokens": [
+          {
+            "text": "Office: Synthetic office ",
+            "top": 231,
+            "height": 16,
+            "width": 123.65625
+          }
+        ],
+        "notes": [],
+        "controlsOpen": false,
+        "table": {
+          "top": 335,
+          "height": 81,
+          "width": 1748.171875
+        },
+        "header": {
+          "top": 335,
+          "height": 44.5,
+          "width": 1748.171875
+        },
+        "firstRow": {
+          "top": 379.5,
+          "height": 36.5,
+          "width": 1748.171875
+        }
+      }
+    },
+    {
+      "code": "team-capacity",
+      "form": "team-capacity",
+      "firstDataTop": 391.5,
+      "firstDataHeight": 37,
+      "measured": {
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "fonts": "loaded",
+        "main": {
+          "top": 56,
+          "height": 944,
+          "width": 1200,
+          "scrollTop": 0,
+          "scrollLeft": 0,
+          "scrollHeight": 944
+        },
+        "band": {
+          "top": 56,
+          "height": 156,
+          "width": 1200
+        },
+        "results": {
+          "top": 228,
+          "height": 497,
+          "width": 856
+        },
+        "counts": {
+          "top": 228,
+          "height": 52,
+          "width": 856
+        },
+        "inputs": {
+          "top": 284,
+          "height": 58,
+          "width": 856
+        },
+        "appliedTokens": [
+          {
+            "text": "Supervisor: Synthetic supervisor ",
+            "top": 231,
+            "height": 16,
+            "width": 176.890625
+          },
+          {
+            "text": "Discipline: Civil ",
+            "top": 231,
+            "height": 16,
+            "width": 82.453125
+          },
+          {
+            "text": "Unit: Synthetic historical unit ",
+            "top": 231,
+            "height": 16,
+            "width": 158.65625
+          },
+          {
+            "text": "From: 2026-09-14 ",
+            "top": 231,
+            "height": 16,
+            "width": 101.59375
+          },
+          {
+            "text": "Weeks: 2 ",
+            "top": 248,
+            "height": 16,
+            "width": 49.296875
+          },
+          {
+            "text": "Include my private drafts: false ",
+            "top": 248,
+            "height": 16,
+            "width": 168.1875
+          }
+        ],
+        "notes": [
+          {
+            "text": "Remaining capacity in the Weekly Planner: capacity \u2212 Confirmed \u2212 Expected",
+            "top": 248,
+            "height": 31,
+            "width": 604.28125
+          }
+        ],
+        "controlsOpen": false,
+        "table": {
+          "top": 347,
+          "height": 377,
+          "width": 854
+        },
+        "header": {
+          "top": 347,
+          "height": 44.5,
+          "width": 854
+        },
+        "firstRow": {
+          "top": 391.5,
+          "height": 37,
+          "width": 854
+        }
+      }
+    },
+    {
+      "code": "allocations-by-source",
+      "form": "hours-by-source",
+      "firstDataTop": 379.5,
+      "firstDataHeight": 37,
+      "measured": {
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "fonts": "loaded",
+        "main": {
+          "top": 56,
+          "height": 944,
+          "width": 1200,
+          "scrollTop": 0,
+          "scrollLeft": 0,
+          "scrollHeight": 944
+        },
+        "band": {
+          "top": 56,
+          "height": 156,
+          "width": 1200
+        },
+        "results": {
+          "top": 228,
+          "height": 263,
+          "width": 856
+        },
+        "counts": {
+          "top": 228,
+          "height": 40,
+          "width": 856
+        },
+        "inputs": {
+          "top": 272,
+          "height": 58,
+          "width": 856
+        },
+        "appliedTokens": [
+          {
+            "text": "Supervisor: Synthetic supervisor ",
+            "top": 231,
+            "height": 16,
+            "width": 176.890625
+          },
+          {
+            "text": "From: 2026-09-14 ",
+            "top": 231,
+            "height": 16,
+            "width": 101.59375
+          },
+          {
+            "text": "Weeks: 2 ",
+            "top": 231,
+            "height": 16,
+            "width": 49.296875
+          },
+          {
+            "text": "Include my private drafts: false ",
+            "top": 231,
+            "height": 16,
+            "width": 168.1875
+          },
+          {
+            "text": "Show: hours-by-source ",
+            "top": 248,
+            "height": 16,
+            "width": 126.8125
+          },
+          {
+            "text": "Source: Admin ",
+            "top": 248,
+            "height": 16,
+            "width": 79.53125
+          },
+          {
+            "text": "Confidence: Confirmed ",
+            "top": 248,
+            "height": 16,
+            "width": 124.578125
+          }
+        ],
+        "notes": [],
+        "controlsOpen": false,
+        "table": {
+          "top": 335,
+          "height": 155,
+          "width": 854
+        },
+        "header": {
+          "top": 335,
+          "height": 44.5,
+          "width": 854
+        },
+        "firstRow": {
+          "top": 379.5,
+          "height": 37,
+          "width": 854
+        }
+      }
+    },
+    {
+      "code": "allocations-by-source",
+      "form": "entries-without-project",
+      "firstDataTop": 379.5,
+      "firstDataHeight": 76.5,
+      "measured": {
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "fonts": "loaded",
+        "main": {
+          "top": 56,
+          "height": 944,
+          "width": 1200,
+          "scrollTop": 0,
+          "scrollLeft": 0,
+          "scrollHeight": 944
+        },
+        "band": {
+          "top": 56,
+          "height": 156,
+          "width": 1200
+        },
+        "results": {
+          "top": 228,
+          "height": 229,
+          "width": 856
+        },
+        "counts": {
+          "top": 228,
+          "height": 40,
+          "width": 856
+        },
+        "inputs": {
+          "top": 272,
+          "height": 58,
+          "width": 856
+        },
+        "appliedTokens": [
+          {
+            "text": "Supervisor: Synthetic supervisor ",
+            "top": 231,
+            "height": 16,
+            "width": 176.890625
+          },
+          {
+            "text": "From: 2026-09-14 ",
+            "top": 231,
+            "height": 16,
+            "width": 101.59375
+          },
+          {
+            "text": "Weeks: 2 ",
+            "top": 231,
+            "height": 16,
+            "width": 49.296875
+          },
+          {
+            "text": "Include my private drafts: false ",
+            "top": 231,
+            "height": 16,
+            "width": 168.1875
+          },
+          {
+            "text": "Show: entries-without-project ",
+            "top": 248,
+            "height": 16,
+            "width": 164.703125
+          },
+          {
+            "text": "Source: Admin ",
+            "top": 248,
+            "height": 16,
+            "width": 79.53125
+          },
+          {
+            "text": "Confidence: Confirmed ",
+            "top": 248,
+            "height": 16,
+            "width": 124.578125
+          }
+        ],
+        "notes": [],
+        "controlsOpen": false,
+        "table": {
+          "top": 335,
+          "height": 121,
+          "width": 1035.046875
+        },
+        "header": {
+          "top": 335,
+          "height": 44.5,
+          "width": 1035.046875
+        },
+        "firstRow": {
+          "top": 379.5,
+          "height": 76.5,
+          "width": 1035.046875
+        }
+      }
+    },
+    {
+      "code": "task-hours",
+      "form": "task-hours",
+      "firstDataTop": 401.5,
+      "firstDataHeight": 37,
+      "measured": {
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "fonts": "loaded",
+        "main": {
+          "top": 56,
+          "height": 944,
+          "width": 1200,
+          "scrollTop": 0,
+          "scrollLeft": 0,
+          "scrollHeight": 944
+        },
+        "band": {
+          "top": 56,
+          "height": 156,
+          "width": 1200
+        },
+        "results": {
+          "top": 228,
+          "height": 305,
+          "width": 856
+        },
+        "counts": {
+          "top": 228,
+          "height": 40,
+          "width": 856
+        },
+        "inputs": {
+          "top": 272,
+          "height": 80,
+          "width": 856
+        },
+        "appliedTokens": [
+          {
+            "text": "Person: Alex Chen ",
+            "top": 231,
+            "height": 16,
+            "width": 99.015625
+          },
+          {
+            "text": "From: 2026-09-14 ",
+            "top": 231,
+            "height": 16,
+            "width": 101.59375
+          },
+          {
+            "text": "To: 2026-09-20 ",
+            "top": 231,
+            "height": 16,
+            "width": 86.390625
+          },
+          {
+            "text": "Entries: mine ",
+            "top": 231,
+            "height": 16,
+            "width": 71.625
+          }
+        ],
+        "notes": [],
+        "controlsOpen": false,
+        "table": {
+          "top": 357,
+          "height": 175,
+          "width": 854
+        },
+        "header": {
+          "top": 357,
+          "height": 44.5,
+          "width": 854
+        },
+        "firstRow": {
+          "top": 401.5,
+          "height": 37,
+          "width": 854
+        }
+      }
+    }
+  ]
+}

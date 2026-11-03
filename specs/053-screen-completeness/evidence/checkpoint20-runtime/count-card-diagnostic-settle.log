@@ -1,0 +1,13 @@
+ZERO_ANIMATION {"hidden":false,"color":"rgb(214, 51, 74)","animations":[{"type":"CSSTransition","property":"color","state":"running","time":0,"start":null,"rate":1,"pending":true,"frames":[{"offset":0,"easing":"linear","composite":"auto","color":"rgb(214, 51, 74)","computedOffset":0},{"offset":1,"easing":"linear","composite":"auto","color":"rgb(22, 26, 35)","computedOffset":1}],"timing":{"delay":0,"direction":"normal","duration":0.01,"easing":"ease","endDelay":0,"fill":"backwards","iterationStart":0,"iterations":1,"activeDuration":0.01,"currentIteration":0,"endTime":0.01,"localTime":0,"progress":0}}]}
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+'32px' !== '28px'
+
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/count-card-contract.cjs:120:53 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: '32px',
+  expected: '28px',
+  operator: 'strictEqual',
+  diff: 'simple'
+}

@@ -1,0 +1,28 @@
+{
+  "error": "Expected values to be strictly deep-equal:\n+ actual - expected\n\n+ [\n+   {\n+     method: 'POST',\n+     path: '/api/v1/me/work/opened'\n+   }\n+ ]\n- []\n",
+  "checks": [
+    "Two actual time entries use distinct persisted-User report openers and natural exact focus return at1440/375",
+    "Actual filtered CSV/XLSX client menu downloads contain exactly eight allowed columns and recorded issue bundle, preserving00123 and excluding internal metadata"
+  ],
+  "downloads": [
+    {
+      "format": "csv",
+      "file": "real-client-register.csv",
+      "rows": 2,
+      "filterPreserved": true
+    },
+    {
+      "format": "xlsx",
+      "file": "real-client-register.xlsx",
+      "rows": 2,
+      "filterPreserved": true
+    }
+  ],
+  "writes": [
+    {
+      "method": "POST",
+      "path": "/api/v1/me/work/opened"
+    }
+  ],
+  "errors": []
+}

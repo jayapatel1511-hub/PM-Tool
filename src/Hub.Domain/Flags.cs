@@ -42,6 +42,14 @@ public static class Flags
         new("admin_review", "051"), // §55.4: the Admin review page, its record, the digest line and the Portfolio strip
         new("data_entry_safety", "051"), // §55.2 Part A: text autosave after a pause, drafts, leave prompt, Retry control
         new(TaskRules.BacklogFlag, "051"), // §55.3: the Backlog filter, row field, counts, export column and FR-BKL-05 exclusions
+        new("visual_system", "052"), // §56: visual system and navigation amendment
+        new("screen_patterns", "053"), // §57.2: cross-screen record-context patterns
+        new("home_overview", "053"), // §57.3: Home overview completeness
+        new("work_screens", "053"), // §57.4: My Work and task-screen completeness
+        new("project_screens", "053"), // §57.5: project, portfolio and dashboard completeness
+        new("capacity_screens", "053"), // §57.6: reports, planning and capacity-screen completeness
+        new("register_screens", "053"), // §57.7: deliverable, review, milestone and register completeness
+        new("people_screens", "053"), // §57.8: people, files, notification, search, preference and admin completeness
     ];
 
     /// `flag.<name>` as a Bool setting, default off, group `flags`, generated like `rule_enabled.*`.

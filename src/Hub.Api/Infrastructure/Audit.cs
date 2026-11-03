@@ -56,7 +56,7 @@ public static class AuditRules
 
     public static string? TypeCategory(IAuditable item) => item switch
     {
-        AppUser or UserSystemRole or RefData or OrgSetting or Holiday or ProjectTemplate => "admin",
+        AppUser or UserSystemRole or UserCertification or RefData or OrgSetting or Holiday or ProjectTemplate => "admin",
         Decision => "decision",
         Comment => "comment",
         TaskDependency or DeliverableDependency => "dependency",

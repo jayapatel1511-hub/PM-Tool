@@ -12,6 +12,16 @@ namespace Hub.Api.Data;
 public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, TimeProvider clock, EvaluationSignal signal, SettingsStore settings, IConfiguration configuration) : DbContext(options)
 {
     internal bool initializingAuditChains;
+    // Save hooks construct notifiers over this same scoped context; all must join its atomic bulk capture.
+    internal Notifier.TaskBulkCapture? TaskBulkNotifications { get; set; }
+    internal Notifier.PendingCapture? PendingNoticeCapture { get; set; }
+    internal string NoticeEmailBaseUrl => (configuration["Email:BaseUrl"] ?? "").TrimEnd('/');
+
+    // Save-hook notifiers share the originating command's raw capture, never their own transaction.
+    public Task FlushNotices(CancellationToken ct = default)
+        => new Notifier(this, audit, settings, clock, configuration).FlushPending(ct);
+
+    public void DiscardNotices() => PendingNoticeCapture = null;
 
     public AuditContext Audit => audit;
 
@@ -25,8 +35,19 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
     public DbSet<ProjectType> ProjectTypes => Set<ProjectType>();
     public DbSet<Phase> Phases => Set<Phase>();
     public DbSet<DeliverableType> DeliverableTypes => Set<DeliverableType>();
+    public DbSet<DeliverableReviewDefault> DeliverableReviewDefaults => Set<DeliverableReviewDefault>();
+    public DbSet<IssuePurpose> IssuePurposes => Set<IssuePurpose>();
+    public DbSet<IssueReturnCode> IssueReturnCodes => Set<IssueReturnCode>();
+    public DbSet<DecisionCategory> DecisionCategories => Set<DecisionCategory>();
+    public DbSet<IssueRootCauseCategory> IssueRootCauseCategories => Set<IssueRootCauseCategory>();
+    public DbSet<CertificationTag> CertificationTags => Set<CertificationTag>();
+    public DbSet<UserCertification> UserCertifications => Set<UserCertification>();
     public DbSet<OrgSetting> Settings => Set<OrgSetting>();
     public DbSet<UserSetting> UserSettings => Set<UserSetting>();
+    public DbSet<WorkAssignmentOccurrence> WorkAssignmentOccurrences => Set<WorkAssignmentOccurrence>();
+    public DbSet<WorkSeenAcknowledgement> WorkSeenAcknowledgements => Set<WorkSeenAcknowledgement>();
+    public DbSet<WorkSeenCommandReceipt> WorkSeenCommandReceipts => Set<WorkSeenCommandReceipt>();
+    public DbSet<TaskBulkCommandReceipt> TaskBulkCommandReceipts => Set<TaskBulkCommandReceipt>();
     public DbSet<RouteCount> RouteCounts => Set<RouteCount>();
     public DbSet<TemplateRole> TemplateRoles => Set<TemplateRole>();
     public DbSet<NotificationPreference> NotificationPreferences => Set<NotificationPreference>();
@@ -50,6 +71,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
     public DbSet<ReviewPackage> ReviewPackages => Set<ReviewPackage>();
     public DbSet<ReviewRound> ReviewRounds => Set<ReviewRound>();
     public DbSet<ReviewManifestItem> ReviewManifestItems => Set<ReviewManifestItem>();
+    public DbSet<ExternalReview> ExternalReviews => Set<ExternalReview>();
     public DbSet<DisciplineReview> DisciplineReviews => Set<DisciplineReview>();
     public DbSet<ReviewFinding> ReviewFindings => Set<ReviewFinding>();
     public DbSet<FindingEvent> FindingEvents => Set<FindingEvent>();
@@ -95,6 +117,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
     public DbSet<TaskDependency> Dependencies => Set<TaskDependency>();
     public DbSet<DeliverableDependency> DeliverableDependencies => Set<DeliverableDependency>();
     public DbSet<TaskCollaborator> Collaborators => Set<TaskCollaborator>();
+    public DbSet<TaskContribution> TaskContributions => Set<TaskContribution>();
     public DbSet<ItemWatcher> Watchers => Set<ItemWatcher>();
     public DbSet<TaskTimeEntry> TimeEntries => Set<TaskTimeEntry>();
     public DbSet<BoardOrder> BoardOrders => Set<BoardOrder>();
@@ -115,6 +138,8 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
     public DbSet<ActivityLog> ActivityLog => Set<ActivityLog>();
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<EmailMessage> Emails => Set<EmailMessage>();
+    public DbSet<NoticeDeliveryIntent> NoticeDeliveryIntents => Set<NoticeDeliveryIntent>();
+    public DbSet<NoticeDeliverySlot> NoticeDeliverySlots => Set<NoticeDeliverySlot>();
     public DbSet<ProjectFollow> Follows => Set<ProjectFollow>();
     public DbSet<OutboxEvent> Outbox => Set<OutboxEvent>();
     public DbSet<TaskState> TaskStates => Set<TaskState>();
@@ -136,6 +161,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
     public DbSet<TemplateMilestone> TemplateMilestones => Set<TemplateMilestone>();
     public DbSet<TemplateDeliverable> TemplateDeliverables => Set<TemplateDeliverable>();
     public DbSet<TemplateTask> TemplateTasks => Set<TemplateTask>();
+    public DbSet<TemplateRisk> TemplateRisks => Set<TemplateRisk>();
     public DbSet<TemplateDependency> TemplateDependencies => Set<TemplateDependency>();
 
     protected override void OnModelCreating(ModelBuilder mb)
@@ -143,6 +169,13 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         mb.HasDefaultSchema("hub");
         mb.HasPostgresExtension("citext");
         mb.HasPostgresExtension("pg_trgm");
+
+        mb.Entity<DeliverableReviewDefault>(e =>
+        {
+            e.HasKey(x => new { x.DeliverableTypeId, x.DisciplineId });
+            e.HasOne<DeliverableType>().WithMany().HasForeignKey(x => x.DeliverableTypeId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne<Discipline>().WithMany().HasForeignKey(x => x.DisciplineId).OnDelete(DeleteBehavior.Restrict);
+        });
 
         mb.Entity<LocalAuthSession>().HasIndex(x => x.ExpiresAt);
         mb.Entity<ExternalIdentity>(e =>
@@ -167,6 +200,12 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
             e.Property(x => x.WeeklyCapacityHours).HasPrecision(5, 1);
             e.HasIndex(x => x.DisplayName).HasMethod("gin").HasOperators("gin_trgm_ops");
             e.ToTable(t => t.HasCheckConstraint("ck_app_user_not_own_supervisor", "supervisor_id IS NULL OR supervisor_id <> id"));
+            e.Property(x => x.PersonType).HasMaxLength(20);
+            e.ToTable(t =>
+            {
+                t.HasCheckConstraint("ck_app_user_person_type", "person_type IS NULL OR person_type IN ('Employee', 'Co-op', 'Contractor')");
+                t.HasCheckConstraint("ck_app_user_person_dates", "person_start_date IS NULL OR person_end_date IS NULL OR person_start_date <= person_end_date");
+            });
         });
         Fk<AppUser, Office>(mb, x => x.OfficeId);
         Fk<AppUser, AppUser>(mb, x => x.SupervisorId);
@@ -177,9 +216,40 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
             e.ToTable(t => t.HasCheckConstraint("ck_role", $"role IN ({In(SystemRole.All)})"));
         });
 
-        foreach (var t in new[] { typeof(Office), typeof(Discipline), typeof(Client), typeof(ProjectType), typeof(Phase), typeof(DeliverableType) })
+        foreach (var t in new[] { typeof(Office), typeof(Discipline), typeof(Client), typeof(ProjectType), typeof(Phase), typeof(DeliverableType), typeof(IssuePurpose), typeof(IssueReturnCode), typeof(DecisionCategory) })
             mb.Entity(t).HasIndex(nameof(RefData.Name));
+        mb.Entity<DecisionCategory>().Property(x => x.Name).HasMaxLength(120);
+        mb.Entity<DecisionCategory>(e =>
+        {
+            e.Property(x => x.Name).HasColumnType("citext");
+            e.HasIndex(x => x.Name).IsUnique();
+            e.ToTable(t => t.HasCheckConstraint("ck_decision_category_name", "name = btrim(name) AND char_length(name) BETWEEN 1 AND 120 AND name !~ '[[:cntrl:]]'"));
+        });
+        mb.Entity<IssueRootCauseCategory>(e =>
+        {
+            e.Property(x => x.Name).HasMaxLength(120).HasColumnType("citext");
+            e.HasIndex(x => x.Name).IsUnique();
+            e.ToTable(t => t.HasCheckConstraint("ck_issue_root_cause_category_name", "name = btrim(name) AND char_length(name) BETWEEN 1 AND 120 AND name !~ '[[:cntrl:]]'"));
+        });
+        mb.Entity<IssuePurpose>().Property(x => x.Name).HasMaxLength(120);
+        mb.Entity<IssueReturnCode>(e =>
+        {
+            e.Property(x => x.Name).HasMaxLength(120);
+            e.Property(x => x.Code).HasColumnType("citext").HasMaxLength(10);
+            e.HasIndex(x => x.Code).IsUnique();
+            e.ToTable(t => t.HasCheckConstraint("ck_issue_return_code", "code = btrim(code) AND char_length(code) BETWEEN 1 AND 10"));
+        });
+        mb.Entity<Project>().Property(x => x.ClientDrawingNumberPattern).HasMaxLength(120);
         Fk<DeliverableType, Discipline>(mb, x => x.DefaultDisciplineId);
+        mb.Entity<CertificationTag>(e =>
+        {
+            e.Property(x => x.Name).HasColumnType("citext").HasMaxLength(120);
+            e.HasIndex(x => x.Name).IsUnique();
+            e.ToTable(t => t.HasCheckConstraint("ck_certification_tag_name", "name = btrim(name) AND char_length(name) BETWEEN 1 AND 120"));
+        });
+        mb.Entity<UserCertification>().HasIndex(x => new { x.UserId, x.CertificationTagId }).IsUnique();
+        Fk<UserCertification, AppUser>(mb, x => x.UserId);
+        Fk<UserCertification, CertificationTag>(mb, x => x.CertificationTagId);
         mb.Entity<OrgSetting>(e => { e.HasKey(x => x.Key); e.Property(x => x.Value).HasColumnType("jsonb"); });
         mb.Entity<RouteCount>(e => { e.HasIndex(x => new { x.Day, x.RouteKey }).IsUnique(); e.Property(x => x.RouteKey).HasMaxLength(100); });
         mb.Entity<TemplateRole>(e => { e.Property(x => x.RoleLabel).HasMaxLength(80); e.Property(x => x.Note).HasMaxLength(2000); e.Property(x => x.PlannedHours).HasPrecision(9, 3); });
@@ -188,14 +258,89 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         Fk<TemplateRole, TemplateMilestone>(mb, x => x.StartMilestoneId);
         Fk<TemplateRole, TemplateMilestone>(mb, x => x.EndMilestoneId);
         mb.Entity<UserSetting>(e => { e.HasKey(x => x.UserId); e.Property(x => x.DigestSectionsOff).HasColumnType("jsonb"); e.Property(x => x.HoldDigestWhenAway).HasDefaultValue(true); });
+        // This revision is deliberately not an EF concurrency token: unrelated preference writers own other columns.
+        mb.Entity<UserSetting>().Property(x => x.MyWorkSeenRevision).HasDefaultValue(0);
+        mb.Entity<UserSetting>(e =>
+        {
+            e.Property(x => x.TimeReminderWeekday).HasConversion<short>().HasColumnType("smallint");
+            e.ToTable(t => t.HasCheckConstraint("ck_notice_preferences",
+                $"(notice_digest_frequency IS NULL OR notice_digest_frequency IN ({In(NoticeDigestFrequency.All.Order(StringComparer.Ordinal))})) "
+                + "AND (notice_preferences_revision IS NULL OR notice_preferences_revision >= 0) "
+                + "AND (time_reminder_weekday IS NULL OR time_reminder_weekday BETWEEN 1 AND 7) "
+                + "AND (time_reminder_time_local IS NULL OR time_reminder_time_local ~ '^([01][0-9]|2[0-3]):[0-5][0-9]$') "
+                + "AND (NOT coalesce(time_reminder_enabled, false) OR (time_reminder_weekday IS NOT NULL AND time_reminder_time_local IS NOT NULL))"));
+        });
+        mb.Entity<WorkAssignmentOccurrence>(e =>
+        {
+            e.HasKey(x => x.Token);
+            e.HasAlternateKey(x => new { x.Token, x.RecipientId });
+            e.Property(x => x.ItemType).HasMaxLength(40);
+            e.Property(x => x.Role).HasMaxLength(32);
+            e.Property(x => x.Provenance).HasMaxLength(20);
+            e.HasIndex(x => new { x.ItemType, x.ItemId, x.Role, x.SourceVersion }).IsUnique().IsDescending(false, false, false, true);
+            e.HasIndex(x => new { x.SourceActivityId, x.Role }).IsUnique().HasFilter("source_activity_id IS NOT NULL");
+            e.HasIndex(x => new { x.RecipientId, x.Token });
+            e.HasOne<AppUser>().WithMany().HasForeignKey(x => x.RecipientId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne<Project>().WithMany().HasForeignKey(x => x.ProjectId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne<ActivityLog>().WithMany().HasForeignKey(x => x.SourceActivityId).OnDelete(DeleteBehavior.Restrict);
+            e.ToTable(t =>
+            {
+                t.HasCheckConstraint("ck_work_assignment_source_version", "source_version >= 0");
+                t.HasCheckConstraint("ck_work_assignment_provenance", "(provenance = 'Published' AND source_activity_id IS NOT NULL AND source_occurred_at IS NOT NULL) OR (provenance = 'BaselineSeed' AND source_activity_id IS NULL AND source_occurred_at IS NULL)");
+                t.HasCheckConstraint("ck_work_assignment_role", "(item_type = 'Task' AND role IN ('Assignee', 'Reviewer')) OR (item_type = 'Deliverable' AND role IN ('Owner', 'Reviewer')) OR (item_type IN ('Decision', 'Action') AND role = 'InternalOwner') OR (item_type IN ('Risk', 'Issue', 'ChangeNotice') AND role = 'Owner') OR (item_type = 'Handoff' AND role IN ('SendingOwner', 'ReceivingOwner')) OR (item_type = 'Project' AND role = 'ProjectManager')");
+            });
+        });
+        mb.Entity<WorkSeenAcknowledgement>(e =>
+        {
+            e.HasKey(x => new { x.RecipientId, x.Token });
+            e.Property(x => x.Provenance).HasMaxLength(20);
+            e.HasOne<WorkAssignmentOccurrence>().WithMany().HasForeignKey(x => new { x.Token, x.RecipientId })
+                .HasPrincipalKey(x => new { x.Token, x.RecipientId }).OnDelete(DeleteBehavior.Restrict);
+            e.ToTable(t => t.HasCheckConstraint("ck_work_seen_ack_provenance", "provenance IN ('InitialBaseline', 'Opened', 'MarkAll')"));
+        });
+        mb.Entity<WorkSeenCommandReceipt>(e =>
+        {
+            e.HasKey(x => new { x.UserId, x.RequestId });
+            e.Property(x => x.Action).HasMaxLength(20);
+            e.Property(x => x.PayloadHash).HasMaxLength(64);
+            e.Property(x => x.ResponseJson).HasColumnType("jsonb");
+            e.HasOne<AppUser>().WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Restrict);
+            e.ToTable(t =>
+            {
+                t.HasCheckConstraint("ck_work_seen_command_action", "action IN ('Visit', 'Opened', 'MarkAll')");
+                t.HasCheckConstraint("ck_work_seen_command_hash", "payload_hash ~ '^[0-9a-f]{64}$'");
+                t.HasCheckConstraint("ck_work_seen_command_response", "jsonb_typeof(response_json) = 'object'");
+            });
+        });
+        mb.Entity<TaskBulkCommandReceipt>(e =>
+        {
+            e.HasIndex(x => new { x.ActorId, x.RequestId }).IsUnique();
+            e.Property(x => x.IntentHash).HasMaxLength(64);
+            e.Property(x => x.IntentJson).HasColumnType("jsonb");
+            e.Property(x => x.ResponseJson).HasColumnType("jsonb");
+            e.HasOne<AppUser>().WithMany().HasForeignKey(x => x.ActorId).OnDelete(DeleteBehavior.Restrict);
+            e.ToTable(t =>
+            {
+                t.HasCheckConstraint("ck_task_bulk_command_hash", "hash_version = 1 AND intent_hash ~ '^[0-9a-f]{64}$'");
+                t.HasCheckConstraint("ck_task_bulk_command_json", "jsonb_typeof(intent_json) = 'object' AND jsonb_typeof(response_json) = 'object'");
+                t.HasCheckConstraint("ck_task_bulk_command_completed", "completed_at >= created_at");
+            });
+        });
         mb.Entity<NotificationPreference>().HasIndex(x => new { x.UserId, x.EventType }).IsUnique();
         Fk<Holiday, Office>(mb, x => x.OfficeId);
         mb.Entity<AdminReview>(e => { e.HasIndex(x => x.ReviewedAt); e.Property(x => x.Note).HasMaxLength(4000); e.Property(x => x.Checks).HasColumnType("jsonb"); });
         Fk<AdminReview, AppUser>(mb, x => x.ReviewerId);
-        mb.Entity<IdempotencyRecord>(e => e.HasIndex(x => new { x.UserId, x.Key }).IsUnique());
+        mb.Entity<IdempotencyRecord>(e =>
+        {
+            e.HasIndex(x => new { x.UserId, x.Key }).IsUnique();
+            e.Property(x => x.CalendarViewScope).HasMaxLength(8);
+            e.ToTable(t => t.HasCheckConstraint("ck_idempotency_calendar_context",
+                "(calendar_view_scope IS NULL AND calendar_view_project_id IS NULL) OR (calendar_view_scope IS NOT NULL AND calendar_view_scope IN ('Personal', 'Project') AND (calendar_view_scope = 'Personal' OR calendar_view_project_id IS NOT NULL))"));
+        });
 
         mb.Entity<Project>(e =>
         {
+            e.Property(x => x.IdentityColour).HasMaxLength(7);
             e.Property(x => x.StatusNote).HasMaxLength(500);
             e.Property(x => x.ProjectNumber).HasColumnType("citext");
             e.HasIndex(x => x.ProjectNumber).IsUnique();
@@ -208,6 +353,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
                 t.HasCheckConstraint("ck_project_priority", $"priority IN ({In(Priority.All)})");
                 t.HasCheckConstraint("ck_project_visibility", "visibility IN ('Open','Restricted')");
                 t.HasCheckConstraint("ck_project_override", "health_override IS NULL OR health_override IN ('Green','Yellow','Red')");
+                t.HasCheckConstraint("ck_project_identity_colour", $"identity_colour IS NULL OR lower(identity_colour) IN ({In(IdentityColour.Palette.Select(x => x.ToLowerInvariant()).ToArray())})");
             });
         });
         Fk<Project, AppUser>(mb, x => x.StatusNoteBy);
@@ -227,6 +373,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         Fk<ProjectDiscipline, AppUser>(mb, x => x.LeadUserId);
         mb.Entity<ProjectMember>(e =>
         {
+            e.Property(x => x.ResponsibilityNote).HasMaxLength(80);
             e.HasIndex(x => new { x.ProjectId, x.UserId }).IsUnique().HasFilter("removed_at IS NULL");
             e.HasIndex(x => x.UserId);
             e.ToTable(t => t.HasCheckConstraint("ck_member_roles", $"cardinality(roles) >= 1 AND roles <@ ARRAY[{In(ProjectRole.All)}]::text[]"));
@@ -237,7 +384,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         Fk<ProjectMember, ProjectDiscipline>(mb, x => x.PrimaryDisciplineId);
         mb.Entity<ProjectStar>().HasKey(x => new { x.UserId, x.ProjectId });
         Fk<ExternalParty, Project>(mb, x => x.ProjectId);
-        mb.Entity<ProjectHealthSnapshot>(e => { e.HasIndex(x => new { x.ProjectId, x.SnapshotDate }).IsUnique(); e.Property(x => x.Inputs).HasColumnType("jsonb"); e.Property(x => x.Counts).HasColumnType("jsonb").HasDefaultValueSql("'{}'::jsonb"); });
+        mb.Entity<ProjectHealthSnapshot>(e => { e.HasIndex(x => new { x.ProjectId, x.SnapshotDate }).IsUnique(); e.Property(x => x.Inputs).HasColumnType("jsonb"); e.Property(x => x.Counts).HasColumnType("jsonb").HasDefaultValueSql("'{}'::jsonb"); e.Property(x => x.HomeMetrics).HasColumnType("jsonb"); });
         Fk<ProjectHealthSnapshot, Project>(mb, x => x.ProjectId, DeleteBehavior.Cascade);
 
         Item<Milestone>(mb, e =>
@@ -251,6 +398,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         Fk<Milestone, Phase>(mb, x => x.CompletesPhaseId);
         Item<Deliverable>(mb, e =>
         {
+            e.Property(x => x.ClientDrawingNumber).HasMaxLength(120);
             e.Property(x => x.BaselineStartDate).HasColumnType("date");
             e.Property(x => x.BaselineDueDate).HasColumnType("date");
             e.HasIndex(x => new { x.ProjectId, x.Status });
@@ -271,6 +419,22 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         Fk<Deliverable, AppUser>(mb, x => x.ReviewerId);
         Fk<Deliverable, Milestone>(mb, x => x.MilestoneId);
         Fk<DeliverableIssue, Deliverable>(mb, x => x.DeliverableId, DeleteBehavior.Cascade);
+        mb.Entity<DeliverableIssue>(e =>
+        {
+            e.Property(x => x.RowVersion).IsConcurrencyToken();
+            e.Property(x => x.IssuedAuthorIds).HasColumnType("uuid[]");
+            e.Property(x => x.PurposeLabelSnapshot).HasMaxLength(120);
+            e.Property(x => x.ReturnCodeSnapshot).HasMaxLength(10);
+            e.Property(x => x.ReturnLabelSnapshot).HasMaxLength(120);
+            e.HasIndex(x => new { x.ProjectId, x.DeliverableId, x.CreatedAt });
+            e.ToTable(t => {
+                t.HasCheckConstraint("ck_deliverable_issue_response_pair", "(return_code_id IS NULL) = (response_date IS NULL)");
+                t.HasCheckConstraint("ck_deliverable_issue_authors", "issued_author_ids IS NULL OR (array_ndims(issued_author_ids) = 1 AND cardinality(issued_author_ids) > 0 AND array_position(issued_author_ids, NULL) IS NULL AND NOT ('00000000-0000-0000-0000-000000000000'::uuid = ANY(issued_author_ids)))");
+            });
+        });
+        Fk<DeliverableIssue, IssuePurpose>(mb, x => x.PurposeOfIssueId);
+        Fk<DeliverableIssue, IssueReturnCode>(mb, x => x.ReturnCodeId);
+        Fk<DeliverableIssue, AppUser>(mb, x => x.ResponseRecordedBy);
         Item<WorkTask>(mb, e =>
         {
             // Contains-search on names and keys at 100,000+ tasks (§18.1, packet 011 scale run).
@@ -325,6 +489,25 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         Fk<DeliverableDependency, Deliverable>(mb, x => x.PredecessorDeliverableId);
         Fk<DeliverableDependency, Deliverable>(mb, x => x.SuccessorDeliverableId);
         mb.Entity<TaskCollaborator>().HasIndex(x => new { x.TaskId, x.UserId }).IsUnique();
+        mb.Entity<TaskCollaborator>().HasAlternateKey(x => new { x.Id, x.TaskId, x.UserId });
+        mb.Entity<WorkTask>().HasAlternateKey(x => new { x.Id, x.ProjectId });
+        mb.Entity<TaskContribution>(e =>
+        {
+            e.HasIndex(x => x.CollaboratorId).IsUnique();
+            e.Property(x => x.Note).HasMaxLength(200);
+            e.HasOne<TaskCollaborator>().WithMany()
+                .HasForeignKey(x => new { x.CollaboratorId, x.TaskId, x.UserId })
+                .HasPrincipalKey(x => new { x.Id, x.TaskId, x.UserId }).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne<WorkTask>().WithMany().HasForeignKey(x => new { x.TaskId, x.ProjectId })
+                .HasPrincipalKey(x => new { x.Id, x.ProjectId }).OnDelete(DeleteBehavior.NoAction);
+            e.ToTable(t =>
+            {
+                t.HasCheckConstraint("ck_task_contribution_version", "row_version >= 1");
+                t.HasCheckConstraint("ck_task_contribution_note", "marked_at IS NOT NULL OR note IS NULL");
+            });
+            e.Ignore(x => x.AuditType); e.Ignore(x => x.AuditProjectId);
+            e.Ignore(x => x.AuditKey); e.Ignore(x => x.AuditName);
+        });
         Fk<TaskCollaborator, WorkTask>(mb, x => x.TaskId, DeleteBehavior.Cascade);
         Fk<TaskCollaborator, AppUser>(mb, x => x.UserId);
         mb.Entity<ItemWatcher>().HasIndex(x => new { x.ItemType, x.ItemId, x.UserId }).IsUnique();
@@ -359,6 +542,13 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         Fk<Decision, AppUser>(mb, x => x.RequestedById);
         Fk<Decision, AppUser>(mb, x => x.OwnerUserId);
         Fk<Decision, ExternalParty>(mb, x => x.OwnerExternalPartyId);
+        Fk<Decision, DecisionCategory>(mb, x => x.CategoryId);
+        mb.Entity<Decision>(e =>
+        {
+            e.Property(x => x.OptionsConsidered).HasColumnType("character varying(500)[]");
+            e.Property(x => x.Rationale).HasMaxLength(2000);
+            e.ToTable(t => t.HasCheckConstraint("ck_decision_options_considered", "options_considered IS NULL OR (cardinality(options_considered) <= 5 AND array_position(options_considered, NULL) IS NULL)"));
+        });
         mb.Entity<ItemLink>(e =>
         {
             e.HasIndex(x => new { x.SourceType, x.SourceId });
@@ -376,7 +566,11 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         {
             t.HasCheckConstraint("ck_issue_status", $"status IN ({In(IssueStatus.All)})");
             t.HasCheckConstraint("ck_issue_type", $"issue_type IN ({In(IssueType.All)})");
+            t.HasCheckConstraint("ck_issue_root_cause_pair", "(root_cause_category_id IS NULL AND root_cause_label_snapshot IS NULL) OR (root_cause_category_id IS NOT NULL AND root_cause_label_snapshot IS NOT NULL AND btrim(root_cause_label_snapshot) <> '')");
         }));
+        mb.Entity<Issue>().Property(x => x.RootCauseLabelSnapshot).HasMaxLength(120);
+        Fk<Issue, IssueRootCauseCategory>(mb, x => x.RootCauseCategoryId);
+        Fk<Risk, TemplateRisk>(mb, x => x.TemplateRiskId);
         mb.Entity<IssueLocation>(e =>
         {
             e.HasIndex(x => new { x.IssueId, x.CreatedAt });
@@ -419,7 +613,19 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         });
         Fk<Comment, AppUser>(mb, x => x.AuthorId);
         Fk<CommentMention, Comment>(mb, x => x.CommentId, DeleteBehavior.Cascade);
-        mb.Entity<DocumentLink>(e => { e.HasIndex(x => new { x.ItemType, x.ItemId }); e.HasQueryFilter(x => x.DeletedAt == null); e.Ignore(x => x.AuditKey); e.Property(x => x.RowVersion).IsConcurrencyToken(); });
+        mb.Entity<DocumentLink>(e => {
+            e.HasIndex(x => new { x.ItemType, x.ItemId }); e.HasQueryFilter(x => x.DeletedAt == null);
+            e.Ignore(x => x.AuditKey); e.Property(x => x.RowVersion).IsConcurrencyToken();
+            e.Property(x => x.SourceSystem).HasMaxLength(200);
+            e.Property(x => x.StableSourceId).HasMaxLength(200);
+            e.Property(x => x.DeclaredRevision).HasMaxLength(50);
+            e.ToTable(t => t.HasCheckConstraint("ck_document_link_reference_registration",
+                "(source_system IS NULL AND stable_source_id IS NULL AND declared_revision IS NULL AND reference_registered_by IS NULL AND reference_registered_at IS NULL AND reference_deliverable_id IS NULL) OR " +
+                "(source_system IS NOT NULL AND btrim(source_system) <> '' AND reference_registered_by IS NOT NULL AND reference_registered_at IS NOT NULL " +
+                "AND (stable_source_id IS NULL OR btrim(stable_source_id) <> '') AND (declared_revision IS NULL OR btrim(declared_revision) <> ''))"));
+        });
+        Fk<DocumentLink, AppUser>(mb, x => x.ReferenceRegisteredBy);
+        Fk<DocumentLink, Deliverable>(mb, x => x.ReferenceDeliverableId);
 
         mb.Entity<ActivityLog>(e =>
         {
@@ -435,7 +641,90 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
             e.HasIndex(x => new { x.UserId, x.ReadAt, x.CreatedAt }).IsDescending(false, false, true);
             e.HasIndex(x => new { x.UserId, x.CollapseKey });
         });
-        mb.Entity<EmailMessage>().HasIndex(x => x.SentAt);
+        mb.Entity<NoticeDeliveryIntent>(e =>
+        {
+            e.Property(x => x.BulkPolicyJson).HasColumnType("jsonb");
+            e.Property(x => x.PolicyChecksInDay).HasConversion<short>().HasColumnType("smallint");
+            e.HasIndex(x => new { x.UserId, x.OccurrenceKey }).IsUnique();
+            e.HasIndex(x => new { x.NotificationId, x.NotificationCountAtCapture }).IsUnique()
+                .HasFilter("notification_id IS NOT NULL AND notification_count_at_capture IS NOT NULL");
+            e.HasIndex(x => new { x.UserId, x.SuppressionKey, x.SuppressionAnchorAt });
+            e.HasIndex(x => new { x.UserId, x.Disposition, x.CreatedAt });
+            e.HasIndex(x => new { x.UserId, x.CreatedAt }); // Bounded original bulk-domain lookback.
+            e.HasIndex(x => x.DeliveryEmailId);
+            e.HasOne<AppUser>().WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne<Notification>().WithMany().HasForeignKey(x => x.NotificationId).OnDelete(DeleteBehavior.SetNull);
+            e.HasOne<EmailMessage>().WithMany().HasForeignKey(x => x.DeliveryEmailId).OnDelete(DeleteBehavior.Restrict);
+            e.ToTable(t => t.HasCheckConstraint("ck_notice_intent",
+                $"disposition IN ({In(NoticeIntentDisposition.All.Order(StringComparer.Ordinal))}) "
+                + "AND btrim(occurrence_key) <> '' AND btrim(event_type) <> '' AND btrim(suppression_key) <> '' "
+                + "AND ((item_type IS NULL) = (item_id IS NULL)) "
+                + "AND (notification_count_at_capture IS NULL OR notification_count_at_capture > 0) "
+                + "AND (notification_id IS NULL OR notification_count_at_capture IS NOT NULL) "
+                + "AND (policy_checks_in_day IS NULL OR policy_checks_in_day BETWEEN 0 AND 8) "
+                + "AND ((policy_check_local_date IS NULL) = (policy_checks_in_day IS NULL)) "
+                + "AND (next_policy_check_at IS NULL OR policy_check_local_date IS NOT NULL) "
+                + "AND (disposition <> 'Mixed' OR bulk_policy_json IS NOT NULL) "
+                + "AND (bulk_policy_json IS NULL OR (jsonb_typeof(bulk_policy_json) = 'object' "
+                + "AND bulk_policy_json ? 'origin' AND bulk_policy_json ? 'progress' "
+                + "AND jsonb_typeof(bulk_policy_json->'origin') = 'object' AND jsonb_typeof(bulk_policy_json->'progress') = 'array')) "
+                + "AND (disposition NOT IN ('HeldAway','HeldNoDigest','Queued','ReservedForDigest','Accepted','Simulated','Unknown','Uncertain','Exhausted') "
+                + "OR suppression_anchor_at IS NOT NULL)"));
+        });
+        mb.Entity<NoticeDeliverySlot>(e =>
+        {
+            e.Property(x => x.CompositionVersion).HasConversion<short>().HasColumnType("smallint");
+            e.Property(x => x.ExternalAttempts).HasConversion<short>().HasColumnType("smallint");
+            e.HasIndex(x => new { x.UserId, x.Kind, x.LocalDate }).IsUnique();
+            e.HasIndex(x => new { x.UserId, x.State, x.LocalDate });
+            e.HasOne<AppUser>().WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne<Notification>().WithMany().HasForeignKey(x => x.ReminderNotificationId).OnDelete(DeleteBehavior.SetNull);
+            e.HasAlternateKey(x => new { x.Id, x.UserId, x.Kind });
+            e.HasOne<NoticeDeliverySlot>().WithMany()
+                .HasForeignKey(x => new { x.CarryForwardToSlotId, x.UserId, x.Kind })
+                .HasPrincipalKey(x => new { x.Id, x.UserId, x.Kind }).OnDelete(DeleteBehavior.Restrict);
+            e.ToTable(t => t.HasCheckConstraint("ck_notice_slot",
+                $"kind IN ({In(NoticeSlotKind.All.Order(StringComparer.Ordinal))}) AND state IN ({In(NoticeSlotState.All.Order(StringComparer.Ordinal))}) "
+                + "AND btrim(org_time_zone_id) <> '' AND scheduled_local_time ~ '^([01][0-9]|2[0-3]):[0-5][0-9]$' "
+                + "AND ((kind = 'Digest' AND frequency_at_creation IS NOT NULL "
+                + $"AND frequency_at_creation IN ({In(NoticeDigestFrequency.All.Order(StringComparer.Ordinal))}) "
+                + "AND window_from IS NOT NULL AND window_through IS NOT NULL AND window_from <= window_through "
+                + "AND reminder_notification_id IS NULL AND composition_version BETWEEN 0 AND 3 AND external_attempts BETWEEN 0 AND 8 AND state <> 'Emitted') "
+                + "OR (kind = 'TimeReminder' AND frequency_at_creation IS NULL AND window_from IS NULL AND window_through IS NULL "
+                + "AND composition_version = 0 AND external_attempts = 0 AND state IN ('Ready','Emitted'))) "
+                + "AND (carry_forward_to_slot_id IS NULL OR (kind = 'Digest' AND carry_forward_to_slot_id <> id))"));
+        });
+        mb.Entity<EmailMessage>(e =>
+        {
+            e.HasIndex(x => x.SentAt);
+            e.Property(x => x.NoticeProtocolVersion).HasConversion<short>().HasColumnType("smallint");
+            e.Property(x => x.NoticeCompositionVersion).HasConversion<short>().HasColumnType("smallint");
+            e.Property(x => x.BulkRenderedMembershipJson).HasColumnType("jsonb");
+            e.Property(x => x.NoticeDigestPolicyJson).HasColumnType("jsonb");
+            e.HasOne<NoticeDeliverySlot>().WithMany().HasForeignKey(x => x.NoticeSlotId).OnDelete(DeleteBehavior.Restrict);
+            e.HasIndex(x => new { x.NoticeSlotId, x.NoticeCompositionVersion }).IsUnique()
+                .HasFilter("notice_slot_id IS NOT NULL AND notice_composition_version IS NOT NULL");
+            e.ToTable(t => t.HasCheckConstraint("ck_notice_email_protocol",
+                "(notice_protocol_version IS NULL AND notice_slot_id IS NULL AND notice_composition_version IS NULL "
+                + "AND rendered_occurrence_ids IS NULL AND bulk_rendered_membership_json IS NULL AND notice_digest_policy_json IS NULL "
+                + "AND notice_claim_token IS NULL AND notice_claim_version IS NULL AND notice_claimed_at IS NULL "
+                + "AND transport_kind IS NULL AND transport_outcome IS NULL AND transport_observed_at IS NULL "
+                + "AND provider_accepted_at IS NULL AND acceptance_uncertain_at IS NULL) OR "
+                + "(notice_protocol_version IS NOT NULL AND notice_protocol_version = 1 AND user_id IS NOT NULL "
+                + "AND rendered_occurrence_ids IS NOT NULL AND attempts BETWEEN 0 AND 8 "
+                + "AND ((kind IN ('Immediate','PlanningEntryChanged','PlanningWithdrawal') AND notice_slot_id IS NULL AND notice_composition_version IS NULL AND notice_digest_policy_json IS NULL AND cardinality(rendered_occurrence_ids) = 1) "
+                + "OR (kind = 'Digest' AND notice_slot_id IS NOT NULL AND notice_composition_version IS NOT NULL AND notice_composition_version BETWEEN 1 AND 3)) "
+                + "AND ((notice_claim_token IS NULL AND notice_claim_version IS NULL AND notice_claimed_at IS NULL) "
+                + "OR (notice_claim_token IS NOT NULL AND notice_claim_version IS NOT NULL AND notice_claim_version >= 1 AND notice_claimed_at IS NOT NULL)) "
+                + $"AND (transport_kind IS NULL OR transport_kind IN ({In(NoticeTransportKind.All.Order(StringComparer.Ordinal))})) "
+                + $"AND (transport_outcome IS NULL OR transport_outcome IN ({In(NoticeTransportOutcome.All.Order(StringComparer.Ordinal))})) "
+                + "AND (notice_claim_token IS NULL OR (transport_kind IS NOT NULL AND transport_outcome IS NOT NULL AND transport_observed_at IS NOT NULL)) "
+                + "AND (provider_accepted_at IS NULL OR (notice_claim_token IS NOT NULL AND transport_kind IS NOT NULL AND transport_kind IN ('Smtp','Graph') "
+                + "AND transport_outcome IS NOT NULL AND transport_outcome = 'Accepted' AND transport_observed_at IS NOT NULL)) "
+                + "AND (transport_outcome IS DISTINCT FROM 'Accepted' OR provider_accepted_at IS NOT NULL) "
+                + "AND (bulk_rendered_membership_json IS NULL OR jsonb_typeof(bulk_rendered_membership_json) = 'array') "
+                + "AND (notice_digest_policy_json IS NULL OR (kind = 'Digest' AND jsonb_typeof(notice_digest_policy_json) = 'object')))"));
+        });
         mb.Entity<ProjectFollow>(e => { e.HasIndex(x => new { x.UserId, x.ProjectId }).IsUnique(); e.HasIndex(x => new { x.ProjectId, x.Level }); });
         Fk<ProjectFollow, Project>(mb, x => x.ProjectId, DeleteBehavior.Cascade);
         mb.Entity<OutboxEvent>(e => { e.Property(x => x.Payload).HasColumnType("jsonb"); e.HasIndex(x => x.ProcessedAt).HasFilter("processed_at IS NULL"); });
@@ -498,9 +787,25 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         mb.Entity<ProjectTemplate>(e =>
         {
             e.HasIndex(x => x.FamilyId);
+            e.Property(x => x.CopiedFromSnapshot).HasColumnType("jsonb");
+            e.ToTable(t => t.HasCheckConstraint("ck_template_copy_baseline_pair", "(copied_from_template_id IS NULL) = (copied_from_snapshot IS NULL)"));
             e.Property(x => x.OffsetDayKind).HasDefaultValue(DayKind.CalendarDays);
             e.ToTable(t => t.HasCheckConstraint("ck_template_offset_day_kind", $"offset_day_kind IN ({In(DayKind.All)})"));
         });
+        Fk<ProjectTemplate, ProjectTemplate>(mb, x => x.CopiedFromTemplateId);
+        mb.Entity<TemplateRisk>(e =>
+        {
+            e.Property(x => x.Title).HasMaxLength(300);
+            e.Property(x => x.Mitigation).HasMaxLength(4000);
+            e.Property(x => x.TriggerIndicator).HasMaxLength(2000);
+            e.HasIndex(x => new { x.TemplateId, x.SortOrder });
+            e.ToTable(t =>
+            {
+                t.HasCheckConstraint("ck_template_risk_title", "char_length(btrim(title)) BETWEEN 1 AND 300");
+                t.HasCheckConstraint("ck_template_risk_scores", "probability BETWEEN 1 AND 3 AND impact BETWEEN 1 AND 3");
+            });
+        });
+        Fk<TemplateRisk, ProjectTemplate>(mb, x => x.TemplateId, DeleteBehavior.Cascade);
         mb.Entity<TemplateDesignBasis>(e =>
         {
             e.HasIndex(x => new { x.TemplateId, x.TemplateDisciplineId });
@@ -789,10 +1094,29 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         mb.Entity<CoordinationCommand>().HasIndex(x => new { x.ProjectId, x.ActorId, x.RequestId }).IsUnique();
         mb.Entity<ReviewRound>().HasIndex(x => new { x.PackageId, x.Number }).IsUnique();
         mb.Entity<ReviewManifestItem>().HasIndex(x => new { x.RoundId, x.DeliverableId }).IsUnique();
+        mb.Entity<ReviewManifestItem>().ToTable(t => t.HasCheckConstraint("ck_review_manifest_source", "(source_revision_id IS NULL) <> (deliverable_issue_id IS NULL)"));
+        mb.Entity<ExternalReview>(e =>
+        {
+            e.Property(x => x.ReturnCodeSnapshot).HasMaxLength(10);
+            e.Property(x => x.ReturnLabelSnapshot).HasMaxLength(120);
+            e.Property(x => x.PartyNameSnapshot).HasMaxLength(200);
+            e.Property(x => x.PartyOrganisationSnapshot).HasMaxLength(200);
+            e.HasIndex(x => new { x.PackageId, x.RoundId });
+            e.HasIndex(x => x.DeliverableIssueId);
+        });
         mb.Entity<DisciplineReview>().HasIndex(x => new { x.RoundId, x.ProjectDisciplineId }).IsUnique();
         mb.Entity<DisciplineReview>().ToTable(t => t.HasCheckConstraint("ck_discipline_review_status", $"status IN ({In(DisciplineReviewStatus.All)})"));
         mb.Entity<ReviewFinding>().HasIndex(x => new { x.RoundId, x.Status });
-        mb.Entity<ReviewFinding>().ToTable(t => { t.HasCheckConstraint("ck_review_finding_status", $"status IN ({In(FindingStatus.All)})"); t.HasCheckConstraint("ck_review_finding_severity", "severity IN ('Blocking', 'Advisory')"); });
+        mb.Entity<ReviewFinding>().Property(x => x.ResponseOutcome).HasMaxLength(32);
+        mb.Entity<FindingEvent>().Property(x => x.ResponseOutcome).HasMaxLength(32);
+        mb.Entity<ReviewFinding>().ToTable(t => {
+            t.HasCheckConstraint("ck_review_finding_status", $"status IN ({In(FindingStatus.All)})");
+            t.HasCheckConstraint("ck_review_finding_severity", "severity IN ('Blocking', 'Advisory')");
+            t.HasCheckConstraint("ck_review_finding_response_outcome", "response_outcome IS NULL OR (response_outcome IN ('Incorporated','Not incorporated','Clarified','Noted') AND response IS NOT NULL)");
+            t.HasCheckConstraint("ck_review_finding_source_origin", "(source_revision_id IS NOT NULL AND deliverable_issue_id IS NULL AND originator_id IS NOT NULL AND external_review_id IS NULL AND verifier_id IS NOT NULL) OR (source_revision_id IS NULL AND deliverable_issue_id IS NOT NULL AND originator_id IS NULL AND external_review_id IS NOT NULL)");
+        });
+        mb.Entity<FindingEvent>().ToTable(t => t.HasCheckConstraint("ck_finding_event_response_outcome",
+            "response_outcome IS NULL OR (response_outcome IN ('Incorporated','Not incorporated','Clarified','Noted') AND action = 'Responded')"));
         mb.Entity<SourceHead>().HasIndex(x => new { x.ProjectId, x.Identity }).IsUnique();
         mb.Entity<InputUse>().HasIndex(x => new { x.ProjectId, x.TargetType, x.TargetId, x.SourceIdentity }).IsUnique();
         mb.Entity<InputUse>().ToTable(t => t.HasCheckConstraint("ck_input_use_type", "target_type IN ('Task', 'Deliverable')"));
@@ -806,7 +1130,15 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         Fk<ReviewRound, ReviewPackage>(mb, x => x.PackageId);
         Fk<ReviewManifestItem, ReviewRound>(mb, x => x.RoundId);
         Fk<ReviewManifestItem, SourceRevision>(mb, x => x.SourceRevisionId);
+        Fk<ReviewManifestItem, DeliverableIssue>(mb, x => x.DeliverableIssueId);
         Fk<ReviewManifestItem, Deliverable>(mb, x => x.DeliverableId);
+        Fk<ExternalReview, Project>(mb, x => x.ProjectId);
+        Fk<ExternalReview, ReviewPackage>(mb, x => x.PackageId);
+        Fk<ExternalReview, ReviewRound>(mb, x => x.RoundId);
+        Fk<ExternalReview, DeliverableIssue>(mb, x => x.DeliverableIssueId);
+        Fk<ExternalReview, ExternalParty>(mb, x => x.ExternalPartyId);
+        Fk<ExternalReview, IssueReturnCode>(mb, x => x.ReturnCodeId);
+        Fk<ExternalReview, AppUser>(mb, x => x.CreatedBy);
         Fk<DisciplineReview, ReviewRound>(mb, x => x.RoundId);
         Fk<DisciplineReview, AppUser>(mb, x => x.ReviewerId);
         Fk<DisciplineReview, ProjectDiscipline>(mb, x => x.ProjectDisciplineId);
@@ -814,6 +1146,8 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         Fk<ReviewFinding, ReviewRound>(mb, x => x.RoundId);
         Fk<ReviewFinding, ReviewFinding>(mb, x => x.CarriedFromId);
         Fk<ReviewFinding, SourceRevision>(mb, x => x.SourceRevisionId);
+        Fk<ReviewFinding, DeliverableIssue>(mb, x => x.DeliverableIssueId);
+        Fk<ReviewFinding, ExternalReview>(mb, x => x.ExternalReviewId);
         Fk<ReviewFinding, AppUser>(mb, x => x.ResolverId);
         Fk<ReviewFinding, AppUser>(mb, x => x.VerifierId);
         Fk<FindingEvent, ReviewFinding>(mb, x => x.FindingId);
@@ -1007,15 +1341,368 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
     /// Organisation settings through the shared 30-second store, the one flag guard every endpoint uses (FR-DLV-08).
     public Task<OrgSettings> CurrentSettings() => settings.Get(this);
 
+    internal async Task<bool> AllowSelfReviewForAuthorship(CancellationToken ct = default)
+    {
+        var setting = await Settings.FirstOrDefaultAsync(row => row.Key == "allow_self_review", ct);
+        return setting is not null && JsonSerializer.Deserialize<bool>(setting.Value);
+    }
+
+    // Shared read-only validation for save hooks and a bulk command's prospective staged authors.
+    internal async Task DemandReviewAuthorship(Guid? deliverableId, Guid[] authorIds, bool allowSelf, CancellationToken ct = default)
+    {
+        if (allowSelf || deliverableId is null) return;
+        Check.That(!await DisciplineReviews.AnyAsync(assignment => authorIds.Contains(assignment.ReviewerId)
+            && ReviewPackages.Any(package => package.CurrentRoundId == assignment.RoundId && package.Status != ReviewStatus.Cancelled && package.Status != ReviewStatus.Superseded)
+            && ReviewManifestItems.Any(item => item.RoundId == assignment.RoundId && item.DeliverableId == deliverableId
+                && item.SourceRevisionId != null && item.DeliverableIssueId == null), ct), "ownerId", "review.independent");
+    }
+
+    bool HasIssuedReviewChanges() => ChangeTracker.Entries().Any(entry => entry.State is EntityState.Added or EntityState.Modified or EntityState.Deleted
+        && (entry.Entity is DeliverableIssue or ExternalReview or ReviewManifestItem or ReviewFinding or ReviewPackage
+            || entry.Entity is Deliverable deliverable && deliverable.RequiredReviewPackageId is not null
+                && (entry.State == EntityState.Added || entry.State == EntityState.Modified && entry.Property(nameof(Deliverable.RequiredReviewPackageId)).IsModified)));
+
+    // Only new issued-source invariants. Internal-source command/independence behavior remains in its existing engine.
+    async Task DemandIssuedReviewProvenance(OrgSettings org, CancellationToken ct)
+    {
+        static void Require(bool valid) { if (!valid) throw new InvalidOperationException("Issued review evidence has inconsistent retained provenance."); }
+        var parents = new Dictionary<(Type, Guid), Entity?>();
+        var knownIssues = new Dictionary<Guid, DeliverableIssue>();
+        async Task<T?> Parent<T>(Guid id) where T : Entity
+        {
+            if (id == Guid.Empty) return null;
+            if (parents.TryGetValue((typeof(T), id), out var cached)) return (T?)cached;
+            var local = Set<T>().Local.FirstOrDefault(row => row.Id == id);
+            var parent = local is not null ? Entry(local).State == EntityState.Deleted ? null : local : await Set<T>().SingleOrDefaultAsync(row => row.Id == id, ct);
+            parents[(typeof(T), id)] = parent; return parent;
+        }
+        async Task<(ReviewRound Round, ReviewPackage Package)> Round(Guid project, Guid id)
+        {
+            var round = await Parent<ReviewRound>(id);
+            var package = round is null ? null : await Parent<ReviewPackage>(round.PackageId);
+            Require(round is not null && package is not null && round.ProjectId == project && package.ProjectId == project && !package.RequiredForIssue);
+            return (round!, package!);
+        }
+        async Task<DeliverableIssue> KnownIssue(Guid project, Guid id)
+        {
+            if (knownIssues.TryGetValue(id, out var known)) { Require(known.ProjectId == project); return known; }
+            var issue = await Parent<DeliverableIssue>(id);
+            Require(issue is not null && issue.ProjectId == project && await IssuedAuthorship.ReadAsync(this, issue!, ct) is not null);
+            knownIssues[id] = issue!;
+            return issue!;
+        }
+        var issueEntries = ChangeTracker.Entries<DeliverableIssue>().Where(entry => entry.State is EntityState.Added or EntityState.Modified or EntityState.Deleted).ToArray();
+        foreach (var entry in issueEntries)
+        {
+            if (entry.State == EntityState.Deleted) throw new InvalidOperationException("An issued revision's captured provenance is retained.");
+            if (entry.State == EntityState.Modified)
+            {
+                if (entry.Property(row => row.IssuedAuthorIds).IsModified || entry.Property(row => row.DeliverableId).IsModified || entry.Property(row => row.ProjectId).IsModified)
+                    throw new InvalidOperationException("An issued revision's parent and captured authors are immutable, including Unknown.");
+                continue; // Existing register-response fields retain their established update behavior.
+            }
+            var issue = entry.Entity; var deliverable = await Parent<Deliverable>(issue.DeliverableId);
+            Require(deliverable is not null && deliverable.ProjectId == issue.ProjectId);
+            if (issue.IssuedAuthorIds is not null)
+            {
+                Require(IssuedAuthorship.Shape(issue.IssuedAuthorIds));
+                var captured = await IssuedAuthorship.CaptureAsync(this, issue.DeliverableId, ct);
+                Require(captured is not null && captured.SequenceEqual(issue.IssuedAuthorIds));
+            }
+        }
+        foreach (var entry in ChangeTracker.Entries<ExternalReview>())
+            if (entry.State is EntityState.Modified or EntityState.Deleted)
+                throw new InvalidOperationException("An incoming external review is immutable.");
+
+        var manifest = ChangeTracker.Entries<ReviewManifestItem>().Where(entry => entry.State == EntityState.Added).Select(entry => entry.Entity).ToArray();
+        var affectedPackages = ChangeTracker.Entries<ReviewPackage>().Where(entry => entry.State is EntityState.Added or EntityState.Modified)
+            .Select(entry => entry.Entity.Id).ToHashSet();
+        foreach (var item in manifest)
+        {
+            var parent = await Parent<ReviewRound>(item.RoundId);
+            if (parent is not null) affectedPackages.Add(parent.PackageId);
+            if (item.DeliverableIssueId is not { } issueId) continue;
+            Require(item.SourceRevisionId is null);
+            var (round, _) = await Round(item.ProjectId, item.RoundId);
+            var issue = await KnownIssue(item.ProjectId, issueId);
+            Require(issue.DeliverableId == item.DeliverableId && item.AuthorIds.SequenceEqual(issue.IssuedAuthorIds!));
+        }
+        foreach (var packageId in affectedPackages)
+        {
+            var stored = await ReviewManifestItems.AsNoTracking().Where(item => ReviewRounds.Any(round => round.Id == item.RoundId && round.PackageId == packageId))
+                .Select(item => new { item.SourceRevisionId, item.DeliverableIssueId }).ToListAsync(ct);
+            var local = new List<ReviewManifestItem>();
+            foreach (var item in manifest)
+                if ((await Parent<ReviewRound>(item.RoundId))?.PackageId == packageId) local.Add(item);
+            var issued = stored.Any(item => item.DeliverableIssueId != null) || local.Any(item => item.DeliverableIssueId != null);
+            if (!issued) continue;
+            var package = await Parent<ReviewPackage>(packageId);
+            Require(package is not null && !package.RequiredForIssue
+                && stored.All(item => item.SourceRevisionId is null && item.DeliverableIssueId is not null)
+                && local.All(item => item.SourceRevisionId is null && item.DeliverableIssueId is not null));
+        }
+        foreach (var entry in ChangeTracker.Entries<Deliverable>().Where(entry => entry.Entity.RequiredReviewPackageId is not null
+            && (entry.State == EntityState.Added || entry.State == EntityState.Modified && entry.Property(row => row.RequiredReviewPackageId).IsModified)))
+        {
+            var packageId = entry.Entity.RequiredReviewPackageId!.Value;
+            Require(!await ReviewManifestItems.AnyAsync(item => item.DeliverableIssueId != null
+                && ReviewRounds.Any(round => round.Id == item.RoundId && round.PackageId == packageId), ct));
+            foreach (var item in manifest.Where(item => item.DeliverableIssueId is not null))
+                Require((await Parent<ReviewRound>(item.RoundId))?.PackageId != packageId);
+        }
+        var manifestSources = new Dictionary<(Guid Project, Guid Round, Guid Issue), bool>();
+        async Task<bool> ManifestHas(Guid project, Guid round, DeliverableIssue issue)
+        {
+            if (manifestSources.TryGetValue((project, round, issue.Id), out var present)) return present;
+            present = ReviewManifestItems.Local.Any(item => item.ProjectId == project
+                && item.RoundId == round && item.DeliverableIssueId == issue.Id && item.DeliverableId == issue.DeliverableId && item.SourceRevisionId == null
+                && Entry(item).State != EntityState.Deleted)
+            || await ReviewManifestItems.AnyAsync(item => item.ProjectId == project && item.RoundId == round && item.DeliverableIssueId == issue.Id
+                && item.DeliverableId == issue.DeliverableId && item.SourceRevisionId == null, ct);
+            manifestSources[(project, round, issue.Id)] = present; return present;
+        }
+        var carryManifests = new Dictionary<(Guid Round, Guid Deliverable), ReviewManifestItem?>();
+        async Task<ReviewManifestItem?> CarryManifest(Guid project, Guid round, Guid deliverable)
+        {
+            if (carryManifests.TryGetValue((round, deliverable), out var cached)) return cached;
+            var rows = await ReviewManifestItems.Where(item => item.RoundId == round && item.DeliverableId == deliverable).ToDictionaryAsync(item => item.Id, ct);
+            foreach (var entry in ChangeTracker.Entries<ReviewManifestItem>().Where(entry => entry.Entity.RoundId == round && entry.Entity.DeliverableId == deliverable))
+                if (entry.State == EntityState.Deleted) rows.Remove(entry.Entity.Id); else rows[entry.Entity.Id] = entry.Entity;
+            Require(rows.Count <= 1 && rows.Values.All(item => item.ProjectId == project && item.SourceRevisionId is null && item.DeliverableIssueId is not null));
+            var result = rows.Values.SingleOrDefault(); carryManifests[(round, deliverable)] = result; return result;
+        }
+        var carryAssignments = new Dictionary<(Guid Round, Guid Discipline), bool>();
+        async Task<bool> CarryAssigned(Guid project, Guid round, Guid discipline)
+        {
+            if (carryAssignments.TryGetValue((round, discipline), out var cached)) return cached;
+            var rows = await DisciplineReviews.Where(item => item.ProjectId == project && item.RoundId == round && item.ProjectDisciplineId == discipline).ToDictionaryAsync(item => item.Id, ct);
+            foreach (var entry in ChangeTracker.Entries<DisciplineReview>().Where(entry => entry.Entity.ProjectId == project && entry.Entity.RoundId == round && entry.Entity.ProjectDisciplineId == discipline))
+                if (entry.State == EntityState.Deleted) rows.Remove(entry.Entity.Id); else rows[entry.Entity.Id] = entry.Entity;
+            return carryAssignments[(round, discipline)] = rows.Count != 0;
+        }
+
+        foreach (var receipt in ChangeTracker.Entries<ExternalReview>().Where(entry => entry.State == EntityState.Added).Select(entry => entry.Entity).ToArray())
+        {
+            var (round, package) = await Round(receipt.ProjectId, receipt.RoundId);
+            Require(package.Id == receipt.PackageId);
+            var issue = await KnownIssue(receipt.ProjectId, receipt.DeliverableIssueId);
+            var party = await Parent<ExternalParty>(receipt.ExternalPartyId); var code = await Parent<IssueReturnCode>(receipt.ReturnCodeId);
+            Require(party is not null && party.ProjectId == receipt.ProjectId && code is not null
+                && receipt.PartyNameSnapshot == party.Name && receipt.PartyOrganisationSnapshot == party.Organisation
+                && receipt.ReturnCodeSnapshot == code.Code && receipt.ReturnLabelSnapshot == code.Name
+                && await ManifestHas(receipt.ProjectId, round.Id, issue));
+        }
+        foreach (var entry in ChangeTracker.Entries<ReviewFinding>().Where(entry => entry.State is EntityState.Added or EntityState.Modified).ToArray())
+        {
+            var finding = entry.Entity;
+            var external = finding.ExternalReviewId is not null || entry.State == EntityState.Modified && entry.Property(row => row.ExternalReviewId).OriginalValue is not null;
+            if (!external) continue;
+            if (entry.State == EntityState.Modified && entry.Properties.Any(property => property.IsModified && property.Metadata.Name is
+                nameof(ReviewFinding.ProjectId) or nameof(ReviewFinding.PackageId) or nameof(ReviewFinding.RoundId) or nameof(ReviewFinding.CarriedFromId)
+                or nameof(ReviewFinding.SourceRevisionId) or nameof(ReviewFinding.DeliverableIssueId) or nameof(ReviewFinding.ExternalReviewId) or nameof(ReviewFinding.OriginatorId)))
+                throw new InvalidOperationException("An external finding's original source and receipt are retained; carry creates a new finding.");
+            Require(finding.OriginatorId is null && finding.SourceRevisionId is null && finding.DeliverableIssueId is not null && finding.ExternalReviewId is not null);
+            var (round, package) = await Round(finding.ProjectId, finding.RoundId);
+            var receipt = await Parent<ExternalReview>(finding.ExternalReviewId!.Value);
+            Require(receipt is not null && receipt.ProjectId == finding.ProjectId && receipt.PackageId == package.Id && finding.PackageId == package.Id);
+            var issue = await KnownIssue(finding.ProjectId, finding.DeliverableIssueId!.Value);
+            var original = await KnownIssue(finding.ProjectId, receipt!.DeliverableIssueId);
+            Require(issue.DeliverableId == original.DeliverableId);
+            var discipline = await Parent<ProjectDiscipline>(finding.ProjectDisciplineId);
+            Require(discipline is not null && discipline.ProjectId == finding.ProjectId);
+            if (finding.IssueId is { } linkedId)
+                Require((await Parent<Issue>(linkedId))?.ProjectId == finding.ProjectId);
+            var seen = new HashSet<Guid>(); var cursor = finding;
+            var chain = new List<(ReviewFinding Finding, ReviewRound Round, DeliverableIssue Issue)>();
+            while (true)
+            {
+                Require(seen.Add(cursor.Id) && seen.Count <= Math.Max(1, org.ChainDepthLimit)
+                    && cursor.ProjectId == finding.ProjectId && cursor.PackageId == package.Id && cursor.ExternalReviewId == receipt.Id
+                    && cursor.ProjectDisciplineId == finding.ProjectDisciplineId
+                    && cursor.SourceRevisionId is null && cursor.OriginatorId is null && cursor.DeliverableIssueId is not null);
+                var ancestorIssue = await KnownIssue(cursor.ProjectId, cursor.DeliverableIssueId!.Value);
+                Require(ancestorIssue.DeliverableId == issue.DeliverableId);
+                var (ancestorRound, ancestorPackage) = await Round(cursor.ProjectId, cursor.RoundId);
+                Require(ancestorPackage.Id == package.Id);
+                chain.Add((cursor, ancestorRound, ancestorIssue));
+                if (cursor.CarriedFromId is not { } previousId) break;
+                var previous = await Parent<ReviewFinding>(previousId);
+                Require(previous is not null);
+                cursor = previous!;
+            }
+            for (var index = 0; index < chain.Count; index++)
+            {
+                var node = chain[index];
+                var source = await CarryManifest(finding.ProjectId, node.Round.Id, original.DeliverableId);
+                if (source is not null)
+                    Require(source.DeliverableIssueId == node.Issue.Id && source.AuthorIds.SequenceEqual(node.Issue.IssuedAuthorIds!));
+                if (index == chain.Count - 1)
+                {
+                    Require(source is not null && node.Round.Id == receipt.RoundId && node.Issue.Id == receipt.DeliverableIssueId);
+                    break;
+                }
+                var previous = chain[index + 1];
+                Require(previous.Round.Number < node.Round.Number);
+                var previousSource = await CarryManifest(finding.ProjectId, previous.Round.Id, original.DeliverableId);
+                var sourceRemoved = source is null && previousSource is not null;
+                var disciplineRemoved = !await CarryAssigned(finding.ProjectId, node.Round.Id, finding.ProjectDisciplineId)
+                    && await CarryAssigned(finding.ProjectId, previous.Round.Id, finding.ProjectDisciplineId);
+                if (sourceRemoved || disciplineRemoved)
+                    Require(!string.IsNullOrWhiteSpace(node.Round.Reason) && !string.IsNullOrWhiteSpace(node.Round.RemovalImpact));
+                // A source absent in both rounds remains the same retained issue. Its original removal
+                // is validated on the actual older edge, never by an unrelated or future manifest.
+                if (source is null) Require(node.Issue.Id == previous.Issue.Id);
+            }
+        }
+    }
+
     // ---------- Audited save (§20.3, §20.4, G-07, G-10) ----------
+
+    void DemandNoticeDeliveryProvenance()
+    {
+        bool ClearingDeletedNotification(PropertyEntry property) => property.OriginalValue is Guid id
+            && property.CurrentValue is null && ChangeTracker.Entries<Notification>()
+                .Any(notification => notification.State == EntityState.Deleted && notification.Entity.Id == id);
+        foreach (var entry in ChangeTracker.Entries<NoticeDeliveryIntent>())
+        {
+            if (entry.State == EntityState.Deleted)
+                throw new InvalidOperationException("Notice occurrence provenance is retained.");
+            if (entry.State != EntityState.Modified) continue;
+            var mutable = new HashSet<string>(StringComparer.Ordinal)
+            {
+                nameof(NoticeDeliveryIntent.Disposition), nameof(NoticeDeliveryIntent.UpdatedAt),
+                nameof(NoticeDeliveryIntent.DeliveryEmailId), nameof(NoticeDeliveryIntent.BulkPolicyJson),
+                nameof(NoticeDeliveryIntent.NextPolicyCheckAt), nameof(NoticeDeliveryIntent.PolicyCheckLocalDate),
+                nameof(NoticeDeliveryIntent.PolicyChecksInDay),
+            };
+            if (entry.Properties.Any(property => property.IsModified && !mutable.Contains(property.Metadata.Name)
+                && !(property.Metadata.Name == nameof(NoticeDeliveryIntent.SuppressionAnchorAt)
+                    && property.OriginalValue is null && property.CurrentValue is DateTimeOffset)
+                && !(property.Metadata.Name == nameof(NoticeDeliveryIntent.NotificationId)
+                    && ClearingDeletedNotification(entry.Property(x => x.NotificationId)))))
+                throw new InvalidOperationException("A notice occurrence's source facts are immutable.");
+            var oldDisposition = entry.Property(x => x.Disposition).OriginalValue;
+            var sourceRefused = oldDisposition is NoticeIntentDisposition.Accepted or NoticeIntentDisposition.Simulated
+                or NoticeIntentDisposition.Unknown or NoticeIntentDisposition.Exhausted
+                && entry.Entity.Disposition == NoticeIntentDisposition.AccessRemoved;
+            if (NoticeIntentDisposition.Terminal.Contains(oldDisposition)
+                && (entry.Property(x => x.DeliveryEmailId).IsModified || entry.Property(x => x.Disposition).IsModified && !sourceRefused))
+                throw new InvalidOperationException("A terminal notice occurrence cannot be revived.");
+            var policy = entry.Property(x => x.BulkPolicyJson);
+            if (policy.IsModified && (policy.OriginalValue is null || policy.CurrentValue is null
+                || !NoticeDeliveryProof.HasSameImmutableOrigin(policy.OriginalValue, policy.CurrentValue, entry.Entity.UserId)))
+                throw new InvalidOperationException("A bulk notice's immutable origin cannot change.");
+        }
+        foreach (var entry in ChangeTracker.Entries<NoticeDeliverySlot>())
+        {
+            if (entry.State == EntityState.Deleted)
+                throw new InvalidOperationException("Notice scheduling provenance is retained.");
+            if (entry.State == EntityState.Added && entry.Entity.CarryForwardToSlotId is not null)
+                throw new InvalidOperationException("A new notice slot cannot invent an earlier coverage transfer.");
+            if (entry.State != EntityState.Modified) continue;
+            var mutable = new HashSet<string>(StringComparer.Ordinal)
+            {
+                nameof(NoticeDeliverySlot.State), nameof(NoticeDeliverySlot.CompositionVersion),
+                nameof(NoticeDeliverySlot.ExternalAttempts), nameof(NoticeDeliverySlot.UpdatedAt),
+                nameof(NoticeDeliverySlot.ReminderNotificationId), nameof(NoticeDeliverySlot.CarryForwardToSlotId),
+            };
+            if (entry.Properties.Any(property => property.IsModified && !mutable.Contains(property.Metadata.Name)))
+                throw new InvalidOperationException("A notice slot's schedule and window are immutable.");
+            if (entry.Entity.CompositionVersion < entry.Property(x => x.CompositionVersion).OriginalValue
+                || entry.Entity.ExternalAttempts < entry.Property(x => x.ExternalAttempts).OriginalValue)
+                throw new InvalidOperationException("Notice composition and sender budgets cannot be reset.");
+            var reminder = entry.Property(x => x.ReminderNotificationId);
+            if (entry.Property(x => x.State).OriginalValue == NoticeSlotState.Emitted
+                && (entry.Property(x => x.State).IsModified || reminder.IsModified && !ClearingDeletedNotification(reminder)))
+                throw new InvalidOperationException("An emitted reminder cannot be reopened.");
+            if (reminder.IsModified && reminder.OriginalValue is not null && !ClearingDeletedNotification(reminder))
+                throw new InvalidOperationException("A reminder's original notification cannot be replaced.");
+            var carry = entry.Property(x => x.CarryForwardToSlotId);
+            if (carry.IsModified)
+            {
+                if (carry.OriginalValue is not null || carry.CurrentValue is not { } targetId)
+                    throw new InvalidOperationException("A recorded digest coverage transfer cannot be cleared or replaced.");
+                var source = entry.Entity;
+                var target = NoticeDeliverySlots.Local.SingleOrDefault(slot => slot.Id == targetId
+                    && Entry(slot).State != EntityState.Deleted);
+                if (source.Kind != NoticeSlotKind.Digest || source.State != NoticeSlotState.Exhausted
+                    || entry.Property(x => x.State).OriginalValue != NoticeSlotState.Exhausted
+                    || target is null || target.Id == source.Id || target.Kind != NoticeSlotKind.Digest || target.UserId != source.UserId
+                    || source.WindowFrom is not { } sourceFrom || source.WindowThrough is not { } sourceThrough
+                    || target.WindowFrom is not { } targetFrom || target.WindowThrough is not { } targetThrough
+                    || targetFrom > sourceFrom || targetThrough <= sourceThrough)
+                    throw new InvalidOperationException("Digest coverage must move once to a bound same-person later containing window.");
+            }
+        }
+        foreach (var entry in ChangeTracker.Entries<EmailMessage>())
+        {
+            var linked = entry.Entity.NoticeProtocolVersion is not null
+                || entry.State != EntityState.Added && entry.Property(x => x.NoticeProtocolVersion).OriginalValue is not null;
+            if (!linked) continue;
+            if (entry.State == EntityState.Deleted)
+                throw new InvalidOperationException("Linked notice transport provenance is retained.");
+            if (entry.State != EntityState.Modified) continue;
+            var immutable = new HashSet<string>(StringComparer.Ordinal)
+            {
+                nameof(EmailMessage.NoticeProtocolVersion), nameof(EmailMessage.NoticeSlotId),
+                nameof(EmailMessage.NoticeCompositionVersion), nameof(EmailMessage.RenderedOccurrenceIds),
+                nameof(EmailMessage.BulkRenderedMembershipJson), nameof(EmailMessage.NoticeDigestPolicyJson), nameof(EmailMessage.UserId),
+                nameof(EmailMessage.ToAddress), nameof(EmailMessage.Subject), nameof(EmailMessage.BodyText),
+                nameof(EmailMessage.BodyHtml), nameof(EmailMessage.Kind), nameof(EmailMessage.CreatedAt),
+                nameof(EmailMessage.DedupKey), nameof(EmailMessage.RequiredProjectIds), nameof(EmailMessage.RequiredPlanningEntryIds),
+            };
+            if (entry.Properties.Any(property => property.IsModified && immutable.Contains(property.Metadata.Name)))
+                throw new InvalidOperationException("A linked notice envelope and membership are immutable.");
+            if (entry.Entity.Attempts < entry.Property(x => x.Attempts).OriginalValue)
+                throw new InvalidOperationException("A linked notice sender budget cannot be reset.");
+            var transport = entry.Property(x => x.TransportKind);
+            if (transport.IsModified && transport.OriginalValue is not null)
+                throw new InvalidOperationException("A linked notice's recorded transport kind is pinned.");
+            var uncertain = entry.Property(x => x.AcceptanceUncertainAt);
+            if (uncertain.IsModified && uncertain.OriginalValue is not null)
+                throw new InvalidOperationException("Possible provider acceptance cannot be erased.");
+            var accepted = entry.Property(x => x.ProviderAcceptedAt);
+            if (accepted.IsModified && accepted.OriginalValue is not null)
+                throw new InvalidOperationException("Recorded provider acceptance cannot be replaced.");
+            var claimVersion = entry.Property(x => x.NoticeClaimVersion);
+            if (claimVersion.OriginalValue is { } originalVersion && (claimVersion.CurrentValue is null || claimVersion.CurrentValue < originalVersion))
+                throw new InvalidOperationException("A linked notice claim version cannot be reset.");
+            if (accepted.OriginalValue is not null && (entry.Property(x => x.TransportOutcome).IsModified
+                || claimVersion.IsModified || entry.Property(x => x.NoticeClaimToken).IsModified
+                || entry.Property(x => x.NoticeClaimedAt).IsModified || entry.Property(x => x.Attempts).IsModified))
+                throw new InvalidOperationException("An accepted notice payload cannot be claimed again.");
+        }
+    }
 
     public override async Task<int> SaveChangesAsync(CancellationToken ct = default)
     {
+        if (Database.CurrentTransaction is null && PendingNoticeCapture is not null)
+            return await Tx.Run(this, () => SaveChangesAsync(ct));
         ChangeTracker.DetectChanges();
+        DemandNoticeDeliveryProvenance();
+        // Contribution identity is the observed membership, never an editable task/person target.
+        foreach (var entry in ChangeTracker.Entries<TaskContribution>().Where(e => e.State == EntityState.Modified))
+            if (entry.Properties.Any(p => p.IsModified && p.Metadata.Name is nameof(TaskContribution.CollaboratorId)
+                or nameof(TaskContribution.TaskId) or nameof(TaskContribution.UserId) or nameof(TaskContribution.ProjectId)
+                or nameof(TaskContribution.TaskKeySnapshot) or nameof(TaskContribution.TaskNameSnapshot)))
+                throw new InvalidOperationException("A contribution's source membership and provenance are immutable.");
         if (ChangeTracker.Entries<ActivityLog>().Any(e => e.State is EntityState.Modified or EntityState.Deleted)
-            || ChangeTracker.Entries<DeliverableBaseline>().Any(e => e.State is EntityState.Modified or EntityState.Deleted))
+            || ChangeTracker.Entries<DeliverableBaseline>().Any(e => e.State is EntityState.Modified or EntityState.Deleted)
+            || ChangeTracker.Entries<WorkAssignmentOccurrence>().Any(e => e.State is EntityState.Modified or EntityState.Deleted)
+            || ChangeTracker.Entries<WorkSeenAcknowledgement>().Any(e => e.State is EntityState.Modified or EntityState.Deleted)
+            || ChangeTracker.Entries<WorkSeenCommandReceipt>().Any(e => e.State is EntityState.Modified or EntityState.Deleted)
+            || ChangeTracker.Entries<TaskBulkCommandReceipt>().Any(e => e.State is EntityState.Modified or EntityState.Deleted))
             throw new InvalidOperationException("Published history is immutable.");
+        // Assignment evidence commits with its canonical change/event; publishers never acquire a personal-state lock.
+        if (Database.CurrentTransaction == null && WorkAssignmentPublication.HasChanges(this))
+            return await Tx.Run(this, () => SaveChangesAsync(ct));
         var org = await settings.Get(this); // one settings read per save, shared with the request's own flag checks
+        var issuedReviewChanges = HasIssuedReviewChanges();
+        if (issuedReviewChanges && Database.CurrentTransaction is null)
+            return await Tx.Run(this, () => SaveChangesAsync(ct));
+        // A hook can create its first raw notice during this save; give it an owner before any hook runs.
+        if (org.IsFlagOn("people_screens") && Database.CurrentTransaction is null)
+            return await Tx.Run(this, () => SaveChangesAsync(ct));
         var structureOn = org.IsFlagOn("org_structure");
         if (structureOn && ChangeTracker.Entries().Any(e => e.State is EntityState.Added or EntityState.Modified && e.Entity is AppUser or OrgUnit or OrgLevel))
         {
@@ -1027,12 +1714,59 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
             || await Set<ActivityChainHead>().AnyAsync(ct);
         if (chainOn && Database.CurrentTransaction == null) return await Tx.Run(this, () => SaveChangesAsync(ct));
         var pickupOn = org.IsFlagOn("task_pickup");
+        var noticesOn = org.IsFlagOn("people_screens");
         var changedProjects = ChangeTracker.Entries().Where(e => e.State is EntityState.Added or EntityState.Modified or EntityState.Deleted)
-            .Select(e => e.Entity is IAuditable item ? item.AuditProjectId : null).OfType<Guid>().Distinct().Order().ToArray();
-        if ((chainOn || pickupOn) && changedProjects.Length > 0)
+            .Select(e => e.Entity is IAuditable item ? item.AuditProjectId
+                : noticesOn && e.Entity is ProjectFollow follow ? follow.ProjectId
+                : issuedReviewChanges && e.Entity is DeliverableIssue issue ? issue.ProjectId : (Guid?)null).OfType<Guid>().Distinct().Order().ToArray();
+        if ((chainOn || pickupOn || noticesOn || issuedReviewChanges) && changedProjects.Length > 0)
         {
             if (Database.CurrentTransaction == null) return await Tx.Run(this, () => SaveChangesAsync(ct));
             foreach (var project in changedProjects) await Coordination.Lock(this, project);
+        }
+        if (noticesOn)
+        {
+            // Automatic follows may have been read before the project lock. A later Manual choice wins.
+            foreach (var entry in ChangeTracker.Entries<ProjectFollow>().Where(e =>
+                (e.State is EntityState.Added or EntityState.Modified) && e.Entity.Source == FollowSource.Assignment
+                || e.State == EntityState.Deleted).ToArray())
+            {
+                var desired = entry.Entity;
+                var current = await Follows.AsNoTracking().SingleOrDefaultAsync(row => row.ProjectId == desired.ProjectId && row.UserId == desired.UserId, ct);
+                if (entry.State == EntityState.Deleted)
+                {
+                    var project = Projects.Local.FirstOrDefault(row => row.Id == desired.ProjectId);
+                    var restricted = project is not null && Entry(project).Property(row => row.Visibility).IsModified
+                        ? project.Visibility == Visibility.Restricted
+                        : await Projects.AsNoTracking().AnyAsync(row => row.Id == desired.ProjectId && row.Visibility == Visibility.Restricted, ct);
+                    entry.State = EntityState.Detached;
+                    if (current is not null)
+                    {
+                        Follows.Attach(current);
+                        if (restricted || current.Source == FollowSource.Assignment) Follows.Remove(current);
+                    }
+                }
+                else if ((entry.State == EntityState.Added || current?.Id != desired.Id) && current is not null)
+                {
+                    var promote = desired.Level == FollowLevel.AllActivity && current.Source == FollowSource.Assignment
+                        && current.Level == FollowLevel.MyItemsOnly;
+                    var at = desired.UpdatedAt;
+                    entry.State = EntityState.Detached;
+                    Follows.Attach(current);
+                    if (promote) { current.Level = FollowLevel.AllActivity; current.UpdatedAt = at; }
+                }
+                else if (entry.State == EntityState.Modified && current is { Source: FollowSource.Manual })
+                {
+                    entry.State = EntityState.Detached;
+                    Follows.Attach(current);
+                }
+                else if (entry.State == EntityState.Modified && current is null)
+                {
+                    desired.CreatedAt = desired.UpdatedAt;
+                    desired.LastSeenAt = desired.UpdatedAt;
+                    entry.State = EntityState.Added;
+                }
+            }
         }
         if (pickupOn)
             foreach (var task in ChangeTracker.Entries<WorkTask>().Where(e => e.State is EntityState.Modified or EntityState.Deleted).Select(e => e.Entity.Id).Order())
@@ -1040,21 +1774,26 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         var authorship = ChangeTracker.Entries().Where(e =>
             e.Entity is WorkTask && (e.State == EntityState.Added || e.State == EntityState.Modified && (e.Property("AssigneeId").IsModified || e.Property("DeliverableId").IsModified))
             || e.Entity is Deliverable && (e.State == EntityState.Added || e.State == EntityState.Modified && e.Property("OwnerId").IsModified)).ToList();
-        if (authorship.Count > 0) {
+        // Soft delete/restore changes the filtered canonical author set. Serialize with real issuance
+        // even while presentation flags are off, without treating removal/restoration as a new author grant.
+        var authorshipProjects = authorship.Select(e => ((ProjectItem)e.Entity).ProjectId)
+            .Concat(ChangeTracker.Entries<WorkTask>().Where(e => e.State == EntityState.Modified && e.Property(row => row.DeletedAt).IsModified)
+                .Select(e => e.Entity.ProjectId)).Distinct().Order().ToArray();
+        if (authorshipProjects.Length > 0) {
             if (Database.CurrentTransaction == null) return await Tx.Run(this, () => SaveChangesAsync(ct));
-            foreach (var projectId in authorship.Select(e => ((ProjectItem)e.Entity).ProjectId).Distinct().Order()) await Coordination.Lock(this, projectId);
-            var settings = await Settings.FirstOrDefaultAsync(x => x.Key == "allow_self_review", ct);
-            var allowSelf = settings != null && JsonSerializer.Deserialize<bool>(settings.Value);
+            foreach (var projectId in authorshipProjects) await Coordination.Lock(this, projectId);
+        }
+        if (authorship.Count > 0) {
+            var allowSelf = await AllowSelfReviewForAuthorship(ct);
             if (!allowSelf) foreach (var e in authorship) {
                 var deliverableId = e.Entity is WorkTask t ? t.DeliverableId : ((Deliverable)e.Entity).Id;
                 if (deliverableId == null) continue;
                 var owners = e.Entity is WorkTask task ? new[] { task.AssigneeId, task.CreatedBy ?? (e.State == EntityState.Added ? audit.ActorId : null) } : new[] { ((Deliverable)e.Entity).OwnerId, ((Deliverable)e.Entity).CreatedBy ?? (e.State == EntityState.Added ? audit.ActorId : null) };
                 var ids = owners.OfType<Guid>().ToArray();
-                Check.That(!await DisciplineReviews.AnyAsync(a => ids.Contains(a.ReviewerId)
-                    && ReviewPackages.Any(p => p.CurrentRoundId == a.RoundId && p.Status != ReviewStatus.Cancelled && p.Status != ReviewStatus.Superseded)
-                    && ReviewManifestItems.Any(m => m.RoundId == a.RoundId && m.DeliverableId == deliverableId), ct), "ownerId", "review.independent");
+                await DemandReviewAuthorship(deliverableId, ids, allowSelf, ct);
             }
         }
+        if (issuedReviewChanges) await DemandIssuedReviewProvenance(org, ct);
         var now = clock.GetUtcNow();
         if (pickupOn) await Hub.Api.Features.TaskPickupLifecycle.BeforeSave(this, now, new Notifier(this, audit, settings, clock, configuration), ct); // FR-PKP-13
         ChangeTracker.DetectChanges();
@@ -1076,7 +1815,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         {
             if (entry.State is EntityState.Unchanged or EntityState.Detached) continue;
             if (entry.State is EntityState.Modified or EntityState.Deleted
-                && entry.Entity is SourceRevision or HandoffRevision or HandoffReceiptEvent or HandoffCommand or CoordinationCommand or ReviewManifestItem or FindingEvent or InputAdoption)
+                && entry.Entity is SourceRevision or HandoffRevision or HandoffReceiptEvent or HandoffCommand or CoordinationCommand or ReviewManifestItem or ExternalReview or FindingEvent or InputAdoption)
                 throw new InvalidOperationException("Published coordination evidence is immutable.");
             if (entry.State is EntityState.Modified or EntityState.Deleted && entry.Entity is AdminReview)
                 throw new InvalidOperationException("A recorded Admin review is never edited or deleted (FR-ADR-03).");
@@ -1087,11 +1826,13 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
                 if (entry.State == EntityState.Added) { a.CreatedAt = now; a.CreatedBy ??= audit.ActorId; }
                 if (entry.State is EntityState.Added or EntityState.Modified) { a.UpdatedAt = now; a.UpdatedBy = audit.ActorId; }
             }
+            ActivityLog? sourceActivity = null;
             if (entry.Entity is IAuditable item && AuditRules.Fields.TryGetValue(entry.Metadata.ClrType, out var fields))
             {
-                var row = BuildLog(entry, item, fields, now);
-                if (row is not null) ActivityLog.Add(row);
+                sourceActivity = BuildLog(entry, item, fields, now);
+                if (sourceActivity is not null) ActivityLog.Add(sourceActivity);
             }
+            WorkAssignmentPublication.Publish(this, entry, sourceActivity, now);
             if (AuditRules.AffectsEvaluation(entry.Entity) is { } pid) projects.Add(pid);
             if (entry.Entity is AppUser u && entry.State == EntityState.Modified
                 && (entry.Property(nameof(AppUser.IsActive)).IsModified || entry.Property(nameof(AppUser.SupervisorId)).IsModified))

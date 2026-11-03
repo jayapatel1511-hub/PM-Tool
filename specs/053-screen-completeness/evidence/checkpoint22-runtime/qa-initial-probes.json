@@ -1,0 +1,22 @@
+{
+  "http://127.0.0.1:5088/health": {
+    "status": 200,
+    "body": {
+      "status": "Healthy",
+      "build": "dev"
+    }
+  },
+  "http://127.0.0.1:8853/api/v1/config": {
+    "status": 200,
+    "body": {
+      "authMode": "Development",
+      "localPasswordEnabled": false,
+      "providers": [],
+      "entra": {
+        "clientId": "",
+        "tenantId": "",
+        "apiScope": ""
+      }
+    }
+  }
+}

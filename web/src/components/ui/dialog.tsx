@@ -5,13 +5,15 @@ import { t } from "@/lib/i18n"
 import { onToast } from "@/lib/drafts"
 import { XIcon } from "lucide-react"
 import { Dialog as DialogPrimitive } from "radix-ui"
+import { useAvailablePortalOpen } from "@/components/hub/form-navigation-context"
 
 import { Button } from "@/components/ui/button"
 
 function Dialog({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Root>) {
-  return <DialogPrimitive.Root data-slot="dialog" {...props} />
+  const availability = useAvailablePortalOpen(props)
+  return <DialogPrimitive.Root data-slot="dialog" {...props} {...availability} />
 }
 
 function DialogTrigger({

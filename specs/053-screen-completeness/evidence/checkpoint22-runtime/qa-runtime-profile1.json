@@ -1,0 +1,70 @@
+{
+  "database": "hub_qa_checkpoint22",
+  "api": "http://127.0.0.1:5088",
+  "verifiedBy": "new database creation + explicit runtime connection env + observedlatestmigration",
+  "apiPid": 72815,
+  "apiSession": 77933,
+  "jobsEnabled": false,
+  "evaluationWorker": true,
+  "reviewDemoSeed": false,
+  "binarySha256": "e101d1578938d36e87d74dba7d9f5dfa9afe79a8aee5c48b9a84e136be358da9",
+  "sourceManifest": "csharp-freeze2.json",
+  "priorSettings": {
+    "flag.small_ux": false,
+    "flag.visual_system": false,
+    "flag.work_screens": false,
+    "flag.project_screens": false,
+    "flag.capacity_screens": false,
+    "flag.register_screens": false,
+    "flag.people_screens": false
+  },
+  "writes": [
+    {
+      "key": "flag.visual_system",
+      "status": 200,
+      "value": true
+    },
+    {
+      "key": "flag.small_ux",
+      "status": 200,
+      "value": true
+    },
+    {
+      "key": "flag.project_screens",
+      "status": 200,
+      "value": true
+    },
+    {
+      "key": "flag.work_screens",
+      "status": 200,
+      "value": true
+    },
+    {
+      "key": "flag.register_screens",
+      "status": 200,
+      "value": true
+    },
+    {
+      "key": "flag.people_screens",
+      "status": 200,
+      "value": true
+    },
+    {
+      "key": "flag.capacity_screens",
+      "status": 200,
+      "value": true
+    }
+  ],
+  "flagsAfter": {
+    "visual_system": true,
+    "small_ux": true,
+    "project_screens": true,
+    "work_screens": true,
+    "register_screens": true,
+    "people_screens": true,
+    "capacity_screens": true
+  },
+  "today": "2026-11-01",
+  "orgTimeZone": "America/Halifax",
+  "scope": "disposable local QA only; source defaults and other databases unchanged"
+}

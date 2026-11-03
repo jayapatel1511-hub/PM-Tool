@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "errors": 0,
+  "warnings": 1156,
+  "csharpCount": 613,
+  "oldApiDllUnchanged": true,
+  "boundary": "APIbootstrapprevious7warnings; solution2incrementalreported1156. NoAPI/providerchecksrunyet."
+}

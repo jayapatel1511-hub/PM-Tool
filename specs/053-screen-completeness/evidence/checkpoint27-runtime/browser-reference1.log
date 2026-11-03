@@ -1,0 +1,12 @@
+{"stage":"editor-normal","url":"http://127.0.0.1:8857/tasks/00000000-0000-0000-0000-000000000001?groupChanges=false&source=files","active":{"id":"_r_3o_-source","text":""},"dialogs":[{"state":"open","hidden":null,"title":"Source reference · Synthetic Different reference"}],"scroll":{"top":1523,"left":0},"completedCases":["AC-SCR-77: labelled C/D warning, neutral match, all unknown/changed/unavailable states, manual provenance, actual registrar only, inherited read-only and HTTP/UNC actions","AC-SCR-77: known registrar Person returns to exact task/query/source scroll and natural keyboard focus without writes"],"commands":0,"mutations":0,"unexpectedGets":["planning/grid"],"unexpectedWrites":0,"errors":[]}
+locator.fill: Timeout 15000ms exceeded.
+Call log:
+[2m  - waiting for locator('[data-link-reference-editor]').getByLabel('Stable source ID', { exact: true })[22m
+
+    at fillReference (/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/document-link-reference.cjs:86:71)
+    at async /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/document-link-reference.cjs:152:19 {
+  log: [
+    "  - waiting for locator('[data-link-reference-editor]').getByLabel('Stable source ID', { exact: true })"
+  ],
+  name: 'TimeoutError'
+}

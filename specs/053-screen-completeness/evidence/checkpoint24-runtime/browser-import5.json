@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "suite": "deliverable-import",
+  "evidence": "synthetic browser transport/UI only; real parser/atomicity/authority remain API-owned",
+  "xlsx": "MOCK BYTES, UI worksheet/format checks only",
+  "observations": [
+    "actual 40-row CSV bytes, one blank-title error, source key without values, corrected file/default invalidation, full normalized row",
+    "mounted Person open/Escape, exact source URL/opener focus/scroll/fold/file return, guarded other route and source Close, no stored source bytes",
+    "mock-only XLSX bytes/format, explicit worksheet preview,375px containment and keyboard/Person return",
+    "fresh-preview reason requirement survives edits, definite409 retains inputs, new preview/new key,40-row result and one established two-pass refresh cycle",
+    "response-loss then403 then404 remains uncertain/locked, exact immutable key+wire retries, recovered40-row result without duplicate intent"
+  ],
+  "previews": 10,
+  "explicitCommitRequests": 6,
+  "distinctKeys": 3,
+  "mockCreatedRows": 80,
+  "successfulReplies": 2,
+  "personReads": 2,
+  "unexpectedBusinessMethods": 0
+}

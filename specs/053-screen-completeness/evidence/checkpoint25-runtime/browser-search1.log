@@ -1,0 +1,8 @@
+locator.focus: Timeout 15000ms exceeded.
+Call log:
+[2m  - waiting for locator('#search-project-filter')[22m
+
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/search-screen.cjs:134:75 {
+  log: [ "  - waiting for locator('#search-project-filter')" ],
+  name: 'TimeoutError'
+}

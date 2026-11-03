@@ -1,0 +1,11 @@
+{
+  "atUtc": "2026-11-03T04:30:44.465706+00:00",
+  "generation": "Design-only actual EF10.0.12 output, no DB apply",
+  "repair": "Down refuses retained issued/authorship provenance before DDL; removed four fabricated Guid.Empty defaults, Up unchanged",
+  "files": {
+    "src/Hub.Api/Data/Migrations/20261103042711_ExternalIssuedReviewSources.cs": "05f705187475576f82ac06de483f140d2643ad9c3efaa01943ab1970080f09a2",
+    "src/Hub.Api/Data/Migrations/20261103042711_ExternalIssuedReviewSources.Designer.cs": "73c51581fa5227616b7f14d3239c8194e530b15cbf8efba717c3c849667140ec",
+    "src/Hub.Api/Data/Migrations/HubDbModelSnapshot.cs": "8d255e95b45c6d565c9f42060ecd1284f060942b03560b322c8c85859611f23c"
+  },
+  "providerVerification": "PENDING two exact migration witnesses"
+}

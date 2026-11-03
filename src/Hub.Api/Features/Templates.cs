@@ -25,6 +25,7 @@ public static class TemplateEndpoints
     public sealed record StructureBody(HeaderBody? Header, DisciplineIn[] Disciplines, MilestoneIn[] Milestones, DeliverableIn[] Deliverables, TaskIn[] Tasks, DependencyIn[] Dependencies, int? RowVersion)
     {
         public TemplateRoleIn[]? Roles { get; init; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public TemplateRiskIn[]? Risks { get; init; }
     }
     public sealed record PreviewBody(DateOnly? StartDate, Dictionary<Guid, DateOnly?>? MilestoneDates, Guid[]? DisciplineIds, Guid? OfficeId = null);
     public sealed record PreviewMilestone(Guid Id, string Name, string MilestoneType, int SortOrder, DateOnly? Date, string Source);
@@ -50,7 +51,8 @@ public static class TemplateEndpoints
         DateTimeOffset UpdatedAt, int RowVersion, int Disciplines, int Milestones, int Deliverables, int Tasks, [property: JsonPropertyOrder(2)] int Projects,
         [property: JsonPropertyOrder(1), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? Roles = null);
     public sealed record TemplateList(bool CanEdit, IReadOnlyList<TemplateListRow> Templates);
-    public sealed record TemplateFamilyVersion(Guid Id, int? Version, string Status, DateTimeOffset? PublishedAt);
+    public sealed record TemplateFamilyVersion(Guid Id, int? Version, string Status, DateTimeOffset? PublishedAt,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? Projects = null);
     /// TemplateDisciplineId is what a basis suggestion is added against; saving ignores it.
     public sealed record TemplateDisciplineRead(Guid DisciplineId, bool IsDefaultIncluded, Guid TemplateDisciplineId);
     public sealed record TemplateBasisRead(Guid Id, Guid DisciplineId, string Kind, string Title, string Scope, string Statement, decimal? NumericValue, string? Units,
@@ -61,7 +63,9 @@ public static class TemplateEndpoints
         int RowVersion, bool CanEdit, IReadOnlyList<TemplateFamilyVersion> Family, IReadOnlyList<TemplateDisciplineRead> Disciplines, IReadOnlyList<TemplateBasisRead> BasisSuggestions,
         IReadOnlyList<MilestoneIn> Milestones, IReadOnlyList<DeliverableIn> Deliverables, IReadOnlyList<TaskIn> Tasks, [property: JsonPropertyOrder(2)] IReadOnlyList<DependencyIn> Dependencies,
         [property: JsonPropertyOrder(1), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<TemplateRoleIn>? Roles = null,
-        [property: JsonPropertyOrder(3), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? OffsetDayKind = null);
+        [property: JsonPropertyOrder(3), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? OffsetDayKind = null,
+        [property: JsonPropertyOrder(4), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<TemplateRiskIn>? Risks = null,
+        [property: JsonPropertyOrder(5), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] TemplateVersionScreenRead? Screen = null);
     public sealed record PackProjectMilestone(Guid Id, string Key, string Name, DateOnly? Date);
     public sealed record PackMilestoneMap(Guid TemplateMilestoneId, string Name, Guid? ProjectMilestoneId);
     public sealed record PackDiscipline(Guid DisciplineId, bool InProject, int Deliverables, int Tasks, IReadOnlyList<PackMilestoneMap> Mapping);
@@ -86,7 +90,9 @@ public static class TemplateEndpoints
             await db.SaveChangesAsync();
             return TypedResults.Created($"/api/v1/templates/{t.Id}", new TemplateCreated(t.Id, t.RowVersion));
         });
-        api.MapGet("/templates/{id:guid}", async Task<Ok<TemplateRead>> (Guid id, Access access, HubDb db, SettingsStore store) => TypedResults.Ok(await Read(await Visible(db, access, id), db, access, store)));
+        api.MapGet("/templates/{id:guid}", async Task<Ok<TemplateRead>> (Guid id, string? changePage, string? changePageSize,
+            Access access, HubDb db, SettingsStore store, TimeProvider clock) =>
+            TypedResults.Ok(await Read(await Visible(db, access, id), db, access, store, clock, changePage, changePageSize)));
         api.MapPut("/templates/{id:guid}/structure", Save);
         api.MapPost("/templates/{id:guid}/design-basis", AddBasisSuggestion);
         api.MapDelete("/templates/{id:guid}/design-basis/{suggestionId:guid}", RemoveBasisSuggestion);
@@ -95,20 +101,24 @@ public static class TemplateEndpoints
         api.MapPost("/templates/{id:guid}/retire", async Task<NoContent> (Guid id, Access access, HubDb db) =>
         {
             Editor(access);
+            return await TemplateVersionProvenance.InFamily<NoContent>(db, id, async () => {
             var t = await db.Templates.FirstOrDefaultAsync(x => x.Id == id) ?? throw ApiException.NotFound();
             if (t.Status != TemplateStatus.Published) throw ApiException.Rule("template_not_published", "template.not_published");
             t.Status = TemplateStatus.Retired;
             db.Audit.Note(t, action: "Retired");
             await db.SaveChangesAsync();
             return TypedResults.NoContent();
+            });
         });
         api.MapDelete("/templates/{id:guid}", async Task<NoContent> (Guid id, Access access, HubDb db) =>
         {
             Editor(access);
+            return await TemplateVersionProvenance.InFamily<NoContent>(db, id, async () => {
             var t = await db.Templates.FirstOrDefaultAsync(x => x.Id == id) ?? throw ApiException.NotFound();
             if (t.Status != TemplateStatus.Draft) throw ApiException.Rule("template_not_draft", "template.not_draft");
             await Tx.Run(db, async () => { await ClearChildren(db, id); db.Audit.Note(t, action: "Discarded"); db.Templates.Remove(t); return await db.SaveChangesAsync(); });
             return TypedResults.NoContent();
+            });
         });
         api.MapPost("/templates/{id:guid}/preview", async (Guid id, PreviewBody body, Access access, HubDb db, SettingsStore store) =>
         {
@@ -134,6 +144,7 @@ public static class TemplateEndpoints
 
         api.MapGet("/projects/{id:guid}/template-packs", PackProposal);
         api.MapPost("/projects/{id:guid}/template-packs", AddPack);
+        TemplateVersionProvenance.Map(api);
     }
 
     /// Basis suggestions (031 FR-BAS-07) change only on a Draft, one at a time; each is logged on the template, whose
@@ -141,6 +152,7 @@ public static class TemplateEndpoints
     static async Task<Created<BasisSuggestionCreated>> AddBasisSuggestion(Guid id, BasisSuggestionBody body, Access access, HubDb db)
     {
         Editor(access);
+        return await TemplateVersionProvenance.InFamily<Created<BasisSuggestionCreated>>(db, id, async () => {
         var template = await db.Templates.FirstOrDefaultAsync(x => x.Id == id) ?? throw ApiException.NotFound();
         if (template.Status != TemplateStatus.Draft) throw ApiException.Rule("template_not_draft", "template.not_draft");
         Check.OneOf(body.Kind, BasisKind.All, "kind");
@@ -160,11 +172,13 @@ public static class TemplateEndpoints
         db.Audit.Note(template, action: "BasisSuggestionAdded", reason: suggestion.Title);
         await db.SaveChangesAsync();
         return TypedResults.Created($"/api/v1/templates/{id}/design-basis/{suggestion.Id}", new BasisSuggestionCreated(suggestion.Id));
+        });
     }
 
     static async Task<NoContent> RemoveBasisSuggestion(Guid id, Guid suggestionId, Access access, HubDb db)
     {
         Editor(access);
+        return await TemplateVersionProvenance.InFamily<NoContent>(db, id, async () => {
         var template = await db.Templates.FirstOrDefaultAsync(x => x.Id == id) ?? throw ApiException.NotFound();
         if (template.Status != TemplateStatus.Draft) throw ApiException.Rule("template_not_draft", "template.not_draft");
         var suggestion = await db.TemplateDesignBases.FirstOrDefaultAsync(x => x.Id == suggestionId && x.TemplateId == id) ?? throw ApiException.NotFound();
@@ -173,6 +187,7 @@ public static class TemplateEndpoints
         db.Audit.Note(template, action: "BasisSuggestionRemoved", reason: suggestion.Title);
         await db.SaveChangesAsync();
         return TypedResults.NoContent();
+        });
     }
 
     static async Task<bool> RolesEnabled(HubDb db) => (await db.CurrentSettings()).IsFlagOn("template_roles");
@@ -182,20 +197,23 @@ public static class TemplateEndpoints
     // ---------- Reading ----------
 
     /// Editors see every version and draft; everyone else sees published templates, for the creation wizard (§8.5.1).
-    static async Task<Ok<TemplateList>> List(Access access, HubDb db)
+    static async Task<Ok<TemplateList>> List(Access access, HubDb db, SettingsStore store)
     {
         var editor = IsEditor(access);
+        var scoped = (await store.Get(db)).IsFlagOn(TemplateVersionProvenance.Flag);
+        await using var snapshot = scoped ? await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead) : null;
+        var visible = access.VisibleProjectIds();
         var q = db.Templates.AsNoTracking();
         if (!editor) q = q.Where(t => t.Status == TemplateStatus.Published);
         var rows = await q.OrderBy(t => t.Name).ThenByDescending(t => t.Version).Select(t => new TemplateListRow(
             t.Id, t.FamilyId, t.Name, t.Description, t.ProjectTypeId, t.Version, t.Status, t.PublishedAt, t.UpdatedAt, t.RowVersion,
             db.TemplateDisciplines.Count(x => x.TemplateId == t.Id), db.TemplateMilestones.Count(x => x.TemplateId == t.Id),
-            db.TemplateDeliverables.Count(x => x.TemplateId == t.Id), db.TemplateTasks.Count(x => x.TemplateId == t.Id), db.Projects.Count(p => p.CreatedFromTemplateId == t.Id),
+            db.TemplateDeliverables.Count(x => x.TemplateId == t.Id), db.TemplateTasks.Count(x => x.TemplateId == t.Id), db.Projects.Count(p => p.CreatedFromTemplateId == t.Id && (!scoped || visible.Contains(p.Id))),
             db.TemplateRoles.Count(x => x.TemplateId == t.Id))).ToListAsync();
         return TypedResults.Ok(new TemplateList(editor, await RolesEnabled(db) ? rows : [.. rows.Select(r => r with { Roles = null })]));
     }
 
-    static async Task<ProjectTemplate> Visible(HubDb db, Access access, Guid id)
+    internal static async Task<ProjectTemplate> Visible(HubDb db, Access access, Guid id)
     {
         var t = await db.Templates.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id) ?? throw ApiException.NotFound();
         if (t.Status != TemplateStatus.Published && !IsEditor(access)) throw ApiException.NotFound();
@@ -230,12 +248,26 @@ public static class TemplateEndpoints
             ? new WorkCalendar(await db.Holidays.AsNoTracking().Where(h => h.OfficeId == null || h.OfficeId == officeId).Select(h => h.Date).ToListAsync())
             : null;
 
-    static async Task<TemplateRead> Read(ProjectTemplate t, HubDb db, Access access, SettingsStore store)
+    static async Task<TemplateRead> Read(ProjectTemplate t, HubDb db, Access access, SettingsStore store, TimeProvider clock,
+        string? changePage = null, string? changePageSize = null, bool includeScreen = true)
     {
+        var settings = await store.Get(db);
+        var people = settings.IsFlagOn(TemplateVersionProvenance.Flag) && includeScreen;
+        var risksEnabled = settings.IsFlagOn(TemplateRiskSeeds.Flag);
+        await using var snapshot = includeScreen && (people || risksEnabled) && db.Database.CurrentTransaction is null
+            ? await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead) : null;
+        if (includeScreen && (people || risksEnabled)) t = await Visible(db, access, t.Id);
+        var asOf = clock.GetUtcNow();
+        var (page, size) = people ? TemplateVersionProvenance.Paging(changePage, changePageSize, "changePage", "changePageSize") : (1, 50);
         var (_, p) = await Snapshot(db, t.Id);
         var disc = p.Disciplines.ToDictionary(d => d.Id, d => d.DisciplineId);
-        var family = await db.Templates.AsNoTracking().Where(x => x.FamilyId == t.FamilyId).OrderByDescending(x => x.Version)
-            .Select(x => new TemplateFamilyVersion(x.Id, x.Version, x.Status, x.PublishedAt)).ToListAsync();
+        var familyRows = await db.Templates.AsNoTracking().Where(x => x.FamilyId == t.FamilyId).OrderByDescending(x => x.Version)
+            .Select(x => new { x.Id, x.Version, x.Status, x.PublishedAt }).ToListAsync();
+        var familyIds = familyRows.Select(row => row.Id).ToArray();
+        var counts = people ? await access.VisibleProjects().AsNoTracking().Where(project => project.CreatedFromTemplateId != null && familyIds.Contains(project.CreatedFromTemplateId.Value))
+            .GroupBy(project => project.CreatedFromTemplateId!.Value).Select(group => new { Id = group.Key, Count = group.Count() }).ToDictionaryAsync(row => row.Id, row => row.Count)
+            : new Dictionary<Guid, int>();
+        var family = familyRows.Select(row => new TemplateFamilyVersion(row.Id, row.Version, row.Status, row.PublishedAt, people ? counts.GetValueOrDefault(row.Id) : null)).ToArray();
         var basis = await db.TemplateDesignBases.AsNoTracking().Where(x => x.TemplateId == t.Id).OrderBy(x => x.Id).ToListAsync();
         return new TemplateRead(t.Id, t.FamilyId, t.Name, t.Description, t.ProjectTypeId, t.Version, t.Status, t.PublishedAt, t.RowVersion, IsEditor(access) && t.Status == TemplateStatus.Draft,
             family,
@@ -247,7 +279,9 @@ public static class TemplateEndpoints
             [.. p.Tasks.Select(k => new TaskIn(k.Id.ToString(), disc[k.TemplateDisciplineId], k.TemplateDeliverableId?.ToString(), k.Name, k.Description, k.RequiresReview, k.Priority, k.EstimatedHours, k.DueOffsetDays, k.AssignToRole))],
             [.. p.Dependencies.Select(d => new DependencyIn(d.PredecessorTemplateTaskId.ToString(), d.SuccessorTemplateTaskId.ToString()))],
             await RolesEnabled(db) ? [.. p.Roles.Select(r => new TemplateRoleIn(r.Id.ToString(), r.TemplateDisciplineId is { } rd ? disc[rd] : null, r.RoleLabel, p.Milestones.FirstOrDefault(m => m.Id == r.StartMilestoneId)?.Id.ToString(), r.StartOffsetDays, p.Milestones.FirstOrDefault(m => m.Id == r.EndMilestoneId)?.Id.ToString(), r.EndOffsetDays, r.PlannedHours, r.Note))] : null,
-            (await store.Get(db)).IsFlagOn(WorkingDaysFlag) ? t.OffsetDayKind : null); // the field exists only while the flag is on (FR-DLV-08)
+            settings.IsFlagOn(WorkingDaysFlag) ? t.OffsetDayKind : null,
+            risksEnabled ? TemplateRiskSeeds.Wire(await TemplateRiskSeeds.Load(db, t.Id)) : null,
+            people ? new TemplateVersionScreenRead(counts.GetValueOrDefault(t.Id), t.Status == TemplateStatus.Draft ? await TemplateDraftDiff.Read(db, t, settings, asOf, page, size) : null) : null);
     }
 
     // ---------- Editing a Draft (FR-001) ----------
@@ -266,6 +300,7 @@ public static class TemplateEndpoints
 
     static async Task ClearChildren(HubDb db, Guid id)
     {
+        await db.TemplateRisks.Where(x => x.TemplateId == id).ExecuteDeleteAsync();
         await db.TemplateDesignBases.Where(x => x.TemplateId == id).ExecuteDeleteAsync(); // they reference the disciplines
         await db.TemplateDependencies.Where(x => x.TemplateId == id).ExecuteDeleteAsync();
         await db.TemplateTasks.Where(x => x.TemplateId == id).ExecuteDeleteAsync();
@@ -276,12 +311,14 @@ public static class TemplateEndpoints
     }
 
     /// The whole structure is saved at once, so references between rows (by `ref`) are checked together.
-    static async Task<Ok<TemplateRead>> Save(Guid id, StructureBody body, HttpContext http, Access access, HubDb db, SettingsStore store)
+    static async Task<Ok<TemplateRead>> Save(Guid id, StructureBody body, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
         Editor(access);
+        return await TemplateVersionProvenance.InFamily<Ok<TemplateRead>>(db, id, async () => {
         var t = await db.Templates.FirstOrDefaultAsync(x => x.Id == id) ?? throw ApiException.NotFound();
         if (t.Status != TemplateStatus.Draft) throw ApiException.Rule("template_not_draft", "template.not_draft");
         await Http.CheckVersion(db, http, t, body.RowVersion);
+        var riskSeeds = TemplateRiskSeeds.Replace(id, body.Risks, await TemplateRiskSeeds.Load(db, id), (await store.Get(db)).IsFlagOn(TemplateRiskSeeds.Flag));
         if (body.Header is { } h) await Header(t, h, db, (await store.Get(db)).IsFlagOn(WorkingDaysFlag));
 
         var refIds = new Dictionary<string, Guid>();
@@ -404,11 +441,13 @@ public static class TemplateEndpoints
             db.TemplateDependencies.AddRange(deps);
             db.TemplateRoles.AddRange(roles);
             db.TemplateDesignBases.AddRange(basis);
+            db.TemplateRisks.AddRange(riskSeeds);
             t.UpdatedAt = DateTimeOffset.UtcNow; // the header carries the draft's version even when only children changed
             db.Audit.Note(t, action: "StructureSaved");
             return await db.SaveChangesAsync();
         });
-        return TypedResults.Ok(await Read(t, db, access, store));
+        return TypedResults.Ok(await Read(t, db, access, store, clock, includeScreen: false));
+        });
     }
 
     /// Dependencies must leave the tasks orderable (Kahn); a cycle could never be scheduled.
@@ -428,14 +467,16 @@ public static class TemplateEndpoints
     }
 
     /// Changing a published template starts (or returns) its family's Draft; the published version stays as it is.
-    static async Task<Results<Ok<TemplateDraft>, Created<TemplateDraft>>> NewDraft(Guid id, Access access, HubDb db)
+    static async Task<Results<Ok<TemplateDraft>, Created<TemplateDraft>>> NewDraft(Guid id, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
         Editor(access);
+        return await TemplateVersionProvenance.InFamily<Results<Ok<TemplateDraft>, Created<TemplateDraft>>>(db, id, async () => {
         var src = await db.Templates.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id) ?? throw ApiException.NotFound();
         if (await db.Templates.AsNoTracking().FirstOrDefaultAsync(x => x.FamilyId == src.FamilyId && x.Status == TemplateStatus.Draft) is { } existing)
             return TypedResults.Ok(new TemplateDraft(existing.Id, existing.RowVersion));
         var (_, p) = await Snapshot(db, id);
         var basis = await db.TemplateDesignBases.AsNoTracking().Where(x => x.TemplateId == id).ToListAsync();
+        var risks = await TemplateRiskSeeds.Load(db, id);
         var draft = new ProjectTemplate { FamilyId = src.FamilyId, Name = src.Name, Description = src.Description, ProjectTypeId = src.ProjectTypeId, Status = TemplateStatus.Draft,
             OffsetDayKind = src.OffsetDayKind };
         var map = new Dictionary<Guid, Guid>();
@@ -460,19 +501,23 @@ public static class TemplateEndpoints
                 StartMilestoneId = r.StartMilestoneId is { } sm ? map[sm] : null, StartOffsetDays = r.StartOffsetDays,
                 EndMilestoneId = r.EndMilestoneId is { } em ? map[em] : null,
                 EndOffsetDays = r.EndOffsetDays, PlannedHours = r.PlannedHours, Note = r.Note }).ToList());
-            db.TemplateDesignBases.AddRange(basis.Select(b => new TemplateDesignBasis { Id = Guid.CreateVersion7(), TemplateId = draft.Id,
+            db.TemplateDesignBases.AddRange(basis.Select(b => new TemplateDesignBasis { Id = N(b.Id), TemplateId = draft.Id,
                 TemplateDisciplineId = map[b.TemplateDisciplineId], Kind = b.Kind, Title = b.Title, Scope = b.Scope, Statement = b.Statement,
                 NumericValue = b.NumericValue, Units = b.Units, SourceSystem = b.SourceSystem, StableSourceId = b.StableSourceId,
                 SourceUrl = b.SourceUrl, DeclaredRevision = b.DeclaredRevision }).ToList());
+            db.TemplateRisks.AddRange(risks.Select(risk => TemplateRiskSeeds.Clone(risk, draft.Id, N(risk.Id))).ToArray());
+            if ((await store.Get(db)).IsFlagOn(TemplateVersionProvenance.Flag)) await TemplateDraftDiff.Capture(db, src, draft, map, clock.GetUtcNow());
             db.Audit.Note(draft, action: "DraftStarted", reason: src.Version is { } v ? $"v{v}" : null);
             return await db.SaveChangesAsync();
         });
         return TypedResults.Created($"/api/v1/templates/{draft.Id}", new TemplateDraft(draft.Id, draft.RowVersion));
+        });
     }
 
     static async Task<Ok<TemplatePublished>> Publish(Guid id, VersionBody? body, HttpContext http, Access access, HubDb db, TimeProvider clock)
     {
         Editor(access);
+        return await TemplateVersionProvenance.InFamily<Ok<TemplatePublished>>(db, id, async () => {
         var t = await db.Templates.FirstOrDefaultAsync(x => x.Id == id) ?? throw ApiException.NotFound();
         if (t.Status != TemplateStatus.Draft) throw ApiException.Rule("template_not_draft", "template.not_draft");
         await Http.CheckVersion(db, http, t, body?.RowVersion);
@@ -491,6 +536,7 @@ public static class TemplateEndpoints
             return await db.SaveChangesAsync();
         });
         return TypedResults.Ok(new TemplatePublished(t.Id, t.Version ?? 0, t.Status, t.RowVersion));
+        });
     }
 
     // ---------- Adding a discipline pack to a project (FR-007, FR-TPL-02) ----------
@@ -518,6 +564,7 @@ public static class TemplateEndpoints
     }
 
     static async Task<Ok<PackAdded>> AddPack(Guid id, PackBody body, Access access, HubDb db, TeamService team, Notifier notify, TimeProvider clock, SettingsStore store)
+        => await Tx.Notice<Ok<PackAdded>>(db, store, async () =>
     {
         var (p, ctx) = await access.Project(id);
         Access.Demand(Permissions.ManageTeam(access.Actor, ctx));
@@ -553,7 +600,7 @@ public static class TemplateEndpoints
             foreach (var (user, n) in result.Assigned)
                 await notify.Send(NotificationEvents.TaskAssigned, user, TeamService.Item(p) with { Link = $"/my-work?tab=overview&project={p.Id}" }, Text.Get("notify.batched_assignments", n, p.ProjectNumber, p.Name));
         return TypedResults.Ok(new PackAdded(result.Deliverables, result.Tasks, result.Dependencies));
-    }
+    });
 
     public sealed record Created(int Milestones, int Deliverables, int Tasks, int Dependencies, Dictionary<Guid, int> Assigned);
 
@@ -658,6 +705,8 @@ public sealed class TemplateHook(HubDb db, TeamService team, CurrentUser me, Tim
             }
         var plan = TemplatePlanner.Plan(snap, p.StartDate, typed, pds.Keys.ToHashSet(), await TemplateEndpoints.Calendar(db, store, t, p.OfficeId));
         var created = await TemplateEndpoints.Instantiate(db, team, p, parts, plan, pds, null, me.Id, clock.GetUtcNow(), createMilestones: true);
+        if ((await store.Get(db)).IsFlagOn(TemplateRiskSeeds.Flag))
+            await TemplateRiskSeeds.Instantiate(db, p, await TemplateRiskSeeds.Load(db, t.Id), clock.GetUtcNow());
         if ((await store.Get(db)).IsFlagOn("template_roles"))
         {
             var calendarFactory = await OpenRoleEndpoints.Calendars(db, [p.Id]);

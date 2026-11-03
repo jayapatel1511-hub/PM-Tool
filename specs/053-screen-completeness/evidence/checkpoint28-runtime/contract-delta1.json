@@ -1,0 +1,246 @@
+{
+  "newSchemas": [
+    "AdminPermissionExample",
+    "AdminRoleChoice",
+    "AdminRoleExamplesRead",
+    "AdminRoleExplanation",
+    "AdminUserDiscipline",
+    "AdminUserScreen",
+    "DecisionCategoryChoice",
+    "DecisionLagGroup",
+    "DecisionLagRead",
+    "DecisionMetadataDetail",
+    "DecisionMetadataSummary",
+    "DecisionScreenRead",
+    "IssueRootCauseChoice",
+    "IssueRootCauseCount",
+    "IssueRootCauseSummary",
+    "IssueRootCauseValue",
+    "PageOfTemplateVersionProject",
+    "TemplateDiffCounts",
+    "TemplateDiffFieldChange",
+    "TemplateDraftChange",
+    "TemplateDraftDiffRead",
+    "TemplateDraftSource",
+    "TemplateProjectProvenanceRead",
+    "TemplateRecordedSource",
+    "TemplateReleasedVersion",
+    "TemplateRiskIn",
+    "TemplateVersionProject",
+    "TemplateVersionScreenRead"
+  ],
+  "oldSchemaChanges": [
+    {
+      "schema": "AdminUserRow",
+      "addedProperties": [
+        "screen"
+      ],
+      "removedProperties": [],
+      "changedExistingProperties": [],
+      "otherSchemaMetadataChanged": false,
+      "newRequiredProperties": []
+    },
+    {
+      "schema": "DecisionCreateBody",
+      "addedProperties": [
+        "categoryId",
+        "optionsConsidered"
+      ],
+      "removedProperties": [],
+      "changedExistingProperties": [],
+      "otherSchemaMetadataChanged": false,
+      "newRequiredProperties": []
+    },
+    {
+      "schema": "DecisionDetailResponse",
+      "addedProperties": [
+        "metadata"
+      ],
+      "removedProperties": [],
+      "changedExistingProperties": [],
+      "otherSchemaMetadataChanged": false,
+      "newRequiredProperties": []
+    },
+    {
+      "schema": "DecisionRow",
+      "addedProperties": [
+        "metadata"
+      ],
+      "removedProperties": [],
+      "changedExistingProperties": [],
+      "otherSchemaMetadataChanged": false,
+      "newRequiredProperties": []
+    },
+    {
+      "schema": "DecisionTransitionBody",
+      "addedProperties": [
+        "rationale"
+      ],
+      "removedProperties": [],
+      "changedExistingProperties": [],
+      "otherSchemaMetadataChanged": false,
+      "newRequiredProperties": []
+    },
+    {
+      "schema": "IssueMove",
+      "addedProperties": [
+        "rootCauseCategoryId"
+      ],
+      "removedProperties": [],
+      "changedExistingProperties": [],
+      "otherSchemaMetadataChanged": false,
+      "newRequiredProperties": []
+    },
+    {
+      "schema": "IssueRow",
+      "addedProperties": [
+        "rootCause"
+      ],
+      "removedProperties": [],
+      "changedExistingProperties": [],
+      "otherSchemaMetadataChanged": false,
+      "newRequiredProperties": []
+    },
+    {
+      "schema": "ReferenceView",
+      "addedProperties": [
+        "issueRootCauses"
+      ],
+      "removedProperties": [],
+      "changedExistingProperties": [],
+      "otherSchemaMetadataChanged": false,
+      "newRequiredProperties": []
+    },
+    {
+      "schema": "StructureBody",
+      "addedProperties": [
+        "risks"
+      ],
+      "removedProperties": [],
+      "changedExistingProperties": [],
+      "otherSchemaMetadataChanged": false,
+      "newRequiredProperties": []
+    },
+    {
+      "schema": "TemplateFamilyVersion",
+      "addedProperties": [
+        "projects"
+      ],
+      "removedProperties": [],
+      "changedExistingProperties": [],
+      "otherSchemaMetadataChanged": false,
+      "newRequiredProperties": []
+    },
+    {
+      "schema": "TemplateRead",
+      "addedProperties": [
+        "risks",
+        "screen"
+      ],
+      "removedProperties": [],
+      "changedExistingProperties": [],
+      "otherSchemaMetadataChanged": false,
+      "newRequiredProperties": []
+    }
+  ],
+  "paths": {
+    "added": [
+      "/api/v1/admin/decisionCategories",
+      "/api/v1/admin/decisionCategories/{id}",
+      "/api/v1/admin/decisionCategories/{id}/usage",
+      "/api/v1/admin/issueRootCauses",
+      "/api/v1/admin/issueRootCauses/{id}",
+      "/api/v1/admin/issueRootCauses/{id}/usage",
+      "/api/v1/admin/role-explanations",
+      "/api/v1/projects/{id}/decisions/screen",
+      "/api/v1/projects/{id}/issues/root-causes",
+      "/api/v1/projects/{id}/template-provenance",
+      "/api/v1/templates/{id}/projects"
+    ],
+    "removed": [],
+    "changedExisting": [
+      {
+        "path": "/api/v1/projects/{id}/issues",
+        "operation": "get",
+        "addedParameters": [
+          {
+            "in": "query",
+            "name": "RootCause",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "removedParameters": [],
+        "otherOperationChanged": false
+      },
+      {
+        "path": "/api/v1/projects/{id}/issues/export",
+        "operation": "get",
+        "addedParameters": [
+          {
+            "in": "query",
+            "name": "RootCause",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "removedParameters": [],
+        "otherOperationChanged": false
+      },
+      {
+        "path": "/api/v1/projects/{id}/risks",
+        "operation": "get",
+        "addedParameters": [
+          {
+            "in": "query",
+            "name": "RootCause",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "removedParameters": [],
+        "otherOperationChanged": false
+      },
+      {
+        "path": "/api/v1/projects/{id}/risks/export",
+        "operation": "get",
+        "addedParameters": [
+          {
+            "in": "query",
+            "name": "RootCause",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "removedParameters": [],
+        "otherOperationChanged": false
+      },
+      {
+        "path": "/api/v1/templates/{id}",
+        "operation": "get",
+        "addedParameters": [
+          {
+            "in": "query",
+            "name": "changePage",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "changePageSize",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "removedParameters": [],
+        "otherOperationChanged": false
+      }
+    ]
+  }
+}

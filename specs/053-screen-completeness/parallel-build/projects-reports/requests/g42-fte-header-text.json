@@ -1,0 +1,9 @@
+{
+  "server": {
+    "reportUnits.measure.available": "Available",
+    "reportUnits.measure.confirmed": "Confirmed reservation",
+    "reportUnits.measure.proposed": "Proposed request",
+    "reportUnits.measure.committed": "Committed load",
+    "reportUnits.periodColumn": "{0} ({1}; ISO weeks: {2})"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "web/src/i18n/en.ts": {
+    "capacity.roomMatches": "{n} matches with at least {h} free in every one of {weeks} weeks",
+    "capacity.freeHours": "{h} free",
+    "capacity.hoursValue": "{h}",
+    "capacity.shortBy": "Short by {h}"
+  }
+}

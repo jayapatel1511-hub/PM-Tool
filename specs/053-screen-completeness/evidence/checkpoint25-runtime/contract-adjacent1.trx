@@ -1,0 +1,652 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="306de625-c500-4534-bd2e-6e495713f813" name="@Jays-MacBook-Pro 2026-11-02 05:46:34" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-11-02T05:46:34.6161230-04:00" queuing="2026-11-02T05:46:34.6161230-04:00" start="2026-11-02T05:46:26.7640250-04:00" finish="2026-11-02T05:47:19.6514410-04:00" />
+  <TestSettings name="default" id="d37a95a4-09bf-43ed-8a6b-fe9d677a8a95">
+    <Deployment runDeploymentRoot="_Jays-MacBook-Pro_2026-11-02_05_46_34" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="e7c1d0d0-b345-455c-8fff-04b59d792a0f" testId="f0c2c1b8-00c3-7823-3ef5-9bfb01ed3854" testName="Hub.Tests.Api.ContractTests.Allocation_preview_contract_describes_both_saved_and_preview_responses(route: &quot;/api/v1/projects/{projectId}/allocations/{id}/conf&quot;···)" computerName="Jays-MacBook-Pro" duration="00:00:00.3379243" startTime="2026-11-02T05:46:55.5859910-04:00" endTime="2026-11-02T05:46:55.9240050-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e7c1d0d0-b345-455c-8fff-04b59d792a0f" />
+    <UnitTestResult executionId="e8bd480f-01fb-419d-93c6-306b525a27be" testId="1186ebfc-8748-bfb4-6cad-64033146cecb" testName="Hub.Tests.Api.SearchContractTests.Every_group_keeps_its_property_names_order_and_nulls" computerName="Jays-MacBook-Pro" duration="00:00:00.2214311" startTime="2026-11-02T05:46:48.3412960-04:00" endTime="2026-11-02T05:46:48.5627420-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e8bd480f-01fb-419d-93c6-306b525a27be" />
+    <UnitTestResult executionId="390d39f2-d23e-44b2-b0d1-603575ec10b0" testId="a32de96a-68b5-7ae2-a631-8e2533a618a9" testName="Hub.Tests.Api.ReviewFindingContextTests.Independence_uses_complete_provenance_and_fails_safe(provenance: &quot;cycle&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:02.5627503" startTime="2026-11-02T05:46:57.6590930-04:00" endTime="2026-11-02T05:47:00.2219610-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="390d39f2-d23e-44b2-b0d1-603575ec10b0" />
+    <UnitTestResult executionId="d1a5b9bc-8347-4580-8223-8198df689ad3" testId="89e0598b-fc27-549e-b474-536777d96b9b" testName="Hub.Tests.Api.ReviewFindingContextTests.Independence_uses_complete_provenance_and_fails_safe(provenance: &quot;captured&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:03.5305449" startTime="2026-11-02T05:46:51.2957370-04:00" endTime="2026-11-02T05:46:54.8264000-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d1a5b9bc-8347-4580-8223-8198df689ad3" />
+    <UnitTestResult executionId="31bd56db-222c-420b-a5c8-5b9f21f5bfc9" testId="c0da2207-ece6-f43e-ebe2-507f5dcf43b6" testName="Hub.Tests.Api.ReviewFindingContextTests.Flag_off_hides_context_and_exact_child_then_enabled_read_is_project_scoped" computerName="Jays-MacBook-Pro" duration="00:00:02.6160359" startTime="2026-11-02T05:47:04.8010100-04:00" endTime="2026-11-02T05:47:07.4171040-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="31bd56db-222c-420b-a5c8-5b9f21f5bfc9" />
+    <UnitTestResult executionId="4d79bccf-99e9-43c9-b8f5-ab9b2e645ae7" testId="bc9b82ae-c451-a28f-bdc8-15347c9a049e" testName="Hub.Tests.Api.SearchPersonReferencesTests.Every_prescribed_fk_is_enriched_and_stripping_metadata_preserves_exact_legacy_payload_and_order" computerName="Jays-MacBook-Pro" duration="00:00:05.1600396" startTime="2026-11-02T05:46:34.6651420-04:00" endTime="2026-11-02T05:46:39.8248230-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4d79bccf-99e9-43c9-b8f5-ab9b2e645ae7" />
+    <UnitTestResult executionId="72ff360d-5d65-40dd-8c53-0cdfb0156f41" testId="c6b17f9a-1101-45d5-df9c-7b78a98de111" testName="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/admin/operations/outbox/retry&quot;, method: &quot;post&quot;, status: &quot;200&quot;, field: &quot;retried&quot;, type: &quot;integer&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.3959806" startTime="2026-11-02T05:46:54.0277330-04:00" endTime="2026-11-02T05:46:54.4237890-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="72ff360d-5d65-40dd-8c53-0cdfb0156f41" />
+    <UnitTestResult executionId="ba139904-cce6-4675-a68f-eafe34f9bdde" testId="92745d94-7e4d-6dd5-2bf6-a8f5d011e8d8" testName="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/admin/audit-chains&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;[].chainId&quot;, type: &quot;string&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.2732974" startTime="2026-11-02T05:46:51.4744420-04:00" endTime="2026-11-02T05:46:51.7478050-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ba139904-cce6-4675-a68f-eafe34f9bdde" />
+    <UnitTestResult executionId="2a325bc0-7338-41b9-b83c-650158bc79bf" testId="55670abb-80ae-2570-83df-396608aa0b60" testName="Hub.Tests.Api.SearchReportsTests.Blocked_report_filters_decision_sources_before_the_export_cap_and_exports_every_match" computerName="Jays-MacBook-Pro" duration="00:00:05.8901185" startTime="2026-11-02T05:46:39.8204750-04:00" endTime="2026-11-02T05:46:45.7107150-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2a325bc0-7338-41b9-b83c-650158bc79bf" />
+    <UnitTestResult executionId="7a976ef2-5cb6-4812-924b-e9cfb01a2e6d" testId="ce67afb1-458e-e49b-8e05-6b8cce16e4e3" testName="Hub.Tests.Api.SearchReportsTests.Filters_combine_links_reproduce_and_exports_hold_the_filtered_rows" computerName="Jays-MacBook-Pro" duration="00:00:00.4382069" startTime="2026-11-02T05:46:46.6628510-04:00" endTime="2026-11-02T05:46:47.1011320-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7a976ef2-5cb6-4812-924b-e9cfb01a2e6d" />
+    <UnitTestResult executionId="7df2156b-0bb9-45d8-8cd2-e4fbfc63cfcb" testId="e7b83363-f6ac-c347-be21-44a550d2e252" testName="Hub.Tests.Api.ContractTests.Client_error_report_success_is_documented_as_bodyless_204" computerName="Jays-MacBook-Pro" duration="00:00:00.2298469" startTime="2026-11-02T05:46:56.4167060-04:00" endTime="2026-11-02T05:46:56.6466330-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7df2156b-0bb9-45d8-8cd2-e4fbfc63cfcb" />
+    <UnitTestResult executionId="e2dd1b52-4d3a-4227-882c-ba3cedf4ed27" testId="3547e624-c914-69a6-d78a-03f1210f61b7" testName="Hub.Tests.Api.SearchReportsTests.A_report_reads_at_most_one_row_past_the_export_cap" computerName="Jays-MacBook-Pro" duration="00:00:07.4430764" startTime="2026-11-02T05:46:27.1527330-04:00" endTime="2026-11-02T05:46:34.5982610-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e2dd1b52-4d3a-4227-882c-ba3cedf4ed27" />
+    <UnitTestResult executionId="9b03152f-4988-469c-bed2-715ecf41d680" testId="1b5a0a4b-0cb7-8e94-71d7-37c969d525ec" testName="Hub.Tests.Api.ReviewFindingContextTests.Historical_finding_remains_exact_while_current_draft_can_respond" computerName="Jays-MacBook-Pro" duration="00:00:02.5376816" startTime="2026-11-02T05:47:12.2137860-04:00" endTime="2026-11-02T05:47:14.7514690-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9b03152f-4988-469c-bed2-715ecf41d680" />
+    <UnitTestResult executionId="1f56e17d-a7a6-44e3-b098-1457b44b9bdb" testId="34b49e09-8339-d78e-eb01-cb64fa206afe" testName="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/me/work/watching&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;items[].projectNumber&quot;, type: &quot;string&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.2592551" startTime="2026-11-02T05:46:54.4238690-04:00" endTime="2026-11-02T05:46:54.6832480-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1f56e17d-a7a6-44e3-b098-1457b44b9bdb" />
+    <UnitTestResult executionId="a7d5acda-3d37-48c5-aa73-59ddd6ea66d4" testId="f91831e8-c312-5d7f-9c0c-6e4d80113508" testName="Hub.Tests.Api.RegistryParityTests.Activity_history_and_export_parameters_match_the_pre_registry_snapshot" computerName="Jays-MacBook-Pro" duration="00:00:00.7310484" startTime="2026-11-02T05:46:48.5628800-04:00" endTime="2026-11-02T05:46:49.2940470-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a7d5acda-3d37-48c5-aa73-59ddd6ea66d4" />
+    <UnitTestResult executionId="2ca44cb4-8b03-4704-a5f5-323dcee490ed" testId="73f46caa-31e3-fe35-82e8-59974406a64a" testName="Hub.Tests.Api.ReviewFindingContextTests.Withdrawn_blocking_without_acknowledgement_still_needs_coordinator" computerName="Jays-MacBook-Pro" duration="00:00:02.3690522" startTime="2026-11-02T05:47:17.2348460-04:00" endTime="2026-11-02T05:47:19.6039050-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2ca44cb4-8b03-4704-a5f5-323dcee490ed" />
+    <UnitTestResult executionId="49907fa0-3e6a-4962-a8da-41ae716e62ed" testId="eca757a5-d596-1917-9019-79cd4bac4bbb" testName="Hub.Tests.Api.SearchPersonReferencesTests.Restricted_and_planning_allocation_scopes_stay_narrow_and_directory_metadata_grants_no_panel_access" computerName="Jays-MacBook-Pro" duration="00:00:07.5102760" startTime="2026-11-02T05:46:27.1522090-04:00" endTime="2026-11-02T05:46:34.6649620-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="49907fa0-3e6a-4962-a8da-41ae716e62ed" />
+    <UnitTestResult executionId="3bd5eda1-5be3-4382-a081-ad957dfb17fd" testId="76065eab-e344-e175-93c7-de7992d53248" testName="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/admin/organisation/import/preview&quot;, method: &quot;post&quot;, status: &quot;200&quot;, field: &quot;applied&quot;, type: &quot;boolean&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.2926228" startTime="2026-11-02T05:46:52.9785630-04:00" endTime="2026-11-02T05:46:53.2712340-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3bd5eda1-5be3-4382-a081-ad957dfb17fd" />
+    <UnitTestResult executionId="80a11eed-bcc8-433a-8e39-bee5eb8b6750" testId="a950ac33-56c9-b290-07ca-7c1bcb42c673" testName="Hub.Tests.Api.ReviewFindingContextTests.Independence_uses_complete_provenance_and_fails_safe(provenance: &quot;response_author&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:03.8752522" startTime="2026-11-02T05:46:43.6094110-04:00" endTime="2026-11-02T05:46:47.4846280-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="80a11eed-bcc8-433a-8e39-bee5eb8b6750" />
+    <UnitTestResult executionId="1a2f12ea-a206-4ef1-bd31-dc81fda705a6" testId="5c50f393-d00c-150b-2514-1cdfbb87e371" testName="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/tasks/{id}&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;permissions.transitions[].allowed&quot;, type: &quot;boolean&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.2909703" startTime="2026-11-02T05:46:52.6874270-04:00" endTime="2026-11-02T05:46:52.9784610-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1a2f12ea-a206-4ef1-bd31-dc81fda705a6" />
+    <UnitTestResult executionId="bf764100-12ad-43ed-b438-47cc1edcd2a8" testId="e2d69e65-ac8c-32ec-d82c-eba08404fa1d" testName="Hub.Tests.Api.SearchReportsTests.Coordination_search_opens_submission_and_basis_keys_and_keeps_allocation_visibility" computerName="Jays-MacBook-Pro" duration="00:00:00.3046916" startTime="2026-11-02T05:46:47.3037320-04:00" endTime="2026-11-02T05:46:47.6084830-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="bf764100-12ad-43ed-b438-47cc1edcd2a8" />
+    <UnitTestResult executionId="b57a8a6a-497f-4862-84e4-85c39f7a48f6" testId="38cfb4bf-77dc-5925-8f41-5412e5968650" testName="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/tasks/{id}/pickup-offer&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;allowed.pickUp&quot;, type: &quot;boolean&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.4277486" startTime="2026-11-02T05:46:50.1775580-04:00" endTime="2026-11-02T05:46:50.6053410-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b57a8a6a-497f-4862-84e4-85c39f7a48f6" />
+    <UnitTestResult executionId="4ce3deae-340b-4bf7-b8ce-71348597ddc6" testId="0f6f5404-7337-2b26-03ba-6a3177fa77c1" testName="Hub.Tests.Api.SearchReportsTests.History_shows_dated_changes_with_reasons_and_deletion_snapshots" computerName="Jays-MacBook-Pro" duration="00:00:00.1856960" startTime="2026-11-02T05:46:46.4769780-04:00" endTime="2026-11-02T05:46:46.6627390-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4ce3deae-340b-4bf7-b8ce-71348597ddc6" />
+    <UnitTestResult executionId="4004e2cc-298e-4d27-bc10-41a5f2bfdecc" testId="3c652c39-3bbb-8bdf-1903-66a7a618fd70" testName="Hub.Tests.Api.ContractTests.Nested_dtos_with_equal_names_have_distinct_contract_schemas" computerName="Jays-MacBook-Pro" duration="00:00:00.5464709" startTime="2026-11-02T05:46:49.6309140-04:00" endTime="2026-11-02T05:46:50.1774240-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4004e2cc-298e-4d27-bc10-41a5f2bfdecc" />
+    <UnitTestResult executionId="0aaf14f9-9ad0-4435-8d79-e9b564c57ea4" testId="f80b312e-cc25-bd12-bf9a-ab6ade073418" testName="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/me/onboarding&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;groups[].steps[].done&quot;, type: &quot;boolean&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.2631121" startTime="2026-11-02T05:46:50.6054470-04:00" endTime="2026-11-02T05:46:50.8686290-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0aaf14f9-9ad0-4435-8d79-e9b564c57ea4" />
+    <UnitTestResult executionId="b81dd124-720b-4b52-972d-9c685a41d846" testId="a7f290fc-f04f-537a-3b42-98a436169cc6" testName="Hub.Tests.Api.ContractTests.Normalization_removes_servers_and_orders_objects_without_reordering_arrays" computerName="Jays-MacBook-Pro" duration="00:00:00.0002636" startTime="2026-11-02T05:46:56.8747630-04:00" endTime="2026-11-02T05:46:56.8749760-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b81dd124-720b-4b52-972d-9c685a41d846" />
+    <UnitTestResult executionId="5a703201-40f8-46b1-a087-d4a60460fa7d" testId="ca8aedd4-dff4-9ea2-236f-e312a09b73de" testName="Hub.Tests.Api.SearchReportsTests.Key_lookup_grouped_results_archived_toggle_and_visibility" computerName="Jays-MacBook-Pro" duration="00:00:00.5704258" startTime="2026-11-02T05:46:47.6086090-04:00" endTime="2026-11-02T05:46:48.1790960-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5a703201-40f8-46b1-a087-d4a60460fa7d" />
+    <UnitTestResult executionId="8db859bd-6406-4e6a-841c-17c42e9a83fb" testId="9c39e606-7b28-dd81-b5dc-fc4db1748dbc" testName="Hub.Tests.Api.ContractTests.Me_settings_are_typed_and_route_counter_field_is_flag_scoped" computerName="Jays-MacBook-Pro" duration="00:00:00.2289770" startTime="2026-11-02T05:46:56.1875590-04:00" endTime="2026-11-02T05:46:56.4166230-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8db859bd-6406-4e6a-841c-17c42e9a83fb" />
+    <UnitTestResult executionId="187bdf77-c773-41dd-9a6b-1b2fd7609204" testId="3f088f94-57ff-334a-b75d-3a6e04d0849d" testName="Hub.Tests.Api.ReviewFindingContextTests.Inactive_named_people_remain_named_without_replacement(role: &quot;coordinator&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:07.5093850" startTime="2026-11-02T05:46:27.1527470-04:00" endTime="2026-11-02T05:46:34.6645310-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="187bdf77-c773-41dd-9a6b-1b2fd7609204" />
+    <UnitTestResult executionId="921c7970-c6f6-4f95-a3e3-0a0d06933949" testId="cc67ea3f-ebbd-510c-c3c5-a6749044b337" testName="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/pickup-offers&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;[].task.rowVersion&quot;, type: &quot;integer&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.3069888" startTime="2026-11-02T05:46:54.6833790-04:00" endTime="2026-11-02T05:46:54.9903840-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="921c7970-c6f6-4f95-a3e3-0a0d06933949" />
+    <UnitTestResult executionId="88a392ac-a00c-4d3b-9134-c1964b8a9040" testId="0f0b6bef-2af7-f2c4-4b1f-db6733c5f4ae" testName="Hub.Tests.Api.ReviewFindingContextTests.Foreign_project_task_authorship_is_unknown_without_exposing_the_reference" computerName="Jays-MacBook-Pro" duration="00:00:02.4829506" startTime="2026-11-02T05:47:14.7516850-04:00" endTime="2026-11-02T05:47:17.2346380-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="88a392ac-a00c-4d3b-9134-c1964b8a9040" />
+    <UnitTestResult executionId="50083775-b4f6-4149-b4ea-cec1fcf5d1e2" testId="f51f96f3-e5ef-f9d4-aeb5-8d8b2b82a309" testName="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/me/work/requested&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;total&quot;, type: &quot;integer&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.3094149" startTime="2026-11-02T05:46:52.0353710-04:00" endTime="2026-11-02T05:46:52.3448500-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="50083775-b4f6-4149-b4ea-cec1fcf5d1e2" />
+    <UnitTestResult executionId="e63a93e7-220f-4888-9db5-45e2b8b88383" testId="9ae4fc25-73fe-15e9-e8f7-60b7200505b3" testName="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/admin/organisation/import/preview&quot;, method: &quot;post&quot;, status: &quot;200&quot;, field: &quot;rows&quot;, type: &quot;integer&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.3144394" startTime="2026-11-02T05:46:51.1598330-04:00" endTime="2026-11-02T05:46:51.4743330-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e63a93e7-220f-4888-9db5-45e2b8b88383" />
+    <UnitTestResult executionId="7161512c-0a01-491d-be6b-4a2f0e0661bc" testId="95655012-01e3-fc01-4ecd-28b47f8554b4" testName="Hub.Tests.Api.ReviewFindingContextTests.Independence_uses_complete_provenance_and_fails_safe(provenance: &quot;current_owner&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:02.8324634" startTime="2026-11-02T05:46:54.8264740-04:00" endTime="2026-11-02T05:46:57.6590210-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7161512c-0a01-491d-be6b-4a2f0e0661bc" />
+    <UnitTestResult executionId="bfe7a4df-92e1-427f-8a7f-1625028255f5" testId="d6b3202e-f85e-2173-1faf-7a1dacb12f92" testName="Hub.Tests.Api.ContractTests.Template_preview_contract_keeps_nested_counts_and_role_fields" computerName="Jays-MacBook-Pro" duration="00:00:00.2278809" startTime="2026-11-02T05:46:56.6467160-04:00" endTime="2026-11-02T05:46:56.8746860-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="bfe7a4df-92e1-427f-8a7f-1625028255f5" />
+    <UnitTestResult executionId="86bf16b5-6273-4030-8d02-b01d51249a10" testId="4805dd1f-3a71-3ad3-c8c3-c48d5c4d31eb" testName="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/admin/organisation/units&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;[].rowVersion&quot;, type: &quot;integer&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.2872975" startTime="2026-11-02T05:46:51.7479110-04:00" endTime="2026-11-02T05:46:52.0352610-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="86bf16b5-6273-4030-8d02-b01d51249a10" />
+    <UnitTestResult executionId="7b3df1fc-3293-451d-85d8-2d2d30987d02" testId="49b863ea-9d64-ea09-a711-b1238a825e9e" testName="Hub.Tests.Api.SearchReportsTests.Issue_report_prioritises_high_severity_before_the_uuid_source_cap" computerName="Jays-MacBook-Pro" duration="00:00:04.8149988" startTime="2026-11-02T05:46:35.0052610-04:00" endTime="2026-11-02T05:46:39.8203420-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7b3df1fc-3293-451d-85d8-2d2d30987d02" />
+    <UnitTestResult executionId="643660d7-874e-4096-8965-91a7471e7abd" testId="701a3331-f990-efa2-5235-97fac357c19d" testName="Hub.Tests.Api.ReviewFindingContextTests.Inactive_named_people_remain_named_without_replacement(role: &quot;resolver&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:04.1623815" startTime="2026-11-02T05:46:39.4467680-04:00" endTime="2026-11-02T05:46:43.6091050-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="643660d7-874e-4096-8965-91a7471e7abd" />
+    <UnitTestResult executionId="a9c01dde-20d9-4ecf-a6cd-60fa5e3db08e" testId="94a985c1-4cff-4ae9-6d24-9384c3dd4713" testName="Hub.Tests.Api.SearchReportsTests.Restricted_items_never_appear_in_search" computerName="Jays-MacBook-Pro" duration="00:00:00.4062121" startTime="2026-11-02T05:46:34.6049810-04:00" endTime="2026-11-02T05:46:35.0050990-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a9c01dde-20d9-4ecf-a6cd-60fa5e3db08e" />
+    <UnitTestResult executionId="a887ffd6-ac5e-49af-8ab2-033706677e81" testId="1e565737-e675-d4e3-b140-dcae18bc02f3" testName="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/projects/{projectId}/commitment-reliabilit&quot;···, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;misses[].commitments[]&quot;, type: &quot;string&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.2702251" startTime="2026-11-02T05:46:53.2713550-04:00" endTime="2026-11-02T05:46:53.5416080-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a887ffd6-ac5e-49af-8ab2-033706677e81" />
+    <UnitTestResult executionId="72fc4216-fdfb-40c1-ab3d-ad1c0ed0ef86" testId="73f87c11-c403-f278-cb31-17f6c4d1f8fa" testName="Hub.Tests.Api.ReviewFindingContextTests.Last_blocker_verification_keeps_the_canonical_approval_gate" computerName="Jays-MacBook-Pro" duration="00:00:02.4190845" startTime="2026-11-02T05:47:07.4173720-04:00" endTime="2026-11-02T05:47:09.8364430-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="72fc4216-fdfb-40c1-ab3d-ad1c0ed0ef86" />
+    <UnitTestResult executionId="5a3d833f-9f99-4d32-bbec-b75a621da8cd" testId="445209c3-5e5b-307c-f257-14c275eb6578" testName="Hub.Tests.Api.SearchReportsTests.Reports_equal_their_lists_and_respect_scope" computerName="Jays-MacBook-Pro" duration="00:00:00.6098563" startTime="2026-11-02T05:46:45.7108340-04:00" endTime="2026-11-02T05:46:46.3207560-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5a3d833f-9f99-4d32-bbec-b75a621da8cd" />
+    <UnitTestResult executionId="c8610dfe-830a-451a-a9cd-0077555fa197" testId="a3443da6-d26e-c6b7-c8f7-4703d53b8d72" testName="Hub.Tests.Api.SearchPersonReferencesTests.Paging_type_filters_exact_key_and_empty_search_keep_their_existing_results" computerName="Jays-MacBook-Pro" duration="00:00:04.1506838" startTime="2026-11-02T05:46:39.8249500-04:00" endTime="2026-11-02T05:46:43.9803780-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c8610dfe-830a-451a-a9cd-0077555fa197" />
+    <UnitTestResult executionId="906c869f-0739-4819-a39f-331537faf2c3" testId="659d8339-11b8-59f6-3e88-bae2be519bf6" testName="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/projects/import-preview&quot;, method: &quot;post&quot;, status: &quot;200&quot;, field: &quot;rows[].projectNumber&quot;, type: &quot;string&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.2342048" startTime="2026-11-02T05:46:53.7933730-04:00" endTime="2026-11-02T05:46:54.0276530-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="906c869f-0739-4819-a39f-331537faf2c3" />
+    <UnitTestResult executionId="79f1dcfb-736b-4706-aeb3-2460a41d20b4" testId="c765ead0-5c4c-dea2-62e0-a45d563478cf" testName="Hub.Tests.Api.ReadinessSearchTests.Constraints_and_promises_are_searchable_by_key_and_text_within_visible_projects" computerName="Jays-MacBook-Pro" duration="00:00:00.3364729" startTime="2026-11-02T05:46:49.2941910-04:00" endTime="2026-11-02T05:46:49.6307700-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="79f1dcfb-736b-4706-aeb3-2460a41d20b4" />
+    <UnitTestResult executionId="76e9207b-208e-473d-8f18-769dcc45fcb0" testId="16c94c65-98e0-d415-de3e-5184260ac08c" testName="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/deliverables/{id}/baselines&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;people[].displayName&quot;, type: &quot;string&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.2515337" startTime="2026-11-02T05:46:53.5416880-04:00" endTime="2026-11-02T05:46:53.7932900-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="76e9207b-208e-473d-8f18-769dcc45fcb0" />
+    <UnitTestResult executionId="00e0cdd4-22b8-49c7-ab56-23d7ee74e77d" testId="630670b0-dfd0-5172-b647-e2fbb113f3b9" testName="Hub.Tests.Api.SearchContractTests.Exact_type_filter_and_blank_term_keep_their_shapes" computerName="Jays-MacBook-Pro" duration="00:00:00.1618540" startTime="2026-11-02T05:46:48.1792680-04:00" endTime="2026-11-02T05:46:48.3411670-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="00e0cdd4-22b8-49c7-ab56-23d7ee74e77d" />
+    <UnitTestResult executionId="347f5261-6b21-4ddd-bc7a-daa4ded99c2a" testId="2c6b3736-5174-2ce8-e80b-3fa041aed662" testName="Hub.Tests.Api.ReviewFindingContextTests.Responded_uses_recorded_verifier_and_terminal_closure_does_not_fallback_to_originator" computerName="Jays-MacBook-Pro" duration="00:00:02.3769086" startTime="2026-11-02T05:47:09.8366360-04:00" endTime="2026-11-02T05:47:12.2135670-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="347f5261-6b21-4ddd-bc7a-daa4ded99c2a" />
+    <UnitTestResult executionId="6fb17afa-6116-436f-aa5c-9314bdbc7191" testId="2640369e-eef7-f1c9-ad7b-1c2b8d7f780c" testName="Hub.Tests.Api.ReviewFindingContextTests.Cancelled_package_finding_is_not_assessed_and_owner_date_remains_unknown" computerName="Jays-MacBook-Pro" duration="00:00:02.2906985" startTime="2026-11-02T05:47:02.5101490-04:00" endTime="2026-11-02T05:47:04.8008100-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6fb17afa-6116-436f-aa5c-9314bdbc7191" />
+    <UnitTestResult executionId="2bfa8360-a9ad-48d5-af6e-0a88e371b5ce" testId="3a2e48a8-7bd0-0a48-fbb0-3b27a9a0beab" testName="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/admin/organisation/levels&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;[].name&quot;, type: &quot;string&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.3423103" startTime="2026-11-02T05:46:52.3449700-04:00" endTime="2026-11-02T05:46:52.6873250-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2bfa8360-a9ad-48d5-af6e-0a88e371b5ce" />
+    <UnitTestResult executionId="642be8bb-206f-486d-86cd-bcb4df8d1d88" testId="054b04b8-3336-95bf-44c0-fa18e5d58cd2" testName="Hub.Tests.Api.ReviewFindingContextTests.Exact_child_requires_accessible_parent_and_round" computerName="Jays-MacBook-Pro" duration="00:00:02.2877335" startTime="2026-11-02T05:47:00.2222860-04:00" endTime="2026-11-02T05:47:02.5099220-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="642be8bb-206f-486d-86cd-bcb4df8d1d88" />
+    <UnitTestResult executionId="39386a76-64cc-46d8-b1a7-8584a111f0b0" testId="49ffbb51-b125-18fc-ff07-1628bdcaedea" testName="Hub.Tests.Api.ContractTests.Openapi_matches_the_committed_golden_document" computerName="Jays-MacBook-Pro" duration="00:00:00.2956668" startTime="2026-11-02T05:46:54.9904860-04:00" endTime="2026-11-02T05:46:55.2862610-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="39386a76-64cc-46d8-b1a7-8584a111f0b0" />
+    <UnitTestResult executionId="45ec9ec4-c895-484c-b8da-36a3afd0d592" testId="a7e44212-9732-8a8d-6183-d1c302cbd689" testName="Hub.Tests.Api.ReviewFindingContextTests.Independence_uses_complete_provenance_and_fails_safe(provenance: &quot;ancestor&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:03.8108154" startTime="2026-11-02T05:46:47.4847370-04:00" endTime="2026-11-02T05:46:51.2956410-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="45ec9ec4-c895-484c-b8da-36a3afd0d592" />
+    <UnitTestResult executionId="34b19415-69b0-4f43-acd6-cc6c3f1b3111" testId="77c4b081-2927-c668-6200-cd967c46e59e" testName="Hub.Tests.Api.ContractTests.Allocation_preview_contract_describes_both_saved_and_preview_responses(route: &quot;/api/v1/projects/{projectId}/allocations&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.2994531" startTime="2026-11-02T05:46:55.2863490-04:00" endTime="2026-11-02T05:46:55.5859040-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="34b19415-69b0-4f43-acd6-cc6c3f1b3111" />
+    <UnitTestResult executionId="2d2b0b72-f394-467d-8bb2-313ce593be7e" testId="8714af0e-3c48-e536-13ee-db52409edb93" testName="Hub.Tests.Api.SearchReportsTests.Report_parameters_name_only_projects_the_caller_can_see" computerName="Jays-MacBook-Pro" duration="00:00:00.1559476" startTime="2026-11-02T05:46:46.3208930-04:00" endTime="2026-11-02T05:46:46.4768690-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2d2b0b72-f394-467d-8bb2-313ce593be7e" />
+    <UnitTestResult executionId="c17c3fa4-693a-43c8-9af4-06ab96740a5d" testId="ffe78e3f-62f1-83f3-b5c0-cd5561c2d48e" testName="Hub.Tests.Api.ContractTests.Allocation_preview_contract_describes_both_saved_and_preview_responses(route: &quot;/api/v1/projects/{projectId}/allocations/{id}/edit&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.2633085" startTime="2026-11-02T05:46:55.9240860-04:00" endTime="2026-11-02T05:46:56.1874790-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c17c3fa4-693a-43c8-9af4-06ab96740a5d" />
+    <UnitTestResult executionId="cf020be4-160d-493e-8cdf-0ea4f722d9e8" testId="c1577961-5650-7145-bd2d-e97e8723f9a7" testName="Hub.Tests.Api.SearchReportsTests.Restricted_filter_ids_are_not_resolved_in_another_projects_export_parameters" computerName="Jays-MacBook-Pro" duration="00:00:00.2022525" startTime="2026-11-02T05:46:47.1012530-04:00" endTime="2026-11-02T05:46:47.3036150-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="cf020be4-160d-493e-8cdf-0ea4f722d9e8" />
+    <UnitTestResult executionId="b5f56c39-baa2-41c8-b7d7-52a1fee8e8bd" testId="02faa5a5-3b17-6d14-68a7-24b886a44831" testName="Hub.Tests.Api.ReviewFindingContextTests.Inactive_named_people_remain_named_without_replacement(role: &quot;verifier&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:04.7818694" startTime="2026-11-02T05:46:34.6649250-04:00" endTime="2026-11-02T05:46:39.4464650-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b5f56c39-baa2-41c8-b7d7-52a1fee8e8bd" />
+    <UnitTestResult executionId="69ee6ae5-1a1c-4f17-a1bf-f19d7f78ce93" testId="af1e1246-4096-e701-0868-591c6935c777" testName="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/projects/{projectId}/revision-check&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;deliverables[].issues[].marks[]&quot;, type: &quot;string&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.2909233" startTime="2026-11-02T05:46:50.8687420-04:00" endTime="2026-11-02T05:46:51.1597290-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="69ee6ae5-1a1c-4f17-a1bf-f19d7f78ce93" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/admin/organisation/units&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;[].rowVersion&quot;, type: &quot;integer&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="4805dd1f-3a71-3ad3-c8c3-c48d5c4d31eb">
+      <Execution id="86bf16b5-6273-4030-8d02-b01d51249a10" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="New_endpoint_contracts_keep_required_nested_wire_types" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.SearchReportsTests.Blocked_report_filters_decision_sources_before_the_export_cap_and_exports_every_match" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="55670abb-80ae-2570-83df-396608aa0b60">
+      <Execution id="2a325bc0-7338-41b9-b83c-650158bc79bf" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.SearchReportsTests" name="Blocked_report_filters_decision_sources_before_the_export_cap_and_exports_every_match" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.SearchReportsTests.Issue_report_prioritises_high_severity_before_the_uuid_source_cap" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="49b863ea-9d64-ea09-a711-b1238a825e9e">
+      <Execution id="7b3df1fc-3293-451d-85d8-2d2d30987d02" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.SearchReportsTests" name="Issue_report_prioritises_high_severity_before_the_uuid_source_cap" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.SearchReportsTests.Key_lookup_grouped_results_archived_toggle_and_visibility" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="ca8aedd4-dff4-9ea2-236f-e312a09b73de">
+      <Execution id="5a703201-40f8-46b1-a087-d4a60460fa7d" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.SearchReportsTests" name="Key_lookup_grouped_results_archived_toggle_and_visibility" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ReviewFindingContextTests.Foreign_project_task_authorship_is_unknown_without_exposing_the_reference" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="0f0b6bef-2af7-f2c4-4b1f-db6733c5f4ae">
+      <Execution id="88a392ac-a00c-4d3b-9134-c1964b8a9040" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ReviewFindingContextTests" name="Foreign_project_task_authorship_is_unknown_without_exposing_the_reference" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ReviewFindingContextTests.Historical_finding_remains_exact_while_current_draft_can_respond" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="1b5a0a4b-0cb7-8e94-71d7-37c969d525ec">
+      <Execution id="9b03152f-4988-469c-bed2-715ecf41d680" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ReviewFindingContextTests" name="Historical_finding_remains_exact_while_current_draft_can_respond" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.SearchReportsTests.Coordination_search_opens_submission_and_basis_keys_and_keeps_allocation_visibility" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="e2d69e65-ac8c-32ec-d82c-eba08404fa1d">
+      <Execution id="bf764100-12ad-43ed-b438-47cc1edcd2a8" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.SearchReportsTests" name="Coordination_search_opens_submission_and_basis_keys_and_keeps_allocation_visibility" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ReviewFindingContextTests.Inactive_named_people_remain_named_without_replacement(role: &quot;coordinator&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="3f088f94-57ff-334a-b75d-3a6e04d0849d">
+      <Execution id="187bdf77-c773-41dd-9a6b-1b2fd7609204" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ReviewFindingContextTests" name="Inactive_named_people_remain_named_without_replacement" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.SearchReportsTests.History_shows_dated_changes_with_reasons_and_deletion_snapshots" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="0f6f5404-7337-2b26-03ba-6a3177fa77c1">
+      <Execution id="4ce3deae-340b-4bf7-b8ce-71348597ddc6" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.SearchReportsTests" name="History_shows_dated_changes_with_reasons_and_deletion_snapshots" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/deliverables/{id}/baselines&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;people[].displayName&quot;, type: &quot;string&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="16c94c65-98e0-d415-de3e-5184260ac08c">
+      <Execution id="76e9207b-208e-473d-8f18-769dcc45fcb0" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="New_endpoint_contracts_keep_required_nested_wire_types" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/pickup-offers&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;[].task.rowVersion&quot;, type: &quot;integer&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="cc67ea3f-ebbd-510c-c3c5-a6749044b337">
+      <Execution id="921c7970-c6f6-4f95-a3e3-0a0d06933949" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="New_endpoint_contracts_keep_required_nested_wire_types" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.SearchReportsTests.Filters_combine_links_reproduce_and_exports_hold_the_filtered_rows" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="ce67afb1-458e-e49b-8e05-6b8cce16e4e3">
+      <Execution id="7a976ef2-5cb6-4812-924b-e9cfb01a2e6d" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.SearchReportsTests" name="Filters_combine_links_reproduce_and_exports_hold_the_filtered_rows" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.SearchContractTests.Every_group_keeps_its_property_names_order_and_nulls" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="1186ebfc-8748-bfb4-6cad-64033146cecb">
+      <Execution id="e8bd480f-01fb-419d-93c6-306b525a27be" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.SearchContractTests" name="Every_group_keeps_its_property_names_order_and_nulls" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/me/work/watching&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;items[].projectNumber&quot;, type: &quot;string&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="34b49e09-8339-d78e-eb01-cb64fa206afe">
+      <Execution id="1f56e17d-a7a6-44e3-b098-1457b44b9bdb" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="New_endpoint_contracts_keep_required_nested_wire_types" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.SearchPersonReferencesTests.Every_prescribed_fk_is_enriched_and_stripping_metadata_preserves_exact_legacy_payload_and_order" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="bc9b82ae-c451-a28f-bdc8-15347c9a049e">
+      <Execution id="4d79bccf-99e9-43c9-b8f5-ab9b2e645ae7" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.SearchPersonReferencesTests" name="Every_prescribed_fk_is_enriched_and_stripping_metadata_preserves_exact_legacy_payload_and_order" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.RegistryParityTests.Activity_history_and_export_parameters_match_the_pre_registry_snapshot" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="f91831e8-c312-5d7f-9c0c-6e4d80113508">
+      <Execution id="a7d5acda-3d37-48c5-aa73-59ddd6ea66d4" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.RegistryParityTests" name="Activity_history_and_export_parameters_match_the_pre_registry_snapshot" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ReviewFindingContextTests.Cancelled_package_finding_is_not_assessed_and_owner_date_remains_unknown" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="2640369e-eef7-f1c9-ad7b-1c2b8d7f780c">
+      <Execution id="6fb17afa-6116-436f-aa5c-9314bdbc7191" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ReviewFindingContextTests" name="Cancelled_package_finding_is_not_assessed_and_owner_date_remains_unknown" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ReviewFindingContextTests.Independence_uses_complete_provenance_and_fails_safe(provenance: &quot;captured&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="89e0598b-fc27-549e-b474-536777d96b9b">
+      <Execution id="d1a5b9bc-8347-4580-8223-8198df689ad3" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ReviewFindingContextTests" name="Independence_uses_complete_provenance_and_fails_safe" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ReviewFindingContextTests.Flag_off_hides_context_and_exact_child_then_enabled_read_is_project_scoped" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="c0da2207-ece6-f43e-ebe2-507f5dcf43b6">
+      <Execution id="31bd56db-222c-420b-a5c8-5b9f21f5bfc9" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ReviewFindingContextTests" name="Flag_off_hides_context_and_exact_child_then_enabled_read_is_project_scoped" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.SearchReportsTests.A_report_reads_at_most_one_row_past_the_export_cap" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="3547e624-c914-69a6-d78a-03f1210f61b7">
+      <Execution id="e2dd1b52-4d3a-4227-882c-ba3cedf4ed27" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.SearchReportsTests" name="A_report_reads_at_most_one_row_past_the_export_cap" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.SearchReportsTests.Report_parameters_name_only_projects_the_caller_can_see" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="8714af0e-3c48-e536-13ee-db52409edb93">
+      <Execution id="2d2b0b72-f394-467d-8bb2-313ce593be7e" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.SearchReportsTests" name="Report_parameters_name_only_projects_the_caller_can_see" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.Normalization_removes_servers_and_orders_objects_without_reordering_arrays" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="a7f290fc-f04f-537a-3b42-98a436169cc6">
+      <Execution id="b81dd124-720b-4b52-972d-9c685a41d846" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="Normalization_removes_servers_and_orders_objects_without_reordering_arrays" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ReviewFindingContextTests.Inactive_named_people_remain_named_without_replacement(role: &quot;verifier&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="02faa5a5-3b17-6d14-68a7-24b886a44831">
+      <Execution id="b5f56c39-baa2-41c8-b7d7-52a1fee8e8bd" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ReviewFindingContextTests" name="Inactive_named_people_remain_named_without_replacement" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ReviewFindingContextTests.Independence_uses_complete_provenance_and_fails_safe(provenance: &quot;current_owner&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="95655012-01e3-fc01-4ecd-28b47f8554b4">
+      <Execution id="7161512c-0a01-491d-be6b-4a2f0e0661bc" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ReviewFindingContextTests" name="Independence_uses_complete_provenance_and_fails_safe" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/projects/{projectId}/revision-check&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;deliverables[].issues[].marks[]&quot;, type: &quot;string&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="af1e1246-4096-e701-0868-591c6935c777">
+      <Execution id="69ee6ae5-1a1c-4f17-a1bf-f19d7f78ce93" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="New_endpoint_contracts_keep_required_nested_wire_types" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ReviewFindingContextTests.Inactive_named_people_remain_named_without_replacement(role: &quot;resolver&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="701a3331-f990-efa2-5235-97fac357c19d">
+      <Execution id="643660d7-874e-4096-8965-91a7471e7abd" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ReviewFindingContextTests" name="Inactive_named_people_remain_named_without_replacement" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.Allocation_preview_contract_describes_both_saved_and_preview_responses(route: &quot;/api/v1/projects/{projectId}/allocations&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="77c4b081-2927-c668-6200-cd967c46e59e">
+      <Execution id="34b19415-69b0-4f43-acd6-cc6c3f1b3111" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="Allocation_preview_contract_describes_both_saved_and_preview_responses" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ReviewFindingContextTests.Last_blocker_verification_keeps_the_canonical_approval_gate" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="73f87c11-c403-f278-cb31-17f6c4d1f8fa">
+      <Execution id="72fc4216-fdfb-40c1-ab3d-ad1c0ed0ef86" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ReviewFindingContextTests" name="Last_blocker_verification_keeps_the_canonical_approval_gate" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/admin/organisation/levels&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;[].name&quot;, type: &quot;string&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="3a2e48a8-7bd0-0a48-fbb0-3b27a9a0beab">
+      <Execution id="2bfa8360-a9ad-48d5-af6e-0a88e371b5ce" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="New_endpoint_contracts_keep_required_nested_wire_types" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ReviewFindingContextTests.Exact_child_requires_accessible_parent_and_round" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="054b04b8-3336-95bf-44c0-fa18e5d58cd2">
+      <Execution id="642be8bb-206f-486d-86cd-bcb4df8d1d88" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ReviewFindingContextTests" name="Exact_child_requires_accessible_parent_and_round" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.SearchReportsTests.Reports_equal_their_lists_and_respect_scope" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="445209c3-5e5b-307c-f257-14c275eb6578">
+      <Execution id="5a3d833f-9f99-4d32-bbec-b75a621da8cd" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.SearchReportsTests" name="Reports_equal_their_lists_and_respect_scope" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ReviewFindingContextTests.Withdrawn_blocking_without_acknowledgement_still_needs_coordinator" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="73f46caa-31e3-fe35-82e8-59974406a64a">
+      <Execution id="2ca44cb4-8b03-4704-a5f5-323dcee490ed" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ReviewFindingContextTests" name="Withdrawn_blocking_without_acknowledgement_still_needs_coordinator" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.SearchContractTests.Exact_type_filter_and_blank_term_keep_their_shapes" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="630670b0-dfd0-5172-b647-e2fbb113f3b9">
+      <Execution id="00e0cdd4-22b8-49c7-ab56-23d7ee74e77d" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.SearchContractTests" name="Exact_type_filter_and_blank_term_keep_their_shapes" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.SearchReportsTests.Restricted_filter_ids_are_not_resolved_in_another_projects_export_parameters" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="c1577961-5650-7145-bd2d-e97e8723f9a7">
+      <Execution id="cf020be4-160d-493e-8cdf-0ea4f722d9e8" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.SearchReportsTests" name="Restricted_filter_ids_are_not_resolved_in_another_projects_export_parameters" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/admin/organisation/import/preview&quot;, method: &quot;post&quot;, status: &quot;200&quot;, field: &quot;rows&quot;, type: &quot;integer&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="9ae4fc25-73fe-15e9-e8f7-60b7200505b3">
+      <Execution id="e63a93e7-220f-4888-9db5-45e2b8b88383" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="New_endpoint_contracts_keep_required_nested_wire_types" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.SearchPersonReferencesTests.Paging_type_filters_exact_key_and_empty_search_keep_their_existing_results" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="a3443da6-d26e-c6b7-c8f7-4703d53b8d72">
+      <Execution id="c8610dfe-830a-451a-a9cd-0077555fa197" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.SearchPersonReferencesTests" name="Paging_type_filters_exact_key_and_empty_search_keep_their_existing_results" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ReadinessSearchTests.Constraints_and_promises_are_searchable_by_key_and_text_within_visible_projects" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="c765ead0-5c4c-dea2-62e0-a45d563478cf">
+      <Execution id="79f1dcfb-736b-4706-aeb3-2460a41d20b4" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ReadinessSearchTests" name="Constraints_and_promises_are_searchable_by_key_and_text_within_visible_projects" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.Nested_dtos_with_equal_names_have_distinct_contract_schemas" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="3c652c39-3bbb-8bdf-1903-66a7a618fd70">
+      <Execution id="4004e2cc-298e-4d27-bc10-41a5f2bfdecc" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="Nested_dtos_with_equal_names_have_distinct_contract_schemas" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/admin/audit-chains&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;[].chainId&quot;, type: &quot;string&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="92745d94-7e4d-6dd5-2bf6-a8f5d011e8d8">
+      <Execution id="ba139904-cce6-4675-a68f-eafe34f9bdde" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="New_endpoint_contracts_keep_required_nested_wire_types" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/tasks/{id}&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;permissions.transitions[].allowed&quot;, type: &quot;boolean&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="5c50f393-d00c-150b-2514-1cdfbb87e371">
+      <Execution id="1a2f12ea-a206-4ef1-bd31-dc81fda705a6" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="New_endpoint_contracts_keep_required_nested_wire_types" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.Openapi_matches_the_committed_golden_document" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="49ffbb51-b125-18fc-ff07-1628bdcaedea">
+      <Execution id="39386a76-64cc-46d8-b1a7-8584a111f0b0" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="Openapi_matches_the_committed_golden_document" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.Allocation_preview_contract_describes_both_saved_and_preview_responses(route: &quot;/api/v1/projects/{projectId}/allocations/{id}/conf&quot;···)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="f0c2c1b8-00c3-7823-3ef5-9bfb01ed3854">
+      <Execution id="e7c1d0d0-b345-455c-8fff-04b59d792a0f" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="Allocation_preview_contract_describes_both_saved_and_preview_responses" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.Me_settings_are_typed_and_route_counter_field_is_flag_scoped" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="9c39e606-7b28-dd81-b5dc-fc4db1748dbc">
+      <Execution id="8db859bd-6406-4e6a-841c-17c42e9a83fb" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="Me_settings_are_typed_and_route_counter_field_is_flag_scoped" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/admin/organisation/import/preview&quot;, method: &quot;post&quot;, status: &quot;200&quot;, field: &quot;applied&quot;, type: &quot;boolean&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="76065eab-e344-e175-93c7-de7992d53248">
+      <Execution id="3bd5eda1-5be3-4382-a081-ad957dfb17fd" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="New_endpoint_contracts_keep_required_nested_wire_types" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.SearchReportsTests.Restricted_items_never_appear_in_search" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="94a985c1-4cff-4ae9-6d24-9384c3dd4713">
+      <Execution id="a9c01dde-20d9-4ecf-a6cd-60fa5e3db08e" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.SearchReportsTests" name="Restricted_items_never_appear_in_search" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/me/work/requested&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;total&quot;, type: &quot;integer&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="f51f96f3-e5ef-f9d4-aeb5-8d8b2b82a309">
+      <Execution id="50083775-b4f6-4149-b4ea-cec1fcf5d1e2" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="New_endpoint_contracts_keep_required_nested_wire_types" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/me/onboarding&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;groups[].steps[].done&quot;, type: &quot;boolean&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="f80b312e-cc25-bd12-bf9a-ab6ade073418">
+      <Execution id="0aaf14f9-9ad0-4435-8d79-e9b564c57ea4" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="New_endpoint_contracts_keep_required_nested_wire_types" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.Allocation_preview_contract_describes_both_saved_and_preview_responses(route: &quot;/api/v1/projects/{projectId}/allocations/{id}/edit&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="ffe78e3f-62f1-83f3-b5c0-cd5561c2d48e">
+      <Execution id="c17c3fa4-693a-43c8-9af4-06ab96740a5d" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="Allocation_preview_contract_describes_both_saved_and_preview_responses" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/projects/{projectId}/commitment-reliabilit&quot;···, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;misses[].commitments[]&quot;, type: &quot;string&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="1e565737-e675-d4e3-b140-dcae18bc02f3">
+      <Execution id="a887ffd6-ac5e-49af-8ab2-033706677e81" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="New_endpoint_contracts_keep_required_nested_wire_types" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ReviewFindingContextTests.Responded_uses_recorded_verifier_and_terminal_closure_does_not_fallback_to_originator" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="2c6b3736-5174-2ce8-e80b-3fa041aed662">
+      <Execution id="347f5261-6b21-4ddd-bc7a-daa4ded99c2a" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ReviewFindingContextTests" name="Responded_uses_recorded_verifier_and_terminal_closure_does_not_fallback_to_originator" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ReviewFindingContextTests.Independence_uses_complete_provenance_and_fails_safe(provenance: &quot;ancestor&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="a7e44212-9732-8a8d-6183-d1c302cbd689">
+      <Execution id="45ec9ec4-c895-484c-b8da-36a3afd0d592" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ReviewFindingContextTests" name="Independence_uses_complete_provenance_and_fails_safe" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/admin/operations/outbox/retry&quot;, method: &quot;post&quot;, status: &quot;200&quot;, field: &quot;retried&quot;, type: &quot;integer&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="c6b17f9a-1101-45d5-df9c-7b78a98de111">
+      <Execution id="72ff360d-5d65-40dd-8c53-0cdfb0156f41" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="New_endpoint_contracts_keep_required_nested_wire_types" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.SearchPersonReferencesTests.Restricted_and_planning_allocation_scopes_stay_narrow_and_directory_metadata_grants_no_panel_access" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="eca757a5-d596-1917-9019-79cd4bac4bbb">
+      <Execution id="49907fa0-3e6a-4962-a8da-41ae716e62ed" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.SearchPersonReferencesTests" name="Restricted_and_planning_allocation_scopes_stay_narrow_and_directory_metadata_grants_no_panel_access" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/projects/import-preview&quot;, method: &quot;post&quot;, status: &quot;200&quot;, field: &quot;rows[].projectNumber&quot;, type: &quot;string&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="659d8339-11b8-59f6-3e88-bae2be519bf6">
+      <Execution id="906c869f-0739-4819-a39f-331537faf2c3" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="New_endpoint_contracts_keep_required_nested_wire_types" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ReviewFindingContextTests.Independence_uses_complete_provenance_and_fails_safe(provenance: &quot;cycle&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="a32de96a-68b5-7ae2-a631-8e2533a618a9">
+      <Execution id="390d39f2-d23e-44b2-b0d1-603575ec10b0" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ReviewFindingContextTests" name="Independence_uses_complete_provenance_and_fails_safe" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/tasks/{id}/pickup-offer&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;allowed.pickUp&quot;, type: &quot;boolean&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="38cfb4bf-77dc-5925-8f41-5412e5968650">
+      <Execution id="b57a8a6a-497f-4862-84e4-85c39f7a48f6" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="New_endpoint_contracts_keep_required_nested_wire_types" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.Client_error_report_success_is_documented_as_bodyless_204" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="e7b83363-f6ac-c347-be21-44a550d2e252">
+      <Execution id="7df2156b-0bb9-45d8-8cd2-e4fbfc63cfcb" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="Client_error_report_success_is_documented_as_bodyless_204" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ReviewFindingContextTests.Independence_uses_complete_provenance_and_fails_safe(provenance: &quot;response_author&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="a950ac33-56c9-b290-07ca-7c1bcb42c673">
+      <Execution id="80a11eed-bcc8-433a-8e39-bee5eb8b6750" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ReviewFindingContextTests" name="Independence_uses_complete_provenance_and_fails_safe" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.Template_preview_contract_keeps_nested_counts_and_role_fields" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint25-artifacts/bin/hub.tests/release/hub.tests.dll" id="d6b3202e-f85e-2173-1faf-7a1dacb12f92">
+      <Execution id="bfe7a4df-92e1-427f-8a7f-1625028255f5" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="Template_preview_contract_keeps_nested_counts_and_role_fields" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="f0c2c1b8-00c3-7823-3ef5-9bfb01ed3854" executionId="e7c1d0d0-b345-455c-8fff-04b59d792a0f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1186ebfc-8748-bfb4-6cad-64033146cecb" executionId="e8bd480f-01fb-419d-93c6-306b525a27be" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a32de96a-68b5-7ae2-a631-8e2533a618a9" executionId="390d39f2-d23e-44b2-b0d1-603575ec10b0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="89e0598b-fc27-549e-b474-536777d96b9b" executionId="d1a5b9bc-8347-4580-8223-8198df689ad3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c0da2207-ece6-f43e-ebe2-507f5dcf43b6" executionId="31bd56db-222c-420b-a5c8-5b9f21f5bfc9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="bc9b82ae-c451-a28f-bdc8-15347c9a049e" executionId="4d79bccf-99e9-43c9-b8f5-ab9b2e645ae7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c6b17f9a-1101-45d5-df9c-7b78a98de111" executionId="72ff360d-5d65-40dd-8c53-0cdfb0156f41" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="92745d94-7e4d-6dd5-2bf6-a8f5d011e8d8" executionId="ba139904-cce6-4675-a68f-eafe34f9bdde" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="55670abb-80ae-2570-83df-396608aa0b60" executionId="2a325bc0-7338-41b9-b83c-650158bc79bf" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ce67afb1-458e-e49b-8e05-6b8cce16e4e3" executionId="7a976ef2-5cb6-4812-924b-e9cfb01a2e6d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e7b83363-f6ac-c347-be21-44a550d2e252" executionId="7df2156b-0bb9-45d8-8cd2-e4fbfc63cfcb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3547e624-c914-69a6-d78a-03f1210f61b7" executionId="e2dd1b52-4d3a-4227-882c-ba3cedf4ed27" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1b5a0a4b-0cb7-8e94-71d7-37c969d525ec" executionId="9b03152f-4988-469c-bed2-715ecf41d680" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="34b49e09-8339-d78e-eb01-cb64fa206afe" executionId="1f56e17d-a7a6-44e3-b098-1457b44b9bdb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f91831e8-c312-5d7f-9c0c-6e4d80113508" executionId="a7d5acda-3d37-48c5-aa73-59ddd6ea66d4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="73f46caa-31e3-fe35-82e8-59974406a64a" executionId="2ca44cb4-8b03-4704-a5f5-323dcee490ed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="eca757a5-d596-1917-9019-79cd4bac4bbb" executionId="49907fa0-3e6a-4962-a8da-41ae716e62ed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="76065eab-e344-e175-93c7-de7992d53248" executionId="3bd5eda1-5be3-4382-a081-ad957dfb17fd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a950ac33-56c9-b290-07ca-7c1bcb42c673" executionId="80a11eed-bcc8-433a-8e39-bee5eb8b6750" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5c50f393-d00c-150b-2514-1cdfbb87e371" executionId="1a2f12ea-a206-4ef1-bd31-dc81fda705a6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e2d69e65-ac8c-32ec-d82c-eba08404fa1d" executionId="bf764100-12ad-43ed-b438-47cc1edcd2a8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="38cfb4bf-77dc-5925-8f41-5412e5968650" executionId="b57a8a6a-497f-4862-84e4-85c39f7a48f6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0f6f5404-7337-2b26-03ba-6a3177fa77c1" executionId="4ce3deae-340b-4bf7-b8ce-71348597ddc6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3c652c39-3bbb-8bdf-1903-66a7a618fd70" executionId="4004e2cc-298e-4d27-bc10-41a5f2bfdecc" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f80b312e-cc25-bd12-bf9a-ab6ade073418" executionId="0aaf14f9-9ad0-4435-8d79-e9b564c57ea4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a7f290fc-f04f-537a-3b42-98a436169cc6" executionId="b81dd124-720b-4b52-972d-9c685a41d846" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ca8aedd4-dff4-9ea2-236f-e312a09b73de" executionId="5a703201-40f8-46b1-a087-d4a60460fa7d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9c39e606-7b28-dd81-b5dc-fc4db1748dbc" executionId="8db859bd-6406-4e6a-841c-17c42e9a83fb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3f088f94-57ff-334a-b75d-3a6e04d0849d" executionId="187bdf77-c773-41dd-9a6b-1b2fd7609204" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="cc67ea3f-ebbd-510c-c3c5-a6749044b337" executionId="921c7970-c6f6-4f95-a3e3-0a0d06933949" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0f0b6bef-2af7-f2c4-4b1f-db6733c5f4ae" executionId="88a392ac-a00c-4d3b-9134-c1964b8a9040" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f51f96f3-e5ef-f9d4-aeb5-8d8b2b82a309" executionId="50083775-b4f6-4149-b4ea-cec1fcf5d1e2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9ae4fc25-73fe-15e9-e8f7-60b7200505b3" executionId="e63a93e7-220f-4888-9db5-45e2b8b88383" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="95655012-01e3-fc01-4ecd-28b47f8554b4" executionId="7161512c-0a01-491d-be6b-4a2f0e0661bc" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d6b3202e-f85e-2173-1faf-7a1dacb12f92" executionId="bfe7a4df-92e1-427f-8a7f-1625028255f5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4805dd1f-3a71-3ad3-c8c3-c48d5c4d31eb" executionId="86bf16b5-6273-4030-8d02-b01d51249a10" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="49b863ea-9d64-ea09-a711-b1238a825e9e" executionId="7b3df1fc-3293-451d-85d8-2d2d30987d02" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="701a3331-f990-efa2-5235-97fac357c19d" executionId="643660d7-874e-4096-8965-91a7471e7abd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="94a985c1-4cff-4ae9-6d24-9384c3dd4713" executionId="a9c01dde-20d9-4ecf-a6cd-60fa5e3db08e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1e565737-e675-d4e3-b140-dcae18bc02f3" executionId="a887ffd6-ac5e-49af-8ab2-033706677e81" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="73f87c11-c403-f278-cb31-17f6c4d1f8fa" executionId="72fc4216-fdfb-40c1-ab3d-ad1c0ed0ef86" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="445209c3-5e5b-307c-f257-14c275eb6578" executionId="5a3d833f-9f99-4d32-bbec-b75a621da8cd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a3443da6-d26e-c6b7-c8f7-4703d53b8d72" executionId="c8610dfe-830a-451a-a9cd-0077555fa197" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="659d8339-11b8-59f6-3e88-bae2be519bf6" executionId="906c869f-0739-4819-a39f-331537faf2c3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c765ead0-5c4c-dea2-62e0-a45d563478cf" executionId="79f1dcfb-736b-4706-aeb3-2460a41d20b4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="16c94c65-98e0-d415-de3e-5184260ac08c" executionId="76e9207b-208e-473d-8f18-769dcc45fcb0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="630670b0-dfd0-5172-b647-e2fbb113f3b9" executionId="00e0cdd4-22b8-49c7-ab56-23d7ee74e77d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2c6b3736-5174-2ce8-e80b-3fa041aed662" executionId="347f5261-6b21-4ddd-bc7a-daa4ded99c2a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2640369e-eef7-f1c9-ad7b-1c2b8d7f780c" executionId="6fb17afa-6116-436f-aa5c-9314bdbc7191" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3a2e48a8-7bd0-0a48-fbb0-3b27a9a0beab" executionId="2bfa8360-a9ad-48d5-af6e-0a88e371b5ce" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="054b04b8-3336-95bf-44c0-fa18e5d58cd2" executionId="642be8bb-206f-486d-86cd-bcb4df8d1d88" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="49ffbb51-b125-18fc-ff07-1628bdcaedea" executionId="39386a76-64cc-46d8-b1a7-8584a111f0b0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a7e44212-9732-8a8d-6183-d1c302cbd689" executionId="45ec9ec4-c895-484c-b8da-36a3afd0d592" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="77c4b081-2927-c668-6200-cd967c46e59e" executionId="34b19415-69b0-4f43-acd6-cc6c3f1b3111" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8714af0e-3c48-e536-13ee-db52409edb93" executionId="2d2b0b72-f394-467d-8bb2-313ce593be7e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ffe78e3f-62f1-83f3-b5c0-cd5561c2d48e" executionId="c17c3fa4-693a-43c8-9af4-06ab96740a5d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c1577961-5650-7145-bd2d-e97e8723f9a7" executionId="cf020be4-160d-493e-8cdf-0ea4f722d9e8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="02faa5a5-3b17-6d14-68a7-24b886a44831" executionId="b5f56c39-baa2-41c8-b7d7-52a1fee8e8bd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="af1e1246-4096-e701-0868-591c6935c777" executionId="69ee6ae5-1a1c-4f17-a1bf-f19d7f78ce93" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="59" executed="59" passed="59" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.11)
+[xUnit.net 00:00:00.08]   Discovering: Hub.Tests
+[xUnit.net 00:00:00.20]   Discovered:  Hub.Tests
+[xUnit.net 00:00:00.21]   Starting:    Hub.Tests
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+warn: Microsoft.EntityFrameworkCore.Query[10103]
+      The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+warn: Microsoft.EntityFrameworkCore.Query[20504]
+      Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w =&gt; w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+warn: Microsoft.EntityFrameworkCore.Query[20504]
+      Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w =&gt; w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+warn: Microsoft.EntityFrameworkCore.Query[10102]
+      The query uses a row limiting operator ('Skip'/'Take') without an 'OrderBy' operator. This may lead to unpredictable results. If the 'Distinct' operator is used after 'OrderBy', then make sure to use the 'OrderBy' operator after 'Distinct' as the ordering would otherwise get erased.
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+warn: Microsoft.EntityFrameworkCore.Query[10102]
+      The query uses a row limiting operator ('Skip'/'Take') without an 'OrderBy' operator. This may lead to unpredictable results. If the 'Distinct' operator is used after 'OrderBy', then make sure to use the 'OrderBy' operator after 'Distinct' as the ordering would otherwise get erased.
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+[xUnit.net 00:00:52.68]   Finished:    Hub.Tests
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

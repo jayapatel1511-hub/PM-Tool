@@ -1,0 +1,38 @@
+{
+  "status": "PASS",
+  "checks": [
+    "Two actual time entries use distinct persisted-User report openers and natural exact focus return at1440/375",
+    "Actual filtered CSV/XLSX client menu downloads contain exactly eight allowed columns and recorded issue bundle, preserving00123 and excluding internal metadata"
+  ],
+  "downloads": [
+    {
+      "format": "csv",
+      "file": "real-client-register.csv",
+      "rows": 2,
+      "filterPreserved": true
+    },
+    {
+      "format": "xlsx",
+      "file": "real-client-register.xlsx",
+      "rows": 2,
+      "filterPreserved": true
+    }
+  ],
+  "browserNonGetBusinessRequests": [],
+  "personalCommands": [
+    {
+      "surface": "project-register",
+      "path": "/api/v1/me/work/opened",
+      "body": {
+        "requestId": "d1ffa8e5-e23b-4780-979d-7c1de9ab3c79",
+        "itemType": "Project",
+        "itemId": "01a19ad8-43ef-7ad6-af63-f90bcbd8468e",
+        "observedTokens": [
+          "01a19ad8-447f-7063-8c94-b7ee373bc660"
+        ]
+      }
+    }
+  ],
+  "errors": [],
+  "boundary": "Actual builtSPA and syntheticQA23 API; existing Exported audit may be appended; no atomic import or human acceptance claim"
+}

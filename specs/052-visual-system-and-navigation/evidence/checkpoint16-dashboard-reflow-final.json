@@ -1,0 +1,3348 @@
+{
+  "base": "http://127.0.0.1:5088",
+  "screens": [
+    "/projects/SYN-101/dashboard"
+  ],
+  "flags": [
+    "visual_system",
+    "screen_patterns",
+    "home_overview",
+    "work_screens",
+    "project_screens",
+    "capacity_screens",
+    "register_screens",
+    "people_screens"
+  ],
+  "scope": "Synthetic local API, all amendment flags enabled. Automated reflow equivalent; actual browser zoom and human acceptance remain unverified.",
+  "buildEvidence": {
+    "apiAssemblySha256": "809a701fe7292e0703bd41a04c542e70be92ebe0bca2f79ae91d0141f6a41ddc",
+    "uiIndexSha256": "71269d29a3eb744e8bbd49fd7befd1116bf6de83da2f6f60af93efdbffc20671"
+  },
+  "rows": [
+    {
+      "variant": "desktop",
+      "route": "/projects/SYN-101/dashboard",
+      "metrics": {
+        "viewport": {
+          "width": 1600,
+          "height": 900,
+          "dpr": 1
+        },
+        "visualMode": "v2",
+        "documentWidth": 1600,
+        "sidewaysDocumentOverflow": false,
+        "titleCount": 1,
+        "tokens": [
+          {
+            "name": "--page",
+            "value": "#f4f5f8"
+          },
+          {
+            "name": "--side",
+            "value": "#f1f2f5"
+          },
+          {
+            "name": "--card",
+            "value": "#fff"
+          },
+          {
+            "name": "--raised",
+            "value": "#f3f4f7"
+          },
+          {
+            "name": "--ink",
+            "value": "#161a23"
+          },
+          {
+            "name": "--ink-2",
+            "value": "#465063"
+          },
+          {
+            "name": "--ink-3",
+            "value": "#646d81"
+          },
+          {
+            "name": "--line",
+            "value": "color-mix(in srgb, #161a23 9%, transparent)"
+          },
+          {
+            "name": "--line-2",
+            "value": "color-mix(in srgb, #161a23 6%, transparent)"
+          },
+          {
+            "name": "--line-3",
+            "value": "color-mix(in srgb, #161a23 16%, transparent)"
+          },
+          {
+            "name": "--input",
+            "value": "#7c8491"
+          },
+          {
+            "name": "--navy",
+            "value": "#1b2a4e"
+          },
+          {
+            "name": "--brand",
+            "value": "#385cac"
+          },
+          {
+            "name": "--brand-tint",
+            "value": "#eaf0fd"
+          },
+          {
+            "name": "--metric-blue",
+            "value": "#2f6fe0"
+          },
+          {
+            "name": "--metric-blue-tint",
+            "value": "#e8f0fe"
+          },
+          {
+            "name": "--metric-violet",
+            "value": "#6a52d1"
+          },
+          {
+            "name": "--metric-violet-tint",
+            "value": "#efebfd"
+          },
+          {
+            "name": "--metric-red",
+            "value": "#d6334a"
+          },
+          {
+            "name": "--metric-red-tint",
+            "value": "#fde9ec"
+          },
+          {
+            "name": "--metric-amber",
+            "value": "#c77d0a"
+          },
+          {
+            "name": "--metric-amber-tint",
+            "value": "#fdf1dc"
+          },
+          {
+            "name": "--metric-green",
+            "value": "#18915f"
+          },
+          {
+            "name": "--metric-green-tint",
+            "value": "#e3f5ec"
+          },
+          {
+            "name": "--metric-teal",
+            "value": "#0f8a96"
+          },
+          {
+            "name": "--metric-teal-tint",
+            "value": "#def3f4"
+          },
+          {
+            "name": "--lane-todo",
+            "value": "#94a0b4"
+          },
+          {
+            "name": "--lane-progress",
+            "value": "#6a52d1"
+          },
+          {
+            "name": "--lane-review",
+            "value": "#f0a42b"
+          },
+          {
+            "name": "--lane-done",
+            "value": "#2f6fe0"
+          },
+          {
+            "name": "--hatch-strong",
+            "value": "#94a0b4"
+          },
+          {
+            "name": "--hatch-light",
+            "value": "#d5dae3"
+          },
+          {
+            "name": "--pill-ok",
+            "value": "#386953"
+          },
+          {
+            "name": "--pill-ok-bg",
+            "value": "#eaf5ef"
+          },
+          {
+            "name": "--pill-warn",
+            "value": "#7a5817"
+          },
+          {
+            "name": "--pill-warn-bg",
+            "value": "#fff4db"
+          },
+          {
+            "name": "--pill-critical",
+            "value": "#b42332"
+          },
+          {
+            "name": "--pill-critical-bg",
+            "value": "#fff0f1"
+          },
+          {
+            "name": "--pill-idle",
+            "value": "#59606c"
+          },
+          {
+            "name": "--pill-idle-bg",
+            "value": "#f1f2f4"
+          },
+          {
+            "name": "--pill-complete",
+            "value": "#37589a"
+          },
+          {
+            "name": "--pill-complete-bg",
+            "value": "#edf2fd"
+          },
+          {
+            "name": "--pill-work",
+            "value": "#574e87"
+          },
+          {
+            "name": "--pill-work-bg",
+            "value": "#f0effa"
+          },
+          {
+            "name": "--project-coral",
+            "value": "#ec6a3e"
+          },
+          {
+            "name": "--project-mint",
+            "value": "#20a36d"
+          },
+          {
+            "name": "--project-rose",
+            "value": "#d9467b"
+          },
+          {
+            "name": "--project-cyan",
+            "value": "#1597cc"
+          },
+          {
+            "name": "--project-lime",
+            "value": "#84a32a"
+          },
+          {
+            "name": "--action-hover",
+            "value": "#263b69"
+          }
+        ],
+        "colours": [
+          {
+            "property": "color",
+            "value": "rgb(22, 26, 35)",
+            "matchesTokenValue": true,
+            "count": 385,
+            "examples": [
+              {
+                "tag": "div",
+                "id": null,
+                "classes": "",
+                "text": "SYN-101Synthetic census project 1◐Active○GreyOwner (PM): Priya NairClient: Internal / TBDTarget date: 2026-11-06OverviewWorkDeliverablesCoor"
+              },
+              {
+                "tag": "div",
+                "id": null,
+                "classes": "flex min-h-full flex-col",
+                "text": "SYN-101Synthetic census project 1◐Active○GreyOwner (PM): Priya NairClient: Internal / TBDTarget date: 2026-11-06OverviewWorkDeliverablesCoor"
+              },
+              {
+                "tag": "div",
+                "id": null,
+                "classes": "flex-1",
+                "text": "DashboardCurrent values2026-11-01 00:36Discipline scopeAll disciplinesCivilNew taskTasks in progress0Project SYN-101 · all disciplinesTasks "
+              }
+            ]
+          },
+          {
+            "property": "background-color",
+            "value": "rgb(27, 42, 78)",
+            "matchesTokenValue": true,
+            "count": 3,
+            "examples": [
+              {
+                "tag": "header",
+                "id": null,
+                "classes": "visual-project-header flex min-w-0 flex-wrap items-center gap-3 border-b border-t-4 md:flex-nowrap border-t-(color:--acc-stripe) bg-card px-4 py-2.5 md:px-6 xl:px-8",
+                "text": "SYN-101Synthetic census project 1◐Active○GreyOwner (PM): Priya NairClient: Internal / TBDTarget date: 2026-11-06"
+              },
+              {
+                "tag": "div",
+                "id": null,
+                "classes": "visual-project-tabs-v2 no-print border-b px-4 md:sticky md:top-0 md:z-20 md:px-6 xl:px-8",
+                "text": "OverviewWorkDeliverablesCoordinationPeopleFilesActivitySettings"
+              },
+              {
+                "tag": "button",
+                "id": null,
+                "classes": "inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors duration-[120ms] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-action text-action-foreground hover:bg-action-hover disabled:bg-disabled disabled:text-disabled-foreground min-h-(--control-h) px-4 py-2 has-[>svg]:px-3",
+                "text": "New task"
+              }
+            ]
+          },
+          {
+            "property": "color",
+            "value": "rgb(87, 78, 135)",
+            "matchesTokenValue": true,
+            "count": 4,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "semantic-pill inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border border-transparent px-2 py-0.5 text-xs/[18px] font-medium bg-work-bg text-work",
+                "text": "◐Active"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "text-xs",
+                "text": "◐"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "semantic-pill inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border border-transparent px-2 py-0.5 text-xs/[18px] font-medium bg-work-bg text-work",
+                "text": "◐Active"
+              }
+            ]
+          },
+          {
+            "property": "background-color",
+            "value": "rgb(240, 239, 250)",
+            "matchesTokenValue": true,
+            "count": 2,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "semantic-pill inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border border-transparent px-2 py-0.5 text-xs/[18px] font-medium bg-work-bg text-work",
+                "text": "◐Active"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "semantic-pill inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border border-transparent px-2 py-0.5 text-xs/[18px] font-medium bg-work-bg text-work",
+                "text": "◐Active"
+              }
+            ]
+          },
+          {
+            "property": "border-bottom-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.09)",
+            "matchesTokenValue": true,
+            "count": 45,
+            "examples": [
+              {
+                "tag": "div",
+                "id": null,
+                "classes": "visual-project-tabs-v2 no-print border-b px-4 md:sticky md:top-0 md:z-20 md:px-6 xl:px-8",
+                "text": "OverviewWorkDeliverablesCoordinationPeopleFilesActivitySettings"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--violet count-card--link",
+                "text": "Tasks in progress0Project SYN-101 · all disciplines"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--amber count-card--link",
+                "text": "Tasks for review0Project SYN-101 · all disciplines"
+              }
+            ]
+          },
+          {
+            "property": "border-top-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.16)",
+            "matchesTokenValue": true,
+            "count": 17,
+            "examples": [
+              {
+                "tag": "dl",
+                "id": null,
+                "classes": "visual-title-block",
+                "text": "Current values"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg)",
+                "text": "MD"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg) mt-0.5",
+                "text": "JL"
+              }
+            ]
+          },
+          {
+            "property": "border-right-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.16)",
+            "matchesTokenValue": true,
+            "count": 17,
+            "examples": [
+              {
+                "tag": "dl",
+                "id": null,
+                "classes": "visual-title-block",
+                "text": "Current values"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg)",
+                "text": "MD"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg) mt-0.5",
+                "text": "JL"
+              }
+            ]
+          },
+          {
+            "property": "border-bottom-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.16)",
+            "matchesTokenValue": true,
+            "count": 17,
+            "examples": [
+              {
+                "tag": "dl",
+                "id": null,
+                "classes": "visual-title-block",
+                "text": "Current values"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg)",
+                "text": "MD"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg) mt-0.5",
+                "text": "JL"
+              }
+            ]
+          },
+          {
+            "property": "border-left-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.16)",
+            "matchesTokenValue": true,
+            "count": 17,
+            "examples": [
+              {
+                "tag": "dl",
+                "id": null,
+                "classes": "visual-title-block",
+                "text": "Current values"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg)",
+                "text": "MD"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg) mt-0.5",
+                "text": "JL"
+              }
+            ]
+          },
+          {
+            "property": "color",
+            "value": "rgb(70, 80, 99)",
+            "matchesTokenValue": true,
+            "count": 17,
+            "examples": [
+              {
+                "tag": "dt",
+                "id": null,
+                "classes": "",
+                "text": "Current values"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg)",
+                "text": "MD"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg) mt-0.5",
+                "text": "JL"
+              }
+            ]
+          },
+          {
+            "property": "border-top-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.09)",
+            "matchesTokenValue": true,
+            "count": 24,
+            "examples": [
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--violet count-card--link",
+                "text": "Tasks in progress0Project SYN-101 · all disciplines"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--amber count-card--link",
+                "text": "Tasks for review0Project SYN-101 · all disciplines"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--red count-card--link",
+                "text": "Overdue tasks0Project SYN-101 · all disciplines"
+              }
+            ]
+          },
+          {
+            "property": "border-right-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.09)",
+            "matchesTokenValue": true,
+            "count": 21,
+            "examples": [
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--violet count-card--link",
+                "text": "Tasks in progress0Project SYN-101 · all disciplines"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--amber count-card--link",
+                "text": "Tasks for review0Project SYN-101 · all disciplines"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--red count-card--link",
+                "text": "Overdue tasks0Project SYN-101 · all disciplines"
+              }
+            ]
+          },
+          {
+            "property": "border-left-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.09)",
+            "matchesTokenValue": true,
+            "count": 21,
+            "examples": [
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--violet count-card--link",
+                "text": "Tasks in progress0Project SYN-101 · all disciplines"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--amber count-card--link",
+                "text": "Tasks for review0Project SYN-101 · all disciplines"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--red count-card--link",
+                "text": "Overdue tasks0Project SYN-101 · all disciplines"
+              }
+            ]
+          },
+          {
+            "property": "color",
+            "value": "rgb(106, 82, 209)",
+            "matchesTokenValue": true,
+            "count": 10,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              },
+              {
+                "tag": "svg",
+                "id": null,
+                "classes": null,
+                "text": ""
+              },
+              {
+                "tag": "path",
+                "id": null,
+                "classes": null,
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "background-color",
+            "value": "rgb(239, 235, 253)",
+            "matchesTokenValue": true,
+            "count": 2,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "stroke",
+            "value": "rgb(106, 82, 209)",
+            "matchesTokenValue": true,
+            "count": 6,
+            "examples": [
+              {
+                "tag": "svg",
+                "id": null,
+                "classes": null,
+                "text": ""
+              },
+              {
+                "tag": "path",
+                "id": null,
+                "classes": null,
+                "text": ""
+              },
+              {
+                "tag": "path",
+                "id": null,
+                "classes": null,
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "color",
+            "value": "rgb(199, 125, 10)",
+            "matchesTokenValue": true,
+            "count": 18,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              },
+              {
+                "tag": "svg",
+                "id": null,
+                "classes": null,
+                "text": ""
+              },
+              {
+                "tag": "path",
+                "id": null,
+                "classes": null,
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "background-color",
+            "value": "rgb(253, 241, 220)",
+            "matchesTokenValue": true,
+            "count": 3,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "stroke",
+            "value": "rgb(199, 125, 10)",
+            "matchesTokenValue": true,
+            "count": 12,
+            "examples": [
+              {
+                "tag": "svg",
+                "id": null,
+                "classes": null,
+                "text": ""
+              },
+              {
+                "tag": "path",
+                "id": null,
+                "classes": null,
+                "text": ""
+              },
+              {
+                "tag": "path",
+                "id": null,
+                "classes": null,
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "color",
+            "value": "rgb(214, 51, 74)",
+            "matchesTokenValue": true,
+            "count": 3,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              },
+              {
+                "tag": "svg",
+                "id": null,
+                "classes": null,
+                "text": ""
+              },
+              {
+                "tag": "circle",
+                "id": null,
+                "classes": null,
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "background-color",
+            "value": "rgb(253, 233, 236)",
+            "matchesTokenValue": true,
+            "count": 1,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "stroke",
+            "value": "rgb(214, 51, 74)",
+            "matchesTokenValue": true,
+            "count": 2,
+            "examples": [
+              {
+                "tag": "svg",
+                "id": null,
+                "classes": null,
+                "text": ""
+              },
+              {
+                "tag": "circle",
+                "id": null,
+                "classes": null,
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "background-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.09)",
+            "matchesTokenValue": true,
+            "count": 1,
+            "examples": [
+              {
+                "tag": "div",
+                "id": null,
+                "classes": "absolute inset-x-0 h-px bg-border",
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "border-left-color",
+            "value": "rgb(56, 92, 172)",
+            "matchesTokenValue": true,
+            "count": 1,
+            "examples": [
+              {
+                "tag": "div",
+                "id": null,
+                "classes": "absolute border-l-2 border-dashed border-primary",
+                "text": "Today"
+              }
+            ]
+          },
+          {
+            "property": "color",
+            "value": "rgb(56, 92, 172)",
+            "matchesTokenValue": true,
+            "count": 2,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "absolute top-0 whitespace-nowrap text-xs/[18px] font-semibold text-primary left-1.5",
+                "text": "Today"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "text-primary underline underline-offset-4 hover:text-foreground",
+                "text": "All activity"
+              }
+            ]
+          }
+        ],
+        "smallText": [],
+        "clippedControls": [],
+        "scrollableDataRegions": [
+          {
+            "tag": "div",
+            "id": null,
+            "classes": "scroll-region overflow-x-auto bg-card rounded-none border-0",
+            "text": "Disciplines"
+          }
+        ]
+      },
+      "violations": []
+    },
+    {
+      "variant": "phone",
+      "route": "/projects/SYN-101/dashboard",
+      "metrics": {
+        "viewport": {
+          "width": 375,
+          "height": 812,
+          "dpr": 1
+        },
+        "visualMode": "v2",
+        "documentWidth": 375,
+        "sidewaysDocumentOverflow": false,
+        "titleCount": 1,
+        "tokens": [
+          {
+            "name": "--page",
+            "value": "#f4f5f8"
+          },
+          {
+            "name": "--side",
+            "value": "#f1f2f5"
+          },
+          {
+            "name": "--card",
+            "value": "#fff"
+          },
+          {
+            "name": "--raised",
+            "value": "#f3f4f7"
+          },
+          {
+            "name": "--ink",
+            "value": "#161a23"
+          },
+          {
+            "name": "--ink-2",
+            "value": "#465063"
+          },
+          {
+            "name": "--ink-3",
+            "value": "#646d81"
+          },
+          {
+            "name": "--line",
+            "value": "color-mix(in srgb, #161a23 9%, transparent)"
+          },
+          {
+            "name": "--line-2",
+            "value": "color-mix(in srgb, #161a23 6%, transparent)"
+          },
+          {
+            "name": "--line-3",
+            "value": "color-mix(in srgb, #161a23 16%, transparent)"
+          },
+          {
+            "name": "--input",
+            "value": "#7c8491"
+          },
+          {
+            "name": "--navy",
+            "value": "#1b2a4e"
+          },
+          {
+            "name": "--brand",
+            "value": "#385cac"
+          },
+          {
+            "name": "--brand-tint",
+            "value": "#eaf0fd"
+          },
+          {
+            "name": "--metric-blue",
+            "value": "#2f6fe0"
+          },
+          {
+            "name": "--metric-blue-tint",
+            "value": "#e8f0fe"
+          },
+          {
+            "name": "--metric-violet",
+            "value": "#6a52d1"
+          },
+          {
+            "name": "--metric-violet-tint",
+            "value": "#efebfd"
+          },
+          {
+            "name": "--metric-red",
+            "value": "#d6334a"
+          },
+          {
+            "name": "--metric-red-tint",
+            "value": "#fde9ec"
+          },
+          {
+            "name": "--metric-amber",
+            "value": "#c77d0a"
+          },
+          {
+            "name": "--metric-amber-tint",
+            "value": "#fdf1dc"
+          },
+          {
+            "name": "--metric-green",
+            "value": "#18915f"
+          },
+          {
+            "name": "--metric-green-tint",
+            "value": "#e3f5ec"
+          },
+          {
+            "name": "--metric-teal",
+            "value": "#0f8a96"
+          },
+          {
+            "name": "--metric-teal-tint",
+            "value": "#def3f4"
+          },
+          {
+            "name": "--lane-todo",
+            "value": "#94a0b4"
+          },
+          {
+            "name": "--lane-progress",
+            "value": "#6a52d1"
+          },
+          {
+            "name": "--lane-review",
+            "value": "#f0a42b"
+          },
+          {
+            "name": "--lane-done",
+            "value": "#2f6fe0"
+          },
+          {
+            "name": "--hatch-strong",
+            "value": "#94a0b4"
+          },
+          {
+            "name": "--hatch-light",
+            "value": "#d5dae3"
+          },
+          {
+            "name": "--pill-ok",
+            "value": "#386953"
+          },
+          {
+            "name": "--pill-ok-bg",
+            "value": "#eaf5ef"
+          },
+          {
+            "name": "--pill-warn",
+            "value": "#7a5817"
+          },
+          {
+            "name": "--pill-warn-bg",
+            "value": "#fff4db"
+          },
+          {
+            "name": "--pill-critical",
+            "value": "#b42332"
+          },
+          {
+            "name": "--pill-critical-bg",
+            "value": "#fff0f1"
+          },
+          {
+            "name": "--pill-idle",
+            "value": "#59606c"
+          },
+          {
+            "name": "--pill-idle-bg",
+            "value": "#f1f2f4"
+          },
+          {
+            "name": "--pill-complete",
+            "value": "#37589a"
+          },
+          {
+            "name": "--pill-complete-bg",
+            "value": "#edf2fd"
+          },
+          {
+            "name": "--pill-work",
+            "value": "#574e87"
+          },
+          {
+            "name": "--pill-work-bg",
+            "value": "#f0effa"
+          },
+          {
+            "name": "--project-coral",
+            "value": "#ec6a3e"
+          },
+          {
+            "name": "--project-mint",
+            "value": "#20a36d"
+          },
+          {
+            "name": "--project-rose",
+            "value": "#d9467b"
+          },
+          {
+            "name": "--project-cyan",
+            "value": "#1597cc"
+          },
+          {
+            "name": "--project-lime",
+            "value": "#84a32a"
+          },
+          {
+            "name": "--action-hover",
+            "value": "#263b69"
+          }
+        ],
+        "colours": [
+          {
+            "property": "color",
+            "value": "rgb(22, 26, 35)",
+            "matchesTokenValue": true,
+            "count": 386,
+            "examples": [
+              {
+                "tag": "div",
+                "id": null,
+                "classes": "",
+                "text": "SYN-101Synthetic census project 1◐Active○GreyOwner (PM): Priya NairClient: Internal / TBDTarget date: 2026-11-06OverviewWorkDeliverablesCoor"
+              },
+              {
+                "tag": "div",
+                "id": null,
+                "classes": "flex min-h-full flex-col",
+                "text": "SYN-101Synthetic census project 1◐Active○GreyOwner (PM): Priya NairClient: Internal / TBDTarget date: 2026-11-06OverviewWorkDeliverablesCoor"
+              },
+              {
+                "tag": "div",
+                "id": null,
+                "classes": "flex-1",
+                "text": "DashboardCurrent values2026-11-01 00:36Discipline scopeAll disciplinesCivilNew taskTasks in progress0Project SYN-101 · all disciplinesTasks "
+              }
+            ]
+          },
+          {
+            "property": "background-color",
+            "value": "rgb(27, 42, 78)",
+            "matchesTokenValue": true,
+            "count": 3,
+            "examples": [
+              {
+                "tag": "header",
+                "id": null,
+                "classes": "visual-project-header flex min-w-0 flex-wrap items-center gap-3 border-b border-t-4 md:flex-nowrap border-t-(color:--acc-stripe) bg-card px-4 py-2.5 md:px-6 xl:px-8",
+                "text": "SYN-101Synthetic census project 1◐Active○GreyOwner (PM): Priya NairClient: Internal / TBDTarget date: 2026-11-06"
+              },
+              {
+                "tag": "div",
+                "id": null,
+                "classes": "visual-project-tabs-v2 no-print border-b px-4 md:sticky md:top-0 md:z-20 md:px-6 xl:px-8",
+                "text": "OverviewWorkDeliverablesCoordinationPeopleFilesActivitySettings"
+              },
+              {
+                "tag": "button",
+                "id": null,
+                "classes": "inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors duration-[120ms] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-action text-action-foreground hover:bg-action-hover disabled:bg-disabled disabled:text-disabled-foreground min-h-(--control-h) px-4 py-2 has-[>svg]:px-3",
+                "text": "New task"
+              }
+            ]
+          },
+          {
+            "property": "color",
+            "value": "rgb(87, 78, 135)",
+            "matchesTokenValue": true,
+            "count": 4,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "semantic-pill inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border border-transparent px-2 py-0.5 text-xs/[18px] font-medium bg-work-bg text-work",
+                "text": "◐Active"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "text-xs",
+                "text": "◐"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "semantic-pill inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border border-transparent px-2 py-0.5 text-xs/[18px] font-medium bg-work-bg text-work",
+                "text": "◐Active"
+              }
+            ]
+          },
+          {
+            "property": "background-color",
+            "value": "rgb(240, 239, 250)",
+            "matchesTokenValue": true,
+            "count": 2,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "semantic-pill inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border border-transparent px-2 py-0.5 text-xs/[18px] font-medium bg-work-bg text-work",
+                "text": "◐Active"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "semantic-pill inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border border-transparent px-2 py-0.5 text-xs/[18px] font-medium bg-work-bg text-work",
+                "text": "◐Active"
+              }
+            ]
+          },
+          {
+            "property": "border-bottom-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.09)",
+            "matchesTokenValue": true,
+            "count": 45,
+            "examples": [
+              {
+                "tag": "div",
+                "id": null,
+                "classes": "visual-project-tabs-v2 no-print border-b px-4 md:sticky md:top-0 md:z-20 md:px-6 xl:px-8",
+                "text": "OverviewWorkDeliverablesCoordinationPeopleFilesActivitySettings"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--violet count-card--link",
+                "text": "Tasks in progress0Project SYN-101 · all disciplines"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--amber count-card--link",
+                "text": "Tasks for review0Project SYN-101 · all disciplines"
+              }
+            ]
+          },
+          {
+            "property": "border-top-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.16)",
+            "matchesTokenValue": true,
+            "count": 17,
+            "examples": [
+              {
+                "tag": "dl",
+                "id": null,
+                "classes": "visual-title-block",
+                "text": "Current values"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg)",
+                "text": "MD"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg) mt-0.5",
+                "text": "JL"
+              }
+            ]
+          },
+          {
+            "property": "border-right-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.16)",
+            "matchesTokenValue": true,
+            "count": 17,
+            "examples": [
+              {
+                "tag": "dl",
+                "id": null,
+                "classes": "visual-title-block",
+                "text": "Current values"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg)",
+                "text": "MD"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg) mt-0.5",
+                "text": "JL"
+              }
+            ]
+          },
+          {
+            "property": "border-bottom-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.16)",
+            "matchesTokenValue": true,
+            "count": 17,
+            "examples": [
+              {
+                "tag": "dl",
+                "id": null,
+                "classes": "visual-title-block",
+                "text": "Current values"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg)",
+                "text": "MD"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg) mt-0.5",
+                "text": "JL"
+              }
+            ]
+          },
+          {
+            "property": "border-left-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.16)",
+            "matchesTokenValue": true,
+            "count": 17,
+            "examples": [
+              {
+                "tag": "dl",
+                "id": null,
+                "classes": "visual-title-block",
+                "text": "Current values"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg)",
+                "text": "MD"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg) mt-0.5",
+                "text": "JL"
+              }
+            ]
+          },
+          {
+            "property": "color",
+            "value": "rgb(70, 80, 99)",
+            "matchesTokenValue": true,
+            "count": 17,
+            "examples": [
+              {
+                "tag": "dt",
+                "id": null,
+                "classes": "",
+                "text": "Current values"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg)",
+                "text": "MD"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg) mt-0.5",
+                "text": "JL"
+              }
+            ]
+          },
+          {
+            "property": "border-top-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.09)",
+            "matchesTokenValue": true,
+            "count": 24,
+            "examples": [
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--violet count-card--link",
+                "text": "Tasks in progress0Project SYN-101 · all disciplines"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--amber count-card--link",
+                "text": "Tasks for review0Project SYN-101 · all disciplines"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--red count-card--link",
+                "text": "Overdue tasks0Project SYN-101 · all disciplines"
+              }
+            ]
+          },
+          {
+            "property": "border-right-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.09)",
+            "matchesTokenValue": true,
+            "count": 21,
+            "examples": [
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--violet count-card--link",
+                "text": "Tasks in progress0Project SYN-101 · all disciplines"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--amber count-card--link",
+                "text": "Tasks for review0Project SYN-101 · all disciplines"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--red count-card--link",
+                "text": "Overdue tasks0Project SYN-101 · all disciplines"
+              }
+            ]
+          },
+          {
+            "property": "border-left-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.09)",
+            "matchesTokenValue": true,
+            "count": 21,
+            "examples": [
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--violet count-card--link",
+                "text": "Tasks in progress0Project SYN-101 · all disciplines"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--amber count-card--link",
+                "text": "Tasks for review0Project SYN-101 · all disciplines"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--red count-card--link",
+                "text": "Overdue tasks0Project SYN-101 · all disciplines"
+              }
+            ]
+          },
+          {
+            "property": "color",
+            "value": "rgb(106, 82, 209)",
+            "matchesTokenValue": true,
+            "count": 10,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              },
+              {
+                "tag": "svg",
+                "id": null,
+                "classes": null,
+                "text": ""
+              },
+              {
+                "tag": "path",
+                "id": null,
+                "classes": null,
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "background-color",
+            "value": "rgb(239, 235, 253)",
+            "matchesTokenValue": true,
+            "count": 2,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "stroke",
+            "value": "rgb(106, 82, 209)",
+            "matchesTokenValue": true,
+            "count": 6,
+            "examples": [
+              {
+                "tag": "svg",
+                "id": null,
+                "classes": null,
+                "text": ""
+              },
+              {
+                "tag": "path",
+                "id": null,
+                "classes": null,
+                "text": ""
+              },
+              {
+                "tag": "path",
+                "id": null,
+                "classes": null,
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "color",
+            "value": "rgb(199, 125, 10)",
+            "matchesTokenValue": true,
+            "count": 18,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              },
+              {
+                "tag": "svg",
+                "id": null,
+                "classes": null,
+                "text": ""
+              },
+              {
+                "tag": "path",
+                "id": null,
+                "classes": null,
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "background-color",
+            "value": "rgb(253, 241, 220)",
+            "matchesTokenValue": true,
+            "count": 3,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "stroke",
+            "value": "rgb(199, 125, 10)",
+            "matchesTokenValue": true,
+            "count": 12,
+            "examples": [
+              {
+                "tag": "svg",
+                "id": null,
+                "classes": null,
+                "text": ""
+              },
+              {
+                "tag": "path",
+                "id": null,
+                "classes": null,
+                "text": ""
+              },
+              {
+                "tag": "path",
+                "id": null,
+                "classes": null,
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "color",
+            "value": "rgb(214, 51, 74)",
+            "matchesTokenValue": true,
+            "count": 3,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              },
+              {
+                "tag": "svg",
+                "id": null,
+                "classes": null,
+                "text": ""
+              },
+              {
+                "tag": "circle",
+                "id": null,
+                "classes": null,
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "background-color",
+            "value": "rgb(253, 233, 236)",
+            "matchesTokenValue": true,
+            "count": 1,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "stroke",
+            "value": "rgb(214, 51, 74)",
+            "matchesTokenValue": true,
+            "count": 2,
+            "examples": [
+              {
+                "tag": "svg",
+                "id": null,
+                "classes": null,
+                "text": ""
+              },
+              {
+                "tag": "circle",
+                "id": null,
+                "classes": null,
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "background-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.09)",
+            "matchesTokenValue": true,
+            "count": 1,
+            "examples": [
+              {
+                "tag": "div",
+                "id": null,
+                "classes": "absolute inset-x-0 h-px bg-border",
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "border-left-color",
+            "value": "rgb(56, 92, 172)",
+            "matchesTokenValue": true,
+            "count": 1,
+            "examples": [
+              {
+                "tag": "div",
+                "id": null,
+                "classes": "absolute border-l-2 border-dashed border-primary",
+                "text": "Today"
+              }
+            ]
+          },
+          {
+            "property": "color",
+            "value": "rgb(56, 92, 172)",
+            "matchesTokenValue": true,
+            "count": 2,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "absolute top-0 whitespace-nowrap text-xs/[18px] font-semibold text-primary left-1.5",
+                "text": "Today"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "text-primary underline underline-offset-4 hover:text-foreground",
+                "text": "All activity"
+              }
+            ]
+          }
+        ],
+        "smallText": [],
+        "clippedControls": [],
+        "scrollableDataRegions": [
+          {
+            "tag": "nav",
+            "id": null,
+            "classes": "visual-project-tabs-v2__primary",
+            "text": "Project sections"
+          },
+          {
+            "tag": "div",
+            "id": null,
+            "classes": "scroll-region overflow-x-auto rounded-lg border bg-card",
+            "text": "Timeline of 1 milestones with today marked"
+          },
+          {
+            "tag": "div",
+            "id": null,
+            "classes": "scroll-region overflow-x-auto bg-card rounded-none border-0",
+            "text": "Staffing until the next submission"
+          },
+          {
+            "tag": "div",
+            "id": null,
+            "classes": "scroll-region overflow-x-auto bg-card rounded-none border-0",
+            "text": "Disciplines"
+          }
+        ]
+      },
+      "violations": []
+    },
+    {
+      "variant": "200-percent-reflow-equivalent",
+      "route": "/projects/SYN-101/dashboard",
+      "metrics": {
+        "viewport": {
+          "width": 800,
+          "height": 450,
+          "dpr": 2
+        },
+        "visualMode": "v2",
+        "documentWidth": 800,
+        "sidewaysDocumentOverflow": false,
+        "titleCount": 1,
+        "tokens": [
+          {
+            "name": "--page",
+            "value": "#f4f5f8"
+          },
+          {
+            "name": "--side",
+            "value": "#f1f2f5"
+          },
+          {
+            "name": "--card",
+            "value": "#fff"
+          },
+          {
+            "name": "--raised",
+            "value": "#f3f4f7"
+          },
+          {
+            "name": "--ink",
+            "value": "#161a23"
+          },
+          {
+            "name": "--ink-2",
+            "value": "#465063"
+          },
+          {
+            "name": "--ink-3",
+            "value": "#646d81"
+          },
+          {
+            "name": "--line",
+            "value": "color-mix(in srgb, #161a23 9%, transparent)"
+          },
+          {
+            "name": "--line-2",
+            "value": "color-mix(in srgb, #161a23 6%, transparent)"
+          },
+          {
+            "name": "--line-3",
+            "value": "color-mix(in srgb, #161a23 16%, transparent)"
+          },
+          {
+            "name": "--input",
+            "value": "#7c8491"
+          },
+          {
+            "name": "--navy",
+            "value": "#1b2a4e"
+          },
+          {
+            "name": "--brand",
+            "value": "#385cac"
+          },
+          {
+            "name": "--brand-tint",
+            "value": "#eaf0fd"
+          },
+          {
+            "name": "--metric-blue",
+            "value": "#2f6fe0"
+          },
+          {
+            "name": "--metric-blue-tint",
+            "value": "#e8f0fe"
+          },
+          {
+            "name": "--metric-violet",
+            "value": "#6a52d1"
+          },
+          {
+            "name": "--metric-violet-tint",
+            "value": "#efebfd"
+          },
+          {
+            "name": "--metric-red",
+            "value": "#d6334a"
+          },
+          {
+            "name": "--metric-red-tint",
+            "value": "#fde9ec"
+          },
+          {
+            "name": "--metric-amber",
+            "value": "#c77d0a"
+          },
+          {
+            "name": "--metric-amber-tint",
+            "value": "#fdf1dc"
+          },
+          {
+            "name": "--metric-green",
+            "value": "#18915f"
+          },
+          {
+            "name": "--metric-green-tint",
+            "value": "#e3f5ec"
+          },
+          {
+            "name": "--metric-teal",
+            "value": "#0f8a96"
+          },
+          {
+            "name": "--metric-teal-tint",
+            "value": "#def3f4"
+          },
+          {
+            "name": "--lane-todo",
+            "value": "#94a0b4"
+          },
+          {
+            "name": "--lane-progress",
+            "value": "#6a52d1"
+          },
+          {
+            "name": "--lane-review",
+            "value": "#f0a42b"
+          },
+          {
+            "name": "--lane-done",
+            "value": "#2f6fe0"
+          },
+          {
+            "name": "--hatch-strong",
+            "value": "#94a0b4"
+          },
+          {
+            "name": "--hatch-light",
+            "value": "#d5dae3"
+          },
+          {
+            "name": "--pill-ok",
+            "value": "#386953"
+          },
+          {
+            "name": "--pill-ok-bg",
+            "value": "#eaf5ef"
+          },
+          {
+            "name": "--pill-warn",
+            "value": "#7a5817"
+          },
+          {
+            "name": "--pill-warn-bg",
+            "value": "#fff4db"
+          },
+          {
+            "name": "--pill-critical",
+            "value": "#b42332"
+          },
+          {
+            "name": "--pill-critical-bg",
+            "value": "#fff0f1"
+          },
+          {
+            "name": "--pill-idle",
+            "value": "#59606c"
+          },
+          {
+            "name": "--pill-idle-bg",
+            "value": "#f1f2f4"
+          },
+          {
+            "name": "--pill-complete",
+            "value": "#37589a"
+          },
+          {
+            "name": "--pill-complete-bg",
+            "value": "#edf2fd"
+          },
+          {
+            "name": "--pill-work",
+            "value": "#574e87"
+          },
+          {
+            "name": "--pill-work-bg",
+            "value": "#f0effa"
+          },
+          {
+            "name": "--project-coral",
+            "value": "#ec6a3e"
+          },
+          {
+            "name": "--project-mint",
+            "value": "#20a36d"
+          },
+          {
+            "name": "--project-rose",
+            "value": "#d9467b"
+          },
+          {
+            "name": "--project-cyan",
+            "value": "#1597cc"
+          },
+          {
+            "name": "--project-lime",
+            "value": "#84a32a"
+          },
+          {
+            "name": "--action-hover",
+            "value": "#263b69"
+          }
+        ],
+        "colours": [
+          {
+            "property": "color",
+            "value": "rgb(22, 26, 35)",
+            "matchesTokenValue": true,
+            "count": 385,
+            "examples": [
+              {
+                "tag": "div",
+                "id": null,
+                "classes": "",
+                "text": "SYN-101Synthetic census project 1◐Active○GreyOwner (PM): Priya NairClient: Internal / TBDTarget date: 2026-11-06OverviewWorkDeliverablesCoor"
+              },
+              {
+                "tag": "div",
+                "id": null,
+                "classes": "flex min-h-full flex-col",
+                "text": "SYN-101Synthetic census project 1◐Active○GreyOwner (PM): Priya NairClient: Internal / TBDTarget date: 2026-11-06OverviewWorkDeliverablesCoor"
+              },
+              {
+                "tag": "div",
+                "id": null,
+                "classes": "flex-1",
+                "text": "DashboardCurrent values2026-11-01 00:36Discipline scopeAll disciplinesCivilNew taskTasks in progress0Project SYN-101 · all disciplinesTasks "
+              }
+            ]
+          },
+          {
+            "property": "background-color",
+            "value": "rgb(27, 42, 78)",
+            "matchesTokenValue": true,
+            "count": 3,
+            "examples": [
+              {
+                "tag": "header",
+                "id": null,
+                "classes": "visual-project-header flex min-w-0 flex-wrap items-center gap-3 border-b border-t-4 md:flex-nowrap border-t-(color:--acc-stripe) bg-card px-4 py-2.5 md:px-6 xl:px-8",
+                "text": "SYN-101Synthetic census project 1◐Active○GreyOwner (PM): Priya NairClient: Internal / TBDTarget date: 2026-11-06"
+              },
+              {
+                "tag": "div",
+                "id": null,
+                "classes": "visual-project-tabs-v2 no-print border-b px-4 md:sticky md:top-0 md:z-20 md:px-6 xl:px-8",
+                "text": "OverviewWorkDeliverablesCoordinationPeopleFilesActivitySettings"
+              },
+              {
+                "tag": "button",
+                "id": null,
+                "classes": "inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors duration-[120ms] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-action text-action-foreground hover:bg-action-hover disabled:bg-disabled disabled:text-disabled-foreground min-h-(--control-h) px-4 py-2 has-[>svg]:px-3",
+                "text": "New task"
+              }
+            ]
+          },
+          {
+            "property": "color",
+            "value": "rgb(87, 78, 135)",
+            "matchesTokenValue": true,
+            "count": 4,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "semantic-pill inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border border-transparent px-2 py-0.5 text-xs/[18px] font-medium bg-work-bg text-work",
+                "text": "◐Active"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "text-xs",
+                "text": "◐"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "semantic-pill inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border border-transparent px-2 py-0.5 text-xs/[18px] font-medium bg-work-bg text-work",
+                "text": "◐Active"
+              }
+            ]
+          },
+          {
+            "property": "background-color",
+            "value": "rgb(240, 239, 250)",
+            "matchesTokenValue": true,
+            "count": 2,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "semantic-pill inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border border-transparent px-2 py-0.5 text-xs/[18px] font-medium bg-work-bg text-work",
+                "text": "◐Active"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "semantic-pill inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border border-transparent px-2 py-0.5 text-xs/[18px] font-medium bg-work-bg text-work",
+                "text": "◐Active"
+              }
+            ]
+          },
+          {
+            "property": "border-bottom-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.09)",
+            "matchesTokenValue": true,
+            "count": 45,
+            "examples": [
+              {
+                "tag": "div",
+                "id": null,
+                "classes": "visual-project-tabs-v2 no-print border-b px-4 md:sticky md:top-0 md:z-20 md:px-6 xl:px-8",
+                "text": "OverviewWorkDeliverablesCoordinationPeopleFilesActivitySettings"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--violet count-card--link",
+                "text": "Tasks in progress0Project SYN-101 · all disciplines"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--amber count-card--link",
+                "text": "Tasks for review0Project SYN-101 · all disciplines"
+              }
+            ]
+          },
+          {
+            "property": "border-top-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.16)",
+            "matchesTokenValue": true,
+            "count": 17,
+            "examples": [
+              {
+                "tag": "dl",
+                "id": null,
+                "classes": "visual-title-block",
+                "text": "Current values"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg)",
+                "text": "MD"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg) mt-0.5",
+                "text": "JL"
+              }
+            ]
+          },
+          {
+            "property": "border-right-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.16)",
+            "matchesTokenValue": true,
+            "count": 17,
+            "examples": [
+              {
+                "tag": "dl",
+                "id": null,
+                "classes": "visual-title-block",
+                "text": "Current values"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg)",
+                "text": "MD"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg) mt-0.5",
+                "text": "JL"
+              }
+            ]
+          },
+          {
+            "property": "border-bottom-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.16)",
+            "matchesTokenValue": true,
+            "count": 17,
+            "examples": [
+              {
+                "tag": "dl",
+                "id": null,
+                "classes": "visual-title-block",
+                "text": "Current values"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg)",
+                "text": "MD"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg) mt-0.5",
+                "text": "JL"
+              }
+            ]
+          },
+          {
+            "property": "border-left-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.16)",
+            "matchesTokenValue": true,
+            "count": 17,
+            "examples": [
+              {
+                "tag": "dl",
+                "id": null,
+                "classes": "visual-title-block",
+                "text": "Current values"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg)",
+                "text": "MD"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg) mt-0.5",
+                "text": "JL"
+              }
+            ]
+          },
+          {
+            "property": "color",
+            "value": "rgb(70, 80, 99)",
+            "matchesTokenValue": true,
+            "count": 17,
+            "examples": [
+              {
+                "tag": "dt",
+                "id": null,
+                "classes": "",
+                "text": "Current values"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg)",
+                "text": "MD"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg) mt-0.5",
+                "text": "JL"
+              }
+            ]
+          },
+          {
+            "property": "border-top-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.09)",
+            "matchesTokenValue": true,
+            "count": 24,
+            "examples": [
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--violet count-card--link",
+                "text": "Tasks in progress0Project SYN-101 · all disciplines"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--amber count-card--link",
+                "text": "Tasks for review0Project SYN-101 · all disciplines"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--red count-card--link",
+                "text": "Overdue tasks0Project SYN-101 · all disciplines"
+              }
+            ]
+          },
+          {
+            "property": "border-right-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.09)",
+            "matchesTokenValue": true,
+            "count": 21,
+            "examples": [
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--violet count-card--link",
+                "text": "Tasks in progress0Project SYN-101 · all disciplines"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--amber count-card--link",
+                "text": "Tasks for review0Project SYN-101 · all disciplines"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--red count-card--link",
+                "text": "Overdue tasks0Project SYN-101 · all disciplines"
+              }
+            ]
+          },
+          {
+            "property": "border-left-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.09)",
+            "matchesTokenValue": true,
+            "count": 21,
+            "examples": [
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--violet count-card--link",
+                "text": "Tasks in progress0Project SYN-101 · all disciplines"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--amber count-card--link",
+                "text": "Tasks for review0Project SYN-101 · all disciplines"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--red count-card--link",
+                "text": "Overdue tasks0Project SYN-101 · all disciplines"
+              }
+            ]
+          },
+          {
+            "property": "color",
+            "value": "rgb(106, 82, 209)",
+            "matchesTokenValue": true,
+            "count": 10,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              },
+              {
+                "tag": "svg",
+                "id": null,
+                "classes": null,
+                "text": ""
+              },
+              {
+                "tag": "path",
+                "id": null,
+                "classes": null,
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "background-color",
+            "value": "rgb(239, 235, 253)",
+            "matchesTokenValue": true,
+            "count": 2,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "stroke",
+            "value": "rgb(106, 82, 209)",
+            "matchesTokenValue": true,
+            "count": 6,
+            "examples": [
+              {
+                "tag": "svg",
+                "id": null,
+                "classes": null,
+                "text": ""
+              },
+              {
+                "tag": "path",
+                "id": null,
+                "classes": null,
+                "text": ""
+              },
+              {
+                "tag": "path",
+                "id": null,
+                "classes": null,
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "color",
+            "value": "rgb(199, 125, 10)",
+            "matchesTokenValue": true,
+            "count": 18,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              },
+              {
+                "tag": "svg",
+                "id": null,
+                "classes": null,
+                "text": ""
+              },
+              {
+                "tag": "path",
+                "id": null,
+                "classes": null,
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "background-color",
+            "value": "rgb(253, 241, 220)",
+            "matchesTokenValue": true,
+            "count": 3,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "stroke",
+            "value": "rgb(199, 125, 10)",
+            "matchesTokenValue": true,
+            "count": 12,
+            "examples": [
+              {
+                "tag": "svg",
+                "id": null,
+                "classes": null,
+                "text": ""
+              },
+              {
+                "tag": "path",
+                "id": null,
+                "classes": null,
+                "text": ""
+              },
+              {
+                "tag": "path",
+                "id": null,
+                "classes": null,
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "color",
+            "value": "rgb(214, 51, 74)",
+            "matchesTokenValue": true,
+            "count": 3,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              },
+              {
+                "tag": "svg",
+                "id": null,
+                "classes": null,
+                "text": ""
+              },
+              {
+                "tag": "circle",
+                "id": null,
+                "classes": null,
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "background-color",
+            "value": "rgb(253, 233, 236)",
+            "matchesTokenValue": true,
+            "count": 1,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "stroke",
+            "value": "rgb(214, 51, 74)",
+            "matchesTokenValue": true,
+            "count": 2,
+            "examples": [
+              {
+                "tag": "svg",
+                "id": null,
+                "classes": null,
+                "text": ""
+              },
+              {
+                "tag": "circle",
+                "id": null,
+                "classes": null,
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "background-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.09)",
+            "matchesTokenValue": true,
+            "count": 1,
+            "examples": [
+              {
+                "tag": "div",
+                "id": null,
+                "classes": "absolute inset-x-0 h-px bg-border",
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "border-left-color",
+            "value": "rgb(56, 92, 172)",
+            "matchesTokenValue": true,
+            "count": 1,
+            "examples": [
+              {
+                "tag": "div",
+                "id": null,
+                "classes": "absolute border-l-2 border-dashed border-primary",
+                "text": "Today"
+              }
+            ]
+          },
+          {
+            "property": "color",
+            "value": "rgb(56, 92, 172)",
+            "matchesTokenValue": true,
+            "count": 2,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "absolute top-0 whitespace-nowrap text-xs/[18px] font-semibold text-primary left-1.5",
+                "text": "Today"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "text-primary underline underline-offset-4 hover:text-foreground",
+                "text": "All activity"
+              }
+            ]
+          }
+        ],
+        "smallText": [],
+        "clippedControls": [],
+        "scrollableDataRegions": [
+          {
+            "tag": "div",
+            "id": null,
+            "classes": "scroll-region overflow-x-auto rounded-lg border bg-card",
+            "text": "Timeline of 1 milestones with today marked"
+          },
+          {
+            "tag": "div",
+            "id": null,
+            "classes": "scroll-region overflow-x-auto bg-card rounded-none border-0",
+            "text": "Staffing until the next submission"
+          },
+          {
+            "tag": "div",
+            "id": null,
+            "classes": "scroll-region overflow-x-auto bg-card rounded-none border-0",
+            "text": "Disciplines"
+          }
+        ]
+      },
+      "violations": []
+    },
+    {
+      "variant": "200-percent-reflow-equivalent-with-text-spacing",
+      "route": "/projects/SYN-101/dashboard",
+      "metrics": {
+        "viewport": {
+          "width": 800,
+          "height": 450,
+          "dpr": 2
+        },
+        "visualMode": "v2",
+        "documentWidth": 800,
+        "sidewaysDocumentOverflow": false,
+        "titleCount": 1,
+        "tokens": [
+          {
+            "name": "--page",
+            "value": "#f4f5f8"
+          },
+          {
+            "name": "--side",
+            "value": "#f1f2f5"
+          },
+          {
+            "name": "--card",
+            "value": "#fff"
+          },
+          {
+            "name": "--raised",
+            "value": "#f3f4f7"
+          },
+          {
+            "name": "--ink",
+            "value": "#161a23"
+          },
+          {
+            "name": "--ink-2",
+            "value": "#465063"
+          },
+          {
+            "name": "--ink-3",
+            "value": "#646d81"
+          },
+          {
+            "name": "--line",
+            "value": "color-mix(in srgb, #161a23 9%, transparent)"
+          },
+          {
+            "name": "--line-2",
+            "value": "color-mix(in srgb, #161a23 6%, transparent)"
+          },
+          {
+            "name": "--line-3",
+            "value": "color-mix(in srgb, #161a23 16%, transparent)"
+          },
+          {
+            "name": "--input",
+            "value": "#7c8491"
+          },
+          {
+            "name": "--navy",
+            "value": "#1b2a4e"
+          },
+          {
+            "name": "--brand",
+            "value": "#385cac"
+          },
+          {
+            "name": "--brand-tint",
+            "value": "#eaf0fd"
+          },
+          {
+            "name": "--metric-blue",
+            "value": "#2f6fe0"
+          },
+          {
+            "name": "--metric-blue-tint",
+            "value": "#e8f0fe"
+          },
+          {
+            "name": "--metric-violet",
+            "value": "#6a52d1"
+          },
+          {
+            "name": "--metric-violet-tint",
+            "value": "#efebfd"
+          },
+          {
+            "name": "--metric-red",
+            "value": "#d6334a"
+          },
+          {
+            "name": "--metric-red-tint",
+            "value": "#fde9ec"
+          },
+          {
+            "name": "--metric-amber",
+            "value": "#c77d0a"
+          },
+          {
+            "name": "--metric-amber-tint",
+            "value": "#fdf1dc"
+          },
+          {
+            "name": "--metric-green",
+            "value": "#18915f"
+          },
+          {
+            "name": "--metric-green-tint",
+            "value": "#e3f5ec"
+          },
+          {
+            "name": "--metric-teal",
+            "value": "#0f8a96"
+          },
+          {
+            "name": "--metric-teal-tint",
+            "value": "#def3f4"
+          },
+          {
+            "name": "--lane-todo",
+            "value": "#94a0b4"
+          },
+          {
+            "name": "--lane-progress",
+            "value": "#6a52d1"
+          },
+          {
+            "name": "--lane-review",
+            "value": "#f0a42b"
+          },
+          {
+            "name": "--lane-done",
+            "value": "#2f6fe0"
+          },
+          {
+            "name": "--hatch-strong",
+            "value": "#94a0b4"
+          },
+          {
+            "name": "--hatch-light",
+            "value": "#d5dae3"
+          },
+          {
+            "name": "--pill-ok",
+            "value": "#386953"
+          },
+          {
+            "name": "--pill-ok-bg",
+            "value": "#eaf5ef"
+          },
+          {
+            "name": "--pill-warn",
+            "value": "#7a5817"
+          },
+          {
+            "name": "--pill-warn-bg",
+            "value": "#fff4db"
+          },
+          {
+            "name": "--pill-critical",
+            "value": "#b42332"
+          },
+          {
+            "name": "--pill-critical-bg",
+            "value": "#fff0f1"
+          },
+          {
+            "name": "--pill-idle",
+            "value": "#59606c"
+          },
+          {
+            "name": "--pill-idle-bg",
+            "value": "#f1f2f4"
+          },
+          {
+            "name": "--pill-complete",
+            "value": "#37589a"
+          },
+          {
+            "name": "--pill-complete-bg",
+            "value": "#edf2fd"
+          },
+          {
+            "name": "--pill-work",
+            "value": "#574e87"
+          },
+          {
+            "name": "--pill-work-bg",
+            "value": "#f0effa"
+          },
+          {
+            "name": "--project-coral",
+            "value": "#ec6a3e"
+          },
+          {
+            "name": "--project-mint",
+            "value": "#20a36d"
+          },
+          {
+            "name": "--project-rose",
+            "value": "#d9467b"
+          },
+          {
+            "name": "--project-cyan",
+            "value": "#1597cc"
+          },
+          {
+            "name": "--project-lime",
+            "value": "#84a32a"
+          },
+          {
+            "name": "--action-hover",
+            "value": "#263b69"
+          }
+        ],
+        "colours": [
+          {
+            "property": "color",
+            "value": "rgb(22, 26, 35)",
+            "matchesTokenValue": true,
+            "count": 385,
+            "examples": [
+              {
+                "tag": "div",
+                "id": null,
+                "classes": "",
+                "text": "SYN-101Synthetic census project 1◐Active○GreyOwner (PM): Priya NairClient: Internal / TBDTarget date: 2026-11-06OverviewWorkDeliverablesCoor"
+              },
+              {
+                "tag": "div",
+                "id": null,
+                "classes": "flex min-h-full flex-col",
+                "text": "SYN-101Synthetic census project 1◐Active○GreyOwner (PM): Priya NairClient: Internal / TBDTarget date: 2026-11-06OverviewWorkDeliverablesCoor"
+              },
+              {
+                "tag": "div",
+                "id": null,
+                "classes": "flex-1",
+                "text": "DashboardCurrent values2026-11-01 00:36Discipline scopeAll disciplinesCivilNew taskTasks in progress0Project SYN-101 · all disciplinesTasks "
+              }
+            ]
+          },
+          {
+            "property": "background-color",
+            "value": "rgb(27, 42, 78)",
+            "matchesTokenValue": true,
+            "count": 3,
+            "examples": [
+              {
+                "tag": "header",
+                "id": null,
+                "classes": "visual-project-header flex min-w-0 flex-wrap items-center gap-3 border-b border-t-4 md:flex-nowrap border-t-(color:--acc-stripe) bg-card px-4 py-2.5 md:px-6 xl:px-8",
+                "text": "SYN-101Synthetic census project 1◐Active○GreyOwner (PM): Priya NairClient: Internal / TBDTarget date: 2026-11-06"
+              },
+              {
+                "tag": "div",
+                "id": null,
+                "classes": "visual-project-tabs-v2 no-print border-b px-4 md:sticky md:top-0 md:z-20 md:px-6 xl:px-8",
+                "text": "OverviewWorkDeliverablesCoordinationPeopleFilesActivitySettings"
+              },
+              {
+                "tag": "button",
+                "id": null,
+                "classes": "inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors duration-[120ms] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-action text-action-foreground hover:bg-action-hover disabled:bg-disabled disabled:text-disabled-foreground min-h-(--control-h) px-4 py-2 has-[>svg]:px-3",
+                "text": "New task"
+              }
+            ]
+          },
+          {
+            "property": "color",
+            "value": "rgb(87, 78, 135)",
+            "matchesTokenValue": true,
+            "count": 4,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "semantic-pill inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border border-transparent px-2 py-0.5 text-xs/[18px] font-medium bg-work-bg text-work",
+                "text": "◐Active"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "text-xs",
+                "text": "◐"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "semantic-pill inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border border-transparent px-2 py-0.5 text-xs/[18px] font-medium bg-work-bg text-work",
+                "text": "◐Active"
+              }
+            ]
+          },
+          {
+            "property": "background-color",
+            "value": "rgb(240, 239, 250)",
+            "matchesTokenValue": true,
+            "count": 2,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "semantic-pill inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border border-transparent px-2 py-0.5 text-xs/[18px] font-medium bg-work-bg text-work",
+                "text": "◐Active"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "semantic-pill inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border border-transparent px-2 py-0.5 text-xs/[18px] font-medium bg-work-bg text-work",
+                "text": "◐Active"
+              }
+            ]
+          },
+          {
+            "property": "border-bottom-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.09)",
+            "matchesTokenValue": true,
+            "count": 45,
+            "examples": [
+              {
+                "tag": "div",
+                "id": null,
+                "classes": "visual-project-tabs-v2 no-print border-b px-4 md:sticky md:top-0 md:z-20 md:px-6 xl:px-8",
+                "text": "OverviewWorkDeliverablesCoordinationPeopleFilesActivitySettings"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--violet count-card--link",
+                "text": "Tasks in progress0Project SYN-101 · all disciplines"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--amber count-card--link",
+                "text": "Tasks for review0Project SYN-101 · all disciplines"
+              }
+            ]
+          },
+          {
+            "property": "border-top-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.16)",
+            "matchesTokenValue": true,
+            "count": 17,
+            "examples": [
+              {
+                "tag": "dl",
+                "id": null,
+                "classes": "visual-title-block",
+                "text": "Current values"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg)",
+                "text": "MD"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg) mt-0.5",
+                "text": "JL"
+              }
+            ]
+          },
+          {
+            "property": "border-right-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.16)",
+            "matchesTokenValue": true,
+            "count": 17,
+            "examples": [
+              {
+                "tag": "dl",
+                "id": null,
+                "classes": "visual-title-block",
+                "text": "Current values"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg)",
+                "text": "MD"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg) mt-0.5",
+                "text": "JL"
+              }
+            ]
+          },
+          {
+            "property": "border-bottom-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.16)",
+            "matchesTokenValue": true,
+            "count": 17,
+            "examples": [
+              {
+                "tag": "dl",
+                "id": null,
+                "classes": "visual-title-block",
+                "text": "Current values"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg)",
+                "text": "MD"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg) mt-0.5",
+                "text": "JL"
+              }
+            ]
+          },
+          {
+            "property": "border-left-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.16)",
+            "matchesTokenValue": true,
+            "count": 17,
+            "examples": [
+              {
+                "tag": "dl",
+                "id": null,
+                "classes": "visual-title-block",
+                "text": "Current values"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg)",
+                "text": "MD"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg) mt-0.5",
+                "text": "JL"
+              }
+            ]
+          },
+          {
+            "property": "color",
+            "value": "rgb(70, 80, 99)",
+            "matchesTokenValue": true,
+            "count": 17,
+            "examples": [
+              {
+                "tag": "dt",
+                "id": null,
+                "classes": "",
+                "text": "Current values"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg)",
+                "text": "MD"
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg) mt-0.5",
+                "text": "JL"
+              }
+            ]
+          },
+          {
+            "property": "border-top-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.09)",
+            "matchesTokenValue": true,
+            "count": 24,
+            "examples": [
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--violet count-card--link",
+                "text": "Tasks in progress0Project SYN-101 · all disciplines"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--amber count-card--link",
+                "text": "Tasks for review0Project SYN-101 · all disciplines"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--red count-card--link",
+                "text": "Overdue tasks0Project SYN-101 · all disciplines"
+              }
+            ]
+          },
+          {
+            "property": "border-right-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.09)",
+            "matchesTokenValue": true,
+            "count": 21,
+            "examples": [
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--violet count-card--link",
+                "text": "Tasks in progress0Project SYN-101 · all disciplines"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--amber count-card--link",
+                "text": "Tasks for review0Project SYN-101 · all disciplines"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--red count-card--link",
+                "text": "Overdue tasks0Project SYN-101 · all disciplines"
+              }
+            ]
+          },
+          {
+            "property": "border-left-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.09)",
+            "matchesTokenValue": true,
+            "count": 21,
+            "examples": [
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--violet count-card--link",
+                "text": "Tasks in progress0Project SYN-101 · all disciplines"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--amber count-card--link",
+                "text": "Tasks for review0Project SYN-101 · all disciplines"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "count-card count-card--red count-card--link",
+                "text": "Overdue tasks0Project SYN-101 · all disciplines"
+              }
+            ]
+          },
+          {
+            "property": "color",
+            "value": "rgb(106, 82, 209)",
+            "matchesTokenValue": true,
+            "count": 10,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              },
+              {
+                "tag": "svg",
+                "id": null,
+                "classes": null,
+                "text": ""
+              },
+              {
+                "tag": "path",
+                "id": null,
+                "classes": null,
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "background-color",
+            "value": "rgb(239, 235, 253)",
+            "matchesTokenValue": true,
+            "count": 2,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "stroke",
+            "value": "rgb(106, 82, 209)",
+            "matchesTokenValue": true,
+            "count": 6,
+            "examples": [
+              {
+                "tag": "svg",
+                "id": null,
+                "classes": null,
+                "text": ""
+              },
+              {
+                "tag": "path",
+                "id": null,
+                "classes": null,
+                "text": ""
+              },
+              {
+                "tag": "path",
+                "id": null,
+                "classes": null,
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "color",
+            "value": "rgb(199, 125, 10)",
+            "matchesTokenValue": true,
+            "count": 18,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              },
+              {
+                "tag": "svg",
+                "id": null,
+                "classes": null,
+                "text": ""
+              },
+              {
+                "tag": "path",
+                "id": null,
+                "classes": null,
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "background-color",
+            "value": "rgb(253, 241, 220)",
+            "matchesTokenValue": true,
+            "count": 3,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              },
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "stroke",
+            "value": "rgb(199, 125, 10)",
+            "matchesTokenValue": true,
+            "count": 12,
+            "examples": [
+              {
+                "tag": "svg",
+                "id": null,
+                "classes": null,
+                "text": ""
+              },
+              {
+                "tag": "path",
+                "id": null,
+                "classes": null,
+                "text": ""
+              },
+              {
+                "tag": "path",
+                "id": null,
+                "classes": null,
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "color",
+            "value": "rgb(214, 51, 74)",
+            "matchesTokenValue": true,
+            "count": 3,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              },
+              {
+                "tag": "svg",
+                "id": null,
+                "classes": null,
+                "text": ""
+              },
+              {
+                "tag": "circle",
+                "id": null,
+                "classes": null,
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "background-color",
+            "value": "rgb(253, 233, 236)",
+            "matchesTokenValue": true,
+            "count": 1,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "count-card__icon",
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "stroke",
+            "value": "rgb(214, 51, 74)",
+            "matchesTokenValue": true,
+            "count": 2,
+            "examples": [
+              {
+                "tag": "svg",
+                "id": null,
+                "classes": null,
+                "text": ""
+              },
+              {
+                "tag": "circle",
+                "id": null,
+                "classes": null,
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "background-color",
+            "value": "color(srgb 0.0862745 0.101961 0.137255 / 0.09)",
+            "matchesTokenValue": true,
+            "count": 1,
+            "examples": [
+              {
+                "tag": "div",
+                "id": null,
+                "classes": "absolute inset-x-0 h-px bg-border",
+                "text": ""
+              }
+            ]
+          },
+          {
+            "property": "border-left-color",
+            "value": "rgb(56, 92, 172)",
+            "matchesTokenValue": true,
+            "count": 1,
+            "examples": [
+              {
+                "tag": "div",
+                "id": null,
+                "classes": "absolute border-l-2 border-dashed border-primary",
+                "text": "Today"
+              }
+            ]
+          },
+          {
+            "property": "color",
+            "value": "rgb(56, 92, 172)",
+            "matchesTokenValue": true,
+            "count": 2,
+            "examples": [
+              {
+                "tag": "span",
+                "id": null,
+                "classes": "absolute top-0 whitespace-nowrap text-xs/[18px] font-semibold text-primary left-1.5",
+                "text": "Today"
+              },
+              {
+                "tag": "a",
+                "id": null,
+                "classes": "text-primary underline underline-offset-4 hover:text-foreground",
+                "text": "All activity"
+              }
+            ]
+          }
+        ],
+        "smallText": [],
+        "clippedControls": [],
+        "scrollableDataRegions": [
+          {
+            "tag": "div",
+            "id": null,
+            "classes": "scroll-region overflow-x-auto rounded-lg border bg-card",
+            "text": "Timeline of 1 milestones with today marked"
+          },
+          {
+            "tag": "div",
+            "id": null,
+            "classes": "scroll-region overflow-x-auto bg-card rounded-none border-0",
+            "text": "Staffing until the next submission"
+          },
+          {
+            "tag": "div",
+            "id": null,
+            "classes": "scroll-region overflow-x-auto bg-card rounded-none border-0",
+            "text": "Disciplines"
+          }
+        ]
+      },
+      "violations": []
+    }
+  ],
+  "pageErrors": [],
+  "externalFonts": [],
+  "flagRestoreFailures": []
+}

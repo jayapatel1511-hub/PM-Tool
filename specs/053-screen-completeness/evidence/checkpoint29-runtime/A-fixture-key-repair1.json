@@ -1,0 +1,8 @@
+{
+  "reason": "Compile CS1061: WorkAssignmentOccurrence actual key is Token, not Id",
+  "file": "tests/Hub.Tests/Api/TaskBulkCommandTests.cs",
+  "before": "b950a2d275a510302fb5dc952f24245b3a86daff0554edabf225bebf72069a33",
+  "after": "f856a4bcced6595c3b351c6f390e66331b7262009dc93deea0d9fd892531ee69",
+  "change": "Snapshot ordering/projection uses actual Token; full rollback/side-effect assertions preserved",
+  "atUtc": "2026-11-02T17:45:12.993943+00:00"
+}

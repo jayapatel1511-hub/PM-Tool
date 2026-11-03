@@ -1,0 +1,24 @@
+{
+  "exitCode": 0,
+  "args": [
+    "node",
+    "../.review/checkpoint30-review/capture-task.cjs"
+  ],
+  "atUtc": "2026-11-02T20:31:02.124342+00:00",
+  "base": "http://127.0.0.1:8867",
+  "scope": "Read-only combined work_screens+visual_system actual-SPA framing; original8gallery images copied unchanged",
+  "screenshots": [
+    "04-notifications-desktop.png",
+    "01-calendar-phone.png",
+    "06-contribution-phone.png",
+    "02-reviews-phone.png",
+    "05-task-history-phone.png",
+    "06-contribution-desktop.png",
+    "01-calendar-desktop.png",
+    "04-notifications-phone.png",
+    "03-bulk-phone.png",
+    "02-reviews-desktop.png",
+    "03-bulk-desktop.png",
+    "05-task-sections-desktop.png"
+  ]
+}

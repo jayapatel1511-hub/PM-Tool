@@ -3,10 +3,12 @@ import { useFlag } from '@/lib/auth'
 import { ScheduleNote } from '@/components/hub/schedule-note'
 import { useQuery } from '@tanstack/react-query'
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronsDownUp, ChevronsUpDown } from 'lucide-react'
-import { Fragment, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
-import { Link, useSearchParams } from 'react-router'
+import { Fragment, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { AccentDot, ActiveFilters, Empty, ErrorBanner, FilterBar, Loading, Notice, Page, Section } from '@/components/hub/common'
+import { IdentityDot, ItemMark, resolveIdentityColour } from '@/components/hub/identity-colour'
 import { useItemPanel } from '@/components/hub/panel-host'
+import { ViewMenu } from '@/components/hub/views'
 import { Key } from '@/components/hub/pills'
 import { useScope, WorkspaceTabs } from '@/components/hub/workspace'
 import { Button } from '@/components/ui/button'
@@ -16,11 +18,14 @@ import { addDays, daysBetween, fmtDate, monthLabel, today } from '@/lib/format'
 import { plural, t, tv } from '@/lib/i18n'
 import { accentOf, cn } from '@/lib/utils'
 import { milestoneLabelLayout } from './gantt-labels'
-import { DepArrow, HATCH, Legend, MoveDialog, PrintLegend, ZOOM, ZoomMenu, assumedWidth, depPath, depTitle, tone, toneBg, type Move, type Zoom } from './projects/Timeline'
+import { DepArrow, Legend, MoveDialog, PrintLegend, ZOOM, ZoomMenu, assumedWidth, depPath, depTitle, overdueAppearance, taskLaneAppearance, tone, toneBg, type Move, type Zoom } from './projects/Timeline'
+import { laneFill } from '@/components/hub/semantic-colours'
+import { captureTimelineView, timelineLayerChoices, timelineViewDate, timelineViewLayers, timelineViewSet, timelineViewSetParam, timelineViewZoom } from './projects/timeline-view-state'
+import { TimelineLayerControls } from './projects/timeline-view-controls'
 
 type GTask = components['schemas']['TimelineTask']
 type Dated = components['schemas']['TimelineDeliverable'] | GTask
-type GProject = components['schemas']['TimelineProjectGroup']
+type GProject = Omit<components['schemas']['TimelineProjectGroup'], 'project'> & { project: components['schemas']['TimelineProject'] & { identityColour?: string | null } }
 /** `assumed`: no start date, so the bar starts at the creation date (§40 AC-TL-01). */
 interface Span { start: string; end: string; late: boolean; assumed: boolean; ghost: { start: string; end: string } | null; baseline?: { start: string; end: string } | null }
 type Row =
@@ -40,30 +45,38 @@ const monday = (d: string) => addDays(d, -((new Date(d + 'T00:00:00Z').getUTCDay
  *  as dated bars, milestone diamonds, arrows only for each project's own dependencies, and a today line. A drag previews
  *  the old and new dates before saving; cancelling changes nothing. Undated items stay listed under Unscheduled. */
 export function GanttPage() {
+  const viewsOn = useFlag('work_screens')
+  const baselineEnabled = useFlag('schedule_baseline')
   const small = useFlag('small_ux')
+  const visualSystem = useFlag('visual_system')
   const scope = useScope()
   const [sp, setSp] = useSearchParams()
+  const location = useLocation(), navigate = useNavigate()
+  const layout = (key: string, value: string) => { const next = new URLSearchParams(sp); next.set(key, value); navigate(`${location.pathname}?${next}${location.hash}`, { replace: true, preventScrollReset: true, state: location.state }) }
   const openPanel = useItemPanel()
   const q = useQuery({ queryKey: ['gantt', scope.api], enabled: scope.ready, queryFn: () => typedRequest('get', '/api/v1/timeline', { query: { projects: scope.api } }) })
   const [localClosed, setLocalClosed] = useState<Set<string>>(new Set())
-  const closed = small ? new Set((sp.get('collapsed') === 'all' ? ['*'] : (sp.get('collapsed') ?? '').split(',')).filter(Boolean)) : localClosed
-  const setClosed = (update: Set<string> | ((previous: Set<string>) => Set<string>)) => { const value = typeof update === 'function' ? update(closed) : update; if (small) set('collapsed', value.has('*') ? 'all' : [...value].join(',') || null); else setLocalClosed(value) }
+  const closed = viewsOn ? timelineViewSet(sp.get('collapsed')) : small ? new Set((sp.get('collapsed') === 'all' ? ['*'] : (sp.get('collapsed') ?? '').split(',')).filter(Boolean)) : localClosed
+  const setClosed = (update: Set<string> | ((previous: Set<string>) => Set<string>)) => { const value = typeof update === 'function' ? update(closed) : update; if (viewsOn) layout('collapsed', timelineViewSetParam(value)); else if (small) set('collapsed', value.has('*') ? 'all' : [...value].join(',') || null); else setLocalClosed(value) }
   const [shift, setShift] = useState<{ id: string; days: number } | null>(null)
   const [move, setMove] = useState<(Move & { projectComplete: boolean }) | null>(null)
   const drag = useRef<{ id: string; x0: number; moved: boolean } | null>(null)
   const suppress = useRef(false)
   const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
-  const zoom = (sp.get('zoom') as Zoom | null) ?? 'month'
+  const zoom = viewsOn ? timelineViewZoom(sp.get('zoom')) : (sp.get('zoom') as Zoom | null) ?? 'month'
+  const layerChoices = timelineLayerChoices('workspace', false, baselineEnabled)
+  const layers = timelineViewLayers(sp.get('layers'), layerChoices)
+  const shown = (layer: (typeof layerChoices)[number]) => !viewsOn || layers.has(layer)
   const hide = sp.get('hideCompleted') === 'true'
   const now = today()
-  const start = sp.get('start') ?? addDays(monday(now), -14)
+  const start = (viewsOn ? timelineViewDate(sp.get('start')) : sp.get('start')) ?? addDays(monday(now), -14)
   const end = addDays(start, LEN[zoom] - 1)
   const px = ZOOM[zoom]
   const width = Math.round(LEN[zoom] * px)
   const x = (d: string) => daysBetween(start, d) * px
 
-  if (!scope.ready || q.isPending) return <Page title={t('wsview.timeline')}><WorkspaceTabs /><div className="rounded-lg border bg-card"><Loading rows={8} /></div></Page>
-  if (q.error) return <Page title={t('wsview.timeline')}><WorkspaceTabs /><ErrorBanner error={q.error} retry={() => q.refetch()} /></Page>
+  if (!scope.ready || q.isPending) return <Page tabs={<WorkspaceTabs />} title={t('wsview.timeline')}><div className="rounded-lg border bg-card"><Loading rows={8} /></div></Page>
+  if (q.error) return <Page tabs={<WorkspaceTabs />} title={t('wsview.timeline')}><ErrorBanner error={q.error} retry={() => q.refetch()} /></Page>
 
   const spanOf = (i: Dated): Span => {
     const due = i.dueDate!
@@ -137,13 +150,16 @@ export function GanttPage() {
 
   const bar = (r: Extract<Row, { kind: 'deliverable' | 'task' }>) => {
     const { item, span } = r
+    const taskVisual = visualSystem && r.kind === 'task'
+    const lane = r.kind === 'task' ? (item as GTask).lane : undefined
+    const laneRole = taskVisual ? taskLaneAppearance(lane) : null
     const left = x(span.start), right = x(span.end) + px
     if (right < 0 || left > width) return null
     const dx = shift?.id === item.id ? shift.days * px : 0
     const type = r.kind === 'task' ? 'Task' : 'Deliverable'
     const late = span.late ? daysBetween(span.end, now) : 0
     const slip = span.ghost ? daysBetween(span.ghost.end, span.end) : 0
-    // Overdue and moved dates are spoken as well as drawn (hatch, dashed baseline), never colour alone.
+    // Overdue and moved dates are spoken as well as drawn, never colour alone.
     const label = [t('timeline.barLabel', { key: item.key, name: item.name, from: fmtDate(span.start), to: fmtDate(span.end), status: tv(item.status), pct: item.progressPct }),
       span.assumed && t('sig.startNotSet'), late > 0 && plural(late, 'timeline.overdueByOne', 'timeline.overdueBy', { n: late }), span.ghost && t('timeline.baseline', { from: fmtDate(span.ghost.start), to: fmtDate(span.ghost.end) })].filter(Boolean).join(' · ')
     const drop = (n: number) => setMove({ kind: r.kind, id: item.id, key: item.key, name: item.name, start: item.startDate, due: item.dueDate!, days: n, rowVersion: item.rowVersion,
@@ -153,19 +169,20 @@ export function GanttPage() {
     const after = (late > 0 ? right + Math.max(late * px, 2) : right) + 6
     return (
       <>
-        {span.ghost && <span aria-hidden className="absolute rounded-md border border-dashed border-foreground/50" title={t('timeline.baseline', { from: fmtDate(span.ghost.start), to: fmtDate(span.ghost.end) })}
+        {shown('originalDates') && span.ghost && <span aria-hidden className="absolute rounded-md border border-dashed border-foreground/50" title={t('timeline.baseline', { from: fmtDate(span.ghost.start), to: fmtDate(span.ghost.end) })}
           style={{ left: x(span.ghost.start), width: Math.max((daysBetween(span.ghost.start, span.ghost.end) + 1) * px, 4), top: top - 3, height: height + 6 }} />}
-        {span.baseline && <span aria-hidden className="absolute rounded-md border-2 border-dotted border-primary/60" title={t('interaction.baselineRange',{from:fmtDate(span.baseline.start),to:fmtDate(span.baseline.end)})} style={{left:x(span.baseline.start),width:Math.max((daysBetween(span.baseline.start,span.baseline.end)+1)*px,4),top:top-5,height:height+10}} />}
+        {shown('baselineDates') && span.baseline && <span aria-hidden className="absolute rounded-md border-2 border-dotted border-primary/60" title={t('interaction.baselineRange',{from:fmtDate(span.baseline.start),to:fmtDate(span.baseline.end)})} style={{left:x(span.baseline.start),width:Math.max((daysBetween(span.baseline.start,span.baseline.end)+1)*px,4),top:top-5,height:height+10}} />}
         <button type="button" {...props} aria-label={label} title={label + (item.canEditDates ? ` · ${t('timeline.dragHint')}` : '')}
+          data-visual-timeline-bar={visualSystem ? item.id : undefined} data-task-lane={taskVisual ? laneFill(lane ?? '') ? lane : 'unknown' : undefined}
           className={cn('absolute flex items-center overflow-hidden rounded-md border text-left text-xs/4 text-foreground', span.late && 'rounded-r-none', dx && 'ring-2 ring-primary')}
-          style={{ left: left + dx, width: w, top, height, borderColor: tone(item.status), background: toneBg(item.status), touchAction: item.canEditDates ? 'none' : undefined, cursor: item.canEditDates ? 'grab' : 'pointer' }}>
+          style={{ left: left + dx, width: w, top, height, borderColor: laneRole?.borderColor ?? tone(item.status), background: laneRole?.background ?? toneBg(item.status), touchAction: item.canEditDates ? 'none' : undefined, cursor: item.canEditDates ? 'grab' : 'pointer' }}>
           {span.assumed && <span aria-hidden className="absolute inset-y-0 left-0 bg-card/65" style={{ width: assumedWidth(span, now, px) }} />}
           {w >= 40 && <span className="relative min-w-0 truncate px-1.5 font-medium tabular-nums">{item.progressPct}%</span>}
-          <span data-meter-fill className="absolute bottom-0 left-0 h-[3px]" style={{ width: `${item.progressPct}%`, background: tone(item.status) }} />
+          <span data-meter-fill data-visual-progress={taskVisual || undefined} className="absolute bottom-0 left-0 h-[3px]" style={{ width: `${item.progressPct}%`, background: laneRole?.progress ?? tone(item.status) }} />
         </button>
         {dx !== 0 && <span className="absolute z-30 rounded-md bg-primary px-1.5 text-xs/[18px] font-medium text-primary-foreground tabular-nums" style={{ left: right + dx + 4, top }}>{shift!.days > 0 ? '+' : ''}{shift!.days} d</span>}
-        {span.late && <span aria-hidden className="absolute rounded-r-md border border-l-0 border-bad" title={plural(late, 'timeline.overdueByOne', 'timeline.overdueBy', { n: late })}
-          style={{ left: right, width: Math.max(late * px, 2), top, height, background: HATCH }} />}
+        {span.late && <span aria-hidden data-visual-overdue={visualSystem ? item.id : undefined} className="absolute rounded-r-md border border-l-0 border-bad" title={plural(late, 'timeline.overdueByOne', 'timeline.overdueBy', { n: late })}
+          style={{ left: right, width: Math.max(late * px, 2), top, height, ...overdueAppearance(visualSystem) }} />}
         {dx === 0 && slip !== 0 && <span aria-hidden className="absolute whitespace-nowrap text-xs/[18px] text-muted-foreground tabular-nums" style={{ left: after, top: (H[r.kind] - 18) / 2 }}>
           {t('gantt.slip', { n: slip > 0 ? `+${slip}` : `−${-slip}` })}</span>}
       </>
@@ -176,8 +193,8 @@ export function GanttPage() {
   const allOpen = closed.size === 0
   const move2 = (n: number) => set('start', addDays(start, n))
   return (
-    <Page title={t('wsview.timeline')} subtitle={t('gantt.range', { from: fmtDate(start), to: fmtDate(end) })}>
-      <WorkspaceTabs />
+    <Page tabs={<WorkspaceTabs />} title={t('wsview.timeline')} subtitle={t('gantt.range', { from: fmtDate(start), to: fmtDate(end) })}
+      actions={viewsOn && <ViewMenu listType="workspace-timeline" captureParams={() => captureTimelineView(sp, 'workspace', { zoom, layers: layerChoices.filter(layer => layers.has(layer)), collapsed: closed, start, scope: scope.params })} />}>
       {q.data?.projects.map(g=><ScheduleNote key={g.project.id} value={g.data.latestPlanned} />)}
       <FilterBar className="no-print" active={<ActiveFilters tokens={hide ? [{ key: 'hideCompleted', label: t('timeline.hideCompleted'), value: t('common.yes') }] : []} onRemove={(k) => set(k, null)} onClear={() => set('hideCompleted', null)} />}
         quick={<div className="flex flex-wrap items-center gap-3">
@@ -191,7 +208,9 @@ export function GanttPage() {
           <label className="flex min-h-(--control-h) items-center gap-2 text-sm"><Checkbox checked={hide} onCheckedChange={(c) => set('hideCompleted', c ? 'true' : null)} />{t('timeline.hideCompleted')}</label>
           {expandable.length > 0 && <Button variant="ghost" onClick={() => setClosed(allOpen ? new Set(['*']) : new Set())}>
             {allOpen ? <ChevronsDownUp className="size-4" /> : <ChevronsUpDown className="size-4" />}{allOpen ? t('gantt.collapse') : t('gantt.expand')}</Button>}
-        </div>} actions={<Legend>{t('sig.ganttDrag')}</Legend>} />
+        </div>} actions={<Legend>{t('sig.ganttDrag')}</Legend>}>
+        {viewsOn && <TimelineLayerControls choices={layerChoices} selected={layers} onChange={value => layout('layers', [...value].sort().join(',') || 'none')} />}
+      </FilterBar>
       <PrintLegend />
       {q.data.truncated && <Notice title={t('ws.truncatedTitle')}>{t('gantt.truncated', { n: q.data.max })}</Notice>}
       {rows.length === 0 ? <div className="rounded-lg border bg-card"><Empty>{t('gantt.empty')}</Empty></div> : (
@@ -220,27 +239,27 @@ export function GanttPage() {
                   const ms = r.g.data.milestones.flatMap((m) => (m.date && m.date >= start && m.date <= end ? [{ ...m, date: m.date }] : [])).sort((a, b) => a.date.localeCompare(b.date))
                   const labels = milestoneLabelLayout(ms.map(m => x(m.date) + px / 2), width)
                   return (
-                    <div key={r.id} data-accent={accentOf(p.id)} className="flex border-b bg-muted" style={{ height: H.project }}>
+                    <div key={r.id} data-accent={!resolveIdentityColour(visualSystem, p.identityColour) ? accentOf(p.id) : undefined} className="flex border-b bg-muted" style={{ height: H.project, ...(resolveIdentityColour(visualSystem, p.identityColour) ? { '--acc-stripe': resolveIdentityColour(visualSystem, p.identityColour) } : {}) } as CSSProperties}>
                       <div className="sticky left-0 z-20 flex shrink-0 items-center gap-1 border-r bg-muted pl-1 pr-3" style={{ width: LABEL }}>
                         <Button variant="ghost" size="icon-sm" aria-expanded={open} aria-label={t(open ? 'gantt.collapseProject' : 'gantt.expandProject', { name: p.projectNumber })}
                           onClick={() => setClosed((s) => { const n = new Set(s); if (n.has('*')) { n.delete('*'); expandable.filter((id) => id !== p.id).forEach((id) => n.add(id)); } else if (n.has(p.id)) n.delete(p.id); else n.add(p.id); return n })}>
                           {open ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
                         </Button>
                         <Link to={`/projects/${p.projectNumber}/timeline`} className="flex min-w-0 flex-1 items-center gap-2 text-sm font-semibold hover:underline" title={`${p.projectNumber} ${p.name}`}>
-                          <AccentDot id={p.id} /><span className="key shrink-0 font-normal text-muted-foreground">{p.projectNumber}</span><span className="truncate">{p.name}</span>
+                          <IdentityDot id={p.id} colour={p.identityColour} /><span className="key shrink-0 font-normal text-muted-foreground">{p.projectNumber}</span><span className="truncate">{p.name}</span>
                         </Link>
                         <span className="rounded-md bg-card px-1.5 text-xs/[18px] font-medium text-muted-foreground tabular-nums">{r.count}</span>
                       </div>
                       <div className="relative overflow-hidden" style={{ width }}>
                         {ps && ps.r > ps.l && <span aria-hidden className="absolute bottom-1.5 h-1 rounded-full bg-(--acc-stripe)" style={{ left: ps.l, width: ps.r - ps.l }} title={t('gantt.projectSpan', { from: fmtDate(p.startDate), to: fmtDate(p.targetCompletionDate) })} />}
-                        {ms.map((m, i) => {
+                        {shown('milestones') && ms.map((m, i) => {
                           const at = x(m.date) + px / 2
                           return (
                             <Fragment key={m.id}>
-                              {m.baselineDate && m.baselineSlipShown !== false && <span aria-hidden className="absolute top-2 size-3.5 rotate-45 border-2 border-dotted border-primary" style={{left:x(m.baselineDate)}} title={t('interaction.baselineDate',{date:fmtDate(m.baselineDate)})} />}
+                              {shown('baselineDates') && m.baselineDate && m.baselineSlipShown !== false && <span aria-hidden className="absolute top-2 size-3.5 rotate-45 border-2 border-dotted border-primary" style={{left:x(m.baselineDate)}} title={t('interaction.baselineDate',{date:fmtDate(m.baselineDate)})} />}
                               <button type="button" className="absolute top-[6px] grid size-6 -translate-x-1/2 place-items-center rounded-md" style={{ left: at }} onClick={() => openPanel('Milestone', m.id)}
                                 aria-label={t('timeline.milestoneLabel', { key: m.key, name: m.name, date: fmtDate(m.date), status: tv(m.status) })} title={`${m.key} ${m.name} · ${fmtDate(m.date)} · ${tv(m.status)}`}>
-                                <span className="block size-3.5 rotate-45 border border-card" style={{ background: tone(m.status) }} />
+                                <ItemMark kind="Milestone" colour={p.identityColour} className="size-3.5 border-card" fallback={<span className="block size-3.5 rotate-45 border border-card" style={{ background: tone(m.status) }} />} />
                               </button>
                               {labels[i].maxWidth > 0 && <span aria-hidden className="pointer-events-none absolute truncate text-xs/[18px] font-medium text-foreground" style={labels[i]}>{m.name}</span>}
                             </Fragment>
@@ -255,14 +274,14 @@ export function GanttPage() {
                   <div key={r.id} className="flex border-b" style={{ height: H[r.kind] }}>
                     <button type="button" className={cn('sticky left-0 z-20 flex shrink-0 items-center gap-2 border-r bg-card pr-3 text-left text-sm outline-offset-[-2px] hover:bg-muted', r.kind === 'deliverable' && 'font-medium', r.indent ? 'pl-14' : 'pl-10')}
                       style={{ width: LABEL }} onClick={() => openPanel(type, r.item.id)} title={`${r.item.key} ${r.item.name}${r.kind === 'task' && (r.item as GTask).assignee ? ` · ${(r.item as GTask).assignee}` : ''}`}>
-                      <span className="key shrink-0 font-normal text-muted-foreground">{r.item.key.split('-').pop()}</span><span className="truncate">{r.item.name}</span>
+                      <ItemMark kind={type} colour={r.g.project.identityColour} /><span className="key shrink-0 font-normal text-muted-foreground">{r.item.key.split('-').pop()}</span><span className="truncate">{r.item.name}</span>
                     </button>
                     <div className="relative overflow-hidden" style={{ width }}>{bar(r)}</div>
                   </div>
                 )
               })}
-              {arrows.length > 0 && (
-                <svg aria-hidden className="pointer-events-none absolute top-0 z-10 overflow-hidden" style={{ left: LABEL, width, height: y }} width={width} height={y}>
+              {shown('dependencies') && arrows.length > 0 && (
+                <svg data-timeline-layer={viewsOn ? 'dependencies' : undefined} aria-hidden className="pointer-events-none absolute top-0 z-10 overflow-hidden" style={{ left: LABEL, width, height: y }} width={width} height={y}>
                   <defs>
                     {(['hot', 'cold'] as const).map((k) => (
                       <marker key={k} id={`g-arrow-${k}`} viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">

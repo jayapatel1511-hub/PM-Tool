@@ -1,0 +1,26 @@
+{
+  "exitCode": 1,
+  "args": [
+    "node",
+    "tests/coordination-consequence-agenda.cjs"
+  ],
+  "base": "http://127.0.0.1:8869",
+  "atUtc": "2026-11-02T21:51:50.144289+00:00",
+  "scope": "Actual isolated SPA with finite synthetic intercepted HTTP; no actual business writes or mail",
+  "driverSHA256": "b36401ef0b9eae311c231157cf82c029f10edb73736b4cb06b88af60f5459ff2",
+  "tail": [
+    "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:",
+    "",
+    "'false' !== 'true'",
+    "",
+    "    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/coordination-consequence-agenda.cjs:97:125",
+    "    at async /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/coordination-consequence-agenda.cjs:97:5 {",
+    "  generatedMessage: true,",
+    "  code: 'ERR_ASSERTION',",
+    "  actual: 'false',",
+    "  expected: 'true',",
+    "  operator: 'strictEqual',",
+    "  diff: 'simple'",
+    "}"
+  ]
+}

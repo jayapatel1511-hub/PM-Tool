@@ -1,0 +1,26 @@
+{
+  "exitCode": 0,
+  "args": [
+    "node",
+    "../.review/checkpoint31-review/capture-coordination.cjs"
+  ],
+  "base": "http://127.0.0.1:8870",
+  "atUtc": "2026-11-02T21:58:31.817904+00:00",
+  "scope": "Actual isolated SPA; finite synthetic intercepted HTTP; no real business writes or mail",
+  "driverSHA256": "b835aa0f948ca4f6a28d24f6801de2a8c761550b6ccd785ecb96746af12ceddc",
+  "tail": [
+    "{\"status\":\"PASS_READONLY_VISUAL\",\"screenshots\":[\"/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint31-review/new-assets3/s38-07-readiness-links-desktop.png\",\"/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint31-review/new-assets3/s38-08-readiness-agenda-desktop.png\",\"/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint31-review/new-assets3/s38-07-readiness-links-phone.png\",\"/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint31-review/new-assets3/s38-08-readiness-agenda-phone.png\"],\"businessWrites\":0,\"profile\":\"register_screens + screen_patterns + visual_system; finite synthetic HTTP\",\"scope\":\"Review framing only, not independent acceptance\"}"
+  ],
+  "browserResult": {
+    "status": "PASS_READONLY_VISUAL",
+    "screenshots": [
+      "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint31-review/new-assets3/s38-07-readiness-links-desktop.png",
+      "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint31-review/new-assets3/s38-08-readiness-agenda-desktop.png",
+      "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint31-review/new-assets3/s38-07-readiness-links-phone.png",
+      "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint31-review/new-assets3/s38-08-readiness-agenda-phone.png"
+    ],
+    "businessWrites": 0,
+    "profile": "register_screens + screen_patterns + visual_system; finite synthetic HTTP",
+    "scope": "Review framing only, not independent acceptance"
+  }
+}

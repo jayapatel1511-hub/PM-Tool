@@ -1,0 +1,107 @@
+{
+  "atUtc": "2026-11-03T06:58:15.774448+00:00",
+  "status": "PARTIAL_LOCAL_PASS_FULL_S49_OPEN",
+  "packet": "053",
+  "checkpoint": 35,
+  "generation": 63,
+  "locallyCheckedSlices": 46,
+  "totalSlices": 49,
+  "remainingSlices": [
+    "S12",
+    "S37",
+    "S49"
+  ],
+  "checks": {
+    "solution-build6": {
+      "verdict": "PASS",
+      "receipt": "solution-build6.json",
+      "exitCode": 0
+    },
+    "app-types2": {
+      "verdict": "PASS",
+      "receipt": "app-types2.json",
+      "exitCode": 0
+    },
+    "fixture-types3": {
+      "verdict": "PASS",
+      "receipt": "fixture-types3.json",
+      "exitCode": 0
+    },
+    "scoped-lint2": {
+      "verdict": "PASS",
+      "receipt": "scoped-lint2.json",
+      "exitCode": 0
+    },
+    "checker-tests3": {
+      "verdict": "PASS",
+      "receipt": "checker-tests3.json",
+      "exitCode": 0
+    },
+    "spec-freshness1": {
+      "verdict": "PASS",
+      "receipt": "spec-freshness1.json",
+      "exitCode": 0
+    },
+    "traceability1": {
+      "verdict": "PASS",
+      "receipt": "traceability1.json",
+      "exitCode": 0
+    },
+    "decisions1": {
+      "verdict": "PASS",
+      "receipt": "decisions1.json",
+      "exitCode": 0
+    },
+    "whitespace2": {
+      "verdict": "PASS",
+      "receipt": "whitespace2.json",
+      "exitCode": 0
+    },
+    "permission-partial2": {
+      "verdict": "PASS",
+      "receipt": "permission-partial2.json",
+      "exitCode": 0
+    },
+    "permission-complete2": {
+      "verdict": "EXPECTED_REFUSAL",
+      "receipt": "permission-complete2.json",
+      "exitCode": 1,
+      "reason": "Full policy/compound/per-child evidence is incomplete"
+    }
+  },
+  "backendDistinctPassed": 31,
+  "backendScope": {
+    "Hub.Tests.Api.": 12,
+    "Hub.Tests.Domain.": 19
+  },
+  "browserFiniteGroups": 9,
+  "checkerDefectTests": 19,
+  "compiledSourceFiles": 711,
+  "webSourceFiles": 275,
+  "SPABundleFiles": 143,
+  "earlierOutputsPreserved": 6294,
+  "previousSPABundlePreserved": 143,
+  "previousGalleryAssetsPreserved": 22,
+  "roleRows": 83,
+  "roleOperations": 257,
+  "rowScenarios": 33,
+  "reviewedMeetingMappings": 3,
+  "coverageComplete": false,
+  "strictCompleteRefuses": true,
+  "review": "http://127.0.0.1:8883/#addition-12",
+  "reviewPath": ".review/checkpoint35-review/index.html",
+  "spa": "http://127.0.0.1:8882",
+  "realAPI5107Listening": false,
+  "flagsActivated": false,
+  "committed": false,
+  "pushed": false,
+  "deployed": false,
+  "Accepted": false,
+  "goalComplete": false,
+  "pendingUserChoices": [
+    "Undo scope/window",
+    "Date cue meanings",
+    "Report export own-project vs visible-project scope"
+  ],
+  "evidenceBoundary": "Finite actual API/provider and pure-domain cases, separately synthetic browser HTTP; no full permission-matrix/exhaustive lifecycle/human/hosted acceptance claim"
+}

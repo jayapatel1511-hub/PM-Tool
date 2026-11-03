@@ -1,0 +1,9 @@
+{
+  "src/Hub.Api/Text.cs": {
+    "personFacts.inactive": "Only an active person may edit their own certification records.",
+    "personFacts.active_tag": "Choose an active certification tag. Existing inactive tags remain recorded until explicitly removed.",
+    "personFacts.duplicate": "This person already has a record for that certification tag.",
+    "personFacts.type": "Choose Employee, Co-op or Contractor, or leave the person type unrecorded.",
+    "personFacts.date_order": "The person end date must be on or after the start date."
+  }
+}

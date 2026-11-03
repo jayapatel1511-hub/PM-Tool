@@ -1,0 +1,23 @@
+{
+  "status": "complete",
+  "results": [
+    {
+      "name": "timeline",
+      "exitCode": 1,
+      "seconds": 0.84,
+      "log": "real-timeline-setup-run1.log"
+    },
+    {
+      "name": "deliverable",
+      "exitCode": 0,
+      "seconds": 1.24,
+      "log": "real-deliverable-setup-run1.log"
+    },
+    {
+      "name": "person",
+      "exitCode": 0,
+      "seconds": 0.62,
+      "log": "real-person-setup-run1.log"
+    }
+  ]
+}

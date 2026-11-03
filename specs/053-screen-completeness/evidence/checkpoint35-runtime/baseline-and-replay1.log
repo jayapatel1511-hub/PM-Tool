@@ -1,0 +1,41 @@
+Test run for /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint35-artifacts/bin/Hub.Tests/release/Hub.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.30]     Hub.Tests.Domain.PermissionExplanationTests.Contribution_examples_require_own_actual_membership_even_for_admin_and_pm [FAIL]
+  Failed Hub.Tests.Domain.PermissionExplanationTests.Contribution_examples_require_own_actual_membership_even_for_admin_and_pm [< 1 ms]
+  Error Message:
+   Assert.True() Failure
+Expected: True
+Actual:   False
+  Stack Trace:
+     at Hub.Tests.Domain.PermissionExplanationTests.Contribution_examples_require_own_actual_membership_even_for_admin_and_pm() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Domain/PermissionExplanationTests.cs:line 62
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+[xUnit.net 00:00:07.15]     Hub.Tests.Api.AdminRoleExplanationTests.Current_role_examples_are_admin_only_bounded_translated_readonly_and_dark_off [FAIL]
+[xUnit.net 00:00:07.39]     Hub.Tests.Api.PlanningLeaveReplayAuthorityTests.Effective_read_only_supervisor_cannot_replay_previously_authorized_leave_success(operation: "reconcile") [FAIL]
+  Failed Hub.Tests.Api.AdminRoleExplanationTests.Current_role_examples_are_admin_only_bounded_translated_readonly_and_dark_off [6 s]
+  Error Message:
+   Assert.DoesNotContain() Failure: Sub-string found
+                                ↓ (pos 186409)
+String: ···"uirements":[{"key":"adminRole.requirement"···
+Found:  "adminRole."
+  Stack Trace:
+     at Hub.Tests.Api.AdminRoleExplanationTests.Current_role_examples_are_admin_only_bounded_translated_readonly_and_dark_off() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/AdminRoleExplanationTests.cs:line 26
+--- End of stack trace from previous location ---
+  Failed Hub.Tests.Api.PlanningLeaveReplayAuthorityTests.Effective_read_only_supervisor_cannot_replay_previously_authorized_leave_success(operation: "reconcile") [7 s]
+  Error Message:
+   Expected 403 but got 200: {"count":1}
+  Stack Trace:
+     at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118
+   at Hub.Tests.Api.PlanningLeaveReplayAuthorityTests.Effective_read_only_supervisor_cannot_replay_previously_authorized_leave_success(String operation) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/PlanningLeaveReplayAuthorityTests.cs:line 126
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:11.24]     Hub.Tests.Api.PlanningLeaveReplayAuthorityTests.Effective_read_only_supervisor_cannot_replay_previously_authorized_leave_success(operation: "manual") [FAIL]
+  Failed Hub.Tests.Api.PlanningLeaveReplayAuthorityTests.Effective_read_only_supervisor_cannot_replay_previously_authorized_leave_success(operation: "manual") [3 s]
+  Error Message:
+   Expected 403 but got 200: {"id":"01a1a000-4a91-7254-910d-509451f4271e","rowVersion":1}
+  Stack Trace:
+     at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118
+   at Hub.Tests.Api.PlanningLeaveReplayAuthorityTests.Effective_read_only_supervisor_cannot_replay_previously_authorized_leave_success(String operation) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/PlanningLeaveReplayAuthorityTests.cs:line 126
+--- End of stack trace from previous location ---
+Results File: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint35-runtime/trx-baseline-and-replay1/baseline-and-replay1.trx
+
+Failed!  - Failed:     4, Passed:     4, Skipped:     0, Total:     8, Duration: 10 s - Hub.Tests.dll (net10.0)

@@ -1,0 +1,12 @@
+{
+  "atUtc": "2026-11-02T22:01:59.605998+00:00",
+  "status": "PASS",
+  "galleryPublicFiles": 17,
+  "galleryMismatches": [],
+  "retainedOutputs": 3701,
+  "retainedMismatches": [],
+  "taskRows": 49,
+  "locallyChecked": 43,
+  "browser": "IAB tab4 visibly verified addition07; markedDeliverable",
+  "priorWrapperDiagnostic": "Initial row selector included table header Slice, causing count assertion; corrected to exact SNN rows. No product change."
+}

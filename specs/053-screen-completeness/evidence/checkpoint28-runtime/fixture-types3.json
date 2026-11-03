@@ -1,0 +1,10 @@
+[
+  {
+    "args": [
+      "npm",
+      "run",
+      "typecheck:tests"
+    ],
+    "exitCode": 0
+  }
+]

@@ -1,0 +1,12 @@
+{"status":"FAIL","suite":"decision-metadata","url":"http://127.0.0.1:8859/projects/P-MOCK/decisions?status=Pending&panel=Decision%3A00000000-0000-0000-0000-000000007120","recentScreens":[{"query":{},"enabled":true,"refused":false},{"query":{},"enabled":true,"refused":false},{"query":{},"enabled":true,"refused":false},{"query":{},"enabled":true,"refused":false},{"query":{},"enabled":true,"refused":false}],"recentLists":[{},{"status":"Pending"},{"status":"Pending"},{"status":"Pending"},{"status":"Pending"},{"status":"Pending"}],"attempts":[{"method":"PATCH","name":"/api/v1/decisions/00000000-0000-0000-0000-000000007120","body":"{\"categoryId\":\"00000000-0000-0000-0000-000000007111\",\"optionsConsidered\":[\"Changed draft option\",\"Synthetic option B\"]}","version":"\"1\""}],"unexpected":[],"unknownGets":[],"observations":["AC69: client4/10/12→10, internal4/11→7.5, full-project basis/denominator and no contact/recorder/person figures despite row filter"]}
+locator.waitFor: Timeout 15000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('button', { name: 'Discard', exact: true }) to be visible[22m
+
+    at discard (/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/decision-metadata.cjs:106:123)
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/decision-metadata.cjs:136:86 {
+  log: [
+    "  - waiting for getByRole('button', { name: 'Discard', exact: true }) to be visible"
+  ],
+  name: 'TimeoutError'
+}

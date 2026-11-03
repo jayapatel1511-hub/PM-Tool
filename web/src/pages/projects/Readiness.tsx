@@ -1,7 +1,8 @@
+import { recordContextReturn } from '@/lib/record-context-navigation'
 import { ViewMenu } from '@/components/hub/views'
 import { AlertTriangle, CalendarCheck, ExternalLink, Plus } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { Link, useSearchParams } from 'react-router'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Empty, ErrorBanner, Field, FilterBar, Loading, Page, Section } from '@/components/hub/common'
 import { Button } from '@/components/ui/button'
@@ -18,10 +19,12 @@ import { Chip, Key } from '@/components/hub/pills'
 import { useFlag, useMe } from '@/lib/auth'
 import { cn } from '@/lib/utils'
 import { useCurrentProject } from './ProjectLayout'
-import { CommandForm, CoordStatus, PersonLabel, SelectField, personName, workChoices, workRef, type CoordOptions } from './CoordinationForms'
+import { CommandForm, CoordStatus, PersonLabel, SelectField, workChoices, workRef, type CoordOptions } from './CoordinationForms'
 import { ReadinessInspector } from './ReadinessForms'
+import { ReadinessWorkList, readinessDeliveryLabel, readinessReadTime } from './readiness-delivery-presentation'
 import { ExportMenu } from '@/components/hub/export'
 import { CommitmentReliability } from './CommitmentReliability'
+import { useItemPanel } from '@/components/hub/panel-host'
 
 type Commitment = components['schemas']['CommitmentRow']
 
@@ -43,26 +46,64 @@ const Truncated = ({ children }: { children: string }) => <p role="status" class
 /** Packet 032 readiness window and explicit weekly promise signatures. */
 export function ReadinessTab() {
   const p = useCurrentProject()
+  const contextOn = useFlag('screen_patterns')
+  const me = useMe()
+  const openPanel = useItemPanel()
   const reliabilityEnabled = useFlag('commitment_reliability')
   const qc = useQueryClient(), [proposing, setProposing] = useState(false), [snapshotWeek, setSnapshotWeek] = useState<string | null>(null)
-  const [inspecting, setInspecting] = useState(false)
+  const [localInspecting, setInspecting] = useState(false)
   const options = useQuery({ queryKey: ['coord-options', p.id], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/changes/options', { params: { projectId: p.id } }) })
   const lookahead = useMe().settings.coordinationLookaheadWeeks
   const [sp, setSp] = useSearchParams()
+  const location = useLocation()
+  const navigate = useNavigate()
+  // The generic inspector has no entity of its own. Keep its open/selected-work
+  // state in the enabled URL so a related-record return can reconstruct it.
+  const inspecting = contextOn ? sp.get('inspect') === '1' : localInspecting
+  const inspectWork = contextOn && inspecting ? sp.get('inspectWork') ?? '' : undefined
+  const inspectCheck = contextOn && inspecting ? sp.get('inspectCheck') ?? undefined : undefined
+  const openInspector = () => {
+    if (!contextOn) { setInspecting(true); return }
+    const next = new URLSearchParams(sp)
+    next.set('inspect', '1'); next.delete('inspectWork'); next.delete('inspectCheck'); next.delete('panel')
+    setSp(next, { state: location.state })
+  }
+  const selectInspectorWork = (target: string) => {
+    const next = new URLSearchParams(sp)
+    next.set('inspect', '1')
+    if (target) next.set('inspectWork', target); else next.delete('inspectWork')
+    next.delete('inspectCheck')
+    setSp(next, { replace: true, state: location.state })
+  }
+  const inspectSelectedWork = (target: string, code?: string) => {
+    const next = new URLSearchParams(sp)
+    next.set('inspect', '1'); next.set('inspectWork', target); next.delete('panel')
+    if (code) next.set('inspectCheck', code); else next.delete('inspectCheck')
+    setSp(next, { state: location.state })
+  }
+  const selectInspectorCheck = (code: string) => {
+    const next = new URLSearchParams(sp); next.set('inspectCheck', code)
+    setSp(next, { replace: true, state: location.state })
+  }
   const day = DAYS.includes(p.coordinationDay ?? '') ? p.coordinationDay! : 'Monday'
   const defaultFrom = weekStart(today(), day)
   const from = sp.get('from') ?? defaultFrom
   const to = sp.get('to') ?? addDays(defaultFrom, lookahead * 7 - 1)
   const promisePage = Math.max(1, Number(sp.get('promisePage')) || 1)
   const constraintsPage = Math.max(1, Number(sp.get('constraintsPage')) || 1), readyPage = Math.max(1, Number(sp.get('readyPage')) || 1)
+  const workPage = Math.max(1, Number(sp.get('workPage')) || 1)
   const set = (key: string, value: string) => {
     const next = new URLSearchParams(sp)
     if (value) next.set(key, value); else next.delete(key)
-    if (key === 'from' || key === 'to') for (const page of ['promisePage', 'constraintsPage', 'readyPage']) next.delete(page)
+    if (key === 'from' || key === 'to') for (const page of ['promisePage', 'constraintsPage', 'readyPage', 'workPage']) next.delete(page)
     setSp(next, { replace: true })
   }
   const reset = () => setSp(new URLSearchParams(), { replace: true })
-  const clear = (...keys: string[]) => { const next = new URLSearchParams(sp); for (const key of keys) next.delete(key); setSp(next, { replace: true }) }
+  const clear = (...keys: string[]) => {
+    const returned = recordContextReturn(location.state)
+    if (keys.includes('panel') && returned) { navigate(returned.url, { replace: true, state: returned.state }); return }
+    const next = new URLSearchParams(sp); for (const key of keys) next.delete(key); setSp(next, { replace: true })
+  }
   // Search and key links open a promise or a constraint's work inspector: ?panel=OutputCommitment:id or WorkConstraint:id.
   const panel = sp.get('panel') ?? ''
   const promiseId = sp.get('promise') ?? (panel.startsWith('OutputCommitment:') ? panel.slice(17) : null)
@@ -83,12 +124,12 @@ export function ReadinessTab() {
   }, [from, to, day])
   const invalidWindow = weeks.length === 0 || weeks.length > 12
   const q = useQuery({
-    queryKey: ['p', p.id, 'readiness-window', from, to, promisePage, constraintsPage, readyPage],
+    queryKey: ['p', p.id, 'readiness-window', from, to, promisePage, constraintsPage, readyPage, contextOn, contextOn ? workPage : null],
     enabled: !invalidWindow,
     queryFn: async () => {
       // A promise due in the window starts at most six days earlier; rows keep the week start they were recorded with.
       const [aggregate, weekly] = await Promise.all([
-        typedRequest('get', '/api/v1/projects/{projectId}/readiness/window', { params: { projectId: p.id }, query: { from, to, constraintsPage, readyPage, pageSize: 50 } }),
+        typedRequest('get', '/api/v1/projects/{projectId}/readiness/window', { params: { projectId: p.id }, query: { from, to, constraintsPage, readyPage, pageSize: 50, ...(contextOn ? { workPage } : {}) } }),
         typedRequest('get', '/api/v1/projects/{projectId}/weekly-commitments', { params: { projectId: p.id }, query: { from: addDays(from, -6), to, targetFrom: from, targetTo: to, page: promisePage } }),
       ])
       return { ...aggregate, ...weekly, pageSize: weekly.pageSize ?? aggregate.pageSize } // a paged read always answers its page size
@@ -120,7 +161,7 @@ export function ReadinessTab() {
   const canCapture = p.permissions.captureWeeklyPlan.ok // FR-FIG-08 decision 6
   return (
     <Page {...header} actions={
-      <><ViewMenu listType="readiness" projectId={p.id} />{options.data && <Button variant="outline" onClick={() => setInspecting(true)}>{t('readiness.inspect')}</Button>}
+      <><ViewMenu listType="readiness" projectId={p.id} />{options.data && <Button variant="outline" onClick={openInspector}>{t('readiness.inspect')}</Button>}
       <ExportMenu path={`projects/${p.id}/weekly-commitments/export`} params={{ from, to }} name={`${p.projectNumber}-weekly-commitments`} label={t('readiness.exportPromises')} />
       <Button asChild variant="outline"><Link to={`${base}/coordination?meeting=1`}><CalendarCheck className="size-4" />{t('readiness.meeting')}</Link></Button>
       {options.data?.canWrite && <Button onClick={() => setProposing(true)}><Plus className="size-4" />{t('readiness.propose')}</Button>}</>
@@ -129,6 +170,11 @@ export function ReadinessTab() {
       {reliabilityEnabled && <CommitmentReliability projectId={p.id} onOpenCommitment={(id) => set('promise', id)} />}
       {options.error && <ErrorBanner error={options.error} retry={() => options.refetch()} />}
       {linked.error && <ErrorBanner error={linked.error} />}
+      {contextOn && <Section title={readinessDeliveryLabel('title')} id="work-readiness" count={data.work?.total}>
+        <div className="space-y-1 border-b px-5 py-3 text-xs text-muted-foreground"><p>{readinessDeliveryLabel('scope', { from: fmtDate(from), to: fmtDate(to) })}</p><p>{readinessDeliveryLabel('readAt', { time: readinessReadTime(data.work?.evaluatedAt) })}</p></div>
+        <ReadinessWorkList work={data.work} options={options.data} number={p.projectNumber} meId={me.id} inspect={inspectSelectedWork} />
+        {data.work && <WindowPager className="border-t" label={readinessDeliveryLabel('title')} page={data.work.page} total={data.work.total} pageSize={data.work.pageSize} onPage={n => set('workPage', String(n))} />}
+      </Section>}
       <div className="grid gap-6 lg:grid-cols-2">
         <Section title={t('readiness.constraints')} id="constraints" count={data.constraintsTotal}
           actions={<ExportMenu path={`projects/${p.id}/readiness/window/export`} params={{ from, to, list: 'constraints' }} name={`${p.projectNumber}-readiness-constraints`} />}>
@@ -174,9 +220,12 @@ export function ReadinessTab() {
       <p className="flex items-center gap-1.5 text-xs/[18px] text-muted-foreground"><ExternalLink className="size-3.5 shrink-0" aria-hidden />{t('readiness.sourceNote')}</p>
       {proposing && options.data && <ProposePromise projectId={p.id} options={options.data} week={weeks[0]} day={day}
         complete={p.permissions.needsReason} close={() => setProposing(false)} done={done} />}
-      {(inspecting || linked.data) && options.data && <ReadinessInspector projectId={p.id} number={p.projectNumber} options={options.data}
+      {(inspecting || linked.data) && options.data && <ReadinessInspector key={contextOn && !inspecting && linked.data?.id ? linked.data.id : 'generic'} projectId={p.id} number={p.projectNumber} options={options.data}
         initial={linked.data && !inspecting ? `${linked.data.targetType}:${linked.data.targetId}` : undefined}
-        close={() => { setInspecting(false); clear('panel') }} done={done} />}
+        selectedTarget={inspectWork} selectedCheck={inspectCheck} onTargetChange={contextOn && inspecting ? selectInspectorWork : undefined} onCheckChange={contextOn && inspecting ? selectInspectorCheck : undefined}
+        context={contextOn && !inspecting ? linked.data?.context : undefined} constraintId={contextOn && !inspecting ? linked.data?.id : undefined}
+        constraintKey={contextOn && !inspecting ? linked.data?.key : undefined} constraintTitle={contextOn && !inspecting ? linked.data?.title ?? undefined : undefined}
+        meId={me.id} openPanel={openPanel} close={() => { setInspecting(false); if (contextOn && inspecting) clear('inspect', 'inspectWork', 'inspectCheck'); else clear('panel') }} done={done} />}
       {snapshotWeek && <SnapshotForm projectId={p.id} week={snapshotWeek} close={() => setSnapshotWeek(null)} done={done} />}
       {promiseId && options.data && <PromiseDetail projectId={p.id} id={promiseId} options={options.data}
         close={() => clear('promise', 'panel')} done={done} />}
@@ -207,7 +256,7 @@ function ProposePromise({ projectId, options, week, day, complete, close, done }
     payload={() => { if (!work) throw new Error(t('coord.unavailable')); return { targetRowVersion: work.rowVersion, weekStart: start, targetDate,
       intendedOutput: output, completionCriteria: criteria, reason: reason || null } }}>
     <SelectField label={t('readiness.work')} value={target} onChange={setTarget} choices={workChoices(eligible)} />
-    {work && <p className="flex flex-wrap items-center gap-2 text-sm"><span className="text-muted-foreground">{t('readiness.performer')}:</span><PersonLabel options={options} id={work.ownerId} /></p>}
+    {work && <p className="flex flex-wrap items-center gap-2 text-sm"><span className="text-muted-foreground">{t('readiness.performer')}:</span><PersonLabel options={options} id={work.ownerId} focusKey={`promise-new:${projectId}:${type}:${work.id}:performer`} /></p>}
     <div className="grid gap-3 sm:grid-cols-2">
       <Field label={t('readiness.weekStart')} htmlFor="promise-week" hint={t('readiness.weekStartHint', { day: runtimeText(`day.${day}`) })}>
         <Input id="promise-week" type="date" required min={week} step={7} value={start} onChange={e => { setStart(e.target.value); setTargetDate(e.target.value) }} /></Field>
@@ -239,7 +288,7 @@ function PromiseDetail({ projectId, id, options, close, done }: { projectId: str
     {q.isPending ? <Loading rows={4} /> : q.error ? <ErrorBanner error={q.error} retry={() => q.refetch()} /> : row && q.data && <div className="space-y-5 text-sm">
       <div className="flex flex-wrap items-center gap-2"><Key>{row.key}</Key><CoordStatus status={row.state} /></div>
       <dl className="grid grid-cols-[minmax(8rem,auto)_1fr] gap-x-4 gap-y-2">
-        <dt className="text-muted-foreground">{t('readiness.performer')}</dt><dd><PersonLabel options={options} id={row.performerId} /></dd>
+        <dt className="text-muted-foreground">{t('readiness.performer')}</dt><dd><PersonLabel options={options} id={row.performerId} focusKey={`promise:${row.id}:performer`} /></dd>
         <dt className="text-muted-foreground">{t('readiness.output')}</dt><dd className="whitespace-pre-wrap">{row.intendedOutput}</dd>
         <dt className="text-muted-foreground">{t('readiness.criteria')}</dt><dd className="whitespace-pre-wrap">{row.completionCriteria}</dd>
         <dt className="text-muted-foreground">{t('readiness.targetDate')}</dt><dd className="tabular-nums">{fmtDate(row.targetDate)}</dd>
@@ -253,7 +302,7 @@ function PromiseDetail({ projectId, id, options, close, done }: { projectId: str
       </div>}
       <section className="space-y-2"><h3 className="text-base/6 font-semibold">{t('readiness.promiseHistory')}</h3>
         <ul className="space-y-2">{q.data.events.map(e => <li key={e.id} className="space-y-1 rounded-lg border p-4">
-          <p><span className="font-medium">{tv(e.fromState)} → {tv(e.toState)}</span> · {personName(options, e.actorId)} · <span className="tabular-nums">{fmtTime(e.createdAt)}</span></p>
+          <p><span className="font-medium">{tv(e.fromState)} → {tv(e.toState)}</span> · <PersonLabel options={options} id={e.actorId} focusKey={`promise:${row.id}:event:${e.id}:actor`} /> · <span className="tabular-nums">{fmtTime(e.createdAt)}</span></p>
           <p className="whitespace-pre-wrap">{e.reason}</p>{e.evidenceUrl && <a className="text-primary underline underline-offset-4" href={e.evidenceUrl} target="_blank" rel="noopener noreferrer">{t('basis.evidence')}</a>}
         </li>)}</ul></section>
     </div>}

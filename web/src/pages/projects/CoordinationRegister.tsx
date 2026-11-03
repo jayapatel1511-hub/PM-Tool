@@ -1,14 +1,16 @@
+import { recordContextReturn } from '@/lib/record-context-navigation'
 import { UrlSearchInput } from '@/components/hub/url-search'
 import { useState, type ReactNode } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Plus } from 'lucide-react'
-import { useSearchParams } from 'react-router'
+import { useLocation, useNavigate, useSearchParams } from 'react-router'
 import { ActiveFilters, ChipToggle, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Page, useIsPhone } from '@/components/hub/common'
 import { ExportMenu } from '@/components/hub/export'
 import { DataTable } from '@/components/hub/registers'
 import { useTable, type Column } from '@/components/hub/table'
 import { ViewMenu } from '@/components/hub/views'
 import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import type { components } from '@/gen/api'
 import { typedRequest } from '@/lib/api'
 import { invalidateChange } from '@/lib/keys'
@@ -16,23 +18,52 @@ import { plural, t, tv } from '@/lib/i18n'
 import { fmtDate } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import { useCurrentProject } from './ProjectLayout'
+import { useFlag } from '@/lib/auth'
 import { CoordStatus, Count, PersonLabel, RegisterPager, SelectField, discName, personName, peopleChoices, disciplineChoices, type CoordOptions } from './CoordinationForms'
 
 type Schemas = components['schemas']
 /** The two registers share their key fields and each shows the columns of its own kind, so both generated rows are read through one type. */
 type Row = Pick<Schemas['ReviewRow'], 'id' | 'key' | 'title' | 'status' | 'rowVersion'> & Partial<Schemas['ReviewRow']> & Partial<Schemas['ChangeRow']>
 export type RegisterContext = { options: CoordOptions; projectId: string; number: string; refresh: () => void; open: (id: string) => void }
-export function CoordinationRegister({ kind, statuses, create, detail, extra }: { kind: 'reviews' | 'changes'; statuses: string[]; create: (c: RegisterContext & { close: () => void }) => ReactNode; detail: (c: RegisterContext & { id: string; close: () => void }) => ReactNode; extra?: (c: RegisterContext) => ReactNode }) {
+export type DetailContext = RegisterContext & { id: string; close: () => void; assessmentId?: string; assessmentContext?: Schemas['RecordContextView']; assessmentKey?: string; assessmentTitle?: string; findingId?: string; findingRoundId?: string; findingContext?: Schemas['RecordContextView']; findingKey?: string; findingTitle?: string }
+export function CoordinationRegister({ kind, statuses, create, detail, extra }: { kind: 'reviews' | 'changes'; statuses: string[]; create: (c: RegisterContext & { close: () => void }) => ReactNode; detail: (c: DetailContext) => ReactNode; extra?: (c: RegisterContext) => ReactNode }) {
+  const noticesOn = useFlag('capacity_screens')
   const phone = useIsPhone()
   const p = useCurrentProject(), [sp, setSp] = useSearchParams(), [adding, setAdding] = useState(false), qc = useQueryClient()
+  const location = useLocation(), navigate = useNavigate(), contextOn = useFlag('screen_patterns'), registerOn = useFlag('register_screens')
+  const findingOn = contextOn || kind === 'reviews' && registerOn
   const type = kind === 'reviews' ? 'ReviewPackage' : 'ChangeNotice', page = Math.max(1, Number(sp.get('page')) || 1), refresh = () => { invalidateChange(qc, type, p.id) }
   const filters = Object.fromEntries(['q', 'status', 'ownerId', 'mine', ...(kind === 'reviews' ? ['disciplineId'] : [])].map(k => [k, sp.get(k) ?? '']))
   const options = useQuery({ queryKey: ['coord-options', p.id], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/changes/options', { params: { projectId: p.id } }) })
   const list = useQuery({ queryKey: [kind, p.id, filters, page], queryFn: (): Promise<{ items: Row[]; totalCount: number; pageSize: number }> => kind === 'reviews'
     ? typedRequest('get', '/api/v1/projects/{projectId}/reviews', { params: { projectId: p.id }, query: { Q: filters.q, Status: filters.status, OwnerId: filters.ownerId, DisciplineId: filters.disciplineId, Mine: filters.mine === 'true', page } })
     : typedRequest('get', '/api/v1/projects/{projectId}/changes', { params: { projectId: p.id }, query: { Q: filters.q, Status: filters.status, OwnerId: filters.ownerId, Mine: filters.mine === 'true', page } }) })
-  const change = (key: string, value: string) => { const next = new URLSearchParams(sp); if (value) next.set(key, value); else next.delete(key); if (key !== 'page' && key !== 'panel') next.delete('page'); setSp(next) }
-  const open = (id: string) => change('panel', `${type}:${id}`), panel = sp.get('panel')?.startsWith(`${type}:`) ? sp.get('panel')!.slice(type.length + 1) : null
+  const change = (key: string, value: string) => { const next = new URLSearchParams(sp); if (value) next.set(key, value); else next.delete(key); if (key !== 'page' && key !== 'panel') next.delete('page'); if (findingOn && kind === 'reviews' && key === 'panel' && !value) next.delete('round'); setSp(next) }
+  const rawPanel = sp.get('panel') ?? ''
+  const assessmentId = kind === 'changes' && rawPanel.startsWith('ChangeAssessment:') ? rawPanel.slice('ChangeAssessment:'.length) : null
+  const findingId = kind === 'reviews' && rawPanel.startsWith('ReviewFinding:') ? rawPanel.slice('ReviewFinding:'.length) : null
+  const panel = rawPanel.startsWith(`${type}:`) ? rawPanel.slice(type.length + 1) : null
+  const childKind = assessmentId ? 'change-assessment' : findingId ? 'review-finding' : null
+  const child = useQuery<Schemas['ChangeAssessmentLocation'] | Schemas['ReviewFindingLocation']>({
+    queryKey: [assessmentId ? 'change-assessment-context' : 'review-finding-context', p.id, assessmentId ?? findingId, ...(findingId ? [contextOn, registerOn] : [])],
+    enabled: !!childKind && (assessmentId ? contextOn : findingOn),
+    queryFn: () => assessmentId
+      ? typedRequest('get', '/api/v1/projects/{projectId}/change-assessments/{id}', { params: { projectId: p.id, id: assessmentId } })
+      : typedRequest('get', '/api/v1/projects/{projectId}/review-findings/{id}', { params: { projectId: p.id, id: findingId ?? '' } }),
+  })
+  const assessmentChild = assessmentId && child.data && 'noticeId' in child.data ? child.data : null
+  const findingChild = findingId && child.data && 'packageId' in child.data ? child.data : null
+  const closePanel = () => {
+    const returned = recordContextReturn(location.state)
+    if (returned) { navigate(returned.url, { replace: true, state: returned.state }); return }
+    change('panel', '')
+  }
+  const open = (id: string) => {
+    const next = new URLSearchParams(sp)
+    next.set('panel', `${type}:${id}`)
+    if (findingOn && kind === 'reviews') next.delete('round')
+    setSp(next)
+  }
   const ctx = options.data ? { options: options.data, projectId: p.id, number: p.projectNumber, refresh, open } : null
   const reviews = kind === 'reviews', ownerLabel = t(reviews ? 'coord.coordinator' : 'coord.owner')
   // Every column is fixed and none sorts: the list keeps its columns, order and header text (FR-REC-14 adds no surface).
@@ -48,7 +79,7 @@ export function CoordinationRegister({ kind, statuses, create, detail, extra }: 
   ]
   const columns: Column<Row>[] = ([
     { id: 'item', label: t('coord.item'), className: 'min-w-64', cell: r => <button className="break-words text-left font-semibold text-primary underline-offset-4 hover:underline" aria-current={panel === r.id || undefined} onClick={() => open(r.id)}><span className="key font-normal">{r.key}</span> · {r.title}</button> },
-    { id: 'owner', label: ownerLabel, cell: r => ctx ? <PersonLabel options={ctx.options} id={r.coordinatorId ?? r.ownerId} /> : <Missing /> },
+    { id: 'owner', label: ownerLabel, cell: r => ctx ? <PersonLabel options={ctx.options} id={r.coordinatorId ?? r.ownerId} focusKey={`${kind}:${r.id}:owner:table`} /> : <Missing /> },
     { id: 'status', label: t('common.status'), cell: r => <CoordStatus status={r.status} /> },
     ...own,
   ] as Column<Row>[]).map(c => ({ ...c, fixed: true, className: cn('align-top', c.className) }))
@@ -69,20 +100,21 @@ export function CoordinationRegister({ kind, statuses, create, detail, extra }: 
       active={<ActiveFilters tokens={tokens} onRemove={k => change(k, '')} onClear={clear} />}>
       <div className="flex flex-wrap items-end gap-3">
         <div className="w-full sm:w-44"><SelectField label={t('common.status')} value={filters.status} onChange={v => change('status', v)} required={false} choices={statuses.map(s => ({ value: s, label: tv(s) }))} /></div>
-        {ctx && <div className="w-full sm:w-52"><SelectField label={ownerLabel} value={filters.ownerId} onChange={v => change('ownerId', v)} required={false} choices={peopleChoices(ctx.options)} /></div>}
+        {ctx && <div className="w-full sm:w-52"><SelectField label={ownerLabel} value={filters.ownerId} onChange={v => change('ownerId', v)} required={false} choices={peopleChoices(ctx.options, noticesOn)} /></div>}
         {ctx && reviews && <div className="w-full sm:w-48"><SelectField label={t('coord.discipline')} value={filters.disciplineId} onChange={v => change('disciplineId', v)} required={false} choices={disciplineChoices(ctx.options)} /></div>}
       </div>
     </FilterBar>
     {options.error && <ErrorBanner error={options.error} retry={() => options.refetch()} />}
     {list.isPending ? <div className="rounded-lg border bg-card"><Loading rows={4} /></div> : list.error ? <ErrorBanner error={list.error} retry={() => list.refetch()} /> : <>
       <p role="status" className="text-sm text-muted-foreground">{plural(list.data.totalCount, 'coord.countOne', 'coord.count')}</p>
-      {phone && list.data.items.length ? <ul className="space-y-2">{list.data.items.map(r => <li key={r.id} className={cn('space-y-3 rounded-lg border bg-card p-4 text-sm', panel === r.id && 'bg-accent shadow-[inset_3px_0_0_var(--primary)]')}><button className="break-words text-left font-semibold text-primary hover:underline" aria-current={panel === r.id || undefined} onClick={() => open(r.id)}><span className="key font-normal">{r.key}</span> · {r.title}</button><CoordStatus status={r.status} /><dl className="grid grid-cols-[minmax(5rem,auto)_minmax(0,1fr)] gap-x-3 gap-y-2"><dt className="text-muted-foreground">{ownerLabel}</dt><dd>{ctx ? <PersonLabel options={ctx.options} id={r.coordinatorId ?? r.ownerId} /> : <Missing />}</dd>{reviews ? <><dt>{t('review.round')}</dt><dd>{r.roundNumber ?? <Missing />}</dd><dt>{t('review.outstanding')}</dt><dd>{r.outstandingDisciplines ?? <Missing />}</dd><dt>{t('review.blocking')}</dt><dd><Count n={r.blockingFindings} tone="bad" /></dd><dt>{t('review.waiting')}</dt><dd>{r.waitingDays ?? <Missing />}</dd></> : <><dt>{t('change.due')}</dt><dd>{r.assessmentDueDate ? fmtDate(r.assessmentDueDate) : <Missing />}</dd><dt>{t('change.pending')}</dt><dd><Count n={r.pendingAssessments} tone="warn" /></dd></>}</dl></li>)}</ul> :
+      {phone && list.data.items.length ? <ul className="space-y-2">{list.data.items.map(r => <li key={r.id} className={cn('space-y-3 rounded-lg border bg-card p-4 text-sm', panel === r.id && 'bg-accent shadow-[inset_3px_0_0_var(--primary)]')}><button className="break-words text-left font-semibold text-primary hover:underline" aria-current={panel === r.id || undefined} onClick={() => open(r.id)}><span className="key font-normal">{r.key}</span> · {r.title}</button><CoordStatus status={r.status} /><dl className="grid grid-cols-[minmax(5rem,auto)_minmax(0,1fr)] gap-x-3 gap-y-2"><dt className="text-muted-foreground">{ownerLabel}</dt><dd>{ctx ? <PersonLabel options={ctx.options} id={r.coordinatorId ?? r.ownerId} focusKey={`${kind}:${r.id}:owner:card`} /> : <Missing />}</dd>{reviews ? <><dt>{t('review.round')}</dt><dd>{r.roundNumber ?? <Missing />}</dd><dt>{t('review.outstanding')}</dt><dd>{r.outstandingDisciplines ?? <Missing />}</dd><dt>{t('review.blocking')}</dt><dd><Count n={r.blockingFindings} tone="bad" /></dd><dt>{t('review.waiting')}</dt><dd>{r.waitingDays ?? <Missing />}</dd></> : <><dt>{t('change.due')}</dt><dd>{r.assessmentDueDate ? fmtDate(r.assessmentDueDate) : <Missing />}</dd><dt>{t('change.pending')}</dt><dd><Count n={r.pendingAssessments} tone="warn" /></dd></>}</dl></li>)}</ul> :
         <DataTable table={table} rows={list.data.items} loading={false} caption={t(`${kind}.title`)} current={r => panel === r.id} cards={false}
           empty={<Empty title={t(`${kind}.empty`)}>{t(tokens.length ? 'register.noMatch' : `${kind}.emptyHint`)}</Empty>} />}
       <RegisterPager label={t(`${kind}.pager`)} page={page} total={list.data.totalCount} pageSize={list.data.pageSize} onPage={n => change('page', String(n))} />
     </>}
     {ctx && extra?.(ctx)}
     {ctx && adding && create({ ...ctx, close: () => setAdding(false) })}
-    {ctx && !adding && panel && detail({ ...ctx, id: panel, close: () => change('panel', '') })}
+    {ctx && !adding && childKind && (assessmentId ? contextOn : findingOn) && (child.isPending ? <Dialog open onOpenChange={open => !open && closePanel()}><DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-4xl"><DialogHeader><DialogTitle>{t(assessmentId ? 'recordContext.assessment' : 'recordContext.finding')}</DialogTitle><DialogDescription>{t(assessmentId ? 'change.detectionBoundary' : 'review.detailHint')}</DialogDescription></DialogHeader><Loading rows={4} /></DialogContent></Dialog> : child.error || (!assessmentChild && !findingChild) ? <Dialog open onOpenChange={open => !open && closePanel()}><DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-4xl"><DialogHeader><DialogTitle>{t(assessmentId ? 'recordContext.assessment' : 'recordContext.finding')}</DialogTitle><DialogDescription>{t(assessmentId ? 'change.detectionBoundary' : 'review.detailHint')}</DialogDescription></DialogHeader><ErrorBanner error={child.error ?? new Error(t('common.unavailable'))} retry={() => child.refetch()} /></DialogContent></Dialog> : assessmentChild ? detail({ ...ctx, id: assessmentChild.noticeId, close: closePanel, assessmentId: assessmentChild.id, assessmentContext: assessmentChild.context, assessmentKey: assessmentChild.key, assessmentTitle: assessmentChild.title }) : findingChild ? detail({ ...ctx, id: findingChild.packageId, close: closePanel, findingId: findingChild.id, findingRoundId: findingChild.roundId, findingContext: findingChild.context ?? undefined, findingKey: findingChild.key, findingTitle: findingChild.title }) : null)}
+    {ctx && !adding && panel && detail({ ...ctx, id: panel, close: closePanel })}
   </Page>
 }

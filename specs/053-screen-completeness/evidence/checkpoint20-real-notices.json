@@ -1,0 +1,1924 @@
+{
+  "observedAtUtc": "2026-11-01T13:44:42.539Z",
+  "project": {
+    "id": "01a19754-b327-78af-b89f-a3a43edcffd7",
+    "number": "QA20-REAL-001"
+  },
+  "sourceReads": {
+    "changes": {
+      "status": 200,
+      "path": "/projects/01a19754-b327-78af-b89f-a3a43edcffd7/changes/options",
+      "rows": [
+        {
+          "id": "01a19751-d447-7e1f-9a5f-23c4303d03a4",
+          "displayName": "Alex Chen",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-7f75-a176-926ba05c6c3e",
+          "displayName": "Jill Martin",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-780f-8722-3aaa0a0c4d21",
+          "displayName": "Marc Dubois",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-79d4-91a8-0895553dde52",
+          "displayName": "Priya Nair",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        }
+      ],
+      "raw": {
+        "actorId": "01a19751-d447-79d4-91a8-0895553dde52",
+        "canWrite": true,
+        "manageDisciplineIds": [
+          "01a19754-b36a-760b-835a-73075c55e499"
+        ],
+        "canCreate": {
+          "changes": true,
+          "reviews": true
+        },
+        "people": [
+          {
+            "id": "01a19751-d447-7e1f-9a5f-23c4303d03a4",
+            "displayName": "Alex Chen",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-7f75-a176-926ba05c6c3e",
+            "displayName": "Jill Martin",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-780f-8722-3aaa0a0c4d21",
+            "displayName": "Marc Dubois",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-79d4-91a8-0895553dde52",
+            "displayName": "Priya Nair",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          }
+        ],
+        "disciplines": [
+          {
+            "id": "01a19754-b36a-760b-835a-73075c55e499",
+            "name": "Civil"
+          }
+        ],
+        "sources": [],
+        "heads": [],
+        "deliverables": [
+          {
+            "id": "01a19754-b48a-70eb-894d-c9a3707e318b",
+            "key": "QA20-REAL-001-D001",
+            "name": "QA20 real deliverable",
+            "projectDisciplineId": "01a19754-b36a-760b-835a-73075c55e499",
+            "ownerId": "01a19751-d447-7e1f-9a5f-23c4303d03a4",
+            "rowVersion": 0,
+            "revision": null,
+            "transmittalUrl": null,
+            "status": "Not Started",
+            "canCommit": true,
+            "canManage": true
+          }
+        ],
+        "tasks": [
+          {
+            "id": "01a19754-b4c9-7e32-b408-97c300f9c125",
+            "key": "QA20-REAL-001-T0001",
+            "name": "QA20 real task one",
+            "projectDisciplineId": "01a19754-b36a-760b-835a-73075c55e499",
+            "ownerId": "01a19751-d447-79d4-91a8-0895553dde52",
+            "rowVersion": 0,
+            "status": "Not Started",
+            "canCommit": true,
+            "canManage": true
+          },
+          {
+            "id": "01a19754-b4f4-7d85-8480-9cd3522778fc",
+            "key": "QA20-REAL-001-T0002",
+            "name": "QA20 real task two",
+            "projectDisciplineId": "01a19754-b36a-760b-835a-73075c55e499",
+            "ownerId": "01a19751-d447-7e1f-9a5f-23c4303d03a4",
+            "rowVersion": 0,
+            "status": "Not Started",
+            "canCommit": true,
+            "canManage": true
+          }
+        ]
+      }
+    },
+    "pickup": {
+      "status": 200,
+      "path": "/tasks/01a19754-b4c9-7e32-b408-97c300f9c125/pickup-offer",
+      "rows": [
+        {
+          "id": "01a19751-d447-722a-ac3f-2313cfb34bc5",
+          "displayName": "Omar Haddad",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-73ed-9659-79f9784aded9",
+          "displayName": "Sam Patel",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-77ed-a543-6e7618a138ab",
+          "displayName": "Diane Roy",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        }
+      ],
+      "raw": {
+        "id": "01a19755-e74e-7fc1-adf7-2246e91c1ac2",
+        "reason": "QA20 real picker notice read",
+        "note": "Disposable QA20 offer",
+        "openedAt": "2026-11-01T13:39:11.822514+00:00",
+        "keepWatching": true,
+        "rowVersion": 0,
+        "task": {
+          "key": "QA20-REAL-001-T0001",
+          "name": "QA20 real task one",
+          "projectId": "01a19754-b327-78af-b89f-a3a43edcffd7",
+          "projectDisciplineId": "01a19754-b36a-760b-835a-73075c55e499",
+          "dueDate": "2026-11-05"
+        },
+        "allowed": {
+          "pickUp": false,
+          "assign": true,
+          "withdraw": true
+        },
+        "candidates": [
+          {
+            "id": "01a19751-d447-722a-ac3f-2313cfb34bc5",
+            "displayName": "Omar Haddad",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-73ed-9659-79f9784aded9",
+            "displayName": "Sam Patel",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-77ed-a543-6e7618a138ab",
+            "displayName": "Diane Roy",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          }
+        ]
+      }
+    },
+    "handoffs": {
+      "status": 200,
+      "path": "/projects/01a19754-b327-78af-b89f-a3a43edcffd7/handoffs/options",
+      "rows": [
+        {
+          "id": "01a19751-d447-7e1f-9a5f-23c4303d03a4",
+          "displayName": "Alex Chen",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-7f75-a176-926ba05c6c3e",
+          "displayName": "Jill Martin",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-780f-8722-3aaa0a0c4d21",
+          "displayName": "Marc Dubois",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-79d4-91a8-0895553dde52",
+          "displayName": "Priya Nair",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        }
+      ],
+      "raw": {
+        "sources": [
+          {
+            "id": "01a19754-b48a-70eb-894d-c9a3707e318b",
+            "key": "QA20-REAL-001-D001",
+            "name": "QA20 real deliverable",
+            "projectDisciplineId": "01a19754-b36a-760b-835a-73075c55e499",
+            "ownerId": "01a19751-d447-7e1f-9a5f-23c4303d03a4",
+            "revision": null,
+            "transmittalUrl": null,
+            "rowVersion": 0,
+            "dueDate": "2026-11-15"
+          }
+        ],
+        "disciplines": [
+          {
+            "id": "01a19754-b36a-760b-835a-73075c55e499",
+            "name": "Civil"
+          }
+        ],
+        "people": [
+          {
+            "id": "01a19751-d447-7e1f-9a5f-23c4303d03a4",
+            "displayName": "Alex Chen",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-7f75-a176-926ba05c6c3e",
+            "displayName": "Jill Martin",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-780f-8722-3aaa0a0c4d21",
+            "displayName": "Marc Dubois",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-79d4-91a8-0895553dde52",
+            "displayName": "Priya Nair",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          }
+        ],
+        "tasks": [
+          {
+            "id": "01a19754-b4c9-7e32-b408-97c300f9c125",
+            "key": "QA20-REAL-001-T0001",
+            "name": "QA20 real task one",
+            "projectDisciplineId": "01a19754-b36a-760b-835a-73075c55e499",
+            "ownerId": "01a19751-d447-79d4-91a8-0895553dde52",
+            "dueDate": "2026-11-05"
+          },
+          {
+            "id": "01a19754-b4f4-7d85-8480-9cd3522778fc",
+            "key": "QA20-REAL-001-T0002",
+            "name": "QA20 real task two",
+            "projectDisciplineId": "01a19754-b36a-760b-835a-73075c55e499",
+            "ownerId": "01a19751-d447-7e1f-9a5f-23c4303d03a4",
+            "dueDate": "2026-11-06"
+          }
+        ],
+        "canCreate": true
+      }
+    },
+    "organisation": {
+      "status": 200,
+      "path": "/organisation",
+      "rows": [
+        {
+          "id": "01a19751-d446-7e24-9561-bb4a5bdd569f",
+          "rowVersion": 0,
+          "displayName": "Jordan Lee",
+          "email": "jordan@hub.test",
+          "unitId": null,
+          "supervisorId": null,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-7344-8c2f-606007b3c015",
+          "rowVersion": 0,
+          "displayName": "Lena Brooks",
+          "email": "lena@hub.test",
+          "unitId": null,
+          "supervisorId": null,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-7b97-9076-25c6fb92b6f0",
+          "rowVersion": 0,
+          "displayName": "Rita Gomez",
+          "email": "rita@hub.test",
+          "unitId": null,
+          "supervisorId": null,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-722a-ac3f-2313cfb34bc5",
+          "rowVersion": 0,
+          "displayName": "Omar Haddad",
+          "email": "omar@hub.test",
+          "unitId": null,
+          "supervisorId": "01a19751-d447-7344-8c2f-606007b3c015",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-73ed-9659-79f9784aded9",
+          "rowVersion": 0,
+          "displayName": "Sam Patel",
+          "email": "sam@hub.test",
+          "unitId": null,
+          "supervisorId": "01a19751-d447-7344-8c2f-606007b3c015",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-77ed-a543-6e7618a138ab",
+          "rowVersion": 0,
+          "displayName": "Diane Roy",
+          "email": "diane@hub.test",
+          "unitId": null,
+          "supervisorId": "01a19751-d447-7344-8c2f-606007b3c015",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-79d4-91a8-0895553dde52",
+          "rowVersion": 0,
+          "displayName": "Priya Nair",
+          "email": "priya@hub.test",
+          "unitId": null,
+          "supervisorId": "01a19751-d447-7344-8c2f-606007b3c015",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-780f-8722-3aaa0a0c4d21",
+          "rowVersion": 0,
+          "displayName": "Marc Dubois",
+          "email": "marc@hub.test",
+          "unitId": null,
+          "supervisorId": "01a19751-d447-73ed-9659-79f9784aded9",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-7e1f-9a5f-23c4303d03a4",
+          "rowVersion": 0,
+          "displayName": "Alex Chen",
+          "email": "alex@hub.test",
+          "unitId": null,
+          "supervisorId": "01a19751-d447-73ed-9659-79f9784aded9",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-7f75-a176-926ba05c6c3e",
+          "rowVersion": 0,
+          "displayName": "Jill Martin",
+          "email": "jill@hub.test",
+          "unitId": null,
+          "supervisorId": "01a19751-d447-73ed-9659-79f9784aded9",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19758-d722-7e80-924f-8512667cbbe5",
+          "rowVersion": 1,
+          "displayName": "qa20-report-a",
+          "email": "qa20-report-a@hub.test",
+          "unitId": null,
+          "supervisorId": "01a19751-d447-73ed-9659-79f9784aded9",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19758-d73a-7cbd-892a-36e719785ce3",
+          "rowVersion": 1,
+          "displayName": "qa20-report-b",
+          "email": "qa20-report-b@hub.test",
+          "unitId": null,
+          "supervisorId": "01a19751-d447-73ed-9659-79f9784aded9",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        }
+      ],
+      "raw": {
+        "levels": [
+          {
+            "id": "00500000-0000-0000-0000-000000000001",
+            "name": "Region",
+            "sortOrder": 0
+          },
+          {
+            "id": "00500000-0000-0000-0000-000000000002",
+            "name": "Business unit",
+            "sortOrder": 1
+          },
+          {
+            "id": "00500000-0000-0000-0000-000000000003",
+            "name": "Team",
+            "sortOrder": 2
+          }
+        ],
+        "units": [],
+        "people": [
+          {
+            "id": "01a19751-d446-7e24-9561-bb4a5bdd569f",
+            "rowVersion": 0,
+            "displayName": "Jordan Lee",
+            "email": "jordan@hub.test",
+            "unitId": null,
+            "supervisorId": null,
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-7344-8c2f-606007b3c015",
+            "rowVersion": 0,
+            "displayName": "Lena Brooks",
+            "email": "lena@hub.test",
+            "unitId": null,
+            "supervisorId": null,
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-7b97-9076-25c6fb92b6f0",
+            "rowVersion": 0,
+            "displayName": "Rita Gomez",
+            "email": "rita@hub.test",
+            "unitId": null,
+            "supervisorId": null,
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-722a-ac3f-2313cfb34bc5",
+            "rowVersion": 0,
+            "displayName": "Omar Haddad",
+            "email": "omar@hub.test",
+            "unitId": null,
+            "supervisorId": "01a19751-d447-7344-8c2f-606007b3c015",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-73ed-9659-79f9784aded9",
+            "rowVersion": 0,
+            "displayName": "Sam Patel",
+            "email": "sam@hub.test",
+            "unitId": null,
+            "supervisorId": "01a19751-d447-7344-8c2f-606007b3c015",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-77ed-a543-6e7618a138ab",
+            "rowVersion": 0,
+            "displayName": "Diane Roy",
+            "email": "diane@hub.test",
+            "unitId": null,
+            "supervisorId": "01a19751-d447-7344-8c2f-606007b3c015",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-79d4-91a8-0895553dde52",
+            "rowVersion": 0,
+            "displayName": "Priya Nair",
+            "email": "priya@hub.test",
+            "unitId": null,
+            "supervisorId": "01a19751-d447-7344-8c2f-606007b3c015",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-780f-8722-3aaa0a0c4d21",
+            "rowVersion": 0,
+            "displayName": "Marc Dubois",
+            "email": "marc@hub.test",
+            "unitId": null,
+            "supervisorId": "01a19751-d447-73ed-9659-79f9784aded9",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-7e1f-9a5f-23c4303d03a4",
+            "rowVersion": 0,
+            "displayName": "Alex Chen",
+            "email": "alex@hub.test",
+            "unitId": null,
+            "supervisorId": "01a19751-d447-73ed-9659-79f9784aded9",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-7f75-a176-926ba05c6c3e",
+            "rowVersion": 0,
+            "displayName": "Jill Martin",
+            "email": "jill@hub.test",
+            "unitId": null,
+            "supervisorId": "01a19751-d447-73ed-9659-79f9784aded9",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19758-d722-7e80-924f-8512667cbbe5",
+            "rowVersion": 1,
+            "displayName": "qa20-report-a",
+            "email": "qa20-report-a@hub.test",
+            "unitId": null,
+            "supervisorId": "01a19751-d447-73ed-9659-79f9784aded9",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19758-d73a-7cbd-892a-36e719785ce3",
+            "rowVersion": 1,
+            "displayName": "qa20-report-b",
+            "email": "qa20-report-b@hub.test",
+            "unitId": null,
+            "supervisorId": "01a19751-d447-73ed-9659-79f9784aded9",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          }
+        ],
+        "managerCycles": [],
+        "includeIndirectReports": false
+      }
+    },
+    "discipline": {
+      "status": 200,
+      "path": "/discipline-coordination?projectId=01a19754-b327-78af-b89f-a3a43edcffd7",
+      "rows": [
+        {
+          "id": "01a19751-d447-7e1f-9a5f-23c4303d03a4",
+          "displayName": "Alex Chen",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-7f75-a176-926ba05c6c3e",
+          "displayName": "Jill Martin",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-780f-8722-3aaa0a0c4d21",
+          "displayName": "Marc Dubois",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-79d4-91a8-0895553dde52",
+          "displayName": "Priya Nair",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        }
+      ],
+      "raw": {
+        "evaluatedAt": "2026-11-01T13:44:42.632924+00:00",
+        "actorId": "01a19751-d447-79d4-91a8-0895553dde52",
+        "projects": [
+          {
+            "id": "01a19754-b327-78af-b89f-a3a43edcffd7",
+            "projectNumber": "QA20-REAL-001",
+            "name": "Checkpoint 20 real QA project",
+            "disciplineId": null,
+            "data": {
+              "evaluatedAt": "2026-11-01T13:44:42.632924+00:00",
+              "handoffs": [],
+              "outgoing": [],
+              "incoming": [],
+              "outgoingPage": 1,
+              "incomingPage": 1,
+              "outgoingTotal": 0,
+              "incomingTotal": 0,
+              "handoffPage": 1,
+              "handoffPageSize": 0,
+              "changeTargets": [],
+              "unavailableChangeTargets": [],
+              "changeTargetsTotal": 0,
+              "unavailableChangeTargetsTotal": 0,
+              "reviews": [],
+              "reviewsPage": 1,
+              "reviewsPageSize": 0,
+              "uses": [],
+              "usesTotal": 0,
+              "usesPage": 1,
+              "usesPageSize": 0,
+              "linkedIssues": [],
+              "linkedIssuesTotal": 0,
+              "linkedIssuesPage": 1,
+              "linkedIssuesPageSize": 0,
+              "handoffsTotal": 0,
+              "changes": [],
+              "changesTotal": 0,
+              "changesPage": 1,
+              "changesPageSize": 0,
+              "reviewsTotal": 0,
+              "blockerGroups": [],
+              "blockerGroupsTotal": 0,
+              "startability": [],
+              "startabilityTotal": 0,
+              "startabilityPage": 1,
+              "startabilityPageSize": 0,
+              "startabilityFrom": "2026-11-01",
+              "startabilityTo": "2026-11-21",
+              "startabilityReadyTotal": 0,
+              "linkedActions": [],
+              "linkedActionsTotal": 0,
+              "upcomingSubmissions": [],
+              "upcomingSubmissionsTotal": 0,
+              "upcomingSubmissionsPage": 1,
+              "staffingConflicts": [],
+              "staffingConflictsTotal": 0,
+              "staffingConflictsPage": 1,
+              "blockerGroupsPage": 1,
+              "page": 1,
+              "pageSize": 0
+            }
+          }
+        ],
+        "projectChoices": [
+          {
+            "id": "01a19754-b327-78af-b89f-a3a43edcffd7",
+            "projectNumber": "QA20-REAL-001",
+            "name": "Checkpoint 20 real QA project",
+            "projectManagerId": "01a19751-d447-79d4-91a8-0895553dde52"
+          },
+          {
+            "id": "01a19758-f4ab-71de-8b96-74a60518caba",
+            "projectNumber": "QA20-S25-001",
+            "name": "Checkpoint 20 S25 month report",
+            "projectManagerId": "01a19751-d447-79d4-91a8-0895553dde52"
+          }
+        ],
+        "disciplines": [
+          {
+            "id": "01a19751-d382-7edf-8ab1-c162666591bb",
+            "name": "Civil"
+          }
+        ],
+        "owners": [
+          {
+            "id": "01a19751-d447-7e1f-9a5f-23c4303d03a4",
+            "displayName": "Alex Chen",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-7f75-a176-926ba05c6c3e",
+            "displayName": "Jill Martin",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-780f-8722-3aaa0a0c4d21",
+            "displayName": "Marc Dubois",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-79d4-91a8-0895553dde52",
+            "displayName": "Priya Nair",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          }
+        ],
+        "scope": "Project"
+      }
+    },
+    "hr": {
+      "status": 200,
+      "path": "/planning/hr-identities",
+      "rows": [
+        {
+          "id": "01a19751-d447-7e1f-9a5f-23c4303d03a4",
+          "displayName": "Alex Chen",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-77ed-a543-6e7618a138ab",
+          "displayName": "Diane Roy",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-7f75-a176-926ba05c6c3e",
+          "displayName": "Jill Martin",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d446-7e24-9561-bb4a5bdd569f",
+          "displayName": "Jordan Lee",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-7344-8c2f-606007b3c015",
+          "displayName": "Lena Brooks",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-780f-8722-3aaa0a0c4d21",
+          "displayName": "Marc Dubois",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-722a-ac3f-2313cfb34bc5",
+          "displayName": "Omar Haddad",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-79d4-91a8-0895553dde52",
+          "displayName": "Priya Nair",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-7b97-9076-25c6fb92b6f0",
+          "displayName": "Rita Gomez",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-73ed-9659-79f9784aded9",
+          "displayName": "Sam Patel",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19758-d722-7e80-924f-8512667cbbe5",
+          "displayName": "qa20-report-a",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 1,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19758-d73a-7cbd-892a-36e719785ce3",
+          "displayName": "qa20-report-b",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 1,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        }
+      ],
+      "raw": [
+        {
+          "id": "01a19751-d447-7e1f-9a5f-23c4303d03a4",
+          "displayName": "Alex Chen",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-77ed-a543-6e7618a138ab",
+          "displayName": "Diane Roy",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-7f75-a176-926ba05c6c3e",
+          "displayName": "Jill Martin",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d446-7e24-9561-bb4a5bdd569f",
+          "displayName": "Jordan Lee",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-7344-8c2f-606007b3c015",
+          "displayName": "Lena Brooks",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-780f-8722-3aaa0a0c4d21",
+          "displayName": "Marc Dubois",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-722a-ac3f-2313cfb34bc5",
+          "displayName": "Omar Haddad",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-79d4-91a8-0895553dde52",
+          "displayName": "Priya Nair",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-7b97-9076-25c6fb92b6f0",
+          "displayName": "Rita Gomez",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-73ed-9659-79f9784aded9",
+          "displayName": "Sam Patel",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19758-d722-7e80-924f-8512667cbbe5",
+          "displayName": "qa20-report-a",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 1,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19758-d73a-7cbd-892a-36e719785ce3",
+          "displayName": "qa20-report-b",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 1,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        }
+      ]
+    }
+  },
+  "facts": {
+    "editorBefore": {
+      "status": 200,
+      "rowVersion": 0,
+      "certifications": []
+    },
+    "patch": {
+      "status": 200,
+      "value": {
+        "id": "01a19751-d447-780f-8722-3aaa0a0c4d21",
+        "rowVersion": 1
+      }
+    },
+    "expected": {
+      "personType": "Co-op",
+      "personStartDate": "2026-11-02",
+      "personEndDate": "2026-11-11",
+      "rowVersion": 0,
+      "reason": "Checkpoint 20 recorded notice QA"
+    }
+  },
+  "hr": {
+    "before": {
+      "id": "01a19751-d447-780f-8722-3aaa0a0c4d21",
+      "displayName": "Marc Dubois",
+      "hrSourceSystem": null,
+      "hrPersonKey": null,
+      "rowVersion": 0,
+      "personNotices": {
+        "personType": null,
+        "startDate": null,
+        "endDate": null,
+        "starts": false,
+        "ends": false
+      }
+    },
+    "after": {
+      "id": "01a19751-d447-780f-8722-3aaa0a0c4d21",
+      "displayName": "Marc Dubois",
+      "hrSourceSystem": null,
+      "hrPersonKey": null,
+      "rowVersion": 1,
+      "personNotices": {
+        "personType": "Co-op",
+        "startDate": "2026-11-02",
+        "endDate": "2026-11-11",
+        "starts": true,
+        "ends": true
+      }
+    },
+    "stalePut": {
+      "status": 409,
+      "value": {
+        "type": "https://hub.local/errors/concurrency_conflict",
+        "title": "Conflict",
+        "status": 409,
+        "code": "concurrency_conflict",
+        "detail": "This record changed. Refresh and review it before trying again.",
+        "traceId": "0HNPO3JQO7T66:00000009"
+      }
+    },
+    "freshPut": {
+      "status": 200,
+      "value": {
+        "rowVersion": 2
+      }
+    }
+  },
+  "comparisons": {
+    "changes": {
+      "status": 200,
+      "rows": [
+        {
+          "id": "01a19751-d447-7e1f-9a5f-23c4303d03a4",
+          "displayName": "Alex Chen",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-7f75-a176-926ba05c6c3e",
+          "displayName": "Jill Martin",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-780f-8722-3aaa0a0c4d21",
+          "displayName": "Marc Dubois",
+          "personNotices": {
+            "personType": "Co-op",
+            "startDate": "2026-11-02",
+            "endDate": "2026-11-11",
+            "starts": true,
+            "ends": true
+          }
+        },
+        {
+          "id": "01a19751-d447-79d4-91a8-0895553dde52",
+          "displayName": "Priya Nair",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        }
+      ]
+    },
+    "pickup": {
+      "status": 200,
+      "rows": [
+        {
+          "id": "01a19751-d447-722a-ac3f-2313cfb34bc5",
+          "displayName": "Omar Haddad",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-73ed-9659-79f9784aded9",
+          "displayName": "Sam Patel",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-77ed-a543-6e7618a138ab",
+          "displayName": "Diane Roy",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        }
+      ]
+    },
+    "handoffs": {
+      "status": 200,
+      "rows": [
+        {
+          "id": "01a19751-d447-7e1f-9a5f-23c4303d03a4",
+          "displayName": "Alex Chen",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-7f75-a176-926ba05c6c3e",
+          "displayName": "Jill Martin",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-780f-8722-3aaa0a0c4d21",
+          "displayName": "Marc Dubois",
+          "personNotices": {
+            "personType": "Co-op",
+            "startDate": "2026-11-02",
+            "endDate": "2026-11-11",
+            "starts": true,
+            "ends": true
+          }
+        },
+        {
+          "id": "01a19751-d447-79d4-91a8-0895553dde52",
+          "displayName": "Priya Nair",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        }
+      ]
+    },
+    "organisation": {
+      "status": 200,
+      "rows": [
+        {
+          "id": "01a19751-d446-7e24-9561-bb4a5bdd569f",
+          "rowVersion": 0,
+          "displayName": "Jordan Lee",
+          "email": "jordan@hub.test",
+          "unitId": null,
+          "supervisorId": null,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-7344-8c2f-606007b3c015",
+          "rowVersion": 0,
+          "displayName": "Lena Brooks",
+          "email": "lena@hub.test",
+          "unitId": null,
+          "supervisorId": null,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-7b97-9076-25c6fb92b6f0",
+          "rowVersion": 0,
+          "displayName": "Rita Gomez",
+          "email": "rita@hub.test",
+          "unitId": null,
+          "supervisorId": null,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-722a-ac3f-2313cfb34bc5",
+          "rowVersion": 0,
+          "displayName": "Omar Haddad",
+          "email": "omar@hub.test",
+          "unitId": null,
+          "supervisorId": "01a19751-d447-7344-8c2f-606007b3c015",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-73ed-9659-79f9784aded9",
+          "rowVersion": 0,
+          "displayName": "Sam Patel",
+          "email": "sam@hub.test",
+          "unitId": null,
+          "supervisorId": "01a19751-d447-7344-8c2f-606007b3c015",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-77ed-a543-6e7618a138ab",
+          "rowVersion": 0,
+          "displayName": "Diane Roy",
+          "email": "diane@hub.test",
+          "unitId": null,
+          "supervisorId": "01a19751-d447-7344-8c2f-606007b3c015",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-79d4-91a8-0895553dde52",
+          "rowVersion": 0,
+          "displayName": "Priya Nair",
+          "email": "priya@hub.test",
+          "unitId": null,
+          "supervisorId": "01a19751-d447-7344-8c2f-606007b3c015",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-7e1f-9a5f-23c4303d03a4",
+          "rowVersion": 0,
+          "displayName": "Alex Chen",
+          "email": "alex@hub.test",
+          "unitId": null,
+          "supervisorId": "01a19751-d447-73ed-9659-79f9784aded9",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-7f75-a176-926ba05c6c3e",
+          "rowVersion": 0,
+          "displayName": "Jill Martin",
+          "email": "jill@hub.test",
+          "unitId": null,
+          "supervisorId": "01a19751-d447-73ed-9659-79f9784aded9",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19758-d722-7e80-924f-8512667cbbe5",
+          "rowVersion": 1,
+          "displayName": "qa20-report-a",
+          "email": "qa20-report-a@hub.test",
+          "unitId": null,
+          "supervisorId": "01a19751-d447-73ed-9659-79f9784aded9",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19758-d73a-7cbd-892a-36e719785ce3",
+          "rowVersion": 1,
+          "displayName": "qa20-report-b",
+          "email": "qa20-report-b@hub.test",
+          "unitId": null,
+          "supervisorId": "01a19751-d447-73ed-9659-79f9784aded9",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-780f-8722-3aaa0a0c4d21",
+          "rowVersion": 1,
+          "displayName": "Marc Dubois",
+          "email": "marc@hub.test",
+          "unitId": null,
+          "supervisorId": "01a19751-d447-73ed-9659-79f9784aded9",
+          "personNotices": {
+            "personType": "Co-op",
+            "startDate": "2026-11-02",
+            "endDate": "2026-11-11",
+            "starts": true,
+            "ends": true
+          }
+        }
+      ]
+    },
+    "discipline": {
+      "status": 200,
+      "rows": [
+        {
+          "id": "01a19751-d447-7e1f-9a5f-23c4303d03a4",
+          "displayName": "Alex Chen",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-7f75-a176-926ba05c6c3e",
+          "displayName": "Jill Martin",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-780f-8722-3aaa0a0c4d21",
+          "displayName": "Marc Dubois",
+          "personNotices": {
+            "personType": "Co-op",
+            "startDate": "2026-11-02",
+            "endDate": "2026-11-11",
+            "starts": true,
+            "ends": true
+          }
+        },
+        {
+          "id": "01a19751-d447-79d4-91a8-0895553dde52",
+          "displayName": "Priya Nair",
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        }
+      ]
+    },
+    "hr": {
+      "status": 200,
+      "rows": [
+        {
+          "id": "01a19751-d447-7e1f-9a5f-23c4303d03a4",
+          "displayName": "Alex Chen",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-77ed-a543-6e7618a138ab",
+          "displayName": "Diane Roy",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-7f75-a176-926ba05c6c3e",
+          "displayName": "Jill Martin",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d446-7e24-9561-bb4a5bdd569f",
+          "displayName": "Jordan Lee",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-7344-8c2f-606007b3c015",
+          "displayName": "Lena Brooks",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-780f-8722-3aaa0a0c4d21",
+          "displayName": "Marc Dubois",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 1,
+          "personNotices": {
+            "personType": "Co-op",
+            "startDate": "2026-11-02",
+            "endDate": "2026-11-11",
+            "starts": true,
+            "ends": true
+          }
+        },
+        {
+          "id": "01a19751-d447-722a-ac3f-2313cfb34bc5",
+          "displayName": "Omar Haddad",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-79d4-91a8-0895553dde52",
+          "displayName": "Priya Nair",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-7b97-9076-25c6fb92b6f0",
+          "displayName": "Rita Gomez",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-73ed-9659-79f9784aded9",
+          "displayName": "Sam Patel",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19758-d722-7e80-924f-8512667cbbe5",
+          "displayName": "qa20-report-a",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 1,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19758-d73a-7cbd-892a-36e719785ce3",
+          "displayName": "qa20-report-b",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 1,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        }
+      ]
+    }
+  },
+  "failures": [],
+  "task": "01a19754-b4c9-7e32-b408-97c300f9c125"
+}

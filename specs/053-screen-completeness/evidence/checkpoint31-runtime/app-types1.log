@@ -1,0 +1,2 @@
+src/pages/notice-preferences.tsx(50,129): error TS2322: Type 'string | null' is not assignable to type 'string'.
+  Type 'null' is not assignable to type 'string'.

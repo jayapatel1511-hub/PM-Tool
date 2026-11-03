@@ -1,0 +1,270 @@
+{
+  "database": "hub_qa_checkpoint24",
+  "apiBase": "http://127.0.0.1:5088",
+  "uiBase": "http://127.0.0.1:8853",
+  "people": {
+    "admin": {
+      "id": "01a19b26-f572-7cd7-b143-cb99f3af929e",
+      "name": "Jordan Lee"
+    },
+    "pm": {
+      "id": "01a19b26-f572-7f9a-a6f0-559c11fd96a3",
+      "name": "Priya Nair"
+    },
+    "alex": {
+      "id": "01a19b26-f572-7d35-89bb-1537f4a54a1c",
+      "name": "Alex Chen"
+    },
+    "marc": {
+      "id": "01a19b26-f572-7efb-867a-f5b065081550",
+      "name": "Marc Dubois"
+    },
+    "jill": {
+      "id": "01a19b26-f572-795d-98ab-7ff574f3e395",
+      "name": "Jill Martin"
+    },
+    "readOnly": {
+      "id": "01a19b26-f572-72e4-a774-8af12d7ca0f4",
+      "name": "Rita Gomez"
+    }
+  },
+  "calls": [
+    {
+      "method": "GET",
+      "route": "me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "me",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "route": "admin/settings/flag.register_screens",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "route": "admin/settings/flag.people_screens",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "route": "admin/settings/flag.work_screens",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "route": "admin/settings/flag.visual_system",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "reference",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "route": "projects",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "route": "projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "route": "projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e/transition",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "route": "projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e/deliverable-numbering",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "me/work",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "route": "projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e/tasks",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "route": "projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e/deliverables",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "route": "items/Project/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e/links",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "route": "items/Task/01a19b30-6581-70ea-998b-6b5b5830548a/links",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "route": "projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e/deliverables/import-options",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "search?q=QA24-MVYY3WT5",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "files?projects=01a19b30-62e7-7b49-9eb1-c9b8b5971e3e",
+      "status": 200
+    }
+  ],
+  "createdProject": {
+    "id": "01a19b30-62e7-7b49-9eb1-c9b8b5971e3e",
+    "projectNumber": "QA24-MVYY3WT5"
+  },
+  "projectId": "01a19b30-62e7-7b49-9eb1-c9b8b5971e3e",
+  "projectNumber": "QA24-MVYY3WT5",
+  "typeId": "01a19b26-f4bd-7996-9148-0a640a6f304c",
+  "disciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+  "today": "2026-11-02",
+  "task": {
+    "id": "01a19b30-6581-70ea-998b-6b5b5830548a",
+    "key": "QA24-MVYY3WT5-T0001",
+    "rowVersion": 0,
+    "warnings": []
+  },
+  "sentinel": {
+    "id": "01a19b30-65c9-7f7c-95ef-0afdafc7f310",
+    "key": "QA24-MVYY3WT5-D001",
+    "rowVersion": 0,
+    "dueDate": null,
+    "warnings": [
+      "Does not match C-###"
+    ]
+  },
+  "links": [
+    {
+      "id": "01a19b30-6603-7bda-a92d-034f9d8bfc2e",
+      "title": "Synthetic QA24 PM source pointer",
+      "url": "https://example.test/qa24/project",
+      "linkType": "Other",
+      "rowVersion": 1
+    },
+    {
+      "id": "01a19b30-6614-7bd3-9227-e018cc946650",
+      "title": "Synthetic QA24 task author pointer",
+      "url": "https://example.test/qa24/task",
+      "linkType": "Other",
+      "rowVersion": 1
+    }
+  ],
+  "options": {
+    "projectRowVersion": 2,
+    "correctionReasonRequired": false,
+    "canImport": true,
+    "disciplines": [
+      {
+        "id": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "name": "Civil",
+        "canCreate": true
+      }
+    ],
+    "types": [
+      {
+        "id": "01a19b26-f4bd-7996-9148-0a640a6f304c",
+        "name": "Drawing Package"
+      },
+      {
+        "id": "01a19b26-f4c2-7e89-934e-dade554124d8",
+        "name": "Report"
+      },
+      {
+        "id": "01a19b26-f4c2-75be-9137-d57886a16e68",
+        "name": "Specification"
+      },
+      {
+        "id": "01a19b26-f4c2-7347-8b7e-acfb2985e1f6",
+        "name": "Calculation"
+      },
+      {
+        "id": "01a19b26-f4c2-7928-b2cb-9ece9a900c78",
+        "name": "Cost Estimate"
+      },
+      {
+        "id": "01a19b26-f4c2-71c6-8332-b572852595e8",
+        "name": "Quantity Estimate"
+      },
+      {
+        "id": "01a19b26-f4c2-709a-870c-16190a5c5fe0",
+        "name": "Permit Submission"
+      },
+      {
+        "id": "01a19b26-f4c2-74c5-957e-4a1b891d9aa2",
+        "name": "Tender Package"
+      },
+      {
+        "id": "01a19b26-f4c2-7f7b-bbf9-ab03c17a451f",
+        "name": "IFC Package"
+      },
+      {
+        "id": "01a19b26-f4c2-755c-8edf-fd9f45a689e0",
+        "name": "Record Drawings"
+      },
+      {
+        "id": "01a19b26-f4c2-7955-9ca4-575f7804a9d3",
+        "name": "Certification"
+      },
+      {
+        "id": "01a19b26-f4c2-7e1b-97c8-a60fb850e2e2",
+        "name": "Memo"
+      },
+      {
+        "id": "01a19b26-f4c2-78be-a624-19f4cb3c8fdd",
+        "name": "Model/Base Plan"
+      },
+      {
+        "id": "01a19b26-f4c2-7ab0-b5ae-f2e0d3a170a1",
+        "name": "Other"
+      }
+    ]
+  },
+  "status": "PASS_NORMAL_COMMAND_SETUP",
+  "boundary": "Only new synthetic QA24 database flags/data; no import command yet"
+}

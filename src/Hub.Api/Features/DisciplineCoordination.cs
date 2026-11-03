@@ -1,4 +1,5 @@
 using System.Data;
+using System.Text.Json.Serialization;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
@@ -9,30 +10,41 @@ namespace Hub.Api.Features;
 
 /// Packet 030 read projection. Counts and rows are produced from the same permission-checked,
 /// filtered source query; callers never have to infer a total from a capped register page.
-public static class DisciplineCoordinationEndpoints
+public static partial class DisciplineCoordinationEndpoints
 {
     // The rows below are written in the property order each has always had; the blocks of one projection are paged together.
-    public sealed record CoordinationHandoffRow(Guid Id, string Key, string Title, string Status, DateOnly NeededBy, DateOnly? PromisedBy, Guid? TargetTaskId,
-        Guid? TargetDeliverableId, Guid SendingOwnerId, Guid ReceivingOwnerId, Guid SendingDisciplineId, Guid ReceivingDisciplineId);
+    public sealed partial record CoordinationHandoffRow(Guid Id, string Key, string Title, string Status, DateOnly NeededBy, DateOnly? PromisedBy, Guid? TargetTaskId,
+        Guid? TargetDeliverableId, Guid SendingOwnerId, Guid ReceivingOwnerId, Guid SendingDisciplineId, Guid ReceivingDisciplineId,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] RecordContextView? Context = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] HandoffReadinessLinks? ReadinessLinks = null);
     /// One handoff that holds a target task and every active task downstream of it.
-    public sealed record CoordinationBlockerGroup(Guid HandoffId, string HandoffKey, Guid[] TaskIds, string[] TaskKeys);
+    public sealed partial record CoordinationBlockerGroup(Guid HandoffId, string HandoffKey, Guid[] TaskIds, string[] TaskKeys,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] RecordContextView? Context = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] HandoffReadinessLinks? ReadinessLinks = null);
     /// A change notice still Open or still holding Pending Assessment in this scope, with the scoped counts beside the whole-project count.
-    public sealed record CoordinationChangeRow(Guid Id, string Key, string Title, string Status, Guid OwnerId, int PendingAssessments, int AcknowledgedPending, int ProjectPending);
-    public sealed record CoordinationReviewRow(Guid Id, string Key, string Title, string Status, Guid CoordinatorId, int OutstandingDisciplines, int BlockingFindings);
-    public sealed record CoordinationIssueRow(Guid Id, string Key, string Title, string Status, Guid OwnerId, string? OwnerName, Guid? ProjectDisciplineId);
+    public sealed partial record CoordinationChangeRow(Guid Id, string Key, string Title, string Status, Guid OwnerId, int PendingAssessments, int AcknowledgedPending, int ProjectPending,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] RecordContextView? Context = null);
+    public sealed partial record CoordinationReviewRow(Guid Id, string Key, string Title, string Status, Guid CoordinatorId, int OutstandingDisciplines, int BlockingFindings,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] RecordContextView? Context = null);
+    public sealed partial record CoordinationIssueRow(Guid Id, string Key, string Title, string Status, Guid OwnerId, string? OwnerName, Guid? ProjectDisciplineId,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] RecordContextView? Context = null);
     /// An adopted source revision with the work that uses it; the target and source columns are null when the row they name is gone.
-    public sealed record CoordinationInputUseRow(Guid Id, string TargetType, Guid TargetId, Guid OwnerId, string SourceIdentity, Guid SourceRevisionId, string IntendedUse,
-        DateTimeOffset AdoptedAt, Guid AdoptedBy, int RowVersion, string? TargetKey, string? TargetName, string? SourceUrl, string? SourceKey, string? Revision);
+    public sealed partial record CoordinationInputUseRow(Guid Id, string TargetType, Guid TargetId, Guid OwnerId, string SourceIdentity, Guid SourceRevisionId, string IntendedUse,
+        DateTimeOffset AdoptedAt, Guid AdoptedBy, int RowVersion, string? TargetKey, string? TargetName, string? SourceUrl, string? SourceKey, string? Revision,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] RecordContextView? Context = null);
     /// A task or deliverable an assessment of a change names; Available is false once it was deleted or left the project.
     public sealed record CoordinationChangeTarget(Guid ChangeNoticeId, string TargetType, Guid TargetId, bool Available);
     public sealed record CoordinationUnavailableTarget(Guid ChangeNoticeId, int Count);
     /// An open meeting action linked to a blocking handoff or a change notice; SourceType and SourceId name that handoff or notice.
-    public sealed record CoordinationLinkedAction(Guid Id, string Key, string Text, string Status, DateOnly? DueDate, string SourceType, Guid SourceId);
+    public sealed partial record CoordinationLinkedAction(Guid Id, string Key, string Text, string Status, DateOnly? DueDate, string SourceType, Guid SourceId,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] RecordContextView? Context = null);
     public sealed record SubmissionFailingCheck(Guid? SourceId, string Kind, string Code, string Message, string? SourcePath);
-    public sealed record SubmissionContextRow(Guid Id, string Key, string Title, string Status, string EffectiveStatus, DateOnly TargetDate,
-        Guid CoordinatorId, IReadOnlyList<SubmissionFailingCheck> FailingChecks);
-    public sealed record StaffingContextRow(Guid Id, string Key, string TargetType, Guid TargetId, string Description, DateOnly NeededBy,
-        string State, Guid AffectedOwnerId, Guid RemovalOwnerId);
+    public sealed partial record SubmissionContextRow(Guid Id, string Key, string Title, string Status, string EffectiveStatus, DateOnly TargetDate,
+        Guid CoordinatorId, IReadOnlyList<SubmissionFailingCheck> FailingChecks,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] RecordContextView? Context = null);
+    public sealed partial record StaffingContextRow(Guid Id, string Key, string TargetType, Guid TargetId, string Description, DateOnly NeededBy,
+        string State, Guid AffectedOwnerId, Guid RemovalOwnerId,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] RecordContextView? Context = null);
 
     /// Counts and rows come from the same filtered source query; Page and PageSize are 1 and 0 when the caller asked for no paging.
     public sealed record CoordinationProjection(
@@ -57,7 +69,7 @@ public static class DisciplineCoordinationEndpoints
     public sealed record WorkspaceCoordinationProject(Guid Id, string ProjectNumber, string Name, Guid? DisciplineId, CoordinationProjection Data);
     public sealed record WorkspaceProjectChoice(Guid Id, string ProjectNumber, string Name, Guid ProjectManagerId);
     public sealed record WorkspaceDisciplineChoice(Guid Id, string Name);
-    public sealed record WorkspaceOwnerChoice(Guid Id, string DisplayName);
+    public sealed record WorkspaceOwnerChoice(Guid Id, string DisplayName, [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] PersonFacts.Notices? PersonNotices = null);
     /// The permitted projects of one scope, each with its projection, and the choices the filters offer; Scope is Project or Workspace.
     public sealed record WorkspaceCoordinationProjection(DateTimeOffset EvaluatedAt, Guid ActorId, IReadOnlyList<WorkspaceCoordinationProject> Projects,
         IReadOnlyList<WorkspaceProjectChoice> ProjectChoices, IReadOnlyList<WorkspaceDisciplineChoice> Disciplines, IReadOnlyList<WorkspaceOwnerChoice> Owners, string Scope);
@@ -81,8 +93,11 @@ public static class DisciplineCoordinationEndpoints
         await using var snapshot = await db.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
         await access.Project(projectId, track: false);
         var org = await settings.Get(db);
-        return TypedResults.Ok(await Build(projectId, disciplineId, ownerId, from, to, page, pageSize, access.Me.Id, db, clock.GetUtcNow(),
-            clock.Today(org), org.CoordinationLookaheadWeeks * 7 - 1, settings));
+        var projection = await Build(projectId, disciplineId, ownerId, from, to, page, pageSize, access.Me.Id, db, clock.GetUtcNow(),
+            clock.Today(org), org.CoordinationLookaheadWeeks * 7 - 1, settings, org);
+        await WorkCoordinationReadMetadata.Apply(db, access, org,
+            new(access.Me.Id, clock.Today(org), clock.GetUtcNow()), [projection]);
+        return TypedResults.Ok(projection);
     }
 
     static async Task<Ok<WorkspaceCoordinationProjection>> Workspace(Guid? projectId, Guid? disciplineId, Guid? ownerId, DateOnly? from, DateOnly? to,
@@ -122,11 +137,13 @@ public static class DisciplineCoordinationEndpoints
             .Select(m => m.UserId).Distinct().ToListAsync();
         ownerIds.AddRange(projects.Select(p => p.ProjectManagerId));
         var owners = await db.Users.AsNoTracking().Where(u => ownerIds.Contains(u.Id)).OrderBy(u => u.DisplayName)
-            .Select(u => new WorkspaceOwnerChoice(u.Id, u.DisplayName)).ToListAsync();
+            .Select(u => new WorkspaceOwnerChoice(u.Id, u.DisplayName, null)).ToListAsync();
         var rows = new List<WorkspaceCoordinationProject>();
         var evaluatedAt = clock.GetUtcNow();
         var org = await settings.Get(db);
-        var today = clock.Today(org);
+        var today = DateOnly.FromDateTime(Clock.Local(evaluatedAt, org).DateTime);
+        var notices = await PersonFacts.ReadNotices(db, owners.Select(person => person.Id).ToArray(), org, today);
+        if (notices.Count > 0) owners = owners.Select(person => person with { PersonNotices = notices.GetValueOrDefault(person.Id) }).ToList();
         foreach (var project in projects)
         {
             var localDiscipline = disciplineId is { } globalDiscipline
@@ -136,14 +153,15 @@ public static class DisciplineCoordinationEndpoints
             if (disciplineId is not null && localDiscipline is null) continue;
             rows.Add(new(project.Id, project.ProjectNumber, project.Name, localDiscipline,
                 await Build(project.Id, localDiscipline, ownerId, from, to, page, pageSize, access.Me.Id, db, evaluatedAt, today,
-                    org.CoordinationLookaheadWeeks * 7 - 1, settings)));
+                    org.CoordinationLookaheadWeeks * 7 - 1, settings, org)));
         }
+        await WorkCoordinationReadMetadata.Apply(db, access, org, new(access.Me.Id, today, evaluatedAt), rows.Select(row => row.Data).ToArray());
         return TypedResults.Ok(new WorkspaceCoordinationProjection(evaluatedAt, access.Me.Id, rows, choices, disciplineChoices, owners, projectId is null ? "Workspace" : "Project"));
     }
 
     static async Task<CoordinationProjection> Build(Guid projectId, Guid? disciplineId, Guid? ownerId, DateOnly? from, DateOnly? to,
         int? page, int? pageSize,
-        Guid actorId, HubDb db, DateTimeOffset evaluatedAt, DateOnly today, int lookaheadDays, SettingsStore settings)
+        Guid actorId, HubDb db, DateTimeOffset evaluatedAt, DateOnly today, int lookaheadDays, SettingsStore settings, OrgSettings org)
     {
 
         var handoffs = db.Handoffs.AsNoTracking().Where(h => h.ProjectId == projectId);
@@ -157,7 +175,7 @@ public static class DisciplineCoordinationEndpoints
             handoffs = handoffs.Where(h => (h.PromisedBy ?? h.NeededBy) <= end);
         var handoffRows = await handoffs.OrderBy(h => h.NeededBy).ThenBy(h => h.Key)
             .Select(h => new CoordinationHandoffRow(h.Id, h.Key, h.Title, h.Status, h.NeededBy, h.PromisedBy, h.TargetTaskId, h.TargetDeliverableId,
-                h.SendingOwnerId, h.ReceivingOwnerId, h.SendingDisciplineId, h.ReceivingDisciplineId)).ToListAsync();
+                h.SendingOwnerId, h.ReceivingOwnerId, h.SendingDisciplineId, h.ReceivingDisciplineId, null, null)).ToListAsync();
         var subject = ownerId ?? actorId;
         var outgoing = handoffRows.Where(h => h.Status != HandoffStatus.Cancelled && h.Status != HandoffStatus.Incorporated &&
             (disciplineId is { } d ? h.SendingDisciplineId == d : h.SendingOwnerId == subject) &&
@@ -209,27 +227,27 @@ public static class DisciplineCoordinationEndpoints
             .Select(c => new CoordinationChangeRow(c.Id, c.Key, c.Title, c.Status, c.OwnerId,
                 scopedAssessments.Count(a => a.ChangeNoticeId == c.Id && a.Status == AssessmentStatus.Pending),
                 scopedAssessments.Count(a => a.ChangeNoticeId == c.Id && a.Status == AssessmentStatus.Pending && a.AcknowledgedAt != null),
-                db.ChangeAssessments.Count(a => a.ChangeNoticeId == c.Id && a.Status == AssessmentStatus.Pending)))
+                db.ChangeAssessments.Count(a => a.ChangeNoticeId == c.Id && a.Status == AssessmentStatus.Pending), null))
             .ToListAsync();
 
-        var reviews = db.ReviewPackages.AsNoTracking().Where(p => p.ProjectId == projectId);
+        var reviews = ReviewIssuedSources.VisiblePackages(db, org.IsFlagOn("register_screens")).AsNoTracking().Where(p => p.ProjectId == projectId);
         if (disciplineId is { } reviewDiscipline) reviews = reviews.Where(p =>
             db.DisciplineReviews.Any(a => a.RoundId == p.CurrentRoundId && a.ProjectDisciplineId == reviewDiscipline));
         if (ownerId is { } reviewOwner) reviews = reviews.Where(p => p.CoordinatorId == reviewOwner || db.DisciplineReviews.Any(a => a.RoundId == p.CurrentRoundId && a.ReviewerId == reviewOwner));
         var reviewRows = await reviews.OrderByDescending(p => p.UpdatedAt).ThenBy(p => p.Key)
             .Select(p => new CoordinationReviewRow(p.Id, p.Key, p.Title, p.Status, p.CoordinatorId,
                 db.DisciplineReviews.Count(a => a.RoundId == p.CurrentRoundId && a.Status != DisciplineReviewStatus.Approved),
-                db.ReviewFindings.Count(f => f.RoundId == p.CurrentRoundId && f.Severity == "Blocking" && f.Status != FindingStatus.VerifiedClosed && (f.Status != FindingStatus.Withdrawn || f.WithdrawalAcknowledgedBy == null))))
+                db.ReviewFindings.Count(f => f.RoundId == p.CurrentRoundId && f.Severity == "Blocking" && f.Status != FindingStatus.VerifiedClosed && (f.Status != FindingStatus.Withdrawn || f.WithdrawalAcknowledgedBy == null)), null))
             .ToListAsync();
 
         var linkedIssues = db.Issues.AsNoTracking().Where(i => i.ProjectId == projectId &&
-            db.ReviewFindings.Any(f => f.ProjectId == projectId && f.IssueId == i.Id &&
+            ReviewIssuedSources.VisibleFindings(db, org.IsFlagOn("register_screens")).Any(f => f.ProjectId == projectId && f.IssueId == i.Id &&
                 db.ReviewPackages.Any(p => p.Id == f.PackageId && p.CurrentRoundId == f.RoundId) &&
                 (disciplineId == null || f.ProjectDisciplineId == disciplineId || i.ProjectDisciplineId == disciplineId ||
                     db.IssueAffectedDisciplines.Any(x => x.IssueId == i.Id && x.ProjectDisciplineId == disciplineId))));
         if (ownerId is { } issueOwner) linkedIssues = linkedIssues.Where(i => i.OwnerId == issueOwner);
         var issueRows = await linkedIssues.OrderBy(i => i.Key)
-            .Select(i => new CoordinationIssueRow(i.Id, i.Key, i.Title, i.Status, i.OwnerId, db.Users.Where(u => u.Id == i.OwnerId).Select(u => u.DisplayName).FirstOrDefault(), i.ProjectDisciplineId))
+            .Select(i => new CoordinationIssueRow(i.Id, i.Key, i.Title, i.Status, i.OwnerId, db.Users.Where(u => u.Id == i.OwnerId).Select(u => u.DisplayName).FirstOrDefault(), i.ProjectDisciplineId, null))
             .ToListAsync();
 
         var uses = db.InputUses.AsNoTracking().Where(u => u.ProjectId == projectId);
@@ -242,13 +260,13 @@ public static class DisciplineCoordinationEndpoints
         }
         var useRows = await uses.OrderByDescending(u => u.AdoptedAt).ThenBy(u => u.Id)
             .Select(u => new CoordinationInputUseRow(u.Id, u.TargetType, u.TargetId, u.OwnerId, u.SourceIdentity, u.SourceRevisionId, u.IntendedUse, u.AdoptedAt, u.AdoptedBy, u.RowVersion,
-                u.TargetType == ItemType.Task ? db.Tasks.Where(t => t.Id == u.TargetId).Select(t => t.Key).FirstOrDefault()
-                    : db.Deliverables.Where(d => d.Id == u.TargetId).Select(d => d.Key).FirstOrDefault(),
-                u.TargetType == ItemType.Task ? db.Tasks.Where(t => t.Id == u.TargetId).Select(t => t.Name).FirstOrDefault()
-                    : db.Deliverables.Where(d => d.Id == u.TargetId).Select(d => d.Name).FirstOrDefault(),
-                db.SourceRevisions.Where(r => r.Id == u.SourceRevisionId).Select(r => r.Url).FirstOrDefault(),
-                db.SourceRevisions.Where(r => r.Id == u.SourceRevisionId).Select(r => r.SourceKey).FirstOrDefault(),
-                db.SourceRevisions.Where(r => r.Id == u.SourceRevisionId).Select(r => r.Revision).FirstOrDefault()))
+                u.TargetType == ItemType.Task ? db.Tasks.Where(t => t.ProjectId == projectId && t.Id == u.TargetId).Select(t => t.Key).FirstOrDefault()
+                    : u.TargetType == ItemType.Deliverable ? db.Deliverables.Where(d => d.ProjectId == projectId && d.Id == u.TargetId).Select(d => d.Key).FirstOrDefault() : null,
+                u.TargetType == ItemType.Task ? db.Tasks.Where(t => t.ProjectId == projectId && t.Id == u.TargetId).Select(t => t.Name).FirstOrDefault()
+                    : u.TargetType == ItemType.Deliverable ? db.Deliverables.Where(d => d.ProjectId == projectId && d.Id == u.TargetId).Select(d => d.Name).FirstOrDefault() : null,
+                db.SourceRevisions.Where(r => r.ProjectId == projectId && r.Id == u.SourceRevisionId).Select(r => r.Url).FirstOrDefault(),
+                db.SourceRevisions.Where(r => r.ProjectId == projectId && r.Id == u.SourceRevisionId).Select(r => r.SourceKey).FirstOrDefault(),
+                db.SourceRevisions.Where(r => r.ProjectId == projectId && r.Id == u.SourceRevisionId).Select(r => r.Revision).FirstOrDefault(), null))
             .ToListAsync();
 
         var paged = page.HasValue || pageSize.HasValue;
@@ -272,9 +290,11 @@ public static class DisciplineCoordinationEndpoints
                 c.ManifestVersion == p.ManifestVersion && c.OwnerId == submissionOwner));
         var packageRows = await packages.OrderBy(p => p.TargetDate).ThenBy(p => p.Key).ToListAsync();
         var submissionRows = new List<SubmissionContextRow>();
+        var submissionReadiness = new Dictionary<Guid, SubmissionReadinessResult>();
         foreach (var package in packageRows)
         {
             var readiness = await SubmissionReadiness.Evaluate(db, package);
+            if (org.IsFlagOn("screen_patterns")) submissionReadiness[package.Id] = readiness;
             var effectiveStatus = package.Status is SubmissionStatus.Checking or SubmissionStatus.Ready
                 ? readiness.Ready ? SubmissionStatus.Ready : SubmissionStatus.Checking : package.Status;
             submissionRows.Add(new(package.Id, package.Key, package.Title, package.Status, effectiveStatus, package.TargetDate,
@@ -288,7 +308,7 @@ public static class DisciplineCoordinationEndpoints
                 (c.TargetType == ItemType.Deliverable && db.Deliverables.Any(d => d.Id == c.TargetId && d.ProjectDisciplineId == staffingDiscipline)));
         if (ownerId is { } staffingOwner) staffing = staffing.Where(c => c.AffectedOwnerId == staffingOwner || c.RemovalOwnerId == staffingOwner);
         var staffingRows = await staffing.OrderBy(c => c.NeededBy).ThenBy(c => c.Key)
-            .Select(c => new StaffingContextRow(c.Id, c.Key, c.TargetType, c.TargetId, c.Description, c.NeededBy, c.State, c.AffectedOwnerId, c.RemovalOwnerId))
+            .Select(c => new StaffingContextRow(c.Id, c.Key, c.TargetType, c.TargetId, c.Description, c.NeededBy, c.State, c.AffectedOwnerId, c.RemovalOwnerId, null))
             .ToListAsync();
         var startability = await Startability(projectId, disciplineId, ownerId, from, to, today,
             lookaheadDays, evaluatedAt, db, settings);
@@ -327,11 +347,16 @@ public static class DisciplineCoordinationEndpoints
                 }
         }
 
-        return new CoordinationProjection(
+        var linksProject = org.IsFlagOn("register_screens") ? await db.Projects.AsNoTracking().SingleAsync(p => p.Id == projectId) : null;
+        var readinessLinks = linksProject is not null ? await HandoffConsequencesEndpoints.ReadBatch(db, linksProject,
+            PageRows(handoffRows).Concat(PageRows(outgoing)).Concat(PageRows(incoming)).Select(h => h.Id)
+                .Concat(PageRows(blockerGroups).Select(g => g.HandoffId)), today) : null;
+        CoordinationHandoffRow HandoffLinks(CoordinationHandoffRow h) => readinessLinks is null ? h : h with { ReadinessLinks = readinessLinks.GetValueOrDefault(h.Id) };
+        var projection = new CoordinationProjection(
             EvaluatedAt: evaluatedAt,
-            Handoffs: PageRows(handoffRows),
-            Outgoing: PageRows(outgoing),
-            Incoming: PageRows(incoming),
+            Handoffs: PageRows(handoffRows).Select(HandoffLinks).ToArray(),
+            Outgoing: PageRows(outgoing).Select(HandoffLinks).ToArray(),
+            Incoming: PageRows(incoming).Select(HandoffLinks).ToArray(),
             OutgoingPage: PageNumber(outgoing.Count),
             IncomingPage: PageNumber(incoming.Count),
             OutgoingTotal: outgoing.Count,
@@ -359,7 +384,7 @@ public static class DisciplineCoordinationEndpoints
             ChangesPage: PageNumber(changeRows.Count),
             ChangesPageSize: paged ? size : changeRows.Count,
             ReviewsTotal: reviewRows.Count,
-            BlockerGroups: PageRows(blockerGroups),
+            BlockerGroups: PageRows(blockerGroups).Select(g => readinessLinks is null ? g : g with { ReadinessLinks = readinessLinks.GetValueOrDefault(g.HandoffId) }).ToArray(),
             BlockerGroupsTotal: blockerGroups.Count,
             Startability: PageRows(startability.Rows),
             StartabilityTotal: startability.Rows.Count,
@@ -379,10 +404,52 @@ public static class DisciplineCoordinationEndpoints
             BlockerGroupsPage: PageNumber(blockerGroups.Count),
             Page: paged ? pg : 1,
             PageSize: paged ? size : 0);
+        if (!org.IsFlagOn("screen_patterns")) return projection;
+        var project = await db.Projects.AsNoTracking().SingleAsync(p => p.Id == projectId);
+        var contextReader = new RecordContextReader(db, project, org);
+        var packageIds = projection.UpcomingSubmissions.Select(p => p.Id).ToArray();
+        var currentPackages = packageRows.Where(p => packageIds.Contains(p.Id)).ToDictionary(p => p.Id);
+        var packageChecks = await db.SubmissionChecks.AsNoTracking().Where(c => c.ProjectId == projectId && packageIds.Contains(c.PackageId) &&
+            db.SubmissionPackages.Any(p => p.ProjectId == projectId && p.Id == c.PackageId && p.ManifestVersion == c.ManifestVersion)).ToListAsync();
+        foreach (var row in projection.UpcomingSubmissions)
+        {
+            var package = currentPackages[row.Id];
+            contextReader.SeedSubmission(package, packageChecks.Where(c => c.PackageId == package.Id && c.ManifestVersion == package.ManifestVersion).ToArray(),
+                submissionReadiness[package.Id], row.EffectiveStatus);
+        }
+        var contexts = new Dictionary<(string, Guid), RecordContextView?>();
+        async Task<RecordContextView?> Context(string kind, Guid id)
+        {
+            if (contexts.TryGetValue((kind, id), out var cached)) return cached;
+            return contexts[(kind, id)] = kind is "InputUse" or "ReviewPackage"
+                ? await contextReader.CoordinationSummary(kind, id) : await contextReader.ReadLoaded(kind, id);
+        }
+        async Task<IReadOnlyList<T>> Enrich<T>(IReadOnlyList<T> rows, Func<T, (string Kind, Guid Id)> identity, Func<T, RecordContextView?, T> attach)
+        {
+            var result = new List<T>();
+            foreach (var row in rows) { var (kind, id) = identity(row); result.Add(attach(row, await Context(kind, id))); }
+            return result;
+        }
+        return projection with
+        {
+            Handoffs = await Enrich(projection.Handoffs, r => (RecordContextKind.Handoff, r.Id), (r, c) => r with { Context = c }),
+            Outgoing = await Enrich(projection.Outgoing, r => (RecordContextKind.Handoff, r.Id), (r, c) => r with { Context = c }),
+            Incoming = await Enrich(projection.Incoming, r => (RecordContextKind.Handoff, r.Id), (r, c) => r with { Context = c }),
+            BlockerGroups = await Enrich(projection.BlockerGroups, r => (RecordContextKind.Handoff, r.HandoffId), (r, c) => r with { Context = c }),
+            Changes = await Enrich(projection.Changes, r => (RecordContextKind.ChangeNotice, r.Id), (r, c) => r with { Context = c }),
+            Reviews = await Enrich(projection.Reviews, r => ("ReviewPackage", r.Id), (r, c) => r with { Context = c }),
+            LinkedIssues = await Enrich(projection.LinkedIssues, r => (RecordContextKind.Issue, r.Id), (r, c) => r with { Context = c }),
+            Uses = await Enrich(projection.Uses, r => ("InputUse", r.Id), (r, c) => r with { Context = c }),
+            LinkedActions = await Enrich(projection.LinkedActions, r => (RecordContextKind.Action, r.Id), (r, c) => r with { Context = c }),
+            UpcomingSubmissions = await Enrich(projection.UpcomingSubmissions, r => (RecordContextKind.SubmissionPackage, r.Id), (r, c) => r with { Context = c }),
+            StaffingConflicts = await Enrich(projection.StaffingConflicts, r => (RecordContextKind.WorkConstraint, r.Id), (r, c) => r with { Context = c }),
+            Startability = await Enrich(projection.Startability, r => (r.TargetType, r.TargetId), (r, c) => r with { Context = c }),
+        };
     }
 
-    public sealed record StartabilityRow(Guid Id, string TargetType, Guid TargetId, string Key, string Name,
-        DateOnly? DueDate, Guid? OwnerId, Guid DisciplineId, string State, string[] Blocked, string[] Unknown);
+    public sealed partial record StartabilityRow(Guid Id, string TargetType, Guid TargetId, string Key, string Name,
+        DateOnly? DueDate, Guid? OwnerId, Guid DisciplineId, string State, string[] Blocked, string[] Unknown,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] RecordContextView? Context = null);
     sealed record StartabilityWindow(DateOnly From, DateOnly To, List<StartabilityRow> Rows);
 
     // Re-evaluate stored assessments against their live source checks inside the same snapshot

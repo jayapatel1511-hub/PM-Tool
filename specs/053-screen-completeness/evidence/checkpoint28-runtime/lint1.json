@@ -1,0 +1,10 @@
+[
+  {
+    "args": [
+      "npm",
+      "run",
+      "lint"
+    ],
+    "exitCode": 0
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "exitCode": 0,
+  "args": [
+    "git",
+    "diff",
+    "--check"
+  ],
+  "atUtc": "2026-11-03T06:57:20.920476+00:00",
+  "elapsedSeconds": 0.12,
+  "errors": [],
+  "tail": []
+}

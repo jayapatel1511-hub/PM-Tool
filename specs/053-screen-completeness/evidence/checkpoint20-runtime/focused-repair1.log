@@ -1,0 +1,14 @@
+Test run for /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:10.26]     Hub.Tests.Api.ReportUnitsTests.Dark_flag_keeps_original_wire_and_export_and_hidden_scope_remains_visible_only_without_private_hours [FAIL]
+  Failed Hub.Tests.Api.ReportUnitsTests.Dark_flag_keeps_original_wire_and_export_and_hidden_scope_remains_visible_only_without_private_hours [3 s]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: 0.25
+Actual:   62.74375
+  Stack Trace:
+     at Hub.Tests.Api.ReportUnitsTests.Dark_flag_keeps_original_wire_and_export_and_hidden_scope_remains_visible_only_without_private_hours() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReportUnitsTests.cs:line 343
+--- End of stack trace from previous location ---
+Results File: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint20-runtime/checkpoint20-focused-repair1.trx
+
+Failed!  - Failed:     1, Passed:     5, Skipped:     0, Total:     6, Duration: 15 s - Hub.Tests.dll (net10.0)

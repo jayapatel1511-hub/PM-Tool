@@ -1,0 +1,17 @@
+{
+  "exitCode": 1,
+  "args": [
+    "dotnet",
+    "build",
+    "Hub.slnx",
+    "-c",
+    "Release",
+    "--artifacts-path",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint28-artifacts",
+    "--disable-build-servers",
+    "-m:1",
+    "-p:UseSharedCompilation=false",
+    "-p:NuGetAudit=false"
+  ],
+  "atUtc": "2026-11-02T14:55:05.195804+00:00"
+}

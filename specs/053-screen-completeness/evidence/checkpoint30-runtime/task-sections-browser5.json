@@ -1,0 +1,21 @@
+{
+  "exitCode": 0,
+  "args": [
+    "node",
+    "tests/task-sections.cjs"
+  ],
+  "atUtc": "2026-11-02T20:30:07.043855+00:00",
+  "base": "http://127.0.0.1:8867",
+  "bundle": "checkpoint30 SPA2",
+  "repair": "Only actual native Chrome window-size. Original held strict driver restored;9real15100ms boundaries/no fake focus/cache/observers.",
+  "sourceHashes": {
+    "tests/task-sections.cjs": "92df7ff97fb64271b2e43da32f160891f32d6bc886c2ae30f732e764102e767b",
+    "tests/task-sections.fixture.cjs": "a157dc642e1b6e268833552ac1e7e7c5b09bd6935e0b2456ced1fcc66b5de1bd",
+    "tests/task-contribution.fixture.cjs": "b5737b979139702799c9cc3f4606a3ea49fde726bf0fba8d9cd2c81d4166bf3b",
+    "tests/native-visibility-browser.cjs": "b641e7ddb06c17b934e8e7cef5832901ed6e955b5b8ab6c2e6f59d331445bb07",
+    "tests/platform-fixtures.cjs": "81091b5e9103fb69213fadff1a4a1e11eb6bf9e6b52d594d3a46bfd0bd948fb2"
+  },
+  "screenshots": [
+    "task-sections-phone.png"
+  ]
+}

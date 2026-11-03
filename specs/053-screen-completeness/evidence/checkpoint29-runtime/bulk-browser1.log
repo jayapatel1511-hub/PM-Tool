@@ -1,0 +1,12 @@
+{"status":"FAIL","suite":"task-cross-project-bulk","url":"http://127.0.0.1:8862/tasks?projects=all","previews":1,"writes":[],"unexpected":[],"errors":[],"observations":[]}
+locator.waitFor: Timeout 15000ms exceeded.
+Call log:
+[2m  - waiting for locator('[data-task-bulk-dialog]').getByText('1 eligible; 0 unchanged; 0 refused; 0 unavailable.', { exact: true }) to be visible[22m
+
+    at review (/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/task-cross-project-bulk.cjs:68:237)
+    at async /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/task-cross-project-bulk.cjs:78:99 {
+  log: [
+    "  - waiting for locator('[data-task-bulk-dialog]').getByText('1 eligible; 0 unchanged; 0 refused; 0 unavailable.', { exact: true }) to be visible"
+  ],
+  name: 'TimeoutError'
+}

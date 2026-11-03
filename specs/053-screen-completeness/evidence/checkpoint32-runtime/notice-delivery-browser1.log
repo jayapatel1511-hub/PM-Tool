@@ -1,0 +1,11 @@
+{"status":"FAIL","suite":"notice-delivery","url":"http://127.0.0.1:8872/notifications","observations":[],"screenReads":[{"status":200,"version":0,"query":{"page":"1","pageSize":"50"}}],"pulseReads":["synthetic-delivery:0","synthetic-delivery:0","synthetic-delivery:0","synthetic-delivery:0"],"recentReads":[],"commands":[],"unexpected":[],"errors":[]}
+locator.waitFor: Timeout 15000ms exceeded.
+Call log:
+[2m  - waiting for locator('[data-notification-screen="00000000-0000-0000-0000-000000099300"]').locator('[data-notification-delivery]').getByText('2 of 2 occurrences have recorded delivery history', { exact: true }) to be visible[22m
+
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/notice-delivery.cjs:66:104 {
+  log: [
+    `  - waiting for locator('[data-notification-screen="00000000-0000-0000-0000-000000099300"]').locator('[data-notification-delivery]').getByText('2 of 2 occurrences have recorded delivery history', { exact: true }) to be visible`
+  ],
+  name: 'TimeoutError'
+}

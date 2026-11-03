@@ -1,0 +1,491 @@
+{
+  "distinctTests": 121,
+  "passed": 121,
+  "latestResults": {
+    "Hub.Tests.Api.ExternalReviewTests.External_response_sheet_keeps_all_rounds_exact_eight_columns_snapshot_party_and_safe_bytes(format: \"csv\")": {
+      "outcome": "Passed",
+      "run": "external-provider1"
+    },
+    "Hub.Tests.Api.ExternalReviewTests.Member_records_party_comments_without_account_acceptance_or_automatic_signature_and_explicit_verifier_owns_their_evidence": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ExternalReviewTests.Deliberately_corrupt_carry_is_not_actionable_and_cannot_pass_command_or_save_guards(corruption: \"sameRound\")": {
+      "outcome": "Passed",
+      "run": "external-provider1"
+    },
+    "Hub.Tests.Api.ExternalReviewTests.Advisory_record_queued_after_coordinator_change_must_recheck_its_package_baseline_under_lock": {
+      "outcome": "Passed",
+      "run": "external-provider1"
+    },
+    "Hub.Tests.Api.ExternalReviewTests.External_batch_receipt_is_exactly_once_under_concurrency_payload_mismatch_and_current_authority": {
+      "outcome": "Passed",
+      "run": "external-provider1"
+    },
+    "Hub.Tests.Api.ExternalReviewTests.Current_members_may_transcribe_but_viewers_readonly_and_removed_members_cannot": {
+      "outcome": "Passed",
+      "run": "external-provider1"
+    },
+    "Hub.Tests.Api.ExternalReviewTests.Internal_omitted_and_null_extension_keep_exact_wire_hash_and_genuine_receipt_parity": {
+      "outcome": "Passed",
+      "run": "external-provider1"
+    },
+    "Hub.Tests.Api.ExternalReviewTests.Deliberately_corrupt_stored_snapshot_blocks_real_start_record_designation_closure_and_final_approval(allowSelf: False)": {
+      "outcome": "Passed",
+      "run": "external-provider1"
+    },
+    "Hub.Tests.Api.ExternalReviewTests.Deliberately_corrupt_carry_is_not_actionable_and_cannot_pass_command_or_save_guards(corruption: \"anotherReceiptAndDeliverable\")": {
+      "outcome": "Passed",
+      "run": "external-provider1"
+    },
+    "Hub.Tests.Api.ExternalReviewTests.Future_issue_capture_is_private_even_off_and_historical_authority_does_not_follow_todays_owner": {
+      "outcome": "Passed",
+      "run": "external-provider-repair2"
+    },
+    "Hub.Tests.Api.ExternalReviewTests.Real_rows_enforce_source_origin_XOR_internal_verifier_and_immutable_capture_and_receipt": {
+      "outcome": "Passed",
+      "run": "external-provider1"
+    },
+    "Hub.Tests.Api.ExternalReviewTests.Stale_nested_baselines_and_late_batch_errors_leave_no_partial_incoming_finding_receipt_sequence_or_notice": {
+      "outcome": "Passed",
+      "run": "external-provider1"
+    },
+    "Hub.Tests.Api.ExternalReviewTests.Same_GUID_party_and_user_stay_typed_snapshot_identity_survives_rename_and_scalar_FK_targets_party": {
+      "outcome": "Passed",
+      "run": "external-provider1"
+    },
+    "Hub.Tests.Api.ExternalReviewTests.Removed_issue_scope_carries_through_a_later_round_without_repeating_the_old_removal_impact": {
+      "outcome": "Passed",
+      "run": "external-provider-repair2"
+    },
+    "Hub.Tests.Api.ExternalReviewTests.External_export_parent_scope_and_dark_guards_refuse_before_any_export_log_or_read_side_effect": {
+      "outcome": "Passed",
+      "run": "external-provider1"
+    },
+    "Hub.Tests.Api.ExternalReviewTests.External_response_sheet_keeps_all_rounds_exact_eight_columns_snapshot_party_and_safe_bytes(format: \"xlsx\")": {
+      "outcome": "Passed",
+      "run": "external-provider1"
+    },
+    "Hub.Tests.Api.ExternalReviewTests.Legacy_internal_review_downgrades_to_required_columns_without_defaults_and_reupgrades_without_data_loss": {
+      "outcome": "Passed",
+      "run": "external-provider1"
+    },
+    "Hub.Tests.Api.ExternalReviewTests.Deliberately_corrupt_carry_is_not_actionable_and_cannot_pass_command_or_save_guards(corruption: \"futureRound\")": {
+      "outcome": "Passed",
+      "run": "external-provider1"
+    },
+    "Hub.Tests.Api.ExternalReviewTests.Explicit_carry_keeps_incoming_identity_resets_response_and_rechecks_independence_against_both_issues": {
+      "outcome": "Passed",
+      "run": "external-provider-repair2"
+    },
+    "Hub.Tests.Api.ExternalReviewTests.Stored_external_work_disappears_when_dark_while_internal_routes_and_wire_remain_unchanged": {
+      "outcome": "Passed",
+      "run": "external-provider1"
+    },
+    "Hub.Tests.Api.ExternalReviewTests.Exact_named_verifier_retry_waiting_behind_real_reassignment_is_refused_before_receipt_replay": {
+      "outcome": "Passed",
+      "run": "external-provider1"
+    },
+    "Hub.Tests.Api.ExternalReviewTests.Deliberately_corrupt_stored_snapshot_blocks_real_start_record_designation_closure_and_final_approval(allowSelf: True)": {
+      "outcome": "Passed",
+      "run": "external-provider1"
+    },
+    "Hub.Tests.Api.ExternalReviewTests.Trusted_legacy_NULL_is_unknown_before_self_review_or_admin_and_cannot_be_backfilled(allowSelf: True)": {
+      "outcome": "Passed",
+      "run": "external-provider1"
+    },
+    "Hub.Tests.Api.ExternalReviewTests.Trusted_legacy_NULL_is_unknown_before_self_review_or_admin_and_cannot_be_backfilled(allowSelf: False)": {
+      "outcome": "Passed",
+      "run": "external-provider1"
+    },
+    "Hub.Tests.Api.ExternalReviewTests.Actual_future_issue_authors_refuse_downgrade_with_55000_before_schema_data_or_history_changes": {
+      "outcome": "Passed",
+      "run": "migration-refusal-repair3"
+    },
+    "Hub.Tests.Api.ExternalReviewTests.Only_an_inactive_discipline_lead_relation_does_not_grant_recording_or_options_capability": {
+      "outcome": "Passed",
+      "run": "external-provider1"
+    },
+    "Hub.Tests.Api.ReviewFindingContextTests.Cancelled_package_finding_is_not_assessed_and_owner_date_remains_unknown": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseTests.Flag_on_fresh_response_requires_an_explicit_exact_outcome(outcome: \"\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewRegisterTests.Readonly_table_parity_preserves_every_business_and_private_seen_counter": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewRegisterTests.Malformed_foreign_relationships_are_omitted_from_rows_counts_and_options(malformed: \"source\")": {
+      "outcome": "Passed",
+      "run": "register-compatibility-repair2"
+    },
+    "Hub.Tests.Api.ReviewResponseTests.Flag_on_fresh_response_requires_an_explicit_exact_outcome(outcome: \"Noted \")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewRegisterTests.Terminal_packages_remain_labelled_readonly_and_approved_advisory_comments_are_not_hidden(terminal: \"Cancelled\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseTests.Missing_or_invalid_response_evidence_is_refused_without_writes(evidence: \"javascript:alert(1)\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewFindingContextTests.Withdrawn_blocking_without_acknowledgement_still_needs_coordinator": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewFindingContextTests.Exact_child_requires_accessible_parent_and_round": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseExportTests.Missing_project_or_deleted_package_is_hidden_without_writes(missingProject: True)": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseTests.Missing_or_invalid_response_evidence_is_refused_without_writes(evidence: null)": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewRegisterTests.Invalid_filters_are_refused_without_read_side_writes(query: \"?resolverId=00000000-0000-0000-0000-000000000000\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseExportTests.Foreign_relationships_refuse_the_entire_download_without_leaking_or_logging(malformed: \"source\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewFindingContextTests.Independence_uses_complete_provenance_and_fails_safe(provenance: \"cycle\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewFindingContextTests.Foreign_project_task_authorship_is_unknown_without_exposing_the_reference": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseReceiptTests.Omitted_and_explicit_null_extension_preserve_exact_old_serialization_and_envelope_hash(action: \"assignResolver\", reason: \"Reassign this finding\", evidence: null, hasOwner: True)": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseTests.Relational_constraints_enforce_length_enum_response_and_event_action_without_changing_legacy_rows": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewRegisterTests.Restricted_project_access_and_foreign_filter_values_never_expand_authorized_options": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewRegisterTests.Invalid_filters_are_refused_without_read_side_writes(query: \"?severity=Unknown\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewRegisterTests.Register_and_exact_locator_flags_are_independent_and_legacy_review_routes_remain_available(register: True, patterns: False)": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewRegisterTests.Register_and_exact_locator_flags_are_independent_and_legacy_review_routes_remain_available(register: False, patterns: True)": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewRegisterTests.Malformed_foreign_relationships_are_omitted_from_rows_counts_and_options(malformed: \"round\")": {
+      "outcome": "Passed",
+      "run": "register-compatibility-repair2"
+    },
+    "Hub.Tests.Api.ReviewRegisterTests.Actual_people_are_retained_with_inactive_or_unknown_labels_and_no_private_facts_or_person_substitution": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseTests.Invalid_outcome_or_existing_reason_refuses_without_any_business_or_receipt_write(outcome: null, reason: \"The reason exists but no outcome was selected\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseExportTests.Unknown_originator_and_discipline_are_not_substituted_and_legacy_outcome_stays_blank(format: \"xlsx\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewRegisterTests.Responded_finding_names_the_actual_verifier_and_closed_findings_leave_the_unresolved_scope": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseReceiptTests.Omitted_and_explicit_null_extension_preserve_exact_old_serialization_and_envelope_hash(action: \"Open\", reason: \"Return this response for correction\", evidence: null, hasOwner: False)": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewFindingContextTests.Independence_uses_complete_provenance_and_fails_safe(provenance: \"ancestor\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewRegisterTests.Register_and_exact_locator_flags_are_independent_and_legacy_review_routes_remain_available(register: False, patterns: False)": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseExportTests.Missing_project_or_deleted_package_is_hidden_without_writes(missingProject: False)": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewRegisterTests.Terminal_packages_remain_labelled_readonly_and_approved_advisory_comments_are_not_hidden(terminal: \"Superseded\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewRegisterTests.Malformed_foreign_relationships_are_omitted_from_rows_counts_and_options(malformed: \"discipline\")": {
+      "outcome": "Passed",
+      "run": "register-compatibility-repair2"
+    },
+    "Hub.Tests.Api.ReviewFindingContextTests.Independence_uses_complete_provenance_and_fails_safe(provenance: \"captured\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseTests.Missing_or_invalid_response_evidence_is_refused_without_writes(evidence: \"\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewFindingContextTests.Inactive_named_people_remain_named_without_replacement(role: \"coordinator\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewFindingContextTests.Responded_uses_recorded_verifier_and_terminal_closure_does_not_fallback_to_originator": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewRegisterTests.Invalid_filters_are_refused_without_read_side_writes(query: \"?originatorId=00000000-0000-0000-0000-000000000000\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewFindingContextTests.Inactive_named_people_remain_named_without_replacement(role: \"verifier\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseExportTests.Foreign_relationships_refuse_the_entire_download_without_leaking_or_logging(malformed: \"deliverable\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseTests.Invalid_outcome_or_existing_reason_refuses_without_any_business_or_receipt_write(outcome: \"Clarified\", reason: \"no\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewFindingContextTests.Independence_uses_complete_provenance_and_fails_safe(provenance: \"current_owner\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewRegisterTests.Current_scope_does_not_double_count_carried_findings_and_explicit_history_retains_exact_identity": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseTests.Exact_outcomes_are_valid_response_metadata(outcome: \"Clarified\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseTests.Response_updates_current_and_one_immutable_event_without_bypassing_independent_closure(outcome: \"Clarified\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewRegisterTests.Two_packages_full_paging_and_four_filters_use_the_whole_authorized_scope": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseTests.Exact_outcomes_are_valid_response_metadata(outcome: \"Not incorporated\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseExportTests.Authorization_readonly_filename_dark_route_and_existing_summary_export_keep_their_contracts": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseTests.Named_actor_stale_version_and_non_response_outcome_refusals_are_atomic": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewFindingContextTests.Flag_off_hides_context_and_exact_child_then_enabled_read_is_project_scoped": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseExportTests.Foreign_relationships_refuse_the_entire_download_without_leaking_or_logging(malformed: \"round\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseReceiptTests.Genuine_six_field_receipt_replays_after_flag_on_without_new_event_or_legacy_backfill(explicitNull: True)": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseTests.Both_carry_paths_reset_the_new_finding_and_retain_the_original_response(publishedReplacement: False)": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseReceiptTests.Omitted_and_explicit_null_extension_preserve_exact_old_serialization_and_envelope_hash(action: \"Responded\", reason: \"  Unicode \u00e9 / \u6865 response with raw whitespace  \", evidence: null, hasOwner: False)": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseExportTests.Foreign_relationships_refuse_the_entire_download_without_leaking_or_logging(malformed: \"findingProject\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseExportTests.Eight_fixed_columns_preserve_complete_history_safe_text_and_actual_people_without_private_metadata(format: \"csv\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseReceiptTests.Omitted_and_explicit_null_extension_preserve_exact_old_serialization_and_envelope_hash(action: \"Responded\", reason: \"Recorded explanation\", evidence: \"https://example.test/evidence.pdf\", hasOwner: False)": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ContractTests.Openapi_matches_the_committed_golden_document": {
+      "outcome": "Passed",
+      "run": "register-compatibility-repair2"
+    },
+    "Hub.Tests.Api.ReviewResponseTests.Invalid_outcome_or_existing_reason_refuses_without_any_business_or_receipt_write(outcome: \"Not incorporated\", reason: \"\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewRegisterTests.Invalid_filters_are_refused_without_read_side_writes(query: \"?originatorKind=Account\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewRegisterTests.Deleted_parents_are_hidden_and_deleted_same_project_source_work_is_unavailable_history": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewRegisterTests.Invalid_filters_are_refused_without_read_side_writes(query: \"?disciplineId=00000000-0000-0000-0000-000000000000\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseTests.Invalid_outcome_or_existing_reason_refuses_without_any_business_or_receipt_write(outcome: \"Not incorporated\", reason: \"abcd\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewFindingContextTests.Historical_finding_remains_exact_while_current_draft_can_respond": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseTests.Response_updates_current_and_one_immutable_event_without_bypassing_independent_closure(outcome: \"Not incorporated\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewRegisterTests.Malformed_foreign_relationships_are_omitted_from_rows_counts_and_options(malformed: \"deliverable\")": {
+      "outcome": "Passed",
+      "run": "register-compatibility-repair2"
+    },
+    "Hub.Tests.Api.ReviewResponseTests.Invalid_outcome_or_existing_reason_refuses_without_any_business_or_receipt_write(outcome: \"Not incorporated\", reason: \"    \")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseTests.Flag_on_fresh_response_requires_an_explicit_exact_outcome(outcome: null)": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseTests.Response_updates_current_and_one_immutable_event_without_bypassing_independent_closure(outcome: \"Noted\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseExportTests.Eight_fixed_columns_preserve_complete_history_safe_text_and_actual_people_without_private_metadata(format: \"xlsx\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseReceiptTests.Genuine_six_field_receipt_replays_after_flag_on_without_new_event_or_legacy_backfill(explicitNull: False)": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewRegisterTests.Invalid_filters_are_refused_without_read_side_writes(query: \"?allRounds=unexpected\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.RegistryTests.Generated_key_families_match_the_registry_and_vocabulary": {
+      "outcome": "Passed",
+      "run": "register-compatibility-repair2"
+    },
+    "Hub.Tests.Api.ReviewResponseTests.Exact_outcomes_are_valid_response_metadata(outcome: \"Incorporated\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseTests.Exact_outcomes_are_valid_response_metadata(outcome: \"Noted\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseReceiptTests.Fresh_flag_on_missing_outcome_is_refused_while_fresh_flag_off_legacy_body_keeps_its_reply": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseTests.Return_re_response_verifier_reassignment_and_resolver_reset_preserve_event_history": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseExportTests.Unknown_originator_and_discipline_are_not_substituted_and_legacy_outcome_stays_blank(format: \"csv\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewRegisterTests.Register_and_exact_locator_flags_are_independent_and_legacy_review_routes_remain_available(register: True, patterns: True)": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewFindingContextTests.Independence_uses_complete_provenance_and_fails_safe(provenance: \"response_author\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseTests.Both_carry_paths_reset_the_new_finding_and_retain_the_original_response(publishedReplacement: True)": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseTests.Complete_project_response_still_requires_a_reason_and_retains_the_project_status": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewFindingContextTests.Last_blocker_verification_keeps_the_canonical_approval_gate": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseTests.Flag_and_non_response_rules_do_not_create_another_transition_engine": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseExportTests.Foreign_relationships_refuse_the_entire_download_without_leaking_or_logging(malformed: \"discipline\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseTests.Flag_on_fresh_response_requires_an_explicit_exact_outcome(outcome: \"incorporated\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseExportTests.Foreign_relationships_refuse_the_entire_download_without_leaking_or_logging(malformed: \"packageDiscipline\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseTests.Flag_on_fresh_response_requires_an_explicit_exact_outcome(outcome: \"Not Incorporated\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseTests.Flag_on_fresh_response_requires_an_explicit_exact_outcome(outcome: \" Incorporated\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewFindingContextTests.Inactive_named_people_remain_named_without_replacement(role: \"resolver\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseTests.Response_updates_current_and_one_immutable_event_without_bypassing_independent_closure(outcome: \"Incorporated\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseReceiptTests.New_outcome_receipt_replays_once_and_is_hidden_before_lookup_while_flag_off": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseExportTests.One_row_beyond_the_export_limit_refuses_both_formats_before_access_logging": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewResponseTests.Invalid_outcome_or_existing_reason_refuses_without_any_business_or_receipt_write(outcome: \"Unknown\", reason: \"An invalid outcome cannot be recorded\")": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ReviewRegisterTests.Blocking_withdrawal_pending_ack_is_distinct_and_only_the_named_coordinator_has_its_primary_action": {
+      "outcome": "Passed",
+      "run": "review-adjacent1"
+    },
+    "Hub.Tests.Api.ExternalReviewTests.R1_refuses_409_when_a_real_issued_finding_has_a_foreign_discipline_in_a_mixed_register": {
+      "outcome": "Passed",
+      "run": "register-compatibility-repair2"
+    }
+  },
+  "scope": "Selected external workflows + existing review register/response/export/context/receipt/strict contract checks; prior failures retained, affected cases rerun only"
+}

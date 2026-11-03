@@ -1,0 +1,9 @@
+{
+  "exitCode": 0,
+  "args": [
+    "node",
+    "--check",
+    "tests/task-cross-project-bulk.cjs"
+  ],
+  "atUtc": "2026-11-02T18:33:22.537042+00:00"
+}

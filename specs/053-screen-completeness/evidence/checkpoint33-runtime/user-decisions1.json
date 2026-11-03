@@ -1,0 +1,6 @@
+{
+  "date": "2026-11-02",
+  "qa24Cleanup": "explicitly approved; API stopped and exact synthetic DB dropped; other4DB/sharedcontainer/previews preserved",
+  "legacyUnknownAuthors": "BLOCK; no attestation",
+  "templates": "align enforcement with \u00a78: Admin or effective non-ReadOnly SystemPM/TemplateEditor"
+}

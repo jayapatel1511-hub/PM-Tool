@@ -1,0 +1,26 @@
+{
+  "exitCode": 0,
+  "args": [
+    "node",
+    "../.review/checkpoint31-review/capture-coordination.cjs"
+  ],
+  "base": "http://127.0.0.1:8869",
+  "atUtc": "2026-11-02T21:54:03.538296+00:00",
+  "scope": "Actual isolated SPA; finite synthetic intercepted HTTP; no real business writes or mail",
+  "driverSHA256": "b0c0e6a981c74b9e6383b285c974e55fffcb45c3a6abdfc4454fb2638782125b",
+  "tail": [
+    "{\"status\":\"PASS_READONLY_VISUAL\",\"screenshots\":[\"/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint31-review/new-assets/s38-07-readiness-links-desktop.png\",\"/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint31-review/new-assets/s38-08-readiness-agenda-desktop.png\",\"/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint31-review/new-assets/s38-07-readiness-links-phone.png\",\"/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint31-review/new-assets/s38-08-readiness-agenda-phone.png\"],\"businessWrites\":0,\"profile\":\"register_screens + screen_patterns + visual_system; finite synthetic HTTP\",\"scope\":\"Review framing only, not independent acceptance\"}"
+  ],
+  "browserResult": {
+    "status": "PASS_READONLY_VISUAL",
+    "screenshots": [
+      "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint31-review/new-assets/s38-07-readiness-links-desktop.png",
+      "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint31-review/new-assets/s38-08-readiness-agenda-desktop.png",
+      "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint31-review/new-assets/s38-07-readiness-links-phone.png",
+      "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint31-review/new-assets/s38-08-readiness-agenda-phone.png"
+    ],
+    "businessWrites": 0,
+    "profile": "register_screens + screen_patterns + visual_system; finite synthetic HTTP",
+    "scope": "Review framing only, not independent acceptance"
+  }
+}

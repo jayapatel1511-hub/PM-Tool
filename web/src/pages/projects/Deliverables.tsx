@@ -1,14 +1,16 @@
+import { useWorkSeenDetailOwner, WorkSeenDetailNotice } from '@/components/hub/work-seen-detail-owner'
+import type { WorkSeenFields } from '@/components/hub/work-seen'
 import { PickerProject } from '@/components/hub/people'
 import { disciplineColour } from '@/lib/discipline-colour'
 import { UrlSearchInput } from '@/components/hub/url-search'
 import { useQuery } from '@tanstack/react-query'
 import { Check, ChevronDown, ChevronRight, Link2, Plus, Send, X } from 'lucide-react'
 import { Fragment, useMemo, useState, type ReactNode } from 'react'
-import { Link, useSearchParams } from 'react-router'
+import { Link, useLocation, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { ActiveFilters, ConfirmDialog, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Page, PageHelp, Spinner, TableRegion, selectCls } from '@/components/hub/common'
 import { DateHint } from '@/components/hub/date-context'
-import { FieldRow, HistoryList, InlineDate, InlinePerson, InlineSelect, InlineText, SaveStatus, TabBar } from '@/components/hub/fields'
+import { FieldRow, HistoryList, InlineDate, InlinePerson, InlineSelect, InlineText, SaveStatus, TabBar, useRecordTab } from '@/components/hub/fields'
 import { DepTypeChip, DepTypeField, DeliverableIndicators, progressLabel } from '@/components/hub/indicators'
 import { useItemPanel, type PanelProps } from '@/components/hub/panel-host'
 import { PeoplePicker } from '@/components/hub/people'
@@ -34,11 +36,18 @@ import { CommentsSlot, ItemSlots, LinksSlot, RaiseSlot } from './slots-items'
 import { useCurrentProject } from './ProjectLayout'
 import { MenuSelect, errorText } from './Tasks'
 import { ExportMenu } from '@/components/hub/export'
-import { useTable } from '@/components/hub/table'
+import { useDeliverableClientExport } from './deliverable-client-export'
+import { DeliverableImportDialog } from './deliverable-import'
+import { useTable, type Column } from '@/components/hub/table'
 import { ViewMenu } from '@/components/hub/views'
 import { DeletedList, DeletedToggle, useShowDeleted } from '@/components/hub/deleted'
 import { DraftNotice } from '@/components/hub/drafts'
 import { useSafeForm } from '@/hooks/drafts'
+import { RecordContext } from '@/components/hub/record-context'
+import { useMe } from '@/lib/auth'
+import { useProjectRelatedPanel } from './project-related-navigation'
+import { useWorkRecordOrigin } from './work-record-navigation'
+import { ClientNumber, ClientNumberEditor, DeliverableDates, IssueResponseDialog, RecipientReturn } from './deliverable-register'
 
 export type DeliverableRow = components['schemas']['DeliverableRow']
 
@@ -52,16 +61,24 @@ function LiveDeliverablesTab() {
   const [sp, setSp] = useSearchParams()
   const openPanel = useItemPanel()
   const [creating, setCreating] = useState(false)
+  const [importing, setImporting] = useState(false)
+  const refresh = useProjectRefresh()
   const [open, setOpen] = useState<Set<string>>(new Set())
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [bulk, setBulk] = useState<string | null>(null)
+  const registerEnabled = useFlag('register_screens')
+  const dates = registerEnabled && sp.get('layout') === 'dates'
   const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
   const filters = { disciplineId: sp.get('disciplineId'), status: sp.get('status'), milestoneId: sp.get('milestoneId'), ownerId: sp.get('ownerId'), typeId: sp.get('typeId'),
-    indicator: sp.get('indicator'), dueFrom: sp.get('dueFrom'), dueTo: sp.get('dueTo'), q: sp.get('q'), requiresReview: sp.get('requiresReview'), revisionWarning: sp.get('revisionWarning') }
+    indicator: sp.get('indicator'), dueFrom: sp.get('dueFrom'), dueTo: sp.get('dueTo'), q: sp.get('q'), requiresReview: sp.get('requiresReview'), revisionWarning: sp.get('revisionWarning'),
+    purposeOfIssueId: registerEnabled ? sp.get('purposeOfIssueId') : null, returnCodeId: registerEnabled ? sp.get('returnCodeId') : null, noDueDate: registerEnabled ? sp.get('noDueDate') : null }
+  const dataFilters = { ...filters, indicator: dates ? [...new Set([...(filters.indicator?.split(',').filter(Boolean) ?? []), 'open'])].join(',') : filters.indicator }
   const revisionEnabled = useFlag('revision_check')
-  const q = useQuery({ queryKey: ['p', p.id, 'deliverables', filters], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/deliverables', { params: { id: p.id }, query: {
+  const clientExports = useDeliverableClientExport(p.id, p.projectNumber, { ...dataFilters, revisionWarning: revisionEnabled ? dataFilters.revisionWarning : undefined })
+  const q = useQuery({ queryKey: ['p', p.id, 'deliverables', dataFilters], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/deliverables', { params: { id: p.id }, query: {
     DisciplineId: filters.disciplineId ?? undefined, Status: filters.status ?? undefined, MilestoneId: filters.milestoneId ?? undefined, OwnerId: filters.ownerId ?? undefined, TypeId: filters.typeId ?? undefined,
-    Indicator: filters.indicator ?? undefined, DueFrom: filters.dueFrom ?? undefined, DueTo: filters.dueTo ?? undefined, Q: filters.q ?? undefined,
+    Indicator: dataFilters.indicator ?? undefined, DueFrom: filters.dueFrom ?? undefined, DueTo: filters.dueTo ?? undefined, Q: filters.q ?? undefined,
+    PurposeOfIssueId: filters.purposeOfIssueId ?? undefined, ReturnCodeId: filters.returnCodeId ?? undefined, NoDueDate: (filters.noDueDate ?? undefined) as boolean | undefined,
     RequiresReview: (filters.requiresReview ?? undefined) as boolean | undefined, // the URL's 'true' or 'false' text goes through as it is: the query builder leaves out a boolean false, which is a real choice here
     RevisionWarning: (revisionEnabled ? filters.revisionWarning ?? undefined : undefined) as boolean | undefined, IncludeTasks: true } }) })
   const revisionQ = useQuery({ queryKey: ['project', p.id, 'revision-check'], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/revision-check', { params: { projectId: p.id } }), enabled: revisionEnabled })
@@ -70,6 +87,12 @@ function LiveDeliverablesTab() {
   const milestones = useQuery({ queryKey: ['p', p.id, 'milestones', false, ''], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/milestones', { params: { id: p.id } }) })
   const group = sp.get('group') ?? 'discipline'
   const panel = sp.get('panel')
+  const registerColumns: Column<DeliverableRow>[] = registerEnabled ? [
+    { id: 'clientDrawingNumber', label: t('deliverableRegister.clientNumber'), sort: d => d.registerInfo?.clientDrawingNumber, cell: d => <ClientNumber value={d.registerInfo} /> },
+    { id: 'purposeOfIssue', label: t('deliverableRegister.purpose'), sort: d => d.registerInfo?.currentIssue?.purpose, cell: d => d.registerInfo?.currentIssue?.purpose ?? <Missing /> },
+    { id: 'returnCode', label: t('deliverableRegister.returnCode'), sort: d => d.registerInfo?.currentIssue?.returnCode, cell: d => <RecipientReturn code={d.registerInfo?.currentIssue?.returnCode} label={d.registerInfo?.currentIssue?.returnLabel} /> },
+    { id: 'responseDate', label: t('deliverableRegister.responseDate'), sort: d => d.registerInfo?.currentIssue?.responseDate, cell: d => <DateText date={d.registerInfo?.currentIssue?.responseDate} /> },
+  ] : []
   const table = useTable<DeliverableRow>('hub.deliverableColumns', [
     { id: 'key', label: t('milestone.key'), fixed: true, sort: (d) => d.key, className: 'whitespace-nowrap', cell: (d) => <Key>{d.key}</Key> },
     { id: 'name', label: t('deliverable.name'), fixed: true, sort: (d) => d.name.toLowerCase(), className: 'min-w-[14rem]',
@@ -88,6 +111,7 @@ function LiveDeliverablesTab() {
     { id: 'indicators', label: t('deliverable.indicators'), className: 'min-w-32', cell: (d) => <DeliverableIndicators s={d.state} /> },
     { id: 'revision', label: t('field.Revision'), sort: (d) => d.revision, cell: (d) => <span className="inline-flex items-center gap-2">{d.revision || <Missing />}{revisionEnabled && (marks.get(d.id)?.length ?? 0) > 0 && <span className="rounded bg-warn-bg px-1 text-xs text-warn">{marks.get(d.id)!.length}</span>}</span> },
     { id: 'issued', label: t('field.IssuedDate'), sort: (d) => d.issuedDate, className: 'text-right', cell: (d) => <DateText date={d.issuedDate} /> },
+    ...registerColumns,
   ], q.data ?? [], (d) => [d.dueDate, d.key])
   const rows = table.sorted.filter((d) => !warningOnly || (marks.get(d.id)?.length ?? 0) > 0)
   const groups = useMemo(() => {
@@ -102,6 +126,9 @@ function LiveDeliverablesTab() {
   const active = Object.values(filters).some(Boolean)
   const clear = () => { const n = new URLSearchParams(sp); for (const k of Object.keys(filters)) n.delete(k); setSp(n, { replace: true }) }
   const milestone = milestones.data?.find((m) => m.id === filters.milestoneId)
+  const refLabel = (row?: { name: string; isActive: boolean }) => row ? row.isActive ? row.name : t('deliverableRegister.inactive', { name: row.name }) : <Missing />
+  const removeRange = () => { const n = new URLSearchParams(sp); n.delete('dueFrom'); n.delete('dueTo'); setSp(n, { replace: true }) }
+  const showUndated = () => { const n = new URLSearchParams(sp); n.set('noDueDate', 'true'); n.set('layout', 'register'); setSp(n, { replace: true }) }
   // Active filters as removable tokens (§13.0 Filters), including owner and review filters that arrive by link.
   const tokens = [
     filters.q && { key: 'q', label: t('common.search'), value: filters.q },
@@ -115,14 +142,22 @@ function LiveDeliverablesTab() {
     filters.dueTo && { key: 'dueTo', label: t('tfilter.dueTo'), value: fmtDate(filters.dueTo) },
     filters.requiresReview && { key: 'requiresReview', label: t('field.RequiresReview'), value: filters.requiresReview === 'true' ? t('common.yes') : t('common.no') },
     warningOnly && { key: 'revisionWarning', label: t('revisionCheck.warningFilter'), value: t('common.yes') },
+    filters.purposeOfIssueId && { key: 'purposeOfIssueId', label: t('deliverableRegister.purpose'), value: refLabel(ref.data?.issuePurposes?.find(x => x.id === filters.purposeOfIssueId)) },
+    filters.returnCodeId && { key: 'returnCodeId', label: t('deliverableRegister.returnCode'), value: refLabel(ref.data?.issueReturnCodes?.find(x => x.id === filters.returnCodeId)) },
+    filters.noDueDate === 'true' && { key: 'noDueDate', label: t('deliverableRegister.noDueDate'), value: t('common.yes') },
   ].filter(Boolean) as { key: string; label: string; value: ReactNode }[]
 
   return (
     <Page title={t('ptab.deliverables')} subtitle={<>{t('deliverable.scope')}<PageHelp>{t('deliverable.subtitle')}</PageHelp></>}
       actions={<>
-        {table.menu}
+        {registerEnabled && <div className="flex rounded-md border" role="group" aria-label={t('deliverableRegister.view')}>
+          <Button size="sm" variant={dates ? 'ghost' : 'secondary'} aria-pressed={!dates} onClick={() => set('layout', 'register')}>{t('deliverableRegister.registerView')}</Button>
+          <Button size="sm" variant={dates ? 'secondary' : 'ghost'} aria-pressed={dates} onClick={() => set('layout', 'dates')}>{t('deliverableRegister.dateView')}</Button>
+        </div>}
+        {!dates && table.menu}
         <ViewMenu listType="deliverables" projectId={p.id} extra={() => ({ cols: table.colsParam })} />
-        <ExportMenu path={`projects/${p.id}/deliverables/export`} params={filters} name={`${p.projectNumber}-deliverables`} />
+        <ExportMenu path={`projects/${p.id}/deliverables/export`} params={dataFilters} name={`${p.projectNumber}-deliverables`} extra={clientExports} />
+        {registerEnabled && canCreate && <Button variant="outline" onClick={() => setImporting(true)}>{t('drawingImport.action')}</Button>}
         {canCreate && <Button onClick={() => setCreating(true)}><Plus className="size-4" />{t('deliverable.new')}</Button>}
       </>}>
       <FilterBar activeCount={tokens.length}
@@ -167,9 +202,18 @@ function LiveDeliverablesTab() {
             <Input id="deliverable-due-to" type="date" value={filters.dueTo ?? ''} onChange={(e) => set('dueTo', e.target.value)} />
           </Field>
           {revisionEnabled && <Field label={t('revisionCheck.warningFilter')} htmlFor="deliverable-revision-warning" className="w-full sm:w-44"><select id="deliverable-revision-warning" className={selectCls} value={filters.revisionWarning ?? ''} onChange={(e) => set('revisionWarning', e.target.value)}><option value="">{t('revisionCheck.all')}</option><option value="true">{t('revisionCheck.withWarnings')}</option></select></Field>}
+          {registerEnabled && <>
+            <Field label={t('deliverableRegister.purpose')} htmlFor="deliverable-purpose" className="w-full sm:w-52"><select id="deliverable-purpose" className={selectCls} value={filters.purposeOfIssueId ?? ''} onChange={e => set('purposeOfIssueId', e.target.value)}>
+              <option value="">{t('deliverableRegister.anyPurpose')}</option>{ref.data?.issuePurposes?.map(value => <option key={value.id} value={value.id}>{value.isActive ? value.name : t('deliverableRegister.inactive', { name: value.name })}</option>)}
+            </select></Field>
+            <Field label={t('deliverableRegister.returnCode')} htmlFor="deliverable-return" className="w-full sm:w-52"><select id="deliverable-return" className={selectCls} value={filters.returnCodeId ?? ''} onChange={e => set('returnCodeId', e.target.value)}>
+              <option value="">{t('deliverableRegister.anyReturn')}</option>{ref.data?.issueReturnCodes?.map(value => <option key={value.id} value={value.id}>{value.code} · {value.isActive ? value.name : t('deliverableRegister.inactive', { name: value.name })}</option>)}
+            </select></Field>
+            <label className="flex min-h-9 items-center gap-2 text-sm"><Checkbox checked={filters.noDueDate === 'true'} onCheckedChange={value => set('noDueDate', value === true ? 'true' : null)} />{t('deliverableRegister.noDueDate')}</label>
+          </>}
         </div>
       </FilterBar>
-      {selected.size > 0 && (
+      {!dates && selected.size > 0 && (
         <div className="flex flex-wrap items-center gap-2 rounded-lg border bg-accent px-4 py-2 text-sm" role="region" aria-label={t('bulk.actions')}>
           <span className="mr-1 font-semibold tabular-nums text-accent-foreground">{t('bulk.selected', { n: selected.size })}</span>
           <Button size="sm" variant="outline" onClick={() => setBulk('setMilestone')}>{t('bulk.setMilestone')}</Button>
@@ -178,7 +222,7 @@ function LiveDeliverablesTab() {
           <Button size="sm" variant="ghost" onClick={() => setSelected(new Set())}>{t('common.clear')}</Button>
         </div>
       )}
-      {q.isPending ? <div className="rounded-lg border bg-card"><Loading rows={8} /></div> : q.error ? <ErrorBanner error={q.error} retry={() => q.refetch()} /> : rows.length === 0 ? (
+      {q.isPending ? <div className="rounded-lg border bg-card"><Loading rows={8} /></div> : q.error ? <ErrorBanner error={q.error} retry={() => q.refetch()} /> : dates ? <DeliverableDates rows={rows} rangeExcluded={!!(filters.dueFrom || filters.dueTo)} removeRange={removeRange} showUndated={showUndated} /> : rows.length === 0 ? (
         <div className="rounded-lg border bg-card">{active
           ? <Empty title={t('register.noMatch')} action={<Button variant="outline" onClick={clear}>{t('filters.clear')}</Button>}>{t('register.noMatchHint')}</Empty>
           : <Empty action={canCreate && <Button variant="outline" onClick={() => setCreating(true)}><Plus className="size-4" />{t('deliverable.new')}</Button>}>{t('deliverable.empty')}</Empty>}</div>
@@ -223,6 +267,7 @@ function LiveDeliverablesTab() {
         </TableRegion>
       </>)}
       {creating && <CreateDeliverable p={p} milestones={milestones.data ?? []} onClose={() => setCreating(false)} />}
+      {registerEnabled && importing && <DeliverableImportDialog projectId={p.id} onClose={() => setImporting(false)} onChanged={() => { void refresh(p.id) }} />}
       {bulk && <BulkDialog p={p} op={bulk} ids={[...selected]} milestones={milestones.data ?? []} onClose={(ok) => { setBulk(null); if (ok) { setSelected(new Set()); q.refetch() } }} />}
     </Page>
   )
@@ -255,6 +300,7 @@ function BulkDialog({ p, op, ids, milestones, onClose }: { p: ProjectDetail; op:
 
 export function CreateDeliverable({ p, milestones, onClose, fromTask }: { p: ProjectDetail; milestones: MilestoneRow[]; onClose: () => void; fromTask?: { id: string; name: string; projectDisciplineId: string; milestoneId?: string; startDate?: string; dueDate?: string; priority: string } }) {
   const ref = useReference()
+  const registerEnabled = useFlag('register_screens')
   const refresh = useProjectRefresh()
   const allowed = p.disciplines.filter((d) => d.isActive && p.permissions.createDeliverableIn.includes(d.id))
   const [f, setF] = useState<Record<string, any>>({ projectDisciplineId: fromTask?.projectDisciplineId ?? allowed[0]?.id, requiresReview: true, priority: 'Medium', ...(fromTask ? {name:fromTask.name, milestoneId:fromTask.milestoneId,startDate:fromTask.startDate,dueDate:fromTask.dueDate,priority:fromTask.priority} : {}) })
@@ -271,7 +317,7 @@ export function CreateDeliverable({ p, milestones, onClose, fromTask }: { p: Pro
       const r = await typedRequest('post', '/api/v1/projects/{id}/deliverables', { params: { id: p.id }, body: {
         name: f.name, projectDisciplineId: f.projectDisciplineId, deliverableTypeId: f.deliverableTypeId, description: f.description ?? null, priority: f.priority ?? null, revision: f.revision ?? null,
         requiresReview: f.requiresReview ?? null, ...(fromTask ? { fromTaskId: fromTask.id } : {}), ownerId: owner.id ?? lead?.leadUserId ?? null, reviewerId: reviewer, milestoneId: f.milestoneId || null,
-        startDate: f.startDate || null, dueDate: f.dueDate || null } })
+        startDate: f.startDate || null, dueDate: f.dueDate || null, ...(registerEnabled ? { clientDrawingNumber: f.clientDrawingNumber || null } : {}) } })
       toast.success(t('deliverable.created', { key: r.key }))
       r.warnings.forEach((w) => toast.warning(w))
       safe.clear(); refresh(p.id); onClose()
@@ -285,6 +331,7 @@ export function CreateDeliverable({ p, milestones, onClose, fromTask }: { p: Pro
         <DraftNotice form={safe} />
         <form className="grid gap-3 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); submit() }}>
           <Field label={t('deliverable.name')} htmlFor="d-name" error={fe.name} className="sm:col-span-2"><Input id="d-name" required placeholder={t('deliverable.namePlaceholder')} value={f.name ?? ''} onChange={(e) => setF({ ...f, name: e.target.value })} /></Field>
+          {registerEnabled && <Field label={t('deliverableRegister.clientNumber')} optional htmlFor="d-client-number" error={fe.clientDrawingNumber} className="sm:col-span-2"><Input id="d-client-number" maxLength={120} value={f.clientDrawingNumber ?? ''} onChange={e => setF({ ...f, clientDrawingNumber: e.target.value })} /></Field>}
           <Field label={t('common.discipline')} htmlFor="d-disc">
             <select id="d-disc" className={selectCls} value={f.projectDisciplineId ?? ''} onChange={(e) => setF({ ...f, projectDisciplineId: e.target.value })}>{allowed.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select>
           </Field>
@@ -322,20 +369,48 @@ export function CreateDeliverable({ p, milestones, onClose, fromTask }: { p: Pro
 export const DELIVERABLE_TABS: { id: string; label: string; render: (d: any) => React.ReactNode }[] = []
 
 export function DeliverablePanel({ id }: PanelProps) {
-  const q = useQuery({ queryKey: ['deliverable', id], queryFn: () => typedRequest('get', '/api/v1/deliverables/{id}', { params: { id } }) })
+  const viewer = useMe(), workOn = useFlag('work_screens'), peopleOn = useFlag('people_screens')
+  const q = useQuery({ queryKey: ['deliverable', id, viewer.id, workOn, peopleOn], queryFn: () => typedRequest('get', '/api/v1/deliverables/{id}', { params: { id } }) })
   const refresh = useProjectRefresh()
   const ref = useReference()
-  const [tab, setTab] = useState('tasks')
+  const [localTab, setLocalTab] = useState('tasks')
+  const [panelParams, setPanelParams] = useSearchParams()
+  const location = useLocation()
   const [baseline, setBaseline] = useState<'set' | 'clear' | null>(null)
   const [transition, setTransition] = useState<{ to: string; needsReason: boolean } | null>(null)
   const [issuing, setIssuing] = useState(false)
+  const [response, setResponse] = useState<{ deliverable: DeliverableRow; issue: IssueRow; needsReason: boolean } | null>(null)
   const [err, setErr] = useState<unknown>(null)
   const project = useProject(q.data?.project.projectNumber)
   const milestones = useQuery({ queryKey: ['p', q.data?.project.id, 'milestones', false, ''], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/milestones', { params: { id: q.data!.project.id } }), enabled: !!q.data })
   const openPanel = useItemPanel()
+  const openRelatedPanel = useProjectRelatedPanel()
+  const followRelatedLink = useWorkRecordOrigin()
   const baselineEnabled = useFlag('baseline_history')
   const revisionEnabled = useFlag('revision_check')
+  const registerEnabled = useFlag('register_screens')
+  const contextOn = useFlag('screen_patterns')
+  // The source panel remounts after a related-record visit. Scope its URL-backed
+  // tab to this record so the target starts on Tasks and a return restores the source.
+  const tabPrefix = `${id}:`
+  const savedTab = panelParams.get('deliverableTab')
+  const requestedTab = savedTab?.startsWith(tabPrefix) ? savedTab.slice(tabPrefix.length) : 'tasks'
+  const allowedTabs = ['tasks', 'deps', 'issues', ...(baselineEnabled ? ['baselines'] : []),
+    ...(ItemSlots.Links ? ['links'] : []), ...(ItemSlots.Comments ? ['comments'] : []), ...DELIVERABLE_TABS.map(x => x.id), 'history']
+  const [recordTab, chooseRecordTab] = useRecordTab('Deliverable', id, contextOn && allowedTabs.includes(requestedTab) ? requestedTab : 'tasks', allowedTabs)
+  const tab = peopleOn || workOn ? recordTab : contextOn ? allowedTabs.includes(requestedTab) ? requestedTab : 'tasks' : localTab
+  const setTab = (value: string) => {
+    if (peopleOn || workOn) { chooseRecordTab(value); return }
+    if (!contextOn) { setLocalTab(value); return }
+    const next = new URLSearchParams(panelParams)
+    next.set('deliverableTab', `${id}:${value}`)
+    setPanelParams(next, { replace: true, state: location.state })
+  }
+  const me = useMe()
   const revisionQ = useQuery({ queryKey: ['project', q.data?.project.id, 'revision-check'], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/revision-check', { params: { projectId: q.data!.project.id } }), enabled: revisionEnabled && !!q.data })
+  const seenOwner = useWorkSeenDetailOwner({ itemType: 'Deliverable', itemId: q.data?.deliverable.id ?? id,
+    sourceVersion: q.data?.deliverable.rowVersion, seen: (q.data as WorkSeenFields | undefined)?.seen, read: q,
+    visible: !baseline && !transition && !issuing && !response })
   if (q.isPending) return <Loading />
   if (q.error) return <div className="p-4"><ErrorBanner error={q.error} /></div>
   const data = q.data
@@ -358,7 +433,8 @@ export function DeliverablePanel({ id }: PanelProps) {
   }
   const s = d.state
   return (
-    <PickerProject.Provider value={d.projectId}><div>
+    <PickerProject.Provider value={d.projectId}><div ref={seenOwner.surfaceRef}>
+      <WorkSeenDetailNotice state={seenOwner.state} />
       <PanelHead title={d.name} meta={<>
         <Key>{d.key}</Key>
         <DropdownMenu>
@@ -377,11 +453,12 @@ export function DeliverablePanel({ id }: PanelProps) {
         <div className="flex flex-wrap gap-2">
           {can && <Button size="sm" variant="outline" asChild><Link to={`/projects/${data.project.projectNumber}/handoffs?source=${d.id}`}>{t('handoff.new')}</Link></Button>}
           <Button size="sm" variant="outline" asChild><Link to={`/projects/${data.project.projectNumber}/changes?target=Deliverable:${d.id}`}>{t('change.inputs')}</Link></Button>
-          {d.requiredReviewPackageId && <Button size="sm" variant="outline" asChild><Link to={`/projects/${data.project.projectNumber}/reviews?panel=ReviewPackage:${d.requiredReviewPackageId}`}>{t('review.issueGate')}</Link></Button>}
+          {d.requiredReviewPackageId && <Button size="sm" variant="outline" asChild><Link to={`/projects/${data.project.projectNumber}/reviews?panel=ReviewPackage:${d.requiredReviewPackageId}`} onClick={followRelatedLink}>{t('review.issueGate')}</Link></Button>}
           <RaiseSlot projectId={d.projectId} targetType="Deliverable" targetId={d.id} targetKey={d.key} targetName={d.name} disciplineId={d.projectDisciplineId} />
           {perms.issue && <Button size="sm" onClick={() => setIssuing(true)}><Send className="size-4" />{t('deliverable.issue')}</Button>}
         </div>
       </PanelHead>
+      {contextOn && <RecordContext context={data.context} projectNumber={data.project.projectNumber} meId={me.id} openPanel={openPanel} />}
       {d.canRebaseline && <div className="flex flex-wrap gap-2 px-4 pt-3"><Button size="sm" variant="outline" onClick={() => setBaseline('set')}>{t('baseline.rebaseline')}</Button>{(d.baselineStartDate || d.baselineDueDate) && <Button size="sm" variant="ghost" onClick={() => setBaseline('clear')}>{t('baseline.useOriginal')}</Button>}</div>}
       {err != null && <div className="px-4 pb-4"><ErrorBanner error={err} retry={() => { setErr(null); reload() }} /></div>}
       <FieldGroup title={t('common.details')}>
@@ -392,8 +469,8 @@ export function DeliverablePanel({ id }: PanelProps) {
         <FieldRow label={t('common.description')}><InlineText value={data.description} multiline disabled={!can} needsReason={perms.needsReason} onSave={(v) => save({ description: v })} /></FieldRow>
       </FieldGroup>
       <FieldGroup title={t('register.group.ownership')}>
-        <FieldRow label={t('common.owner')}><InlinePerson value={d.ownerId} name={d.ownerName} disabled={!can} allowClear={false} onSave={(v) => save({ ownerId: v })} /></FieldRow>
-        <FieldRow label={t('field.ReviewerId')}><InlinePerson value={d.reviewerId} name={d.reviewerName} disabled={!can} onSave={(v) => save({ reviewerId: v })} /></FieldRow>
+        <FieldRow label={t('common.owner')}><InlinePerson focusKey={`deliverable:${d.id}:owner`} value={d.ownerId} name={d.ownerName} disabled={!can} allowClear={false} onSave={(v) => save({ ownerId: v })} /></FieldRow>
+        <FieldRow label={t('field.ReviewerId')}><InlinePerson focusKey={`deliverable:${d.id}:reviewer`} value={d.reviewerId} name={d.reviewerName} disabled={!can} onSave={(v) => save({ reviewerId: v })} /></FieldRow>
       </FieldGroup>
       <FieldGroup title={t('register.group.schedule')}>
         <FieldRow label={t('field.MilestoneId')}><InlineSelect value={d.milestoneId} allowEmpty disabled={!can} options={(milestones.data ?? []).map((m) => ({ value: m.id, label: `${m.key} ${m.name}` }))} onSave={(v) => save({ milestoneId: v })} title={t('field.MilestoneId')} /></FieldRow>
@@ -404,16 +481,23 @@ export function DeliverablePanel({ id }: PanelProps) {
           {s && <div className="mt-1 text-xs/[18px] text-muted-foreground tabular-nums">{t('deliverable.breakdown', { open: s.taskOpen, overdue: s.taskOverdue, blocked: s.taskBlocked })}</div>}</div></FieldRow>
       </FieldGroup>
       <FieldGroup title={t('register.group.reviewIssue')}>
+        {registerEnabled && d.registerInfo && <FieldRow label={t('deliverableRegister.clientNumber')}><ClientNumberEditor deliverable={d} canEdit={can} needsReason={perms.needsReason} onSaved={reload} /></FieldRow>}
         <FieldRow label={t('field.RequiresReview')}><ReviewRequiredCheckbox key={d.id} value={d.requiresReview} disabled={!can} onSave={async (v) => {
           const ok = await save({ requiresReview: v })
           if (ok) await q.refetch()
           return ok
         }} /></FieldRow>
         <FieldRow label={t('field.Revision')}><InlineText value={d.revision} disabled={!can} needsReason={perms.needsReason} onSave={(v) => save({ revision: v })} /></FieldRow>
+        {registerEnabled && <>
+          <FieldRow label={t('deliverableRegister.latest')}><div className="px-2 py-1.5">{d.registerInfo?.currentIssue ? t('deliverableRegister.latestIssue', { revision: d.registerInfo.currentIssue.revision ?? t('common.dash'), date: fmtDate(d.registerInfo.currentIssue.issuedDate) }) : t('deliverableRegister.unknown')}</div></FieldRow>
+          <FieldRow label={t('deliverableRegister.purpose')}><div className="px-2 py-1.5">{d.registerInfo?.currentIssue?.purpose ?? <Missing />}</div></FieldRow>
+          <FieldRow label={t('deliverableRegister.returnCode')}><div className="px-2 py-1.5"><RecipientReturn code={d.registerInfo?.currentIssue?.returnCode} label={d.registerInfo?.currentIssue?.returnLabel} /></div></FieldRow>
+          <FieldRow label={t('deliverableRegister.responseDate')}><div className="px-2 py-1.5"><DateText date={d.registerInfo?.currentIssue?.responseDate} /></div></FieldRow>
+        </>}
         {d.issuedDate && <FieldRow label={t('deliverable.issued')}><div className="px-2 py-1.5"><span className="tabular-nums">{fmtDate(d.issuedDate)}</span> · {d.revision} · {d.issuedTo}{data.transmittalUrl && <> · <a className="text-primary underline underline-offset-4" href={data.transmittalUrl} target="_blank" rel="noreferrer noopener">{t('deliverable.transmittal')}</a></>}</div></FieldRow>}
         {data.onHoldReason && d.status === 'On Hold' && <FieldRow label={t('field.OnHoldReason')}><div className="px-2 py-1.5">{data.onHoldReason}</div></FieldRow>}
       </FieldGroup>
-      {!!q.data.relatedTasks?.length && <div className="px-4 py-3 text-sm">{t('interaction.relatedTasks')}: {q.data.relatedTasks.map((r)=><button key={r.id} className="ml-2 underline underline-offset-2" onClick={()=>openPanel('Task',r.id)}>{r.key} {r.name}</button>)}</div>}
+      {!!q.data.relatedTasks?.length && <div className="px-4 py-3 text-sm">{t('interaction.relatedTasks')}: {q.data.relatedTasks.map((r)=><button key={r.id} className="ml-2 underline underline-offset-2" onClick={e=>openRelatedPanel('Task',r.id,e)}>{r.key} {r.name}</button>)}</div>}
       <TabBar tabs={[{ id: 'tasks', label: t('ptab.tasks'), count: d.tasks?.length }, { id: 'deps', label: t('deliverable.dependencies') }, { id: 'issues', label: t('deliverable.issues'), count: data.issues.length },
         ...(baselineEnabled ? [{ id: 'baselines', label: t('baseline.history') }] : []),
         ...(ItemSlots.Links ? [{ id: 'links', label: t('common.links') }] : []), ...(ItemSlots.Comments ? [{ id: 'comments', label: t('common.comments') }] : []),
@@ -424,7 +508,7 @@ export function DeliverablePanel({ id }: PanelProps) {
             <ul className="divide-y rounded-md border">
               {d.tasks!.map((tk) => (
                 <li key={tk.id} className="flex min-h-(--row-min) flex-wrap items-center gap-x-3 gap-y-1 px-3 py-(--cell-py) text-sm">
-                  <Key>{tk.key}</Key><button className="min-w-0 flex-1 truncate text-left hover:underline" onClick={() => openPanel('Task', tk.id)}>{tk.name}</button>
+                  <Key>{tk.key}</Key><button className="min-w-0 flex-1 truncate text-left hover:underline" onClick={e => openRelatedPanel('Task', tk.id, e)}>{tk.name}</button>
                   <span className="text-muted-foreground">{tk.assignee ?? t('ind.unassigned')}</span><DateText date={tk.dueDate} /><StatusPill status={tk.status} />
                 </li>
               ))}
@@ -438,12 +522,14 @@ export function DeliverablePanel({ id }: PanelProps) {
           <p className="text-xs/[18px] text-muted-foreground">{t('deliverable.derivedHint')}</p>
           {[['deliverable.dependsOn', data.derivedPredecessors], ['deliverable.blocks', data.derivedSuccessors]].map(([label, list]: any) => (
             <div key={label}><div className="mb-1 font-medium">{t(label)}</div>
-              {list.length === 0 ? <p className="text-muted-foreground">{t('common.none')}</p> : <ul className="space-y-1">{list.map((x: any) => <li key={x.id} className="flex flex-wrap items-center gap-2"><Key>{x.key}</Key><button className="text-left hover:underline" onClick={() => openPanel('Deliverable', x.id)}>{x.name}</button><StatusPill status={x.status} /></li>)}</ul>}
+              {list.length === 0 ? <p className="text-muted-foreground">{t('common.none')}</p> : <ul className="space-y-1">{list.map((x: any) => <li key={x.id} className="flex flex-wrap items-center gap-2"><Key>{x.key}</Key><button className="text-left hover:underline" onClick={e => openRelatedPanel('Deliverable', x.id, e)}>{x.name}</button><StatusPill status={x.status} /></li>)}</ul>}
             </div>
           ))}
         </div>
       )}
-      {tab === 'issues' && <IssueHistory issues={data.issues} marks={new Map(revisionQ.data?.deliverables.find((x) => x.id === d.id)?.issues.map((i) => [i.id, i.marks] as const))} />}
+      {tab === 'issues' && <IssueHistory issues={data.issues} registerEnabled={registerEnabled} currentIssueId={d.registerInfo?.currentIssue?.id}
+        onResponse={perms.recordIssueResponse ? issue => setResponse({ deliverable: d, issue, needsReason: perms.needsReason }) : undefined}
+        marks={new Map(revisionQ.data?.deliverables.find((x) => x.id === d.id)?.issues.map((i) => [i.id, i.marks] as const))} />}
       {tab === 'baselines' && baselineEnabled && <BaselineHistory deliverableId={d.id} />}
       {tab === 'links' && <LinksSlot type="Deliverable" id={d.id} projectId={d.projectId} />}
       {tab === 'comments' && <CommentsSlot type="Deliverable" id={d.id} projectId={d.projectId} />}
@@ -453,6 +539,8 @@ export function DeliverablePanel({ id }: PanelProps) {
         onConfirm={async (reason) => { await typedRequest('post', '/api/v1/deliverables/{id}/rebaseline', { params: { id: d.id }, body: { reason, clear: baseline === 'clear', rowVersion: d.rowVersion } }); setBaseline(null); reload() }} />}
       {transition && <DeliverableTransition d={d} to={transition.to} needsReason={transition.needsReason} onClose={() => { setTransition(null); reload() }} />}
       {issuing && <IssueDialog d={d} needsConfirm={perms.issueNeedsConfirm} onClose={() => { setIssuing(false); reload() }} />}
+      {registerEnabled && response && <IssueResponseDialog deliverable={response.deliverable} issue={response.issue} needsReason={response.needsReason}
+        onClose={() => { setResponse(null); reload() }} onSaved={() => { setResponse(null); reload() }} />}
     </div></PickerProject.Provider>
   )
 }
@@ -497,7 +585,7 @@ type DepRow = components['schemas']['DeliverableLinkRead']
 /** Explicit typed links to other deliverables (FR-DEP-09, FR-DEPT-01), with an optional lag, apart from derived ones. Whether a
  *  link is met comes from the server's shared rule (AC-DEPT-05); the client never recomputes it. */
 function ExplicitDeps({ d, data, onChange }: { d: DeliverableRow; data: any; onChange: () => void }) {
-  const openPanel = useItemPanel()
+  const openRelatedPanel = useProjectRelatedPanel()
   const [adding, setAdding] = useState<'predecessor' | 'successor' | null>(null)
   const can: boolean = data.permissions.linkDeliverables
   const remove = async (x: DepRow) => { try { await typedRequest('delete', '/api/v1/deliverable-dependencies/{id}', { params: { id: x.dependencyId } }); onChange() } catch (e) { toast.error(errorText(e)) } }
@@ -509,7 +597,7 @@ function ExplicitDeps({ d, data, onChange }: { d: DeliverableRow; data: any; onC
         <ul className="divide-y rounded-md border bg-card">{rows.map((x) => (
           <li key={x.dependencyId} className="flex flex-wrap items-center gap-2 px-3 py-1.5">
             {x.satisfied ? <Check className="size-4 text-done" role="img" aria-label={t('task.satisfied')} /> : <Link2 className="size-4 text-muted-foreground" aria-hidden />}
-            <button className="min-w-40 flex-1 truncate text-left hover:underline" onClick={() => openPanel('Deliverable', x.id)}><Key>{x.key}</Key> {x.name}</button>
+            <button className="min-w-40 flex-1 truncate text-left hover:underline" onClick={e => openRelatedPanel('Deliverable', x.id, e)}><Key>{x.key}</Key> {x.name}</button>
             <DepTypeChip type={x.type} lag={x.lagDays} />
             {x.note && <span className="hidden max-w-40 truncate text-xs/[18px] text-muted-foreground sm:inline" title={x.note}>{x.note}</span>}
             <DateText date={x.issuedDate ?? x.dueDate} /><StatusPill status={x.status} />
@@ -577,22 +665,28 @@ type IssueRow = components['schemas']['DeliverableIssueRead']
 
 /** Every issue of the deliverable, newest first, so Rev A stays on record after Rev B goes out (FR-DEL-08, E-24).
  *  Each issue shows its own revision marks as text (FR-VER-16); `marks` is keyed by issue ID. */
-function IssueHistory({ issues, marks }: { issues: IssueRow[]; marks?: Map<string, string[]> }) {
+function IssueHistory({ issues, marks, registerEnabled, currentIssueId, onResponse }: { issues: IssueRow[]; marks?: Map<string, string[]>; registerEnabled: boolean; currentIssueId?: string | null; onResponse?: (issue: IssueRow) => void }) {
   if (!issues.length) return <div className="p-4"><Empty>{t('deliverable.noIssues')}</Empty></div>
   return (
     <div className="scroll-region overflow-x-auto p-4">
       <table className="w-full text-sm">
         <thead className="text-left text-muted-foreground">
-          <tr>{['field.IssuedDate', 'field.Revision', 'field.IssuedTo', 'deliverable.transmittalLink', 'common.notes', 'deliverable.issuedBy'].map((h) => <th key={h} scope="col" className="whitespace-nowrap py-2 pr-3 font-medium">{runtimeText(h)}</th>)}</tr>
+          <tr>{['field.IssuedDate', 'field.Revision', 'field.IssuedTo', 'deliverable.transmittalLink', 'common.notes', 'deliverable.issuedBy', ...(registerEnabled ? ['deliverableRegister.purpose', 'deliverableRegister.returnCode', 'deliverableRegister.responseDate'] : [])].map((h) => <th key={h} scope="col" className="whitespace-nowrap py-2 pr-3 font-medium">{runtimeText(h)}</th>)}{registerEnabled && onResponse && <th scope="col"><span className="sr-only">{t('deliverableRegister.recordResponse')}</span></th>}</tr>
         </thead>
         <tbody>{issues.map((x) => (
-          <tr key={x.id} className="border-t align-top">
+          <tr key={x.id} className="border-t align-top" data-register-issue-id={registerEnabled ? x.id : undefined}>
             <td className="py-2 pr-3"><DateText date={x.issuedDate} /></td>
-            <td className="whitespace-nowrap py-2 pr-3 font-medium">{x.revision ?? <Missing />}{marks?.get(x.id)?.map((m) => <span key={m} className="mt-1 block w-fit whitespace-normal rounded bg-warn-bg px-1 text-xs font-normal text-warn">{m}</span>)}</td>
+            <td className="whitespace-nowrap py-2 pr-3 font-medium">{x.revision ?? <Missing />}{registerEnabled && x.id === currentIssueId && <span className="mt-1 block text-xs font-normal text-muted-foreground">{t('deliverableRegister.latest')}</span>}{marks?.get(x.id)?.map((m) => <span key={m} className="mt-1 block w-fit whitespace-normal rounded bg-warn-bg px-1 text-xs font-normal text-warn">{m}</span>)}</td>
             <td className="py-2 pr-3">{x.issuedTo}</td>
             <td className="py-2 pr-3">{x.transmittalUrl && <a className="text-primary underline underline-offset-4" href={x.transmittalUrl} title={x.transmittalUrl} target="_blank" rel="noreferrer noopener">{t('deliverable.transmittal')}</a>}</td>
             <td className="whitespace-pre-wrap py-2 pr-3">{x.note}</td>
             <td className="whitespace-nowrap py-2">{x.issuedBy}</td>
+            {registerEnabled && <>
+              <td className="py-2 pr-3">{x.registerInfo?.purpose ?? <Missing />}</td>
+              <td className="py-2 pr-3"><RecipientReturn code={x.registerInfo?.returnCode} label={x.registerInfo?.returnLabel} /></td>
+              <td className="py-2 pr-3"><DateText date={x.registerInfo?.responseDate} /></td>
+              {onResponse && <td className="py-2 pr-3">{x.registerInfo && <Button size="sm" variant="outline" aria-label={`${t('deliverableRegister.recordResponse')} · ${t('deliverableRegister.responseFor', { revision: x.revision ?? t('common.dash'), date: fmtDate(x.issuedDate) })}`} onClick={() => onResponse(x)}>{t('deliverableRegister.recordResponse')}</Button>}</td>}
+            </>}
           </tr>))}
         </tbody>
       </table>
@@ -602,16 +696,23 @@ function IssueHistory({ issues, marks }: { issues: IssueRow[]; marks?: Map<strin
 
 /** "Issue deliverable" (§12.4 UI, DL-05, DL-06): date, revision, recipient, transmittal link, note. */
 function IssueDialog({ d, needsConfirm, onClose }: { d: DeliverableRow; needsConfirm: boolean; onClose: () => void }) {
+  const registerEnabled = useFlag('register_screens')
+  const ref = useReference()
+  const purposes = ref.data?.issuePurposes?.filter(value => value.isActive) ?? []
   const [f, setF] = useState<Record<string, string>>({ issuedDate: today(), revision: d.revision ?? '' })
   const [open, setOpen] = useState<any[] | null>(null)
   return (
     <ConfirmDialog open onOpenChange={(o) => !o && onClose()} title={t('deliverable.issueTitle', { key: d.key, name: d.name })} confirmLabel={t('deliverable.issue')}
       body={open ? t('deliverable.openTasksConfirm', { n: open.length }) : needsConfirm ? t('deliverable.issueOutOfSequence', { status: tv(d.status) }) : undefined}
+      busy={registerEnabled && (!f.purposeOfIssueId || !purposes.some(value => value.id === f.purposeOfIssueId))}
       onConfirm={async () => {
-        try { await typedRequest('post', '/api/v1/deliverables/{id}/issue', { params: { id: d.id }, body: { issuedDate: f.issuedDate ?? null, revision: f.revision ?? null, issuedTo: f.issuedTo ?? null, transmittalUrl: f.transmittalUrl ?? null, note: f.note ?? null, confirmOpenTasks: !!open, rowVersion: d.rowVersion } }); toast.success(t('deliverable.issuedToast', { key: d.key })) }
+        try { await typedRequest('post', '/api/v1/deliverables/{id}/issue', { params: { id: d.id }, body: { issuedDate: f.issuedDate ?? null, revision: f.revision ?? null, issuedTo: f.issuedTo ?? null, transmittalUrl: f.transmittalUrl ?? null, note: f.note ?? null, confirmOpenTasks: !!open, rowVersion: d.rowVersion, ...(registerEnabled ? { purposeOfIssueId: f.purposeOfIssueId } : {}) } }); toast.success(t('deliverable.issuedToast', { key: d.key })) }
         catch (e) { if ((e as ApiError).code === 'confirm_open_tasks') { setOpen((e as ApiError).body.tasks); throw new ApiError(409, { detail: t('deliverable.confirmAgain') }) } throw e }
       }}>
       <div className="grid gap-3 sm:grid-cols-2">
+        {registerEnabled && <Field label={t('deliverableRegister.purpose')} htmlFor="i-purpose" className="sm:col-span-2"><select id="i-purpose" className={selectCls} required value={f.purposeOfIssueId ?? ''} onChange={event => setF({ ...f, purposeOfIssueId: event.target.value })}>
+          <option value="">{t('deliverableRegister.choosePurpose')}</option>{purposes.map(value => <option key={value.id} value={value.id}>{value.name}</option>)}
+        </select>{!ref.isPending && !purposes.length && <p role="status" className="text-sm text-warn">{t('deliverableRegister.noPurposes')}</p>}{ref.error && <ErrorBanner error={ref.error} />}</Field>}
         <Field label={t('field.IssuedDate')} htmlFor="i-date"><Input id="i-date" type="date" max={today()} value={f.issuedDate} onChange={(e) => setF({ ...f, issuedDate: e.target.value })} /></Field>
         <Field label={t('field.Revision')} htmlFor="i-rev"><Input id="i-rev" placeholder="Rev A" value={f.revision} onChange={(e) => setF({ ...f, revision: e.target.value })} /></Field>
         <Field label={t('field.IssuedTo')} htmlFor="i-to" className="sm:col-span-2"><Input id="i-to" placeholder={t('deliverable.issuedToPlaceholder')} value={f.issuedTo ?? ''} onChange={(e) => setF({ ...f, issuedTo: e.target.value })} /></Field>

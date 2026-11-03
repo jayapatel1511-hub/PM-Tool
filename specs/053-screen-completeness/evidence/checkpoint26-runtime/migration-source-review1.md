@@ -1,0 +1,3 @@
+# Independent migration source PASS
+
+/root/checkpoint24_import_backend_review: Up exactly2nullablevarchar32columns+2allowlistedchecks, noexistingchanges/default/backfill/unrelatedschema. LegacyNULLallowed; findingrequiresretainedresponse, eventonlyResponded; return/closedretentionvalid. Downonlynewchecks/cols. ModeldeltaagainstprecedingDesigneronlytheseadditions; snapshotmodelbodyexactlynewDesigner. Sourceonly, noapplication/providerexecution.

@@ -1,0 +1,12 @@
+{
+  "atUtc": "2026-11-02T15:41:10.382886+00:00",
+  "csharpFiles": 652,
+  "webBuildInputs": 270,
+  "retainedEarlierOutputs": 857,
+  "isolatedSPAProfiles": {
+    "preview-build1": 143,
+    "preview-build2": 143
+  },
+  "mismatches": [],
+  "status": "PASS"
+}

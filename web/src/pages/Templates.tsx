@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowDown, ArrowUp, Lock, Monitor, Plus, Trash2 } from 'lucide-react'
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { toast } from 'sonner'
 import { ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, Loading, Notice, Page, Section, Spinner, TableRegion, selectCls, tdCls, thCls } from '@/components/hub/common'
@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useReference } from '@/hooks/data'
-import { useSafeForm } from '@/hooks/drafts'
+import { useSafeForm, useUnsavedGuard } from '@/hooks/drafts'
 import type { components } from '@/gen/api'
 import { ApiError, typedRequest } from '@/lib/api'
 import { useMe, useFlag } from '@/lib/auth'
@@ -21,6 +21,8 @@ import { t, tv , runtimeText } from '@/lib/i18n'
 import { invalidateChange, roots } from '@/lib/keys'
 import { cn } from '@/lib/utils'
 import { FieldsCommand } from './projects/CoordinationForms'
+import { TemplateRiskSeedEditor } from './template-risk-seeds'
+import { TemplateVersionDetails } from './template-version-provenance'
 
 const MILESTONE_TYPES = ['Kickoff', 'Field Work', 'Design Submission', 'Client Workshop', 'Permit Submission', 'Tender', 'Construction', 'IFC', 'Record Drawings', 'Closeout', 'Other']
 const ANCHORS = ['ProjectStart', 'PreviousMilestone', 'None']
@@ -66,7 +68,8 @@ export function TemplatesPage() {
 }
 
 function Templates() {
-  const q = useQuery({ queryKey: ['templates'], queryFn: () => typedRequest('get', '/api/v1/templates', {}) })
+  const me = useMe(); const people = useFlag('people_screens'); const roles = useFlag('template_roles')
+  const q = useQuery({ queryKey: ['templates', me.id, people, roles], queryFn: () => typedRequest('get', '/api/v1/templates', {}) })
   const [creating, setCreating] = useState(false)
   const header = { title: t('nav.templates'), subtitle: t('tpl.subtitle') }
   if (q.isPending) return <Page {...header}><div className="rounded-lg border bg-card"><Loading rows={6} /></div></Page>
@@ -137,17 +140,22 @@ function NewTemplateDialog({ onClose }: { onClose: () => void }) {
 /** One template version. A Draft is edited as a whole and saved at once; published and retired versions are read-only
  *  and change only through a new Draft (§12.14). */
 export function TemplatePage() {
-  return <DesktopOnly notice={<PhoneNotice />}><TemplateEditor /></DesktopOnly>
+  const me = useMe(); const people = useFlag('people_screens'); const risks = useFlag('register_screens')
+  const roles = useFlag('template_roles'); const working = useFlag('template_working_days')
+  return <DesktopOnly notice={<PhoneNotice />}><TemplateEditor key={`${me.id}:${people}:${risks}:${roles}:${working}`} /></DesktopOnly>
 }
 
 function TemplateEditor() {
   const rolesOn = useFlag('template_roles')
+  const risksOn = useFlag('register_screens'); const peopleOn = useFlag('people_screens'); const workingOn = useFlag('template_working_days')
+  const safeOn = useFlag('data_entry_safety')
   const id = useParams().id ?? ''
   const navigate = useNavigate()
   const qc = useQueryClient()
   const ref = useReference()
   const me = useMe()
-  const q = useQuery({ queryKey: ['template', id], queryFn: async () => detailOf(await typedRequest('get', '/api/v1/templates/{id}', { params: { id } })) })
+  const templateKey = ['template', id, me.id, peopleOn, risksOn, rolesOn, workingOn] as const
+  const q = useQuery({ queryKey: templateKey, queryFn: async () => detailOf(await typedRequest('get', '/api/v1/templates/{id}', { params: { id } })) })
   const [d, setD] = useState<Detail | null>(null)
   const [dirty, setDirty] = useState(false)
   const [err, setErr] = useState<unknown>(null)
@@ -156,7 +164,10 @@ function TemplateEditor() {
   const [removingBasis, setRemovingBasis] = useState<Basis | null>(null)
   const [addingBasis, setAddingBasis] = useState(false)
   const [start, setStart] = useState('')
-  useEffect(() => { if (q.data) { setD(q.data); setDirty(false) } }, [q.data])
+  const editing = useRef({ dirty, id: d?.id })
+  editing.current = { dirty, id: d?.id }
+  useEffect(() => { if (q.data && (!editing.current.dirty || q.data.id !== editing.current.id)) { setD(q.data); setDirty(false) } }, [q.data])
+  useUnsavedGuard(() => safeOn && (risksOn || peopleOn) && dirty, () => { setD(q.data ?? null); setDirty(false); setErr(null) })
   const preview = useQuery({ queryKey: ['template', id, 'preview', start], enabled: !!q.data,
     queryFn: () => typedRequest('post', '/api/v1/templates/{id}/preview', { params: { id }, body: { startDate: start || null, milestoneDates: null, disciplineIds: null } }) })
   const disciplines = useMemo(() => new Map(ref.data?.disciplines.map((x) => [x.id, x.name])), [ref.data])
@@ -174,8 +185,10 @@ function TemplateEditor() {
       const r = detailOf(await typedRequest('put', '/api/v1/templates/{id}/structure', { params: { id }, body: {
         rowVersion: d.rowVersion, header: { name: d.name, description: d.description || null, projectTypeId: d.projectTypeId || null, ...(d.offsetDayKind ? { offsetDayKind: d.offsetDayKind } : {}) },
         disciplines: d.disciplines, milestones: d.milestones, deliverables: d.deliverables, tasks: d.tasks, dependencies: d.dependencies, ...(rolesOn ? { roles: d.roles } : {}),
+        ...(risksOn ? { risks: d.risks ?? null } : {}),
       } }))
-      qc.setQueryData(['template', id], r); setD(r); setDirty(false); toast.success(t('tpl.saved')); refresh()
+      if (!peopleOn) qc.setQueryData(templateKey, r)
+      setD(r); setDirty(false); toast.success(t('tpl.saved')); refresh()
       return r
     } catch (e) { setErr(e as ApiError); return null }
   }
@@ -211,22 +224,26 @@ function TemplateEditor() {
       subtitle={<span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1"><Pill tone={tone(d.status)}>{versionLabel(d)}</Pill>{d.publishedAt && <span className="text-sm tabular-nums">{t('tpl.publishedOn', { date: fmtTime(d.publishedAt) })}</span>}</span>}
       actions={<>
         {edit && <Button variant="outline" disabled={!dirty || !!busy} onClick={run('save', save)}>{busy === 'save' && <Spinner />}{busy === 'save' ? t('common.saving') : t('common.save')}</Button>}
+        {edit && dirty && (risksOn || peopleOn) && <Button variant="ghost" disabled={!!busy} onClick={() => { setD(saved); setDirty(false); setErr(null); void q.refetch() }}>{t('common.cancel')}</Button>}
         {edit && <Button disabled={!!busy} onClick={run('publish', publish)}>{busy === 'publish' && <Spinner />}{busy === 'publish' ? t('common.saving') : t('tpl.publish')}</Button>}
         {edit && <Button variant="ghost" className="text-bad hover:text-bad" disabled={!!busy} onClick={() => setConfirm('discard')}>{t('tpl.discard')}</Button>}
         {!edit && me.capabilities.templates && saved.status !== 'Draft' && <Button disabled={!!busy} onClick={run('draft', newDraft)}>{busy === 'draft' && <Spinner />}{busy === 'draft' ? t('common.saving') : t('tpl.editDraft')}</Button>}
         {!edit && me.capabilities.templates && saved.status === 'Published' && <Button variant="ghost" disabled={!!busy} onClick={() => setConfirm('retire')}>{t('tpl.retire')}</Button>}
       </>}>
       {q.error != null && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
-      {err != null && <ErrorBanner error={err} retry={(err as ApiError).code === 'concurrency_conflict' ? () => { setErr(null); q.refetch() } : undefined} />}
+      {err != null && <ErrorBanner error={err} retry={!(risksOn || peopleOn) && (err as ApiError).code === 'concurrency_conflict' ? () => { setErr(null); q.refetch() } : undefined} />}
       {!edit && <Notice icon={Lock} title={t('tpl.readOnlyTitle')}>{saved.status === 'Draft' ? t('tpl.editorsOnly') : t('tpl.readOnly')}</Notice>}
       {d.family.length > 1 && <nav aria-label={t('tpl.col.versions')} className="flex flex-wrap gap-2">{d.family.map((v) => {
         const on = v.id === d.id
         return (
           <Link key={v.id} to={`/templates/${v.id}`} aria-current={on ? 'page' : undefined}
             className={cn('inline-flex min-h-(--control-row-h) items-center gap-1 rounded-md border px-3 text-sm', on ? 'border-primary bg-accent font-semibold text-accent-foreground' : 'border-input bg-card hover:bg-muted')}>
-            {on && <span aria-hidden>✓</span>}{versionLabel(v)}</Link>
+            {on && <span aria-hidden>✓</span>}{versionLabel(v)}{peopleOn && v.projects != null && <span className="text-xs text-muted-foreground"> · {v.projects}</span>}</Link>
         )
       })}</nav>}
+
+      {peopleOn && !q.error && <TemplateVersionDetails key={id} template={saved} dirty={dirty || !!busy || d.rowVersion !== saved.rowVersion} />}
+      {risksOn && !q.error && (Array.isArray(d.risks) ? <div data-template-draft-version={d.rowVersion}><TemplateRiskSeedEditor rows={d.risks} editable={edit} busy={!!busy} onChange={risks => change({ risks })} /></div> : <ErrorBanner error={new Error(t('tpl.dataUnavailable'))} />)}
 
       <Section title={t('tpl.about')}>
         <div className="grid max-w-[760px] gap-4 p-5 sm:grid-cols-2">

@@ -2,7 +2,7 @@ using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 namespace Hub.Api.Records;
-public static class IssueRecord { public static RegistryEntry Entry { get; } = new(typeof(Hub.Api.Data.Issue), "Issue", ["Title", "Description", "OwnerId", "Severity", "TargetResolutionDate", "Resolution", "ResolvedDate", "Status", "IssueType", "OriginRiskId", "ProjectDisciplineId", "DeletedAt"], true, null)
+public static class IssueRecord { public static RegistryEntry Entry { get; } = new(typeof(Hub.Api.Data.Issue), "Issue", ["Title", "Description", "OwnerId", "Severity", "TargetResolutionDate", "Resolution", "ResolvedDate", "Status", "IssueType", "OriginRiskId", "ProjectDisciplineId", "DeletedAt", "RootCauseCategoryId", "RootCauseLabelSnapshot"], true, null)
     {
         NameOrder = 8,
         Names = async (db, list) => (await db.Issues.IgnoreQueryFilters().Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.Key, x.Title }).ToListAsync()).Select(x => (x.Id, $"{x.Key} {x.Title}")),

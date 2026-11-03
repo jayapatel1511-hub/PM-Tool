@@ -1,0 +1,144 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="b1ba2c6f-a726-43dc-bb48-a9d7771d8d36" name="@Jays-MacBook-Pro 2026-11-02 11:02:45" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-11-02T11:02:45.6045190-04:00" queuing="2026-11-02T11:02:45.6045190-04:00" start="2026-11-02T11:02:38.9778980-04:00" finish="2026-11-02T11:02:54.0363790-04:00" />
+  <TestSettings name="default" id="eaeae820-27c9-4186-ac84-9eebd31dcc30">
+    <Deployment runDeploymentRoot="_Jays-MacBook-Pro_2026-11-02_11_02_45" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="ce7fbd6f-140d-4f32-ba87-6c3fec0100d7" testId="3182a2fe-2611-e29b-6168-cec34df449ab" testName="Hub.Tests.Api.TemplateDraftDiffTests.Every_structural_kind_uses_recorded_identity_including_basis_remove_add_roles_order_and_working_day_header" computerName="Jays-MacBook-Pro" duration="00:00:07.2265917" startTime="2026-11-02T11:02:39.3790380-04:00" endTime="2026-11-02T11:02:46.6069210-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ce7fbd6f-140d-4f32-ba87-6c3fec0100d7" />
+    <UnitTestResult executionId="28c28208-d762-4dec-a4b6-8e131f2d294d" testId="73c44e52-6aed-25c6-d4e3-e11a37a7872a" testName="Hub.Tests.Api.AdminUserScreenTests.Http_screen_is_admin_only_coherent_and_absent_off_without_removing_old_fields" computerName="Jays-MacBook-Pro" duration="00:00:03.3050630" startTime="2026-11-02T11:02:48.4097590-04:00" endTime="2026-11-02T11:02:51.7148910-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="28c28208-d762-4dec-a4b6-8e131f2d294d" />
+    <UnitTestResult executionId="0a8385c8-025d-42a6-b496-8b18e926f9eb" testId="c8fa612d-c8ab-a5be-ad40-83829dc32fba" testName="Hub.Tests.Api.AdminUserScreenTests.Structure_on_uses_target_scope_with_overlap_self_and_existing_closed_unit_behavior(indirect: False, expected: 4)" computerName="Jays-MacBook-Pro" duration="00:00:02.8211942" startTime="2026-11-02T11:02:45.5936150-04:00" endTime="2026-11-02T11:02:48.4096190-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0a8385c8-025d-42a6-b496-8b18e926f9eb" />
+    <UnitTestResult executionId="04f5fc81-1a3a-44c7-9891-c32356343857" testId="7905bd47-2d55-a68f-1cbf-e9e193742afd" testName="Hub.Tests.Api.AdminUserScreenTests.Structure_off_is_direct_reports_even_for_mixed_admin_and_capacity_is_only_base_configuration" computerName="Jays-MacBook-Pro" duration="00:00:02.2875749" startTime="2026-11-02T11:02:51.7153260-04:00" endTime="2026-11-02T11:02:54.0026920-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="04f5fc81-1a3a-44c7-9891-c32356343857" />
+    <UnitTestResult executionId="43b1f6e3-5db6-4740-87b1-17789ea17a6e" testId="0e43e852-d29d-035f-111c-eb5383e20e9b" testName="Hub.Tests.Api.AdminUserScreenTests.Structure_on_uses_target_scope_with_overlap_self_and_existing_closed_unit_behavior(indirect: True, expected: 5)" computerName="Jays-MacBook-Pro" duration="00:00:06.2061256" startTime="2026-11-02T11:02:39.3785290-04:00" endTime="2026-11-02T11:02:45.5880850-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="43b1f6e3-5db6-4740-87b1-17789ea17a6e" />
+    <UnitTestResult executionId="75738fb6-8319-40a9-8d3e-3524769f7f41" testId="b20063ae-fb26-3682-4775-4c551e88d399" testName="Hub.Tests.Api.TemplateVersionProvenanceTests.Successful_old_POST_receipts_contain_no_new_feature_payload_when_replayed_after_flags_turn_off" computerName="Jays-MacBook-Pro" duration="00:00:07.2263905" startTime="2026-11-02T11:02:39.3790230-04:00" endTime="2026-11-02T11:02:46.6068450-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="75738fb6-8319-40a9-8d3e-3524769f7f41" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="Hub.Tests.Api.TemplateDraftDiffTests.Every_structural_kind_uses_recorded_identity_including_basis_remove_add_roles_order_and_working_day_header" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint28-artifacts/bin/hub.tests/release/hub.tests.dll" id="3182a2fe-2611-e29b-6168-cec34df449ab">
+      <Execution id="ce7fbd6f-140d-4f32-ba87-6c3fec0100d7" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint28-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TemplateDraftDiffTests" name="Every_structural_kind_uses_recorded_identity_including_basis_remove_add_roles_order_and_working_day_header" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.AdminUserScreenTests.Structure_off_is_direct_reports_even_for_mixed_admin_and_capacity_is_only_base_configuration" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint28-artifacts/bin/hub.tests/release/hub.tests.dll" id="7905bd47-2d55-a68f-1cbf-e9e193742afd">
+      <Execution id="04f5fc81-1a3a-44c7-9891-c32356343857" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint28-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.AdminUserScreenTests" name="Structure_off_is_direct_reports_even_for_mixed_admin_and_capacity_is_only_base_configuration" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.AdminUserScreenTests.Structure_on_uses_target_scope_with_overlap_self_and_existing_closed_unit_behavior(indirect: True, expected: 5)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint28-artifacts/bin/hub.tests/release/hub.tests.dll" id="0e43e852-d29d-035f-111c-eb5383e20e9b">
+      <Execution id="43b1f6e3-5db6-4740-87b1-17789ea17a6e" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint28-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.AdminUserScreenTests" name="Structure_on_uses_target_scope_with_overlap_self_and_existing_closed_unit_behavior" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.AdminUserScreenTests.Http_screen_is_admin_only_coherent_and_absent_off_without_removing_old_fields" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint28-artifacts/bin/hub.tests/release/hub.tests.dll" id="73c44e52-6aed-25c6-d4e3-e11a37a7872a">
+      <Execution id="28c28208-d762-4dec-a4b6-8e131f2d294d" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint28-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.AdminUserScreenTests" name="Http_screen_is_admin_only_coherent_and_absent_off_without_removing_old_fields" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.AdminUserScreenTests.Structure_on_uses_target_scope_with_overlap_self_and_existing_closed_unit_behavior(indirect: False, expected: 4)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint28-artifacts/bin/hub.tests/release/hub.tests.dll" id="c8fa612d-c8ab-a5be-ad40-83829dc32fba">
+      <Execution id="0a8385c8-025d-42a6-b496-8b18e926f9eb" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint28-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.AdminUserScreenTests" name="Structure_on_uses_target_scope_with_overlap_self_and_existing_closed_unit_behavior" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TemplateVersionProvenanceTests.Successful_old_POST_receipts_contain_no_new_feature_payload_when_replayed_after_flags_turn_off" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint28-artifacts/bin/hub.tests/release/hub.tests.dll" id="b20063ae-fb26-3682-4775-4c551e88d399">
+      <Execution id="75738fb6-8319-40a9-8d3e-3524769f7f41" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint28-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TemplateVersionProvenanceTests" name="Successful_old_POST_receipts_contain_no_new_feature_payload_when_replayed_after_flags_turn_off" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="3182a2fe-2611-e29b-6168-cec34df449ab" executionId="ce7fbd6f-140d-4f32-ba87-6c3fec0100d7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="73c44e52-6aed-25c6-d4e3-e11a37a7872a" executionId="28c28208-d762-4dec-a4b6-8e131f2d294d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c8fa612d-c8ab-a5be-ad40-83829dc32fba" executionId="0a8385c8-025d-42a6-b496-8b18e926f9eb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7905bd47-2d55-a68f-1cbf-e9e193742afd" executionId="04f5fc81-1a3a-44c7-9891-c32356343857" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0e43e852-d29d-035f-111c-eb5383e20e9b" executionId="43b1f6e3-5db6-4740-87b1-17789ea17a6e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b20063ae-fb26-3682-4775-4c551e88d399" executionId="75738fb6-8319-40a9-8d3e-3524769f7f41" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="6" executed="6" passed="6" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.11)
+[xUnit.net 00:00:00.09]   Discovering: Hub.Tests
+[xUnit.net 00:00:00.21]   Discovered:  Hub.Tests
+[xUnit.net 00:00:00.22]   Starting:    Hub.Tests
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+warn: Microsoft.EntityFrameworkCore.Query[10103]
+      The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+[xUnit.net 00:00:14.86]   Finished:    Hub.Tests
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

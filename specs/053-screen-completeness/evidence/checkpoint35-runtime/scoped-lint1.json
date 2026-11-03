@@ -1,0 +1,23 @@
+{
+  "exitCode": 0,
+  "args": [
+    "web/node_modules/.bin/oxlint",
+    "web/src/pages/admin/admin-role-explanations.tsx",
+    "web/tests/admin-screen.cjs",
+    "web/tests/admin-screen.fixture.cjs",
+    "web/src/i18n/en.ts"
+  ],
+  "atUtc": "2026-11-03T06:23:01.609859+00:00",
+  "elapsedSeconds": 0.09,
+  "errors": [],
+  "tail": [
+    "web/src/pages/admin/admin-role-explanations.tsx:67:190: warning react(refs): Cannot access refs during render help: React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected",
+    "web/src/pages/admin/admin-role-explanations.tsx:67:190: warning react(refs): Cannot access refs during render help: React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected",
+    "web/src/pages/admin/admin-role-explanations.tsx:68:259: warning react(refs): Cannot access refs during render help: React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected",
+    "web/src/pages/admin/admin-role-explanations.tsx:68:259: warning react(refs): Cannot access refs during render help: React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected",
+    "web/src/pages/admin/admin-role-explanations.tsx:69:204: warning react(refs): Cannot access refs during render help: React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected",
+    "web/src/pages/admin/admin-role-explanations.tsx:69:204: warning react(refs): Cannot access refs during render help: React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected",
+    "web/src/pages/admin/admin-role-explanations.tsx:70:289: warning react(refs): Cannot access refs during render help: React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected",
+    "web/src/pages/admin/admin-role-explanations.tsx:66:6: warning react(refs): Cannot access refs during render help: React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected"
+  ]
+}

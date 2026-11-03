@@ -1,0 +1,170 @@
+{
+  "observedAtUtc": "2026-11-01T13:45:25.396Z",
+  "rows": [
+    {
+      "viewport": "desktop",
+      "route": "/projects/QA20-REAL-001/changes",
+      "status": 200,
+      "options": [],
+      "hasMarcText": false,
+      "hasNoticeText": false,
+      "hasIssueVerifier": false,
+      "textSample": "Skip to content\nt\nTuesday\nMy Work\nHome\nProjects\nTasks\nResources\nTime\nReports\nTeam\nFiles\nMy Staff\nTemplates\nAdmin\nTuesday\nProjects\nQA20-REAL-001 Checkpoint 20 real QA project\nChanges\nSearch\n/\nMy projects\nNew\nJL\nQA20-REAL-001\nCheckpoint 20 real QA project\n◐\nActive\n○\nGrey\nOwner (PM): Priya Nair\nClient: Internal / TBD\nTarget date: 2026-11-30\nOverview\nWork\nDeliverables\nCoordination\nPeople\nFiles\nActivity\nSettings\nWeekly Coordination\nHandoffs\nChanges\nDesign basis\nDecisions\nRisks\nIssues\nMeetings & Actions\nRevisions and change impact\n\nTrack the inputs each team used and assess the work affected by a new registered revision.\n\nViews\nExport\nRegister source revision\nSearch\nFilters\nAssigned to me\n\n0 records in this view\n\nNo change notices in this view\n\nRegister a baseline source, record where it is used, then register an explicit replacement revision.\n\nInputs used by receiving work\n\nOnly explicitly linked work and added targets are assessed. Unlinked work has not been checked.\n\nRecord input use\nFilters\n\nNo input use is recorded in this view.\n\nRegistered source history",
+      "errors": []
+    },
+    {
+      "viewport": "desktop",
+      "route": "/projects/QA20-REAL-001/handoffs",
+      "status": 200,
+      "options": [
+        "Alex Chen",
+        "Jill Martin",
+        "Marc Dubois · Co-op · Starts 2026-11-02 · Ends 2026-11-11",
+        "Alex Chen",
+        "Jill Martin",
+        "Marc Dubois · Co-op · Starts 2026-11-02 · Ends 2026-11-11"
+      ],
+      "hasMarcText": true,
+      "hasNoticeText": true,
+      "hasIssueVerifier": false,
+      "textSample": "Skip to content\nt\nTuesday\nMy Work\nHome\nProjects\nTasks\nResources\nTime\nReports\nTeam\nFiles\nMy Staff\nTemplates\nAdmin\nTuesday\nProjects\nQA20-REAL-001 Checkpoint 20 real QA project\nHandoffs\nSearch\n/\nMy projects\nNew\nJL\nQA20-REAL-001\nCheckpoint 20 real QA project\n◐\nActive\n○\nGrey\nOwner (PM): Priya Nair\nClient: Internal / TBD\nTarget date: 2026-11-30\nOverview\nWork\nDeliverables\nCoordination\nPeople\nFiles\nActivity\nSettings\nWeekly Coordination\nHandoffs\nChanges\nDesign basis\nDecisions\nRisks\nIssues\nMeetings & Actions\nDiscipline handoffs\n\nKnow what was sent, accepted for use, and incorporated into the receiving work.\n\nViews\nExport\nNew handoff\nSearch\nFilters\nOverdue only\n\n0 handoffs in this view\n\nNo handoffs in this view\n\nCreate a handoff from existing deliverables and receiving work, or adjust the filters.\n\nNew handoff\n\nOne receiving owner, one intended use, and an exact input revision.\n\nHandoff\nSource deliverable\nChoose…\nQA20-REAL-001-D001 · QA20 real deliverable\nDeclared revision\nExact source link\n\nManually registered reference. Tuesday does not fetch the file or verify that the link contains this revision.\n\nReceiving discipline\nChoose…\nCivil\nReceiving work\nChoose…\nSending owner\nChoose…\nAlex Chen\nJill Martin\nMarc Dubois · Co-op · Starts 2026-11-02 · Ends 2026-11-11\nPriya Nair\nReceiving owner\nChoose…\nAlex Chen\nJill Martin\nMarc Dubois · Co-op · Starts 2026-11-02 · Ends 2026-11-11\nPriya Nair\nIntended use and scope\nAcceptance criteria\nNeeded by\nPromised by\n\nRequired before submission; optional in a draft.\n\nCancel\nSave draft\nClose",
+      "errors": []
+    },
+    {
+      "viewport": "desktop",
+      "route": "/projects/QA20-REAL-001/tasks",
+      "status": 200,
+      "options": [],
+      "hasMarcText": false,
+      "hasNoticeText": false,
+      "hasIssueVerifier": false,
+      "textSample": "Skip to content\nt\nTuesday\nMy Work\nHome\nProjects\nTasks\nResources\nTime\nReports\nTeam\nFiles\nMy Staff\nTemplates\nAdmin\nTuesday\nProjects\nQA20-REAL-001 Checkpoint 20 real QA project\nTasks\nSearch\n/\nMy projects\nNew\nJL\nQA20-REAL-001\nCheckpoint 20 real QA project\n◐\nActive\n○\nGrey\nOwner (PM): Priya Nair\nClient: Internal / TBD\nTarget date: 2026-11-30\nOverview\nWork\nDeliverables\nCoordination\nPeople\nFiles\nActivity\nSettings\nTasks\nBoard\nTimeline\nCalendar\nMilestones\nTasks\n\n2 tasks\n\nBoard\nViews\nNew task\nSearch\nFilters\nDeliverable\n\nGroup totals: first read 2026-11-01 09:45; later pages are separate live reads.\n\nTasks\n\tKey\tTask\tDeliverable\tDiscipline\tAssignee\tReviewer\tStatus\tIndicators\tPriority\tStart date\tDue\tProgress\tEst. hrs\tLast activity\n\nQA20-REAL-001-D001 QA20 real deliverable\n2 shown / 2 matched tasks\n0 known overdue · 2 state unavailable\n16 h estimated across matched rows · 0 unestimated\n0% by hours\nNext due 2026-11-05 · 0 undated open\nAdd task\n\n\tQA20-REAL-001-T0001\t\nQA20 real task one\n\t\nQA20 real deliverable\n\t\nCivil\t\nPN\nPriya Nair\n\t—\t\n○\nNot Started\n\t\n◐\nOpen for pickup\n\t\nLow\nMedium\nHigh\nCritical\n\t2026-10-26\t\n2026-11-05\n\t\n0%\n10%\n20%\n30%\n40%\n50%\n60%\n70%\n80%\n90%\n100%\n\t8 h\t7 min ago · Priya Nair\n\tQA20-REAL-001-T0002\t\nQA20 real task two\n\t\nQA20 real deliverable\n\t\nCivil\t\nAC\nAlex Chen\n\t—\t\n○\nNot Started\n\t\n◐\nOpen for pickup\n\t\nLow\nMedium\nHigh\nCritical\n\t2026-10-27\t\n2026-11-06\n\t\n0%\n10%\n20%\n30%\n40%\n50%\n60%\n70%\n80%\n90%\n100%\n\t8 h\t7 min ago · Alex Chen",
+      "errors": []
+    },
+    {
+      "viewport": "desktop",
+      "route": "/pickup",
+      "status": 200,
+      "options": [],
+      "hasMarcText": false,
+      "hasNoticeText": false,
+      "hasIssueVerifier": false,
+      "textSample": "Skip to content\nt\nTuesday\nMy Work\nHome\nProjects\nTasks\nResources\nTime\nReports\nTeam\nFiles\nMy Staff\nTemplates\nAdmin\nTuesday\nOpen for pickup\nSearch\n/\nMy projects\nNew\nJL\nOpen for pickup\n\nWork your team has offered for pickup, and offers you can assign\n\nProject\nAny project\nDiscipline\nAny discipline\nCivil\nNeeded by\nQA20-REAL-001-T0001\nQA20 real task one\nQA20 real picker notice read\nQA20-REAL-001 · Civil · Priya Nair · 6 min ago · 4 h remaining\nNeeded by 2026-11-07 · Due 2026-11-05\nAssign pickup\nQA20-REAL-001-T0002\nQA20 real task two\nCheckpoint 20 picker notice QA\nQA20-REAL-001 · Civil · Alex Chen · just now · — h remaining\nNeeded by — · Due 2026-11-06\nAssign pickup",
+      "errors": []
+    },
+    {
+      "viewport": "desktop",
+      "route": "/vacation",
+      "status": 200,
+      "options": [
+        "March"
+      ],
+      "hasMarcText": true,
+      "hasNoticeText": true,
+      "hasIssueVerifier": false,
+      "textSample": " h\n\t\n0 h\nNon-working day\n\t\n0 h\nNon-working day\n\t\n6.4 h\n\t\n6.4 h\n\t\n6.4 h\n\t\n6.4 h\n\t\n6.4 h\n\t\n0 h\nNon-working day\n\t\n0 h\nNon-working day\n\t\n6.4 h\nLeave and working schedules\nAlex Chen\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nDiane Roy\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nJill Martin\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nJordan Lee\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nLena Brooks\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nMarc Dubois\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nOmar Haddad\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nPriya Nair\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nRita Gomez\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nSam Patel\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nqa20-report-a\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nqa20-report-b\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nCoverage concerns\n\nReview dated work that lands during absence. These prompts do not choose a replacement or assess qualifications. Undated work stays unknown.\n\nNo dated conflicts or undated work found in your visible scope.\n\nTime off shows reported hours within each displayed period. Faint stripes show non-working dates from the person's working calendar.",
+      "errors": []
+    },
+    {
+      "viewport": "desktop",
+      "route": "/projects/QA20-REAL-001/registers",
+      "status": 200,
+      "options": [],
+      "hasMarcText": false,
+      "hasNoticeText": false,
+      "hasIssueVerifier": false,
+      "textSample": "Skip to content\nt\nTuesday\nMy Work\nHome\nProjects\nTasks\nResources\nTime\nReports\nTeam\nFiles\nMy Staff\nTemplates\nAdmin\nTuesday\nProjects\nQA20-REAL-001 Checkpoint 20 real QA project\nSearch\n/\nMy projects\nNew\nJL\nPage not available\n\nThis page or item does not exist, or you cannot view it.\n\nMy Work",
+      "errors": []
+    },
+    {
+      "viewport": "phone",
+      "route": "/projects/QA20-REAL-001/changes",
+      "status": 200,
+      "options": [],
+      "hasMarcText": false,
+      "hasNoticeText": false,
+      "hasIssueVerifier": false,
+      "textSample": "Skip to content\nJL\nQA20-REAL-001\nCheckpoint 20 real QA project\n◐\nActive\n○\nGrey\nOwner (PM): Priya Nair\nClient: Internal / TBD\nTarget date: 2026-11-30\nOverview\nWork\nDeliverables\nCoordination\nPeople\nFiles\nActivity\nSettings\nWeekly Coordination\nHandoffs\nChanges\nDesign basis\nDecisions\nRisks\nIssues\nMeetings & Actions\nRevisions and change impact\n\nTrack the inputs each team used and assess the work affected by a new registered revision.\n\nViews\nExport\nRegister source revision\nSearch\nFilters\nAssigned to me\n\n0 records in this view\n\nNo change notices in this view\n\nRegister a baseline source, record where it is used, then register an explicit replacement revision.\n\nInputs used by receiving work\n\nOnly explicitly linked work and added targets are assessed. Unlinked work has not been checked.\n\nRecord input use\nFilters\n\nNo input use is recorded in this view.\n\nRegistered source history\nMy Work\nSearch\nNotifications",
+      "errors": []
+    },
+    {
+      "viewport": "phone",
+      "route": "/projects/QA20-REAL-001/handoffs",
+      "status": 200,
+      "options": [
+        "Alex Chen",
+        "Jill Martin",
+        "Marc Dubois · Co-op · Starts 2026-11-02 · Ends 2026-11-11",
+        "Alex Chen",
+        "Jill Martin",
+        "Marc Dubois · Co-op · Starts 2026-11-02 · Ends 2026-11-11"
+      ],
+      "hasMarcText": true,
+      "hasNoticeText": true,
+      "hasIssueVerifier": false,
+      "textSample": "Skip to content\nJL\nQA20-REAL-001\nCheckpoint 20 real QA project\n◐\nActive\n○\nGrey\nOwner (PM): Priya Nair\nClient: Internal / TBD\nTarget date: 2026-11-30\nOverview\nWork\nDeliverables\nCoordination\nPeople\nFiles\nActivity\nSettings\nWeekly Coordination\nHandoffs\nChanges\nDesign basis\nDecisions\nRisks\nIssues\nMeetings & Actions\nDiscipline handoffs\n\nKnow what was sent, accepted for use, and incorporated into the receiving work.\n\nViews\nExport\nNew handoff\nSearch\nFilters\nOverdue only\n\n0 handoffs in this view\n\nNo handoffs in this view\n\nCreate a handoff from existing deliverables and receiving work, or adjust the filters.\n\nMy Work\nSearch\nNotifications\nNew handoff\n\nOne receiving owner, one intended use, and an exact input revision.\n\nHandoff\nSource deliverable\nChoose…\nQA20-REAL-001-D001 · QA20 real deliverable\nDeclared revision\nExact source link\n\nManually registered reference. Tuesday does not fetch the file or verify that the link contains this revision.\n\nReceiving discipline\nChoose…\nCivil\nReceiving work\nChoose…\nSending owner\nChoose…\nAlex Chen\nJill Martin\nMarc Dubois · Co-op · Starts 2026-11-02 · Ends 2026-11-11\nPriya Nair\nReceiving owner\nChoose…\nAlex Chen\nJill Martin\nMarc Dubois · Co-op · Starts 2026-11-02 · Ends 2026-11-11\nPriya Nair\nIntended use and scope\nAcceptance criteria\nNeeded by\nPromised by\n\nRequired before submission; optional in a draft.\n\nCancel\nSave draft\nClose",
+      "errors": []
+    },
+    {
+      "viewport": "phone",
+      "route": "/projects/QA20-REAL-001/tasks",
+      "status": 200,
+      "options": [],
+      "hasMarcText": false,
+      "hasNoticeText": false,
+      "hasIssueVerifier": false,
+      "textSample": "Skip to content\nJL\nQA20-REAL-001\nCheckpoint 20 real QA project\n◐\nActive\n○\nGrey\nOwner (PM): Priya Nair\nClient: Internal / TBD\nTarget date: 2026-11-30\nOverview\nWork\nDeliverables\nCoordination\nPeople\nFiles\nActivity\nSettings\nTasks\nBoard\nTimeline\nCalendar\nMilestones\nTasks\n\n2 tasks\n\nBoard\nViews\nNew task\nSearch\nFilters\nDeliverable\n\nGroup totals: first read 2026-11-01 09:45; later pages are separate live reads.\n\nQA20-REAL-001-D001 QA20 real deliverable\n2 shown / 2 matched tasks\n0 known overdue · 2 state unavailable\n16 h estimated across matched rows · 0 unestimated\n0% by hours\nNext due 2026-11-05 · 0 undated open\nAdd task\nQA20-REAL-001-T0001\nQA20 real task one\nDeliverable\nQA20 real deliverable\nDiscipline\nCivil\nAssignee\nPN\nPriya Nair\nStatus\n○\nNot Started\nPriority\nLow\nMedium\nHigh\nCritical\nStart date\n2026-10-26\nDue\n2026-11-05\nProgress\n0%\n10%\n20%\n30%\n40%\n50%\n60%\n70%\n80%\n90%\n100%\nEst. hrs\n8 h\nLast activity\n7 min ago · Priya Nair\nQA20-REAL-001-T0002\nQA20 real task two\nDeliverable\nQA20 real deliverable\nDiscipline\nCivil\nAssignee\nAC\nAlex Chen\nStatus\n○\nNot Started\nPriority\nLow\nMedium\nHigh\nCritical\nStart date\n2026-10-27\nDue\n2026-11-06\nProgress\n0%\n10%\n20%\n30%\n40%\n50%\n60%\n70%\n80%\n90%\n100%\nEst. hrs\n8 h\nLast activity\n7 min ago · Alex Chen\nMy Work\nSearch\nNotifications",
+      "errors": []
+    },
+    {
+      "viewport": "phone",
+      "route": "/pickup",
+      "status": 200,
+      "options": [],
+      "hasMarcText": false,
+      "hasNoticeText": false,
+      "hasIssueVerifier": false,
+      "textSample": "Skip to content\nJL\nOpen for pickup\n\nWork your team has offered for pickup, and offers you can assign\n\nProject\nAny project\nDiscipline\nAny discipline\nCivil\nNeeded by\nQA20-REAL-001-T0001\nQA20 real task one\nQA20 real picker notice read\nQA20-REAL-001 · Civil · Priya Nair · 6 min ago · 4 h remaining\nNeeded by 2026-11-07 · Due 2026-11-05\nAssign pickup\nQA20-REAL-001-T0002\nQA20 real task two\nCheckpoint 20 picker notice QA\nQA20-REAL-001 · Civil · Alex Chen · just now · — h remaining\nNeeded by — · Due 2026-11-06\nAssign pickup\nMy Work\nSearch\nNotifications",
+      "errors": []
+    },
+    {
+      "viewport": "phone",
+      "route": "/vacation",
+      "status": 200,
+      "options": [
+        "March"
+      ],
+      "hasMarcText": true,
+      "hasNoticeText": true,
+      "hasIssueVerifier": false,
+      "textSample": "\nNon-working day\n\t\n6.4 h\n\t\n6.4 h\n\t\n6.4 h\n\t\n6.4 h\n\t\n6.4 h\n\t\n0 h\nNon-working day\n\t\n0 h\nNon-working day\n\t\n6.4 h\nLeave and working schedules\nAlex Chen\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nDiane Roy\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nJill Martin\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nJordan Lee\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nLena Brooks\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nMarc Dubois\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nOmar Haddad\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nPriya Nair\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nRita Gomez\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nSam Patel\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nqa20-report-a\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nqa20-report-b\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nCoverage concerns\n\nReview dated work that lands during absence. These prompts do not choose a replacement or assess qualifications. Undated work stays unknown.\n\nNo dated conflicts or undated work found in your visible scope.\n\nTime off shows reported hours within each displayed period. Faint stripes show non-working dates from the person's working calendar.\n\nMy Work\nSearch\nNotifications",
+      "errors": []
+    },
+    {
+      "viewport": "phone",
+      "route": "/projects/QA20-REAL-001/registers",
+      "status": 200,
+      "options": [],
+      "hasMarcText": false,
+      "hasNoticeText": false,
+      "hasIssueVerifier": false,
+      "textSample": "Skip to content\nJL\nPage not available\n\nThis page or item does not exist, or you cannot view it.\n\nMy Work\nMy Work\nSearch\nNotifications",
+      "errors": []
+    }
+  ],
+  "screenshots": [
+    "specs/053-screen-completeness/evidence/checkpoint20-real-notices-desktop-projects-QA20-REAL-001-changes.png",
+    "specs/053-screen-completeness/evidence/checkpoint20-real-notices-desktop-projects-QA20-REAL-001-handoffs.png",
+    "specs/053-screen-completeness/evidence/checkpoint20-real-notices-desktop-projects-QA20-REAL-001-tasks.png",
+    "specs/053-screen-completeness/evidence/checkpoint20-real-notices-desktop-pickup.png",
+    "specs/053-screen-completeness/evidence/checkpoint20-real-notices-desktop-vacation.png",
+    "specs/053-screen-completeness/evidence/checkpoint20-real-notices-desktop-projects-QA20-REAL-001-registers.png",
+    "specs/053-screen-completeness/evidence/checkpoint20-real-notices-phone-projects-QA20-REAL-001-changes.png",
+    "specs/053-screen-completeness/evidence/checkpoint20-real-notices-phone-projects-QA20-REAL-001-handoffs.png",
+    "specs/053-screen-completeness/evidence/checkpoint20-real-notices-phone-projects-QA20-REAL-001-tasks.png",
+    "specs/053-screen-completeness/evidence/checkpoint20-real-notices-phone-pickup.png",
+    "specs/053-screen-completeness/evidence/checkpoint20-real-notices-phone-vacation.png",
+    "specs/053-screen-completeness/evidence/checkpoint20-real-notices-phone-projects-QA20-REAL-001-registers.png"
+  ],
+  "limitations": []
+}

@@ -1,0 +1,15 @@
+{
+  "exitCode": 1,
+  "args": [
+    "node",
+    "tests/task-sections.cjs"
+  ],
+  "atUtc": "2026-11-02T20:22:47.889152+00:00",
+  "base": "http://127.0.0.1:8867",
+  "bundle": "SPA2",
+  "scope": "Unchanged strict assertions plus read-only failure geometry/screenshot",
+  "driverHash": "e9c288ce2c733b822c0297f608f4510e82f0b093e9ab8206530f49b365d59a0f",
+  "screenshots": [
+    "failure.png"
+  ]
+}

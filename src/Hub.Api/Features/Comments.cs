@@ -93,7 +93,8 @@ public static partial class CommentEndpoints
 
         });
 
-        api.MapPost("/items/{type}/{id:guid}/comments", async (string type, Guid id, CommentBody body, Access access, HubDb db, Notifier notify, TimeProvider clock) =>
+        api.MapPost("/items/{type}/{id:guid}/comments", async (string type, Guid id, CommentBody body, Access access, HubDb db, Notifier notify, TimeProvider clock, SettingsStore store) =>
+            await Tx.Notice(db, store, async () =>
         {
             Check.OneOf(type, ItemType.Commentable, "type");
             var target = await Item(db, type, id) ?? throw ApiException.NotFound();
@@ -107,9 +108,10 @@ public static partial class CommentEndpoints
             await Notices(db, notify, p, type, id, target, mentioned, []);
             await db.SaveChangesAsync();
             return TypedResults.Created($"/api/v1/comments/{c.Id}", new CommentCreated(c.Id));
-        });
+        }));
 
-        api.MapPatch("/comments/{id:guid}", async (Guid id, CommentBody body, Access access, HubDb db, Notifier notify, TimeProvider clock) =>
+        api.MapPatch("/comments/{id:guid}", async (Guid id, CommentBody body, Access access, HubDb db, Notifier notify, TimeProvider clock, SettingsStore store) =>
+            await Tx.Notice(db, store, async () =>
         {
             var c = await db.Comments.FirstOrDefaultAsync(x => x.Id == id) ?? throw ApiException.NotFound();
             var (p, ctx) = await access.Project(c.ProjectId);
@@ -126,7 +128,7 @@ public static partial class CommentEndpoints
             await Notices(db, notify, p, c.ItemType, c.ItemId, target, mentioned.Where(m => !before.Contains(m)).ToList(), [], commentOnItem: false);
             await db.SaveChangesAsync();
             return TypedResults.NoContent();
-        });
+        }));
 
         api.MapDelete("/comments/{id:guid}", async (Guid id, Access access, HubDb db, TimeProvider clock) =>
         {

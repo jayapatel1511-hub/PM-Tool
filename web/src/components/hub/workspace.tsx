@@ -13,11 +13,12 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Input } from '@/components/ui/input'
 import type { components } from '@/gen/api'
 import { ApiError, typedRequest } from '@/lib/api'
-import { useMe, type Me } from '@/lib/auth-context'
+import { useFlag, useMe, type Me } from '@/lib/auth-context'
 import { refreshWorkspaces } from '@/lib/keys'
 import { plural, t , runtimeText } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { ProjectsPicker } from '@/pages/Reports'
+import './visual-tabs.css'
 
 export type WorkspaceRow = components['schemas']['WorkspaceRow']
 interface Stored { ws?: string; projects?: string }
@@ -135,7 +136,7 @@ async function share(scope: Scope) {
 
 type Mode = { mode: 'choose' | 'new' } | { mode: 'edit'; ws: WorkspaceRow }
 
-export function WorkspaceSelector() {
+export function WorkspaceSelector({ displayLabel, contextNote }: { displayLabel?: string; contextNote?: string } = {}) {
   const scope = useScope()
   const list = useWorkspaces()
   const setScope = useSetScope()
@@ -149,12 +150,13 @@ export function WorkspaceSelector() {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="max-w-52 gap-1.5" aria-label={t('scope.label', { name: scope.label })}>
-            <Layers className="size-4" /><span className="hidden truncate sm:inline">{scope.label}</span><ChevronDown className="size-3.5 opacity-60" />
+          <Button variant="outline" className="max-w-52 gap-1.5" aria-label={t('scope.label', { name: displayLabel ?? scope.label })}>
+            <Layers className="size-4" /><span className="hidden truncate sm:inline">{displayLabel ?? scope.label}</span><ChevronDown className="size-3.5 opacity-60" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-64">
           <DropdownMenuLabel>{t('scope.title')}</DropdownMenuLabel>
+          {contextNote && <DropdownMenuLabel className="whitespace-normal text-xs font-normal text-muted-foreground">{contextNote}</DropdownMenuLabel>}
           {item(t('scope.mine'), scope.kind === 'mine', () => setScope({ projects: 'mine' }), 'mine')}
           {item(t('scope.all'), scope.kind === 'all', () => setScope({ projects: 'all' }), 'all')}
           {scope.kind === 'set' && item(scope.label, true, () => undefined, 'set')}
@@ -241,10 +243,76 @@ export const VIEWS: View[] = [
   { id: 'workload', path: '/workload', icon: FolderKanban, label: 'wsview.workload', show: (m) => m.capabilities.workload },
 ]
 
+type AreaTab = { path: string; label: string; show?: (me: Me) => boolean }
+const PROJECT_AREA_TABS: AreaTab[] = [
+  { path: '/projects', label: 'wsview.list' },
+  { path: '/projects?view=board', label: 'nav.boards' },
+  { path: '/portfolio', label: 'nav.portfolio', show: (m) => m.capabilities.portfolio },
+]
+const RESOURCE_AREA_TABS: AreaTab[] = [
+  { path: '/planner', label: 'planner.title', show: (m) => m.capabilities.workload },
+  { path: '/workload', label: 'nav.workload', show: (m) => m.capabilities.workload },
+  { path: '/vacation', label: 'availability.title', show: (m) => !m.capabilities.readOnly },
+]
+const PROJECT_QUERY = new Set(['ws', 'projects', 'q', 'status', 'health', 'officeId', 'disciplineId', 'leadUnitId', 'includeArchived', 'ids', 'computedHealth', 'projectTypeId', 'clientId', 'pmId', 'phaseId', 'mine', 'overdueDecisions', 'submissionWithinDays', 'group', 'sort', 'starred', 'priority'])
+const RESOURCE_QUERY = {
+  planner: new Set(['ws', 'projects', 'supervisorId', 'disciplineId', 'officeId', 'personId', 'projectId', 'unitId', 'source', 'confidence', 'visibility', 'indicator', 'q', 'sort', 'week', 'from', 'to', 'weeks', 'withoutProject', 'stale', 'includeMyDrafts', 'layout']),
+  workload: new Set(['ws', 'projects', 'supervisorId', 'disciplineId', 'officeId', 'personId', 'projectId', 'unitId', 'indicator', 'from', 'to', 'groupBy']),
+  vacation: new Set(['year', 'month', 'view', 'unitId', 'groupBy']),
+}
+function areaSearch(sp: URLSearchParams, keys: Set<string>) {
+  const next = new URLSearchParams()
+  for (const key of keys) { const value = sp.get(key); if (value) next.set(key, value) }
+  return next.toString()
+}
+
+function AreaTabs({ tabs, queryKeys, activePath }: { tabs: AreaTab[]; queryKeys: (path: string) => Set<string>; activePath: string }) {
+  const me = useMe()
+  const [sp] = useSearchParams()
+  const visualSystem = useFlag('visual_system')
+  if (!visualSystem) return null
+  const visible = tabs.filter((tab) => !tab.show || tab.show(me))
+  return <nav data-area-tabs aria-label={t('wsview.label')} className="visual-area-tabs">
+    {visible.map((tab) => <Link key={tab.path} to={{ pathname: tab.path, search: areaSearch(sp, queryKeys(tab.path)) }} aria-current={activePath === tab.path ? 'page' : undefined}>{runtimeText(tab.label)}</Link>)}
+  </nav>
+}
+
+/** Project list/board/portfolio parent row. It is dark-only; legacy pages retain their existing layout. */
+export function ProjectAreaTabs() {
+  const { pathname } = useLocation()
+  const me = useMe()
+  const [sp] = useSearchParams()
+  const visualSystem = useFlag('visual_system')
+  const overview = useFlag('home_overview')
+  if (!visualSystem) return null
+  const board = pathname === '/projects' && sp.get('view') === 'board'
+  return <nav data-area-tabs aria-label={t('wsview.label')} className="visual-area-tabs">
+    {PROJECT_AREA_TABS.filter((tab) => !tab.show || tab.show(me)).map((tab) => {
+      const isBoard = tab.path.includes('?view=board')
+      const target = isBoard ? '/projects' : tab.path
+      const queryKeys = target === '/portfolio' ? PROJECT_QUERY : new Set([...PROJECT_QUERY].filter(key => !['overdueDecisions', 'ws', 'projects'].includes(key)))
+      // Both project layouts use the same reader. Its scalar Home scope is not a Portfolio contract.
+      if (pathname === '/projects' && target === '/projects' && overview) {
+        queryKeys.add('homePreset'); queryKeys.add('homeProjects')
+      }
+      const search = areaSearch(sp, queryKeys)
+      const next = new URLSearchParams(search); if (isBoard) next.set('view', 'board'); else next.delete('view')
+      return <Link key={tab.label} to={{ pathname: target, search: next.toString() }} aria-current={(isBoard ? board : pathname === target && !board) ? 'page' : undefined}>{runtimeText(tab.label)}</Link>
+    })}
+  </nav>
+}
+
+/** Resource planner/workload/vacation parent row with per-destination query allowlists. */
+export function ResourceAreaTabs() {
+  const { pathname } = useLocation()
+  return <AreaTabs tabs={RESOURCE_AREA_TABS} activePath={pathname} queryKeys={(path) => path === '/planner' ? RESOURCE_QUERY.planner : path === '/workload' ? RESOURCE_QUERY.workload : RESOURCE_QUERY.vacation} />
+}
+
 /** The workspace's view tabs with the plus-tab view switcher and the share control; every tab keeps the scope. */
 export function WorkspaceTabs() {
   const scope = useScope()
   const me = useMe()
+  const visualSystem = useFlag('visual_system')
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const forced = useContext(Forced)
@@ -252,13 +320,13 @@ export function WorkspaceTabs() {
   const views = VIEWS.filter((v) => !v.show || v.show(me))
   const search = new URLSearchParams(scope.params).toString()
   return (
-    <div className="no-print flex flex-wrap items-center gap-x-1 border-b">
+    <div data-workspace-tabs data-visual-tabs={visualSystem ? 'v2' : 'legacy'} className={cn('no-print flex items-center border-b', visualSystem ? 'visual-workspace-tabs' : 'flex-wrap gap-x-1')}>
       {/* Phones get one select instead of nine tabs over three rows; the plus menu and share stay beside it. */}
-      <label className="flex min-h-11 items-center gap-2 py-1 text-sm md:hidden"><span className="sr-only">{t('wsview.label')}</span>
+      {!visualSystem && <label className="flex min-h-11 items-center gap-2 py-1 text-sm md:hidden"><span className="sr-only">{t('wsview.label')}</span>
         <select className={selectCls} value={views.some((v) => v.path === pathname) ? pathname : ''} onChange={(e) => navigate({ pathname: e.target.value, search })}>
           {views.map((v) => <option key={v.id} value={v.path}>{runtimeText(v.label)}</option>)}
-        </select></label>
-      <nav aria-label={t('wsview.label')} className="hidden flex-wrap items-center md:flex">
+        </select></label>}
+      <nav aria-label={t('wsview.label')} className={cn(visualSystem ? 'visual-workspace-tab-scroll' : 'hidden flex-wrap items-center md:flex')}>
         {views.map((v) => {
           const on = pathname === v.path
           return (
@@ -278,11 +346,13 @@ export function WorkspaceTabs() {
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild><Link to={{ pathname: '/my-work', search }}>{t('nav.myWork')}</Link></DropdownMenuItem>
             <DropdownMenuItem asChild><Link to="/projects">{t('nav.projects')}</Link></DropdownMenuItem>
+            {visualSystem && me.flags?.org_structure === true && <DropdownMenuItem asChild><Link to={{ pathname: '/organisation', search }}>{t('organisation.title')}</Link></DropdownMenuItem>}
+            {visualSystem && me.flags?.task_pickup === true && <DropdownMenuItem asChild><Link to={{ pathname: '/pickup', search }}>{t('pickup.title')}</Link></DropdownMenuItem>}
           </DropdownMenuContent>
         </DropdownMenu>
       </nav>
       <div className="flex-1" />
-      <span className="hidden items-center gap-1.5 text-sm text-muted-foreground md:inline-flex"><Layers className="size-4" aria-hidden />{scope.label}</span>
+      <span className="visual-workspace-scope hidden items-center gap-1.5 text-sm text-muted-foreground md:inline-flex"><Layers className="size-4" aria-hidden />{scope.label}</span>
       <Button variant="ghost" onClick={() => share(scope)}><Link2 className="size-4" />{t('scope.share')}</Button>
     </div>
   )

@@ -1,0 +1,19 @@
+{
+  "base": "http://127.0.0.1:8859",
+  "pid": 92437,
+  "args": [
+    "node",
+    "node_modules/vite/bin/vite.js",
+    "preview",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "8859",
+    "--strictPort",
+    "--outDir",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint28-artifacts/bin/spa-wwwroot"
+  ],
+  "atUtc": "2026-11-02T15:08:35.829987+00:00",
+  "boundary": "Static synthetic browser-test preview only; verified no real API5094. Retained runtimes unchanged.",
+  "execSession": 61755
+}

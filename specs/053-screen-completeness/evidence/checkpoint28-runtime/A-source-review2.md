@@ -1,0 +1,1 @@
+Independent bounded repair PASS. Canonical Complete reason from actual context in new editor/outcome; min5 no cap, immutable original intent/version, reason refusal revealsfield without refetch. Exact Description selector fixed. New actual provider Complete case and browser10attempts/4simulatedmutations authored; all execution unrun. Other source held. No new findings.

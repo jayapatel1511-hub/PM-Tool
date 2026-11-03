@@ -1,10 +1,15 @@
 import { CalendarSubscriptionDialog } from '@/components/hub/calendar-subscription'
+import { PersonPanelTrigger } from '@/components/hub/person-panel-trigger'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { CalendarClock, ChevronLeft, ChevronRight, Flag, HardHat, ListTodo, Plus, Users } from 'lucide-react'
-import { useContext, useState } from 'react'
-import { useSearchParams } from 'react-router'
+import { createContext, useContext, useEffect, useRef, useState, type DragEvent } from 'react'
+import { useLocation, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import { AccentDot, ActiveFilters, ChipToggle, Empty, ErrorBanner, Field, FilterBar, InProject, Loading, Page, PageHelp, Segmented, Spinner, selectCls } from '@/components/hub/common'
+import { ActiveFilters, ChipToggle, Empty, ErrorBanner, Field, FilterBar, InProject, Loading, Notice, Page, PageHelp, Segmented, Spinner, selectCls } from '@/components/hub/common'
+import { ViewMenu } from '@/components/hub/views'
+import { DeadlineDateDialog } from '@/components/hub/deadline-date-dialog'
+import { IdentityDot, ItemMark, resolveIdentityColour } from '@/components/hub/identity-colour'
+import { useFlag, useMe } from '@/lib/auth-context'
 import { useItemPanel } from '@/components/hub/panel-host'
 import { Key } from '@/components/hub/pills'
 import { Button } from '@/components/ui/button'
@@ -20,12 +25,27 @@ import { accentOf, cn } from '@/lib/utils'
 import { useScope, WorkspaceTabs } from '@/components/hub/workspace'
 import { DraftNotice } from '@/components/hub/drafts'
 import { useSafeForm } from '@/hooks/drafts'
+import { recordContextReturn } from '@/lib/record-context-navigation'
+import type { FormNavigationLocation } from '@/lib/drafts'
+import { calendarScreenState, calendarSourceKey, calendarTriggerId, calendarViewParams, calendarViewProject, clearCalendarFilters } from './calendar-screen-state'
 
 type Schemas = components['schemas']
 // The contract types `kind` and a deadline's `sourceType` as plain strings; the page narrows on them.
-type Deadline = Omit<Schemas['CalendarEntryCalendarDeadline'], 'kind' | 'sourceType'> & { kind: 'deadline'; sourceType: 'Task' | 'Deliverable' | 'Milestone' }
-type CalEvent = Omit<Schemas['CalendarEventRow'], 'kind'> & { kind: 'event' }
+type Deadline = Omit<Schemas['CalendarEntryCalendarDeadline'], 'kind' | 'sourceType'> & { kind: 'deadline'; sourceType: 'Task' | 'Deliverable' | 'Milestone'; identityColour?: string | null }
+type CalEvent = Omit<Schemas['CalendarEventRow'], 'kind'> & { kind: 'event'; identityColour?: string | null }
 type Entry = Deadline | CalEvent
+
+const eventRouteUrl = (location: FormNavigationLocation) => location.pathname + location.search + location.hash
+const eventSourceRoute = (location: FormNavigationLocation) => {
+  const params = new URLSearchParams(location.search)
+  for (const key of ['panel', 'personStaffScope', 'personProjectsPage', 'personProjectsPageSize']) params.delete(key)
+  params.sort()
+  return location.pathname + '?' + params.toString() + location.hash
+}
+const eventPersonTarget = (location: FormNavigationLocation) => {
+  const target = new URLSearchParams(location.search).get('panel')
+  return target && /^Person:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(target) ? target : null
+}
 
 // Types are told apart by icon and text; colour on an entry is its project's identity accent (design §3), never the type.
 const TYPES = [
@@ -47,6 +67,131 @@ const TodayTag = () => <span className="rounded-md bg-primary px-1.5 text-xs/[18
  *  popover (§41 R1, R2), all-day project deadlines that open their source item, and events created, edited and cancelled
  *  here. */
 export function CalendarPage() {
+  const enabled = useFlag('work_screens')
+  const [params, setParams] = useSearchParams()
+  useEffect(() => {
+    if (enabled || !['showAway', 'personId', 'disciplineId', 'view'].some(key => params.has(key))) return
+    const clean = new URLSearchParams(params)
+    for (const key of ['showAway', 'personId', 'disciplineId', 'view']) clean.delete(key)
+    setParams(clean, { replace: true })
+  }, [enabled, params, setParams])
+  return enabled ? <CalendarScreenPage /> : <LegacyCalendarPage />
+}
+
+type ScreenDeadline = Schemas['CalendarScreenDeadline']
+type ScreenAway = Schemas['CalendarScreenAwayDay']
+type ScreenInteraction = { sources: Map<string, ScreenDeadline>; away: ScreenAway[]; phone: boolean; move: (source: ScreenDeadline, date: string, trigger: string) => void }
+const CalendarInteraction = createContext<ScreenInteraction | null>(null)
+function dayDrop(context: ScreenInteraction | null, date: string) {
+  if (!context) return {}
+  return { 'data-calendar-drop-day': date,
+    onDragOver: (event: DragEvent<HTMLElement>) => { if (!context.phone && event.dataTransfer.types.includes('application/x-tuesday-calendar')) event.preventDefault() },
+    onDrop: (event: DragEvent<HTMLElement>) => {
+      if (context.phone) return
+      const source = context.sources.get(event.dataTransfer.getData('application/x-tuesday-calendar'))
+      if (!source?.canMove) return
+      event.preventDefault(); context.move(source, date, calendarTriggerId(source.sourceType, source.id))
+    } }
+}
+function AwayDay({ date, list = false }: { date: string; list?: boolean }) {
+  const context = useContext(CalendarInteraction)
+  return <>{context?.away.filter(day => day.date === date).map(day => <p key={day.personId} role={list ? 'listitem' : undefined} className="break-words rounded-md bg-muted px-2 py-1 text-xs/[18px]" data-calendar-away>
+    {day.person} · {day.state === 'Full' ? t('calendarScreen.away') : day.state === 'Reduced' && day.hours != null ? t('calendarScreen.awayHours', { hours: day.hours }) : t('calendarScreen.unavailable')}
+    {day.unverified && ` · ${t('calendarScreen.unverified')}`}
+  </p>)}</>
+}
+function DeadlineAction({ source }: { source: ScreenDeadline }) {
+  const context = useContext(CalendarInteraction)
+  return context && source.canMove ? <Button id={calendarTriggerId(source.sourceType, source.id, 'move')} variant="ghost" size="sm" className="max-w-full whitespace-normal text-xs/[18px]"
+    aria-label={t('calendarScreen.moveTitle', { key: source.key })} onClick={() => context.move(source, source.dueDate ?? '', calendarTriggerId(source.sourceType, source.id, 'move'))}>{t('calendarScreen.move')}</Button> : null
+}
+
+function CalendarScreenPage() {
+  const viewer = useMe(), scope = useScope(), openPanel = useItemPanel()
+  const [sp, setSp] = useSearchParams(), qc = useQueryClient()
+  const state = calendarScreenState(sp, viewer.settings.today ?? today())
+  const { mode: view, anchor, hidden, types, personId, disciplineId, showAway } = state
+  const [page, setPage] = useState(1), [subscription, setSubscription] = useState(false), [editing, setEditing] = useState<CalEvent | 'new' | null>(null)
+  const [intent, setIntent] = useState<{ source: ScreenDeadline; date: string; trigger: string } | null>(null), [restoreFocus, setRestoreFocus] = useState<string | null>(null)
+  const [phone, setPhone] = useState(() => window.matchMedia('(max-width: 767.98px)').matches)
+  const from = view === 'week' ? monday(anchor) : view === 'month' ? monday(anchor.slice(0, 8) + '01') : anchor
+  const to = view === 'week' ? addDays(from, 6) : view === 'month' ? addDays(from, 41) : addDays(anchor, 30)
+  const typeKey = types.join(',')
+  const q = useQuery({ queryKey: ['calendar-screen', viewer.id, from, to, scope.api, typeKey, personId, disciplineId, showAway, page], enabled: scope.ready,
+    queryFn: () => typedRequest('get', '/api/v1/calendar/screen', { query: { from, to, projectIds: scope.api, types: typeKey || 'none', personId, disciplineId, showAway, undatedPage: page, undatedPageSize: 50 } }) })
+  const data = q.error ? undefined : q.data
+  const captureReady = !!data && scope.ready && (!personId || data.people.some(person => person.id === personId)) && (!disciplineId || data.disciplines.some(discipline => discipline.id === disciplineId))
+  useEffect(() => { setPage(1) }, [from, to, scope.api, typeKey, personId, disciplineId])
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 767.98px)'), change = () => setPhone(media.matches)
+    media.addEventListener('change', change); return () => media.removeEventListener('change', change)
+  }, [])
+  useEffect(() => {
+    if (intent || !restoreFocus || q.isFetching) return
+    const frame = requestAnimationFrame(() => {
+      const target = document.getElementById(restoreFocus) ?? document.getElementById('calendar-undated')
+      target?.focus(); setRestoreFocus(null)
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [intent, restoreFocus, q.isFetching])
+  const set = (key: string, value?: string | null) => {
+    const next = new URLSearchParams(sp); if (value) next.set(key, value); else next.delete(key)
+    next.delete('panel'); next.delete('view'); setPage(1); setSp(next, { replace: true })
+  }
+  const step = (n: number) => set('date', view === 'week' ? addDays(anchor, 7 * n) : view === 'month' ? shiftMonth(anchor, n) : addDays(anchor, 30 * n))
+  const toggle = (id: string) => set('hide', (hidden.includes(id as typeof hidden[number]) ? hidden.filter(type => type !== id) : [...hidden, id]).join(',') || null)
+  const entries = (data?.range.entries ?? []) as Entry[]
+  const sources = new Map((data?.deadlines ?? []).concat(data?.undated.items ?? []).map(source => [calendarSourceKey(source.sourceType, source.id), source]))
+  const interaction: ScreenInteraction = { sources, away: data?.away.days ?? [], phone,
+    move: (source, date, trigger) => { if (!q.error && source.canMove) setIntent({ source: { ...source }, date, trigger }) } }
+  const open = (entry: Entry) => entry.kind === 'deadline' ? openPanel(entry.sourceType, entry.id) : setEditing(entry)
+  const label = view === 'month' ? monthTitle(anchor) : `${fmtDate(from)} – ${fmtDate(to)}`
+  return <CalendarInteraction.Provider value={interaction}>
+    <Page tabs={<WorkspaceTabs />} title={t('nav.calendar')} subtitle={<>{t('calendar.zoneShort', { zone: data?.range.timeZone ?? '' })}<PageHelp>{t('calendarScreen.scopeHelp')}</PageHelp></>}
+      actions={<><ViewMenu key={`${viewer.id}:${calendarViewProject(sp) ?? 'workspace'}`} listType="calendar" projectId={calendarViewProject(sp)} captureParams={() => calendarViewParams(sp, scope.params)} captureReady={captureReady} requireCompleteParams />
+        <Button variant="outline" onClick={() => setSubscription(true)}>{t('calendar.subscription')}</Button><Button onClick={() => setEditing('new')}><Plus className="size-4" />{t('calendar.new')}</Button></>}>
+      {subscription && <CalendarSubscriptionDialog onClose={() => setSubscription(false)} />}
+      <div className="flex flex-wrap items-center gap-3">
+        <Segmented label={t('calendar.view')} value={view} onChange={mode => set('mode', mode === 'week' ? null : mode)} options={(['week', 'month', 'agenda'] as const).map(mode => ({ value: mode, label: t(`calendar.mode.${mode}`) }))} />
+        <Button variant="outline" onClick={() => set('date', null)}>{t('common.today')}</Button>
+        <Button variant="outline" size="icon" aria-label={t('calendar.previous')} onClick={() => step(-1)}><ChevronLeft className="size-5" /></Button>
+        <Button variant="outline" size="icon" aria-label={t('calendar.next')} onClick={() => step(1)}><ChevronRight className="size-5" /></Button>
+        <span aria-live="polite" className="text-base/6 font-semibold tabular-nums">{label}</span>
+      </div>
+      <div className="flex flex-wrap items-end gap-3 rounded-lg border bg-card p-4" data-calendar-filters>
+        <div className="flex flex-wrap gap-2" role="group" aria-label={t('calendar.types')}>{TYPES.map(type => <ChipToggle key={type.id} on={!hidden.includes(type.id)} onClick={() => toggle(type.id)}>{t(type.label)}</ChipToggle>)}</div>
+        <ChipToggle on={showAway} onClick={() => set('showAway', showAway ? null : 'true')}>{t('calendarScreen.timeAway')}</ChipToggle>
+        <Field label={t('calendarScreen.person')} htmlFor="calendar-person"><select id="calendar-person" className={selectCls} value={personId ?? ''} disabled={!data} onChange={event => set('personId', event.target.value)}>
+          <option value="">{t('common.all')}</option>{personId && !data?.people.some(person => person.id === personId) && <option value={personId}>{t('calendarScreen.unavailable')}</option>}{data?.people.map(person => <option key={person.id} value={person.id}>{person.name}</option>)}
+        </select></Field>
+        <Field label={t('calendarScreen.discipline')} htmlFor="calendar-discipline" hint={t('calendarScreen.disciplineHelp')}><select id="calendar-discipline" className={selectCls} value={disciplineId ?? ''} disabled={!data} onChange={event => set('disciplineId', event.target.value)}>
+          <option value="">{t('common.all')}</option>{disciplineId && !data?.disciplines.some(discipline => discipline.id === disciplineId) && <option value={disciplineId}>{t('calendarScreen.unavailable')}</option>}{data?.disciplines.map(discipline => <option key={discipline.id} value={discipline.id}>{discipline.name}</option>)}
+        </select></Field>
+        <Button variant="ghost" onClick={() => { setPage(1); setSp(clearCalendarFilters(sp), { replace: true }) }}>{t('calendarScreen.clear')}</Button>
+      </div>
+      {showAway && data?.away.state === 'Unavailable' && <Notice title={t('calendarScreen.awayUnavailable')} />}
+      {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
+      {q.isPending ? <Loading rows={8} /> : view === 'week' ? <Week from={from} entries={entries} onOpen={open} /> : view === 'month' ? <Month from={from} anchor={anchor} entries={entries} onOpen={open} onDay={date => { const next = new URLSearchParams(sp); next.set('date', date); next.set('mode', 'week'); setSp(next) }} /> : <Agenda from={from} to={to} entries={entries} onOpen={open} />}
+      {data && <section className="space-y-3 rounded-lg border bg-card p-4" aria-labelledby="calendar-undated" data-calendar-undated>
+        <h2 id="calendar-undated" tabIndex={-1} className="font-semibold">{t('calendarScreen.undatedCount', { count: data.undated.totalCount })}</h2>
+        {data.undated.items.length === 0 ? <p className="text-sm text-muted-foreground">{t('calendarScreen.noUndated')}</p> : <ul className="space-y-2">{data.undated.items.map(source => <li key={calendarSourceKey(source.sourceType, source.id)} className="flex flex-wrap items-center justify-between gap-2 rounded-md border p-2"
+          draggable={!phone && source.canMove} onDragStart={event => event.dataTransfer.setData('application/x-tuesday-calendar', calendarSourceKey(source.sourceType, source.id))}>
+          <button id={calendarTriggerId(source.sourceType, source.id)} className="min-w-0 break-words text-left text-sm hover:underline" onClick={() => { if (source.sourceType === 'Task' || source.sourceType === 'Deliverable') openPanel(source.sourceType, source.id) }}>{source.key} · {source.title}</button>
+          <DeadlineAction source={source} />{!source.canMove && <span className="text-xs/[18px] text-muted-foreground">{source.moveReason}</span>}
+        </li>)}</ul>}
+        <div className="flex gap-2"><Button variant="outline" disabled={page <= 1 || q.isFetching} onClick={() => setPage(page - 1)}>{t('common.previous')}</Button>
+          <Button variant="outline" disabled={page * data.undated.pageSize >= data.undated.totalCount || q.isFetching} onClick={() => setPage(page + 1)}>{t('common.next')}</Button></div>
+      </section>}
+      {editing && <EventDialog event={editing === 'new' ? null : editing} anchor={anchor} onClose={() => setEditing(null)} />}
+      {intent && <DeadlineDateDialog source={intent.source} initialDate={intent.date} projectIds={scope.api}
+        onClose={() => { setRestoreFocus(intent.trigger); setIntent(null) }}
+        onReload={async () => { await q.refetch(); setRestoreFocus(intent.trigger); setIntent(null) }}
+        onSaved={date => { setRestoreFocus(calendarTriggerId(intent.source.sourceType, intent.source.id)); setIntent(null); if (date < from || date > to) set('date', date); void qc.invalidateQueries({ queryKey: ['calendar-screen'] }) }} />}
+    </Page>
+  </CalendarInteraction.Provider>
+}
+
+function LegacyCalendarPage() {
   const [subscription, setSubscription] = useState(false)
   const [sp, setSp] = useSearchParams()
   const openPanel = useItemPanel()
@@ -68,9 +213,9 @@ export function CalendarPage() {
   const label = view === 'month' ? monthTitle(anchor) : `${fmtDate(from)} – ${fmtDate(to)}`
 
   return (
-    <Page title={t('nav.calendar')} subtitle={<>{t('calendar.zoneShort', { zone: q.data?.timeZone ?? '' })}<PageHelp>{t('calendar.subtitle', { zone: q.data?.timeZone ?? '' })}</PageHelp></>}
+    <Page tabs={<WorkspaceTabs />} title={t('nav.calendar')} subtitle={<>{t('calendar.zoneShort', { zone: q.data?.timeZone ?? '' })}<PageHelp>{t('calendar.subtitle', { zone: q.data?.timeZone ?? '' })}</PageHelp></>}
       actions={<><Button variant="outline" onClick={() => setSubscription(true)}>{t('calendar.subscription')}</Button><Button onClick={() => setEditing('new')}><Plus className="size-4" />{t('calendar.new')}</Button></>}>
-      {subscription && <CalendarSubscriptionDialog onClose={() => setSubscription(false)} />}<WorkspaceTabs />
+      {subscription && <CalendarSubscriptionDialog onClose={() => setSubscription(false)} />}
       <div className="flex flex-wrap items-center gap-3">
         <Segmented label={t('calendar.view')} value={view} onChange={(m) => set('mode', m === 'week' ? null : m)}
           options={(['week', 'month', 'agenda'] as const).map((m) => ({ value: m, label: t(`calendar.mode.${m}`) }))} />
@@ -113,27 +258,35 @@ function monthTitle(d: string) { const [y, m] = d.split('-'); return `${runtimeT
 function Marks({ e }: { e: Entry }) {
   const type = typeOf(e)
   const Icon = type?.icon ?? CalendarClock
-  return <><Icon className="size-3.5 shrink-0" aria-hidden />{type && <span className="sr-only">{t(type.label)}:</span>}</>
+  const kind = e.kind === 'deadline' ? e.sourceType : undefined
+  return <><ItemMark kind={kind} colour={e.identityColour} /><Icon className="size-3.5 shrink-0" aria-hidden />{type && <span className="sr-only">{t(type.label)}:</span>}</>
 }
 
 /** An entry on the grid: type icon, readable 12 px text and the project's accent stripe (an event without a project stays
  *  neutral); an overdue deadline adds the critical square and the word for screen readers. */
 function Chip({ e, onOpen, compact }: { e: Entry; onOpen: (e: Entry) => void; compact?: boolean }) {
+  const context = useContext(CalendarInteraction)
+  const source = e.kind === 'deadline' ? context?.sources.get(calendarSourceKey(e.sourceType, e.id)) : undefined
+  const visualSystem = useFlag('visual_system')
+  const colour = resolveIdentityColour(visualSystem, e.identityColour)
   const deadline = e.kind === 'deadline'
   return (
-    <button type="button" onClick={() => onOpen(e)} data-accent={e.projectId ? accentOf(e.projectId) : undefined} title={deadline ? `${e.key} ${e.title} · ${e.projectNumber}` : `${time(e.start)}–${time(e.end)} ${e.title}${e.location ? ` · ${e.location}` : ''}`}
+    <><button type="button" id={source ? calendarTriggerId(source.sourceType, source.id) : undefined} draggable={source && !context?.phone ? source.canMove : undefined}
+      onDragStart={source ? event => event.dataTransfer.setData('application/x-tuesday-calendar', calendarSourceKey(source.sourceType, source.id)) : undefined}
+      onClick={() => onOpen(e)} data-accent={e.projectId && !colour ? accentOf(e.projectId) : undefined} style={colour ? { borderLeftColor: colour } : undefined} title={deadline ? `${e.key} ${e.title} · ${e.projectNumber}` : `${time(e.start)}–${time(e.end)} ${e.title}${e.location ? ` · ${e.location}` : ''}`}
       className={cn('flex w-full min-w-0 items-center gap-1 rounded-md border-l-4 bg-secondary px-1.5 py-0.5 text-left text-xs/[18px] hover:brightness-95', e.projectId ? 'border-l-(color:--acc-stripe)' : 'border-l-transparent', late(e) ? 'text-bad' : 'text-foreground')}>
-      <Marks e={e} />
+      <Marks e={e} />{deadline && visualSystem && <span className="key shrink-0">{e.projectNumber}</span>}
       {late(e) && <span className="shrink-0 font-semibold"><span aria-hidden>■</span><span className="sr-only">{t('ind.overdue')}</span></span>}
       {deadline ? !compact && <span className="key shrink-0 text-muted-foreground">{e.key.split('-').pop()}</span>
         : <span className="shrink-0 tabular-nums text-muted-foreground">{time(e.start)}</span>}
       <span className="truncate font-medium">{e.title}</span>
-    </button>
+    </button>{source && <DeadlineAction source={source} />}</>
   )
 }
 
 /** Week: all-day deadlines on top, timed events on an hour grid; overlapping events sit side by side (§36.5). */
 function Week({ from, entries, onOpen }: { from: string; entries: Entry[]; onOpen: (e: Entry) => void }) {
+  const context = useContext(CalendarInteraction)
   const days = Array.from({ length: 7 }, (_, i) => addDays(from, i))
   const now = today()
   return ( // focusable so the keyboard can scroll a week with no events in it (WCAG 2.1.1)
@@ -148,7 +301,8 @@ function Week({ from, entries, onOpen }: { from: string; entries: Entry[]; onOpe
         ))}
         <div className="border-b px-1 py-1.5 text-xs/[18px] text-muted-foreground">{t('calendar.allDay')}</div>
         {days.map((d) => (
-          <div key={d} className={cn('space-y-1 border-b border-l p-1', d === now && 'bg-accent/40')} role="list" aria-label={t('calendar.allDayOn', { date: fmtDate(d) })}>
+          <div key={d} {...dayDrop(context, d)} className={cn('space-y-1 border-b border-l p-1', d === now && 'bg-accent/40')} role="list" aria-label={t('calendar.allDayOn', { date: fmtDate(d) })}>
+            <AwayDay date={d} list />
             {entries.filter((e) => e.kind === 'deadline' && e.date === d).map((e) => <div key={e.id} role="listitem"><Chip e={e} onOpen={onOpen} /></div>)}
           </div>
         ))}
@@ -190,6 +344,7 @@ function DayColumn({ day, today: isToday, events, onOpen }: { day: string; today
 }
 
 function Month({ from, anchor, entries, onOpen, onDay }: { from: string; anchor: string; entries: Entry[]; onOpen: (e: Entry) => void; onDay: (d: string) => void }) {
+  const context = useContext(CalendarInteraction)
   const days = Array.from({ length: 42 }, (_, i) => addDays(from, i))
   const month = anchor.slice(0, 7)
   const now = today()
@@ -200,12 +355,13 @@ function Month({ from, anchor, entries, onOpen, onDay }: { from: string; anchor:
         {days.map((d) => {
           const list = entries.filter((e) => dayOf(e) === d || (e.kind === 'event' && e.start.slice(0, 10) < d && e.end.slice(0, 10) >= d))
           return (
-            <div key={d} aria-current={d === now ? 'date' : undefined} className={cn('min-h-28 space-y-1 border-b border-l p-1.5', d.slice(0, 7) !== month && 'bg-muted text-muted-foreground', d === now && 'bg-accent/40')}>
+            <div key={d} {...dayDrop(context, d)} aria-current={d === now ? 'date' : undefined} className={cn('min-h-28 space-y-1 border-b border-l p-1.5', d.slice(0, 7) !== month && 'bg-muted text-muted-foreground', d === now && 'bg-accent/40')}>
               <div className="flex items-center gap-1.5">
                 <button type="button" className={cn('grid h-7 min-w-7 place-items-center rounded-md px-1 text-sm tabular-nums', d === now ? 'bg-primary font-semibold text-primary-foreground' : 'hover:bg-secondary')} onClick={() => onDay(d)}
                   aria-label={t('calendar.openWeek', { date: fmtDate(d) })}>{Number(d.slice(8))}</button>
                 {d === now && <span className="text-xs/[18px] font-semibold text-accent-foreground">{t('common.today')}</span>}
               </div>
+              <AwayDay date={d} />
               <div role="list" aria-label={t('calendar.entriesOn', { date: fmtDate(d) })} className="space-y-1">
                 {list.slice(0, 3).map((e) => <div key={`${e.kind}-${e.id}`} role="listitem"><Chip e={e} onOpen={onOpen} compact /></div>)}
               </div>
@@ -219,27 +375,33 @@ function Month({ from, anchor, entries, onOpen, onDay }: { from: string; anchor:
 }
 
 function Agenda({ from, to, entries, onOpen }: { from: string; to: string; entries: Entry[]; onOpen: (e: Entry) => void }) {
+  const context = useContext(CalendarInteraction)
   const Heading = useContext(InProject) ? 'h3' : 'h2' // a project tab's title is already an h2
-  const days = Array.from({ length: daysBetween(from, to) + 1 }, (_, i) => addDays(from, i)).filter((d) => entries.some((e) => dayOf(e) === d))
+  const days = Array.from({ length: daysBetween(from, to) + 1 }, (_, i) => addDays(from, i)).filter((d) => entries.some((e) => dayOf(e) === d) || context?.away.some(day => day.date === d))
   if (days.length === 0) return <div className="rounded-lg border bg-card"><Empty>{t('calendar.nothing')}</Empty></div>
   return (
     <div className="divide-y overflow-hidden rounded-lg border bg-card">
       {days.map((d) => {
         const list = entries.filter((e) => dayOf(e) === d).sort((a, b) => (a.kind === 'deadline' ? '' : a.start).localeCompare(b.kind === 'deadline' ? '' : b.start))
         return (
-          <section key={d} aria-label={fmtDate(d)} className={cn('grid gap-x-6 gap-y-2 px-5 py-4 sm:grid-cols-[11rem_1fr]', d === today() && 'bg-accent/40')}>
+          <section key={d} {...dayDrop(context, d)} aria-label={fmtDate(d)} className={cn('grid gap-x-6 gap-y-2 px-5 py-4 sm:grid-cols-[11rem_1fr]', d === today() && 'bg-accent/40')}>
             <Heading className="flex flex-wrap items-center gap-2 self-start text-sm font-semibold">{weekday(d)} <span className="tabular-nums">{fmtDate(d)}</span>{d === today() && <TodayTag />}</Heading>
             <ul className="space-y-1">
+              {context?.away.some(day => day.date === d) && <li><AwayDay date={d} /></li>}
               {list.map((e) => (
                 <li key={`${e.kind}-${e.id}`}>
-                  <button type="button" className="flex min-h-(--row-min) w-full flex-wrap items-center gap-x-3 gap-y-1 rounded-md px-2 py-1.5 text-left text-sm hover:bg-muted" onClick={() => onOpen(e)}>
+                  <button type="button" id={context && e.kind === 'deadline' ? calendarTriggerId(e.sourceType, e.id) : undefined}
+                    draggable={context && e.kind === 'deadline' && !context.phone ? context.sources.get(calendarSourceKey(e.sourceType, e.id))?.canMove : undefined}
+                    onDragStart={context && e.kind === 'deadline' ? event => event.dataTransfer.setData('application/x-tuesday-calendar', calendarSourceKey(e.sourceType, e.id)) : undefined}
+                    className="flex min-h-(--row-min) w-full flex-wrap items-center gap-x-3 gap-y-1 rounded-md px-2 py-1.5 text-left text-sm hover:bg-muted" onClick={() => onOpen(e)}>
                     <span className="w-28 shrink-0 tabular-nums text-muted-foreground">{e.kind === 'deadline' ? t('calendar.allDay') : `${time(e.start)}–${time(e.end)}`}</span>
                     <span className="flex items-center text-muted-foreground"><Marks e={e} /></span>
-                    {e.projectId && <AccentDot id={e.projectId} />}
+                    {e.projectId && <IdentityDot id={e.projectId} colour={e.identityColour} />}
                     {e.kind === 'deadline' && <Key>{e.key}</Key>}
                     <span className={cn('font-medium', late(e) && 'text-bad')}>{late(e) && <span aria-hidden>■ </span>}{e.title}</span>
                     <span className="text-xs/[18px] text-muted-foreground">{[e.kind === 'deadline' ? `${t(`itemType.${e.sourceType}`)} · ${e.projectNumber}` : [tv(e.type), e.projectNumber, e.location].filter(Boolean).join(' · '), late(e) && t('ind.overdue')].filter(Boolean).join(' · ')}</span>
                   </button>
+                  {e.kind === 'deadline' && context?.sources.get(calendarSourceKey(e.sourceType, e.id)) && <DeadlineAction source={context.sources.get(calendarSourceKey(e.sourceType, e.id))!} />}
                 </li>
               ))}
             </ul>
@@ -254,13 +416,25 @@ function Agenda({ from, to, entries, onOpen }: { from: string; to: string; entri
  *  organisation's time zone, location, description, visibility; the owner or a project PM edits and cancels. */
 export function EventDialog({ event, anchor, onClose }: { event: CalEvent | null; anchor: string; onClose: () => void }) {
   const qc = useQueryClient()
+  const location = useLocation(), peopleOn = useFlag('people_screens')
+  const mounted = useRef({ route: eventSourceRoute(location), eventId: event?.id ?? 'new' })
   const readOnly = !!event && !event.canEdit
   const [f, setF] = useState<Record<string, string>>(event ? {
     type: event.type, title: event.title, projectId: event.projectId ?? '', start: event.start, end: event.end, location: event.location ?? '', description: event.description ?? '', visibility: event.visibility,
   } : { type: 'Meeting', title: '', projectId: '', start: `${anchor}T09:00`, end: `${anchor}T10:00`, location: '', description: '', visibility: 'Project' })
   const [err, setErr] = useState<ApiError | null>(null)
   const [busy, setBusy] = useState(false)
-  const safe = useSafeForm(event ? null : 'event.new', f, setF) // FR-SAV-03
+  const safe = useSafeForm(event ? null : 'event.new', f, setF, (from, to) => {
+    // Only a verified Person overlay keeps this same mounted event editor and its exact calendar/filter scope.
+    if (!peopleOn || (event?.id ?? 'new') !== mounted.current.eventId
+      || eventSourceRoute(from) !== mounted.current.route || eventSourceRoute(to) !== mounted.current.route) return false
+    const fromPerson = eventPersonTarget(from), toPerson = eventPersonTarget(to)
+    const fromReturn = recordContextReturn(from.state), toReturn = recordContextReturn(to.state)
+    if ((!fromPerson && new URLSearchParams(from.search).has('panel')) || (!toPerson && new URLSearchParams(to.search).has('panel'))) return false
+    if (toPerson && toReturn?.url === eventRouteUrl(from)) return true
+    if (fromPerson && fromReturn?.url === eventRouteUrl(to)) return true
+    return !!fromPerson && fromPerson === toPerson && !!fromReturn && !!toReturn && fromReturn.url === toReturn.url
+  }) // FR-SAV-03; closing, changing event/page/filter and browser unload remain guarded.
   const projects = useQuery({ queryKey: ['projects-pick', ''], queryFn: () => typedRequest('get', '/api/v1/projects', { query: { PageSize: 200 } }) })
   const fe = err?.fieldErrors ?? {}
   const done = (projectId?: string | null) => { void invalidateChange(qc, 'CalendarEvent', projectId ?? undefined); onClose() }
@@ -277,12 +451,19 @@ export function EventDialog({ event, anchor, onClose }: { event: CalEvent | null
     try { await typedRequest('post', '/api/v1/calendar/events/{id}/cancel', { params: { id: event.id }, body: { rowVersion: event.rowVersion } }); toast.success(t('calendar.cancelled')); done(event.projectId) } catch (e) { setErr(e as ApiError) }
   }
   const input = (k: string, props: Record<string, unknown> = {}) => ({ id: `ev-${k}`, value: f[k] ?? '', disabled: readOnly, onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setF({ ...f, [k]: e.target.value }), ...props })
+  const ownerText = (context: 'read-only' | 'field') => {
+    const text = context === 'read-only' ? t('calendar.readOnly', { owner: '\uFFFC' }) : t('calendar.owner', { name: '\uFFFC' })
+    const parts = text.split('\uFFFC')
+    if (!event?.ownerId || event.ownerId === '00000000-0000-0000-0000-000000000000' || !event.owner?.trim() || parts.length !== 2)
+      return context === 'read-only' ? t('calendar.readOnly', { owner: event?.owner ?? '' }) : t('calendar.owner', { name: event?.owner ?? '' })
+    return <>{parts[0]}<PersonPanelTrigger userId={event.ownerId} name={event.owner} focusKey={`calendar:event:${event.id}:owner:${context}`}>{event.owner}</PersonPanelTrigger>{parts[1]}</>
+  }
   return (
     <Dialog open onOpenChange={(o) => !o && safe.close(onClose)}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2"><CalendarClock className="size-5 shrink-0" aria-hidden />{event ? event.title : t('calendar.new')}</DialogTitle>
-          <DialogDescription>{event && readOnly ? t('calendar.readOnly', { owner: event.owner ?? '' }) : t('calendar.zoneNote', { zone: event?.timeZone ?? t('calendar.orgZone') })}</DialogDescription>
+          <DialogDescription>{event && readOnly ? ownerText('read-only') : t('calendar.zoneNote', { zone: event?.timeZone ?? t('calendar.orgZone') })}</DialogDescription>
         </DialogHeader>
         <DraftNotice form={safe} />
         <form className="grid gap-4 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); save() }}>
@@ -302,7 +483,7 @@ export function EventDialog({ event, anchor, onClose }: { event: CalEvent | null
               <option value="Project">{t('calendar.vis.Project')}</option><option value="Private">{t('calendar.vis.Private')}</option>
             </select>
           </Field>
-          {event?.owner && <p className="self-end pb-2.5 text-xs/[18px] text-muted-foreground">{t('calendar.owner', { name: event.owner })}</p>}
+          {event?.owner && <p className="self-end pb-2.5 text-xs/[18px] text-muted-foreground">{ownerText('field')}</p>}
           {err && !Object.keys(fe).length && <div className="sm:col-span-2"><ErrorBanner error={err} /></div>}
           <DialogFooter className="gap-2 sm:col-span-2">
             {event && !readOnly && <Button type="button" variant="ghost" className="text-bad hover:text-bad sm:mr-auto" onClick={cancel}>{t('calendar.cancelEvent')}</Button>}

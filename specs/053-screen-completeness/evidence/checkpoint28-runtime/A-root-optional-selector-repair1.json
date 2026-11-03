@@ -1,0 +1,7 @@
+{
+  "file": "web/tests/decision-metadata.cjs",
+  "before": "98e2ca6fceb3503b68bd0868d812a03f505ea96875fd9a362f52aef032d9d589",
+  "after": "5eb6a9f61eaf8296189eb8535900f0c4a92e9cd611b3d3b31005354f8a9e9f83",
+  "observed": "Browser3 selectOption exact Category missing because Field optional contributes accessible suffix",
+  "repair": "Use actual exact Category (optional); no assertions/request/product changes; browser3 stopped"
+}

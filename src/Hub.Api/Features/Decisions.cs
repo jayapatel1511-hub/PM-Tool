@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using System.Text.Json;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
@@ -8,12 +9,15 @@ using Microsoft.AspNetCore.Http.HttpResults;
 namespace Hub.Api.Features;
 
 /// Decision Register (§12.9, §13.8, DEC-01..DEC-07, FR-DEC-01..04) and project external parties (FR-ORG-08).
-public static class DecisionEndpoints
+public static partial class DecisionEndpoints
 {
     public sealed record LinkInput(string TargetType, Guid TargetId, string? Relation = null);
     public sealed record CreateBody(string Subject, string Description, Guid? RequestedById, Guid? OwnerUserId, Guid? OwnerExternalPartyId, DateOnly? DateRequested,
-        DateOnly? RequiredByDate, string ImpactLevel, string ImpactDescription, LinkInput[]? Links);
-    public sealed record TransitionBody(string ToStatus, string? Reason = null, string? DecisionText = null, DateOnly? DecisionDate = null, DateOnly? NewRequiredBy = null, bool? NotifyAssignees = null, int? RowVersion = null);
+        DateOnly? RequiredByDate, string ImpactLevel, string ImpactDescription, LinkInput[]? Links,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] Guid? CategoryId = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string[]? OptionsConsidered = null);
+    public sealed record TransitionBody(string ToStatus, string? Reason = null, string? DecisionText = null, DateOnly? DecisionDate = null, DateOnly? NewRequiredBy = null, bool? NotifyAssignees = null, int? RowVersion = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Rationale = null);
     public sealed record PartyBody(string Name, string? Organisation, string? Email, string? Role, bool? IsClient, string? Notes);
     public sealed record ExternalPartyRow(Guid Id, string Name, string? Organisation, string? Email, string? Role, bool IsClient, string? Notes, bool IsActive, int RowVersion);
     public sealed record ExternalPartyCreated(Guid Id, string Name, string? Organisation, bool IsClient, int RowVersion);
@@ -23,18 +27,20 @@ public static class DecisionEndpoints
         Guid? OwnerUserId, Guid? OwnerExternalPartyId, string? OwnerName, string? OwnerOrganisation, bool OwnerIsClient, DateOnly DateRequested,
         DateOnly RequiredByDate, DateOnly OriginalRequiredByDate, string ImpactLevel, string ImpactDescription, string? DecisionText, DateOnly? DecisionDate,
         int RowVersion, int? DaysUntil, bool IsOverdue, int DaysOverdue, bool IsDueSoon, bool IsInactiveOwner, IReadOnlyList<Guid> BlockingTaskIds,
-        IReadOnlyList<DecisionLinkSummary> Deliverables, IReadOnlyList<DecisionLinkSummary> Milestones);
+        IReadOnlyList<DecisionLinkSummary> Deliverables, IReadOnlyList<DecisionLinkSummary> Milestones,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] DecisionMetadataSummary? Metadata = null);
     public sealed record DecisionProject(Guid Id, string ProjectNumber, string Name, string Status);
     public sealed record DecisionPermission(bool Ok, string? Reason);
     public sealed record DecisionTransition(string To, bool Ok, string? Reason);
     public sealed record DecisionPermissions(DecisionPermission Edit, IReadOnlyList<DecisionTransition> Transitions, bool Comment);
-    public sealed record DecisionDetailResponse(DecisionRow Decision, string Description, string? DeferralReason, string? CancelledReason, string? DecidedBy,
-        DecisionProject Project, IReadOnlyList<ItemLinkRow> Links, DecisionPermissions Permissions);
+    public sealed partial record DecisionDetailResponse(DecisionRow Decision, string Description, string? DeferralReason, string? CancelledReason, string? DecidedBy,
+        DecisionProject Project, IReadOnlyList<ItemLinkRow> Links, DecisionPermissions Permissions, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] RecordContextView? Context = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] DecisionMetadataDetail? Metadata = null);
     public sealed record DecisionCreated(Guid Id, string Key, int RowVersion);
     public sealed record DecisionMutation(Guid Id, int RowVersion);
     public sealed record DecisionTransitionMutation(Guid Id, string Status, int RowVersion);
     public sealed record DecisionLinkMutation(Guid Id);
-    sealed record Target(Guid Id, string Key, string Name, string? Status, DateOnly? Date, string? Person);
+    sealed record Target(string Kind, Guid Id, string Key, string Name, string? Status, DateOnly? Date, string? Person, Guid? PersonId);
 
     internal static readonly string[] Open = [DecisionStatus.Pending, DecisionStatus.UnderReview, DecisionStatus.Deferred];
     static readonly string[] LinkTargets = [ItemType.Task, ItemType.Deliverable, ItemType.Milestone];
@@ -43,10 +49,11 @@ public static class DecisionEndpoints
     public static void Map(RouteGroupBuilder api)
     {
         api.MapGet("/projects/{id:guid}/decisions", Register);
-        api.MapPost("/projects/{id:guid}/decisions", Create);
+        api.MapPost("/projects/{id:guid}/decisions", Create).WithMetadata(new DecisionMetadataReplay.Guard());
+        api.MapGet("/projects/{id:guid}/decisions/screen", DecisionScreenReads.Read).RequireFlag(DecisionMetadata.Flag);
         api.MapGet("/decisions/{id}", Get);
         api.MapPatch("/decisions/{id:guid}", Edit);
-        api.MapPost("/decisions/{id:guid}/transition", Transition);
+        api.MapPost("/decisions/{id:guid}/transition", Transition).WithMetadata(new DecisionMetadataReplay.Guard(true));
         api.MapPost("/decisions/{id:guid}/links", AddLink);
         api.MapDelete("/item-links/{id:guid}", RemoveLink);
         api.MapGet("/projects/{id:guid}/external-parties", ListParties);
@@ -132,24 +139,29 @@ public static class DecisionEndpoints
                 "open" => query.Where(d => Open.Contains(d.Status)),
                 _ => query,
             };
-        return await Rows(db, query, clock.Today(await store.Get(db)));
+        var settings = await store.Get(db);
+        await using var snapshot = settings.IsFlagOn(DecisionMetadata.Flag) ? await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead) : null;
+        return await Rows(db, query, clock.Today(settings), settings.IsFlagOn(DecisionMetadata.Flag));
     }
 
-    public static async Task<List<DecisionRow>> Rows(HubDb db, IQueryable<Decision> query, DateOnly today)
+    public static async Task<List<DecisionRow>> Rows(HubDb db, IQueryable<Decision> query, DateOnly today, bool registerScreens = false)
     {
         var rows = await query.Select(d => new
         {
             d.Id, d.ProjectId, d.Key, d.Subject, d.Status, d.RequestedById, d.OwnerUserId, d.OwnerExternalPartyId, d.DateRequested, d.RequiredByDate,
-            d.OriginalRequiredByDate, d.ImpactLevel, d.ImpactDescription, d.DecisionText, d.DecisionDate, d.RowVersion,
+            d.OriginalRequiredByDate, d.ImpactLevel, d.ImpactDescription, d.DecisionText, d.DecisionDate, d.RowVersion, d.CategoryId, d.OptionsConsidered, d.Rationale,
             RequestedByName = db.Users.Where(u => u.Id == d.RequestedById).Select(u => u.IsActive ? u.DisplayName : u.DisplayName + " (Inactive)").FirstOrDefault(),
             OwnerName = db.Users.Where(u => u.Id == d.OwnerUserId).Select(u => u.IsActive ? u.DisplayName : u.DisplayName + " (Inactive)").FirstOrDefault(),
             External = db.ExternalParties.Where(x => x.Id == d.OwnerExternalPartyId).Select(x => new { x.Name, x.Organisation, x.IsClient }).FirstOrDefault(),
             State = db.DecisionStates.Where(x => x.DecisionId == d.Id).Select(x => new { x.IsOverdue, x.DaysOverdue, x.IsDueSoon, x.IsInactiveOwner, x.BlockingTaskIds }).FirstOrDefault(),
-            Deliverables = (from l in db.ItemLinks where l.SourceId == d.Id && l.TargetType == ItemType.Deliverable
-                            join x in db.Deliverables on l.TargetId equals x.Id select new { x.Id, x.Key, x.Name }).ToList(),
-            Milestones = (from l in db.ItemLinks where l.SourceId == d.Id && l.TargetType == ItemType.Milestone
-                          join x in db.Milestones on l.TargetId equals x.Id select new { x.Id, x.Key, x.Name }).ToList(),
+            Deliverables = (from l in db.ItemLinks where l.ProjectId == d.ProjectId && l.SourceType == ItemType.Decision && l.SourceId == d.Id && l.TargetType == ItemType.Deliverable
+                            join x in db.Deliverables on l.TargetId equals x.Id where x.ProjectId == d.ProjectId select new { x.Id, x.Key, x.Name }).ToList(),
+            Milestones = (from l in db.ItemLinks where l.ProjectId == d.ProjectId && l.SourceType == ItemType.Decision && l.SourceId == d.Id && l.TargetType == ItemType.Milestone
+                          join x in db.Milestones on l.TargetId equals x.Id where x.ProjectId == d.ProjectId select new { x.Id, x.Key, x.Name }).ToList(),
         }).ToListAsync();
+        var categoryIds = registerScreens ? rows.Select(row => row.CategoryId).OfType<Guid>().Distinct().ToArray() : [];
+        var categories = registerScreens ? await db.DecisionCategories.AsNoTracking().Where(category => categoryIds.Contains(category.Id))
+            .Select(category => new DecisionCategoryChoice(category.Id, category.Name, category.IsActive)).ToDictionaryAsync(category => category.Id) : new Dictionary<Guid, DecisionCategoryChoice>();
         // FR-DEC-04: overdue first, then required-by ascending, then impact (High first).
         static int Weight(string i) => i switch { Impact.High => 0, Impact.Medium => 1, _ => 2 };
         return rows.OrderByDescending(r => r.State?.IsOverdue == true && DecisionStatus.IsOpen(r.Status)).ThenBy(r => r.RequiredByDate).ThenBy(r => Weight(r.ImpactLevel)).ThenBy(r => r.Key)
@@ -163,7 +175,8 @@ public static class DecisionEndpoints
                     open ? r.RequiredByDate.DayNumber - today.DayNumber : null, st?.IsOverdue ?? false, st?.DaysOverdue ?? 0,
                     st?.IsDueSoon ?? false, st?.IsInactiveOwner ?? false, st?.BlockingTaskIds ?? [],
                     r.Deliverables.Select(x => new DecisionLinkSummary(x.Id, x.Key, x.Name)).ToList(),
-                    r.Milestones.Select(x => new DecisionLinkSummary(x.Id, x.Key, x.Name)).ToList());
+                    r.Milestones.Select(x => new DecisionLinkSummary(x.Id, x.Key, x.Name)).ToList(),
+                    registerScreens ? new DecisionMetadataSummary(r.CategoryId is { } categoryId ? categories.GetValueOrDefault(categoryId) : null, r.OptionsConsidered?.Length, !string.IsNullOrWhiteSpace(r.Rationale)) : null);
             }).ToList();
     }
 
@@ -174,6 +187,7 @@ public static class DecisionEndpoints
         var (p, ctx) = await access.Project(id);
         Access.Demand(Permissions.RaiseRegisterItem(access.Actor, ctx));
         var today = clock.Today(await store.Get(db));
+        var metadata = await DecisionMetadata.Create(db, body.CategoryId, body.OptionsConsidered, (await store.Get(db)).IsFlagOn(DecisionMetadata.Flag));
         await Owner(db, id, body.OwnerUserId, body.OwnerExternalPartyId);
         if (body.RequestedById is { } rq) await DeliverableEndpoints.ActivePerson(db, rq, "requestedById");
         Check.OneOf(body.ImpactLevel, Impact.All, "impactLevel");
@@ -189,6 +203,7 @@ public static class DecisionEndpoints
                 ImpactLevel = body.ImpactLevel, ImpactDescription = Check.Required(body.ImpactDescription, "impactDescription", 2000),
                 StatusChangedAt = clock.GetUtcNow(), LastActivityAt = clock.GetUtcNow(),
             };
+            DecisionMetadata.Apply(d, metadata);
             db.Decisions.Add(d);
             foreach (var l in body.Links ?? []) await Link(db, access, p, d, l);
             await team.EnsureMember(p, d.OwnerUserId, ProjectRole.TeamMember); // the owner must be able to open what they are asked to decide
@@ -239,23 +254,33 @@ public static class DecisionEndpoints
         return link;
     }
 
-    /// The linked sources of a register item, oldest link first, with their status and date.
-    public sealed record ItemLinkRow(Guid Id, string TargetType, Guid TargetId, string Relation, string Key, string Name, string? Status, DateOnly? Date, string? Person);
-    internal static async Task<List<ItemLinkRow>> LinkRows(HubDb db, Guid sourceId)
+    /// Same-project, declared-kind links only. The dark screen pattern normalizes visible
+    /// targets by kind/id and orders them by relationship, key and id; legacy valid reads
+    /// retain their creation order while the flag is off.
+    public sealed record ItemLinkRow(Guid Id, string TargetType, Guid TargetId, string Relation, string Key, string Name, string? Status, DateOnly? Date, string? Person,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] Guid? PersonId = null);
+    internal static async Task<List<ItemLinkRow>> LinkRows(HubDb db, Guid projectId, string sourceType, Guid sourceId, bool screenPatterns, bool peopleScreens = false)
     {
-        var links = await db.ItemLinks.AsNoTracking().Where(l => l.SourceId == sourceId && l.DeletedAt == null && ActionLinkTargets.Contains(l.TargetType)).OrderBy(l => l.CreatedAt).ToListAsync();
-        var ids = links.Select(l => l.TargetId).ToList();
-        var targets = (await db.Tasks.AsNoTracking().Where(t => ids.Contains(t.Id))
-                .Select(t => new Target(t.Id, t.Key, t.Name, t.Status, t.DueDate, db.Users.Where(u => u.Id == t.AssigneeId).Select(u => u.DisplayName).FirstOrDefault())).ToListAsync())
-            .Concat(await db.Deliverables.AsNoTracking().Where(x => ids.Contains(x.Id)).Select(x => new Target(x.Id, x.Key, x.Name, x.Status, x.DueDate, null)).ToListAsync())
-            .Concat(await db.Milestones.AsNoTracking().Where(x => ids.Contains(x.Id)).Select(x => new Target(x.Id, x.Key, x.Name, null, x.Date, null)).ToListAsync())
-            .Concat(await db.Handoffs.AsNoTracking().Where(x => ids.Contains(x.Id)).Select(x => new Target(x.Id, x.Key, x.Title, x.Status, x.NeededBy, null)).ToListAsync())
-            .Concat(await db.ChangeNotices.AsNoTracking().Where(x => ids.Contains(x.Id)).Select(x => new Target(x.Id, x.Key, x.Title, x.Status, x.AssessmentDueDate, null)).ToListAsync())
-            .ToDictionary(x => x.Id);
-        return [.. links.Where(l => targets.ContainsKey(l.TargetId)).Select(l => {
-            var t = targets[l.TargetId];
-            return new ItemLinkRow(l.Id, l.TargetType, l.TargetId, l.Relation, t.Key, t.Name, t.Status, t.Date, t.Person);
-        })];
+        var links = await db.ItemLinks.AsNoTracking().Where(l => l.ProjectId == projectId && l.SourceType == sourceType && l.SourceId == sourceId
+            && l.DeletedAt == null && ActionLinkTargets.Contains(l.TargetType)).OrderBy(l => l.CreatedAt).ToListAsync();
+        Guid[] Ids(string kind) => [.. links.Where(l => l.TargetType == kind).Select(l => l.TargetId).Distinct()];
+        var taskIds = Ids(ItemType.Task); var deliverableIds = Ids(ItemType.Deliverable); var milestoneIds = Ids(ItemType.Milestone);
+        var handoffIds = Ids(ItemType.Handoff); var changeIds = Ids(ItemType.ChangeNotice);
+        var targets = (await db.Tasks.AsNoTracking().Where(t => t.ProjectId == projectId && taskIds.Contains(t.Id))
+                .Select(t => new Target(ItemType.Task, t.Id, t.Key, t.Name, t.Status, t.DueDate, db.Users.Where(u => u.Id == t.AssigneeId).Select(u => u.DisplayName).FirstOrDefault(), t.AssigneeId)).ToListAsync())
+            .Concat(await db.Deliverables.AsNoTracking().Where(x => x.ProjectId == projectId && deliverableIds.Contains(x.Id)).Select(x => new Target(ItemType.Deliverable, x.Id, x.Key, x.Name, x.Status, x.DueDate, null, null)).ToListAsync())
+            .Concat(await db.Milestones.AsNoTracking().Where(x => x.ProjectId == projectId && milestoneIds.Contains(x.Id)).Select(x => new Target(ItemType.Milestone, x.Id, x.Key, x.Name, null, x.Date, null, null)).ToListAsync())
+            .Concat(await db.Handoffs.AsNoTracking().Where(x => x.ProjectId == projectId && handoffIds.Contains(x.Id)).Select(x => new Target(ItemType.Handoff, x.Id, x.Key, x.Title, x.Status, x.NeededBy, null, null)).ToListAsync())
+            .Concat(await db.ChangeNotices.AsNoTracking().Where(x => x.ProjectId == projectId && changeIds.Contains(x.Id)).Select(x => new Target(ItemType.ChangeNotice, x.Id, x.Key, x.Title, x.Status, x.AssessmentDueDate, null, null)).ToListAsync())
+            .ToDictionary(x => (x.Kind, x.Id));
+        var rows = links.Where(l => targets.ContainsKey((l.TargetType, l.TargetId))).Select(l => {
+            var t = targets[(l.TargetType, l.TargetId)];
+            return new ItemLinkRow(l.Id, l.TargetType, l.TargetId, l.Relation, t.Key, t.Name, t.Status, t.Date, t.Person, peopleScreens ? t.PersonId : null);
+        });
+        if (screenPatterns)
+            rows = rows.OrderBy(l => l.Relation, StringComparer.Ordinal).ThenBy(l => l.Key, StringComparer.Ordinal).ThenBy(l => l.TargetId)
+                .ThenBy(l => l.TargetType, StringComparer.Ordinal).ThenBy(l => l.Id).DistinctBy(l => (l.TargetType, l.TargetId));
+        return [.. rows];
     }
 
     // ---------- Detail, edit, links ----------
@@ -266,7 +291,15 @@ public static class DecisionEndpoints
             : await db.Decisions.AsNoTracking().FirstOrDefaultAsync(x => x.Key == id)) ?? throw ApiException.NotFound();
         var (p, ctx) = await access.Project(d.ProjectId, track: false);
         await eval.EnsureFresh(p.Id);
-        var row = (await Rows(db, db.Decisions.AsNoTracking().Where(x => x.Id == d.Id), clock.Today(await store.Get(db)))).Single();
+        var settings = await store.Get(db);
+        await using var snapshot = settings.IsFlagOn("work_screens") || settings.IsFlagOn(DecisionMetadata.Flag)
+            ? await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead) : null;
+        if (snapshot is not null)
+        {
+            d = await db.Decisions.AsNoTracking().SingleOrDefaultAsync(x => x.Id == d.Id) ?? throw ApiException.NotFound();
+            (p, ctx) = await access.Project(d.ProjectId, track: false);
+        }
+        var row = (await Rows(db, db.Decisions.AsNoTracking().Where(x => x.Id == d.Id), clock.Today(settings), settings.IsFlagOn(DecisionMetadata.Flag))).Single();
         var a = access.Actor;
         static DecisionPermission P(Allow x, string fallback) => new(x.Ok, x.Ok ? null : Text.Get(x.Why!, x.Arg ?? fallback));
         var transitions = DecisionStatus.All.Where(to => Workflow.DecisionStep(d.Status, to))
@@ -274,7 +307,9 @@ public static class DecisionEndpoints
         var permissions = new DecisionPermissions(P(Permissions.EditRegisterItem(a, ctx, Facts(d)), p.Status), transitions, Permissions.Comment(a, ctx).Ok);
         var project = new DecisionProject(p.Id, p.ProjectNumber, p.Name, p.Status);
         var decidedBy = d.DecidedById is { } by ? await db.Users.Where(u => u.Id == by).Select(u => u.DisplayName).FirstOrDefaultAsync() : null;
-        return TypedResults.Ok(new DecisionDetailResponse(row, d.Description, d.DeferralReason, d.CancelledReason, decidedBy, project, await LinkRows(db, d.Id), permissions));
+        return TypedResults.Ok(await WorkScreenResponseMetadata.AttachDetailAsync(new DecisionDetailResponse(row, d.Description, d.DeferralReason, d.CancelledReason, decidedBy, project,
+            await LinkRows(db, p.Id, ItemType.Decision, d.Id, settings.IsFlagOn("screen_patterns"), settings.IsFlagOn("people_screens")), permissions,
+            await new RecordContextReader(db, p, settings).Read(RecordContextKind.Decision, d.Id), settings.IsFlagOn(DecisionMetadata.Flag) ? DecisionMetadata.Detail(d, a, ctx) : null), d, access, db, settings, clock));
     }
 
     /// The owner or PM decide, defer and cancel (§8.5.2 "Record a decision outcome"); only the PM reopens (DEC-07);
@@ -286,34 +321,40 @@ public static class DecisionEndpoints
         _ => Permissions.EditRegisterItem(a, ctx, Facts(d)),
     };
 
-    static async Task<Ok<DecisionMutation>> Edit(Guid id, JsonElement body, HttpContext http, Access access, HubDb db, Notifier notify, TeamService team, TimeProvider clock)
+    static async Task<Ok<DecisionMutation>> Edit(Guid id, JsonElement body, HttpContext http, Access access, HubDb db, Notifier notify, TeamService team, TimeProvider clock, SettingsStore store)
+        => await Tx.Notice<Ok<DecisionMutation>>(db, store, async () =>
     {
         var (d, p, ctx) = await Load(db, access, id);
         Access.Demand(Permissions.EditRegisterItem(access.Actor, ctx, Facts(d)));
         var patch = new Patch(body);
         await Http.CheckVersion(db, http, d, patch.RowVersion);
         ProjectEndpoints.CorrectionReason(p, patch.Str("reason"));
-        db.Audit.Reason = patch.Str("reason");
-        if (patch.Has("subject")) d.Subject = Check.Required(patch.Str("subject"), "subject", 300);
-        if (patch.Has("description")) d.Description = Check.Required(patch.Str("description"), "description", 8000);
-        if (patch.Has("impactLevel")) { var i = patch.Str("impactLevel"); Check.OneOf(i, Impact.All, "impactLevel"); d.ImpactLevel = i!; }
-        if (patch.Has("impactDescription")) d.ImpactDescription = Check.Required(patch.Str("impactDescription"), "impactDescription", 2000);
-        if (patch.Has("requestedById")) { var r = patch.Id("requestedById") ?? throw ApiException.Invalid("requestedById", "error.required"); await DeliverableEndpoints.ActivePerson(db, r, "requestedById"); d.RequestedById = r; }
-        if (patch.Has("dateRequested")) d.DateRequested = patch.Date("dateRequested") ?? throw ApiException.Invalid("dateRequested", "error.required");
-        if (patch.Has("requiredByDate"))
-        {
-            Check.That(DecisionStatus.IsOpen(d.Status), "requiredByDate", "decision.date_closed");
-            d.RequiredByDate = patch.Date("requiredByDate") ?? throw ApiException.Invalid("requiredByDate", "error.required");
-        }
-        var oldOwner = d.OwnerUserId;
+        var enabled = (await store.Get(db)).IsFlagOn(DecisionMetadata.Flag);
+        var metadata = await DecisionMetadata.Patch(db, d, body, enabled, access.Actor, ctx);
+        // Stage every old and new field before assigning or invoking membership/notification side effects.
+        var subject = patch.Has("subject") ? Check.Required(patch.Str("subject"), "subject", 300) : d.Subject;
+        var description = patch.Has("description") ? Check.Required(patch.Str("description"), "description", 8000) : d.Description;
+        var impact = patch.Has("impactLevel") ? patch.Str("impactLevel") : d.ImpactLevel;
+        if (patch.Has("impactLevel")) Check.OneOf(impact, Impact.All, "impactLevel");
+        var impactDescription = patch.Has("impactDescription") ? Check.Required(patch.Str("impactDescription"), "impactDescription", 2000) : d.ImpactDescription;
+        var requester = d.RequestedById;
+        if (patch.Has("requestedById")) { requester = patch.Id("requestedById") ?? throw ApiException.Invalid("requestedById", "error.required"); await DeliverableEndpoints.ActivePerson(db, requester, "requestedById"); }
+        var requested = patch.Has("dateRequested") ? patch.Date("dateRequested") ?? throw ApiException.Invalid("dateRequested", "error.required") : d.DateRequested;
+        if (enabled && d.Status == DecisionStatus.Decided && patch.Has("dateRequested")) Check.That(d.DecisionDate is { } date && date >= requested, "dateRequested", "error.invalid");
+        var required = d.RequiredByDate;
+        if (patch.Has("requiredByDate")) { Check.That(DecisionStatus.IsOpen(d.Status), "requiredByDate", "decision.date_closed"); required = patch.Date("requiredByDate") ?? throw ApiException.Invalid("requiredByDate", "error.required"); }
+        var ownerUser = d.OwnerUserId; var ownerParty = d.OwnerExternalPartyId;
         if (patch.Has("ownerUserId") || patch.Has("ownerExternalPartyId"))
         {
-            var u = patch.Has("ownerUserId") ? patch.Id("ownerUserId") : patch.Has("ownerExternalPartyId") ? null : d.OwnerUserId;
-            var x = patch.Has("ownerExternalPartyId") ? patch.Id("ownerExternalPartyId") : patch.Has("ownerUserId") ? null : d.OwnerExternalPartyId;
-            await Owner(db, d.ProjectId, u, x);
-            d.OwnerUserId = u;
-            d.OwnerExternalPartyId = x;
+            ownerUser = patch.Has("ownerUserId") ? patch.Id("ownerUserId") : null;
+            ownerParty = patch.Has("ownerExternalPartyId") ? patch.Id("ownerExternalPartyId") : null;
+            await Owner(db, d.ProjectId, ownerUser, ownerParty);
         }
+        db.Audit.Reason = patch.Str("reason");
+        var oldOwner = d.OwnerUserId;
+        (d.Subject, d.Description, d.ImpactLevel, d.ImpactDescription, d.RequestedById, d.DateRequested, d.RequiredByDate, d.OwnerUserId, d.OwnerExternalPartyId)
+            = (subject, description, impact!, impactDescription, requester, requested, required, ownerUser, ownerParty);
+        DecisionMetadata.Apply(d, metadata);
         d.LastActivityAt = clock.GetUtcNow();
         if (d.OwnerUserId != oldOwner)
         {
@@ -323,7 +364,7 @@ public static class DecisionEndpoints
         await db.SaveChangesAsync();
         Http.ETag(http, d);
         return TypedResults.Ok(new DecisionMutation(d.Id, d.RowVersion));
-    }
+    });
 
     static async Task<Created<DecisionLinkMutation>> AddLink(Guid id, LinkInput body, Access access, HubDb db)
     {
@@ -357,8 +398,11 @@ public static class DecisionEndpoints
     // ---------- Record, defer, cancel, reopen (DEC-02, DEC-03, DEC-07, FR-011, Workflow 11) ----------
 
     static async Task<Ok<DecisionTransitionMutation>> Transition(Guid id, TransitionBody body, HttpContext http, Access access, HubDb db, Notifier notify, SettingsStore store, TimeProvider clock, CurrentUser me)
+        => await Tx.Notice<Ok<DecisionTransitionMutation>>(db, store, async () =>
     {
         var (d, p, ctx) = await Load(db, access, id);
+        var metadataOn = (await store.Get(db)).IsFlagOn(DecisionMetadata.Flag);
+        var rationale = DecisionMetadata.Outcome(body.ToStatus, body.Rationale, metadataOn);
         await Http.CheckVersion(db, http, d, body.RowVersion);
         Check.OneOf(body.ToStatus, DecisionStatus.All, "toStatus");
         var (from, to) = (d.Status, body.ToStatus);
@@ -372,7 +416,9 @@ public static class DecisionEndpoints
                 d.DecisionText = Check.Required(body.DecisionText, "decisionText", 8000);
                 d.DecisionDate = body.DecisionDate ?? today;
                 Check.That(d.DecisionDate <= today, "decisionDate", "decision.future_date");
+                if (metadataOn) Check.That(d.DecisionDate >= d.DateRequested, "decisionDate", "error.invalid");
                 d.DecidedById = me.Id;
+                d.Rationale = rationale;
                 break;
             case DecisionStatus.Deferred: // DEC-03: the previous date stays in the history
                 var next = body.NewRequiredBy ?? throw ApiException.Invalid("newRequiredBy", "error.required");
@@ -386,6 +432,7 @@ public static class DecisionEndpoints
             case DecisionStatus.Pending when from == DecisionStatus.Decided: // DEC-07
                 reason = Check.Reason(body.Reason);
                 (d.DecisionText, d.DecisionDate, d.DecidedById) = (null, null, null);
+                d.Rationale = null;
                 break;
         }
         reason ??= string.IsNullOrWhiteSpace(body.Reason) ? null : body.Reason.Trim();
@@ -438,5 +485,5 @@ public static class DecisionEndpoints
         }
         await db.SaveChangesAsync();
         return TypedResults.Ok(new DecisionTransitionMutation(d.Id, d.Status, d.RowVersion));
-    }
+    });
 }

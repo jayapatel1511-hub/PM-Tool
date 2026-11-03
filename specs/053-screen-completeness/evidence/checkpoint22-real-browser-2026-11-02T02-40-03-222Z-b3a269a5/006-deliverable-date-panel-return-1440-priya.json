@@ -1,0 +1,21 @@
+{
+  "name": "deliverable-date-panel-return",
+  "actor": "priya@hub.test",
+  "width": 1440,
+  "status": "PASS",
+  "startedAtUtc": "2026-11-02T02:40:10.317Z",
+  "facts": {
+    "deliverableId": "01a19847-72b6-7193-917d-74aa43c98fb8",
+    "origin": {
+      "url": "http://127.0.0.1:8853/projects/QA22-DLV-MVY51IDP-2DD0D2/deliverables?layout=dates",
+      "top": 0,
+      "left": 0,
+      "focusId": "deliverable-date-01a19847-72b6-7193-917d-74aa43c98fb8"
+    },
+    "returnedUrl": "http://127.0.0.1:8853/projects/QA22-DLV-MVY51IDP-2DD0D2/deliverables?layout=dates",
+    "focusReturned": true,
+    "scrollReturnedWithinPx": 1
+  },
+  "screenshot": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint22-real-browser-2026-11-02T02-40-03-222Z-b3a269a5/008-priya-1440-deliverable-date-panel-return.png",
+  "finishedAtUtc": "2026-11-02T02:40:11.615Z"
+}

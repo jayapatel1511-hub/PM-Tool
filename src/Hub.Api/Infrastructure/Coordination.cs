@@ -15,7 +15,8 @@ public static class Coordination
     public static string Hash(object value) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(value, JsonOpts.Web))));
     public static string Identity(SourceRevision r) => r.SourceIdentity.Length > 0 ? r.SourceIdentity : $"deliverable:{r.DeliverableId}";
     public static async Task Lock(HubDb db, Guid project) => await db.Database.SqlQueryRaw<Guid>("SELECT id AS \"Value\" FROM hub.project WHERE id = {0} FOR UPDATE", project).ToListAsync();
-    public static async Task<Result> Run(Guid projectId, Guid requestId, object payload, Access access, HubDb db, TimeProvider clock, Func<Project, ProjectContext, Task<Audited>> action)
+    public static async Task<Result> Run(Guid projectId, Guid requestId, object payload, Access access, HubDb db, TimeProvider clock, Func<Project, ProjectContext, Task<Audited>> action,
+        Func<Project, ProjectContext, Task>? beforeReplay = null)
     {
         Check.That(requestId != Guid.Empty, "requestId", "error.required");
         await access.Project(projectId, false);
@@ -23,6 +24,9 @@ public static class Coordination
             await Lock(db, projectId);
             var (p, ctx) = await access.Project(projectId);
             Access.Demand(Permissions.CoordinationWrite(access.Actor, ctx));
+            // Optional operation authority is re-read under the same lock as receipt lookup.
+            // Existing callers retain their established replay behavior.
+            if (beforeReplay is not null) await beforeReplay(p, ctx);
             var hash = Hash(payload);
             var prior = await db.CoordinationCommands.SingleOrDefaultAsync(c => c.ProjectId == projectId && c.ActorId == access.Me.Id && c.RequestId == requestId);
             if (prior is not null) {

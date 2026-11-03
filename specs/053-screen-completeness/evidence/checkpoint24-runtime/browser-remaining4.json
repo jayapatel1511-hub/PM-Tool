@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "suite": "person-remaining-surfaces",
+  "cases": [
+    "PM table/cards/board and real same-name IDs; repeated PM in two client groups; selection retained",
+    "Calendar both owner labels, event keys, real safety-on memory draft retained; close and other-page guards remain",
+    "Staff assign/remove title fragments retain scope, project/discipline selection and reason without command",
+    "375px manual leave title retains stored create draft and memory-only existing edit; source close stays guarded",
+    "Settings Details follows two actual selected candidates and retains unsaved form; picker remains separate",
+    "Files explicit author FK/two IDs, legacy/null/mismatch, answered 404; real scroll and nested unmounted Person return",
+    "Root Home greeting return and account own-name menu return naturally to Account trigger",
+    "People flag off at 375px retains labels/pickers/control destinations, omits menu action and makes no Person read"
+  ],
+  "personReads": 14,
+  "businessWrites": 0,
+  "scope404": true
+}

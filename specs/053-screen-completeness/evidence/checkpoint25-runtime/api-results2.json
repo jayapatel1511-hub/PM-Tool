@@ -1,0 +1,14 @@
+{
+  "atUtc": "2026-11-02T09:41:33.022115+00:00",
+  "status": "PASS_40_DISTINCT_FOCUSED_API_CASES",
+  "ReviewRegisterTests": {
+    "passed": 24,
+    "source": "screen-readers1.trx"
+  },
+  "SearchScreenTests": {
+    "passed": 16,
+    "source": "search-screen2.trx"
+  },
+  "historicalFailures": "First combined run38/40: metadataorderproductionfix+illegalplanningfixture; originalTRXretained",
+  "boundary": "Local actual API/provider checks, no browser or fullS35acceptance"
+}

@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
@@ -28,18 +29,30 @@ public static partial class ReportEndpoints
     public sealed record ReportOption(string Value, string Label);
     public sealed record ReportParamView(string Key, string Label, string Type, string? Default, IReadOnlyList<ReportOption>? Options);
     /// One report in the catalogue: what it asks for and the columns it shows when it asks for nothing more.
-    public sealed record ReportListItem(string Code, string Title, string Description, IReadOnlyList<ReportParamView> Params, string? ItemType, IReadOnlyList<ReportColumn> Columns);
+    public sealed record ReportListItem(string Code, string Title, string Description, IReadOnlyList<ReportParamView> Params, string? ItemType, IReadOnlyList<ReportColumn> Columns,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Question = null);
+    public sealed record ReportSavedViewDefinition(string Code, Param[] Parameters);
     /// A parameter as the server applied it, in words, so the result states what it covers.
     public sealed record ReportAppliedParameter(string Label, string Value);
     /// One report run. The rows differ by report, so `Rows` stays an array of free-form objects read through `Columns`.
     public sealed record ReportView(string Code, string Title, string? ItemType, IReadOnlyList<ReportColumn> Columns, JsonArray Rows, int Total, bool TotalIsLowerBound, bool Truncated,
-        string? ListLink, IReadOnlyList<ReportAppliedParameter> Parameters);
-    sealed record TaskHoursRow(DateOnly WorkDate, string Person, string ProjectNumber, string TaskKey, string TaskName, decimal Hours, string? Note, string ItemType, Guid Id);
+        string? ListLink, IReadOnlyList<ReportAppliedParameter> Parameters,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] DateTimeOffset? AsOf = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyDictionary<string, string>? SavedParameters = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] ReportTaskInputs? TaskInputs = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] ReportUnitView? UnitView = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] ReportCapacityComparison? CapacityComparison = null);
+    sealed record TaskHoursRow(DateOnly WorkDate, string Person, string ProjectNumber, string TaskKey, string TaskName, decimal Hours, string? Note, string ItemType, Guid Id,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] Guid? PersonId = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] Guid? EntryId = null);
     sealed record HealthRow(string ProjectNumber, string Name, DateOnly Date, string Computed, string Reported);
     sealed record PilotWeekRow(DateOnly WeekOf, int Projects, int Reviewed, int? Unassigned, int? NoDueDate, int? Blocked, int People, int Updaters, int? UpdatersPct);
     sealed record PickupRow(string Project, string Discipline, DateTimeOffset Offered, DateTimeOffset? Closed, string CloseCause, int DaysOpen);
     sealed record MissReportRow(string? Project, string? Discipline, string? Category, int Count);
-    sealed record StaffRow(string Person, string ProjectNumber, string ProjectName, string ProjectStatus, string Roles, string? PrimaryDiscipline, DateOnly AddedAt, string? AddedBy, int OpenTasks, int OverdueTasks);
+    sealed record StaffRow(string Person, string ProjectNumber, string ProjectName, string ProjectStatus, string Roles, string? PrimaryDiscipline, DateOnly AddedAt, string? AddedBy, int OpenTasks, int OverdueTasks,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] Guid? PersonId = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] Guid? AddedById = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] Guid? MemberId = null);
     sealed record ProjectRef(Guid Id, string ProjectNumber);
     sealed record SuccessorMilestone(Guid Id, Guid? Milestone);
     sealed record HealthSnapshotRow(string ProjectNumber, string Name, DateOnly Date, string Computed, string Reported);
@@ -50,8 +63,9 @@ public static partial class ReportEndpoints
     sealed record CommitmentDimension(Guid ProjectId, Guid DisciplineId, Guid? CategoryId);
     sealed record CommitmentGroupKey(Guid ProjectId, Guid DisciplineId, Guid? CategoryId);
     sealed record StaffProject(string ProjectNumber, string Name, string Status);
-    sealed record StaffAssignmentSource(Guid UserId, Guid ProjectId, List<string> Roles, DateTimeOffset AddedAt, string Person, StaffProject Project, string? PrimaryDiscipline, string? AddedBy, int OpenTasks, int OverdueTasks);
-    sealed record Def(string Code, Param[] Params, Col[] Cols, Func<Ctx, Task<Result>> Run, Func<Actor, bool>? Allowed = null, string? Flag = null);
+    sealed record StaffAssignmentSource(Guid UserId, Guid ProjectId, List<string> Roles, DateTimeOffset AddedAt, string Person, StaffProject Project, string? PrimaryDiscipline, string? AddedBy, int OpenTasks, int OverdueTasks, Guid MemberId, Guid? AddedById);
+    sealed record Def(string Code, Param[] Params, Col[] Cols, Func<Ctx, Task<Result>> Run, Func<Actor, bool>? Allowed = null, string? Flag = null,
+        Func<Ctx, IQueryable<WorkTask>>? TaskSource = null);
     sealed record Result(JsonArray Rows, string? ListLink = null, Col[]? Columns = null);
 
     static readonly string[] Live = [ProjectStatus.Setup, ProjectStatus.Active, ProjectStatus.OnHold, ProjectStatus.Complete];
@@ -75,16 +89,16 @@ public static partial class ReportEndpoints
              new("count", "count", "number")], CommitmentMisses, Flag: "commitment_reliability"),
         new("tasks-due-this-week", [Projects, Discipline, new("assigneeId", "person"), new("week", "date"), new("mine", "bool")],
             [new("key", "key", "key"), new("name", "task"), new("projectNumber", "project"), new("deliverableKey", "deliverable"), new("disciplineName", "discipline"),
-             new("assigneeName", "assignee"), new("dueDate", "due", "date"), new("status", "status"), new("indicators", "indicators")], DueThisWeek),
+             new("assigneeName", "assignee"), new("dueDate", "due", "date"), new("status", "status"), new("indicators", "indicators")], DueThisWeek, TaskSource: DueThisWeekSource),
         new("overdue-tasks", [Projects, Discipline, new("assigneeId", "person"), new("minDaysOverdue", "number", Default: "1")],
             [new("key", "key", "key"), new("name", "task"), new("projectNumber", "project"), new("assigneeName", "assignee"), new("dueDate", "due", "date"),
-             new("state.daysOverdue", "daysOverdue", "number"), new("state.blockingCount", "blockingCount", "number"), new("affectedMilestones", "affectedMilestones"), new("status", "status")], Overdue),
+             new("state.daysOverdue", "daysOverdue", "number"), new("state.blockingCount", "blockingCount", "number"), new("affectedMilestones", "affectedMilestones"), new("status", "status")], Overdue, TaskSource: OverdueSource),
         new("blocked-tasks", [Projects, Discipline, new("blockerType", "select", ["task", "decision", "manual"])],
             [new("key", "key", "key"), new("name", "task"), new("projectNumber", "project"), new("assigneeName", "assignee"), new("state.blockedSince", "blockedSince", "date"),
-             new("state.daysBlocked", "daysBlocked", "number"), new("blockers", "blockers"), new("affectedMilestones", "affectedMilestones")], Blocked),
+             new("state.daysBlocked", "daysBlocked", "number"), new("blockers", "blockers"), new("affectedMilestones", "affectedMilestones")], Blocked, TaskSource: BlockedSource),
         new("tasks-blocking-others", [Projects],
             [new("key", "key", "key"), new("name", "task"), new("projectNumber", "project"), new("assigneeName", "assignee"), new("dueDate", "due", "date"),
-             new("status", "status"), new("state.blockingCount", "successors", "number"), new("successorMilestones", "successorMilestones")], Blocking),
+             new("status", "status"), new("state.blockingCount", "successors", "number"), new("successorMilestones", "successorMilestones")], Blocking, TaskSource: BlockingSource),
         new("upcoming-deliverables", [Projects, Discipline, new("daysAhead", "number", Default: "14")],
             [new("key", "key", "key"), new("name", "deliverable"), new("projectNumber", "project"), new("disciplineName", "discipline"), new("ownerName", "owner"),
              new("milestoneKey", "milestone"), new("dueDate", "due", "date"), new("status", "status"), new("state.progressPct", "progress", "percent"), new("indicators", "indicators")], UpcomingDeliverables),
@@ -105,10 +119,10 @@ public static partial class ReportEndpoints
              new("ownerTypeLabel", "ownerType"), new("dueDate", "due", "date"), new("daysOverdue", "daysOverdue", "number"), new("status", "status")], MeetingActions),
         new("review-queue", [new("reviewerId", "person"), Projects],
             [new("key", "key", "key"), new("name", "item"), new("itemTypeLabel", "type"), new("projectNumber", "project"), new("assigneeName", "assignee"),
-             new("reviewerName", "reviewer"), new("readySince", "readySince", "date"), new("daysWaiting", "daysWaiting", "number"), new("round", "round", "number")], ReviewQueue),
+             new("reviewerName", "reviewer"), new("readySince", "readySince", "date"), new("daysWaiting", "daysWaiting", "number"), new("round", "round", "number")], ReviewQueue, TaskSource: ReviewQueueSource),
         new("stale-work", [Projects, new("days", "number")],
             [new("key", "key", "key"), new("name", "task"), new("projectNumber", "project"), new("assigneeName", "assignee"), new("status", "status"),
-             new("lastActivityAt", "lastActivity", "datetime"), new("staleDays", "days", "number")], Stale),
+             new("lastActivityAt", "lastActivity", "datetime"), new("staleDays", "days", "number")], Stale, TaskSource: StaleSource),
         new("project-activity-log", [new("projectId", "project"), new("from", "date"), new("to", "date"), new("category", "select", ["status", "assignment", "date", "deletion", "creation", "comment", "decision", "health", "dependency", "structure"])],
             [new("occurredAt", "timestamp", "datetime"), new("actorName", "actor"), new("action", "action"), new("item", "item"), new("summary", "change"), new("reason", "reason")], ActivityLog_),
         new("staff-assignments", [new("scope", "select", ["direct", "all"], "direct"), Discipline, new("officeId", "office"), new("projectId", "projects"), new("role", "select", ProjectRole.All)],
@@ -137,10 +151,76 @@ public static partial class ReportEndpoints
 
     static bool UnitReadableReport(string code) => code is "staff-assignments" or "workload-employee" or "workload-discipline" or "team-capacity" or "allocations-by-source";
 
-    static Param[] ReportParams(Def def, OrgSettings settings, string[]? units = null) =>
+    static Param[] ReportParams(Def def, OrgSettings settings, string[]? units = null) => [..
         settings.IsFlagOn("org_structure") && def.Code is "staff-assignments" or "team-capacity"
             ? [.. def.Params, new("unitId", "select", units), .. def.Code == "staff-assignments" ? new Param[] { new("week", "date") } : []]
-            : def.Params;
+            : def.Params, .. settings.IsFlagOn("capacity_screens") && HasReportUnits(def) ? UnitParams : []];
+
+    /// Maintained registration union; actual read/write support is the current definition below.
+    public static IReadOnlyDictionary<string, string[]> SavedViewParameterKeys { get; } = All.ToDictionary(
+        def => $"report:{def.Code}", def => def.Params.Select(p => p.Key)
+            .Concat(def.Code is "staff-assignments" or "team-capacity" ? ["unitId"] : Array.Empty<string>())
+            .Concat(def.Code == "staff-assignments" ? ["week"] : Array.Empty<string>())
+            .Concat(def.Code == "project-activity-log" ? ["history"] : Array.Empty<string>())
+            .Concat(HasReportUnits(def) ? ["unit", "period"] : Array.Empty<string>()).Distinct().ToArray());
+
+    /// Views reuses the report's current eligibility; the sharing container never changes its data filters.
+    public static async Task<ReportSavedViewDefinition> SavedViewDefinition(string listType, Access access, HubDb db, SettingsStore store)
+    {
+        var s = await store.Get(db); Http.RequireFlag(s, "capacity_screens");
+        var def = listType.StartsWith("report:", StringComparison.Ordinal) ? All.FirstOrDefault(r => listType == $"report:{r.Code}") : null;
+        if (def is null) throw ApiException.NotFound();
+        await DemandReport(def, access.Actor, db, s);
+        return new(def.Code, [.. ReportParams(def, s).Select(p => p.Key == "scope" && !Permissions.ViewAllStaff(access.Actor) && def.Code == "staff-assignments"
+                ? p with { Options = p.Options?.Where(option => option != "all").ToArray() } : p),
+            .. def.Code == "project-activity-log" ? new Param[] { new("history", "select", ["all"]) } : []]);
+    }
+
+    static async Task DemandReport(Def def, Actor actor, HubDb db, OrgSettings s)
+    {
+        if (def.Allowed is { } ok && !ok(actor) && !(UnitReadableReport(def.Code) && await PeopleScope.ReadsAsUnitLeader(db, s, actor)))
+            throw ApiException.Forbidden("perm.staff");
+        if (def.Flag != null) Http.RequireFlag(s, def.Flag);
+    }
+
+    /// Definitions only: actual supported values, before the UI adds view/catalogue/container/panel state.
+    static IReadOnlyDictionary<string, string> SavedParameters(Def def, Ctx c)
+    {
+        var values = new Dictionary<string, string>();
+        void Date(string key, DateOnly date) => values[key] = date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        void Number(string key, int value) => values[key] = value.ToString(CultureInfo.InvariantCulture);
+        foreach (var p in ReportParams(def, c.S))
+        {
+            if (p.Key is "unit" or "period" && !UsesReportUnits(def, c)) continue;
+            var raw = c.Str(p.Key) ?? p.Default; if (raw is null) continue;
+            if (p.Type == "date") { if (c.Date(p.Key) is { } day) Date(p.Key, day); }
+            else if (p.Type is "project" or "projects" or "person" or "discipline" or "office")
+            { var ids = Http.Ids(raw); if (ids.Length > 0) values[p.Key] = string.Join(",", ids); }
+            else if (p.Type == "bool") values[p.Key] = (p.Key == "includeMyDrafts" ? raw != "false" : raw == "true") ? "true" : "false";
+            else if (p.Type == "number") { if (int.TryParse(raw, out var number)) Number(p.Key, number); }
+            else values[p.Key] = raw;
+        }
+        switch (def.Code)
+        {
+            case "team-capacity": case "allocations-by-source":
+                Date("from", Workload.WeekOf(c.Date("from") ?? c.Today)); Number("weeks", c.Int("weeks") ?? c.S.PlanningHorizonWeeks);
+                values["includeMyDrafts"] = c.Str("includeMyDrafts") == "false" ? "false" : "true"; break;
+            case "tasks-due-this-week": Date("week", Workload.WeekOf(c.Date("week") ?? c.Today)); break;
+            case "pilot-measures": Number("weeks", Math.Clamp(c.Int("weeks") ?? 8, 1, 26)); break;
+            case "pilot-route-use": Number("weeks", c.Int("weeks") ?? 8); break;
+            case "upcoming-deliverables": Number("daysAhead", Math.Clamp(c.Int("daysAhead") ?? 14, 0, 365)); break;
+            case "upcoming-milestones": Number("daysAhead", Math.Clamp(c.Int("daysAhead") ?? 30, 0, 365)); break;
+            case "overdue-tasks": Number("minDaysOverdue", Math.Max(c.Int("minDaysOverdue") ?? 1, 1)); break;
+            case "stale-work": Number("days", Math.Max(c.Int("days") ?? c.S.TaskStaleDays, 1)); break;
+            case "health-history": Date("from", c.Date("from") ?? c.Today.AddDays(-56)); Date("to", c.Date("to") ?? c.Today); break;
+            case "pickup-offers": case "commitment-misses": Date("from", c.Date("from") ?? c.Today.AddDays(-42)); Date("to", c.Date("to") ?? c.Today); break;
+            case "task-hours":
+                var from = c.Date("from") ?? Workload.WeekOf(c.Today); Date("from", from); Date("to", c.Date("to") ?? from.AddDays(6));
+                values["scope"] = c.Str("scope") == "team" ? "team" : "mine"; break;
+            case "project-activity-log": if (c.Date("from") is null && c.Date("to") is null) values["history"] = "all"; break;
+        }
+        return values;
+    }
 
     public static void Map(RouteGroupBuilder api)
     {
@@ -153,24 +233,44 @@ public static partial class ReportEndpoints
                 r.Code, Text.Get($"report.{r.Code}"), Text.Get($"report.{r.Code}.about"),
                 [.. ReportParams(r, settings, unitNames.Keys.ToArray()).Select(p => new ReportParamView(p.Key, Text.Get($"param.{p.Key}"), p.Type, p.Key == "weeks" && r.Flag == "capacity_reports" ? settings.PlanningHorizonWeeks.ToString(CultureInfo.InvariantCulture) : p.Default,
                     p.Options is null ? null : [.. p.Options.Where(o => !(p.Key == "scope" && o == "all" && !Permissions.ViewAllStaff(me.Actor))).Select(o => new ReportOption(o, p.Key == "unitId" ? unitNames.GetValueOrDefault(o, o) : Text.Get($"opt.{o}")))]))],
-                ItemTypeOf(r.Code), [.. r.Cols.Select(c => new ReportColumn(c.Path, c.Title, c.Type))])).ToArray());
+                ItemTypeOf(r.Code), [.. r.Cols.Select(c => new ReportColumn(c.Path, c.Title, c.Type))],
+                settings.IsFlagOn("capacity_screens") ? Text.Get($"report.{r.Code}.question") : null)).ToArray());
         });
         api.MapGet("/reports/{code}", async Task<Ok<ReportView>> (string code, HttpContext http, HubDb db, Access access, CurrentUser me, SettingsStore store, TimeProvider clock) =>
         {
             var (def, ctx) = await Prepare(code, http, db, access, me, store, clock);
+            await using var snapshot = ctx.InputsEnabled
+                ? await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead) : null;
+            ctx.CaptureCapacityComparison = ctx.InputsEnabled && def.Code == "team-capacity";
             var r = await def.Run(ctx);
+            var inputs = snapshot is not null ? await TaskInputSummary(def, ctx) : null;
+            ctx.UnitUnestimated = inputs?.Unestimated.KnownCount ?? 0;
             return TypedResults.Ok(new ReportView(def.Code, Text.Get($"report.{def.Code}"), ItemTypeOf(def.Code), [.. (r.Columns ?? def.Cols).Select(c => new ReportColumn(c.Path, c.Title, c.Type))],
-                new JsonArray([.. r.Rows.Take(ScreenRows).Select(x => x?.DeepClone())]), r.Rows.Count, r.Rows.Count >= Cap, r.Rows.Count > ScreenRows, r.ListLink,
-                [.. (await ctx.Describe(ReportParams(def, ctx.S), def.Code == "project-activity-log")).Select(p => new ReportAppliedParameter(p.Item1, p.Item2))]));
+                ReportPeople.Add(def.Code, ItemTypeOf(def.Code), new JsonArray([.. r.Rows.Take(ScreenRows).Select(x => x?.DeepClone())]), ctx.S.IsFlagOn("people_screens")), r.Rows.Count, r.Rows.Count >= Cap, r.Rows.Count > ScreenRows, r.ListLink,
+                [.. (await ctx.Describe(AppliedReportParams(def, ctx), def.Code == "project-activity-log")).Select(p => new ReportAppliedParameter(p.Item1, p.Item2))],
+                ctx.S.IsFlagOn("visual_system") ? (snapshot is null ? clock.GetUtcNow() : ctx.Now) : null,
+                ctx.S.IsFlagOn("capacity_screens") ? SavedParameters(def, ctx) : null,
+                inputs, UnitView(def, ctx, r, ScreenRows), ctx.CapacityComparison));
         });
         api.MapGet("/reports/{code}/export", async (string code, string? format, HttpContext http, HubDb db, Access access, CurrentUser me, SettingsStore store, TimeProvider clock) =>
         {
             var (def, ctx) = await Prepare(code, http, db, access, me, store, clock);
+            await using var snapshot = UsesReportUnits(def, ctx) ? await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead) : null;
             var r = await def.Run(ctx);
             var title = Text.Get($"report.{def.Code}");
-            var parameters = await ctx.Describe(ReportParams(def, ctx.S), def.Code == "project-activity-log");
-            return await ExportFile.Send(db, store, format, title, r.Columns ?? def.Cols, r.Rows, parameters, await ctx.SingleProjectId(), def.Code, clock);
+            var parameters = await ctx.Describe(AppliedReportParams(def, ctx), def.Code == "project-activity-log");
+            ReportUnitView? units = null;
+            if (snapshot is not null)
+            {
+                ctx.UnitUnestimated = (await TaskInputSummary(def, ctx)).Unestimated.KnownCount;
+                units = UnitView(def, ctx, r); r = UnitExport(r, units!);
+            }
+            var response = await ExportFile.Send(db, store, format, title, r.Columns ?? def.Cols, r.Rows, parameters, await ctx.SingleProjectId(), def.Code, clock,
+                units is null ? null : UnitExportHeader(units, parameters));
+            if (snapshot is not null) await snapshot.CommitAsync();
+            return response;
         });
+        MapTaskInputs(api);
     }
 
     /// The kind of item each row is, so a key cell opens its panel (review-queue rows carry their own).
@@ -184,14 +284,20 @@ public static partial class ReportEndpoints
         _ => ItemType.Task,
     };
 
-    static async Task<(Def, Ctx)> Prepare(string code, HttpContext http, HubDb db, Access access, CurrentUser me, SettingsStore store, TimeProvider clock)
+    static async Task<(Def, Ctx)> Prepare(string code, HttpContext http, HubDb db, Access access, CurrentUser me, SettingsStore store, TimeProvider clock, bool taskInputList = false)
     {
         var def = All.FirstOrDefault(r => r.Code == code) ?? throw ApiException.NotFound();
         var s = await store.Get(db);
-        if (def.Allowed is { } ok && !ok(me.Actor) && !(UnitReadableReport(code) && await PeopleScope.ReadsAsUnitLeader(db, s, me.Actor)))
-            throw ApiException.Forbidden("perm.staff");
-        if (def.Flag != null) Http.RequireFlag(s, def.Flag);
-        return (def, new Ctx(http.Request.Query, db, access, me, s, clock.Today(s), clock.GetUtcNow(), store, clock));
+        await DemandReport(def, me.Actor, db, s);
+        var today = clock.Today(s); var now = clock.GetUtcNow();
+        var inputs = s.IsFlagOn("capacity_screens") && HasTaskInputs(def);
+        if (inputs) { today = Clock.LocalDate(now, s); ValidateTaskInputScope(def, http.Request.Query, s, taskInputList); }
+        var context = new Ctx(http.Request.Query, db, access, me, s, today, now, store, clock);
+        context.InputsEnabled = inputs;
+        if (inputs) ValidateRemainingInputRange(def, context);
+        ValidateUnitForm(def, context);
+        context.InputTasks = def.TaskSource?.Invoke(context);
+        return (def, context);
     }
 
     // ---------- Parameters and scope ----------
@@ -201,6 +307,18 @@ public static partial class ReportEndpoints
         public HubDb Db => db; public Access Access => access; public CurrentUser Me => me; public OrgSettings S => s; public DateOnly Today => today; public DateTimeOffset Now => now;
         public SettingsStore Store => store; public TimeProvider Clock => clock;
         public bool Partial { get; set; }
+        public IQueryable<WorkTask>? InputTasks { get; set; }
+        public bool InputsEnabled { get; set; }
+        public bool CaptureCapacityComparison { get; set; }
+        public ReportCapacityComparison? CapacityComparison { get; set; }
+        public TaskInputContext? InputContext { get; set; }
+        public PlanningEndpoints.GridResult? InputGrid { get; set; }
+        public WorkloadReportRead? InputWorkload { get; set; }
+        public List<TimeEndpoints.Row>? InputTime { get; set; }
+        public ExactUnitSource? UnitSource { get; set; }
+        public (string Suffix, string Label)[] UnitMeasures { get; set; } = [];
+        public int UnitUnestimated { get; set; }
+        public TimeProvider ReadClock { get; } = new ReportReadClock(now);
         public string? Str(string k) => string.IsNullOrWhiteSpace(q[k]) ? null : q[k].ToString();
         public Guid? Id(string k) => Guid.TryParse(q[k], out var g) ? g : null;
         public Guid[] Ids(string k) => Http.Ids(q[k]);
@@ -337,8 +455,7 @@ public static partial class ReportEndpoints
         var day = c.Date("week") ?? c.Today;
         var from = day.AddDays(-(((int)day.DayOfWeek + 6) % 7));
         var to = from.AddDays(6);
-        var f = new TaskFilter { DueFrom = from, DueTo = to, Indicators = ["open"], AssigneeIds = c.Id("assigneeId") is { } a ? [a] : [], Mine = c.Bool("mine") ? true : null };
-        var rows = Json(await TaskQueries.Rows(c.Db, TaskQueries.Sort(Tasks(c, f), null).Take(Cap), c.Me.Actor));
+        var rows = Json(await TaskQueries.Rows(c.Db, TaskQueries.Sort(c.InputTasks!, null).Take(Cap), c.Me.Actor));
         foreach (var r in rows) r!["indicators"] = Indicators(r["state"]);
         return new(rows, await Link(c, "tasks", ("dueFrom", $"{from:yyyy-MM-dd}"), ("dueTo", $"{to:yyyy-MM-dd}"), ("open", "true"), ("assigneeId", c.Str("assigneeId")), ("mine", c.Bool("mine") ? "true" : null)));
     }
@@ -346,8 +463,7 @@ public static partial class ReportEndpoints
     static async Task<Result> Overdue(Ctx c)
     {
         var min = Math.Max(c.Int("minDaysOverdue") ?? 1, 1);
-        var f = new TaskFilter { Indicators = ["overdue"], AssigneeIds = c.Id("assigneeId") is { } a ? [a] : [] };
-        var q = Tasks(c, f).Where(t => c.Db.TaskStates.Any(s => s.TaskId == t.Id && s.DaysOverdue >= min));
+        var q = c.InputTasks!;
         var rows = await WithMilestones(c.Db, Json(await TaskQueries.Rows(c.Db, q.OrderBy(t => t.DueDate).ThenBy(t => t.Seq).Take(Cap), c.Me.Actor)));
         return new(rows, min > 1 ? null : await Link(c, "tasks", ("overdue", "true"), ("assigneeId", c.Str("assigneeId"))));
     }
@@ -355,17 +471,7 @@ public static partial class ReportEndpoints
     static async Task<Result> Blocked(Ctx c)
     {
         var kind = c.Str("blockerType");
-        var q = Tasks(c, new TaskFilter { Indicators = ["blocked"] });
-        if (kind is not null)
-        {
-            // Match the complete blocker predicate before the cap, including legacy entries without a blocking flag.
-            var matching = c.Db.Database.SqlQuery<Guid>($"""
-                SELECT task_id AS "Value" FROM hub.task_state
-                WHERE EXISTS (SELECT 1 FROM jsonb_array_elements(blocked_by) AS b
-                    WHERE b->>'type' = {kind} AND b->>'blocking' IS DISTINCT FROM 'false')
-                """);
-            q = q.Where(t => matching.Contains(t.Id));
-        }
+        var q = c.InputTasks!;
         var rows = await WithMilestones(c.Db, Json(await TaskQueries.Rows(c.Db, q.OrderBy(t => t.DueDate).ThenBy(t => t.Seq).Take(Cap), c.Me.Actor)));
         var kept = new JsonArray();
         foreach (var r in rows.ToList())
@@ -382,7 +488,7 @@ public static partial class ReportEndpoints
 
     static async Task<Result> Blocking(Ctx c)
     {
-        var rows = Json(await TaskQueries.Rows(c.Db, Tasks(c, new TaskFilter { Indicators = ["blocking"] }).OrderBy(t => t.DueDate).ThenBy(t => t.Seq).Take(Cap), c.Me.Actor));
+        var rows = Json(await TaskQueries.Rows(c.Db, c.InputTasks!.OrderBy(t => t.DueDate).ThenBy(t => t.Seq).Take(Cap), c.Me.Actor));
         var succIds = rows.SelectMany(r => GuidList(r!["state"]?["blockingTaskIds"])).Distinct().ToList();
         var succ = await c.Db.Tasks.AsNoTracking().Where(t => succIds.Contains(t.Id))
             .Select(t => new SuccessorMilestone(t.Id, t.MilestoneId ?? c.Db.Deliverables.Where(d => d.Id == t.DeliverableId).Select(d => d.MilestoneId).FirstOrDefault())).ToListAsync();
@@ -496,8 +602,7 @@ public static partial class ReportEndpoints
     static async Task<Result> ReviewQueue(Ctx c)
     {
         var reviewer = c.Id("reviewerId");
-        var f = new TaskFilter { Indicators = ["readyForReview"], ReviewerIds = reviewer is { } r ? [r] : [] };
-        var tasks = Json(await TaskQueries.Rows(c.Db, Tasks(c, f).OrderBy(t => t.ReviewRequestedAt == null && t.StatusChangedAt == null)
+        var tasks = Json(await TaskQueries.Rows(c.Db, c.InputTasks!.OrderBy(t => t.ReviewRequestedAt == null && t.StatusChangedAt == null)
             .ThenBy(t => t.ReviewRequestedAt ?? t.StatusChangedAt).ThenBy(t => t.Key).Take(Cap), c.Me.Actor));
         var taskIds = tasks.Select(x => Guid.Parse(x!["id"]!.GetValue<string>())).ToList();
         var requested = await c.Db.Tasks.AsNoTracking().Where(t => taskIds.Contains(t.Id)).ToDictionaryAsync(t => t.Id, t => t.ReviewRequestedAt ?? t.StatusChangedAt);
@@ -517,6 +622,11 @@ public static partial class ReportEndpoints
                 ["readySince"] = at is { } a ? Clock.LocalDate(a, c.S).ToString("yyyy-MM-dd") : null, ["daysWaiting"] = at is { } w ? c.Today.DayNumber - Clock.LocalDate(w, c.S).DayNumber : null,
                 ["round"] = t["reviewRound"]!.DeepClone(),
             });
+            if (c.S.IsFlagOn("people_screens"))
+            {
+                rows[rows.Count - 1]!["assigneeId"] = t["assigneeId"]?.DeepClone();
+                rows[rows.Count - 1]!["reviewerId"] = t["reviewerId"]?.DeepClone();
+            }
         }
         foreach (var d in dels)
         {
@@ -527,6 +637,11 @@ public static partial class ReportEndpoints
                 ["key"] = d["key"]!.DeepClone(), ["name"] = d["name"]!.DeepClone(), ["assigneeName"] = d["ownerName"]?.DeepClone(), ["reviewerName"] = d["reviewerName"]?.DeepClone(),
                 ["readySince"] = at is { } a ? Clock.LocalDate(a, c.S).ToString("yyyy-MM-dd") : null, ["daysWaiting"] = at is { } w ? c.Today.DayNumber - Clock.LocalDate(w, c.S).DayNumber : null,
             });
+            if (c.S.IsFlagOn("people_screens"))
+            {
+                rows[rows.Count - 1]!["assigneeId"] = d["ownerId"]?.DeepClone();
+                rows[rows.Count - 1]!["reviewerId"] = d["reviewerId"]?.DeepClone();
+            }
         }
         var ordered = new JsonArray([.. rows.Select(r => r!.DeepClone()).OrderByDescending(r => r["daysWaiting"]?.GetValue<int?>() ?? -1)]);
         return new(ordered, dels.Count == 0 ? await Link(c, "tasks", ("readyForReview", "true"), ("reviewerId", c.Str("reviewerId"))) : null);
@@ -535,8 +650,7 @@ public static partial class ReportEndpoints
     static async Task<Result> Stale(Ctx c)
     {
         var days = Math.Max(c.Int("days") ?? c.S.TaskStaleDays, 1);
-        var cutoff = c.Now.AddDays(-days);
-        var q = Tasks(c, new TaskFilter { Indicators = ["open"] }).Where(t => t.Status != TaskStatuses.OnHold && t.LastActivityAt < cutoff);
+        var q = c.InputTasks!;
         var rows = Json(await TaskQueries.Rows(c.Db, q.OrderBy(t => t.LastActivityAt).Take(Cap), c.Me.Actor));
         foreach (var r in rows)
             r!["staleDays"] = c.Today.DayNumber - Clock.LocalDate(DateTimeOffset.Parse(r["lastActivityAt"]!.GetValue<string>(), CultureInfo.InvariantCulture), c.S).DayNumber;
@@ -573,19 +687,24 @@ public static partial class ReportEndpoints
 
     static async Task<Result> WorkloadEmployee(Ctx c)
     {
-        var (weeks, people, _) = await WorkloadEndpoints.Grid(new WorkloadEndpoints.WorkloadQuery(c.Id("supervisorId"), c.Id("disciplineId"), c.Id("officeId"), c.Id("projectId"), null, null, "name"),
-            c.Access, c.Db, c.Me, c.Store, c.Clock);
+        var (weeks, people, _) = await ReadWorkloadInputs(c);
         var (cols, rows) = WorkloadEndpoints.EmployeeRows(weeks, people);
+        if (c.S.IsFlagOn("people_screens")) for (var i = 0; i < people.Count; i++)
+        {
+            rows[i]!["id"] = people[i].Id;
+            rows[i]!["personId"] = people[i].Id;
+            rows[i]!["supervisorId"] = people[i].SupervisorId;
+        }
+        CaptureEmployeeUnits(c, weeks, people, cols);
         return new(rows, null, cols);
     }
 
     /// §19 Task Hours (§36.8): the Time view's permitted, non-deleted entries and their total.
     static async Task<Result> TaskHours(Ctx c)
     {
-        var (from, to) = await TimeEndpoints.Range(new(c.Date("from"), c.Date("to"), null, null, null, null), c.Db, c.Store, c.Clock); // the Time view's bound
-        var f = new TimeEndpoints.TimeQuery(from, to, c.Id("projectId"), null, c.Id("userId"), c.Str("scope") == "team" ? "all" : "mine");
-        var rows = await TimeEndpoints.Visible(f, c.Access, c.Db, c.Me);
-        var json = Json(rows.Select(r => new TaskHoursRow(r.WorkDate, r.Person, r.ProjectNumber, r.TaskKey, r.TaskName, r.Hours, r.Note, ItemType.Task, r.TaskId)));
+        var (from, to, rows) = await ReadRecordedInputs(c);
+        var json = Json(rows.Select(r => new TaskHoursRow(r.WorkDate, r.Person, r.ProjectNumber, r.TaskKey, r.TaskName, r.Hours, r.Note, ItemType.Task, r.TaskId,
+            c.S.IsFlagOn("people_screens") ? r.UserId : null, c.S.IsFlagOn("people_screens") ? r.Id : null)));
         json.Add(new JsonObject { ["person"] = Text.Get("time.total"), ["hours"] = rows.Sum(r => r.Hours) });
         var qs = string.Join("&", new[] { ("from", from.ToString("yyyy-MM-dd")), ("to", to.ToString("yyyy-MM-dd")), ("projectId", c.Str("projectId")), ("userId", c.Str("userId")), ("scope", c.Str("scope") == "team" ? "all" : null) }
             .Where(x => x.Item2 is not null).Select(x => $"{x.Item1}={x.Item2}"));
@@ -594,8 +713,17 @@ public static partial class ReportEndpoints
 
     static async Task<Result> WorkloadDiscipline(Ctx c)
     {
-        var (cols, rows) = await WorkloadEndpoints.DisciplineRows(c.Id("officeId"), c.Access, c.Db, c.Me, c.Store, c.Clock);
-        return new(rows, null, cols);
+        if (!c.InputsEnabled)
+        {
+            var (cols, rows) = await WorkloadEndpoints.DisciplineRows(c.Id("officeId"), c.Access, c.Db, c.Me, c.Store, c.Clock);
+            return new(rows, null, cols);
+        }
+        var read = await WorkloadEndpoints.ReadDisciplineReport(c.Id("officeId"), c.Access, c.Db, c.Me, c.Store, c.ReadClock);
+        await SetDisciplineInputs(c);
+        c.UnitMeasures = [("", Text.Get("reportUnits.estimatedHours"))];
+        c.UnitSource = new(read.Weeks.ToArray(), read.Columns, WithUnitTotal(read.ExactHours.Select((hours, index) => new ExactUnitRow(index, "Hours", "VisibleOnly",
+            [UnitMeasure("", c.UnitMeasures[0].Label, hours, read.Rows[index]!["unestimated"]!.GetValue<int>())])).ToArray()));
+        return new(read.Rows, null, read.Columns);
     }
 
     /// §19 Health History from the nightly snapshots (§16.5).
@@ -711,10 +839,11 @@ public static partial class ReportEndpoints
                 c.Db.ProjectDisciplines.Where(pd => pd.Id == m.PrimaryDisciplineId).Select(pd => pd.Discipline!.Name).FirstOrDefault(),
                 c.Db.Users.Where(u => u.Id == m.AddedBy).Select(u => u.DisplayName).FirstOrDefault(),
                 c.Db.Tasks.Count(t => t.ProjectId == m.ProjectId && t.AssigneeId == m.UserId && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled),
-                c.Db.Tasks.Count(t => t.ProjectId == m.ProjectId && t.AssigneeId == m.UserId && c.Db.TaskStates.Any(s => s.TaskId == t.Id && s.IsOverdue))))
+                c.Db.Tasks.Count(t => t.ProjectId == m.ProjectId && t.AssigneeId == m.UserId && c.Db.TaskStates.Any(s => s.TaskId == t.Id && s.IsOverdue)), m.Id, m.AddedBy))
             .ToListAsync();
         var data = Json(rows.OrderBy(r => r.Person).ThenBy(r => r.Project.ProjectNumber).Select(r => new StaffRow(r.Person, r.Project.ProjectNumber, r.Project.Name, r.Project.Status,
-            string.Join(", ", r.Roles.Select(x => Text.Get($"role.{x}"))), r.PrimaryDiscipline, Clock.LocalDate(r.AddedAt, c.S), r.AddedBy, r.OpenTasks, r.OverdueTasks)));
+            string.Join(", ", r.Roles.Select(x => Text.Get($"role.{x}"))), r.PrimaryDiscipline, Clock.LocalDate(r.AddedAt, c.S), r.AddedBy, r.OpenTasks, r.OverdueTasks,
+            c.S.IsFlagOn("people_screens") ? r.UserId : null, c.S.IsFlagOn("people_screens") ? r.AddedById : null, c.S.IsFlagOn("people_screens") ? r.MemberId : null)));
         if (!c.S.IsFlagOn("org_structure")) return new(data);
         var ids = rows.Select(r => r.UserId).Distinct().ToArray();
         var week = c.Date("week");

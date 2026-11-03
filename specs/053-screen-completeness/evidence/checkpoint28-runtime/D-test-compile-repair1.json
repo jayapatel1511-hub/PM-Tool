@@ -1,0 +1,7 @@
+{
+  "file": "tests/Hub.Tests/Api/AdminUserScreenTests.cs",
+  "before": "1eb4b559f77912cbd59aacb29a1dd845a3add466bd4ad426ea5099dc08393f08",
+  "after": "15f6cc13e7d7cc679080e2a9800a6e20603c37efde692e4ff6fe2407ebe8a43e",
+  "observed": "solution1 CS0411 generic Graph inference in seed lambda",
+  "repair": "Explicit DbAsync<Graph>; no test setup/assertion change; prior build stopped"
+}

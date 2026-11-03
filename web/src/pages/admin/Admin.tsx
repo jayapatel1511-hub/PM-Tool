@@ -1,3 +1,5 @@
+import { PersonPanelTrigger } from '@/components/hub/person-panel-trigger'
+import { personOptionLabel } from '@/components/hub/person-option-label'
 import { disciplineColour } from '@/lib/discipline-colour'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowDown, ArrowUp, Monitor, Plus, X } from 'lucide-react'
@@ -21,13 +23,17 @@ import { fmtTime } from '@/lib/format'
 import { invalidateChange } from '@/lib/keys'
 import { runtimeText, settingLabel, t } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
-import { useFlag } from '@/lib/auth'
+import { CertificationVocabulary, PersonFactsEditor } from '@/components/hub/person-facts-editor'
+import { useFlag, useMe } from '@/lib/auth'
+import { AdminRoleExamples } from './admin-role-explanations'
 import { ADMIN_EXTRA } from '@/app/extension-slots'
 import { toast } from 'sonner'
 import { DraftNotice } from '@/components/hub/drafts'
 import { useSafeForm } from '@/hooks/drafts'
+import { DeliverableReviewDefaults } from './deliverable-review-defaults'
 
-const KINDS = ['disciplines', 'clients', 'offices', 'deliverableTypes', 'phases', 'projectTypes'] as const
+const KINDS = ['disciplines', 'clients', 'offices', 'deliverableTypes', 'phases', 'projectTypes', 'issuePurposes', 'issueReturnCodes', 'decisionCategories', 'issueRootCauses'] as const
+const REGISTER_KINDS: readonly string[] = ['issuePurposes', 'issueReturnCodes', 'decisionCategories', 'issueRootCauses']
 type Kind = (typeof KINDS)[number]
 type Schemas = components['schemas']
 
@@ -38,8 +44,9 @@ const Active = ({ on }: { on: boolean }) => <Pill tone={on ? 'ok' : 'idle'}>{on 
 /** Administration (§13.15): plain forms and lifecycle tables under one row of tabs; desktop and tablet only (§13.0). */
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const structure = useFlag('org_structure'), chain = useFlag('verifiable_log'), adminReview = useFlag('admin_review')
+  const register = useFlag('register_screens')
   const title = t('admin.title')
-  const links = [...KINDS.map((k) => ({ to: `/admin/reference/${k}`, label: runtimeText(`admin.${k}`) })),
+  const links = [...KINDS.filter(k => register || !REGISTER_KINDS.includes(k)).map((k) => ({ to: `/admin/reference/${k}`, label: runtimeText(`admin.${k}`) })),
     { to: '/admin/settings', label: t('admin.settings') }, { to: '/admin/users', label: t('admin.users') }, { to: '/admin/activity', label: t('admin.activity') },
     ...(structure ? [{ to: '/admin/structure', label: t('admin.structure.title') }] : []),
     ...(chain ? [{ to: '/admin/audit-chains', label: t('auditChains.title') }] : []),
@@ -67,22 +74,32 @@ export function AdminIndex() { return <Navigate to="/admin/reference/disciplines
 // ---------- Reference data (FR-008..FR-015) ----------
 
 /** One entry of any kind: the shared columns, and whichever of the kind's own columns it has (the contract's rows for each kind). */
-type Ref = Schemas['ReferenceRow'] & Partial<Schemas['OfficeRow'] & Schemas['DisciplineRow'] & Schemas['ClientRow'] & Schemas['DeliverableTypeRow']>
+type Ref = Schemas['ReferenceRow'] & Partial<Schemas['OfficeRow'] & Schemas['DisciplineRow'] & Schemas['ClientRow'] & Schemas['DeliverableTypeRow'] & Schemas['IssueReturnCodeRow']>
 
 export function ReferenceData() {
+  const { kind } = useParams()
+  const register = useFlag('register_screens')
+  return REGISTER_KINDS.includes(kind ?? '') && !register ? <Navigate to="/admin/reference/disciplines" replace /> : <ReferenceDataList />
+}
+
+function ReferenceDataList() {
   const { kind = 'disciplines' } = useParams() as { kind: Kind }
+  const reviewDefaultsOn = useFlag('register_screens')
   const qc = useQueryClient()
   const path = `/api/v1/admin/${kind}` as const
   const list = useQuery({ queryKey: ['admin', kind], queryFn: (): Promise<Ref[]> => typedRequest('get', path, {}) })
   const disciplines = useQuery({ queryKey: ['admin', 'disciplines'], queryFn: () => typedRequest('get', '/api/v1/admin/disciplines', {}), enabled: kind === 'deliverableTypes' })
   const [editing, setEditing] = useState<Partial<Ref> | null>(null)
   const [deactivate, setDeactivate] = useState<{ row: Ref; projects: number } | null>(null)
+  const [reviewDefaults, setReviewDefaults] = useState<{ typeId: string; name: string; typeActive: boolean; disciplines: Schemas['DisciplineRow'][] } | null>(null)
   const refresh = () => { void invalidateChange(qc, 'ReferenceData') }
   const save = useMutation({
     mutationFn: (r: Partial<Ref>) => r.id ? typedRequest('patch', `/api/v1/admin/${kind}/{id}`, { params: { id: r.id }, body: r, ifMatch: r.rowVersion }) : typedRequest('post', path, { body: r }),
     onSuccess: () => { refresh(); setEditing(null); toast.success(t('common.saved')) },
   })
   const rows = list.data ?? []
+  const currentReviewType = rows.find(row => row.id === reviewDefaults?.typeId)
+  const reviewCatalogueError = list.error ?? disciplines.error ?? (reviewDefaults && list.data && !currentReviewType ? new Error(t('common.unavailable')) : null)
   const move = async (i: number, dir: -1 | 1) => {
     const a = rows[i], b = rows[i + dir]
     if (!b) return
@@ -90,7 +107,7 @@ export function ReferenceData() {
     await typedRequest('patch', `/api/v1/admin/${kind}/{id}`, { params: { id: b.id }, body: { sortOrder: a.sortOrder }, ifMatch: b.rowVersion })
     refresh()
   }
-  const hasCode = kind === 'disciplines' || kind === 'offices'
+  const hasCode = kind === 'disciplines' || kind === 'offices' || kind === 'issueReturnCodes'
   const title = runtimeText(`admin.${kind}`)
   const addLabel = t('admin.add', { kind: title.toLowerCase() })
   // FR-REC-14: the shared DataTable; no column sorts and none is optional, so the list keeps the server's order.
@@ -110,6 +127,8 @@ export function ReferenceData() {
     { id: 'status', label: t('common.status'), fixed: true, cell: (r) => <Active on={r.isActive} /> },
     { id: 'actions', label: t('common.actions'), srOnly: true, fixed: true, className: 'py-0.5', cell: (r) => (
       <div className="flex justify-end gap-1">
+        {kind === 'deliverableTypes' && reviewDefaultsOn && <Button type="button" variant="outline" size="sm" disabled={disciplines.isError || !disciplines.data}
+          onClick={() => setReviewDefaults({ typeId: r.id, name: r.name, typeActive: r.isActive, disciplines: [...(disciplines.data ?? [])] })}>{t('reviewDefaults.edit')}</Button>}
         <Button size="sm" variant="outline" onClick={() => setEditing(r)}>{t('common.edit')}</Button>
         {r.isActive
           ? <Button size="sm" variant="ghost" onClick={async () => setDeactivate({ row: r, projects: (await typedRequest('get', `/api/v1/admin/${kind}/{id}/usage`, { params: { id: r.id } })).projects })}>{t('admin.deactivate')}</Button>
@@ -126,6 +145,11 @@ export function ReferenceData() {
         <DataTable table={table} rows={table.sorted} loading={list.isPending} wide caption={title} current={() => false}
           rowClass={(r) => !r.isActive && 'text-muted-foreground'} empty={<Empty>{t('common.empty')}</Empty>} />
       )}
+      {kind === 'deliverableTypes' && reviewDefaultsOn && reviewDefaults && <DeliverableReviewDefaults key={reviewDefaults.typeId}
+        typeId={reviewDefaults.typeId} name={reviewDefaults.name} typeActive={currentReviewType?.isActive ?? reviewDefaults.typeActive}
+        disciplines={!disciplines.isError && disciplines.data ? disciplines.data : reviewDefaults.disciplines}
+        catalogueError={reviewCatalogueError} cataloguePending={!list.data || !disciplines.data}
+        onRetryCatalogue={() => { void list.refetch(); void disciplines.refetch() }} onClose={() => setReviewDefaults(null)} />}
       <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
         <DialogContent>
           <DialogHeader><DialogTitle>{editing?.id ? t('common.edit') : addLabel}</DialogTitle></DialogHeader>
@@ -185,6 +209,7 @@ export function Settings() {
     try {
       await typedRequest('put', '/api/v1/admin/settings/{key}', { params: { key }, body: { value } })
       await invalidateChange(qc, 'Setting')
+      if (key === 'certification_warn_days' || key === 'availability_window_days') await invalidateChange(qc, 'PersonFacts')
       clearDraft(key)
       toast.success(t('common.saved'))
     } catch (e) {
@@ -253,27 +278,54 @@ const RoleBadge = ({ r, children }: { r: UserRow['roles'][number]; children: Rea
 
 export function Users() {
   const qc = useQueryClient()
+  const screens = useFlag('people_screens'), structure = useFlag('org_structure'), me = useMe()
   const [q, setQ] = useState('')
   const [inactive, setInactive] = useState(false)
   const [noSup, setNoSup] = useState(false)
-  const list = useQuery({ queryKey: ['admin', 'users', q, inactive, noSup], queryFn: () => typedRequest('get', '/api/v1/admin/users', { query: { q, inactive, noSupervisor: noSup } }) })
-  const everyone = useQuery({ queryKey: ['admin', 'users', 'all'], queryFn: () => typedRequest('get', '/api/v1/admin/users', { query: { inactive: true } }) })
+  const list = useQuery({ queryKey: screens ? ['admin', 'users', q, inactive, noSup, me.id, true, structure] : ['admin', 'users', q, inactive, noSup], queryFn: () => typedRequest('get', '/api/v1/admin/users', { query: { q, inactive, noSupervisor: noSup } }) })
+  const everyone = useQuery({ queryKey: screens ? ['admin', 'users', 'all', me.id, true, structure] : ['admin', 'users', 'all'], queryFn: () => typedRequest('get', '/api/v1/admin/users', { query: { inactive: true } }) })
   const ref = useQuery({ queryKey: ['reference'], queryFn: () => typedRequest('get', '/api/v1/reference', {}) })
   const [edit, setEdit] = useState<UserRow | null>(null)
   const [creating, setCreating] = useState(false)
   const [handoff, setHandoff] = useState<{ id: string; email: string; displayName: string } | null>(null)
-  const supervisor = (id: string) => everyone.data?.find((u) => u.id === id)?.displayName ?? <Missing />
+  const supervisor = (id: string, sourceId: string) => { const person = everyone.data?.find(u => u.id === id); return person ? <PersonPanelTrigger userId={person.id} name={person.displayName} active={person.isActive} focusKey={`admin:user:${sourceId}:supervisor`} /> : <Missing /> }
   const refresh = () => { void invalidateChange(qc, 'User') }
-  const rows = list.data ?? []
+  const rows = screens ? list.isSuccess && !list.error ? list.data : [] : list.data ?? []
+  const screen = (user: UserRow) => {
+    const read = user.screen
+    if (!screens || !read || read.userId !== user.id || read.userRowVersion !== user.rowVersion || read.homeDisciplineId !== user.homeDisciplineId || read.configuredInactive !== !user.isActive) return undefined
+    const homeValid = read.homeDisciplineState === 'NotSet' ? user.homeDisciplineId == null && read.homeDiscipline == null
+      : read.homeDisciplineState === 'Unknown' ? user.homeDisciplineId != null && read.homeDiscipline == null
+      : read.homeDiscipline && read.homeDiscipline.id === user.homeDisciplineId && !!read.homeDiscipline.name.trim()
+        && read.homeDisciplineState === (read.homeDiscipline.isActive ? 'Active' : 'Inactive')
+    const expectedScope = !user.roles.some(role => role.role === 'Supervisor') ? 'NotApplicable' : structure ? 'OrgPeopleScope' : 'DirectReports'
+    return homeValid && read.scopeBasis === expectedScope && read.capacityBasis === (user.weeklyCapacityHours == null ? 'OrganisationDefault' : 'Override')
+      && (user.weeklyCapacityHours == null || read.baseWeeklyCapacityHours === user.weeklyCapacityHours) ? read : undefined
+  }
+  const unavailable = () => <span className="text-muted-foreground">{t('adminScreen.unknown')}</span>
+  const extraColumns: Column<UserRow>[] = !screens ? [] : [
+    { id: 'homeDiscipline', label: t('adminScreen.homeDiscipline'), cell: user => { const read = screen(user); return !read ? unavailable() : read.homeDisciplineState === 'NotSet' ? t('adminScreen.notSet')
+      : read.homeDiscipline ? read.homeDiscipline.isActive ? read.homeDiscipline.name : t('common.inactiveSuffix', { name: read.homeDiscipline.name }) : unavailable() } },
+    { id: 'baseCapacity', label: t('adminScreen.baseCapacity'), cell: user => { const read = screen(user); return read && Number.isFinite(read.baseWeeklyCapacityHours)
+      && ['Override', 'OrganisationDefault'].includes(read.capacityBasis) ? t(read.capacityBasis === 'Override' ? 'adminScreen.override' : 'adminScreen.defaultCapacity', { hours: read.baseWeeklyCapacityHours }) : unavailable() } },
+    { id: 'templateEditor', label: t('adminScreen.templateEditor'), cell: user => t(user.isTemplateEditor ? 'common.yes' : 'common.no') },
+    { id: 'peopleScope', label: t('adminScreen.scope'), cell: user => { const read = screen(user)
+      if (!read) return unavailable()
+      if (read.scopeBasis === 'NotApplicable') return t('adminScreen.notApplicable')
+      return read.peopleScopeCount != null && Number.isInteger(read.peopleScopeCount) && read.peopleScopeCount >= 0 && ['DirectReports', 'OrgPeopleScope'].includes(read.scopeBasis)
+        ? <span className="block space-y-1"><span className="block">{t(read.scopeBasis === 'DirectReports' ? 'adminScreen.directReports' : 'adminScreen.orgScope', { count: read.peopleScopeCount })}</span>
+          {read.scopeIncludesSelf && <span className="block text-xs text-muted-foreground">{t('adminScreen.includesSelf')}</span>}{read.configuredInactive && <span className="block text-xs text-muted-foreground">{t('adminScreen.configuredInactive')}</span>}</span> : unavailable() } },
+  ]
   // FR-REC-14: the shared DataTable; no column sorts and none is optional, so the list keeps the server's order.
   const table = useTable<UserRow>('hub.userColumns', ([
     { id: 'name', label: t('common.name'), cell: (u) => (
       <div className="flex items-start gap-2.5"><Avatar id={u.id} name={u.displayName} />
-        <div className="min-w-0"><div className="font-semibold">{u.isActive ? u.displayName : t('common.inactiveSuffix', { name: u.displayName })}</div>
+        <div className="min-w-0"><div className="font-semibold"><PersonPanelTrigger userId={u.id} name={u.displayName} active={u.isActive} focusKey={`admin:user:${u.id}:name`}>{u.isActive ? u.displayName : t('common.inactiveSuffix', { name: u.displayName })}</PersonPanelTrigger></div>
           <div className="break-words text-xs/[18px] text-muted-foreground">{u.email}</div></div></div>) },
     { id: 'jobTitle', label: t('admin.jobTitle'), cell: (u) => u.jobTitle || <Missing /> },
     { id: 'office', label: t('admin.office'), cell: (u) => ref.data?.offices.find((o: any) => o.id === u.officeId)?.name ?? <Missing /> },
-    { id: 'supervisor', label: t('admin.supervisor'), cell: (u) => u.supervisorId ? supervisor(u.supervisorId) : <Chip tone="warn">{t('admin.noSupervisor')}</Chip> },
+    { id: 'supervisor', label: t('admin.supervisor'), cell: (u) => u.supervisorId ? supervisor(u.supervisorId, u.id) : <Chip tone="warn">{t('admin.noSupervisor')}</Chip> },
+    ...extraColumns,
     { id: 'roles', label: t('admin.roles'), cell: (u) => <div className="flex flex-wrap gap-1">{u.roles.map((r) => <RoleBadge key={r.role + r.source} r={r}>{runtimeText(`role.${r.role}`)}</RoleBadge>)}</div> },
     { id: 'status', label: t('common.status'), cell: (u) => <Active on={u.isActive} /> },
     { id: 'lastSignIn', label: t('admin.lastSignIn'), className: 'whitespace-nowrap tabular-nums', cell: (u) => u.lastSignInAt ? fmtTime(u.lastSignInAt) : <Missing /> },
@@ -288,7 +340,7 @@ export function Users() {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="max-w-3xl"><h2 className={h2}>{t('admin.users')}</h2>
           <p className="mt-1 text-base/6 text-muted-foreground">{t('admin.usersIntro')}</p></div>
-        <Button onClick={() => setCreating(true)}><Plus className="size-4" />{t('admin.createUser')}</Button>
+        <><CertificationVocabulary /><Button onClick={() => setCreating(true)}><Plus className="size-4" />{t('admin.createUser')}</Button></>
       </div>
       <FilterBar search={<Field label={t('common.search')} htmlFor="users-q"><Input id="users-q" placeholder={t('common.search')} value={q} onChange={(e) => setQ(e.target.value)} /></Field>}
         quick={<>
@@ -299,6 +351,7 @@ export function Users() {
         <DataTable table={table} rows={table.sorted} loading={list.isPending} wide caption={t('admin.users')} current={() => false}
           rowClass={(u) => !u.isActive && 'text-muted-foreground'} empty={<Empty>{t('admin.noUsers')}</Empty>} />
       )}
+      {screens && <AdminRoleExamples key={me.id} />}
       {edit && <UserDialog user={edit} users={everyone.data ?? []} offices={ref.data?.offices ?? []} disciplines={ref.data?.disciplines ?? []} onClose={() => { setEdit(null); refresh() }} />}
       {creating && <CreateUserDialog users={everyone.data ?? []} offices={ref.data?.offices ?? []}
         onClose={() => setCreating(false)} onCreated={(created) => { setCreating(false); setHandoff(created); refresh() }} />}
@@ -309,6 +362,7 @@ export function Users() {
 
 function CreateUserDialog({ users, offices, onClose, onCreated }: { users: UserRow[]; offices: { id: string; name: string; isActive: boolean }[];
   onClose: () => void; onCreated: (user: { id: string; email: string; displayName: string }) => void }) {
+  const factsEnabled = useFlag('capacity_screens')
   const [form, setForm] = useState({ email: '', displayName: '', jobTitle: '', officeId: '', supervisorId: '' })
   const [err, setErr] = useState<unknown>(null), [busy, setBusy] = useState(false)
   const safe = useSafeForm('user.new', form, setForm) // FR-SAV-03
@@ -327,7 +381,7 @@ function CreateUserDialog({ users, offices, onClose, onCreated }: { users: UserR
         <Field label={t('common.name')} htmlFor="new-user-name" error={(err as ApiError)?.fieldErrors?.displayName}><Input id="new-user-name" required maxLength={200} value={form.displayName} onChange={(e) => setForm({ ...form, displayName: e.target.value })} /></Field>
         <Field label={t('admin.jobTitle')} htmlFor="new-user-title" optional><Input id="new-user-title" maxLength={200} value={form.jobTitle} onChange={(e) => setForm({ ...form, jobTitle: e.target.value })} /></Field>
         <Field label={t('admin.office')} htmlFor="new-user-office"><select id="new-user-office" className={selectCls} value={form.officeId} onChange={(e) => setForm({ ...form, officeId: e.target.value })}><option value="">{t('common.none')}</option>{offices.filter((o) => o.isActive).map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}</select></Field>
-        <Field label={t('admin.supervisor')} htmlFor="new-user-supervisor"><select id="new-user-supervisor" className={selectCls} value={form.supervisorId} onChange={(e) => setForm({ ...form, supervisorId: e.target.value })}><option value="">{t('admin.noSupervisor')}</option>{users.filter((u) => u.isActive).map((u) => <option key={u.id} value={u.id}>{u.displayName}</option>)}</select></Field>
+        <Field label={t('admin.supervisor')} htmlFor="new-user-supervisor"><select id="new-user-supervisor" className={selectCls} value={form.supervisorId} onChange={(e) => setForm({ ...form, supervisorId: e.target.value })}><option value="">{t('admin.noSupervisor')}</option>{users.filter((u) => u.isActive).map((u) => <option key={u.id} value={u.id}>{personOptionLabel(u.displayName, u.personFacts?.notices, factsEnabled)}</option>)}</select></Field>
         {err != null && <ErrorBanner error={err} />}
       </fieldset><DialogFooter><Button type="button" variant="outline" onClick={() => safe.close(onClose)}>{t('common.cancel')}</Button>
         <Button type="submit" disabled={busy}>{busy && <Spinner />}{busy ? t('common.saving') : t('common.save')}</Button></DialogFooter></form>
@@ -351,6 +405,8 @@ function CredentialHandoff({ user, onClose }: { user: { id: string; email: strin
 }
 
 function UserDialog({ user, users, offices, disciplines, onClose }: { user: UserRow; users: UserRow[]; offices: any[]; disciplines: { id: string; name: string; isActive: boolean }[]; onClose: () => void }) {
+  const factsEnabled = useFlag('capacity_screens')
+  const [userVersion, setUserVersion] = useState(user.rowVersion)
   const [form, setForm] = useState({ supervisorId: user.supervisorId ?? '', officeId: user.officeId ?? '', homeDisciplineId: user.homeDisciplineId ?? '', weeklyCapacityHours: user.weeklyCapacityHours?.toString() ?? '', isTemplateEditor: user.isTemplateEditor, isActive: user.isActive })
   const [role, setRole] = useState('')
   const [err, setErr] = useState<unknown>(null)
@@ -359,7 +415,7 @@ function UserDialog({ user, users, offices, disciplines, onClose }: { user: User
   const submit = async () => {
     setErr(null); setBusy(true)
     try {
-      await typedRequest('patch', '/api/v1/admin/users/{id}', { params: { id: user.id }, body: { supervisorId: form.supervisorId || null, officeId: form.officeId || null, homeDisciplineId: form.homeDisciplineId || null, weeklyCapacityHours: form.weeklyCapacityHours === '' ? null : Number(form.weeklyCapacityHours), isTemplateEditor: form.isTemplateEditor, isActive: form.isActive }, ifMatch: user.rowVersion })
+      await typedRequest('patch', '/api/v1/admin/users/{id}', { params: { id: user.id }, body: { supervisorId: form.supervisorId || null, officeId: form.officeId || null, homeDisciplineId: form.homeDisciplineId || null, weeklyCapacityHours: form.weeklyCapacityHours === '' ? null : Number(form.weeklyCapacityHours), isTemplateEditor: form.isTemplateEditor, isActive: form.isActive }, ifMatch: userVersion })
       toast.success(t('common.saved')); onClose()
     } catch (e) { setErr(e) } finally { setBusy(false) }
   }
@@ -367,13 +423,14 @@ function UserDialog({ user, users, offices, disciplines, onClose }: { user: User
   const removeRole = async (r: string) => { try { await typedRequest('delete', '/api/v1/admin/users/{id}/roles/{role}', { params: { id: user.id, role: r } }); setRoles(roles.filter((x) => !(x.role === r && x.source === 'Manual'))) } catch (e) { setErr(e) } }
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-lg">
-        <DialogHeader><DialogTitle>{user.displayName}</DialogTitle></DialogHeader>
+      <DialogContent className={cn('max-w-lg', factsEnabled && 'max-h-[90dvh] overflow-y-auto')}>
+        <DialogHeader><DialogTitle><PersonPanelTrigger userId={user.id} name={user.displayName} active={user.isActive} focusKey={`admin:user:${user.id}:edit-dialog:title`} /></DialogTitle></DialogHeader>
+        {factsEnabled && <details className="rounded-md border p-3"><summary className="cursor-pointer text-sm font-medium">{t('personFacts.adminSection')}</summary><div className="mt-3"><PersonFactsEditor adminUserId={user.id} onUserVersion={(nextVersion, priorVersion) => setUserVersion(baseline => baseline === priorVersion ? nextVersion : baseline)} /></div></details>}
         <div className="grid gap-4">
           <Field label={t('admin.supervisor')} htmlFor="u-sup">
             <select id="u-sup" className={selectCls} value={form.supervisorId} onChange={(e) => setForm({ ...form, supervisorId: e.target.value })}>
               <option value="">{t('admin.noSupervisor')}</option>
-              {users.filter((u) => u.isActive && u.id !== user.id).map((u) => <option key={u.id} value={u.id}>{u.displayName}</option>)}
+              {users.filter((u) => u.isActive && u.id !== user.id).map((u) => <option key={u.id} value={u.id}>{personOptionLabel(u.displayName, u.personFacts?.notices, factsEnabled)}</option>)}
             </select>
           </Field>
           <Field label={t('admin.office')} htmlFor="u-off">

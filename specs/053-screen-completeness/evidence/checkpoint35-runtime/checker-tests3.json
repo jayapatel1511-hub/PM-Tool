@@ -1,0 +1,23 @@
+{
+  "exitCode": 0,
+  "args": [
+    "python3",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_permission_explainer_coverage.py"
+  ],
+  "atUtc": "2026-11-03T06:38:24.154167+00:00",
+  "elapsedSeconds": 10.53,
+  "errors": [],
+  "tail": [
+    "...................",
+    "----------------------------------------------------------------------",
+    "Ran 19 tests in 10.440s",
+    "",
+    "OK"
+  ]
+}

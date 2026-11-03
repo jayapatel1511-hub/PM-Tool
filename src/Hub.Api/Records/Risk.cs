@@ -2,7 +2,7 @@ using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 namespace Hub.Api.Records;
-public static class RiskRecord { public static RegistryEntry Entry => new(typeof(Hub.Api.Data.Risk), "Risk", ["Title", "Description", "OwnerId", "Probability", "Impact", "Mitigation", "TriggerIndicator", "ReviewDate", "Status", "RealisedIssueId", "ProjectDisciplineId", "DeletedAt"], true, null)
+public static class RiskRecord { public static RegistryEntry Entry => new(typeof(Hub.Api.Data.Risk), "Risk", ["Title", "Description", "OwnerId", "Probability", "Impact", "Mitigation", "TriggerIndicator", "ReviewDate", "Status", "RealisedIssueId", "ProjectDisciplineId", "DeletedAt", "TemplateRiskId"], true, null)
     {
         NameOrder = 7,
         Names = async (db, list) => (await db.Risks.IgnoreQueryFilters().Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.Key, x.Title }).ToListAsync()).Select(x => (x.Id, $"{x.Key} {x.Title}")),

@@ -1,0 +1,14 @@
+{
+  "exitCode": 0,
+  "args": [
+    "python3",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_permission_explainer_coverage.py",
+    "-v"
+  ]
+}

@@ -1,0 +1,3103 @@
+{
+  "observedAtUtc": "2026-11-01T15:56:00.381Z",
+  "commands": {
+    "flag-visual_system": {
+      "status": 200,
+      "key": "flag.visual_system"
+    },
+    "flag-small_ux": {
+      "status": 200,
+      "key": "flag.small_ux"
+    },
+    "flag-work_screens": {
+      "status": 200,
+      "key": "flag.work_screens"
+    },
+    "flag-project_screens": {
+      "status": 200,
+      "key": "flag.project_screens"
+    },
+    "flag-people_screens": {
+      "status": 200,
+      "key": "flag.people_screens"
+    },
+    "flag-org_structure": {
+      "status": 200,
+      "key": "flag.org_structure"
+    },
+    "flag-capacity_screens": {
+      "status": 200,
+      "key": "flag.capacity_screens"
+    },
+    "flag-capacity_reports": {
+      "status": 200,
+      "key": "flag.capacity_reports"
+    },
+    "planning1": {
+      "status": 201,
+      "id": "01a197d3-288e-71c3-85b0-1001e4885104"
+    },
+    "planning2": {
+      "status": 201,
+      "id": "01a197d3-2897-70fb-9999-d24c10252037"
+    }
+  },
+  "reads": {
+    "config": {
+      "status": 200,
+      "value": {
+        "authMode": "Development",
+        "localPasswordEnabled": false,
+        "providers": [],
+        "entra": {
+          "clientId": "",
+          "tenantId": "",
+          "apiScope": ""
+        }
+      }
+    },
+    "attention": {
+      "status": 200,
+      "value": {
+        "items": [],
+        "snoozed": 0,
+        "total": 0,
+        "truncated": false
+      }
+    },
+    "board": {
+      "status": 200,
+      "value": {
+        "items": [
+          {
+            "lastActivityActorName": "Priya Nair",
+            "id": "01a197d2-986d-7dc9-8e06-3f76216fee08",
+            "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+            "projectNumber": "QA21-REAL-001",
+            "projectName": "Checkpoint 21 real Board Team project",
+            "projectStatus": "Active",
+            "key": "QA21-REAL-001-T0001",
+            "name": "QA21 overdue",
+            "projectDisciplineId": "01a197d2-4609-7f79-b091-f5ea0fa32659",
+            "disciplineName": "Civil",
+            "disciplineCode": "CIV",
+            "disciplineColour": "#2563eb",
+            "disciplineOrder": 0,
+            "deliverableId": "01a197d2-4722-7ffb-8a3d-afae06e9c004",
+            "deliverableKey": "QA21-REAL-001-D001",
+            "deliverableName": "QA21 current deliverable",
+            "deliverableDueDate": "2026-11-20",
+            "deliverableStatus": "In Progress",
+            "deliverableOrder": 1,
+            "milestoneId": null,
+            "effectiveMilestoneId": null,
+            "milestoneKey": null,
+            "milestoneName": null,
+            "milestoneDate": null,
+            "milestoneDerived": false,
+            "assigneeId": "01a197bd-ba3c-7a2c-91b0-ae7a7140aeb9",
+            "assigneeName": "Alex Chen",
+            "assigneeActive": true,
+            "reviewerId": null,
+            "reviewerName": null,
+            "requiresReview": false,
+            "priority": "Medium",
+            "startDate": "2026-10-13",
+            "dueDate": "2026-10-20",
+            "originalStartDate": "2026-10-13",
+            "originalDueDate": "2026-10-20",
+            "status": "In Progress",
+            "lane": "In Progress",
+            "progressPct": 0,
+            "estimatedHours": 3,
+            "reviewRound": 0,
+            "dueDateChangeCount": 0,
+            "lastActivityAt": "2026-11-01T15:55:23.764432+00:00",
+            "statusChangedAt": "2026-11-01T15:55:23.764432+00:00",
+            "completedAt": null,
+            "createdAt": "2026-11-01T15:55:23.655233+00:00",
+            "createdBy": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "createdByName": "Priya Nair",
+            "sortOrder": 1,
+            "rowVersion": 1,
+            "manualBlockType": null,
+            "manualBlockReason": null,
+            "manualBlockSetAt": null,
+            "commentCount": 0,
+            "predecessorCount": 0,
+            "successorCount": 0,
+            "collaboratorIds": [],
+            "can": {
+              "assign": true,
+              "edit": true,
+              "changeDue": true,
+              "block": true
+            },
+            "state": null,
+            "submissionDate": {
+              "state": "Known",
+              "targetDate": null
+            },
+            "board": {
+              "reviewRequestedAt": null,
+              "reviewWaitingDays": null,
+              "reviewStaleDays": 5,
+              "disciplineLead": {
+                "state": "Known",
+                "id": "01a197bd-ba3c-749e-a252-425184b403b0",
+                "name": "Marc Dubois"
+              },
+              "projectManager": {
+                "state": "Known",
+                "id": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+                "name": "Priya Nair"
+              }
+            }
+          },
+          {
+            "lastActivityActorName": "Alex Chen",
+            "id": "01a197d2-98b5-7b50-a4fe-7ff227951d8c",
+            "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+            "projectNumber": "QA21-REAL-001",
+            "projectName": "Checkpoint 21 real Board Team project",
+            "projectStatus": "Active",
+            "key": "QA21-REAL-001-T0004",
+            "name": "QA21 reviewer zero-day",
+            "projectDisciplineId": "01a197d2-4609-7f79-b091-f5ea0fa32659",
+            "disciplineName": "Civil",
+            "disciplineCode": "CIV",
+            "disciplineColour": "#2563eb",
+            "disciplineOrder": 0,
+            "deliverableId": "01a197d2-4722-7ffb-8a3d-afae06e9c004",
+            "deliverableKey": "QA21-REAL-001-D001",
+            "deliverableName": "QA21 current deliverable",
+            "deliverableDueDate": "2026-11-20",
+            "deliverableStatus": "In Progress",
+            "deliverableOrder": 1,
+            "milestoneId": null,
+            "effectiveMilestoneId": null,
+            "milestoneKey": null,
+            "milestoneName": null,
+            "milestoneDate": null,
+            "milestoneDerived": false,
+            "assigneeId": "01a197bd-ba3c-7a2c-91b0-ae7a7140aeb9",
+            "assigneeName": "Alex Chen",
+            "assigneeActive": true,
+            "reviewerId": "01a197bd-ba3c-749e-a252-425184b403b0",
+            "reviewerName": "Marc Dubois",
+            "requiresReview": true,
+            "priority": "Medium",
+            "startDate": "2026-10-26",
+            "dueDate": "2026-11-01",
+            "originalStartDate": "2026-10-26",
+            "originalDueDate": "2026-11-01",
+            "status": "Ready for Review",
+            "lane": "Review",
+            "progressPct": 0,
+            "estimatedHours": 2,
+            "reviewRound": 0,
+            "dueDateChangeCount": 0,
+            "lastActivityAt": "2026-11-01T15:55:23.817916+00:00",
+            "statusChangedAt": "2026-11-01T15:55:23.817916+00:00",
+            "completedAt": null,
+            "createdAt": "2026-11-01T15:55:23.703886+00:00",
+            "createdBy": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "createdByName": "Priya Nair",
+            "sortOrder": 4,
+            "rowVersion": 2,
+            "manualBlockType": null,
+            "manualBlockReason": null,
+            "manualBlockSetAt": null,
+            "commentCount": 0,
+            "predecessorCount": 0,
+            "successorCount": 0,
+            "collaboratorIds": [],
+            "can": {
+              "assign": true,
+              "edit": true,
+              "changeDue": true,
+              "block": true
+            },
+            "state": null,
+            "submissionDate": {
+              "state": "Known",
+              "targetDate": null
+            },
+            "board": {
+              "reviewRequestedAt": "2026-11-01T15:55:23.817916+00:00",
+              "reviewWaitingDays": 0,
+              "reviewStaleDays": 5,
+              "disciplineLead": {
+                "state": "Known",
+                "id": "01a197bd-ba3c-749e-a252-425184b403b0",
+                "name": "Marc Dubois"
+              },
+              "projectManager": {
+                "state": "Known",
+                "id": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+                "name": "Priya Nair"
+              }
+            }
+          },
+          {
+            "lastActivityActorName": "Marc Dubois",
+            "id": "01a197d2-98c9-7ec0-a591-71911fcc3b99",
+            "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+            "projectNumber": "QA21-REAL-001",
+            "projectName": "Checkpoint 21 real Board Team project",
+            "projectStatus": "Active",
+            "key": "QA21-REAL-001-T0005",
+            "name": "QA21 review timestamp",
+            "projectDisciplineId": "01a197d2-4609-7f79-b091-f5ea0fa32659",
+            "disciplineName": "Civil",
+            "disciplineCode": "CIV",
+            "disciplineColour": "#2563eb",
+            "disciplineOrder": 0,
+            "deliverableId": "01a197d2-4722-7ffb-8a3d-afae06e9c004",
+            "deliverableKey": "QA21-REAL-001-D001",
+            "deliverableName": "QA21 current deliverable",
+            "deliverableDueDate": "2026-11-20",
+            "deliverableStatus": "In Progress",
+            "deliverableOrder": 1,
+            "milestoneId": null,
+            "effectiveMilestoneId": null,
+            "milestoneKey": null,
+            "milestoneName": null,
+            "milestoneDate": null,
+            "milestoneDerived": false,
+            "assigneeId": "01a197bd-ba3c-7a2c-91b0-ae7a7140aeb9",
+            "assigneeName": "Alex Chen",
+            "assigneeActive": true,
+            "reviewerId": "01a197bd-ba3c-749e-a252-425184b403b0",
+            "reviewerName": "Marc Dubois",
+            "requiresReview": true,
+            "priority": "Medium",
+            "startDate": "2026-11-03",
+            "dueDate": "2026-11-12",
+            "originalStartDate": "2026-11-03",
+            "originalDueDate": "2026-11-12",
+            "status": "In Review",
+            "lane": "Review",
+            "progressPct": 0,
+            "estimatedHours": 2,
+            "reviewRound": 0,
+            "dueDateChangeCount": 0,
+            "lastActivityAt": "2026-11-01T15:55:23.911144+00:00",
+            "statusChangedAt": "2026-11-01T15:55:23.911144+00:00",
+            "completedAt": null,
+            "createdAt": "2026-11-01T15:55:23.723744+00:00",
+            "createdBy": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "createdByName": "Priya Nair",
+            "sortOrder": 5,
+            "rowVersion": 3,
+            "manualBlockType": null,
+            "manualBlockReason": null,
+            "manualBlockSetAt": null,
+            "commentCount": 0,
+            "predecessorCount": 0,
+            "successorCount": 0,
+            "collaboratorIds": [],
+            "can": {
+              "assign": true,
+              "edit": true,
+              "changeDue": true,
+              "block": true
+            },
+            "state": null,
+            "submissionDate": {
+              "state": "Known",
+              "targetDate": null
+            },
+            "board": {
+              "reviewRequestedAt": "2026-11-01T15:55:23.888077+00:00",
+              "reviewWaitingDays": 0,
+              "reviewStaleDays": 5,
+              "disciplineLead": {
+                "state": "Known",
+                "id": "01a197bd-ba3c-749e-a252-425184b403b0",
+                "name": "Marc Dubois"
+              },
+              "projectManager": {
+                "state": "Known",
+                "id": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+                "name": "Priya Nair"
+              }
+            }
+          },
+          {
+            "lastActivityActorName": "Priya Nair",
+            "id": "01a197d2-98a9-7265-89ba-e5de3a283ee1",
+            "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+            "projectNumber": "QA21-REAL-001",
+            "projectName": "Checkpoint 21 real Board Team project",
+            "projectStatus": "Active",
+            "key": "QA21-REAL-001-T0003",
+            "name": "QA21 PM-owned",
+            "projectDisciplineId": "01a197d2-4609-7f79-b091-f5ea0fa32659",
+            "disciplineName": "Civil",
+            "disciplineCode": "CIV",
+            "disciplineColour": "#2563eb",
+            "disciplineOrder": 0,
+            "deliverableId": "01a197d2-4722-7ffb-8a3d-afae06e9c004",
+            "deliverableKey": "QA21-REAL-001-D001",
+            "deliverableName": "QA21 current deliverable",
+            "deliverableDueDate": "2026-11-20",
+            "deliverableStatus": "In Progress",
+            "deliverableOrder": 1,
+            "milestoneId": null,
+            "effectiveMilestoneId": null,
+            "milestoneKey": null,
+            "milestoneName": null,
+            "milestoneDate": null,
+            "milestoneDerived": false,
+            "assigneeId": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "assigneeName": "Priya Nair",
+            "assigneeActive": true,
+            "reviewerId": null,
+            "reviewerName": null,
+            "requiresReview": false,
+            "priority": "Medium",
+            "startDate": "2026-11-10",
+            "dueDate": "2026-11-18",
+            "originalStartDate": "2026-11-10",
+            "originalDueDate": "2026-11-18",
+            "status": "In Progress",
+            "lane": "In Progress",
+            "progressPct": 0,
+            "estimatedHours": 2,
+            "reviewRound": 0,
+            "dueDateChangeCount": 0,
+            "lastActivityAt": "2026-11-01T15:55:23.797932+00:00",
+            "statusChangedAt": "2026-11-01T15:55:23.797932+00:00",
+            "completedAt": null,
+            "createdAt": "2026-11-01T15:55:23.691879+00:00",
+            "createdBy": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "createdByName": "Priya Nair",
+            "sortOrder": 3,
+            "rowVersion": 1,
+            "manualBlockType": null,
+            "manualBlockReason": null,
+            "manualBlockSetAt": null,
+            "commentCount": 0,
+            "predecessorCount": 0,
+            "successorCount": 0,
+            "collaboratorIds": [],
+            "can": {
+              "assign": true,
+              "edit": true,
+              "changeDue": true,
+              "block": true
+            },
+            "state": null,
+            "submissionDate": {
+              "state": "Known",
+              "targetDate": null
+            },
+            "board": {
+              "reviewRequestedAt": null,
+              "reviewWaitingDays": null,
+              "reviewStaleDays": 5,
+              "disciplineLead": {
+                "state": "Known",
+                "id": "01a197bd-ba3c-749e-a252-425184b403b0",
+                "name": "Marc Dubois"
+              },
+              "projectManager": {
+                "state": "Known",
+                "id": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+                "name": "Priya Nair"
+              }
+            }
+          },
+          {
+            "lastActivityActorName": "Priya Nair",
+            "id": "01a197d2-9899-72ba-a182-963e99ee2847",
+            "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+            "projectNumber": "QA21-REAL-001",
+            "projectName": "Checkpoint 21 real Board Team project",
+            "projectStatus": "Active",
+            "key": "QA21-REAL-001-T0002",
+            "name": "QA21 current deliverable",
+            "projectDisciplineId": "01a197d2-4609-7f79-b091-f5ea0fa32659",
+            "disciplineName": "Civil",
+            "disciplineCode": "CIV",
+            "disciplineColour": "#2563eb",
+            "disciplineOrder": 0,
+            "deliverableId": "01a197d2-4722-7ffb-8a3d-afae06e9c004",
+            "deliverableKey": "QA21-REAL-001-D001",
+            "deliverableName": "QA21 current deliverable",
+            "deliverableDueDate": "2026-11-20",
+            "deliverableStatus": "In Progress",
+            "deliverableOrder": 1,
+            "milestoneId": null,
+            "effectiveMilestoneId": null,
+            "milestoneKey": null,
+            "milestoneName": null,
+            "milestoneDate": null,
+            "milestoneDerived": false,
+            "assigneeId": "01a197bd-ba3c-7a2c-91b0-ae7a7140aeb9",
+            "assigneeName": "Alex Chen",
+            "assigneeActive": true,
+            "reviewerId": null,
+            "reviewerName": null,
+            "requiresReview": false,
+            "priority": "Medium",
+            "startDate": "2026-11-10",
+            "dueDate": "2026-11-20",
+            "originalStartDate": "2026-11-10",
+            "originalDueDate": "2026-11-20",
+            "status": "In Progress",
+            "lane": "In Progress",
+            "progressPct": 0,
+            "estimatedHours": 3,
+            "reviewRound": 0,
+            "dueDateChangeCount": 0,
+            "lastActivityAt": "2026-11-01T15:55:23.787001+00:00",
+            "statusChangedAt": "2026-11-01T15:55:23.787001+00:00",
+            "completedAt": null,
+            "createdAt": "2026-11-01T15:55:23.675724+00:00",
+            "createdBy": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "createdByName": "Priya Nair",
+            "sortOrder": 2,
+            "rowVersion": 1,
+            "manualBlockType": null,
+            "manualBlockReason": null,
+            "manualBlockSetAt": null,
+            "commentCount": 0,
+            "predecessorCount": 0,
+            "successorCount": 0,
+            "collaboratorIds": [],
+            "can": {
+              "assign": true,
+              "edit": true,
+              "changeDue": true,
+              "block": true
+            },
+            "state": null,
+            "submissionDate": {
+              "state": "Known",
+              "targetDate": null
+            },
+            "board": {
+              "reviewRequestedAt": null,
+              "reviewWaitingDays": null,
+              "reviewStaleDays": 5,
+              "disciplineLead": {
+                "state": "Known",
+                "id": "01a197bd-ba3c-749e-a252-425184b403b0",
+                "name": "Marc Dubois"
+              },
+              "projectManager": {
+                "state": "Known",
+                "id": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+                "name": "Priya Nair"
+              }
+            }
+          }
+        ],
+        "page": 1,
+        "pageSize": 200,
+        "totalCount": 5,
+        "sort": "board",
+        "filters": null
+      }
+    },
+    "projectDashboard": {
+      "status": 200,
+      "value": {
+        "milestones": [],
+        "tasks": {
+          "total": {
+            "value": 5,
+            "link": ""
+          },
+          "complete": {
+            "value": 0,
+            "link": "status=Complete"
+          },
+          "inProgress": {
+            "value": 3,
+            "link": "status=In%20Progress"
+          },
+          "review": {
+            "value": 2,
+            "link": "readyForReview=true"
+          },
+          "overdue": {
+            "value": 0,
+            "link": "overdue=true"
+          },
+          "blocked": {
+            "value": 0,
+            "link": "blocked=true"
+          },
+          "waiting": {
+            "value": 0,
+            "link": "waiting=true"
+          },
+          "unassigned": {
+            "value": 0,
+            "link": "unassigned=true"
+          }
+        },
+        "deliverables": {
+          "upcoming": {
+            "value": 0,
+            "link": "dueFrom=2026-11-01&dueTo=2026-11-15&indicator=open"
+          },
+          "atRisk": {
+            "value": 0,
+            "link": "indicator=atRisk"
+          },
+          "issued": {
+            "value": 0,
+            "link": "status=Issued%2CAccepted"
+          },
+          "total": {
+            "value": 1,
+            "link": ""
+          }
+        },
+        "decisions": {
+          "pending": {
+            "value": 0,
+            "link": "status=Pending%2CUnder%20Review%2CDeferred"
+          },
+          "overdue": {
+            "value": 0,
+            "link": "indicator=overdue"
+          }
+        },
+        "issues": {
+          "open": 0,
+          "high": 0
+        },
+        "risks": {
+          "high": 0
+        },
+        "registers": {
+          "issuesOpen": {
+            "value": 0,
+            "link": "indicator=open"
+          },
+          "issuesHigh": {
+            "value": 0,
+            "link": "indicator=open&severity=High"
+          },
+          "risksHigh": {
+            "value": 0,
+            "link": "indicator=open&severity=High"
+          }
+        },
+        "disciplines": [
+          {
+            "name": "Civil",
+            "open": 0,
+            "health": "Grey",
+            "leadId": "01a197bd-ba3c-749e-a252-425184b403b0",
+            "blocked": 0,
+            "overdue": 0,
+            "reasons": [
+              {
+                "rule": "G-05",
+                "text": "Project in setup",
+                "colour": null,
+                "values": null,
+                "threshold": null
+              }
+            ],
+            "waiting": 0,
+            "nextDueId": null,
+            "sortOrder": 0,
+            "nextDueKey": null,
+            "nextDueDate": null,
+            "nextDueName": null,
+            "nextDueType": null,
+            "disciplineId": "01a197d2-4609-7f79-b091-f5ea0fa32659",
+            "deliverablesDue14": 0
+          }
+        ],
+        "disciplineDue14": {
+          "01a197d2-4609-7f79-b091-f5ea0fa32659": {
+            "value": 0,
+            "link": "dueFrom=2026-11-01&dueTo=2026-11-15&indicator=open&disciplineId=01a197d2-4609-7f79-b091-f5ea0fa32659"
+          }
+        },
+        "dueThisWeek": {
+          "items": [
+            {
+              "id": "01a197d2-98b5-7b50-a4fe-7ff227951d8c",
+              "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+              "projectNumber": "QA21-REAL-001",
+              "projectName": "Checkpoint 21 real Board Team project",
+              "projectStatus": "Active",
+              "key": "QA21-REAL-001-T0004",
+              "name": "QA21 reviewer zero-day",
+              "projectDisciplineId": "01a197d2-4609-7f79-b091-f5ea0fa32659",
+              "disciplineName": "Civil",
+              "disciplineCode": "CIV",
+              "disciplineColour": "#2563eb",
+              "disciplineOrder": 0,
+              "deliverableId": "01a197d2-4722-7ffb-8a3d-afae06e9c004",
+              "deliverableKey": "QA21-REAL-001-D001",
+              "deliverableName": "QA21 current deliverable",
+              "deliverableDueDate": "2026-11-20",
+              "deliverableStatus": "In Progress",
+              "deliverableOrder": 1,
+              "milestoneId": null,
+              "effectiveMilestoneId": null,
+              "milestoneKey": null,
+              "milestoneName": null,
+              "milestoneDate": null,
+              "milestoneDerived": false,
+              "assigneeId": "01a197bd-ba3c-7a2c-91b0-ae7a7140aeb9",
+              "assigneeName": "Alex Chen",
+              "assigneeActive": true,
+              "reviewerId": "01a197bd-ba3c-749e-a252-425184b403b0",
+              "reviewerName": "Marc Dubois",
+              "requiresReview": true,
+              "priority": "Medium",
+              "startDate": "2026-10-26",
+              "dueDate": "2026-11-01",
+              "originalStartDate": "2026-10-26",
+              "originalDueDate": "2026-11-01",
+              "status": "Ready for Review",
+              "lane": "Review",
+              "progressPct": 0,
+              "estimatedHours": 2,
+              "reviewRound": 0,
+              "dueDateChangeCount": 0,
+              "lastActivityAt": "2026-11-01T15:55:23.817916+00:00",
+              "statusChangedAt": "2026-11-01T15:55:23.817916+00:00",
+              "completedAt": null,
+              "createdAt": "2026-11-01T15:55:23.703886+00:00",
+              "createdBy": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+              "createdByName": "Priya Nair",
+              "sortOrder": 4,
+              "rowVersion": 2,
+              "manualBlockType": null,
+              "manualBlockReason": null,
+              "manualBlockSetAt": null,
+              "commentCount": 0,
+              "predecessorCount": 0,
+              "successorCount": 0,
+              "collaboratorIds": [],
+              "can": {
+                "assign": true,
+                "edit": true,
+                "changeDue": true,
+                "block": true
+              },
+              "state": null
+            }
+          ],
+          "total": 1,
+          "link": "dueThisWeek=true"
+        },
+        "blocked": {
+          "items": [],
+          "total": 0,
+          "link": "blocked=true"
+        },
+        "activity": [
+          {
+            "id": "01a197d2-99b8-7454-9ddd-18e414ffef64",
+            "occurredAt": "2026-11-01T15:55:23.960922+00:00",
+            "actorId": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "actorName": "Priya Nair",
+            "actorType": "User",
+            "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+            "itemType": "OpenRole",
+            "itemId": "01a197d2-99b7-7486-bb99-d5eb0135f066",
+            "itemKey": null,
+            "itemName": "QA21 Civil technologist",
+            "action": "Created",
+            "categories": [
+              "creation"
+            ],
+            "changes": [
+              {
+                "field": "RoleLabel",
+                "old": null,
+                "new": "QA21 Civil technologist",
+                "oldLabel": null,
+                "newLabel": "QA21 Civil technologist"
+              },
+              {
+                "field": "ProjectDisciplineId",
+                "old": null,
+                "new": "01a197d2-4609-7f79-b091-f5ea0fa32659",
+                "oldLabel": null,
+                "newLabel": "Civil"
+              },
+              {
+                "field": "FromDate",
+                "old": null,
+                "new": "2026-11-02",
+                "oldLabel": null,
+                "newLabel": "2026-11-02"
+              },
+              {
+                "field": "ThroughDate",
+                "old": null,
+                "new": "2026-11-06",
+                "oldLabel": null,
+                "newLabel": "2026-11-06"
+              },
+              {
+                "field": "PlannedHours",
+                "old": null,
+                "new": 20,
+                "oldLabel": null,
+                "newLabel": "20"
+              },
+              {
+                "field": "Status",
+                "old": null,
+                "new": "Open",
+                "oldLabel": null,
+                "newLabel": "Open"
+              },
+              {
+                "field": "Note",
+                "old": null,
+                "new": "Disposable QA21 role",
+                "oldLabel": null,
+                "newLabel": "Disposable QA21 role"
+              }
+            ],
+            "summary": "RoleLabel: — → QA21 Civil technologist; ProjectDiscipline: — → Civil; FromDate: — → 2026-11-02; ThroughDate: — → 2026-11-06; PlannedHours: — → 20; Status: — → Open; Note: — → Disposable QA21 role",
+            "reason": null,
+            "source": "API",
+            "correlationId": "01a197d2-99b4-7722-898c-b0017c4f46b8",
+            "snapshot": null,
+            "snapshotLabels": null
+          },
+          {
+            "id": "01a197d2-99ae-7bab-8bb6-7ea07c8b6918",
+            "occurredAt": "2026-11-01T15:55:23.950879+00:00",
+            "actorId": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "actorName": "Priya Nair",
+            "actorType": "User",
+            "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+            "itemType": "OpenRole",
+            "itemId": "01a197d2-999b-7f92-b2ae-394a7ed831ee",
+            "itemKey": null,
+            "itemName": "QA21 Civil reviewer",
+            "action": "Created",
+            "categories": [
+              "creation"
+            ],
+            "changes": [
+              {
+                "field": "RoleLabel",
+                "old": null,
+                "new": "QA21 Civil reviewer",
+                "oldLabel": null,
+                "newLabel": "QA21 Civil reviewer"
+              },
+              {
+                "field": "ProjectDisciplineId",
+                "old": null,
+                "new": "01a197d2-4609-7f79-b091-f5ea0fa32659",
+                "oldLabel": null,
+                "newLabel": "Civil"
+              },
+              {
+                "field": "FromDate",
+                "old": null,
+                "new": "2026-11-02",
+                "oldLabel": null,
+                "newLabel": "2026-11-02"
+              },
+              {
+                "field": "ThroughDate",
+                "old": null,
+                "new": "2026-11-06",
+                "oldLabel": null,
+                "newLabel": "2026-11-06"
+              },
+              {
+                "field": "PlannedHours",
+                "old": null,
+                "new": 10,
+                "oldLabel": null,
+                "newLabel": "10"
+              },
+              {
+                "field": "Status",
+                "old": null,
+                "new": "Open",
+                "oldLabel": null,
+                "newLabel": "Open"
+              },
+              {
+                "field": "Note",
+                "old": null,
+                "new": "Disposable QA21 role",
+                "oldLabel": null,
+                "newLabel": "Disposable QA21 role"
+              }
+            ],
+            "summary": "RoleLabel: — → QA21 Civil reviewer; ProjectDiscipline: — → Civil; FromDate: — → 2026-11-02; ThroughDate: — → 2026-11-06; PlannedHours: — → 10; Status: — → Open; Note: — → Disposable QA21 role",
+            "reason": null,
+            "source": "API",
+            "correlationId": "01a197d2-9999-77f2-a4fd-7bb86e080659",
+            "snapshot": null,
+            "snapshotLabels": null
+          },
+          {
+            "id": "01a197d2-9987-7f15-b171-c6a703becdb8",
+            "occurredAt": "2026-11-01T15:55:23.911578+00:00",
+            "actorId": "01a197bd-ba3c-749e-a252-425184b403b0",
+            "actorName": "Marc Dubois",
+            "actorType": "User",
+            "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+            "itemType": "Task",
+            "itemId": "01a197d2-98c9-7ec0-a591-71911fcc3b99",
+            "itemKey": "QA21-REAL-001-T0005",
+            "itemName": "QA21 review timestamp",
+            "action": "StatusChanged",
+            "categories": [
+              "status"
+            ],
+            "changes": [
+              {
+                "field": "Status",
+                "old": "Ready for Review",
+                "new": "In Review",
+                "oldLabel": "Ready for Review",
+                "newLabel": "In Review"
+              }
+            ],
+            "summary": "Status: Ready for Review → In Review",
+            "reason": null,
+            "source": "API",
+            "correlationId": "01a197d2-9983-76e2-8f99-29c711495d44",
+            "snapshot": null,
+            "snapshotLabels": null
+          },
+          {
+            "id": "01a197d2-9970-7001-b1f3-ba267ffcfbb8",
+            "occurredAt": "2026-11-01T15:55:23.888465+00:00",
+            "actorId": "01a197bd-ba3c-7a2c-91b0-ae7a7140aeb9",
+            "actorName": "Alex Chen",
+            "actorType": "User",
+            "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+            "itemType": "Task",
+            "itemId": "01a197d2-98c9-7ec0-a591-71911fcc3b99",
+            "itemKey": "QA21-REAL-001-T0005",
+            "itemName": "QA21 review timestamp",
+            "action": "StatusChanged",
+            "categories": [
+              "status"
+            ],
+            "changes": [
+              {
+                "field": "Status",
+                "old": "In Progress",
+                "new": "Ready for Review",
+                "oldLabel": "In Progress",
+                "newLabel": "Ready for Review"
+              }
+            ],
+            "summary": "Status: In Progress → Ready for Review",
+            "reason": null,
+            "source": "API",
+            "correlationId": "01a197d2-996c-7368-ab94-b3bad8e9f3d3",
+            "snapshot": null,
+            "snapshotLabels": null
+          },
+          {
+            "id": "01a197d2-9968-7945-829b-1fc5c733d5fe",
+            "occurredAt": "2026-11-01T15:55:23.879733+00:00",
+            "actorId": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "actorName": "Priya Nair",
+            "actorType": "User",
+            "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+            "itemType": "Task",
+            "itemId": "01a197d2-98c9-7ec0-a591-71911fcc3b99",
+            "itemKey": "QA21-REAL-001-T0005",
+            "itemName": "QA21 review timestamp",
+            "action": "StatusChanged",
+            "categories": [
+              "status"
+            ],
+            "changes": [
+              {
+                "field": "Status",
+                "old": "Not Started",
+                "new": "In Progress",
+                "oldLabel": "Not Started",
+                "newLabel": "In Progress"
+              },
+              {
+                "field": "StartedAt",
+                "old": null,
+                "new": "2026-11-01T15:55:23.8783520+00:00",
+                "oldLabel": null,
+                "newLabel": "2026-11-01T15:55:23.8783520+00:00"
+              }
+            ],
+            "summary": "Status: Not Started → In Progress; StartedAt: — → 2026-11-01T15:55:23.8783520+00:00",
+            "reason": "QA21 real acceptance",
+            "source": "API",
+            "correlationId": "01a197d2-9961-7f96-b595-4ef29c8f0b4e",
+            "snapshot": null,
+            "snapshotLabels": null
+          },
+          {
+            "id": "01a197d2-9968-74ec-bcc0-6667f451ad92",
+            "occurredAt": "2026-11-01T15:55:23.879733+00:00",
+            "actorId": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "actorName": "Priya Nair",
+            "actorType": "User",
+            "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+            "itemType": "TaskStartAuthorisation",
+            "itemId": "01a197d2-9966-7b36-b3da-7615ed04e263",
+            "itemKey": null,
+            "itemName": null,
+            "action": "Created",
+            "categories": [
+              "creation"
+            ],
+            "changes": [
+              {
+                "field": "TaskId",
+                "old": null,
+                "new": "01a197d2-98c9-7ec0-a591-71911fcc3b99",
+                "oldLabel": null,
+                "newLabel": "QA21-REAL-001-T0005 QA21 review timestamp"
+              },
+              {
+                "field": "AuthorisedBy",
+                "old": null,
+                "new": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+                "oldLabel": null,
+                "newLabel": "Priya Nair"
+              },
+              {
+                "field": "Reason",
+                "old": null,
+                "new": "QA21 real acceptance",
+                "oldLabel": null,
+                "newLabel": "QA21 real acceptance"
+              },
+              {
+                "field": "ReadinessAtAuthorisation",
+                "old": null,
+                "new": "Needs Assessment",
+                "oldLabel": null,
+                "newLabel": "Needs Assessment"
+              },
+              {
+                "field": "Unknown",
+                "old": null,
+                "new": [],
+                "oldLabel": null,
+                "newLabel": "[]"
+              },
+              {
+                "field": "Blocked",
+                "old": null,
+                "new": [],
+                "oldLabel": null,
+                "newLabel": "[]"
+              },
+              {
+                "field": "StartedBy",
+                "old": null,
+                "new": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+                "oldLabel": null,
+                "newLabel": "Priya Nair"
+              },
+              {
+                "field": "StartedAt",
+                "old": null,
+                "new": "2026-11-01T15:55:23.8783510+00:00",
+                "oldLabel": null,
+                "newLabel": "2026-11-01T15:55:23.8783510+00:00"
+              }
+            ],
+            "summary": "Task: — → QA21-REAL-001-T0005 QA21 review timestamp; AuthorisedBy: — → Priya Nair; Reason: — → QA21 real acceptance; ReadinessAtAuthorisation: — → Needs Assessment; Unknown: — → []; Blocked: — → []; StartedBy: — → Priya Nair; StartedAt: — → 2026-11-01T15:55:23.8783510+00:00",
+            "reason": null,
+            "source": "API",
+            "correlationId": "01a197d2-9961-7f96-b595-4ef29c8f0b4e",
+            "snapshot": null,
+            "snapshotLabels": null
+          },
+          {
+            "id": "01a197d2-992a-7e27-a362-7ab95b8b44d7",
+            "occurredAt": "2026-11-01T15:55:23.818331+00:00",
+            "actorId": "01a197bd-ba3c-7a2c-91b0-ae7a7140aeb9",
+            "actorName": "Alex Chen",
+            "actorType": "User",
+            "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+            "itemType": "Task",
+            "itemId": "01a197d2-98b5-7b50-a4fe-7ff227951d8c",
+            "itemKey": "QA21-REAL-001-T0004",
+            "itemName": "QA21 reviewer zero-day",
+            "action": "StatusChanged",
+            "categories": [
+              "status"
+            ],
+            "changes": [
+              {
+                "field": "Status",
+                "old": "In Progress",
+                "new": "Ready for Review",
+                "oldLabel": "In Progress",
+                "newLabel": "Ready for Review"
+              }
+            ],
+            "summary": "Status: In Progress → Ready for Review",
+            "reason": null,
+            "source": "API",
+            "correlationId": "01a197d2-9926-7ff0-a0a9-353f45935dd1",
+            "snapshot": null,
+            "snapshotLabels": null
+          },
+          {
+            "id": "01a197d2-9922-7f2f-8f57-a4159106a56b",
+            "occurredAt": "2026-11-01T15:55:23.809729+00:00",
+            "actorId": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "actorName": "Priya Nair",
+            "actorType": "User",
+            "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+            "itemType": "TaskStartAuthorisation",
+            "itemId": "01a197d2-9920-7918-b463-0a39c092e8d1",
+            "itemKey": null,
+            "itemName": null,
+            "action": "Created",
+            "categories": [
+              "creation"
+            ],
+            "changes": [
+              {
+                "field": "TaskId",
+                "old": null,
+                "new": "01a197d2-98b5-7b50-a4fe-7ff227951d8c",
+                "oldLabel": null,
+                "newLabel": "QA21-REAL-001-T0004 QA21 reviewer zero-day"
+              },
+              {
+                "field": "AuthorisedBy",
+                "old": null,
+                "new": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+                "oldLabel": null,
+                "newLabel": "Priya Nair"
+              },
+              {
+                "field": "Reason",
+                "old": null,
+                "new": "QA21 real acceptance",
+                "oldLabel": null,
+                "newLabel": "QA21 real acceptance"
+              },
+              {
+                "field": "ReadinessAtAuthorisation",
+                "old": null,
+                "new": "Needs Assessment",
+                "oldLabel": null,
+                "newLabel": "Needs Assessment"
+              },
+              {
+                "field": "Unknown",
+                "old": null,
+                "new": [],
+                "oldLabel": null,
+                "newLabel": "[]"
+              },
+              {
+                "field": "Blocked",
+                "old": null,
+                "new": [],
+                "oldLabel": null,
+                "newLabel": "[]"
+              },
+              {
+                "field": "StartedBy",
+                "old": null,
+                "new": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+                "oldLabel": null,
+                "newLabel": "Priya Nair"
+              },
+              {
+                "field": "StartedAt",
+                "old": null,
+                "new": "2026-11-01T15:55:23.8084750+00:00",
+                "oldLabel": null,
+                "newLabel": "2026-11-01T15:55:23.8084750+00:00"
+              }
+            ],
+            "summary": "Task: — → QA21-REAL-001-T0004 QA21 reviewer zero-day; AuthorisedBy: — → Priya Nair; Reason: — → QA21 real acceptance; ReadinessAtAuthorisation: — → Needs Assessment; Unknown: — → []; Blocked: — → []; StartedBy: — → Priya Nair; StartedAt: — → 2026-11-01T15:55:23.8084750+00:00",
+            "reason": null,
+            "source": "API",
+            "correlationId": "01a197d2-991b-767d-bb01-97a8987d82d3",
+            "snapshot": null,
+            "snapshotLabels": null
+          },
+          {
+            "id": "01a197d2-9922-7b36-b6a2-65e5884d4d65",
+            "occurredAt": "2026-11-01T15:55:23.809729+00:00",
+            "actorId": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "actorName": "Priya Nair",
+            "actorType": "User",
+            "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+            "itemType": "Task",
+            "itemId": "01a197d2-98b5-7b50-a4fe-7ff227951d8c",
+            "itemKey": "QA21-REAL-001-T0004",
+            "itemName": "QA21 reviewer zero-day",
+            "action": "StatusChanged",
+            "categories": [
+              "status"
+            ],
+            "changes": [
+              {
+                "field": "Status",
+                "old": "Not Started",
+                "new": "In Progress",
+                "oldLabel": "Not Started",
+                "newLabel": "In Progress"
+              },
+              {
+                "field": "StartedAt",
+                "old": null,
+                "new": "2026-11-01T15:55:23.8084760+00:00",
+                "oldLabel": null,
+                "newLabel": "2026-11-01T15:55:23.8084760+00:00"
+              }
+            ],
+            "summary": "Status: Not Started → In Progress; StartedAt: — → 2026-11-01T15:55:23.8084760+00:00",
+            "reason": "QA21 real acceptance",
+            "source": "API",
+            "correlationId": "01a197d2-991b-767d-bb01-97a8987d82d3",
+            "snapshot": null,
+            "snapshotLabels": null
+          },
+          {
+            "id": "01a197d2-9917-7e60-ab10-3aa19eda2ce9",
+            "occurredAt": "2026-11-01T15:55:23.799157+00:00",
+            "actorId": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "actorName": "Priya Nair",
+            "actorType": "User",
+            "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+            "itemType": "Task",
+            "itemId": "01a197d2-98a9-7265-89ba-e5de3a283ee1",
+            "itemKey": "QA21-REAL-001-T0003",
+            "itemName": "QA21 PM-owned",
+            "action": "StatusChanged",
+            "categories": [
+              "status"
+            ],
+            "changes": [
+              {
+                "field": "Status",
+                "old": "Not Started",
+                "new": "In Progress",
+                "oldLabel": "Not Started",
+                "newLabel": "In Progress"
+              },
+              {
+                "field": "StartedAt",
+                "old": null,
+                "new": "2026-11-01T15:55:23.7979320+00:00",
+                "oldLabel": null,
+                "newLabel": "2026-11-01T15:55:23.7979320+00:00"
+              }
+            ],
+            "summary": "Status: Not Started → In Progress; StartedAt: — → 2026-11-01T15:55:23.7979320+00:00",
+            "reason": "QA21 real acceptance",
+            "source": "API",
+            "correlationId": "01a197d2-9911-78ef-abe6-1117f22e6660",
+            "snapshot": null,
+            "snapshotLabels": null
+          },
+          {
+            "id": "01a197d2-9917-76f7-91d5-82bc670e85e3",
+            "occurredAt": "2026-11-01T15:55:23.799157+00:00",
+            "actorId": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "actorName": "Priya Nair",
+            "actorType": "User",
+            "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+            "itemType": "TaskStartAuthorisation",
+            "itemId": "01a197d2-9915-7a70-ace8-27ab2c6d7b2b",
+            "itemKey": null,
+            "itemName": null,
+            "action": "Created",
+            "categories": [
+              "creation"
+            ],
+            "changes": [
+              {
+                "field": "TaskId",
+                "old": null,
+                "new": "01a197d2-98a9-7265-89ba-e5de3a283ee1",
+                "oldLabel": null,
+                "newLabel": "QA21-REAL-001-T0003 QA21 PM-owned"
+              },
+              {
+                "field": "AuthorisedBy",
+                "old": null,
+                "new": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+                "oldLabel": null,
+                "newLabel": "Priya Nair"
+              },
+              {
+                "field": "Reason",
+                "old": null,
+                "new": "QA21 real acceptance",
+                "oldLabel": null,
+                "newLabel": "QA21 real acceptance"
+              },
+              {
+                "field": "ReadinessAtAuthorisation",
+                "old": null,
+                "new": "Needs Assessment",
+                "oldLabel": null,
+                "newLabel": "Needs Assessment"
+              },
+              {
+                "field": "Unknown",
+                "old": null,
+                "new": [],
+                "oldLabel": null,
+                "newLabel": "[]"
+              },
+              {
+                "field": "Blocked",
+                "old": null,
+                "new": [],
+                "oldLabel": null,
+                "newLabel": "[]"
+              },
+              {
+                "field": "StartedBy",
+                "old": null,
+                "new": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+                "oldLabel": null,
+                "newLabel": "Priya Nair"
+              },
+              {
+                "field": "StartedAt",
+                "old": null,
+                "new": "2026-11-01T15:55:23.7979310+00:00",
+                "oldLabel": null,
+                "newLabel": "2026-11-01T15:55:23.7979310+00:00"
+              }
+            ],
+            "summary": "Task: — → QA21-REAL-001-T0003 QA21 PM-owned; AuthorisedBy: — → Priya Nair; Reason: — → QA21 real acceptance; ReadinessAtAuthorisation: — → Needs Assessment; Unknown: — → []; Blocked: — → []; StartedBy: — → Priya Nair; StartedAt: — → 2026-11-01T15:55:23.7979310+00:00",
+            "reason": null,
+            "source": "API",
+            "correlationId": "01a197d2-9911-78ef-abe6-1117f22e6660",
+            "snapshot": null,
+            "snapshotLabels": null
+          },
+          {
+            "id": "01a197d2-990c-772a-a300-83c921a43900",
+            "occurredAt": "2026-11-01T15:55:23.788238+00:00",
+            "actorId": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "actorName": "Priya Nair",
+            "actorType": "User",
+            "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+            "itemType": "Task",
+            "itemId": "01a197d2-9899-72ba-a182-963e99ee2847",
+            "itemKey": "QA21-REAL-001-T0002",
+            "itemName": "QA21 current deliverable",
+            "action": "StatusChanged",
+            "categories": [
+              "status"
+            ],
+            "changes": [
+              {
+                "field": "Status",
+                "old": "Not Started",
+                "new": "In Progress",
+                "oldLabel": "Not Started",
+                "newLabel": "In Progress"
+              },
+              {
+                "field": "StartedAt",
+                "old": null,
+                "new": "2026-11-01T15:55:23.7870010+00:00",
+                "oldLabel": null,
+                "newLabel": "2026-11-01T15:55:23.7870010+00:00"
+              }
+            ],
+            "summary": "Status: Not Started → In Progress; StartedAt: — → 2026-11-01T15:55:23.7870010+00:00",
+            "reason": "QA21 real acceptance",
+            "source": "API",
+            "correlationId": "01a197d2-9905-77a4-926f-33a5fad3ec65",
+            "snapshot": null,
+            "snapshotLabels": null
+          },
+          {
+            "id": "01a197d2-990c-728c-889c-4bf4fed8479a",
+            "occurredAt": "2026-11-01T15:55:23.788238+00:00",
+            "actorId": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "actorName": "Priya Nair",
+            "actorType": "User",
+            "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+            "itemType": "TaskStartAuthorisation",
+            "itemId": "01a197d2-990a-796e-bbd5-3a66d8351a10",
+            "itemKey": null,
+            "itemName": null,
+            "action": "Created",
+            "categories": [
+              "creation"
+            ],
+            "changes": [
+              {
+                "field": "TaskId",
+                "old": null,
+                "new": "01a197d2-9899-72ba-a182-963e99ee2847",
+                "oldLabel": null,
+                "newLabel": "QA21-REAL-001-T0002 QA21 current deliverable"
+              },
+              {
+                "field": "AuthorisedBy",
+                "old": null,
+                "new": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+                "oldLabel": null,
+                "newLabel": "Priya Nair"
+              },
+              {
+                "field": "Reason",
+                "old": null,
+                "new": "QA21 real acceptance",
+                "oldLabel": null,
+                "newLabel": "QA21 real acceptance"
+              },
+              {
+                "field": "ReadinessAtAuthorisation",
+                "old": null,
+                "new": "Needs Assessment",
+                "oldLabel": null,
+                "newLabel": "Needs Assessment"
+              },
+              {
+                "field": "Unknown",
+                "old": null,
+                "new": [],
+                "oldLabel": null,
+                "newLabel": "[]"
+              },
+              {
+                "field": "Blocked",
+                "old": null,
+                "new": [],
+                "oldLabel": null,
+                "newLabel": "[]"
+              },
+              {
+                "field": "StartedBy",
+                "old": null,
+                "new": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+                "oldLabel": null,
+                "newLabel": "Priya Nair"
+              },
+              {
+                "field": "StartedAt",
+                "old": null,
+                "new": "2026-11-01T15:55:23.7870000+00:00",
+                "oldLabel": null,
+                "newLabel": "2026-11-01T15:55:23.7870000+00:00"
+              }
+            ],
+            "summary": "Task: — → QA21-REAL-001-T0002 QA21 current deliverable; AuthorisedBy: — → Priya Nair; Reason: — → QA21 real acceptance; ReadinessAtAuthorisation: — → Needs Assessment; Unknown: — → []; Blocked: — → []; StartedBy: — → Priya Nair; StartedAt: — → 2026-11-01T15:55:23.7870000+00:00",
+            "reason": null,
+            "source": "API",
+            "correlationId": "01a197d2-9905-77a4-926f-33a5fad3ec65",
+            "snapshot": null,
+            "snapshotLabels": null
+          },
+          {
+            "id": "01a197d2-98fd-7d19-9216-5033c2d07c65",
+            "occurredAt": "2026-11-01T15:55:23.772144+00:00",
+            "actorId": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "actorName": "Priya Nair",
+            "actorType": "User",
+            "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+            "itemType": "Deliverable",
+            "itemId": "01a197d2-4722-7ffb-8a3d-afae06e9c004",
+            "itemKey": "QA21-REAL-001-D001",
+            "itemName": "QA21 current deliverable",
+            "action": "StatusChanged",
+            "categories": [
+              "status"
+            ],
+            "changes": [
+              {
+                "field": "Status",
+                "old": "Not Started",
+                "new": "In Progress",
+                "oldLabel": "Not Started",
+                "newLabel": "In Progress"
+              },
+              {
+                "field": "StartedAt",
+                "old": null,
+                "new": "2026-11-01T15:55:23.7644320+00:00",
+                "oldLabel": null,
+                "newLabel": "2026-11-01T15:55:23.7644320+00:00"
+              }
+            ],
+            "summary": "Status: Not Started → In Progress; StartedAt: — → 2026-11-01T15:55:23.7644320+00:00",
+            "reason": null,
+            "source": "API",
+            "correlationId": "01a197d2-98d8-7a87-bf7e-154feb567ee2",
+            "snapshot": null,
+            "snapshotLabels": null
+          },
+          {
+            "id": "01a197d2-98fd-72d0-a1aa-416a139c4268",
+            "occurredAt": "2026-11-01T15:55:23.772144+00:00",
+            "actorId": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "actorName": "Priya Nair",
+            "actorType": "User",
+            "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+            "itemType": "TaskStartAuthorisation",
+            "itemId": "01a197d2-98ef-76cd-8a27-348583810a2c",
+            "itemKey": null,
+            "itemName": null,
+            "action": "Created",
+            "categories": [
+              "creation"
+            ],
+            "changes": [
+              {
+                "field": "TaskId",
+                "old": null,
+                "new": "01a197d2-986d-7dc9-8e06-3f76216fee08",
+                "oldLabel": null,
+                "newLabel": "QA21-REAL-001-T0001 QA21 overdue"
+              },
+              {
+                "field": "AuthorisedBy",
+                "old": null,
+                "new": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+                "oldLabel": null,
+                "newLabel": "Priya Nair"
+              },
+              {
+                "field": "Reason",
+                "old": null,
+                "new": "QA21 real acceptance",
+                "oldLabel": null,
+                "newLabel": "QA21 real acceptance"
+              },
+              {
+                "field": "ReadinessAtAuthorisation",
+                "old": null,
+                "new": "Needs Assessment",
+                "oldLabel": null,
+                "newLabel": "Needs Assessment"
+              },
+              {
+                "field": "Unknown",
+                "old": null,
+                "new": [],
+                "oldLabel": null,
+                "newLabel": "[]"
+              },
+              {
+                "field": "Blocked",
+                "old": null,
+                "new": [],
+                "oldLabel": null,
+                "newLabel": "[]"
+              },
+              {
+                "field": "StartedBy",
+                "old": null,
+                "new": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+                "oldLabel": null,
+                "newLabel": "Priya Nair"
+              },
+              {
+                "field": "StartedAt",
+                "old": null,
+                "new": "2026-11-01T15:55:23.7644200+00:00",
+                "oldLabel": null,
+                "newLabel": "2026-11-01T15:55:23.7644200+00:00"
+              }
+            ],
+            "summary": "Task: — → QA21-REAL-001-T0001 QA21 overdue; AuthorisedBy: — → Priya Nair; Reason: — → QA21 real acceptance; ReadinessAtAuthorisation: — → Needs Assessment; Unknown: — → []; Blocked: — → []; StartedBy: — → Priya Nair; StartedAt: — → 2026-11-01T15:55:23.7644200+00:00",
+            "reason": null,
+            "source": "API",
+            "correlationId": "01a197d2-98d8-7a87-bf7e-154feb567ee2",
+            "snapshot": null,
+            "snapshotLabels": null
+          }
+        ],
+        "state": {
+          "evaluatedAt": "2026-11-01T15:55:02.665955+00:00"
+        },
+        "asOf": "2026-11-01T15:56:00.564214+00:00",
+        "staffing": {
+          "fromDate": "2026-11-01",
+          "throughDate": null,
+          "state": "NoTarget",
+          "target": null,
+          "allocationCoverage": "Unavailable",
+          "unattributedConfirmedHours": null,
+          "knownUnattributedConfirmedHours": null,
+          "unavailableUnattributed": null,
+          "disciplines": [],
+          "asOf": "2026-11-01T15:56:00.564214+00:00"
+        }
+      }
+    },
+    "projectTeam": {
+      "status": 200,
+      "value": {
+        "disciplines": [
+          {
+            "id": "01a197d2-4609-7f79-b091-f5ea0fa32659",
+            "disciplineId": "01a197bd-b98a-7b9e-833e-8ab59cfa4aac",
+            "name": "Civil",
+            "code": "CIV",
+            "colour": "#2563eb",
+            "leadUserId": "01a197bd-ba3c-749e-a252-425184b403b0",
+            "isActive": true,
+            "sortOrder": 0,
+            "rowVersion": 1,
+            "leadName": "Marc Dubois"
+          }
+        ],
+        "members": [
+          {
+            "id": "01a197d2-4613-7eaf-a252-1f938f97b19b",
+            "userId": "01a197bd-ba3c-7a2c-91b0-ae7a7140aeb9",
+            "displayName": "Alex Chen",
+            "email": "alex@hub.test",
+            "jobTitle": "Civil Designer (EIT)",
+            "officeId": "01a197bd-b99d-7182-b168-be4cf3245483",
+            "isActive": true,
+            "roles": [
+              "TeamMember"
+            ],
+            "primaryDisciplineId": "01a197d2-4609-7f79-b091-f5ea0fa32659",
+            "addedAt": "2026-11-01T15:55:02.547006+00:00",
+            "addedBy": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "rowVersion": 1,
+            "leadOf": [],
+            "isPrimaryPm": false,
+            "canStaff": false,
+            "personFacts": {
+              "notices": {
+                "personType": null,
+                "startDate": null,
+                "endDate": null,
+                "starts": false,
+                "ends": false
+              },
+              "certifications": []
+            },
+            "organisationFacts": {
+              "homeDiscipline": null,
+              "office": {
+                "id": "01a197bd-b99d-7182-b168-be4cf3245483",
+                "name": "Head Office"
+              },
+              "supervisor": {
+                "id": "01a197bd-ba3c-7258-adc0-8330b4dec463",
+                "name": "Sam Patel"
+              }
+            }
+          },
+          {
+            "id": "01a197d2-4641-7750-b0a4-6eeb248af7db",
+            "userId": "01a197bd-ba3c-7024-a2a4-c6581e4b7428",
+            "displayName": "Jill Martin",
+            "email": "jill@hub.test",
+            "jobTitle": "Civil Designer",
+            "officeId": "01a197bd-b99d-7182-b168-be4cf3245483",
+            "isActive": true,
+            "roles": [
+              "TeamMember"
+            ],
+            "primaryDisciplineId": "01a197d2-4609-7f79-b091-f5ea0fa32659",
+            "addedAt": "2026-11-01T15:55:02.593016+00:00",
+            "addedBy": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "rowVersion": 1,
+            "leadOf": [],
+            "isPrimaryPm": false,
+            "canStaff": false,
+            "personFacts": {
+              "notices": {
+                "personType": null,
+                "startDate": null,
+                "endDate": null,
+                "starts": false,
+                "ends": false
+              },
+              "certifications": []
+            },
+            "organisationFacts": {
+              "homeDiscipline": null,
+              "office": {
+                "id": "01a197bd-b99d-7182-b168-be4cf3245483",
+                "name": "Head Office"
+              },
+              "supervisor": {
+                "id": "01a197bd-ba3c-7258-adc0-8330b4dec463",
+                "name": "Sam Patel"
+              }
+            }
+          },
+          {
+            "id": "01a197d2-464b-7c70-ab99-b03b495ac9ed",
+            "userId": "01a197bd-ba3c-749e-a252-425184b403b0",
+            "displayName": "Marc Dubois",
+            "email": "marc@hub.test",
+            "jobTitle": "Senior Civil Engineer",
+            "officeId": "01a197bd-b99d-7182-b168-be4cf3245483",
+            "isActive": true,
+            "roles": [
+              "TeamMember"
+            ],
+            "primaryDisciplineId": "01a197d2-4609-7f79-b091-f5ea0fa32659",
+            "addedAt": "2026-11-01T15:55:02.603558+00:00",
+            "addedBy": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "rowVersion": 1,
+            "leadOf": [
+              "01a197d2-4609-7f79-b091-f5ea0fa32659"
+            ],
+            "isPrimaryPm": false,
+            "canStaff": false,
+            "personFacts": {
+              "notices": {
+                "personType": null,
+                "startDate": null,
+                "endDate": null,
+                "starts": false,
+                "ends": false
+              },
+              "certifications": []
+            },
+            "organisationFacts": {
+              "homeDiscipline": null,
+              "office": {
+                "id": "01a197bd-b99d-7182-b168-be4cf3245483",
+                "name": "Head Office"
+              },
+              "supervisor": {
+                "id": "01a197bd-ba3c-7258-adc0-8330b4dec463",
+                "name": "Sam Patel"
+              }
+            }
+          },
+          {
+            "id": "01a197d2-45fc-7151-b042-a7f72e31c39a",
+            "userId": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "displayName": "Priya Nair",
+            "email": "priya@hub.test",
+            "jobTitle": "Project Manager",
+            "officeId": "01a197bd-b99d-7182-b168-be4cf3245483",
+            "isActive": true,
+            "roles": [
+              "PM"
+            ],
+            "primaryDisciplineId": null,
+            "addedAt": "2026-11-01T15:55:02.524467+00:00",
+            "addedBy": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "rowVersion": 1,
+            "leadOf": [],
+            "isPrimaryPm": true,
+            "canStaff": false,
+            "personFacts": {
+              "notices": {
+                "personType": null,
+                "startDate": null,
+                "endDate": null,
+                "starts": false,
+                "ends": false
+              },
+              "certifications": []
+            },
+            "organisationFacts": {
+              "homeDiscipline": null,
+              "office": {
+                "id": "01a197bd-b99d-7182-b168-be4cf3245483",
+                "name": "Head Office"
+              },
+              "supervisor": {
+                "id": "01a197bd-ba3c-7b3b-a27a-5114a13f4e92",
+                "name": "Lena Brooks"
+              }
+            }
+          }
+        ],
+        "canManage": true,
+        "manageReason": null
+      }
+    },
+    "workspaceTeam": {
+      "status": 200,
+      "value": {
+        "people": [
+          {
+            "userId": "01a197bd-ba3c-7a2c-91b0-ae7a7140aeb9",
+            "displayName": "Alex Chen",
+            "jobTitle": "Civil Designer (EIT)",
+            "email": "alex@hub.test",
+            "projects": [
+              {
+                "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+                "projectNumber": "QA21-REAL-001",
+                "projectName": "Checkpoint 21 real Board Team project",
+                "roles": [
+                  "TeamMember"
+                ],
+                "leads": [],
+                "identityColour": "#ec6a3e"
+              }
+            ],
+            "personFacts": {
+              "notices": {
+                "personType": null,
+                "startDate": null,
+                "endDate": null,
+                "starts": false,
+                "ends": false
+              },
+              "certifications": []
+            },
+            "organisationFacts": {
+              "homeDiscipline": null,
+              "office": {
+                "id": "01a197bd-b99d-7182-b168-be4cf3245483",
+                "name": "Head Office"
+              },
+              "supervisor": {
+                "id": "01a197bd-ba3c-7258-adc0-8330b4dec463",
+                "name": "Sam Patel"
+              }
+            }
+          },
+          {
+            "userId": "01a197bd-ba3c-7024-a2a4-c6581e4b7428",
+            "displayName": "Jill Martin",
+            "jobTitle": "Civil Designer",
+            "email": "jill@hub.test",
+            "projects": [
+              {
+                "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+                "projectNumber": "QA21-REAL-001",
+                "projectName": "Checkpoint 21 real Board Team project",
+                "roles": [
+                  "TeamMember"
+                ],
+                "leads": [],
+                "identityColour": "#ec6a3e"
+              }
+            ],
+            "personFacts": {
+              "notices": {
+                "personType": null,
+                "startDate": null,
+                "endDate": null,
+                "starts": false,
+                "ends": false
+              },
+              "certifications": []
+            },
+            "organisationFacts": {
+              "homeDiscipline": null,
+              "office": {
+                "id": "01a197bd-b99d-7182-b168-be4cf3245483",
+                "name": "Head Office"
+              },
+              "supervisor": {
+                "id": "01a197bd-ba3c-7258-adc0-8330b4dec463",
+                "name": "Sam Patel"
+              }
+            }
+          },
+          {
+            "userId": "01a197bd-ba3c-749e-a252-425184b403b0",
+            "displayName": "Marc Dubois",
+            "jobTitle": "Senior Civil Engineer",
+            "email": "marc@hub.test",
+            "projects": [
+              {
+                "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+                "projectNumber": "QA21-REAL-001",
+                "projectName": "Checkpoint 21 real Board Team project",
+                "roles": [
+                  "TeamMember"
+                ],
+                "leads": [
+                  "Civil"
+                ],
+                "identityColour": "#ec6a3e"
+              }
+            ],
+            "personFacts": {
+              "notices": {
+                "personType": null,
+                "startDate": null,
+                "endDate": null,
+                "starts": false,
+                "ends": false
+              },
+              "certifications": []
+            },
+            "organisationFacts": {
+              "homeDiscipline": null,
+              "office": {
+                "id": "01a197bd-b99d-7182-b168-be4cf3245483",
+                "name": "Head Office"
+              },
+              "supervisor": {
+                "id": "01a197bd-ba3c-7258-adc0-8330b4dec463",
+                "name": "Sam Patel"
+              }
+            }
+          },
+          {
+            "userId": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "displayName": "Priya Nair",
+            "jobTitle": "Project Manager",
+            "email": "priya@hub.test",
+            "projects": [
+              {
+                "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+                "projectNumber": "QA21-REAL-001",
+                "projectName": "Checkpoint 21 real Board Team project",
+                "roles": [
+                  "PM"
+                ],
+                "leads": [],
+                "identityColour": "#ec6a3e"
+              }
+            ],
+            "personFacts": {
+              "notices": {
+                "personType": null,
+                "startDate": null,
+                "endDate": null,
+                "starts": false,
+                "ends": false
+              },
+              "certifications": []
+            },
+            "organisationFacts": {
+              "homeDiscipline": null,
+              "office": {
+                "id": "01a197bd-b99d-7182-b168-be4cf3245483",
+                "name": "Head Office"
+              },
+              "supervisor": {
+                "id": "01a197bd-ba3c-7b3b-a27a-5114a13f4e92",
+                "name": "Lena Brooks"
+              }
+            }
+          }
+        ],
+        "projects": 1
+      }
+    },
+    "openRoles": {
+      "status": 200,
+      "value": [
+        {
+          "id": "01a197d2-999b-7f92-b2ae-394a7ed831ee",
+          "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+          "roleLabel": "QA21 Civil reviewer",
+          "projectDisciplineId": "01a197d2-4609-7f79-b091-f5ea0fa32659",
+          "disciplineName": "Civil",
+          "fromDate": "2026-11-02",
+          "throughDate": "2026-11-06",
+          "plannedHours": 10,
+          "status": "Open",
+          "filledAllocationId": null,
+          "note": "Disposable QA21 role",
+          "rowVersion": 0,
+          "canManage": true
+        },
+        {
+          "id": "01a197d2-99b7-7486-bb99-d5eb0135f066",
+          "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+          "roleLabel": "QA21 Civil technologist",
+          "projectDisciplineId": "01a197d2-4609-7f79-b091-f5ea0fa32659",
+          "disciplineName": "Civil",
+          "fromDate": "2026-11-02",
+          "throughDate": "2026-11-06",
+          "plannedHours": 20,
+          "status": "Open",
+          "filledAllocationId": null,
+          "note": "Disposable QA21 role",
+          "rowVersion": 0,
+          "canManage": true
+        }
+      ]
+    },
+    "grid": {
+      "status": 200,
+      "value": {
+        "weeks": [
+          "2026-10-26"
+        ],
+        "currentWeek": "2026-10-26",
+        "evaluatedAt": "2026-11-01T15:56:00.626601+00:00",
+        "partialView": false,
+        "draftAccess": false,
+        "settings": {
+          "horizonWeeks": 12,
+          "overPct": 105,
+          "underPct": 50,
+          "underWeeks": 2,
+          "staleDays": 28,
+          "maxHoursPerWeek": 80
+        },
+        "people": [
+          {
+            "id": "01a197bd-ba3c-7024-a2a4-c6581e4b7428",
+            "displayName": "Jill Martin",
+            "supervisorId": "01a197bd-ba3c-7258-adc0-8330b4dec463",
+            "supervisorName": "Sam Patel",
+            "weeklyCapacity": 40,
+            "canCreateSelfEntry": false,
+            "canCreateManagerEntry": true,
+            "canRecordTimeAway": true,
+            "indicators": [],
+            "cells": [
+              {
+                "week": "2026-10-26",
+                "capacity": 40,
+                "timeAway": 0,
+                "additionalAvailability": 0,
+                "approved": 0,
+                "confirmed": 0,
+                "expected": 24,
+                "possible": 0,
+                "remaining": 16,
+                "taskEstimates": 0,
+                "unestimatedTasks": 0,
+                "overPlanned": false,
+                "underPlanned": false,
+                "staleEntries": 0,
+                "ownDraftHours": 24,
+                "holidayHours": 0,
+                "provisional": false
+              }
+            ],
+            "entries": [
+              {
+                "id": "01a197d2-99dc-74f5-9bfc-6f880dc6d921",
+                "personId": "01a197bd-ba3c-7024-a2a4-c6581e4b7428",
+                "personName": "Jill Martin",
+                "ownerId": "01a197bd-ba3c-7258-adc0-8330b4dec463",
+                "ownerName": "Sam Patel",
+                "ownerKind": "Manager",
+                "label": "QA21 current-week Jill",
+                "sourceCategory": "Other",
+                "projectId": null,
+                "projectNumber": null,
+                "projectName": null,
+                "projectDisciplineId": null,
+                "disciplineName": null,
+                "hoursPerWeek": 12,
+                "startWeek": "2026-10-26",
+                "endWeek": "2026-10-26",
+                "confidence": "Expected",
+                "visibility": "Draft",
+                "notes": null,
+                "lastValidatedAt": "2026-11-01T15:55:23.996042+00:00",
+                "stale": false,
+                "warnings": [],
+                "canEdit": true,
+                "canChangeVisibility": true,
+                "correctionOnly": false,
+                "rowVersion": 0,
+                "matchesFilter": true,
+                "weekHours": null,
+                "countedHours": null,
+                "coveredHours": null
+              },
+              {
+                "id": "01a197d3-2897-70fb-9999-d24c10252037",
+                "personId": "01a197bd-ba3c-7024-a2a4-c6581e4b7428",
+                "personName": "Jill Martin",
+                "ownerId": "01a197bd-ba3c-7258-adc0-8330b4dec463",
+                "ownerName": "Sam Patel",
+                "ownerKind": "Manager",
+                "label": "QA21 current-week Jill",
+                "sourceCategory": "Other",
+                "projectId": null,
+                "projectNumber": null,
+                "projectName": null,
+                "projectDisciplineId": null,
+                "disciplineName": null,
+                "hoursPerWeek": 12,
+                "startWeek": "2026-10-26",
+                "endWeek": "2026-10-26",
+                "confidence": "Expected",
+                "visibility": "Draft",
+                "notes": null,
+                "lastValidatedAt": "2026-11-01T15:56:00.535125+00:00",
+                "stale": false,
+                "warnings": [],
+                "canEdit": true,
+                "canChangeVisibility": true,
+                "correctionOnly": false,
+                "rowVersion": 0,
+                "matchesFilter": true,
+                "weekHours": null,
+                "countedHours": null,
+                "coveredHours": null
+              }
+            ],
+            "approvedAllocations": [],
+            "officeId": "01a197bd-b99d-7182-b168-be4cf3245483",
+            "jobTitle": "Civil Designer",
+            "homeDisciplineId": null,
+            "partial": false
+          },
+          {
+            "id": "01a197bd-ba3c-7a2c-91b0-ae7a7140aeb9",
+            "displayName": "Alex Chen",
+            "supervisorId": "01a197bd-ba3c-7258-adc0-8330b4dec463",
+            "supervisorName": "Sam Patel",
+            "weeklyCapacity": 40,
+            "canCreateSelfEntry": false,
+            "canCreateManagerEntry": true,
+            "canRecordTimeAway": true,
+            "indicators": [
+              "UnderPlanned"
+            ],
+            "cells": [
+              {
+                "week": "2026-10-26",
+                "capacity": 40,
+                "timeAway": 0,
+                "additionalAvailability": 0,
+                "approved": 0,
+                "confirmed": 0,
+                "expected": 16,
+                "possible": 0,
+                "remaining": 24,
+                "taskEstimates": 5,
+                "unestimatedTasks": 0,
+                "overPlanned": false,
+                "underPlanned": true,
+                "staleEntries": 0,
+                "ownDraftHours": 16,
+                "holidayHours": 0,
+                "provisional": false
+              }
+            ],
+            "entries": [
+              {
+                "id": "01a197d2-99c0-73b1-993d-243b533993c2",
+                "personId": "01a197bd-ba3c-7a2c-91b0-ae7a7140aeb9",
+                "personName": "Alex Chen",
+                "ownerId": "01a197bd-ba3c-7258-adc0-8330b4dec463",
+                "ownerName": "Sam Patel",
+                "ownerKind": "Manager",
+                "label": "QA21 current-week Alex",
+                "sourceCategory": "Other",
+                "projectId": null,
+                "projectNumber": null,
+                "projectName": null,
+                "projectDisciplineId": null,
+                "disciplineName": null,
+                "hoursPerWeek": 8,
+                "startWeek": "2026-10-26",
+                "endWeek": "2026-10-26",
+                "confidence": "Expected",
+                "visibility": "Draft",
+                "notes": null,
+                "lastValidatedAt": "2026-11-01T15:55:23.968454+00:00",
+                "stale": false,
+                "warnings": [],
+                "canEdit": true,
+                "canChangeVisibility": true,
+                "correctionOnly": false,
+                "rowVersion": 0,
+                "matchesFilter": true,
+                "weekHours": null,
+                "countedHours": null,
+                "coveredHours": null
+              },
+              {
+                "id": "01a197d3-288e-71c3-85b0-1001e4885104",
+                "personId": "01a197bd-ba3c-7a2c-91b0-ae7a7140aeb9",
+                "personName": "Alex Chen",
+                "ownerId": "01a197bd-ba3c-7258-adc0-8330b4dec463",
+                "ownerName": "Sam Patel",
+                "ownerKind": "Manager",
+                "label": "QA21 current-week Alex",
+                "sourceCategory": "Other",
+                "projectId": null,
+                "projectNumber": null,
+                "projectName": null,
+                "projectDisciplineId": null,
+                "disciplineName": null,
+                "hoursPerWeek": 8,
+                "startWeek": "2026-10-26",
+                "endWeek": "2026-10-26",
+                "confidence": "Expected",
+                "visibility": "Draft",
+                "notes": null,
+                "lastValidatedAt": "2026-11-01T15:56:00.526103+00:00",
+                "stale": false,
+                "warnings": [],
+                "canEdit": true,
+                "canChangeVisibility": true,
+                "correctionOnly": false,
+                "rowVersion": 0,
+                "matchesFilter": true,
+                "weekHours": null,
+                "countedHours": null,
+                "coveredHours": null
+              }
+            ],
+            "approvedAllocations": [],
+            "officeId": "01a197bd-b99d-7182-b168-be4cf3245483",
+            "jobTitle": "Civil Designer (EIT)",
+            "homeDisciplineId": null,
+            "partial": false
+          },
+          {
+            "id": "01a197bd-ba3c-749e-a252-425184b403b0",
+            "displayName": "Marc Dubois",
+            "supervisorId": "01a197bd-ba3c-7258-adc0-8330b4dec463",
+            "supervisorName": "Sam Patel",
+            "weeklyCapacity": 40,
+            "canCreateSelfEntry": false,
+            "canCreateManagerEntry": true,
+            "canRecordTimeAway": true,
+            "indicators": [
+              "UnderPlanned"
+            ],
+            "cells": [
+              {
+                "week": "2026-10-26",
+                "capacity": 40,
+                "timeAway": 0,
+                "additionalAvailability": 0,
+                "approved": 0,
+                "confirmed": 0,
+                "expected": 0,
+                "possible": 0,
+                "remaining": 40,
+                "taskEstimates": 0,
+                "unestimatedTasks": 0,
+                "overPlanned": false,
+                "underPlanned": true,
+                "staleEntries": 0,
+                "ownDraftHours": 0,
+                "holidayHours": 0,
+                "provisional": false
+              }
+            ],
+            "entries": [],
+            "approvedAllocations": [],
+            "officeId": "01a197bd-b99d-7182-b168-be4cf3245483",
+            "jobTitle": "Senior Civil Engineer",
+            "homeDisciplineId": null,
+            "partial": false
+          },
+          {
+            "id": "01a197bd-ba3c-7258-adc0-8330b4dec463",
+            "displayName": "Sam Patel",
+            "supervisorId": "01a197bd-ba3c-7b3b-a27a-5114a13f4e92",
+            "supervisorName": "Lena Brooks",
+            "weeklyCapacity": 40,
+            "canCreateSelfEntry": true,
+            "canCreateManagerEntry": false,
+            "canRecordTimeAway": false,
+            "indicators": [
+              "UnderPlanned"
+            ],
+            "cells": [
+              {
+                "week": "2026-10-26",
+                "capacity": 40,
+                "timeAway": 0,
+                "additionalAvailability": 0,
+                "approved": 0,
+                "confirmed": 0,
+                "expected": 0,
+                "possible": 0,
+                "remaining": 40,
+                "taskEstimates": 0,
+                "unestimatedTasks": 0,
+                "overPlanned": false,
+                "underPlanned": true,
+                "staleEntries": 0,
+                "ownDraftHours": 0,
+                "holidayHours": 0,
+                "provisional": false
+              }
+            ],
+            "entries": [],
+            "approvedAllocations": [],
+            "officeId": "01a197bd-b99d-7182-b168-be4cf3245483",
+            "jobTitle": "Civil Group Manager",
+            "homeDisciplineId": null,
+            "partial": false
+          }
+        ],
+        "asOf": "2026-11-01T15:56:00.626607+00:00",
+        "deadlines": {
+          "weeks": [
+            "2026-10-26"
+          ],
+          "dated": [],
+          "undated": [],
+          "asOf": "2026-11-01T15:56:00.626599+00:00"
+        }
+      }
+    },
+    "taskDetails": [
+      {
+        "status": 200,
+        "value": {
+          "task": {
+            "id": "01a197d2-986d-7dc9-8e06-3f76216fee08",
+            "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+            "projectNumber": "QA21-REAL-001",
+            "projectName": "Checkpoint 21 real Board Team project",
+            "projectStatus": "Active",
+            "key": "QA21-REAL-001-T0001",
+            "name": "QA21 overdue",
+            "projectDisciplineId": "01a197d2-4609-7f79-b091-f5ea0fa32659",
+            "disciplineName": "Civil",
+            "disciplineCode": "CIV",
+            "disciplineColour": "#2563eb",
+            "disciplineOrder": 0,
+            "deliverableId": "01a197d2-4722-7ffb-8a3d-afae06e9c004",
+            "deliverableKey": "QA21-REAL-001-D001",
+            "deliverableName": "QA21 current deliverable",
+            "deliverableDueDate": "2026-11-20",
+            "deliverableStatus": "In Progress",
+            "deliverableOrder": 1,
+            "milestoneId": null,
+            "effectiveMilestoneId": null,
+            "milestoneKey": null,
+            "milestoneName": null,
+            "milestoneDate": null,
+            "milestoneDerived": false,
+            "assigneeId": "01a197bd-ba3c-7a2c-91b0-ae7a7140aeb9",
+            "assigneeName": "Alex Chen",
+            "assigneeActive": true,
+            "reviewerId": null,
+            "reviewerName": null,
+            "requiresReview": false,
+            "priority": "Medium",
+            "startDate": "2026-10-13",
+            "dueDate": "2026-10-20",
+            "originalStartDate": "2026-10-13",
+            "originalDueDate": "2026-10-20",
+            "status": "In Progress",
+            "lane": "In Progress",
+            "progressPct": 0,
+            "estimatedHours": 3,
+            "reviewRound": 0,
+            "dueDateChangeCount": 0,
+            "lastActivityAt": "2026-11-01T15:55:23.764432+00:00",
+            "statusChangedAt": "2026-11-01T15:55:23.764432+00:00",
+            "completedAt": null,
+            "createdAt": "2026-11-01T15:55:23.655233+00:00",
+            "createdBy": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "createdByName": "Priya Nair",
+            "sortOrder": 1,
+            "rowVersion": 1,
+            "manualBlockType": null,
+            "manualBlockReason": null,
+            "manualBlockSetAt": null,
+            "commentCount": 0,
+            "predecessorCount": 0,
+            "successorCount": 0,
+            "collaboratorIds": [],
+            "can": {
+              "assign": true,
+              "edit": true,
+              "changeDue": true,
+              "block": true
+            },
+            "state": null
+          },
+          "description": null,
+          "onHoldReason": null,
+          "cancelledReason": null,
+          "previousStatus": null,
+          "reviewRequestedAt": null,
+          "project": {
+            "id": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+            "projectNumber": "QA21-REAL-001",
+            "name": "Checkpoint 21 real Board Team project",
+            "status": "Active"
+          },
+          "collaborators": [],
+          "watchers": [],
+          "permissions": {
+            "edit": {
+              "ok": true,
+              "reason": null
+            },
+            "assign": {
+              "ok": true,
+              "reason": null
+            },
+            "setReviewer": {
+              "ok": true,
+              "reason": null
+            },
+            "dueNeedsReason": false,
+            "dueDate": {
+              "ok": true,
+              "reason": null
+            },
+            "block": {
+              "ok": true,
+              "reason": null
+            },
+            "delete": {
+              "ok": true,
+              "reason": null
+            },
+            "restore": true,
+            "comment": true,
+            "transitions": [
+              {
+                "to": "Complete",
+                "allowed": true,
+                "reason": null,
+                "needsReason": false,
+                "via": null
+              },
+              {
+                "to": "On Hold",
+                "allowed": true,
+                "reason": null,
+                "needsReason": true,
+                "via": null
+              },
+              {
+                "to": "Cancelled",
+                "allowed": true,
+                "reason": null,
+                "needsReason": true,
+                "via": null
+              }
+            ],
+            "completeHint": null,
+            "isReviewer": false,
+            "dependencies": true,
+            "enterTime": true,
+            "needsReason": false,
+            "allowSelfReview": false,
+            "authoriseStart": false
+          },
+          "relatedDeliverables": []
+        }
+      },
+      {
+        "status": 200,
+        "value": {
+          "task": {
+            "id": "01a197d2-9899-72ba-a182-963e99ee2847",
+            "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+            "projectNumber": "QA21-REAL-001",
+            "projectName": "Checkpoint 21 real Board Team project",
+            "projectStatus": "Active",
+            "key": "QA21-REAL-001-T0002",
+            "name": "QA21 current deliverable",
+            "projectDisciplineId": "01a197d2-4609-7f79-b091-f5ea0fa32659",
+            "disciplineName": "Civil",
+            "disciplineCode": "CIV",
+            "disciplineColour": "#2563eb",
+            "disciplineOrder": 0,
+            "deliverableId": "01a197d2-4722-7ffb-8a3d-afae06e9c004",
+            "deliverableKey": "QA21-REAL-001-D001",
+            "deliverableName": "QA21 current deliverable",
+            "deliverableDueDate": "2026-11-20",
+            "deliverableStatus": "In Progress",
+            "deliverableOrder": 1,
+            "milestoneId": null,
+            "effectiveMilestoneId": null,
+            "milestoneKey": null,
+            "milestoneName": null,
+            "milestoneDate": null,
+            "milestoneDerived": false,
+            "assigneeId": "01a197bd-ba3c-7a2c-91b0-ae7a7140aeb9",
+            "assigneeName": "Alex Chen",
+            "assigneeActive": true,
+            "reviewerId": null,
+            "reviewerName": null,
+            "requiresReview": false,
+            "priority": "Medium",
+            "startDate": "2026-11-10",
+            "dueDate": "2026-11-20",
+            "originalStartDate": "2026-11-10",
+            "originalDueDate": "2026-11-20",
+            "status": "In Progress",
+            "lane": "In Progress",
+            "progressPct": 0,
+            "estimatedHours": 3,
+            "reviewRound": 0,
+            "dueDateChangeCount": 0,
+            "lastActivityAt": "2026-11-01T15:55:23.787001+00:00",
+            "statusChangedAt": "2026-11-01T15:55:23.787001+00:00",
+            "completedAt": null,
+            "createdAt": "2026-11-01T15:55:23.675724+00:00",
+            "createdBy": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "createdByName": "Priya Nair",
+            "sortOrder": 2,
+            "rowVersion": 1,
+            "manualBlockType": null,
+            "manualBlockReason": null,
+            "manualBlockSetAt": null,
+            "commentCount": 0,
+            "predecessorCount": 0,
+            "successorCount": 0,
+            "collaboratorIds": [],
+            "can": {
+              "assign": true,
+              "edit": true,
+              "changeDue": true,
+              "block": true
+            },
+            "state": null
+          },
+          "description": null,
+          "onHoldReason": null,
+          "cancelledReason": null,
+          "previousStatus": null,
+          "reviewRequestedAt": null,
+          "project": {
+            "id": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+            "projectNumber": "QA21-REAL-001",
+            "name": "Checkpoint 21 real Board Team project",
+            "status": "Active"
+          },
+          "collaborators": [],
+          "watchers": [],
+          "permissions": {
+            "edit": {
+              "ok": true,
+              "reason": null
+            },
+            "assign": {
+              "ok": true,
+              "reason": null
+            },
+            "setReviewer": {
+              "ok": true,
+              "reason": null
+            },
+            "dueNeedsReason": false,
+            "dueDate": {
+              "ok": true,
+              "reason": null
+            },
+            "block": {
+              "ok": true,
+              "reason": null
+            },
+            "delete": {
+              "ok": true,
+              "reason": null
+            },
+            "restore": true,
+            "comment": true,
+            "transitions": [
+              {
+                "to": "Complete",
+                "allowed": true,
+                "reason": null,
+                "needsReason": false,
+                "via": null
+              },
+              {
+                "to": "On Hold",
+                "allowed": true,
+                "reason": null,
+                "needsReason": true,
+                "via": null
+              },
+              {
+                "to": "Cancelled",
+                "allowed": true,
+                "reason": null,
+                "needsReason": true,
+                "via": null
+              }
+            ],
+            "completeHint": null,
+            "isReviewer": false,
+            "dependencies": true,
+            "enterTime": true,
+            "needsReason": false,
+            "allowSelfReview": false,
+            "authoriseStart": false
+          },
+          "relatedDeliverables": []
+        }
+      },
+      {
+        "status": 200,
+        "value": {
+          "task": {
+            "id": "01a197d2-98a9-7265-89ba-e5de3a283ee1",
+            "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+            "projectNumber": "QA21-REAL-001",
+            "projectName": "Checkpoint 21 real Board Team project",
+            "projectStatus": "Active",
+            "key": "QA21-REAL-001-T0003",
+            "name": "QA21 PM-owned",
+            "projectDisciplineId": "01a197d2-4609-7f79-b091-f5ea0fa32659",
+            "disciplineName": "Civil",
+            "disciplineCode": "CIV",
+            "disciplineColour": "#2563eb",
+            "disciplineOrder": 0,
+            "deliverableId": "01a197d2-4722-7ffb-8a3d-afae06e9c004",
+            "deliverableKey": "QA21-REAL-001-D001",
+            "deliverableName": "QA21 current deliverable",
+            "deliverableDueDate": "2026-11-20",
+            "deliverableStatus": "In Progress",
+            "deliverableOrder": 1,
+            "milestoneId": null,
+            "effectiveMilestoneId": null,
+            "milestoneKey": null,
+            "milestoneName": null,
+            "milestoneDate": null,
+            "milestoneDerived": false,
+            "assigneeId": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "assigneeName": "Priya Nair",
+            "assigneeActive": true,
+            "reviewerId": null,
+            "reviewerName": null,
+            "requiresReview": false,
+            "priority": "Medium",
+            "startDate": "2026-11-10",
+            "dueDate": "2026-11-18",
+            "originalStartDate": "2026-11-10",
+            "originalDueDate": "2026-11-18",
+            "status": "In Progress",
+            "lane": "In Progress",
+            "progressPct": 0,
+            "estimatedHours": 2,
+            "reviewRound": 0,
+            "dueDateChangeCount": 0,
+            "lastActivityAt": "2026-11-01T15:55:23.797932+00:00",
+            "statusChangedAt": "2026-11-01T15:55:23.797932+00:00",
+            "completedAt": null,
+            "createdAt": "2026-11-01T15:55:23.691879+00:00",
+            "createdBy": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "createdByName": "Priya Nair",
+            "sortOrder": 3,
+            "rowVersion": 1,
+            "manualBlockType": null,
+            "manualBlockReason": null,
+            "manualBlockSetAt": null,
+            "commentCount": 0,
+            "predecessorCount": 0,
+            "successorCount": 0,
+            "collaboratorIds": [],
+            "can": {
+              "assign": true,
+              "edit": true,
+              "changeDue": true,
+              "block": true
+            },
+            "state": null
+          },
+          "description": null,
+          "onHoldReason": null,
+          "cancelledReason": null,
+          "previousStatus": null,
+          "reviewRequestedAt": null,
+          "project": {
+            "id": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+            "projectNumber": "QA21-REAL-001",
+            "name": "Checkpoint 21 real Board Team project",
+            "status": "Active"
+          },
+          "collaborators": [],
+          "watchers": [],
+          "permissions": {
+            "edit": {
+              "ok": true,
+              "reason": null
+            },
+            "assign": {
+              "ok": true,
+              "reason": null
+            },
+            "setReviewer": {
+              "ok": true,
+              "reason": null
+            },
+            "dueNeedsReason": false,
+            "dueDate": {
+              "ok": true,
+              "reason": null
+            },
+            "block": {
+              "ok": true,
+              "reason": null
+            },
+            "delete": {
+              "ok": true,
+              "reason": null
+            },
+            "restore": true,
+            "comment": true,
+            "transitions": [
+              {
+                "to": "Complete",
+                "allowed": true,
+                "reason": null,
+                "needsReason": false,
+                "via": null
+              },
+              {
+                "to": "On Hold",
+                "allowed": true,
+                "reason": null,
+                "needsReason": true,
+                "via": null
+              },
+              {
+                "to": "Cancelled",
+                "allowed": true,
+                "reason": null,
+                "needsReason": true,
+                "via": null
+              }
+            ],
+            "completeHint": null,
+            "isReviewer": false,
+            "dependencies": true,
+            "enterTime": true,
+            "needsReason": false,
+            "allowSelfReview": false,
+            "authoriseStart": false
+          },
+          "relatedDeliverables": []
+        }
+      },
+      {
+        "status": 200,
+        "value": {
+          "task": {
+            "id": "01a197d2-98b5-7b50-a4fe-7ff227951d8c",
+            "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+            "projectNumber": "QA21-REAL-001",
+            "projectName": "Checkpoint 21 real Board Team project",
+            "projectStatus": "Active",
+            "key": "QA21-REAL-001-T0004",
+            "name": "QA21 reviewer zero-day",
+            "projectDisciplineId": "01a197d2-4609-7f79-b091-f5ea0fa32659",
+            "disciplineName": "Civil",
+            "disciplineCode": "CIV",
+            "disciplineColour": "#2563eb",
+            "disciplineOrder": 0,
+            "deliverableId": "01a197d2-4722-7ffb-8a3d-afae06e9c004",
+            "deliverableKey": "QA21-REAL-001-D001",
+            "deliverableName": "QA21 current deliverable",
+            "deliverableDueDate": "2026-11-20",
+            "deliverableStatus": "In Progress",
+            "deliverableOrder": 1,
+            "milestoneId": null,
+            "effectiveMilestoneId": null,
+            "milestoneKey": null,
+            "milestoneName": null,
+            "milestoneDate": null,
+            "milestoneDerived": false,
+            "assigneeId": "01a197bd-ba3c-7a2c-91b0-ae7a7140aeb9",
+            "assigneeName": "Alex Chen",
+            "assigneeActive": true,
+            "reviewerId": "01a197bd-ba3c-749e-a252-425184b403b0",
+            "reviewerName": "Marc Dubois",
+            "requiresReview": true,
+            "priority": "Medium",
+            "startDate": "2026-10-26",
+            "dueDate": "2026-11-01",
+            "originalStartDate": "2026-10-26",
+            "originalDueDate": "2026-11-01",
+            "status": "Ready for Review",
+            "lane": "Review",
+            "progressPct": 0,
+            "estimatedHours": 2,
+            "reviewRound": 0,
+            "dueDateChangeCount": 0,
+            "lastActivityAt": "2026-11-01T15:55:23.817916+00:00",
+            "statusChangedAt": "2026-11-01T15:55:23.817916+00:00",
+            "completedAt": null,
+            "createdAt": "2026-11-01T15:55:23.703886+00:00",
+            "createdBy": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "createdByName": "Priya Nair",
+            "sortOrder": 4,
+            "rowVersion": 2,
+            "manualBlockType": null,
+            "manualBlockReason": null,
+            "manualBlockSetAt": null,
+            "commentCount": 0,
+            "predecessorCount": 0,
+            "successorCount": 0,
+            "collaboratorIds": [],
+            "can": {
+              "assign": true,
+              "edit": true,
+              "changeDue": true,
+              "block": true
+            },
+            "state": null
+          },
+          "description": null,
+          "onHoldReason": null,
+          "cancelledReason": null,
+          "previousStatus": null,
+          "reviewRequestedAt": "2026-11-01T15:55:23.817916+00:00",
+          "project": {
+            "id": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+            "projectNumber": "QA21-REAL-001",
+            "name": "Checkpoint 21 real Board Team project",
+            "status": "Active"
+          },
+          "collaborators": [],
+          "watchers": [],
+          "permissions": {
+            "edit": {
+              "ok": true,
+              "reason": null
+            },
+            "assign": {
+              "ok": true,
+              "reason": null
+            },
+            "setReviewer": {
+              "ok": true,
+              "reason": null
+            },
+            "dueNeedsReason": false,
+            "dueDate": {
+              "ok": true,
+              "reason": null
+            },
+            "block": {
+              "ok": true,
+              "reason": null
+            },
+            "delete": {
+              "ok": true,
+              "reason": null
+            },
+            "restore": true,
+            "comment": true,
+            "transitions": [
+              {
+                "to": "In Progress",
+                "allowed": true,
+                "reason": null,
+                "needsReason": false,
+                "via": null
+              },
+              {
+                "to": "In Review",
+                "allowed": true,
+                "reason": null,
+                "needsReason": false,
+                "via": null
+              },
+              {
+                "to": "On Hold",
+                "allowed": true,
+                "reason": null,
+                "needsReason": true,
+                "via": null
+              },
+              {
+                "to": "Cancelled",
+                "allowed": true,
+                "reason": null,
+                "needsReason": true,
+                "via": null
+              }
+            ],
+            "completeHint": null,
+            "isReviewer": false,
+            "dependencies": true,
+            "enterTime": true,
+            "needsReason": false,
+            "allowSelfReview": false,
+            "authoriseStart": false
+          },
+          "relatedDeliverables": []
+        }
+      },
+      {
+        "status": 200,
+        "value": {
+          "task": {
+            "id": "01a197d2-98c9-7ec0-a591-71911fcc3b99",
+            "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+            "projectNumber": "QA21-REAL-001",
+            "projectName": "Checkpoint 21 real Board Team project",
+            "projectStatus": "Active",
+            "key": "QA21-REAL-001-T0005",
+            "name": "QA21 review timestamp",
+            "projectDisciplineId": "01a197d2-4609-7f79-b091-f5ea0fa32659",
+            "disciplineName": "Civil",
+            "disciplineCode": "CIV",
+            "disciplineColour": "#2563eb",
+            "disciplineOrder": 0,
+            "deliverableId": "01a197d2-4722-7ffb-8a3d-afae06e9c004",
+            "deliverableKey": "QA21-REAL-001-D001",
+            "deliverableName": "QA21 current deliverable",
+            "deliverableDueDate": "2026-11-20",
+            "deliverableStatus": "In Progress",
+            "deliverableOrder": 1,
+            "milestoneId": null,
+            "effectiveMilestoneId": null,
+            "milestoneKey": null,
+            "milestoneName": null,
+            "milestoneDate": null,
+            "milestoneDerived": false,
+            "assigneeId": "01a197bd-ba3c-7a2c-91b0-ae7a7140aeb9",
+            "assigneeName": "Alex Chen",
+            "assigneeActive": true,
+            "reviewerId": "01a197bd-ba3c-749e-a252-425184b403b0",
+            "reviewerName": "Marc Dubois",
+            "requiresReview": true,
+            "priority": "Medium",
+            "startDate": "2026-11-03",
+            "dueDate": "2026-11-12",
+            "originalStartDate": "2026-11-03",
+            "originalDueDate": "2026-11-12",
+            "status": "In Review",
+            "lane": "Review",
+            "progressPct": 0,
+            "estimatedHours": 2,
+            "reviewRound": 0,
+            "dueDateChangeCount": 0,
+            "lastActivityAt": "2026-11-01T15:55:23.911144+00:00",
+            "statusChangedAt": "2026-11-01T15:55:23.911144+00:00",
+            "completedAt": null,
+            "createdAt": "2026-11-01T15:55:23.723744+00:00",
+            "createdBy": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "createdByName": "Priya Nair",
+            "sortOrder": 5,
+            "rowVersion": 3,
+            "manualBlockType": null,
+            "manualBlockReason": null,
+            "manualBlockSetAt": null,
+            "commentCount": 0,
+            "predecessorCount": 0,
+            "successorCount": 0,
+            "collaboratorIds": [],
+            "can": {
+              "assign": true,
+              "edit": true,
+              "changeDue": true,
+              "block": true
+            },
+            "state": null
+          },
+          "description": null,
+          "onHoldReason": null,
+          "cancelledReason": null,
+          "previousStatus": null,
+          "reviewRequestedAt": "2026-11-01T15:55:23.888077+00:00",
+          "project": {
+            "id": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+            "projectNumber": "QA21-REAL-001",
+            "name": "Checkpoint 21 real Board Team project",
+            "status": "Active"
+          },
+          "collaborators": [],
+          "watchers": [],
+          "permissions": {
+            "edit": {
+              "ok": true,
+              "reason": null
+            },
+            "assign": {
+              "ok": true,
+              "reason": null
+            },
+            "setReviewer": {
+              "ok": true,
+              "reason": null
+            },
+            "dueNeedsReason": false,
+            "dueDate": {
+              "ok": true,
+              "reason": null
+            },
+            "block": {
+              "ok": true,
+              "reason": null
+            },
+            "delete": {
+              "ok": true,
+              "reason": null
+            },
+            "restore": true,
+            "comment": true,
+            "transitions": [
+              {
+                "to": "Revision Required",
+                "allowed": true,
+                "reason": null,
+                "needsReason": false,
+                "via": null
+              },
+              {
+                "to": "Complete",
+                "allowed": true,
+                "reason": null,
+                "needsReason": false,
+                "via": null
+              },
+              {
+                "to": "On Hold",
+                "allowed": true,
+                "reason": null,
+                "needsReason": true,
+                "via": null
+              },
+              {
+                "to": "Cancelled",
+                "allowed": true,
+                "reason": null,
+                "needsReason": true,
+                "via": null
+              }
+            ],
+            "completeHint": null,
+            "isReviewer": false,
+            "dependencies": true,
+            "enterTime": true,
+            "needsReason": false,
+            "allowSelfReview": false,
+            "authoriseStart": false
+          },
+          "relatedDeliverables": []
+        }
+      }
+    ]
+  },
+  "browser": [
+    {
+      "route": "/boards",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "status": 200,
+      "overflow": true,
+      "textSample": "Skip to content\nt\nTuesday\nMy Work\nHome\nProjects\nTasks\nResources\nTime\nReports\nTeam\nFiles\nTuesday\nBoards\nSearch\n/\nMy projects\nNew\nPN\nBoards\n\n5 cards\n\nViews\nList\nBoard\nNew task\nDashboard\nBoard\nList\nTimeline\nCalendar\nFiles\nTeam\nWorkload\nMy projects\nCopy link\nSearch\nFilters\nMine\nOverdue\nBlocked\n\nFigures describe shown cards only; hidden or unloaded cards are excluded.\n\nTo Do\n0\n0 h estimated · 0 unestimated\n0 overdue\n\nNo tasks in this lane.\n\nIn Progress\n3\n8 h estimated · 0 unestimated\n0 overdue · 3 state unavailable\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTask:\nQA21-REAL-001-T0001\nQA21 overdue\nQA21-REAL-001-D001\nAC\nAlex Chen\nDue\nOct 20\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTask:\nQA21-REAL-001-T0003\nQA21 PM-owned\nQA21-REAL-001-D001\nPN\nPriya Nair\nDue\nNov 18\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTask:\nQA21-REAL-001-T0002\nQA21 current deliverable\nQA21-REAL-001-D001\nAC\nAlex Chen\nDue\nNov 20\nReview\n2\n4 h estimated · 0 unestimated\n0 overdue · 2 state unavailable\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTask:\nQA21-REAL-001-T0004\nQA21 reviewer zero-day\n◐\nReady for Review\nQA21-REAL-001-D001\nPerformer\nAlex Chen\nIndependent reviewer\nMarc Dubois\n\n0 days waiting\n\nDue\nNov 1\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTask:\nQA21-REAL-001-T0005\nQA21 review timestamp\n◐\nIn Review\nQA21-REAL-001-D001\nPerformer\nAlex Chen\nIndependent reviewer\nMarc Dubois\n\n0 days waiting\n\nDue\nNov 12\nDone (14 days)\n0\n0 h estimated · 0 unestimated\n0 overdue\n\nNo tasks in this lane.",
+      "errors": []
+    },
+    {
+      "route": "/boards",
+      "viewport": [
+        375,
+        812
+      ],
+      "status": 200,
+      "overflow": true,
+      "textSample": "Skip to content\nPN\nBoards\n\n5 cards\n\nViews\nList\nBoard\nNew task\nDashboard\nBoard\nList\nTimeline\nCalendar\nFiles\nTeam\nWorkload\nCopy link\nSearch\nFilters\nMine\nOverdue\nBlocked\n\nFigures describe shown cards only; hidden or unloaded cards are excluded.\n\nTo Do\n0\n0 h estimated · 0 unestimated\n0 overdue\n\nNo tasks in this lane.\n\nIn Progress\n3\n8 h estimated · 0 unestimated\n0 overdue · 3 state unavailable\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTask:\nQA21-REAL-001-T0001\nQA21 overdue\nQA21-REAL-001-D001\nAC\nAlex Chen\nDue\nOct 20\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTask:\nQA21-REAL-001-T0003\nQA21 PM-owned\nQA21-REAL-001-D001\nPN\nPriya Nair\nDue\nNov 18\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTask:\nQA21-REAL-001-T0002\nQA21 current deliverable\nQA21-REAL-001-D001\nAC\nAlex Chen\nDue\nNov 20\nReview\n2\n4 h estimated · 0 unestimated\n0 overdue · 2 state unavailable\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTask:\nQA21-REAL-001-T0004\nQA21 reviewer zero-day\n◐\nReady for Review\nQA21-REAL-001-D001\nPerformer\nAlex Chen\nIndependent reviewer\nMarc Dubois\n\n0 days waiting\n\nDue\nNov 1\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTask:\nQA21-REAL-001-T0005\nQA21 review timestamp\n◐\nIn Review\nQA21-REAL-001-D001\nPerformer\nAlex Chen\nIndependent reviewer\nMarc Dubois\n\n0 days waiting\n\nDue\nNov 12\nDone (14 days)\n0\n0 h estimated · 0 unestimated\n0 overdue\n\nNo tasks in this lane.\n\nMy Work\nSearch\nNotifications",
+      "errors": []
+    },
+    {
+      "route": "/team",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "status": 200,
+      "overflow": true,
+      "textSample": "Skip to content\nt\nTuesday\nMy Work\nHome\nProjects\nTasks\nResources\nTime\nReports\nTeam\nFiles\nTuesday\nTeam\nSearch\n/\nMy projects\nNew\nPN\nTeam\n\n4 people\n\nViews\nDashboard\nBoard\nList\nTimeline\nCalendar\nFiles\nTeam\nWorkload\nMy projects\nCopy link\nSearch\nGroup by\nNo grouping\nHome discipline\nOffice\nSupervisor\nCurrent unit\nFilters\nColumns\nTeam\nPerson\tHome discipline\tOffice\tSupervisor\tCurrent unit\tProjects and roles\n\nAC\nAlex Chen\nCivil Designer (EIT)\n\tNot set\tHead Office\tSam Patel\tNot set\t\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTeam Member\n\n\nJM\nJill Martin\nCivil Designer\n\tNot set\tHead Office\tSam Patel\tNot set\t\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTeam Member\n\n\nMD\nMarc Dubois\nSenior Civil Engineer\n\tNot set\tHead Office\tSam Patel\tNot set\t\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTeam Member\nLead: Civil\n\n\nPN\nPriya Nair\nProject Manager\n\tNot set\tHead Office\tLena Brooks\tNot set\t\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nProject Manager",
+      "errors": []
+    },
+    {
+      "route": "/team",
+      "viewport": [
+        375,
+        812
+      ],
+      "status": 200,
+      "overflow": true,
+      "textSample": "Skip to content\nPN\nTeam\n\n4 people\n\nViews\nDashboard\nBoard\nList\nTimeline\nCalendar\nFiles\nTeam\nWorkload\nCopy link\nSearch\nGroup by\nNo grouping\nHome discipline\nOffice\nSupervisor\nCurrent unit\nFilters\nColumns\nPerson\nAC\nAlex Chen\nCivil Designer (EIT)\nHome discipline\nNot set\nOffice\nHead Office\nSupervisor\nSam Patel\nCurrent unit\nNot set\nProjects and roles\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTeam Member\nPerson\nJM\nJill Martin\nCivil Designer\nHome discipline\nNot set\nOffice\nHead Office\nSupervisor\nSam Patel\nCurrent unit\nNot set\nProjects and roles\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTeam Member\nPerson\nMD\nMarc Dubois\nSenior Civil Engineer\nHome discipline\nNot set\nOffice\nHead Office\nSupervisor\nSam Patel\nCurrent unit\nNot set\nProjects and roles\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTeam Member\nLead: Civil\nPerson\nPN\nPriya Nair\nProject Manager\nHome discipline\nNot set\nOffice\nHead Office\nSupervisor\nLena Brooks\nCurrent unit\nNot set\nProjects and roles\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nProject Manager\nMy Work\nSearch\nNotifications",
+      "errors": []
+    },
+    {
+      "route": "/projects/QA21-REAL-001/team",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "status": 200,
+      "overflow": true,
+      "textSample": "Tuesday\nMy Work\nHome\nProjects\nTasks\nResources\nTime\nReports\nTeam\nFiles\nTuesday\nProjects\nQA21-REAL-001 Checkpoint 21 real Board Team project\nTeam & Disciplines\nSearch\n/\nMy projects\nNew\nPN\nQA21-REAL-001\nCheckpoint 21 real Board Team project\n◐\nActive\n○\nGrey\nOwner (PM): Priya Nair\nClient: Internal / TBD\nTarget date: 2026-11-30\nOverview\nWork\nDeliverables\nCoordination\nPeople\nFiles\nActivity\nSettings\nTeam & Disciplines\nAllocations\nWorkload\nTeam & Disciplines\nUnfilled roles2\n\nUnfilled roles are separate from people and capacity.\n\nQA21 Civil reviewer\n\nCivil · 2026-11-02 – 2026-11-06 · 10 h\n\nFill\n\nQA21 Civil technologist\n\nCivil · 2026-11-02 – 2026-11-06 · 20 h\n\nFill\nDisciplines1\nCivil\nMarc Dubois\nRemove\nAdd discipline\nChoose…\nProject Management\nSurvey\nGeotechnical\nElectrical\nEnvironmental\nStructural\nTransportation\nArchitecture\nAdd\nAdd from template\nMembers4\nCertification tag\nAll certification tags\nPerson\nAdd a person…\nRole\nTeam Member\nReviewer\nViewer\nProject Manager\nPrimary discipline\n(optional)\nNo primary discipline\nCivil\nAdd\nGroup by\nNo grouping\nHome discipline\nOffice\nSupervisor\nCurrent unit\nFilters\nColumns\nViews\n\n4 people shown\n\nMembers\nName\tHome discipline\tOffice\tSupervisor\tCurrent unit\tProject Manager\tTeam Member\tReviewer\tViewer\tPrimary discipline\tAdded\t\nActions\n\n\nAC\nAlex Chen\nCivil Designer (EIT)\n\tNot set\tHead Office\tSam Patel\tNot set\t\t\n\t\t\t\nNo primary discipline\nCivil\n\t2026-11-01\tRemove\n\nJM\nJill Martin\nCivil Designer\n\tNot set\tHead Office\tSam Patel\tNot set\t\t\n\t\t\t\nNo primary discipline\nCivil\n\t2026-11-01\tRemove\n\nMD\nMarc Dubois\nSenior Civil Engineer · Discipline Lead: Civil\n\tNot set\tHead Office\tSam Patel\tNot set\t\t\n\t\t\t\nNo primary discipline\nCivil\n\t2026-11-01\tRemove\n\nPN\nPriya Nair\nProject Manager\n\tNot set\tHead Office\tLena Brooks\tNot set\t\n\t\t\t\t\nNo primary discipline\nCivil\n\t2026-11-01\t",
+      "errors": []
+    },
+    {
+      "route": "/projects/QA21-REAL-001/team",
+      "viewport": [
+        375,
+        812
+      ],
+      "status": 200,
+      "overflow": true,
+      "textSample": "nation\nPeople\nFiles\nActivity\nSettings\nTeam & Disciplines\nAllocations\nWorkload\nTeam & Disciplines\nUnfilled roles2\n\nUnfilled roles are separate from people and capacity.\n\nQA21 Civil reviewer\n\nCivil · 2026-11-02 – 2026-11-06 · 10 h\n\nFill\n\nQA21 Civil technologist\n\nCivil · 2026-11-02 – 2026-11-06 · 20 h\n\nFill\nDisciplines1\nCivil\nMarc Dubois\nRemove\nAdd discipline\nChoose…\nProject Management\nSurvey\nGeotechnical\nElectrical\nEnvironmental\nStructural\nTransportation\nArchitecture\nAdd\nAdd from template\nMembers4\nCertification tag\nAll certification tags\nPerson\nAdd a person…\nRole\nTeam Member\nReviewer\nViewer\nProject Manager\nPrimary discipline\n(optional)\nNo primary discipline\nCivil\nAdd\nGroup by\nNo grouping\nHome discipline\nOffice\nSupervisor\nCurrent unit\nFilters\nColumns\nViews\n\n4 people shown\n\nAC\nAlex Chen\n\nCivil Designer (EIT)\n\nHome discipline\nNot set\nOffice\nHead Office\nSupervisor\nSam Patel\nCurrent unit\nNot set\nRole\nProject Manager\nTeam Member\nReviewer\nViewer\nPrimary discipline\nNo primary discipline\nCivil\n\nAdded: 2026-11-01\n\nRemove\nJM\nJill Martin\n\nCivil Designer\n\nHome discipline\nNot set\nOffice\nHead Office\nSupervisor\nSam Patel\nCurrent unit\nNot set\nRole\nProject Manager\nTeam Member\nReviewer\nViewer\nPrimary discipline\nNo primary discipline\nCivil\n\nAdded: 2026-11-01\n\nRemove\nMD\nMarc Dubois\n\nSenior Civil Engineer · Discipline Lead: Civil\n\nHome discipline\nNot set\nOffice\nHead Office\nSupervisor\nSam Patel\nCurrent unit\nNot set\nRole\nProject Manager\nTeam Member\nReviewer\nViewer\nPrimary discipline\nNo primary discipline\nCivil\n\nAdded: 2026-11-01\n\nRemove\nPN\nPriya Nair\n\nProject Manager\n\nHome discipline\nNot set\nOffice\nHead Office\nSupervisor\nLena Brooks\nCurrent unit\nNot set\nRole\nProject Manager\nTeam Member\nReviewer\nViewer\nPrimary discipline\nNo primary discipline\nCivil\n\nAdded: 2026-11-01\n\nMy Work\nSearch\nNotifications",
+      "errors": []
+    }
+  ],
+  "failures": [
+    {
+      "blocked": "canonical board State.IsOverdue unavailable after normal /attention EnsureFresh read"
+    }
+  ],
+  "limits": [
+    "QA21 disposable DB only; normal API commands; no SQL; browser contexts closed"
+  ],
+  "fixture": {
+    "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+    "projectNumber": "QA21-REAL-001",
+    "taskIds": [
+      "01a197d2-986d-7dc9-8e06-3f76216fee08",
+      "01a197d2-9899-72ba-a182-963e99ee2847",
+      "01a197d2-98a9-7265-89ba-e5de3a283ee1",
+      "01a197d2-98b5-7b50-a4fe-7ff227951d8c",
+      "01a197d2-98c9-7ec0-a591-71911fcc3b99"
+    ],
+    "reviewerZeroTaskId": "01a197d2-98b5-7b50-a4fe-7ff227951d8c",
+    "reviewTaskId": "01a197d2-98c9-7ec0-a591-71911fcc3b99",
+    "reviewReady": {
+      "01a197d2-98b5-7b50-a4fe-7ff227951d8c": "2026-11-01T15:55:23.817916+00:00",
+      "01a197d2-98c9-7ec0-a591-71911fcc3b99": "2026-11-01T15:55:23.888077+00:00"
+    },
+    "personIds": {
+      "alex": "01a197bd-ba3c-7a2c-91b0-ae7a7140aeb9",
+      "jill": "01a197bd-ba3c-7024-a2a4-c6581e4b7428",
+      "marc": "01a197bd-ba3c-749e-a252-425184b403b0",
+      "priya": "01a197bd-ba3c-7004-8608-b9ff012100b9"
+    },
+    "today": "2026-11-01",
+    "week": "2026-10-26"
+  },
+  "blocked": true,
+  "joins": {
+    "boardCards": 5,
+    "boardHours": 12,
+    "overdue": null,
+    "currentDeliverable": 5,
+    "pmCards": 5,
+    "inReview": 1,
+    "reviewerZero": 1,
+    "projectTeamMembers": 4,
+    "workspaceTeamMembers": 4,
+    "openRoles": 2,
+    "gridPeople": 4
+  }
+}

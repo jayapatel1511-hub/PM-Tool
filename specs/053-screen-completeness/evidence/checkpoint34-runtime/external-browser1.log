@@ -1,0 +1,13 @@
+{"stage":"PM verifier and own closure evidence","completedCases":["Normal current-started record with explicit actual IDs, four versions, disabled blank confirmation, native invalid-date refusal, reason over4000 preserved in wire, typed party provenance, original/current issued revision, no automatic verifier"],"currentUrl":"http://127.0.0.1:8875/projects/P-MOCK/reviews?q=Synthetic&page=1&findingSeverity=Advisory&panel=ReviewPackage:00000000-0000-0000-0000-000000018201","commands":3,"unexpectedGets":[],"unexpectedWrites":[],"pageErrors":[],"baseUnknownGets":[]}
+locator.waitFor: Timeout 15000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('dialog').filter({ has: getByRole('heading', { name: 'RV-EXT · Synthetic issued review', exact: true }) }).locator('article').filter({ has: getByText('Synthetic carried external comment', { exact: true }) }).getByText('Verified Closed', { exact: true }) to be visible[22m
+[2m    33 × locator resolved to hidden <span class="font-medium">Verified Closed</span>[22m
+
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/external-review.cjs:186:65 {
+  log: [
+    "  - waiting for getByRole('dialog').filter({ has: getByRole('heading', { name: 'RV-EXT · Synthetic issued review', exact: true }) }).locator('article').filter({ has: getByText('Synthetic carried external comment', { exact: true }) }).getByText('Verified Closed', { exact: true }) to be visible",
+    '    33 × locator resolved to hidden <span class="font-medium">Verified Closed</span>'
+  ],
+  name: 'TimeoutError'
+}

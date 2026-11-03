@@ -1,0 +1,21 @@
+✔ person fact commands refresh mounted staff, both Teams, editor and date-only picker facts (4.924459ms)
+✔ successful discussion refreshes its originating project task count without a live event (0.56925ms)
+✔ activity, own-week candidates and report inputs refetch otherwise fresh cached facts (2.006583ms)
+✔ a project colour change refreshes an already cached workspace Team identity (0.149208ms)
+✔ item changes keep the previous project and item-specific invalidations (AC-PLAT-19) (0.27425ms)
+✔ project refresh retains its 1.5 second derived-state pass (0.735333ms)
+✔ child audit types refresh mounted details and dependent pickers; reconnect repairs missed events (0.798292ms)
+✔ invalidation prefixes match actual mounted screen query keys (0.316166ms)
+✔ a person's own workspaces and dashboard layout refresh the screens that read them (0.151792ms)
+✔ workload changes refresh the pickup own-load hint (0.095458ms)
+✔ notification and preference commands refresh the bell, the centre, the Following tab and the preferences page (0.076ms)
+✔ new batch mutations refresh their mounted views and await active refetches (0.084375ms)
+✔ person date and setting changes refresh all authorised candidate sources; submission events refresh workspace dates (1.883041ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 175.634417

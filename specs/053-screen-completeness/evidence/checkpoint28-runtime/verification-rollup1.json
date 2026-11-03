@@ -1,0 +1,66 @@
+{
+  "status": "PASS_LOCAL_S39_S40_S41_S48_S49_PARTIAL",
+  "atUtc": "2026-11-02T15:49:01.030583+00:00",
+  "checkedSlices": 39,
+  "totalSlices": 49,
+  "newChecked": [
+    "S39",
+    "S40",
+    "S41",
+    "S48"
+  ],
+  "partial": [
+    "S49"
+  ],
+  "dotnetDistinctFinalPass": 170,
+  "clientStateTests": 28,
+  "coverageToolTests": 5,
+  "decisionTests": 8,
+  "browserPass": {
+    "A": "decision-metadata5",
+    "B": "template-risk-provenance3",
+    "C": "issue-root-cause3",
+    "D": "admin-screen3"
+  },
+  "browserBoundary": "Actual final SPA, finite synthetic intercepted HTTP. Separate real PostgreSQL provider checks; no new live Kestrel/browser join.",
+  "migration": "20261102145256_RegisterMetadataAndTemplateLineage:3newtables8nullablecolumns;no seeds/backfill",
+  "contracts": {
+    "newSchemas": 28,
+    "existingSchemasOptionalAdditions": 11,
+    "newPaths": 11,
+    "oldMembersRemovedOrChanged": 0
+  },
+  "auditFix": {
+    "newFieldsHiddenByOwningFlag": 22,
+    "newEventKinds": 6,
+    "storedBytesAndHashesPreserved": true,
+    "pureFlagCombinations": 16,
+    "providerFlagTransitions": "register/people on/off/on"
+  },
+  "parity": {
+    "atUtc": "2026-11-02T15:41:10.382886+00:00",
+    "csharpFiles": 652,
+    "webBuildInputs": 270,
+    "retainedEarlierOutputs": 857,
+    "isolatedSPAProfiles": {
+      "preview-build1": 143,
+      "preview-build2": 143
+    },
+    "mismatches": [],
+    "status": "PASS"
+  },
+  "staticPreviews": {
+    "8859": "SPA1,noAPI5094",
+    "8860": "finalSPA2,noAPI5095"
+  },
+  "gallery": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint28-review/index.html",
+  "review": "bounded independent final PASS",
+  "limits": [
+    "No deployment/commit/push/pilot/flagactivation/formalAccepted",
+    "FullS49/83/deactivation/policy unresolved",
+    "R3 unknown legacy author decision pending",
+    "D14/D15 starter taxonomy open",
+    "QA24 cleanup rejected previously; no stop/drop executed",
+    "Broad052/native/zoom/human and remaining10slices open"
+  ]
+}

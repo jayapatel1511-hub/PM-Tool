@@ -107,8 +107,10 @@ function mockPlatformApi(page, { build, buildIds = ['mock-build-a', 'mock-build-
   return { eventRequests, pulseRequests, apiErrors, unknownGets, setBuild: (next) => { currentBuild = next }, stop: () => page.unroute('**/api/**', routePromise) }
 }
 async function newMockPage(base, opts) {
-  const browser = await chromium.launch({ headless: true, ...(process.env.CHROME_EXECUTABLE_PATH ? { executablePath: process.env.CHROME_EXECUTABLE_PATH } : {}) })
-  const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } })
+  const browser = opts?.nativeVisibility ? await require('./native-visibility-browser.cjs').nativeVisibilityBrowser()
+    : await chromium.launch({ headless: true, ...(process.env.CHROME_EXECUTABLE_PATH ? { executablePath: process.env.CHROME_EXECUTABLE_PATH } : {}) })
+  const page = opts?.nativeVisibility ? await browser.contexts()[0].newPage() : await browser.newPage({ viewport: { width: 1440, height: 1000 } })
+  if (opts?.nativeVisibility) await page.setViewportSize({ width: 1440, height: 1000 })
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.addInitScript(() => { sessionStorage.setItem('hub.devUser', 'alex@hub.test'); sessionStorage.setItem('hub.signedIn', '1') })
   const mock = mockPlatformApi(page, opts)

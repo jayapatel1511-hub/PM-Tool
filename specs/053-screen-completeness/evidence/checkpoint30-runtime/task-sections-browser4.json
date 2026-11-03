@@ -1,0 +1,12 @@
+{
+  "exitCode": 1,
+  "args": [
+    "node",
+    "tests/task-sections.cjs"
+  ],
+  "atUtc": "2026-11-02T20:26:35.238676+00:00",
+  "base": "http://127.0.0.1:8867",
+  "bundle": "SPA2",
+  "scope": "Strict unchanged test. ONLY AFTER assertion failure, resize isolated native window and repeat natural wheel to diagnose harness vs app; no manufactured passing outcome.",
+  "driverHash": "dc43e8fcb5dd834c30ec7e90a6b1456ef7b19ae5230c1bc11d1c192d1bf5ce12"
+}

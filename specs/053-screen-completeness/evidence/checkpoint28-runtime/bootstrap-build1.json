@@ -1,0 +1,19 @@
+{
+  "exitCode": 1,
+  "atUtc": "2026-11-02T14:50:51.054760+00:00",
+  "args": [
+    "dotnet",
+    "build",
+    "src/Hub.Api/Hub.Api.csproj",
+    "-c",
+    "Release",
+    "--artifacts-path",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint28-artifacts",
+    "--disable-build-servers",
+    "-m:1",
+    "-p:UseSharedCompilation=false",
+    "-p:NuGetAudit=false"
+  ],
+  "configWatching": false,
+  "nugetAudit": "disabled: no audit verification claimed"
+}

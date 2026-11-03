@@ -34,23 +34,70 @@ public static partial class SearchEndpoints
     public static partial Regex KeyPattern();
 
     // One record per row shape of GET /search, in the property order each group has always written. The generated client reads these names.
-    public sealed record SearchProjectHit(Guid Id, string ProjectNumber, string Name, string Status, string? Client, string? Pm);
+    public sealed record SearchUserReference(Guid Id, string DisplayName, bool IsActive, string Role);
+    public interface ISearchPersonHit
+    {
+        Guid? PersonUserId { get; }
+        SearchUserReference? Person { get; set; }
+    }
+
+    public sealed record SearchProjectHit(Guid Id, string ProjectNumber, string Name, string Status, string? Client, string? Pm) : ISearchPersonHit
+    {
+        [JsonIgnore] public Guid? PersonUserId { get; init; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public SearchUserReference? Person { get; set; }
+    }
     /// Match is the snippet around the text that matched in the description, null when the key or name matched.
-    public sealed record SearchTaskHit(Guid Id, string Key, string Name, string Status, DateOnly? DueDate, string ProjectNumber, string? Assignee, string? Match);
-    public sealed record SearchDeliverableHit(Guid Id, string Key, string Name, string Status, DateOnly? DueDate, string ProjectNumber, string? Owner, string? Match);
+    public sealed record SearchTaskHit(Guid Id, string Key, string Name, string Status, DateOnly? DueDate, string ProjectNumber, string? Assignee, string? Match) : ISearchPersonHit
+    {
+        [JsonIgnore] public Guid? PersonUserId { get; init; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public SearchUserReference? Person { get; set; }
+    }
+    public sealed record SearchDeliverableHit(Guid Id, string Key, string Name, string Status, DateOnly? DueDate, string ProjectNumber, string? Owner, string? Match) : ISearchPersonHit
+    {
+        [JsonIgnore] public Guid? PersonUserId { get; init; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public SearchUserReference? Person { get; set; }
+    }
     public sealed record SearchMilestoneHit(Guid Id, string Key, string Name, DateOnly? Date, bool IsComplete, bool IsCancelled, string ProjectNumber);
     public sealed record SearchDecisionHit(Guid Id, string Key, string Name, string Status, DateOnly RequiredByDate, string ProjectNumber);
     /// Handoffs, readiness constraints and weekly promises: a status, the date the work is needed by and the person who owns it.
-    public sealed record SearchOwnedHit(Guid Id, string Key, string Name, string Status, DateOnly DueDate, string ProjectNumber, string? Owner);
+    public sealed record SearchOwnedHit(Guid Id, string Key, string Name, string Status, DateOnly DueDate, string ProjectNumber, string? Owner) : ISearchPersonHit
+    {
+        [JsonIgnore] public Guid? PersonUserId { get; init; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public SearchUserReference? Person { get; set; }
+    }
     /// Review packages and change notices.
     public sealed record SearchStatusHit(Guid Id, string Key, string Name, string Status, string ProjectNumber);
-    public sealed record SearchSubmissionHit(Guid Id, string Key, string Name, DateOnly DueDate, string ProjectNumber, string? Owner);
-    public sealed record SearchAllocationHit(Guid Id, string Name, string Status, DateOnly DueDate, string ProjectNumber);
-    public sealed record SearchBasisHit(Guid Id, string Key, string Name, string ProjectNumber, string? Owner);
+    public sealed record SearchSubmissionHit(Guid Id, string Key, string Name, DateOnly DueDate, string ProjectNumber, string? Owner) : ISearchPersonHit
+    {
+        [JsonIgnore] public Guid? PersonUserId { get; init; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public SearchUserReference? Person { get; set; }
+    }
+    public sealed record SearchAllocationHit(Guid Id, string Name, string Status, DateOnly DueDate, string ProjectNumber) : ISearchPersonHit
+    {
+        [JsonIgnore] public Guid? PersonUserId { get; init; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public SearchUserReference? Person { get; set; }
+    }
+    public sealed record SearchBasisHit(Guid Id, string Key, string Name, string ProjectNumber, string? Owner) : ISearchPersonHit
+    {
+        [JsonIgnore] public Guid? PersonUserId { get; init; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public SearchUserReference? Person { get; set; }
+    }
     /// A live comment with the item it sits on and the snippet that matched.
-    public sealed record SearchCommentHit(Guid Id, string ItemType, Guid ItemId, string Key, string Name, string ProjectNumber, string? Author, DateTimeOffset CreatedAt, string? Match);
-    public sealed record SearchPlanningHit(Guid Id, string Name, string Status, DateOnly DueDate, DateOnly StartWeek, Guid PersonId);
-    public sealed record SearchPersonHit(Guid Id, string DisplayName, string Email, string? JobTitle, bool IsActive, bool CanViewWork);
+    public sealed record SearchCommentHit(Guid Id, string ItemType, Guid ItemId, string Key, string Name, string ProjectNumber, string? Author, DateTimeOffset CreatedAt, string? Match) : ISearchPersonHit
+    {
+        [JsonIgnore] public Guid? PersonUserId { get; init; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public SearchUserReference? Person { get; set; }
+    }
+    public sealed record SearchPlanningHit(Guid Id, string Name, string Status, DateOnly DueDate, DateOnly StartWeek, Guid PersonId) : ISearchPersonHit
+    {
+        [JsonIgnore] public Guid? PersonUserId => PersonId;
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public SearchUserReference? Person { get; set; }
+    }
+    public sealed record SearchPersonHit(Guid Id, string DisplayName, string Email, string? JobTitle, bool IsActive, bool CanViewWork) : ISearchPersonHit
+    {
+        [JsonIgnore] public Guid? PersonUserId => Id;
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public SearchUserReference? Person { get; set; }
+    }
 
     /// The groups the request asked for, in the order they are written: all sixteen, or the one named by `type`. A group not asked for is left out; one with no matches is [].
     public sealed record SearchGroups(
@@ -74,9 +121,10 @@ public static partial class SearchEndpoints
     /// FR-SRCH-02: the item (or project) whose key or number the whole term spells; Id is null for a project.
     public sealed record SearchExact(string Type, Guid? Id, string ProjectNumber, string Key);
     /// Counts holds the total matches of each group asked for, not just the page returned.
-    public sealed record SearchResponse(string Q, SearchExact? Exact, SearchGroups Groups, IReadOnlyDictionary<string, int> Counts);
+    public sealed record SearchResponse(string Q, SearchExact? Exact, SearchGroups Groups, IReadOnlyDictionary<string, int> Counts,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] SearchScreenReads.SearchScreenMetadata? Screen = null);
 
-    sealed record SearchCommentRow(Guid Id, string ItemType, Guid ItemId, string Body, DateTimeOffset CreatedAt, string? Author, string ProjectNumber);
+    sealed record SearchCommentRow(Guid Id, string ItemType, Guid ItemId, string Body, DateTimeOffset CreatedAt, string? Author, string ProjectNumber, Guid? AuthorId);
     sealed record SearchItemRow(Guid Id, string Key, string Name);
     sealed record SearchFound(string Type, Guid Id, Guid ProjectId, string Key);
 
@@ -86,16 +134,24 @@ public static partial class SearchEndpoints
     internal static string Escape(string s) => s.Replace(@"\", @"\\").Replace("%", @"\%").Replace("_", @"\_");
 
     // ponytail: ILIKE scans; add pg_trgm GIN indexes on names and keys (§18.2) if search passes 1 s at scale (packet 011).
-    static async Task<Ok<SearchResponse>> Search(string? q, string? type, bool? includeArchived, int? limit, int? page, Access access, HubDb db, CurrentUser me)
+    static async Task<Ok<SearchResponse>> Search(string? q, string? type, bool? includeArchived, int? limit, int? page,
+        string? projectId, string? status, string? disciplineId, Access access, HubDb db, CurrentUser me, SettingsStore store)
     {
         var term = (q ?? "").Trim();
-        if (term.Length == 0) return TypedResults.Ok(new SearchResponse(term, null, new SearchGroups(), new Dictionary<string, int>()));
+        var settings = await store.Get(db);
+        var screenEnabled = settings.IsFlagOn("people_screens");
+        if (!screenEnabled && term.Length == 0)
+            return TypedResults.Ok(new SearchResponse(term, null, new SearchGroups(), new Dictionary<string, int>()));
+        var filters = SearchScreenReads.Parse(screenEnabled, type, projectId, status, disciplineId);
+        var visibleProjects = access.VisibleProjects();
+        if (includeArchived != true) visibleProjects = visibleProjects.Where(p => p.Status != ProjectStatus.Archived && p.Status != ProjectStatus.Cancelled);
+        var screen = screenEnabled ? await SearchScreenReads.Metadata(db, visibleProjects, filters) : null;
+        if (term.Length == 0) return TypedResults.Ok(new SearchResponse(term, null, new SearchGroups(), new Dictionary<string, int>(), screen));
         var (pg, size) = Http.Paging(page, limit ?? 5);
         var contains = $"%{Escape(term)}%";
         var prefix = $"{Escape(term)}%";
         var lower = term.ToLowerInvariant();
-        var projects = access.VisibleProjects();
-        if (includeArchived != true) projects = projects.Where(p => p.Status != ProjectStatus.Archived && p.Status != ProjectStatus.Cancelled);
+        var projects = filters.ProjectId is { } selectedProject ? visibleProjects.Where(p => p.Id == selectedProject) : visibleProjects;
         var ids = projects.Select(p => p.Id);
         var want = type is null ? Groups : Groups.Where(g => g == type).ToArray();
         var groups = new SearchGroups();
@@ -108,39 +164,43 @@ public static partial class SearchEndpoints
         {
             var pq = projects.Where(p => EF.Functions.ILike(p.ProjectNumber, contains, @"\") || EF.Functions.ILike(p.Name, contains, @"\")
                 || db.Clients.Any(c => c.Id == p.ClientId && EF.Functions.ILike(c.Name, contains, @"\")));
+            pq = SearchScreenReads.Projects(pq, db, filters);
             counts["projects"] = await pq.CountAsync();
             groups = groups with { Projects = await Page(pq.OrderBy(p => p.ProjectNumber.ToLower() == lower ? 0 : EF.Functions.ILike(p.ProjectNumber, prefix, @"\") ? 1 : EF.Functions.ILike(p.Name, prefix, @"\") ? 2 : 3)
                 .ThenBy(p => p.Status == ProjectStatus.Active ? 0 : 1).ThenByDescending(p => p.UpdatedAt))
                 .Select(p => new SearchProjectHit(p.Id, p.ProjectNumber, p.Name, p.Status, db.Clients.Where(c => c.Id == p.ClientId).Select(c => c.Name).FirstOrDefault(),
-                    db.Users.Where(u => u.Id == p.ProjectManagerId).Select(u => u.DisplayName).FirstOrDefault())).ToListAsync() };
+                    db.Users.Where(u => u.Id == p.ProjectManagerId).Select(u => u.DisplayName).FirstOrDefault()) { PersonUserId = p.ProjectManagerId }).ToListAsync() };
         }
         if (want.Contains("tasks"))
         {
             var tq = db.Tasks.AsNoTracking().Where(t => ids.Contains(t.ProjectId)
                 && (EF.Functions.ILike(t.Key, contains, @"\") || EF.Functions.ILike(t.Name, contains, @"\") || EF.Functions.ILike(t.Description!, contains, @"\")));
+            tq = SearchScreenReads.StoredStatus(SearchScreenReads.ProjectDiscipline(tq, db, filters), filters);
             counts["tasks"] = await tq.CountAsync();
             var tasks = await Page(tq.OrderBy(t => t.Key.ToLower() == lower ? 0 : EF.Functions.ILike(t.Key, prefix, @"\") ? 1 : EF.Functions.ILike(t.Name, prefix, @"\") ? 2
                     : EF.Functions.ILike(t.Name, contains, @"\") ? 3 : 4) // a match in the description ranks after names
                 .ThenBy(t => db.Projects.Any(p => p.Id == t.ProjectId && p.Status == ProjectStatus.Active) ? 0 : 1).ThenByDescending(t => t.LastActivityAt))
                 .Select(t => new SearchTaskHit(t.Id, t.Key, t.Name, t.Status, t.DueDate, db.Projects.Where(p => p.Id == t.ProjectId).Select(p => p.ProjectNumber).First(),
-                    db.Users.Where(u => u.Id == t.AssigneeId).Select(u => u.DisplayName).FirstOrDefault(), t.Description)).ToListAsync(); // Match carries the description until the snippet is cut
+                    db.Users.Where(u => u.Id == t.AssigneeId).Select(u => u.DisplayName).FirstOrDefault(), t.Description) { PersonUserId = t.AssigneeId }).ToListAsync(); // Match carries the description until the snippet is cut
             groups = groups with { Tasks = tasks.Select(t => t with { Match = Named(t.Key, t.Name) ? null : Snippet(t.Match, term) }).ToList() };
         }
         if (want.Contains("deliverables"))
         {
             var dq = db.Deliverables.AsNoTracking().Where(d => ids.Contains(d.ProjectId)
                 && (EF.Functions.ILike(d.Key, contains, @"\") || EF.Functions.ILike(d.Name, contains, @"\") || EF.Functions.ILike(d.Description!, contains, @"\")));
+            dq = SearchScreenReads.StoredStatus(SearchScreenReads.ProjectDiscipline(dq, db, filters), filters);
             counts["deliverables"] = await dq.CountAsync();
             var dels = await Page(dq.OrderBy(d => d.Key.ToLower() == lower ? 0 : EF.Functions.ILike(d.Key, prefix, @"\") ? 1 : EF.Functions.ILike(d.Name, prefix, @"\") ? 2
                     : EF.Functions.ILike(d.Name, contains, @"\") ? 3 : 4)
                 .ThenBy(d => db.Projects.Any(p => p.Id == d.ProjectId && p.Status == ProjectStatus.Active) ? 0 : 1).ThenByDescending(d => d.LastActivityAt))
                 .Select(d => new SearchDeliverableHit(d.Id, d.Key, d.Name, d.Status, d.DueDate, db.Projects.Where(p => p.Id == d.ProjectId).Select(p => p.ProjectNumber).First(),
-                    db.Users.Where(u => u.Id == d.OwnerId).Select(u => u.DisplayName).FirstOrDefault(), d.Description)).ToListAsync(); // Match carries the description until the snippet is cut
+                    db.Users.Where(u => u.Id == d.OwnerId).Select(u => u.DisplayName).FirstOrDefault(), d.Description) { PersonUserId = d.OwnerId }).ToListAsync(); // Match carries the description until the snippet is cut
             groups = groups with { Deliverables = dels.Select(d => d with { Match = Named(d.Key, d.Name) ? null : Snippet(d.Match, term) }).ToList() };
         }
         if (want.Contains("milestones"))
         {
             var mq = db.Milestones.AsNoTracking().Where(m => ids.Contains(m.ProjectId) && (EF.Functions.ILike(m.Key, contains, @"\") || EF.Functions.ILike(m.Name, contains, @"\")));
+            mq = SearchScreenReads.Milestones(mq, db, filters);
             counts["milestones"] = await mq.CountAsync();
             groups = groups with { Milestones = await Page(mq.OrderBy(m => m.Key.ToLower() == lower ? 0 : EF.Functions.ILike(m.Key, prefix, @"\") ? 1 : EF.Functions.ILike(m.Name, prefix, @"\") ? 2 : 3)
                 .ThenBy(m => db.Projects.Any(p => p.Id == m.ProjectId && p.Status == ProjectStatus.Active) ? 0 : 1).ThenByDescending(m => m.UpdatedAt))
@@ -149,6 +209,7 @@ public static partial class SearchEndpoints
         if (want.Contains("decisions"))
         {
             var cq = db.Decisions.AsNoTracking().Where(d => ids.Contains(d.ProjectId) && (EF.Functions.ILike(d.Key, contains, @"\") || EF.Functions.ILike(d.Subject, contains, @"\")));
+            cq = SearchScreenReads.StoredStatus(cq, filters);
             counts["decisions"] = await cq.CountAsync();
             groups = groups with { Decisions = await Page(cq.OrderBy(d => d.Key.ToLower() == lower ? 0 : EF.Functions.ILike(d.Key, prefix, @"\") ? 1 : EF.Functions.ILike(d.Subject, prefix, @"\") ? 2 : 3)
                 .ThenBy(d => db.Projects.Any(p => p.Id == d.ProjectId && p.Status == ProjectStatus.Active) ? 0 : 1).ThenByDescending(d => d.LastActivityAt))
@@ -158,31 +219,35 @@ public static partial class SearchEndpoints
         {
             var hq = db.Handoffs.AsNoTracking().Where(h => ids.Contains(h.ProjectId)
                 && (EF.Functions.ILike(h.Key, contains, @"\") || EF.Functions.ILike(h.Title, contains, @"\")));
+            hq = SearchScreenReads.Handoffs(hq, db, filters);
             counts["handoffs"] = await hq.CountAsync();
             groups = groups with { Handoffs = await Page(hq.OrderBy(h => h.Key.ToLower() == lower ? 0 : 1).ThenBy(h => h.NeededBy))
                 .Select(h => new SearchOwnedHit(h.Id, h.Key, h.Title, h.Status, h.NeededBy,
                     db.Projects.Where(p => p.Id == h.ProjectId).Select(p => p.ProjectNumber).First(),
-                    db.Users.Where(u => u.Id == h.ReceivingOwnerId).Select(u => u.DisplayName).FirstOrDefault())).ToListAsync() };
+                    db.Users.Where(u => u.Id == h.ReceivingOwnerId).Select(u => u.DisplayName).FirstOrDefault()) { PersonUserId = h.ReceivingOwnerId }).ToListAsync() };
         }
         if (want.Contains("reviews")) {
-            var rq = db.ReviewPackages.AsNoTracking().Where(x => ids.Contains(x.ProjectId) && (EF.Functions.ILike(x.Key, contains, @"\") || EF.Functions.ILike(x.Title, contains, @"\")));
+            var rq = ReviewIssuedSources.VisiblePackages(db, settings.IsFlagOn("register_screens")).AsNoTracking().Where(x => ids.Contains(x.ProjectId) && (EF.Functions.ILike(x.Key, contains, @"\") || EF.Functions.ILike(x.Title, contains, @"\")));
+            rq = SearchScreenReads.StoredStatus(SearchScreenReads.ProjectDiscipline(rq, db, filters), filters);
             counts["reviews"] = await rq.CountAsync();
             groups = groups with { Reviews = await Page(rq.OrderBy(x => x.Key.ToLower() == lower ? 0 : 1).ThenByDescending(x => x.UpdatedAt))
                 .Select(x => new SearchStatusHit(x.Id, x.Key, x.Title, x.Status, db.Projects.Where(p => p.Id == x.ProjectId).Select(p => p.ProjectNumber).First())).ToListAsync() };
         }
         if (want.Contains("changes")) {
             var rq = db.ChangeNotices.AsNoTracking().Where(x => ids.Contains(x.ProjectId) && (EF.Functions.ILike(x.Key, contains, @"\") || EF.Functions.ILike(x.Title, contains, @"\")));
+            rq = SearchScreenReads.StoredStatus(SearchScreenReads.ProjectDiscipline(rq, db, filters), filters);
             counts["changes"] = await rq.CountAsync();
             groups = groups with { Changes = await Page(rq.OrderBy(x => x.Key.ToLower() == lower ? 0 : 1).ThenByDescending(x => x.UpdatedAt))
                 .Select(x => new SearchStatusHit(x.Id, x.Key, x.Title, x.Status, db.Projects.Where(p => p.Id == x.ProjectId).Select(p => p.ProjectNumber).First())).ToListAsync() };
         }
         if (want.Contains("submissions")) {
             var rq = db.SubmissionPackages.AsNoTracking().Where(x => ids.Contains(x.ProjectId) && (EF.Functions.ILike(x.Key, contains, @"\") || EF.Functions.ILike(x.Title, contains, @"\")));
+            rq = SearchScreenReads.StoredStatus(rq, filters);
             counts["submissions"] = await rq.CountAsync();
             groups = groups with { Submissions = await Page(rq.OrderBy(x => x.Key.ToLower() == lower ? 0 : 1).ThenByDescending(x => x.UpdatedAt).ThenBy(x => x.Id))
                 .Select(x => new SearchSubmissionHit(x.Id, x.Key, x.Title, x.TargetDate,
                     db.Projects.Where(p => p.Id == x.ProjectId).Select(p => p.ProjectNumber).First(),
-                    db.Users.Where(u => u.Id == x.CoordinatorId).Select(u => u.DisplayName).FirstOrDefault())).ToListAsync() };
+                    db.Users.Where(u => u.Id == x.CoordinatorId).Select(u => u.DisplayName).FirstOrDefault()) { PersonUserId = x.CoordinatorId }).ToListAsync() };
         }
         if (want.Contains("allocations")) {
             var actor = access.Actor;
@@ -190,34 +255,38 @@ public static partial class SearchEndpoints
                 || db.ProjectMembers.Any(m => m.ProjectId == p.Id && m.UserId == actor.Id && m.RemovedAt == null && m.Roles.Contains(ProjectRole.PM))).Select(p => p.Id);
             var rq = AllocationEndpoints.VisibleQuery(db, actor, managed).Where(x => ids.Contains(x.ProjectId)
                 && (EF.Functions.ILike(x.Purpose, contains, @"\") || db.Users.Any(u => u.Id == x.PersonId && EF.Functions.ILike(u.DisplayName, contains, @"\"))));
+            rq = SearchScreenReads.StoredStatus(rq, filters);
             counts["allocations"] = await rq.CountAsync();
             groups = groups with { Allocations = await Page(rq.OrderByDescending(x => x.UpdatedAt).ThenBy(x => x.Id)).Select(x => new SearchAllocationHit(
                 x.Id, db.Users.Where(u => u.Id == x.PersonId).Select(u => u.DisplayName).FirstOrDefault() + " · " + x.Purpose,
-                x.Status, x.ThroughDate, db.Projects.Where(p => p.Id == x.ProjectId).Select(p => p.ProjectNumber).First())).ToListAsync() };
+                x.Status, x.ThroughDate, db.Projects.Where(p => p.Id == x.ProjectId).Select(p => p.ProjectNumber).First()) { PersonUserId = x.PersonId }).ToListAsync() };
         }
         if (want.Contains("design-basis")) {
             var rq = db.DesignBasisEntries.AsNoTracking().Where(x => ids.Contains(x.ProjectId) && (EF.Functions.ILike(x.Key, contains, @"\") || EF.Functions.ILike(x.Title, contains, @"\")));
+            rq = SearchScreenReads.Basis(rq, db, filters);
             counts["design-basis"] = await rq.CountAsync();
             groups = groups with { DesignBasis = await Page(rq.OrderBy(x => x.Key.ToLower() == lower ? 0 : 1).ThenByDescending(x => x.UpdatedAt).ThenBy(x => x.Id))
                 .Select(x => new SearchBasisHit(x.Id, x.Key, x.Title,
                     db.Projects.Where(p => p.Id == x.ProjectId).Select(p => p.ProjectNumber).First(),
-                    db.Users.Where(u => u.Id == x.OwnerId).Select(u => u.DisplayName).FirstOrDefault())).ToListAsync() };
+                    db.Users.Where(u => u.Id == x.OwnerId).Select(u => u.DisplayName).FirstOrDefault()) { PersonUserId = x.OwnerId }).ToListAsync() };
         }
         if (want.Contains("constraints")) { // packet 032: open the work's readiness inspector
             var rq = db.WorkConstraints.AsNoTracking().Where(x => ids.Contains(x.ProjectId) && (EF.Functions.ILike(x.Key, contains, @"\") || EF.Functions.ILike(x.Description, contains, @"\")));
+            rq = SearchScreenReads.StoredStatus(SearchScreenReads.TargetDiscipline(rq, db, filters), filters, "State");
             counts["constraints"] = await rq.CountAsync();
             groups = groups with { Constraints = await Page(rq.OrderBy(x => x.Key.ToLower() == lower ? 0 : 1).ThenBy(x => x.NeededBy))
                 .Select(x => new SearchOwnedHit(x.Id, x.Key, x.Description, x.State, x.NeededBy,
                     db.Projects.Where(p => p.Id == x.ProjectId).Select(p => p.ProjectNumber).First(),
-                    db.Users.Where(u => u.Id == x.RemovalOwnerId).Select(u => u.DisplayName).FirstOrDefault())).ToListAsync() };
+                    db.Users.Where(u => u.Id == x.RemovalOwnerId).Select(u => u.DisplayName).FirstOrDefault()) { PersonUserId = x.RemovalOwnerId }).ToListAsync() };
         }
         if (want.Contains("commitments")) {
             var rq = db.OutputCommitments.AsNoTracking().Where(x => ids.Contains(x.ProjectId) && (EF.Functions.ILike(x.Key, contains, @"\") || EF.Functions.ILike(x.IntendedOutput, contains, @"\")));
+            rq = SearchScreenReads.StoredStatus(SearchScreenReads.TargetDiscipline(rq, db, filters), filters, "State");
             counts["commitments"] = await rq.CountAsync();
             groups = groups with { Commitments = await Page(rq.OrderBy(x => x.Key.ToLower() == lower ? 0 : 1).ThenByDescending(x => x.WeekStart))
                 .Select(x => new SearchOwnedHit(x.Id, x.Key, x.IntendedOutput, x.State, x.TargetDate,
                     db.Projects.Where(p => p.Id == x.ProjectId).Select(p => p.ProjectNumber).First(),
-                    db.Users.Where(u => u.Id == x.PerformerId).Select(u => u.DisplayName).FirstOrDefault())).ToListAsync() };
+                    db.Users.Where(u => u.Id == x.PerformerId).Select(u => u.DisplayName).FirstOrDefault()) { PersonUserId = x.PerformerId }).ToListAsync() };
         }
         if (want.Contains("comments")) // FR-004: never deleted ones
         {
@@ -225,16 +294,17 @@ public static partial class SearchEndpoints
             counts["comments"] = await cq.CountAsync();
             var rows = await Page(cq.OrderByDescending(c => c.CreatedAt)).Select(c => new SearchCommentRow(c.Id, c.ItemType, c.ItemId, c.Body, c.CreatedAt,
                 db.Users.Where(u => u.Id == c.AuthorId).Select(u => u.DisplayName).FirstOrDefault(),
-                db.Projects.Where(p => p.Id == c.ProjectId).Select(p => p.ProjectNumber).First())).ToListAsync();
+                db.Projects.Where(p => p.Id == c.ProjectId).Select(p => p.ProjectNumber).First(), c.AuthorId)).ToListAsync();
             var items = await Items(db, rows.Select(r => r.ItemId).ToList());
             // ponytail: a comment on a deleted item is dropped from the page but still counted; filter in SQL if that matters
             groups = groups with { Comments = rows.Where(r => items.ContainsKey(r.ItemId)).Select(r => new SearchCommentHit(r.Id, r.ItemType, r.ItemId,
-                items[r.ItemId].Key, items[r.ItemId].Name, r.ProjectNumber, r.Author, r.CreatedAt, Snippet(r.Body, term))).ToList() };
+                items[r.ItemId].Key, items[r.ItemId].Name, r.ProjectNumber, r.Author, r.CreatedAt, Snippet(r.Body, term)) { PersonUserId = r.AuthorId }).ToList() };
         }
         if (want.Contains("planning"))
         {
             var pq = (await PlanningEndpoints.VisibleEntries(db, access)).Where(e => EF.Functions.ILike(e.Label, contains, @"\")
                 || e.Notes != null && EF.Functions.ILike(e.Notes, contains, @"\"));
+            pq = SearchScreenReads.Planning(pq, db, filters);
             counts["planning"] = await pq.CountAsync();
             groups = groups with { Planning = await Page(pq.OrderBy(e => e.StartWeek)).Select(e => new SearchPlanningHit(
                 e.Id, db.Users.Where(u => u.Id == e.PersonId).Select(u => u.DisplayName).First() + " · " + e.Label,
@@ -248,13 +318,43 @@ public static partial class SearchEndpoints
             // members of projects the caller manages (the PM view of §13.10, AC-MYW-04).
             var managed = db.ProjectMembers.Where(m => m.RemovedAt == null && db.Projects.Any(p => p.Id == m.ProjectId && p.Status != ProjectStatus.Archived && p.Status != ProjectStatus.Cancelled
                 && (p.ProjectManagerId == me.Id || db.ProjectMembers.Any(x => x.ProjectId == p.Id && x.UserId == me.Id && x.RemovedAt == null && x.Roles.Contains(ProjectRole.PM))))).Select(m => m.UserId);
-            var uq = db.Users.AsNoTracking().Where(u => EF.Functions.ILike(u.DisplayName, contains, @"\") || EF.Functions.ILike(u.Email, contains, @"\"));
+            var uq = screenEnabled
+                ? db.Users.AsNoTracking().Where(u => EF.Functions.ILike(u.DisplayName, contains, @"\") || EF.Functions.ILike(u.Email, contains, @"\")
+                    || u.JobTitle != null && EF.Functions.ILike(u.JobTitle, contains, @"\")
+                    || db.Disciplines.Any(d => d.Id == u.HomeDisciplineId && EF.Functions.ILike(d.Name, contains, @"\")))
+                : db.Users.AsNoTracking().Where(u => EF.Functions.ILike(u.DisplayName, contains, @"\") || EF.Functions.ILike(u.Email, contains, @"\"));
+            uq = SearchScreenReads.People(uq, filters);
             counts["people"] = await uq.CountAsync();
             groups = groups with { People = await Page(uq.OrderBy(u => u.IsActive ? 0 : 1).ThenBy(u => EF.Functions.ILike(u.DisplayName, prefix, @"\") || EF.Functions.ILike(u.Email, prefix, @"\") ? 0 : 1).ThenBy(u => u.DisplayName))
                 .Select(u => new SearchPersonHit(u.Id, u.DisplayName, u.Email, u.JobTitle, u.IsActive,
                     all || u.Id == me.Id || (a.Supervisor && u.SupervisorId == me.Id) || managed.Contains(u.Id))).ToListAsync() };
         }
-        return TypedResults.Ok(new SearchResponse(term, await Exact(db, projects, term), groups, counts));
+        if (screenEnabled) await AttachPersonReferences(db, groups);
+        return TypedResults.Ok(new SearchResponse(term, filters.HasFilters ? null : await Exact(db, projects, term, settings.IsFlagOn("register_screens")), groups, counts, screen));
+    }
+
+    static async Task AttachPersonReferences(HubDb db, SearchGroups groups)
+    {
+        // IDs travel with the original authorised, ranked and paged projection. Never infer a
+        // User from a caption, item ID, comment parent, allocation title or external party.
+        var selected = new List<(ISearchPersonHit Hit, string Role)>();
+        void Add(IEnumerable<ISearchPersonHit>? hits, string role)
+        {
+            if (hits is not null) selected.AddRange(hits.Select(hit => (hit, role)));
+        }
+        Add(groups.Projects, "pm"); Add(groups.Tasks, "assignee"); Add(groups.Deliverables, "owner");
+        Add(groups.Handoffs, "receivingOwner"); Add(groups.Submissions, "coordinator"); Add(groups.Allocations, "person");
+        Add(groups.DesignBasis, "owner"); Add(groups.Constraints, "removalOwner"); Add(groups.Commitments, "performer");
+        Add(groups.Comments, "author"); Add(groups.Planning, "person"); Add(groups.People, "person");
+        var ids = selected.Select(row => row.Hit.PersonUserId).OfType<Guid>().Where(id => id != Guid.Empty).Distinct().ToArray();
+        if (ids.Length == 0) return;
+        // One bounded User read across all returned groups. This adds no directory discovery,
+        // person-panel authority, writes or per-hit queries; the panel checks its own scope.
+        var users = await db.Users.AsNoTracking().Where(user => ids.Contains(user.Id))
+            .Select(user => new { user.Id, user.DisplayName, user.IsActive }).ToDictionaryAsync(user => user.Id);
+        foreach (var (hit, role) in selected)
+            if (hit.PersonUserId is { } id && users.TryGetValue(id, out var user) && !string.IsNullOrWhiteSpace(user.DisplayName))
+                hit.Person = new(user.Id, user.DisplayName, user.IsActive, role);
     }
 
     /// The key and name of each commented item that still exists.
@@ -273,7 +373,7 @@ public static partial class SearchEndpoints
     }
 
     /// FR-SRCH-02: a value shaped like an item key (or a project number) that matches exactly opens that item.
-    static async Task<SearchExact?> Exact(HubDb db, IQueryable<Project> projects, string term)
+    static async Task<SearchExact?> Exact(HubDb db, IQueryable<Project> projects, string term, bool issuedReviewsEnabled)
     {
         var ids = projects.Select(p => p.Id);
         var number = await projects.Where(p => p.ProjectNumber.ToLower() == term.ToLower()).Select(p => p.ProjectNumber).FirstOrDefaultAsync();
@@ -288,7 +388,7 @@ public static partial class SearchEndpoints
             ?? await db.Issues.Where(t => ids.Contains(t.ProjectId) && t.Key.ToUpper() == key).Select(t => new SearchFound(ItemType.Issue, t.Id, t.ProjectId, t.Key)).FirstOrDefaultAsync()
             ?? await db.Actions.Where(t => ids.Contains(t.ProjectId) && t.Key.ToUpper() == key).Select(t => new SearchFound(ItemType.Action, t.Id, t.ProjectId, t.Key)).FirstOrDefaultAsync()
             ?? await db.Handoffs.Where(t => ids.Contains(t.ProjectId) && t.Key.ToUpper() == key).Select(t => new SearchFound("Handoff", t.Id, t.ProjectId, t.Key)).FirstOrDefaultAsync();
-        hit ??= await db.ReviewPackages.Where(t => ids.Contains(t.ProjectId) && t.Key.ToUpper() == key).Select(t => new SearchFound("ReviewPackage", t.Id, t.ProjectId, t.Key)).FirstOrDefaultAsync();
+        hit ??= await ReviewIssuedSources.VisiblePackages(db, issuedReviewsEnabled).Where(t => ids.Contains(t.ProjectId) && t.Key.ToUpper() == key).Select(t => new SearchFound("ReviewPackage", t.Id, t.ProjectId, t.Key)).FirstOrDefaultAsync();
         hit ??= await db.ChangeNotices.Where(t => ids.Contains(t.ProjectId) && t.Key.ToUpper() == key).Select(t => new SearchFound("ChangeNotice", t.Id, t.ProjectId, t.Key)).FirstOrDefaultAsync();
         hit ??= await db.SubmissionPackages.Where(t => ids.Contains(t.ProjectId) && t.Key.ToUpper() == key).Select(t => new SearchFound("SubmissionPackage", t.Id, t.ProjectId, t.Key)).FirstOrDefaultAsync();
         hit ??= await db.DesignBasisEntries.Where(t => ids.Contains(t.ProjectId) && t.Key.ToUpper() == key).Select(t => new SearchFound("DesignBasisEntry", t.Id, t.ProjectId, t.Key)).FirstOrDefaultAsync();

@@ -1,0 +1,34 @@
+{
+  "checkedAtUtc": "2026-11-02T02:42:58.570334+00:00",
+  "status": "PASS_PRODUCT_PARITY_TEST_SOURCE_DELTAS_ONLY",
+  "manifests": {
+    "csharp-freeze2.json": {
+      "checked": 567,
+      "changes": []
+    },
+    "web-freeze2.json": {
+      "checked": 438,
+      "changes": [
+        {
+          "path": "web/tests/count-card-overlap.cjs",
+          "before": "6becff1387ce4fb0de20e9d56edcb3574810f0167a658c3506b7944c441617a3",
+          "after": "ce00cb6302b3a31bc0d22c09df246075c0fbba0fca23ab0b99e90f5d4dcaff85"
+        },
+        {
+          "path": "web/tests/project-dashboard-completeness.cjs",
+          "before": "341086c48b0e5146a08760ef25cd85c6ba3a053a897b6317a1a2e20cf3e2610c",
+          "after": "22e591cc6d96ce5e647bb6ec01593f56a5ab8ba7c35d9ed5a177d5680af58d4c"
+        },
+        {
+          "path": "web/tests/project-header-compact.cjs",
+          "before": "1fdf0478a86feb0be82d5fcce0290e5f9697677eb63c4c9898310506120f4d48",
+          "after": "3b28b7c7207ee861ebb8bdaf633a7fdbad664d3c845300588cf956fe689f0773"
+        }
+      ]
+    }
+  },
+  "preparedRunnerHashes": {
+    "specs/053-screen-completeness/evidence/checkpoint22-real-browser.cjs": "3bdd653c2321260ef3133d7ee0dac87e6b10b3af416a84b14ec0dba5e3a6c081",
+    "specs/053-screen-completeness/evidence/checkpoint22-real-timeline-setup.cjs": "13f7b8637657cc1ddc13db7184ed8bb3dc811967ef267a0293ad93cf02a11e15"
+  }
+}

@@ -1,0 +1,131 @@
+VSTest version 18.7.0 (arm64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:12.38]     Hub.Tests.Api.AdminUserScreenTests.Structure_on_uses_target_scope_with_overlap_self_and_existing_closed_unit_behavior(indirect: True, expected: 5) [FAIL]
+  Failed Hub.Tests.Api.AdminUserScreenTests.Structure_on_uses_target_scope_with_overlap_self_and_existing_closed_unit_behavior(indirect: True, expected: 5) [12 s]
+  Error Message:
+   System.InvalidOperationException : Unable to save changes because a circular dependency was detected in the data to be saved: 'AppUser [Added] <-
+ForeignKeyConstraint { 'leader_id' } OrgUnit [Added] <-
+ForeignKeyConstraint { 'unit_id' } AppUser [Added]To show additional information call 'DbContextOptionsBuilder.EnableSensitiveDataLogging'.'.
+  Stack Trace:
+     at Microsoft.EntityFrameworkCore.Utilities.Multigraph`2.ThrowCycle(List`1 cycle, Func`2 formatCycle, Func`2 formatException)
+   at Microsoft.EntityFrameworkCore.Utilities.Multigraph`2.TopologicalSortCore(Boolean withBatching, Func`4 canBreakEdges, Func`2 formatCycle, Func`2 formatException)
+   at Microsoft.EntityFrameworkCore.Utilities.Multigraph`2.BatchingTopologicalSort(Func`4 canBreakEdges, Func`2 formatCycle, Func`2 formatException)
+   at Microsoft.EntityFrameworkCore.Update.Internal.CommandBatchPreparer.TopologicalSort(IEnumerable`1 commands)
+   at Microsoft.EntityFrameworkCore.Update.Internal.CommandBatchPreparer.BatchCommands(IList`1 entries, IUpdateAdapter updateAdapter)+MoveNext()
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Hub.Api.Data.HubDb.SaveChangesAsync(CancellationToken ct) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Data/HubDb.cs:line 1267
+   at Hub.Tests.Api.AdminUserScreenTests.<>c__DisplayClass1_0.<<Seed>b__0>d.MoveNext() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/AdminUserScreenTests.cs:line 38
+--- End of stack trace from previous location ---
+   at Hub.Tests.Api.HubFactory.DbAsync[T](Func`2 f) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 104
+   at Hub.Tests.Api.AdminUserScreenTests.Seed(HubFactory f) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/AdminUserScreenTests.cs:line 16
+   at Hub.Tests.Api.AdminUserScreenTests.Structure_on_uses_target_scope_with_overlap_self_and_existing_closed_unit_behavior(Boolean indirect, Int32 expected) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/AdminUserScreenTests.cs:line 74
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:16.49]     Hub.Tests.Api.AdminUserScreenTests.Structure_on_uses_target_scope_with_overlap_self_and_existing_closed_unit_behavior(indirect: False, expected: 4) [FAIL]
+  Failed Hub.Tests.Api.AdminUserScreenTests.Structure_on_uses_target_scope_with_overlap_self_and_existing_closed_unit_behavior(indirect: False, expected: 4) [4 s]
+  Error Message:
+   System.InvalidOperationException : Unable to save changes because a circular dependency was detected in the data to be saved: 'AppUser [Added] <-
+ForeignKeyConstraint { 'leader_id' } OrgUnit [Added] <-
+ForeignKeyConstraint { 'unit_id' } AppUser [Added]To show additional information call 'DbContextOptionsBuilder.EnableSensitiveDataLogging'.'.
+  Stack Trace:
+     at Microsoft.EntityFrameworkCore.Utilities.Multigraph`2.ThrowCycle(List`1 cycle, Func`2 formatCycle, Func`2 formatException)
+   at Microsoft.EntityFrameworkCore.Utilities.Multigraph`2.TopologicalSortCore(Boolean withBatching, Func`4 canBreakEdges, Func`2 formatCycle, Func`2 formatException)
+   at Microsoft.EntityFrameworkCore.Utilities.Multigraph`2.BatchingTopologicalSort(Func`4 canBreakEdges, Func`2 formatCycle, Func`2 formatException)
+   at Microsoft.EntityFrameworkCore.Update.Internal.CommandBatchPreparer.TopologicalSort(IEnumerable`1 commands)
+   at Microsoft.EntityFrameworkCore.Update.Internal.CommandBatchPreparer.BatchCommands(IList`1 entries, IUpdateAdapter updateAdapter)+MoveNext()
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Hub.Api.Data.HubDb.SaveChangesAsync(CancellationToken ct) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Data/HubDb.cs:line 1267
+   at Hub.Tests.Api.AdminUserScreenTests.<>c__DisplayClass1_0.<<Seed>b__0>d.MoveNext() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/AdminUserScreenTests.cs:line 38
+--- End of stack trace from previous location ---
+   at Hub.Tests.Api.HubFactory.DbAsync[T](Func`2 f) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 104
+   at Hub.Tests.Api.AdminUserScreenTests.Seed(HubFactory f) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/AdminUserScreenTests.cs:line 16
+   at Hub.Tests.Api.AdminUserScreenTests.Structure_on_uses_target_scope_with_overlap_self_and_existing_closed_unit_behavior(Boolean indirect, Int32 expected) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/AdminUserScreenTests.cs:line 74
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:22.58]     Hub.Tests.Api.AdminUserScreenTests.Http_screen_is_admin_only_coherent_and_absent_off_without_removing_old_fields [FAIL]
+  Failed Hub.Tests.Api.AdminUserScreenTests.Http_screen_is_admin_only_coherent_and_absent_off_without_removing_old_fields [6 s]
+  Error Message:
+   System.InvalidOperationException : Unable to save changes because a circular dependency was detected in the data to be saved: 'AppUser [Added] <-
+ForeignKeyConstraint { 'leader_id' } OrgUnit [Added] <-
+ForeignKeyConstraint { 'unit_id' } AppUser [Added]To show additional information call 'DbContextOptionsBuilder.EnableSensitiveDataLogging'.'.
+  Stack Trace:
+     at Microsoft.EntityFrameworkCore.Utilities.Multigraph`2.ThrowCycle(List`1 cycle, Func`2 formatCycle, Func`2 formatException)
+   at Microsoft.EntityFrameworkCore.Utilities.Multigraph`2.TopologicalSortCore(Boolean withBatching, Func`4 canBreakEdges, Func`2 formatCycle, Func`2 formatException)
+   at Microsoft.EntityFrameworkCore.Utilities.Multigraph`2.BatchingTopologicalSort(Func`4 canBreakEdges, Func`2 formatCycle, Func`2 formatException)
+   at Microsoft.EntityFrameworkCore.Update.Internal.CommandBatchPreparer.TopologicalSort(IEnumerable`1 commands)
+   at Microsoft.EntityFrameworkCore.Update.Internal.CommandBatchPreparer.BatchCommands(IList`1 entries, IUpdateAdapter updateAdapter)+MoveNext()
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Hub.Api.Data.HubDb.SaveChangesAsync(CancellationToken ct) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Data/HubDb.cs:line 1267
+   at Hub.Tests.Api.AdminUserScreenTests.<>c__DisplayClass1_0.<<Seed>b__0>d.MoveNext() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/AdminUserScreenTests.cs:line 38
+--- End of stack trace from previous location ---
+   at Hub.Tests.Api.HubFactory.DbAsync[T](Func`2 f) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 104
+   at Hub.Tests.Api.AdminUserScreenTests.Seed(HubFactory f) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/AdminUserScreenTests.cs:line 16
+   at Hub.Tests.Api.AdminUserScreenTests.Http_screen_is_admin_only_coherent_and_absent_off_without_removing_old_fields() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/AdminUserScreenTests.cs:line 89
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:24.34]     Hub.Tests.Api.TemplateVersionProvenanceTests.Successful_old_POST_receipts_contain_no_new_feature_payload_when_replayed_after_flags_turn_off [FAIL]
+  Failed Hub.Tests.Api.TemplateVersionProvenanceTests.Successful_old_POST_receipts_contain_no_new_feature_payload_when_replayed_after_flags_turn_off [8 s]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: /api/v1/templates/01a19cc4-2128-7d88-9b73-525ef40aed6e
+Actual:   null
+  Stack Trace:
+     at Hub.Tests.Api.TemplateVersionProvenanceTests.Successful_old_POST_receipts_contain_no_new_feature_payload_when_replayed_after_flags_turn_off() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/TemplateVersionProvenanceTests.cs:line 103
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:26.44]     Hub.Tests.Api.AdminUserScreenTests.Structure_off_is_direct_reports_even_for_mixed_admin_and_capacity_is_only_base_configuration [FAIL]
+  Failed Hub.Tests.Api.AdminUserScreenTests.Structure_off_is_direct_reports_even_for_mixed_admin_and_capacity_is_only_base_configuration [3 s]
+  Error Message:
+   System.InvalidOperationException : Unable to save changes because a circular dependency was detected in the data to be saved: 'AppUser [Added] <-
+ForeignKeyConstraint { 'leader_id' } OrgUnit [Added] <-
+ForeignKeyConstraint { 'unit_id' } AppUser [Added]To show additional information call 'DbContextOptionsBuilder.EnableSensitiveDataLogging'.'.
+  Stack Trace:
+     at Microsoft.EntityFrameworkCore.Utilities.Multigraph`2.ThrowCycle(List`1 cycle, Func`2 formatCycle, Func`2 formatException)
+   at Microsoft.EntityFrameworkCore.Utilities.Multigraph`2.TopologicalSortCore(Boolean withBatching, Func`4 canBreakEdges, Func`2 formatCycle, Func`2 formatException)
+   at Microsoft.EntityFrameworkCore.Utilities.Multigraph`2.BatchingTopologicalSort(Func`4 canBreakEdges, Func`2 formatCycle, Func`2 formatException)
+   at Microsoft.EntityFrameworkCore.Update.Internal.CommandBatchPreparer.TopologicalSort(IEnumerable`1 commands)
+   at Microsoft.EntityFrameworkCore.Update.Internal.CommandBatchPreparer.BatchCommands(IList`1 entries, IUpdateAdapter updateAdapter)+MoveNext()
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Hub.Api.Data.HubDb.SaveChangesAsync(CancellationToken ct) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Data/HubDb.cs:line 1267
+   at Hub.Tests.Api.AdminUserScreenTests.<>c__DisplayClass1_0.<<Seed>b__0>d.MoveNext() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/AdminUserScreenTests.cs:line 38
+--- End of stack trace from previous location ---
+   at Hub.Tests.Api.HubFactory.DbAsync[T](Func`2 f) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 104
+   at Hub.Tests.Api.AdminUserScreenTests.Seed(HubFactory f) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/AdminUserScreenTests.cs:line 16
+   at Hub.Tests.Api.AdminUserScreenTests.Structure_off_is_direct_reports_even_for_mixed_admin_and_capacity_is_only_base_configuration() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/AdminUserScreenTests.cs:line 55
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:52.86]     Hub.Tests.Api.TemplateDraftDiffTests.Every_structural_kind_uses_recorded_identity_including_basis_remove_add_roles_order_and_working_day_header [FAIL]
+  Failed Hub.Tests.Api.TemplateDraftDiffTests.Every_structural_kind_uses_recorded_identity_including_basis_remove_add_roles_order_and_working_day_header [6 s]
+  Error Message:
+   Assert.Equal() Failure: Collections differ
+                                                    ↓ (pos 1)
+Expected: string[]                        ["Basis", "Dependency", "Deliverable", "Discipline", "Header", ···]
+Actual:   OrderedIterator<string, string> ["Basis", "Deliverable", "Dependency", "Discipline", "Header", ···]
+                                                    ↑ (pos 1)
+  Stack Trace:
+     at Hub.Tests.Api.TemplateDraftDiffTests.Every_structural_kind_uses_recorded_identity_including_basis_remove_add_roles_order_and_working_day_header() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/TemplateDraftDiffTests.cs:line 127
+--- End of stack trace from previous location ---
+Results File: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint28-runtime/test-results/g56-focused1.trx
+
+Failed!  - Failed:     6, Passed:    70, Skipped:     0, Total:    76, Duration: 1 m 42 s - Hub.Tests.dll (net10.0)

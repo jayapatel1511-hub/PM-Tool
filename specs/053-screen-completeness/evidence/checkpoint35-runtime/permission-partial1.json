@@ -1,0 +1,20 @@
+{
+  "exitCode": 0,
+  "args": [
+    "python3",
+    "tools/check_permission_explainer_coverage.py"
+  ],
+  "atUtc": "2026-11-03T06:38:13.783664+00:00",
+  "elapsedSeconds": 0.16,
+  "errors": [],
+  "tail": [
+    "  ],",
+    "  \"sections\": 4,",
+    "  \"rows\": 83,",
+    "  \"canonicalMethods\": 81,",
+    "  \"operations\": 257,",
+    "  \"evaluatedOperations\": 0,",
+    "  \"manifestFormat\": 2",
+    "}"
+  ]
+}

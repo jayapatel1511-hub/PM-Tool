@@ -1,0 +1,18 @@
+{
+  "web/src/i18n/en.ts": {
+    "allocationCapacity.title": "Weekly capacity before and after",
+    "allocationCapacity.basis": "Proposal dates: {from}\u2013{through}. Figures cover each full Monday\u2013Sunday week; the proposal applies only within its chosen dates. Load uses confirmed allocations and task estimates, with linked work counted once. Other proposed allocations are excluded. Over-capacity marks use the existing daily confirmation rule. Saving recalculates; confirmation is unchanged.",
+    "allocationCapacity.partial": "Some work is outside your project access. Available hours are shown where known; before, after and overload cannot be assessed. No hidden work details are included.",
+    "allocationCapacity.unavailable": "A changed allocation calendar prevents a reliable load calculation. Before, after and overload are unavailable.",
+    "allocationCapacity.incomplete": "Load figures are known subtotals. Active work includes {unestimated} unestimated tasks and {undated} tasks with no due date; an unmarked week is not proof of spare capacity.",
+    "allocationCapacity.provisional": "Some availability is provisional. Those weeks show availability and overload as unavailable until reconciled.",
+    "allocationCapacity.completeProposal": "Choose the linked work and complete the proposal to compare the after load.",
+    "allocationCapacity.available": "Available",
+    "allocationCapacity.before": "Load before",
+    "allocationCapacity.after": "Load after",
+    "allocationCapacity.assessment": "Daily capacity check",
+    "allocationCapacity.over": "Over capacity",
+    "allocationCapacity.within": "No daily overload",
+    "allocationCapacity.knownHours": "{hours} known"
+  }
+}

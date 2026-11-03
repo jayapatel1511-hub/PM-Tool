@@ -1,0 +1,7 @@
+{
+  "atUtc": "2026-11-02T10:11:26.073741+00:00",
+  "file": "web/tests/review-register.cjs",
+  "sha256": "20e435e1c6d2fb20659fc5d68509bede9ac2071b68519d2cfec8d055578ea98b",
+  "repair": "Actual expanded/hidden/natural trigger-focus settling between filters; all assertions preserved",
+  "status": "READY_HOLD"
+}

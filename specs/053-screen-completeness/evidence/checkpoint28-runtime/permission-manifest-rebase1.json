@@ -1,0 +1,6 @@
+{
+  "path": "src/Hub.Api/Features/Admin.cs",
+  "before": "c92a1fe1edadcefde89f3f726a9fbcc790d99108d9b90a56d2b1449c4fe26961",
+  "after": "4b6560ba40be43bf78ac10129da1ce4e0f7d2235329b3d64be455afa210278d1",
+  "reason": "Root shared Admin DTO/snapshot/helper/map/catalogue additions occurred after D guard capture. Independent root shared +D source reviews confirm unchanged canonical permission bodies/guards. Update only observed whole-file fingerprint; all pending rows/guards and policy completion gaps unchanged."
+}

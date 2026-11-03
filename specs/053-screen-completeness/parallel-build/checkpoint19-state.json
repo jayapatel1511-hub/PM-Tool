@@ -1,0 +1,120 @@
+{
+  "checkpoint": 19,
+  "generation": 23,
+  "mode": "checkpoint19 closed; all source held; full goal active/incomplete",
+  "goal": "active/incomplete; no commit/push/deploy/activation",
+  "previous": "checkpoint18closed;S32checked;05321locallychecked;052broadvisualacceptanceopen",
+  "lanes": {
+    "A": "ALL SOURCE HELD23; next named loan pending",
+    "B": "ALL SOURCE HELD23; next named loan pending",
+    "C": "ALL SOURCE HELD23; next named loan pending",
+    "D": "ALL SOURCE HELD23; next named loan pending"
+  },
+  "root_authored": [
+    "AppUser3nullableJsonIgnoredfields; CertificationTag/UserCertificationmodel/DbSets/constraints",
+    "OrgSettings2windows30/60,capacitygatevisible+writable;noexistingbackfill",
+    "2newrecorddeclarations+AppUserauditfields;UserCertificationadmincategory",
+    "AdmincertificationTagGETPOSTPATCH,noUsage/noPeopleCounts;Idempotency2personal+1vocabpre-replayguard",
+    "PersonFacts.Map Modules;optionalAdmin/Staff/WorkspaceTeamfacts;pickerdate-onlynotices;alreadyfilteredIDs;capacity-onlyRR",
+    "WorkspaceTeamtagfilterrawstringignoreoff,emptyclear,strictconfigurednonemptyon",
+    "MyWorkgroupSavedViewwhitelist;TaskFiltergroupmetadata",
+    "Rootmaxintpageoverflowrepair/testbeforeBSQLreplacement",
+    "Reportdependencycache+3S29cachetypes andactualQueryClienttest",
+    "C7UI/D5server/root8auditsettinglabelsmerged",
+    "ProjectIndex redirectpreservesquery/hash/statebothflags"
+  ],
+  "pending": [
+    "S11-B selectable columns and exact Submission date",
+    "S29 FR50 custom/native authorised candidate bridges",
+    "Utility sidebar required user answer",
+    "All other unchecked packet slices and broad052 acceptance"
+  ],
+  "services": {
+    "QA18": "API5088/dev8854stopped;hub_qa_checkpoint18dropped;nohub_test_*remainsatcheckpoint18cleanup",
+    "preserved": "testPG55432,staticpreview8853,reviewDB55433,prototypes",
+    "QA19": "API5088/session76132/PID48593 anddev8854/session70428/PID46930stopped; onlyhub_qa_checkpoint19dropped; nohub_test_* remains"
+  },
+  "verification": {
+    "apiDistinctPassing": 92,
+    "apiWithoutPassing": 0,
+    "nodeCache": 12,
+    "ui": "finalbuild3,app/fixturetypes,lint,SSR PASS; warningsremain",
+    "browserSuites": 12,
+    "reportFirstRowsRemainingSix": [
+      363.5,
+      379.5,
+      391.5,
+      379.5,
+      379.5,
+      401.5
+    ],
+    "realReportFirstRows": [
+      379.5,
+      379.5,
+      379.5,
+      363.5
+    ],
+    "sourceReviews": "all material P1/P2 closed",
+    "csharpFrozenUnchanged": 542,
+    "specTrace": "PASS1546IDs/438sections/0unknown",
+    "realLimits": "native/custom picker unimplemented; real metric focus notmeasured; earlier Total0 notactualdata"
+  },
+  "csharp_manifest": "/private/tmp/tuesday-checkpoint19-csharp-freeze.json",
+  "csharp_count": 542,
+  "csharp_ack": [
+    "A explicit21 message",
+    "B explicit21 message",
+    "C explicit21 status",
+    "D explicit21 status"
+  ],
+  "backend_review": {
+    "C": "no remainingP1P2 after endpoint-aware pager repair/re-review",
+    "B": "noP1P2 after SQL bounded rewrite; root4dimension cases independently reviewed;13prepared runtimecases",
+    "D_root": "no productionP1P2; canonicalRemoved actor/snapshot testrepair independently closed;8D+3foundationcases prepared"
+  },
+  "root_source_repairs": [
+    "Report Prepare caller-specific page/pageSize allowance; Run/export strict guards retained",
+    "S29 physical removal expectedRemoved plus actor/user/tag/expiry snapshot",
+    "Task grouping added3dimension theory rows and direct/inherited/no-milestone/foreign-refusal case"
+  ],
+  "focused_api": {
+    "initial": "41PASS/1fixturefailure, privacy createdOpen because wizard ignores visibility",
+    "repaired": "1PASS through normal enableRestricted/PMvisibilityPATCH +membership removal; all42distinctPASS",
+    "logs": [
+      "/private/tmp/tuesday-checkpoint19-api-focused.log",
+      "/private/tmp/tuesday-checkpoint19-api-privacy-repaired.log"
+    ],
+    "no_product_guard_relaxed": true
+  },
+  "migration": "20261101062102_ScreenPersonFacts; additive3nullablecolumns/2tables, independent noP1P2; actualDBconstraints casesPASS",
+  "compiler": "Build2PASS 52s/0errors; warningsremain. Initial sandboxstall stopped; elevatedsingleprocess compiler used",
+  "frontend_reviews": "D two P2 repairs closed incl canonicalversion0; root optionalFilterBarlead and consistent active-picker fixture independently noP1P2",
+  "contracts": "Reviewed exact8newpaths/10newschemas/PageOfRow->ListPage/optionalpersonfacts; fresh50subset includes2goldens PASS; npmgenPASS",
+  "browser_passes": [
+    "task-grouping",
+    "capacity-person-facts run5",
+    "visual-drawer run2",
+    "visual-route-matrix449/nineprofiles",
+    "visual-layout run6",
+    "visual-navigation",
+    "visual-tabs",
+    "workspace",
+    "team"
+  ],
+  "browser_pending": [
+    "remaining6reports after compactheaderrepair",
+    "first6report/catalogue regressions after finalbuild",
+    "realQA exactgroup50/selfUIcreate/AdminUIenddate/directorypicker/reportmetricreturn followup"
+  ],
+  "csharp_hash_validation": "542 unchanged after all current UI/script repairs",
+  "spec_check": "PASS1546IDs/438sections/0unknown",
+  "real_qa_initial": "Observed normal synthetic setup/report rows/Team/AdminAllStaff/panelreturn; missing exact group50/selfUIcreate/enddatewindow/picker/metricreturn sent for followup. Initialrawpartial retained.",
+  "local053checked": 22,
+  "checkedThisCheckpoint": [
+    "S23"
+  ],
+  "build_hashes": {
+    "api": "4a6328a7a8f4fd1552ff42b37ef715356ea17745ebf4ba8a24452055c847f276",
+    "ui_manifest": "e0dc4df3e750b2d258607a20bfe2288dd80da3c6e5d37c334867a9e31148849e"
+  }
+}

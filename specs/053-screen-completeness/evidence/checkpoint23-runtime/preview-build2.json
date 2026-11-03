@@ -1,0 +1,6 @@
+{
+  "baseUrl": "http://127.0.0.1:8853",
+  "htmlSha256": "db752bc9ddfa9305e8b468d2f01b00881e36d0b0968bdae108d382ea2639e2dd",
+  "entryAssetCount": 52,
+  "status": "PASS build2 HTML+entry assets identical to owned preview"
+}

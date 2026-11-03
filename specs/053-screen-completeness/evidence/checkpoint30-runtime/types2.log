@@ -1,0 +1,1 @@
+src/pages/projects/TaskPanel.tsx(118,162): error TS2339: Property 'isError' does not exist on type 'never'.

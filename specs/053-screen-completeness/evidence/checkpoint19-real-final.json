@@ -1,0 +1,24 @@
+{
+  "base": "http://127.0.0.1:5088",
+  "project": "SYN-JOIN19-1101",
+  "setup": {
+    "tasks": 4,
+    "disciplineGroups": {"Civil": {"tasks": 2, "hours": 20}, "Geotechnical": {"tasks": 2, "hours": 20}},
+    "normalSchedule": "Omar 40h/week",
+    "personFacts": {"Omar": "Synthetic QA19 Certification, expires in 20 days", "Jill": "Co-op, starts 2026-12-01"}
+  },
+  "reports": {
+    "workloadEmployee": {"rows": 2, "AlexOpenTasks": 2, "OmarOpenTasks": 2, "AlexCommittedWeekHours": 20, "OmarCommittedWeekHours": 20, "firstRowY": 395.5, "firstRowWidth": 11854.5},
+    "workloadDiscipline": {"rows": 2, "CivilHours": 20, "GeotechnicalHours": 20, "firstRowY": 395.5, "firstRowWidth": 1780.8125},
+    "taskHours": {"viewer": "Alex", "rows": 2, "taskInput": "SYN-JOIN19-1101-T0001 · SYN-JOIN19 CIV task 1 · 2026-11-03 · 2h", "firstRowY": 383.5, "firstRowWidth": 854},
+    "taskPanel": {"openedNonFirstTask": true, "closePreservedExactURL": true}
+  },
+  "peopleUI": {
+    "TeamAsPriya": {"OmarVisible": true, "certificationVisible": true, "expiryVisible": "Expires in 20 days"},
+    "StaffAsJordanAdmin": {"allStaffVisible": true, "JillVisible": true, "jillCoopStartVisible": "Co-op · Starts 2026-12-01", "OmarCertificationVisible": true},
+    "limitation": "Priya My Staff correctly returned 403; Jordan Admin All staff was used for the authorized directory check. Picker coverage was not claimed."
+  },
+  "reflow": {"employeeScreenshotCaptured1440And375": true, "reportGeometryObserved": true},
+  "errors": [],
+  "mutationsDuringBrowserJourneys": []
+}

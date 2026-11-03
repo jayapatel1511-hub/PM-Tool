@@ -1,0 +1,6 @@
+{
+  "workActivity.actorUnavailable": "Actor unavailable",
+  "workActivity.timeUnavailable": "Time unavailable",
+  "workActivity.commentsUnavailable": "Comment count unavailable",
+  "workActivity.openComments": "Open Comments for {key} ({n})"
+}

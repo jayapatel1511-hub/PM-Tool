@@ -1,0 +1,5 @@
+{
+  "tests/Hub.Tests/Api/TemplateVersionProvenanceTests.cs": "abe145ca195335f8c4b2971e0649ca4b1b258454234933e64fffbd83607db692",
+  "tests/Hub.Tests/Api/TemplateDraftDiffTests.cs": "d1f1016f5d91287c8705661e9e940e95b5c70cdf48294dad714fce54c13ca60a",
+  "tests/Hub.Tests/Api/AdminUserScreenTests.cs": "15f6cc13e7d7cc679080e2a9800a6e20603c37efde692e4ff6fe2407ebe8a43e"
+}

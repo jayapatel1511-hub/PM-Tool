@@ -1,0 +1,9 @@
+{
+  "status": "READY_HOLD_ROOT_HASH_VERIFIED",
+  "files": {
+    "tests/Hub.Tests/Api/TemplateVersionProvenanceTests.cs": "e855d4f50656fb167923c117b0e10f9de838a472169f479054c44b2e2fc2ce6e",
+    "tests/Hub.Tests/Api/TemplateDraftDiffTests.cs": "cbe596654eeb79240e46e1c21ab59c15a889764ebf6c191cff0d96d213c1a183",
+    "tests/Hub.Tests/Api/AdminUserScreenTests.cs": "08b31b2e0f2e38271bef12dcb75a9ef3b79993d07711db259be73d449eb43def"
+  },
+  "appChanges": false
+}

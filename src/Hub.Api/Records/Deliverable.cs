@@ -2,7 +2,7 @@ using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 namespace Hub.Api.Records;
-public static class DeliverableRecord { public static RegistryEntry Entry { get; } = new(typeof(Hub.Api.Data.Deliverable), "Deliverable", ["Name", "ProjectDisciplineId", "DeliverableTypeId", "Description", "OwnerId", "ReviewerId", "MilestoneId", "StartDate", "DueDate", "Priority", "Status", "Revision", "IssuedDate", "IssuedTo", "TransmittalUrl", "AcceptedDate", "OnHoldReason", "CancelledReason", "RequiresReview", "RequiredReviewPackageId", "StartedAt", "DeletedAt", "CurrentBaselineId", "BaselineStartDate", "BaselineDueDate"], true, null)
+public static class DeliverableRecord { public static RegistryEntry Entry { get; } = new(typeof(Hub.Api.Data.Deliverable), "Deliverable", ["Name", "ProjectDisciplineId", "DeliverableTypeId", "Description", "OwnerId", "ReviewerId", "MilestoneId", "StartDate", "DueDate", "Priority", "Status", "Revision", "IssuedDate", "IssuedTo", "TransmittalUrl", "AcceptedDate", "OnHoldReason", "CancelledReason", "RequiresReview", "RequiredReviewPackageId", "ClientDrawingNumber", "StartedAt", "DeletedAt", "CurrentBaselineId", "BaselineStartDate", "BaselineDueDate"], true, null)
     {
         NameOrder = 4,
         Names = async (db, list) => (await db.Deliverables.IgnoreQueryFilters().Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.Key, x.Name }).ToListAsync()).Select(x => (x.Id, $"{x.Key} {x.Name}")),

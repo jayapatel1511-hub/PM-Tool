@@ -1,0 +1,4 @@
+{
+  "exitCode": 1,
+  "boundary": "Actual isolated SPA + explicit synthetic API; no Kestrel or persistence claim"
+}

@@ -1,0 +1,163 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - `__dirname` (vite.config.ts:12:41). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+vite v8.3.1 building client environment for production...
+transforming...
+✓ 2522 modules transformed.
+rendering chunks...
+computing gzip size...
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/index.html                                          4.27 kB │ gzip:   0.99 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/IBMPlexMono-Regular-Du0PCiXT.woff2          49.24 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/IBMPlexMono-Medium-CiYsa3y2.woff2           50.40 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/IBMPlexMono-SemiBold-CT2p8cOJ.woff2         50.60 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/.vite/manifest.json                                50.81 kB │ gzip:   5.04 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/IBMPlexSans-Regular-BiEB_oxT.woff2          63.02 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/IBMPlexSans-Medium-BQLKo0ot.woff2           66.74 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/IBMPlexSans-SemiBold-KfaJl9PC.woff2         67.06 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Time-CbSQmF5r.css                            0.64 kB │ gzip:   0.26 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/title-block-hdyxJNMI.css                     1.26 kB │ gzip:   0.42 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Staff-CcxsPuBK.css                           1.81 kB │ gzip:   0.45 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/pills-GRc589h_.css                           1.84 kB │ gzip:   0.44 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/count-card-iiayh2De.css                      2.44 kB │ gzip:   0.73 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/visual-tabs-Droa3Yn1.css                     3.03 kB │ gzip:   0.65 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Portfolio-C86c8S7c.css                       4.98 kB │ gzip:   1.14 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Reports-C9L1fA_m.css                         5.27 kB │ gzip:   1.37 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Home-C0xDwDht.css                           10.00 kB │ gzip:   2.25 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Entrance-ChlWH_uU.css                       25.58 kB │ gzip:   5.29 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/index-DP5TSq-I.css                         130.74 kB │ gzip:  22.72 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/BrowserPerformanceMeasurement-CRRdnzEp.js    0.11 kB │ gzip:   0.09 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/chevron-left-h9EMov6r.js                     0.15 kB │ gzip:   0.16 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/plus-CDwvD1Jq.js                             0.18 kB │ gzip:   0.16 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/arrow-right-DtdedXik.js                      0.19 kB │ gzip:   0.17 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/check-check-D4AD3cbf.js                      0.20 kB │ gzip:   0.18 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/download-CARO-rfn.js                         0.26 kB │ gzip:   0.21 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/link-2-BEV8HdK9.js                           0.27 kB │ gzip:   0.22 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/arrow-up-down-dmQWDq1J.js                    0.27 kB │ gzip:   0.21 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/monitor-BdxdPkhO.js                          0.28 kB │ gzip:   0.22 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/circle-alert-Bgs4CsaH.js                     0.30 kB │ gzip:   0.21 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/pencil-Df9A1Uru.js                           0.30 kB │ gzip:   0.24 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/arrow-up-CmzUjodz.js                         0.32 kB │ gzip:   0.22 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/discipline-colour-B7Cu5WgU.js                0.32 kB │ gzip:   0.19 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/users-y0rBzz7v.js                            0.33 kB │ gzip:   0.24 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/shield-check-DSvof4Aw.js                     0.34 kB │ gzip:   0.26 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/item-mark-Caof5MsZ.js                        0.35 kB │ gzip:   0.25 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/calendar-clock-BXSu1R5o.js                   0.41 kB │ gzip:   0.27 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/schedule-note-Dy8QpNCl.js                    0.43 kB │ gzip:   0.27 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/NotFound-Cyd4pki0.js                         0.43 kB │ gzip:   0.28 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/layers-CmKzGc9V.js                           0.47 kB │ gzip:   0.27 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/square-check-big-JyruzktX.js                 0.47 kB │ gzip:   0.31 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/star-15gSgMC_.js                             0.50 kB │ gzip:   0.31 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/page-mode-FL9Mfqt4.js                        0.50 kB │ gzip:   0.33 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/calendar-days-DZrvoybu.js                    0.52 kB │ gzip:   0.28 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/data-BsPU0BEu.js                             0.55 kB │ gzip:   0.35 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/rolldown-runtime-hePW80VL.js                 0.71 kB │ gzip:   0.42 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/input-89V9EC3Z.js                            0.83 kB │ gzip:   0.45 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/export-BV1vhXDM.js                           0.90 kB │ gzip:   0.50 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/CopyStructure-DbMpO5vH.js                    1.00 kB │ gzip:   0.55 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/square-kanban-D_3-Ylqh.js                    1.00 kB │ gzip:   0.48 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/useOrgPlacement-BVGCwX9z.js                  1.03 kB │ gzip:   0.55 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/scale-DvBDlX4Z.js                            1.07 kB │ gzip:   0.52 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/useInfiniteQuery-CwzqyL7A.js                 1.11 kB │ gzip:   0.47 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/title-block-MQBuu3mQ.js                      1.14 kB │ gzip:   0.66 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/preload-helper-BZ1Pz5am.js                   1.21 kB │ gzip:   0.69 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/drafts-B9qAPL8h.js                           1.33 kB │ gzip:   0.72 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/drafts-CBCLq6oi.js                           1.79 kB │ gzip:   0.77 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/count-card-DrxDQsva.js                       1.95 kB │ gzip:   0.86 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/useMutation-D7COPQQz.js                      2.41 kB │ gzip:   1.01 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/project-status-note-Dlt7YQhO.js              2.50 kB │ gzip:   1.13 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Health-DYWKiXZI.js                           2.70 kB │ gzip:   1.15 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/AuditChains-B0uKiDwU.js                      3.26 kB │ gzip:   1.18 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/extension-slots-DXS5C-C3.js                  3.41 kB │ gzip:   1.40 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Organisation-DDp9_rHc.js                     3.42 kB │ gzip:   1.29 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/team-organisation-controls-EV_ZMZ1U.js       3.54 kB │ gzip:   1.48 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Operations-C3qUkQHC.js                       3.80 kB │ gzip:   1.44 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/pills-BUoBeyuY.js                            3.92 kB │ gzip:   1.51 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Holidays-BVROhttm.js                         4.39 kB │ gzip:   1.71 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/checkbox-CcvWZbS3.js                         4.61 kB │ gzip:   1.95 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/switch-NhJ8m355.js                           4.62 kB │ gzip:   1.92 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/person-panel-trigger-Yt5tCWy4.js             4.79 kB │ gzip:   2.19 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/TimeAwayDialog-BPH4Ya8J.js                   4.92 kB │ gzip:   2.09 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Pickup-Csl7_NCO.js                           5.26 kB │ gzip:   1.93 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/ReassignWork-B333kISc.js                     5.29 kB │ gzip:   2.28 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/ProjectActivity-Bh_ws_iA.js                  5.70 kB │ gzip:   2.08 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/WorkspaceTeam-CRVUjj4O.js                    5.84 kB │ gzip:   2.41 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/activity-F36ek24Z.js                         6.03 kB │ gzip:   2.14 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/person-panel-elc7SUy9.js                     6.34 kB │ gzip:   2.21 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/AdminReview-Cnn2JFMQ.js                      6.37 kB │ gzip:   2.17 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/views-ZST5DYQj.js                            6.99 kB │ gzip:   2.69 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/project-list-details-BPeNoqyk.js             7.14 kB │ gzip:   2.38 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/comments-BY_Uo6Ys.js                         7.60 kB │ gzip:   2.91 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/template-version-provenance-B0u5OMLr.js      8.48 kB │ gzip:   2.71 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/keys-BhnO2UR-.js                             8.60 kB │ gzip:   2.40 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/CoordinationRegister-JDb8IG29.js             9.66 kB │ gzip:   3.35 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/auth-Du4Y84vt.js                             9.78 kB │ gzip:   3.94 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/FromTemplate-BBIO0llP.js                    11.49 kB │ gzip:   3.45 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Structure-C34erF9c.js                       11.90 kB │ gzip:   2.90 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Files-CcSwyipf.js                           12.57 kB │ gzip:   4.03 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/person-facts-editor-CHtm7Dbc.js             13.33 kB │ gzip:   3.89 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/search-DwmFzfOl.js                          13.60 kB │ gzip:   5.45 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Search-B_kLh4D4.js                          14.05 kB │ gzip:   4.63 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/workspace-CZfzDipY.js                       15.46 kB │ gzip:   5.57 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/links-DeXZ8K-4.js                           18.57 kB │ gzip:   5.74 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Notifications-CSx7nDi7.js                   18.63 kB │ gzip:   5.46 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Gantt-4XBdQ0FY.js                           18.77 kB │ gzip:   6.54 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Staff-DVrz0X9P.js                           21.49 kB │ gzip:   6.51 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Dashboard-Cp9VVipg.js                       21.54 kB │ gzip:   6.11 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/ProjectSettings-C8sRpWWR.js                 21.59 kB │ gzip:   6.03 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Preferences-DjNu9h2X.js                     22.11 kB │ gzip:   5.73 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Team-DW11PF4R.js                            22.77 kB │ gzip:   6.71 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/useQuery-BJVlqHtv.js                        22.98 kB │ gzip:   7.67 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Vacation-CramxcVe.js                        23.63 kB │ gzip:   6.97 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/WorkspaceTasks-DZsct5FI.js                  23.65 kB │ gzip:   7.34 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/people-zC831ZiM.js                          24.22 kB │ gzip:   9.00 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Entrance-zjeIMu_X.js                        24.55 kB │ gzip:   6.42 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Changes-DUmrbtlj.js                         24.56 kB │ gzip:   6.62 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Portfolio-CXCumxlC.js                       26.92 kB │ gzip:   7.57 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Time-CkKVH4J7.js                            27.90 kB │ gzip:   8.15 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Handoffs-CwzZg7k2.js                        30.38 kB │ gzip:   7.28 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Milestones-72ofW-5z.js                      31.18 kB │ gzip:   8.57 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/DesignBasis-BPRGZRdn.js                     32.28 kB │ gzip:   8.09 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Templates-DS5-WN7y.js                       32.95 kB │ gzip:   8.00 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/ProjectList-DO7mKD7u.js                     34.43 kB │ gzip:   9.26 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Workload-B1rcawGF.js                        36.57 kB │ gzip:   9.59 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Submissions-Bd2HWqc2.js                     37.76 kB │ gzip:   9.20 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Coordination-WEzortyj.js                    38.14 kB │ gzip:  10.55 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Planner-CueVweEn.js                         38.63 kB │ gzip:  10.44 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Reports-BbD_dI5h.js                         38.87 kB │ gzip:  11.03 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Timeline-1lA5Rdtx.js                        39.56 kB │ gzip:  11.82 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Home-D6lqNZpb.js                            40.10 kB │ gzip:  11.00 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Admin-C4NxsA3o.js                           43.59 kB │ gzip:  11.08 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Allocations-DRkjpo7f.js                     54.38 kB │ gzip:  13.39 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Readiness-CihaOOTC.js                       61.96 kB │ gzip:  14.31 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Decisions-3SsDJqoj.js                       62.99 kB │ gzip:  15.23 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Reviews-CNA6X8jN.js                         68.69 kB │ gzip:  16.50 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/Registers-B2W2J1NF.js                       72.30 kB │ gzip:  17.16 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/common-bVmW1Cvd.js                         272.66 kB │ gzip:  83.93 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/dist-BfBb9CKk.js                           284.94 kB │ gzip:  73.15 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/label-Uw89qtVv.js                          346.76 kB │ gzip: 100.68 kB
+../.review/checkpoint35-artifacts/bin/spa-wwwroot-build1/assets/index-DK0_AnUw.js                          879.31 kB │ gzip: 242.45 kB
+
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0msrc/pages/Calendar.tsx is dynamically imported by src/app/routes.tsx but also statically imported by src/components/hub/new-item.tsx, dynamic import will not move module into another chunk.
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0msrc/pages/projects/Deliverables.tsx is dynamically imported by src/app/registrations.tsx, src/app/routes.tsx but also statically imported by src/pages/projects/Milestones.tsx, src/pages/projects/TaskPanel.tsx, dynamic import will not move module into another chunk.
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0msrc/pages/projects/TaskPanel.tsx is dynamically imported by src/app/registrations.tsx, src/app/routes.tsx but also statically imported by src/pages/projects/Board.tsx, src/pages/projects/Tasks.tsx, dynamic import will not move module into another chunk.
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0msrc/pages/projects/Tasks.tsx is dynamically imported by src/app/routes.tsx but also statically imported by src/components/hub/new-item.tsx, src/pages/MyWork.tsx, src/pages/Pickup.tsx, src/pages/Planner.tsx, src/pages/ReassignWork.tsx, ..., dynamic import will not move module into another chunk.
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0msrc/components/hub/new-item.tsx is dynamically imported by src/app/registrations.tsx but also statically imported by src/pages/MyWork.tsx, src/pages/WorkspaceTasks.tsx, dynamic import will not move module into another chunk.
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0msrc/components/hub/notifications.tsx is dynamically imported by src/app/registrations.tsx but also statically imported by src/pages/MyWork.tsx, src/pages/Notifications.tsx, dynamic import will not move module into another chunk.
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0msrc/pages/projects/Board.tsx is dynamically imported by src/app/routes.tsx but also statically imported by src/pages/MyWork.tsx, src/pages/WorkspaceTasks.tsx, dynamic import will not move module into another chunk.
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0msrc/pages/projects/Meetings.tsx is dynamically imported by src/app/registrations.tsx, src/app/routes.tsx but also statically imported by src/pages/MyWork.tsx, src/pages/projects/Coordination.tsx, src/pages/projects/Registers.tsx, dynamic import will not move module into another chunk.
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0msrc/pages/projects/Follow.tsx is dynamically imported by src/app/registrations.tsx but also statically imported by src/pages/MyWork.tsx, src/pages/Preferences.tsx, dynamic import will not move module into another chunk.
+
+✓ built in 345ms

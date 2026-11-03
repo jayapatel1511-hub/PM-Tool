@@ -1,0 +1,4 @@
+  Determining projects to restore...
+  Restored /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Domain/Hub.Domain.csproj (in 25 ms).
+  Restored /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Hub.Tests.csproj (in 137 ms).
+  Restored /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Hub.Api.csproj (in 52 ms).

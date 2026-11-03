@@ -1,0 +1,41 @@
+Test run for /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint34-artifacts/bin/Hub.Tests/release/Hub.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:22.02]     Hub.Tests.Api.ExternalReviewTests.Future_issue_capture_is_private_even_off_and_historical_authority_does_not_follow_todays_owner [FAIL]
+  Failed Hub.Tests.Api.ExternalReviewTests.Future_issue_capture_is_private_even_off_and_historical_authority_does_not_follow_todays_owner [2 s]
+  Error Message:
+   System.NullReferenceException : Object reference not set to an instance of an object.
+  Stack Trace:
+     at Hub.Tests.Api.ExternalReviewTests.Ref(String list, String field, String value) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ExternalReviewTests.cs:line 33
+   at Hub.Tests.Api.ExternalReviewTests.New(Boolean presentationOn, Boolean package, Boolean start, String partyName) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ExternalReviewTests.cs:line 86
+   at Hub.Tests.Api.ExternalReviewTests.Future_issue_capture_is_private_even_off_and_historical_authority_does_not_follow_todays_owner() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ExternalReviewTests.cs:line 200
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:24.77]     Hub.Tests.Api.ExternalReviewTests.Removed_issue_scope_carries_through_a_later_round_without_repeating_the_old_removal_impact [FAIL]
+  Failed Hub.Tests.Api.ExternalReviewTests.Removed_issue_scope_carries_through_a_later_round_without_repeating_the_old_removal_impact [2 s]
+  Error Message:
+   Expected 200 but got 403: {"type":"https://hub.local/errors/forbidden","title":"Forbidden","status":403,"code":"forbidden","detail":"Only the Project Manager can do this.","traceId":"0HNPPCGOTGLKC"}
+  Stack Trace:
+     at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118
+   at Hub.Tests.Api.ReviewResponseFixture.Post(String who, String path, Object body, Int32 status) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReviewResponseTests.cs:line 254
+   at Hub.Tests.Api.ExternalReviewTests.Removed_issue_scope_carries_through_a_later_round_without_repeating_the_old_removal_impact() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ExternalReviewTests.cs:line 254
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:30.19]     Hub.Tests.Api.ExternalReviewTests.Actual_future_issue_authors_refuse_downgrade_with_55000_before_schema_data_or_history_changes [FAIL]
+  Failed Hub.Tests.Api.ExternalReviewTests.Actual_future_issue_authors_refuse_downgrade_with_55000_before_schema_data_or_history_changes [2 s]
+  Error Message:
+   System.NullReferenceException : Object reference not set to an instance of an object.
+  Stack Trace:
+     at Hub.Tests.Api.ExternalReviewTests.Ref(String list, String field, String value) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ExternalReviewTests.cs:line 33
+   at Hub.Tests.Api.ExternalReviewTests.New(Boolean presentationOn, Boolean package, Boolean start, String partyName) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ExternalReviewTests.cs:line 86
+   at Hub.Tests.Api.ExternalReviewTests.Actual_future_issue_authors_refuse_downgrade_with_55000_before_schema_data_or_history_changes() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ExternalReviewSchemaTests.cs:line 76
+--- End of stack trace from previous location ---
+[xUnit.net 00:01:20.61]     Hub.Tests.Api.ExternalReviewTests.Explicit_carry_keeps_incoming_identity_resets_response_and_rechecks_independence_against_both_issues [FAIL]
+  Failed Hub.Tests.Api.ExternalReviewTests.Explicit_carry_keeps_incoming_identity_resets_response_and_rechecks_independence_against_both_issues [3 s]
+  Error Message:
+   Expected 400 but got 200: {"id":"01a19fb3-fb00-7999-900d-6cae5edb3c1c","rowVersion":4}
+  Stack Trace:
+     at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118
+   at Hub.Tests.Api.ReviewResponseFixture.Post(String who, String path, Object body, Int32 status) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReviewResponseTests.cs:line 254
+   at Hub.Tests.Api.ExternalReviewTests.Explicit_carry_keeps_incoming_identity_resets_response_and_rechecks_independence_against_both_issues() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ExternalReviewTests.cs:line 232
+--- End of stack trace from previous location ---
+Results File: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint34-runtime/trx-external-provider1/external-provider1.trx
+
+Failed!  - Failed:     4, Passed:    22, Skipped:     0, Total:    26, Duration: 1 m 27 s - Hub.Tests.dll (net10.0)

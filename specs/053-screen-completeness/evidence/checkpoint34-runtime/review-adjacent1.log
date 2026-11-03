@@ -1,0 +1,41 @@
+Test run for /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint34-artifacts/bin/Hub.Tests/release/Hub.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:26.09]     Hub.Tests.Api.ReviewRegisterTests.Malformed_foreign_relationships_are_omitted_from_rows_counts_and_options(malformed: "deliverable") [FAIL]
+  Failed Hub.Tests.Api.ReviewRegisterTests.Malformed_foreign_relationships_are_omitted_from_rows_counts_and_options(malformed: "deliverable") [5 s]
+  Error Message:
+   Expected 200 but got 409: {"type":"https://hub.local/errors/review_register_integrity","title":"Conflict","status":409,"code":"review_register_integrity","detail":"The issued review provenance is incomplete or inconsistent.","traceId":"0HNPPD2UP9AIR"}
+  Stack Trace:
+     at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118
+   at Hub.Tests.Api.ReviewRegisterTests.Get(Guid project, String query, String who, Int32 status) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReviewRegisterTests.cs:line 24
+   at Hub.Tests.Api.ReviewRegisterTests.Malformed_foreign_relationships_are_omitted_from_rows_counts_and_options(String malformed) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReviewRegisterTests.cs:line 226
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:31.56]     Hub.Tests.Api.ReviewRegisterTests.Malformed_foreign_relationships_are_omitted_from_rows_counts_and_options(malformed: "round") [FAIL]
+  Failed Hub.Tests.Api.ReviewRegisterTests.Malformed_foreign_relationships_are_omitted_from_rows_counts_and_options(malformed: "round") [5 s]
+  Error Message:
+   Expected 200 but got 409: {"type":"https://hub.local/errors/review_register_integrity","title":"Conflict","status":409,"code":"review_register_integrity","detail":"The issued review provenance is incomplete or inconsistent.","traceId":"0HNPPD2UP9AL8"}
+  Stack Trace:
+     at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118
+   at Hub.Tests.Api.ReviewRegisterTests.Get(Guid project, String query, String who, Int32 status) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReviewRegisterTests.cs:line 24
+   at Hub.Tests.Api.ReviewRegisterTests.Malformed_foreign_relationships_are_omitted_from_rows_counts_and_options(String malformed) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReviewRegisterTests.cs:line 226
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:37.29]     Hub.Tests.Api.ReviewRegisterTests.Malformed_foreign_relationships_are_omitted_from_rows_counts_and_options(malformed: "source") [FAIL]
+  Failed Hub.Tests.Api.ReviewRegisterTests.Malformed_foreign_relationships_are_omitted_from_rows_counts_and_options(malformed: "source") [5 s]
+  Error Message:
+   Expected 200 but got 409: {"type":"https://hub.local/errors/review_register_integrity","title":"Conflict","status":409,"code":"review_register_integrity","detail":"The issued review provenance is incomplete or inconsistent.","traceId":"0HNPPD2UP9AN8"}
+  Stack Trace:
+     at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118
+   at Hub.Tests.Api.ReviewRegisterTests.Get(Guid project, String query, String who, Int32 status) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReviewRegisterTests.cs:line 24
+   at Hub.Tests.Api.ReviewRegisterTests.Malformed_foreign_relationships_are_omitted_from_rows_counts_and_options(String malformed) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReviewRegisterTests.cs:line 226
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:43.12]     Hub.Tests.Api.ReviewRegisterTests.Malformed_foreign_relationships_are_omitted_from_rows_counts_and_options(malformed: "discipline") [FAIL]
+  Failed Hub.Tests.Api.ReviewRegisterTests.Malformed_foreign_relationships_are_omitted_from_rows_counts_and_options(malformed: "discipline") [5 s]
+  Error Message:
+   Expected 200 but got 409: {"type":"https://hub.local/errors/review_register_integrity","title":"Conflict","status":409,"code":"review_register_integrity","detail":"The issued review provenance is incomplete or inconsistent.","traceId":"0HNPPD2UP9AP5"}
+  Stack Trace:
+     at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118
+   at Hub.Tests.Api.ReviewRegisterTests.Get(Guid project, String query, String who, Int32 status) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReviewRegisterTests.cs:line 24
+   at Hub.Tests.Api.ReviewRegisterTests.Malformed_foreign_relationships_are_omitted_from_rows_counts_and_options(String malformed) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReviewRegisterTests.cs:line 226
+--- End of stack trace from previous location ---
+Results File: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint34-runtime/trx-review-adjacent1/review-adjacent1.trx
+
+Failed!  - Failed:     4, Passed:    91, Skipped:     0, Total:    95, Duration: 2 m 15 s - Hub.Tests.dll (net10.0)

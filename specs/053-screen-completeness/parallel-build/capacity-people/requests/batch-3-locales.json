@@ -1,0 +1,16 @@
+{
+  "web/src/i18n/en.ts": {
+    "allocationComparison.title": "Allocations beside task estimates",
+    "allocationComparison.basis": "Three separate measures by project discipline and due week. Confirmed and Proposed are allocation approval states; remaining estimates use task progress, exclude Complete, Cancelled and On Hold work, and are never added to allocated hours. This context is independent of allocation-list filters and paging.",
+    "allocationComparison.partial": "Allocation figures cover only rows you may view and are lower bounds, not complete project totals. Task estimates cover the project's visible active work.",
+    "allocationComparison.confirmed": "Confirmed allocations",
+    "allocationComparison.proposed": "Proposed allocations",
+    "allocationComparison.estimates": "Remaining task estimates",
+    "allocationComparison.atLeast": "At least {hours}",
+    "allocationComparison.knownUnavailable": "{hours} known · {n} unavailable",
+    "allocationComparison.knownUnestimated": "{hours} known · {n} unestimated",
+    "allocationComparison.unattributed": "Unattributed work",
+    "allocationComparison.unattributedN": "Allocations with mixed or unavailable discipline links: {n}",
+    "allocationComparison.undatedTasks": "Active tasks with no due date: {n}"
+  }
+}

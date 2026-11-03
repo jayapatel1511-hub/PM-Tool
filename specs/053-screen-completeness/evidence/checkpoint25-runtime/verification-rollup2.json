@@ -1,0 +1,37 @@
+{
+  "atUtc": "2026-11-02T10:30:04.917854+00:00",
+  "status": "LOCAL_S46_PASS_S35_R1_PARTIAL",
+  "dotnetDistinct": 99,
+  "node": 25,
+  "chromeSuites": [
+    "Search3",
+    "ReviewRegister3",
+    "PersonSearch1",
+    "FindingContext1"
+  ],
+  "checks": [
+    "app types",
+    "fixture types",
+    "lint with warnings",
+    "SSR",
+    "isolated solution build2",
+    "isolated SPA1",
+    "visualcapture2 inspected",
+    "spec freshness",
+    "1546IDs438sections0unknown trace",
+    "8decisionchecks",
+    "actualAC79/84testlinkage"
+  ],
+  "sourceEvidence": [
+    "final-source-parity1.json",
+    "post-verification-metadata1.json",
+    "final-served-parity1.json"
+  ],
+  "limits": [
+    "No new liveKestrel/API/browserjoin",
+    "FullS35R2/R3open",
+    "Wholepacket/052/native/zoom/human/pilot/hostednotaccepted",
+    "QA24cleanupblockedexplicitconfirmationpending"
+  ],
+  "localCheckedSlices": 34
+}

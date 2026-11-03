@@ -1,0 +1,13 @@
+{
+  "result": "PASS",
+  "observations": [
+    "Team duplicate supervisor IDs, nested page/scope/scroll/focus return",
+    "375px Team, Organisation expansion, leader/unplaced names and admin selectors",
+    "Vacation same Task/User Assignee/Reviewer IDs and natural return to second Reviewer opener",
+    "Dirty Vacation CSV/preview and source focus retained; only explicit preview POST",
+    "PM metadata/popover nested return, Escape dismissal, 375/1440 header bounds"
+  ],
+  "previewRequests": 1,
+  "businessWrites": 0,
+  "personReads": 18
+}

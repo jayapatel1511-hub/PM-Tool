@@ -1,0 +1,21 @@
+{
+  "exitCode": 0,
+  "args": [
+    "/opt/homebrew/bin/dotnet",
+    "restore",
+    "Hub.slnx",
+    "--artifacts-path",
+    ".review/checkpoint34-artifacts",
+    "--ignore-failed-sources",
+    "-p:NuGetAudit=false",
+    "--disable-parallel"
+  ],
+  "atUtc": "2026-11-03T04:36:26.443806+00:00",
+  "elapsedSeconds": 0.62,
+  "errors": [],
+  "tail": [
+    "  Determining projects to restore...",
+    "  Restored /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Hub.Tests.csproj (in 121 ms).",
+    "  2 of 3 projects are up-to-date for restore."
+  ]
+}

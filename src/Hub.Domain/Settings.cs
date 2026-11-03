@@ -12,6 +12,11 @@ public sealed record SettingDef(string Key, SettingKind Kind, object Default, st
 public sealed record OrgSettings
 {
     public int TaskDueSoonDays { get; init; } = 5;
+    public int HomeDueWindowDays { get; init; } = 7;
+    public int TrendCompareDays { get; init; } = 7;
+    public int StaffingLookaheadWeeks { get; init; } = 4;
+    public int CertificationWarnDays { get; init; } = 30;
+    public int AvailabilityWindowDays { get; init; } = 60;
     public int DeliverableDueSoonDays { get; init; } = 10;
     public int MilestoneApproachingDays { get; init; } = 14;
     public int DecisionDueSoonDays { get; init; } = 5;
@@ -73,6 +78,11 @@ public sealed record OrgSettings
     [
         new("route_counter_enabled", SettingKind.Bool, false, "pilot"),
         new("task_due_soon_days", SettingKind.Int, 5, "thresholds"),
+        new("home_due_window_days", SettingKind.Int, 7, "home"),
+        new("trend_compare_days", SettingKind.Int, 7, "home"),
+        new("staffing_lookahead_weeks", SettingKind.Int, 4, "projects"),
+        new("certification_warn_days", SettingKind.Int, 30, "people"),
+        new("availability_window_days", SettingKind.Int, 60, "people"),
         new("deliverable_due_soon_days", SettingKind.Int, 10, "thresholds"),
         new("milestone_approaching_days", SettingKind.Int, 14, "thresholds"),
         new("decision_due_soon_days", SettingKind.Int, 5, "thresholds"),
@@ -131,11 +141,24 @@ public sealed record OrgSettings
     public static readonly IReadOnlyDictionary<string, string> ShownWithFlag = new Dictionary<string, string>
     {
         ["route_counter_enabled"] = "route_counter",
+        ["home_due_window_days"] = "home_overview",
+        ["trend_compare_days"] = "home_overview",
+        ["staffing_lookahead_weeks"] = "project_screens",
+        ["certification_warn_days"] = "capacity_screens",
+        ["availability_window_days"] = "capacity_screens",
         ["autosave_delay_ms"] = "data_entry_safety",
         ["draft_keep_days"] = "data_entry_safety",
         ["admin_review_interval_days"] = "admin_review",
         ["admin_review_idle_days"] = "admin_review",
     };
+
+    public static bool SettingVisible(string key, Func<string, bool> flagOn)
+    {
+        // The same comparison window belongs to Home trends and Portfolio's
+        // change summary. Either released part exposes its existing setting.
+        if (key == "trend_compare_days" && flagOn("project_screens")) return true;
+        return !ShownWithFlag.TryGetValue(key, out var flag) || flagOn(flag);
+    }
 
     public static OrgSettings From(IReadOnlyDictionary<string, JsonElement> v)
     {
@@ -146,6 +169,11 @@ public sealed record OrgSettings
         return s with
         {
             TaskDueSoonDays = I("task_due_soon_days", s.TaskDueSoonDays),
+            HomeDueWindowDays = I("home_due_window_days", s.HomeDueWindowDays),
+            TrendCompareDays = I("trend_compare_days", s.TrendCompareDays),
+            StaffingLookaheadWeeks = I("staffing_lookahead_weeks", s.StaffingLookaheadWeeks),
+            CertificationWarnDays = I("certification_warn_days", s.CertificationWarnDays),
+            AvailabilityWindowDays = I("availability_window_days", s.AvailabilityWindowDays),
             DeliverableDueSoonDays = I("deliverable_due_soon_days", s.DeliverableDueSoonDays),
             MilestoneApproachingDays = I("milestone_approaching_days", s.MilestoneApproachingDays),
             DecisionDueSoonDays = I("decision_due_soon_days", s.DecisionDueSoonDays),
@@ -218,6 +246,9 @@ public sealed record OrgSettings
 
     static bool IntRange(string key, int n) => key switch
     {
+        "home_due_window_days" => n is >= 0 and <= 366,
+        "trend_compare_days" => n is >= 1 and <= 366,
+        "staffing_lookahead_weeks" => n is >= 1 and <= 26,
         "commitment_reliability_good_pct" or "commitment_reliability_watch_pct" => n is >= 0 and <= 100,
         "commitment_trend_weeks" => n is >= 1 and <= 52,
         "coordination_lookahead_weeks" or "planning_under_weeks" => n is >= 1 and <= 12,
@@ -243,6 +274,8 @@ public sealed record NotificationEventDef(string Code, bool App, bool Email, boo
 /// Event catalogue and default channels (§17.2). Digest content is controlled separately (§17.3).
 public static class NotificationEvents
 {
+    // This opt-in own-app reminder is controlled separately from the legacy channel catalogue.
+    public const string TimeEntryReminder = "TimeEntryReminder";
     public const string TaskAssigned = "TaskAssigned", ReviewerSet = "ReviewerSet", ReviewRequested = "ReviewRequested",
         ReviewOutcome = "ReviewOutcome", TaskBlocked = "TaskBlocked", TaskUnblocked = "TaskUnblocked",
         BlockingOverdue = "BlockingOverdue", DueDateChanged = "DueDateChanged", CommentOnItem = "CommentOnItem",

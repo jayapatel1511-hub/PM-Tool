@@ -1,0 +1,7 @@
+{
+  "atUtc": "2026-11-02T11:10:48.678300+00:00",
+  "status": "FAIL",
+  "stage": "exactsource return afterdirtyformCancel",
+  "error": "Escape followed bywaitForURL(origin)timedout atdriverline267",
+  "boundary": "No fullsuitepass. ActualURL/dialog/focusdiagnostics missingfromfirstdriver; preservefailure. HypothesisclosingdiscarddialogconsumedEscape mustbeobserved; noappchangeauthorized."
+}

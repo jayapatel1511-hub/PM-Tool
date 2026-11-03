@@ -1,0 +1,168 @@
+--- /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint32-baseline/src/Hub.Api/Data/Entities.cs	2026-11-02 17:00:08
++++ /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Data/Entities.cs	2026-11-02 18:58:45
+@@ -904,6 +904,7 @@
+     [JsonIgnore] public int? NoticeCompositionVersion { get; set; }
+     [JsonIgnore] public Guid[]? RenderedOccurrenceIds { get; set; }
+     [JsonIgnore] public string? BulkRenderedMembershipJson { get; set; }
++    [JsonIgnore] public string? NoticeDigestPolicyJson { get; set; }
+     [JsonIgnore] public Guid? NoticeClaimToken { get; set; }
+     [JsonIgnore] public int? NoticeClaimVersion { get; set; }
+     [JsonIgnore] public DateTimeOffset? NoticeClaimedAt { get; set; }
+
+--- /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint32-baseline/src/Hub.Api/Data/NoticeDeliveryEntities.cs	2026-11-02 17:00:08
++++ /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Data/NoticeDeliveryEntities.cs	2026-11-02 18:58:45
+@@ -50,4 +50,5 @@
+     public int ExternalAttempts { get; set; }
+     public DateTimeOffset UpdatedAt { get; set; }
+     public Guid? ReminderNotificationId { get; set; }
++    public Guid? CarryForwardToSlotId { get; set; }
+ }
+
+--- /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint32-baseline/src/Hub.Api/Data/HubDb.cs	2026-11-02 17:35:51
++++ /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Data/HubDb.cs	2026-11-02 19:00:39
+@@ -14,6 +14,14 @@
+     internal bool initializingAuditChains;
+     // Save hooks construct notifiers over this same scoped context; all must join its atomic bulk capture.
+     internal Notifier.TaskBulkCapture? TaskBulkNotifications { get; set; }
++    internal Notifier.PendingCapture? PendingNoticeCapture { get; set; }
++    internal string NoticeEmailBaseUrl => (configuration["Email:BaseUrl"] ?? "").TrimEnd('/');
++
++    // Save-hook notifiers share the originating command's raw capture, never their own transaction.
++    public Task FlushNotices(CancellationToken ct = default)
++        => new Notifier(this, audit, settings, clock, configuration).FlushPending(ct);
++
++    public void DiscardNotices() => PendingNoticeCapture = null;
+ 
+     public AuditContext Audit => audit;
+ 
+@@ -666,6 +674,10 @@
+             e.HasIndex(x => new { x.UserId, x.State, x.LocalDate });
+             e.HasOne<AppUser>().WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Restrict);
+             e.HasOne<Notification>().WithMany().HasForeignKey(x => x.ReminderNotificationId).OnDelete(DeleteBehavior.SetNull);
++            e.HasAlternateKey(x => new { x.Id, x.UserId, x.Kind });
++            e.HasOne<NoticeDeliverySlot>().WithMany()
++                .HasForeignKey(x => new { x.CarryForwardToSlotId, x.UserId, x.Kind })
++                .HasPrincipalKey(x => new { x.Id, x.UserId, x.Kind }).OnDelete(DeleteBehavior.Restrict);
+             e.ToTable(t => t.HasCheckConstraint("ck_notice_slot",
+                 $"kind IN ({In(NoticeSlotKind.All.Order(StringComparer.Ordinal))}) AND state IN ({In(NoticeSlotState.All.Order(StringComparer.Ordinal))}) "
+                 + "AND btrim(org_time_zone_id) <> '' AND scheduled_local_time ~ '^([01][0-9]|2[0-3]):[0-5][0-9]$' "
+@@ -674,7 +686,8 @@
+                 + "AND window_from IS NOT NULL AND window_through IS NOT NULL AND window_from <= window_through "
+                 + "AND reminder_notification_id IS NULL AND composition_version BETWEEN 0 AND 3 AND external_attempts BETWEEN 0 AND 8 AND state <> 'Emitted') "
+                 + "OR (kind = 'TimeReminder' AND frequency_at_creation IS NULL AND window_from IS NULL AND window_through IS NULL "
+-                + "AND composition_version = 0 AND external_attempts = 0 AND state IN ('Ready','Emitted')))"));
++                + "AND composition_version = 0 AND external_attempts = 0 AND state IN ('Ready','Emitted'))) "
++                + "AND (carry_forward_to_slot_id IS NULL OR (kind = 'Digest' AND carry_forward_to_slot_id <> id))"));
+         });
+         mb.Entity<EmailMessage>(e =>
+         {
+@@ -682,18 +695,19 @@
+             e.Property(x => x.NoticeProtocolVersion).HasConversion<short>().HasColumnType("smallint");
+             e.Property(x => x.NoticeCompositionVersion).HasConversion<short>().HasColumnType("smallint");
+             e.Property(x => x.BulkRenderedMembershipJson).HasColumnType("jsonb");
++            e.Property(x => x.NoticeDigestPolicyJson).HasColumnType("jsonb");
+             e.HasOne<NoticeDeliverySlot>().WithMany().HasForeignKey(x => x.NoticeSlotId).OnDelete(DeleteBehavior.Restrict);
+             e.HasIndex(x => new { x.NoticeSlotId, x.NoticeCompositionVersion }).IsUnique()
+                 .HasFilter("notice_slot_id IS NOT NULL AND notice_composition_version IS NOT NULL");
+             e.ToTable(t => t.HasCheckConstraint("ck_notice_email_protocol",
+                 "(notice_protocol_version IS NULL AND notice_slot_id IS NULL AND notice_composition_version IS NULL "
+-                + "AND rendered_occurrence_ids IS NULL AND bulk_rendered_membership_json IS NULL "
++                + "AND rendered_occurrence_ids IS NULL AND bulk_rendered_membership_json IS NULL AND notice_digest_policy_json IS NULL "
+                 + "AND notice_claim_token IS NULL AND notice_claim_version IS NULL AND notice_claimed_at IS NULL "
+                 + "AND transport_kind IS NULL AND transport_outcome IS NULL AND transport_observed_at IS NULL "
+                 + "AND provider_accepted_at IS NULL AND acceptance_uncertain_at IS NULL) OR "
+                 + "(notice_protocol_version IS NOT NULL AND notice_protocol_version = 1 AND user_id IS NOT NULL "
+                 + "AND rendered_occurrence_ids IS NOT NULL AND attempts BETWEEN 0 AND 8 "
+-                + "AND ((kind IN ('Immediate','PlanningEntryChanged','PlanningWithdrawal') AND notice_slot_id IS NULL AND notice_composition_version IS NULL AND cardinality(rendered_occurrence_ids) = 1) "
++                + "AND ((kind IN ('Immediate','PlanningEntryChanged','PlanningWithdrawal') AND notice_slot_id IS NULL AND notice_composition_version IS NULL AND notice_digest_policy_json IS NULL AND cardinality(rendered_occurrence_ids) = 1) "
+                 + "OR (kind = 'Digest' AND notice_slot_id IS NOT NULL AND notice_composition_version IS NOT NULL AND notice_composition_version BETWEEN 1 AND 3)) "
+                 + "AND ((notice_claim_token IS NULL AND notice_claim_version IS NULL AND notice_claimed_at IS NULL) "
+                 + "OR (notice_claim_token IS NOT NULL AND notice_claim_version IS NOT NULL AND notice_claim_version >= 1 AND notice_claimed_at IS NOT NULL)) "
+@@ -703,7 +717,8 @@
+                 + "AND (provider_accepted_at IS NULL OR (notice_claim_token IS NOT NULL AND transport_kind IS NOT NULL AND transport_kind IN ('Smtp','Graph') "
+                 + "AND transport_outcome IS NOT NULL AND transport_outcome = 'Accepted' AND transport_observed_at IS NOT NULL)) "
+                 + "AND (transport_outcome IS DISTINCT FROM 'Accepted' OR provider_accepted_at IS NOT NULL) "
+-                + "AND (bulk_rendered_membership_json IS NULL OR jsonb_typeof(bulk_rendered_membership_json) = 'array'))"));
++                + "AND (bulk_rendered_membership_json IS NULL OR jsonb_typeof(bulk_rendered_membership_json) = 'array') "
++                + "AND (notice_digest_policy_json IS NULL OR (kind = 'Digest' AND jsonb_typeof(notice_digest_policy_json) = 'object')))"));
+         });
+         mb.Entity<ProjectFollow>(e => { e.HasIndex(x => new { x.UserId, x.ProjectId }).IsUnique(); e.HasIndex(x => new { x.ProjectId, x.Level }); });
+         Fk<ProjectFollow, Project>(mb, x => x.ProjectId, DeleteBehavior.Cascade);
+@@ -1356,12 +1371,14 @@
+         {
+             if (entry.State == EntityState.Deleted)
+                 throw new InvalidOperationException("Notice scheduling provenance is retained.");
++            if (entry.State == EntityState.Added && entry.Entity.CarryForwardToSlotId is not null)
++                throw new InvalidOperationException("A new notice slot cannot invent an earlier coverage transfer.");
+             if (entry.State != EntityState.Modified) continue;
+             var mutable = new HashSet<string>(StringComparer.Ordinal)
+             {
+                 nameof(NoticeDeliverySlot.State), nameof(NoticeDeliverySlot.CompositionVersion),
+                 nameof(NoticeDeliverySlot.ExternalAttempts), nameof(NoticeDeliverySlot.UpdatedAt),
+-                nameof(NoticeDeliverySlot.ReminderNotificationId),
++                nameof(NoticeDeliverySlot.ReminderNotificationId), nameof(NoticeDeliverySlot.CarryForwardToSlotId),
+             };
+             if (entry.Properties.Any(property => property.IsModified && !mutable.Contains(property.Metadata.Name)))
+                 throw new InvalidOperationException("A notice slot's schedule and window are immutable.");
+@@ -1374,6 +1391,22 @@
+                 throw new InvalidOperationException("An emitted reminder cannot be reopened.");
+             if (reminder.IsModified && reminder.OriginalValue is not null && !ClearingDeletedNotification(reminder))
+                 throw new InvalidOperationException("A reminder's original notification cannot be replaced.");
++            var carry = entry.Property(x => x.CarryForwardToSlotId);
++            if (carry.IsModified)
++            {
++                if (carry.OriginalValue is not null || carry.CurrentValue is not { } targetId)
++                    throw new InvalidOperationException("A recorded digest coverage transfer cannot be cleared or replaced.");
++                var source = entry.Entity;
++                var target = NoticeDeliverySlots.Local.SingleOrDefault(slot => slot.Id == targetId
++                    && Entry(slot).State != EntityState.Deleted);
++                if (source.Kind != NoticeSlotKind.Digest || source.State != NoticeSlotState.Exhausted
++                    || entry.Property(x => x.State).OriginalValue != NoticeSlotState.Exhausted
++                    || target is null || target.Id == source.Id || target.Kind != NoticeSlotKind.Digest || target.UserId != source.UserId
++                    || source.WindowFrom is not { } sourceFrom || source.WindowThrough is not { } sourceThrough
++                    || target.WindowFrom is not { } targetFrom || target.WindowThrough is not { } targetThrough
++                    || targetFrom > sourceFrom || targetThrough <= sourceThrough)
++                    throw new InvalidOperationException("Digest coverage must move once to a bound same-person later containing window.");
++            }
+         }
+         foreach (var entry in ChangeTracker.Entries<EmailMessage>())
+         {
+@@ -1387,7 +1420,7 @@
+             {
+                 nameof(EmailMessage.NoticeProtocolVersion), nameof(EmailMessage.NoticeSlotId),
+                 nameof(EmailMessage.NoticeCompositionVersion), nameof(EmailMessage.RenderedOccurrenceIds),
+-                nameof(EmailMessage.BulkRenderedMembershipJson), nameof(EmailMessage.UserId),
++                nameof(EmailMessage.BulkRenderedMembershipJson), nameof(EmailMessage.NoticeDigestPolicyJson), nameof(EmailMessage.UserId),
+                 nameof(EmailMessage.ToAddress), nameof(EmailMessage.Subject), nameof(EmailMessage.BodyText),
+                 nameof(EmailMessage.BodyHtml), nameof(EmailMessage.Kind), nameof(EmailMessage.CreatedAt),
+                 nameof(EmailMessage.DedupKey), nameof(EmailMessage.RequiredProjectIds), nameof(EmailMessage.RequiredPlanningEntryIds),
+@@ -1417,6 +1450,8 @@
+ 
+     public override async Task<int> SaveChangesAsync(CancellationToken ct = default)
+     {
++        if (Database.CurrentTransaction is null && PendingNoticeCapture is not null)
++            return await Tx.Run(this, () => SaveChangesAsync(ct));
+         ChangeTracker.DetectChanges();
+         DemandNoticeDeliveryProvenance();
+         // Contribution identity is the observed membership, never an editable task/person target.
+
+--- /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint32-baseline/src/Hub.Domain/NoticeDelivery.cs	2026-11-02 17:03:57
++++ /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Domain/NoticeDelivery.cs	2026-11-02 18:54:53
+@@ -71,13 +71,14 @@
+ {
+     public const string ChannelOff = "ChannelOff", NoAddress = "NoAddress", Muted = "Muted", AccessRemoved = "AccessRemoved",
+         RecipientInactive = "RecipientInactive", Duplicate = "Duplicate", PlanningAssignmentWithdrawn = "PlanningAssignmentWithdrawn",
+-        ProjectAccessRemoved = "ProjectAccessRemoved", PlanningAccessRemoved = "PlanningAccessRemoved", AttemptsExhausted = "AttemptsExhausted";
++        ProjectAccessRemoved = "ProjectAccessRemoved", PlanningAccessRemoved = "PlanningAccessRemoved", AttemptsExhausted = "AttemptsExhausted",
++        AddressChanged = "AddressChanged";
+     public static readonly IReadOnlySet<string> All = new[] { ChannelOff, NoAddress, Muted, AccessRemoved, RecipientInactive, Duplicate,
+-        PlanningAssignmentWithdrawn, ProjectAccessRemoved, PlanningAccessRemoved, AttemptsExhausted }.ToFrozenSet(StringComparer.Ordinal);
++        PlanningAssignmentWithdrawn, ProjectAccessRemoved, PlanningAccessRemoved, AttemptsExhausted, AddressChanged }.ToFrozenSet(StringComparer.Ordinal);
+     public static bool Matches(string state, string? reason) => reason is null
+         ? !NoticeIntentDisposition.Refusals.Contains(state)
+         : All.Contains(reason) && (state == reason || state == NoticeIntentDisposition.AccessRemoved
+-            && reason is PlanningAssignmentWithdrawn or ProjectAccessRemoved or PlanningAccessRemoved
++            && reason is PlanningAssignmentWithdrawn or ProjectAccessRemoved or PlanningAccessRemoved or AddressChanged
+             || state == NoticeIntentDisposition.Exhausted && reason == AttemptsExhausted);
+ }
+ 

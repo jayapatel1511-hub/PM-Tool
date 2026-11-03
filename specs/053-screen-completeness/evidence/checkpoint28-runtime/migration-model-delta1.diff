@@ -1,0 +1,394 @@
+--- 20261102123823_DocumentLinkManualReferences.Designer.cs
++++ 20261102145256_RegisterMetadataAndTemplateLineage.Designer.cs
+@@ -1992,6 +1992,10 @@
+                         .HasColumnType("text")
+                         .HasColumnName("cancelled_reason");
+ 
++                    b.Property<Guid?>("CategoryId")
++                        .HasColumnType("uuid")
++                        .HasColumnName("category_id");
++
+                     b.Property<DateTimeOffset>("CreatedAt")
+                         .HasColumnType("timestamp with time zone")
+                         .HasColumnName("created_at");
+@@ -2052,6 +2056,10 @@
+                         .HasColumnType("timestamp with time zone")
+                         .HasColumnName("last_activity_at");
+ 
++                    b.PrimitiveCollection<string[]>("OptionsConsidered")
++                        .HasColumnType("character varying(500)[]")
++                        .HasColumnName("options_considered");
++
+                     b.Property<DateOnly>("OriginalRequiredByDate")
+                         .HasColumnType("date")
+                         .HasColumnName("original_required_by_date");
+@@ -2068,6 +2076,11 @@
+                         .HasColumnType("uuid")
+                         .HasColumnName("project_id");
+ 
++                    b.Property<string>("Rationale")
++                        .HasMaxLength(2000)
++                        .HasColumnType("character varying(2000)")
++                        .HasColumnName("rationale");
++
+                     b.Property<Guid>("RequestedById")
+                         .HasColumnType("uuid")
+                         .HasColumnName("requested_by_id");
+@@ -2110,6 +2123,9 @@
+                     b.HasKey("Id")
+                         .HasName("pk_decision");
+ 
++                    b.HasIndex("CategoryId")
++                        .HasDatabaseName("ix_decision_category_id");
++
+                     b.HasIndex("Key")
+                         .HasDatabaseName("ix_decision_key");
+ 
+@@ -2137,9 +2153,66 @@
+ 
+                     b.ToTable("decision", "hub", t =>
+                         {
++                            t.HasCheckConstraint("ck_decision_options_considered", "options_considered IS NULL OR (cardinality(options_considered) <= 5 AND array_position(options_considered, NULL) IS NULL)");
++
+                             t.HasCheckConstraint("ck_decision_owner", "num_nonnulls(owner_user_id, owner_external_party_id) = 1");
+ 
+                             t.HasCheckConstraint("ck_decision_status", "status IN ('Pending','Under Review','Decided','Deferred','Cancelled')");
++                        });
++                });
++
++            modelBuilder.Entity("Hub.Api.Data.DecisionCategory", b =>
++                {
++                    b.Property<Guid>("Id")
++                        .ValueGeneratedOnAdd()
++                        .HasColumnType("uuid")
++                        .HasColumnName("id");
++
++                    b.Property<DateTimeOffset>("CreatedAt")
++                        .HasColumnType("timestamp with time zone")
++                        .HasColumnName("created_at");
++
++                    b.Property<Guid?>("CreatedBy")
++                        .HasColumnType("uuid")
++                        .HasColumnName("created_by");
++
++                    b.Property<bool>("IsActive")
++                        .HasColumnType("boolean")
++                        .HasColumnName("is_active");
++
++                    b.Property<string>("Name")
++                        .IsRequired()
++                        .HasMaxLength(120)
++                        .HasColumnType("citext")
++                        .HasColumnName("name");
++
++                    b.Property<int>("RowVersion")
++                        .IsConcurrencyToken()
++                        .HasColumnType("integer")
++                        .HasColumnName("row_version");
++
++                    b.Property<int>("SortOrder")
++                        .HasColumnType("integer")
++                        .HasColumnName("sort_order");
++
++                    b.Property<DateTimeOffset>("UpdatedAt")
++                        .HasColumnType("timestamp with time zone")
++                        .HasColumnName("updated_at");
++
++                    b.Property<Guid?>("UpdatedBy")
++                        .HasColumnType("uuid")
++                        .HasColumnName("updated_by");
++
++                    b.HasKey("Id")
++                        .HasName("pk_decision_category");
++
++                    b.HasIndex("Name")
++                        .IsUnique()
++                        .HasDatabaseName("ix_decision_category_name");
++
++                    b.ToTable("decision_category", "hub", t =>
++                        {
++                            t.HasCheckConstraint("ck_decision_category_name", "name = btrim(name) AND char_length(name) BETWEEN 1 AND 120 AND name !~ '[[:cntrl:]]'");
+                         });
+                 });
+ 
+@@ -4304,6 +4377,15 @@
+                         .HasColumnType("date")
+                         .HasColumnName("resolved_date");
+ 
++                    b.Property<Guid?>("RootCauseCategoryId")
++                        .HasColumnType("uuid")
++                        .HasColumnName("root_cause_category_id");
++
++                    b.Property<string>("RootCauseLabelSnapshot")
++                        .HasMaxLength(120)
++                        .HasColumnType("character varying(120)")
++                        .HasColumnName("root_cause_label_snapshot");
++
+                     b.Property<int>("RowVersion")
+                         .IsConcurrencyToken()
+                         .HasColumnType("integer")
+@@ -4350,12 +4432,17 @@
+                     b.HasIndex("Key")
+                         .HasDatabaseName("ix_issue_key");
+ 
++                    b.HasIndex("RootCauseCategoryId")
++                        .HasDatabaseName("ix_issue_root_cause_category_id");
++
+                     b.HasIndex("ProjectId", "Seq")
+                         .IsUnique()
+                         .HasDatabaseName("ix_issue_project_id_seq");
+ 
+                     b.ToTable("issue", "hub", t =>
+                         {
++                            t.HasCheckConstraint("ck_issue_root_cause_pair", "(root_cause_category_id IS NULL AND root_cause_label_snapshot IS NULL) OR (root_cause_category_id IS NOT NULL AND root_cause_label_snapshot IS NOT NULL AND btrim(root_cause_label_snapshot) <> '')");
++
+                             t.HasCheckConstraint("ck_issue_status", "status IN ('Open','In Progress','Resolved','Cancelled')");
+ 
+                             t.HasCheckConstraint("ck_issue_type", "issue_type IN ('General','Coordination')");
+@@ -4890,6 +4977,61 @@
+                         });
+                 });
+ 
++            modelBuilder.Entity("Hub.Api.Data.IssueRootCauseCategory", b =>
++                {
++                    b.Property<Guid>("Id")
++                        .ValueGeneratedOnAdd()
++                        .HasColumnType("uuid")
++                        .HasColumnName("id");
++
++                    b.Property<DateTimeOffset>("CreatedAt")
++                        .HasColumnType("timestamp with time zone")
++                        .HasColumnName("created_at");
++
++                    b.Property<Guid?>("CreatedBy")
++                        .HasColumnType("uuid")
++                        .HasColumnName("created_by");
++
++                    b.Property<bool>("IsActive")
++                        .HasColumnType("boolean")
++                        .HasColumnName("is_active");
++
++                    b.Property<string>("Name")
++                        .IsRequired()
++                        .HasMaxLength(120)
++                        .HasColumnType("citext")
++                        .HasColumnName("name");
++
++                    b.Property<int>("RowVersion")
++                        .IsConcurrencyToken()
++                        .HasColumnType("integer")
++                        .HasColumnName("row_version");
++
++                    b.Property<int>("SortOrder")
++                        .HasColumnType("integer")
++                        .HasColumnName("sort_order");
++
++                    b.Property<DateTimeOffset>("UpdatedAt")
++                        .HasColumnType("timestamp with time zone")
++                        .HasColumnName("updated_at");
++
++                    b.Property<Guid?>("UpdatedBy")
++                        .HasColumnType("uuid")
++                        .HasColumnName("updated_by");
++
++                    b.HasKey("Id")
++                        .HasName("pk_issue_root_cause_category");
++
++                    b.HasIndex("Name")
++                        .IsUnique()
++                        .HasDatabaseName("ix_issue_root_cause_category_name");
++
++                    b.ToTable("issue_root_cause_category", "hub", t =>
++                        {
++                            t.HasCheckConstraint("ck_issue_root_cause_category_name", "name = btrim(name) AND char_length(name) BETWEEN 1 AND 120 AND name !~ '[[:cntrl:]]'");
++                        });
++                });
++
+             modelBuilder.Entity("Hub.Api.Data.IssueVerification", b =>
+                 {
+                     b.Property<Guid>("Id")
+@@ -7315,6 +7457,14 @@
+                         .HasColumnType("uuid")
+                         .HasColumnName("id");
+ 
++                    b.Property<string>("CopiedFromSnapshot")
++                        .HasColumnType("jsonb")
++                        .HasColumnName("copied_from_snapshot");
++
++                    b.Property<Guid?>("CopiedFromTemplateId")
++                        .HasColumnType("uuid")
++                        .HasColumnName("copied_from_template_id");
++
+                     b.Property<DateTimeOffset>("CreatedAt")
+                         .HasColumnType("timestamp with time zone")
+                         .HasColumnName("created_at");
+@@ -7376,11 +7526,16 @@
+                     b.HasKey("Id")
+                         .HasName("pk_project_template");
+ 
++                    b.HasIndex("CopiedFromTemplateId")
++                        .HasDatabaseName("ix_project_template_copied_from_template_id");
++
+                     b.HasIndex("FamilyId")
+                         .HasDatabaseName("ix_project_template_family_id");
+ 
+                     b.ToTable("project_template", "hub", t =>
+                         {
++                            t.HasCheckConstraint("ck_template_copy_baseline_pair", "(copied_from_template_id IS NULL) = (copied_from_snapshot IS NULL)");
++
+                             t.HasCheckConstraint("ck_template_offset_day_kind", "offset_day_kind IN ('CalendarDays','WorkingDays')");
+                         });
+                 });
+@@ -8345,6 +8500,10 @@
+                         .HasColumnType("timestamp with time zone")
+                         .HasColumnName("status_changed_at");
+ 
++                    b.Property<Guid?>("TemplateRiskId")
++                        .HasColumnType("uuid")
++                        .HasColumnName("template_risk_id");
++
+                     b.Property<string>("Title")
+                         .IsRequired()
+                         .HasColumnType("text")
+@@ -8367,6 +8526,9 @@
+ 
+                     b.HasIndex("Key")
+                         .HasDatabaseName("ix_risk_key");
++
++                    b.HasIndex("TemplateRiskId")
++                        .HasDatabaseName("ix_risk_template_risk_id");
+ 
+                     b.HasIndex("ProjectId", "Seq")
+                         .IsUnique()
+@@ -9777,6 +9939,59 @@
+                         .HasName("pk_template_milestone");
+ 
+                     b.ToTable("template_milestone", "hub");
++                });
++
++            modelBuilder.Entity("Hub.Api.Data.TemplateRisk", b =>
++                {
++                    b.Property<Guid>("Id")
++                        .ValueGeneratedOnAdd()
++                        .HasColumnType("uuid")
++                        .HasColumnName("id");
++
++                    b.Property<int>("Impact")
++                        .HasColumnType("integer")
++                        .HasColumnName("impact");
++
++                    b.Property<string>("Mitigation")
++                        .HasMaxLength(4000)
++                        .HasColumnType("character varying(4000)")
++                        .HasColumnName("mitigation");
++
++                    b.Property<int>("Probability")
++                        .HasColumnType("integer")
++                        .HasColumnName("probability");
++
++                    b.Property<int>("SortOrder")
++                        .HasColumnType("integer")
++                        .HasColumnName("sort_order");
++
++                    b.Property<Guid>("TemplateId")
++                        .HasColumnType("uuid")
++                        .HasColumnName("template_id");
++
++                    b.Property<string>("Title")
++                        .IsRequired()
++                        .HasMaxLength(300)
++                        .HasColumnType("character varying(300)")
++                        .HasColumnName("title");
++
++                    b.Property<string>("TriggerIndicator")
++                        .HasMaxLength(2000)
++                        .HasColumnType("character varying(2000)")
++                        .HasColumnName("trigger_indicator");
++
++                    b.HasKey("Id")
++                        .HasName("pk_template_risk");
++
++                    b.HasIndex("TemplateId", "SortOrder")
++                        .HasDatabaseName("ix_template_risk_template_id_sort_order");
++
++                    b.ToTable("template_risk", "hub", t =>
++                        {
++                            t.HasCheckConstraint("ck_template_risk_scores", "probability BETWEEN 1 AND 3 AND impact BETWEEN 1 AND 3");
++
++                            t.HasCheckConstraint("ck_template_risk_title", "char_length(btrim(title)) BETWEEN 1 AND 300");
++                        });
+                 });
+ 
+             modelBuilder.Entity("Hub.Api.Data.TemplateRole", b =>
+@@ -11132,6 +11347,12 @@
+ 
+             modelBuilder.Entity("Hub.Api.Data.Decision", b =>
+                 {
++                    b.HasOne("Hub.Api.Data.DecisionCategory", null)
++                        .WithMany()
++                        .HasForeignKey("CategoryId")
++                        .OnDelete(DeleteBehavior.Restrict)
++                        .HasConstraintName("fk_decision_decision_categories_category_id");
++
+                     b.HasOne("Hub.Api.Data.ExternalParty", null)
+                         .WithMany()
+                         .HasForeignKey("OwnerExternalPartyId")
+@@ -11628,6 +11849,12 @@
+                         .OnDelete(DeleteBehavior.Restrict)
+                         .IsRequired()
+                         .HasConstraintName("fk_issue_projects_project_id");
++
++                    b.HasOne("Hub.Api.Data.IssueRootCauseCategory", null)
++                        .WithMany()
++                        .HasForeignKey("RootCauseCategoryId")
++                        .OnDelete(DeleteBehavior.Restrict)
++                        .HasConstraintName("fk_issue_issue_root_cause_categories_root_cause_category_id");
+                 });
+ 
+             modelBuilder.Entity("Hub.Api.Data.IssueAffectedDiscipline", b =>
+@@ -12150,6 +12377,15 @@
+                         .HasConstraintName("fk_project_state_project_project_id");
+                 });
+ 
++            modelBuilder.Entity("Hub.Api.Data.ProjectTemplate", b =>
++                {
++                    b.HasOne("Hub.Api.Data.ProjectTemplate", null)
++                        .WithMany()
++                        .HasForeignKey("CopiedFromTemplateId")
++                        .OnDelete(DeleteBehavior.Restrict)
++                        .HasConstraintName("fk_project_template_project_template_copied_from_template_id");
++                });
++
+             modelBuilder.Entity("Hub.Api.Data.ReadinessAssessment", b =>
+                 {
+                     b.HasOne("Hub.Api.Data.AppUser", null)
+@@ -12431,6 +12667,12 @@
+                         .OnDelete(DeleteBehavior.Restrict)
+                         .IsRequired()
+                         .HasConstraintName("fk_risk_project_project_id");
++
++                    b.HasOne("Hub.Api.Data.TemplateRisk", null)
++                        .WithMany()
++                        .HasForeignKey("TemplateRiskId")
++                        .OnDelete(DeleteBehavior.Restrict)
++                        .HasConstraintName("fk_risk_template_risks_template_risk_id");
+                 });
+ 
+             modelBuilder.Entity("Hub.Api.Data.SourceHead", b =>
+@@ -12742,6 +12984,16 @@
+                         .OnDelete(DeleteBehavior.Restrict)
+                         .IsRequired()
+                         .HasConstraintName("fk_template_design_basis_project_template_template_id");
++                });
++
++            modelBuilder.Entity("Hub.Api.Data.TemplateRisk", b =>
++                {
++                    b.HasOne("Hub.Api.Data.ProjectTemplate", null)
++                        .WithMany()
++                        .HasForeignKey("TemplateId")
++                        .OnDelete(DeleteBehavior.Cascade)
++                        .IsRequired()
++                        .HasConstraintName("fk_template_risk_project_template_template_id");
+                 });
+ 
+             modelBuilder.Entity("Hub.Api.Data.TemplateRole", b =>

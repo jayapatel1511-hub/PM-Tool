@@ -1,0 +1,6 @@
+{
+  "file": "src/Hub.Api/Features/Admin.cs",
+  "before": "4b6560ba40be43bf78ac10129da1ce4e0f7d2235329b3d64be455afa210278d1",
+  "after": "7a19fa13503c519b8e885275102247e7ff5965a5b59fb97c895092ce339ebda4",
+  "reason": "Explicit root-reviewed audit visibility repair adds actual-flag read+whole-new-row filter before Admin history count/page; independent source PASS. No Permissions body/role grant change; all coverage gaps unchanged."
+}

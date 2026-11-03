@@ -1,0 +1,26 @@
+# Generation20 S29 — early exact typed shared-reader seam
+
+New static `Hub.Api.Features.PersonFacts` in Features/PersonFacts.cs owns Map(api) plus these public nested records/methods. Root may wire against this exact contract now; all consuming ID arrays must already be authorised by their existing caller. No arbitrary batch route is added.
+
+```csharp
+public sealed record Notices(string? PersonType, DateOnly? StartDate, DateOnly? EndDate, bool Starts, bool Ends);
+public sealed record CertificationFact(Guid Id, Guid TagId, string TagName, bool TagActive, DateOnly? ExpiresOn,
+    string ExpiryState, int? DaysToExpiry, int RowVersion);
+public sealed record Facts(Notices Notices, CertificationFact[] Certifications);
+public static Task<Dictionary<Guid, Facts>> Read(HubDb db, Guid[] authorisedIds, OrgSettings settings, TimeProvider clock);
+public static Task<Dictionary<Guid, Notices>> ReadNotices(HubDb db, Guid[] authorisedIds, OrgSettings settings, TimeProvider clock);
+```
+
+Both methods return an empty dictionary off; do not emit a fact object for an ID not returned by the reader. They query only supplied IDs; ReadNotices never queries certifications. Null type/start/end stay null. Notice Starts = future start; Ends = end-today0..AvailabilityWindowDays inclusive; past end has no implied status. Clock.Today(settings) is authoritative. Dates themselves remain recorded fixed facts; bools are server-derived display notices only.
+
+Certification ExpiryState exact values: `Unknown` (null expiry), `Expired` (<today), `ExpiresIn` (today..CertificationWarnDays inclusive, DaysToExpiry0..N), `Recorded` (later date). DaysToExpiry null outside ExpiresIn. Include recorded inactive tags with TagActive=false; no fake Valid state, comparison or person count.
+
+Root bridge naming confirmed and held: optional null-omitted `PersonFacts.Facts? PersonFacts` for MyStaffPerson, Workspace TeamPersonRow and AdminUserRow; picker only optional null-omitted `PersonFacts.Notices? PersonNotices`. Thus **personFacts/personNotices** on the wire, as root requested. Own Preferences editor uses EditorRead.Facts directly (wire facts); no MeView full fact requirement. D owns projectTeam equivalent PersonFacts property. Class/method/nested Facts/Notices names above are fixed for root integration and will not change without a prior seam request. Root Workspace Team tag filter named `certificationTagId`, applies within existing authorised cohort before shaping returned people; off ignores it. D projectTeam uses same key, filters current scoped members, and keeps original other staffing data.
+
+Vocabulary agreement after root clarification: D adds flag-guarded authenticated GET `/certification-tags` returning `CertificationChoice[]` (Id,Name,IsActive) from configured vocabulary only, including inactive historical choices. EditorRead also includes these Choices. No /reference widening required for this lane; no inferred assignments/counts. Root Admin GET/POST/PATCH `/admin/certificationTags` returns normal ReferenceRow, versioned PATCH Name/IsActive/SortOrder; **no usage/count endpoint**. D will author a small dedicated vocabulary UI in assigned Admin.tsx section using these routes; no generic Ref usage/deactivation-count prompt. Root raw AppUser fact properties JsonIgnore is compatible: all responses explicitly projected through these flagged readers.
+
+Editing GET /me/certifications and /admin/users/{userId}/certifications returns `EditorRead(Guid UserId, int RowVersion, bool CanEdit, Facts Facts, CertificationChoice[] Choices, DateOnly Today)`, Choice(Id,Name,IsActive). RowVersion is AppUser's current version for type/date correction and certification create's parent-version guard. POST create accepts CertificationTagId,ExpiresOn,RowVersion,Reason; uses parent IfMatch/body version and returns Saved(Id,RowVersion) for child. PATCH child accepts ExpiresOn,RowVersion,Reason only and requires child IfMatch/body version; tag/user identity cannot change. DELETE child accepts Reason/RowVersion, explicit child version, preserves audit history. PATCH admin person-facts allows PersonType,PersonStartDate,PersonEndDate,Reason,RowVersion only; user version guard and before/after audit. Admin correcting another/inactive person requires Check.Reason; self edits active nonReadOnly certs only. Root supplies schema/settings/Admin/ref/Program/metadata/cache/generated; D edits none of those files.
+
+No totals, ranking, skills search, Person Profile/S43, expiry-driven eligibility or capacity/schedule/activation/HR mutation. Root AppUser.PersonType/PersonStartDate/PersonEndDate and db.CertificationTags/UserCertifications are the exact schema contract from generation20 brief.
+
+ProjectTeam detail: the enabled response also appends null-omitted ProjectTeamDiscipline.LeadName from the original authorised current-member cohort before filtering member rows. This preserves the existing discipline lead label/selection when a certification filter excludes that lead from the member list; no extra person/detail fetch. Off omits it. New tag selector is accepted as a raw nullable string and parsed only while capacity_screens is on, so off truly ignores even malformed additive selectors. Root Workspace bridge should follow the same off-ignore behavior.

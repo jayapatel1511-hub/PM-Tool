@@ -1,0 +1,5763 @@
+{
+  "observedAtUtc": "2026-11-01T13:39:11.625Z",
+  "flags": {
+    "visual_system": 200,
+    "small_ux": 200,
+    "work_screens": 200,
+    "capacity_screens": 200,
+    "project_screens": 200,
+    "people_screens": 200,
+    "org_structure": 200,
+    "task_pickup": 200
+  },
+  "reads": {
+    "users": [
+      {
+        "id": "01a19751-d447-7e1f-9a5f-23c4303d03a4",
+        "displayName": "Alex Chen",
+        "email": "alex@hub.test",
+        "jobTitle": "Civil Designer (EIT)",
+        "officeId": "01a19751-d397-7b0f-8816-fd179d794104",
+        "supervisorId": "01a19751-d447-73ed-9659-79f9784aded9",
+        "homeDisciplineId": null,
+        "isActive": true,
+        "weeklyCapacityHours": null,
+        "isTemplateEditor": false,
+        "lastSignInAt": null,
+        "rowVersion": 0,
+        "roles": [],
+        "personFacts": {
+          "notices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          },
+          "certifications": []
+        }
+      },
+      {
+        "id": "01a19751-d447-77ed-a543-6e7618a138ab",
+        "displayName": "Diane Roy",
+        "email": "diane@hub.test",
+        "jobTitle": "Senior Technical Reviewer",
+        "officeId": "01a19751-d397-7b0f-8816-fd179d794104",
+        "supervisorId": "01a19751-d447-7344-8c2f-606007b3c015",
+        "homeDisciplineId": null,
+        "isActive": true,
+        "weeklyCapacityHours": null,
+        "isTemplateEditor": false,
+        "lastSignInAt": null,
+        "rowVersion": 0,
+        "roles": [],
+        "personFacts": {
+          "notices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          },
+          "certifications": []
+        }
+      },
+      {
+        "id": "01a19751-d447-7f75-a176-926ba05c6c3e",
+        "displayName": "Jill Martin",
+        "email": "jill@hub.test",
+        "jobTitle": "Civil Designer",
+        "officeId": "01a19751-d397-7b0f-8816-fd179d794104",
+        "supervisorId": "01a19751-d447-73ed-9659-79f9784aded9",
+        "homeDisciplineId": null,
+        "isActive": true,
+        "weeklyCapacityHours": null,
+        "isTemplateEditor": false,
+        "lastSignInAt": null,
+        "rowVersion": 0,
+        "roles": [],
+        "personFacts": {
+          "notices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          },
+          "certifications": []
+        }
+      },
+      {
+        "id": "01a19751-d446-7e24-9561-bb4a5bdd569f",
+        "displayName": "Jordan Lee",
+        "email": "jordan@hub.test",
+        "jobTitle": "Applications Administrator",
+        "officeId": "01a19751-d397-7b0f-8816-fd179d794104",
+        "supervisorId": null,
+        "homeDisciplineId": null,
+        "isActive": true,
+        "weeklyCapacityHours": null,
+        "isTemplateEditor": false,
+        "lastSignInAt": null,
+        "rowVersion": 0,
+        "roles": [
+          {
+            "role": "Admin",
+            "source": "Manual"
+          }
+        ],
+        "personFacts": {
+          "notices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          },
+          "certifications": []
+        }
+      },
+      {
+        "id": "01a19751-d447-7344-8c2f-606007b3c015",
+        "displayName": "Lena Brooks",
+        "email": "lena@hub.test",
+        "jobTitle": "Regional Manager",
+        "officeId": "01a19751-d397-7b0f-8816-fd179d794104",
+        "supervisorId": null,
+        "homeDisciplineId": null,
+        "isActive": true,
+        "weeklyCapacityHours": null,
+        "isTemplateEditor": false,
+        "lastSignInAt": null,
+        "rowVersion": 0,
+        "roles": [
+          {
+            "role": "Executive",
+            "source": "Manual"
+          },
+          {
+            "role": "Supervisor",
+            "source": "Manual"
+          }
+        ],
+        "personFacts": {
+          "notices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          },
+          "certifications": []
+        }
+      },
+      {
+        "id": "01a19751-d447-780f-8722-3aaa0a0c4d21",
+        "displayName": "Marc Dubois",
+        "email": "marc@hub.test",
+        "jobTitle": "Senior Civil Engineer",
+        "officeId": "01a19751-d397-7b0f-8816-fd179d794104",
+        "supervisorId": "01a19751-d447-73ed-9659-79f9784aded9",
+        "homeDisciplineId": null,
+        "isActive": true,
+        "weeklyCapacityHours": null,
+        "isTemplateEditor": false,
+        "lastSignInAt": null,
+        "rowVersion": 0,
+        "roles": [
+          {
+            "role": "Supervisor",
+            "source": "Manual"
+          },
+          {
+            "role": "ProjectManager",
+            "source": "Manual"
+          }
+        ],
+        "personFacts": {
+          "notices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          },
+          "certifications": []
+        }
+      },
+      {
+        "id": "01a19751-d447-722a-ac3f-2313cfb34bc5",
+        "displayName": "Omar Haddad",
+        "email": "omar@hub.test",
+        "jobTitle": "Geotechnical Lead",
+        "officeId": "01a19751-d397-7b0f-8816-fd179d794104",
+        "supervisorId": "01a19751-d447-7344-8c2f-606007b3c015",
+        "homeDisciplineId": null,
+        "isActive": true,
+        "weeklyCapacityHours": null,
+        "isTemplateEditor": false,
+        "lastSignInAt": null,
+        "rowVersion": 0,
+        "roles": [],
+        "personFacts": {
+          "notices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          },
+          "certifications": []
+        }
+      },
+      {
+        "id": "01a19751-d447-79d4-91a8-0895553dde52",
+        "displayName": "Priya Nair",
+        "email": "priya@hub.test",
+        "jobTitle": "Project Manager",
+        "officeId": "01a19751-d397-7b0f-8816-fd179d794104",
+        "supervisorId": "01a19751-d447-7344-8c2f-606007b3c015",
+        "homeDisciplineId": null,
+        "isActive": true,
+        "weeklyCapacityHours": null,
+        "isTemplateEditor": false,
+        "lastSignInAt": null,
+        "rowVersion": 0,
+        "roles": [
+          {
+            "role": "ProjectManager",
+            "source": "Manual"
+          }
+        ],
+        "personFacts": {
+          "notices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          },
+          "certifications": []
+        }
+      },
+      {
+        "id": "01a19751-d447-7b97-9076-25c6fb92b6f0",
+        "displayName": "Rita Gomez",
+        "email": "rita@hub.test",
+        "jobTitle": "Auditor",
+        "officeId": "01a19751-d397-7b0f-8816-fd179d794104",
+        "supervisorId": null,
+        "homeDisciplineId": null,
+        "isActive": true,
+        "weeklyCapacityHours": null,
+        "isTemplateEditor": false,
+        "lastSignInAt": null,
+        "rowVersion": 0,
+        "roles": [
+          {
+            "role": "ReadOnly",
+            "source": "Manual"
+          }
+        ],
+        "personFacts": {
+          "notices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          },
+          "certifications": []
+        }
+      },
+      {
+        "id": "01a19751-d447-73ed-9659-79f9784aded9",
+        "displayName": "Sam Patel",
+        "email": "sam@hub.test",
+        "jobTitle": "Civil Group Manager",
+        "officeId": "01a19751-d397-7b0f-8816-fd179d794104",
+        "supervisorId": "01a19751-d447-7344-8c2f-606007b3c015",
+        "homeDisciplineId": null,
+        "isActive": true,
+        "weeklyCapacityHours": null,
+        "isTemplateEditor": false,
+        "lastSignInAt": null,
+        "rowVersion": 0,
+        "roles": [
+          {
+            "role": "Supervisor",
+            "source": "Manual"
+          }
+        ],
+        "personFacts": {
+          "notices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          },
+          "certifications": []
+        }
+      }
+    ],
+    "projects": {
+      "items": [
+        {
+          "id": "01a19754-b327-78af-b89f-a3a43edcffd7",
+          "projectNumber": "QA20-REAL-001",
+          "name": "Checkpoint 20 real QA project",
+          "status": "Active",
+          "priority": "Medium",
+          "visibility": "Open",
+          "startDate": "2026-10-26",
+          "targetCompletionDate": "2026-11-30",
+          "client": {
+            "id": "01a19751-d391-700d-8304-7ddfc706aeb5",
+            "name": "Internal / TBD"
+          },
+          "pm": {
+            "id": "01a19751-d447-79d4-91a8-0895553dde52",
+            "displayName": "Priya Nair"
+          },
+          "officeId": "01a19751-d397-7b0f-8816-fd179d794104",
+          "office": "Head Office",
+          "phaseId": null,
+          "phase": null,
+          "projectTypeId": null,
+          "computedHealth": "Grey",
+          "reportedHealth": "Grey",
+          "healthReasons": [
+            {
+              "rule": "G-05",
+              "text": "Project in setup",
+              "colour": null,
+              "values": null,
+              "threshold": null
+            }
+          ],
+          "healthOverrideNote": null,
+          "healthOverrideAt": null,
+          "overrideBy": null,
+          "overrideActive": false,
+          "progressPct": null,
+          "overdueTasks": 0,
+          "blockedTasks": 0,
+          "overdueDecisions": 0,
+          "highIssues": 0,
+          "attentionCritical": 0,
+          "attentionWarning": 0,
+          "nextMilestone": null,
+          "nextSubmission": null,
+          "myRoles": [
+            "PM"
+          ],
+          "starred": false,
+          "lastActivityAt": "2026-11-01T13:37:53.442637+00:00",
+          "identityColour": "#ec6a3e",
+          "staffing": {
+            "openRoles": 0,
+            "overCapacityPeople": 0,
+            "limitedScope": false,
+            "partialView": false,
+            "ownPlannerOnly": false,
+            "lookaheadWeeks": 4,
+            "from": "2026-10-26",
+            "through": "2026-11-22"
+          },
+          "span": {
+            "today": "2026-11-01",
+            "openMilestones": 0
+          },
+          "progressFacts": {
+            "today": "2026-11-01",
+            "elapsedPct": 17,
+            "progressPct": null
+          },
+          "rowVersion": 1
+        }
+      ],
+      "page": 1,
+      "pageSize": 200,
+      "totalCount": 1,
+      "sort": null,
+      "filters": null
+    },
+    "me": {
+      "id": "01a19751-d447-79d4-91a8-0895553dde52",
+      "displayName": "Priya Nair",
+      "email": "priya@hub.test",
+      "jobTitle": "Project Manager",
+      "officeId": "01a19751-d397-7b0f-8816-fd179d794104",
+      "supervisorId": "01a19751-d447-7344-8c2f-606007b3c015",
+      "isTemplateEditor": false,
+      "roles": [
+        {
+          "role": "ProjectManager",
+          "source": "Manual"
+        }
+      ],
+      "systemRoles": [
+        "ProjectManager"
+      ],
+      "capabilities": {
+        "createProject": true,
+        "createTask": true,
+        "portfolio": true,
+        "workload": true,
+        "staff": false,
+        "allStaff": false,
+        "admin": false,
+        "templates": false,
+        "readOnly": false,
+        "directReports": 0
+      },
+      "settings": {
+        "dateFormat": "yyyy-MM-dd",
+        "orgTimeZone": "America/Halifax",
+        "today": "2026-11-01",
+        "idleTimeoutHours": 8,
+        "restrictedProjectsEnabled": false,
+        "allowSelfReview": false,
+        "taskDueSoonDays": 5,
+        "milestoneApproachingDays": 14,
+        "chainDepthLimit": 10,
+        "defaultWeeklyCapacityHours": 40,
+        "coordinationLookaheadWeeks": 3,
+        "workingDaysEnabled": false,
+        "activityBurstMinutes": 10
+      },
+      "preferences": {
+        "digestEnabled": true,
+        "digestTimeLocal": null,
+        "denseRows": true,
+        "weeklySummaryEnabled": true
+      },
+      "flags": {
+        "verifiable_log": false,
+        "commitment_reliability": false,
+        "allocation_preview": false,
+        "baseline_history": false,
+        "revision_check": false,
+        "task_pickup": true,
+        "org_structure": true,
+        "figure_names": false,
+        "planner_kept_rows": false,
+        "show_deleted": false,
+        "template_working_days": false,
+        "status_rollups": false,
+        "picker_project_rank": false,
+        "row_quick_actions": false,
+        "date_context": false,
+        "schedule_baseline": false,
+        "small_ux": true,
+        "timeline_handoffs_chain": false,
+        "onboarding_card": false,
+        "capacity_reports": false,
+        "route_counter": false,
+        "template_roles": false,
+        "unfilled_beside_capacity": false,
+        "project_status_note": false,
+        "my_work_follow_up": false,
+        "project_import": false,
+        "capacity_polish": false,
+        "record_engine_additions": false,
+        "live_project_stamp": false,
+        "live_events": false,
+        "admin_review": false,
+        "data_entry_safety": false,
+        "backlog": false,
+        "visual_system": true,
+        "screen_patterns": false,
+        "home_overview": false,
+        "work_screens": true,
+        "project_screens": true,
+        "capacity_screens": true,
+        "register_screens": false,
+        "people_screens": true
+      }
+    },
+    "staff": {
+      "status": 200,
+      "value": {
+        "scope": "direct",
+        "canSeeAll": false,
+        "tiles": {
+          "staff": 3,
+          "assignments": 3,
+          "withOverdue": 0,
+          "withBlocked": 0,
+          "reviewsStalled": 0
+        },
+        "people": [
+          {
+            "id": "01a19751-d447-7e1f-9a5f-23c4303d03a4",
+            "displayName": "Alex Chen",
+            "jobTitle": "Civil Designer (EIT)",
+            "officeId": "01a19751-d397-7b0f-8816-fd179d794104",
+            "isActive": true,
+            "projects": 1,
+            "roles": {
+              "pm": 0,
+              "dl": 0,
+              "team": 1,
+              "reviewer": 0,
+              "viewer": 0
+            },
+            "open": 1,
+            "overdue": 0,
+            "blocked": 0,
+            "blocking": 0,
+            "reviews": 0,
+            "reviewsStalled": 0,
+            "deliverablesDue": 1,
+            "lastActivityAt": null,
+            "personFacts": {
+              "notices": {
+                "personType": null,
+                "startDate": null,
+                "endDate": null,
+                "starts": false,
+                "ends": false
+              },
+              "certifications": []
+            }
+          },
+          {
+            "id": "01a19751-d447-7f75-a176-926ba05c6c3e",
+            "displayName": "Jill Martin",
+            "jobTitle": "Civil Designer",
+            "officeId": "01a19751-d397-7b0f-8816-fd179d794104",
+            "isActive": true,
+            "projects": 1,
+            "roles": {
+              "pm": 0,
+              "dl": 0,
+              "team": 1,
+              "reviewer": 0,
+              "viewer": 0
+            },
+            "open": 0,
+            "overdue": 0,
+            "blocked": 0,
+            "blocking": 0,
+            "reviews": 0,
+            "reviewsStalled": 0,
+            "deliverablesDue": 0,
+            "lastActivityAt": null,
+            "personFacts": {
+              "notices": {
+                "personType": null,
+                "startDate": null,
+                "endDate": null,
+                "starts": false,
+                "ends": false
+              },
+              "certifications": []
+            }
+          },
+          {
+            "id": "01a19751-d447-780f-8722-3aaa0a0c4d21",
+            "displayName": "Marc Dubois",
+            "jobTitle": "Senior Civil Engineer",
+            "officeId": "01a19751-d397-7b0f-8816-fd179d794104",
+            "isActive": true,
+            "projects": 1,
+            "roles": {
+              "pm": 0,
+              "dl": 1,
+              "team": 1,
+              "reviewer": 0,
+              "viewer": 0
+            },
+            "open": 0,
+            "overdue": 0,
+            "blocked": 0,
+            "blocking": 0,
+            "reviews": 0,
+            "reviewsStalled": 0,
+            "deliverablesDue": 0,
+            "lastActivityAt": null,
+            "personFacts": {
+              "notices": {
+                "personType": null,
+                "startDate": null,
+                "endDate": null,
+                "starts": false,
+                "ends": false
+              },
+              "certifications": []
+            }
+          }
+        ],
+        "asOf": "2026-11-01T13:39:11.721563+00:00"
+      }
+    },
+    "time": {
+      "status": 200,
+      "value": {
+        "from": "2026-10-26",
+        "to": "2026-11-01",
+        "entries": [
+          {
+            "id": "01a19754-b510-72fe-8855-afc8b8da84e9",
+            "projectId": "01a19754-b327-78af-b89f-a3a43edcffd7",
+            "projectNumber": "QA20-REAL-001",
+            "projectName": "Checkpoint 20 real QA project",
+            "taskId": "01a19754-b4c9-7e32-b408-97c300f9c125",
+            "taskKey": "QA20-REAL-001-T0001",
+            "taskName": "QA20 real task one",
+            "userId": "01a19751-d447-79d4-91a8-0895553dde52",
+            "person": "Priya Nair",
+            "workDate": "2026-10-27",
+            "hours": 2,
+            "note": "QA20 real acceptance entry",
+            "rowVersion": 0,
+            "canEdit": true,
+            "editNeedsReason": false
+          },
+          {
+            "id": "01a19754-b522-7311-9440-c37d40c61b4f",
+            "projectId": "01a19754-b327-78af-b89f-a3a43edcffd7",
+            "projectNumber": "QA20-REAL-001",
+            "projectName": "Checkpoint 20 real QA project",
+            "taskId": "01a19754-b4f4-7d85-8480-9cd3522778fc",
+            "taskKey": "QA20-REAL-001-T0002",
+            "taskName": "QA20 real task two",
+            "userId": "01a19751-d447-79d4-91a8-0895553dde52",
+            "person": "Priya Nair",
+            "workDate": "2026-10-28",
+            "hours": 2,
+            "note": "QA20 real acceptance entry",
+            "rowVersion": 0,
+            "canEdit": true,
+            "editNeedsReason": false
+          }
+        ],
+        "total": 4,
+        "byDay": [
+          {
+            "date": "2026-10-27",
+            "hours": 2
+          },
+          {
+            "date": "2026-10-28",
+            "hours": 2
+          }
+        ],
+        "byTask": [
+          {
+            "taskId": "01a19754-b4c9-7e32-b408-97c300f9c125",
+            "taskKey": "QA20-REAL-001-T0001",
+            "taskName": "QA20 real task one",
+            "projectNumber": "QA20-REAL-001",
+            "hours": 2
+          },
+          {
+            "taskId": "01a19754-b4f4-7d85-8480-9cd3522778fc",
+            "taskKey": "QA20-REAL-001-T0002",
+            "taskName": "QA20 real task two",
+            "projectNumber": "QA20-REAL-001",
+            "hours": 2
+          }
+        ],
+        "byProject": [
+          {
+            "projectId": "01a19754-b327-78af-b89f-a3a43edcffd7",
+            "projectNumber": "QA20-REAL-001",
+            "projectName": "Checkpoint 20 real QA project",
+            "hours": 4
+          }
+        ],
+        "canReview": true,
+        "asOf": "2026-11-01T13:39:11.727426+00:00"
+      }
+    },
+    "timeWeek": {
+      "status": 200,
+      "value": {
+        "from": "2026-10-26",
+        "to": "2026-11-01",
+        "today": "2026-11-01",
+        "personId": "01a19751-d447-79d4-91a8-0895553dde52",
+        "capacityHours": 40,
+        "days": [
+          {
+            "date": "2026-10-26",
+            "normalHours": 8,
+            "availableHours": 8,
+            "timeAwayHours": 0,
+            "holidayHours": 0,
+            "additionalHours": 0,
+            "provisional": false,
+            "unavailable": false
+          },
+          {
+            "date": "2026-10-27",
+            "normalHours": 8,
+            "availableHours": 8,
+            "timeAwayHours": 0,
+            "holidayHours": 0,
+            "additionalHours": 0,
+            "provisional": false,
+            "unavailable": false
+          },
+          {
+            "date": "2026-10-28",
+            "normalHours": 8,
+            "availableHours": 8,
+            "timeAwayHours": 0,
+            "holidayHours": 0,
+            "additionalHours": 0,
+            "provisional": false,
+            "unavailable": false
+          },
+          {
+            "date": "2026-10-29",
+            "normalHours": 8,
+            "availableHours": 8,
+            "timeAwayHours": 0,
+            "holidayHours": 0,
+            "additionalHours": 0,
+            "provisional": false,
+            "unavailable": false
+          },
+          {
+            "date": "2026-10-30",
+            "normalHours": 8,
+            "availableHours": 8,
+            "timeAwayHours": 0,
+            "holidayHours": 0,
+            "additionalHours": 0,
+            "provisional": false,
+            "unavailable": false
+          },
+          {
+            "date": "2026-10-31",
+            "normalHours": 0,
+            "availableHours": 0,
+            "timeAwayHours": 0,
+            "holidayHours": 0,
+            "additionalHours": 0,
+            "provisional": false,
+            "unavailable": false
+          },
+          {
+            "date": "2026-11-01",
+            "normalHours": 0,
+            "availableHours": 0,
+            "timeAwayHours": 0,
+            "holidayHours": 0,
+            "additionalHours": 0,
+            "provisional": false,
+            "unavailable": false
+          }
+        ],
+        "tasks": [
+          {
+            "taskId": "01a19754-b4c9-7e32-b408-97c300f9c125",
+            "taskKey": "QA20-REAL-001-T0001",
+            "taskName": "QA20 real task one",
+            "projectId": "01a19754-b327-78af-b89f-a3a43edcffd7",
+            "projectNumber": "QA20-REAL-001",
+            "projectName": "Checkpoint 20 real QA project",
+            "canCreate": true,
+            "deleted": false,
+            "assigned": true,
+            "previousWeek": false,
+            "entries": [
+              {
+                "id": "01a19754-b510-72fe-8855-afc8b8da84e9",
+                "projectId": "01a19754-b327-78af-b89f-a3a43edcffd7",
+                "projectNumber": "QA20-REAL-001",
+                "projectName": "Checkpoint 20 real QA project",
+                "taskId": "01a19754-b4c9-7e32-b408-97c300f9c125",
+                "taskKey": "QA20-REAL-001-T0001",
+                "taskName": "QA20 real task one",
+                "userId": "01a19751-d447-79d4-91a8-0895553dde52",
+                "person": "Priya Nair",
+                "workDate": "2026-10-27",
+                "hours": 2,
+                "note": "QA20 real acceptance entry",
+                "rowVersion": 0,
+                "canEdit": true,
+                "editNeedsReason": false
+              }
+            ]
+          },
+          {
+            "taskId": "01a19754-b4f4-7d85-8480-9cd3522778fc",
+            "taskKey": "QA20-REAL-001-T0002",
+            "taskName": "QA20 real task two",
+            "projectId": "01a19754-b327-78af-b89f-a3a43edcffd7",
+            "projectNumber": "QA20-REAL-001",
+            "projectName": "Checkpoint 20 real QA project",
+            "canCreate": true,
+            "deleted": false,
+            "assigned": false,
+            "previousWeek": false,
+            "entries": [
+              {
+                "id": "01a19754-b522-7311-9440-c37d40c61b4f",
+                "projectId": "01a19754-b327-78af-b89f-a3a43edcffd7",
+                "projectNumber": "QA20-REAL-001",
+                "projectName": "Checkpoint 20 real QA project",
+                "taskId": "01a19754-b4f4-7d85-8480-9cd3522778fc",
+                "taskKey": "QA20-REAL-001-T0002",
+                "taskName": "QA20 real task two",
+                "userId": "01a19751-d447-79d4-91a8-0895553dde52",
+                "person": "Priya Nair",
+                "workDate": "2026-10-28",
+                "hours": 2,
+                "note": "QA20 real acceptance entry",
+                "rowVersion": 0,
+                "canEdit": true,
+                "editNeedsReason": false
+              }
+            ]
+          }
+        ],
+        "asOf": "2026-11-01T13:39:11.737044+00:00"
+      }
+    },
+    "reports": {
+      "status": 200,
+      "value": [
+        {
+          "code": "pickup-offers",
+          "title": "report.pickup-offers",
+          "description": "report.pickup-offers.about",
+          "params": [
+            {
+              "key": "projectId",
+              "label": "Projects",
+              "type": "projects",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "disciplineId",
+              "label": "Discipline",
+              "type": "discipline",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "from",
+              "label": "From",
+              "type": "date",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "to",
+              "label": "To",
+              "type": "date",
+              "default": null,
+              "options": null
+            }
+          ],
+          "itemType": "Task",
+          "columns": [
+            {
+              "path": "project",
+              "header": "Project",
+              "type": "text"
+            },
+            {
+              "path": "discipline",
+              "header": "Discipline",
+              "type": "text"
+            },
+            {
+              "path": "offered",
+              "header": "Offered",
+              "type": "datetime"
+            },
+            {
+              "path": "closed",
+              "header": "Closed",
+              "type": "datetime"
+            },
+            {
+              "path": "closeCause",
+              "header": "Closing cause",
+              "type": "text"
+            },
+            {
+              "path": "daysOpen",
+              "header": "Days open",
+              "type": "number"
+            }
+          ],
+          "question": "How are pickup and commitments working?"
+        },
+        {
+          "code": "tasks-due-this-week",
+          "title": "Tasks Due This Week",
+          "description": "Open tasks due Monday to Sunday of the chosen week.",
+          "params": [
+            {
+              "key": "projectId",
+              "label": "Projects",
+              "type": "projects",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "disciplineId",
+              "label": "Discipline",
+              "type": "discipline",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "assigneeId",
+              "label": "Assignee",
+              "type": "person",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "week",
+              "label": "Week of",
+              "type": "date",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "mine",
+              "label": "My tasks only",
+              "type": "bool",
+              "default": null,
+              "options": null
+            }
+          ],
+          "itemType": "Task",
+          "columns": [
+            {
+              "path": "key",
+              "header": "Key",
+              "type": "key"
+            },
+            {
+              "path": "name",
+              "header": "Task",
+              "type": "text"
+            },
+            {
+              "path": "projectNumber",
+              "header": "Project",
+              "type": "text"
+            },
+            {
+              "path": "deliverableKey",
+              "header": "Deliverable",
+              "type": "text"
+            },
+            {
+              "path": "disciplineName",
+              "header": "Discipline",
+              "type": "text"
+            },
+            {
+              "path": "assigneeName",
+              "header": "Assignee",
+              "type": "text"
+            },
+            {
+              "path": "dueDate",
+              "header": "Due",
+              "type": "date"
+            },
+            {
+              "path": "status",
+              "header": "Status",
+              "type": "text"
+            },
+            {
+              "path": "indicators",
+              "header": "Indicators",
+              "type": "text"
+            }
+          ],
+          "question": "What needs action this week or is holding work up?"
+        },
+        {
+          "code": "overdue-tasks",
+          "title": "Overdue Tasks",
+          "description": "Tasks past their due date, with what they hold up.",
+          "params": [
+            {
+              "key": "projectId",
+              "label": "Projects",
+              "type": "projects",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "disciplineId",
+              "label": "Discipline",
+              "type": "discipline",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "assigneeId",
+              "label": "Assignee",
+              "type": "person",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "minDaysOverdue",
+              "label": "Minimum days overdue",
+              "type": "number",
+              "default": "1",
+              "options": null
+            }
+          ],
+          "itemType": "Task",
+          "columns": [
+            {
+              "path": "key",
+              "header": "Key",
+              "type": "key"
+            },
+            {
+              "path": "name",
+              "header": "Task",
+              "type": "text"
+            },
+            {
+              "path": "projectNumber",
+              "header": "Project",
+              "type": "text"
+            },
+            {
+              "path": "assigneeName",
+              "header": "Assignee",
+              "type": "text"
+            },
+            {
+              "path": "dueDate",
+              "header": "Due",
+              "type": "date"
+            },
+            {
+              "path": "state.daysOverdue",
+              "header": "Days overdue",
+              "type": "number"
+            },
+            {
+              "path": "state.blockingCount",
+              "header": "Blocking",
+              "type": "number"
+            },
+            {
+              "path": "affectedMilestones",
+              "header": "Affected milestones",
+              "type": "text"
+            },
+            {
+              "path": "status",
+              "header": "Status",
+              "type": "text"
+            }
+          ],
+          "question": "What needs action this week or is holding work up?"
+        },
+        {
+          "code": "blocked-tasks",
+          "title": "Blocked Tasks",
+          "description": "Tasks that cannot proceed and what blocks them.",
+          "params": [
+            {
+              "key": "projectId",
+              "label": "Projects",
+              "type": "projects",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "disciplineId",
+              "label": "Discipline",
+              "type": "discipline",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "blockerType",
+              "label": "Blocked by",
+              "type": "select",
+              "default": null,
+              "options": [
+                {
+                  "value": "task",
+                  "label": "A task"
+                },
+                {
+                  "value": "decision",
+                  "label": "A decision"
+                },
+                {
+                  "value": "manual",
+                  "label": "A manual block"
+                }
+              ]
+            }
+          ],
+          "itemType": "Task",
+          "columns": [
+            {
+              "path": "key",
+              "header": "Key",
+              "type": "key"
+            },
+            {
+              "path": "name",
+              "header": "Task",
+              "type": "text"
+            },
+            {
+              "path": "projectNumber",
+              "header": "Project",
+              "type": "text"
+            },
+            {
+              "path": "assigneeName",
+              "header": "Assignee",
+              "type": "text"
+            },
+            {
+              "path": "state.blockedSince",
+              "header": "Blocked since",
+              "type": "date"
+            },
+            {
+              "path": "state.daysBlocked",
+              "header": "Days blocked",
+              "type": "number"
+            },
+            {
+              "path": "blockers",
+              "header": "Blocked by",
+              "type": "text"
+            },
+            {
+              "path": "affectedMilestones",
+              "header": "Affected milestones",
+              "type": "text"
+            }
+          ],
+          "question": "What needs action this week or is holding work up?"
+        },
+        {
+          "code": "tasks-blocking-others",
+          "title": "Tasks Blocking Others",
+          "description": "Tasks whose successors are waiting or blocked on them.",
+          "params": [
+            {
+              "key": "projectId",
+              "label": "Projects",
+              "type": "projects",
+              "default": null,
+              "options": null
+            }
+          ],
+          "itemType": "Task",
+          "columns": [
+            {
+              "path": "key",
+              "header": "Key",
+              "type": "key"
+            },
+            {
+              "path": "name",
+              "header": "Task",
+              "type": "text"
+            },
+            {
+              "path": "projectNumber",
+              "header": "Project",
+              "type": "text"
+            },
+            {
+              "path": "assigneeName",
+              "header": "Assignee",
+              "type": "text"
+            },
+            {
+              "path": "dueDate",
+              "header": "Due",
+              "type": "date"
+            },
+            {
+              "path": "status",
+              "header": "Status",
+              "type": "text"
+            },
+            {
+              "path": "state.blockingCount",
+              "header": "Successors",
+              "type": "number"
+            },
+            {
+              "path": "successorMilestones",
+              "header": "Successors' milestones",
+              "type": "text"
+            }
+          ],
+          "question": "What needs action this week or is holding work up?"
+        },
+        {
+          "code": "upcoming-deliverables",
+          "title": "Upcoming Deliverables",
+          "description": "Open deliverables due in the coming days.",
+          "params": [
+            {
+              "key": "projectId",
+              "label": "Projects",
+              "type": "projects",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "disciplineId",
+              "label": "Discipline",
+              "type": "discipline",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "daysAhead",
+              "label": "Days ahead",
+              "type": "number",
+              "default": "14",
+              "options": null
+            }
+          ],
+          "itemType": "Deliverable",
+          "columns": [
+            {
+              "path": "key",
+              "header": "Key",
+              "type": "key"
+            },
+            {
+              "path": "name",
+              "header": "Deliverable",
+              "type": "text"
+            },
+            {
+              "path": "projectNumber",
+              "header": "Project",
+              "type": "text"
+            },
+            {
+              "path": "disciplineName",
+              "header": "Discipline",
+              "type": "text"
+            },
+            {
+              "path": "ownerName",
+              "header": "Owner",
+              "type": "text"
+            },
+            {
+              "path": "milestoneKey",
+              "header": "Milestone",
+              "type": "text"
+            },
+            {
+              "path": "dueDate",
+              "header": "Due",
+              "type": "date"
+            },
+            {
+              "path": "status",
+              "header": "Status",
+              "type": "text"
+            },
+            {
+              "path": "state.progressPct",
+              "header": "Progress",
+              "type": "percent"
+            },
+            {
+              "path": "indicators",
+              "header": "Indicators",
+              "type": "text"
+            }
+          ],
+          "question": "What is due, issued or approaching submission?"
+        },
+        {
+          "code": "deliverable-status-by-project",
+          "title": "Deliverable Status by Project",
+          "description": "Every deliverable by project with status, due and issue dates.",
+          "params": [
+            {
+              "key": "projectId",
+              "label": "Projects",
+              "type": "projects",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "disciplineId",
+              "label": "Discipline",
+              "type": "discipline",
+              "default": null,
+              "options": null
+            }
+          ],
+          "itemType": "Deliverable",
+          "columns": [
+            {
+              "path": "projectNumber",
+              "header": "Project",
+              "type": "text"
+            },
+            {
+              "path": "key",
+              "header": "Key",
+              "type": "key"
+            },
+            {
+              "path": "name",
+              "header": "Deliverable",
+              "type": "text"
+            },
+            {
+              "path": "disciplineName",
+              "header": "Discipline",
+              "type": "text"
+            },
+            {
+              "path": "status",
+              "header": "Status",
+              "type": "text"
+            },
+            {
+              "path": "dueDate",
+              "header": "Due",
+              "type": "date"
+            },
+            {
+              "path": "issuedDate",
+              "header": "Issued",
+              "type": "date"
+            },
+            {
+              "path": "revision",
+              "header": "Revision",
+              "type": "text"
+            }
+          ],
+          "question": "What is due, issued or approaching submission?"
+        },
+        {
+          "code": "upcoming-milestones",
+          "title": "Upcoming Milestones",
+          "description": "Milestones in the coming days with readiness and slip.",
+          "params": [
+            {
+              "key": "projectId",
+              "label": "Projects",
+              "type": "projects",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "daysAhead",
+              "label": "Days ahead",
+              "type": "number",
+              "default": "30",
+              "options": null
+            },
+            {
+              "key": "type",
+              "label": "Milestone type",
+              "type": "select",
+              "default": null,
+              "options": [
+                {
+                  "value": "Kickoff",
+                  "label": "Kickoff"
+                },
+                {
+                  "value": "Field Work",
+                  "label": "Field Work"
+                },
+                {
+                  "value": "Design Submission",
+                  "label": "Design Submission"
+                },
+                {
+                  "value": "Client Workshop",
+                  "label": "Client Workshop"
+                },
+                {
+                  "value": "Permit Submission",
+                  "label": "Permit Submission"
+                },
+                {
+                  "value": "Tender",
+                  "label": "Tender"
+                },
+                {
+                  "value": "Construction",
+                  "label": "Construction"
+                },
+                {
+                  "value": "IFC",
+                  "label": "IFC"
+                },
+                {
+                  "value": "Record Drawings",
+                  "label": "Record Drawings"
+                },
+                {
+                  "value": "Closeout",
+                  "label": "Closeout"
+                },
+                {
+                  "value": "Other",
+                  "label": "Other"
+                }
+              ]
+            }
+          ],
+          "itemType": "Milestone",
+          "columns": [
+            {
+              "path": "projectNumber",
+              "header": "Project",
+              "type": "text"
+            },
+            {
+              "path": "key",
+              "header": "Key",
+              "type": "key"
+            },
+            {
+              "path": "name",
+              "header": "Milestone",
+              "type": "text"
+            },
+            {
+              "path": "milestoneType",
+              "header": "Type",
+              "type": "text"
+            },
+            {
+              "path": "date",
+              "header": "Date",
+              "type": "date"
+            },
+            {
+              "path": "status",
+              "header": "Status",
+              "type": "text"
+            },
+            {
+              "path": "slipDays",
+              "header": "Slip (days)",
+              "type": "number"
+            },
+            {
+              "path": "deliverablesIssued",
+              "header": "Deliverables issued",
+              "type": "text"
+            },
+            {
+              "path": "taskOpen",
+              "header": "Open tasks",
+              "type": "number"
+            }
+          ],
+          "question": "What is due, issued or approaching submission?"
+        },
+        {
+          "code": "open-decisions",
+          "title": "Open Decisions",
+          "description": "Decisions still to be made, by required-by date.",
+          "params": [
+            {
+              "key": "projectId",
+              "label": "Projects",
+              "type": "projects",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "ownerType",
+              "label": "Owner type",
+              "type": "select",
+              "default": null,
+              "options": [
+                {
+                  "value": "internal",
+                  "label": "Internal"
+                },
+                {
+                  "value": "external",
+                  "label": "External"
+                },
+                {
+                  "value": "client",
+                  "label": "Client"
+                }
+              ]
+            },
+            {
+              "key": "overdueOnly",
+              "label": "Overdue only",
+              "type": "bool",
+              "default": null,
+              "options": null
+            }
+          ],
+          "itemType": "Decision",
+          "columns": [
+            {
+              "path": "key",
+              "header": "Key",
+              "type": "key"
+            },
+            {
+              "path": "subject",
+              "header": "Subject",
+              "type": "text"
+            },
+            {
+              "path": "projectNumber",
+              "header": "Project",
+              "type": "text"
+            },
+            {
+              "path": "ownerName",
+              "header": "Owner",
+              "type": "text"
+            },
+            {
+              "path": "dateRequested",
+              "header": "Requested",
+              "type": "date"
+            },
+            {
+              "path": "requiredByDate",
+              "header": "Required by",
+              "type": "date"
+            },
+            {
+              "path": "days",
+              "header": "Days",
+              "type": "number"
+            },
+            {
+              "path": "impactLevel",
+              "header": "Impact",
+              "type": "text"
+            },
+            {
+              "path": "blocking",
+              "header": "Blocking",
+              "type": "number"
+            },
+            {
+              "path": "status",
+              "header": "Status",
+              "type": "text"
+            }
+          ],
+          "question": "What needs a decision, response or review?"
+        },
+        {
+          "code": "open-issues-high-risks",
+          "title": "Open Issues / High Risks",
+          "description": "Open issues and open risks, most severe first. Without a severity, every open issue and the High risks.",
+          "params": [
+            {
+              "key": "projectId",
+              "label": "Projects",
+              "type": "projects",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "severity",
+              "label": "Severity",
+              "type": "select",
+              "default": null,
+              "options": [
+                {
+                  "value": "Low",
+                  "label": "Low"
+                },
+                {
+                  "value": "Medium",
+                  "label": "Medium"
+                },
+                {
+                  "value": "High",
+                  "label": "High"
+                }
+              ]
+            }
+          ],
+          "itemType": null,
+          "columns": [
+            {
+              "path": "itemTypeLabel",
+              "header": "Type",
+              "type": "text"
+            },
+            {
+              "path": "key",
+              "header": "Key",
+              "type": "key"
+            },
+            {
+              "path": "title",
+              "header": "Title",
+              "type": "text"
+            },
+            {
+              "path": "projectNumber",
+              "header": "Project",
+              "type": "text"
+            },
+            {
+              "path": "ownerName",
+              "header": "Owner",
+              "type": "text"
+            },
+            {
+              "path": "severity",
+              "header": "Severity",
+              "type": "text"
+            },
+            {
+              "path": "status",
+              "header": "Status",
+              "type": "text"
+            },
+            {
+              "path": "date",
+              "header": "Date",
+              "type": "date"
+            },
+            {
+              "path": "daysOverdue",
+              "header": "Days overdue",
+              "type": "number"
+            }
+          ],
+          "question": "What needs a decision, response or review?"
+        },
+        {
+          "code": "meeting-actions-outstanding",
+          "title": "Meeting Actions Outstanding",
+          "description": "Open actions from project meetings, by due date, with who owns them.",
+          "params": [
+            {
+              "key": "projectId",
+              "label": "Projects",
+              "type": "projects",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "ownerType",
+              "label": "Owner type",
+              "type": "select",
+              "default": null,
+              "options": [
+                {
+                  "value": "User",
+                  "label": "Person"
+                },
+                {
+                  "value": "Discipline",
+                  "label": "Discipline"
+                },
+                {
+                  "value": "External Party",
+                  "label": "External party"
+                }
+              ]
+            }
+          ],
+          "itemType": "Action",
+          "columns": [
+            {
+              "path": "key",
+              "header": "Key",
+              "type": "key"
+            },
+            {
+              "path": "text",
+              "header": "Action",
+              "type": "text"
+            },
+            {
+              "path": "projectNumber",
+              "header": "Project",
+              "type": "text"
+            },
+            {
+              "path": "meetingTitle",
+              "header": "Meeting",
+              "type": "text"
+            },
+            {
+              "path": "ownerName",
+              "header": "Owner",
+              "type": "text"
+            },
+            {
+              "path": "ownerTypeLabel",
+              "header": "Owner type",
+              "type": "text"
+            },
+            {
+              "path": "dueDate",
+              "header": "Due",
+              "type": "date"
+            },
+            {
+              "path": "daysOverdue",
+              "header": "Days overdue",
+              "type": "number"
+            },
+            {
+              "path": "status",
+              "header": "Status",
+              "type": "text"
+            }
+          ],
+          "question": "What needs a decision, response or review?"
+        },
+        {
+          "code": "review-queue",
+          "title": "Review Queue",
+          "description": "Tasks and deliverables waiting for review, longest first.",
+          "params": [
+            {
+              "key": "reviewerId",
+              "label": "Reviewer",
+              "type": "person",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "projectId",
+              "label": "Projects",
+              "type": "projects",
+              "default": null,
+              "options": null
+            }
+          ],
+          "itemType": null,
+          "columns": [
+            {
+              "path": "key",
+              "header": "Key",
+              "type": "key"
+            },
+            {
+              "path": "name",
+              "header": "Item",
+              "type": "text"
+            },
+            {
+              "path": "itemTypeLabel",
+              "header": "Type",
+              "type": "text"
+            },
+            {
+              "path": "projectNumber",
+              "header": "Project",
+              "type": "text"
+            },
+            {
+              "path": "assigneeName",
+              "header": "Assignee",
+              "type": "text"
+            },
+            {
+              "path": "reviewerName",
+              "header": "Reviewer",
+              "type": "text"
+            },
+            {
+              "path": "readySince",
+              "header": "Ready since",
+              "type": "date"
+            },
+            {
+              "path": "daysWaiting",
+              "header": "Days waiting",
+              "type": "number"
+            },
+            {
+              "path": "round",
+              "header": "Round",
+              "type": "number"
+            }
+          ],
+          "question": "What needs a decision, response or review?"
+        },
+        {
+          "code": "stale-work",
+          "title": "Stale Work",
+          "description": "Open tasks with no activity for a number of days.",
+          "params": [
+            {
+              "key": "projectId",
+              "label": "Projects",
+              "type": "projects",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "days",
+              "label": "Days without activity",
+              "type": "number",
+              "default": null,
+              "options": null
+            }
+          ],
+          "itemType": "Task",
+          "columns": [
+            {
+              "path": "key",
+              "header": "Key",
+              "type": "key"
+            },
+            {
+              "path": "name",
+              "header": "Task",
+              "type": "text"
+            },
+            {
+              "path": "projectNumber",
+              "header": "Project",
+              "type": "text"
+            },
+            {
+              "path": "assigneeName",
+              "header": "Assignee",
+              "type": "text"
+            },
+            {
+              "path": "status",
+              "header": "Status",
+              "type": "text"
+            },
+            {
+              "path": "lastActivityAt",
+              "header": "Last activity",
+              "type": "datetime"
+            },
+            {
+              "path": "staleDays",
+              "header": "Days",
+              "type": "number"
+            }
+          ],
+          "question": "What needs action this week or is holding work up?"
+        },
+        {
+          "code": "project-activity-log",
+          "title": "Project Activity Log",
+          "description": "Every recorded change on one project.",
+          "params": [
+            {
+              "key": "projectId",
+              "label": "Projects",
+              "type": "project",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "from",
+              "label": "From",
+              "type": "date",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "to",
+              "label": "To",
+              "type": "date",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "category",
+              "label": "Action type",
+              "type": "select",
+              "default": null,
+              "options": [
+                {
+                  "value": "status",
+                  "label": "Status changes"
+                },
+                {
+                  "value": "assignment",
+                  "label": "Assignments"
+                },
+                {
+                  "value": "date",
+                  "label": "Date changes"
+                },
+                {
+                  "value": "deletion",
+                  "label": "Deletions"
+                },
+                {
+                  "value": "creation",
+                  "label": "Creations"
+                },
+                {
+                  "value": "comment",
+                  "label": "Comments"
+                },
+                {
+                  "value": "decision",
+                  "label": "A decision"
+                },
+                {
+                  "value": "health",
+                  "label": "Health"
+                },
+                {
+                  "value": "dependency",
+                  "label": "Dependencies"
+                },
+                {
+                  "value": "structure",
+                  "label": "Structure"
+                }
+              ]
+            }
+          ],
+          "itemType": null,
+          "columns": [
+            {
+              "path": "occurredAt",
+              "header": "Timestamp",
+              "type": "datetime"
+            },
+            {
+              "path": "actorName",
+              "header": "Actor",
+              "type": "text"
+            },
+            {
+              "path": "action",
+              "header": "Action",
+              "type": "text"
+            },
+            {
+              "path": "item",
+              "header": "Item",
+              "type": "text"
+            },
+            {
+              "path": "summary",
+              "header": "Change",
+              "type": "text"
+            },
+            {
+              "path": "reason",
+              "header": "Reason",
+              "type": "text"
+            }
+          ],
+          "question": "What changed and which projects need attention?"
+        },
+        {
+          "code": "projects-at-risk",
+          "title": "Projects At Risk",
+          "description": "Active projects whose computed or reported health is Red or Yellow, and why.",
+          "params": [
+            {
+              "key": "officeId",
+              "label": "Office",
+              "type": "office",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "pmId",
+              "label": "Project Manager",
+              "type": "person",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "health",
+              "label": "Health",
+              "type": "select",
+              "default": null,
+              "options": [
+                {
+                  "value": "Red",
+                  "label": "Red"
+                },
+                {
+                  "value": "Yellow",
+                  "label": "Yellow"
+                }
+              ]
+            }
+          ],
+          "itemType": null,
+          "columns": [
+            {
+              "path": "projectNumber",
+              "header": "Project",
+              "type": "text"
+            },
+            {
+              "path": "name",
+              "header": "Name",
+              "type": "text"
+            },
+            {
+              "path": "pm.displayName",
+              "header": "Project Manager",
+              "type": "text"
+            },
+            {
+              "path": "office",
+              "header": "Office",
+              "type": "text"
+            },
+            {
+              "path": "computedHealth",
+              "header": "Computed health",
+              "type": "text"
+            },
+            {
+              "path": "reportedHealth",
+              "header": "Reported health",
+              "type": "text"
+            },
+            {
+              "path": "why",
+              "header": "Why",
+              "type": "text"
+            },
+            {
+              "path": "healthOverrideNote",
+              "header": "Override note",
+              "type": "text"
+            },
+            {
+              "path": "nextSubmission.name",
+              "header": "Next submission",
+              "type": "text"
+            },
+            {
+              "path": "nextSubmission.date",
+              "header": "Submission date",
+              "type": "date"
+            }
+          ],
+          "question": "What changed and which projects need attention?"
+        },
+        {
+          "code": "health-history",
+          "title": "Health History",
+          "description": "Nightly computed and reported health by project.",
+          "params": [
+            {
+              "key": "projectId",
+              "label": "Projects",
+              "type": "projects",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "from",
+              "label": "From",
+              "type": "date",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "to",
+              "label": "To",
+              "type": "date",
+              "default": null,
+              "options": null
+            }
+          ],
+          "itemType": null,
+          "columns": [
+            {
+              "path": "projectNumber",
+              "header": "Project",
+              "type": "text"
+            },
+            {
+              "path": "name",
+              "header": "Name",
+              "type": "text"
+            },
+            {
+              "path": "date",
+              "header": "Date",
+              "type": "date"
+            },
+            {
+              "path": "computed",
+              "header": "Computed health",
+              "type": "text"
+            },
+            {
+              "path": "reported",
+              "header": "Reported health",
+              "type": "text"
+            }
+          ],
+          "question": "What changed and which projects need attention?"
+        },
+        {
+          "code": "workload-employee",
+          "title": "Workload by Employee",
+          "description": "Each person's estimated hours per week against capacity, with open, unestimated and overdue tasks.",
+          "params": [
+            {
+              "key": "supervisorId",
+              "label": "Supervisor",
+              "type": "person",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "disciplineId",
+              "label": "Discipline",
+              "type": "discipline",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "officeId",
+              "label": "Office",
+              "type": "office",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "projectId",
+              "label": "Projects",
+              "type": "project",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "unit",
+              "label": "Report unit",
+              "type": "select",
+              "default": "hours",
+              "options": [
+                {
+                  "value": "hours",
+                  "label": "Hours"
+                },
+                {
+                  "value": "fte",
+                  "label": "FTE"
+                }
+              ]
+            },
+            {
+              "key": "period",
+              "label": "Period",
+              "type": "select",
+              "default": "weeks",
+              "options": [
+                {
+                  "value": "weeks",
+                  "label": "Weeks"
+                },
+                {
+                  "value": "months",
+                  "label": "Months"
+                }
+              ]
+            }
+          ],
+          "itemType": null,
+          "columns": [
+            {
+              "path": "person",
+              "header": "Person",
+              "type": "text"
+            },
+            {
+              "path": "capacity",
+              "header": "Capacity (h/week)",
+              "type": "number"
+            }
+          ],
+          "question": "Who has room in the coming weeks?"
+        },
+        {
+          "code": "workload-discipline",
+          "title": "Workload by Discipline",
+          "description": "Estimated hours per week by discipline.",
+          "params": [
+            {
+              "key": "officeId",
+              "label": "Office",
+              "type": "office",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "unit",
+              "label": "Report unit",
+              "type": "select",
+              "default": "hours",
+              "options": [
+                {
+                  "value": "hours",
+                  "label": "Hours"
+                },
+                {
+                  "value": "fte",
+                  "label": "FTE"
+                }
+              ]
+            },
+            {
+              "key": "period",
+              "label": "Period",
+              "type": "select",
+              "default": "weeks",
+              "options": [
+                {
+                  "value": "weeks",
+                  "label": "Weeks"
+                },
+                {
+                  "value": "months",
+                  "label": "Months"
+                }
+              ]
+            }
+          ],
+          "itemType": null,
+          "columns": [
+            {
+              "path": "discipline",
+              "header": "Discipline",
+              "type": "text"
+            }
+          ],
+          "question": "Where is work concentrated by discipline?"
+        },
+        {
+          "code": "pilot-measures",
+          "title": "Pilot measures",
+          "description": "Weekly readings of the pilot goals on chosen projects: coordination reviews, tasks without an owner or due date, blocked tasks, and people updating task status.",
+          "params": [
+            {
+              "key": "projectId",
+              "label": "Projects",
+              "type": "projects",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "weeks",
+              "label": "Weeks",
+              "type": "number",
+              "default": "8",
+              "options": null
+            }
+          ],
+          "itemType": "Task",
+          "columns": [
+            {
+              "path": "weekOf",
+              "header": "Week of",
+              "type": "date"
+            },
+            {
+              "path": "projects",
+              "header": "Projects",
+              "type": "number"
+            },
+            {
+              "path": "reviewed",
+              "header": "Coordination reviews (G1)",
+              "type": "number"
+            },
+            {
+              "path": "unassigned",
+              "header": "Open tasks without owner (G2)",
+              "type": "number"
+            },
+            {
+              "path": "noDueDate",
+              "header": "Open tasks without due date (G2)",
+              "type": "number"
+            },
+            {
+              "path": "blocked",
+              "header": "Blocked tasks (G3)",
+              "type": "number"
+            },
+            {
+              "path": "people",
+              "header": "People with open tasks",
+              "type": "number"
+            },
+            {
+              "path": "updaters",
+              "header": "Changed a task status (G4)",
+              "type": "number"
+            },
+            {
+              "path": "updatersPct",
+              "header": "Share changing status (G4)",
+              "type": "percent"
+            }
+          ],
+          "question": "What do pilot activity and screen measurements show?"
+        },
+        {
+          "code": "task-hours",
+          "title": "Task Hours",
+          "description": "Actual hours recorded against tasks, by date and person.",
+          "params": [
+            {
+              "key": "projectId",
+              "label": "Projects",
+              "type": "project",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "userId",
+              "label": "Person",
+              "type": "person",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "from",
+              "label": "From",
+              "type": "date",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "to",
+              "label": "To",
+              "type": "date",
+              "default": null,
+              "options": null
+            },
+            {
+              "key": "scope",
+              "label": "Staff",
+              "type": "select",
+              "default": "mine",
+              "options": [
+                {
+                  "value": "mine",
+                  "label": "Mine"
+                },
+                {
+                  "value": "team",
+                  "label": "Everyone I can review"
+                }
+              ]
+            }
+          ],
+          "itemType": null,
+          "columns": [
+            {
+              "path": "workDate",
+              "header": "Date",
+              "type": "date"
+            },
+            {
+              "path": "person",
+              "header": "Person",
+              "type": "text"
+            },
+            {
+              "path": "projectNumber",
+              "header": "Project",
+              "type": "text"
+            },
+            {
+              "path": "taskKey",
+              "header": "Key",
+              "type": "text"
+            },
+            {
+              "path": "taskName",
+              "header": "Task",
+              "type": "text"
+            },
+            {
+              "path": "hours",
+              "header": "Hours",
+              "type": "number"
+            },
+            {
+              "path": "note",
+              "header": "Note",
+              "type": "text"
+            }
+          ],
+          "question": "What task time was recorded?"
+        }
+      ]
+    },
+    "reportWorkload": {
+      "status": 200,
+      "value": {
+        "code": "workload-employee",
+        "title": "Workload by Employee",
+        "itemType": null,
+        "columns": [
+          {
+            "path": "person",
+            "header": "Person",
+            "type": "text"
+          },
+          {
+            "path": "supervisor",
+            "header": "Supervisor",
+            "type": "text"
+          },
+          {
+            "path": "capacity",
+            "header": "Capacity (h/week)",
+            "type": "number"
+          },
+          {
+            "path": "partialScope",
+            "header": "Scope",
+            "type": "text"
+          },
+          {
+            "path": "w0",
+            "header": "Week of 2026-10-26",
+            "type": "number"
+          },
+          {
+            "path": "w0Available",
+            "header": "Week of 2026-10-26 · Available (h)",
+            "type": "number"
+          },
+          {
+            "path": "w0Confirmed",
+            "header": "Week of 2026-10-26 · Confirmed reservation (h)",
+            "type": "number"
+          },
+          {
+            "path": "w0Proposed",
+            "header": "Week of 2026-10-26 · Proposed request (h)",
+            "type": "number"
+          },
+          {
+            "path": "w0Committed",
+            "header": "Week of 2026-10-26 · Committed load (h)",
+            "type": "number"
+          },
+          {
+            "path": "w1",
+            "header": "Week of 2026-11-02",
+            "type": "number"
+          },
+          {
+            "path": "w1Available",
+            "header": "Week of 2026-11-02 · Available (h)",
+            "type": "number"
+          },
+          {
+            "path": "w1Confirmed",
+            "header": "Week of 2026-11-02 · Confirmed reservation (h)",
+            "type": "number"
+          },
+          {
+            "path": "w1Proposed",
+            "header": "Week of 2026-11-02 · Proposed request (h)",
+            "type": "number"
+          },
+          {
+            "path": "w1Committed",
+            "header": "Week of 2026-11-02 · Committed load (h)",
+            "type": "number"
+          },
+          {
+            "path": "w2",
+            "header": "Week of 2026-11-09",
+            "type": "number"
+          },
+          {
+            "path": "w2Available",
+            "header": "Week of 2026-11-09 · Available (h)",
+            "type": "number"
+          },
+          {
+            "path": "w2Confirmed",
+            "header": "Week of 2026-11-09 · Confirmed reservation (h)",
+            "type": "number"
+          },
+          {
+            "path": "w2Proposed",
+            "header": "Week of 2026-11-09 · Proposed request (h)",
+            "type": "number"
+          },
+          {
+            "path": "w2Committed",
+            "header": "Week of 2026-11-09 · Committed load (h)",
+            "type": "number"
+          },
+          {
+            "path": "w3",
+            "header": "Week of 2026-11-16",
+            "type": "number"
+          },
+          {
+            "path": "w3Available",
+            "header": "Week of 2026-11-16 · Available (h)",
+            "type": "number"
+          },
+          {
+            "path": "w3Confirmed",
+            "header": "Week of 2026-11-16 · Confirmed reservation (h)",
+            "type": "number"
+          },
+          {
+            "path": "w3Proposed",
+            "header": "Week of 2026-11-16 · Proposed request (h)",
+            "type": "number"
+          },
+          {
+            "path": "w3Committed",
+            "header": "Week of 2026-11-16 · Committed load (h)",
+            "type": "number"
+          },
+          {
+            "path": "w4",
+            "header": "Week of 2026-11-23",
+            "type": "number"
+          },
+          {
+            "path": "w4Available",
+            "header": "Week of 2026-11-23 · Available (h)",
+            "type": "number"
+          },
+          {
+            "path": "w4Confirmed",
+            "header": "Week of 2026-11-23 · Confirmed reservation (h)",
+            "type": "number"
+          },
+          {
+            "path": "w4Proposed",
+            "header": "Week of 2026-11-23 · Proposed request (h)",
+            "type": "number"
+          },
+          {
+            "path": "w4Committed",
+            "header": "Week of 2026-11-23 · Committed load (h)",
+            "type": "number"
+          },
+          {
+            "path": "w5",
+            "header": "Week of 2026-11-30",
+            "type": "number"
+          },
+          {
+            "path": "w5Available",
+            "header": "Week of 2026-11-30 · Available (h)",
+            "type": "number"
+          },
+          {
+            "path": "w5Confirmed",
+            "header": "Week of 2026-11-30 · Confirmed reservation (h)",
+            "type": "number"
+          },
+          {
+            "path": "w5Proposed",
+            "header": "Week of 2026-11-30 · Proposed request (h)",
+            "type": "number"
+          },
+          {
+            "path": "w5Committed",
+            "header": "Week of 2026-11-30 · Committed load (h)",
+            "type": "number"
+          },
+          {
+            "path": "w6",
+            "header": "Week of 2026-12-07",
+            "type": "number"
+          },
+          {
+            "path": "w6Available",
+            "header": "Week of 2026-12-07 · Available (h)",
+            "type": "number"
+          },
+          {
+            "path": "w6Confirmed",
+            "header": "Week of 2026-12-07 · Confirmed reservation (h)",
+            "type": "number"
+          },
+          {
+            "path": "w6Proposed",
+            "header": "Week of 2026-12-07 · Proposed request (h)",
+            "type": "number"
+          },
+          {
+            "path": "w6Committed",
+            "header": "Week of 2026-12-07 · Committed load (h)",
+            "type": "number"
+          },
+          {
+            "path": "w7",
+            "header": "Week of 2026-12-14",
+            "type": "number"
+          },
+          {
+            "path": "w7Available",
+            "header": "Week of 2026-12-14 · Available (h)",
+            "type": "number"
+          },
+          {
+            "path": "w7Confirmed",
+            "header": "Week of 2026-12-14 · Confirmed reservation (h)",
+            "type": "number"
+          },
+          {
+            "path": "w7Proposed",
+            "header": "Week of 2026-12-14 · Proposed request (h)",
+            "type": "number"
+          },
+          {
+            "path": "w7Committed",
+            "header": "Week of 2026-12-14 · Committed load (h)",
+            "type": "number"
+          },
+          {
+            "path": "noDueDate",
+            "header": "No due date (h)",
+            "type": "number"
+          },
+          {
+            "path": "openTasks",
+            "header": "Open tasks",
+            "type": "number"
+          },
+          {
+            "path": "unestimated",
+            "header": "Unestimated",
+            "type": "number"
+          },
+          {
+            "path": "overdue",
+            "header": "Overdue tasks",
+            "type": "number"
+          },
+          {
+            "path": "projects",
+            "header": "Projects",
+            "type": "number"
+          },
+          {
+            "path": "indicator",
+            "header": "Indicator",
+            "type": "text"
+          }
+        ],
+        "rows": [
+          {
+            "person": "Alex Chen",
+            "supervisor": "Sam Patel",
+            "capacity": 40,
+            "partialScope": "Partial project scope",
+            "noDueDate": 0,
+            "openTasks": 1,
+            "unestimated": 0,
+            "overdue": 0,
+            "projects": 1,
+            "indicator": "OK",
+            "w0": 0,
+            "w0Available": 40,
+            "w0Confirmed": 0,
+            "w0Proposed": 0,
+            "w0Committed": 0,
+            "w1": 8,
+            "w1Available": 40,
+            "w1Confirmed": 0,
+            "w1Proposed": 0,
+            "w1Committed": 8,
+            "w2": 0,
+            "w2Available": 40,
+            "w2Confirmed": 0,
+            "w2Proposed": 0,
+            "w2Committed": 0,
+            "w3": 0,
+            "w3Available": 40,
+            "w3Confirmed": 0,
+            "w3Proposed": 0,
+            "w3Committed": 0,
+            "w4": 0,
+            "w4Available": 40,
+            "w4Confirmed": 0,
+            "w4Proposed": 0,
+            "w4Committed": 0,
+            "w5": 0,
+            "w5Available": 40,
+            "w5Confirmed": 0,
+            "w5Proposed": 0,
+            "w5Committed": 0,
+            "w6": 0,
+            "w6Available": 40,
+            "w6Confirmed": 0,
+            "w6Proposed": 0,
+            "w6Committed": 0,
+            "w7": 0,
+            "w7Available": 40,
+            "w7Confirmed": 0,
+            "w7Proposed": 0,
+            "w7Committed": 0
+          },
+          {
+            "person": "Jill Martin",
+            "supervisor": "Sam Patel",
+            "capacity": 40,
+            "partialScope": "Partial project scope",
+            "noDueDate": 0,
+            "openTasks": 0,
+            "unestimated": 0,
+            "overdue": 0,
+            "projects": 0,
+            "indicator": "OK",
+            "w0": 0,
+            "w0Available": 40,
+            "w0Confirmed": 0,
+            "w0Proposed": 0,
+            "w0Committed": 0,
+            "w1": 0,
+            "w1Available": 40,
+            "w1Confirmed": 0,
+            "w1Proposed": 0,
+            "w1Committed": 0,
+            "w2": 0,
+            "w2Available": 40,
+            "w2Confirmed": 0,
+            "w2Proposed": 0,
+            "w2Committed": 0,
+            "w3": 0,
+            "w3Available": 40,
+            "w3Confirmed": 0,
+            "w3Proposed": 0,
+            "w3Committed": 0,
+            "w4": 0,
+            "w4Available": 40,
+            "w4Confirmed": 0,
+            "w4Proposed": 0,
+            "w4Committed": 0,
+            "w5": 0,
+            "w5Available": 40,
+            "w5Confirmed": 0,
+            "w5Proposed": 0,
+            "w5Committed": 0,
+            "w6": 0,
+            "w6Available": 40,
+            "w6Confirmed": 0,
+            "w6Proposed": 0,
+            "w6Committed": 0,
+            "w7": 0,
+            "w7Available": 40,
+            "w7Confirmed": 0,
+            "w7Proposed": 0,
+            "w7Committed": 0
+          },
+          {
+            "person": "Marc Dubois",
+            "supervisor": "Sam Patel",
+            "capacity": 40,
+            "partialScope": "Partial project scope",
+            "noDueDate": 0,
+            "openTasks": 0,
+            "unestimated": 0,
+            "overdue": 0,
+            "projects": 0,
+            "indicator": "OK",
+            "w0": 0,
+            "w0Available": 40,
+            "w0Confirmed": 0,
+            "w0Proposed": 0,
+            "w0Committed": 0,
+            "w1": 0,
+            "w1Available": 40,
+            "w1Confirmed": 0,
+            "w1Proposed": 0,
+            "w1Committed": 0,
+            "w2": 0,
+            "w2Available": 40,
+            "w2Confirmed": 0,
+            "w2Proposed": 0,
+            "w2Committed": 0,
+            "w3": 0,
+            "w3Available": 40,
+            "w3Confirmed": 0,
+            "w3Proposed": 0,
+            "w3Committed": 0,
+            "w4": 0,
+            "w4Available": 40,
+            "w4Confirmed": 0,
+            "w4Proposed": 0,
+            "w4Committed": 0,
+            "w5": 0,
+            "w5Available": 40,
+            "w5Confirmed": 0,
+            "w5Proposed": 0,
+            "w5Committed": 0,
+            "w6": 0,
+            "w6Available": 40,
+            "w6Confirmed": 0,
+            "w6Proposed": 0,
+            "w6Committed": 0,
+            "w7": 0,
+            "w7Available": 40,
+            "w7Confirmed": 0,
+            "w7Proposed": 0,
+            "w7Committed": 0
+          },
+          {
+            "person": "Priya Nair",
+            "supervisor": "Lena Brooks",
+            "capacity": 40,
+            "partialScope": "Partial project scope",
+            "noDueDate": 0,
+            "openTasks": 1,
+            "unestimated": 0,
+            "overdue": 0,
+            "projects": 1,
+            "indicator": "OK",
+            "w0": 0,
+            "w0Available": 40,
+            "w0Confirmed": 0,
+            "w0Proposed": 0,
+            "w0Committed": 0,
+            "w1": 8,
+            "w1Available": 40,
+            "w1Confirmed": 0,
+            "w1Proposed": 0,
+            "w1Committed": 8,
+            "w2": 0,
+            "w2Available": 40,
+            "w2Confirmed": 0,
+            "w2Proposed": 0,
+            "w2Committed": 0,
+            "w3": 0,
+            "w3Available": 40,
+            "w3Confirmed": 0,
+            "w3Proposed": 0,
+            "w3Committed": 0,
+            "w4": 0,
+            "w4Available": 40,
+            "w4Confirmed": 0,
+            "w4Proposed": 0,
+            "w4Committed": 0,
+            "w5": 0,
+            "w5Available": 40,
+            "w5Confirmed": 0,
+            "w5Proposed": 0,
+            "w5Committed": 0,
+            "w6": 0,
+            "w6Available": 40,
+            "w6Confirmed": 0,
+            "w6Proposed": 0,
+            "w6Committed": 0,
+            "w7": 0,
+            "w7Available": 40,
+            "w7Confirmed": 0,
+            "w7Proposed": 0,
+            "w7Committed": 0
+          }
+        ],
+        "total": 4,
+        "totalIsLowerBound": false,
+        "truncated": false,
+        "listLink": null,
+        "parameters": [
+          {
+            "label": "Report unit",
+            "value": "FTE"
+          },
+          {
+            "label": "Period",
+            "value": "Weeks"
+          }
+        ],
+        "asOf": "2026-11-01T13:39:11.743215+00:00",
+        "savedParameters": {
+          "unit": "fte",
+          "period": "weeks"
+        },
+        "taskInputs": {
+          "basis": "WorkloadPeopleContext",
+          "scopeCoverage": "VisibleOnly",
+          "unavailableReferences": 0,
+          "unestimated": {
+            "count": 0,
+            "knownCount": 0,
+            "href": "/reports/workload-employee?unit=fte&period=weeks&taskInput=unestimated&inputPage=1&inputPageSize=50"
+          },
+          "openUndated": {
+            "count": 0,
+            "knownCount": 0,
+            "href": "/reports/workload-employee?unit=fte&period=weeks&taskInput=open-undated&inputPage=1&inputPageSize=50"
+          },
+          "parameters": {
+            "unit": "fte",
+            "period": "weeks"
+          },
+          "asOf": "2026-11-01T13:39:11.743215+00:00"
+        },
+        "unitView": {
+          "unit": "fte",
+          "period": "weeks",
+          "standardWeeklyHours": 40,
+          "displayedWeekCount": 8,
+          "periods": [
+            {
+              "key": "2026-10-26",
+              "label": "2026-10-26",
+              "weeks": [
+                "2026-10-26"
+              ],
+              "weekCount": 1,
+              "denominatorHours": 40
+            },
+            {
+              "key": "2026-11-02",
+              "label": "2026-11-02",
+              "weeks": [
+                "2026-11-02"
+              ],
+              "weekCount": 1,
+              "denominatorHours": 40
+            },
+            {
+              "key": "2026-11-09",
+              "label": "2026-11-09",
+              "weeks": [
+                "2026-11-09"
+              ],
+              "weekCount": 1,
+              "denominatorHours": 40
+            },
+            {
+              "key": "2026-11-16",
+              "label": "2026-11-16",
+              "weeks": [
+                "2026-11-16"
+              ],
+              "weekCount": 1,
+              "denominatorHours": 40
+            },
+            {
+              "key": "2026-11-23",
+              "label": "2026-11-23",
+              "weeks": [
+                "2026-11-23"
+              ],
+              "weekCount": 1,
+              "denominatorHours": 40
+            },
+            {
+              "key": "2026-11-30",
+              "label": "2026-11-30",
+              "weeks": [
+                "2026-11-30"
+              ],
+              "weekCount": 1,
+              "denominatorHours": 40
+            },
+            {
+              "key": "2026-12-07",
+              "label": "2026-12-07",
+              "weeks": [
+                "2026-12-07"
+              ],
+              "weekCount": 1,
+              "denominatorHours": 40
+            },
+            {
+              "key": "2026-12-14",
+              "label": "2026-12-14",
+              "weeks": [
+                "2026-12-14"
+              ],
+              "weekCount": 1,
+              "denominatorHours": 40
+            }
+          ],
+          "columns": [
+            {
+              "path": "person",
+              "header": "Person",
+              "type": "text"
+            },
+            {
+              "path": "supervisor",
+              "header": "Supervisor",
+              "type": "text"
+            },
+            {
+              "path": "capacity",
+              "header": "Capacity (h/week)",
+              "type": "number"
+            },
+            {
+              "path": "partialScope",
+              "header": "Scope",
+              "type": "text"
+            },
+            {
+              "path": "u0",
+              "header": "2026-10-26 · Estimated work (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u0Available",
+              "header": "2026-10-26 · Available (h) (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u0Confirmed",
+              "header": "2026-10-26 · Confirmed reservation (h) (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u0Proposed",
+              "header": "2026-10-26 · Proposed request (h) (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u0Committed",
+              "header": "2026-10-26 · Committed load (h) (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u1",
+              "header": "2026-11-02 · Estimated work (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u1Available",
+              "header": "2026-11-02 · Available (h) (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u1Confirmed",
+              "header": "2026-11-02 · Confirmed reservation (h) (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u1Proposed",
+              "header": "2026-11-02 · Proposed request (h) (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u1Committed",
+              "header": "2026-11-02 · Committed load (h) (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u2",
+              "header": "2026-11-09 · Estimated work (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u2Available",
+              "header": "2026-11-09 · Available (h) (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u2Confirmed",
+              "header": "2026-11-09 · Confirmed reservation (h) (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u2Proposed",
+              "header": "2026-11-09 · Proposed request (h) (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u2Committed",
+              "header": "2026-11-09 · Committed load (h) (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u3",
+              "header": "2026-11-16 · Estimated work (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u3Available",
+              "header": "2026-11-16 · Available (h) (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u3Confirmed",
+              "header": "2026-11-16 · Confirmed reservation (h) (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u3Proposed",
+              "header": "2026-11-16 · Proposed request (h) (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u3Committed",
+              "header": "2026-11-16 · Committed load (h) (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u4",
+              "header": "2026-11-23 · Estimated work (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u4Available",
+              "header": "2026-11-23 · Available (h) (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u4Confirmed",
+              "header": "2026-11-23 · Confirmed reservation (h) (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u4Proposed",
+              "header": "2026-11-23 · Proposed request (h) (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u4Committed",
+              "header": "2026-11-23 · Committed load (h) (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u5",
+              "header": "2026-11-30 · Estimated work (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u5Available",
+              "header": "2026-11-30 · Available (h) (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u5Confirmed",
+              "header": "2026-11-30 · Confirmed reservation (h) (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u5Proposed",
+              "header": "2026-11-30 · Proposed request (h) (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u5Committed",
+              "header": "2026-11-30 · Committed load (h) (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u6",
+              "header": "2026-12-07 · Estimated work (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u6Available",
+              "header": "2026-12-07 · Available (h) (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u6Confirmed",
+              "header": "2026-12-07 · Confirmed reservation (h) (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u6Proposed",
+              "header": "2026-12-07 · Proposed request (h) (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u6Committed",
+              "header": "2026-12-07 · Committed load (h) (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u7",
+              "header": "2026-12-14 · Estimated work (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u7Available",
+              "header": "2026-12-14 · Available (h) (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u7Confirmed",
+              "header": "2026-12-14 · Confirmed reservation (h) (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u7Proposed",
+              "header": "2026-12-14 · Proposed request (h) (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "u7Committed",
+              "header": "2026-12-14 · Committed load (h) (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "noDueDate",
+              "header": "No due date (h)",
+              "type": "number"
+            },
+            {
+              "path": "openTasks",
+              "header": "Open tasks",
+              "type": "number"
+            },
+            {
+              "path": "unestimated",
+              "header": "Unestimated",
+              "type": "number"
+            },
+            {
+              "path": "overdue",
+              "header": "Overdue tasks",
+              "type": "number"
+            },
+            {
+              "path": "projects",
+              "header": "Projects",
+              "type": "number"
+            },
+            {
+              "path": "indicator",
+              "header": "Indicator",
+              "type": "text"
+            }
+          ],
+          "rows": [
+            {
+              "rowIndex": 0,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "u0",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u0Available",
+                  "kind": "Hours",
+                  "value": 1,
+                  "knownHours": 40,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u0Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u0Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u0Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u1",
+                  "kind": "Hours",
+                  "value": 0.2,
+                  "knownHours": 8,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u1Available",
+                  "kind": "Hours",
+                  "value": 1,
+                  "knownHours": 40,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u1Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u1Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u1Committed",
+                  "kind": "Hours",
+                  "value": 0.2,
+                  "knownHours": 8,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u2",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u2Available",
+                  "kind": "Hours",
+                  "value": 1,
+                  "knownHours": 40,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u2Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u2Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u2Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u3",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u3Available",
+                  "kind": "Hours",
+                  "value": 1,
+                  "knownHours": 40,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u3Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u3Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u3Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u4",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u4Available",
+                  "kind": "Hours",
+                  "value": 1,
+                  "knownHours": 40,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u4Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u4Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u4Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u5",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u5Available",
+                  "kind": "Hours",
+                  "value": 1,
+                  "knownHours": 40,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u5Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u5Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u5Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u6",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u6Available",
+                  "kind": "Hours",
+                  "value": 1,
+                  "knownHours": 40,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u6Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u6Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u6Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u7",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u7Available",
+                  "kind": "Hours",
+                  "value": 1,
+                  "knownHours": 40,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u7Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u7Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u7Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "capacity",
+                  "kind": "WeeklyRate",
+                  "value": 40,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "noDueDate",
+                  "kind": "UndatedHours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                }
+              ]
+            },
+            {
+              "rowIndex": 1,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "u0",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u0Available",
+                  "kind": "Hours",
+                  "value": 1,
+                  "knownHours": 40,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u0Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u0Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u0Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u1",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u1Available",
+                  "kind": "Hours",
+                  "value": 1,
+                  "knownHours": 40,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u1Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u1Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u1Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u2",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u2Available",
+                  "kind": "Hours",
+                  "value": 1,
+                  "knownHours": 40,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u2Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u2Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u2Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u3",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u3Available",
+                  "kind": "Hours",
+                  "value": 1,
+                  "knownHours": 40,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u3Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u3Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u3Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u4",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u4Available",
+                  "kind": "Hours",
+                  "value": 1,
+                  "knownHours": 40,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u4Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u4Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u4Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u5",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u5Available",
+                  "kind": "Hours",
+                  "value": 1,
+                  "knownHours": 40,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u5Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u5Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u5Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u6",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u6Available",
+                  "kind": "Hours",
+                  "value": 1,
+                  "knownHours": 40,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u6Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u6Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u6Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u7",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u7Available",
+                  "kind": "Hours",
+                  "value": 1,
+                  "knownHours": 40,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u7Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u7Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u7Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "capacity",
+                  "kind": "WeeklyRate",
+                  "value": 40,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "noDueDate",
+                  "kind": "UndatedHours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                }
+              ]
+            },
+            {
+              "rowIndex": 2,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "u0",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u0Available",
+                  "kind": "Hours",
+                  "value": 1,
+                  "knownHours": 40,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u0Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u0Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u0Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u1",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u1Available",
+                  "kind": "Hours",
+                  "value": 1,
+                  "knownHours": 40,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u1Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u1Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u1Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u2",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u2Available",
+                  "kind": "Hours",
+                  "value": 1,
+                  "knownHours": 40,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u2Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u2Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u2Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u3",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u3Available",
+                  "kind": "Hours",
+                  "value": 1,
+                  "knownHours": 40,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u3Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u3Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u3Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u4",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u4Available",
+                  "kind": "Hours",
+                  "value": 1,
+                  "knownHours": 40,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u4Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u4Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u4Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u5",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u5Available",
+                  "kind": "Hours",
+                  "value": 1,
+                  "knownHours": 40,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u5Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u5Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u5Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u6",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u6Available",
+                  "kind": "Hours",
+                  "value": 1,
+                  "knownHours": 40,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u6Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u6Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u6Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u7",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u7Available",
+                  "kind": "Hours",
+                  "value": 1,
+                  "knownHours": 40,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u7Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u7Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u7Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "capacity",
+                  "kind": "WeeklyRate",
+                  "value": 40,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "noDueDate",
+                  "kind": "UndatedHours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                }
+              ]
+            },
+            {
+              "rowIndex": 3,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "u0",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u0Available",
+                  "kind": "Hours",
+                  "value": 1,
+                  "knownHours": 40,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u0Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u0Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u0Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u1",
+                  "kind": "Hours",
+                  "value": 0.2,
+                  "knownHours": 8,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u1Available",
+                  "kind": "Hours",
+                  "value": 1,
+                  "knownHours": 40,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u1Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u1Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u1Committed",
+                  "kind": "Hours",
+                  "value": 0.2,
+                  "knownHours": 8,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u2",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u2Available",
+                  "kind": "Hours",
+                  "value": 1,
+                  "knownHours": 40,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u2Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u2Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u2Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u3",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u3Available",
+                  "kind": "Hours",
+                  "value": 1,
+                  "knownHours": 40,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u3Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u3Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u3Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u4",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u4Available",
+                  "kind": "Hours",
+                  "value": 1,
+                  "knownHours": 40,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u4Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u4Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u4Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u5",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u5Available",
+                  "kind": "Hours",
+                  "value": 1,
+                  "knownHours": 40,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u5Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u5Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u5Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u6",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u6Available",
+                  "kind": "Hours",
+                  "value": 1,
+                  "knownHours": 40,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u6Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u6Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u6Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u7",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u7Available",
+                  "kind": "Hours",
+                  "value": 1,
+                  "knownHours": 40,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u7Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u7Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u7Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "capacity",
+                  "kind": "WeeklyRate",
+                  "value": 40,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "noDueDate",
+                  "kind": "UndatedHours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                }
+              ]
+            },
+            {
+              "rowIndex": -1,
+              "kind": "Total",
+              "cells": [
+                {
+                  "path": "u0",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u0Available",
+                  "kind": "Hours",
+                  "value": 4,
+                  "knownHours": 160,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u0Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u0Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u0Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u1",
+                  "kind": "Hours",
+                  "value": 0.4,
+                  "knownHours": 16,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u1Available",
+                  "kind": "Hours",
+                  "value": 4,
+                  "knownHours": 160,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u1Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u1Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u1Committed",
+                  "kind": "Hours",
+                  "value": 0.4,
+                  "knownHours": 16,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u2",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u2Available",
+                  "kind": "Hours",
+                  "value": 4,
+                  "knownHours": 160,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u2Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u2Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u2Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u3",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u3Available",
+                  "kind": "Hours",
+                  "value": 4,
+                  "knownHours": 160,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u3Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u3Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u3Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u4",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u4Available",
+                  "kind": "Hours",
+                  "value": 4,
+                  "knownHours": 160,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u4Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u4Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u4Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u5",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u5Available",
+                  "kind": "Hours",
+                  "value": 4,
+                  "knownHours": 160,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u5Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u5Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u5Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u6",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u6Available",
+                  "kind": "Hours",
+                  "value": 4,
+                  "knownHours": 160,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u6Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u6Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u6Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u7",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u7Available",
+                  "kind": "Hours",
+                  "value": 4,
+                  "knownHours": 160,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u7Confirmed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u7Proposed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                },
+                {
+                  "path": "u7Committed",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "VisibleOnly"
+                }
+              ]
+            }
+          ],
+          "scopeCoverage": "VisibleOnly",
+          "unestimatedTasks": 0
+        }
+      }
+    },
+    "hrIdentities": {
+      "status": 200,
+      "value": [
+        {
+          "id": "01a19751-d447-7e1f-9a5f-23c4303d03a4",
+          "displayName": "Alex Chen",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-77ed-a543-6e7618a138ab",
+          "displayName": "Diane Roy",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-7f75-a176-926ba05c6c3e",
+          "displayName": "Jill Martin",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d446-7e24-9561-bb4a5bdd569f",
+          "displayName": "Jordan Lee",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-7344-8c2f-606007b3c015",
+          "displayName": "Lena Brooks",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-780f-8722-3aaa0a0c4d21",
+          "displayName": "Marc Dubois",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-722a-ac3f-2313cfb34bc5",
+          "displayName": "Omar Haddad",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-79d4-91a8-0895553dde52",
+          "displayName": "Priya Nair",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-7b97-9076-25c6fb92b6f0",
+          "displayName": "Rita Gomez",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        },
+        {
+          "id": "01a19751-d447-73ed-9659-79f9784aded9",
+          "displayName": "Sam Patel",
+          "hrSourceSystem": null,
+          "hrPersonKey": null,
+          "rowVersion": 0,
+          "personNotices": {
+            "personType": null,
+            "startDate": null,
+            "endDate": null,
+            "starts": false,
+            "ends": false
+          }
+        }
+      ]
+    },
+    "organisation": {
+      "status": 200,
+      "value": {
+        "levels": [
+          {
+            "id": "00500000-0000-0000-0000-000000000001",
+            "name": "Region",
+            "sortOrder": 0
+          },
+          {
+            "id": "00500000-0000-0000-0000-000000000002",
+            "name": "Business unit",
+            "sortOrder": 1
+          },
+          {
+            "id": "00500000-0000-0000-0000-000000000003",
+            "name": "Team",
+            "sortOrder": 2
+          }
+        ],
+        "units": [],
+        "people": [
+          {
+            "id": "01a19751-d446-7e24-9561-bb4a5bdd569f",
+            "rowVersion": 0,
+            "displayName": "Jordan Lee",
+            "email": "jordan@hub.test",
+            "unitId": null,
+            "supervisorId": null,
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-7344-8c2f-606007b3c015",
+            "rowVersion": 0,
+            "displayName": "Lena Brooks",
+            "email": "lena@hub.test",
+            "unitId": null,
+            "supervisorId": null,
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-7b97-9076-25c6fb92b6f0",
+            "rowVersion": 0,
+            "displayName": "Rita Gomez",
+            "email": "rita@hub.test",
+            "unitId": null,
+            "supervisorId": null,
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-722a-ac3f-2313cfb34bc5",
+            "rowVersion": 0,
+            "displayName": "Omar Haddad",
+            "email": "omar@hub.test",
+            "unitId": null,
+            "supervisorId": "01a19751-d447-7344-8c2f-606007b3c015",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-73ed-9659-79f9784aded9",
+            "rowVersion": 0,
+            "displayName": "Sam Patel",
+            "email": "sam@hub.test",
+            "unitId": null,
+            "supervisorId": "01a19751-d447-7344-8c2f-606007b3c015",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-77ed-a543-6e7618a138ab",
+            "rowVersion": 0,
+            "displayName": "Diane Roy",
+            "email": "diane@hub.test",
+            "unitId": null,
+            "supervisorId": "01a19751-d447-7344-8c2f-606007b3c015",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-79d4-91a8-0895553dde52",
+            "rowVersion": 0,
+            "displayName": "Priya Nair",
+            "email": "priya@hub.test",
+            "unitId": null,
+            "supervisorId": "01a19751-d447-7344-8c2f-606007b3c015",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-780f-8722-3aaa0a0c4d21",
+            "rowVersion": 0,
+            "displayName": "Marc Dubois",
+            "email": "marc@hub.test",
+            "unitId": null,
+            "supervisorId": "01a19751-d447-73ed-9659-79f9784aded9",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-7e1f-9a5f-23c4303d03a4",
+            "rowVersion": 0,
+            "displayName": "Alex Chen",
+            "email": "alex@hub.test",
+            "unitId": null,
+            "supervisorId": "01a19751-d447-73ed-9659-79f9784aded9",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-7f75-a176-926ba05c6c3e",
+            "rowVersion": 0,
+            "displayName": "Jill Martin",
+            "email": "jill@hub.test",
+            "unitId": null,
+            "supervisorId": "01a19751-d447-73ed-9659-79f9784aded9",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          }
+        ],
+        "managerCycles": [],
+        "includeIndirectReports": false
+      }
+    },
+    "project:changes/options": {
+      "status": 200,
+      "value": {
+        "actorId": "01a19751-d447-79d4-91a8-0895553dde52",
+        "canWrite": true,
+        "manageDisciplineIds": [
+          "01a19754-b36a-760b-835a-73075c55e499"
+        ],
+        "canCreate": {
+          "changes": true,
+          "reviews": true
+        },
+        "people": [
+          {
+            "id": "01a19751-d447-7e1f-9a5f-23c4303d03a4",
+            "displayName": "Alex Chen",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-7f75-a176-926ba05c6c3e",
+            "displayName": "Jill Martin",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-780f-8722-3aaa0a0c4d21",
+            "displayName": "Marc Dubois",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-79d4-91a8-0895553dde52",
+            "displayName": "Priya Nair",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          }
+        ],
+        "disciplines": [
+          {
+            "id": "01a19754-b36a-760b-835a-73075c55e499",
+            "name": "Civil"
+          }
+        ],
+        "sources": [],
+        "heads": [],
+        "deliverables": [
+          {
+            "id": "01a19754-b48a-70eb-894d-c9a3707e318b",
+            "key": "QA20-REAL-001-D001",
+            "name": "QA20 real deliverable",
+            "projectDisciplineId": "01a19754-b36a-760b-835a-73075c55e499",
+            "ownerId": "01a19751-d447-7e1f-9a5f-23c4303d03a4",
+            "rowVersion": 0,
+            "revision": null,
+            "transmittalUrl": null,
+            "status": "Not Started",
+            "canCommit": true,
+            "canManage": true
+          }
+        ],
+        "tasks": [
+          {
+            "id": "01a19754-b4c9-7e32-b408-97c300f9c125",
+            "key": "QA20-REAL-001-T0001",
+            "name": "QA20 real task one",
+            "projectDisciplineId": "01a19754-b36a-760b-835a-73075c55e499",
+            "ownerId": "01a19751-d447-79d4-91a8-0895553dde52",
+            "rowVersion": 0,
+            "status": "Not Started",
+            "canCommit": true,
+            "canManage": true
+          },
+          {
+            "id": "01a19754-b4f4-7d85-8480-9cd3522778fc",
+            "key": "QA20-REAL-001-T0002",
+            "name": "QA20 real task two",
+            "projectDisciplineId": "01a19754-b36a-760b-835a-73075c55e499",
+            "ownerId": "01a19751-d447-7e1f-9a5f-23c4303d03a4",
+            "rowVersion": 0,
+            "status": "Not Started",
+            "canCommit": true,
+            "canManage": true
+          }
+        ]
+      }
+    },
+    "project:handoffs/options": {
+      "status": 200,
+      "value": {
+        "sources": [
+          {
+            "id": "01a19754-b48a-70eb-894d-c9a3707e318b",
+            "key": "QA20-REAL-001-D001",
+            "name": "QA20 real deliverable",
+            "projectDisciplineId": "01a19754-b36a-760b-835a-73075c55e499",
+            "ownerId": "01a19751-d447-7e1f-9a5f-23c4303d03a4",
+            "revision": null,
+            "transmittalUrl": null,
+            "rowVersion": 0,
+            "dueDate": "2026-11-15"
+          }
+        ],
+        "disciplines": [
+          {
+            "id": "01a19754-b36a-760b-835a-73075c55e499",
+            "name": "Civil"
+          }
+        ],
+        "people": [
+          {
+            "id": "01a19751-d447-7e1f-9a5f-23c4303d03a4",
+            "displayName": "Alex Chen",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-7f75-a176-926ba05c6c3e",
+            "displayName": "Jill Martin",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-780f-8722-3aaa0a0c4d21",
+            "displayName": "Marc Dubois",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-79d4-91a8-0895553dde52",
+            "displayName": "Priya Nair",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          }
+        ],
+        "tasks": [
+          {
+            "id": "01a19754-b4c9-7e32-b408-97c300f9c125",
+            "key": "QA20-REAL-001-T0001",
+            "name": "QA20 real task one",
+            "projectDisciplineId": "01a19754-b36a-760b-835a-73075c55e499",
+            "ownerId": "01a19751-d447-79d4-91a8-0895553dde52",
+            "dueDate": "2026-11-05"
+          },
+          {
+            "id": "01a19754-b4f4-7d85-8480-9cd3522778fc",
+            "key": "QA20-REAL-001-T0002",
+            "name": "QA20 real task two",
+            "projectDisciplineId": "01a19754-b36a-760b-835a-73075c55e499",
+            "ownerId": "01a19751-d447-7e1f-9a5f-23c4303d03a4",
+            "dueDate": "2026-11-06"
+          }
+        ],
+        "canCreate": true
+      }
+    },
+    "project:discipline-coordination?projectId=01a19754-b327-78af-b89f-a3a43edcffd7": {
+      "status": 200,
+      "value": {
+        "evaluatedAt": "2026-11-01T13:39:11.780128+00:00",
+        "handoffs": [],
+        "outgoing": [],
+        "incoming": [],
+        "outgoingPage": 1,
+        "incomingPage": 1,
+        "outgoingTotal": 0,
+        "incomingTotal": 0,
+        "handoffPage": 1,
+        "handoffPageSize": 0,
+        "changeTargets": [],
+        "unavailableChangeTargets": [],
+        "changeTargetsTotal": 0,
+        "unavailableChangeTargetsTotal": 0,
+        "reviews": [],
+        "reviewsPage": 1,
+        "reviewsPageSize": 0,
+        "uses": [],
+        "usesTotal": 0,
+        "usesPage": 1,
+        "usesPageSize": 0,
+        "linkedIssues": [],
+        "linkedIssuesTotal": 0,
+        "linkedIssuesPage": 1,
+        "linkedIssuesPageSize": 0,
+        "handoffsTotal": 0,
+        "changes": [],
+        "changesTotal": 0,
+        "changesPage": 1,
+        "changesPageSize": 0,
+        "reviewsTotal": 0,
+        "blockerGroups": [],
+        "blockerGroupsTotal": 0,
+        "startability": [],
+        "startabilityTotal": 0,
+        "startabilityPage": 1,
+        "startabilityPageSize": 0,
+        "startabilityFrom": "2026-11-01",
+        "startabilityTo": "2026-11-21",
+        "startabilityReadyTotal": 0,
+        "linkedActions": [],
+        "linkedActionsTotal": 0,
+        "upcomingSubmissions": [],
+        "upcomingSubmissionsTotal": 0,
+        "upcomingSubmissionsPage": 1,
+        "staffingConflicts": [],
+        "staffingConflictsTotal": 0,
+        "staffingConflictsPage": 1,
+        "blockerGroupsPage": 1,
+        "page": 1,
+        "pageSize": 0
+      }
+    },
+    "projectTasks": {
+      "status": 200,
+      "value": {
+        "items": [
+          {
+            "lastActivityActorName": "Priya Nair",
+            "id": "01a19754-b4c9-7e32-b408-97c300f9c125",
+            "projectId": "01a19754-b327-78af-b89f-a3a43edcffd7",
+            "projectNumber": "QA20-REAL-001",
+            "projectName": "Checkpoint 20 real QA project",
+            "projectStatus": "Active",
+            "key": "QA20-REAL-001-T0001",
+            "name": "QA20 real task one",
+            "projectDisciplineId": "01a19754-b36a-760b-835a-73075c55e499",
+            "disciplineName": "Civil",
+            "disciplineCode": "CIV",
+            "disciplineColour": "#2563eb",
+            "disciplineOrder": 0,
+            "deliverableId": "01a19754-b48a-70eb-894d-c9a3707e318b",
+            "deliverableKey": "QA20-REAL-001-D001",
+            "deliverableName": "QA20 real deliverable",
+            "deliverableDueDate": "2026-11-15",
+            "deliverableStatus": "Not Started",
+            "deliverableOrder": 1,
+            "milestoneId": null,
+            "effectiveMilestoneId": null,
+            "milestoneKey": null,
+            "milestoneName": null,
+            "milestoneDate": null,
+            "milestoneDerived": false,
+            "assigneeId": "01a19751-d447-79d4-91a8-0895553dde52",
+            "assigneeName": "Priya Nair",
+            "assigneeActive": true,
+            "reviewerId": null,
+            "reviewerName": null,
+            "requiresReview": false,
+            "priority": "Medium",
+            "startDate": "2026-10-26",
+            "dueDate": "2026-11-05",
+            "originalStartDate": "2026-10-26",
+            "originalDueDate": "2026-11-05",
+            "status": "Not Started",
+            "lane": "To Do",
+            "progressPct": 0,
+            "estimatedHours": 8,
+            "reviewRound": 0,
+            "dueDateChangeCount": 0,
+            "lastActivityAt": "2026-11-01T13:37:53.351463+00:00",
+            "statusChangedAt": "2026-11-01T13:37:53.351463+00:00",
+            "completedAt": null,
+            "createdAt": "2026-11-01T13:37:53.381792+00:00",
+            "createdBy": "01a19751-d447-79d4-91a8-0895553dde52",
+            "createdByName": "Priya Nair",
+            "sortOrder": 1,
+            "rowVersion": 0,
+            "manualBlockType": null,
+            "manualBlockReason": null,
+            "manualBlockSetAt": null,
+            "commentCount": 0,
+            "predecessorCount": 0,
+            "successorCount": 0,
+            "collaboratorIds": [],
+            "can": {
+              "assign": true,
+              "edit": true,
+              "changeDue": true,
+              "block": true
+            },
+            "state": null,
+            "pickupOfferOpen": false,
+            "submissionDate": {
+              "state": "Known",
+              "targetDate": null
+            }
+          },
+          {
+            "lastActivityActorName": "Priya Nair",
+            "id": "01a19754-b4f4-7d85-8480-9cd3522778fc",
+            "projectId": "01a19754-b327-78af-b89f-a3a43edcffd7",
+            "projectNumber": "QA20-REAL-001",
+            "projectName": "Checkpoint 20 real QA project",
+            "projectStatus": "Active",
+            "key": "QA20-REAL-001-T0002",
+            "name": "QA20 real task two",
+            "projectDisciplineId": "01a19754-b36a-760b-835a-73075c55e499",
+            "disciplineName": "Civil",
+            "disciplineCode": "CIV",
+            "disciplineColour": "#2563eb",
+            "disciplineOrder": 0,
+            "deliverableId": "01a19754-b48a-70eb-894d-c9a3707e318b",
+            "deliverableKey": "QA20-REAL-001-D001",
+            "deliverableName": "QA20 real deliverable",
+            "deliverableDueDate": "2026-11-15",
+            "deliverableStatus": "Not Started",
+            "deliverableOrder": 1,
+            "milestoneId": null,
+            "effectiveMilestoneId": null,
+            "milestoneKey": null,
+            "milestoneName": null,
+            "milestoneDate": null,
+            "milestoneDerived": false,
+            "assigneeId": "01a19751-d447-7e1f-9a5f-23c4303d03a4",
+            "assigneeName": "Alex Chen",
+            "assigneeActive": true,
+            "reviewerId": null,
+            "reviewerName": null,
+            "requiresReview": false,
+            "priority": "Medium",
+            "startDate": "2026-10-27",
+            "dueDate": "2026-11-06",
+            "originalStartDate": "2026-10-27",
+            "originalDueDate": "2026-11-06",
+            "status": "Not Started",
+            "lane": "To Do",
+            "progressPct": 0,
+            "estimatedHours": 8,
+            "reviewRound": 0,
+            "dueDateChangeCount": 0,
+            "lastActivityAt": "2026-11-01T13:37:53.395611+00:00",
+            "statusChangedAt": "2026-11-01T13:37:53.395611+00:00",
+            "completedAt": null,
+            "createdAt": "2026-11-01T13:37:53.398669+00:00",
+            "createdBy": "01a19751-d447-79d4-91a8-0895553dde52",
+            "createdByName": "Priya Nair",
+            "sortOrder": 2,
+            "rowVersion": 0,
+            "manualBlockType": null,
+            "manualBlockReason": null,
+            "manualBlockSetAt": null,
+            "commentCount": 0,
+            "predecessorCount": 0,
+            "successorCount": 0,
+            "collaboratorIds": [],
+            "can": {
+              "assign": true,
+              "edit": true,
+              "changeDue": true,
+              "block": true
+            },
+            "state": null,
+            "pickupOfferOpen": false,
+            "submissionDate": {
+              "state": "Known",
+              "targetDate": null
+            }
+          }
+        ],
+        "page": 1,
+        "pageSize": 200,
+        "totalCount": 2,
+        "sort": null,
+        "filters": null
+      }
+    },
+    "taskPickup": {
+      "status": 200,
+      "value": {
+        "id": "01a19755-e74e-7fc1-adf7-2246e91c1ac2",
+        "reason": "QA20 real picker notice read",
+        "note": "Disposable QA20 offer",
+        "openedAt": "2026-11-01T13:39:11.822514+00:00",
+        "keepWatching": true,
+        "rowVersion": 0,
+        "task": {
+          "key": "QA20-REAL-001-T0001",
+          "name": "QA20 real task one",
+          "projectId": "01a19754-b327-78af-b89f-a3a43edcffd7",
+          "projectDisciplineId": "01a19754-b36a-760b-835a-73075c55e499",
+          "dueDate": "2026-11-05"
+        },
+        "allowed": {
+          "pickUp": false,
+          "assign": true,
+          "withdraw": true
+        },
+        "candidates": [
+          {
+            "id": "01a19751-d447-722a-ac3f-2313cfb34bc5",
+            "displayName": "Omar Haddad",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-73ed-9659-79f9784aded9",
+            "displayName": "Sam Patel",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          },
+          {
+            "id": "01a19751-d447-77ed-a543-6e7618a138ab",
+            "displayName": "Diane Roy",
+            "personNotices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            }
+          }
+        ]
+      }
+    }
+  },
+  "failures": [],
+  "project": {
+    "id": "01a19754-b327-78af-b89f-a3a43edcffd7",
+    "number": "QA20-REAL-001"
+  },
+  "commands": {
+    "pickupOffer": 201
+  }
+}

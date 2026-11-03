@@ -1,0 +1,63 @@
+{
+  "generationOutcome": "expected explicit golden updates; not a passing test run",
+  "newPaths": [
+    "/api/v1/me/work/opened",
+    "/api/v1/me/work/seen-all",
+    "/api/v1/me/work/visits",
+    "/api/v1/projects/{id}/deliverables/client-export"
+  ],
+  "removedPaths": [],
+  "newSchemas": [
+    "AdminClientRow",
+    "PersonFactsFacts",
+    "TaskQueriesRowCompoundActivityRow",
+    "WorkActivityFact",
+    "WorkSeenCommandResult",
+    "WorkSeenDecoration",
+    "WorkSeenObservedToken",
+    "WorkSeenOpenedBody",
+    "WorkSeenVisitBody"
+  ],
+  "removedSchemas": [
+    "ClientRow",
+    "Facts"
+  ],
+  "changedSchemaCount": 35,
+  "changedSchemas": [
+    "ActionDetail",
+    "AdminUserRow",
+    "AttentionRow",
+    "ChangeDetail",
+    "CoordinationBlockerGroup",
+    "CoordinationChangeRow",
+    "CoordinationHandoffRow",
+    "CoordinationInputUseRow",
+    "CoordinationIssueRow",
+    "CoordinationLinkedAction",
+    "CoordinationReviewRow",
+    "DecisionDetailResponse",
+    "DeliverableDetail",
+    "DeliverableRow",
+    "EditorRead",
+    "FollowUpItem",
+    "HandoffDetail",
+    "IssueDetailData",
+    "ItemLinkRow",
+    "MeetingActionRow",
+    "MyStaffPerson",
+    "MyWorkDecision",
+    "MyWorkMilestone",
+    "MyWorkProject",
+    "MyWorkSuccessor",
+    "PersonPanelRead",
+    "ProjectDetail",
+    "ProjectTeamMember",
+    "RiskDetailData",
+    "StaffingContextRow",
+    "StartabilityRow",
+    "SubmissionContextRow",
+    "TaskDetailResponse",
+    "TaskQueriesRowBase",
+    "TeamPersonRow"
+  ]
+}

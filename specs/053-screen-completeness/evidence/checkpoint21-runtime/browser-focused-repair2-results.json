@@ -1,0 +1,10 @@
+[
+  {
+    "suite": "work-board-completeness",
+    "exitCode": 0
+  },
+  {
+    "suite": "team-completeness",
+    "exitCode": 0
+  }
+]

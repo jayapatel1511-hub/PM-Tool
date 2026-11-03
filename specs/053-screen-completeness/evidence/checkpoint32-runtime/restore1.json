@@ -1,0 +1,17 @@
+{
+  "exitCode": 0,
+  "args": [
+    "/opt/homebrew/bin/dotnet",
+    "restore",
+    "Hub.slnx",
+    "--artifacts-path",
+    ".review/checkpoint32-artifacts",
+    "--ignore-failed-sources",
+    "-p:NuGetAudit=false",
+    "--disable-parallel"
+  ],
+  "atUtc": "2026-11-02T23:45:31.486498+00:00",
+  "elapsedSeconds": 46.52,
+  "errors": [],
+  "tail": []
+}

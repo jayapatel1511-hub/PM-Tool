@@ -1,0 +1,722 @@
+{
+  "atUtc": "2026-11-03T05:40:14.953408+00:00",
+  "base": "http://127.0.0.1:8880/",
+  "publicFiles": 142,
+  "rows": [
+    {
+      "path": "assets/Admin-DeIQDJgU.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/AdminReview-Cwo0XydZ.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Allocations-DNZirrnZ.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/AuditChains-cyz0xKPp.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/BrowserPerformanceMeasurement-CRRdnzEp.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Changes-P-Fk22E3.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Coordination-870sjnGT.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/CoordinationRegister-DTwMDPiG.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/CopyStructure-BZtI5c0D.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Dashboard-BqP-pwHI.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Decisions-CJ8xIfZI.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/DesignBasis-BKzG4MbT.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Entrance-CfYjXJ2g.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Entrance-ChlWH_uU.css",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Files-BXCSOEEj.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/FromTemplate-CCpBGejx.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Gantt-B-sRuScW.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Handoffs-CJ3yr5hd.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Health-BgOpfqT4.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Holidays-B4WBwdAR.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Home-BJe_Cg4S.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Home-C0xDwDht.css",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/IBMPlexMono-Medium-CiYsa3y2.woff2",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/IBMPlexMono-Regular-Du0PCiXT.woff2",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/IBMPlexMono-SemiBold-CT2p8cOJ.woff2",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/IBMPlexSans-Medium-BQLKo0ot.woff2",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/IBMPlexSans-Regular-BiEB_oxT.woff2",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/IBMPlexSans-SemiBold-KfaJl9PC.woff2",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Milestones-BLIuLo5g.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/NotFound-DWs7lcDN.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Notifications-m-Pi2kK4.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Operations-C4WzIME5.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Organisation-CeUgfiQ0.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Pickup-DPyaRYUw.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Planner-B4eqqNLD.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Portfolio-C86c8S7c.css",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Portfolio-JMIAgCqJ.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Preferences-8p15-YVu.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/ProjectActivity-BYLqRQyf.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/ProjectList-2PcF9x-6.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/ProjectSettings-DE_KCOsw.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Readiness-CWqAL_cg.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/ReassignWork-C5WVjyfF.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Registers-CsXz-Qig.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Reports-C9L1fA_m.css",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Reports-oA93q1rI.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Reviews-DS40SJsc.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Search-C-K_Qkma.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Staff-BpH0cdEz.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Staff-CcxsPuBK.css",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Structure-BEP_EkrQ.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Submissions-svJb_u9g.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Team-B6ss9jOQ.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Templates-Cl3Z9SKX.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Time-CbSQmF5r.css",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Time-vMyocCOb.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/TimeAwayDialog-CEgN2Tr5.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Timeline-XLJSMRtM.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Vacation-Bv0KRSba.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/Workload-f1SDSHCN.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/WorkspaceTasks-D7_6i4gZ.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/WorkspaceTeam-DjL6ALgQ.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/activity-SJFSZQFK.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/arrow-right-Dqo564M7.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/arrow-up-CksTpr8u.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/arrow-up-down-F7PE8lg-.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/auth-CLGR7N8U.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/calendar-clock-Bx1BahhB.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/calendar-days-CZYzc0Pv.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/check-check-BUPenHTh.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/checkbox-DPYa075o.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/chevron-left-DjVPsaqI.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/circle-alert-BNZVoiFh.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/comments-DKJGjLPf.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/common-DQadRcSE.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/count-card-BWqlZQfv.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/count-card-iiayh2De.css",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/data-DWA56Y5i.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/discipline-colour-B7Cu5WgU.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/dist-BfBb9CKk.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/download-CaDJ0Xwa.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/drafts-B_rVw3XP.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/drafts-C-rYtoQA.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/export-Cb62SjLp.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/extension-slots-BpM0btgg.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/index-DP5TSq-I.css",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/index-Dt5Vfy1E.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/input-C-mId4ag.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/item-mark-h0FQ0rvb.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/keys-BhnO2UR-.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/label-DyeVTR-W.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/layers-DwZzUmxY.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/link-2-DTPIO9Cf.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/links-DkJn5da7.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/monitor-CUD6Yx5O.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/page-mode-YY8g_7WX.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/pencil-BEQuf8tu.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/people-C1Rhrmk9.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/person-facts-editor-CMobKSvy.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/person-panel-C8Dgl8Md.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/person-panel-trigger-Bn5TerZw.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/pills-CAnoL7e3.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/pills-GRc589h_.css",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/plus-Df_fYStx.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/preload-helper-BZ1Pz5am.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/project-list-details-BGjGAsFu.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/project-status-note-CAya6FtO.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/rolldown-runtime-hePW80VL.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/scale-BS1mu9_P.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/schedule-note-BEGF2uNe.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/search-acbSbG3P.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/shield-check-CDpABc5v.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/square-check-big-CRt61iAc.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/square-kanban-Bar-kMxQ.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/star-Bia2uAeN.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/switch-Cr52uGDR.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/team-organisation-controls-XYq0FPfx.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/template-version-provenance-DnXEAMIr.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/title-block-hdyxJNMI.css",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/title-block-yMaSYUPr.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/useInfiniteQuery-BmLHlXfK.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/useMutation-BaUYXV2W.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/useOrgPlacement-DI7YdzFQ.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/useQuery-DmDKVBnv.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/users-wUgkasDG.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/views-DsISwRMQ.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/visual-tabs-Droa3Yn1.css",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/workspace-Cyj8L-5K.js",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "favicon.svg",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "icons.svg",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "index.html",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "landing/THIRD-PARTY-NOTICES.txt",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "landing/board.svg",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "landing/fonts/caveat-OFL.txt",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "landing/fonts/caveat-normal-0.woff2",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "landing/fonts/dm-sans-normal-1.woff2",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "landing/fonts/dmsans-OFL.txt",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "landing/fonts/instrument-serif-italic-2.woff2",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "landing/fonts/instrument-serif-normal-3.woff2",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "landing/fonts/instrumentserif-OFL.txt",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "landing/tuesday-board-current.jpg",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "landing/tuesday-board.jpg",
+      "status": 200,
+      "matches": true
+    }
+  ],
+  "deepRouteMatchesIndex": true,
+  "noRealAPI5106": true,
+  "currentSourceFiles": 275,
+  "sourceMismatch": [],
+  "status": "PASS"
+}

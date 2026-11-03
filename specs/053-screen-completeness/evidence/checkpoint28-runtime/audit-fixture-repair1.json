@@ -1,0 +1,7 @@
+{
+  "file": "tests/Hub.Tests/Api/ActivityScreenFlagProjectionTests.cs",
+  "before": "a818dc6d349d6fc51d21a6388f007c9505b224b72872791654294ddbab2f32cb",
+  "after": "fa6c0c85d5a7872f6325f886a9d1bd6c94f360346127822f30ffd11e02185e37",
+  "observed": "audit1 two fixture errors: missing one required Decision owner, paging DTO TotalCount serialized totalCount",
+  "repair": "Seed legitimate PM owner; use actual totalCount response key; no application/expected count/visibility assertion changes"
+}

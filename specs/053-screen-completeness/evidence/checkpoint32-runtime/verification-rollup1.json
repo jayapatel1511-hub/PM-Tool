@@ -1,0 +1,607 @@
+{
+  "atUtc": "2026-11-03T00:14:05.753991+00:00",
+  "checkpoint": 32,
+  "generation": 60,
+  "localVerdict": "PASS_LOCAL_S45_S47",
+  "locallyChecked": 45,
+  "screenSlices": 49,
+  "remaining": [
+    "S12",
+    "S35",
+    "S37",
+    "S49"
+  ],
+  "dotnetDistinct": 127,
+  "providerBackedChecks": 114,
+  "pureChecks": 13,
+  "dotnetLatest": {
+    "Hub.Tests.Api.NotificationDigestCompositionTests.Staff_summary_provenance_covers_counted_work_and_stalled_reviews_but_not_other_report_work": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.TimeEntryReminderTests.Waiting_job_rechecks_current_policy_and_clock_after_the_real_recipient_lock(change: \"week\")": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.TimeEntryReminderTests.Waiting_job_rechecks_current_policy_and_clock_after_the_real_recipient_lock(change: \"schedule\")": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.TimeEntryReminderTests.Only_explicit_active_flagged_opt_in_runs_even_when_forced_and_reads_create_no_defaults": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationAwayDeliveryTests.Recording_sender_outcomes_are_pinned_and_only_real_declared_success_counts_as_accepted(kind: \"Log\", outcome: \"Simulated\")": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Domain.NoticeDeliveryProofTests.Rendered_map_is_closed_exactly_bound_and_distinct_from_transport_acceptance": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.TimeEntryReminderTests.Calendar_resolution_uses_fixed_independent_UTC_expectations_and_emits_only_once(zone: \"America/Halifax\", instant: \"2026-11-01T04:30:00Z\", weekday: 7, chosenTime: \"01:30\", monday: \"2026-10-26\", effectiveTime: \"01:30\")": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Domain.NoticeDeliveryProofTests.Ordinary_policy_witness_is_canonical_closed_and_bound_to_actual_window_scope_and_version": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationAwayDeliveryTests.Compatible_occurrences_keep_first_content_and_actual_actor_while_new_command_keeps_rolling_suppression": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationAwayDeliveryTests.Stale_completion_and_changed_nonempty_address_cannot_send_or_rewrite_a_payload": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationAwayDeliveryTests.Concurrent_claims_reserve_one_invocation_and_orphan_recovery_keeps_a_matching_late_ack": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationAwayDeliveryTests.Away_capture_is_held_with_original_age_and_24h_domain_without_an_email": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationAwayDeliveryTests.Context_requires_owners_live_ReadCommitted_transaction": {
+      "outcome": "Passed",
+      "run": "focused2"
+    },
+    "Hub.Tests.Api.NoticeDeliveryModelTests.Carry_guard_refuses_invalid_source_coverage_target_tracking_and_invented_or_rewritten_provenance(variant: \"sameThrough\")": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationAwayDeliveryTests.Fresh_flag_off_after_buffering_refuses_before_staging_and_rolls_back_source": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationDigestCompositionTests.Stale_preparation_and_removed_admission_refuse_without_committing_partial_slot_queue_or_watermark": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.TimeEntryReminderTests.ReadOnly_opt_in_keeps_personal_Time_scope_and_existing_create_edit_refusals": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationAwayDeliveryTests.Exact_bulk_app_cohort_cannot_be_proven_by_equal_changed_task_totals": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.TimeEntryReminderTests.Independent_concurrent_workers_and_bounded_keyset_batches_emit_one_row_per_recipient": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.TimeEntryReminderTests.Cancellation_while_waiting_propagates_without_committing_and_retry_is_safe": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NoticeDeliveryModelTests.Carry_guard_refuses_invalid_source_coverage_target_tracking_and_invented_or_rewritten_provenance(variant: \"nonCoverFrom\")": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationAwayDeliveryTests.Known_failure_exhaustion_uses_eight_reserved_invocations_without_changing_identity": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationDigestCompositionTests.Digest_job_uses_fresh_under_lock_flag_even_when_its_callers_settings_cache_is_stably_off": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationDigestCompositionTests.A_foreign_slot_or_expired_recipient_context_cannot_compose_or_mutate_any_delivery_state": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationAwayDeliveryTests.Selected_scalar_receipt_still_decodes_a_digest_containing_another_apps_bulk_intent": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationAwayDeliveryTests.Held_immediate_partial_opt_out_and_hold_release_leave_only_the_eligible_subset_parked": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.TimeEntryReminderTests.Waiting_job_rechecks_current_policy_and_clock_after_the_real_recipient_lock(change: \"flag\")": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NoticeDeliveryModelTests.Email_protocol_separates_legacy_single_occurrence_digest_claim_and_real_transport_acceptance_metadata": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationDigestCompositionTests.Staff_notice_history_is_From_exclusive_Through_inclusive_and_retains_actual_multi_project_scope": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NoticeProducerIntegrationTests.Actual_assignment_capture_public_receipt_and_opaque_pulse_distinguish_real_acceptance_from_simulation(transport: \"Smtp\", outcome: \"Accepted\", state: \"Emailed\")": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationAwayDeliveryTests.Every_enhanced_marker_is_excluded_by_the_same_legacy_definition_before_limiting": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Domain.NoticeDeliveryProofTests.Project_notice_coverage_unions_actual_changed_tasks_without_multiplying_count": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NoticeDeliveryModelTests.Tracked_digest_transfer_retains_original_windows_budgets_mail_and_history_and_cannot_clear_repoint_or_cycle": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationAwayDeliveryTests.Default_sender_declaration_is_unknown_and_task_throw_is_sticky_uncertainty": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationDigestCompositionTests.All_twenty_off_never_bypasses_with_held_or_admin_content_and_admin_output_has_an_explicit_witness": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NoticeDeliveryModelTests.Carry_guard_refuses_invalid_source_coverage_target_tracking_and_invented_or_rewritten_provenance(variant: \"flipAway\")": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NoticeProducerIntegrationTests.Operations_counts_a_captured_weekly_dispatch_on_Tuesday_without_creating_another_slot_or_alarm_for_a_reminder": {
+      "outcome": "Passed",
+      "run": "focused2"
+    },
+    "Hub.Tests.Api.TimeEntryReminderTests.Poll_interval_is_one_minute_and_job_identity_is_stable": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NoticeDeliveryModelTests.Carry_guard_refuses_invalid_source_coverage_target_tracking_and_invented_or_rewritten_provenance(variant: \"budgetReset\")": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationAwayDeliveryTests.Accepted_captured_ordinal_does_not_invent_missing_collapsed_history_or_foreign_visibility": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NoticeDeliveryModelTests.PostgreSQL_carry_pointer_is_same_user_same_kind_nonself_Digest_and_target_deletion_is_restricted": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationDigestCompositionTests.Malformed_cross_recipient_or_duplicate_held_bindings_refuse_without_mutating_delivery_state": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.TimeEntryReminderTests.Exact_due_and_once_per_local_week_survive_edits_disable_enable_cleanup_and_next_week": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NoticeDeliveryModelTests.Slot_window_budgets_and_linked_email_payload_membership_transport_and_uncertainty_cannot_be_rewritten": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NoticeDeliveryModelTests.Digest_policy_json_is_private_nullable_jsonb_but_immutable_when_linked_and_forbidden_on_other_mail": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NoticeDeliveryModelTests.Carry_guard_refuses_invalid_source_coverage_target_tracking_and_invented_or_rewritten_provenance(variant: \"windowRewrite\")": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NoticeProducerIntegrationTests.Automatic_follow_rereads_a_manual_choice_committed_after_its_original_read_with_unrelated_flags_off(automaticDelete: False, replacement: True, restricted: False)": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.TimeEntryReminderTests.Existing_Ready_preserves_captured_basis_or_stays_unavailable_without_replacement(variant: \"valid\")": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationAwayDeliveryTests.Turning_hold_off_queues_one_original_payload_without_rebasing_its_capture_age": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NoticeProducerIntegrationTests.Automatic_follow_rereads_a_manual_choice_committed_after_its_original_read_with_unrelated_flags_off(automaticDelete: True, replacement: True, restricted: True)": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationDigestCompositionTests.Counted_overflow_keeps_the_eleventh_rows_project_even_when_its_detail_line_is_capped": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NoticeDeliveryModelTests.PostgreSQL_enforces_private_keys_foreign_keys_and_disposition_slot_preference_counter_primitives": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NoticeDeliveryModelTests.Carry_guard_refuses_invalid_source_coverage_target_tracking_and_invented_or_rewritten_provenance(variant: \"added\")": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.TimeEntryReminderTests.Waiting_job_rechecks_current_policy_and_clock_after_the_real_recipient_lock(change: \"optOut\")": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Domain.NoticeDeliveryProofTests.Local_schedule_resolves_first_valid_instant_and_earliest_ambiguous_utc_without_losing_requested_time": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationAwayDeliveryTests.Recording_sender_outcomes_are_pinned_and_only_real_declared_success_counts_as_accepted(kind: \"Graph\", outcome: \"Accepted\")": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.TimeEntryReminderTests.Calendar_resolution_uses_fixed_independent_UTC_expectations_and_emits_only_once(zone: \"Synthetic/InvalidZone\", instant: \"2026-11-02T09:00:00Z\", weekday: 1, chosenTime: \"09:00\", monday: \"2026-11-02\", effectiveTime: \"09:00\")": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.TimeEntryReminderTests.Waiting_job_rechecks_current_policy_and_clock_after_the_real_recipient_lock(change: \"inactive\")": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationAwayDeliveryTests.Recording_sender_outcomes_are_pinned_and_only_real_declared_success_counts_as_accepted(kind: \"Unknown\", outcome: \"Unknown\")": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Domain.NoticeDeliveryProofTests.Terminal_refusal_and_uncertain_membership_cannot_be_revived_or_released": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NoticeProducerIntegrationTests.Actual_assignment_capture_public_receipt_and_opaque_pulse_distinguish_real_acceptance_from_simulation(transport: \"Log\", outcome: \"Simulated\", state: \"Simulated\")": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationAwayDeliveryTests.Actual_sender_change_after_safe_failure_suppresses_without_relabelling_replaying_or_spending_an_attempt": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.TimeEntryReminderTests.Calendar_resolution_uses_fixed_independent_UTC_expectations_and_emits_only_once(zone: \"Australia/Lord_Howe\", instant: \"2026-10-03T15:30:00Z\", weekday: 7, chosenTime: \"02:15\", monday: \"2026-09-28\", effectiveTime: \"02:30\")": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationDigestCompositionTests.Concurrent_same_recipient_creation_and_queue_share_one_slot_email_and_preparation_watermark": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationDigestCompositionTests.Safe_recomposition_uses_original_window_after_watermark_advance_and_omits_later_staff_history": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NoticeDeliveryModelTests.Carry_guard_refuses_invalid_source_coverage_target_tracking_and_invented_or_rewritten_provenance(variant: \"untracked\")": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NoticeProducerIntegrationTests.Automatic_follow_rereads_a_manual_choice_committed_after_its_original_read_with_unrelated_flags_off(automaticDelete: True, replacement: False, restricted: False)": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationDigestCompositionTests.Transport_mismatch_parks_the_linked_digest_without_recomposition_carry_or_envelope_attempt_and_kind_changes": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.TimeEntryReminderTests.Existing_Ready_preserves_captured_basis_or_stays_unavailable_without_replacement(variant: \"zone\")": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Domain.NoticeDeliveryProofTests.Counts_scope_and_fixed_progress_vocabulary_are_bounded_before_capture": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.TimeEntryReminderTests.Existing_Ready_preserves_captured_basis_or_stays_unavailable_without_replacement(variant: \"date\")": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NoticeProducerIntegrationTests.Automatic_follow_rereads_a_manual_choice_committed_after_its_original_read_with_unrelated_flags_off(automaticDelete: True, replacement: True, restricted: False)": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NoticeDeliveryModelTests.Captured_intent_identity_content_anchor_and_typed_bulk_origin_are_immutable_but_valid_progress_can_advance": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationDigestCompositionTests.A_safely_suppressed_third_version_reaches_core_exhaustion_instead_of_resetting_or_stalling_its_slot": {
+      "outcome": "Passed",
+      "run": "focused2"
+    },
+    "Hub.Tests.Domain.NoticeDeliveryProofTests.Unknown_duplicate_foreign_missing_and_mutated_proofs_fail_closed_without_raw_diagnostics": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.TimeEntryReminderTests.Due_context_cannot_be_reused_in_a_different_transaction": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NoticeDeliveryModelTests.Nullable_private_fragments_preserve_old_self_and_email_shapes_without_business_audit_or_assignment_publication": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationDigestCompositionTests.Safe_exhausted_leaf_carries_once_but_later_uncertainty_never_reopens_its_covered_window": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationDigestCompositionTests.Planning_scope_uses_actual_recipient_created_entry_ids_including_the_bounded_count_overflow": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NoticeProducerIntegrationTests.Automatic_follow_rereads_a_manual_choice_committed_after_its_original_read_with_unrelated_flags_off(automaticDelete: False, replacement: False, restricted: False)": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NoticeProducerIntegrationTests.Captured_work_can_be_late_on_a_noncreation_day_without_inventing_a_reminder_alert": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NoticeDeliveryModelTests.Notification_cleanup_sets_links_null_but_retains_captured_ordinal_and_emitted_reminder_for_tracked_and_bulk_deletion": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationDigestCompositionTests.Scheduling_readers_do_not_create_defaults_and_all_off_disabled_no_address_and_known_away_hold_creation": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationDigestCompositionTests.Real_held_capture_reserves_ten_parent_intents_and_leaves_the_eleventh_unreserved_without_claiming_acceptance": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Domain.NoticeDeliveryProofTests.Near_limit_origin_with_all_4096_records_reserves_every_later_legal_outcome": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationAwayDeliveryTests.Queued_bulk_partial_opt_out_preserves_eligible_sibling_and_bounds_checks_without_replacing_failed_payload": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.TimeEntryReminderTests.Database_fault_rolls_back_notification_and_slot_together_then_retry_emits_once": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationDigestCompositionTests.Tracked_slot_transfer_queue_and_watermark_roll_back_together_on_owner_failure": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Domain.NoticeDeliveryProofTests.Canonical_hash_roundtrips_reordering_and_does_not_hash_itself_or_progress": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationDigestCompositionTests.Held_parents_are_ungrouped_capped_at_ten_and_reserve_only_actual_printed_intents_and_bulk_subsets": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.TimeEntryReminderTests.Existing_Ready_preserves_captured_basis_or_stays_unavailable_without_replacement(variant: \"instant\")": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationDigestCompositionTests.Update_counts_keep_all_contributing_activity_ids_after_window_privacy_and_notification_filters": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationAwayDeliveryTests.Recording_sender_outcomes_are_pinned_and_only_real_declared_success_counts_as_accepted(kind: \"Smtp\", outcome: \"Accepted\")": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationDigestCompositionTests.Weekly_creation_is_Monday_only_but_an_existing_Monday_slot_composes_on_Tuesday_with_its_captured_basis": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.TimeEntryReminderTests.Missed_previous_weeks_never_backfill_and_due_reader_does_not_create_a_slot": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationDigestCompositionTests.No_held_output_matches_legacy_bytes_and_requires_only_contributing_projects_without_writes": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.TimeEntryReminderTests.Calendar_resolution_uses_fixed_independent_UTC_expectations_and_emits_only_once(zone: \"America/Halifax\", instant: \"2026-03-08T06:00:00Z\", weekday: 7, chosenTime: \"02:30\", monday: \"2026-03-02\", effectiveTime: \"03:00\")": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NoticeDeliveryModelTests.Carry_guard_refuses_invalid_source_coverage_target_tracking_and_invented_or_rewritten_provenance(variant: \"notExhausted\")": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NoticeDeliveryModelTests.Carry_guard_refuses_invalid_source_coverage_target_tracking_and_invented_or_rewritten_provenance(variant: \"flipToExhausted\")": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Domain.NoticeDeliveryProofTests.Whole_app_inclusion_needs_exact_event_keys_despite_equal_task_counts": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationAwayDeliveryTests.Incompatible_legacy_collapse_alias_rolls_back_whole_business_transaction": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NoticeDeliveryModelTests.Carry_guard_refuses_invalid_source_coverage_target_tracking_and_invented_or_rewritten_provenance(variant: \"self\")": {
+      "outcome": "Passed",
+      "run": "focused1"
+    },
+    "Hub.Tests.Api.NotificationContractTests.Follow_commands_and_the_following_read_marker_keep_their_answers": {
+      "outcome": "Passed",
+      "run": "regressions-contract1"
+    },
+    "Hub.Tests.Api.NotificationScreenTests.Follow_uses_existing_own_command_without_read_side_effects_and_dark_route_leaves_the_original_wire_intact": {
+      "outcome": "Passed",
+      "run": "regressions-contract1"
+    },
+    "Hub.Tests.Api.RegistryTests.Generated_key_families_match_the_registry_and_vocabulary": {
+      "outcome": "Passed",
+      "run": "regressions-contract1"
+    },
+    "Hub.Tests.Api.CoordinationDigestTests.Pending_coordination_actions_have_capped_opt_out_digest_sections_with_current_access": {
+      "outcome": "Passed",
+      "run": "regressions-contract1"
+    },
+    "Hub.Tests.Api.CoordinationDigestTests.Owner_recovery_hides_stale_exception_assignment_but_keeps_current_exception_assignment": {
+      "outcome": "Passed",
+      "run": "regressions-contract1"
+    },
+    "Hub.Tests.Api.DigestTests.An_overdue_Admin_review_adds_one_line_to_each_Admins_digest_until_it_is_recorded": {
+      "outcome": "Passed",
+      "run": "regressions-contract1"
+    },
+    "Hub.Tests.Api.NotificationContractTests.Notification_reads_keep_their_answers_and_shape": {
+      "outcome": "Passed",
+      "run": "regressions-contract1"
+    },
+    "Hub.Tests.Api.NoticePreferenceTests.Real_recipient_lock_serializes_first_row_race_and_preserves_separate_legacy_fields": {
+      "outcome": "Passed",
+      "run": "regressions-contract1"
+    },
+    "Hub.Tests.Api.ContractTests.Openapi_matches_the_committed_golden_document": {
+      "outcome": "Passed",
+      "run": "regressions-contract1"
+    },
+    "Hub.Tests.Api.NotificationContractTests.Event_preference_density_and_digest_commands_answer_204_with_no_body": {
+      "outcome": "Passed",
+      "run": "regressions-contract1"
+    },
+    "Hub.Tests.Api.NotificationScreenTests.Unknown_mismatched_deleted_targets_stay_unknown_and_hidden_recipient_and_compound_scope_rows_are_excluded_before_counts": {
+      "outcome": "Passed",
+      "run": "regressions-contract1"
+    },
+    "Hub.Tests.Api.NoticePreferenceTests.Lock_requires_originating_read_committed_transaction_and_exact_canonical_key": {
+      "outcome": "Passed",
+      "run": "regressions-contract1"
+    },
+    "Hub.Tests.Api.NoticePreferenceTests.Own_defaults_and_noop_reads_do_not_create_settings_or_delivery_work_and_off_is404": {
+      "outcome": "Passed",
+      "run": "regressions-contract1"
+    },
+    "Hub.Tests.Api.NoticePreferenceTests.Changed_fragment_preserves_legacy_fields_and_disabled_reminder_retains_choices": {
+      "outcome": "Passed",
+      "run": "regressions-contract1"
+    },
+    "Hub.Tests.Api.NoticePreferenceTests.Invalid_or_unknown_fragments_missing_revision_and_stale_revision_write_nothing": {
+      "outcome": "Passed",
+      "run": "regressions-contract1"
+    },
+    "Hub.Tests.Api.NotificationContractTests.A_restricted_project_cannot_be_followed_by_someone_who_may_not_see_it": {
+      "outcome": "Passed",
+      "run": "regressions-contract1"
+    },
+    "Hub.Tests.Api.NoticePreferenceTests.ReadOnly_person_can_change_only_their_own_preference_fragment": {
+      "outcome": "Passed",
+      "run": "regressions-contract1"
+    },
+    "Hub.Tests.Api.OperationsTests.Each_condition_raises_its_alert_and_only_past_its_threshold": {
+      "outcome": "Passed",
+      "run": "regressions-contract1"
+    },
+    "Hub.Tests.Api.NotificationScreenTests.Full_cohort_filter_counts_two_current_actors_beyond_the_first_fifty_with_patterns_off_and_rechecks_changed_actors": {
+      "outcome": "Passed",
+      "run": "regressions-contract1"
+    },
+    "Hub.Tests.Api.OperationsTests.Operators_see_the_checks_and_job_runs_and_the_watchdog_reports_them": {
+      "outcome": "Passed",
+      "run": "regressions-contract1"
+    },
+    "Hub.Tests.Api.NoticePreferenceTests.Flag_turned_off_while_patch_waits_is_read_fresh_after_the_lock": {
+      "outcome": "Passed",
+      "run": "regressions-contract1"
+    },
+    "Hub.Tests.Api.NotificationScreenTests.Many_distinct_task_primaries_and_present_or_missing_states_are_batched_without_changing_current_action_counts": {
+      "outcome": "Passed",
+      "run": "regressions-contract1"
+    },
+    "Hub.Tests.Api.NotificationScreenTests.Terminal_task_with_stale_missing_blocker_is_known_not_actionable_rather_than_unknown": {
+      "outcome": "Passed",
+      "run": "regressions-contract1"
+    },
+    "Hub.Tests.Api.NotificationScreenTests.Typed_finding_uses_current_child_actor_instead_of_package_owner_or_parent_id_with_patterns_off": {
+      "outcome": "Passed",
+      "run": "regressions-contract1"
+    },
+    "Hub.Tests.Api.DigestTests.With_the_flag_off_no_digest_carries_the_line": {
+      "outcome": "Passed",
+      "run": "regressions-contract1"
+    }
+  },
+  "browser": {
+    "notice-preferences-browser2": {
+      "status": "PASS",
+      "observations": 6,
+      "visualSystem": false,
+      "driverSHA256": "a6c0b2a839d8ecb1f2d1414e2885a23e214440be6abe4ccea90af14043e05b1b"
+    },
+    "notice-preferences-browser3": {
+      "status": "PASS",
+      "observations": 6,
+      "visualSystem": true,
+      "driverSHA256": "ae6febd9454425c129e728de156aa9fe546733c1f9f5a5728054742800885425"
+    },
+    "notice-delivery-browser2": {
+      "status": "PASS",
+      "observations": 4,
+      "visualSystem": true,
+      "driverSHA256": "97d11c78be8a78e47d2acfc71a3336018b219107533e2e4fe9fe16518e16a7ee"
+    },
+    "notification-screen-regression1": {
+      "status": "PASS",
+      "observations": 9,
+      "visualSystem": false,
+      "driverSHA256": "e05b8bfa7da411843180209959f147c802e810b26fd193428c39c4508248d298"
+    }
+  },
+  "distinctFinalBrowserScenarios": 19,
+  "deliveryMatrixRows": 17,
+  "builds": [
+    "bootstrap-build1 PASS0errors22warnings",
+    "fixture-build1 FAIL2testaccesserrors",
+    "fixture-build2 PASS0errors1183warnings",
+    "fixture-build3 PASS0errors1183warnings",
+    "solution-build1 PASS0errors0warnings incremental"
+  ],
+  "focusedRepairs": [
+    "focused1 99/102 passed; three fixture defects recorded",
+    "focused2 only3failedcases passed;99passingcases not repeated; no production delta"
+  ],
+  "contract": "Producer expected1drift refusal; strict2casesPASS within25regressions; only NotificationScreenDelivery adds5optional properties",
+  "frontend": "Generated types/app-types2/fixture-types2/scoped-lint2/spa-build2 PASS",
+  "migration": "20261102234729_NoticeDeliveryPolicyWitness; generated/source reviewed and applied ONLY by fresh HubFactory databases",
+  "sourceCount": 697,
+  "webSourceCount": 274,
+  "bundleFiles": 143,
+  "priorOutputsPreserved": 4606,
+  "newReviewPublicFiles": 21,
+  "priorReviewImagesPreserved": 16,
+  "gallery": "http://127.0.0.1:8873/#addition-09",
+  "finalSPA": "http://127.0.0.1:8874",
+  "previewOnlyAPIOrigin": "http://127.0.0.1:5105 (no API listener)",
+  "boundaries": {
+    "committed": false,
+    "pushed": false,
+    "deployed": false,
+    "maintainedFlagsActivated": false,
+    "realExternalMailSent": false,
+    "humanAccepted": false,
+    "goalComplete": false
+  },
+  "limits": [
+    "Synthetic source/provider databases and recording/admission senders; actual SMTP/Graph delivery not exercised",
+    "Headless Chrome with actual tab visibility where required; screenshots do not prove human/device acceptance",
+    "Four screen slices and existing policy decisions remain open",
+    "QA24 runtime/database retained; cleanup explicit approval remains pending"
+  ],
+  "finalChecks": {
+    "spec-check1": true,
+    "trace-check1": true,
+    "decisions-check1": true,
+    "whitespace-check1": true,
+    "app-types2": true,
+    "fixture-types2": true,
+    "scoped-lint2": true,
+    "solution-build1": true,
+    "sourceServedPreservation": true,
+    "taskCount": true,
+    "finalWhitespace": true
+  },
+  "finalChecksPass": true
+}

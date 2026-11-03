@@ -1,10 +1,17 @@
+import { WorkRowEvidence } from '@/components/hub/work-row-evidence'
+import { PersonPanelTrigger } from '@/components/hub/person-panel-trigger'
+import { personOptionLabel } from '@/components/hub/person-option-label'
 import { useQuery } from '@tanstack/react-query'
-import { Link, useSearchParams } from 'react-router'
-import { useEffect, type ReactNode } from 'react'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router'
+import { useEffect, type ComponentProps, type ReactNode } from 'react'
 import { ErrorBanner, Field, FilterBar, Loading, PageHelp, selectCls } from '@/components/hub/common'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useItemPanel } from '@/components/hub/panel-host'
+import { RecordContext } from '@/components/hub/record-context'
+import { useFlag, useMe } from '@/lib/auth'
+import { HandoffReadinessSummary } from './handoff-consequences'
+import { captureRecordContextOrigin } from '@/lib/record-context-navigation'
 import type { components } from '@/gen/api'
 import { typedRequest } from '@/lib/api'
 import { fmtDate, fmtTime } from '@/lib/format'
@@ -23,6 +30,16 @@ const box = 'overflow-hidden rounded-lg border bg-card', head = 'flex flex-wrap 
 const badge = 'rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums', title = 'text-base/6 font-semibold'
 const keyLink = 'key text-primary underline underline-offset-4', textLink = 'text-primary underline underline-offset-4'
 const row = 'space-y-1 py-2 first:pt-0 last:pb-0'
+
+function ContextLink({ to, children, ...props }: Omit<ComponentProps<typeof Link>, 'to'> & { to: string }) {
+  const location = useLocation(), navigate = useNavigate(), contextOn = useFlag('screen_patterns')
+  return <Link to={to} {...props} onClick={event => {
+    props.onClick?.(event)
+    if (!contextOn || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+    event.preventDefault()
+    navigate(to, { state: { recordContextReturn: captureRecordContextOrigin(location, event.currentTarget) } })
+  }}>{children}</Link>
+}
 
 function Pager({ label, page, total, pageSize, onPage }: { label: string; page: number; total: number; pageSize: number; onPage: (page: number) => void }) {
   if (pageSize <= 0 || total <= pageSize) return null
@@ -50,7 +67,10 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
   project: ProjectDetail; disciplineId?: string; meeting?: boolean; canCapture?: boolean; printAll?: boolean; onPrinted?: (printing: boolean) => void;
   onCapture?: (label: string, links: { targetType: string; targetId: string }[], linkedActionIds: string[]) => void
 }) {
-  const openPanel = useItemPanel()
+  const noticesOn = useFlag('capacity_screens')
+  const openPanel = useItemPanel(), location = useLocation()
+  const me = useMe(), contextOn = useFlag('screen_patterns'), workOn = useFlag('work_screens'), peopleOn = useFlag('people_screens'), registerOn = useFlag('register_screens')
+  const context = (value: Schemas['RecordContextView'] | null | undefined) => contextOn && value ? <RecordContext context={value} projectNumber={project.projectNumber} meId={me.id} openPanel={openPanel} /> : null
   const [sp, setSp] = useSearchParams()
   const ownerId = sp.get('owner') ?? ''
   const from = sp.get('from') ?? ''
@@ -66,7 +86,7 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
   const clearScope = () => setSp(p => { const next = new URLSearchParams(p); ['owner', 'from', 'to', 'rowsPage'].forEach(name => next.delete(name)); return next }, { replace: true })
   const team = useQuery({ queryKey: ['p', project.id, 'team'], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/team', { params: { id: project.id } }), staleTime: 60_000 })
   const q = useQuery({
-    queryKey: ['p', project.id, 'discipline-coordination', disciplineId, ownerId, from, to, page, printAll],
+    queryKey: ['p', project.id, 'discipline-coordination', disciplineId, ownerId, from, to, page, printAll, me.id, workOn, peopleOn, registerOn],
     staleTime: 0,
     queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/discipline-coordination', { params: { projectId: project.id },
       query: { disciplineId, ownerId, from, to, page: printAll ? undefined : page, pageSize: printAll ? undefined : 4 } }),
@@ -79,7 +99,7 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
   }, [printAll, q.isPending, q.isFetching, q.error, onPrinted])
   const filters = <FilterBar activeCount={[ownerId, from, to].filter(Boolean).length}><div role="group" className="flex flex-wrap items-end gap-3" aria-label={t('dcv.scopeLabel')}>
     <p className="w-full text-sm text-muted-foreground">{t('dcv.projectPrefix')} <strong className="font-semibold text-foreground">{project.projectNumber}</strong>{disciplineId ? ` · ${project.disciplines.find(x => x.id === disciplineId)?.name ?? t('dcv.selectedDiscipline')}` : ''}</p>
-    <Field label={t('common.owner')} htmlFor="dcv-owner" className="w-full sm:w-56"><select id="dcv-owner" className={selectCls} value={ownerId} onChange={e => setScope('owner', e.target.value)}><option value="">{t('dcv.allPermittedOwners')}</option>{team.data?.members.map(m => <option key={m.userId} value={m.userId}>{m.displayName}</option>)}</select></Field>
+    <Field label={t('common.owner')} htmlFor="dcv-owner" className="w-full sm:w-56"><select id="dcv-owner" className={selectCls} value={ownerId} onChange={e => setScope('owner', e.target.value)}><option value="">{t('dcv.allPermittedOwners')}</option>{team.data?.members.map(m => <option key={m.userId} value={m.userId}>{personOptionLabel(m.displayName, m.personFacts?.notices, noticesOn)}</option>)}</select></Field>
     <Field label={t('common.from')} htmlFor="dcv-from" className="w-full sm:w-44"><Input id="dcv-from" type="date" value={from} onChange={e => setScope('from', e.target.value)} /></Field>
     <Field label={t('common.to')} htmlFor="dcv-to" className="w-full sm:w-44"><Input id="dcv-to" type="date" value={to} onChange={e => setScope('to', e.target.value)} /></Field>
     {(ownerId || from || to) && <Button variant="link" className="px-1" onClick={clearScope}>{t('dcv.clearScope')}</Button>}
@@ -113,6 +133,7 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
     const suffix = params.size ? `?${params}` : ''
     return `/projects/${project.projectNumber}/${pathname}${suffix}`
   }
+  const evidence = (value: object, type: string, id: string, key: string, section: string) => <WorkRowEvidence row={value} itemType={type} itemId={id} itemKey={key} projectNumber={project.projectNumber} sourceKey={`project-coordination:${project.id}:${section}:${type}:${id}`} />
   const none = <p className="text-muted-foreground">{t('dcv.none')}</p>
   // One of the five fixed questions: a stable identity stripe, the question as its heading, its count, and the register.
   // Each answer is a data card (article), like the boxes below it (§41 R9).
@@ -123,30 +144,34 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
       <div className="border-t px-4 py-2.5"><Link className="text-sm font-medium text-primary underline underline-offset-4" to={registerUrl(href)}>{t('dcv.openRegister')}</Link></div>
     </article>
   )
-  const items = (rows: { id: string; key: string; text: string; detail?: ReactNode }[], register: string) => rows.length ? <ul className="divide-y">{rows.map((r) => <li key={r.id} className={row}>
-    <p><Link className={keyLink} to={registerUrl(register, `${register === 'handoffs' ? 'Handoff' : 'ChangeNotice'}:${r.id}`)}>{r.key}</Link> <span className="font-medium">{r.text}</span></p>
+  const items = (rows: { id: string; key: string; text: string; detail?: ReactNode; context?: Schemas['RecordContextView'] | null; readinessLinks?: Schemas['HandoffReadinessLinks'] | null }[], register: string, section: string) => rows.length ? <ul className="divide-y">{rows.map((r) => <li key={r.id} className={row}>
+    {context(r.context)}<p><ContextLink className={keyLink} to={registerUrl(register, `${register === 'handoffs' ? 'Handoff' : 'ChangeNotice'}:${r.id}`)}>{r.key}</ContextLink> <span className="font-medium">{r.text}</span></p>
+    {evidence(r, register === 'handoffs' ? 'Handoff' : 'ChangeNotice', r.id, r.key, section)}
+    {register === 'handoffs' && <HandoffReadinessSummary projectId={project.id} projectNumber={project.projectNumber} handoffId={r.id} links={r.readinessLinks} surface={section} />}
     {r.detail && <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">{r.detail}</div>}
   </li>)}</ul> : none
   const linkedIssueItems = d.linkedIssues
   const existingActions = (sourceType: string, sourceId: string) => d.linkedActions.filter(a => a.sourceType === sourceType && a.sourceId === sourceId)
   const actionLinks = (rows: LinkedAction[]) => rows.length > 0 && <ul className="mt-1 space-y-1 text-xs">{rows.map(a =>
-    <li key={a.id}>{t('dcv.existingAction')} <Link className={keyLink} to={registerUrl('meetings', `Action:${a.id}`)}>{a.key}</Link> · {a.text} · {tv(a.status)}{a.dueDate && <span className="tabular-nums"> · {fmtDate(a.dueDate)}</span>}</li>)}</ul>
+    <li key={a.id}>{context(a.context)}{t('dcv.existingAction')} <ContextLink className={keyLink} to={registerUrl('meetings', `Action:${a.id}`)}>{a.key}</ContextLink> · {a.text} · {tv(a.status)}{a.dueDate && <span className="tabular-nums"> · {fmtDate(a.dueDate)}</span>}{evidence(a, 'Action', a.id, a.key, `linked:${a.sourceType}:${a.sourceId}`)}</li>)}</ul>
   const capture = (key: string, onClick: () => void) => meeting && canCapture && onCapture &&
     <button type="button" className="no-print inline-flex min-h-6 items-center text-sm text-primary underline underline-offset-4" aria-label={t('dcv.reuseCaptureFor', { key })} onClick={onClick}>{t('dcv.captureAction')}</button>
   return shell(<>
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-      {card('owe', t('dcv.owe'), d.outgoingTotal, <>{items(outgoing.map((h) => ({ id: h.id, key: h.key, text: h.title, detail: <><CoordStatus status={h.status} /><span>{t('dcv.promisedDate')}: <span className="tabular-nums">{h.promisedBy ? fmtDate(h.promisedBy) : t('dcv.unavailable')}</span></span><span>{t('dcv.neededDate')}: <span className="tabular-nums">{fmtDate(h.neededBy)}</span></span></> })), 'handoffs')}<Pager label={t('dcv.owe')} page={d.outgoingPage} total={d.outgoingTotal} pageSize={d.handoffPageSize} onPage={setPage} /></>, 'handoffs')}
-      {card('waiting', t('dcv.waiting'), d.incomingTotal, <>{items(incoming.map((h) => ({ id: h.id, key: h.key, text: h.title, detail: <CoordStatus status={h.status} /> })), 'handoffs')}<Pager label={t('dcv.waiting')} page={d.incomingPage} total={d.incomingTotal} pageSize={d.handoffPageSize} onPage={setPage} /></>, 'handoffs')}
+      {card('owe', t('dcv.owe'), d.outgoingTotal, <>{items(outgoing.map((h) => ({ ...h, text: h.title, detail: <><CoordStatus status={h.status} /><span>{t('dcv.promisedDate')}: <span className="tabular-nums">{h.promisedBy ? fmtDate(h.promisedBy) : t('dcv.unavailable')}</span></span><span>{t('dcv.neededDate')}: <span className="tabular-nums">{fmtDate(h.neededBy)}</span></span></> })), 'handoffs', 'outgoing')}<Pager label={t('dcv.owe')} page={d.outgoingPage} total={d.outgoingTotal} pageSize={d.handoffPageSize} onPage={setPage} /></>, 'handoffs')}
+      {card('waiting', t('dcv.waiting'), d.incomingTotal, <>{items(incoming.map((h) => ({ ...h, text: h.title, detail: <CoordStatus status={h.status} /> })), 'handoffs', 'incoming')}<Pager label={t('dcv.waiting')} page={d.incomingPage} total={d.incomingTotal} pageSize={d.handoffPageSize} onPage={setPage} /></>, 'handoffs')}
       {card('using', `${t('dcv.using')}${wide}`, d.usesTotal, d.uses.length ? <><ul className="divide-y">{d.uses.map(u => <li key={u.id} className={row}>
-        <p><Link className={keyLink} to={registerUrl(u.targetType === 'Task' ? 'tasks' : 'deliverables', `${u.targetType}:${u.targetId}`)}>{u.targetKey ?? t('dcv.unknownWork')}</Link> <span className="font-medium">{u.targetName ?? ''}</span></p>
+        {context(u.context)}<p><ContextLink className={keyLink} to={registerUrl(u.targetType === 'Task' ? 'tasks' : 'deliverables', `${u.targetType}:${u.targetId}`)}>{u.targetKey ?? t('dcv.unknownWork')}</ContextLink> <span className="font-medium">{u.targetName ?? ''}</span></p>
         <p>{t('dcv.sourceRevision')}: {u.sourceUrl ? <a className={textLink} href={u.sourceUrl} target="_blank" rel="noopener noreferrer">{u.sourceKey ?? t('dcv.unavailable')} {u.revision ? `(${u.revision})` : ''}</a> : <span className="text-muted-foreground">{t('dcv.unavailable')}</span>}</p>
         <p className="text-xs text-muted-foreground">{u.intendedUse}</p>
+        {u.targetKey && evidence(u, u.targetType, u.targetId, u.targetKey, `use:${u.id}`)}
       </li>)}</ul><Pager label={t('dcv.using')} page={d.usesPage} total={d.usesTotal} pageSize={d.usesPageSize} onPage={setPage} /></> : none, 'changes')}
       {card('changed', `${t('dcv.changed')}${wide}`, d.changesTotal,
         d.changes.length ? <><ul className="divide-y">{d.changes.map(c => <li key={c.id} className={row}>
-          <p><Link className={keyLink} to={registerUrl('changes', `ChangeNotice:${c.id}`)}>{c.key}</Link> <span className="font-medium">{c.title}</span></p>
+          {context(c.context)}<p><ContextLink className={keyLink} to={registerUrl('changes', `ChangeNotice:${c.id}`)}>{c.key}</ContextLink> <span className="font-medium">{c.title}</span></p>
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs"><CoordStatus status={c.status} /><span className={c.pendingAssessments > 0 ? 'text-warn' : 'text-muted-foreground'}>{c.pendingAssessments > 0 && <span aria-hidden>▲ </span>}<ChangeAssessmentCounts c={c} scoped={scoped} /></span></div>
           {actionLinks(existingActions('ChangeNotice', c.id))}
+          {evidence(c, 'ChangeNotice', c.id, c.key, 'changes')}
           {d.unavailableChangeTargets.filter(target => target.changeNoticeId === c.id).map(target =>
             <p key={target.changeNoticeId} role="status" className="text-xs text-warn"><span aria-hidden>▲ </span>{plural(target.count, 'dcv.targetUnavailableOneLinkable', 'dcv.targetUnavailableManyLinkable')}</p>)}
           {capture(c.key, () => onCapture!(c.key,
@@ -157,7 +182,7 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
       {card('start', `${t('dcv.start')}${wide}`, d.startabilityReadyTotal,
         <><p className="mb-2 text-xs text-muted-foreground">{t('dcv.readySummary', { ready: d.startabilityReadyTotal, n: d.startabilityTotal, from: d.startabilityFrom, to: d.startabilityTo })}</p>
           {d.startability.length ? <><ul className="divide-y">{d.startability.map(r => <li key={r.id} className={row}>
-            <p><Link className={keyLink} to={registerUrl(r.targetType === 'Task' ? 'tasks' : 'deliverables', `${r.targetType}:${r.targetId}`)}>{r.key}</Link> <span className="font-medium">{r.name}</span></p>
+            {evidence(r, r.targetType, r.targetId, r.key, 'startability')}{context(r.context)}<p><ContextLink className={keyLink} to={registerUrl(r.targetType === 'Task' ? 'tasks' : 'deliverables', `${r.targetType}:${r.targetId}`)}>{r.key}</ContextLink> <span className="font-medium">{r.name}</span></p>
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs"><CoordStatus status={r.state} />
               {r.blocked.length > 0 && <Flags tone="bad">{t('dcv.blocked', { list: r.blocked.join(', ') })}</Flags>}{r.unknown.length > 0 && <Flags tone="warn">{t('dcv.unknown', { list: r.unknown.join(', ') })}</Flags>}</div>
           </li>)}</ul><Pager label={t('dcv.start')} page={d.startabilityPage} total={d.startabilityTotal} pageSize={d.startabilityPageSize} onPage={setPage} /></> : <p className="text-muted-foreground">{t('dcv.noAssessedWork')}</p>}</>, 'readiness')}
@@ -166,10 +191,10 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
       <div className={head}><div className="flex items-center"><h2 id="dcv-linked-issues" className={title}>{t('dcv.linkedIssues')}</h2><PageHelp>{t('dcv.linkedIssuesHint')}</PageHelp></div><span className={badge}>{d.linkedIssuesTotal}</span></div>
       <div className={body}>
         {linkedIssueItems.length ? <><ul className="divide-y rounded-md border">{linkedIssueItems.map((issue) => <li key={issue.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-3 py-2">
-          <Link className={keyLink} to={`/projects/${project.projectNumber}/issues?panel=Issue:${issue.id}`} aria-label={t('dcv.openLinkedIssue', { key: issue.key })}>{issue.key}</Link>
-          <button type="button" className="min-w-[12rem] flex-1 text-left font-medium hover:underline" onClick={() => openPanel('Issue', issue.id)}>{issue.title}</button>
+          {evidence(issue, 'Issue', issue.id, issue.key, 'issues')}{contextOn && issue.context && <div className="w-full">{context(issue.context)}</div>}<ContextLink className={keyLink} to={`/projects/${project.projectNumber}/issues?panel=Issue:${issue.id}`} aria-label={t('dcv.openLinkedIssue', { key: issue.key })}>{issue.key}</ContextLink>
+          <button type="button" className="min-w-[12rem] flex-1 text-left font-medium hover:underline" onClick={event => openPanel('Issue', issue.id, contextOn ? captureRecordContextOrigin(location, event.currentTarget) : undefined)}>{issue.title}</button>
           <CoordStatus status={issue.status} />
-          <span className="text-muted-foreground">{issue.ownerName ?? issue.ownerId ?? t('dcv.ownerUnavailable')}</span>
+          <span className="text-muted-foreground">{issue.ownerId && issue.ownerName ? <PersonPanelTrigger userId={issue.ownerId} name={issue.ownerName} focusKey={`discipline-issue:${issue.id}:owner`} /> : t('dcv.ownerUnavailable')}</span>
         </li>)}</ul><Pager label={t('dcv.linkedIssues')} page={d.linkedIssuesPage} total={d.linkedIssuesTotal} pageSize={d.linkedIssuesPageSize} onPage={setPage} /></> : none}
       </div>
     </article>
@@ -177,7 +202,7 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
       <div className={head}><h2 id="dcv-pending-reviews" className={title}>{t('dcv.pendingReviews')} · {d.reviewsTotal}</h2></div>
       <div className={body}>
         {d.reviews.length ? <ul className="divide-y">{d.reviews.map(r => <li key={r.id} className={row}>
-          <p><Link className={keyLink} to={registerUrl('reviews', `ReviewPackage:${r.id}`)}>{r.key}</Link> <span className="font-medium">{r.title}</span></p>
+          {evidence(r, 'ReviewPackage', r.id, r.key, 'reviews')}{context(r.context)}<p><ContextLink className={keyLink} to={registerUrl('reviews', `ReviewPackage:${r.id}`)}>{r.key}</ContextLink> <span className="font-medium">{r.title}</span></p>
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground"><CoordStatus status={r.status} /><span className="tabular-nums">{t('dcv.reviewOutstanding', { n: r.outstandingDisciplines })}</span><span className={r.blockingFindings > 0 ? 'font-medium text-bad tabular-nums' : 'tabular-nums'}>{r.blockingFindings > 0 && <span aria-hidden>■ </span>}{t('dcv.reviewBlocking', { n: r.blockingFindings })}</span></div>
         </li>)}</ul> : none}
         <Pager label={t('dcv.pendingReviews')} page={d.reviewsPage} total={d.reviewsTotal} pageSize={d.reviewsPageSize} onPage={setPage} />
@@ -186,23 +211,26 @@ export function DisciplineCoordinationView({ project, disciplineId, meeting, can
     <div className="grid gap-4 md:grid-cols-2">
       <article aria-labelledby="dcv-submissions" className={box}><div className={head}><h2 id="dcv-submissions" className={title}>{t('dcv.upcomingSubmissions')}</h2><span className={badge}>{d.upcomingSubmissionsTotal}</span></div>
         <div className={body}>{d.upcomingSubmissions.length ? <><ul className="divide-y">{d.upcomingSubmissions.map(s => <li key={s.id} className={row}>
-          <p><Link className={keyLink} to={`/projects/${project.projectNumber}/submissions?panel=SubmissionPackage:${s.id}`}>{s.key}</Link> <span className="font-medium">{s.title}</span></p>
+          {evidence(s, 'SubmissionPackage', s.id, s.key, 'submissions')}{context(s.context)}<p><ContextLink className={keyLink} to={`/projects/${project.projectNumber}/submissions?panel=SubmissionPackage:${s.id}`}>{s.key}</ContextLink> <span className="font-medium">{s.title}</span></p>
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground"><CoordStatus status={s.effectiveStatus} /><span className="tabular-nums">{fmtDate(s.targetDate)}</span></div>
           {s.failingChecks.length > 0 && <p className="text-xs text-warn"><span aria-hidden>▲ </span>{t('dcv.failingChecks')}: {s.failingChecks.map((c, i) => <span key={`${s.id}-${c.code}-${c.sourceId ?? 'none'}`}>{i > 0 && '; '}{c.sourcePath ? <Link className="underline underline-offset-4" to={c.sourcePath}>{c.kind}: {c.message}</Link> : `${c.kind}: ${c.message}`}</span>)}</p>}
         </li>)}</ul><Pager label={t('dcv.upcomingSubmissions')} page={d.upcomingSubmissionsPage} total={d.upcomingSubmissionsTotal} pageSize={d.pageSize} onPage={setPage} /></> : none}</div>
       </article>
       <article aria-labelledby="dcv-staffing" className={box}><div className={head}><h2 id="dcv-staffing" className={title}>{t('dcv.staffingConflicts')}</h2><span className={badge}>{d.staffingConflictsTotal}</span></div>
         <div className={body}>{d.staffingConflicts.length ? <><ul className="divide-y">{d.staffingConflicts.map(c => <li key={c.id} className={row}>
-          <p><Link className={keyLink} to={registerUrl(c.targetType === 'Task' ? 'tasks' : 'deliverables', `${c.targetType}:${c.targetId}`)}>{c.key}</Link> <span className="font-medium">{c.description}</span></p>
+          {context(c.context)}<p><ContextLink className={keyLink} to={contextOn ? registerUrl('readiness', `WorkConstraint:${c.id}`) : registerUrl(c.targetType === 'Task' ? 'tasks' : 'deliverables', `${c.targetType}:${c.targetId}`)}>{c.key}</ContextLink> <span className="font-medium">{c.description}</span></p>
           <p className="text-xs text-muted-foreground tabular-nums">{fmtDate(c.neededBy)}</p>
+          {evidence(c, 'WorkConstraint', c.id, c.key, 'staffing')}
         </li>)}</ul><Pager label={t('dcv.staffingConflicts')} page={d.staffingConflictsPage} total={d.staffingConflictsTotal} pageSize={d.pageSize} onPage={setPage} /></> : none}</div>
       </article>
     </div>
     {d.blockerGroups.length > 0 && <article aria-labelledby="dcv-blockers" className={box}>
       <div className={head}><h2 id="dcv-blockers" className={title}>{t('dcv.ws.linkedTaskBlockers')}{wide}</h2><span className={badge}>{d.blockerGroupsTotal}</span></div>
       <div className={body}><ul className="divide-y">{d.blockerGroups.map(group => <li key={group.handoffId} className={row}>
-        <p><Link className={keyLink} to={registerUrl('handoffs', `Handoff:${group.handoffId}`)}>{group.handoffKey}</Link> · <Link className={textLink} to={`/projects/${project.projectNumber}/tasks?ids=${group.taskIds.join(',')}`}>{t('dcv.linkedTasks', { n: group.taskIds.length })}</Link> ({group.taskIds.map((id, i) => <span key={id}>{i > 0 && ', '}<Link className={keyLink} to={`/projects/${project.projectNumber}/tasks?panel=Task:${id}`}>{group.taskKeys[i] ?? id}</Link></span>)})</p>
+        {context(group.context)}<p><ContextLink className={keyLink} to={registerUrl('handoffs', `Handoff:${group.handoffId}`)}>{group.handoffKey}</ContextLink> · <Link className={textLink} to={`/projects/${project.projectNumber}/tasks?ids=${group.taskIds.join(',')}`}>{t('dcv.linkedTasks', { n: group.taskIds.length })}</Link> ({group.taskIds.map((id, i) => <span key={id}>{i > 0 && ', '}<ContextLink className={keyLink} to={`/projects/${project.projectNumber}/tasks?panel=Task:${id}`}>{group.taskKeys[i] ?? id}</ContextLink></span>)})</p>
         {actionLinks(existingActions('Handoff', group.handoffId))}
+        <HandoffReadinessSummary projectId={project.id} projectNumber={project.projectNumber} handoffId={group.handoffId} links={group.readinessLinks} surface="blockers" />
+        {evidence(group, 'Handoff', group.handoffId, group.handoffKey, 'blockers')}
         {capture(group.handoffKey, () => onCapture!(group.handoffKey,
           [{ targetType: 'Handoff', targetId: group.handoffId }, ...group.taskIds.map(id => ({ targetType: 'Task', targetId: id }))],
           existingActions('Handoff', group.handoffId).map(a => a.id)))}

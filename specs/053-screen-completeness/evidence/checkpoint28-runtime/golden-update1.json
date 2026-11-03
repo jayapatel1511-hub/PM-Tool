@@ -1,0 +1,17 @@
+{
+  "exitCode": 1,
+  "expectedTwoUpdateFailures": true,
+  "messages": [
+    "Updated web/src/gen/openapi.json; review the diff, run npm run gen, and rerun without HUB_UPDATE_CONTRACT",
+    "Updated web/src/gen/registry.gen.ts; review the diff and rerun without HUB_UPDATE_REGISTRY"
+  ],
+  "args": [
+    "dotnet",
+    "vstest",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint28-artifacts/bin/Hub.Tests/release/Hub.Tests.dll",
+    "--TestCaseFilter:FullyQualifiedName~Hub.Tests.Api.ContractTests.Openapi_matches_the_committed_golden_document|FullyQualifiedName~Hub.Tests.Api.RegistryTests.Generated_key_families_match_the_registry_and_vocabulary",
+    "--Logger:trx;LogFileName=g56-golden-update1.trx",
+    "--ResultsDirectory:/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint28-runtime/test-results"
+  ],
+  "atUtc": "2026-11-02T15:04:34.402905+00:00"
+}

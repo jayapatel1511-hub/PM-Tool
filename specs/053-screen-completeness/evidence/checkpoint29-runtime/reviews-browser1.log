@@ -1,0 +1,10 @@
+locator.click: Timeout 15000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('dialog').filter({ has: getByRole('heading', { name: 'New review package', exact: true }) }).getByRole('button', { name: 'Save', exact: true })[22m
+
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/review-discipline-patterns.cjs:100:87 {
+  log: [
+    "  - waiting for getByRole('dialog').filter({ has: getByRole('heading', { name: 'New review package', exact: true }) }).getByRole('button', { name: 'Save', exact: true })"
+  ],
+  name: 'TimeoutError'
+}

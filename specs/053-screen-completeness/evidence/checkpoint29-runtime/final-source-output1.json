@@ -1,0 +1,50 @@
+{
+  "atUtc": "2026-11-02T18:49:06.322074+00:00",
+  "csharp": {
+    "expected": 668,
+    "mismatches": []
+  },
+  "web": {
+    "expected": 259,
+    "mismatches": []
+  },
+  "priorOutputs": {
+    "expected": 1143,
+    "mismatches": []
+  },
+  "bundle": {
+    "filesystemFiles": 143,
+    "publicServedFiles": 142,
+    "mismatches": [],
+    "origin": "http://127.0.0.1:8864",
+    "metadataOnlyNotPublic": [
+      ".vite/manifest.json"
+    ]
+  },
+  "listeners": {
+    "5088": {
+      "exitCode": 0,
+      "output": "p4323\ncdotnet\nf319\nn127.0.0.1:5088"
+    },
+    "8861": {
+      "exitCode": 0,
+      "output": "p28946\ncnode\nf14\nn127.0.0.1:8861"
+    },
+    "8862": {
+      "exitCode": 0,
+      "output": "p30651\ncnode\nf14\nn127.0.0.1:8862"
+    },
+    "8863": {
+      "exitCode": 0,
+      "output": "p33293\ncnode\nf14\nn127.0.0.1:8863"
+    },
+    "8864": {
+      "exitCode": 0,
+      "output": "p34614\ncnode\nf14\nn127.0.0.1:8864"
+    },
+    "5099": {
+      "exitCode": 1,
+      "output": ""
+    }
+  }
+}

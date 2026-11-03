@@ -30,12 +30,21 @@ public static class ListExportEndpoints
     internal static async Task<List<(string, string)>> Filters(HubDb db, HttpContext http, Access access)
     {
         var pairs = http.Request.Query.Where(k => k.Key is not ("format" or "page" or "pageSize" or "panel") && !string.IsNullOrWhiteSpace(k.Value)).ToList();
+        var issueRootCause = http.Request.Path.Value?.EndsWith("/issues/export", StringComparison.OrdinalIgnoreCase) == true
+            && (await db.CurrentSettings()).IsFlagOn("register_screens");
+        pairs.RemoveAll(pair => string.Equals(pair.Key, "rootCause", StringComparison.OrdinalIgnoreCase) && !issueRootCause);
         var ids = pairs.SelectMany(p => Http.Ids(p.Value)).ToHashSet();
         var names = await VisibleNames(db, access, ids);
+        if (issueRootCause)
+            foreach (var category in await db.IssueRootCauseCategories.AsNoTracking().Where(category => ids.Contains(category.Id))
+                .Select(category => new { category.Id, category.Name }).ToListAsync())
+                names.TryAdd(category.Id, category.Name);
         return pairs.Select(p =>
         {
-            var label = Text.Get($"param.{p.Key}");
-            var value = string.Join(", ", Http.List(p.Value).Select(v => Guid.TryParse(v, out var g) && names.TryGetValue(g, out var n) ? n : v));
+            var isCause = string.Equals(p.Key, "rootCause", StringComparison.OrdinalIgnoreCase);
+            var label = Text.Get($"param.{(isCause ? "rootCause" : p.Key)}");
+            var value = string.Join(", ", Http.List(p.Value).Select(v => isCause && v == "not-recorded"
+                ? Text.Get("issueRootCause.notRecorded") : Guid.TryParse(v, out var g) && names.TryGetValue(g, out var n) ? n : v));
             return (label.StartsWith("param.") ? p.Key : label, value);
         }).ToList();
     }

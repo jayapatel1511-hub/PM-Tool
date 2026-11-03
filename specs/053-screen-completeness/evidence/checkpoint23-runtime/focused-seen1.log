@@ -1,0 +1,13 @@
+Test run for /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:01:25.19]     Hub.Tests.Api.MyWorkSeenRaceTests.Producers_commit_under_actual_personal_lock_contention_then_competing_commands_replay_once [FAIL]
+  Failed Hub.Tests.Api.MyWorkSeenRaceTests.Producers_commit_under_actual_personal_lock_contention_then_competing_commands_replay_once [1 m 24 s]
+  Error Message:
+   System.OperationCanceledException : The operation was canceled.
+  Stack Trace:
+     at System.Threading.CancellationToken.ThrowOperationCanceledException()
+   at Hub.Tests.Api.MyWorkSeenRaceTests.Producers_commit_under_actual_personal_lock_contention_then_competing_commands_replay_once() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/MyWorkSeenRaceTests.cs:line 92
+--- End of stack trace from previous location ---
+Results File: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint23-runtime/focused-seen1.trx
+
+Failed!  - Failed:     1, Passed:    58, Skipped:     0, Total:    59, Duration: 1 m 39 s - Hub.Tests.dll (net10.0)

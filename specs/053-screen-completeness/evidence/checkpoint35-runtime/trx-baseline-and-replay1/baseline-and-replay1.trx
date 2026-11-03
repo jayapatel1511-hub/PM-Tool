@@ -1,0 +1,195 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="a2a36417-fed4-4201-a961-5c62d52f9e7e" name="@Jays-MacBook-Pro 2026-11-03 02:02:06" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-11-03T02:02:06.5180370-04:00" queuing="2026-11-03T02:02:06.5180370-04:00" start="2026-11-03T02:02:04.8391250-04:00" finish="2026-11-03T02:02:16.2966260-04:00" />
+  <TestSettings name="default" id="af55b0ac-4c05-44db-932e-a2527b259d41">
+    <Deployment runDeploymentRoot="_Jays-MacBook-Pro_2026-11-03_02_02_06" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="48f42c5b-d1c4-458a-849e-605aab99be3d" testId="c916c372-9ce7-4085-d19d-172f86f5c9fa" testName="Hub.Tests.Api.PlanningLeaveReplayAuthorityTests.Effective_read_only_supervisor_cannot_replay_previously_authorized_leave_success(operation: &quot;reconcile&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:07.1145880" startTime="2026-11-03T02:02:05.2936180-04:00" endTime="2026-11-03T02:02:12.4095780-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="48f42c5b-d1c4-458a-849e-605aab99be3d">
+      <Output>
+        <ErrorInfo>
+          <Message>Expected 403 but got 200: {"count":1}</Message>
+          <StackTrace>   at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118
+   at Hub.Tests.Api.PlanningLeaveReplayAuthorityTests.Effective_read_only_supervisor_cannot_replay_previously_authorized_leave_success(String operation) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/PlanningLeaveReplayAuthorityTests.cs:line 126
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="169b161f-0f48-4dd0-bcdb-e2013546db1a" testId="8de1aba9-f323-4d48-7e85-105316c2922b" testName="Hub.Tests.Domain.PermissionExplanationTests.Every_public_allow_bool_and_correction_tuple_has_one_actual_method_binding" computerName="Jays-MacBook-Pro" duration="00:00:00.0040626" startTime="2026-11-03T02:02:05.3167870-04:00" endTime="2026-11-03T02:02:05.3207360-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="169b161f-0f48-4dd0-bcdb-e2013546db1a" />
+    <UnitTestResult executionId="dcd3f000-4865-440b-b838-1bdc53d6dbcc" testId="d9229ec7-52fb-d313-0358-d14e145a6e53" testName="Hub.Tests.Domain.PermissionExplanationTests.Current_overrides_privacy_boolean_reasons_and_resolved_template_policy_stay_canonical" computerName="Jays-MacBook-Pro" duration="00:00:00.0026334" startTime="2026-11-03T02:02:05.3166730-04:00" endTime="2026-11-03T02:02:05.3167060-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="dcd3f000-4865-440b-b838-1bdc53d6dbcc" />
+    <UnitTestResult executionId="24e2fc2a-c8d8-4e45-81d0-bdf44d1245ce" testId="3cfdc508-7762-63f1-1c82-1753f8064386" testName="Hub.Tests.Domain.PermissionExplanationTests.Contribution_examples_require_own_actual_membership_even_for_admin_and_pm" computerName="Jays-MacBook-Pro" duration="00:00:00.0004715" startTime="2026-11-03T02:02:05.3142540-04:00" endTime="2026-11-03T02:02:05.3144170-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="24e2fc2a-c8d8-4e45-81d0-bdf44d1245ce">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.True() Failure
+Expected: True
+Actual:   False</Message>
+          <StackTrace>   at Hub.Tests.Domain.PermissionExplanationTests.Contribution_examples_require_own_actual_membership_even_for_admin_and_pm() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Domain/PermissionExplanationTests.cs:line 62
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="a3ccb77b-592a-47d6-9a7e-4ab2b92c99a1" testId="64912a32-7dfc-d29e-5612-477f6e8ddbc8" testName="Hub.Tests.Domain.PermissionExplanationTests.Public_examples_are_bounded_labelled_and_never_publish_synthetic_identifiers" computerName="Jays-MacBook-Pro" duration="00:00:00.0059791" startTime="2026-11-03T02:02:05.3208270-04:00" endTime="2026-11-03T02:02:05.3267540-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a3ccb77b-592a-47d6-9a7e-4ab2b92c99a1" />
+    <UnitTestResult executionId="ac44349f-ce4e-4b48-acbb-19863b83473f" testId="4f67d386-4fbe-b6eb-5b42-d752125aaae9" testName="Hub.Tests.Domain.PermissionExplanationTests.Discipline_lead_examples_call_current_own_other_scope_and_milestone_rules" computerName="Jays-MacBook-Pro" duration="00:00:00.0150407" startTime="2026-11-03T02:02:05.2930690-04:00" endTime="2026-11-03T02:02:05.3106080-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ac44349f-ce4e-4b48-acbb-19863b83473f" />
+    <UnitTestResult executionId="96cf6f3d-a801-46df-ae71-9b9ec70a8845" testId="5237ef7c-28e8-f625-f532-bb5633176a02" testName="Hub.Tests.Api.PlanningLeaveReplayAuthorityTests.Effective_read_only_supervisor_cannot_replay_previously_authorized_leave_success(operation: &quot;manual&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:03.8499976" startTime="2026-11-03T02:02:12.4101610-04:00" endTime="2026-11-03T02:02:16.2599990-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="96cf6f3d-a801-46df-ae71-9b9ec70a8845">
+      <Output>
+        <ErrorInfo>
+          <Message>Expected 403 but got 200: {"id":"01a1a000-4a91-7254-910d-509451f4271e","rowVersion":1}</Message>
+          <StackTrace>   at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118
+   at Hub.Tests.Api.PlanningLeaveReplayAuthorityTests.Effective_read_only_supervisor_cannot_replay_previously_authorized_leave_success(String operation) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/PlanningLeaveReplayAuthorityTests.cs:line 126
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="cb4cc4c5-81e4-4d4b-9285-ec5e25ddbb1b" testId="4751ba24-03aa-3aa5-077b-ce8c02fee37a" testName="Hub.Tests.Api.AdminRoleExplanationTests.Current_role_examples_are_admin_only_bounded_translated_readonly_and_dark_off" computerName="Jays-MacBook-Pro" duration="00:00:06.8729889" startTime="2026-11-03T02:02:05.2936020-04:00" endTime="2026-11-03T02:02:12.1693970-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="cb4cc4c5-81e4-4d4b-9285-ec5e25ddbb1b">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.DoesNotContain() Failure: Sub-string found
+                                ↓ (pos 186409)
+String: ···"uirements":[{"key":"adminRole.requirement"···
+Found:  "adminRole."</Message>
+          <StackTrace>   at Hub.Tests.Api.AdminRoleExplanationTests.Current_role_examples_are_admin_only_bounded_translated_readonly_and_dark_off() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/AdminRoleExplanationTests.cs:line 26
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="Hub.Tests.Domain.PermissionExplanationTests.Contribution_examples_require_own_actual_membership_even_for_admin_and_pm" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint35-artifacts/bin/hub.tests/release/hub.tests.dll" id="3cfdc508-7762-63f1-1c82-1753f8064386">
+      <Execution id="24e2fc2a-c8d8-4e45-81d0-bdf44d1245ce" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint35-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Domain.PermissionExplanationTests" name="Contribution_examples_require_own_actual_membership_even_for_admin_and_pm" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.PlanningLeaveReplayAuthorityTests.Effective_read_only_supervisor_cannot_replay_previously_authorized_leave_success(operation: &quot;manual&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint35-artifacts/bin/hub.tests/release/hub.tests.dll" id="5237ef7c-28e8-f625-f532-bb5633176a02">
+      <Execution id="96cf6f3d-a801-46df-ae71-9b9ec70a8845" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint35-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.PlanningLeaveReplayAuthorityTests" name="Effective_read_only_supervisor_cannot_replay_previously_authorized_leave_success" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Domain.PermissionExplanationTests.Current_overrides_privacy_boolean_reasons_and_resolved_template_policy_stay_canonical" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint35-artifacts/bin/hub.tests/release/hub.tests.dll" id="d9229ec7-52fb-d313-0358-d14e145a6e53">
+      <Execution id="dcd3f000-4865-440b-b838-1bdc53d6dbcc" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint35-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Domain.PermissionExplanationTests" name="Current_overrides_privacy_boolean_reasons_and_resolved_template_policy_stay_canonical" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.AdminRoleExplanationTests.Current_role_examples_are_admin_only_bounded_translated_readonly_and_dark_off" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint35-artifacts/bin/hub.tests/release/hub.tests.dll" id="4751ba24-03aa-3aa5-077b-ce8c02fee37a">
+      <Execution id="cb4cc4c5-81e4-4d4b-9285-ec5e25ddbb1b" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint35-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.AdminRoleExplanationTests" name="Current_role_examples_are_admin_only_bounded_translated_readonly_and_dark_off" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.PlanningLeaveReplayAuthorityTests.Effective_read_only_supervisor_cannot_replay_previously_authorized_leave_success(operation: &quot;reconcile&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint35-artifacts/bin/hub.tests/release/hub.tests.dll" id="c916c372-9ce7-4085-d19d-172f86f5c9fa">
+      <Execution id="48f42c5b-d1c4-458a-849e-605aab99be3d" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint35-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.PlanningLeaveReplayAuthorityTests" name="Effective_read_only_supervisor_cannot_replay_previously_authorized_leave_success" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Domain.PermissionExplanationTests.Public_examples_are_bounded_labelled_and_never_publish_synthetic_identifiers" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint35-artifacts/bin/hub.tests/release/hub.tests.dll" id="64912a32-7dfc-d29e-5612-477f6e8ddbc8">
+      <Execution id="a3ccb77b-592a-47d6-9a7e-4ab2b92c99a1" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint35-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Domain.PermissionExplanationTests" name="Public_examples_are_bounded_labelled_and_never_publish_synthetic_identifiers" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Domain.PermissionExplanationTests.Every_public_allow_bool_and_correction_tuple_has_one_actual_method_binding" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint35-artifacts/bin/hub.tests/release/hub.tests.dll" id="8de1aba9-f323-4d48-7e85-105316c2922b">
+      <Execution id="169b161f-0f48-4dd0-bcdb-e2013546db1a" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint35-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Domain.PermissionExplanationTests" name="Every_public_allow_bool_and_correction_tuple_has_one_actual_method_binding" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Domain.PermissionExplanationTests.Discipline_lead_examples_call_current_own_other_scope_and_milestone_rules" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint35-artifacts/bin/hub.tests/release/hub.tests.dll" id="4f67d386-4fbe-b6eb-5b42-d752125aaae9">
+      <Execution id="ac44349f-ce4e-4b48-acbb-19863b83473f" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint35-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Domain.PermissionExplanationTests" name="Discipline_lead_examples_call_current_own_other_scope_and_milestone_rules" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="c916c372-9ce7-4085-d19d-172f86f5c9fa" executionId="48f42c5b-d1c4-458a-849e-605aab99be3d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8de1aba9-f323-4d48-7e85-105316c2922b" executionId="169b161f-0f48-4dd0-bcdb-e2013546db1a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d9229ec7-52fb-d313-0358-d14e145a6e53" executionId="dcd3f000-4865-440b-b838-1bdc53d6dbcc" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3cfdc508-7762-63f1-1c82-1753f8064386" executionId="24e2fc2a-c8d8-4e45-81d0-bdf44d1245ce" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="64912a32-7dfc-d29e-5612-477f6e8ddbc8" executionId="a3ccb77b-592a-47d6-9a7e-4ab2b92c99a1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4f67d386-4fbe-b6eb-5b42-d752125aaae9" executionId="ac44349f-ce4e-4b48-acbb-19863b83473f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5237ef7c-28e8-f625-f532-bb5633176a02" executionId="96cf6f3d-a801-46df-ae71-9b9ec70a8845" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4751ba24-03aa-3aa5-077b-ce8c02fee37a" executionId="cb4cc4c5-81e4-4d4b-9285-ec5e25ddbb1b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="8" executed="8" passed="4" failed="4" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.11)
+[xUnit.net 00:00:00.11]   Discovering: Hub.Tests
+[xUnit.net 00:00:00.25]   Discovered:  Hub.Tests
+[xUnit.net 00:00:00.27]   Starting:    Hub.Tests
+[xUnit.net 00:00:00.30]       Assert.True() Failure
+[xUnit.net 00:00:00.30]       Expected: True
+[xUnit.net 00:00:00.30]       Actual:   False
+[xUnit.net 00:00:00.30]       Stack Trace:
+[xUnit.net 00:00:00.30]         /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Domain/PermissionExplanationTests.cs(62,0): at Hub.Tests.Domain.PermissionExplanationTests.Contribution_examples_require_own_actual_membership_even_for_admin_and_pm()
+[xUnit.net 00:00:00.30]            at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+[xUnit.net 00:00:00.30]            at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+warn: Microsoft.EntityFrameworkCore.Query[10103]
+      The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+[xUnit.net 00:00:07.15]       Assert.DoesNotContain() Failure: Sub-string found
+[xUnit.net 00:00:07.15]                                       ↓ (pos 186409)
+[xUnit.net 00:00:07.15]       String: ···"uirements":[{"key":"adminRole.requirement"···
+[xUnit.net 00:00:07.15]       Found:  "adminRole."
+[xUnit.net 00:00:07.15]       Stack Trace:
+[xUnit.net 00:00:07.15]         /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/AdminRoleExplanationTests.cs(26,0): at Hub.Tests.Api.AdminRoleExplanationTests.Current_role_examples_are_admin_only_bounded_translated_readonly_and_dark_off()
+[xUnit.net 00:00:07.15]         --- End of stack trace from previous location ---
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+[xUnit.net 00:00:07.39]       Expected 403 but got 200: {"count":1}
+[xUnit.net 00:00:07.39]       Stack Trace:
+[xUnit.net 00:00:07.39]         /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs(118,0): at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect)
+[xUnit.net 00:00:07.39]         /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/PlanningLeaveReplayAuthorityTests.cs(126,0): at Hub.Tests.Api.PlanningLeaveReplayAuthorityTests.Effective_read_only_supervisor_cannot_replay_previously_authorized_leave_success(String operation)
+[xUnit.net 00:00:07.39]         --- End of stack trace from previous location ---
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+[xUnit.net 00:00:11.24]       Expected 403 but got 200: {"id":"01a1a000-4a91-7254-910d-509451f4271e","rowVersion":1}
+[xUnit.net 00:00:11.24]       Stack Trace:
+[xUnit.net 00:00:11.24]         /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs(118,0): at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect)
+[xUnit.net 00:00:11.24]         /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/PlanningLeaveReplayAuthorityTests.cs(126,0): at Hub.Tests.Api.PlanningLeaveReplayAuthorityTests.Effective_read_only_supervisor_cannot_replay_previously_authorized_leave_success(String operation)
+[xUnit.net 00:00:11.24]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:11.24]   Finished:    Hub.Tests
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="Jays-MacBook-Pro" outcome="Error" timestamp="2026-11-03T02:02:05.3156410-04:00">
+        <Text>[xUnit.net 00:00:00.30]     Hub.Tests.Domain.PermissionExplanationTests.Contribution_examples_require_own_actual_membership_even_for_admin_and_pm [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="Jays-MacBook-Pro" outcome="Error" timestamp="2026-11-03T02:02:12.1698370-04:00">
+        <Text>[xUnit.net 00:00:07.15]     Hub.Tests.Api.AdminRoleExplanationTests.Current_role_examples_are_admin_only_bounded_translated_readonly_and_dark_off [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="Jays-MacBook-Pro" outcome="Error" timestamp="2026-11-03T02:02:12.4098110-04:00">
+        <Text>[xUnit.net 00:00:07.39]     Hub.Tests.Api.PlanningLeaveReplayAuthorityTests.Effective_read_only_supervisor_cannot_replay_previously_authorized_leave_success(operation: "reconcile") [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="Jays-MacBook-Pro" outcome="Error" timestamp="2026-11-03T02:02:16.2602780-04:00">
+        <Text>[xUnit.net 00:00:11.24]     Hub.Tests.Api.PlanningLeaveReplayAuthorityTests.Effective_read_only_supervisor_cannot_replay_previously_authorized_leave_success(operation: "manual") [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

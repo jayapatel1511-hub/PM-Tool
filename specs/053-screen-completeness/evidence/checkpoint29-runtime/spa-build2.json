@@ -1,0 +1,15 @@
+{
+  "exitCode": 0,
+  "args": [
+    "node",
+    "node_modules/vite/bin/vite.js",
+    "build",
+    "--outDir",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint29-artifacts/bin/spa-wwwroot-build2"
+  ],
+  "atUtc": "2026-11-02T18:12:18.359435+00:00",
+  "APIOrigin": "http://127.0.0.1:5096",
+  "noRealAPI": true,
+  "buildIdentity": "dev",
+  "reason": "Match established local synthetic-browser profile; avoid false server-build mismatch notices from mock HTTP headers; source unchanged; build1 preserved"
+}

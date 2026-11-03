@@ -1,0 +1,76 @@
+{
+  "checkpoint": 18,
+  "goal": "active/incomplete; no commit/push/deploy/activation",
+  "generation": 19,
+  "mode": "checkpoint18 closed; all sources held pending explicit generation20 dispatch",
+  "scope": "A planner semantic presentation; B S10-A actual activity/Comments; C S23-B first six row-report full input cohorts; D S32 own-Time week",
+  "root_sources": [
+    "PersonCapacity.cs Scheduled/NonWorking truth",
+    "Planning.cs and Availability.cs optional visual daily projection",
+    "ScreenLists.cs NotKept display keys",
+    "panel-host.tsx transient Comments cleanup",
+    "keys.ts actual Work/Time/report cache refresh",
+    "4 VisualNonWorkingCalendarTests and new actualQueryClient cache case",
+    "A4/B4 UI locale keys and D2 server messages merged",
+    "D28 Time UI labels merged; further delta pending",
+    "D current UI locale delta merged (savedAwaiting)",
+    "CommentsPanel required-project refreshComments + actual QueryClient source project count case"
+  ],
+  "backend_ready": [
+    "A no C# owned/held",
+    "B exact off parity repaired; all source ready/held",
+    "D explicit BACKEND READY held",
+    "C9 cases final scalar/fixture/raw-parser repairs held per status"
+  ],
+  "backend_pending": [],
+  "verification": {
+    "cache": "PASS11 /private/tmp/tuesday-checkpoint18-cache-keys.log",
+    "initial_api": "33:29PASS;2 expected golden update failures;2 fixture failures (root expected404butcanonical403; B legacy log fixture tried deleting append-only activity)",
+    "current_api": "All backend processes completed; focused41+adjacent98PASS (139distinct), Node11PASS",
+    "golden_delta": "exactly2new routes,6new schemas,optional AvailabilityDay/DayRow.nonWorking and ReportView.taskInputs;no removals;registry4transient keys only",
+    "fixture_repairs": "Expected existing403; synthetic imported missing-log Task cloned without deleting history; real system logs append later with equal-time ID tie; existing catalogue parity explicitly asserts/removes new TaskInputs before exact old-body equality. No product guards relaxed.",
+    "focused": "PASS41 fresh, /private/tmp/tuesday-checkpoint18-api-final.log; no update variables",
+    "ui_gen": "PASS api.d.ts generated from reviewed golden, no product UI build yet",
+    "adjacent": "PASS98 /private/tmp/tuesday-checkpoint18-api-adjacent.log",
+    "api_unique": 139,
+    "api_overlap": 0,
+    "planner_browser": "PASS source semantic harness + actual PlannerPage entry-list on/off 8h supplement",
+    "ui_build": "Build5PASS final app, types included; final layout lintPASS",
+    "report_browser": "PASS3 including main-tableTask reportorigin+focus and separate metricdialog nonfirstrow origin+focus; fourflagpairs;6nonemptyrows379.5px onvisual,653.5visualoffpreserved.",
+    "work_browser": "PASS2 (101/page100, all task streams, keyboardComments/return/unknowns/phone/4flags/no seen writes)",
+    "time_browser": "PASS final rerun including desktop grid fit/firsttask<=405 plus full writes/races/retry/scopes/phone/off",
+    "real_journeys": "PASS followup Work/ownTime/report, exact limits in checkpoint18-findings.md; raw initialPARTIAL retained",
+    "main_report_origin": "Repaired/reviewed; mock mainrow+metric focus/URL PASS and real mainrow/metric URL return PASS",
+    "browser_suites": "8PASS: planner-semantic dev harness;work-activity-comments;capacity-time-week;report-task-inputs;workspace;planner full existing workflows;capacity-planner-headers (actualliston/off supplement);report-catalogue-views.",
+    "report_geometry_artifact": "052/evidence/checkpoint18-report-geometry.json",
+    "final_source_review": "All source reviews closed/no remainingP1P2; no active build/test/QA actor",
+    "final_time_geometry": "Real1440 region1134/1134, firsttask399.5;375document375, region341/1065;32capacity/8away/2actual/4rows;0errors/0mutations",
+    "census": "Not rerun this checkpoint; latest broad checkpoint17, exclusions/limits explicitly retained"
+  },
+  "services": {
+    "stopped": [
+      "api5088/session97732/pid24340",
+      "dev8854/session63338/pid21519"
+    ],
+    "dropped": "hub_qa_checkpoint18",
+    "no_test_databases": true,
+    "preserved": "preview8853/testPG55432/reviewDB55433/prototypes"
+  },
+  "next": "Open named generation20 loans only after coordinator brief; goal active/incomplete",
+  "independent_review": "All material findings closed, including finalTime layout; root inspected settled finalTime1440/375 and Reports1440/375 captures",
+  "frontend_review_findings": [],
+  "csharp_manifest": "/private/tmp/tuesday-checkpoint18-csharp-freeze.json",
+  "csharp_ack": [
+    "A18 status/message",
+    "B18 message",
+    "C18 status",
+    "D18 message"
+  ],
+  "frontend": "Build5PASS; finalTime browserPASS; final layout lintPASS; app/fixture types and SSR PASS as scoped in findings; warnings remain",
+  "root_locales": "A6+B4+C17+D29 UI keys; D2 server messages merged; exact counts pending final delta",
+  "expected_focused": 41,
+  "build_hashes": {
+    "api": "d6ab3f82cdcd8022d66a97310453c19a664fbfab02d5aba186ba514675846e73",
+    "ui_manifest": "dc6fd42a4282a66dfc10221cc62de7f6320ea0cd4ce992512b383d434809595b"
+  }
+}

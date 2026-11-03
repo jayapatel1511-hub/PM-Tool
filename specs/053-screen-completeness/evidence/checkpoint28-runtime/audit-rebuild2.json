@@ -1,0 +1,18 @@
+{
+  "exitCode": 0,
+  "args": [
+    "dotnet",
+    "build",
+    "tests/Hub.Tests/Hub.Tests.csproj",
+    "-c",
+    "Release",
+    "--no-restore",
+    "--artifacts-path",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint28-artifacts",
+    "--disable-build-servers",
+    "-m:1",
+    "-p:UseSharedCompilation=false",
+    "-p:NuGetAudit=false"
+  ],
+  "atUtc": "2026-11-02T15:37:02.115931+00:00"
+}

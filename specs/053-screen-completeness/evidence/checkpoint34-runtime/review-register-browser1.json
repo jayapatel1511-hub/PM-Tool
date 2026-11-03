@@ -1,0 +1,32 @@
+{
+  "exitCode": 1,
+  "args": [
+    "node",
+    "tests/review-register.cjs"
+  ],
+  "base": "http://127.0.0.1:8880",
+  "visualSystem": true,
+  "atUtc": "2026-11-03T05:30:36.225755+00:00",
+  "scope": "Actual isolated SPA; finite synthetic intercepted HTTP; no real business writes or mail",
+  "driverSHA256": "382109425774169dd2a3854bc4f61d9626311e5c246f266fc22e6305000504c7",
+  "tail": [
+    "+   'projects/00000000-0000-0000-0000-000000000010/reviews/discipline-summary',",
+    "+   'projects/00000000-0000-0000-0000-000000000010/reviews/discipline-summary',",
+    "+   'projects/00000000-0000-0000-0000-000000000010/reviews/discipline-summary',",
+    "+   'projects/00000000-0000-0000-0000-000000000010/reviews/discipline-summary',",
+    "+   'projects/00000000-0000-0000-0000-000000000010/reviews/discipline-summary',",
+    "+   'projects/00000000-0000-0000-0000-000000000010/reviews/discipline-summary',",
+    "+   'projects/00000000-0000-0000-0000-000000000010/reviews/discipline-summary'",
+    "+ ]",
+    "- []",
+    "",
+    "    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/review-register.cjs:253:42 {",
+    "  generatedMessage: true,",
+    "  code: 'ERR_ASSERTION',",
+    "  actual: [Array],",
+    "  expected: [],",
+    "  operator: 'deepStrictEqual',",
+    "  diff: 'simple'",
+    "}"
+  ]
+}

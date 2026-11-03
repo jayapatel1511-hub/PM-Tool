@@ -1,0 +1,10 @@
+{
+  "exitCode": 0,
+  "args": [
+    "node",
+    "node_modules/oxlint/bin/oxlint",
+    "src/pages/projects/TaskPanel.tsx"
+  ],
+  "atUtc": "2026-11-02T20:13:19.956280+00:00",
+  "warningCount": 14
+}

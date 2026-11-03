@@ -1,0 +1,10 @@
+{
+  "atUtc": "2026-11-03T06:57:23.258743+00:00",
+  "path": ".review/checkpoint35-review/index.html",
+  "url": "http://127.0.0.1:8883/#addition-12",
+  "sha256": "ce1c0d73bcec58516508356d7422479f858a07d603e10481087509615025b492",
+  "matches": true,
+  "selectedBackendCases": 31,
+  "adminBrowserGroups": 9,
+  "checkerDefectTests": 19
+}

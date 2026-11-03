@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import { ConfirmDialog, ErrorBanner, Field, Notice, Page, Section, Spinner, selectCls } from '@/components/hub/common'
 import { PeoplePicker } from '@/components/hub/people'
+import { PersonPanelTrigger } from '@/components/hub/person-panel-trigger'
+import type { Person } from '@/components/hub/people'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
@@ -18,6 +20,8 @@ import { cn } from '@/lib/utils'
 import { useCurrentProject } from './ProjectLayout'
 import { useFlag } from '@/lib/auth'
 import { SETTINGS_SECTIONS } from '@/app/extension-slots'
+import { IDENTITY_COLOURS } from '@/components/hub/identity-colour'
+import { DeliverableNumberingSettings } from './deliverable-numbering'
 
 
 /** Project Settings tab (§13.16): information, links, coordination day, visibility, status, danger zone. */
@@ -25,6 +29,7 @@ export function ProjectSettingsTab() {
   const p = useCurrentProject()
   const structureEnabled = useFlag('org_structure')
   const revisionEnabled = useFlag('revision_check')
+  const peopleOn = useFlag('people_screens')
   const ref = useReference()
   const structure = useQuery({ queryKey: ['organisation'], queryFn: () => get<{ units: { id: string; name: string; parentId?: string | null; closedOn?: string | null }[] }>('organisation'), enabled: structureEnabled })
   const leadUnit = useQuery({ queryKey: ['project', p.id, 'lead-unit'], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/lead-unit', { params: { id: p.id } }), enabled: structureEnabled })
@@ -32,7 +37,13 @@ export function ProjectSettingsTab() {
   const refresh = useProjectRefresh()
   const navigate = useNavigate()
   const canEdit = p.permissions.edit.ok
+  const visualSystem = useFlag('visual_system')
+  const identityColour = (p as ProjectDetail & { identityColour?: string | null }).identityColour
   const [f, setF] = useState<Record<string, any>>({})
+  const [pmCandidate, setPmCandidate] = useState<Person | null>(null)
+  const selectedPmId = f.projectManagerId ?? p.projectManagerId
+  const selectedPm: Person | null = pmCandidate?.id === selectedPmId ? pmCandidate
+    : selectedPmId === p.projectManagerId && p.pmName?.trim() ? { id: p.projectManagerId, displayName: p.pmName } : null
   const [reason, setReason] = useState('')
   const [err, setErr] = useState<ApiError | null>(null)
   const [saving, setSaving] = useState(false)
@@ -73,8 +84,10 @@ export function ProjectSettingsTab() {
             </Field>
             <Field label={t('projects.clientRef')} htmlFor="s-cref" optional><Input id="s-cref" value={v('clientReference')} onChange={set('clientReference')} disabled={!canEdit} /></Field>
             <Field label={t('projects.col.pm')} htmlFor="s-pm" hint={t('settings.pmHint')}>
-              <PeoplePicker id="s-pm" value={f.projectManagerId ?? p.projectManagerId} valueName={f.projectManagerId ? undefined : p.pmName} allowClear={false} disabled={!canEdit}
-                onChange={(id) => id && setF({ ...f, projectManagerId: id })} />
+              <div className="flex min-w-0 items-center gap-2"><div className="min-w-0 flex-1">
+                <PeoplePicker id="s-pm" value={selectedPmId} valueName={selectedPm?.displayName} allowClear={false} disabled={!canEdit}
+                  onChange={(id, candidate) => { if (id) { setF({ ...f, projectManagerId: id }); setPmCandidate(candidate?.id === id ? candidate : null) } }} />
+              </div>{peopleOn && selectedPm?.id && selectedPm.displayName.trim() && <PersonPanelTrigger userId={selectedPm.id} name={selectedPm.displayName} active={selectedPm.isActive} focusKey={`project-settings:${p.id}:pm:selected:${selectedPm.id}:details`}>{t('common.details')}</PersonPanelTrigger>}</div>
             </Field>
             <Field label={t('projects.col.office')} htmlFor="s-office">
               <select id="s-office" className={selectCls} value={v('officeId')} onChange={set('officeId')} disabled={!canEdit}>
@@ -100,6 +113,11 @@ export function ProjectSettingsTab() {
             </Field>
             <Field label={t('field.StartDate')} htmlFor="s-start" optional><Input id="s-start" type="date" value={v('startDate')} onChange={set('startDate')} disabled={!canEdit} /></Field>
             <Field label={t('field.TargetCompletionDate')} htmlFor="s-target" optional><Input id="s-target" type="date" value={v('targetCompletionDate')} onChange={set('targetCompletionDate')} disabled={!canEdit} /></Field>
+            {visualSystem && <Field label={t('admin.colour')} htmlFor="s-identity-colour">
+              <select id="s-identity-colour" className={selectCls} value={f.identityColour ?? identityColour ?? IDENTITY_COLOURS[0].value} onChange={(e) => setF({ ...f, identityColour: e.target.value })} disabled={!canEdit}>
+                {IDENTITY_COLOURS.map((colour) => <option key={colour.value} value={colour.value}>{colour.label}</option>)}
+              </select>
+            </Field>}
             <Field label={t('common.priority')} htmlFor="s-prio">
               <select id="s-prio" className={selectCls} value={v('priority')} onChange={set('priority')} disabled={!canEdit}>{['Low', 'Medium', 'High', 'Critical'].map((x) => <option key={x} value={x}>{runtimeText(`value.${x}`)}</option>)}</select>
             </Field>
@@ -138,6 +156,7 @@ export function ProjectSettingsTab() {
         <div className="min-w-0 space-y-6">
           <LinksSection p={p} onChange={() => refresh(p.id)} />
           {revisionEnabled && <RevisionCheckSection projectId={p.id} rowVersion={p.rowVersion} initial={revision.data} canEdit={canEdit} />}
+          <DeliverableNumberingSettings projectId={p.id} />
           {SETTINGS_SECTIONS.map((s) => <div key={s.id}>{s.render(p)}</div>)}
           <Section title={t('settings.status')}>
             <div className="space-y-3 px-5 py-4 text-sm">

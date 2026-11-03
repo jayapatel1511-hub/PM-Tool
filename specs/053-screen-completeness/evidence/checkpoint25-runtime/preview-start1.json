@@ -1,0 +1,11 @@
+{
+  "atUtc": "2026-11-02T10:00:34.086218+00:00",
+  "port8854": "verifiedunusedbeforestart",
+  "output": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/spa-wwwroot",
+  "apiProxy": "http://127.0.0.1:5089",
+  "boundary": "New static mock-UI verification preview only; no live API5089 has been started. ExistingQA24API5088/preview8853/databasepreserved. Do not share as a real-data review instance until API join exists.",
+  "pid": 32906,
+  "session": 71943,
+  "servedFiles": 129,
+  "status": "RUNNING_STATIC_MOCK_TEST_PREVIEW"
+}

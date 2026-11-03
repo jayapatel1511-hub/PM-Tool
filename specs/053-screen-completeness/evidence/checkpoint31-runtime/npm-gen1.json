@@ -1,0 +1,17 @@
+{
+  "exitCode": 0,
+  "args": [
+    "npm",
+    "run",
+    "gen"
+  ],
+  "atUtc": "2026-11-02T21:48:59.600084+00:00",
+  "tail": [
+    "",
+    "> web@0.0.0 gen",
+    "> openapi-typescript src/gen/openapi.json -o src/gen/api.d.ts",
+    "",
+    "\u2728 openapi-typescript 7.13.0",
+    "\ud83d\ude80 src/gen/openapi.json \u2192 src/gen/api.d.ts [314.4ms]"
+  ]
+}

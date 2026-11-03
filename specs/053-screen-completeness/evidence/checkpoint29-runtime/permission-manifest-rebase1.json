@@ -1,0 +1,11 @@
+{
+  "atUtc": "2026-11-02T17:54:33.743682+00:00",
+  "reviewedChangedGuards": [
+    "src/Hub.Api/Features/Admin.cs",
+    "src/Hub.Api/Features/Planning.cs",
+    "src/Hub.Api/Features/Calendar.cs",
+    "src/Hub.Api/Features/Views.cs"
+  ],
+  "evidence": "source-review1.md independent scoped source reviews; canonical Permissions signatures/bodies unchanged",
+  "coverage": "Structural hashes only; FR83 completeness remains refused with current policy/compound/newfeature gaps"
+}

@@ -1,0 +1,15 @@
+VSTest version 18.7.0 (arm64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:01:11.74]     Hub.Tests.Api.FileScreenTests.Missing_is_an_independent_live_direct_link_anti_join_including_on_hold_and_ignoring_link_filters [FAIL]
+  Failed Hub.Tests.Api.FileScreenTests.Missing_is_an_independent_live_direct_link_anti_join_including_on_hold_and_ignoring_link_filters [4 s]
+  Error Message:
+   System.Net.Http.HttpRequestException : Response status code does not indicate success: 409 (Conflict).
+  Stack Trace:
+     at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()
+   at Hub.Tests.Api.FileScreenTests.Missing_is_an_independent_live_direct_link_anti_join_including_on_hold_and_ignoring_link_filters() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/FileScreenTests.cs:line 137
+--- End of stack trace from previous location ---
+Results File: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint27-runtime/file-reference1.trx
+
+Failed!  - Failed:     1, Passed:    66, Skipped:     0, Total:    67, Duration: 1 m 39 s - Hub.Tests.dll (net10.0)

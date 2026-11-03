@@ -1,0 +1,45 @@
+/* 052 dark presentation: availability, planning origin and confidence are separate facts. */
+:root[data-visual="v2"] .planner-semantic-quantity {
+  color: var(--metric-teal);
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 24px;
+}
+:root[data-visual="v2"] .planner-semantic-quantity--negative { color: var(--metric-red); }
+:root[data-visual="v2"] .planner-semantic-entry {
+  position: relative;
+  border-color: var(--input);
+  border-left-color: var(--line-3);
+  background-image: none;
+}
+:root[data-visual="v2"] .planner-semantic-draft::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border: 1px dashed var(--input);
+  border-radius: 3px;
+  pointer-events: none;
+}
+:root[data-visual="v2"] .planner-semantic-possible {
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+:root[data-visual="v2"] .planner-semantic-kept { border-style: dashed; background-color: var(--raised); }
+:root[data-visual="v2"] .planner-semantic-band { margin: 4px 0; min-width: 112px; }
+:root[data-visual="v2"] .planner-semantic-band-values { color: var(--ink-2); font-size: 11px; line-height: 16px; font-variant-numeric: tabular-nums; }
+:root[data-visual="v2"] .planner-semantic-confirmed { background: var(--metric-teal); }
+:root[data-visual="v2"] .planner-semantic-expected { background: var(--metric-teal-tint); border: 1px solid var(--input); }
+:root[data-visual="v2"] .planner-semantic-possible-band { background: var(--card); border: 1px dotted var(--ink-2); }
+:root[data-visual="v2"] .planner-semantic-away { display: inline-flex; align-items: center; gap: 6px; }
+:root[data-visual="v2"] .planner-semantic-away::before {
+  content: "";
+  display: inline-block;
+  flex: 0 0 12px;
+  width: 12px;
+  height: 8px;
+  border: 1px solid var(--line-3);
+  background-image: var(--time-away-hatch);
+}
+:root[data-visual="v2"] .planner-semantic-nonworking { background-image: var(--nonworking-hatch); }
+:root[data-visual="v2"] .planner-semantic-provisional { color: var(--pill-warn); }
+:root[data-visual="v2"] .planner-semantic-legend { color: var(--ink-2); font-size: 12px; line-height: 18px; }

@@ -44,6 +44,12 @@ public static class Permissions
     // Shared packet 026/027 gates. Management does not confer a named technical signature.
     public static Allow CoordinationWrite(Actor a, ProjectContext p) => !a.IsActive || !CanView(a, p)
         ? Allow.No("perm.not_member") : Writable(a, p);
+    public static Allow RecordExternalReview(Actor a, ProjectContext p)
+    {
+        var gate = CoordinationWrite(a, p); if (!gate) return gate;
+        return IsPM(a, p) || IsAnyDL(p) || p.Has(ProjectRole.TeamMember) || p.Has(ProjectRole.Reviewer)
+            ? Allow.Yes : Allow.No("perm.not_member");
+    }
     public static Allow CoordinateReview(Actor a, ProjectContext p, Guid discipline, Guid? coordinator = null)
     {
         var gate = CoordinationWrite(a, p); if (!gate) return gate;
@@ -158,7 +164,7 @@ public static class Permissions
     public static Allow ViewStaff(Actor a) => a.Admin || a.Executive || a.Supervisor ? Allow.Yes : Allow.No("perm.staff");
     public static bool ViewAllStaff(Actor a) => a.Admin || a.Executive;
     public static Allow Administer(Actor a) => a.Admin ? Allow.Yes : Allow.No("perm.admin");
-    public static Allow ManageTemplates(Actor a, bool templateEditor) => a.Admin || (templateEditor && !a.ReadOnly) ? Allow.Yes : Allow.No("perm.templates");
+    public static Allow ManageTemplates(Actor a, bool templateEditor) => a.Admin || (!a.ReadOnly && (a.SystemPM || templateEditor)) ? Allow.Yes : Allow.No("perm.templates");
 
     /// Supervisors act on their direct reports only (Q19, ASG-08); Admins on anyone.
     public static Allow ActOnStaff(Actor a, Guid? personSupervisorId) =>
@@ -220,6 +226,13 @@ public static class Permissions
 
     public static Allow EditProject(Actor a, ProjectContext p) => PmOnly(a, p);
     public static Allow ManageTeam(Actor a, ProjectContext p) => PmOnly(a, p);
+    /// A note is not a role edit. The caller supplies an active, same-project primary-discipline lead check.
+    public static Allow SetMemberResponsibility(Actor a, ProjectContext p, bool leadsActivePrimaryDiscipline)
+    {
+        var writable = Writable(a, p);
+        if (!writable.Ok) return writable;
+        return IsPM(a, p) || leadsActivePrimaryDiscipline ? Allow.Yes : Allow.No("perm.dl_own");
+    }
     public static Allow HealthOverride(Actor a, ProjectContext p) => PmOnly(a, p);
     public static Allow ManageMilestones(Actor a, ProjectContext p) => PmOnly(a, p);
 
@@ -284,6 +297,13 @@ public static class Permissions
     }
 
     static bool Owns(Actor a, TaskFacts t) => t.AssigneeId == a.Id || t.Collaborators.Contains(a.Id);
+
+    public static Allow MarkTaskContribution(Actor a, ProjectContext p, bool ownActualCollaborator)
+    {
+        if (!a.IsActive || !CanView(a, p)) return Allow.No("perm.not_member");
+        var writable = Writable(a, p); if (!writable) return writable;
+        return ownActualCollaborator ? Allow.Yes : Allow.No("taskContribution.ownCollaborator");
+    }
 
     public static Allow EditTask(Actor a, ProjectContext p, TaskFacts t)
     {

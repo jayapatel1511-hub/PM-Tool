@@ -1,0 +1,8 @@
+{
+  "planner.semantic.timeOffHours": "Time off {hours}",
+  "planner.semantic.timeOffLegend": "Time off shows reported hours within each displayed period.",
+  "planner.semantic.bandLegend": "Confidence: Confirmed / Expected / Possible; solid, outlined and dotted, with a capacity line.",
+  "planner.semantic.nonWorkingDay": "Non-working day",
+  "planner.semantic.nonWorkingLegend": "Faint stripes show non-working dates from the person's working calendar.",
+  "planner.semantic.entryLegend": "Private drafts keep a lock and inset outline. Possible confidence uses a dotted underline. Retained entries keep their filter note."
+}

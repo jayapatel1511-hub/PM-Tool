@@ -1,0 +1,10 @@
+AssertionError [ERR_ASSERTION]: Staff all: actual band/card overlap must be 64: {"overlap":-16,"band":{"top":56,"bottom":240,"background":"rgb(27, 42, 78)"},"cardTop":256,"facts":[{"text":"My Staff","top":94,"bottom":126,"width":90.15625,"height":32},{"text":"Current values2026-11-01 09:00","top":142,"bottom":176,"width":343,"height":34},{"text":"Views","top":184,"bottom":224,"width":88.28125,"height":40}],"paddingTop":"16px","marginTop":"0px","transforms":["none","none"],"contained":true}
+    at measure (/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/count-card-overlap.cjs:69:14)
+    at async /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/count-card-overlap.cjs:86:9 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}

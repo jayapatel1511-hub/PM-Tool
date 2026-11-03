@@ -1,0 +1,19 @@
+{
+  "checkpoint": "20-real",
+  "status": "FAIL_GEOMETRY",
+  "observedAtUtc": "2026-11-01T13:36:00Z",
+  "scope": "Real local API/browser acceptance against QA20 only",
+  "allowedApi": "http://127.0.0.1:5088",
+  "apiProbe": {"method": "GET", "path": "/api/v1/config", "result": "200 after require_escalated local-network retry"},
+  "previewProbes": [
+    {"url": "http://127.0.0.1:8853", "result": "200"},
+    {"url": "http://127.0.0.1:8854", "result": "200"}
+  ],
+  "mutations": "none",
+  "fixtures": "QA20-REAL-001 created through normal API commands: one project, one deliverable, two tasks, two 2h time entries, one pickup offer",
+  "screenshots": "12 Chrome route x viewport screenshots under checkpoint20-real-*.png",
+  "observed": {"staffPeople":3,"staffAssignments":3,"timeEntries":2,"timeTotalHours":4,"taskRows":2,"reportCode":"workload-employee","reportUnit":"fte","reportPeriod":"weeks","noticeSources":6,"desktopHorizontalOverflow":false,"phoneHorizontalOverflow":false},
+  "geometry": {"staffFirstRowY1440x1000":437.5,"projectTasksFirstRowY1440x1000":424.5,"workloadReportFirstRowY1440x1000":379,"requiredMaxY":405,"verdict":"FAIL"},
+  "untested": ["live date edit/update transport", "named-view persistence", "S25 four-week 160/120h synthetic denominator case", "HR stale-version409 write", "phone first-row bound"],
+  "constraint": "Initial refusal was sandbox-limited; escalated probes succeeded. Service launch/restart/kill prohibited; no alternate DB or port used."
+}

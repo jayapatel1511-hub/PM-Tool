@@ -1,0 +1,10 @@
+locator.waitFor: Timeout 15000ms exceeded.
+Call log:
+[2m  - waiting for locator('tr:visible').filter({ has: locator('[data-workspace-column="key"] button').filter({ hasText: 'P-MOCK-T1' }) }).locator('[data-workspace-column="reviewer"]').getByText('Pat Reviewer', { exact: true }) to be visible[22m
+
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/work-task-columns.cjs:133:85 {
+  log: [
+    `  - waiting for locator('tr:visible').filter({ has: locator('[data-workspace-column="key"] button').filter({ hasText: 'P-MOCK-T1' }) }).locator('[data-workspace-column="reviewer"]').getByText('Pat Reviewer', { exact: true }) to be visible`
+  ],
+  name: 'TimeoutError'
+}

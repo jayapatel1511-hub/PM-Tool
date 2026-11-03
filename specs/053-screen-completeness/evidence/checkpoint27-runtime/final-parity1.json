@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "compiledCSharpUnchanged": 622,
+  "finalWebInputsUnchanged": 451,
+  "earlierOutputFilesIncludingOldApiDllUnchanged": 715,
+  "finalStaticFilesUnchanged": 142,
+  "servedProof": "preview-build2.json initial actual HTTP byte equality; final browser suites use same immutable directory",
+  "boundary": "No new live API/Kestrel join, no stop/delete/restart of retained QA24 or outputs",
+  "atUtc": "2026-11-02T12:58:42.814935+00:00"
+}

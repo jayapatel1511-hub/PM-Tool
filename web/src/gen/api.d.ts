@@ -340,6 +340,105 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/certificationTags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReferenceRow"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["JsonElement"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReferenceRow"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/certificationTags/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["JsonElement"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReferenceRow"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
     "/api/v1/admin/clients": {
         parameters: {
             query?: never;
@@ -612,6 +711,142 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/decisionCategories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReferenceRow"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["JsonElement"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReferenceRow"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/decisionCategories/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["JsonElement"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReferenceRow"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/api/v1/admin/decisionCategories/{id}/usage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReferenceUsage"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/deliverableTypes": {
         parameters: {
             query?: never;
@@ -709,6 +944,68 @@ export interface paths {
                 };
             };
         };
+        trace?: never;
+    };
+    "/api/v1/admin/deliverableTypes/{id}/review-defaults": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReviewDefaultSettings"];
+                    };
+                };
+            };
+        };
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ReviewDefaultSettingsWrite"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReviewDefaultSettings"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/admin/deliverableTypes/{id}/usage": {
@@ -1010,6 +1307,414 @@ export interface paths {
                 };
             };
         };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/issuePurposes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReferenceRow"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["JsonElement"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReferenceRow"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/issuePurposes/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["JsonElement"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReferenceRow"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/api/v1/admin/issuePurposes/{id}/usage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReferenceUsage"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/issueReturnCodes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["IssueReturnCodeRow"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["JsonElement"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["IssueReturnCodeRow"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/issueReturnCodes/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["JsonElement"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["IssueReturnCodeRow"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/api/v1/admin/issueReturnCodes/{id}/usage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReferenceUsage"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/issueRootCauses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReferenceRow"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["JsonElement"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReferenceRow"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/issueRootCauses/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["JsonElement"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReferenceRow"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/api/v1/admin/issueRootCauses/{id}/usage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReferenceUsage"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -2034,6 +2739,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/role-explanations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    role?: string;
+                    scenario?: string;
+                    membership?: string;
+                    operation?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminRoleExamplesRead"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/settings": {
         parameters: {
             query?: never;
@@ -2289,6 +3034,175 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/users/{userId}/certifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    userId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["EditorRead"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    userId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PersonFactsCreateBody"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Saved"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/users/{userId}/certifications/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    userId: string;
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["RemoveBody"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    userId: string;
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["JsonElement"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Saved"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/api/v1/admin/users/{userId}/person-facts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    userId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["JsonElement"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Saved"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
     "/api/v1/attention/{id}/snooze": {
         parameters: {
             query?: never;
@@ -2541,6 +3455,128 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/calendar/screen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query: {
+                    from: string;
+                    to: string;
+                    projectIds?: string;
+                    types?: string;
+                    personId?: string;
+                    disciplineId?: string;
+                    showAway?: boolean;
+                    undatedPage?: number;
+                    undatedPageSize?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CalendarScreenRead"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/calendar/screen/{type}/{id}/date-preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query: {
+                    dueDate: string;
+                    rowVersion: number;
+                    projectIds?: string;
+                };
+                header?: never;
+                path: {
+                    type: string;
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CalendarScreenPreview"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/certification-tags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CertificationChoice"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -3128,6 +4164,48 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/deliverables/{id}/issues/{issueId}/response": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                    issueId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["IssueResponseBody"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["IssueResponseSaved"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
     "/api/v1/deliverables/{id}/rebaseline": {
         parameters: {
             query?: never;
@@ -3415,6 +4493,9 @@ export interface paths {
                     projects?: string;
                     q?: string;
                     type?: string;
+                    disciplineId?: string;
+                    addedById?: string;
+                    addedThisWeek?: string;
                 };
                 header?: never;
                 path?: never;
@@ -3454,6 +4535,10 @@ export interface paths {
                     projects?: string;
                     from?: string;
                     to?: string;
+                    projectStatus?: string;
+                    deadlinePage?: number;
+                    deadlinePageSize?: number;
+                    homePreset?: string;
                 };
                 header?: never;
                 path?: never;
@@ -3976,6 +5061,7 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
+                    actorId?: string;
                     page?: number;
                     pageSize?: number;
                 };
@@ -4485,6 +5571,128 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/certifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["EditorRead"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PersonFactsCreateBody"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Saved"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/certifications/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["RemoveBody"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["JsonElement"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Saved"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
     "/api/v1/me/dashboard-layout": {
         parameters: {
             query?: never;
@@ -4618,6 +5826,101 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/home-preset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["HomePresetBody"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/notice-preferences": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["NoticePreferencesRead"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["NoticePreferencesSetBody"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["NoticePreferencesRead"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
     "/api/v1/me/notifications": {
         parameters: {
             query?: never;
@@ -4729,6 +6032,48 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/notifications/screen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    unread?: boolean;
+                    type?: string;
+                    projectId?: string;
+                    needsAction?: boolean;
+                    page?: number;
+                    pageSize?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["NotificationScreenPage"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -5157,6 +6502,45 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/work/opened": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["WorkSeenOpenedBody"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["WorkSeenCommandResult"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/work/requested": {
         parameters: {
             query?: never;
@@ -5186,6 +6570,84 @@ export interface paths {
         };
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/work/seen-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["WorkSeenVisitBody"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["WorkSeenCommandResult"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/work/visits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["WorkSeenVisitBody"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["WorkSeenCommandResult"];
+                    };
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
@@ -5880,6 +7342,47 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/people/{userId}/panel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    staffScope?: string;
+                    projectsPage?: number;
+                    projectsPageSize?: number;
+                };
+                header?: never;
+                path: {
+                    userId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PersonPanelRead"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/pickup-offers": {
         parameters: {
             query?: never;
@@ -6108,6 +7611,10 @@ export interface paths {
                     DisciplineId?: string;
                     Weeks?: number;
                     UnitId?: string;
+                    TeamProjectId?: string;
+                    HomeDisciplineId?: string;
+                    Indicator?: string;
+                    Week?: string;
                 };
                 header?: never;
                 path?: never;
@@ -6121,7 +7628,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["PageOfEntryRow"];
+                        "application/json": components["schemas"]["EntryList"];
                     };
                 };
             };
@@ -6187,6 +7694,10 @@ export interface paths {
                     DisciplineId?: string;
                     Weeks?: number;
                     UnitId?: string;
+                    TeamProjectId?: string;
+                    HomeDisciplineId?: string;
+                    Indicator?: string;
+                    Week?: string;
                     format?: string;
                 };
                 header?: never;
@@ -6460,6 +7971,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/planning/find-room": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query: {
+                    HoursPerWeek: number;
+                    Weeks: number;
+                    From: string;
+                    DisciplineId?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FindRoomResult"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/planning/grid": {
         parameters: {
             query?: never;
@@ -6490,6 +8041,8 @@ export interface paths {
                     Keep?: string;
                     IncludeOpenRoles?: boolean;
                     UnitId?: string;
+                    TeamProjectId?: string;
+                    HomeDisciplineId?: string;
                 };
                 header?: never;
                 path?: never;
@@ -6546,6 +8099,8 @@ export interface paths {
                     Keep?: string;
                     IncludeOpenRoles?: boolean;
                     UnitId?: string;
+                    TeamProjectId?: string;
+                    HomeDisciplineId?: string;
                     format?: string;
                 };
                 header?: never;
@@ -6988,6 +8543,8 @@ export interface paths {
                     SubmissionWithinDays?: number;
                     ComputedHealth?: string;
                     LeadUnitId?: string;
+                    HomePreset?: string;
+                    HomeProjects?: string;
                     overdueDecisions?: boolean;
                 };
                 header?: never;
@@ -7081,6 +8638,8 @@ export interface paths {
                     SubmissionWithinDays?: number;
                     ComputedHealth?: string;
                     LeadUnitId?: string;
+                    HomePreset?: string;
+                    HomeProjects?: string;
                     overdueDecisions?: boolean;
                 };
                 header?: never;
@@ -7136,6 +8695,8 @@ export interface paths {
                     SubmissionWithinDays?: number;
                     ComputedHealth?: string;
                     LeadUnitId?: string;
+                    HomePreset?: string;
+                    HomeProjects?: string;
                 };
                 header?: never;
                 path?: never;
@@ -7216,6 +8777,8 @@ export interface paths {
                     SubmissionWithinDays?: number;
                     ComputedHealth?: string;
                     LeadUnitId?: string;
+                    HomePreset?: string;
+                    HomeProjects?: string;
                 };
                 header?: never;
                 path?: never;
@@ -8074,6 +9637,105 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{id}/decisions/screen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DecisionScreenRead"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{id}/deliverable-numbering": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["NumberingRead"];
+                    };
+                };
+            };
+        };
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["NumberingBody"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["NumberingSaved"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{id}/deliverables": {
         parameters: {
             query?: never;
@@ -8097,6 +9759,9 @@ export interface paths {
                     Sort?: string;
                     IncludeTasks?: boolean;
                     RevisionWarning?: boolean;
+                    PurposeOfIssueId?: string;
+                    ReturnCodeId?: string;
+                    NoDueDate?: boolean;
                 };
                 header?: never;
                 path: {
@@ -8185,6 +9850,59 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{id}/deliverables/client-export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    format?: string;
+                    DisciplineId?: string;
+                    Status?: string;
+                    MilestoneId?: string;
+                    OwnerId?: string;
+                    TypeId?: string;
+                    DueFrom?: string;
+                    DueTo?: string;
+                    Indicator?: string;
+                    RequiresReview?: boolean;
+                    Q?: string;
+                    Sort?: string;
+                    IncludeTasks?: boolean;
+                    RevisionWarning?: boolean;
+                    PurposeOfIssueId?: string;
+                    ReturnCodeId?: string;
+                    NoDueDate?: boolean;
+                };
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -8294,6 +10012,9 @@ export interface paths {
                     Sort?: string;
                     IncludeTasks?: boolean;
                     RevisionWarning?: boolean;
+                    PurposeOfIssueId?: string;
+                    ReturnCodeId?: string;
+                    NoDueDate?: boolean;
                 };
                 header?: never;
                 path: {
@@ -8639,6 +10360,7 @@ export interface paths {
                     StationTo?: number;
                     StationUnits?: string;
                     IssueType?: string;
+                    RootCause?: string;
                 };
                 header?: never;
                 path: {
@@ -8718,6 +10440,7 @@ export interface paths {
                     StationTo?: number;
                     StationUnits?: string;
                     IssueType?: string;
+                    RootCause?: string;
                 };
                 header?: never;
                 path: {
@@ -8733,6 +10456,43 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{id}/issues/root-causes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["IssueRootCauseSummary"];
+                    };
                 };
             };
         };
@@ -9288,6 +11048,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{id}/peek": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PeekView"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{id}/risks": {
         parameters: {
             query?: never;
@@ -9313,6 +11110,7 @@ export interface paths {
                     StationTo?: number;
                     StationUnits?: string;
                     IssueType?: string;
+                    RootCause?: string;
                 };
                 header?: never;
                 path: {
@@ -9392,6 +11190,7 @@ export interface paths {
                     StationTo?: number;
                     StationUnits?: string;
                     IssueType?: string;
+                    RootCause?: string;
                 };
                 header?: never;
                 path: {
@@ -9526,6 +11325,7 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
+                    seenSubjectId?: string;
                     status?: string | string[];
                     priority?: string | string[];
                     indicator?: string | string[];
@@ -9537,6 +11337,7 @@ export interface paths {
                     projectId?: string | string[];
                     createdBy?: string | string[];
                     ids?: string | string[];
+                    homeProjectStatus?: string | string[];
                     dueFrom?: string;
                     dueTo?: string;
                     startFrom?: string;
@@ -9547,12 +11348,15 @@ export interface paths {
                     workspaceId?: string;
                     q?: string;
                     sort?: string;
+                    homePreset?: string;
+                    group?: string;
                     requiresReview?: boolean | string;
                     hasDependencies?: boolean | string;
                     mine?: boolean | string;
                     includeCancelled?: boolean | string;
                     onHold?: boolean | string;
                     noDeliverable?: boolean | string;
+                    withoutDueDate?: boolean | string;
                     overdue?: boolean | string;
                     blocked?: boolean | string;
                     blocking?: boolean | string;
@@ -9584,7 +11388,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["PageOfRow"];
+                        "application/json": components["schemas"]["ListPage"];
                     };
                 };
             };
@@ -9788,7 +11592,9 @@ export interface paths {
         };
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    certificationTagId?: string;
+                };
                 header?: never;
                 path: {
                     id: string;
@@ -9874,6 +11680,43 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{id}/template-provenance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TemplateProjectProvenanceRead"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -10068,6 +11911,34 @@ export interface paths {
                             /** Format: int32 */
                             rowVersion: number;
                         } | {
+                            comparison?: {
+                                /** Format: date-time */
+                                asOf: string;
+                                /** Format: date */
+                                fromDate: string;
+                                includesProposal: boolean;
+                                /** Format: uuid */
+                                personId: null | string;
+                                state: string;
+                                /** Format: date */
+                                throughDate: string;
+                                /** Format: int32 */
+                                undatedTasks: null | number;
+                                /** Format: int32 */
+                                unestimatedTasks: null | number;
+                                weeks: {
+                                    /** Format: double */
+                                    afterHours: null | number;
+                                    /** Format: double */
+                                    availableHours: null | number;
+                                    /** Format: double */
+                                    beforeHours: null | number;
+                                    overCapacity: null | boolean;
+                                    provisional: boolean;
+                                    /** Format: date */
+                                    week: string;
+                                }[];
+                            };
                             preview: boolean;
                             weeks: {
                                 band: string;
@@ -10088,6 +11959,127 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectId}/allocations/capacity-preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    projectId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ProposalCapacityBody"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProposalCapacityRead"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectId}/allocations/deadlines": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    from?: string;
+                    weeks?: number;
+                };
+                header?: never;
+                path: {
+                    projectId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PlanningDeadlineContext"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectId}/allocations/discipline-context": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    from?: string;
+                    weeks?: number;
+                };
+                header?: never;
+                path: {
+                    projectId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DisciplineComparison"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -10168,6 +12160,88 @@ export interface paths {
         };
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectId}/allocations/shift": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    projectId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AllocationShiftBody"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CoordinationResult"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectId}/allocations/shift-preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    projectId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AllocationShiftPreviewBody"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AllocationShiftPreview"];
+                    };
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
@@ -10335,6 +12409,34 @@ export interface paths {
                             /** Format: int32 */
                             rowVersion: number;
                         } | {
+                            comparison?: {
+                                /** Format: date-time */
+                                asOf: string;
+                                /** Format: date */
+                                fromDate: string;
+                                includesProposal: boolean;
+                                /** Format: uuid */
+                                personId: null | string;
+                                state: string;
+                                /** Format: date */
+                                throughDate: string;
+                                /** Format: int32 */
+                                undatedTasks: null | number;
+                                /** Format: int32 */
+                                unestimatedTasks: null | number;
+                                weeks: {
+                                    /** Format: double */
+                                    afterHours: null | number;
+                                    /** Format: double */
+                                    availableHours: null | number;
+                                    /** Format: double */
+                                    beforeHours: null | number;
+                                    overCapacity: null | boolean;
+                                    provisional: boolean;
+                                    /** Format: date */
+                                    week: string;
+                                }[];
+                            };
                             preview: boolean;
                             weeks: {
                                 band: string;
@@ -10480,6 +12582,34 @@ export interface paths {
                             /** Format: int32 */
                             rowVersion: number;
                         } | {
+                            comparison?: {
+                                /** Format: date-time */
+                                asOf: string;
+                                /** Format: date */
+                                fromDate: string;
+                                includesProposal: boolean;
+                                /** Format: uuid */
+                                personId: null | string;
+                                state: string;
+                                /** Format: date */
+                                throughDate: string;
+                                /** Format: int32 */
+                                undatedTasks: null | number;
+                                /** Format: int32 */
+                                unestimatedTasks: null | number;
+                                weeks: {
+                                    /** Format: double */
+                                    afterHours: null | number;
+                                    /** Format: double */
+                                    availableHours: null | number;
+                                    /** Format: double */
+                                    beforeHours: null | number;
+                                    overCapacity: null | boolean;
+                                    provisional: boolean;
+                                    /** Format: date */
+                                    week: string;
+                                }[];
+                            };
                             preview: boolean;
                             weeks: {
                                 band: string;
@@ -10500,6 +12630,44 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectId}/change-assessments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    projectId: string;
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ChangeAssessmentLocation"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -10826,6 +12994,169 @@ export interface paths {
         };
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectId}/coordination/readiness-agenda": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query: {
+                    from: string;
+                    to: string;
+                    disciplineId?: string;
+                    constraintsPage?: number;
+                    proposalsPage?: number;
+                    pageSize?: number;
+                };
+                header?: never;
+                path: {
+                    projectId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["WeeklyReadinessAgenda"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectId}/deliverables/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    projectId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["DrawingImportCommitBody"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DrawingImportCreated"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectId}/deliverables/import-options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    projectId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DrawingImportOptions"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectId}/deliverables/import-preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    projectId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["DrawingImportPreviewBody"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DrawingImportPreview"];
+                    };
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
@@ -11682,6 +14013,47 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{projectId}/handoffs/{id}/readiness-linked-tasks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                };
+                header?: never;
+                path: {
+                    projectId: string;
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["HandoffLinkedTaskPage"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{projectId}/handoffs/{id}/transition": {
         parameters: {
             query?: never;
@@ -11789,6 +14161,48 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectId}/members/{memberId}/responsibility": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    projectId: string;
+                    memberId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SetResponsibilityBody"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ResponsibilitySaved"];
+                    };
+                };
+            };
+        };
         trace?: never;
     };
     "/api/v1/projects/{projectId}/open-roles": {
@@ -11944,6 +14358,7 @@ export interface paths {
                     to?: string;
                     constraintsPage?: number;
                     readyPage?: number;
+                    workPage?: number;
                     pageSize?: number;
                 };
                 header?: never;
@@ -12386,6 +14801,168 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{projectId}/review-assignment-guidance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    sourceRevisionIds?: string;
+                };
+                header?: never;
+                path: {
+                    projectId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReviewAssignmentGuidance"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectId}/review-findings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    DisciplineId?: string;
+                    Severity?: string;
+                    OriginatorKind?: string;
+                    OriginatorId?: string;
+                    ResolverId?: string;
+                    AllRounds?: boolean;
+                    Page?: number;
+                    PageSize?: number;
+                };
+                header?: never;
+                path: {
+                    projectId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReviewRegisterPage"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectId}/review-findings/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    projectId: string;
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReviewFindingLocation"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectId}/review-issued-assignment-guidance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    issuedRevisionIds?: string;
+                };
+                header?: never;
+                path: {
+                    projectId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReviewIssuedAssignmentGuidance"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{projectId}/reviews": {
         parameters: {
             query?: never;
@@ -12456,6 +15033,82 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{projectId}/reviews/default-disciplines": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    sourceRevisionIds?: string;
+                };
+                header?: never;
+                path: {
+                    projectId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReviewDefaultSuggestions"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectId}/reviews/discipline-summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    projectId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReviewDisciplineSummary"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{projectId}/reviews/export": {
         parameters: {
             query?: never;
@@ -12487,6 +15140,48 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectId}/reviews/issued-sources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    deliverableId?: string;
+                    q?: string;
+                    page?: number;
+                    pageSize?: number;
+                };
+                header?: never;
+                path: {
+                    projectId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PageOfReviewIssuedSourceRead"];
+                    };
                 };
             };
         };
@@ -12785,6 +15480,150 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{projectId}/reviews/{id}/external-reviews": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                };
+                header?: never;
+                path: {
+                    projectId: string;
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PageOfExternalReviewRead"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    projectId: string;
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ExternalReviewRecordBody"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CoordinationResult"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectId}/reviews/{id}/external-reviews/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    projectId: string;
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ExternalReviewOptions"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectId}/reviews/{id}/external-reviews/{externalReviewId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    projectId: string;
+                    id: string;
+                    externalReviewId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ExternalReviewRead"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{projectId}/reviews/{id}/findings": {
         parameters: {
             query?: never;
@@ -12864,6 +15703,44 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectId}/reviews/{id}/response-sheet": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    format?: string;
+                };
+                header?: never;
+                path: {
+                    projectId: string;
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -13009,6 +15886,44 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{projectId}/submission-checks/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    projectId: string;
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SubmissionCheckLocation"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -13975,6 +16890,47 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/reports/{code}/task-inputs/{metric}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                };
+                header?: never;
+                path: {
+                    code: string;
+                    metric: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReportTaskInputPage"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/risks/{id}": {
         parameters: {
             query?: never;
@@ -14171,6 +17127,9 @@ export interface paths {
                     includeArchived?: boolean;
                     limit?: number;
                     page?: number;
+                    projectId?: string;
+                    status?: string;
+                    disciplineId?: string;
                 };
                 header?: never;
                 path?: never;
@@ -14289,6 +17248,7 @@ export interface paths {
             parameters: {
                 query?: {
                     projects?: string;
+                    seenSubjectId?: string;
                     status?: string | string[];
                     priority?: string | string[];
                     indicator?: string | string[];
@@ -14300,6 +17260,7 @@ export interface paths {
                     projectId?: string | string[];
                     createdBy?: string | string[];
                     ids?: string | string[];
+                    homeProjectStatus?: string | string[];
                     dueFrom?: string;
                     dueTo?: string;
                     startFrom?: string;
@@ -14310,12 +17271,15 @@ export interface paths {
                     workspaceId?: string;
                     q?: string;
                     sort?: string;
+                    homePreset?: string;
+                    group?: string;
                     requiresReview?: boolean | string;
                     hasDependencies?: boolean | string;
                     mine?: boolean | string;
                     includeCancelled?: boolean | string;
                     onHold?: boolean | string;
                     noDeliverable?: boolean | string;
+                    withoutDueDate?: boolean | string;
                     overdue?: boolean | string;
                     blocked?: boolean | string;
                     blocking?: boolean | string;
@@ -14345,13 +17309,91 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["PageOfRow"];
+                        "application/json": components["schemas"]["ListPage"];
                     };
                 };
             };
         };
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tasks/bulk/commands": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["TaskBulkCommandBody"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TaskBulkCommandResult"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tasks/bulk/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["TaskBulkIntent"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TaskBulkPreview"];
+                    };
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
@@ -14439,6 +17481,43 @@ export interface paths {
                 };
             };
         };
+        trace?: never;
+    };
+    "/api/v1/tasks/{id}/activity/actors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TaskHistoryActorChoice"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/tasks/{id}/block": {
@@ -14594,6 +17673,47 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tasks/{id}/contribution": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["TaskContributionSetBody"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TaskContributionRead"];
+                    };
+                };
+            };
+        };
         trace?: never;
     };
     "/api/v1/tasks/{id}/delete-preview": {
@@ -15102,6 +18222,9 @@ export interface paths {
             parameters: {
                 query?: {
                     projects?: string;
+                    homePreset?: string;
+                    homeProjectStatus?: string;
+                    certificationTagId?: string;
                 };
                 header?: never;
                 path?: never;
@@ -15195,7 +18318,10 @@ export interface paths {
         };
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    changePage?: string;
+                    changePageSize?: string;
+                };
                 header?: never;
                 path: {
                     id: string;
@@ -15400,6 +18526,46 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/templates/{id}/projects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    page?: string;
+                    pageSize?: string;
+                };
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PageOfTemplateVersionProject"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -15618,6 +18784,48 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/time/week": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    From?: string;
+                    To?: string;
+                    ProjectId?: string;
+                    TaskId?: string;
+                    UserId?: string;
+                    Scope?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TimeWeekView"];
+                    };
                 };
             };
         };
@@ -16111,6 +19319,7 @@ export interface paths {
                     From?: string;
                     Sort?: string;
                     UnitId?: string;
+                    ShowProposedAsConfirmed?: boolean;
                 };
                 header?: never;
                 path?: never;
@@ -16156,6 +19365,7 @@ export interface paths {
                     From?: string;
                     Sort?: string;
                     UnitId?: string;
+                    ShowProposedAsConfirmed?: boolean;
                 };
                 header?: never;
                 path?: never;
@@ -16440,14 +19650,17 @@ export interface components {
         };
         ActionDetail: {
             action: components["schemas"]["MeetingActionRow"];
+            context?: null | components["schemas"]["RecordContextView"];
             decision: null | components["schemas"]["ActionDecisionRef"];
             links: components["schemas"]["ItemLinkRow"][];
             meeting: components["schemas"]["ActionMeetingRef"];
             permissions: components["schemas"]["ActionDetailPermissions"];
             project: components["schemas"]["ActionProject"];
+            seen?: null | components["schemas"]["WorkSeenDecoration"];
             task: null | components["schemas"]["ActionTaskRef"];
             /** Format: uuid */
             taskDisciplineId: null | string;
+            workActivity?: null | components["schemas"]["WorkActivityFact"];
         };
         ActionDetailPermissions: {
             comment: boolean;
@@ -16526,6 +19739,52 @@ export interface components {
             source: string;
             summary: string;
         };
+        AdminOperationChoice: {
+            key: string;
+            label: string;
+            rowId: string;
+        };
+        AdminPermissionExample: {
+            actionKey: string;
+            actionLabel: string;
+            allowed: boolean;
+            decisionKind: string;
+            facts: string[];
+            reasonCode: null | string;
+            reasonText: null | string;
+            requiresReason: null | boolean;
+            resultKind: string;
+            scenarioKey: string;
+            scenarioLabel: string;
+        };
+        AdminPermissionFactor: {
+            actionKey: string;
+            actionLabel: string;
+            eligible: boolean;
+            reasonCode: null | string;
+            reasonText: null | string;
+            requiresReason: null | boolean;
+            resultKind: string;
+        };
+        AdminPermissionOperation: {
+            decisionKind: string;
+            factors: components["schemas"]["AdminPermissionFactor"][];
+            facts: string[];
+            key: string;
+            label: string;
+            requirements: components["schemas"]["AdminPermissionRequirement"][];
+        };
+        AdminPermissionRequirement: {
+            key: string;
+            state: string;
+            text: string;
+        };
+        AdminPermissionRow: {
+            label: string;
+            matrixRowKey: string;
+            operations: components["schemas"]["AdminPermissionOperation"][];
+            rowId: string;
+        };
         AdminReviewStrip: {
             checks: components["schemas"]["AdminReviewStripCount"][];
             /** Format: date-time */
@@ -16536,6 +19795,35 @@ export interface components {
             count: number;
             key: string;
             title: string;
+        };
+        AdminRoleChoice: {
+            key: string;
+            label: string;
+        };
+        AdminRoleExamplesRead: {
+            basis: string;
+            coverageComplete: boolean;
+            gaps: string[];
+            membershipChoices: components["schemas"]["AdminRoleChoice"][];
+            operationChoices: components["schemas"]["AdminOperationChoice"][];
+            roleChoices: components["schemas"]["AdminRoleChoice"][];
+            roles: components["schemas"]["AdminRoleExplanation"][];
+            rows: components["schemas"]["AdminPermissionRow"][];
+            scenarioChoices: components["schemas"]["AdminRoleChoice"][];
+            selectedMembershipKey: string;
+            systemRoleChoices: components["schemas"]["AdminRoleChoice"][];
+        };
+        AdminRoleExplanation: {
+            examples: components["schemas"]["AdminPermissionExample"][];
+            key: string;
+            label: string;
+            scopeKind: string;
+        };
+        AdminUserDiscipline: {
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+            name: string;
         };
         AdminUserRole: {
             role: string;
@@ -16555,13 +19843,35 @@ export interface components {
             lastSignInAt: null | string;
             /** Format: uuid */
             officeId: null | string;
+            personFacts?: null | components["schemas"]["Facts"];
             roles: components["schemas"]["AdminUserRole"][];
             /** Format: int32 */
             rowVersion: number;
+            screen?: null | components["schemas"]["AdminUserScreen"];
             /** Format: uuid */
             supervisorId: null | string;
             /** Format: double */
             weeklyCapacityHours: null | number;
+        };
+        AdminUserScreen: {
+            /** Format: date-time */
+            asOf: string;
+            /** Format: double */
+            baseWeeklyCapacityHours: number;
+            capacityBasis: string;
+            configuredInactive: boolean;
+            homeDiscipline: null | components["schemas"]["AdminUserDiscipline"];
+            /** Format: uuid */
+            homeDisciplineId: null | string;
+            homeDisciplineState: string;
+            /** Format: int32 */
+            peopleScopeCount: null | number;
+            scopeBasis: string;
+            scopeIncludesSelf: null | boolean;
+            /** Format: uuid */
+            userId: string;
+            /** Format: int32 */
+            userRowVersion: number;
         };
         AdoptBody: {
             /** Format: uuid */
@@ -16711,6 +20021,64 @@ export interface components {
             /** Format: date */
             throughDate: string;
         };
+        AllocationShiftBody: {
+            allocations: components["schemas"]["AllocationShiftVersion"][];
+            mode: string;
+            reason: string;
+            /** Format: uuid */
+            requestId: string;
+            /** Format: int32 */
+            weeks: number;
+        };
+        AllocationShiftPreview: {
+            allocations: components["schemas"]["AllocationShiftRow"][];
+            /** Format: date-time */
+            asOf: string;
+            mode: string;
+            /** Format: int32 */
+            weeks: number;
+        };
+        AllocationShiftPreviewBody: {
+            allocationIds: string[];
+            mode: string;
+            /** Format: int32 */
+            weeks: number;
+        };
+        AllocationShiftRole: {
+            /** Format: date */
+            fromDate: string;
+            /** Format: uuid */
+            id: string;
+            label: string;
+            /** Format: date */
+            throughDate: string;
+        };
+        AllocationShiftRow: {
+            /** Format: date */
+            fromDate: string;
+            /** Format: uuid */
+            id: string;
+            /** Format: date */
+            newFromDate: string;
+            /** Format: date */
+            newThroughDate: string;
+            /** Format: uuid */
+            personId: string;
+            personName: string;
+            requiresConfirmation: boolean;
+            /** Format: int32 */
+            rowVersion: number;
+            status: string;
+            /** Format: date */
+            throughDate: string;
+            unchangedRoles: components["schemas"]["AllocationShiftRole"][];
+        };
+        AllocationShiftVersion: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
+        };
         AllocationWeek: {
             /** Format: double */
             hours: number;
@@ -16805,6 +20173,7 @@ export interface components {
         AttentionRow: {
             /** Format: int32 */
             ageDays: number;
+            context?: null | components["schemas"]["RecordContextView"];
             /** Format: int32 */
             daysOverdueOrBlocked: number;
             /** Format: date */
@@ -16831,12 +20200,14 @@ export interface components {
             routeToUserIds: string[];
             ruleId: string;
             ruleName: string;
+            seen?: null | components["schemas"]["WorkSeenDecoration"];
             severity: string;
             snoozeNote: null | string;
             snoozed: boolean;
             /** Format: date-time */
             snoozedUntil: null | string;
             why: null | components["schemas"]["JsonElement"];
+            workActivity?: null | components["schemas"]["WorkActivityFact"];
         };
         AttentionSnoozed: {
             /** Format: uuid */
@@ -16881,6 +20252,7 @@ export interface components {
             holiday: number;
             /** Format: double */
             leave: number;
+            nonWorking?: null | boolean;
             /** Format: double */
             normal: number;
             provisional: boolean;
@@ -17222,6 +20594,16 @@ export interface components {
             rowVersion: null | number;
             type: string;
         };
+        BoardFact: {
+            disciplineLead: components["schemas"]["LeadFact"];
+            projectManager: components["schemas"]["LeadFact"];
+            /** Format: date-time */
+            reviewRequestedAt: null | string;
+            /** Format: int32 */
+            reviewStaleDays: number;
+            /** Format: int32 */
+            reviewWaitingDays: null | number;
+        };
         BulkLinkBody: {
             relation: null | string;
             targetIds: string[];
@@ -17237,6 +20619,7 @@ export interface components {
             date: string;
             /** Format: uuid */
             id: string;
+            identityColour?: null | string;
             key: string;
             kind: string;
             overdue: boolean;
@@ -17257,6 +20640,7 @@ export interface components {
             endAt: string;
             /** Format: uuid */
             id: string;
+            identityColour?: null | string;
             kind: string;
             location: null | string;
             owner: null | string;
@@ -17291,6 +20675,7 @@ export interface components {
             endAt: string;
             /** Format: uuid */
             id: string;
+            identityColour?: null | string;
             kind: string;
             location: null | string;
             owner: null | string;
@@ -17321,6 +20706,62 @@ export interface components {
             timeZone: string;
             /** Format: date */
             to: string;
+        };
+        CalendarScreenAwayDay: {
+            /** Format: date */
+            date: string;
+            /** Format: double */
+            hours: null | number;
+            person: string;
+            /** Format: uuid */
+            personId: string;
+            state: string;
+            unverified: boolean;
+        };
+        CalendarScreenAwayRead: {
+            days: components["schemas"]["CalendarScreenAwayDay"][];
+            state: string;
+        };
+        CalendarScreenChoice: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+        };
+        CalendarScreenDeadline: {
+            canMove: boolean;
+            /** Format: date */
+            dueDate: null | string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            moveReason: null | string;
+            needsReason: boolean;
+            /** Format: uuid */
+            projectId: string;
+            projectNumber: string;
+            /** Format: int32 */
+            rowVersion: number;
+            sourceType: string;
+            /** Format: date */
+            startDate: null | string;
+            title: string;
+        };
+        CalendarScreenPreview: {
+            context: null | components["schemas"]["DateContextRead"];
+            /** Format: date */
+            dueDate: string;
+            milestone: null | components["schemas"]["DatePreview"];
+            source: components["schemas"]["CalendarScreenDeadline"];
+        };
+        CalendarScreenRead: {
+            /** Format: date-time */
+            asOf: string;
+            away: components["schemas"]["CalendarScreenAwayRead"];
+            deadlines: components["schemas"]["CalendarScreenDeadline"][];
+            disciplines: components["schemas"]["CalendarScreenChoice"][];
+            people: components["schemas"]["CalendarScreenChoice"][];
+            range: components["schemas"]["CalendarRange"];
+            undated: components["schemas"]["PageOfCalendarScreenDeadline"];
         };
         Can: {
             assign: boolean;
@@ -17465,6 +20906,27 @@ export interface components {
             /** Format: int32 */
             unestimatedTasks: number;
         };
+        CertificationChoice: {
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+            name: string;
+        };
+        CertificationFact: {
+            /** Format: int32 */
+            daysToExpiry: null | number;
+            /** Format: date */
+            expiresOn: null | string;
+            expiryState: string;
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
+            tagActive: boolean;
+            /** Format: uuid */
+            tagId: string;
+            tagName: string;
+        };
         ChainStep: {
             /** Format: int32 */
             level: number;
@@ -17488,6 +20950,15 @@ export interface components {
             /** Format: date-time */
             verifiedAt: string;
             verifier: string;
+        };
+        ChangeAssessmentLocation: {
+            context: components["schemas"]["RecordContextView"];
+            /** Format: uuid */
+            id: string;
+            key: string;
+            /** Format: uuid */
+            noticeId: string;
+            title: string;
         };
         ChangeAssessmentRow: {
             /** Format: date-time */
@@ -17562,12 +21033,15 @@ export interface components {
             canPublish: boolean;
             canWrite: boolean;
             completeAssessmentIds: string[];
+            context?: null | components["schemas"]["RecordContextView"];
             eligiblePeople: string[];
             head: null | components["schemas"]["SourceHeadRow"];
             newRevision: components["schemas"]["SourceRevisionRow"];
             notice: components["schemas"]["ChangeNoticeRow"];
             oldRevision: components["schemas"]["SourceRevisionRow"];
+            seen?: null | components["schemas"]["WorkSeenDecoration"];
             uses: components["schemas"]["InputUseRow"][];
+            workActivity?: null | components["schemas"]["WorkActivityFact"];
         };
         ChangeLine: {
             field: string;
@@ -17911,6 +21385,39 @@ export interface components {
             /** Format: date */
             weekStart: string;
         };
+        ComparisonDiscipline: {
+            disciplineName: null | string;
+            /** Format: uuid */
+            projectDisciplineId: null | string;
+            unattributed: boolean;
+            /** Format: int32 */
+            unattributedAllocations: number;
+            /** Format: int32 */
+            undatedTasks: number;
+            weeks: components["schemas"]["ComparisonWeek"][];
+        };
+        ComparisonWeek: {
+            /** Format: double */
+            confirmedHours: null | number;
+            /** Format: double */
+            knownConfirmedHours: number;
+            /** Format: double */
+            knownProposedHours: number;
+            /** Format: double */
+            knownRemainingEstimateHours: number;
+            /** Format: double */
+            proposedHours: null | number;
+            /** Format: double */
+            remainingEstimateHours: null | number;
+            /** Format: int32 */
+            unavailableConfirmed: number;
+            /** Format: int32 */
+            unavailableProposed: number;
+            /** Format: int32 */
+            unestimatedTasks: number;
+            /** Format: date */
+            week: string;
+        };
         CompleteBody: {
             /** Format: date */
             completedDate: null | string;
@@ -17979,11 +21486,15 @@ export interface components {
             rowVersion: null | number;
         };
         CoordinationBlockerGroup: {
+            context?: null | components["schemas"]["RecordContextView"];
             /** Format: uuid */
             handoffId: string;
             handoffKey: string;
+            readinessLinks?: null | components["schemas"]["HandoffReadinessLinks"];
+            seen?: null | components["schemas"]["WorkSeenDecoration"];
             taskIds: string[];
             taskKeys: string[];
+            workActivity?: null | components["schemas"]["WorkActivityFact"];
         };
         CoordinationCanCreate: {
             changes: boolean;
@@ -17992,6 +21503,7 @@ export interface components {
         CoordinationChangeRow: {
             /** Format: int32 */
             acknowledgedPending: number;
+            context?: null | components["schemas"]["RecordContextView"];
             /** Format: uuid */
             id: string;
             key: string;
@@ -18001,8 +21513,10 @@ export interface components {
             pendingAssessments: number;
             /** Format: int32 */
             projectPending: number;
+            seen?: null | components["schemas"]["WorkSeenDecoration"];
             status: string;
             title: string;
+            workActivity?: null | components["schemas"]["WorkActivityFact"];
         };
         CoordinationChangeTarget: {
             available: boolean;
@@ -18035,6 +21549,7 @@ export interface components {
             name: string;
         };
         CoordinationHandoffRow: {
+            context?: null | components["schemas"]["RecordContextView"];
             /** Format: uuid */
             id: string;
             key: string;
@@ -18042,10 +21557,12 @@ export interface components {
             neededBy: string;
             /** Format: date */
             promisedBy: null | string;
+            readinessLinks?: null | components["schemas"]["HandoffReadinessLinks"];
             /** Format: uuid */
             receivingDisciplineId: string;
             /** Format: uuid */
             receivingOwnerId: string;
+            seen?: null | components["schemas"]["WorkSeenDecoration"];
             /** Format: uuid */
             sendingDisciplineId: string;
             /** Format: uuid */
@@ -18056,12 +21573,14 @@ export interface components {
             /** Format: uuid */
             targetTaskId: null | string;
             title: string;
+            workActivity?: null | components["schemas"]["WorkActivityFact"];
         };
         CoordinationInputUseRow: {
             /** Format: date-time */
             adoptedAt: string;
             /** Format: uuid */
             adoptedBy: string;
+            context?: null | components["schemas"]["RecordContextView"];
             /** Format: uuid */
             id: string;
             intendedUse: string;
@@ -18070,6 +21589,7 @@ export interface components {
             revision: null | string;
             /** Format: int32 */
             rowVersion: number;
+            seen?: null | components["schemas"]["WorkSeenDecoration"];
             sourceIdentity: string;
             sourceKey: null | string;
             /** Format: uuid */
@@ -18080,8 +21600,10 @@ export interface components {
             targetKey: null | string;
             targetName: null | string;
             targetType: string;
+            workActivity?: null | components["schemas"]["WorkActivityFact"];
         };
         CoordinationIssueRow: {
+            context?: null | components["schemas"]["RecordContextView"];
             /** Format: uuid */
             id: string;
             key: string;
@@ -18090,20 +21612,25 @@ export interface components {
             ownerName: null | string;
             /** Format: uuid */
             projectDisciplineId: null | string;
+            seen?: null | components["schemas"]["WorkSeenDecoration"];
             status: string;
             title: string;
+            workActivity?: null | components["schemas"]["WorkActivityFact"];
         };
         CoordinationLinkedAction: {
+            context?: null | components["schemas"]["RecordContextView"];
             /** Format: date */
             dueDate: null | string;
             /** Format: uuid */
             id: string;
             key: string;
+            seen?: null | components["schemas"]["WorkSeenDecoration"];
             /** Format: uuid */
             sourceId: string;
             sourceType: string;
             status: string;
             text: string;
+            workActivity?: null | components["schemas"]["WorkActivityFact"];
         };
         CoordinationOptions: {
             /** Format: uuid */
@@ -18122,6 +21649,7 @@ export interface components {
             displayName: string;
             /** Format: uuid */
             id: string;
+            personNotices?: null | components["schemas"]["Notices"];
         };
         CoordinationProjection: {
             blockerGroups: components["schemas"]["CoordinationBlockerGroup"][];
@@ -18222,6 +21750,7 @@ export interface components {
         CoordinationReviewRow: {
             /** Format: int32 */
             blockingFindings: number;
+            context?: null | components["schemas"]["RecordContextView"];
             /** Format: uuid */
             coordinatorId: string;
             /** Format: uuid */
@@ -18229,8 +21758,10 @@ export interface components {
             key: string;
             /** Format: int32 */
             outstandingDisciplines: number;
+            seen?: null | components["schemas"]["WorkSeenDecoration"];
             status: string;
             title: string;
+            workActivity?: null | components["schemas"]["WorkActivityFact"];
         };
         CoordinationSource: {
             identity: string;
@@ -18386,6 +21917,24 @@ export interface components {
             /** Format: int32 */
             high: number;
         };
+        DashboardStaffing: {
+            allocationCoverage: string;
+            /** Format: date-time */
+            asOf: string;
+            disciplines: components["schemas"]["StaffingDiscipline"][];
+            /** Format: date */
+            fromDate: string;
+            /** Format: double */
+            knownUnattributedConfirmedHours: null | number;
+            state: string;
+            target: null | components["schemas"]["StaffingTarget"];
+            /** Format: date */
+            throughDate: null | string;
+            /** Format: double */
+            unattributedConfirmedHours: null | number;
+            /** Format: int32 */
+            unavailableUnattributed: null | number;
+        };
         DashboardState: {
             /** Format: date-time */
             evaluatedAt: string;
@@ -18415,6 +21964,8 @@ export interface components {
         };
         DashboardView: {
             activity: components["schemas"]["ActivityEntry"][];
+            /** Format: date-time */
+            asOf?: null | string;
             blocked: components["schemas"]["DashboardTaskList"];
             decisions: components["schemas"]["DashboardDecisions"];
             deliverables: components["schemas"]["DashboardDeliverables"];
@@ -18433,6 +21984,7 @@ export interface components {
             milestones: components["schemas"]["DashboardMilestoneRow"][];
             registers: components["schemas"]["DashboardRegisters"];
             risks: components["schemas"]["DashboardRisks"];
+            staffing?: null | components["schemas"]["DashboardStaffing"];
             state: null | components["schemas"]["DashboardState"];
             tasks: components["schemas"]["DashboardTasks"];
         };
@@ -18531,6 +22083,7 @@ export interface components {
             date: string;
             /** Format: double */
             holiday: number;
+            nonWorking?: null | boolean;
             /** Format: double */
             normal: number;
             provisional: boolean;
@@ -18545,13 +22098,22 @@ export interface components {
             rowVersion: number;
             status: string;
         };
+        DecisionCategoryChoice: {
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+            name: string;
+        };
         DecisionCreateBody: {
+            /** Format: uuid */
+            categoryId?: null | string;
             /** Format: date */
             dateRequested: null | string;
             description: string;
             impactDescription: string;
             impactLevel: string;
             links: null | components["schemas"]["DecisionLinkInput"][];
+            optionsConsidered?: null | string[];
             /** Format: uuid */
             ownerExternalPartyId: null | string;
             /** Format: uuid */
@@ -18571,13 +22133,37 @@ export interface components {
         };
         DecisionDetailResponse: {
             cancelledReason: null | string;
+            context?: null | components["schemas"]["RecordContextView"];
             decidedBy: null | string;
             decision: components["schemas"]["DecisionRow"];
             deferralReason: null | string;
             description: string;
             links: components["schemas"]["ItemLinkRow"][];
+            metadata?: null | components["schemas"]["DecisionMetadataDetail"];
             permissions: components["schemas"]["DecisionPermissions"];
             project: components["schemas"]["DecisionProject"];
+            seen?: null | components["schemas"]["WorkSeenDecoration"];
+            workActivity?: null | components["schemas"]["WorkActivityFact"];
+        };
+        DecisionLagGroup: {
+            /** Format: int32 */
+            decidedCount: number;
+            /** Format: double */
+            medianDays: number;
+            organisation: string;
+            ownerKind: string;
+        };
+        DecisionLagRead: {
+            /** Format: int32 */
+            attributed: number;
+            basis: string;
+            groups: components["schemas"]["DecisionLagGroup"][];
+            /** Format: int32 */
+            invalidDateCount: number;
+            /** Format: int32 */
+            total: number;
+            /** Format: int32 */
+            unattributedCount: number;
         };
         DecisionLinkInput: {
             relation?: null | string;
@@ -18609,6 +22195,20 @@ export interface components {
             recordedBy: null | string;
             subject: null | string;
             text: null | string;
+        };
+        DecisionMetadataDetail: {
+            canEditRationale: boolean;
+            /** Format: uuid */
+            categoryId: null | string;
+            correctionReasonRequired: boolean;
+            optionsConsidered: null | string[];
+            rationale: null | string;
+        };
+        DecisionMetadataSummary: {
+            category: null | components["schemas"]["DecisionCategoryChoice"];
+            /** Format: int32 */
+            optionCount: null | number;
+            rationaleRecorded: boolean;
         };
         DecisionMutation: {
             /** Format: uuid */
@@ -18652,6 +22252,7 @@ export interface components {
             isInactiveOwner: boolean;
             isOverdue: boolean;
             key: string;
+            metadata?: null | components["schemas"]["DecisionMetadataSummary"];
             milestones: components["schemas"]["DecisionLinkSummary"][];
             /** Format: date */
             originalRequiredByDate: string;
@@ -18674,6 +22275,12 @@ export interface components {
             status: string;
             subject: string;
         };
+        DecisionScreenRead: {
+            /** Format: date-time */
+            asOf: string;
+            categories: components["schemas"]["DecisionCategoryChoice"][];
+            lag: components["schemas"]["DecisionLagRead"];
+        };
         DecisionTransition: {
             ok: boolean;
             reason: null | string;
@@ -18686,6 +22293,7 @@ export interface components {
             /** Format: date */
             newRequiredBy?: null | string;
             notifyAssignees?: null | boolean;
+            rationale?: null | string;
             reason?: null | string;
             /** Format: int32 */
             rowVersion?: null | number;
@@ -18766,6 +22374,7 @@ export interface components {
             reason: string;
         };
         DeliverableCreateBody: {
+            clientDrawingNumber?: null | string;
             /** Format: uuid */
             deliverableTypeId: string;
             description: null | string;
@@ -18798,6 +22407,22 @@ export interface components {
             rowVersion: number;
             warnings: string[];
         };
+        DeliverableCurrentIssue: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date */
+            issuedDate: string;
+            purpose: null | string;
+            /** Format: uuid */
+            purposeOfIssueId: null | string;
+            /** Format: date */
+            responseDate: null | string;
+            returnCode: null | string;
+            /** Format: uuid */
+            returnCodeId: null | string;
+            returnLabel: null | string;
+            revision: null | string;
+        };
         DeliverableDependencyAdded: {
             /** Format: uuid */
             id: string;
@@ -18806,6 +22431,7 @@ export interface components {
             /** Format: date */
             acceptedDate: null | string;
             cancelledReason: null | string;
+            context?: null | components["schemas"]["RecordContextView"];
             deliverable: components["schemas"]["DeliverableRow"];
             derivedPredecessors: components["schemas"]["DerivedDeliverable"][];
             derivedSuccessors: components["schemas"]["DerivedDeliverable"][];
@@ -18819,7 +22445,9 @@ export interface components {
             previousStatus: null | string;
             project: components["schemas"]["DeliverableProject"];
             relatedTasks?: null | components["schemas"]["DeliverableTaskRef"][];
+            seen?: null | components["schemas"]["WorkSeenDecoration"];
             transmittalUrl: null | string;
+            workActivity?: null | components["schemas"]["WorkActivityFact"];
         };
         DeliverableEdited: {
             /** Format: uuid */
@@ -18847,6 +22475,8 @@ export interface components {
             issuedDate: null | string;
             issuedTo: null | string;
             note: null | string;
+            /** Format: uuid */
+            purposeOfIssueId?: null | string;
             revision: null | string;
             /** Format: int32 */
             rowVersion: null | number;
@@ -18860,8 +22490,22 @@ export interface components {
             issuedDate: string;
             issuedTo: null | string;
             note: null | string;
+            registerInfo?: null | components["schemas"]["DeliverableIssueRegisterInfo"];
             revision: null | string;
             transmittalUrl: null | string;
+        };
+        DeliverableIssueRegisterInfo: {
+            purpose: null | string;
+            /** Format: uuid */
+            purposeOfIssueId: null | string;
+            /** Format: date */
+            responseDate: null | string;
+            returnCode: null | string;
+            /** Format: uuid */
+            returnCodeId: null | string;
+            returnLabel: null | string;
+            /** Format: int32 */
+            rowVersion: number;
         };
         DeliverableIssueResult: {
             /** Format: uuid */
@@ -18917,6 +22561,7 @@ export interface components {
             linkDeliverables: boolean;
             needsReason: boolean;
             readyToIssueGuard: null | string;
+            recordIssueResponse?: null | boolean;
             transitions: components["schemas"]["DeliverableTransitionOption"][];
         };
         DeliverableProject: {
@@ -18925,6 +22570,12 @@ export interface components {
             name: string;
             projectNumber: string;
             status: string;
+        };
+        DeliverableRegisterInfo: {
+            clientDrawingNumber: null | string;
+            currentIssue: null | components["schemas"]["DeliverableCurrentIssue"];
+            numberMatchesPattern: null | boolean;
+            numberPattern: null | string;
         };
         DeliverableRestored: {
             /** Format: uuid */
@@ -18977,6 +22628,7 @@ export interface components {
             projectDisciplineId: string;
             /** Format: uuid */
             projectId: string;
+            registerInfo?: null | components["schemas"]["DeliverableRegisterInfo"];
             /** Format: uuid */
             requiredReviewPackageId: null | string;
             requiresReview: boolean;
@@ -18986,6 +22638,7 @@ export interface components {
             revision: null | string;
             /** Format: int32 */
             rowVersion: number;
+            seen?: null | components["schemas"]["WorkSeenDecoration"];
             /** Format: int32 */
             sinceBaselineDays?: null | number;
             slipShown?: null | boolean;
@@ -18995,6 +22648,7 @@ export interface components {
             status: string;
             tasks: null | components["schemas"]["DeliverableTaskRead"][];
             typeName: null | string;
+            workActivity?: null | components["schemas"]["WorkActivityFact"];
         };
         DeliverableShift: {
             /** Format: uuid */
@@ -19110,6 +22764,76 @@ export interface components {
             updatedAt: string;
             /** Format: uuid */
             updatedBy: null | string;
+        };
+        DeliveryCheckView: {
+            blocking: boolean;
+            /** Format: uuid */
+            checkId: string;
+            checkingOwner: components["schemas"]["RecordContextPerson"];
+            /** Format: uuid */
+            disciplineId: null | string;
+            disciplineName: null | string;
+            known: boolean;
+            reasons: components["schemas"]["DeliveryReason"][];
+            state: null | string;
+        };
+        DeliveryManifestView: {
+            available: boolean;
+            currentRevision: null | components["schemas"]["DeliveryRevision"];
+            /** Format: uuid */
+            deliverableId: string;
+            /** Format: uuid */
+            id: string;
+            key: null | string;
+            recordedRevision: null | components["schemas"]["DeliveryRevision"];
+            required: boolean;
+            revisionMismatch: null | boolean;
+            status: null | string;
+            title: null | string;
+        };
+        DeliveryPresentation: {
+            checks: components["schemas"]["DeliveryCheckView"][];
+            checksComplete: boolean;
+            /** Format: date-time */
+            evaluatedAt: string;
+            issueAvailability: string;
+            manifest: components["schemas"]["DeliveryManifestView"][];
+            manifestComplete: boolean;
+            packageProblems: components["schemas"]["DeliveryProblem"][];
+            statusCounts: components["schemas"]["DeliveryStatusCount"][];
+            summary: components["schemas"]["DeliverySummary"];
+            /** Format: int32 */
+            unavailableDeliverables: number;
+        };
+        DeliveryProblem: {
+            code: string;
+            message: string;
+        };
+        DeliveryReason: {
+            code: string;
+            message: string;
+            source: null | components["schemas"]["RecordContextInputView"];
+            sourceExpected: boolean;
+        };
+        DeliveryRevision: {
+            /** Format: uuid */
+            id: string;
+            revision: string;
+            url: null | string;
+        };
+        DeliveryStatusCount: {
+            /** Format: int32 */
+            count: number;
+            status: string;
+        };
+        DeliverySummary: {
+            available: boolean;
+            /** Format: int32 */
+            blockingCheckCount: null | number;
+            /** Format: int32 */
+            packageProblemCount: number;
+            /** Format: int32 */
+            unknownCheckCount: number;
         };
         Delta: {
             /** Format: int32 */
@@ -19267,6 +22991,39 @@ export interface components {
             /** Format: uuid */
             leadUserId: null | string;
         };
+        DisciplineCapacity: {
+            /** Format: uuid */
+            disciplineId: null | string;
+            disciplineName: null | string;
+            /** Format: int32 */
+            people: number;
+            /** Format: int32 */
+            undatedUnassignedTasks: number;
+            weeks: components["schemas"]["DisciplineCapacityWeek"][];
+        };
+        DisciplineCapacityWeek: {
+            /** Format: double */
+            freeHours: null | number;
+            /** Format: double */
+            knownUnassignedTaskHours: number;
+            /** Format: double */
+            shortfallHours: null | number;
+            /** Format: int32 */
+            unavailablePeople: number;
+            /** Format: int32 */
+            unestimatedTasks: number;
+            /** Format: double */
+            unfilledRoleHours: number;
+            /** Format: date */
+            week: string;
+        };
+        DisciplineComparison: {
+            allocationCoverage: string;
+            /** Format: date-time */
+            asOf: string;
+            disciplines: components["schemas"]["ComparisonDiscipline"][];
+            weeks: string[];
+        };
         DisciplineIn: {
             /** Format: uuid */
             disciplineId: string;
@@ -19324,8 +23081,52 @@ export interface components {
         };
         DocumentLinkAddBody: {
             linkType?: null | string;
+            reference?: null | components["schemas"]["DocumentLinkReferenceInput"];
             title?: null | string;
             url: string;
+        };
+        DocumentLinkReferenceComparison: {
+            currentRevision?: null | string;
+            declaredRevision?: null | string;
+            state: string;
+        };
+        DocumentLinkReferenceContext: {
+            comparison: components["schemas"]["DocumentLinkReferenceComparison"];
+            reference: null | components["schemas"]["DocumentLinkReferenceValue"];
+            target: null | components["schemas"]["DocumentLinkReferenceTarget"];
+        };
+        DocumentLinkReferenceInput: {
+            declaredRevision?: null | string;
+            sourceSystem?: null | string;
+            stableSourceId?: null | string;
+        };
+        DocumentLinkReferenceTarget: {
+            currentRevision: null | string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            /** Format: int32 */
+            rowVersion: number;
+            status: string;
+        };
+        DocumentLinkReferenceUser: {
+            displayName: string;
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+        };
+        DocumentLinkReferenceValue: {
+            declaredRevision: null | string;
+            /** Format: date-time */
+            registeredAt: string;
+            /** Format: uuid */
+            registeredBy: string;
+            registeredByUser: null | components["schemas"]["DocumentLinkReferenceUser"];
+            /** @default Manual */
+            registrationKind: string;
+            sourceSystem: string;
+            stableSourceId: null | string;
         };
         DraftBody: {
             acceptanceCriteria: string;
@@ -19357,6 +23158,147 @@ export interface components {
             targetTaskId: null | string;
             title: string;
         };
+        DrawingImportCommitBody: {
+            contentBase64: string;
+            defaults?: null | components["schemas"]["DrawingImportDefaults"];
+            format: string;
+            previewFingerprint?: null | string;
+            /** Format: int32 */
+            projectRowVersion?: null | number;
+            reason?: null | string;
+            sourceReference?: null | string;
+            worksheet?: null | string;
+        };
+        DrawingImportCreated: {
+            rows: components["schemas"]["DrawingImportCreatedRow"][];
+            /** Format: int32 */
+            total: number;
+        };
+        DrawingImportCreatedRow: {
+            /** Format: uuid */
+            id: string;
+            key: string;
+            /** Format: uuid */
+            projectDisciplineId: string;
+            /** Format: int32 */
+            rowVersion: number;
+            /** Format: int32 */
+            sourceRow: number;
+            warnings: string[];
+        };
+        DrawingImportDefaults: {
+            /** Format: uuid */
+            deliverableTypeId?: null | string;
+            /** Format: uuid */
+            projectDisciplineId?: null | string;
+        };
+        DrawingImportDiagnostic: {
+            code: string;
+            /** Format: int32 */
+            column?: null | number;
+            message: string;
+            severity: components["schemas"]["DrawingImportDiagnosticSeverity"];
+            sheet?: null | string;
+            /** Format: int32 */
+            sourceRow?: null | number;
+        };
+        DrawingImportDiagnosticSeverity: number;
+        DrawingImportDisciplineOption: {
+            canCreate: boolean;
+            /** Format: uuid */
+            id: string;
+            name: string;
+        };
+        DrawingImportMessage: {
+            code: string;
+            field: string;
+            message: string;
+        };
+        DrawingImportOptions: {
+            canImport: boolean;
+            correctionReasonRequired: boolean;
+            disciplines: components["schemas"]["DrawingImportDisciplineOption"][];
+            /** Format: int32 */
+            projectRowVersion: number;
+            types: components["schemas"]["DrawingImportTypeOption"][];
+        };
+        DrawingImportPreview: {
+            canCommit: boolean;
+            complete: boolean;
+            contentSha256: null | string;
+            correctionReasonRequired: boolean;
+            /** Format: int32 */
+            creates: number;
+            diagnostics: components["schemas"]["DrawingImportDiagnostic"][];
+            /** Format: int32 */
+            errors: number;
+            format: string;
+            previewFingerprint: null | string;
+            /** Format: int32 */
+            projectRowVersion: number;
+            rows: components["schemas"]["DrawingImportPreviewRow"][];
+            selectedSheet: null | string;
+            sheets: components["schemas"]["DrawingImportSheet"][];
+            sourceReference: null | string;
+        };
+        DrawingImportPreviewBody: {
+            contentBase64: string;
+            defaults?: null | components["schemas"]["DrawingImportDefaults"];
+            format: string;
+            reason?: null | string;
+            sourceReference?: null | string;
+            worksheet?: null | string;
+        };
+        DrawingImportPreviewRow: {
+            classification: string;
+            errors: components["schemas"]["DrawingImportMessage"][];
+            hidden: boolean;
+            /** Format: int32 */
+            sourceRow: number;
+            sourceRowInferred: boolean;
+            sourceRowKey: null | string;
+            values: null | components["schemas"]["DrawingImportValues"];
+            warnings: components["schemas"]["DrawingImportMessage"][];
+        };
+        DrawingImportSheet: {
+            name: string;
+            part: string;
+            state: string;
+        };
+        DrawingImportTypeOption: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+        };
+        DrawingImportValues: {
+            clientDrawingNumber: null | string;
+            /** Format: uuid */
+            deliverableTypeId: string;
+            deliverableTypeName: string;
+            description: null | string;
+            /** Format: date */
+            dueDate: null | string;
+            dueFromMilestone: boolean;
+            /** Format: uuid */
+            milestoneId: null | string;
+            milestoneKey: null | string;
+            name: string;
+            ownerFromLead: boolean;
+            /** Format: uuid */
+            ownerId: string;
+            ownerName: string;
+            priority: string;
+            /** Format: uuid */
+            projectDisciplineId: string;
+            projectDisciplineName: string;
+            requiresReview: boolean;
+            /** Format: uuid */
+            reviewerId: null | string;
+            reviewerName: null | string;
+            revision: null | string;
+            /** Format: date */
+            startDate: null | string;
+        };
         EditProposedBody: {
             /** Format: int32 */
             entryRowVersion: number;
@@ -19368,6 +23310,17 @@ export interface components {
             version: components["schemas"]["VersionInput"];
             /** Format: int32 */
             versionRowVersion: number;
+        };
+        EditorRead: {
+            canEdit: boolean;
+            choices: components["schemas"]["CertificationChoice"][];
+            facts: components["schemas"]["Facts"];
+            /** Format: int32 */
+            rowVersion: number;
+            /** Format: date */
+            today: string;
+            /** Format: uuid */
+            userId: string;
         };
         EntraClientConfig: {
             apiScope: null | string;
@@ -19382,6 +23335,19 @@ export interface components {
             taskId: string;
             /** Format: date */
             workDate: string;
+        };
+        EntryList: {
+            /** Format: date-time */
+            asOf?: null | string;
+            filters?: unknown;
+            items: components["schemas"]["EntryRow"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            sort?: null | string;
+            /** Format: int32 */
+            totalCount: number;
         };
         EntryRow: {
             canChangeVisibility: boolean;
@@ -19489,6 +23455,93 @@ export interface components {
             /** Format: int32 */
             rowVersion: number;
         };
+        ExternalReviewCodeRead: {
+            code: string;
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** Format: int32 */
+            rowVersion: number;
+        };
+        ExternalReviewCommentBody: {
+            /** Format: uuid */
+            issueId?: null | string;
+            /** Format: uuid */
+            projectDisciplineId: string;
+            /** Format: uuid */
+            resolverId: string;
+            severity: string;
+            text: string;
+        };
+        ExternalReviewOptions: {
+            canRecord: boolean;
+            issuedRevisions: components["schemas"]["ReviewIssuedSourceRead"][];
+            parties: components["schemas"]["ExternalReviewPartyRead"][];
+            returnCodes: components["schemas"]["ExternalReviewCodeRead"][];
+        };
+        ExternalReviewPartyRead: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            organisation: null | string;
+            /** Format: int32 */
+            rowVersion: number;
+        };
+        ExternalReviewRead: {
+            /** Format: int32 */
+            commentCount: number;
+            /** Format: uuid */
+            deliverableIssueId: string;
+            /** Format: uuid */
+            externalPartyId: string;
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            packageId: string;
+            partyName: string;
+            partyOrganisation: null | string;
+            partyState: string;
+            /** Format: date */
+            receivedDate: string;
+            /** Format: date-time */
+            recordedAt: string;
+            /** Format: uuid */
+            recordedBy: null | string;
+            returnCode: string;
+            /** Format: uuid */
+            returnCodeId: string;
+            returnLabel: string;
+            /** Format: uuid */
+            roundId: string;
+            /** Format: int32 */
+            rowVersion: number;
+        };
+        ExternalReviewRecordBody: {
+            comments: components["schemas"]["ExternalReviewCommentBody"][];
+            /** Format: uuid */
+            deliverableIssueId: string;
+            /** Format: uuid */
+            externalPartyId: string;
+            /** Format: int32 */
+            issueRowVersion: null | number;
+            /** Format: int32 */
+            partyRowVersion: null | number;
+            reason: string;
+            /** Format: date */
+            receivedDate: string;
+            /** Format: uuid */
+            requestId: string;
+            /** Format: uuid */
+            returnCodeId: string;
+            /** Format: int32 */
+            returnCodeRowVersion: null | number;
+            /** Format: int32 */
+            rowVersion: null | number;
+        };
+        Facts: {
+            certifications: components["schemas"]["CertificationFact"][];
+            notices: components["schemas"]["Notices"];
+        };
         FileItemRow: {
             /** Format: uuid */
             itemId: string;
@@ -19501,6 +23554,7 @@ export interface components {
             /** Format: date-time */
             addedAt: string;
             addedBy: null | string;
+            addedByUser?: null | components["schemas"]["WorkspaceFileUserReference"];
             /** Format: uuid */
             id: string;
             isNetworkPath: boolean;
@@ -19512,18 +23566,99 @@ export interface components {
             canAdd: boolean;
             /** Format: int32 */
             count: number;
+            identityColour?: null | string;
             items: components["schemas"]["FileItemRow"][];
             name: string;
             /** Format: uuid */
             projectId: string;
             projectNumber: string;
         };
+        FileScreenApplied: {
+            /** Format: uuid */
+            addedById: null | string;
+            addedThisWeek: boolean;
+            /** Format: uuid */
+            disciplineId: null | string;
+        };
+        FileScreenAuthorChoice: {
+            displayName: string;
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+        };
+        FileScreenDisciplineChoice: {
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+            name: string;
+        };
+        FileScreenLinkContext: {
+            canChange: boolean;
+            discipline: null | components["schemas"]["FileScreenDisciplineChoice"];
+            /** Format: uuid */
+            linkId: string;
+            referenceContext: components["schemas"]["DocumentLinkReferenceContext"];
+            /** Format: int32 */
+            rowVersion: number;
+        };
+        FileScreenMissingDeliverable: {
+            canAddLink: boolean;
+            currentRevision: null | string;
+            /** Format: uuid */
+            disciplineId: string;
+            disciplineName: string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            /** Format: uuid */
+            projectId: string;
+            projectName: string;
+            projectNumber: string;
+            /** Format: int32 */
+            rowVersion: number;
+            status: string;
+        };
+        FileScreenMissingDeliverables: {
+            items: components["schemas"]["FileScreenMissingDeliverable"][];
+            /** Format: int32 */
+            total: number;
+            truncated: boolean;
+        };
+        FileScreenRead: {
+            applied: components["schemas"]["FileScreenApplied"];
+            /** Format: date-time */
+            asOf: string;
+            authors: components["schemas"]["FileScreenAuthorChoice"][];
+            authorsTruncated: boolean;
+            disciplines: components["schemas"]["FileScreenDisciplineChoice"][];
+            disciplinesTruncated: boolean;
+            links: components["schemas"]["FileScreenLinkContext"][];
+            missingDeliverables: components["schemas"]["FileScreenMissingDeliverables"];
+            orgTimeZone: string;
+            /** Format: date */
+            weekFrom: string;
+            /** Format: date */
+            weekThrough: string;
+        };
         FilesRead: {
             projects: components["schemas"]["FileProjectRow"][];
+            screen?: null | components["schemas"]["FileScreenRead"];
             /** Format: int32 */
             total: number;
             truncated: boolean;
             types: string[];
+        };
+        FindRoomResult: {
+            /** Format: date-time */
+            asOf: string;
+            /** Format: int32 */
+            horizonWeeks: number;
+            /** Format: double */
+            hoursPerWeek: number;
+            matches: components["schemas"]["RoomPerson"][];
+            unavailable: components["schemas"]["RoomUnavailable"][];
+            weeks: string[];
         };
         FindingAction: {
             action: string;
@@ -19533,6 +23668,7 @@ export interface components {
             reason: string;
             /** Format: uuid */
             requestId: string;
+            responseOutcome?: null | string;
             /** Format: int32 */
             rowVersion: number;
         };
@@ -19568,12 +23704,15 @@ export interface components {
             key: string;
             /** Format: uuid */
             ownerId: null | string;
+            ownerKind?: null | string;
             ownerName: null | string;
             /** Format: uuid */
             projectId: string;
             projectNumber: string;
+            seen?: null | components["schemas"]["WorkSeenDecoration"];
             status: string;
             title: string;
+            workActivity?: null | components["schemas"]["WorkActivityFact"];
         };
         FollowUpResponse: {
             items: components["schemas"]["FollowUpItem"][];
@@ -19611,8 +23750,11 @@ export interface components {
             unread: number;
         };
         GridResult: {
+            /** Format: date-time */
+            asOf?: null | string;
             /** Format: date */
             currentWeek: string;
+            deadlines?: null | components["schemas"]["PlanningDeadlineContext"];
             draftAccess: boolean;
             /** Format: date-time */
             evaluatedAt: string;
@@ -19649,10 +23791,13 @@ export interface components {
         };
         HandoffDetail: {
             changeAssessments: components["schemas"]["HandoffChangeAssessment"][];
+            context?: null | components["schemas"]["RecordContextView"];
             history: components["schemas"]["HandoffHistoryRow"][];
             permissions: components["schemas"]["HandoffDetailPermissions"];
             revisions: components["schemas"]["HandoffRevisionRow"][];
             row: components["schemas"]["HandoffRow"];
+            seen?: null | components["schemas"]["WorkSeenDecoration"];
+            workActivity?: null | components["schemas"]["WorkActivityFact"];
         };
         HandoffDetailPermissions: {
             assign: components["schemas"]["HandoffPermission"];
@@ -19679,6 +23824,24 @@ export interface components {
             revisionId: null | string;
             toStatus: string;
         };
+        HandoffLinkedTask: {
+            /** Format: date */
+            dueDate: null | string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+            relationships: components["schemas"]["HandoffTaskRelationship"][];
+            status: string;
+        };
+        HandoffLinkedTaskPage: {
+            /** Format: uuid */
+            handoffId: string;
+            /** Format: uuid */
+            projectId: string;
+            summary: components["schemas"]["HandoffReadinessLinks"];
+            tasks: null | components["schemas"]["PageOfHandoffLinkedTask"];
+        };
         HandoffMoveBody: {
             criteriaOutcome: null | string;
             reason: null | string;
@@ -19703,6 +23866,25 @@ export interface components {
             displayName: string;
             /** Format: uuid */
             id: string;
+            personNotices?: null | components["schemas"]["Notices"];
+        };
+        HandoffReadinessLinks: {
+            /** Format: int32 */
+            constraintLinkedTaskCount: null | number;
+            /** Format: int32 */
+            datedTaskCount: null | number;
+            directReceiptSatisfied: null | boolean;
+            /** Format: int32 */
+            directTaskCount: null | number;
+            /** Format: date */
+            firstRecordedDueDate: null | string;
+            hasPromisedDateMismatch: boolean;
+            isHistoricalMismatch: boolean;
+            isOverdue: boolean;
+            scope: string;
+            state: string;
+            /** Format: int32 */
+            taskCount: null | number;
         };
         HandoffRevisionRow: {
             acceptanceCriteria: string;
@@ -19762,6 +23944,7 @@ export interface components {
             ownersAvailable: boolean;
             /** Format: date */
             promisedBy: null | string;
+            readinessLinks?: null | components["schemas"]["HandoffReadinessLinks"];
             receiverName: null | string;
             /** Format: uuid */
             receivingDisciplineId: string;
@@ -19816,6 +23999,17 @@ export interface components {
             ownerId: null | string;
             /** Format: uuid */
             projectDisciplineId: string;
+        };
+        HandoffTaskRelationship: {
+            affectedOwner: null | components["schemas"]["RecordContextPerson"];
+            /** Format: uuid */
+            constraintId: null | string;
+            constraintKey: null | string;
+            /** Format: date */
+            constraintNeededBy: null | string;
+            constraintState: null | string;
+            relationship: string;
+            removalOwner: null | components["schemas"]["RecordContextPerson"];
         };
         HandoffTransition: {
             permission: components["schemas"]["HandoffPermission"];
@@ -19886,13 +24080,89 @@ export interface components {
             /** Format: uuid */
             officeId: null | string;
         };
+        HomeCapacity: {
+            above100Path: string;
+            /** Format: date-time */
+            asOf: string;
+            disciplines: components["schemas"]["HomeCapacityDiscipline"][];
+            plannerPath: string;
+            /** Format: date */
+            through: string;
+            totals: components["schemas"]["HomeCapacityTotals"];
+            /** Format: date */
+            week: string;
+        };
+        HomeCapacityDiscipline: {
+            /** Format: uuid */
+            disciplineId: null | string;
+            disciplineName: null | string;
+            plannerPath: string;
+            totals: components["schemas"]["HomeCapacityTotals"];
+        };
+        HomeCapacityTotals: {
+            /** Format: int32 */
+            above100People: number;
+            /** Format: double */
+            availableHours: null | number;
+            /** Format: double */
+            freeHours: null | number;
+            /** Format: double */
+            grossHours: null | number;
+            /** Format: int32 */
+            missingWeeks: number;
+            /** Format: int32 */
+            partialPeople: number;
+            /** Format: int32 */
+            pct: null | number;
+            /** Format: int32 */
+            people: number;
+            /** Format: double */
+            plannedHours: null | number;
+            /** Format: double */
+            possibleHours: null | number;
+            /** Format: int32 */
+            provisionalPeople: number;
+            /** Format: double */
+            timeAwayHours: null | number;
+        };
+        HomeCountContext: {
+            /** Format: int32 */
+            busiestDueCount: number;
+            /** Format: date */
+            busiestDueDate: null | string;
+            /** Format: date */
+            dueFrom: string;
+            /** Format: date */
+            dueTo: string;
+            /** Format: int32 */
+            dueWithinDays: number;
+            /** Format: int32 */
+            dueWithinDeliverables: number;
+            /** Format: int32 */
+            dueWithinMilestones: number;
+            /** Format: int32 */
+            dueWithinTasks: number;
+            /** Format: int32 */
+            homeDisciplineCount: number;
+            onTrackCriticalProjects: string[];
+            openTasksProject: null | components["schemas"]["HomeProjectCount"];
+            /** Format: int32 */
+            openTasksWithoutDueDate: number;
+            overdueTasksProject: null | components["schemas"]["HomeProjectCount"];
+            projectIds: string[];
+            projectStatuses: string[];
+            /** Format: int32 */
+            projectsInScope: number;
+        };
         HomeDeadline: {
             /** Format: date */
             date: string;
             /** Format: uuid */
             id: string;
+            identityColour?: null | string;
             key: string;
             name: string;
+            note?: null | components["schemas"]["HomeDeadlineNote"];
             overdue: boolean;
             owner: null | string;
             /** Format: uuid */
@@ -19901,10 +24171,21 @@ export interface components {
             status: null | string;
             type: string;
         };
+        HomeDeadlineNote: {
+            /** Format: int32 */
+            days: number;
+            kind: string;
+        };
         HomeDeadlines: {
             items: components["schemas"]["HomeDeadline"][];
             /** Format: int32 */
+            page?: null | number;
+            /** Format: int32 */
+            pageSize?: null | number;
+            /** Format: int32 */
             total: number;
+            /** Format: int32 */
+            totalPages?: null | number;
             truncated: boolean;
         };
         HomeLane: {
@@ -19937,7 +24218,23 @@ export interface components {
             /** Format: int32 */
             pct: null | number;
         };
+        HomePresetBody: {
+            code: null | string;
+        };
+        HomePresetContext: {
+            available: string[];
+            code: null | string;
+            /** Format: int32 */
+            disciplines: number;
+            /** Format: int32 */
+            people: number;
+            /** Format: int32 */
+            projects: number;
+            savedPreset: null | string;
+            unownedMilestonesExcluded: boolean;
+        };
         HomeProject: {
+            identityColour?: null | string;
             lanes: components["schemas"]["HomeLane"][];
             name: string;
             /** Format: uuid */
@@ -19946,22 +24243,94 @@ export interface components {
             /** Format: int32 */
             total: number;
         };
+        HomeProjectCount: {
+            /** Format: int32 */
+            count: number;
+            /** Format: uuid */
+            projectId: string;
+            projectNumber: string;
+        };
         HomeRead: {
             /** Format: date-time */
             asOf: string;
+            countContext?: null | components["schemas"]["HomeCountContext"];
             /** Format: date */
             from: string;
             isDefault: boolean;
             layout: components["schemas"]["Widget"][];
             metrics: components["schemas"]["HomeMetrics"];
             onHold: components["schemas"]["HomeOnHold"];
+            preset?: null | components["schemas"]["HomePresetContext"];
+            runway?: null | components["schemas"]["HomeRunway"];
             tasksByProject: components["schemas"]["HomeProject"][];
             tasksByStatus: components["schemas"]["HomeLane"][];
             /** Format: date */
             to: string;
             /** Format: date */
             today: string;
+            trends?: null | components["schemas"]["HomeTrendsRead"];
             upcomingDeadlines: components["schemas"]["HomeDeadlines"];
+            weeklyCapacity?: null | components["schemas"]["HomeCapacity"];
+        };
+        HomeRunway: {
+            days: components["schemas"]["HomeRunwayDay"][];
+            /** Format: date */
+            from: string;
+            /** Format: date */
+            to: string;
+            truncatedRange: boolean;
+        };
+        HomeRunwayDay: {
+            /** Format: date */
+            date: string;
+            items: components["schemas"]["HomeRunwayItem"][];
+            nonWorking: boolean;
+            /** Format: int32 */
+            total: number;
+        };
+        HomeRunwayItem: {
+            /** Format: uuid */
+            id: string;
+            identityColour?: null | string;
+            key: string;
+            name: string;
+            /** Format: uuid */
+            projectId: string;
+            projectNumber: string;
+            type: string;
+        };
+        HomeTrendMetric: {
+            /** Format: int32 */
+            current: null | number;
+            /** Format: int32 */
+            delta: null | number;
+            id: string;
+            /** Format: int32 */
+            previous: null | number;
+            reason: null | string;
+            state: string;
+            tone: string;
+        };
+        HomeTrendProject: {
+            /** Format: date-time */
+            capturedAt: string;
+            projectNumber: string;
+            /** Format: date */
+            snapshotDate: string;
+        };
+        HomeTrendsRead: {
+            /** Format: int32 */
+            compareDays: number;
+            /** Format: date-time */
+            compareFrom: null | string;
+            /** Format: date-time */
+            compareThrough: null | string;
+            /** Format: int32 */
+            excludedProjects: number;
+            metrics: components["schemas"]["HomeTrendMetric"][];
+            projects: components["schemas"]["HomeTrendProject"][];
+            /** Format: date */
+            targetDate: string;
         };
         HrIdentity: {
             displayName: string;
@@ -19969,6 +24338,7 @@ export interface components {
             hrSourceSystem: null | string;
             /** Format: uuid */
             id: string;
+            personNotices?: null | components["schemas"]["Notices"];
             /** Format: int32 */
             rowVersion: number;
         };
@@ -20125,12 +24495,15 @@ export interface components {
             verifiedEntries: number;
         };
         IssueDetailData: {
+            context?: null | components["schemas"]["RecordContextView"];
             description: null | string;
             issue: components["schemas"]["IssueRow"];
             links: components["schemas"]["ItemLinkRow"][];
             originRisk: null | components["schemas"]["IssueOriginRisk"];
             permissions: components["schemas"]["IssuePermissions"];
             project: components["schemas"]["RegisterProject"];
+            seen?: null | components["schemas"]["WorkSeenDecoration"];
+            workActivity?: null | components["schemas"]["WorkActivityFact"];
         };
         IssueDocumentBody: {
             externalTopicId: null | string;
@@ -20238,6 +24611,8 @@ export interface components {
             resolution: null | string;
             /** Format: date */
             resolvedDate: null | string;
+            /** Format: uuid */
+            rootCauseCategoryId?: null | string;
             /** Format: int32 */
             rowVersion: null | number;
             toStatus: string;
@@ -20261,6 +24636,81 @@ export interface components {
             comment: boolean;
             edit: components["schemas"]["RegisterPermission"];
             transitions: components["schemas"]["RegisterTransition"][];
+        };
+        IssueResponseBody: {
+            /** Format: int32 */
+            issueRowVersion: null | number;
+            reason: null | string;
+            /** Format: date */
+            responseDate: null | string;
+            /** Format: uuid */
+            returnCodeId: null | string;
+            /** Format: int32 */
+            rowVersion: null | number;
+        };
+        IssueResponseSaved: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            issueId: string;
+            /** Format: int32 */
+            issueRowVersion: number;
+            /** Format: int32 */
+            rowVersion: number;
+        };
+        IssueReturnCodeRow: {
+            auditKey: null | string;
+            auditName: null | string;
+            /** Format: uuid */
+            auditProjectId: null | string;
+            auditType: string;
+            code: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            createdBy: null | string;
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+            name: string;
+            /** Format: int32 */
+            rowVersion: number;
+            /** Format: int32 */
+            sortOrder: number;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: uuid */
+            updatedBy: null | string;
+        };
+        IssueRootCauseChoice: {
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+            name: string;
+            /** Format: int32 */
+            sortOrder: number;
+        };
+        IssueRootCauseCount: {
+            /** Format: uuid */
+            categoryId: string;
+            /** Format: int32 */
+            count: number;
+            isActive: boolean;
+            name: string;
+        };
+        IssueRootCauseSummary: {
+            causes: components["schemas"]["IssueRootCauseCount"][];
+            /** Format: int32 */
+            notRecordedCount: number;
+            /** Format: uuid */
+            projectId: string;
+            /** Format: int32 */
+            resolvedTotal: number;
+        };
+        IssueRootCauseValue: {
+            /** Format: uuid */
+            categoryId: string;
+            recordedName: string;
         };
         IssueRow: {
             affectedDisciplineIds: string[];
@@ -20299,6 +24749,7 @@ export interface components {
             resolution: null | string;
             /** Format: date */
             resolvedDate: null | string;
+            rootCause?: null | components["schemas"]["IssueRootCauseValue"];
             /** Format: int32 */
             rowVersion: number;
             severity: string;
@@ -20338,6 +24789,8 @@ export interface components {
             key: string;
             name: string;
             person: null | string;
+            /** Format: uuid */
+            personId?: null | string;
             relation: string;
             status: null | string;
             /** Format: uuid */
@@ -20363,6 +24816,12 @@ export interface components {
         };
         LayoutBody: {
             widgets: components["schemas"]["Widget"][];
+        };
+        LeadFact: {
+            /** Format: uuid */
+            id: null | string;
+            name: null | string;
+            state: string;
         };
         LeadUnitResponse: {
             /** Format: uuid */
@@ -20458,6 +24917,7 @@ export interface components {
             id: string;
             isNetworkPath: boolean;
             linkType: string;
+            referenceContext?: null | components["schemas"]["DocumentLinkReferenceContext"];
             /** Format: int32 */
             rowVersion: number;
             title: string;
@@ -20485,6 +24945,20 @@ export interface components {
             title: string;
             type: string;
         };
+        ListPage: {
+            /** Format: date-time */
+            asOf?: null | string;
+            filters?: unknown;
+            groups?: null | components["schemas"]["TaskListGroup"][];
+            items: components["schemas"]["TaskQueriesRow"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            sort?: null | string;
+            /** Format: int32 */
+            totalCount: number;
+        };
         ListTask: {
             disciplineName: string;
             /** Format: date */
@@ -20509,6 +24983,7 @@ export interface components {
             confirmed: number;
             /** Format: double */
             hours: number;
+            includesProposed?: null | boolean;
             /** Format: double */
             pct: number;
             /** Format: double */
@@ -20706,9 +25181,11 @@ export interface components {
             relatedTaskId: null | string;
             /** Format: int32 */
             rowVersion: number;
+            seen?: null | components["schemas"]["WorkSeenDecoration"];
             status: string;
             taskKey: null | string;
             text: string;
+            workActivity?: null | components["schemas"]["WorkActivityFact"];
         };
         MeetingBody: {
             /** Format: uuid */
@@ -20843,6 +25320,7 @@ export interface components {
         };
         MilestoneDetail: {
             completesPhase: null | components["schemas"]["MilestonePhase"];
+            context?: null | components["schemas"]["RecordContextView"];
             deliverables: components["schemas"]["DeliverableRow"][];
             directTasks: components["schemas"]["MilestoneTask"][];
             milestone: components["schemas"]["MilestoneMilestoneRow"];
@@ -20990,6 +25468,8 @@ export interface components {
             status: string;
         };
         MyStaffList: {
+            /** Format: date-time */
+            asOf?: null | string;
             canSeeAll: boolean;
             people: components["schemas"]["MyStaffPerson"][];
             scope: string;
@@ -21023,6 +25503,7 @@ export interface components {
             open: number;
             /** Format: int32 */
             overdue: number;
+            personFacts?: null | components["schemas"]["Facts"];
             /** Format: int32 */
             projects: number;
             /** Format: int32 */
@@ -21068,8 +25549,10 @@ export interface components {
             /** Format: date */
             requiredByDate: string;
             role: string;
+            seen?: null | components["schemas"]["WorkSeenDecoration"];
             status: string;
             subject: string;
+            workActivity?: null | components["schemas"]["WorkActivityFact"];
         };
         MyWorkFollow: {
             level: string;
@@ -21086,7 +25569,9 @@ export interface components {
             /** Format: uuid */
             projectId: string;
             projectNumber: string;
+            seen?: null | components["schemas"]["WorkSeenDecoration"];
             status: null | string;
+            workActivity?: null | components["schemas"]["WorkActivityFact"];
         };
         MyWorkNextMilestone: {
             /** Format: date */
@@ -21114,13 +25599,17 @@ export interface components {
             projectNumber: string;
             reportedHealth: string;
             roles: string[];
+            seen?: null | components["schemas"]["WorkSeenDecoration"];
             status: string;
+            workActivity?: null | components["schemas"]["WorkActivityFact"];
         };
         MyWorkReviews: {
             deliverables: components["schemas"]["DeliverableRow"][];
             tasks: components["schemas"]["TaskQueriesRow"][];
         };
         MyWorkSuccessor: {
+            /** Format: uuid */
+            assigneeId?: null | string;
             assigneeName: null | string;
             /** Format: date */
             dueDate: null | string;
@@ -21180,6 +25669,35 @@ export interface components {
             /** Format: int32 */
             rowVersion: number;
         };
+        NoticePreferencesRead: {
+            holdImmediateEmailWhenAway: boolean;
+            noticeDigestFrequency: string;
+            /** Format: int32 */
+            revision: number;
+            timeReminderEnabled: boolean;
+            timeReminderTimeLocal: null | string;
+            /** Format: int32 */
+            timeReminderWeekday: null | number;
+        };
+        NoticePreferencesSetBody: {
+            holdImmediateEmailWhenAway?: null | boolean;
+            noticeDigestFrequency?: null | string;
+            /** Format: int32 */
+            revision: number;
+            timeReminderEnabled?: null | boolean;
+            timeReminderTimeLocal?: null | string;
+            /** Format: int32 */
+            timeReminderWeekday?: null | number;
+        };
+        Notices: {
+            /** Format: date */
+            endDate: null | string;
+            ends: boolean;
+            personType: null | string;
+            /** Format: date */
+            startDate: null | string;
+            starts: boolean;
+        };
         NotificationPulse: {
             projectStamp?: null | string;
             stamp: string;
@@ -21209,6 +25727,74 @@ export interface components {
             title: string;
             /** Format: date-time */
             updatedAt: string;
+        };
+        NotificationScreenContextCoverage: {
+            /** Format: date-time */
+            asOf: string;
+            /** Format: int32 */
+            known: number;
+            /** Format: int32 */
+            unknown: number;
+        };
+        NotificationScreenDelivery: {
+            /** Format: date-time */
+            acceptedAt?: null | string;
+            historyCoverage: string;
+            /** Format: int32 */
+            knownOccurrences?: null | number;
+            /** Format: int32 */
+            realEmailedOccurrences?: null | number;
+            state: string;
+            /** Format: int32 */
+            totalOccurrences?: null | number;
+            /** Format: int32 */
+            uncertainOccurrences?: null | number;
+        };
+        NotificationScreenFollow: {
+            level: null | string;
+            /** Format: uuid */
+            projectId: string;
+            projectNumber: string;
+            source: null | string;
+        };
+        NotificationScreenPage: {
+            contextCoverage: components["schemas"]["NotificationScreenContextCoverage"];
+            items: components["schemas"]["NotificationScreenRow"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+        };
+        NotificationScreenRow: {
+            notification: components["schemas"]["NotificationRow"];
+            screen: components["schemas"]["NotificationScreenState"];
+        };
+        NotificationScreenState: {
+            contextState: string;
+            delivery: components["schemas"]["NotificationScreenDelivery"];
+            follow: null | components["schemas"]["NotificationScreenFollow"];
+            needsYourAction: null | boolean;
+        };
+        NumberingBody: {
+            pattern: null | string;
+            reason: null | string;
+            /** Format: int32 */
+            rowVersion: null | number;
+        };
+        NumberingRead: {
+            canEdit: boolean;
+            pattern: null | string;
+            /** Format: int32 */
+            rowVersion: number;
+        };
+        NumberingSaved: {
+            /** Format: uuid */
+            id: string;
+            pattern: null | string;
+            /** Format: int32 */
+            rowVersion: number;
         };
         OfferBody: {
             /** Format: double */
@@ -21410,6 +25996,12 @@ export interface components {
             /** Format: uuid */
             updatedBy: null | string;
         };
+        Organisation: {
+            homeDiscipline: null | components["schemas"]["Reference"];
+            office: null | components["schemas"]["Reference"];
+            supervisor: null | components["schemas"]["Reference"];
+            unit?: null | components["schemas"]["Reference"];
+        };
         OrganisationLevelRow: {
             /** Format: uuid */
             id: string;
@@ -21422,6 +26014,7 @@ export interface components {
             email: string;
             /** Format: uuid */
             id: string;
+            personNotices?: null | components["schemas"]["Notices"];
             /** Format: int32 */
             rowVersion: number;
             /** Format: uuid */
@@ -21556,6 +26149,17 @@ export interface components {
             /** Format: int32 */
             totalCount: number;
         };
+        PageOfCalendarScreenDeadline: {
+            filters?: unknown;
+            items: components["schemas"]["CalendarScreenDeadline"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            sort?: null | string;
+            /** Format: int32 */
+            totalCount: number;
+        };
         PageOfChangeRow: {
             filters?: unknown;
             items: components["schemas"]["ChangeRow"][];
@@ -21578,9 +26182,20 @@ export interface components {
             /** Format: int32 */
             totalCount: number;
         };
-        PageOfEntryRow: {
+        PageOfExternalReviewRead: {
             filters?: unknown;
-            items: components["schemas"]["EntryRow"][];
+            items: components["schemas"]["ExternalReviewRead"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            sort?: null | string;
+            /** Format: int32 */
+            totalCount: number;
+        };
+        PageOfHandoffLinkedTask: {
+            filters?: unknown;
+            items: components["schemas"]["HandoffLinkedTask"][];
             /** Format: int32 */
             page: number;
             /** Format: int32 */
@@ -21633,6 +26248,17 @@ export interface components {
             /** Format: int32 */
             totalCount: number;
         };
+        PageOfReviewIssuedSourceRead: {
+            filters?: unknown;
+            items: components["schemas"]["ReviewIssuedSourceRead"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            sort?: null | string;
+            /** Format: int32 */
+            totalCount: number;
+        };
         PageOfReviewRow: {
             filters?: unknown;
             items: components["schemas"]["ReviewRow"][];
@@ -21644,9 +26270,31 @@ export interface components {
             /** Format: int32 */
             totalCount: number;
         };
-        PageOfRow: {
+        PageOfTemplateVersionProject: {
             filters?: unknown;
-            items: components["schemas"]["TaskQueriesRow"][];
+            items: components["schemas"]["TemplateVersionProject"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            sort?: null | string;
+            /** Format: int32 */
+            totalCount: number;
+        };
+        PageOfWeeklyConstraintAgendaRow: {
+            filters?: unknown;
+            items: components["schemas"]["WeeklyConstraintAgendaRow"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            sort?: null | string;
+            /** Format: int32 */
+            totalCount: number;
+        };
+        PageOfWeeklyProposedAgendaRow: {
+            filters?: unknown;
+            items: components["schemas"]["WeeklyProposedAgendaRow"][];
             /** Format: int32 */
             page: number;
             /** Format: int32 */
@@ -21686,10 +26334,83 @@ export interface components {
             organisation: null | string;
             role: null | string;
         };
+        PeekDiscipline: {
+            /** Format: uuid */
+            id: string;
+            lead: components["schemas"]["PeekLead"];
+            name: string;
+            /** Format: int32 */
+            overdueTasks: number;
+        };
+        PeekLead: {
+            /** Format: uuid */
+            id: null | string;
+            name: null | string;
+            state: string;
+        };
+        PeekView: {
+            /** Format: date-time */
+            asOf: string;
+            disciplines: components["schemas"]["PeekDiscipline"][];
+            /** Format: uuid */
+            id: string;
+            milestones: components["schemas"]["ProjectMilestoneRef"][];
+            name: string;
+            projectNumber: string;
+            statusNote: null | components["schemas"]["NoteView"];
+            statusNoteEnabled: boolean;
+        };
         Person: {
             displayName: string;
             /** Format: uuid */
             id: string;
+        };
+        PersonFactsCreateBody: {
+            /** Format: uuid */
+            certificationTagId: string;
+            /** Format: date */
+            expiresOn: null | string;
+            reason: null | string;
+            /** Format: int32 */
+            rowVersion: null | number;
+        };
+        PersonPanelRead: {
+            /** Format: date-time */
+            asOf: string;
+            displayName: string;
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+            jobTitle: null | string;
+            organisationFacts: components["schemas"]["Organisation"];
+            personFacts?: null | components["schemas"]["Facts"];
+            projects: components["schemas"]["PersonProjectPage"];
+            /** Format: date */
+            today: string;
+            /** Format: date */
+            week: string;
+        };
+        PersonProjectMembership: {
+            leadOf: components["schemas"]["Reference"][];
+            /** Format: uuid */
+            memberId: string;
+            primaryDiscipline: null | components["schemas"]["Reference"];
+            /** Format: uuid */
+            projectId: string;
+            projectName: string;
+            projectNumber: string;
+            projectStatus: string;
+            responsibilityNote: null | string;
+            roles: string[];
+        };
+        PersonProjectPage: {
+            items: components["schemas"]["PersonProjectMembership"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            total: number;
         };
         PersonTaskLoad: {
             projects: components["schemas"]["PersonTaskProject"][];
@@ -21736,6 +26457,7 @@ export interface components {
             /** Format: uuid */
             officeId: null | string;
             onProject?: null | boolean;
+            personNotices?: null | components["schemas"]["Notices"];
             /** Format: uuid */
             supervisorId: null | string;
         };
@@ -21810,6 +26532,25 @@ export interface components {
             /** Format: date */
             workDate: string;
         };
+        PlanningDeadlineContext: {
+            /** Format: date-time */
+            asOf: string;
+            dated: components["schemas"]["PlanningDeadlineRow"][];
+            undated: components["schemas"]["PlanningDeadlineRow"][];
+            weeks: string[];
+        };
+        PlanningDeadlineRow: {
+            /** Format: date */
+            date: null | string;
+            /** Format: uuid */
+            id: string;
+            itemType: string;
+            key: string;
+            name: string;
+            /** Format: uuid */
+            projectId: string;
+            projectNumber: string;
+        };
         PlanningPersonRow: {
             approvedAllocations: components["schemas"]["ApprovedRow"][];
             canCreateManagerEntry: boolean;
@@ -21840,6 +26581,41 @@ export interface components {
             /** Format: int32 */
             rowVersion: number;
         };
+        PortfolioCardFact: {
+            /** Format: int32 */
+            clients: number;
+            /** Format: int32 */
+            projects: number;
+        };
+        PortfolioChangeMetric: {
+            /** Format: int32 */
+            count: null | number;
+            /** Format: int32 */
+            observed: number;
+            projects: components["schemas"]["PortfolioChangedProject"][];
+            /** Format: int32 */
+            unavailableProjects: number;
+        };
+        PortfolioChangedProject: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            projectNumber: string;
+        };
+        PortfolioChanges: {
+            /** Format: int32 */
+            days: number;
+            /** Format: date */
+            fromDate: string;
+            health: components["schemas"]["PortfolioChangeMetric"];
+            milestones: components["schemas"]["PortfolioChangeMetric"];
+            scopeCeilingReached: boolean;
+            /** Format: int32 */
+            scopeProjects: number;
+            status: components["schemas"]["PortfolioChangeMetric"];
+            /** Format: date-time */
+            through: string;
+        };
         PortfolioTiles: {
             /** Format: int32 */
             active: number;
@@ -21855,6 +26631,12 @@ export interface components {
             yellow: number;
         };
         PortfolioView: {
+            /** Format: date-time */
+            asOf?: null | string;
+            cardFacts?: null | {
+                [key: string]: components["schemas"]["PortfolioCardFact"];
+            };
+            changes?: null | components["schemas"]["PortfolioChanges"];
             ownOnly: boolean;
             projects: components["schemas"]["JsonArray"];
             tiles: components["schemas"]["PortfolioTiles"];
@@ -21972,6 +26754,14 @@ export interface components {
             /** Format: int32 */
             tasks: number;
         };
+        ProgressView: {
+            /** Format: int32 */
+            elapsedPct: null | number;
+            /** Format: int32 */
+            progressPct: null | number;
+            /** Format: date */
+            today: string;
+        };
         ProjectClientRef: {
             /** Format: uuid */
             id: string;
@@ -22031,6 +26821,7 @@ export interface components {
             health: components["schemas"]["ProjectHealth"];
             /** Format: uuid */
             id: string;
+            identityColour?: null | string;
             internalNotes: null | string;
             /** Format: date-time */
             lastCoordinationReviewedAt: null | string;
@@ -22060,6 +26851,7 @@ export interface components {
             projectTypeId: null | string;
             /** Format: int32 */
             rowVersion: number;
+            seen?: null | components["schemas"]["WorkSeenDecoration"];
             setupChecklist: null | components["schemas"]["SetupChecklist"];
             starred: boolean;
             /** Format: date */
@@ -22075,6 +26867,7 @@ export interface components {
             /** Format: int32 */
             templateVersion: null | number;
             visibility: string;
+            workActivity?: null | components["schemas"]["WorkActivityFact"];
         };
         ProjectDisciplineAdded: {
             /** Format: uuid */
@@ -22236,6 +27029,7 @@ export interface components {
             highIssues: number;
             /** Format: uuid */
             id: string;
+            identityColour?: null | string;
             /** Format: date-time */
             lastActivityAt: null | string;
             myRoles: string[];
@@ -22256,12 +27050,17 @@ export interface components {
             phaseId: null | string;
             pm: components["schemas"]["ProjectPmRef"];
             priority: string;
+            progressFacts?: null | components["schemas"]["ProgressView"];
             /** Format: int32 */
             progressPct: null | number;
             projectNumber: string;
             /** Format: uuid */
             projectTypeId: null | string;
             reportedHealth: string;
+            /** Format: int32 */
+            rowVersion?: null | number;
+            span?: null | components["schemas"]["SpanView"];
+            staffing?: null | components["schemas"]["StaffingView"];
             starred: boolean;
             /** Format: date */
             startDate: null | string;
@@ -22299,6 +27098,7 @@ export interface components {
             /** Format: uuid */
             id: string;
             isActive: boolean;
+            leadName?: null | string;
             /** Format: uuid */
             leadUserId: null | string;
             name: string;
@@ -22323,8 +27123,11 @@ export interface components {
             leadOf: string[];
             /** Format: uuid */
             officeId: null | string;
+            organisationFacts?: null | components["schemas"]["Organisation"];
+            personFacts?: null | components["schemas"]["Facts"];
             /** Format: uuid */
             primaryDisciplineId: null | string;
+            responsibility?: null | components["schemas"]["ResponsibilityRead"];
             roles: string[];
             /** Format: int32 */
             rowVersion: number;
@@ -22351,6 +27154,49 @@ export interface components {
             rowVersion: number;
             status: string;
         };
+        ProposalCapacityBody: {
+            days: components["schemas"]["DayInput"][];
+            /** Format: date */
+            fromDate: string;
+            includeProposal: boolean;
+            links: components["schemas"]["AllocationLinkInput"][];
+            /** Format: uuid */
+            personId: string;
+            /** Format: double */
+            plannedHours: number;
+            purpose: string;
+            /** Format: date */
+            throughDate: string;
+        };
+        ProposalCapacityRead: {
+            /** Format: date-time */
+            asOf: string;
+            /** Format: date */
+            fromDate: string;
+            includesProposal: boolean;
+            /** Format: uuid */
+            personId: null | string;
+            state: string;
+            /** Format: date */
+            throughDate: string;
+            /** Format: int32 */
+            undatedTasks: null | number;
+            /** Format: int32 */
+            unestimatedTasks: null | number;
+            weeks: components["schemas"]["ProposalCapacityWeek"][];
+        };
+        ProposalCapacityWeek: {
+            /** Format: double */
+            afterHours: null | number;
+            /** Format: double */
+            availableHours: null | number;
+            /** Format: double */
+            beforeHours: null | number;
+            overCapacity: null | boolean;
+            provisional: boolean;
+            /** Format: date */
+            week: string;
+        };
         PublishBody: {
             additionalTargets: null | components["schemas"]["TargetRef"][];
             /** Format: int32 */
@@ -22370,6 +27216,16 @@ export interface components {
         ReadBody: {
             all?: null | boolean;
             ids?: null | string[];
+        };
+        ReadinessApplicabilityActors: {
+            candidates: components["schemas"]["ReadinessApplicabilityCandidate"][];
+            role: string;
+            state: string;
+        };
+        ReadinessApplicabilityCandidate: {
+            allowed: boolean;
+            person: components["schemas"]["RecordContextPerson"];
+            refusal: null | string;
         };
         ReadinessAssessmentRead: {
             auditKey: null | string;
@@ -22433,12 +27289,14 @@ export interface components {
             updatedBy: null | string;
         };
         ReadinessConstraintLocation: {
+            context?: null | components["schemas"]["RecordContextView"];
             /** Format: uuid */
             id: string;
             key: string;
             /** Format: uuid */
             targetId: string;
             targetType: string;
+            title?: null | string;
         };
         ReadinessConstraintRow: {
             /** Format: uuid */
@@ -22484,11 +27342,39 @@ export interface components {
             /** Format: int32 */
             targetRowVersion: number;
         };
+        ReadinessDeliveryCheck: {
+            applies: null | boolean;
+            blocking: boolean;
+            code: string;
+            reason: null | string;
+            satisfied: null | boolean;
+            unknown: boolean;
+        };
+        ReadinessDeliveryConstraint: {
+            affectedOwner: components["schemas"]["RecordContextPerson"];
+            /** Format: uuid */
+            id: string;
+            removalOwner: components["schemas"]["RecordContextPerson"];
+        };
+        ReadinessDeliveryPresentation: {
+            applicability: components["schemas"]["ReadinessApplicabilityActors"];
+            available: boolean;
+            blocked: string[];
+            checks: components["schemas"]["ReadinessDeliveryCheck"][];
+            constraintOwners: components["schemas"]["ReadinessDeliveryConstraint"][];
+            /** Format: date-time */
+            evaluatedAt: string;
+            hasAssessment: boolean;
+            inputs: components["schemas"]["WorkReadinessInput"][];
+            state: string;
+            unknown: string[];
+        };
         ReadinessDetail: {
             assessment: components["schemas"]["ReadinessAssessmentRead"];
             blocked: string[];
             checks: components["schemas"]["ReadinessCheckRead"][];
             exceptions: components["schemas"]["ReadinessExceptionRead"][];
+            presentation?: null | components["schemas"]["ReadinessDeliveryPresentation"];
             sources: components["schemas"]["CheckSource"][];
             unknown: string[];
         };
@@ -22572,6 +27458,7 @@ export interface components {
             readyPage: number;
             /** Format: date */
             to: string;
+            work?: null | components["schemas"]["ReadinessWorkPage"];
         };
         ReadinessWindowConstraint: {
             /** Format: uuid */
@@ -22617,6 +27504,35 @@ export interface components {
             verifiedAt: null | string;
             /** Format: uuid */
             verifiedBy: null | string;
+        };
+        ReadinessWorkPage: {
+            /** Format: date-time */
+            evaluatedAt: string;
+            items: components["schemas"]["ReadinessWorkRow"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            scope: string;
+            /** Format: int32 */
+            total: number;
+        };
+        ReadinessWorkRow: {
+            available: boolean;
+            /** Format: uuid */
+            disciplineId: string;
+            /** Format: date */
+            dueDate: null | string;
+            hasAssessment: boolean;
+            key: string;
+            name: string;
+            /** Format: uuid */
+            ownerId: null | string;
+            presentation: components["schemas"]["ReadinessDeliveryPresentation"];
+            state: string;
+            /** Format: uuid */
+            targetId: string;
+            targetType: string;
         };
         ReadyOutput: {
             completionCriteria: string;
@@ -22687,6 +27603,57 @@ export interface components {
             checks: null | components["schemas"]["CheckNote"][];
             note: null | string;
         };
+        RecordContextInputView: {
+            actorState?: null | string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            kind: string;
+            /** Format: date */
+            neededBy: null | string;
+            nextAction: string;
+            nextActors: components["schemas"]["RecordContextPerson"][];
+            primary: boolean;
+            title: string;
+        };
+        RecordContextPerson: {
+            /** Format: uuid */
+            id: null | string;
+            /** @default User */
+            kind: string;
+            name: null | string;
+            state: string;
+        };
+        RecordContextReviewPackage: {
+            /** Format: uuid */
+            id: null | string;
+            key: null | string;
+            reason: null | string;
+            satisfied: null | boolean;
+            status: null | string;
+            title: null | string;
+        };
+        RecordContextView: {
+            actorState: string;
+            available?: null | boolean;
+            inputs: components["schemas"]["RecordContextInputView"][];
+            /** Format: date */
+            neededBy: null | string;
+            nextAction: string;
+            nextActors: components["schemas"]["RecordContextPerson"][];
+            nextTransitions: string[];
+            owner: components["schemas"]["RecordContextPerson"];
+            requiresReviewGate: boolean;
+            reviewPackageGate?: null | components["schemas"]["RecordContextReviewPackage"];
+            terminal: boolean;
+            /** Format: int32 */
+            unavailableInputCount?: null | number;
+        };
+        Reference: {
+            /** Format: uuid */
+            id: string;
+            name: null | string;
+        };
         ReferenceClient: {
             /** Format: uuid */
             id: string;
@@ -22750,6 +27717,23 @@ export interface components {
             verifierId: null | string;
             verifierReason: null | string;
         };
+        ReferenceIssuePurpose: {
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+            name: string;
+            /** Format: int32 */
+            sortOrder: number;
+        };
+        ReferenceIssueReturnCode: {
+            code: string;
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+            name: string;
+            /** Format: int32 */
+            sortOrder: number;
+        };
         ReferenceLimits: {
             /** Format: int32 */
             roleLabel: number;
@@ -22807,6 +27791,9 @@ export interface components {
             clients: components["schemas"]["ReferenceClient"][];
             deliverableTypes: components["schemas"]["ReferenceDeliverableType"][];
             disciplines: components["schemas"]["ReferenceDiscipline"][];
+            issuePurposes?: null | components["schemas"]["ReferenceIssuePurpose"][];
+            issueReturnCodes?: null | components["schemas"]["ReferenceIssueReturnCode"][];
+            issueRootCauses?: null | components["schemas"]["IssueRootCauseChoice"][];
             limits: components["schemas"]["ReferenceLimits"];
             offices: components["schemas"]["ReferenceOffice"][];
             phases: components["schemas"]["ReferencePhase"][];
@@ -22891,6 +27878,11 @@ export interface components {
             reason: null | string;
             to: string;
         };
+        RemoveBody: {
+            reason: null | string;
+            /** Format: int32 */
+            rowVersion: null | number;
+        };
         ReplaceIssueDocumentBody: {
             document: components["schemas"]["IssueDocumentBody"];
             /** Format: int32 */
@@ -22905,6 +27897,38 @@ export interface components {
             label: string;
             value: string;
         };
+        ReportCapacityComparison: {
+            /** Format: date-time */
+            asOf: string;
+            basis: string;
+            groupBy: string;
+            periods: components["schemas"]["ReportPeriod"][];
+            /** Format: int32 */
+            returnedGroups: number;
+            rows: components["schemas"]["ReportCapacityComparisonRow"][];
+            scopeCoverage: string;
+            /** Format: int32 */
+            totalGroups: number;
+            truncated: boolean;
+            unit: string;
+        };
+        ReportCapacityComparisonRow: {
+            capacity: components["schemas"]["ReportUnitCell"];
+            confirmed: components["schemas"]["ReportUnitCell"];
+            deficit: components["schemas"]["ReportUnitCell"];
+            demand: components["schemas"]["ReportUnitCell"];
+            discipline: string;
+            /** Format: uuid */
+            disciplineId: null | string;
+            expected: components["schemas"]["ReportUnitCell"];
+            key: string;
+            /** Format: int32 */
+            partialPeople: number;
+            periodKey: string;
+            possible: components["schemas"]["ReportUnitCell"];
+            /** Format: int32 */
+            provisionalPeople: number;
+        };
         ReportColumn: {
             header: string;
             path: string;
@@ -22916,6 +27940,7 @@ export interface components {
             description: string;
             itemType: null | string;
             params: components["schemas"]["ReportParamView"][];
+            question?: null | string;
             title: string;
         };
         ReportOption: {
@@ -22929,18 +27954,108 @@ export interface components {
             options: null | components["schemas"]["ReportOption"][];
             type: string;
         };
+        ReportPeriod: {
+            /** Format: double */
+            denominatorHours: null | number;
+            key: string;
+            label: string;
+            /** Format: int32 */
+            weekCount: number;
+            weeks: string[];
+        };
+        ReportTaskInputCount: {
+            /** Format: int32 */
+            count: null | number;
+            href: string;
+            /** Format: int32 */
+            knownCount: number;
+        };
+        ReportTaskInputPage: {
+            /** Format: date-time */
+            asOf: string;
+            basis: string;
+            code: string;
+            items: components["schemas"]["TaskQueriesRow"][];
+            /** Format: int32 */
+            knownTotal: number;
+            metric: string;
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            parameters: {
+                [key: string]: string;
+            };
+            scopeCoverage: string;
+            /** Format: int32 */
+            total: null | number;
+            /** Format: int32 */
+            unavailableReferences: number;
+        };
+        ReportTaskInputs: {
+            /** Format: date-time */
+            asOf: string;
+            basis: string;
+            openUndated: components["schemas"]["ReportTaskInputCount"];
+            parameters: {
+                [key: string]: string;
+            };
+            scopeCoverage: string;
+            /** Format: int32 */
+            unavailableReferences: number;
+            unestimated: components["schemas"]["ReportTaskInputCount"];
+        };
+        ReportUnitCell: {
+            coverage: string;
+            kind: string;
+            /** Format: double */
+            knownHours: null | number;
+            /** Format: int32 */
+            missingInputs: number;
+            path: string;
+            /** Format: double */
+            value: null | number;
+        };
+        ReportUnitRow: {
+            cells: components["schemas"]["ReportUnitCell"][];
+            kind: string;
+            /** Format: int32 */
+            rowIndex: number;
+        };
+        ReportUnitView: {
+            columns: components["schemas"]["ReportColumn"][];
+            /** Format: int32 */
+            displayedWeekCount: number;
+            period: string;
+            periods: components["schemas"]["ReportPeriod"][];
+            rows: components["schemas"]["ReportUnitRow"][];
+            scopeCoverage: string;
+            /** Format: double */
+            standardWeeklyHours: null | number;
+            /** Format: int32 */
+            unestimatedTasks: number;
+            unit: string;
+        };
         ReportView: {
+            /** Format: date-time */
+            asOf?: null | string;
+            capacityComparison?: null | components["schemas"]["ReportCapacityComparison"];
             code: string;
             columns: components["schemas"]["ReportColumn"][];
             itemType: null | string;
             listLink: null | string;
             parameters: components["schemas"]["ReportAppliedParameter"][];
             rows: components["schemas"]["JsonArray"];
+            savedParameters?: null | {
+                [key: string]: string;
+            };
+            taskInputs?: null | components["schemas"]["ReportTaskInputs"];
             title: string;
             /** Format: int32 */
             total: number;
             totalIsLowerBound: boolean;
             truncated: boolean;
+            unitView?: null | components["schemas"]["ReportUnitView"];
         };
         ResolveConflictBody: {
             /** Format: int32 */
@@ -22961,6 +28076,18 @@ export interface components {
             hidden: boolean;
             /** Format: int32 */
             total: number;
+        };
+        ResponsibilityRead: {
+            canEdit: boolean;
+            editReason: null | string;
+            note: null | string;
+        };
+        ResponsibilitySaved: {
+            /** Format: uuid */
+            id: string;
+            responsibilityNote: null | string;
+            /** Format: int32 */
+            rowVersion: number;
         };
         RetargetDeliverable: {
             /** Format: uuid */
@@ -22989,6 +28116,18 @@ export interface components {
             requestId: string;
             /** Format: int32 */
             rowVersion: number;
+        };
+        ReviewAssignmentGuidance: {
+            allowSelfReview: boolean;
+            authorIds: string[];
+            excludedReviewerIds: string[];
+            sources: components["schemas"]["ReviewSourcePerformers"][];
+            sourcesAvailable: boolean;
+        };
+        ReviewAssignmentPerson: {
+            /** Format: uuid */
+            assignmentId: string;
+            reviewer: components["schemas"]["RecordContextPerson"];
         };
         ReviewAssignmentRow: {
             auditKey: null | string;
@@ -23029,6 +28168,7 @@ export interface components {
             assignments: components["schemas"]["Assignment"][];
             /** Format: uuid */
             coordinatorId: string;
+            issuedRevisionIds?: null | string[];
             /** Format: uuid */
             projectDisciplineId: string;
             purpose: string;
@@ -23039,6 +28179,46 @@ export interface components {
             sourceRevisionIds: string[];
             title: string;
         };
+        ReviewDefaultSettings: {
+            /** Format: uuid */
+            deliverableTypeId: string;
+            disciplineIds: string[];
+            /** Format: int32 */
+            rowVersion: number;
+        };
+        ReviewDefaultSettingsWrite: {
+            disciplineIds: null | string[];
+            /** Format: int32 */
+            rowVersion: null | number;
+        };
+        ReviewDefaultSourceType: {
+            /** Format: uuid */
+            deliverableId: string;
+            /** Format: uuid */
+            deliverableTypeId: string;
+            /** Format: uuid */
+            sourceRevisionId: string;
+            typeActive: boolean;
+            /** Format: int32 */
+            typeRowVersion: number;
+        };
+        ReviewDefaultSuggestion: {
+            deliverableTypeIds: string[];
+            /** Format: uuid */
+            disciplineId: string;
+            name: null | string;
+            /** Format: uuid */
+            projectDisciplineId: null | string;
+            state: string;
+        };
+        ReviewDefaultSuggestions: {
+            disciplines: components["schemas"]["ReviewDefaultSuggestion"][];
+            exceedsAssignmentLimit: boolean;
+            /** Format: uuid */
+            projectId: string;
+            sourceRevisionIds: string[];
+            sourceTypes: components["schemas"]["ReviewDefaultSourceType"][];
+        };
         ReviewDetail: {
             /** Format: uuid */
             actorId: string;
@@ -23046,13 +28226,53 @@ export interface components {
             canCoordinate: boolean;
             canManage: boolean;
             canReassignVerifier: boolean;
+            canRecordExternalReview?: null | boolean;
             canWrite: boolean;
             eligiblePeople: string[];
             events: components["schemas"]["ReviewFindingEventRow"][];
+            externalReviews?: null | components["schemas"]["ExternalReviewRead"][];
             findings: components["schemas"]["ReviewFindingRow"][];
             manifest: components["schemas"]["ReviewManifestRow"][];
             package: components["schemas"]["ReviewPackageRow"];
+            presentation?: null | components["schemas"]["ReviewRoundPresentation"][];
             rounds: components["schemas"]["ReviewRoundRow"][];
+        };
+        ReviewDisciplineSummary: {
+            disciplines: components["schemas"]["ReviewDisciplineSummaryRow"][];
+            population: string;
+            /** Format: uuid */
+            projectId: string;
+            timingBasis: string;
+        };
+        ReviewDisciplineSummaryRow: {
+            /** Format: int32 */
+            approvedPackageCount: number;
+            /** Format: uuid */
+            disciplineId: string;
+            /** Format: int32 */
+            eligiblePackageCount: number;
+            /** Format: int32 */
+            maximumRoundsToApproval: null | number;
+            /** Format: double */
+            medianDaysPerRound: null | number;
+            /** Format: double */
+            medianRoundsToApproval: null | number;
+            name: null | string;
+            /** Format: int32 */
+            nonApplicablePackageCount: number;
+            /** Format: int32 */
+            packageSampleCount: number;
+            /** Format: uuid */
+            projectDisciplineId: string;
+            /** Format: int32 */
+            startedAssignmentRoundCount: number;
+            state: string;
+            /** Format: int32 */
+            timedAssignmentRoundCount: number;
+            /** Format: int32 */
+            unavailablePackageCount: number;
+            /** Format: int32 */
+            unavailableTimingAssignmentRoundCount: number;
         };
         ReviewFindingEventRow: {
             action: string;
@@ -23073,12 +28293,24 @@ export interface components {
             /** Format: uuid */
             projectId: string;
             reason: string;
+            responseOutcome?: null | string;
             /** Format: int32 */
             rowVersion: number;
             /** Format: date-time */
             updatedAt: string;
             /** Format: uuid */
             updatedBy: null | string;
+        };
+        ReviewFindingLocation: {
+            context?: null | components["schemas"]["RecordContextView"];
+            /** Format: uuid */
+            id: string;
+            key: string;
+            /** Format: uuid */
+            packageId: string;
+            /** Format: uuid */
+            roundId: string;
+            title: string;
         };
         ReviewFindingRow: {
             auditKey: null | string;
@@ -23088,17 +28320,23 @@ export interface components {
             auditType: string;
             /** Format: uuid */
             carriedFromId: null | string;
+            context?: null | components["schemas"]["RecordContextView"];
             /** Format: date-time */
             createdAt: string;
             /** Format: uuid */
             createdBy: null | string;
+            /** Format: uuid */
+            deliverableIssueId?: null | string;
             evidenceUrl: null | string;
+            /** Format: uuid */
+            externalReviewId?: null | string;
             /** Format: uuid */
             id: string;
             /** Format: uuid */
             issueId: null | string;
+            originator?: null | components["schemas"]["ReviewRegisterOriginator"];
             /** Format: uuid */
-            originatorId: string;
+            originatorId: null | string;
             /** Format: uuid */
             packageId: string;
             /** Format: uuid */
@@ -23108,13 +28346,14 @@ export interface components {
             /** Format: uuid */
             resolverId: string;
             response: null | string;
+            responseOutcome?: null | string;
             /** Format: uuid */
             roundId: string;
             /** Format: int32 */
             rowVersion: number;
             severity: string;
             /** Format: uuid */
-            sourceRevisionId: string;
+            sourceRevisionId: null | string;
             status: string;
             text: string;
             /** Format: date-time */
@@ -23122,9 +28361,31 @@ export interface components {
             /** Format: uuid */
             updatedBy: null | string;
             /** Format: uuid */
-            verifierId: string;
+            verifierId: null | string;
             /** Format: uuid */
             withdrawalAcknowledgedBy: null | string;
+        };
+        ReviewIssuedAssignmentGuidance: {
+            allowSelfReview: boolean;
+            authorIds: string[];
+            excludedReviewerIds: string[];
+            sources: components["schemas"]["ReviewIssuedSourceRead"][];
+            sourcesAvailable: boolean;
+        };
+        ReviewIssuedSourceRead: {
+            authorsState: string;
+            /** Format: uuid */
+            deliverableId: string;
+            /** Format: uuid */
+            deliverableIssueId: string;
+            deliverableKey: string;
+            /** Format: date */
+            issuedDate: string;
+            reason: null | string;
+            revision: null | string;
+            /** Format: int32 */
+            rowVersion: number;
+            selectable: boolean;
         };
         ReviewManifestRow: {
             authorIds: string[];
@@ -23132,11 +28393,12 @@ export interface components {
             deliverableId: string;
             /** Format: uuid */
             id: string;
+            issuedSource?: null | components["schemas"]["ReviewIssuedSourceRead"];
             /** Format: uuid */
             roundId: string;
-            source: components["schemas"]["SourceRevisionRow"];
+            source: null | components["schemas"]["SourceRevisionRow"];
             /** Format: uuid */
-            sourceRevisionId: string;
+            sourceRevisionId: null | string;
         };
         ReviewOptionRow: {
             /** Format: date */
@@ -23212,6 +28474,121 @@ export interface components {
             /** Format: uuid */
             reviewerId: string;
         };
+        ReviewRegisterActionability: {
+            canAct: boolean;
+            isCurrentRound: boolean;
+            isPackageLive: boolean;
+            nextAction: string;
+            nextActor: null | components["schemas"]["ReviewRegisterPerson"];
+            reason: null | string;
+        };
+        ReviewRegisterDiscipline: {
+            /** Format: uuid */
+            id: string;
+            name: null | string;
+            state: string;
+        };
+        ReviewRegisterFilters: {
+            /** Format: uuid */
+            disciplineId: null | string;
+            /** Format: uuid */
+            originatorId: null | string;
+            originatorKind: null | string;
+            /** Format: uuid */
+            resolverId: null | string;
+            severity: null | string;
+        };
+        ReviewRegisterOptions: {
+            disciplines: components["schemas"]["ReviewRegisterDiscipline"][];
+            originators: components["schemas"]["ReviewRegisterOriginator"][];
+            resolutionOwners: components["schemas"]["ReviewRegisterPerson"][];
+            severities: string[];
+        };
+        ReviewRegisterOriginator: {
+            /** Format: uuid */
+            externalPartyId: null | string;
+            kind: string;
+            name: null | string;
+            organisation?: null | string;
+            state: string;
+            /** Format: uuid */
+            userId: null | string;
+        };
+        ReviewRegisterPage: {
+            allRounds: boolean;
+            filters: components["schemas"]["ReviewRegisterFilters"];
+            items: components["schemas"]["ReviewRegisterRow"][];
+            options: components["schemas"]["ReviewRegisterOptions"];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+        };
+        ReviewRegisterPerson: {
+            /** Format: uuid */
+            id: null | string;
+            name: null | string;
+            state: string;
+        };
+        ReviewRegisterRow: {
+            actionability: components["schemas"]["ReviewRegisterActionability"];
+            /** Format: uuid */
+            carriedFromId: null | string;
+            coordinator: components["schemas"]["ReviewRegisterPerson"];
+            /** Format: date-time */
+            createdAt: string;
+            disciplineName: null | string;
+            disciplineState: string;
+            /** Format: uuid */
+            id: string;
+            isCurrentRound: boolean;
+            originator: components["schemas"]["ReviewRegisterOriginator"];
+            /** Format: uuid */
+            packageId: string;
+            packageKey: string;
+            packageStatus: string;
+            packageTitle: string;
+            pendingWithdrawalAcknowledgement: boolean;
+            /** Format: uuid */
+            projectDisciplineId: string;
+            resolutionOwner: components["schemas"]["ReviewRegisterPerson"];
+            response: null | string;
+            responseOutcome?: null | string;
+            /** Format: uuid */
+            roundId: string;
+            /** Format: int32 */
+            roundNumber: number;
+            /** Format: int32 */
+            rowVersion: number;
+            severity: string;
+            source: components["schemas"]["ReviewRegisterSource"];
+            status: string;
+            text: string;
+            verifier: components["schemas"]["ReviewRegisterPerson"];
+        };
+        ReviewRegisterSource: {
+            available: boolean;
+            /** Format: uuid */
+            deliverableId: null | string;
+            /** Format: uuid */
+            id: string;
+            issuedSource?: null | components["schemas"]["ReviewIssuedSourceRead"];
+            key: string;
+            kind?: null | string;
+            revision: null | string;
+        };
+        ReviewRoundPresentation: {
+            guidance: null | components["schemas"]["ReviewAssignmentGuidance"];
+            issuedGuidance?: null | components["schemas"]["ReviewIssuedAssignmentGuidance"];
+            missingReviewerAssignmentIds: string[];
+            reviewers: components["schemas"]["ReviewAssignmentPerson"][];
+            /** Format: uuid */
+            roundId: string;
+            startAllowed: boolean;
+            startReason: null | string;
+        };
         ReviewRoundRow: {
             auditKey: null | string;
             auditName: null | string;
@@ -23262,6 +28639,17 @@ export interface components {
             /** Format: int32 */
             waitingDays: number;
         };
+        ReviewSourcePerformer: {
+            person: components["schemas"]["RecordContextPerson"];
+            taskKey: string;
+        };
+        ReviewSourcePerformers: {
+            available: boolean;
+            performers: components["schemas"]["ReviewSourcePerformer"][];
+            sourceKey: string;
+            /** Format: uuid */
+            sourceRevisionId: string;
+        };
         RevisionCheckReadResponse: {
             convention: null | components["schemas"]["RevisionConvention"];
             deliverables: components["schemas"]["DeliverableMarks"][];
@@ -23290,12 +28678,15 @@ export interface components {
             triggerIndicator: null | string;
         };
         RiskDetailData: {
+            context?: null | components["schemas"]["RecordContextView"];
             description: null | string;
             links: components["schemas"]["ItemLinkRow"][];
             permissions: components["schemas"]["RiskPermissions"];
             project: components["schemas"]["RegisterProject"];
             realisedIssue: null | components["schemas"]["RealisedRiskIssue"];
             risk: components["schemas"]["RiskListRow"];
+            seen?: null | components["schemas"]["WorkSeenDecoration"];
+            workActivity?: null | components["schemas"]["WorkActivityFact"];
         };
         RiskListRow: {
             band: string;
@@ -23360,8 +28751,29 @@ export interface components {
         RoleBody: {
             role: string;
         };
+        RoomPerson: {
+            displayName: string;
+            /** Format: uuid */
+            homeDisciplineId: null | string;
+            /** Format: uuid */
+            id: string;
+            weeks: components["schemas"]["RoomWeek"][];
+        };
+        RoomUnavailable: {
+            displayName: string;
+            /** Format: uuid */
+            id: string;
+            reason: string;
+        };
+        RoomWeek: {
+            /** Format: double */
+            freeHours: number;
+            /** Format: date */
+            week: string;
+        };
         RoundBody: {
             assignments: components["schemas"]["Assignment"][];
+            issuedRevisionIds?: null | string[];
             purpose: string;
             reason: string;
             removalImpact: null | string;
@@ -23370,6 +28782,12 @@ export interface components {
             /** Format: int32 */
             rowVersion: number;
             sourceRevisionIds: string[];
+        };
+        Saved: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            rowVersion: number;
         };
         SavedViewList: {
             canShare: boolean;
@@ -23434,6 +28852,7 @@ export interface components {
             /** Format: uuid */
             id: string;
             name: string;
+            person?: null | components["schemas"]["SearchUserReference"];
             projectNumber: string;
             status: string;
         };
@@ -23443,6 +28862,7 @@ export interface components {
             key: string;
             name: string;
             owner: null | string;
+            person?: null | components["schemas"]["SearchUserReference"];
             projectNumber: string;
         };
         SearchCommentHit: {
@@ -23457,6 +28877,7 @@ export interface components {
             key: string;
             match: null | string;
             name: string;
+            person?: null | components["schemas"]["SearchUserReference"];
             projectNumber: string;
         };
         SearchDecisionHit: {
@@ -23478,6 +28899,7 @@ export interface components {
             match: null | string;
             name: string;
             owner: null | string;
+            person?: null | components["schemas"]["SearchUserReference"];
             projectNumber: string;
             status: string;
         };
@@ -23525,6 +28947,7 @@ export interface components {
             key: string;
             name: string;
             owner: null | string;
+            person?: null | components["schemas"]["SearchUserReference"];
             projectNumber: string;
             status: string;
         };
@@ -23536,6 +28959,7 @@ export interface components {
             id: string;
             isActive: boolean;
             jobTitle: null | string;
+            person?: null | components["schemas"]["SearchUserReference"];
         };
         SearchPlanningHit: {
             /** Format: date */
@@ -23543,6 +28967,7 @@ export interface components {
             /** Format: uuid */
             id: string;
             name: string;
+            person?: null | components["schemas"]["SearchUserReference"];
             /** Format: uuid */
             personId: string;
             /** Format: date */
@@ -23554,6 +28979,7 @@ export interface components {
             /** Format: uuid */
             id: string;
             name: string;
+            person?: null | components["schemas"]["SearchUserReference"];
             pm: null | string;
             projectNumber: string;
             status: string;
@@ -23565,6 +28991,41 @@ export interface components {
             exact: null | components["schemas"]["SearchExact"];
             groups: components["schemas"]["SearchGroups"];
             q: string;
+            screen?: null | components["schemas"]["SearchScreenMetadata"];
+        };
+        SearchScreenAppliedFilters: {
+            /** Format: uuid */
+            disciplineId: null | string;
+            /** Format: uuid */
+            projectId: null | string;
+            status: null | string;
+        };
+        SearchScreenDisciplineChoice: {
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+            name: string;
+        };
+        SearchScreenMetadata: {
+            applied: components["schemas"]["SearchScreenAppliedFilters"];
+            disciplines: components["schemas"]["SearchScreenDisciplineChoice"][];
+            disciplinesTruncated: boolean;
+            projects: components["schemas"]["SearchScreenProjectChoice"][];
+            projectsTruncated: boolean;
+            tabs: components["schemas"]["SearchScreenTab"][];
+        };
+        SearchScreenProjectChoice: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            projectNumber: string;
+        };
+        SearchScreenTab: {
+            discipline: boolean;
+            project: boolean;
+            status: boolean;
+            statusValues: string[];
+            type: string;
         };
         SearchStatusHit: {
             /** Format: uuid */
@@ -23582,6 +29043,7 @@ export interface components {
             key: string;
             name: string;
             owner: null | string;
+            person?: null | components["schemas"]["SearchUserReference"];
             projectNumber: string;
         };
         SearchTaskHit: {
@@ -23593,14 +29055,28 @@ export interface components {
             key: string;
             match: null | string;
             name: string;
+            person?: null | components["schemas"]["SearchUserReference"];
             projectNumber: string;
             status: string;
+        };
+        SearchUserReference: {
+            displayName: string;
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+            role: string;
         };
         Selection: {
             /** Format: uuid */
             id: string;
             /** Format: int32 */
             rowVersion: number;
+        };
+        SetResponsibilityBody: {
+            reason: null | string;
+            responsibilityNote: null | string;
+            /** Format: int32 */
+            rowVersion: null | number;
         };
         SettingRow: {
             default: unknown;
@@ -23728,9 +29204,16 @@ export interface components {
             updatedBy: null | string;
             url: string;
         };
+        SpanView: {
+            /** Format: int32 */
+            openMilestones: number;
+            /** Format: date */
+            today: string;
+        };
         StaffingContextRow: {
             /** Format: uuid */
             affectedOwnerId: string;
+            context?: null | components["schemas"]["RecordContextView"];
             description: string;
             /** Format: uuid */
             id: string;
@@ -23739,10 +29222,65 @@ export interface components {
             neededBy: string;
             /** Format: uuid */
             removalOwnerId: string;
+            seen?: null | components["schemas"]["WorkSeenDecoration"];
             state: string;
             /** Format: uuid */
             targetId: string;
             targetType: string;
+            workActivity?: null | components["schemas"]["WorkActivityFact"];
+        };
+        StaffingDiscipline: {
+            comparisonState: string;
+            /** Format: double */
+            confirmedHours: null | number;
+            /** Format: double */
+            excessHours: null | number;
+            /** Format: double */
+            knownConfirmedHours: number;
+            /** Format: double */
+            knownOpenRoleHours: number;
+            /** Format: double */
+            knownRemainingHours: number;
+            name: null | string;
+            /** Format: double */
+            openRoleHours: null | number;
+            /** Format: uuid */
+            projectDisciplineId: null | string;
+            /** Format: double */
+            remainingHours: null | number;
+            unattributed: boolean;
+            /** Format: int32 */
+            unavailableConfirmed: number;
+            /** Format: int32 */
+            unavailableOpenRoles: number;
+            /** Format: int32 */
+            undatedTasks: number;
+            /** Format: int32 */
+            unestimatedTasks: number;
+        };
+        StaffingTarget: {
+            /** Format: date */
+            date: string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            kind: string;
+            name: string;
+        };
+        StaffingView: {
+            /** Format: date */
+            from: string;
+            limitedScope: boolean;
+            /** Format: int32 */
+            lookaheadWeeks: number;
+            /** Format: int32 */
+            openRoles: number;
+            /** Format: int32 */
+            overCapacityPeople: null | number;
+            ownPlannerOnly: boolean;
+            partialView: boolean;
+            /** Format: date */
+            through: string;
         };
         StartAuthorisationView: {
             /** Format: uuid */
@@ -23763,6 +29301,7 @@ export interface components {
         };
         StartabilityRow: {
             blocked: string[];
+            context?: null | components["schemas"]["RecordContextView"];
             /** Format: uuid */
             disciplineId: string;
             /** Format: date */
@@ -23773,11 +29312,13 @@ export interface components {
             name: string;
             /** Format: uuid */
             ownerId: null | string;
+            seen?: null | components["schemas"]["WorkSeenDecoration"];
             state: string;
             /** Format: uuid */
             targetId: string;
             targetType: string;
             unknown: string[];
+            workActivity?: null | components["schemas"]["WorkActivityFact"];
         };
         State: {
             affectedMilestoneIds: string[];
@@ -23822,6 +29363,7 @@ export interface components {
             disciplines: components["schemas"]["DisciplineIn"][];
             header: null | components["schemas"]["HeaderBody"];
             milestones: components["schemas"]["MilestoneIn"][];
+            risks?: null | components["schemas"]["TemplateRiskIn"][];
             roles?: null | components["schemas"]["TemplateRoleIn"][];
             /** Format: int32 */
             rowVersion: null | number;
@@ -23855,6 +29397,17 @@ export interface components {
             /** Format: int32 */
             rowVersion: number;
         };
+        SubmissionCheckLocation: {
+            context: components["schemas"]["RecordContextView"];
+            /** Format: uuid */
+            id: string;
+            key: string;
+            /** Format: int32 */
+            manifestVersion: number;
+            /** Format: uuid */
+            packageId: string;
+            title: string;
+        };
         SubmissionCheckRow: {
             /** Format: date-time */
             approvedAt: null | string;
@@ -23865,10 +29418,12 @@ export interface components {
             /** Format: uuid */
             auditProjectId: null | string;
             auditType: string;
+            context?: null | components["schemas"]["RecordContextView"];
             /** Format: date-time */
             createdAt: string;
             /** Format: uuid */
             createdBy: null | string;
+            effectiveStatus?: null | string;
             evidenceRule: null | string;
             evidenceUrl: null | string;
             /** Format: uuid */
@@ -23897,6 +29452,7 @@ export interface components {
             updatedBy: null | string;
         };
         SubmissionContextRow: {
+            context?: null | components["schemas"]["RecordContextView"];
             /** Format: uuid */
             coordinatorId: string;
             effectiveStatus: string;
@@ -23904,10 +29460,12 @@ export interface components {
             /** Format: uuid */
             id: string;
             key: string;
+            seen?: null | components["schemas"]["WorkSeenDecoration"];
             status: string;
             /** Format: date */
             targetDate: string;
             title: string;
+            workActivity?: null | components["schemas"]["WorkActivityFact"];
         };
         SubmissionCreateBody: {
             /** Format: uuid */
@@ -23927,10 +29485,17 @@ export interface components {
             targetDate: string;
             title: string;
         };
+        SubmissionDateFact: {
+            state: string;
+            /** Format: date */
+            targetDate: null | string;
+        };
         SubmissionDetail: {
             canAuthorise: boolean;
             canCoordinate: boolean;
             checks: components["schemas"]["SubmissionCheckRow"][];
+            context?: null | components["schemas"]["RecordContextView"];
+            delivery?: null | components["schemas"]["DeliveryPresentation"];
             effectiveStatus: string;
             evidence: components["schemas"]["SubmissionEvidenceRow"][];
             issue: null | components["schemas"]["SubmissionIssueRow"];
@@ -24026,6 +29591,7 @@ export interface components {
             /** Format: uuid */
             coordinatorId: string;
             coordinatorName: null | string;
+            delivery?: null | components["schemas"]["DeliverySummary"];
             /** Format: uuid */
             id: string;
             key: string;
@@ -24144,11 +29710,123 @@ export interface components {
             reason: null | string;
             taskIds: string[];
         };
+        TaskBulkCommandBody: {
+            intent: components["schemas"]["TaskBulkIntent"];
+            /** Format: uuid */
+            requestId: string;
+        };
+        TaskBulkCommandResult: {
+            /** Format: uuid */
+            commandId: string;
+            /** Format: date-time */
+            completedAt: string;
+            counts: components["schemas"]["TaskBulkCounts"];
+            rows: components["schemas"]["TaskBulkRow"][];
+            warnings: string[];
+        };
+        TaskBulkCounts: {
+            /** Format: int32 */
+            changed: number;
+            /** Format: int32 */
+            refused: number;
+            /** Format: int32 */
+            unavailable: number;
+            /** Format: int32 */
+            unchanged: number;
+        };
+        TaskBulkDeliverableTarget: {
+            /** Format: uuid */
+            deliverableId: null | string;
+            /** Format: uuid */
+            projectId: string;
+        };
+        TaskBulkIntent: {
+            items: components["schemas"]["TaskBulkItem"][];
+            operation: string;
+            params: components["schemas"]["TaskBulkParameters"];
+            reason: null | string;
+            /** Format: int32 */
+            schemaVersion: number;
+        };
+        TaskBulkItem: {
+            /** Format: uuid */
+            projectId: string;
+            /** Format: int32 */
+            rowVersion: number;
+            /** Format: uuid */
+            taskId: string;
+        };
+        TaskBulkParameters: components["schemas"]["TaskBulkParametersTaskBulkAssignParameters"] | components["schemas"]["TaskBulkParametersTaskBulkDueDateParameters"] | components["schemas"]["TaskBulkParametersTaskBulkShiftDatesParameters"] | components["schemas"]["TaskBulkParametersTaskBulkPriorityParameters"] | components["schemas"]["TaskBulkParametersTaskBulkDeliverableParameters"] | components["schemas"]["TaskBulkParametersTaskBulkHoldParameters"] | components["schemas"]["TaskBulkParametersTaskBulkCancelParameters"];
+        TaskBulkParametersTaskBulkAssignParameters: {
+            /** Format: uuid */
+            assigneeId: null | string;
+            /** @enum {string} */
+            kind?: "assign";
+        };
+        TaskBulkParametersTaskBulkCancelParameters: {
+            /** @enum {string} */
+            kind?: "cancel";
+        };
+        TaskBulkParametersTaskBulkDeliverableParameters: {
+            /** @enum {string} */
+            kind?: "setDeliverable";
+            targets: components["schemas"]["TaskBulkDeliverableTarget"][];
+        };
+        TaskBulkParametersTaskBulkDueDateParameters: {
+            /** Format: date */
+            dueDate: null | string;
+            /** @enum {string} */
+            kind?: "setDueDate";
+        };
+        TaskBulkParametersTaskBulkHoldParameters: {
+            /** @enum {string} */
+            kind?: "hold";
+        };
+        TaskBulkParametersTaskBulkPriorityParameters: {
+            /** @enum {string} */
+            kind?: "setPriority";
+            priority: string;
+        };
+        TaskBulkParametersTaskBulkShiftDatesParameters: {
+            /** Format: int32 */
+            days: number;
+            /** @enum {string} */
+            kind?: "shiftDueDates";
+        };
+        TaskBulkPreview: {
+            counts: components["schemas"]["TaskBulkPreviewCounts"];
+            rows: components["schemas"]["TaskBulkRow"][];
+        };
+        TaskBulkPreviewCounts: {
+            /** Format: int32 */
+            eligible: number;
+            /** Format: int32 */
+            refused: number;
+            /** Format: int32 */
+            unavailable: number;
+            /** Format: int32 */
+            unchanged: number;
+        };
         TaskBulkResult: {
             skipped: components["schemas"]["TaskBulkSkipped"][];
             /** Format: int32 */
             updated: number;
             warnings: string[];
+        };
+        TaskBulkRow: {
+            activityIds?: null | string[];
+            code?: null | string;
+            /** Format: int32 */
+            index: number;
+            key?: null | string;
+            outcome: string;
+            /** Format: uuid */
+            projectId?: null | string;
+            reason?: null | string;
+            /** Format: int32 */
+            rowVersion?: null | number;
+            /** Format: uuid */
+            taskId?: null | string;
         };
         TaskBulkSkipped: {
             /** Format: uuid */
@@ -24162,6 +29840,27 @@ export interface components {
             predecessors: components["schemas"]["ChainStep"][];
             successors: components["schemas"]["ChainStep"][];
             task: components["schemas"]["TaskQueriesRow"];
+        };
+        TaskContributionRead: {
+            canMark: boolean;
+            canWithdraw: boolean;
+            /** Format: uuid */
+            collaboratorId: string;
+            /** Format: date-time */
+            markedAt: null | string;
+            note: null | string;
+            refusalReason: null | string;
+            /** Format: int32 */
+            rowVersion: number;
+        };
+        TaskContributionSetBody: {
+            /** Format: uuid */
+            collaboratorId: string;
+            marked: boolean;
+            note?: null | string;
+            reason?: null | string;
+            /** Format: int32 */
+            rowVersion: number;
         };
         TaskCreateBody: {
             /** Format: uuid */
@@ -24232,6 +29931,7 @@ export interface components {
             dependsOn: components["schemas"]["TaskDependencyEdge"][];
         };
         TaskDetailCollaborator: {
+            contribution?: null | components["schemas"]["TaskContributionRead"];
             displayName: string;
             /** Format: uuid */
             id: string;
@@ -24271,16 +29971,22 @@ export interface components {
         TaskDetailResponse: {
             cancelledReason: null | string;
             collaborators: components["schemas"]["TaskDetailCollaborator"][];
+            context?: null | components["schemas"]["RecordContextView"];
             description: null | string;
+            inputEffects?: null | components["schemas"]["WorkInputEffect"][];
             onHoldReason: null | string;
             permissions: components["schemas"]["TaskDetailPermissions"];
             previousStatus: null | string;
             project: components["schemas"]["TaskDetailProject"];
+            readinessInputs?: null | components["schemas"]["WorkReadinessInputs"];
             relatedDeliverables?: null | components["schemas"]["TaskRelatedDeliverable"][];
             /** Format: date-time */
             reviewRequestedAt: null | string;
+            seen?: null | components["schemas"]["WorkSeenDecoration"];
+            sourceUses?: null | components["schemas"]["WorkInputSourceUse"][];
             task: components["schemas"]["TaskQueriesRow"];
             watchers: components["schemas"]["TaskDetailWatcher"][];
+            workActivity?: null | components["schemas"]["WorkActivityFact"];
         };
         TaskDetailTransition: {
             allowed: boolean;
@@ -24303,6 +30009,12 @@ export interface components {
             /** Format: int32 */
             rowVersion: number;
             warnings: string[];
+        };
+        TaskHistoryActorChoice: {
+            displayName: string;
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
         };
         TaskHours: {
             /** Format: double */
@@ -24328,6 +30040,40 @@ export interface components {
             ref: string;
             requiresReview: boolean;
         };
+        TaskListGroup: {
+            dimension: string;
+            /** Format: double */
+            estimatedHours: number;
+            key: string;
+            label: null | string;
+            /** Format: date */
+            nextDueDate: null | string;
+            /** Format: int32 */
+            overdueCount: number;
+            /** Format: int32 */
+            pageShown: number;
+            pageTaskIds: string[];
+            parentKey: null | string;
+            progressBasis: string;
+            /** Format: int32 */
+            progressPct: null | number;
+            /** Format: int32 */
+            progressTaskCount: number;
+            /** Format: uuid */
+            projectId: string;
+            projectName: string;
+            projectNumber: string;
+            referenceAvailable: boolean;
+            /** Format: int32 */
+            rowCount: number;
+            /** Format: int32 */
+            unavailableStateCount: number;
+            /** Format: int32 */
+            undatedOpenCount: number;
+            /** Format: int32 */
+            unestimatedCount: number;
+            value: null | string;
+        };
         TaskPickupAssignBody: {
             /** Format: int32 */
             rowVersion: null | number;
@@ -24338,6 +30084,7 @@ export interface components {
             displayName: null | string;
             /** Format: uuid */
             id: string;
+            personNotices?: null | components["schemas"]["Notices"];
         };
         TaskPickupListRow: {
             canAssign: boolean;
@@ -24366,6 +30113,7 @@ export interface components {
             assigneeId: null | string;
             assigneeName: null | string;
             backlog?: null | boolean;
+            board?: null | components["schemas"]["BoardFact"];
             can: null | components["schemas"]["Can"];
             collaboratorIds: string[];
             /** Format: int32 */
@@ -24403,9 +30151,14 @@ export interface components {
             id: string;
             key: string;
             lane: string;
+            /** Format: uuid */
+            lastActivityActorId?: null | string;
             lastActivityActorName?: null | string;
+            lastActivityActorType?: null | string;
             /** Format: date-time */
             lastActivityAt: string;
+            /** Format: date-time */
+            lastActivityEventAt?: null | string;
             manualBlockReason: null | string;
             /** Format: date-time */
             manualBlockSetAt: null | string;
@@ -24443,6 +30196,7 @@ export interface components {
             reviewerName: null | string;
             /** Format: int32 */
             rowVersion: number;
+            seen?: null | components["schemas"]["WorkSeenDecoration"];
             /** Format: int32 */
             sortOrder: number;
             /** Format: date */
@@ -24451,8 +30205,113 @@ export interface components {
             status: string;
             /** Format: date-time */
             statusChangedAt: null | string;
+            submissionDate?: null | components["schemas"]["SubmissionDateFact"];
             /** Format: int32 */
             successorCount: number;
+            workActivity?: null | components["schemas"]["WorkActivityFact"];
+        };
+        TaskQueriesRowCompoundActivityRow: {
+            assigneeActive?: boolean;
+            /** Format: uuid */
+            assigneeId?: null | string;
+            assigneeName?: null | string;
+            backlog?: null | boolean;
+            board?: null | components["schemas"]["BoardFact"];
+            can?: null | components["schemas"]["Can"];
+            collaboratorIds?: string[];
+            /** Format: int32 */
+            commentCount?: number;
+            /** Format: date-time */
+            completedAt?: null | string;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: uuid */
+            createdBy?: null | string;
+            createdByName?: null | string;
+            /** Format: date */
+            deliverableDueDate?: null | string;
+            /** Format: uuid */
+            deliverableId?: null | string;
+            deliverableKey?: null | string;
+            deliverableName?: null | string;
+            /** Format: int32 */
+            deliverableOrder?: null | number;
+            deliverableStatus?: null | string;
+            disciplineCode?: string;
+            disciplineColour?: null | string;
+            disciplineName?: string;
+            /** Format: int32 */
+            disciplineOrder?: number;
+            /** Format: date */
+            dueDate?: null | string;
+            /** Format: int32 */
+            dueDateChangeCount?: number;
+            /** Format: uuid */
+            effectiveMilestoneId?: null | string;
+            /** Format: double */
+            estimatedHours?: null | number;
+            /** Format: uuid */
+            id?: string;
+            key?: string;
+            lane?: string;
+            /** Format: uuid */
+            lastActivityActorId?: null | string;
+            lastActivityActorName?: null | string;
+            lastActivityActorType?: null | string;
+            /** Format: date-time */
+            lastActivityAt?: string;
+            /** Format: date-time */
+            lastActivityEventAt?: null | string;
+            manualBlockReason?: null | string;
+            /** Format: date-time */
+            manualBlockSetAt?: null | string;
+            manualBlockType?: null | string;
+            /** Format: date */
+            milestoneDate?: null | string;
+            milestoneDerived?: boolean;
+            /** Format: uuid */
+            milestoneId?: null | string;
+            milestoneKey?: null | string;
+            milestoneName?: null | string;
+            name?: string;
+            /** Format: date */
+            originalDueDate?: null | string;
+            /** Format: date */
+            originalStartDate?: null | string;
+            pickupOfferOpen?: null | boolean;
+            /** Format: int32 */
+            predecessorCount?: number;
+            priority?: string;
+            /** Format: int32 */
+            progressPct?: number;
+            /** Format: uuid */
+            projectDisciplineId?: string;
+            /** Format: uuid */
+            projectId?: string;
+            projectName?: string;
+            projectNumber?: string;
+            projectStatus?: string;
+            requiresReview?: boolean;
+            /** Format: int32 */
+            reviewRound?: number;
+            /** Format: uuid */
+            reviewerId?: null | string;
+            reviewerName?: null | string;
+            /** Format: int32 */
+            rowVersion?: number;
+            seen?: null | components["schemas"]["WorkSeenDecoration"];
+            /** Format: int32 */
+            sortOrder?: number;
+            /** Format: date */
+            startDate?: null | string;
+            state?: null | components["schemas"]["State"];
+            status?: string;
+            /** Format: date-time */
+            statusChangedAt?: null | string;
+            submissionDate?: null | components["schemas"]["SubmissionDateFact"];
+            /** Format: int32 */
+            successorCount?: number;
+            workActivity?: null | components["schemas"]["WorkActivityFact"];
         };
         TaskRelatedDeliverable: {
             /** Format: uuid */
@@ -24522,16 +30381,20 @@ export interface components {
             displayName: string;
             email: string;
             jobTitle: null | string;
+            organisationFacts?: null | components["schemas"]["Organisation"];
+            personFacts?: null | components["schemas"]["Facts"];
             projects: components["schemas"]["TeamProjectRow"][];
             /** Format: uuid */
             userId: string;
         };
         TeamProjectRow: {
+            identityColour?: null | string;
             leads: string[];
             /** Format: uuid */
             projectId: string;
             projectName: string;
             projectNumber: string;
+            responsibilityNote?: null | string;
             roles: string[];
         };
         TeamRead: {
@@ -24562,6 +30425,19 @@ export interface components {
             /** Format: int32 */
             rowVersion: number;
         };
+        TemplateDiffCounts: {
+            /** Format: int32 */
+            added: number;
+            /** Format: int32 */
+            changed: number;
+            /** Format: int32 */
+            removed: number;
+        };
+        TemplateDiffFieldChange: {
+            after: null | string;
+            before: null | string;
+            field: string;
+        };
         TemplateDisciplineRead: {
             /** Format: uuid */
             disciplineId: string;
@@ -24575,9 +30451,43 @@ export interface components {
             /** Format: int32 */
             rowVersion: number;
         };
+        TemplateDraftChange: {
+            afterName: null | string;
+            beforeName: null | string;
+            change: string;
+            fields: components["schemas"]["TemplateDiffFieldChange"][];
+            kind: string;
+            ref: string;
+        };
+        TemplateDraftDiffRead: {
+            /** Format: date-time */
+            asOf: string;
+            changes: components["schemas"]["TemplateDraftChange"][];
+            counts: null | components["schemas"]["TemplateDiffCounts"];
+            /** Format: int32 */
+            draftRowVersion: number;
+            incompleteSections: string[];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            source: null | components["schemas"]["TemplateDraftSource"];
+            state: string;
+            /** Format: int32 */
+            totalCount: null | number;
+        };
+        TemplateDraftSource: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** Format: int32 */
+            version: null | number;
+        };
         TemplateFamilyVersion: {
             /** Format: uuid */
             id: string;
+            /** Format: int32 */
+            projects?: null | number;
             /** Format: date-time */
             publishedAt: null | string;
             status: string;
@@ -24619,6 +30529,14 @@ export interface components {
             /** Format: int32 */
             version: null | number;
         };
+        TemplateProjectProvenanceRead: {
+            /** Format: date-time */
+            asOf: string;
+            currentPublished: null | components["schemas"]["TemplateReleasedVersion"];
+            newer: null | components["schemas"]["TemplateReleasedVersion"];
+            source: null | components["schemas"]["TemplateRecordedSource"];
+            state: string;
+        };
         TemplatePublished: {
             /** Format: uuid */
             id: string;
@@ -24647,13 +30565,39 @@ export interface components {
             projectTypeId: null | string;
             /** Format: date-time */
             publishedAt: null | string;
+            risks?: null | components["schemas"]["TemplateRiskIn"][];
             roles?: null | components["schemas"]["TemplateRoleIn"][];
             /** Format: int32 */
             rowVersion: number;
+            screen?: null | components["schemas"]["TemplateVersionScreenRead"];
             status: string;
             tasks: components["schemas"]["TaskIn"][];
             /** Format: int32 */
             version: null | number;
+        };
+        TemplateRecordedSource: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** Format: int32 */
+            version: number;
+        };
+        TemplateReleasedVersion: {
+            /** Format: uuid */
+            id: string;
+            status: string;
+            /** Format: int32 */
+            version: number;
+        };
+        TemplateRiskIn: {
+            /** Format: int32 */
+            impact: null | number;
+            mitigation?: null | string;
+            /** Format: int32 */
+            probability: null | number;
+            ref: string;
+            title: string;
+            triggerIndicator?: null | string;
         };
         TemplateRoleIn: {
             /** Format: uuid */
@@ -24673,6 +30617,20 @@ export interface components {
         TemplateVersionBody: {
             /** Format: int32 */
             rowVersion: null | number;
+        };
+        TemplateVersionProject: {
+            /** Format: date-time */
+            createdAt: string;
+            name: string;
+            /** Format: uuid */
+            projectId: string;
+            projectNumber: string;
+            status: string;
+        };
+        TemplateVersionScreenRead: {
+            draftDiff: null | components["schemas"]["TemplateDraftDiffRead"];
+            /** Format: int32 */
+            projects: number;
         };
         TimeAwayBody: {
             action: string;
@@ -24721,6 +30679,8 @@ export interface components {
             workDate: string;
         };
         TimeView: {
+            /** Format: date-time */
+            asOf?: null | string;
             byDay: components["schemas"]["DayHours"][];
             byProject: components["schemas"]["ProjectHours"][];
             byTask: components["schemas"]["TaskHours"][];
@@ -24732,6 +30692,53 @@ export interface components {
             to: string;
             /** Format: double */
             total: number;
+        };
+        TimeWeekDay: {
+            /** Format: double */
+            additionalHours: null | number;
+            /** Format: double */
+            availableHours: null | number;
+            /** Format: date */
+            date: string;
+            /** Format: double */
+            holidayHours: null | number;
+            /** Format: double */
+            normalHours: null | number;
+            provisional: boolean;
+            /** Format: double */
+            timeAwayHours: null | number;
+            unavailable: boolean;
+        };
+        TimeWeekTask: {
+            assigned: boolean;
+            canCreate: boolean;
+            deleted: boolean;
+            entries: components["schemas"]["TimeRow"][];
+            previousWeek: boolean;
+            /** Format: uuid */
+            projectId: string;
+            projectName: string;
+            projectNumber: string;
+            /** Format: uuid */
+            taskId: string;
+            taskKey: string;
+            taskName: string;
+        };
+        TimeWeekView: {
+            /** Format: date-time */
+            asOf: string;
+            /** Format: double */
+            capacityHours: null | number;
+            days: components["schemas"]["TimeWeekDay"][];
+            /** Format: date */
+            from: string;
+            /** Format: uuid */
+            personId: string;
+            tasks: components["schemas"]["TimeWeekTask"][];
+            /** Format: date */
+            to: string;
+            /** Format: date */
+            today: string;
         };
         TimelineData: {
             deliverableLinks: components["schemas"]["TimelineDeliverableLink"][];
@@ -24843,6 +30850,7 @@ export interface components {
         TimelineProject: {
             /** Format: uuid */
             id: string;
+            identityColour?: null | string;
             name: string;
             projectNumber: string;
             /** Format: date */
@@ -24870,6 +30878,7 @@ export interface components {
             id: string;
             isOverdue: boolean;
             key: string;
+            lane?: null | string;
             /** Format: uuid */
             milestoneId: null | string;
             name: string;
@@ -25077,9 +31086,26 @@ export interface components {
             deliverables: components["schemas"]["DeliverableRow"][];
             tasks: components["schemas"]["TaskQueriesRow"][];
         };
+        WeeklyConstraintAgendaRow: {
+            affectedOwner: components["schemas"]["RecordContextPerson"];
+            description: string;
+            /** Format: uuid */
+            id: string;
+            key: string;
+            /** Format: date */
+            neededBy: string;
+            removalOwner: components["schemas"]["RecordContextPerson"];
+            state: string;
+            /** Format: uuid */
+            targetId: string;
+            targetKey: null | string;
+            targetState: string;
+            targetType: string;
+        };
         WeeklyCoordination: {
             blocked: components["schemas"]["TaskQueriesRow"][];
             completed: components["schemas"]["WeeklyCompleted"];
+            contexts?: null | components["schemas"]["WeeklyRecordContext"][];
             decisions: components["schemas"]["WeeklyDecision"][];
             deliverables: components["schemas"]["DeliverableRow"][];
             disciplines: components["schemas"]["WeeklyRound"][];
@@ -25089,6 +31115,7 @@ export interface components {
             issues: components["schemas"]["WeeklyIssue"][];
             milestones: components["schemas"]["DashboardMilestoneRow"][];
             overdue: components["schemas"]["TaskQueriesRow"][];
+            readinessInputs?: null | components["schemas"]["WorkReadinessTask"][];
             risks: components["schemas"]["WeeklyRisk"][];
             upcoming: components["schemas"]["WeeklyUpcoming"];
             waiting: components["schemas"]["MeetingActionRow"][];
@@ -25167,6 +31194,42 @@ export interface components {
             visibility: string;
             warnings: string[];
         };
+        WeeklyProposedAgendaRow: {
+            /** Format: uuid */
+            id: string;
+            intendedOutput: string;
+            key: string;
+            performer: components["schemas"]["RecordContextPerson"];
+            state: string;
+            /** Format: date */
+            targetDate: string;
+            /** Format: uuid */
+            targetId: string;
+            targetKey: null | string;
+            targetState: string;
+            targetType: string;
+            /** Format: date */
+            weekStart: string;
+        };
+        WeeklyReadinessAgenda: {
+            constraintScope: string;
+            constraints: components["schemas"]["PageOfWeeklyConstraintAgendaRow"];
+            /** Format: uuid */
+            disciplineId: null | string;
+            /** Format: date */
+            from: string;
+            /** Format: uuid */
+            projectId: string;
+            proposals: components["schemas"]["PageOfWeeklyProposedAgendaRow"];
+            /** Format: date */
+            to: string;
+        };
+        WeeklyRecordContext: {
+            context: components["schemas"]["RecordContextView"];
+            /** Format: uuid */
+            id: string;
+            kind: string;
+        };
         WeeklyReviewed: {
             /** Format: date-time */
             lastCoordinationReviewedAt: string;
@@ -25223,11 +31286,133 @@ export interface components {
             /** Format: int32 */
             versionRowVersion: number;
         };
+        WorkActivityFact: {
+            /** Format: uuid */
+            actorId: null | string;
+            actorName: null | string;
+            actorType: null | string;
+            /** Format: int32 */
+            commentCount: null | number;
+            commentable: boolean;
+            /** Format: uuid */
+            eventId: null | string;
+            /** Format: date-time */
+            occurredAt: null | string;
+        };
+        WorkInputAffectedTask: {
+            /** Format: uuid */
+            id: string;
+            key: string;
+            name: string;
+        };
+        WorkInputAssessment: {
+            /** Format: uuid */
+            id: string;
+            key: string;
+            /** Format: uuid */
+            noticeId: string;
+            noticeStatus: string;
+            status: string;
+        };
+        WorkInputEffect: {
+            /** Format: uuid */
+            id: string;
+            kind: string;
+            otherOpenTasks: components["schemas"]["WorkInputAffectedTask"][];
+        };
+        WorkInputRevision: {
+            /** Format: uuid */
+            id: string;
+            key: string;
+            /** Format: date-time */
+            registeredAt: string;
+            revision: string;
+            /** Format: date-time */
+            sourceCheckedAt: null | string;
+            title: string;
+        };
+        WorkInputSourceUse: {
+            assessmentAvailable: boolean;
+            assessments: components["schemas"]["WorkInputAssessment"][];
+            currentRegisteredRevision: null | components["schemas"]["WorkInputRevision"];
+            /** Format: uuid */
+            id: string;
+            intendedUse: string;
+            revisionUsed: null | components["schemas"]["WorkInputRevision"];
+        };
+        WorkReadinessInput: {
+            checkApplies: null | boolean;
+            checkSatisfied: null | boolean;
+            code: string;
+            contextAvailable: boolean;
+            linkedAvailable: boolean;
+            linkedSource: null | components["schemas"]["RecordContextInputView"];
+            linkedStatus: null | string;
+            relationship: string;
+            source: components["schemas"]["RecordContextInputView"];
+            status: string;
+        };
+        WorkReadinessInputs: {
+            available: boolean;
+            blocked: string[];
+            hasAssessment: boolean;
+            inputs: components["schemas"]["WorkReadinessInput"][];
+            state: string;
+            unknown: string[];
+        };
+        WorkReadinessTask: {
+            readiness: components["schemas"]["WorkReadinessInputs"];
+            /** Format: uuid */
+            taskId: string;
+        };
+        WorkSeenCommandResult: {
+            /** Format: date-time */
+            committedAt: string;
+            /** Format: date-time */
+            firstVisitAt: null | string;
+            /** Format: date-time */
+            lastMarkAllAt: null | string;
+            /** Format: date-time */
+            lastVisitAt: null | string;
+            /** Format: date-time */
+            previousVisitAt: null | string;
+            /** Format: uuid */
+            requestId: string;
+            /** Format: int64 */
+            revision: number;
+        };
+        WorkSeenDecoration: {
+            observedTokens: components["schemas"]["WorkSeenObservedToken"][];
+            state: string;
+        };
+        WorkSeenObservedToken: {
+            role: string;
+            /** Format: int32 */
+            sourceVersion: number;
+            /** Format: uuid */
+            token: string;
+        };
+        WorkSeenOpenedBody: {
+            /** Format: uuid */
+            itemId: string;
+            itemType: string;
+            observedTokens: string[];
+            /** Format: uuid */
+            requestId: string;
+        };
+        WorkSeenVisitBody: {
+            /** Format: uuid */
+            requestId: string;
+        };
         WorkloadGrid: {
+            /** Format: date-time */
+            asOf?: null | string;
             /** Format: date */
             currentWeek: string;
             /** Format: double */
             defaultCapacity: number;
+            disciplineContext?: null | components["schemas"]["DisciplineCapacity"][];
+            includesProposed?: null | boolean;
             people: components["schemas"]["LoadPerson"][];
             thresholds: components["schemas"]["LoadThresholds"];
             /** Format: date */
@@ -25267,10 +31452,17 @@ export interface components {
             id: string;
             name: string;
         };
+        WorkspaceFileUserReference: {
+            displayName: string;
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+        };
         WorkspaceOwnerChoice: {
             displayName: string;
             /** Format: uuid */
             id: string;
+            personNotices?: null | components["schemas"]["Notices"];
         };
         WorkspaceProjectChoice: {
             /** Format: uuid */

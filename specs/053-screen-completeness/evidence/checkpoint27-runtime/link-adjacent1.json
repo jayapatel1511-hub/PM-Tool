@@ -1,0 +1,13 @@
+{
+  "exitCode": 0,
+  "classes": [
+    "ContractTests",
+    "RegistryTests",
+    "WorkspaceFilePersonTests"
+  ],
+  "methods": [
+    "CollaborationTests.Document_links_are_typed_copyable_inherited_and_soft_deleted",
+    "ProjectsContractTests.Header_keeps_its_property_names_order_nulls_nesting_and_flag_gated_members",
+    "ProjectsContractTests.Star_and_header_link_commands_answer_with_their_status_body_and_refusals"
+  ]
+}

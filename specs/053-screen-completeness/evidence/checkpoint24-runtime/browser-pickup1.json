@@ -1,0 +1,53 @@
+{
+  "status": "PASS",
+  "scope": "synthetic Pickup actor UI only; no API authority or command acceptance claim",
+  "browser": "156.0.8078.74",
+  "chromeExecutable": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+  "width": 375,
+  "businessWrites": 0,
+  "personReads": [
+    {
+      "user": "00000000-0000-0000-0000-000000008801",
+      "query": {
+        "projectsPage": "1",
+        "projectsPageSize": "25"
+      }
+    },
+    {
+      "user": "00000000-0000-0000-0000-000000008802",
+      "query": {
+        "projectsPage": "1",
+        "projectsPageSize": "25"
+      }
+    },
+    {
+      "user": "00000000-0000-0000-0000-000000008803",
+      "query": {
+        "projectsPage": "1",
+        "projectsPageSize": "25"
+      }
+    }
+  ],
+  "offerReads": [
+    {
+      "projectId": "00000000-0000-0000-0000-000000000010",
+      "disciplineId": "00000000-0000-0000-0000-000000000011",
+      "neededBy": "2026-11-06"
+    },
+    {
+      "projectId": "00000000-0000-0000-0000-000000000010",
+      "disciplineId": "00000000-0000-0000-0000-000000000011",
+      "neededBy": "2026-11-06"
+    }
+  ],
+  "ownLoadReads": 2,
+  "cases": [
+    "two offers/same User distinct IDs",
+    "same-name different User",
+    "Enter/Escape natural exact URL/focus/filter/nonzero-scroll return",
+    "answered narrow author404 clears other cached facts",
+    "no Workload hours/planner reads",
+    "pickup confirmation cancel only and Assign href unchanged",
+    "flag-off original names/offers/actions at375"
+  ]
+}

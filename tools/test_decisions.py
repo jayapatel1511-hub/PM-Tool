@@ -10,7 +10,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 LOG = ROOT / "specs/DECISIONS.md"
 COLUMNS = ["ID", "Packet", "Question", "Default", "Flag", "Status", "Last change", "Source"]
 ID_FORMS = re.compile(r"^(RPT-\d{2}|\d{3}-D\d+|\d{3}-DEF\d+)$")
-STATUSES = {"default-active", "confirmed", "overruled", "deferred"}
+STATUSES = {"Open", "default-active", "confirmed", "overruled", "deferred"}
 DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 # The source lists FR-DLV-26 names: label -> (file, how its row IDs are found).
 SOURCES = {

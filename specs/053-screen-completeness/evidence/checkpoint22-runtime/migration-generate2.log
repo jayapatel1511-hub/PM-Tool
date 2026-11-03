@@ -1,0 +1,31 @@
+Using project '/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Hub.Api.csproj'.
+Using startup project '/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Hub.Api.csproj'.
+dotnet msbuild /getProperty:ProjectName /getProperty:AssemblyName /getProperty:DesignAssembly /getProperty:Language /getProperty:OutputPath /getProperty:PlatformTarget /getProperty:ProjectAssetsFile /getProperty:ProjectDir /getProperty:RootNamespace /getProperty:RuntimeFrameworkVersion /getProperty:TargetFileName /getProperty:TargetFrameworkMoniker /getProperty:Nullable /getProperty:TargetFramework /getProperty:TargetPlatformIdentifier /getProperty:Platform /t:ResolvePackageAssets /getItem:RuntimeCopyLocalItems /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Hub.Api.csproj
+dotnet msbuild /getProperty:ProjectName /getProperty:AssemblyName /getProperty:DesignAssembly /getProperty:Language /getProperty:OutputPath /getProperty:PlatformTarget /getProperty:ProjectAssetsFile /getProperty:ProjectDir /getProperty:RootNamespace /getProperty:RuntimeFrameworkVersion /getProperty:TargetFileName /getProperty:TargetFrameworkMoniker /getProperty:Nullable /getProperty:TargetFramework /getProperty:TargetPlatformIdentifier /getProperty:Platform /t:ResolvePackageAssets /getItem:RuntimeCopyLocalItems /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Hub.Api.csproj
+dotnet exec --depsfile /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/bin/Debug/net10.0/Hub.Api.deps.json --additionalprobingpath /Users/jaypatel/.nuget/packages --runtimeconfig /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/bin/Debug/net10.0/Hub.Api.runtimeconfig.json /Users/jaypatel/.nuget/packages/dotnet-ef/10.0.12/tools/net8.0/any/tools/net8.0/any/ef.dll migrations add ScreenPersonAndIssueMetadata --output-dir Data/Migrations --assembly /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/bin/Debug/net10.0/Hub.Api.dll --project /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Hub.Api.csproj --startup-assembly /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/bin/Debug/net10.0/Hub.Api.dll --startup-project /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Hub.Api.csproj --project-dir /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/ --root-namespace Hub.Api --language C# --framework net10.0 --design-assembly /Users/jaypatel/.nuget/packages/microsoft.entityframeworkcore.design/10.0.12/lib/net10.0/Microsoft.EntityFrameworkCore.Design.dll --nullable --working-dir /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053 --verbose
+Using assembly 'Hub.Api'.
+Using startup assembly 'Hub.Api'.
+Using application base '/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/bin/Debug/net10.0'.
+Using working directory '/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api'.
+Using root namespace 'Hub.Api'.
+Using project directory '/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/'.
+Remaining arguments: .
+Finding DbContext classes...
+Using environment 'Testing'.
+Finding IDesignTimeDbContextFactory implementations...
+Finding DbContext classes in the project...
+Found DbContext 'HubDb'.
+Finding application service provider in assembly 'Hub.Api'...
+Finding Microsoft.Extensions.Hosting service provider...
+Using application service provider from Microsoft.Extensions.Hosting.
+Using context 'HubDb'.
+Finding design-time services referenced by assembly 'Hub.Api'...
+Finding design-time services referenced by assembly 'Hub.Api'...
+No referenced design-time services were found.
+Finding design-time services for provider 'Npgsql.EntityFrameworkCore.PostgreSQL'...
+Using design-time services from provider 'Npgsql.EntityFrameworkCore.PostgreSQL'.
+Finding IDesignTimeServices implementations in assembly 'Hub.Api'...
+No design-time services were found.
+Writing migration to '/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Data/Migrations/20261101171546_ScreenPersonAndIssueMetadata.cs'.
+Writing model snapshot to '/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Data/Migrations/HubDbModelSnapshot.cs'.
+Done. To undo this action, use 'ef migrations remove'

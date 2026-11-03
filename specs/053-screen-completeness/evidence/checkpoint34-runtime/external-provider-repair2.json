@@ -1,0 +1,50 @@
+{
+  "exitCode": 1,
+  "args": [
+    "/opt/homebrew/bin/dotnet",
+    "test",
+    "tests/Hub.Tests/Hub.Tests.csproj",
+    "-c",
+    "Release",
+    "--no-build",
+    "--no-restore",
+    "--artifacts-path",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint34-artifacts",
+    "--filter",
+    "FullyQualifiedName~Future_issue_capture_is_private_even_off|FullyQualifiedName~Removed_issue_scope_carries_through_a_later_round|FullyQualifiedName~Explicit_carry_keeps_incoming_identity|FullyQualifiedName~Actual_future_issue_authors_refuse_downgrade",
+    "--logger",
+    "trx;LogFileName=external-provider-repair2.trx",
+    "--results-directory",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint34-runtime/trx-external-provider-repair2",
+    "-m:1",
+    "-p:UseSharedCompilation=false",
+    "-p:NuGetAudit=false"
+  ],
+  "atUtc": "2026-11-03T04:50:01.814894+00:00",
+  "boundary": "Fresh HubFactory-owned synthetic databases via authorized tunnel; no retained QA/operational data or mail",
+  "producer": false,
+  "counters": {
+    "total": "4",
+    "executed": "4",
+    "passed": "3",
+    "failed": "1",
+    "error": "0",
+    "timeout": "0",
+    "aborted": "0",
+    "inconclusive": "0",
+    "passedButRunAborted": "0",
+    "notRunnable": "0",
+    "notExecuted": "0",
+    "disconnected": "0",
+    "warning": "0",
+    "completed": "0",
+    "inProgress": "0",
+    "pending": "0"
+  },
+  "failures": [
+    {
+      "name": "Hub.Tests.Api.ExternalReviewTests.Actual_future_issue_authors_refuse_downgrade_with_55000_before_schema_data_or_history_changes",
+      "message": "Assert.Throws() Failure: Exception type was not an exact match\nExpected: typeof(Npgsql.PostgresException)\nActual:   typeof(System.InvalidOperationException)\n---- System.InvalidOperationException : An exception has been raised that is likely due to a transient failure.\n-------- Npgsql.PostgresException : 55000: Cannot downgrade issued-review schema while captured authorship or issued-review records remain."
+    }
+  ]
+}

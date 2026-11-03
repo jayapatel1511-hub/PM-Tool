@@ -1,0 +1,18 @@
+{
+  "newPaths": [],
+  "removedPaths": [],
+  "changedPaths": [
+    "/api/v1/admin/role-explanations"
+  ],
+  "addedSchemas": [
+    "AdminOperationChoice",
+    "AdminPermissionFactor",
+    "AdminPermissionOperation",
+    "AdminPermissionRequirement",
+    "AdminPermissionRow"
+  ],
+  "changedSchemas": [
+    "AdminPermissionExample",
+    "AdminRoleExamplesRead"
+  ]
+}

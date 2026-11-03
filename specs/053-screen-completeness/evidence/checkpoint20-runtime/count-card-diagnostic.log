@@ -1,0 +1,16 @@
+ZERO_DIAG {"html":"<span id=\"_r_1d_-value\" class=\"count-card__value\">0</span>","root":"v2","matches":true,"ink":"#161a23","color":"rgb(214, 51, 74)","css":[".count-card__value { font-size: 28px; line-height: 36px; font-weight: 500; font-variant-numeric: tabular-nums; }",":root[data-visual=\"v2\"] .count-card__value { color: var(--metric); font-size: 32px; line-height: 40px; }",":root[data-visual=\"v2\"] .count-card--red .count-card__value:not([data-alert]) { color: var(--ink); }","@media (max-width: 767.98px) {\n  :root[data-visual=\"v2\"] .home-count-cards { grid-template-columns: repeat(2, minmax(0px, 1fr)); }\n  :root[data-visual=\"v2\"] .count-card { min-height: 156px; padding: 16px; }\n  :root[data-visual=\"v2\"] .count-card__value { font-size: 28px; line-height: 36px; }\n}"]}
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
++ actual - expected
+
++ 'rgb(214, 51, 74)'
+- 'rgb(22, 26, 35)'
+        ^
+
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/count-card-contract.cjs:107:12 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 'rgb(214, 51, 74)',
+  expected: 'rgb(22, 26, 35)',
+  operator: 'strictEqual',
+  diff: 'simple'
+}

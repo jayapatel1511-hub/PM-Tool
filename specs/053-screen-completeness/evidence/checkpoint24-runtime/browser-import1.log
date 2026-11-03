@@ -1,0 +1,9 @@
+AssertionError [ERR_ASSERTION]: Short desktop viewport establishes actual outer dialog overflow
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/deliverable-import.cjs:190:12 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}

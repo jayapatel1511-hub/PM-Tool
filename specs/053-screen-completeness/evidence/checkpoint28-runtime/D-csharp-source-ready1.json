@@ -1,0 +1,12 @@
+{
+  "status": "READY_HOLD_EXACT_D_AND_ROOT_HASH_MATCH",
+  "basis": "Explicit D6-source HOLD and subsequent exact hash message matches root independent two captures",
+  "files": {
+    "src/Hub.Api/Features/AdminUserScreen.cs": "2f834f6fe7bdbcf5e2f18b3cb76b04075e6fd6a75aee55732cd688ebf94c4e1f",
+    "src/Hub.Api/Features/AdminRoleExplanations.cs": "c19fcd042093f2fcf7b2a9489c1ad0ce7051abd2d514dd8747dd357240c2559a",
+    "src/Hub.Domain/PermissionExplanationCatalog.cs": "3f3170da83c2ca0b7fc9d4b0812b3bc7e7601fd09732729bac012d70cd2b85c0",
+    "tests/Hub.Tests/Api/AdminUserScreenTests.cs": "1eb4b559f77912cbd59aacb29a1dd845a3add466bd4ad426ea5099dc08393f08",
+    "tests/Hub.Tests/Api/AdminRoleExplanationTests.cs": "171d6e624cf067e2ca2c36902cbc5f914885c22940ec1b7f4e72fa4316622b51",
+    "tests/Hub.Tests/Domain/PermissionExplanationTests.cs": "4e884af06a85118b5e7c90ef7ac94896ab8c5919f142f0a571063db83c55d810"
+  }
+}

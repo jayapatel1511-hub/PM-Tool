@@ -1,0 +1,49 @@
+{
+  "status": "LOCAL_S44_PASS",
+  "distinctApiTests": 103,
+  "nodeTests": 27,
+  "builds": [
+    "API bootstrap1 PASS: 0 errors,9 warnings (includes unavailable NuGet audit)",
+    "solution1 PASS: 0 errors,1165 warnings",
+    "test rebuild2 PASS: 0 errors,1158 warnings",
+    "isolated SPA1/SPA2 PASS"
+  ],
+  "types": "Generation, app1/app2 and fixture1 PASS; lint1 PASS with existing warnings; UI review1 PASS",
+  "browser": {
+    "Files3": {
+      "groups": 7,
+      "fileReads": 35,
+      "personReads": 3,
+      "deliverableReads": 1,
+      "businessWrites": 0,
+      "unexpectedGets": 0
+    },
+    "Reference2": {
+      "cases": 9,
+      "explicitSimulatedCommands": 23,
+      "simulatedMutations": 10,
+      "personReads": 1,
+      "exactScopedPlanningReads": 1
+    },
+    "PersonAdjacent1": {
+      "cases": 8,
+      "personReads": 14,
+      "businessWrites": 0
+    },
+    "IdentityAdjacent1": "PASS"
+  },
+  "visual": "Four final SPA2 desktop/375px captures inspected",
+  "parity": "622 C# /451 web /715 retained earlier output files including old DLL /142 final static files PASS",
+  "spec": "Freshness PASS;1546 IDs and438 sections cited;0 unknown;8 decision tests PASS;whitespace PASS before docs",
+  "retainedFailures": [
+    "EF design1 interrupted with no files after configuration watcher stall; watcher-disabled design2 PASS",
+    "Source review P1 positional-record SQL projection fixed before execution",
+    "Source review P2 UTF16 pre-replay bypass fixed and exercised",
+    "API1:66 pass/1 stale fixture version failure; same-case API2 pass; no app change",
+    "Two intentional golden update failures, later plain checks PASS",
+    "Files Chrome1 ambiguous heading selector; Chrome2 inaccurate neutral fallback copy; Chrome3 PASS on final SPA2",
+    "Reference Chrome1 optional accessible labels and finite registrar planning read; corrected Chrome2 PASS"
+  ],
+  "boundary": "Local implementation only; no full suite, live Kestrel/browser join, deployed/pilot/human/formal Accepted or full-goal completion",
+  "atUtc": "2026-11-02T13:01:45.417311+00:00"
+}

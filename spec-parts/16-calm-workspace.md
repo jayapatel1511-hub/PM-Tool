@@ -61,7 +61,7 @@ The census in packet 037's verification record measures AC-CALM-01 to AC-CALM-05
 
 - **AC-CALM-05.** Less reading and fewer colours: chrome words above the fold are at most 50 % of each screen's baseline and never need to be fewer than 40, and at most 6 chromatic fill colours (saturation at least 15 % and lightness 8–96 %, on white) show above the fold. The census counts tables, grids, dialogs, and articles and list items outside navigation as data, not chrome, and each screen's baseline is the screen before the change measured with that census. Baseline: 16–221 words; 2–10 colours.
 
-- **AC-CALM-06.** Nothing lost: every route loads for a permitted user and highlights its sidebar item and project group; every former tab and quick filter is reachable in at most 2 clicks from its page; and every former quick-filter URL returns the same rows as before the change.
+- **AC-CALM-06.** Nothing lost: every route loads for a permitted user and highlights its sidebar item and project group where applicable; Search, Notifications and Preferences intentionally have no selected sidebar item (Jay confirmed 052-D12 on 2026-11-01); every former tab and quick filter is reachable in at most 2 clicks from its page; and every former quick-filter URL returns the same rows as before the change.
 
 - **AC-CALM-07.** Filters behave the same: setting a filter in the popover updates the URL exactly as before, shows a removable chip and a count on the Filters button; Clear resets all; reloading restores the state.
 

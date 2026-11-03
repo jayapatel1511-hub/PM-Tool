@@ -1,0 +1,23 @@
+{
+  "status": "complete",
+  "results": [
+    {
+      "suite": "timeline-saved-views",
+      "exitCode": 0,
+      "seconds": 8.32,
+      "log": "timeline-saved-views-run2.log"
+    },
+    {
+      "suite": "person-panel",
+      "exitCode": 1,
+      "seconds": 49.97,
+      "log": "person-panel-run2.log"
+    },
+    {
+      "suite": "deliverable-register",
+      "exitCode": 1,
+      "seconds": 18.92,
+      "log": "deliverable-register-run2.log"
+    }
+  ]
+}

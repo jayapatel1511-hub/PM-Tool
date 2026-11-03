@@ -1,0 +1,14 @@
+{
+  "atUtc": "2026-11-02T20:17:52.559071+00:00",
+  "nativeDefaultViewport": {
+    "width": 756,
+    "height": 469
+  },
+  "attemptedWheelPoint": {
+    "x": 1250,
+    "y": 800
+  },
+  "finding": "Fixed wheel point was outside default native window; driver lacked intended desktop device setup",
+  "repair": "Explicit initial1440x1000viewport. Native visibility, natural input, assertions and real15100ms waits unchanged",
+  "applicationChanged": false
+}

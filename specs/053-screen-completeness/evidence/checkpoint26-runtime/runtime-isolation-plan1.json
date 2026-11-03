@@ -1,0 +1,21 @@
+{
+  "status": "PLAN_ONLY_NO_BUILD_OR_RUNTIME_EXECUTION",
+  "artifactsPath": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint26-artifacts",
+  "spaOutput": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint26-artifacts/bin/spa-wwwroot",
+  "retained": [
+    "QA24API5088PID4323/DBhub_qa_checkpoint24",
+    "oldpreview8853/src/Hub.Api/wwwroot",
+    "gen53preview8854/.review/checkpoint25-artifacts/bin/spa-wwwroot",
+    "sharedtestPG55432"
+  ],
+  "guards": [
+    "AllCSharpauthorsHOLD beforebuild/EF/generator/test",
+    "RootschemaonlyEFgenerationafterisolatednewAPIbuild;Db__Migrate=false directEF10.0.12againstisolatedassembly, notoldbin",
+    "Rootreviewgeneratedmigration: exactly2nullablemax32columns+2checks, noexistingcolumn/default/backfill/destructiveops",
+    "Rebuildaftermigrationbeforeproviderchecks",
+    "AllfrontendauthorsHOLDbeforetypes/lint/SSR/prodVite",
+    "No.NETandproductionViteconcurrently",
+    "No stop/restart/drop oroldbinary/outputoverwrite;cleanupquestionpending"
+  ],
+  "boundary": "No active newAPI/previewloan;this directory andplanonly."
+}

@@ -1,0 +1,20 @@
+Test run for /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.28]     Hub.Tests.Api.RegistryTests.Generated_key_families_match_the_registry_and_vocabulary [FAIL]
+  Failed Hub.Tests.Api.RegistryTests.Generated_key_families_match_the_registry_and_vocabulary [49 ms]
+  Error Message:
+   Updated web/src/gen/registry.gen.ts; review the diff and rerun without HUB_UPDATE_REGISTRY
+  Stack Trace:
+     at Hub.Tests.Api.RegistryTests.Generated_key_families_match_the_registry_and_vocabulary() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/RegistryTests.cs:line 135
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+[xUnit.net 00:00:06.31]     Hub.Tests.Api.ContractTests.Openapi_matches_the_committed_golden_document [FAIL]
+  Failed Hub.Tests.Api.ContractTests.Openapi_matches_the_committed_golden_document [6 s]
+  Error Message:
+   Updated web/src/gen/openapi.json; review the diff, run npm run gen, and rerun without HUB_UPDATE_CONTRACT
+  Stack Trace:
+     at Hub.Tests.Api.ContractTests.Openapi_matches_the_committed_golden_document() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ContractTests.cs:line 50
+--- End of stack trace from previous location ---
+Results File: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint20-runtime/checkpoint20-golden-refresh.trx
+
+Failed!  - Failed:     2, Passed:     0, Skipped:     0, Total:     2, Duration: 6 s - Hub.Tests.dll (net10.0)

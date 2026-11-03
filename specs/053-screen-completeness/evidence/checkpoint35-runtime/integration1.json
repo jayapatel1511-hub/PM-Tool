@@ -1,0 +1,20 @@
+{
+  "backendFiles": 2,
+  "newReplayTests": "tests/Hub.Tests/Api/PlanningLeaveReplayAuthorityTests.cs",
+  "serverLocaleKeysAdded": 556,
+  "existingSameKeys": 0,
+  "productionPlanningUnchanged": true,
+  "status": "INTEGRATED_UNCOMPILED",
+  "policyS21": "PENDING",
+  "uiFiles": [
+    "web/src/pages/admin/admin-role-explanations.tsx",
+    "web/tests/admin-screen.cjs",
+    "web/tests/admin-screen.fixture.cjs"
+  ],
+  "uiLocaleKeysAdded": 25,
+  "rows": 83,
+  "operations": 250,
+  "rowScenarios": 32,
+  "serverLocaleKeys": 556,
+  "checks": "UNCOMPILED_UNRUN"
+}

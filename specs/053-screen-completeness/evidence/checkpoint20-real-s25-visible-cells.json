@@ -1,0 +1,57 @@
+{
+  "observedAtUtc": "2026-11-01T13:57:09.525Z",
+  "path": "u1",
+  "period": {
+    "key": "2026-11",
+    "label": "2026-11",
+    "weeks": [
+      "2026-11-02",
+      "2026-11-09",
+      "2026-11-16",
+      "2026-11-23"
+    ],
+    "weekCount": 4,
+    "denominatorHours": 160
+  },
+  "rows": [
+    {
+      "person": "qa20-report-a",
+      "rowIndex": 0,
+      "path": "u1",
+      "value": 1,
+      "text": "1.0",
+      "bounds": {
+        "x": 970,
+        "y": 388,
+        "width": 20.609375,
+        "height": 20
+      }
+    },
+    {
+      "person": "qa20-report-b",
+      "rowIndex": 1,
+      "path": "u1",
+      "value": 0.75,
+      "text": "0.75",
+      "bounds": {
+        "x": 961.59375,
+        "y": 445,
+        "width": 29.015625,
+        "height": 20
+      }
+    }
+  ],
+  "errors": [],
+  "total": {
+    "value": 1.75,
+    "text": "1.75",
+    "bounds": {
+      "x": 961.34375,
+      "y": 502,
+      "width": 29.265625,
+      "height": 20
+    }
+  },
+  "url": "http://127.0.0.1:8853/reports/workload-employee?projectId=01a19758-f4ab-71de-8b96-74a60518caba&unit=fte&period=months",
+  "documentOverflow": false
+}

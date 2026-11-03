@@ -1,0 +1,28 @@
+{
+  "exitCode": 0,
+  "args": [
+    "npm",
+    "--prefix",
+    "web",
+    "run",
+    "lint",
+    "--",
+    "src/components/hub/notification-row-actions.tsx",
+    "src/pages/notice-preferences.tsx",
+    "src/pages/Preferences.tsx",
+    "src/i18n/en.ts",
+    "tests/notice-delivery.cjs",
+    "tests/notice-delivery.fixture.cjs",
+    "tests/notice-preferences.cjs",
+    "tests/notice-preferences.fixture.cjs"
+  ],
+  "atUtc": "2026-11-02T23:57:25.384401+00:00",
+  "elapsedSeconds": 0.17,
+  "errors": [],
+  "tail": [
+    "",
+    "> web@0.0.0 lint",
+    "> oxlint src/components/hub/notification-row-actions.tsx src/pages/notice-preferences.tsx src/pages/Preferences.tsx src/i18n/en.ts tests/notice-delivery.cjs tests/notice-delivery.fixture.cjs tests/notice-preferences.cjs tests/notice-preferences.fixture.cjs",
+    ""
+  ]
+}

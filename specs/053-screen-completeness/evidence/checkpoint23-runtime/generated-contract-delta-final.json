@@ -1,0 +1,52 @@
+{
+  "newPaths": [
+    "/api/v1/me/work/opened",
+    "/api/v1/me/work/seen-all",
+    "/api/v1/me/work/visits",
+    "/api/v1/projects/{id}/deliverables/client-export"
+  ],
+  "removedPaths": [],
+  "newSchemas": [
+    "TaskQueriesRowCompoundActivityRow",
+    "WorkActivityFact",
+    "WorkSeenCommandResult",
+    "WorkSeenDecoration",
+    "WorkSeenObservedToken",
+    "WorkSeenOpenedBody",
+    "WorkSeenVisitBody"
+  ],
+  "removedSchemas": [],
+  "legacyClientRowPreserved": true,
+  "legacyFactsPreserved": true,
+  "changedSchemas": [
+    "ActionDetail",
+    "AttentionRow",
+    "ChangeDetail",
+    "CoordinationBlockerGroup",
+    "CoordinationChangeRow",
+    "CoordinationHandoffRow",
+    "CoordinationInputUseRow",
+    "CoordinationIssueRow",
+    "CoordinationLinkedAction",
+    "CoordinationReviewRow",
+    "DecisionDetailResponse",
+    "DeliverableDetail",
+    "DeliverableRow",
+    "FollowUpItem",
+    "HandoffDetail",
+    "IssueDetailData",
+    "ItemLinkRow",
+    "MeetingActionRow",
+    "MyWorkDecision",
+    "MyWorkMilestone",
+    "MyWorkProject",
+    "MyWorkSuccessor",
+    "ProjectDetail",
+    "RiskDetailData",
+    "StaffingContextRow",
+    "StartabilityRow",
+    "SubmissionContextRow",
+    "TaskDetailResponse",
+    "TaskQueriesRowBase"
+  ]
+}

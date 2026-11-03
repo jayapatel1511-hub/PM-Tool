@@ -1,0 +1,24 @@
+{
+  "status": "PASS_FOCUSED_DOTNET",
+  "distinctPassed": 137,
+  "reports": [
+    {
+      "file": "drawing-format1.trx",
+      "passed": 69
+    },
+    {
+      "file": "person-readers2.trx",
+      "passed": 6
+    },
+    {
+      "file": "drawing-import1.trx",
+      "passed": 16
+    },
+    {
+      "file": "contract-adjacent1.trx",
+      "passed": 46
+    }
+  ],
+  "nodeDraftGuards": 7,
+  "limitations": "Frontendtypes/lint/build/Chrome/realQA24andKestrel>1MiBnotyetverified; noS34/S43check"
+}

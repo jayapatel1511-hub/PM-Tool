@@ -1,0 +1,60 @@
+{
+  "newPaths": [
+    "/api/v1/admin/deliverableTypes/{id}/review-defaults",
+    "/api/v1/calendar/screen",
+    "/api/v1/calendar/screen/{type}/{id}/date-preview",
+    "/api/v1/me/notifications/screen",
+    "/api/v1/projects/{projectId}/reviews/default-disciplines",
+    "/api/v1/projects/{projectId}/reviews/discipline-summary",
+    "/api/v1/tasks/bulk/commands",
+    "/api/v1/tasks/bulk/preview"
+  ],
+  "newSchemas": [
+    "CalendarScreenAwayDay",
+    "CalendarScreenAwayRead",
+    "CalendarScreenChoice",
+    "CalendarScreenDeadline",
+    "CalendarScreenPreview",
+    "CalendarScreenRead",
+    "NotificationScreenContextCoverage",
+    "NotificationScreenDelivery",
+    "NotificationScreenFollow",
+    "NotificationScreenPage",
+    "NotificationScreenRow",
+    "NotificationScreenState",
+    "PageOfCalendarScreenDeadline",
+    "ReviewDefaultSettings",
+    "ReviewDefaultSettingsWrite",
+    "ReviewDefaultSourceType",
+    "ReviewDefaultSuggestion",
+    "ReviewDefaultSuggestions",
+    "ReviewDisciplineSummary",
+    "ReviewDisciplineSummaryRow",
+    "TaskBulkCommandBody",
+    "TaskBulkCommandResult",
+    "TaskBulkCounts",
+    "TaskBulkDeliverableTarget",
+    "TaskBulkIntent",
+    "TaskBulkItem",
+    "TaskBulkParameters",
+    "TaskBulkParametersTaskBulkAssignParameters",
+    "TaskBulkParametersTaskBulkCancelParameters",
+    "TaskBulkParametersTaskBulkDeliverableParameters",
+    "TaskBulkParametersTaskBulkDueDateParameters",
+    "TaskBulkParametersTaskBulkHoldParameters",
+    "TaskBulkParametersTaskBulkPriorityParameters",
+    "TaskBulkParametersTaskBulkShiftDatesParameters",
+    "TaskBulkPreview",
+    "TaskBulkPreviewCounts",
+    "TaskBulkRow"
+  ],
+  "oldSchemaChanges": [],
+  "removedPaths": [],
+  "privateSchemasOrProps": [
+    "WeeklySummaryResult"
+  ],
+  "preexistingPrivateMatches": [
+    "WeeklySummaryResult"
+  ],
+  "newPrivateLeaks": []
+}

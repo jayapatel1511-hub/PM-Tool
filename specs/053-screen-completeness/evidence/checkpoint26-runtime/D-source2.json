@@ -1,0 +1,23 @@
+{
+  "atUtc": "2026-11-02T10:49:48.828608+00:00",
+  "status": "READY_HOLD_REPAIR_SOURCE_PASS",
+  "files": [
+    {
+      "path": "web/src/pages/projects/review-response-form.tsx",
+      "sha256": "787ae51f8f68b5b1a7cc958ba01787466c10d79cf8866aba364ed0b74b8baf6d"
+    },
+    {
+      "path": "web/tests/review-response.cjs",
+      "sha256": "d3d1265d6aed47b79987a24d4893d22f2360f628ea9aa7953621939c35ff1e49"
+    },
+    {
+      "path": "web/tests/review-response.fixture.cjs",
+      "sha256": "ca069722246d53c26ebc7bb20f28e61f0ca1f5c29f620ca5135159e6a6d7d7b1"
+    }
+  ],
+  "closedFindings": [
+    "validateparsedreplyshape before allsuccesssideeffects",
+    "export latestretainedresponse notoldtext",
+    "actualnonzero natural keyboardscroll precondition"
+  ]
+}

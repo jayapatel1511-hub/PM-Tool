@@ -1,0 +1,9 @@
+{
+  "exitCode": 0,
+  "args": [
+    "python3",
+    "tools/trace_spec.py",
+    "--check"
+  ],
+  "atUtc": "2026-11-02T18:48:09.416015+00:00"
+}

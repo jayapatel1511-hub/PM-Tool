@@ -1,0 +1,11 @@
+{
+  "atUtc": "2026-11-02T09:57:53.827824+00:00",
+  "files": {
+    "web/src/pages/Search.tsx": "59e1527859d3fb32114cf2d299ffac0b3ad639546572d07523c487dd9b8c3c0b",
+    "web/src/components/hub/search.tsx": "fafa6e4d112614aaec686e7f2eb50f964948ba350f13f27723cecdb8bb9aa462",
+    "web/tests/person-search-reassign.fixture.cjs": "b36e4a0dc7ca5fb905fa9ebfb4488acaeb34aba58087077f294b4c777d2d8fca",
+    "web/tests/search-screen.cjs": "1a2c74f738f6addb1aa8831498955e42f8bfd830185f5fd3af2997265ea3f260",
+    "web/tests/search-screen.fixture.cjs": "8d5fc4170353ea4bf5a9b81cf88ae7be9ed27dc6780cb434ad4e9f2e9e9c9b45"
+  },
+  "status": "HANDOFF_HASHES_MATCH_ROOT_FROZEN_SNAPSHOT"
+}

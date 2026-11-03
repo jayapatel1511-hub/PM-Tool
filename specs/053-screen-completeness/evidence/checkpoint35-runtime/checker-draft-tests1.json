@@ -1,0 +1,23 @@
+{
+  "exitCode": 0,
+  "args": [
+    "python3",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    ".review/checkpoint35-checker-draft/tools",
+    "-p",
+    "test_permission_explainer_coverage.py"
+  ],
+  "atUtc": "2026-11-03T06:32:45.493462+00:00",
+  "elapsedSeconds": 10.11,
+  "errors": [],
+  "tail": [
+    ".................",
+    "----------------------------------------------------------------------",
+    "Ran 17 tests in 9.945s",
+    "",
+    "OK"
+  ]
+}

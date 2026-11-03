@@ -1,0 +1,10 @@
+{
+  "atUtc": "2026-11-02T19:58:42.397808+00:00",
+  "addedCanonicalSignatures": {
+    "MarkTaskContribution": "Allow MarkTaskContribution(Actor a, ProjectContext p, bool ownActualCollaborator)"
+  },
+  "existingSignaturesChanged": false,
+  "guardHashesChanged": false,
+  "catalogBinding": "Exact Permissions method; synthetic actual-own-collaborator facts, no role proxy",
+  "coverage": "Full FR83 remains pending; new compound transport equivalence explicitly recorded as gap"
+}

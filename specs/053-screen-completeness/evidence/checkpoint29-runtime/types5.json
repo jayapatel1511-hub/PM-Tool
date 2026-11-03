@@ -1,0 +1,9 @@
+{
+  "exitCode": 0,
+  "args": [
+    "node",
+    "node_modules/typescript/bin/tsc",
+    "-b"
+  ],
+  "atUtc": "2026-11-02T18:38:07.520855+00:00"
+}

@@ -1,0 +1,26 @@
+{
+  "status": "complete",
+  "results": [
+    {
+      "suite": "count-card-overlap",
+      "attempt": 4,
+      "exitCode": 0,
+      "seconds": 5.35,
+      "log": "count-card-overlap-run4.log"
+    },
+    {
+      "suite": "project-dashboard-completeness",
+      "attempt": 2,
+      "exitCode": 0,
+      "seconds": 11.73,
+      "log": "project-dashboard-completeness-run2.log"
+    },
+    {
+      "suite": "project-header-compact",
+      "attempt": 2,
+      "exitCode": 0,
+      "seconds": 12.79,
+      "log": "project-header-compact-run2.log"
+    }
+  ]
+}

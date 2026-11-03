@@ -1,0 +1,7 @@
+{"step":"answered-cached-person404","requestObserved":true,"httpStatus":404,"problemCode":"not_found","cachedFactsRemoved":true}
+page.waitForFunction: Timeout 12000ms exceeded.
+    at openPassive (/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/person-panel.cjs:272:81)
+    at async /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/person-panel.cjs:301:30 {
+  log: [],
+  name: 'TimeoutError'
+}

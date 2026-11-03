@@ -1,0 +1,38 @@
+.report-capacity-layout { display: grid; min-width: 0; gap: 1rem; align-items: start; }
+.report-capacity-matrix { min-width: 0; }
+/* Keep the original complete matrix headers on one line in their own scroll region. */
+.report-capacity-matrix table { min-width: max-content; }
+.report-capacity-matrix thead th { white-space: nowrap; }
+.report-capacity-comparison { display: grid; gap: .75rem; min-width: 0; padding: .75rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); overflow-wrap: anywhere; }
+.report-capacity-comparison figure { display: grid; gap: 1rem; margin: 0; min-width: 0; }
+.report-capacity-period { display: grid; gap: .25rem; font-size: .875rem; }
+.report-capacity-period select { min-width: 0; width: 100%; }
+.report-capacity-group { display: grid; gap: .375rem; min-width: 0; font-size: .75rem; }
+.report-capacity-group > strong { font-size: .875rem; }
+.report-capacity-bar-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .25rem .5rem; align-items: center; }
+.report-capacity-bar-track { display: block; grid-column: 1 / -1; grid-row: 2; height: .625rem; background: var(--muted); min-width: 0; }
+.report-capacity-bar-fill { display: flex; height: 100%; }
+.report-capacity-bar-fill--capacity { border: 1px solid var(--foreground); background: var(--muted); }
+.report-capacity-bar-fill--deficit { background: var(--bad); }
+.report-capacity-confirmed { background: var(--ok); }
+.report-capacity-expected { background: var(--muted); border: 1px solid var(--foreground); }
+.report-capacity-short { color: var(--bad); font-weight: 600; }
+.report-capacity-value { display: grid; gap: .25rem; font-variant-numeric: tabular-nums; }
+.report-capacity-table { max-width: 100%; min-width: 0; overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); }
+.report-capacity-table:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.report-capacity-table table { min-width: 40rem; width: 100%; font-size: .75rem; }
+.report-capacity-table thead { background: var(--muted); }
+.report-capacity-table th { text-align: start; }
+.report-capacity-table td { text-align: end; }
+.report-capacity-table tbody tr { border-block-start: 1px solid var(--border); }
+:root[data-visual="v2"] .report-capacity-confirmed { background: var(--metric-teal); }
+:root[data-visual="v2"] .report-capacity-expected { background: var(--metric-teal-tint); border-color: var(--line-3); }
+:root[data-visual="v2"] .report-capacity-bar-fill--deficit { background: var(--metric-red); }
+:root[data-visual="v2"] .report-capacity-short { color: var(--pill-critical); }
+@media (min-width: 1280px) {
+  .report-capacity-layout { grid-template-columns: minmax(0, 1fr) minmax(18rem, 22rem); }
+}
+@media (max-width: 639px) {
+  .report-capacity-comparison nav button { min-height: 44px; }
+  .report-capacity-period select { min-height: 44px; }
+}

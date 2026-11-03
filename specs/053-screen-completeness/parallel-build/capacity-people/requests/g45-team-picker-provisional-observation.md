@@ -1,0 +1,7 @@
+# Root-owned shared picker seam: provisional current-week figures
+
+Read-only source finding during S42: current `CapacityFigure` in web/src/components/hub/people.tsx checks missing cell and person.partial, but not CellRow.provisional. `usePeopleCapacity` passes that existing server flag through. Thus a provisional cell can currently display its numeric remaining value as N h free without an uncertainty label. MyWeekStrip already treats a provisional first cell as unavailable. No new algorithm, permission or HTTP read is needed to distinguish this.
+
+S42's acceptance brief explicitly includes unknowns/partial coverage. D has not edited shared PeoplePicker/CapacityFigure (root owns it). Please review/open the smallest shared presentation guard: for S42 Add a person, a provisional candidate must remain selectable but must not read as verified free/away; show an existing Provisional/Unavailable label with accessible explanation, preserving existing partial/missing/outside-scope behavior and owner flag boundaries. Keep exact server values/calculations/eligibility unchanged. If the existing canonical semantics deliberately allow a labelled provisional figure, document that precise interpretation before weakening acceptance.
+
+Dedicated team-completeness.cjs authors a provisional candidate read and asserts no verified 12 h free label while selection remains possible. This expectation is currently pending root-owned shared integration; source readiness alone cannot close S42. Existing FR-PICK-01/02 source and no-wider-scope rules remain unchanged.

@@ -1,0 +1,15 @@
+
+> web@0.0.0 test:ui-review
+> node tests/ui-review.cjs
+
+TypeError: Cannot read properties of null (reading 'me')
+    at useMe (/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/src/lib/auth-context.ts:12:62)
+    at useFlag (/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/src/lib/auth-context.ts:13:27)
+    at ActivityTable (/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/src/components/hub/activity.tsx:176:52)
+    at Object.react_stack_bottom_frame (/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:10371:18)
+    at renderWithHooks (/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:5361:19)
+    at renderElement (/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:5796:23)
+    at retryNode (/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:6772:31)
+    at performWork (/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:7919:19)
+    at startWork (/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:8807:7)
+    at renderToStringImpl (/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:8933:7)

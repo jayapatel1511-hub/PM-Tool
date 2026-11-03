@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
@@ -10,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Hub.Api.Features;
 
 /// Packet 025. A separate handoff is one receiver's receipt for one purpose, never a task completion.
-public static class HandoffEndpoints
+public static partial class HandoffEndpoints
 {
     public sealed record AtomicCommand;
     public sealed record DraftBody(Guid RequestId, string Title, Guid SourceDeliverableId, int SourceRowVersion,
@@ -26,19 +27,21 @@ public static class HandoffEndpoints
     public sealed record HandoffRow(Guid Id, string Key, string Title, string Status, int RowVersion, Guid SourceDeliverableId, int SourceRowVersion, string DeclaredRevision, string SourceUrl,
         Guid SendingDisciplineId, Guid ReceivingDisciplineId, Guid SendingOwnerId, Guid ReceivingOwnerId, Guid? TargetTaskId, Guid? TargetDeliverableId, string IntendedUse, string AcceptanceCriteria,
         DateOnly NeededBy, DateOnly? PromisedBy, Guid? CurrentRevisionId, Guid? IncorporatedRevisionId, string? SenderName, string? ReceiverName, string? SourceKey, string? TargetKey,
-        bool OwnersAvailable, bool SourceChanged, bool DateMismatch, bool IsOverdue);
+        bool OwnersAvailable, bool SourceChanged, bool DateMismatch, bool IsOverdue,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] HandoffReadinessLinks? ReadinessLinks = null);
 
     /// What the create form chooses from: the live deliverables, tasks and people of the project, and whether this actor may start a handoff.
     public sealed record HandoffOptions(IReadOnlyList<HandoffSource> Sources, IReadOnlyList<HandoffDiscipline> Disciplines, IReadOnlyList<HandoffPerson> People,
         IReadOnlyList<HandoffTask> Tasks, bool CanCreate);
     public sealed record HandoffSource(Guid Id, string Key, string Name, Guid ProjectDisciplineId, Guid? OwnerId, string? Revision, string? TransmittalUrl, int RowVersion, DateOnly? DueDate);
     public sealed record HandoffDiscipline(Guid Id, string Name);
-    public sealed record HandoffPerson(Guid Id, string DisplayName);
+    public sealed record HandoffPerson(Guid Id, string DisplayName, [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] PersonFacts.Notices? PersonNotices = null);
     public sealed record HandoffTask(Guid Id, string Key, string Name, Guid ProjectDisciplineId, Guid? OwnerId, DateOnly? DueDate);
 
     /// One handoff with what this actor may do to it, the change assessments about its source, its receipt history and each submission it kept.
-    public sealed record HandoffDetail(HandoffRow Row, HandoffDetailPermissions Permissions, IReadOnlyList<HandoffChangeAssessment> ChangeAssessments,
-        IReadOnlyList<HandoffHistoryRow> History, IReadOnlyList<HandoffRevisionRow> Revisions);
+    public sealed partial record HandoffDetail(HandoffRow Row, HandoffDetailPermissions Permissions, IReadOnlyList<HandoffChangeAssessment> ChangeAssessments,
+        IReadOnlyList<HandoffHistoryRow> History, IReadOnlyList<HandoffRevisionRow> Revisions,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] RecordContextView? Context = null);
     public sealed record HandoffPermission(bool Ok, string? Reason);
     public sealed record HandoffTransition(string To, HandoffPermission Permission);
     public sealed record HandoffDetailPermissions(HandoffPermission Edit, HandoffPermission Assign, IReadOnlyList<HandoffTransition> Transitions);
@@ -309,7 +312,7 @@ public static class HandoffEndpoints
         return q.OrderBy(h => h.NeededBy).ThenBy(h => h.Seq);
     }
 
-    static async Task<List<HandoffRow>> Rows(HubDb db, IQueryable<Handoff> query, Project p, DateOnly today)
+    static async Task<List<HandoffRow>> Rows(HubDb db, IQueryable<Handoff> query, Project p, DateOnly today, bool readinessLinks = false)
     {
         var eligible = Coordination.People(db, p).Select(u => u.Id);
         var rows = await query.Select(h => new RowFacts(h,
@@ -320,32 +323,41 @@ public static class HandoffEndpoints
             db.Tasks.IgnoreQueryFilters().Where(t => t.Id == h.TargetTaskId).Select(t => t.Key).FirstOrDefault()
                 ?? db.Deliverables.IgnoreQueryFilters().Where(d => d.Id == h.TargetDeliverableId).Select(d => d.Key).FirstOrDefault(),
             eligible.Contains(h.SendingOwnerId) && eligible.Contains(h.ReceivingOwnerId))).ToListAsync();
+        var links = readinessLinks ? await HandoffConsequencesEndpoints.ReadBatch(db, p, rows.Select(r => r.H.Id), today) : null;
         return rows.Select(r => new HandoffRow(r.H.Id, r.H.Key, r.H.Title, r.H.Status, r.H.RowVersion,
             r.H.SourceDeliverableId, r.H.SourceRowVersion, r.H.DeclaredRevision, r.H.SourceUrl, r.H.SendingDisciplineId, r.H.ReceivingDisciplineId,
             r.H.SendingOwnerId, r.H.ReceivingOwnerId, r.H.TargetTaskId, r.H.TargetDeliverableId, r.H.IntendedUse, r.H.AcceptanceCriteria,
             r.H.NeededBy, r.H.PromisedBy, r.H.CurrentRevisionId, r.H.IncorporatedRevisionId,
             r.SenderName, r.ReceiverName, r.SourceKey, r.TargetKey, r.OwnersAvailable,
             r.CurrentSourceVersion != r.H.SourceRowVersion,
-            HandoffRules.DateMismatch(r.H.NeededBy, r.H.PromisedBy), HandoffRules.Overdue(r.H.Status, r.H.NeededBy, today, p.Status))).ToList();
+            HandoffRules.DateMismatch(r.H.NeededBy, r.H.PromisedBy), HandoffRules.Overdue(r.H.Status, r.H.NeededBy, today, p.Status), links?.GetValueOrDefault(r.H.Id))).ToList();
     }
 
     static async Task<Ok<Page<HandoffRow>>> List(Guid projectId, [AsParameters] Filter filter, int? page, int? pageSize, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
+        var settings = await store.Get(db);
+        await using var snapshot = settings.IsFlagOn("register_screens") && db.Database.CurrentTransaction is null
+            ? await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead) : null;
         var (p, _) = await access.Project(projectId, track: false);
-        var today = clock.Today(await store.Get(db));
+        var today = clock.Today(settings);
         var query = Query(db, p, filter, access.Me.Id, today);
         var (pg, size) = Http.Paging(page, pageSize);
-        return TypedResults.Ok(new Page<HandoffRow>(await Rows(db, query.Skip((pg - 1) * size).Take(size), p, today), pg, size, await query.CountAsync()));
+        return TypedResults.Ok(new Page<HandoffRow>(await Rows(db, query.Skip((pg - 1) * size).Take(size), p, today, settings.IsFlagOn("register_screens")), pg, size, await query.CountAsync()));
     }
 
-    static async Task<Ok<HandoffOptions>> Options(Guid projectId, Access access, HubDb db)
+    static async Task<Ok<HandoffOptions>> Options(Guid projectId, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
+        var org = await store.Get(db);
+        await using var noticeSnapshot = org.IsFlagOn("capacity_screens") ? await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead) : null;
         var (p, ctx) = await access.Project(projectId, track: false);
         var sources = await db.Deliverables.AsNoTracking().Where(d => d.ProjectId == p.Id && d.Status != DeliverableStatus.Cancelled)
             .OrderBy(d => d.Seq).Select(d => new HandoffSource(d.Id, d.Key, d.Name, d.ProjectDisciplineId, d.OwnerId, d.Revision, d.TransmittalUrl, d.RowVersion, d.DueDate)).ToListAsync();
         var disciplines = await db.ProjectDisciplines.Where(d => d.ProjectId == p.Id && d.IsActive).Select(d => new HandoffDiscipline(d.Id, d.Discipline!.Name)).ToListAsync();
+        var people = await Coordination.People(db, p).OrderBy(u => u.DisplayName).Select(u => new HandoffPerson(u.Id, u.DisplayName, null)).ToListAsync();
+        var notices = await PersonFacts.ReadNotices(db, people.Select(person => person.Id).ToArray(), org, clock);
+        if (notices.Count > 0) people = people.Select(person => person with { PersonNotices = notices.GetValueOrDefault(person.Id) }).ToList();
         return TypedResults.Ok(new HandoffOptions(sources, disciplines,
-            await Coordination.People(db, p).OrderBy(u => u.DisplayName).Select(u => new HandoffPerson(u.Id, u.DisplayName)).ToListAsync(),
+            people,
             await db.Tasks.Where(t => t.ProjectId == p.Id && t.Status != TaskStatuses.Cancelled).OrderBy(t => t.Seq)
                 .Select(t => new HandoffTask(t.Id, t.Key, t.Name, t.ProjectDisciplineId, t.AssigneeId, t.DueDate)).ToListAsync(),
             sources.Any(s => disciplines.Any(d => Permissions.CreateHandoff(access.Actor, ctx, s.ProjectDisciplineId, d.Id, s.OwnerId).Ok))));
@@ -353,13 +365,16 @@ public static class HandoffEndpoints
 
     static async Task<Ok<HandoffDetail>> Detail(Guid projectId, Guid id, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
+        var settings = await store.Get(db);
+        await using var snapshot = (settings.IsFlagOn("work_screens") || settings.IsFlagOn("register_screens")) && db.Database.CurrentTransaction is null
+            ? await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead) : null;
         var (p, ctx) = await access.Project(projectId, track: false);
         var h = await Load(db, projectId, id);
         var facts = await Facts(db, h);
-        var settings = await store.Get(db);
+        var context = await new RecordContextReader(db, p, settings).Read(RecordContextKind.Handoff, h.Id);
         HandoffPermission Permission(Allow allow) => new(allow.Ok, allow.Why is null ? null : Text.Get(allow.Why, allow.Arg ?? ""));
-        return TypedResults.Ok(new HandoffDetail(
-            (await Rows(db, db.Handoffs.AsNoTracking().Where(x => x.Id == id), p, clock.Today(settings))).Single(),
+        return TypedResults.Ok(await WorkScreenResponseMetadata.AttachDetailAsync(new HandoffDetail(
+            (await Rows(db, db.Handoffs.AsNoTracking().Where(x => x.Id == id && x.ProjectId == projectId), p, clock.Today(settings), settings.IsFlagOn("register_screens"))).Single(),
             new HandoffDetailPermissions(Permission(Permissions.EditHandoff(access.Actor, ctx, facts)), Permission(Permissions.AssignHandoff(access.Actor, ctx, facts)),
                 HandoffStatus.All.Where(to => HandoffRules.Step(h.Status, to)).Select(to => new HandoffTransition(to,
                     Permission(Permissions.HandoffTransition(access.Actor, ctx, facts, to, settings.AllowSelfReview)))).ToList()),
@@ -373,7 +388,7 @@ public static class HandoffEndpoints
                 .Join(db.SourceRevisions, r => r.SourceRevisionId, s => s.Id, (r, s) => new HandoffRevisionRow(r.Id, r.PreviousRevisionId,
                     r.IntendedUse, r.AcceptanceCriteria, r.NeededBy, r.PromisedBy, r.SendingOwnerId, r.ReceivingOwnerId,
                     r.TargetTaskId, r.TargetDeliverableId, r.Response, r.CreatedAt, r.CreatedBy,
-                    new HandoffRevisionSource(s.Id, s.SourceKey, s.Title, s.Revision, s.Url, s.SourceRowVersion, s.CreatedAt, s.CreatedBy))).ToListAsync()));
+                    new HandoffRevisionSource(s.Id, s.SourceKey, s.Title, s.Revision, s.Url, s.SourceRowVersion, s.CreatedAt, s.CreatedBy))).ToListAsync(), context), h, access, db, settings, clock));
     }
 
     static async Task<IResult> ExportRows(Guid projectId, [AsParameters] Filter filter, string? format, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock)

@@ -1,3 +1,4 @@
+import { PersonPanelTrigger } from '@/components/hub/person-panel-trigger'
 import { invalidateChange } from '@/lib/keys'
 import type { components } from '@/gen/api'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -6,13 +7,14 @@ import { Fragment, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { AccentDot, ActiveFilters, ChipToggle, ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Missing, Notice, Page, PageHelp, Section, Spinner, selectCls, tdCls, thCls, useDensity, type Density } from '@/components/hub/common'
+import { TitleBlock } from '@/components/hub/title-block'
 import { ExportMenu } from '@/components/hub/export'
 import { OneSignal, type Signal } from '@/components/hub/indicators'
 import { Avatar, PeoplePicker, weekOf } from '@/components/hub/people'
 import { Key, StatusPill } from '@/components/hub/pills'
 import { itemHref } from '@/components/hub/search'
 import { ViewMenu } from '@/components/hub/views'
-import { WorkspaceTabs } from '@/components/hub/workspace'
+import { WorkspaceTabs, ResourceAreaTabs } from '@/components/hub/workspace'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
@@ -25,9 +27,10 @@ import { addDays, fmtDate, hours, shortDate, today } from '@/lib/format'
 import { runtimeText, t } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import type { SavedViewKeys } from '@/gen/registry.gen'
-import { GROUP_BY, GROUP_LABEL, groupPeople } from '@/components/planner/labels'
+import { GROUP_BY, GROUP_LABEL, groupPeople, type PeopleGroup } from '@/components/planner/labels'
 import { descendantUnitIds, unitLabel, useOrgPlacement } from '@/hooks/useOrgPlacement'
 import { MenuSelect, errorText } from './projects/Tasks'
+import { WorkloadDisciplineContext } from '@/components/planner/WorkloadDisciplineContext'
 
 /** The server's load band for the week (FR-FIG-05), from the organisation's workload thresholds. */
 type Cell = components['schemas']['LoadCell']
@@ -66,7 +69,7 @@ const METER = { bad: 'bg-bad', warn: 'bg-warn', ok: 'bg-ok', idle: 'bg-ok' }
 export function WorkloadPage() {
   const header = { eyebrow: t('nav.resources'), title: t('nav.workload'), subtitle: t('workload.subtitle') }
   return (
-    <DesktopOnly notice={<Page {...header}><Notice icon={Monitor} title={t('app.phoneNotice')}
+    <DesktopOnly notice={<Page {...header} tabs={<ResourceAreaTabs />}><Notice icon={Monitor} title={t('app.phoneNotice')}
       action={<Button asChild variant="outline"><Link to="/my-work">{t('nav.myWork')}</Link></Button>}>{t('workload.phoneHint')}</Notice></Page>}>
       <Workload {...header} />
     </DesktopOnly>
@@ -81,7 +84,11 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
   const [availability, setAvailability] = useState<PersonRow | null>(null)
   const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
   const filters = Object.fromEntries(FILTERS.map((k) => [k, sp.get(k)]))
-  const q = useQuery({ queryKey: ['workload', filters], queryFn: () => typedRequest('get', '/api/v1/workload', { query: filters }) })
+  const capacityScreens = useFlag('capacity_screens')
+  const peopleOn = useFlag('people_screens')
+  const includesProposed = capacityScreens && sp.get('showProposedAsConfirmed') === 'true'
+  const readFilters = includesProposed ? { ...filters, ShowProposedAsConfirmed: true } : filters
+  const q = useQuery({ queryKey: ['workload', readFilters], queryFn: () => typedRequest('get', '/api/v1/workload', { query: readFilters }) })
   const projects = useQuery({ queryKey: ['projects-pick', ''], queryFn: () => typedRequest('get', '/api/v1/projects', { query: { PageSize: 200 } }) })
   const forbidden = (q.error as ApiError | null)?.status === 403
   const toggle = (id: string) => setOpen((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n })
@@ -91,9 +98,10 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
   const unitIds = filters.unitId ? descendantUnitIds(org.units, filters.unitId) : null
   const scopedPeople = org.enabled && filters.unitId ? people.filter(p => org.placementMap.has(p.id) && unitIds!.has(org.placementMap.get(p.id) as string)) : people
   const unitName = (id: string | null | undefined) => id == null ? t('staff.group.notSet') : unitLabel(org.units, id) ?? t('staff.group.unknown')
-  const groups = groupBy === 'homeUnit' ? [...scopedPeople.reduce((m, p) => { const unit = org.placementMap.get(p.id); const key = unit === undefined ? t('staff.group.unknown') : unitName(unit); m.set(key, [...(m.get(key) ?? []), p]); return m }, new Map<string, PersonRow[]>())] : groupPeople(scopedPeople, groupBy, ref.data)
+  const groups: PeopleGroup<PersonRow>[] = groupBy === 'homeUnit' ? [...scopedPeople.reduce((m, p) => { const unit = org.placementMap.get(p.id); const key = unit === undefined ? t('staff.group.unknown') : unitName(unit); m.set(key, [...(m.get(key) ?? []), p]); return m }, new Map<string, PersonRow[]>())] : groupPeople(scopedPeople, groupBy, ref.data, peopleOn)
   const allPartial = people.length > 0 && people.every((p) => p.partialScope)
   const named = useFlag('figure_names')
+  const visualSystem = useFlag('visual_system')
 
   // Active filters as removable tokens (§13.0 Filters); sort is an order, not a filter.
   const supervisorName = people.find((p) => p.supervisorId === filters.supervisorId)?.supervisorName
@@ -115,14 +123,14 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
 
   return (
     // Without access the page holds only the notice, so the description and the method help, which explain data the person cannot see, are left out.
-    <Page {...header} subtitle={forbidden ? undefined : header.subtitle} actions={forbidden ? undefined : <><Method thresholds={q.data?.thresholds} /><ViewMenu listType="workload" /><ExportMenu path="workload/export" params={filters} name="workload" /><DensityMenu /></>}>
-      <WorkspaceTabs />
+    <Page {...header} tabs={visualSystem ? <ResourceAreaTabs /> : <WorkspaceTabs />} subtitle={forbidden ? undefined : header.subtitle} titleBlock={q.data && <TitleBlock asOf={(q.data as typeof q.data & { asOf?: string }).asOf} />} actions={forbidden ? undefined : <><Method thresholds={q.data?.thresholds} /><ViewMenu listType="workload" /><ExportMenu path="workload/export" params={readFilters} name="workload" /><DensityMenu /></>}>
       {forbidden ? <Notice icon={Lock} title={t('workload.noAccessTitle')}
         action={<Button asChild variant="outline"><Link to="/my-work">{t('nav.myWork')}</Link></Button>}>{t('workload.noAccess')}</Notice> : <>
         {/* §41 R1: one toolbar row. Filters and the week start sit in the popover; Group and Sort are menus. */}
         <FilterBar activeCount={tokens.length}
           quick={<>
             <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('workload.indicator')}>{INDICATORS.slice(0, 3).map(indicatorChip)}</div>
+            {capacityScreens && q.data?.includesProposed && <span role="status" className="text-sm font-medium">{t('capacity.includesProposed')}</span>}
             <MenuSelect label={t('common.groupBy')} value={groupBy} onChange={(v) => set('groupBy', v === 'supervisor' ? null : v)} options={[...GROUP_BY.map((g) => ({ value: g, label: t(GROUP_LABEL[g]) })), ...(org.enabled ? [{ value: 'homeUnit', label: t('org.homeUnit') }] : [])]} />
             <MenuSelect label={t('common.sort')} icon={ArrowUpDown} value={filters.sort ?? 'load'} onChange={(v) => set('sort', v === 'load' ? null : v)} options={SORTS.map((v) => ({ value: v, label: t(`workload.sortBy.${v}`) }))} />
           </>}
@@ -166,6 +174,7 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
             <span id="wl-indicator" className="mr-1 text-sm font-medium">{t('calm.moreQuick')}</span>
             {INDICATORS.slice(3).map(indicatorChip)}
           </div>
+          {capacityScreens && <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={includesProposed} onChange={(event) => set('showProposedAsConfirmed', event.target.checked ? 'true' : null)} />{t('capacity.showProposedAsConfirmed')}</label>}
         </FilterBar>
 
         {filters.disciplineId && <p className="text-sm text-muted-foreground">{t('workload.disciplineScope')}</p>}
@@ -181,12 +190,12 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
             <table className="w-full min-w-max border-separate border-spacing-0 text-sm">
               <caption className="sr-only">{t('workload.gridCaption')}</caption>
               <WeekHead weeks={q.data.weeks} currentWeek={q.data.currentWeek} first={t('workload.person')} last={t('workload.summary')} />
-              {groups.map(([g, list]) => (
-                <tbody key={g}>
+              {groups.map(([g, list, supervisor, groupKey]) => (
+                <tbody key={groupKey ?? g}>
                   {groupBy !== 'none' && (
                     <tr>
                       <th scope="rowgroup" className="sticky left-0 z-10 border-b border-r bg-sidebar px-4 py-2 text-left text-xs/[18px] font-semibold uppercase tracking-[0.5px] text-muted-foreground">
-                        {g} · {list.length}
+                        {supervisor ? <PersonPanelTrigger userId={supervisor.id} name={supervisor.name} focusKey={`workload:group:${groupKey}:heading`}>{g}</PersonPanelTrigger> : g} · {list.length}
                       </th>
                       {/* Group subtotal (AC-GRP-02c): the sum of the rows below, week by week. */}
                       {q.data!.weeks.map((w, i) => {
@@ -208,7 +217,7 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
                             </Button>
                             <Avatar id={p.id} name={p.displayName} className="mt-0.5" />
                             <div className="min-w-0 flex-1">
-                              <div className="break-words font-semibold">{p.displayName}</div>
+                              <div className="break-words font-semibold"><PersonPanelTrigger userId={p.id} name={p.displayName} focusKey={`workload:person:${p.id}:row`} /></div>
                               <div className="text-xs/[18px] text-muted-foreground">
                                 {t('workload.capacityPerWeek', { h: hours(p.capacity) })}{p.capacityOverride && ` · ${t('workload.custom')}`}
                               </div>
@@ -234,6 +243,7 @@ function Workload(header: { eyebrow: string; title: string; subtitle: string }) 
             </table>
           </div>
         )}
+        {capacityScreens && q.data?.disciplineContext && q.data.disciplineContext.length > 0 && <WorkloadDisciplineContext rows={q.data.disciplineContext} weeks={q.data.weeks} />}
         {q.data && unfilled.length > 0 && <UnfilledRoles roles={unfilled} weeks={q.data.weeks} currentWeek={q.data.currentWeek} />}
         {q.data?.unassigned && <UnassignedTasks data={q.data.unassigned} />}
       </>}
@@ -313,7 +323,8 @@ function WeekCell({ c, capacity, named }: { c: Cell; capacity: number; named: bo
   const tone = TONE[c.band as keyof typeof TONE] ?? 'idle'
   // The server's Uncommitted (FR-FIG-03): null on a partial row unless negative; "Remaining" until flag.figure_names is on.
   const figure = c.uncommitted == null ? null : t(named ? 'workload.uncommitted' : 'workload.remaining', { h: hours(c.uncommitted) })
-  const scale = Math.max(c.available, c.committed + c.proposed, 1)
+  const uncountedProposed = c.includesProposed ? 0 : c.proposed
+  const scale = Math.max(c.available, c.committed + uncountedProposed, 1)
   return (
     <div data-band={c.band} className={cn('flex h-full min-h-28 flex-col gap-1.5 px-(--cell-px) py-(--cell-py)', SHADE[tone])}>
       <p className="tabular-nums">
@@ -322,7 +333,7 @@ function WeekCell({ c, capacity, named }: { c: Cell; capacity: number; named: bo
       </p>
       <div aria-hidden className="relative h-1.5 overflow-hidden rounded-full bg-border">
         <span data-meter-fill className={cn('absolute inset-y-0 left-0 rounded-full', METER[tone])} style={{ width: `${Math.min(c.committed, scale) / scale * 100}%` }} />
-        {c.proposed > 0 && <span className="absolute inset-y-0 rounded-full border border-dotted border-work bg-work-bg" style={{ left: `${c.committed / scale * 100}%`, width: `${c.proposed / scale * 100}%` }} />}
+        {uncountedProposed > 0 && <span className="absolute inset-y-0 rounded-full border border-dotted border-work bg-work-bg" style={{ left: `${c.committed / scale * 100}%`, width: `${uncountedProposed / scale * 100}%` }} />}
         {c.available < scale && <span className="absolute inset-y-[-2px] w-0.5 bg-foreground" style={{ left: `${c.available / scale * 100}%` }} />}
       </div>
       <p className="text-xs/[18px] tabular-nums">
@@ -333,7 +344,7 @@ function WeekCell({ c, capacity, named }: { c: Cell; capacity: number; named: bo
       {(c.confirmed > 0 || c.hours > 0) && (
         <p className="text-xs/[18px] text-muted-foreground tabular-nums">{[c.confirmed > 0 && t('workload.reserved', { h: hours(c.confirmed) }), c.hours > 0 && t('workload.forecast', { h: hours(c.hours) })].filter(Boolean).join(' · ')}</p>
       )}
-      {c.proposed > 0 && <p className="w-fit rounded-md border border-dashed border-work bg-work-bg px-1.5 text-xs/[18px] text-work tabular-nums">{t('workload.proposedNotCounted', { h: hours(c.proposed) })}</p>}
+      {c.includesProposed ? <p className="text-xs/[18px] font-medium">{t('capacity.includesProposed')}</p> : c.proposed > 0 && <p className="w-fit rounded-md border border-dashed border-work bg-work-bg px-1.5 text-xs/[18px] text-work tabular-nums">{t('workload.proposedNotCounted', { h: hours(c.proposed) })}</p>}
       {c.available !== capacity && c.available > 0 && (
         <p className="text-xs/[18px] text-muted-foreground" title={t('workload.availabilityTitle', { a: hours(c.available), c: hours(capacity) })}>
           <span aria-hidden>{c.available < capacity ? '▾ ' : '▴ '}</span>{t(c.available < capacity ? 'workload.reducedAvailability' : 'workload.extraAvailability')}

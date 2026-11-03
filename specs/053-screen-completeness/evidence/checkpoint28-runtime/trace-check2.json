@@ -1,0 +1,8 @@
+{
+  "exitCode": 0,
+  "args": [
+    "python3",
+    "tools/trace_spec.py",
+    "--check"
+  ]
+}

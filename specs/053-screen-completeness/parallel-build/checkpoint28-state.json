@@ -1,0 +1,20 @@
+{
+  "generation": 56,
+  "checkpoint": 28,
+  "status": "CLOSED_LOCAL_S39_S40_S41_S48_PASS_S49_PARTIAL",
+  "checkedSlices": 39,
+  "totalSlices": 49,
+  "atUtc": "2026-11-02T15:49:01.030583+00:00",
+  "appSource": "ALL_HOLD",
+  "evidence": "../evidence/checkpoint28-findings.md",
+  "rollup": "../evidence/checkpoint28-runtime/verification-rollup1.json",
+  "next": "G57 exact contracts before app source; A bulk, B Calendar plan, C review discipline, D notice preferences plan",
+  "pending": [
+    "No deployment/commit/push/pilot/flagactivation/formalAccepted",
+    "FullS49/83/deactivation/policy unresolved",
+    "R3 unknown legacy author decision pending",
+    "D14/D15 starter taxonomy open",
+    "QA24 cleanup rejected previously; no stop/drop executed",
+    "Broad052/native/zoom/human and remaining10slices open"
+  ]
+}

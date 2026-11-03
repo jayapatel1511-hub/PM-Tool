@@ -1,7 +1,206 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { invalidateChange, invalidateNotifications, invalidatePreferences, keysForChange, refreshHome, refreshProject, refreshWorkspaces } from './keys.ts'
-import type { QueryClient } from '@tanstack/react-query'
+import { invalidateChange, invalidateNotifications, invalidatePreferences, invalidateWorkSeen, keysForChange, refreshComments, refreshHome, refreshProject, refreshWorkspaces } from './keys.ts'
+import { QueryClient } from '@tanstack/react-query'
+
+test('a contribution child refreshes mounted collaborator facts and complete history actors without pretending task workflow changed', async () => {
+  const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, gcTime: Infinity } } })
+  const readers = [['task', 'task-id', 'viewer', true, true], ['task-history-actors', 'task-id', 'viewer', true], ['history', 'Task', 'task-id']] as const
+  const unaffected = [['wtasks', { projectId: 'project' }], ['workload'], ['preferences']] as const
+  try {
+    for (const key of [...readers, ...unaffected]) qc.setQueryData(key, { cut: 'before' })
+    await invalidateChange(qc, 'TaskContribution', 'project', 'contribution-id')
+    for (const key of readers) {
+      let reads = 0
+      const data = await qc.fetchQuery({ queryKey: key, queryFn: async () => { reads++; return { cut: 'current contribution' } } })
+      assert.equal(reads, 1, key.join(':')); assert.equal(data.cut, 'current contribution')
+    }
+    for (const key of unaffected) assert.equal(qc.getQueryState(key)?.isInvalidated, false, key.join(':'))
+  } finally { qc.clear() }
+})
+
+test('notification action facts refresh on record, graph, access and untyped evaluation changes without broadening legacy readers', async () => {
+  for (const type of ['ReviewFinding', 'DisciplineReview', 'FindingEvent', 'Decision', 'Issue', 'Handoff', 'SubmissionCheck', 'WorkConstraint', 'Dependency', 'SourceRevision', 'Project', 'Member', 'User', 'Setting', undefined]) {
+    const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, gcTime: Infinity } } })
+    const screen = ['notifications', 'screen', 'viewer', true, { needsAction: true }] as const
+    const legacy = [['notifications', 'list', {}], ['notifications', 'recent'], ['preferences']] as const
+    try {
+      qc.setQueryData(screen, { totalCount: 1, items: [{ needsYourAction: true }] })
+      for (const key of legacy) qc.setQueryData(key, { cut: 'before' })
+      await invalidateChange(qc, type, 'muted-project')
+      let reads = 0
+      const current = await qc.fetchQuery({ queryKey: screen, queryFn: async () => { reads++; return { totalCount: 0, items: [] } } })
+      assert.equal(reads, 1, type ?? 'untyped evaluation')
+      assert.equal(current.totalCount, 0)
+      for (const key of legacy) assert.equal(qc.getQueryState(key)?.isInvalidated, false, `${type}: ${key.join(':')}`)
+    } finally { qc.clear() }
+  }
+})
+
+test('decision, issue and template derived reads refresh after metadata and access changes', async () => {
+  // The viewer and owning flags are in these actual mounted keys. A previously fresh
+  // cohort must refetch after a command or visibility change, without clearing preferences.
+  const readers: [readonly unknown[], string[]][] = [
+    [['decision-screen', 'project', 'viewer', true], ['Decision', 'ExternalParty', 'ReferenceData', 'Setting', 'Project', 'Member', 'User']],
+    [['issue-root-causes', 'project', 'viewer', true], ['Issue', 'ReferenceData', 'Setting', 'Project', 'Member', 'User']],
+    [['reference', 'issue-root-causes', 'viewer', true], ['ReferenceData', 'Setting', 'User']],
+    [['template-provenance', 'project', 'viewer', true], ['Template', 'Project', 'Member', 'User', 'Setting']],
+    [['template', 'version', 'projects', 'viewer', true, 1], ['Template', 'Project', 'Member', 'User', 'Setting']],
+    [['templates', 'viewer', true, false], ['Template', 'Project', 'Member', 'User', 'Setting']],
+  ]
+  for (const [key, changes] of readers) for (const type of changes) {
+    const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, gcTime: Infinity } } })
+    try {
+      qc.setQueryData(key, { cut: 'before', visibleTotal: 9 })
+      qc.setQueryData(['preferences'], { locale: 'en' })
+      await invalidateChange(qc, type, 'project')
+      let reads = 0
+      const current = await qc.fetchQuery({ queryKey: key, queryFn: async () => { reads++; return { cut: 'after', visibleTotal: 8 } } })
+      assert.equal(reads, 1, `${type}: ${key.join(':')}`)
+      assert.equal(current.visibleTotal, 8)
+      assert.equal(qc.getQueryState(['preferences'])?.isInvalidated, false)
+    } finally { qc.clear() }
+  }
+})
+
+test('file reference readers refresh after revision, parent, author, scope and owning-flag changes', async () => {
+  // AC-SCR-77: revision and missing-link figures must not retain the previously observed cohort.
+  for (const type of ['Task', 'Deliverable', 'User', 'Member', 'Discipline', 'ReferenceData', 'Setting', 'DocumentLink', 'Project']) {
+    const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, gcTime: Infinity } } })
+    const key = ['files', 'viewer', true, 'project', 'discipline', 'author', true] as const
+    try {
+      qc.setQueryData(key, { revision: 'C', missingTotal: 1 })
+      qc.setQueryData(['preferences'], { digestEnabled: true })
+      await invalidateChange(qc, type, 'project')
+      let reads = 0
+      const data = await qc.fetchQuery({ queryKey: key, queryFn: async () => { reads++; return { revision: 'D', missingTotal: 0 } } })
+      assert.equal(reads, 1, type); assert.equal(data.revision, 'D', type); assert.equal(data.missingTotal, 0, type)
+      assert.equal(qc.getQueryState(['preferences'])?.isInvalidated, false, type)
+    } finally { qc.clear() }
+  }
+})
+
+test('a personal seen commit refreshes its readers while preserving unrelated business and preference caches', async () => {
+  const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, gcTime: Infinity } } })
+  try {
+    const readers = [['mywork', 'viewer'], ['my-work-follow-up', 'viewer', 'watching'], ['workspace-coordination'], ['p', 'project', 'discipline-coordination'], ['p', 'project', 'attention', {}], ['task', 'task']] as const
+    const unrelated = [['p', 'project', 'budget'], ['p', 'project', 'files'], ['preferences'], ['notifications', 'inbox']] as const
+    for (const key of [...readers, ...unrelated]) qc.setQueryData(key, { cut: 'before' })
+    await invalidateWorkSeen(qc)
+    for (const key of readers) {
+      let reads = 0
+      const value = await qc.fetchQuery({ queryKey: key, queryFn: async () => { reads++; return { cut: 'committed' } } })
+      assert.equal(reads, 1, key.join(':')); assert.equal(value.cut, 'committed')
+    }
+    for (const key of unrelated) assert.equal(qc.getQueryState(key)?.isInvalidated, false, key.join(':'))
+  } finally { qc.clear() }
+})
+
+test('follow-up rows refetch typed owners and activity after flags, assignment and comment changes', async () => {
+  for (const [type, view] of [['Setting', 'watching'], ['Decision', 'requested'], ['Comment', 'watching']] as const) {
+    const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, gcTime: Infinity } } })
+    const key = ['my-work-follow-up', 'synthetic-viewer', view, true, true]
+    try {
+      qc.setQueryData(key, { items: [{ id: 'synthetic-decision', ownerName: 'Previous owner' }] })
+      qc.setQueryData(['unrelated-query'], { label: 'unchanged' })
+      await invalidateChange(qc, type, 'synthetic-project')
+      let reads = 0
+      const current = await qc.fetchQuery({ queryKey: key, queryFn: async () => {
+        reads++; return { items: [{ id: 'synthetic-decision', ownerName: 'Current owner', ownerKind: 'User', commentCount: 3 }] }
+      } })
+      assert.equal(reads, 1)
+      assert.equal(current.items[0].ownerKind, 'User')
+      assert.equal(current.items[0].ownerName, 'Current owner')
+      assert.equal(current.items[0].commentCount, 3)
+      assert.equal(qc.getQueryState(['unrelated-query'])?.isInvalidated, false)
+    } finally { qc.clear() }
+  }
+})
+
+test('person fact commands refresh mounted staff, both Teams, editor and date-only picker facts', async () => {
+  const cases: [string, readonly unknown[]][] = [
+    ['UserCertification', ['staff', { scope: 'direct' }]],
+    ['UserCertification', ['wteam', 'visible-projects', { certificationTagId: 'synthetic-tag' }]],
+    ['UserCertification', ['p', 'synthetic-project', 'team']],
+    ['UserCertification', ['person-facts', 'synthetic-person']],
+    ['CertificationTag', ['certification-tags']],
+    ['CertificationTag', ['staff', { scope: 'unit' }]],
+    ['PersonFacts', ['people', 'synthetic search', 'synthetic-project']],
+    ['PersonFacts', ['admin', 'users', 'all']],
+  ]
+  for (const [type, key] of cases) {
+    const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, gcTime: Infinity } } })
+    try {
+      qc.setQueryData(key, { label: 'before' }); qc.setQueryData(['unrelated-query'], { label: 'unchanged' })
+      await invalidateChange(qc, type)
+      let reads = 0
+      const current = await qc.fetchQuery({ queryKey: key, queryFn: async () => { reads++; return { label: 'after' } } })
+      assert.equal(current.label, 'after'); assert.equal(reads, 1)
+      assert.equal(qc.getQueryState(['unrelated-query'])?.isInvalidated, false)
+    } finally { qc.clear() }
+  }
+})
+
+test('successful discussion refreshes its originating project task count without a live event', async () => {
+  const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, gcTime: Infinity } } })
+  const origin = ['p', 'synthetic-project', 'tasks', { page: 2, sort: 'key:asc' }] as const
+  const otherProject = ['p', 'other-project', 'tasks', {}] as const
+  let reads = 0
+  try {
+    qc.setQueryData(origin, { commentCount: 3 })
+    qc.setQueryData(otherProject, { commentCount: 7 })
+    // This is the command callback used by CommentsPanel after create/edit/delete, independent of SSE.
+    await refreshComments(qc, 'synthetic-project')
+    const row = await qc.fetchQuery({ queryKey: origin, queryFn: async () => { reads++; return { commentCount: 4 } } })
+    assert.equal(row.commentCount, 4)
+    assert.equal(reads, 1)
+    assert.equal(qc.getQueryState(otherProject)?.isInvalidated, false)
+  } finally { qc.clear() }
+})
+
+test('activity, own-week candidates and report inputs refetch otherwise fresh cached facts', async () => {
+  const changes: [string, readonly unknown[]][] = [
+    ['Comment', ['wtasks', 'visible-projects', { page: 2 }]],
+    ['Comment', ['mywork-tasks', { tab: 'completed' }]],
+    ['Task', ['time', 'week', { from: '2026-09-14' }]],
+    ['Task', ['time-tasks', 'synthetic search']],
+    ['Task', ['report', 'overdue-tasks', { minDaysOverdue: '3' }, 'task-inputs', 'unestimated', 2, 50]],
+    ...['TimeEntry', 'PlanningEntry', 'OpenRole', 'ResourceAllocation', 'User', 'ReferenceData', 'Setting', 'Holiday', 'ApprovedLeave', 'PersonAvailabilityOverride', 'PersonSchedule', 'OrgUnit', 'OrgLevel'].map(type => [type, ['report', 'team-capacity', { unitId: 'synthetic-unit', weeks: '12' }, 'task-inputs', 'unestimated', 1, 50]] as [string, readonly unknown[]]),
+    ...['ApprovedLeave', 'PersonAvailabilityOverride', 'PersonSchedule', 'Holiday', 'User', 'Setting', 'Member', 'Project'].map(type => [type, ['time', 'week', { from: '2026-09-14' }]] as [string, readonly unknown[]]),
+  ]
+  for (const [type, key] of changes) {
+    const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, gcTime: Infinity } } })
+    let reads = 0
+    try {
+      qc.setQueryData(key, { revision: 'before' })
+      qc.setQueryData(['unrelated-query'], { revision: 'unrelated' })
+      await invalidateChange(qc, type, 'synthetic-project')
+      const result = await qc.fetchQuery({ queryKey: key, queryFn: async () => { reads++; return { revision: 'after' } } })
+      assert.equal(result.revision, 'after', `${type} must refresh ${key[0]}`)
+      assert.equal(reads, 1)
+      assert.equal(qc.getQueryState(['unrelated-query'])?.isInvalidated, false)
+    } finally { qc.clear() }
+  }
+})
+
+test('a project colour change refreshes an already cached workspace Team identity', async () => {
+  const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, gcTime: Infinity } } })
+  const team = ['wteam', 'my'] as const // WorkspaceTeam's actual scoped query, not the project Team tab.
+  const unrelated = ['preferences'] as const
+  let reads = 0
+  try {
+    qc.setQueryData(team, { projectId: 'synthetic-project', identityColour: '#ec6a3e' })
+    qc.setQueryData(unrelated, { locale: 'en' })
+    await invalidateChange(qc, 'Project', 'synthetic-project')
+    const current = await qc.fetchQuery({ queryKey: team, queryFn: async () => {
+      reads++
+      return { projectId: 'synthetic-project', identityColour: '#1597cc' }
+    } })
+    assert.equal(reads, 1, 'an otherwise fresh Team cache must read the newly saved project identity')
+    assert.equal(current.identityColour, '#1597cc')
+    assert.equal(qc.getQueryState(unrelated)?.isInvalidated, false)
+  } finally { qc.clear() }
+})
 
 test('item changes keep the previous project and item-specific invalidations (AC-PLAT-19)', () => {
   const before: Record<string, string[]> = {
@@ -120,4 +319,97 @@ test('new batch mutations refresh their mounted views and await active refetches
   release()
   await refresh
   assert.equal(finished, true)
+})
+
+test('person date and setting changes refresh all authorised candidate sources; submission events refresh workspace dates', async () => {
+  const noticeSources = ['coord-options', 'issue-verifier-eligible', 'pickup-offers', 'handoff-options', 'organisation', 'workspace-coordination', 'hr-identities']
+  const changes: [string, readonly unknown[]][] = [
+    ...['PersonFacts', 'User', 'Setting'].flatMap(type => noticeSources.map(source => [type, [source, 'synthetic-scope']] as [string, readonly unknown[]])),
+    ...['SubmissionPackage', 'SubmissionManifestItem', 'SubmissionIssue', 'Deliverable'].map(type => [type, ['wtasks', 'visible-projects', { page: 2, cols: 'submissionDate' }]] as [string, readonly unknown[]]),
+  ]
+  for (const [type, key] of changes) {
+    const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, gcTime: Infinity } } })
+    try {
+      qc.setQueryData(key, { version: 'before' }); qc.setQueryData(['unrelated-query'], { version: 'same' })
+      await invalidateChange(qc, type, 'synthetic-project')
+      let reads = 0
+      const row = await qc.fetchQuery({ queryKey: key, queryFn: async () => { reads++; return { version: 'after' } } })
+      assert.equal(row.version, 'after', `${type}: ${key[0]}`); assert.equal(reads, 1)
+      assert.equal(qc.getQueryState(['unrelated-query'])?.isInvalidated, false)
+    } finally { qc.clear() }
+  }
+})
+
+test('board leads and thresholds, Team organisation labels and candidate capacity refresh cached reads', async () => {
+  const changes: [string, readonly unknown[]][] = [
+    ...['Setting', 'User', 'Discipline', 'Project', 'Member', 'ReferenceData'].flatMap(type =>
+      ['task', 'wtasks', 'wboard'].map(root => [type, [root, 'authorised-scope', { swim: 'discipline' }]] as [string, readonly unknown[]])),
+    ...['User', 'ReferenceData', 'Member', 'Discipline', 'OrgUnit', 'Setting'].flatMap(type =>
+      [['wteam', 'authorised-scope'], ['p', 'project-one', 'team']].map(key => [type, key] as [string, readonly unknown[]])),
+    ...['Setting', 'User', 'Task', 'PlanningEntry', 'ResourceAllocation', 'ApprovedLeave', 'PersonSchedule', 'PersonAvailabilityOverride', 'Holiday'].map(type =>
+      [type, ['people-capacity', 'viewer', '2026-11-02', ['candidate']]] as [string, readonly unknown[]]),
+  ]
+  for (const [type, key] of changes) {
+    const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, gcTime: Infinity } } })
+    try {
+      qc.setQueryData(key, { version: 'before' }); qc.setQueryData(['unrelated-query'], { version: 'same' })
+      await invalidateChange(qc, type, 'project-one')
+      let reads = 0
+      const row = await qc.fetchQuery({ queryKey: key, queryFn: async () => { reads++; return { version: 'after' } } })
+      assert.equal(row.version, 'after', `${type}: ${key[0]}`); assert.equal(reads, 1)
+      assert.equal(qc.getQueryState(['unrelated-query'])?.isInvalidated, false)
+    } finally { qc.clear() }
+  }
+})
+
+
+test('person panels refetch after membership, scope and permitted-fact changes without touching unrelated personal state', async () => {
+  const key = ['person-panel', 'viewer', 'person', 'direct', 1, 25, true, true] as const
+  for (const type of ['Member', 'Project', 'User', 'Discipline', 'ReferenceData', 'OrgLevel', 'OrgUnit', 'PersonFacts', 'UserCertification', 'CertificationTag', 'Setting']) {
+    const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, gcTime: Infinity } } })
+    try {
+      qc.setQueryData(key, { displayName: 'Previously authorised name' })
+      qc.setQueryData(['preferences'], { digestEnabled: true })
+      await invalidateChange(qc, type, 'project')
+      let reads = 0
+      const read = await qc.fetchQuery({ queryKey: key, queryFn: async () => { reads++; return { displayName: 'Current authorised name' } } })
+      assert.equal(reads, 1, type)
+      assert.equal(read.displayName, 'Current authorised name', type)
+      assert.equal(qc.getQueryState(['preferences'])?.isInvalidated, false, type)
+    } finally { qc.clear() }
+  }
+})
+
+test('an owning flag change refreshes the cached reference vocabulary', async () => {
+  const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, gcTime: Infinity } } })
+  try {
+    qc.setQueryData(['reference'], { issuePurposes: [] })
+    await invalidateChange(qc, 'Setting')
+    let reads = 0
+    const result = await qc.fetchQuery({ queryKey: ['reference'], queryFn: async () => { reads++; return { issuePurposes: [{ id: 'purpose', name: 'For review' }] } } })
+    assert.equal(reads, 1)
+    assert.equal(result.issuePurposes[0].name, 'For review')
+  } finally { qc.clear() }
+})
+
+test('coordination readers refresh current linked work and meeting agenda without treating a contribution as a workflow change', async () => {
+  const readers = [
+    ['handoff-readiness-links', 'viewer', 'project', 'handoff', true, 2],
+    ['weekly-readiness-agenda', 'viewer', 'project', true, '2026-11-02', '2026-11-08', null, 2, 1],
+  ] as const
+  const qc = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, gcTime: Infinity } } })
+  try {
+    for (const key of readers) qc.setQueryData(key, { total: 3 })
+    await invalidateChange(qc, 'TaskContribution', 'project', 'task')
+    for (const key of readers) assert.equal(qc.getQueryState(key)?.isInvalidated, false)
+    for (const type of ['Task', 'Handoff', 'WorkConstraint', 'OutputCommitment', 'Member', 'Setting']) {
+      for (const key of readers) qc.setQueryData(key, { total: 3 })
+      await invalidateChange(qc, type, 'project')
+      for (const key of readers) {
+        let reads = 0
+        const current = await qc.fetchQuery({ queryKey: key, queryFn: async () => { reads++; return { total: 2 } } })
+        assert.equal(reads, 1, type); assert.equal(current.total, 2, type)
+      }
+    }
+  } finally { qc.clear() }
 })

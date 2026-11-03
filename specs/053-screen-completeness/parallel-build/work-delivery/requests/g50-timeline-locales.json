@@ -1,0 +1,8 @@
+{
+  "timelineViews.layers": "Shown layers",
+  "timelineViews.layer.dependencies": "Dependencies",
+  "timelineViews.layer.milestones": "Milestones",
+  "timelineViews.layer.originalDates": "Original dates",
+  "timelineViews.layer.baselineDates": "Baseline dates",
+  "timelineViews.layer.handoffs": "Handoffs"
+}

@@ -1,0 +1,146 @@
+{
+  "observedAtUtc": "2026-11-01T13:43:30.441Z",
+  "rows": [
+    {
+      "viewport": "desktop",
+      "route": "/reports/workload-employee?projectId=01a19758-f4ab-71de-8b96-74a60518caba&unit=fte&period=months",
+      "status": 200,
+      "url": "http://127.0.0.1:8853/reports/workload-employee?projectId=01a19758-f4ab-71de-8b96-74a60518caba&unit=fte&period=months",
+      "hasUnit": true,
+      "hasPeriod": true,
+      "hasOne": true,
+      "hasThreeQuarter": true,
+      "hasAggregate": true,
+      "snippets": [
+        [
+          "qa20-report-a",
+          "026-12 · Committed load (h) (FTE; ISO weeks: 3)\tNo due date (h)\tOpen tasks\tUnestimated\tOverdue tasks\tProjects\tIndicator\nqa20-report-a\tSam Patel\t\n40\n\tPartial project scope\t\n0.0\n\t\n1.0\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n1.0\n\t\n1.0\n\t\n0.0\n\t\n0.0\n\t\n1.0\n\t\n0.0\n\t\n1.0\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n0\n\t20\t0\t0\t1\tOK\nqa20-report-b\tSam Patel"
+        ],
+        [
+          "qa20-report-b",
+          "project scope\t\n0.0\n\t\n1.0\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n1.0\n\t\n1.0\n\t\n0.0\n\t\n0.0\n\t\n1.0\n\t\n0.0\n\t\n1.0\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n0\n\t20\t0\t0\t1\tOK\nqa20-report-b\tSam Patel\t\n32\n\tPartial project scope\t\n0.0\n\t\n0.8\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n0.75\n\t\n0.8\n\t\n0.0\n\t\n0.0\n\t\n0.75\n\t\n0.0\n\t\n0.8\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n0\n\t15\t0\t0\t1\tOK\nVisible report total\t"
+        ],
+        [
+          "1.75",
+          "\t\n0.0\n\t\n0\n\t15\t0\t0\t1\tOK\nVisible report total\t—\nUnavailable\n\t—\nUnavailable\n\t—\nUnavailable\n\t\n0.0\n\t\n1.8\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n1.75\n\t\n1.8\n\t\n0.0\n\t\n0.0\n\t\n1.75\n\t\n0.0\n\t\n1.8\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t—\nUnavailable\n\t—\nUnavailable\n\t—\nUnavailable\n\t—\nUnavailable\n\t—\nUnavailable\n\t—\nUnavailable\n\nUnit: FTE · Period: Months. F"
+        ],
+        [
+          "0.75",
+          ".0\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n0\n\t20\t0\t0\t1\tOK\nqa20-report-b\tSam Patel\t\n32\n\tPartial project scope\t\n0.0\n\t\n0.8\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n0.75\n\t\n0.8\n\t\n0.0\n\t\n0.0\n\t\n0.75\n\t\n0.0\n\t\n0.8\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n0\n\t15\t0\t0\t1\tOK\nVisible report total\t—\nUnavailable\n\t—\nUnavailable\n\t—\nUnavailable\n\t\n0.0\n\t\n1.8\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n1.75\n\t"
+        ]
+      ],
+      "metrics": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "firstDataY": 379.5
+      },
+      "errors": []
+    },
+    {
+      "viewport": "desktop",
+      "route": "/reports/workload-employee?projectId=01a19758-f4ab-71de-8b96-74a60518caba&unit=fte&period=weeks",
+      "status": 200,
+      "url": "http://127.0.0.1:8853/reports/workload-employee?projectId=01a19758-f4ab-71de-8b96-74a60518caba&unit=fte&period=weeks",
+      "hasUnit": true,
+      "hasPeriod": true,
+      "hasOne": true,
+      "hasThreeQuarter": true,
+      "hasAggregate": true,
+      "snippets": [
+        [
+          "qa20-report-a",
+          "-12-14 · Committed load (h) (FTE; ISO weeks: 1)\tNo due date (h)\tOpen tasks\tUnestimated\tOverdue tasks\tProjects\tIndicator\nqa20-report-a\tSam Patel\t\n40\n\tPartial project scope\t\n0.0\n\t\n1.0\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n1.0\n\t\n1.0\n\t\n0.0\n\t\n0.0\n\t\n1.0\n\t\n1.0\n\t\n1.0\n\t\n0.0\n\t\n0.0\n\t\n1.0\n\t\n1.0\n\t\n1.0\n\t\n0.0\n\t\n0.0\n\t\n1.0\n\t\n1.0\n\t\n1."
+        ],
+        [
+          "qa20-report-b",
+          "\n\t\n0.0\n\t\n1.0\n\t\n0.0\n\t\n1.0\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n1.0\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n1.0\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n0\n\t20\t0\t0\t1\tOK\nqa20-report-b\tSam Patel\t\n32\n\tPartial project scope\t\n0.0\n\t\n0.8\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n0.75\n\t\n0.8\n\t\n0.0\n\t\n0.0\n\t\n0.75\n\t\n0.75\n\t\n0.8\n\t\n0.0\n\t\n0.0\n\t\n0.75\n\t\n0.75\n\t\n0.8\n\t\n0.0\n\t\n0.0\n\t\n0.75\n\t\n0."
+        ],
+        [
+          "1.75",
+          "\t\n0.0\n\t\n0\n\t15\t0\t0\t1\tOK\nVisible report total\t—\nUnavailable\n\t—\nUnavailable\n\t—\nUnavailable\n\t\n0.0\n\t\n1.8\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n1.75\n\t\n1.8\n\t\n0.0\n\t\n0.0\n\t\n1.75\n\t\n1.75\n\t\n1.8\n\t\n0.0\n\t\n0.0\n\t\n1.75\n\t\n1.75\n\t\n1.8\n\t\n0.0\n\t\n0.0\n\t\n1.75\n\t\n1.75\n\t\n1.8\n\t\n0.0\n\t\n0.0\n\t\n1.75\n\t\n0.0\n\t\n1.8\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n1.8\n\t\n0.0\n\t\n0.0\n"
+        ],
+        [
+          "0.75",
+          ".0\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n0\n\t20\t0\t0\t1\tOK\nqa20-report-b\tSam Patel\t\n32\n\tPartial project scope\t\n0.0\n\t\n0.8\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n0.75\n\t\n0.8\n\t\n0.0\n\t\n0.0\n\t\n0.75\n\t\n0.75\n\t\n0.8\n\t\n0.0\n\t\n0.0\n\t\n0.75\n\t\n0.75\n\t\n0.8\n\t\n0.0\n\t\n0.0\n\t\n0.75\n\t\n0.75\n\t\n0.8\n\t\n0.0\n\t\n0.0\n\t\n0.75\n\t\n0.0\n\t\n0.8\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n0.8\n\t\n0.0\n\t\n0.0\n"
+        ]
+      ],
+      "metrics": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "firstDataY": 379.5
+      },
+      "errors": []
+    },
+    {
+      "viewport": "phone",
+      "route": "/reports/workload-employee?projectId=01a19758-f4ab-71de-8b96-74a60518caba&unit=fte&period=months",
+      "status": 200,
+      "url": "http://127.0.0.1:8853/reports/workload-employee?projectId=01a19758-f4ab-71de-8b96-74a60518caba&unit=fte&period=months",
+      "hasUnit": true,
+      "hasPeriod": true,
+      "hasOne": true,
+      "hasThreeQuarter": true,
+      "hasAggregate": true,
+      "snippets": [
+        [
+          "qa20-report-a",
+          "026-12 · Committed load (h) (FTE; ISO weeks: 3)\tNo due date (h)\tOpen tasks\tUnestimated\tOverdue tasks\tProjects\tIndicator\nqa20-report-a\tSam Patel\t\n40\n\tPartial project scope\t\n0.0\n\t\n1.0\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n1.0\n\t\n1.0\n\t\n0.0\n\t\n0.0\n\t\n1.0\n\t\n0.0\n\t\n1.0\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n0\n\t20\t0\t0\t1\tOK\nqa20-report-b\tSam Patel"
+        ],
+        [
+          "qa20-report-b",
+          "project scope\t\n0.0\n\t\n1.0\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n1.0\n\t\n1.0\n\t\n0.0\n\t\n0.0\n\t\n1.0\n\t\n0.0\n\t\n1.0\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n0\n\t20\t0\t0\t1\tOK\nqa20-report-b\tSam Patel\t\n32\n\tPartial project scope\t\n0.0\n\t\n0.8\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n0.75\n\t\n0.8\n\t\n0.0\n\t\n0.0\n\t\n0.75\n\t\n0.0\n\t\n0.8\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n0\n\t15\t0\t0\t1\tOK\nVisible report total\t"
+        ],
+        [
+          "1.75",
+          "\t\n0.0\n\t\n0\n\t15\t0\t0\t1\tOK\nVisible report total\t—\nUnavailable\n\t—\nUnavailable\n\t—\nUnavailable\n\t\n0.0\n\t\n1.8\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n1.75\n\t\n1.8\n\t\n0.0\n\t\n0.0\n\t\n1.75\n\t\n0.0\n\t\n1.8\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t—\nUnavailable\n\t—\nUnavailable\n\t—\nUnavailable\n\t—\nUnavailable\n\t—\nUnavailable\n\t—\nUnavailable\n\nUnit: FTE · Period: Months. F"
+        ],
+        [
+          "0.75",
+          ".0\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n0\n\t20\t0\t0\t1\tOK\nqa20-report-b\tSam Patel\t\n32\n\tPartial project scope\t\n0.0\n\t\n0.8\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n0.75\n\t\n0.8\n\t\n0.0\n\t\n0.0\n\t\n0.75\n\t\n0.0\n\t\n0.8\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n0\n\t15\t0\t0\t1\tOK\nVisible report total\t—\nUnavailable\n\t—\nUnavailable\n\t—\nUnavailable\n\t\n0.0\n\t\n1.8\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n1.75\n\t"
+        ]
+      ],
+      "metrics": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "firstDataY": 601.515625
+      },
+      "errors": []
+    },
+    {
+      "viewport": "phone",
+      "route": "/reports/workload-employee?projectId=01a19758-f4ab-71de-8b96-74a60518caba&unit=fte&period=weeks",
+      "status": 200,
+      "url": "http://127.0.0.1:8853/reports/workload-employee?projectId=01a19758-f4ab-71de-8b96-74a60518caba&unit=fte&period=weeks",
+      "hasUnit": true,
+      "hasPeriod": true,
+      "hasOne": true,
+      "hasThreeQuarter": true,
+      "hasAggregate": true,
+      "snippets": [
+        [
+          "qa20-report-a",
+          "-12-14 · Committed load (h) (FTE; ISO weeks: 1)\tNo due date (h)\tOpen tasks\tUnestimated\tOverdue tasks\tProjects\tIndicator\nqa20-report-a\tSam Patel\t\n40\n\tPartial project scope\t\n0.0\n\t\n1.0\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n1.0\n\t\n1.0\n\t\n0.0\n\t\n0.0\n\t\n1.0\n\t\n1.0\n\t\n1.0\n\t\n0.0\n\t\n0.0\n\t\n1.0\n\t\n1.0\n\t\n1.0\n\t\n0.0\n\t\n0.0\n\t\n1.0\n\t\n1.0\n\t\n1."
+        ],
+        [
+          "qa20-report-b",
+          "\n\t\n0.0\n\t\n1.0\n\t\n0.0\n\t\n1.0\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n1.0\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n1.0\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n0\n\t20\t0\t0\t1\tOK\nqa20-report-b\tSam Patel\t\n32\n\tPartial project scope\t\n0.0\n\t\n0.8\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n0.75\n\t\n0.8\n\t\n0.0\n\t\n0.0\n\t\n0.75\n\t\n0.75\n\t\n0.8\n\t\n0.0\n\t\n0.0\n\t\n0.75\n\t\n0.75\n\t\n0.8\n\t\n0.0\n\t\n0.0\n\t\n0.75\n\t\n0."
+        ],
+        [
+          "1.75",
+          "\t\n0.0\n\t\n0\n\t15\t0\t0\t1\tOK\nVisible report total\t—\nUnavailable\n\t—\nUnavailable\n\t—\nUnavailable\n\t\n0.0\n\t\n1.8\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n1.75\n\t\n1.8\n\t\n0.0\n\t\n0.0\n\t\n1.75\n\t\n1.75\n\t\n1.8\n\t\n0.0\n\t\n0.0\n\t\n1.75\n\t\n1.75\n\t\n1.8\n\t\n0.0\n\t\n0.0\n\t\n1.75\n\t\n1.75\n\t\n1.8\n\t\n0.0\n\t\n0.0\n\t\n1.75\n\t\n0.0\n\t\n1.8\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n1.8\n\t\n0.0\n\t\n0.0\n"
+        ],
+        [
+          "0.75",
+          ".0\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n0\n\t20\t0\t0\t1\tOK\nqa20-report-b\tSam Patel\t\n32\n\tPartial project scope\t\n0.0\n\t\n0.8\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n0.75\n\t\n0.8\n\t\n0.0\n\t\n0.0\n\t\n0.75\n\t\n0.75\n\t\n0.8\n\t\n0.0\n\t\n0.0\n\t\n0.75\n\t\n0.75\n\t\n0.8\n\t\n0.0\n\t\n0.0\n\t\n0.75\n\t\n0.75\n\t\n0.8\n\t\n0.0\n\t\n0.0\n\t\n0.75\n\t\n0.0\n\t\n0.8\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n0.0\n\t\n0.8\n\t\n0.0\n\t\n0.0\n"
+        ]
+      ],
+      "metrics": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "firstDataY": 601.515625
+      },
+      "errors": []
+    }
+  ],
+  "errors": []
+}

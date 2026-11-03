@@ -1,0 +1,20 @@
+:root[data-visual="v2"] .semantic-pill[data-semantic-tone="idle"] { background: var(--pill-idle-bg); color: var(--pill-idle); }
+:root[data-visual="v2"] .semantic-pill[data-semantic-tone="work"] { background: var(--pill-work-bg); color: var(--pill-work); }
+:root[data-visual="v2"] .semantic-pill[data-semantic-tone="warn"] { background: var(--pill-warn-bg); color: var(--pill-warn); }
+:root[data-visual="v2"] .semantic-pill[data-semantic-tone="done"] { background: var(--pill-complete-bg); color: var(--pill-complete); }
+:root[data-visual="v2"] .semantic-pill[data-semantic-tone="bad"] { background: var(--pill-critical-bg); color: var(--pill-critical); }
+:root[data-visual="v2"] .semantic-pill[data-semantic-tone="ok"] { background: var(--pill-ok-bg); color: var(--pill-ok); }
+:root[data-visual="v2"] .semantic-lane { border-top: 3px solid var(--lane-accent, var(--ink-2)); }
+:root[data-visual="v2"] .semantic-lane-to-do { --lane-accent: var(--lane-todo); }
+:root[data-visual="v2"] .semantic-lane-in-progress { --lane-accent: var(--lane-progress); }
+:root[data-visual="v2"] .semantic-lane-review { --lane-accent: var(--lane-review); }
+:root[data-visual="v2"] .semantic-lane-done { --lane-accent: var(--lane-done); }
+:root[data-visual="v2"] .semantic-lane-on-hold { --lane-accent: var(--hatch-strong); background-image: var(--time-away-hatch); }
+/* Apply only to recorded away/on-hold work or verified non-working calendar days,
+   respectively. Call sites must retain their visible label and legend. */
+:root[data-visual="v2"] .semantic-time-away { background-image: var(--time-away-hatch); }
+:root[data-visual="v2"] .semantic-nonworking-day { background-image: var(--nonworking-hatch); }
+:root[data-visual="v2"] [data-item-mark] { --item-mark-colour: var(--ink-2); display: inline-block; flex: 0 0 auto; width: 10px; height: 10px; background: var(--item-mark-colour);  }
+:root[data-visual="v2"] [data-item-mark][data-item-kind="Task"] { border-radius: 999px; }
+:root[data-visual="v2"] [data-item-mark][data-item-kind="Deliverable"] { border-radius: 2px; }
+:root[data-visual="v2"] [data-item-mark][data-item-kind="Milestone"] { transform: rotate(45deg); border-radius: 0; width: 10px; height: 10px; }

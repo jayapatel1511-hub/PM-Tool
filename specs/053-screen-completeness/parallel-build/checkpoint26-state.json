@@ -1,0 +1,64 @@
+{
+  "generation": 54,
+  "checkpoint": 26,
+  "startedAtUtc": "2026-11-02T10:32:02.074936+00:00",
+  "status": "CLOSED_LOCAL_R2_FR61_PASS_S35_R3_UNIMPLEMENTED",
+  "previous": "Checkpoint25S46localPASS34/49;S35partialR1",
+  "target": "S35R2responseoutcome+allroundpackageCSV/XLSXresponseSheet;R3externalremainsrequired",
+  "sourceLoans": {
+    "A": [],
+    "B": [],
+    "C": [],
+    "D": [],
+    "root": []
+  },
+  "pending": [
+    "S35R3externalprovenancelegacychoicepending;noassumedanswer/dependentcode",
+    "Otherunchecked053andbroad052visual/native/zoom/humangates",
+    "QA24cleanupconfirmationpending;runtimepreserved"
+  ],
+  "runtime": "No stop/delete/restart oldQA24; futureisolatedcheckpoint26artifacts preservingold5088/8853/8854outputs",
+  "updatedAtUtc": "2026-11-02T11:47:58.227162+00:00",
+  "rootIntegration": [
+    "Nullableentity/eventResponseOutcome,max32+4value/eventaction/responseconstraints authored; no migrationyet",
+    "FindingActionappendignore-nullpreserveslegacyhash; disablednonnullguardpreRun, freshvalidationincallbackafterreplay",
+    "Current+eventDTOomitoff; resolverresetclear/carrydefaultsnull; Registeroptionalfieldmapping",
+    "ExportMap/typedfutureformmount/currenthistoryoutcome/helperunknownmapping+packageExportMenu",
+    "ReviewDetailcachepartitionsviewer+register+pattern; locale+fixture/browserinventory authored",
+    "R1onlyflag-onRespondedfixtureexplicitClarified; noassertionchanged"
+  ],
+  "unverified": "Allgeneration54application/schema/testchangesuncompiled/unrun; noEF/build/test/browseruntilwritersREADY/HOLD",
+  "evidence": "evidence/checkpoint26-findings.md",
+  "reviews": {
+    "rootBackend": "BOUNDED_SOURCE_PASS no findings; migration/Cfinal/runtimeunverified",
+    "rootFrontend": "source review active;futureDcontracts only"
+  },
+  "checks": {
+    "dotnetDistinct": 149,
+    "newCases": 52,
+    "adjacent": 97,
+    "solutionBuild2": "PASS0errors1156warnings",
+    "frontend": "types2/fixture1/lint2warnings/SSR1/SPA2PASS",
+    "browserFinal": "R2Chrome3PASS10cases66explicitmockcommands2downloads0unexpected; R1register1/findingcontext1PASS",
+    "visual": "capture4read-only0writes;desktop/375/current+historyinspected",
+    "parity": "613C#/446web/143finalserved/401retainedoutputs+oldDLLunchanged",
+    "spec": "uptodate1546IDs438sections0unknown;8decisions+whitespacePASS"
+  },
+  "preview": {
+    "base": "http://127.0.0.1:8856",
+    "pid": 51321,
+    "execSession": 75968,
+    "output": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint26-artifacts/bin/spa-wwwroot-build2",
+    "boundary": "Finalstaticmockonly;API5091notstarted;8855/build1preserved"
+  },
+  "pendingUserChoices": {
+    "externalLegacyAuthors": "AwaitingJay:blockunknownauthorsvsPMauthorattestation;requiredforR3sourcecontractcoverage;elapsednotapproval",
+    "qa24Cleanup": "EarlierautomaticreviewrejectedstopAPI4323/dropONLYhub_qa_checkpoint24;explicitconfirmationstillpending,noactionexecuted"
+  },
+  "nextContracts": {
+    "S44": "A a736692c...READYdoconly",
+    "S45": "B c65e42c8...READYdoconly deliveryprovenance dependencyS47",
+    "S35R3": "C b1fa446b...READYproposedcontract;independentreviewREADY,legacyrestrictionOpen"
+  },
+  "checkedSlices": 34
+}

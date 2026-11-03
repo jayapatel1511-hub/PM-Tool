@@ -169,10 +169,14 @@ public static class TeamEndpoints
     public sealed record DisciplineBody(Guid DisciplineId, Guid? LeadUserId);
 
     /// One discipline on the project with its lead; the name, code and colour are the reference discipline's.
-    public sealed record ProjectTeamDiscipline(Guid Id, Guid DisciplineId, string Name, string Code, string Colour, Guid? LeadUserId, bool IsActive, int SortOrder, int RowVersion);
+    public sealed record ProjectTeamDiscipline(Guid Id, Guid DisciplineId, string Name, string Code, string Colour, Guid? LeadUserId, bool IsActive, int SortOrder, int RowVersion,
+        [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] string? LeadName = null);
     /// One current member with the person's facts, the roles, the disciplines they lead and whether the caller may staff them.
     public sealed record ProjectTeamMember(Guid Id, Guid UserId, string DisplayName, string Email, string? JobTitle, Guid? OfficeId, bool IsActive, IReadOnlyList<string> Roles,
-        Guid? PrimaryDisciplineId, DateTimeOffset AddedAt, Guid? AddedBy, int RowVersion, IReadOnlyList<Guid> LeadOf, bool IsPrimaryPm, bool CanStaff);
+        Guid? PrimaryDisciplineId, DateTimeOffset AddedAt, Guid? AddedBy, int RowVersion, IReadOnlyList<Guid> LeadOf, bool IsPrimaryPm, bool CanStaff,
+        [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] PersonFacts.Facts? PersonFacts = null,
+        [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] TeamScreenReads.Organisation? OrganisationFacts = null,
+        [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] MemberResponsibilityEndpoints.ResponsibilityRead? Responsibility = null);
     public sealed record ProjectTeamRead(IReadOnlyList<ProjectTeamDiscipline> Disciplines, IReadOnlyList<ProjectTeamMember> Members, bool CanManage, string? ManageReason);
     public sealed record MemberAdded(Guid Id, int RowVersion);
     /// How many open items moved to the person named in `reassignTo`.
@@ -184,12 +188,15 @@ public static class TeamEndpoints
 
     /// A member joined to the person, as the team read needs it (the supervisor decides who may be staffed).
     sealed record MemberRead(Guid Id, Guid UserId, string DisplayName, string Email, string? JobTitle, Guid? OfficeId, bool IsActive, Guid? SupervisorId, List<string> Roles,
-        Guid? PrimaryDisciplineId, DateTimeOffset AddedAt, Guid? AddedBy, int RowVersion);
+        Guid? PrimaryDisciplineId, DateTimeOffset AddedAt, Guid? AddedBy, int RowVersion, string? ResponsibilityNote);
 
     public static void Map(RouteGroupBuilder api)
     {
-        api.MapGet("/projects/{id:guid}/team", async Task<Ok<ProjectTeamRead>> (Guid id, Access access, HubDb db) =>
+        api.MapGet("/projects/{id:guid}/team", async Task<Ok<ProjectTeamRead>> (Guid id, string? certificationTagId, Access access, HubDb db, SettingsStore store, TimeProvider clock) =>
         {
+            var settings = await store.Get(db);
+            await using var snapshot = settings.IsFlagOn("capacity_screens") || settings.IsFlagOn("people_screens")
+                ? await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead) : null;
             var (p, ctx) = await access.Project(id, track: false);
             var disciplines = await db.ProjectDisciplines.AsNoTracking().Where(d => d.ProjectId == id).OrderBy(d => d.SortOrder)
                 .Select(d => new ProjectTeamDiscipline(d.Id, d.DisciplineId, d.Discipline!.Name, d.Discipline.Code, d.Discipline.Colour, d.LeadUserId, d.IsActive, d.SortOrder, d.RowVersion)).ToListAsync();
@@ -197,19 +204,36 @@ public static class TeamEndpoints
                 join u in db.Users on m.UserId equals u.Id
                 where m.ProjectId == id && m.RemovedAt == null
                 orderby u.DisplayName
-                select new MemberRead(m.Id, m.UserId, u.DisplayName, u.Email, u.JobTitle, u.OfficeId, u.IsActive, u.SupervisorId, m.Roles, m.PrimaryDisciplineId, m.AddedAt, m.AddedBy, m.RowVersion)).ToListAsync();
+                select new MemberRead(m.Id, m.UserId, u.DisplayName, u.Email, u.JobTitle, u.OfficeId, u.IsActive, u.SupervisorId, m.Roles, m.PrimaryDisciplineId, m.AddedAt, m.AddedBy, m.RowVersion, m.ResponsibilityNote)).ToListAsync();
             var leadIds = disciplines.Where(d => d.LeadUserId != null).Select(d => d.LeadUserId!.Value).ToHashSet();
+            if (settings.IsFlagOn("capacity_screens"))
+            {
+                // The member filter must not erase the existing lead label/selection on the unchanged discipline controls.
+                disciplines = disciplines.Select(discipline => discipline with { LeadName = members.FirstOrDefault(member => member.UserId == discipline.LeadUserId)?.DisplayName }).ToList();
+                if (!string.IsNullOrEmpty(certificationTagId))
+                {
+                    Check.That(Guid.TryParse(certificationTagId, out var tagId) && tagId != Guid.Empty, "certificationTagId", "error.invalid");
+                    Check.That(await db.CertificationTags.AnyAsync(tag => tag.Id == tagId), "certificationTagId", "error.not_found");
+                    var authorised = members.Select(member => member.UserId).ToArray();
+                    var matched = (await db.UserCertifications.AsNoTracking().Where(record => authorised.Contains(record.UserId) && record.CertificationTagId == tagId).Select(record => record.UserId).ToArrayAsync()).ToHashSet();
+                    members = members.Where(member => matched.Contains(member.UserId)).ToList();
+                }
+            }
+            var facts = await PersonFacts.Read(db, members.Select(member => member.UserId).ToArray(), settings, clock);
+            var organisation = await TeamScreenReads.ReadOrganisation(db, members.Select(member => member.UserId).ToArray(), settings);
             var a = access.Actor;
             return TypedResults.Ok(new ProjectTeamRead(disciplines,
                 [.. members.Select(m => new ProjectTeamMember(m.Id, m.UserId, m.DisplayName, m.Email, m.JobTitle, m.OfficeId, m.IsActive, m.Roles, m.PrimaryDisciplineId, m.AddedAt, m.AddedBy, m.RowVersion,
                     [.. disciplines.Where(d => d.LeadUserId == m.UserId).Select(d => d.Id)], m.UserId == p.ProjectManagerId,
-                    Permissions.StaffOnProject(a, ctx, m.SupervisorId).Ok && m.Roles.All(r => r == ProjectRole.TeamMember) && !leadIds.Contains(m.UserId)))],
+                    Permissions.StaffOnProject(a, ctx, m.SupervisorId).Ok && m.Roles.All(r => r == ProjectRole.TeamMember) && !leadIds.Contains(m.UserId), facts.GetValueOrDefault(m.UserId), organisation.GetValueOrDefault(m.UserId),
+                    settings.IsFlagOn("people_screens") ? MemberResponsibilityEndpoints.Describe(a, ctx, m.ResponsibilityNote, disciplines.Any(discipline => discipline.Id == m.PrimaryDisciplineId && discipline.IsActive && discipline.LeadUserId == a.Id)) : null))],
                 Permissions.ManageTeam(a, ctx).Ok,
                 Permissions.ManageTeam(a, ctx).Why is { } w ? Text.Get(w, p.Status) : null));
         });
 
         // PM, or a Supervisor adding a direct report as Team Member (§8.5.1, ASG-10).
-        api.MapPost("/projects/{id:guid}/members", async Task<Created<MemberAdded>> (Guid id, MemberBody body, Access access, HubDb db, TeamService team, Notifier notify) =>
+        api.MapPost("/projects/{id:guid}/members", async Task<Created<MemberAdded>> (Guid id, MemberBody body, Access access, HubDb db, TeamService team, Notifier notify, SettingsStore store) =>
+            await Tx.Notice<Created<MemberAdded>>(db, store, async () =>
         {
             var (p, ctx) = await access.Project(id);
             var person = await db.Users.FirstOrDefaultAsync(u => u.Id == body.UserId) ?? throw ApiException.Invalid("userId", "error.not_found");
@@ -226,7 +250,7 @@ public static class TeamEndpoints
                     Text.Get("notify.supervisor_added", await notify.ActorName(), person.DisplayName, p.ProjectNumber));
             await db.SaveChangesAsync();
             return TypedResults.Created($"/api/v1/projects/{id}/members/{m.Id}", new MemberAdded(m.Id, m.RowVersion));
-        });
+        }));
 
         api.MapPatch("/projects/{id:guid}/members/{memberId:guid}", async Task<NoContent> (Guid id, Guid memberId, JsonElement body, HttpContext http, Access access, HubDb db, TeamService team) =>
         {
@@ -260,7 +284,8 @@ public static class TeamEndpoints
             return TypedResults.Ok(await OpenItems(db, id, m.UserId));
         });
 
-        api.MapDelete("/projects/{id:guid}/members/{memberId:guid}", async Task<Ok<MemberRemoved>> (Guid id, Guid memberId, Guid? reassignTo, string? reason, HttpContext http, Access access, HubDb db, TeamService team) =>
+        api.MapDelete("/projects/{id:guid}/members/{memberId:guid}", async Task<Ok<MemberRemoved>> (Guid id, Guid memberId, Guid? reassignTo, string? reason, HttpContext http, Access access, HubDb db, TeamService team, SettingsStore store) =>
+            await Tx.Notice<Ok<MemberRemoved>>(db, store, async () =>
         {
             var (p, ctx) = await access.Project(id);
             var m = await db.ProjectMembers.FirstOrDefaultAsync(x => x.Id == memberId && x.ProjectId == id && x.RemovedAt == null) ?? throw ApiException.NotFound();
@@ -282,9 +307,10 @@ public static class TeamEndpoints
             var moved = await team.Remove(p, m, reassignTo, reason, bySupervisor: !asPm);
             await db.SaveChangesAsync();
             return TypedResults.Ok(new MemberRemoved(moved));
-        });
+        }));
 
-        api.MapPost("/projects/{id:guid}/disciplines", async Task<Results<Ok<ProjectDisciplineAdded>, Created<ProjectDisciplineAdded>>> (Guid id, DisciplineBody body, Access access, HubDb db, TeamService team) =>
+        api.MapPost("/projects/{id:guid}/disciplines", async Task<Results<Ok<ProjectDisciplineAdded>, Created<ProjectDisciplineAdded>>> (Guid id, DisciplineBody body, Access access, HubDb db, TeamService team, SettingsStore store) =>
+            await Tx.Notice<Results<Ok<ProjectDisciplineAdded>, Created<ProjectDisciplineAdded>>>(db, store, async () =>
         {
             var (p, ctx) = await access.Project(id);
             Access.Demand(Permissions.ManageTeam(access.Actor, ctx));
@@ -304,9 +330,10 @@ public static class TeamEndpoints
             await team.SetLead(p, pd, body.LeadUserId);
             await db.SaveChangesAsync();
             return TypedResults.Created($"/api/v1/projects/{id}/disciplines/{pd.Id}", new ProjectDisciplineAdded(pd.Id, pd.RowVersion));
-        });
+        }));
 
-        api.MapPatch("/projects/{id:guid}/disciplines/{pdId:guid}", async Task<NoContent> (Guid id, Guid pdId, JsonElement body, HttpContext http, Access access, HubDb db, TeamService team) =>
+        api.MapPatch("/projects/{id:guid}/disciplines/{pdId:guid}", async Task<NoContent> (Guid id, Guid pdId, JsonElement body, HttpContext http, Access access, HubDb db, TeamService team, SettingsStore store) =>
+            await Tx.Notice<NoContent>(db, store, async () =>
         {
             var (p, ctx) = await access.Project(id);
             Access.Demand(Permissions.ManageTeam(access.Actor, ctx));
@@ -318,7 +345,7 @@ public static class TeamEndpoints
             if (patch.Int("sortOrder") is { } so) pd.SortOrder = so;
             await db.SaveChangesAsync();
             return TypedResults.NoContent();
-        });
+        }));
 
         // TM-05: only a discipline without non-cancelled work can be removed; otherwise deactivate.
         api.MapDelete("/projects/{id:guid}/disciplines/{pdId:guid}", async Task<NoContent> (Guid id, Guid pdId, HttpContext http, Access access, HubDb db) =>

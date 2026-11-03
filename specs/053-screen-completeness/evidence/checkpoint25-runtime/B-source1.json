@@ -1,0 +1,9 @@
+{
+  "atUtc": "2026-11-02T09:04:26.082933+00:00",
+  "files": {
+    "src/Hub.Api/Features/Search.cs": "49468d21a8b7ff9b8c3443314c7ac5fa2c8376721045a4474a2ecee75f43cfc1",
+    "src/Hub.Api/Features/SearchScreenReads.cs": "aadb3217ee97c4475d7eab229078a6ef3eeb829e7365597271a0b35c899e58b4",
+    "tests/Hub.Tests/Api/SearchScreenTests.cs": "73f9838db49f0be0918a474476c64621c8768d17840c951342fca7396e41c7c7"
+  },
+  "status": "SOURCE_HANDOFF_HASHES_PASS_UNCOMPILED_UNRUN"
+}

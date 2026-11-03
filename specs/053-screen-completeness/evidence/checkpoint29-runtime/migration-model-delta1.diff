@@ -1,0 +1,175 @@
+--- G56 snapshot
++++ G57 snapshot
+@@ -2769,6 +2769,25 @@
+                         });
+                 });
+ 
++            modelBuilder.Entity("Hub.Api.Data.DeliverableReviewDefault", b =>
++                {
++                    b.Property<Guid>("DeliverableTypeId")
++                        .HasColumnType("uuid")
++                        .HasColumnName("deliverable_type_id");
++
++                    b.Property<Guid>("DisciplineId")
++                        .HasColumnType("uuid")
++                        .HasColumnName("discipline_id");
++
++                    b.HasKey("DeliverableTypeId", "DisciplineId")
++                        .HasName("pk_deliverable_review_default");
++
++                    b.HasIndex("DisciplineId")
++                        .HasDatabaseName("ix_deliverable_review_default_discipline_id");
++
++                    b.ToTable("deliverable_review_default", "hub");
++                });
++
+             modelBuilder.Entity("Hub.Api.Data.DeliverableState", b =>
+                 {
+                     b.Property<Guid>("DeliverableId")
+@@ -4136,6 +4155,15 @@
+                         .HasColumnType("bytea")
+                         .HasColumnName("body");
+ 
++                    b.Property<Guid?>("CalendarViewProjectId")
++                        .HasColumnType("uuid")
++                        .HasColumnName("calendar_view_project_id");
++
++                    b.Property<string>("CalendarViewScope")
++                        .HasMaxLength(8)
++                        .HasColumnType("character varying(8)")
++                        .HasColumnName("calendar_view_scope");
++
+                     b.Property<string>("ContentType")
+                         .HasColumnType("text")
+                         .HasColumnName("content_type");
+@@ -4169,7 +4197,10 @@
+                         .IsUnique()
+                         .HasDatabaseName("ix_idempotency_record_user_id_key");
+ 
+-                    b.ToTable("idempotency_record", "hub");
++                    b.ToTable("idempotency_record", "hub", t =>
++                        {
++                            t.HasCheckConstraint("ck_idempotency_calendar_context", "(calendar_view_scope IS NULL AND calendar_view_project_id IS NULL) OR (calendar_view_scope IS NOT NULL AND calendar_view_scope IN ('Personal', 'Project') AND (calendar_view_scope = 'Personal' OR calendar_view_project_id IS NOT NULL))");
++                        });
+                 });
+ 
+             modelBuilder.Entity("Hub.Api.Data.InputAdoption", b =>
+@@ -5847,6 +5878,10 @@
+                         .HasColumnType("timestamp with time zone")
+                         .HasColumnName("read_at");
+ 
++                    b.PrimitiveCollection<Guid[]>("RequiredProjectIds")
++                        .HasColumnType("uuid[]")
++                        .HasColumnName("required_project_ids");
++
+                     b.Property<string>("Title")
+                         .IsRequired()
+                         .HasColumnType("text")
+@@ -9256,6 +9291,66 @@
+                     b.ToTable("submission_package", "hub", t =>
+                         {
+                             t.HasCheckConstraint("ck_submission_package_status", "status IN ('Draft','Checking','Ready','Issued','Superseded','Cancelled')");
++                        });
++                });
++
++            modelBuilder.Entity("Hub.Api.Data.TaskBulkCommandReceipt", b =>
++                {
++                    b.Property<Guid>("Id")
++                        .ValueGeneratedOnAdd()
++                        .HasColumnType("uuid")
++                        .HasColumnName("id");
++
++                    b.Property<Guid>("ActorId")
++                        .HasColumnType("uuid")
++                        .HasColumnName("actor_id");
++
++                    b.Property<DateTimeOffset>("CompletedAt")
++                        .HasColumnType("timestamp with time zone")
++                        .HasColumnName("completed_at");
++
++                    b.Property<DateTimeOffset>("CreatedAt")
++                        .HasColumnType("timestamp with time zone")
++                        .HasColumnName("created_at");
++
++                    b.Property<int>("HashVersion")
++                        .HasColumnType("integer")
++                        .HasColumnName("hash_version");
++
++                    b.Property<string>("IntentHash")
++                        .IsRequired()
++                        .HasMaxLength(64)
++                        .HasColumnType("character varying(64)")
++                        .HasColumnName("intent_hash");
++
++                    b.Property<string>("IntentJson")
++                        .IsRequired()
++                        .HasColumnType("jsonb")
++                        .HasColumnName("intent_json");
++
++                    b.Property<Guid>("RequestId")
++                        .HasColumnType("uuid")
++                        .HasColumnName("request_id");
++
++                    b.Property<string>("ResponseJson")
++                        .IsRequired()
++                        .HasColumnType("jsonb")
++                        .HasColumnName("response_json");
++
++                    b.HasKey("Id")
++                        .HasName("pk_task_bulk_command_receipt");
++
++                    b.HasIndex("ActorId", "RequestId")
++                        .IsUnique()
++                        .HasDatabaseName("ix_task_bulk_command_receipt_actor_id_request_id");
++
++                    b.ToTable("task_bulk_command_receipt", "hub", t =>
++                        {
++                            t.HasCheckConstraint("ck_task_bulk_command_completed", "completed_at >= created_at");
++
++                            t.HasCheckConstraint("ck_task_bulk_command_hash", "hash_version = 1 AND intent_hash ~ '^[0-9a-f]{64}$'");
++
++                            t.HasCheckConstraint("ck_task_bulk_command_json", "jsonb_typeof(intent_json) = 'object' AND jsonb_typeof(response_json) = 'object'");
+                         });
+                 });
+ 
+@@ -11512,6 +11607,23 @@
+                         .HasConstraintName("fk_deliverable_issue_issue_return_codes_return_code_id");
+                 });
+ 
++            modelBuilder.Entity("Hub.Api.Data.DeliverableReviewDefault", b =>
++                {
++                    b.HasOne("Hub.Api.Data.DeliverableType", null)
++                        .WithMany()
++                        .HasForeignKey("DeliverableTypeId")
++                        .OnDelete(DeleteBehavior.Restrict)
++                        .IsRequired()
++                        .HasConstraintName("fk_deliverable_review_default_deliverable_types_deliverable_typ~");
++
++                    b.HasOne("Hub.Api.Data.Discipline", null)
++                        .WithMany()
++                        .HasForeignKey("DisciplineId")
++                        .OnDelete(DeleteBehavior.Restrict)
++                        .IsRequired()
++                        .HasConstraintName("fk_deliverable_review_default_disciplines_discipline_id");
++                });
++
+             modelBuilder.Entity("Hub.Api.Data.DeliverableState", b =>
+                 {
+                     b.HasOne("Hub.Api.Data.Deliverable", null)
+@@ -12872,6 +12984,16 @@
+                         .HasForeignKey("SupersedesPackageId")
+                         .OnDelete(DeleteBehavior.Restrict)
+                         .HasConstraintName("fk_submission_package_submission_package_supersedes_package_id");
++                });
++
++            modelBuilder.Entity("Hub.Api.Data.TaskBulkCommandReceipt", b =>
++                {
++                    b.HasOne("Hub.Api.Data.AppUser", null)
++                        .WithMany()
++                        .HasForeignKey("ActorId")
++                        .OnDelete(DeleteBehavior.Restrict)
++                        .IsRequired()
++                        .HasConstraintName("fk_task_bulk_command_receipt_app_user_actor_id");
+                 });
+ 
+             modelBuilder.Entity("Hub.Api.Data.TaskCollaborator", b =>

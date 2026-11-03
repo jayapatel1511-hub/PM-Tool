@@ -1,0 +1,25 @@
+{
+  "exitCode": 1,
+  "args": [
+    "node",
+    "tests/coordination-consequence-agenda.cjs"
+  ],
+  "base": "http://127.0.0.1:8869",
+  "atUtc": "2026-11-02T21:53:30.717360+00:00",
+  "scope": "Actual isolated SPA; finite synthetic intercepted HTTP; no real business writes or mail",
+  "driverSHA256": "4eedf813fbb8959ec593ca38d51b6eebebf4da8f37cc9dd7ee35d046ec93c7a2",
+  "tail": [
+    "AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:",
+    "",
+    "  assert.ok(await page.evaluate(() => window.scrollY > 0))",
+    "",
+    "    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/coordination-consequence-agenda.cjs:109:87 {",
+    "  generatedMessage: true,",
+    "  code: 'ERR_ASSERTION',",
+    "  actual: false,",
+    "  expected: true,",
+    "  operator: '==',",
+    "  diff: 'simple'",
+    "}"
+  ]
+}

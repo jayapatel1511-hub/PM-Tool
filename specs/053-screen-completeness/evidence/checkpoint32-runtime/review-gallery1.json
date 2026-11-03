@@ -1,0 +1,49 @@
+{
+  "atUtc": "2026-11-03T00:11:12.222336+00:00",
+  "path": ".review/checkpoint32-review",
+  "publicFiles": 21,
+  "preservedEarlierImages": 16,
+  "originalIndexPreservedAt": ".review/checkpoint31-review/index.html",
+  "newSections": [
+    "09",
+    "10"
+  ],
+  "removedOnlyNewCopiesOfUnpublishedCaptureFiles": [
+    "capture-coordination.cjs",
+    "new-assets/s38-08-readiness-agenda-desktop.png",
+    "new-assets/s38-08-readiness-agenda-phone.png",
+    "new-assets/s38-07-readiness-links-desktop.png",
+    "new-assets/s38-07-readiness-links-phone.png",
+    "new-assets2/s38-08-readiness-agenda-desktop.png",
+    "new-assets2/s38-08-readiness-agenda-phone.png",
+    "new-assets2/s38-07-readiness-links-desktop.png",
+    "new-assets2/s38-07-readiness-links-phone.png",
+    "new-assets3/s38-08-readiness-agenda-desktop.png",
+    "new-assets3/s38-08-readiness-agenda-phone.png",
+    "new-assets3/s38-07-readiness-links-desktop.png",
+    "new-assets3/s38-07-readiness-links-phone.png"
+  ],
+  "files": {
+    "assets/01-calendar-desktop.png": "46962b18c8d9e04d1e6586facc6c979253c1db86078d67f2c70371c0beb9e932",
+    "assets/01-calendar-phone.png": "9907f3fb3339786fbd76dbea4ce11cc79d8cdea10291ad69588a5cb0cde90fcf",
+    "assets/02-reviews-desktop.png": "86cc9e7508bfee55addeaf45ef4922c846ef4b92d294bd4f196af2010591309b",
+    "assets/02-reviews-phone.png": "c9589d57ad152ee0005ec921d580ab783b7632dac7695da975276a4ab463cca1",
+    "assets/03-bulk-desktop.png": "eb87fd1631b7e2dbf63b259c49c2d8491834b99aa0c362668b1d21e1f448b316",
+    "assets/03-bulk-phone.png": "011a116790e2feb1c7a527900ca15dcd6807f28d4305b9639a3f90cbbb64218c",
+    "assets/04-notifications-desktop.png": "0e719babc78356ae514eb1fb1f72d3cdce8d1c054914c05fb1b49363a85b35a3",
+    "assets/04-notifications-phone.png": "8c88909ced7254409d66767015e93226f1d2149f31511238a0b5b7e3c29876dd",
+    "assets/05-task-history-phone.png": "a4241495e48529af69764f219fc2f0417b77f75d228a2e50c3997a4dd80839ff",
+    "assets/05-task-sections-desktop.png": "dbbf9c8842844f72bd3171a1c844bd09de3db9e5137092125db20461afdf7984",
+    "assets/06-contribution-desktop.png": "7c29b4ed300d878b43184ee2fc9517380eb1ff3c7e60569488516509dcc3d869",
+    "assets/06-contribution-phone.png": "c12d7d0189939984775ac09f106dab9b20556cdae5b1e2e6a8928c19416c2846",
+    "assets/07-readiness-links-desktop.png": "cb0797fa4a448de8ed1338cbfebfc93d2ece6b9920bc5c37026d9fb07cd5893a",
+    "assets/07-readiness-links-phone.png": "049a9156171a59c8e69f8b6338dd765e1401fcb0bfb45ce52603e14458bfaa7d",
+    "assets/08-readiness-agenda-desktop.png": "2eef66b0b092cb23ecdfd131f9e924942872b0330222fa1da4220220c09c479c",
+    "assets/08-readiness-agenda-phone.png": "70742c8dcdfcc0042b9e47c9f1819760986a1e68a8c7722b63e40037b82ddbdc",
+    "assets/09-notice-preferences-desktop.png": "a5e04ef937de2791bd35dd574dea39619ce05f65d59d33d311a294f210896641",
+    "assets/09-notice-preferences-phone.png": "ff4d1a8dbda45d5133c94debe21c5cdd13d45b2ca5e225bb35442b896b27703b",
+    "assets/10-notice-delivery-desktop.png": "acf71c36288fd0ccf3d24b15f8dfb683e30456b1c4b2b4ab0bccef5283d59a49",
+    "assets/10-notice-delivery-phone.png": "ccecb51aef66da75d62898c2c8490b29dc7780d25ee426c0b0bd6339ccc3a0e8",
+    "index.html": "ded3813f9fb769a9e761111d77cbf1047302379f2d221f58683919ac81b62a26"
+  }
+}

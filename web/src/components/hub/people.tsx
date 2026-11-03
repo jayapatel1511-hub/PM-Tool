@@ -10,16 +10,16 @@ import { useFlag, useMe } from '@/lib/auth'
 import { addDays, hours } from '@/lib/format'
 import { t } from '@/lib/i18n'
 import { accentOf, cn } from '@/lib/utils'
+import { PersonDateNotice, type PersonDateNotices } from '@/components/hub/person-facts'
 
-export interface Person { id: string; displayName: string; email?: string; jobTitle?: string; homeDiscipline?: string; isActive?: boolean; onProject?: boolean }
+export interface Person { id: string; displayName: string; email?: string; jobTitle?: string; homeDiscipline?: string; isActive?: boolean; onProject?: boolean; personNotices?: PersonDateNotices | null }
 
 export function initials(name?: string | null) { return (name ?? '?').split(/\s+/).map((p) => p[0]).slice(0, 2).join('').toUpperCase() }
 
-/** Initials in the person's stable accent (keyed by id where known), 28 px in tables. The accent is a ring and the initials,
- *  not a fill, so a list of people stays inside the colour budget (§41 R8). */
+/** Initials stay neutral in v2; the id-derived ring/text accent remains the v1 presentation. */
 export function Avatar({ name, id, className, title }: { name?: string | null; id?: string | null; className?: string; title?: string }) {
   return (
-    <span title={title ?? name ?? ''} aria-hidden data-accent={accentOf(id ?? name)}
+    <span title={title ?? name ?? ''} aria-hidden data-visual-decoration="person" data-accent={accentOf(id ?? name)}
       className={cn('inline-grid size-7 shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card text-xs font-semibold text-(--acc-fg)', className)}>
       {initials(name)}
     </span>
@@ -55,7 +55,7 @@ export function usePeopleCapacity(week: string | undefined, open: boolean, ids: 
     staleTime: 60_000,
   })) })
   const cells: Record<string, CapacityCell> = Object.fromEntries(results.flatMap((r) =>
-    (r.data?.people ?? []).filter((p) => p.cells[0]).map((p) => [p.id, { ...p.cells[0], partial: p.partial }])))
+    (r.error ? [] : r.data?.people ?? []).filter((p) => p.cells[0]).map((p) => [p.id, { ...p.cells[0], partial: p.partial }])))
   return (id: string) => cells[id]
 }
 
@@ -65,7 +65,11 @@ export function usePeopleCapacity(week: string | undefined, open: boolean, ids: 
 export function CapacityFigure({ cell }: { cell?: CapacityCell }) {
   const description = useId()
   const named = useFlag('figure_names')
+  const showUncertainty = useFlag('people_screens')
   if (!cell) return null
+  if (showUncertainty && cell.provisional && !cell.partial) return (
+    <span data-capacity title={t('capacity.provisionalAvailability')} className="shrink-0 text-xs text-muted-foreground">{t('capacity.provisionalAvailability')}</span>
+  )
   // §45.3 (flag.figure_names): a figure that is not partial carries the remaining-capacity basis as its tooltip and description.
   const basis = cell.partial ? t('workload.partial') : named ? t('people.freeBasis') : undefined
   const free = cell.partial ? t('workload.partialChip') : cell.remaining < 0 ? t('people.overBy', { h: hours(-cell.remaining) }) : t('people.free', { h: hours(cell.remaining) })
@@ -83,13 +87,14 @@ export function PeoplePicker({ value, valueName, onChange, placeholder, allowCle
   value?: string | null; valueName?: string | null; onChange: (id: string | null, person?: Person) => void; placeholder?: string
   allowClear?: boolean; exclude?: string[]; id?: string; disabled?: boolean; candidates?: Person[]; compact?: boolean; label?: string; capacityWeek?: string
 } & Pick<ComponentProps<typeof Button>, 'aria-describedby' | 'aria-invalid'>) {
+  const personFactsEnabled = useFlag('capacity_screens')
   const [open, setOpen] = useState(false)
   const [q, setQ] = useState('')
   const providedWeek = useContext(CapacityWeek)
   const projectId = useContext(PickerProject)
   const week = capacityWeek ?? providedWeek
   const search = useQuery({
-    queryKey: ['people', q, projectId ?? null], enabled: open && !candidates,
+    queryKey: ['people', q, projectId ?? null, ...(personFactsEnabled ? ['capacity_screens'] : [])], enabled: open && !candidates,
     queryFn: () => get<Person[]>(`users${qs({ q, limit: 30, projectId })}`), staleTime: 60_000,
   })
   const pool = (candidates ?? search.data ?? []).filter((p) => !exclude.includes(p.id) && (!candidates || !q || p.displayName.toLowerCase().includes(q.toLowerCase())))
@@ -114,7 +119,7 @@ export function PeoplePicker({ value, valueName, onChange, placeholder, allowCle
                 {pool.map((p) => (
                   <CommandItem key={p.id} value={p.id} onSelect={() => { onChange(p.id, p); setOpen(false) }}>
                     <Check className={cn('size-3.5', value === p.id ? 'opacity-100' : 'opacity-0')} />
-                    <span className="truncate">{p.displayName}</span>
+                    {personFactsEnabled && p.personNotices ? <span className="min-w-0"><span className="block truncate">{p.displayName}</span><PersonDateNotice notices={p.personNotices} /></span> : <span className="truncate">{p.displayName}</span>}
                     {p.onProject && <span className="ml-1 shrink-0 text-xs text-muted-foreground">{t('people.onProject')}</span>}
                     {p.jobTitle && <span className="ml-auto truncate text-xs text-muted-foreground">{p.jobTitle}</span>}
                     {week && <span className={cn('flex shrink-0 justify-end', !p.jobTitle && 'ml-auto')}><CapacityFigure cell={capacity(p.id)} /></span>}

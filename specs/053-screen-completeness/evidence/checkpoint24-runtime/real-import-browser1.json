@@ -1,0 +1,1677 @@
+{
+  "status": "PASS_REAL_CHROME_API_SQL_JOIN",
+  "database": "hub_qa_checkpoint24",
+  "projectId": "01a19b30-62e7-7b49-9eb1-c9b8b5971e3e",
+  "actorId": "01a19b26-f572-7f9a-a6f0-559c11fd96a3",
+  "source": {
+    "bad": {
+      "path": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint24-runtime/real-drawings-bad.xlsx",
+      "sha256": "7bb73007706af0689e4cb4da629879ce5f12aa450043e3c2ac90b0c925ce1e81",
+      "bytes": 2002
+    },
+    "good": {
+      "path": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint24-runtime/real-drawings.xlsx",
+      "sha256": "a76d0ca1b7cb12bb6dc8a23aa7a76fbbde1b7138f40be5666ea1aaa9a276db39",
+      "bytes": 2002
+    }
+  },
+  "checks": [
+    "Real40-row bad XLSX: row24 error,39/1, disabled Create, unchanged SQL business baseline",
+    "Actual row22 Marc Person Enter/Escape naturally retains source file/hash, row2/22 disclosures, genuine nonzero preview-list and measured outer scroll, full opener focus and no discard prompt",
+    "One explicit Chrome Create40 joins exact successful response IDs to SQL delta40,40Created/Import logs,40source rows,1batch,0new issues and unchanged sentinel",
+    "Actual Search task metadata Alex Person and Files two typed authors/Jill Person naturally return; no Search rail selection or additional business command"
+  ],
+  "apiRequests": [
+    {
+      "method": "GET",
+      "path": "/api/v1/config"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/QA24-MVYY3WT5"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/workspaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/me/notifications/pulse"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/me/notifications/unread-count"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e/date-review"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/views"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reference"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e/deliverables"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e/milestones"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/QA24-MVYY3WT5"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/me/work/opened"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/QA24-MVYY3WT5"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e/deliverables/import-options"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e/deliverables/import-preview"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e/deliverables/import-preview"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/people/01a19b26-f572-7efb-867a-f5b065081550/panel"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/planning/grid"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e/deliverables/import"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/QA24-MVYY3WT5"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e/date-review"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e/deliverables"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e/milestones"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reference"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e/date-review"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e/deliverables"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e/milestones"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/views"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/QA24-MVYY3WT5"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/config"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/search"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/search"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/workspaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/me/notifications/pulse"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/me/notifications/unread-count"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/people/01a19b26-f572-7d35-89bb-1537f4a54a1c/panel"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/planning/grid"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/config"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/workspaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/files"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/me/notifications/pulse"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/me/notifications/unread-count"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/people/01a19b26-f572-795d-98ab-7ff574f3e395/panel"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/planning/grid"
+    }
+  ],
+  "privateProjectOpened": [
+    {
+      "requestId": "df983aea-9d29-4783-9b78-ebba2cca7833",
+      "itemType": "Project",
+      "itemId": "01a19b30-62e7-7b49-9eb1-c9b8b5971e3e",
+      "observedTokens": [
+        "01a19b30-638b-7dac-8cf2-aea52a74655b"
+      ]
+    }
+  ],
+  "bootstrap": [],
+  "previews": [
+    {
+      "creates": 39,
+      "errors": 1,
+      "canCommit": false,
+      "format": "xlsx",
+      "selectedSheet": "Drawings",
+      "fileSha256": "7bb73007706af0689e4cb4da629879ce5f12aa450043e3c2ac90b0c925ce1e81",
+      "projectRowVersion": 2,
+      "previewFingerprint": null,
+      "row2OwnerId": "01a19b26-f572-7efb-867a-f5b065081550",
+      "row22OwnerId": "01a19b26-f572-7efb-867a-f5b065081550",
+      "invalidSourceRows": [
+        24
+      ]
+    },
+    {
+      "creates": 40,
+      "errors": 0,
+      "canCommit": true,
+      "format": "xlsx",
+      "selectedSheet": "Drawings",
+      "fileSha256": "a76d0ca1b7cb12bb6dc8a23aa7a76fbbde1b7138f40be5666ea1aaa9a276db39",
+      "projectRowVersion": 2,
+      "previewFingerprint": "C0984E4B7441622E209166809148C0E45E6A06A6ECEE16226EA36FAC3E9DBA76",
+      "row2OwnerId": "01a19b26-f572-7efb-867a-f5b065081550",
+      "row22OwnerId": "01a19b26-f572-7efb-867a-f5b065081550",
+      "invalidSourceRows": []
+    }
+  ],
+  "personReads": [
+    {
+      "userId": "01a19b26-f572-7efb-867a-f5b065081550",
+      "status": 200,
+      "returnedId": "01a19b26-f572-7efb-867a-f5b065081550"
+    },
+    {
+      "userId": "01a19b26-f572-7d35-89bb-1537f4a54a1c",
+      "status": 200,
+      "returnedId": "01a19b26-f572-7d35-89bb-1537f4a54a1c"
+    },
+    {
+      "userId": "01a19b26-f572-795d-98ab-7ff574f3e395",
+      "status": 200,
+      "returnedId": "01a19b26-f572-795d-98ab-7ff574f3e395"
+    }
+  ],
+  "assets": [
+    {
+      "path": "/assets/rolldown-runtime-hePW80VL.js",
+      "bytes": 716,
+      "sha256": "580ad8c58061a4dde99bde0a56905e382f0568516ee2f5b84dbfb52085709021"
+    },
+    {
+      "path": "/assets/preload-helper-BZ1Pz5am.js",
+      "bytes": 1218,
+      "sha256": "8820987e6a8afb54d776f21e305917e1ecf83cef678b4db38c2e5a405d04a8bf"
+    },
+    {
+      "path": "/assets/useQuery-BiBTTWaU.js",
+      "bytes": 22981,
+      "sha256": "0f376c585d7e0885d414106e37ce7e42afd71e89e9b2d05dc4000fcb95ba3d0b"
+    },
+    {
+      "path": "/assets/pills-GRc589h_.css",
+      "bytes": 1846,
+      "sha256": "a0cf34a6fb5ad834b1318788b6acb123ce5af66ecc7a46653c1ec4c92a147cba"
+    },
+    {
+      "path": "/assets/useInfiniteQuery-CBOStFmB.js",
+      "bytes": 1113,
+      "sha256": "31db0a0d9ec5e3eea93c0631baa113584e63ad382cb0f824c1f7670cdccfb1ea"
+    },
+    {
+      "path": "/assets/title-block-hdyxJNMI.css",
+      "bytes": 1264,
+      "sha256": "1d542cef234c3933e5cd54734181f4f379277706de851e66df77aa81837c7c12"
+    },
+    {
+      "path": "/assets/Reports-C9L1fA_m.css",
+      "bytes": 5273,
+      "sha256": "407a66cf9ca0ca0341daf7f166dcbc5f8473523ed0b9346500f8b768cb4568b7"
+    },
+    {
+      "path": "/assets/visual-tabs-Droa3Yn1.css",
+      "bytes": 3037,
+      "sha256": "4bb9774efa44fe3f2b838489aeece39c82c8710ce3e349deb92a874d1158d8fb"
+    },
+    {
+      "path": "/assets/auth-C9wHBIOu.js",
+      "bytes": 9782,
+      "sha256": "88847a38a3df614057deb9dedf20cbaa248e9e65b74c15114234356df56b2d9e"
+    },
+    {
+      "path": "/assets/people-B0S1rWly.js",
+      "bytes": 24213,
+      "sha256": "4f03df816ff6a8b6e55fcc47ddd8413af48122fe1b90fd60a345420f7e5e393e"
+    },
+    {
+      "path": "/assets/index-9Akouhj1.css",
+      "bytes": 129668,
+      "sha256": "813d9de5619072125eddde032a25006bf74a62afd5c18a0304f00d9acb93729c"
+    },
+    {
+      "path": "/assets/arrow-up-Du0mjDsm.js",
+      "bytes": 328,
+      "sha256": "0bf76e07537ec7ded62a73633679bafeece0441cfc28f4392e55df38ea8956d7"
+    },
+    {
+      "path": "/assets/checkbox-CYS5cLaa.js",
+      "bytes": 4616,
+      "sha256": "183d16c37fea13c9299905a6472bb54ac2fb01fb39f1165b6dc84d81d563ace8"
+    },
+    {
+      "path": "/assets/arrow-right-TviIEF_5.js",
+      "bytes": 194,
+      "sha256": "723a6a14d679a8947f0af499f281b79e088fdab69abf4154069111a968580622"
+    },
+    {
+      "path": "/assets/star-DI8dkK2Z.js",
+      "bytes": 501,
+      "sha256": "39bbcebd794ba2fa02cc2213798498db6a5e312e5228997e1af8acb59e754bd5"
+    },
+    {
+      "path": "/assets/common-By2IU64p.js",
+      "bytes": 266933,
+      "sha256": "ec3fe0299994128cad2717984b981a96a6de030038289ef2c5a1a5e67c8217d5"
+    },
+    {
+      "path": "/assets/input-CSbLhXja.js",
+      "bytes": 834,
+      "sha256": "6fa79368a79cff44825ea15171385af1b697a8d6491305a5224c0a708cb28cf6"
+    },
+    {
+      "path": "/assets/label-Cl4QH66_.js",
+      "bytes": 313248,
+      "sha256": "8832a9d4709a5711c47c4a5ab9747ccb223fc27760b0b5488fcafae8f107d6e2"
+    },
+    {
+      "path": "/assets/keys-BNiF73M6.js",
+      "bytes": 6914,
+      "sha256": "c09035549500ffbd52e7b80e46f18943fc3a393ab29637d06418d9d088df53f6"
+    },
+    {
+      "path": "/assets/square-check-big-Dzf1Pq0Y.js",
+      "bytes": 475,
+      "sha256": "b94b0ae8d3ac6a80230b5136fce9680dc88ef59c8a20851703ab26e432d6400d"
+    },
+    {
+      "path": "/assets/external-link-BWRnjv3O.js",
+      "bytes": 280,
+      "sha256": "f05b8e07bad2e27e8a695ad9b4a135f92009a3158fb5605d46ce83f5e43375f2"
+    },
+    {
+      "path": "/assets/views-CxamdAHU.js",
+      "bytes": 6994,
+      "sha256": "24684047220b9d324cddd596505d27410450663647a00cbf29d7f12c6fba88e8"
+    },
+    {
+      "path": "/assets/scale-D9lje-eA.js",
+      "bytes": 1073,
+      "sha256": "d712b41883b21810f7a2f2430edcd80ef4d149d19a6edf341d19f1b6c972c79f"
+    },
+    {
+      "path": "/assets/person-panel-trigger-1v8ElRcB.js",
+      "bytes": 6120,
+      "sha256": "af69e61f644fc2e0a65b878c020cc5718b2d418be3b26e59fb1b3b14ab37073c"
+    },
+    {
+      "path": "/assets/calendar-clock-C3axPN1Q.js",
+      "bytes": 410,
+      "sha256": "0d0b8ccef7d63bee254bf4658e6afc0ff73cdcdc59d91816f30300fe427d120b"
+    },
+    {
+      "path": "/assets/calendar-days-CuYoiSjC.js",
+      "bytes": 521,
+      "sha256": "ea47118823e9186e5dfdb4b3466889ec9fbbc1b05c7db9717ba148d346c4fa99"
+    },
+    {
+      "path": "/assets/data-Z7uxQbbL.js",
+      "bytes": 559,
+      "sha256": "405158282ede80af51f390b2a8216ea11f0017dc11e9a5bf1283392bd29f9ec5"
+    },
+    {
+      "path": "/assets/search-TJcrJ5Ht.js",
+      "bytes": 13600,
+      "sha256": "0bf59d1e44485f5975862f2b1f2d0dcaf22caf6ba4c57555fe60a2bca48e0fea"
+    },
+    {
+      "path": "/assets/pills-Bh_xyr93.js",
+      "bytes": 3924,
+      "sha256": "26795501027324f20ffa477aa8d8d970a137df5148117f08d40007911f31ae41"
+    },
+    {
+      "path": "/assets/title-block-C6-xsmD-.js",
+      "bytes": 1142,
+      "sha256": "fe24b28f2c3d1fabfbf1b0a529b301233f6fea5bf1ad6ef2f8b87df53717e9da"
+    },
+    {
+      "path": "/assets/download-BC-jqnYR.js",
+      "bytes": 261,
+      "sha256": "aa564d822b9e940644b1f89e1dec3579cbd4ab19d0cd7d0c112e567369d85dab"
+    },
+    {
+      "path": "/assets/export-AROBCCFY.js",
+      "bytes": 903,
+      "sha256": "653481f7b158ff2a4fdf9a56f4a0047d963361a9240950d990f4a4f6d75001d9"
+    },
+    {
+      "path": "/assets/square-kanban-gx81C63K.js",
+      "bytes": 1002,
+      "sha256": "7501514fd4eb0c3af64fed6b3933c2cc5e7e20b9abae896449a113f001a7a96a"
+    },
+    {
+      "path": "/assets/layers-GY8UzkGQ.js",
+      "bytes": 471,
+      "sha256": "1f305f27d4404ea3cef84cd2d1d19cd815ea679541dabadb5a95ae82bed3d675"
+    },
+    {
+      "path": "/assets/link-2-DXavmfDU.js",
+      "bytes": 271,
+      "sha256": "d4173f52a604c75f2a553378def2a8a611bf9f93db6bc21c4246cadb319aa76f"
+    },
+    {
+      "path": "/assets/activity-CJoFDgD3.js",
+      "bytes": 6025,
+      "sha256": "4b1222312deb1a4d651ae7d8ae50a6089bafe1dae155d55f6335123f35b6f7f7"
+    },
+    {
+      "path": "/assets/Reports-BWy15fzG.js",
+      "bytes": 38871,
+      "sha256": "6552b0554233507b69933f595e32f1322574f9c9a9cf3eb1799c9ba0ba9a3e37"
+    },
+    {
+      "path": "/assets/plus-vw_u1OSf.js",
+      "bytes": 182,
+      "sha256": "cd59c6cec90548b8ab9f3a9df75a914377b9e179a2ea13db4f266d68edee02b7"
+    },
+    {
+      "path": "/assets/users-DEUKZTFQ.js",
+      "bytes": 335,
+      "sha256": "f5cd829abd16b1b2c956c7dbded166d813c85f2532850c12e6bfc645bde5f5b1"
+    },
+    {
+      "path": "/assets/check-check-KLA_YKkr.js",
+      "bytes": 208,
+      "sha256": "32ae3c87bd1cb9707805bd29e09d8022c8f423fef5f49d231083c459ff320aca"
+    },
+    {
+      "path": "/assets/workspace-CL1i7huZ.js",
+      "bytes": 15466,
+      "sha256": "2dae3b7712132a5bbfe16c2ed15cf173e93077c7a3f561f238863bcf6226677a"
+    },
+    {
+      "path": "/assets/chevron-left-B3kDE_VO.js",
+      "bytes": 159,
+      "sha256": "bbc533a7d8543176a877f90e73872e7fd9fb2fce0656df18b8cdf38d533bfeef"
+    },
+    {
+      "path": "/assets/circle-alert-BJbcNcQl.js",
+      "bytes": 304,
+      "sha256": "6560a4f8c155c1aa8962195f338f1fb6d01555418e7a78e277c9e82c421eb823"
+    },
+    {
+      "path": "/assets/monitor-B453rmdw.js",
+      "bytes": 288,
+      "sha256": "b7d80c01cddadd8a1fb07ed457c1aecd17707db370178e4db0df5a8c067c1abd"
+    },
+    {
+      "path": "/assets/pencil-BIa4Qm-B.js",
+      "bytes": 305,
+      "sha256": "fc65a81ae129e966f49d6bafbbb8feca59a2851744d939c40559627e5a6e38d9"
+    },
+    {
+      "path": "/assets/item-mark-Hs1gJCTu.js",
+      "bytes": 350,
+      "sha256": "01e96320fb171738087f885d4e111e2ef39829841a9d176b7b7fe4825aef18b0"
+    },
+    {
+      "path": "/assets/drafts-CsdN9dv5.js",
+      "bytes": 1331,
+      "sha256": "3d7daebf466c0ea6957155ffd93c1bf2be15d27761a1faf21305081f9ec8c5f0"
+    },
+    {
+      "path": "/assets/drafts-BTV1BUye.js",
+      "bytes": 1772,
+      "sha256": "f6a6ed2e3d616f33804652b4c7be2e19a1b73fb649b7e625cae6a171c4a18864"
+    },
+    {
+      "path": "/assets/discipline-colour-B7Cu5WgU.js",
+      "bytes": 328,
+      "sha256": "69b1d9867495f9930b444b43b9932609fa200d9d2e485674f8f8d4bb84c321bd"
+    },
+    {
+      "path": "/assets/extension-slots-DOaIPLBi.js",
+      "bytes": 1839,
+      "sha256": "e7739869a004e27dcf4704ec14b51b1f3ffa72e7f8369a3eb2e9e6256903c4d0"
+    },
+    {
+      "path": "/assets/index-BOGh8_qK.js",
+      "bytes": 833474,
+      "sha256": "5c71568438e6f07cccfacd6589e15e04523206083002f39241d21d314187c2d5"
+    },
+    {
+      "path": "/assets/IBMPlexSans-Regular-BiEB_oxT.woff2",
+      "bytes": 63020,
+      "sha256": "ba711a3085ff9f27440b6b9c4550cfc47c97bf36591d5da958b975bb3add8c1a"
+    },
+    {
+      "path": "/assets/IBMPlexSans-Medium-BQLKo0ot.woff2",
+      "bytes": 66740,
+      "sha256": "5660f8a658f8bb50dbc005232f885eadffd2bc1c235c4f6fbb63469d1f9cde6d"
+    },
+    {
+      "path": "/assets/IBMPlexSans-SemiBold-KfaJl9PC.woff2",
+      "bytes": 67060,
+      "sha256": "f78048030eab62e860efa39a0df79e2e5581bf122eb95b9bc42c0b8a4988d205"
+    },
+    {
+      "path": "/assets/Health-BNN2g4OF.js",
+      "bytes": 2696,
+      "sha256": "5f85e3d89f8c8dad2f10806ead27ec7415c889e05d882aeac5fb8863fbae9e5e"
+    },
+    {
+      "path": "/assets/IBMPlexMono-Regular-Du0PCiXT.woff2",
+      "bytes": 49248,
+      "sha256": "ba204497f16b6d334cee9d1e963a831b73e3a56e1d6300a8489d18df7214b350"
+    },
+    {
+      "path": "/assets/team-organisation-controls-BcBhTtm5.js",
+      "bytes": 3541,
+      "sha256": "64304ed879ea381afd17312ccc286f605bc7fbb572fd80e00d1ce969df53169b"
+    },
+    {
+      "path": "/assets/person-panel-DgOMROzl.js",
+      "bytes": 6396,
+      "sha256": "92b3f0080de40079bb6d01b692c46657278a748c9459fc11fb8ec373a1d9a227"
+    },
+    {
+      "path": "/assets/rolldown-runtime-hePW80VL.js",
+      "bytes": 716,
+      "sha256": "580ad8c58061a4dde99bde0a56905e382f0568516ee2f5b84dbfb52085709021"
+    },
+    {
+      "path": "/assets/preload-helper-BZ1Pz5am.js",
+      "bytes": 1218,
+      "sha256": "8820987e6a8afb54d776f21e305917e1ecf83cef678b4db38c2e5a405d04a8bf"
+    },
+    {
+      "path": "/assets/useQuery-BiBTTWaU.js",
+      "bytes": 22981,
+      "sha256": "0f376c585d7e0885d414106e37ce7e42afd71e89e9b2d05dc4000fcb95ba3d0b"
+    },
+    {
+      "path": "/assets/useInfiniteQuery-CBOStFmB.js",
+      "bytes": 1113,
+      "sha256": "31db0a0d9ec5e3eea93c0631baa113584e63ad382cb0f824c1f7670cdccfb1ea"
+    },
+    {
+      "path": "/assets/auth-C9wHBIOu.js",
+      "bytes": 9782,
+      "sha256": "88847a38a3df614057deb9dedf20cbaa248e9e65b74c15114234356df56b2d9e"
+    },
+    {
+      "path": "/assets/pills-GRc589h_.css",
+      "bytes": 1846,
+      "sha256": "a0cf34a6fb5ad834b1318788b6acb123ce5af66ecc7a46653c1ec4c92a147cba"
+    },
+    {
+      "path": "/assets/title-block-hdyxJNMI.css",
+      "bytes": 1264,
+      "sha256": "1d542cef234c3933e5cd54734181f4f379277706de851e66df77aa81837c7c12"
+    },
+    {
+      "path": "/assets/Reports-C9L1fA_m.css",
+      "bytes": 5273,
+      "sha256": "407a66cf9ca0ca0341daf7f166dcbc5f8473523ed0b9346500f8b768cb4568b7"
+    },
+    {
+      "path": "/assets/visual-tabs-Droa3Yn1.css",
+      "bytes": 3037,
+      "sha256": "4bb9774efa44fe3f2b838489aeece39c82c8710ce3e349deb92a874d1158d8fb"
+    },
+    {
+      "path": "/assets/index-9Akouhj1.css",
+      "bytes": 129668,
+      "sha256": "813d9de5619072125eddde032a25006bf74a62afd5c18a0304f00d9acb93729c"
+    },
+    {
+      "path": "/assets/checkbox-CYS5cLaa.js",
+      "bytes": 4616,
+      "sha256": "183d16c37fea13c9299905a6472bb54ac2fb01fb39f1165b6dc84d81d563ace8"
+    },
+    {
+      "path": "/assets/people-B0S1rWly.js",
+      "bytes": 24213,
+      "sha256": "4f03df816ff6a8b6e55fcc47ddd8413af48122fe1b90fd60a345420f7e5e393e"
+    },
+    {
+      "path": "/assets/common-By2IU64p.js",
+      "bytes": 266933,
+      "sha256": "ec3fe0299994128cad2717984b981a96a6de030038289ef2c5a1a5e67c8217d5"
+    },
+    {
+      "path": "/assets/label-Cl4QH66_.js",
+      "bytes": 313248,
+      "sha256": "8832a9d4709a5711c47c4a5ab9747ccb223fc27760b0b5488fcafae8f107d6e2"
+    },
+    {
+      "path": "/assets/arrow-up-Du0mjDsm.js",
+      "bytes": 328,
+      "sha256": "0bf76e07537ec7ded62a73633679bafeece0441cfc28f4392e55df38ea8956d7"
+    },
+    {
+      "path": "/assets/arrow-right-TviIEF_5.js",
+      "bytes": 194,
+      "sha256": "723a6a14d679a8947f0af499f281b79e088fdab69abf4154069111a968580622"
+    },
+    {
+      "path": "/assets/star-DI8dkK2Z.js",
+      "bytes": 501,
+      "sha256": "39bbcebd794ba2fa02cc2213798498db6a5e312e5228997e1af8acb59e754bd5"
+    },
+    {
+      "path": "/assets/input-CSbLhXja.js",
+      "bytes": 834,
+      "sha256": "6fa79368a79cff44825ea15171385af1b697a8d6491305a5224c0a708cb28cf6"
+    },
+    {
+      "path": "/assets/keys-BNiF73M6.js",
+      "bytes": 6914,
+      "sha256": "c09035549500ffbd52e7b80e46f18943fc3a393ab29637d06418d9d088df53f6"
+    },
+    {
+      "path": "/assets/square-check-big-Dzf1Pq0Y.js",
+      "bytes": 475,
+      "sha256": "b94b0ae8d3ac6a80230b5136fce9680dc88ef59c8a20851703ab26e432d6400d"
+    },
+    {
+      "path": "/assets/external-link-BWRnjv3O.js",
+      "bytes": 280,
+      "sha256": "f05b8e07bad2e27e8a695ad9b4a135f92009a3158fb5605d46ce83f5e43375f2"
+    },
+    {
+      "path": "/assets/views-CxamdAHU.js",
+      "bytes": 6994,
+      "sha256": "24684047220b9d324cddd596505d27410450663647a00cbf29d7f12c6fba88e8"
+    },
+    {
+      "path": "/assets/scale-D9lje-eA.js",
+      "bytes": 1073,
+      "sha256": "d712b41883b21810f7a2f2430edcd80ef4d149d19a6edf341d19f1b6c972c79f"
+    },
+    {
+      "path": "/assets/calendar-clock-C3axPN1Q.js",
+      "bytes": 410,
+      "sha256": "0d0b8ccef7d63bee254bf4658e6afc0ff73cdcdc59d91816f30300fe427d120b"
+    },
+    {
+      "path": "/assets/person-panel-trigger-1v8ElRcB.js",
+      "bytes": 6120,
+      "sha256": "af69e61f644fc2e0a65b878c020cc5718b2d418be3b26e59fb1b3b14ab37073c"
+    },
+    {
+      "path": "/assets/search-TJcrJ5Ht.js",
+      "bytes": 13600,
+      "sha256": "0bf59d1e44485f5975862f2b1f2d0dcaf22caf6ba4c57555fe60a2bca48e0fea"
+    },
+    {
+      "path": "/assets/calendar-days-CuYoiSjC.js",
+      "bytes": 521,
+      "sha256": "ea47118823e9186e5dfdb4b3466889ec9fbbc1b05c7db9717ba148d346c4fa99"
+    },
+    {
+      "path": "/assets/data-Z7uxQbbL.js",
+      "bytes": 559,
+      "sha256": "405158282ede80af51f390b2a8216ea11f0017dc11e9a5bf1283392bd29f9ec5"
+    },
+    {
+      "path": "/assets/download-BC-jqnYR.js",
+      "bytes": 261,
+      "sha256": "aa564d822b9e940644b1f89e1dec3579cbd4ab19d0cd7d0c112e567369d85dab"
+    },
+    {
+      "path": "/assets/pills-Bh_xyr93.js",
+      "bytes": 3924,
+      "sha256": "26795501027324f20ffa477aa8d8d970a137df5148117f08d40007911f31ae41"
+    },
+    {
+      "path": "/assets/title-block-C6-xsmD-.js",
+      "bytes": 1142,
+      "sha256": "fe24b28f2c3d1fabfbf1b0a529b301233f6fea5bf1ad6ef2f8b87df53717e9da"
+    },
+    {
+      "path": "/assets/export-AROBCCFY.js",
+      "bytes": 903,
+      "sha256": "653481f7b158ff2a4fdf9a56f4a0047d963361a9240950d990f4a4f6d75001d9"
+    },
+    {
+      "path": "/assets/square-kanban-gx81C63K.js",
+      "bytes": 1002,
+      "sha256": "7501514fd4eb0c3af64fed6b3933c2cc5e7e20b9abae896449a113f001a7a96a"
+    },
+    {
+      "path": "/assets/layers-GY8UzkGQ.js",
+      "bytes": 471,
+      "sha256": "1f305f27d4404ea3cef84cd2d1d19cd815ea679541dabadb5a95ae82bed3d675"
+    },
+    {
+      "path": "/assets/activity-CJoFDgD3.js",
+      "bytes": 6025,
+      "sha256": "4b1222312deb1a4d651ae7d8ae50a6089bafe1dae155d55f6335123f35b6f7f7"
+    },
+    {
+      "path": "/assets/link-2-DXavmfDU.js",
+      "bytes": 271,
+      "sha256": "d4173f52a604c75f2a553378def2a8a611bf9f93db6bc21c4246cadb319aa76f"
+    },
+    {
+      "path": "/assets/Reports-BWy15fzG.js",
+      "bytes": 38871,
+      "sha256": "6552b0554233507b69933f595e32f1322574f9c9a9cf3eb1799c9ba0ba9a3e37"
+    },
+    {
+      "path": "/assets/users-DEUKZTFQ.js",
+      "bytes": 335,
+      "sha256": "f5cd829abd16b1b2c956c7dbded166d813c85f2532850c12e6bfc645bde5f5b1"
+    },
+    {
+      "path": "/assets/plus-vw_u1OSf.js",
+      "bytes": 182,
+      "sha256": "cd59c6cec90548b8ab9f3a9df75a914377b9e179a2ea13db4f266d68edee02b7"
+    },
+    {
+      "path": "/assets/check-check-KLA_YKkr.js",
+      "bytes": 208,
+      "sha256": "32ae3c87bd1cb9707805bd29e09d8022c8f423fef5f49d231083c459ff320aca"
+    },
+    {
+      "path": "/assets/chevron-left-B3kDE_VO.js",
+      "bytes": 159,
+      "sha256": "bbc533a7d8543176a877f90e73872e7fd9fb2fce0656df18b8cdf38d533bfeef"
+    },
+    {
+      "path": "/assets/workspace-CL1i7huZ.js",
+      "bytes": 15466,
+      "sha256": "2dae3b7712132a5bbfe16c2ed15cf173e93077c7a3f561f238863bcf6226677a"
+    },
+    {
+      "path": "/assets/circle-alert-BJbcNcQl.js",
+      "bytes": 304,
+      "sha256": "6560a4f8c155c1aa8962195f338f1fb6d01555418e7a78e277c9e82c421eb823"
+    },
+    {
+      "path": "/assets/monitor-B453rmdw.js",
+      "bytes": 288,
+      "sha256": "b7d80c01cddadd8a1fb07ed457c1aecd17707db370178e4db0df5a8c067c1abd"
+    },
+    {
+      "path": "/assets/pencil-BIa4Qm-B.js",
+      "bytes": 305,
+      "sha256": "fc65a81ae129e966f49d6bafbbb8feca59a2851744d939c40559627e5a6e38d9"
+    },
+    {
+      "path": "/assets/index-BOGh8_qK.js",
+      "bytes": 833474,
+      "sha256": "5c71568438e6f07cccfacd6589e15e04523206083002f39241d21d314187c2d5"
+    },
+    {
+      "path": "/assets/item-mark-Hs1gJCTu.js",
+      "bytes": 350,
+      "sha256": "01e96320fb171738087f885d4e111e2ef39829841a9d176b7b7fe4825aef18b0"
+    },
+    {
+      "path": "/assets/drafts-CsdN9dv5.js",
+      "bytes": 1331,
+      "sha256": "3d7daebf466c0ea6957155ffd93c1bf2be15d27761a1faf21305081f9ec8c5f0"
+    },
+    {
+      "path": "/assets/drafts-BTV1BUye.js",
+      "bytes": 1772,
+      "sha256": "f6a6ed2e3d616f33804652b4c7be2e19a1b73fb649b7e625cae6a171c4a18864"
+    },
+    {
+      "path": "/assets/discipline-colour-B7Cu5WgU.js",
+      "bytes": 328,
+      "sha256": "69b1d9867495f9930b444b43b9932609fa200d9d2e485674f8f8d4bb84c321bd"
+    },
+    {
+      "path": "/assets/extension-slots-DOaIPLBi.js",
+      "bytes": 1839,
+      "sha256": "e7739869a004e27dcf4704ec14b51b1f3ffa72e7f8369a3eb2e9e6256903c4d0"
+    },
+    {
+      "path": "/assets/Search-D5BpvGhB.js",
+      "bytes": 4812,
+      "sha256": "ee77d8cb0c56f41fd987b92245f92b5893e9efad132e0b55413f3021ba9568a4"
+    },
+    {
+      "path": "/assets/IBMPlexSans-Regular-BiEB_oxT.woff2",
+      "bytes": 63020,
+      "sha256": "ba711a3085ff9f27440b6b9c4550cfc47c97bf36591d5da958b975bb3add8c1a"
+    },
+    {
+      "path": "/assets/IBMPlexSans-SemiBold-KfaJl9PC.woff2",
+      "bytes": 67060,
+      "sha256": "f78048030eab62e860efa39a0df79e2e5581bf122eb95b9bc42c0b8a4988d205"
+    },
+    {
+      "path": "/assets/IBMPlexSans-Medium-BQLKo0ot.woff2",
+      "bytes": 66740,
+      "sha256": "5660f8a658f8bb50dbc005232f885eadffd2bc1c235c4f6fbb63469d1f9cde6d"
+    },
+    {
+      "path": "/assets/IBMPlexMono-Regular-Du0PCiXT.woff2",
+      "bytes": 49248,
+      "sha256": "ba204497f16b6d334cee9d1e963a831b73e3a56e1d6300a8489d18df7214b350"
+    },
+    {
+      "path": "/assets/team-organisation-controls-BcBhTtm5.js",
+      "bytes": 3541,
+      "sha256": "64304ed879ea381afd17312ccc286f605bc7fbb572fd80e00d1ce969df53169b"
+    },
+    {
+      "path": "/assets/person-panel-DgOMROzl.js",
+      "bytes": 6396,
+      "sha256": "92b3f0080de40079bb6d01b692c46657278a748c9459fc11fb8ec373a1d9a227"
+    },
+    {
+      "path": "/assets/rolldown-runtime-hePW80VL.js",
+      "bytes": 716,
+      "sha256": "580ad8c58061a4dde99bde0a56905e382f0568516ee2f5b84dbfb52085709021"
+    },
+    {
+      "path": "/assets/preload-helper-BZ1Pz5am.js",
+      "bytes": 1218,
+      "sha256": "8820987e6a8afb54d776f21e305917e1ecf83cef678b4db38c2e5a405d04a8bf"
+    },
+    {
+      "path": "/assets/useQuery-BiBTTWaU.js",
+      "bytes": 22981,
+      "sha256": "0f376c585d7e0885d414106e37ce7e42afd71e89e9b2d05dc4000fcb95ba3d0b"
+    },
+    {
+      "path": "/assets/useInfiniteQuery-CBOStFmB.js",
+      "bytes": 1113,
+      "sha256": "31db0a0d9ec5e3eea93c0631baa113584e63ad382cb0f824c1f7670cdccfb1ea"
+    },
+    {
+      "path": "/assets/pills-GRc589h_.css",
+      "bytes": 1846,
+      "sha256": "a0cf34a6fb5ad834b1318788b6acb123ce5af66ecc7a46653c1ec4c92a147cba"
+    },
+    {
+      "path": "/assets/auth-C9wHBIOu.js",
+      "bytes": 9782,
+      "sha256": "88847a38a3df614057deb9dedf20cbaa248e9e65b74c15114234356df56b2d9e"
+    },
+    {
+      "path": "/assets/title-block-hdyxJNMI.css",
+      "bytes": 1264,
+      "sha256": "1d542cef234c3933e5cd54734181f4f379277706de851e66df77aa81837c7c12"
+    },
+    {
+      "path": "/assets/Reports-C9L1fA_m.css",
+      "bytes": 5273,
+      "sha256": "407a66cf9ca0ca0341daf7f166dcbc5f8473523ed0b9346500f8b768cb4568b7"
+    },
+    {
+      "path": "/assets/visual-tabs-Droa3Yn1.css",
+      "bytes": 3037,
+      "sha256": "4bb9774efa44fe3f2b838489aeece39c82c8710ce3e349deb92a874d1158d8fb"
+    },
+    {
+      "path": "/assets/checkbox-CYS5cLaa.js",
+      "bytes": 4616,
+      "sha256": "183d16c37fea13c9299905a6472bb54ac2fb01fb39f1165b6dc84d81d563ace8"
+    },
+    {
+      "path": "/assets/index-9Akouhj1.css",
+      "bytes": 129668,
+      "sha256": "813d9de5619072125eddde032a25006bf74a62afd5c18a0304f00d9acb93729c"
+    },
+    {
+      "path": "/assets/arrow-up-Du0mjDsm.js",
+      "bytes": 328,
+      "sha256": "0bf76e07537ec7ded62a73633679bafeece0441cfc28f4392e55df38ea8956d7"
+    },
+    {
+      "path": "/assets/arrow-right-TviIEF_5.js",
+      "bytes": 194,
+      "sha256": "723a6a14d679a8947f0af499f281b79e088fdab69abf4154069111a968580622"
+    },
+    {
+      "path": "/assets/people-B0S1rWly.js",
+      "bytes": 24213,
+      "sha256": "4f03df816ff6a8b6e55fcc47ddd8413af48122fe1b90fd60a345420f7e5e393e"
+    },
+    {
+      "path": "/assets/star-DI8dkK2Z.js",
+      "bytes": 501,
+      "sha256": "39bbcebd794ba2fa02cc2213798498db6a5e312e5228997e1af8acb59e754bd5"
+    },
+    {
+      "path": "/assets/input-CSbLhXja.js",
+      "bytes": 834,
+      "sha256": "6fa79368a79cff44825ea15171385af1b697a8d6491305a5224c0a708cb28cf6"
+    },
+    {
+      "path": "/assets/common-By2IU64p.js",
+      "bytes": 266933,
+      "sha256": "ec3fe0299994128cad2717984b981a96a6de030038289ef2c5a1a5e67c8217d5"
+    },
+    {
+      "path": "/assets/keys-BNiF73M6.js",
+      "bytes": 6914,
+      "sha256": "c09035549500ffbd52e7b80e46f18943fc3a393ab29637d06418d9d088df53f6"
+    },
+    {
+      "path": "/assets/square-check-big-Dzf1Pq0Y.js",
+      "bytes": 475,
+      "sha256": "b94b0ae8d3ac6a80230b5136fce9680dc88ef59c8a20851703ab26e432d6400d"
+    },
+    {
+      "path": "/assets/label-Cl4QH66_.js",
+      "bytes": 313248,
+      "sha256": "8832a9d4709a5711c47c4a5ab9747ccb223fc27760b0b5488fcafae8f107d6e2"
+    },
+    {
+      "path": "/assets/views-CxamdAHU.js",
+      "bytes": 6994,
+      "sha256": "24684047220b9d324cddd596505d27410450663647a00cbf29d7f12c6fba88e8"
+    },
+    {
+      "path": "/assets/scale-D9lje-eA.js",
+      "bytes": 1073,
+      "sha256": "d712b41883b21810f7a2f2430edcd80ef4d149d19a6edf341d19f1b6c972c79f"
+    },
+    {
+      "path": "/assets/external-link-BWRnjv3O.js",
+      "bytes": 280,
+      "sha256": "f05b8e07bad2e27e8a695ad9b4a135f92009a3158fb5605d46ce83f5e43375f2"
+    },
+    {
+      "path": "/assets/calendar-clock-C3axPN1Q.js",
+      "bytes": 410,
+      "sha256": "0d0b8ccef7d63bee254bf4658e6afc0ff73cdcdc59d91816f30300fe427d120b"
+    },
+    {
+      "path": "/assets/calendar-days-CuYoiSjC.js",
+      "bytes": 521,
+      "sha256": "ea47118823e9186e5dfdb4b3466889ec9fbbc1b05c7db9717ba148d346c4fa99"
+    },
+    {
+      "path": "/assets/person-panel-trigger-1v8ElRcB.js",
+      "bytes": 6120,
+      "sha256": "af69e61f644fc2e0a65b878c020cc5718b2d418be3b26e59fb1b3b14ab37073c"
+    },
+    {
+      "path": "/assets/search-TJcrJ5Ht.js",
+      "bytes": 13600,
+      "sha256": "0bf59d1e44485f5975862f2b1f2d0dcaf22caf6ba4c57555fe60a2bca48e0fea"
+    },
+    {
+      "path": "/assets/data-Z7uxQbbL.js",
+      "bytes": 559,
+      "sha256": "405158282ede80af51f390b2a8216ea11f0017dc11e9a5bf1283392bd29f9ec5"
+    },
+    {
+      "path": "/assets/pills-Bh_xyr93.js",
+      "bytes": 3924,
+      "sha256": "26795501027324f20ffa477aa8d8d970a137df5148117f08d40007911f31ae41"
+    },
+    {
+      "path": "/assets/download-BC-jqnYR.js",
+      "bytes": 261,
+      "sha256": "aa564d822b9e940644b1f89e1dec3579cbd4ab19d0cd7d0c112e567369d85dab"
+    },
+    {
+      "path": "/assets/export-AROBCCFY.js",
+      "bytes": 903,
+      "sha256": "653481f7b158ff2a4fdf9a56f4a0047d963361a9240950d990f4a4f6d75001d9"
+    },
+    {
+      "path": "/assets/title-block-C6-xsmD-.js",
+      "bytes": 1142,
+      "sha256": "fe24b28f2c3d1fabfbf1b0a529b301233f6fea5bf1ad6ef2f8b87df53717e9da"
+    },
+    {
+      "path": "/assets/layers-GY8UzkGQ.js",
+      "bytes": 471,
+      "sha256": "1f305f27d4404ea3cef84cd2d1d19cd815ea679541dabadb5a95ae82bed3d675"
+    },
+    {
+      "path": "/assets/square-kanban-gx81C63K.js",
+      "bytes": 1002,
+      "sha256": "7501514fd4eb0c3af64fed6b3933c2cc5e7e20b9abae896449a113f001a7a96a"
+    },
+    {
+      "path": "/assets/link-2-DXavmfDU.js",
+      "bytes": 271,
+      "sha256": "d4173f52a604c75f2a553378def2a8a611bf9f93db6bc21c4246cadb319aa76f"
+    },
+    {
+      "path": "/assets/activity-CJoFDgD3.js",
+      "bytes": 6025,
+      "sha256": "4b1222312deb1a4d651ae7d8ae50a6089bafe1dae155d55f6335123f35b6f7f7"
+    },
+    {
+      "path": "/assets/Reports-BWy15fzG.js",
+      "bytes": 38871,
+      "sha256": "6552b0554233507b69933f595e32f1322574f9c9a9cf3eb1799c9ba0ba9a3e37"
+    },
+    {
+      "path": "/assets/plus-vw_u1OSf.js",
+      "bytes": 182,
+      "sha256": "cd59c6cec90548b8ab9f3a9df75a914377b9e179a2ea13db4f266d68edee02b7"
+    },
+    {
+      "path": "/assets/users-DEUKZTFQ.js",
+      "bytes": 335,
+      "sha256": "f5cd829abd16b1b2c956c7dbded166d813c85f2532850c12e6bfc645bde5f5b1"
+    },
+    {
+      "path": "/assets/check-check-KLA_YKkr.js",
+      "bytes": 208,
+      "sha256": "32ae3c87bd1cb9707805bd29e09d8022c8f423fef5f49d231083c459ff320aca"
+    },
+    {
+      "path": "/assets/chevron-left-B3kDE_VO.js",
+      "bytes": 159,
+      "sha256": "bbc533a7d8543176a877f90e73872e7fd9fb2fce0656df18b8cdf38d533bfeef"
+    },
+    {
+      "path": "/assets/circle-alert-BJbcNcQl.js",
+      "bytes": 304,
+      "sha256": "6560a4f8c155c1aa8962195f338f1fb6d01555418e7a78e277c9e82c421eb823"
+    },
+    {
+      "path": "/assets/monitor-B453rmdw.js",
+      "bytes": 288,
+      "sha256": "b7d80c01cddadd8a1fb07ed457c1aecd17707db370178e4db0df5a8c067c1abd"
+    },
+    {
+      "path": "/assets/pencil-BIa4Qm-B.js",
+      "bytes": 305,
+      "sha256": "fc65a81ae129e966f49d6bafbbb8feca59a2851744d939c40559627e5a6e38d9"
+    },
+    {
+      "path": "/assets/workspace-CL1i7huZ.js",
+      "bytes": 15466,
+      "sha256": "2dae3b7712132a5bbfe16c2ed15cf173e93077c7a3f561f238863bcf6226677a"
+    },
+    {
+      "path": "/assets/index-BOGh8_qK.js",
+      "bytes": 833474,
+      "sha256": "5c71568438e6f07cccfacd6589e15e04523206083002f39241d21d314187c2d5"
+    },
+    {
+      "path": "/assets/item-mark-Hs1gJCTu.js",
+      "bytes": 350,
+      "sha256": "01e96320fb171738087f885d4e111e2ef39829841a9d176b7b7fe4825aef18b0"
+    },
+    {
+      "path": "/assets/drafts-CsdN9dv5.js",
+      "bytes": 1331,
+      "sha256": "3d7daebf466c0ea6957155ffd93c1bf2be15d27761a1faf21305081f9ec8c5f0"
+    },
+    {
+      "path": "/assets/discipline-colour-B7Cu5WgU.js",
+      "bytes": 328,
+      "sha256": "69b1d9867495f9930b444b43b9932609fa200d9d2e485674f8f8d4bb84c321bd"
+    },
+    {
+      "path": "/assets/drafts-BTV1BUye.js",
+      "bytes": 1772,
+      "sha256": "f6a6ed2e3d616f33804652b4c7be2e19a1b73fb649b7e625cae6a171c4a18864"
+    },
+    {
+      "path": "/assets/extension-slots-DOaIPLBi.js",
+      "bytes": 1839,
+      "sha256": "e7739869a004e27dcf4704ec14b51b1f3ffa72e7f8369a3eb2e9e6256903c4d0"
+    },
+    {
+      "path": "/assets/Files-B6ZlYkG5.js",
+      "bytes": 5241,
+      "sha256": "0503645697780c3e156051ae69a930c598c5076dc8514621fe9a9b1ec69499b2"
+    },
+    {
+      "path": "/assets/links-DeYcKmjO.js",
+      "bytes": 6758,
+      "sha256": "888b021762e74317b5b8d8dd7a3452d6ab9bf7ebd86ca592d7d53b782f44cfb6"
+    },
+    {
+      "path": "/assets/IBMPlexSans-Regular-BiEB_oxT.woff2",
+      "bytes": 63020,
+      "sha256": "ba711a3085ff9f27440b6b9c4550cfc47c97bf36591d5da958b975bb3add8c1a"
+    },
+    {
+      "path": "/assets/IBMPlexSans-SemiBold-KfaJl9PC.woff2",
+      "bytes": 67060,
+      "sha256": "f78048030eab62e860efa39a0df79e2e5581bf122eb95b9bc42c0b8a4988d205"
+    },
+    {
+      "path": "/assets/IBMPlexSans-Medium-BQLKo0ot.woff2",
+      "bytes": 66740,
+      "sha256": "5660f8a658f8bb50dbc005232f885eadffd2bc1c235c4f6fbb63469d1f9cde6d"
+    },
+    {
+      "path": "/assets/IBMPlexMono-Regular-Du0PCiXT.woff2",
+      "bytes": 49248,
+      "sha256": "ba204497f16b6d334cee9d1e963a831b73e3a56e1d6300a8489d18df7214b350"
+    },
+    {
+      "path": "/assets/IBMPlexMono-SemiBold-CT2p8cOJ.woff2",
+      "bytes": 50600,
+      "sha256": "6a825b4824c01cbb401e829e5a066a1818411bcb3538b5a5792c5ca9b82343c3"
+    },
+    {
+      "path": "/assets/team-organisation-controls-BcBhTtm5.js",
+      "bytes": 3541,
+      "sha256": "64304ed879ea381afd17312ccc286f605bc7fbb572fd80e00d1ce969df53169b"
+    },
+    {
+      "path": "/assets/person-panel-DgOMROzl.js",
+      "bytes": 6396,
+      "sha256": "92b3f0080de40079bb6d01b692c46657278a748c9459fc11fb8ec373a1d9a227"
+    }
+  ],
+  "screenshots": [
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint24-runtime/real-ui-import1-invalid-desktop.png",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint24-runtime/real-ui-import1-preview-desktop.png",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint24-runtime/real-ui-import1-person-desktop.png",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint24-runtime/real-ui-import1-preview-375.png",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint24-runtime/real-ui-import1-result-375.png",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint24-runtime/real-ui-import1-search-desktop.png",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint24-runtime/real-ui-import1-files-desktop.png"
+  ],
+  "unexpected": [],
+  "before": {
+    "count": 81,
+    "createdImportLogs": 80,
+    "issues": 0,
+    "sentinelSha256": "5bd9c248b8dc8903def9a32e69039d35bed056cdfbcb7c6000e6e94c3f9c1d93"
+  },
+  "intent": {
+    "key": "2d9ccf1d-bf83-4cc4-ac2e-f676d1a75b6e",
+    "method": "POST",
+    "path": "/api/v1/projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e/deliverables/import",
+    "logicalBody": {
+      "format": "xlsx",
+      "worksheet": null,
+      "sourceReference": null,
+      "defaults": {
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "deliverableTypeId": "01a19b26-f4bd-7996-9148-0a640a6f304c"
+      },
+      "reason": null,
+      "previewFingerprint": "C0984E4B7441622E209166809148C0E45E6A06A6ECEE16226EA36FAC3E9DBA76",
+      "projectRowVersion": 2
+    },
+    "wirePropertyOrder": [
+      "format",
+      "contentBase64",
+      "worksheet",
+      "sourceReference",
+      "defaults",
+      "reason",
+      "previewFingerprint",
+      "projectRowVersion"
+    ],
+    "defaultsPropertyOrder": [
+      "projectDisciplineId",
+      "deliverableTypeId"
+    ],
+    "wireSha256": "d6a9b20c6358202e396ee23e8cb239bafbd8b0104d0af68c3c64afce828940d8",
+    "wireBytes": 3005,
+    "file": {
+      "path": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint24-runtime/real-drawings.xlsx",
+      "sha256": "a76d0ca1b7cb12bb6dc8a23aa7a76fbbde1b7138f40be5666ea1aaa9a276db39",
+      "bytes": 2002
+    }
+  },
+  "receipt": {
+    "status": 200,
+    "key": "2d9ccf1d-bf83-4cc4-ac2e-f676d1a75b6e",
+    "createdIds": [
+      "01a19b5b-22f0-7e33-b516-2e0a43f5693d",
+      "01a19b5b-22fb-710a-b7aa-688b18ca0a7d",
+      "01a19b5b-2303-7ac4-9b02-48226f4c375f",
+      "01a19b5b-230c-7ea6-bfd8-7c58c55ed036",
+      "01a19b5b-2315-7317-b44b-a55a360e1ed6",
+      "01a19b5b-231d-78fa-86ed-b765ab90fa25",
+      "01a19b5b-2326-7fa2-8e9d-fa97c1bb0bad",
+      "01a19b5b-232f-7bd1-8c15-75c3fe3440c1",
+      "01a19b5b-2338-7faa-8095-54a0890525c8",
+      "01a19b5b-2341-7498-9723-3dafdcc5f113",
+      "01a19b5b-234a-77bb-8f35-5a27c5b4540e",
+      "01a19b5b-2353-75bf-b7e7-7bc6625f4bee",
+      "01a19b5b-235c-7036-80b0-920e1f839461",
+      "01a19b5b-2366-768c-bd02-466d50e3d4b4",
+      "01a19b5b-2370-71bd-af82-03d5c0566953",
+      "01a19b5b-237a-71e6-91b7-82901d9cc695",
+      "01a19b5b-2384-7da5-9aea-24a3e2b014c7",
+      "01a19b5b-238f-70e7-9c60-b3c8510e3416",
+      "01a19b5b-2399-7788-a7a6-0d02596b8e67",
+      "01a19b5b-23a4-7617-b472-7f47a4872265",
+      "01a19b5b-23ae-72f6-afd5-37f78d748ad0",
+      "01a19b5b-23b8-793c-a4c6-ef3a19124bdc",
+      "01a19b5b-23c2-7ac3-971b-78303b009c2d",
+      "01a19b5b-23cd-75da-b332-555f3703f9bf",
+      "01a19b5b-23d8-7182-b8c0-cdfb795d9a9c",
+      "01a19b5b-23e3-7b0e-8a6d-e38393728063",
+      "01a19b5b-23ed-7aed-af30-c2a790777e71",
+      "01a19b5b-23f9-71ef-897b-d4fa037710d2",
+      "01a19b5b-2403-75e8-9d3b-f1b31f3cb449",
+      "01a19b5b-240e-7e6b-a570-c3897191db9c",
+      "01a19b5b-2419-7836-a341-cabd8f053135",
+      "01a19b5b-2425-7515-8a9e-029840bc9d95",
+      "01a19b5b-2430-737a-a300-ff80296145df",
+      "01a19b5b-243c-701e-a8b2-479cee1d94a0",
+      "01a19b5b-2448-76a3-b579-a2ccaff7c7e2",
+      "01a19b5b-2454-77a9-9bb7-be47f5e84176",
+      "01a19b5b-2460-75cc-8995-567b4b569958",
+      "01a19b5b-246c-762c-b4a7-7cdcb6b9a8bd",
+      "01a19b5b-2479-7b5d-a2f1-d61f0f208c9b",
+      "01a19b5b-2486-78ba-b625-dbe5a9bb5532"
+    ],
+    "total": 40,
+    "rows": [
+      {
+        "sourceRow": 2,
+        "id": "01a19b5b-22f0-7e33-b516-2e0a43f5693d",
+        "key": "QA24-MVYY3WT5-D082",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "Does not match C-###",
+          "The client drawing number does not match this project's convention. It can still be created.",
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 3,
+        "id": "01a19b5b-22fb-710a-b7aa-688b18ca0a7d",
+        "key": "QA24-MVYY3WT5-D083",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 4,
+        "id": "01a19b5b-2303-7ac4-9b02-48226f4c375f",
+        "key": "QA24-MVYY3WT5-D084",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 5,
+        "id": "01a19b5b-230c-7ea6-bfd8-7c58c55ed036",
+        "key": "QA24-MVYY3WT5-D085",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 6,
+        "id": "01a19b5b-2315-7317-b44b-a55a360e1ed6",
+        "key": "QA24-MVYY3WT5-D086",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 7,
+        "id": "01a19b5b-231d-78fa-86ed-b765ab90fa25",
+        "key": "QA24-MVYY3WT5-D087",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 8,
+        "id": "01a19b5b-2326-7fa2-8e9d-fa97c1bb0bad",
+        "key": "QA24-MVYY3WT5-D088",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 9,
+        "id": "01a19b5b-232f-7bd1-8c15-75c3fe3440c1",
+        "key": "QA24-MVYY3WT5-D089",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 10,
+        "id": "01a19b5b-2338-7faa-8095-54a0890525c8",
+        "key": "QA24-MVYY3WT5-D090",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 11,
+        "id": "01a19b5b-2341-7498-9723-3dafdcc5f113",
+        "key": "QA24-MVYY3WT5-D091",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 12,
+        "id": "01a19b5b-234a-77bb-8f35-5a27c5b4540e",
+        "key": "QA24-MVYY3WT5-D092",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 13,
+        "id": "01a19b5b-2353-75bf-b7e7-7bc6625f4bee",
+        "key": "QA24-MVYY3WT5-D093",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 14,
+        "id": "01a19b5b-235c-7036-80b0-920e1f839461",
+        "key": "QA24-MVYY3WT5-D094",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 15,
+        "id": "01a19b5b-2366-768c-bd02-466d50e3d4b4",
+        "key": "QA24-MVYY3WT5-D095",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 16,
+        "id": "01a19b5b-2370-71bd-af82-03d5c0566953",
+        "key": "QA24-MVYY3WT5-D096",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 17,
+        "id": "01a19b5b-237a-71e6-91b7-82901d9cc695",
+        "key": "QA24-MVYY3WT5-D097",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 18,
+        "id": "01a19b5b-2384-7da5-9aea-24a3e2b014c7",
+        "key": "QA24-MVYY3WT5-D098",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 19,
+        "id": "01a19b5b-238f-70e7-9c60-b3c8510e3416",
+        "key": "QA24-MVYY3WT5-D099",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 20,
+        "id": "01a19b5b-2399-7788-a7a6-0d02596b8e67",
+        "key": "QA24-MVYY3WT5-D100",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 21,
+        "id": "01a19b5b-23a4-7617-b472-7f47a4872265",
+        "key": "QA24-MVYY3WT5-D101",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 22,
+        "id": "01a19b5b-23ae-72f6-afd5-37f78d748ad0",
+        "key": "QA24-MVYY3WT5-D102",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 23,
+        "id": "01a19b5b-23b8-793c-a4c6-ef3a19124bdc",
+        "key": "QA24-MVYY3WT5-D103",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 24,
+        "id": "01a19b5b-23c2-7ac3-971b-78303b009c2d",
+        "key": "QA24-MVYY3WT5-D104",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 25,
+        "id": "01a19b5b-23cd-75da-b332-555f3703f9bf",
+        "key": "QA24-MVYY3WT5-D105",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 26,
+        "id": "01a19b5b-23d8-7182-b8c0-cdfb795d9a9c",
+        "key": "QA24-MVYY3WT5-D106",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 27,
+        "id": "01a19b5b-23e3-7b0e-8a6d-e38393728063",
+        "key": "QA24-MVYY3WT5-D107",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 28,
+        "id": "01a19b5b-23ed-7aed-af30-c2a790777e71",
+        "key": "QA24-MVYY3WT5-D108",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 29,
+        "id": "01a19b5b-23f9-71ef-897b-d4fa037710d2",
+        "key": "QA24-MVYY3WT5-D109",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 30,
+        "id": "01a19b5b-2403-75e8-9d3b-f1b31f3cb449",
+        "key": "QA24-MVYY3WT5-D110",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 31,
+        "id": "01a19b5b-240e-7e6b-a570-c3897191db9c",
+        "key": "QA24-MVYY3WT5-D111",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 32,
+        "id": "01a19b5b-2419-7836-a341-cabd8f053135",
+        "key": "QA24-MVYY3WT5-D112",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 33,
+        "id": "01a19b5b-2425-7515-8a9e-029840bc9d95",
+        "key": "QA24-MVYY3WT5-D113",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 34,
+        "id": "01a19b5b-2430-737a-a300-ff80296145df",
+        "key": "QA24-MVYY3WT5-D114",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 35,
+        "id": "01a19b5b-243c-701e-a8b2-479cee1d94a0",
+        "key": "QA24-MVYY3WT5-D115",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 36,
+        "id": "01a19b5b-2448-76a3-b579-a2ccaff7c7e2",
+        "key": "QA24-MVYY3WT5-D116",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 37,
+        "id": "01a19b5b-2454-77a9-9bb7-be47f5e84176",
+        "key": "QA24-MVYY3WT5-D117",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 38,
+        "id": "01a19b5b-2460-75cc-8995-567b4b569958",
+        "key": "QA24-MVYY3WT5-D118",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 39,
+        "id": "01a19b5b-246c-762c-b4a7-7cdcb6b9a8bd",
+        "key": "QA24-MVYY3WT5-D119",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 40,
+        "id": "01a19b5b-2479-7b5d-a2f1-d61f0f208c9b",
+        "key": "QA24-MVYY3WT5-D120",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      },
+      {
+        "sourceRow": 41,
+        "id": "01a19b5b-2486-78ba-b625-dbe5a9bb5532",
+        "key": "QA24-MVYY3WT5-D121",
+        "rowVersion": 0,
+        "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+        "warnings": [
+          "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+        ]
+      }
+    ]
+  },
+  "createdFacts": {
+    "issues": 0,
+    "batches": 1,
+    "records": 40,
+    "sourceRows": 40,
+    "createdImportLogs": 40
+  },
+  "after": {
+    "count": 121,
+    "createdImportLogs": 120,
+    "issues": 0,
+    "sentinelSha256": "5bd9c248b8dc8903def9a32e69039d35bed056cdfbcb7c6000e6e94c3f9c1d93"
+  },
+  "boundary": "Owned synthetic QA24 only. UI/API/SQL join with actual workbooks; API atomicity proof is real-import-api1.json. Asset samples are observed served resources, not complete parity. No pilot, deployment or human acceptance."
+}

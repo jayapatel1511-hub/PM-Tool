@@ -1,0 +1,12 @@
+{
+  "exitCode": 0,
+  "args": [
+    "web/node_modules/.bin/tsc",
+    "-p",
+    "web/tests/tsconfig.json"
+  ],
+  "atUtc": "2026-11-03T04:59:32.100577+00:00",
+  "elapsedSeconds": 0.64,
+  "errors": [],
+  "tail": []
+}

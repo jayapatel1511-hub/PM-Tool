@@ -1,0 +1,11 @@
+{
+  "name": "deliverable-backdated-current-history-response-view",
+  "actor": "priya@hub.test",
+  "width": 375,
+  "status": "FAIL",
+  "startedAtUtc": "2026-11-02T02:38:48.695Z",
+  "error": "AssertionError [ERR_ASSERTION]: Unknown current recipient response is not zero\n+ actual - expected\n\n+ '— Unavailable'\n- '—'\n\n    at equalText (/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint22-real-browser.cjs:32:55)\n    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint22-real-browser.cjs:300:5\n    at async step (/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint22-real-browser.cjs:100:20)\n    at async deliverableCase (/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint22-real-browser.cjs:290:3)\n    at async withActor (/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint22-real-browser.cjs:176:9)\n    at async main (/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint22-real-browser.cjs:488:7)",
+  "url": "http://127.0.0.1:8853/projects/QA22-DLV-MVY51IDP-2DD0D2/deliverables?panel=Deliverable%3A01a19847-71a0-7a65-b343-b5961050aa90&deliverableTab=01a19847-71a0-7a65-b343-b5961050aa90%3Aissues",
+  "screenshot": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint22-real-browser-2026-11-02T02-38-25-414Z-93a8de2d/025-priya-375-deliverable-backdated-current-history-response-view-FAIL.png",
+  "finishedAtUtc": "2026-11-02T02:38:49.689Z"
+}

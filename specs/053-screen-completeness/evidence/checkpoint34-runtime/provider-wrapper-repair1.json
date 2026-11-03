@@ -1,0 +1,10 @@
+{
+  "atUtc": "2026-11-03T04:53:50.482919+00:00",
+  "sourceChanges": {
+    "tests/Hub.Tests/Api/ExternalReviewSchemaTests.cs": "7dfc146224ce00542acc37321398707ed844265a54bfe632d58886bb70a95c92"
+  },
+  "productionUnchanged": true,
+  "exactServerCauseRequired": "Npgsql.PostgresException SQLSTATE55000",
+  "remainingNoEffectsAssertions": "UNCHANGED",
+  "priorFocusedRun": "3/4PASS; intended actual refusal reached but wrapper type mismatch"
+}

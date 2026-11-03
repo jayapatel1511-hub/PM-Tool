@@ -1,0 +1,6 @@
+page.waitForFunction: Timeout 15000ms exceeded.
+    at waitRows (/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/search-screen.cjs:107:18)
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/search-screen.cjs:164:82 {
+  log: [],
+  name: 'TimeoutError'
+}

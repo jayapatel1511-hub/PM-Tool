@@ -1,0 +1,1 @@
+Bounded source PASS. Helper SHA264751a6b7898ed9416488096fbd72eb4ab0728217f82660a1a46f9e13bd6080 matches repaired loan; anonymous scalar members retain server filters/exact count/order/cap before DTO materialization. Workspace/tests original hashes unchanged. No execution; provider proof pending.

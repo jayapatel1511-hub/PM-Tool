@@ -1,0 +1,110 @@
+{
+  "observedAtUtc": "2026-11-01T13:45:56.624Z",
+  "rows": [
+    {
+      "who": "priya",
+      "route": "/projects/QA20-REAL-001/changes",
+      "viewport": "desktop",
+      "status": 200,
+      "labels": [],
+      "hasMarc": false,
+      "hasNotice": false,
+      "textSample": "Skip to content\nt\nTuesday\nMy Work\nHome\nProjects\nTasks\nResources\nTime\nReports\nTeam\nFiles\nTuesday\nProjects\nQA20-REAL-001 Checkpoint 20 real QA project\nChanges\nSearch\n/\nMy projects\nNew\n1\nPN\nQA20-REAL-001\nCheckpoint 20 real QA project\n◐\nActive\n○\nGrey\nOwner (PM): Priya Nair\nClient: Internal / TBD\nTarget date: 2026-11-30\nOverview\nWork\nDeliverables\nCoordination\nPeople\nFiles\nActivity\nSettings\nWeekly Coordination\nHandoffs\nChanges\nDesign basis\nDecisions\nRisks\nIssues\nMeetings & Actions\nRevisions and change impact\n\nTrack the inputs each team used and assess the work affected by a new registered revision.\n\nViews\nExport\nRegister source revision\nSearch\nFilters\nAssigned to me\n\n0 records in this view\n\nNo change notices in this view\n\nRegister a baseline source, record where it is used, then register an explicit replacement revision.\n\nInputs used by receiving work\n\nOnly explicitly linked work and added targets are assessed. Unlinked work has not been checked.\n\nRecord input use\nFilters\n\nNo input use is recorded in this view.\n\nRegistered source history",
+      "errors": []
+    },
+    {
+      "who": "priya",
+      "route": "/projects/QA20-REAL-001/changes",
+      "viewport": "phone",
+      "status": 200,
+      "labels": [],
+      "hasMarc": false,
+      "hasNotice": false,
+      "textSample": "Skip to content\n1\nPN\nQA20-REAL-001\nCheckpoint 20 real QA project\n◐\nActive\n○\nGrey\nOwner (PM): Priya Nair\nClient: Internal / TBD\nTarget date: 2026-11-30\nOverview\nWork\nDeliverables\nCoordination\nPeople\nFiles\nActivity\nSettings\nWeekly Coordination\nHandoffs\nChanges\nDesign basis\nDecisions\nRisks\nIssues\nMeetings & Actions\nRevisions and change impact\n\nTrack the inputs each team used and assess the work affected by a new registered revision.\n\nViews\nExport\nRegister source revision\nSearch\nFilters\nAssigned to me\n\n0 records in this view\n\nNo change notices in this view\n\nRegister a baseline source, record where it is used, then register an explicit replacement revision.\n\nInputs used by receiving work\n\nOnly explicitly linked work and added targets are assessed. Unlinked work has not been checked.\n\nRecord input use\nFilters\n\nNo input use is recorded in this view.\n\nRegistered source history\nMy Work\nSearch\nNotifications",
+      "errors": []
+    },
+    {
+      "who": "priya",
+      "route": "/projects/QA20-REAL-001/handoffs",
+      "viewport": "desktop",
+      "status": 200,
+      "labels": [
+        "Marc Dubois · Co-op · Starts 2026-11-02 · Ends 2026-11-11",
+        "Marc Dubois · Co-op · Starts 2026-11-02 · Ends 2026-11-11"
+      ],
+      "hasMarc": true,
+      "hasNotice": true,
+      "textSample": "Skip to content\nt\nTuesday\nMy Work\nHome\nProjects\nTasks\nResources\nTime\nReports\nTeam\nFiles\nTuesday\nProjects\nQA20-REAL-001 Checkpoint 20 real QA project\nHandoffs\nSearch\n/\nMy projects\nNew\n1\nPN\nQA20-REAL-001\nCheckpoint 20 real QA project\n◐\nActive\n○\nGrey\nOwner (PM): Priya Nair\nClient: Internal / TBD\nTarget date: 2026-11-30\nOverview\nWork\nDeliverables\nCoordination\nPeople\nFiles\nActivity\nSettings\nWeekly Coordination\nHandoffs\nChanges\nDesign basis\nDecisions\nRisks\nIssues\nMeetings & Actions\nDiscipline handoffs\n\nKnow what was sent, accepted for use, and incorporated into the receiving work.\n\nViews\nExport\nNew handoff\nSearch\nFilters\nOverdue only\n\n0 handoffs in this view\n\nNo handoffs in this view\n\nCreate a handoff from existing deliverables and receiving work, or adjust the filters.\n\nNew handoff\n\nOne receiving owner, one intended use, and an exact input revision.\n\nHandoff\nSource deliverable\nChoose…\nQA20-REAL-001-D001 · QA20 real deliverable\nDeclared revision\nExact source link\n\nManually registered reference. Tuesday does not fetch the file or verify that the link contains this revision.\n\nReceiving discipline\nChoose…\nCivil\nReceiving work\nChoose…\nSending owner\nChoose…\nAlex Chen\nJill Martin\nMarc Dubois · Co-op · Starts 2026-11-02 · Ends 2026-11-11\nPriya Nair\nReceiving owner\nChoose…\nAlex Chen\nJill Martin\nMarc Dubois · Co-op · Starts 2026-11-02 · Ends 2026-11-11\nPriya Nair\nIntended use and scope\nAcceptance criteria\nNeeded by\nPromised by\n\nRequired before submission; optional in a draft.\n\nCancel\nSave draft\nClose",
+      "errors": []
+    },
+    {
+      "who": "priya",
+      "route": "/projects/QA20-REAL-001/handoffs",
+      "viewport": "phone",
+      "status": 200,
+      "labels": [
+        "Marc Dubois · Co-op · Starts 2026-11-02 · Ends 2026-11-11",
+        "Marc Dubois · Co-op · Starts 2026-11-02 · Ends 2026-11-11"
+      ],
+      "hasMarc": true,
+      "hasNotice": true,
+      "textSample": "Skip to content\n1\nPN\nQA20-REAL-001\nCheckpoint 20 real QA project\n◐\nActive\n○\nGrey\nOwner (PM): Priya Nair\nClient: Internal / TBD\nTarget date: 2026-11-30\nOverview\nWork\nDeliverables\nCoordination\nPeople\nFiles\nActivity\nSettings\nWeekly Coordination\nHandoffs\nChanges\nDesign basis\nDecisions\nRisks\nIssues\nMeetings & Actions\nDiscipline handoffs\n\nKnow what was sent, accepted for use, and incorporated into the receiving work.\n\nViews\nExport\nNew handoff\nSearch\nFilters\nOverdue only\n\n0 handoffs in this view\n\nNo handoffs in this view\n\nCreate a handoff from existing deliverables and receiving work, or adjust the filters.\n\nMy Work\nSearch\nNotifications\nNew handoff\n\nOne receiving owner, one intended use, and an exact input revision.\n\nHandoff\nSource deliverable\nChoose…\nQA20-REAL-001-D001 · QA20 real deliverable\nDeclared revision\nExact source link\n\nManually registered reference. Tuesday does not fetch the file or verify that the link contains this revision.\n\nReceiving discipline\nChoose…\nCivil\nReceiving work\nChoose…\nSending owner\nChoose…\nAlex Chen\nJill Martin\nMarc Dubois · Co-op · Starts 2026-11-02 · Ends 2026-11-11\nPriya Nair\nReceiving owner\nChoose…\nAlex Chen\nJill Martin\nMarc Dubois · Co-op · Starts 2026-11-02 · Ends 2026-11-11\nPriya Nair\nIntended use and scope\nAcceptance criteria\nNeeded by\nPromised by\n\nRequired before submission; optional in a draft.\n\nCancel\nSave draft\nClose",
+      "errors": []
+    },
+    {
+      "who": "priya",
+      "route": "/projects/QA20-REAL-001/tasks?panel=Task:01a19754-b4f4-7d85-8480-9cd3522778fc",
+      "viewport": "desktop",
+      "status": 200,
+      "labels": [
+        "Marc Dubois · Co-op · Starts 2026-11-02 · Ends 2026-11-11"
+      ],
+      "hasMarc": true,
+      "hasNotice": true,
+      "textSample": "y hours\nNext due 2026-11-05 · 0 undated open\nAdd task\n\n\tQA20-REAL-001-T0001\t\nQA20 real task one\n\t\nQA20 real deliverable\n\t\nCivil\t\nPN\nPriya Nair\n\t—\t\n○\nNot Started\n\t\n◐\nOpen for pickup\n\t\nLow\nMedium\nHigh\nCritical\n\t2026-10-26\t\n2026-11-05\n\t\n0%\n10%\n20%\n30%\n40%\n50%\n60%\n70%\n80%\n90%\n100%\n\t8 h\t8 min ago · Priya Nair\n\tQA20-REAL-001-T0002\t\nQA20 real task two\n\t\nQA20 real deliverable\n\t\nCivil\t\nAC\nAlex Chen\n\t—\t\n○\nNot Started\n\t\n◐\nOpen for pickup\n\t\nLow\nMedium\nHigh\nCritical\n\t2026-10-27\t\n2026-11-06\n\t\n0%\n10%\n20%\n30%\n40%\n50%\n60%\n70%\n80%\n90%\n100%\n\t8 h\t8 min ago · Alex Chen\n\nItem details\n\nTask\nOpen full page\nQA20-REAL-001-T0002\n○\nNot Started\nMedium\nOpen for pickup\nQA20-REAL-001\nQA20 real task two\n◐\nOpen for pickup\nCreate deliverable from this task\nNew handoff\nInputs used by receiving work\nAuthorise start\nWithdraw pickup offer\nAssign to…\nJill Martin\nqa20-report-a\nqa20-report-b\nMarc Dubois · Co-op · Starts 2026-11-02 · Ends 2026-11-11\nAssign pickup\nRaise\nPeople\nAssignee\nAC\nAlex Chen\nReviewer\nNone\nRequires review\nCollaborators\nNone\nAdd collaborator\n\nCollaborators update status, progress and the description; the assignee and due date stay with the assignee and lead.\n\nWatchers\nNone\nWatch\nDetails\nPriority\nLow\nMedium\nHigh\nCritical\nDiscipline\nCivil\nDeliverable\nNone\nQA20-REAL-001-D001 QA20 real deliverable\nMilestone\n—\n(from its deliverable)\nDates\nStart date\n2026-10-27\nDue date\n2026-11-06\nProgress and hours\nProgress\n0%\nEstimated hours\n8\nDescription\nDescription\nAdd a description\nDependencies\nShow chain\nDepends on\nAdd\n\nDepends on nothing.\n\nBlocks\nAdd\n\nBlocks nothing.\n\nManual block\nSet block\nLinks\n\nNo document links yet.\n\nAdd link\nComments\nHistory\n\nNo comments yet. Discuss the work here; changes are recorded in History.\n\nComment\nCtrl+Enter to post · **bold**, *italic*, - lists, `code`, links\nPost\nDelete task",
+      "errors": []
+    },
+    {
+      "who": "priya",
+      "route": "/projects/QA20-REAL-001/tasks?panel=Task:01a19754-b4f4-7d85-8480-9cd3522778fc",
+      "viewport": "phone",
+      "status": 200,
+      "labels": [
+        "Marc Dubois · Co-op · Starts 2026-11-02 · Ends 2026-11-11"
+      ],
+      "hasMarc": true,
+      "hasNotice": true,
+      "textSample": "l\nAssignee\nPN\nPriya Nair\nStatus\n○\nNot Started\nPriority\nLow\nMedium\nHigh\nCritical\nStart date\n2026-10-26\nDue\n2026-11-05\nProgress\n0%\n10%\n20%\n30%\n40%\n50%\n60%\n70%\n80%\n90%\n100%\nEst. hrs\n8 h\nLast activity\n8 min ago · Priya Nair\nQA20-REAL-001-T0002\nQA20 real task two\nDeliverable\nQA20 real deliverable\nDiscipline\nCivil\nAssignee\nAC\nAlex Chen\nStatus\n○\nNot Started\nPriority\nLow\nMedium\nHigh\nCritical\nStart date\n2026-10-27\nDue\n2026-11-06\nProgress\n0%\n10%\n20%\n30%\n40%\n50%\n60%\n70%\n80%\n90%\n100%\nEst. hrs\n8 h\nLast activity\n8 min ago · Alex Chen\nMy Work\nSearch\nNotifications\n\nItem details\n\nTask\nOpen full page\nQA20-REAL-001-T0002\n○\nNot Started\nMedium\nOpen for pickup\nQA20-REAL-001\nQA20 real task two\n◐\nOpen for pickup\nCreate deliverable from this task\nNew handoff\nInputs used by receiving work\nAuthorise start\nWithdraw pickup offer\nAssign to…\nJill Martin\nqa20-report-a\nqa20-report-b\nMarc Dubois · Co-op · Starts 2026-11-02 · Ends 2026-11-11\nAssign pickup\nRaise\nPeople\nAssignee\nAC\nAlex Chen\nReviewer\nNone\nRequires review\nCollaborators\nNone\nAdd collaborator\n\nCollaborators update status, progress and the description; the assignee and due date stay with the assignee and lead.\n\nWatchers\nNone\nWatch\nDetails\nPriority\nLow\nMedium\nHigh\nCritical\nDiscipline\nCivil\nDeliverable\nNone\nQA20-REAL-001-D001 QA20 real deliverable\nMilestone\n—\n(from its deliverable)\nDates\nStart date\n2026-10-27\nDue date\n2026-11-06\nProgress and hours\nProgress\n0%\nEstimated hours\n8\nDescription\nDescription\nAdd a description\nDependencies\nShow chain\nDepends on\nAdd\n\nDepends on nothing.\n\nBlocks\nAdd\n\nBlocks nothing.\n\nManual block\nSet block\nLinks\n\nNo document links yet.\n\nAdd link\nComments\nHistory\n\nNo comments yet. Discuss the work here; changes are recorded in History.\n\nComment\nCtrl+Enter to post · **bold**, *italic*, - lists, `code`, links\nPost\nDelete task",
+      "errors": []
+    },
+    {
+      "who": "jordan",
+      "route": "/vacation",
+      "viewport": "desktop",
+      "status": 200,
+      "labels": [
+        "March",
+        "Marc Dubois · Co-op · Starts 2026-11-02 · Ends 2026-11-11"
+      ],
+      "hasMarc": true,
+      "hasNotice": true,
+      "textSample": "hedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nLena Brooks\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nMarc Dubois\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nOmar Haddad\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nPriya Nair\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nRita Gomez\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nSam Patel\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nqa20-report-a\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nqa20-report-b\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nCoverage concerns\n\nReview dated work that lands during absence. These prompts do not choose a replacement or assess qualifications. Undated work stays unknown.\n\nNo dated conflicts or undated work found in your visible scope.\n\nTime off shows reported hours within each displayed period. Faint stripes show non-working dates from the person's working calendar.\n\nImport approved leave\n\nMap stable HR person keys first. Preview every row before applying. Missing rows never cancel leave: include an explicit Cancelled row with a newer source timestamp.\n\nHR identity mapping\nPerson\nChoose an employee\nAlex Chen\nDiane Roy\nJill Martin\nJordan Lee\nLena Brooks\nMarc Dubois · Co-op · Starts 2026-11-02 · Ends 2026-11-11\nOmar Haddad\nPriya Nair\nRita Gomez\nSam Patel\nqa20-report-a\nqa20-report-b\nHR source system\nStable HR person key\nSave HR mapping\n\nsource_system,external_id,person_key,status,start_date,end_date,hours_per_day,source_updated_at\n\nHR export CSV\nChoose CSV file\nCancel\nPreview import\nApply reviewed import\nClose",
+      "errors": []
+    },
+    {
+      "who": "jordan",
+      "route": "/vacation",
+      "viewport": "phone",
+      "status": 200,
+      "labels": [
+        "March",
+        "Marc Dubois · Co-op · Starts 2026-11-02 · Ends 2026-11-11"
+      ],
+      "hasMarc": true,
+      "hasNotice": true,
+      "textSample": "ve\n\nNo recorded leave in this period.\n\nLena Brooks\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nMarc Dubois\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nOmar Haddad\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nPriya Nair\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nRita Gomez\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nSam Patel\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nqa20-report-a\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nqa20-report-b\nWorking schedule\nRecord HR-approved leave\n\nNo recorded leave in this period.\n\nCoverage concerns\n\nReview dated work that lands during absence. These prompts do not choose a replacement or assess qualifications. Undated work stays unknown.\n\nNo dated conflicts or undated work found in your visible scope.\n\nTime off shows reported hours within each displayed period. Faint stripes show non-working dates from the person's working calendar.\n\nMy Work\nSearch\nNotifications\nImport approved leave\n\nMap stable HR person keys first. Preview every row before applying. Missing rows never cancel leave: include an explicit Cancelled row with a newer source timestamp.\n\nHR identity mapping\nPerson\nChoose an employee\nAlex Chen\nDiane Roy\nJill Martin\nJordan Lee\nLena Brooks\nMarc Dubois · Co-op · Starts 2026-11-02 · Ends 2026-11-11\nOmar Haddad\nPriya Nair\nRita Gomez\nSam Patel\nqa20-report-a\nqa20-report-b\nHR source system\nStable HR person key\nSave HR mapping\n\nsource_system,external_id,person_key,status,start_date,end_date,hours_per_day,source_updated_at\n\nHR export CSV\nChoose CSV file\nCancel\nPreview import\nApply reviewed import\nClose",
+      "errors": []
+    }
+  ],
+  "errors": []
+}

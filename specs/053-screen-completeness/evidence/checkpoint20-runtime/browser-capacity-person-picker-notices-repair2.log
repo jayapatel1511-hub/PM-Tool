@@ -1,0 +1,12 @@
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+17 !== 2
+
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/capacity-person-picker-notices.cjs:197:14 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 17,
+  expected: 2,
+  operator: 'strictEqual',
+  diff: 'simple'
+}

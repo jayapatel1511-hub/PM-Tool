@@ -4,14 +4,15 @@ import { Loading, Missing, TableRegion } from '@/components/hub/common'
 import type { Column } from '@/components/hub/table'
 import { fmtDate } from '@/lib/format'
 import { cn } from '@/lib/utils'
+import { PersonPanelTrigger } from './person-panel-trigger'
 
 /** Shared register presentation: the selected row has both tint and a leading cue. */
 export const SELECTED_ROW = 'bg-accent shadow-[inset_3px_0_0_var(--primary)] hover:bg-accent'
 export const TITLE_LINK = 'break-words text-left font-medium text-primary underline-offset-4 hover:underline'
 
-export function Person({ id, name }: { id?: string | null; name?: string | null }) {
+export function Person({ id, name, focusKey }: { id?: string | null; name?: string | null; focusKey?: string }) {
   if (!name) return <Missing />
-  return <span className="inline-flex items-center gap-2"><Avatar id={id} name={name} />{name}</span>
+  return <span className="inline-flex items-center gap-2"><Avatar id={id} name={name} />{id ? <PersonPanelTrigger userId={id} name={name} focusKey={focusKey} /> : name}</span>
 }
 
 export function DateText({ date }: { date?: string | null }) {
@@ -24,10 +25,10 @@ export function GroupRow({ span, label, count }: { span: number; label: ReactNod
   </th></tr>
 }
 
-export function RegisterCards<T extends { id: string }>({ groups, columns, current }: { groups: { label: string; rows: T[] }[]; columns: Column<T>[]; current: (r: T) => boolean }) {
+export function RegisterCards<T extends { id: string }>({ groups, columns, current, groupLabel }: { groups: { label: string; rows: T[] }[]; columns: Column<T>[]; current: (r: T) => boolean; groupLabel?: (key: string) => ReactNode }) {
   return <div className="space-y-4 md:hidden">
     {groups.map((g, i) => <div key={`${i}-${g.label}`} className="space-y-2">
-      {g.label && <h3 className="text-sm font-semibold">{g.label}<span className="ml-2 rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{g.rows.length}</span></h3>}
+      {g.label && <h3 className="text-sm font-semibold">{groupLabel?.(g.label) ?? g.label}<span className="ml-2 rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{g.rows.length}</span></h3>}
       <ul className="space-y-2">{g.rows.map((r) => <li key={r.id} className={cn('rounded-lg border bg-card p-4', current(r) && SELECTED_ROW)}>
         <dl className="grid grid-cols-[minmax(5.5rem,auto)_minmax(0,1fr)] items-start gap-x-3 gap-y-1.5 text-sm">
           {columns.map((c) => <Fragment key={c.id}><dt className="text-muted-foreground">{c.label}</dt><dd className="min-w-0 break-words">{c.cell(r)}</dd></Fragment>)}
@@ -40,9 +41,11 @@ export function RegisterCards<T extends { id: string }>({ groups, columns, curre
 /** The shared register list (§47.7, FR-REC-14): a table from `md` up, cards below it, optional group rows, one selected row.
  *  A list with its own phone cards (or none), group row or click-through row passes `cards`, `groupRow` or `onRowClick`;
  *  `oneBody` keeps the groups in a single `<tbody>`; `detail` adds a full-width row under a row that has one (an expanded milestone); `rowClass` adds classes to a row (a list that mutes its inactive records). */
-export function DataTable<T extends { id: string }>({ table, rows, loading, empty, current, groupBy, caption, label, cards, wide, groupRow, onRowClick, oneBody, flush, detail, rowClass }: {
+export function DataTable<T extends { id: string }>({ table, rows, loading, empty, current, groupBy, groupLabel, caption, label, cards, wide, groupRow, onRowClick, oneBody, flush, detail, rowClass }: {
   table: { visible: Column<T>[]; header: (c: Column<T>) => ReactElement; cell: (c: Column<T>, r: T) => ReactNode }; rows: T[]; loading: boolean; empty: ReactNode
   current: (r: T) => boolean; groupBy?: (r: T) => string
+  /** Optional presentation for a typed group key; table/card identities remain distinct. */
+  groupLabel?: (key: string, surface: 'table' | 'card') => ReactNode
   /** The table's screen-reader caption; omitted for a table that never had one, so its accessible name does not change. */ caption?: string
   /** Names the scroll region (role region) when the screen's table had one. */ label?: string
   /** Below `md`: omitted draws one generic card per row, `false` draws none, a node replaces them for a screen whose rows carry their own phone controls. */
@@ -64,7 +67,7 @@ export function DataTable<T extends { id: string }>({ table, rows, loading, empt
     groups.at(-1)!.items.push(row)
   }
   const body = groups.map((group, index) => <Fragment key={`${index}-${group.label}`}>
-    {groupBy && (groupRow?.(group.label, group.items.length, table.visible.length) ?? <GroupRow span={table.visible.length} label={group.label} count={group.items.length} />)}
+    {groupBy && (groupRow?.(group.label, group.items.length, table.visible.length) ?? <GroupRow span={table.visible.length} label={groupLabel?.(group.label, 'table') ?? group.label} count={group.items.length} />)}
     {group.items.map((r) => { const more = detail?.(r); return <Fragment key={r.id}>
       <tr className={cn('border-t hover:bg-muted', onRowClick && 'cursor-pointer', rowClass?.(r), current(r) && SELECTED_ROW)} onClick={onRowClick && (() => onRowClick(r))}>{table.visible.map((c) => table.cell(c, r))}</tr>
       {more && <tr className="border-t bg-muted"><td colSpan={table.visible.length} className="py-3 pl-14 pr-(--cell-px)">{more}</td></tr>}
@@ -79,7 +82,7 @@ export function DataTable<T extends { id: string }>({ table, rows, loading, empt
   )
   if (flush) return <div className="scroll-region overflow-x-auto">{grid}</div>
   return (<>
-    {!wide && (cards === undefined ? <RegisterCards groups={groups.map((g) => ({ label: g.label, rows: g.items }))} columns={table.visible} current={current} /> : cards)}
+    {!wide && (cards === undefined ? <RegisterCards groups={groups.map((g) => ({ label: g.label, rows: g.items }))} columns={table.visible} current={current} groupLabel={groupLabel && (key => groupLabel(key, 'card'))} /> : cards)}
     {/* With no cards the table is the only list, so it never hides below `md` (a rem breakpoint that a large default font moves past the px phone switch). */}
     <TableRegion className={wide || cards === false ? undefined : 'hidden md:block'} {...(label && { role: 'region', 'aria-label': label })}>{grid}</TableRegion>
   </>)

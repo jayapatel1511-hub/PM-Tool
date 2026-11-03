@@ -1,0 +1,37 @@
+[
+  {
+    "suite": "project-dashboard-completeness",
+    "exitCode": 0,
+    "completedAtUtc": "2026-11-01T14:05:57.924941+00:00"
+  },
+  {
+    "suite": "task-grouping",
+    "exitCode": 0,
+    "completedAtUtc": "2026-11-01T14:06:09.608163+00:00"
+  },
+  {
+    "suite": "capacity-person-facts",
+    "exitCode": 0,
+    "completedAtUtc": "2026-11-01T14:06:14.525077+00:00"
+  },
+  {
+    "suite": "capacity-time-week",
+    "exitCode": 0,
+    "completedAtUtc": "2026-11-01T14:06:20.105967+00:00"
+  },
+  {
+    "suite": "report-task-inputs",
+    "exitCode": 0,
+    "completedAtUtc": "2026-11-01T14:06:26.958558+00:00"
+  },
+  {
+    "suite": "report-capacity-task-inputs",
+    "exitCode": 0,
+    "completedAtUtc": "2026-11-01T14:06:43.892625+00:00"
+  },
+  {
+    "suite": "report-catalogue-views",
+    "exitCode": 0,
+    "completedAtUtc": "2026-11-01T14:06:46.897107+00:00"
+  }
+]

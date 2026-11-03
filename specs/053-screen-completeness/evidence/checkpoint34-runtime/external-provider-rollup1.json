@@ -1,0 +1,185 @@
+{
+  "distinctTests": 26,
+  "latestPassed": 26,
+  "originalFailuresPreserved": true,
+  "focusedRerunsOnly": true,
+  "scope": "Actual fresh synthetic PostgreSQL-backed external-review workflows and migration behavior; not hosted or human acceptance",
+  "tests": {
+    "Hub.Tests.Api.ExternalReviewTests.External_response_sheet_keeps_all_rounds_exact_eight_columns_snapshot_party_and_safe_bytes(format: \"csv\")": [
+      {
+        "run": "external-provider1",
+        "outcome": "Passed"
+      }
+    ],
+    "Hub.Tests.Api.ExternalReviewTests.Member_records_party_comments_without_account_acceptance_or_automatic_signature_and_explicit_verifier_owns_their_evidence": [
+      {
+        "run": "external-provider1",
+        "outcome": "Passed"
+      }
+    ],
+    "Hub.Tests.Api.ExternalReviewTests.Deliberately_corrupt_carry_is_not_actionable_and_cannot_pass_command_or_save_guards(corruption: \"sameRound\")": [
+      {
+        "run": "external-provider1",
+        "outcome": "Passed"
+      }
+    ],
+    "Hub.Tests.Api.ExternalReviewTests.Advisory_record_queued_after_coordinator_change_must_recheck_its_package_baseline_under_lock": [
+      {
+        "run": "external-provider1",
+        "outcome": "Passed"
+      }
+    ],
+    "Hub.Tests.Api.ExternalReviewTests.External_batch_receipt_is_exactly_once_under_concurrency_payload_mismatch_and_current_authority": [
+      {
+        "run": "external-provider1",
+        "outcome": "Passed"
+      }
+    ],
+    "Hub.Tests.Api.ExternalReviewTests.Current_members_may_transcribe_but_viewers_readonly_and_removed_members_cannot": [
+      {
+        "run": "external-provider1",
+        "outcome": "Passed"
+      }
+    ],
+    "Hub.Tests.Api.ExternalReviewTests.Internal_omitted_and_null_extension_keep_exact_wire_hash_and_genuine_receipt_parity": [
+      {
+        "run": "external-provider1",
+        "outcome": "Passed"
+      }
+    ],
+    "Hub.Tests.Api.ExternalReviewTests.Deliberately_corrupt_stored_snapshot_blocks_real_start_record_designation_closure_and_final_approval(allowSelf: False)": [
+      {
+        "run": "external-provider1",
+        "outcome": "Passed"
+      }
+    ],
+    "Hub.Tests.Api.ExternalReviewTests.Deliberately_corrupt_carry_is_not_actionable_and_cannot_pass_command_or_save_guards(corruption: \"anotherReceiptAndDeliverable\")": [
+      {
+        "run": "external-provider1",
+        "outcome": "Passed"
+      }
+    ],
+    "Hub.Tests.Api.ExternalReviewTests.Future_issue_capture_is_private_even_off_and_historical_authority_does_not_follow_todays_owner": [
+      {
+        "run": "external-provider1",
+        "outcome": "Failed"
+      },
+      {
+        "run": "external-provider-repair2",
+        "outcome": "Passed"
+      }
+    ],
+    "Hub.Tests.Api.ExternalReviewTests.Real_rows_enforce_source_origin_XOR_internal_verifier_and_immutable_capture_and_receipt": [
+      {
+        "run": "external-provider1",
+        "outcome": "Passed"
+      }
+    ],
+    "Hub.Tests.Api.ExternalReviewTests.Stale_nested_baselines_and_late_batch_errors_leave_no_partial_incoming_finding_receipt_sequence_or_notice": [
+      {
+        "run": "external-provider1",
+        "outcome": "Passed"
+      }
+    ],
+    "Hub.Tests.Api.ExternalReviewTests.Same_GUID_party_and_user_stay_typed_snapshot_identity_survives_rename_and_scalar_FK_targets_party": [
+      {
+        "run": "external-provider1",
+        "outcome": "Passed"
+      }
+    ],
+    "Hub.Tests.Api.ExternalReviewTests.Removed_issue_scope_carries_through_a_later_round_without_repeating_the_old_removal_impact": [
+      {
+        "run": "external-provider1",
+        "outcome": "Failed"
+      },
+      {
+        "run": "external-provider-repair2",
+        "outcome": "Passed"
+      }
+    ],
+    "Hub.Tests.Api.ExternalReviewTests.External_export_parent_scope_and_dark_guards_refuse_before_any_export_log_or_read_side_effect": [
+      {
+        "run": "external-provider1",
+        "outcome": "Passed"
+      }
+    ],
+    "Hub.Tests.Api.ExternalReviewTests.External_response_sheet_keeps_all_rounds_exact_eight_columns_snapshot_party_and_safe_bytes(format: \"xlsx\")": [
+      {
+        "run": "external-provider1",
+        "outcome": "Passed"
+      }
+    ],
+    "Hub.Tests.Api.ExternalReviewTests.Legacy_internal_review_downgrades_to_required_columns_without_defaults_and_reupgrades_without_data_loss": [
+      {
+        "run": "external-provider1",
+        "outcome": "Passed"
+      }
+    ],
+    "Hub.Tests.Api.ExternalReviewTests.Deliberately_corrupt_carry_is_not_actionable_and_cannot_pass_command_or_save_guards(corruption: \"futureRound\")": [
+      {
+        "run": "external-provider1",
+        "outcome": "Passed"
+      }
+    ],
+    "Hub.Tests.Api.ExternalReviewTests.Explicit_carry_keeps_incoming_identity_resets_response_and_rechecks_independence_against_both_issues": [
+      {
+        "run": "external-provider1",
+        "outcome": "Failed"
+      },
+      {
+        "run": "external-provider-repair2",
+        "outcome": "Passed"
+      }
+    ],
+    "Hub.Tests.Api.ExternalReviewTests.Stored_external_work_disappears_when_dark_while_internal_routes_and_wire_remain_unchanged": [
+      {
+        "run": "external-provider1",
+        "outcome": "Passed"
+      }
+    ],
+    "Hub.Tests.Api.ExternalReviewTests.Exact_named_verifier_retry_waiting_behind_real_reassignment_is_refused_before_receipt_replay": [
+      {
+        "run": "external-provider1",
+        "outcome": "Passed"
+      }
+    ],
+    "Hub.Tests.Api.ExternalReviewTests.Deliberately_corrupt_stored_snapshot_blocks_real_start_record_designation_closure_and_final_approval(allowSelf: True)": [
+      {
+        "run": "external-provider1",
+        "outcome": "Passed"
+      }
+    ],
+    "Hub.Tests.Api.ExternalReviewTests.Trusted_legacy_NULL_is_unknown_before_self_review_or_admin_and_cannot_be_backfilled(allowSelf: True)": [
+      {
+        "run": "external-provider1",
+        "outcome": "Passed"
+      }
+    ],
+    "Hub.Tests.Api.ExternalReviewTests.Trusted_legacy_NULL_is_unknown_before_self_review_or_admin_and_cannot_be_backfilled(allowSelf: False)": [
+      {
+        "run": "external-provider1",
+        "outcome": "Passed"
+      }
+    ],
+    "Hub.Tests.Api.ExternalReviewTests.Actual_future_issue_authors_refuse_downgrade_with_55000_before_schema_data_or_history_changes": [
+      {
+        "run": "external-provider1",
+        "outcome": "Failed"
+      },
+      {
+        "run": "external-provider-repair2",
+        "outcome": "Failed"
+      },
+      {
+        "run": "migration-refusal-repair3",
+        "outcome": "Passed"
+      }
+    ],
+    "Hub.Tests.Api.ExternalReviewTests.Only_an_inactive_discipline_lead_relation_does_not_grant_recording_or_options_capability": [
+      {
+        "run": "external-provider1",
+        "outcome": "Passed"
+      }
+    ]
+  }
+}

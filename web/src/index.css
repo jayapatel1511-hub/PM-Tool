@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "./visual-layout.css";
 
 /* Tuesday visual standard v1.0 (docs/design/tuesday-tokens.json): light surfaces, black primary actions, six pastel
    identity accents and the §13.0 status language. Colour never carries meaning alone: status keeps its text and symbol. */
@@ -52,6 +53,171 @@
   --control-row-h: 32px;
 }
 
+/* Visual system v2 (§56.2), dark-shipped behind flag.visual_system. Keep the
+   existing v1 variables above intact so flag-off rendering remains unchanged. */
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("./assets/fonts/IBMPlexSans-Regular.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("./assets/fonts/IBMPlexSans-SemiBold.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("./assets/fonts/IBMPlexSans-Medium.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("./assets/fonts/IBMPlexMono-SemiBold.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("./assets/fonts/IBMPlexMono-Regular.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("./assets/fonts/IBMPlexMono-Medium.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+
+:root[data-visual="v2"] {
+  --page: #f4f5f8;
+  --side: #f1f2f5;
+  --card: #ffffff;
+  --raised: #f3f4f7;
+  --ink: #161a23;
+  --ink-2: #465063;
+  --ink-3: #646d81;
+  --line: color-mix(in srgb, var(--ink) 9%, transparent);
+  --line-2: color-mix(in srgb, var(--ink) 6%, transparent);
+  --line-3: color-mix(in srgb, var(--ink) 16%, transparent);
+  --input: #7c8491;
+  --navy: #1b2a4e;
+  --brand: #385cac;
+  --brand-tint: #eaf0fd;
+
+  /* Text and controls on the navy band, including FR-VSN-13's explicit focus role. */
+  --on-navy: var(--card);
+  --on-navy-secondary: color-mix(in srgb, var(--on-navy) 82%, transparent);
+  --on-navy-muted: color-mix(in srgb, var(--on-navy) 72%, transparent);
+  --on-navy-boundary: color-mix(in srgb, var(--on-navy) 55%, transparent);
+  --on-navy-hover: color-mix(in srgb, var(--on-navy) 12%, transparent);
+  --on-navy-active: color-mix(in srgb, var(--on-navy) 20%, transparent);
+  --on-navy-focus: #9bb8ff;
+  /* Existing band mixes, named by their surface role; rendered values are unchanged. */
+  --on-navy-number-bg: color-mix(in srgb, var(--on-navy) 14%, transparent);
+  --on-navy-divider: color-mix(in srgb, var(--on-navy) 16%, transparent);
+  --on-navy-reference-border: color-mix(in srgb, var(--on-navy) 24%, transparent);
+  --on-navy-reference-bg: color-mix(in srgb, var(--ink) 12%, transparent);
+
+  /* Metric domain: strong marks and their quiet card/chip tints. */
+  --metric-blue: #2f6fe0; --metric-blue-tint: #e8f0fe;
+  --metric-violet: #6a52d1; --metric-violet-tint: #efebfd;
+  --metric-red: #d6334a; --metric-red-tint: #fde9ec;
+  --metric-amber: #c77d0a; --metric-amber-tint: #fdf1dc;
+  --metric-green: #18915f; --metric-green-tint: #e3f5ec;
+  --metric-teal: #0f8a96; --metric-teal-tint: #def3f4;
+
+  /* Task lanes, status pills and the two named hatches. */
+  --lane-todo: #94a0b4; --lane-progress: #6a52d1; --lane-review: #f0a42b; --lane-done: #2f6fe0;
+  --hatch-strong: #94a0b4; --hatch-light: #d5dae3;
+  --time-away-hatch: repeating-linear-gradient(135deg, var(--hatch-strong) 0 3px, var(--hatch-light) 3px 6px);
+  --nonworking-hatch: repeating-linear-gradient(135deg, color-mix(in srgb, var(--ink) 3.5%, transparent) 0 3px, transparent 3px 6px);
+  --pill-ok: #386953; --pill-ok-bg: #eaf5ef;
+  --pill-warn: #7a5817; --pill-warn-bg: #fff4db;
+  --pill-critical: #b42332; --pill-critical-bg: #fff0f1;
+  --pill-idle: #59606c; --pill-idle-bg: #f1f2f4;
+  --pill-complete: #37589a; --pill-complete-bg: #edf2fd;
+  --pill-work: #574e87; --pill-work-bg: #f0effa;
+  --ok: var(--pill-ok); --ok-bg: var(--pill-ok-bg);
+  --warn: var(--pill-warn); --warn-bg: var(--pill-warn-bg);
+  --bad: var(--pill-critical); --bad-bg: var(--pill-critical-bg);
+  --idle: var(--pill-idle); --idle-bg: var(--pill-idle-bg);
+  --done: var(--pill-complete); --done-bg: var(--pill-complete-bg);
+  --work: var(--pill-work); --work-bg: var(--pill-work-bg);
+
+  /* Five project identity colours are deliberately separate from status. */
+  --project-coral: #ec6a3e; --project-mint: #20a36d; --project-rose: #d9467b;
+  --project-cyan: #1597cc; --project-lime: #84a32a;
+
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+  --space-5: 20px; --space-6: 24px; --space-8: 32px;
+  --card-radius: 14px; --control-radius: 8px;
+  --shadow-card: 0 1px 2px rgb(22 26 35 / 0.08); --shadow-count: 0 4px 14px rgb(22 26 35 / 0.12);
+
+  /* Existing utility-facing names follow the v2 tokens. */
+  --background: var(--page);
+  --foreground: var(--ink);
+  --card-foreground: var(--ink);
+  --popover: var(--card);
+  --popover-foreground: var(--ink);
+  --primary: var(--brand);
+  --primary-foreground: var(--card);
+  --secondary: var(--raised);
+  --secondary-foreground: var(--ink);
+  --muted: var(--raised);
+  --muted-foreground: var(--ink-3);
+  --placeholder: var(--ink-3);
+  --accent: var(--brand-tint);
+  --accent-foreground: var(--brand);
+  --border: var(--line);
+  --ring: var(--brand);
+  --action: var(--navy);
+  --action-hover: #263b69;
+  --sidebar: var(--side);
+  --sidebar-hover: var(--raised);
+  --nav-active: var(--brand-tint);
+  --nav-active-foreground: var(--brand);
+  --radius: 0.875rem;
+  --font-sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+:root[data-visual="v2"] body {
+  font-family: var(--font-sans);
+  background: var(--page);
+  color: var(--ink);
+}
+
+:root[data-visual="v2"] .key,
+:root[data-visual="v2"] .font-mono,
+:root[data-visual="v2"] [data-mono] {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+:root[data-visual="v2"] :focus-visible { outline-color: var(--brand); outline-offset: 2px; }
+
+/* @theme inline emits literal legacy stacks; explicit utilities also follow the switch. */
+:root[data-visual="v2"] .font-sans { font-family: var(--font-sans); }
+
+@media (prefers-contrast: more) {
+  :root[data-visual="v2"] { --border: var(--input); --ink-3: var(--ink); --muted-foreground: var(--ink); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-visual="v2"] [data-visual-enter] { animation: visual-rise 400ms ease-out both; }
+}
+@keyframes visual-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
 :root[data-density="comfortable"] { --row-min: 48px; --cell-py: 14px; --cell-px: 16px; --control-h: 44px; --control-row-h: 44px; }
 @media (pointer: coarse) { :root { --control-h: 44px; --control-row-h: 44px; } }
 
@@ -65,6 +231,23 @@
 [data-accent="peach"] { --acc-fg: #8d5538; --acc-stripe: #ecc3a9; }
 [data-accent="amber"] { --acc-fg: #7a5817; --acc-stripe: #e3d29d; }
 [data-accent="rose"] { --acc-fg: #974a68; --acc-stripe: #e7b8c8; }
+
+/* Only decorative person/section surfaces become neutral. Count tiles, status
+   pills and stored project identities keep their own explicit colour domains. */
+:root[data-visual="v2"] [data-visual-decoration="person"] {
+  --acc-fg: var(--ink-2);
+  --acc-stripe: var(--line-3);
+  --acc-bg: var(--card);
+}
+:root[data-visual="v2"] [data-visual-decoration="section"] {
+  --acc-fg: var(--ink-2);
+  --acc-stripe: var(--line-3);
+  --acc-bg: var(--raised);
+}
+:root[data-visual="v2"] [data-visual-decoration="brand"] {
+  --acc-fg: var(--navy);
+  --acc-bg: var(--raised);
+}
 
 @media (prefers-contrast: more) {
   :root { --border: #7c8491; --muted-foreground: #191b20; }

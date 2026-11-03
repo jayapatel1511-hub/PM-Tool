@@ -1,0 +1,12 @@
+{
+  "server": {
+    "reportUnits.recordedHoursColumn": "{0} · recorded source hours (h; may be provisional; see coverage)",
+    "reportUnits.coverage.ProvisionalAvailability": "Availability provisional; recorded source values are unverified",
+    "reportUnits.coverage.AvailabilityDependentCount": "Recorded weekly indicator count; availability coverage is not assessed"
+  },
+  "ui": {
+    "reportUnits.provisional": "Availability provisional",
+    "reportUnits.recorded": "Recorded provisional source hours: {n} h",
+    "reportUnits.availabilityCount": "Recorded indicator; availability coverage is not assessed"
+  }
+}

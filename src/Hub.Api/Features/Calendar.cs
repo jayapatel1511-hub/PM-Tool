@@ -20,11 +20,13 @@ public static class CalendarEndpoints
     [JsonDerivedType(typeof(CalendarDeadline))]
     [JsonDerivedType(typeof(CalendarEventRow))]
     public abstract record CalendarEntry;
-    public sealed record CalendarDeadline(string Kind, string SourceType, Guid Id, string Key, string Title, DateOnly Date, Guid ProjectId, string ProjectNumber, string ProjectName, string? Status, bool Overdue)
+    public sealed record CalendarDeadline(string Kind, string SourceType, Guid Id, string Key, string Title, DateOnly Date, Guid ProjectId, string ProjectNumber, string ProjectName, string? Status, bool Overdue,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? IdentityColour = null)
         : CalendarEntry;
     /// An event as the calendar, the New Event dialog and the editing answers show it: Start and End are local to the organisation's zone, StartAt and EndAt are instants.
     public sealed record CalendarEventRow(string Kind, Guid Id, string Type, string Title, string Start, string End, DateTimeOffset StartAt, DateTimeOffset EndAt, string TimeZone, Guid? ProjectId,
-        string? ProjectNumber, string? ProjectName, Guid OwnerId, string? Owner, string? Location, string? Description, string Visibility, bool Cancelled, int RowVersion, bool CanEdit)
+        string? ProjectNumber, string? ProjectName, Guid OwnerId, string? Owner, string? Location, string? Description, string Visibility, bool Cancelled, int RowVersion, bool CanEdit,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? IdentityColour = null)
         : CalendarEntry;
     public sealed record CalendarRange(string TimeZone, DateOnly From, DateOnly To, List<CalendarEntry> Entries);
     public sealed record CalendarEventCancelled(Guid Id, int RowVersion);
@@ -87,25 +89,33 @@ public static class CalendarEndpoints
     static async Task<CalendarEventRow> Row(HubDb db, Access access, CurrentUser me, CalendarEvent e, OrgSettings s)
     {
         var zone = Clock.Zone(s);
-        var number = e.ProjectId is { } pid ? await db.Projects.Where(p => p.Id == pid).Select(p => new { p.ProjectNumber, p.Name }).FirstOrDefaultAsync() : null;
+        var number = e.ProjectId is { } pid ? await db.Projects.Where(p => p.Id == pid).Select(p => new { p.ProjectNumber, p.Name, p.IdentityColour }).FirstOrDefaultAsync() : null;
         var owner = await db.Users.Where(u => u.Id == e.OwnerId).Select(u => u.DisplayName).FirstOrDefaultAsync();
         return new CalendarEventRow("event", e.Id, e.Type, e.Title, Local(e.StartAt, zone), Local(e.EndAt, zone), e.StartAt, e.EndAt, s.OrgTimeZone,
             e.ProjectId, number?.ProjectNumber, number?.Name, e.OwnerId, owner, e.Location, e.Description, e.Visibility,
-            e.CancelledAt is not null, e.RowVersion, (await CanEdit(db, access, e)).Ok);
+            e.CancelledAt is not null, e.RowVersion, (await CanEdit(db, access, e)).Ok, s.IsFlagOn("visual_system") ? number?.IdentityColour : null);
     }
 
     static async Task<Ok<CalendarRange>> Entries(DateOnly from, DateOnly to, string? projectIds, string? types, Access access, HubDb db, CurrentUser me, SettingsStore store)
     {
         Check.That(to >= from && to.DayNumber - from.DayNumber <= 92, "to", "calendar.range");
         var s = await store.Get(db);
+        return TypedResults.Ok(await ReadRange(from, to, projectIds, types, access, db, me, s));
+    }
+
+    // Shared projection only. The old route treats an empty types value as all; the new screen distinguishes an explicit empty selection.
+    internal static async Task<CalendarRange> ReadRange(DateOnly from, DateOnly to, string? projectIds, string? types,
+        Access access, HubDb db, CurrentUser me, OrgSettings s, bool explicitEmptyTypes = false)
+    {
+        Check.That(to >= from && to.DayNumber - from.DayNumber <= 92, "to", "calendar.range");
         var zone = Clock.Zone(s);
         var want = Http.List(types);
-        bool Want(string t) => want.Length == 0 || want.Contains(t);
+        bool Want(string t) => want.Contains(t) || want.Length == 0 && (!explicitEmptyTypes || types is null);
         // The workspace scope (§36.1): mine, all or chosen ids; visibility and live status applied as everywhere else.
         var projects = Scope.Projects(access, db, projectIds);
         var scoped = !string.IsNullOrWhiteSpace(projectIds) && projectIds != Scope.All;
         var pids = projects.Select(p => p.Id);
-        var numbers = await projects.Select(p => new { p.Id, p.ProjectNumber, p.Name }).ToDictionaryAsync(p => p.Id);
+        var numbers = await projects.Select(p => new { p.Id, p.ProjectNumber, p.Name, p.IdentityColour }).ToDictionaryAsync(p => p.Id);
         var entries = new List<CalendarEntry>();
         if (Want(Deadlines))
         {
@@ -117,7 +127,7 @@ public static class CalendarEndpoints
             var ms = await db.Milestones.AsNoTracking().Where(m => pids.Contains(m.ProjectId) && m.Date >= from && m.Date <= to && !m.IsCancelled)
                 .Select(m => new { m.Id, m.Key, m.Name, m.Date, m.ProjectId, Status = m.IsComplete ? MilestoneStatus.Complete : db.MilestoneStates.Where(x => x.MilestoneId == m.Id).Select(x => x.Status).FirstOrDefault() }).ToListAsync();
             CalendarDeadline D(string type, Guid id, string key, string name, DateOnly date, Guid pid, string? status, bool overdue) =>
-                new("deadline", type, id, key, name, date, pid, numbers[pid].ProjectNumber, numbers[pid].Name, status, overdue);
+                new("deadline", type, id, key, name, date, pid, numbers[pid].ProjectNumber, numbers[pid].Name, status, overdue, s.IsFlagOn("visual_system") ? numbers[pid].IdentityColour : null);
             entries.AddRange(tasks.Select(t => D(ItemType.Task, t.Id, t.Key, t.Name, t.DueDate!.Value, t.ProjectId, t.Status, t.Overdue)));
             entries.AddRange(dels.Select(d => D(ItemType.Deliverable, d.Id, d.Key, d.Name, d.DueDate!.Value, d.ProjectId, d.Status, d.Overdue)));
             entries.AddRange(ms.Select(m => D(ItemType.Milestone, m.Id, m.Key, m.Name, m.Date!.Value, m.ProjectId, m.Status, m.Status == MilestoneStatus.Overdue)));
@@ -131,7 +141,7 @@ public static class CalendarEndpoints
             if (scoped) q = q.Where(e => e.ProjectId == null || pids.Contains(e.ProjectId.Value)); // private project-less events stay in the owner's calendar
             foreach (var e in await q.OrderBy(e => e.StartAt).ToListAsync()) entries.Add(await Row(db, access, me, e, s));
         }
-        return TypedResults.Ok(new CalendarRange(s.OrgTimeZone, from, to, entries));
+        return new CalendarRange(s.OrgTimeZone, from, to, entries);
     }
 
     static async Task<Created<CalendarEventRow>> Create(EventBody body, Access access, HubDb db, CurrentUser me, SettingsStore store)

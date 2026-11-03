@@ -1,0 +1,25 @@
+Test run for /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:12.50]     Hub.Tests.Api.CapacityPersonFactsTests.Owner_flag_alone_controls_facts_settings_and_same_key_create_replay_still_obeys_current_flag [FAIL]
+  Failed Hub.Tests.Api.CapacityPersonFactsTests.Owner_flag_alone_controls_facts_settings_and_same_key_create_replay_still_obeys_current_flag [4 s]
+  Error Message:
+   Assert.Equal() Failure: Strings differ
+                                  ↓ (pos 1003)
+Expected: ···"lse,"canStaff":false},{"id":"01a197af-d2c"···
+Actual:   ···"lse,"canStaff":false,"organisationFacts":"···
+                                  ↑ (pos 1003)
+  Stack Trace:
+     at Hub.Tests.Api.CapacityPersonFactsTests.Owner_flag_alone_controls_facts_settings_and_same_key_create_replay_still_obeys_current_flag() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/CapacityPersonFactsTests.cs:line 194
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:22.31]     Hub.Tests.Api.TaskGroupingTests.Disabled_group_parameter_preserves_legacy_bytes_and_enabled_ungrouped_shape [FAIL]
+  Failed Hub.Tests.Api.TaskGroupingTests.Disabled_group_parameter_preserves_legacy_bytes_and_enabled_ungrouped_shape [4 s]
+  Error Message:
+   Assert.True() Failure
+Expected: True
+Actual:   False
+  Stack Trace:
+     at Hub.Tests.Api.TaskGroupingTests.Disabled_group_parameter_preserves_legacy_bytes_and_enabled_ungrouped_shape() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/TaskGroupingTests.cs:line 255
+--- End of stack trace from previous location ---
+Results File: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint21-runtime/checkpoint21-adjacent.trx
+
+Failed!  - Failed:     2, Passed:    89, Skipped:     0, Total:    91, Duration: 1 m 2 s - Hub.Tests.dll (net10.0)

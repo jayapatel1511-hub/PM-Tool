@@ -17,6 +17,8 @@ import { runtimeText, t } from '@/lib/i18n'
 import { socialSignInError, useFlag, useMe } from '@/lib/auth'
 import { cn } from '@/lib/utils'
 import { FollowLevelSelect } from './projects/Follow'
+import { PersonFactsEditor } from '@/components/hub/person-facts-editor'
+import { NoticePreferences } from './notice-preferences'
 
 type Prefs = components['schemas']['PreferencesRead']
 const saveDigest = (body: components['schemas']['DigestBody']) => typedRequest('put', '/api/v1/me/preferences/digest', { body })
@@ -25,6 +27,8 @@ const saveDigest = (body: components['schemas']['DigestBody']) => typedRequest('
  *  fields sit in a 760 px region (design §5). */
 export function PreferencesPage() {
   const me = useMe()
+  const personFacts = useFlag('capacity_screens')
+  const noticePreferences = useFlag('people_screens')
   const signInConfig = useQuery({ queryKey: ['sign-in-config'], queryFn: () => typedRequest('get', '/api/v1/config', {}) })
   const signInMethods = useQuery({ queryKey: ['sign-in-methods'], enabled: signInConfig.data?.authMode === 'Social', queryFn: () => get<{ available: string[]; connected: string[] }>('auth/social/providers') })
   const qc = useQueryClient()
@@ -51,7 +55,9 @@ export function PreferencesPage() {
   return (
     <Page {...header}>
       <div className="flex w-full max-w-[760px] flex-col gap-6">
+        {personFacts && <Section title={t('personFacts.certifications')} id="my-certifications"><div className="px-5 py-4"><PersonFactsEditor /></div></Section>}
         <OnboardingPreference />{me.settings.routeCounterEnabled && <p className="text-sm text-muted-foreground">{t('onboarding.counterNotice')}</p>}
+        <NoticePreferences />
         {err != null && <ErrorBanner error={err} />}
         {signInConfig.data?.authMode === 'Social' && <Section title={t('auth.signInMethods')} id="sign-in-methods">
           <div className="space-y-3 px-5 py-4">
@@ -64,7 +70,7 @@ export function PreferencesPage() {
               </form>)}</div>}
           </div>
         </Section>}
-        <Section title={t('prefs.digest')} id="digest">
+        <Section title={t(noticePreferences ? 'prefs.digestSettings' : 'prefs.digest')} id="digest">
           <div className="divide-y">
             <div className="px-5 py-4">
               <label className="flex min-h-(--control-row-h) items-center gap-3 text-sm font-medium">

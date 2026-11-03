@@ -1,0 +1,12 @@
+
+> web@0.0.0 typecheck:tests
+> tsc -p tests/tsconfig.json
+
+tests/admin.fixture.cjs(32,25): error TS2339: Property 'ClientRow' does not exist on type '{ ActionConverted: { id: string; rowVersion: number; status: string; taskId: string; taskKey: string; }; ActionCreated: { id: string; key: string; rowVersion: number; warnings: string[]; }; ActionDecisionRef: { ...; }; ... 884 more ...; WriteResponse: { ...; }; }'.
+tests/admin.fixture.cjs(32,72): error TS2339: Property 'ClientRow' does not exist on type '{ ActionConverted: { id: string; rowVersion: number; status: string; taskId: string; taskKey: string; }; ActionCreated: { id: string; key: string; rowVersion: number; warnings: string[]; }; ActionDecisionRef: { ...; }; ... 884 more ...; WriteResponse: { ...; }; }'.
+tests/admin.fixture.cjs(33,22): error TS2339: Property 'ClientRow' does not exist on type '{ ActionConverted: { id: string; rowVersion: number; status: string; taskId: string; taskKey: string; }; ActionCreated: { id: string; key: string; rowVersion: number; warnings: string[]; }; ActionDecisionRef: { ...; }; ... 884 more ...; WriteResponse: { ...; }; }'.
+tests/work-seen-state.fixture.cjs(40,31): error TS7034: Variable 'previousVisit' implicitly has type 'any' in some locations where its type cannot be determined.
+tests/work-seen-state.fixture.cjs(40,53): error TS7034: Variable 'lastMarkAll' implicitly has type 'any' in some locations where its type cannot be determined.
+tests/work-seen-state.fixture.cjs(103,132): error TS7005: Variable 'previousVisit' implicitly has an 'any' type.
+tests/work-seen-state.fixture.cjs(103,186): error TS7005: Variable 'lastMarkAll' implicitly has an 'any' type.
+tests/work-seen-state.fixture.cjs(112,18): error TS7006: Parameter 'itemId' implicitly has an 'any' type.

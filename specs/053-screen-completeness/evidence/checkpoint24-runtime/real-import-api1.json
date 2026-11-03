@@ -1,0 +1,862 @@
+{
+  "database": "hub_qa_checkpoint24",
+  "calls": [
+    {
+      "method": "POST",
+      "route": "projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e/deliverables/import-preview",
+      "status": 200,
+      "bodyBytes": 2193,
+      "key": "qa24-preview-79e877a5-042f-4ab3-a1a5-b0275c960f5a"
+    },
+    {
+      "method": "POST",
+      "route": "projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e/deliverables/import",
+      "status": 400,
+      "bodyBytes": 2268,
+      "key": "79980559-8da5-4bcc-9f85-3a86fe939a3b"
+    },
+    {
+      "method": "POST",
+      "route": "projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e/deliverables/import-preview",
+      "status": 200,
+      "bodyBytes": 2233,
+      "key": null
+    },
+    {
+      "method": "POST",
+      "route": "projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e/deliverables/import",
+      "status": 200,
+      "bodyBytes": 2343,
+      "key": "829b3c4f-2ac6-498e-8146-17ebd36c07bf"
+    },
+    {
+      "method": "POST",
+      "route": "projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e/deliverables/import",
+      "status": 200,
+      "bodyBytes": 2343,
+      "key": "829b3c4f-2ac6-498e-8146-17ebd36c07bf"
+    },
+    {
+      "method": "POST",
+      "route": "projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e/deliverables/import-preview",
+      "status": 200,
+      "bodyBytes": 2890,
+      "key": "qa24-preview-678cf622-4d39-4f63-ba93-aebc5d1d7841"
+    },
+    {
+      "method": "POST",
+      "route": "projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e/deliverables/import",
+      "status": 400,
+      "bodyBytes": 2965,
+      "key": "b38a2f95-927a-485c-a20a-9af493aa49e6"
+    },
+    {
+      "method": "POST",
+      "route": "projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e/deliverables/import-preview",
+      "status": 200,
+      "bodyBytes": 2890,
+      "key": null
+    },
+    {
+      "method": "POST",
+      "route": "projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e/deliverables/import",
+      "status": 200,
+      "bodyBytes": 3000,
+      "key": "7a5d6062-e1c2-4678-86d8-9b3f83ca0fbe"
+    },
+    {
+      "method": "POST",
+      "route": "projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e/deliverables/import",
+      "status": 200,
+      "bodyBytes": 3000,
+      "key": "7a5d6062-e1c2-4678-86d8-9b3f83ca0fbe"
+    },
+    {
+      "method": "POST",
+      "route": "projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e/deliverables/import-preview",
+      "status": 200,
+      "bodyBytes": 1270338,
+      "key": "qa24-large-preview-e6cb0094-1bbb-4769-96b6-61529a719b8e"
+    },
+    {
+      "method": "POST",
+      "route": "projects/01a19b30-62e7-7b49-9eb1-c9b8b5971e3e/deliverables",
+      "status": 413,
+      "bodyBytes": 1100203,
+      "key": null
+    }
+  ],
+  "checks": [
+    "csv: one bad title has zero table changes; correction creates40 and40normal Import logs, no issue evidence, exact retry inert, sentinel unchanged",
+    "xlsx: one bad title has zero table changes; correction creates40 and40normal Import logs, no issue evidence, exact retry inert, sentinel unchanged",
+    "Actual Kestrel accepts a supported >1MiB drawing preview with zero writes; ordinary create still413 at global1MiB"
+  ],
+  "batches": [
+    {
+      "format": "csv",
+      "key": "829b3c4f-2ac6-498e-8146-17ebd36c07bf",
+      "file": "real-drawings.csv",
+      "projectRowVersion": 2,
+      "previewFingerprint": "44C8066E460783D0B5107A1D0A2EC84D9E334F4E22DE42D1A5B1D36F56B2369B",
+      "created": {
+        "rows": [
+          {
+            "sourceRow": 2,
+            "id": "01a19b37-fdf9-7c87-91a9-68b209085ace",
+            "key": "QA24-MVYY3WT5-D002",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "Does not match C-###",
+              "The client drawing number does not match this project's convention. It can still be created."
+            ]
+          },
+          {
+            "sourceRow": 3,
+            "id": "01a19b37-fe09-7765-bcb0-61dfed37a0b4",
+            "key": "QA24-MVYY3WT5-D003",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 4,
+            "id": "01a19b37-fe14-70d3-9caf-85f722e5599f",
+            "key": "QA24-MVYY3WT5-D004",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 5,
+            "id": "01a19b37-fe20-7774-a690-be2883cedeea",
+            "key": "QA24-MVYY3WT5-D005",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 6,
+            "id": "01a19b37-fe2d-75aa-ad8d-e768e3f2bbd6",
+            "key": "QA24-MVYY3WT5-D006",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 7,
+            "id": "01a19b37-fe3b-7fbd-875c-6cba2eb46915",
+            "key": "QA24-MVYY3WT5-D007",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 8,
+            "id": "01a19b37-fe49-723c-bece-df6bfdb6e4ae",
+            "key": "QA24-MVYY3WT5-D008",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 9,
+            "id": "01a19b37-fe58-7294-a161-50c96b038943",
+            "key": "QA24-MVYY3WT5-D009",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 10,
+            "id": "01a19b37-fe68-7b70-b970-a2a7a1985922",
+            "key": "QA24-MVYY3WT5-D010",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 11,
+            "id": "01a19b37-fe78-7e17-b330-4928df842f16",
+            "key": "QA24-MVYY3WT5-D011",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 12,
+            "id": "01a19b37-fe89-78be-b3c3-f0149517da4e",
+            "key": "QA24-MVYY3WT5-D012",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 13,
+            "id": "01a19b37-fe9a-7e35-9051-82cdab96c614",
+            "key": "QA24-MVYY3WT5-D013",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 14,
+            "id": "01a19b37-feac-7ccf-852b-d65a8574f17a",
+            "key": "QA24-MVYY3WT5-D014",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 15,
+            "id": "01a19b37-febf-7048-b2c3-62e9b3475487",
+            "key": "QA24-MVYY3WT5-D015",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 16,
+            "id": "01a19b37-fed3-74cc-adff-0244afec66c9",
+            "key": "QA24-MVYY3WT5-D016",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 17,
+            "id": "01a19b37-fee8-7966-9583-424a1a7cc0d5",
+            "key": "QA24-MVYY3WT5-D017",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 18,
+            "id": "01a19b37-feff-7582-a402-02586eaf9297",
+            "key": "QA24-MVYY3WT5-D018",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 19,
+            "id": "01a19b37-ff16-7cca-8733-e09498779f34",
+            "key": "QA24-MVYY3WT5-D019",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 20,
+            "id": "01a19b37-ff2e-7c4d-992b-f22bb660ff77",
+            "key": "QA24-MVYY3WT5-D020",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 21,
+            "id": "01a19b37-ff49-7d04-a2ca-0596fc6b87b8",
+            "key": "QA24-MVYY3WT5-D021",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 22,
+            "id": "01a19b37-ff67-7e1f-9f36-6b958efe4ccd",
+            "key": "QA24-MVYY3WT5-D022",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 23,
+            "id": "01a19b37-ff83-71e7-b0ad-12ea40b42f49",
+            "key": "QA24-MVYY3WT5-D023",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 24,
+            "id": "01a19b37-ff9f-7c9e-8469-404ecb26812b",
+            "key": "QA24-MVYY3WT5-D024",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 25,
+            "id": "01a19b37-ffbe-7861-9f2c-ebe0947f8e58",
+            "key": "QA24-MVYY3WT5-D025",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 26,
+            "id": "01a19b37-ffdf-7ecd-ba3b-7d3906716d66",
+            "key": "QA24-MVYY3WT5-D026",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 27,
+            "id": "01a19b38-0000-7c99-8645-398d338a1af3",
+            "key": "QA24-MVYY3WT5-D027",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 28,
+            "id": "01a19b38-0023-7dda-9ab2-2ce1ec6b7dd0",
+            "key": "QA24-MVYY3WT5-D028",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 29,
+            "id": "01a19b38-0046-7f85-81dd-83dce525ae19",
+            "key": "QA24-MVYY3WT5-D029",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 30,
+            "id": "01a19b38-006a-72b7-849b-1f886b01ddc4",
+            "key": "QA24-MVYY3WT5-D030",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 31,
+            "id": "01a19b38-008d-7fa6-988b-8972f5c1cc99",
+            "key": "QA24-MVYY3WT5-D031",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 32,
+            "id": "01a19b38-00b2-7078-b1bc-5a2b2f346508",
+            "key": "QA24-MVYY3WT5-D032",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 33,
+            "id": "01a19b38-00d7-70bc-8162-fabce0a80b59",
+            "key": "QA24-MVYY3WT5-D033",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 34,
+            "id": "01a19b38-00fc-7429-ac33-38f8165b86b9",
+            "key": "QA24-MVYY3WT5-D034",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 35,
+            "id": "01a19b38-0121-7f19-9fba-5d7d6fb93662",
+            "key": "QA24-MVYY3WT5-D035",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 36,
+            "id": "01a19b38-0148-7bbd-9fa4-fa21a4a63d48",
+            "key": "QA24-MVYY3WT5-D036",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 37,
+            "id": "01a19b38-016c-79bf-b870-57f0e4a40ab0",
+            "key": "QA24-MVYY3WT5-D037",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 38,
+            "id": "01a19b38-0191-774d-ba2d-b21b83e9724d",
+            "key": "QA24-MVYY3WT5-D038",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 39,
+            "id": "01a19b38-01b6-750e-b99c-b2b417c2860a",
+            "key": "QA24-MVYY3WT5-D039",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 40,
+            "id": "01a19b38-01e7-7d1c-bb42-a034f325995f",
+            "key": "QA24-MVYY3WT5-D040",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          },
+          {
+            "sourceRow": 41,
+            "id": "01a19b38-020b-73be-99d6-40d77a07f10e",
+            "key": "QA24-MVYY3WT5-D041",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": []
+          }
+        ],
+        "total": 40
+      },
+      "facts": {
+        "issues": 0,
+        "batches": 1,
+        "records": 40,
+        "sourceRows": 40,
+        "createdLogs": 40
+      }
+    },
+    {
+      "format": "xlsx",
+      "key": "7a5d6062-e1c2-4678-86d8-9b3f83ca0fbe",
+      "file": "real-drawings.xlsx",
+      "projectRowVersion": 2,
+      "previewFingerprint": "D3ECB25D987D3A137599EDC9EFABE1CB749B7D9EB3E14B61CA27291DC98C7D64",
+      "created": {
+        "rows": [
+          {
+            "sourceRow": 2,
+            "id": "01a19b38-058d-7faf-bbe2-f6b442ec4584",
+            "key": "QA24-MVYY3WT5-D042",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "Does not match C-###",
+              "The client drawing number does not match this project's convention. It can still be created.",
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 3,
+            "id": "01a19b38-0598-7896-aaef-1192652ec84e",
+            "key": "QA24-MVYY3WT5-D043",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 4,
+            "id": "01a19b38-05a3-7cb6-8737-40bcbe6288bb",
+            "key": "QA24-MVYY3WT5-D044",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 5,
+            "id": "01a19b38-05ae-7eaa-80ac-caefae66be94",
+            "key": "QA24-MVYY3WT5-D045",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 6,
+            "id": "01a19b38-05b8-7d65-b143-05ba917ab874",
+            "key": "QA24-MVYY3WT5-D046",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 7,
+            "id": "01a19b38-05c3-7b73-8d7a-69f9011f4a33",
+            "key": "QA24-MVYY3WT5-D047",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 8,
+            "id": "01a19b38-05cf-7445-a275-6371a1b20deb",
+            "key": "QA24-MVYY3WT5-D048",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 9,
+            "id": "01a19b38-05db-7d98-a859-840587a438cd",
+            "key": "QA24-MVYY3WT5-D049",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 10,
+            "id": "01a19b38-05e8-7036-8d44-7d9e3f2e8025",
+            "key": "QA24-MVYY3WT5-D050",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 11,
+            "id": "01a19b38-05f6-7e78-80a3-cc6ed384f7b0",
+            "key": "QA24-MVYY3WT5-D051",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 12,
+            "id": "01a19b38-060b-7bc9-b53c-d6693ba7230b",
+            "key": "QA24-MVYY3WT5-D052",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 13,
+            "id": "01a19b38-061d-7916-8c53-34644dece731",
+            "key": "QA24-MVYY3WT5-D053",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 14,
+            "id": "01a19b38-062f-7732-92b3-dc2e92b47f5c",
+            "key": "QA24-MVYY3WT5-D054",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 15,
+            "id": "01a19b38-0668-7900-afb1-0cc4ff43b9d6",
+            "key": "QA24-MVYY3WT5-D055",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 16,
+            "id": "01a19b38-0677-7c6b-bc16-b6156622535f",
+            "key": "QA24-MVYY3WT5-D056",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 17,
+            "id": "01a19b38-0688-75c3-8f40-194095f5ec0c",
+            "key": "QA24-MVYY3WT5-D057",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 18,
+            "id": "01a19b38-069d-70ad-bdea-6c1e5b551edf",
+            "key": "QA24-MVYY3WT5-D058",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 19,
+            "id": "01a19b38-06b1-7342-8811-6f3da0542f65",
+            "key": "QA24-MVYY3WT5-D059",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 20,
+            "id": "01a19b38-06d3-7c79-973c-be47754c32b7",
+            "key": "QA24-MVYY3WT5-D060",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 21,
+            "id": "01a19b38-06f9-70e6-bc94-42eab4567950",
+            "key": "QA24-MVYY3WT5-D061",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 22,
+            "id": "01a19b38-070c-7b28-9c3e-8fb1f4444781",
+            "key": "QA24-MVYY3WT5-D062",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 23,
+            "id": "01a19b38-0722-7e4a-abce-cdf08b322db0",
+            "key": "QA24-MVYY3WT5-D063",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 24,
+            "id": "01a19b38-0739-74f6-8a63-ca277005390a",
+            "key": "QA24-MVYY3WT5-D064",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 25,
+            "id": "01a19b38-074d-7597-827e-4de80f07884d",
+            "key": "QA24-MVYY3WT5-D065",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 26,
+            "id": "01a19b38-075e-75d8-801b-db79ae6a0d7d",
+            "key": "QA24-MVYY3WT5-D066",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 27,
+            "id": "01a19b38-076d-75cd-af57-13c60f5794c1",
+            "key": "QA24-MVYY3WT5-D067",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 28,
+            "id": "01a19b38-077b-7030-b0be-cfabd2222e05",
+            "key": "QA24-MVYY3WT5-D068",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 29,
+            "id": "01a19b38-078b-7c8c-9b6e-91e8c147ddf1",
+            "key": "QA24-MVYY3WT5-D069",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 30,
+            "id": "01a19b38-079a-723b-a4fd-6da7060190a8",
+            "key": "QA24-MVYY3WT5-D070",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 31,
+            "id": "01a19b38-07ab-7fec-bd24-ca40590f2fa7",
+            "key": "QA24-MVYY3WT5-D071",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 32,
+            "id": "01a19b38-07ba-7aaf-9670-c86b5e718cea",
+            "key": "QA24-MVYY3WT5-D072",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 33,
+            "id": "01a19b38-07c9-7e2c-8f1a-1ea77db58c15",
+            "key": "QA24-MVYY3WT5-D073",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 34,
+            "id": "01a19b38-07d7-7ff3-a775-a2eaea53d7d8",
+            "key": "QA24-MVYY3WT5-D074",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 35,
+            "id": "01a19b38-07e7-7263-9a0a-ccd72ec6acac",
+            "key": "QA24-MVYY3WT5-D075",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 36,
+            "id": "01a19b38-07f6-76fd-8263-62200b921848",
+            "key": "QA24-MVYY3WT5-D076",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 37,
+            "id": "01a19b38-0806-725a-9c7d-ded23b276c1d",
+            "key": "QA24-MVYY3WT5-D077",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 38,
+            "id": "01a19b38-0817-783c-a879-b4b66b35e1dc",
+            "key": "QA24-MVYY3WT5-D078",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 39,
+            "id": "01a19b38-082a-7681-a248-2c4964c65ddd",
+            "key": "QA24-MVYY3WT5-D079",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 40,
+            "id": "01a19b38-083a-775b-9aa4-e5761056d424",
+            "key": "QA24-MVYY3WT5-D080",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          },
+          {
+            "sourceRow": 41,
+            "id": "01a19b38-084a-7853-b098-d9683ddab7e2",
+            "key": "QA24-MVYY3WT5-D081",
+            "rowVersion": 0,
+            "projectDisciplineId": "01a19b30-6329-7754-b181-379bdb0528b2",
+            "warnings": [
+              "A title or client drawing number matches another row or existing record. Confirming creates an additional record."
+            ]
+          }
+        ],
+        "total": 40
+      },
+      "facts": {
+        "issues": 0,
+        "batches": 1,
+        "records": 40,
+        "sourceRows": 40,
+        "createdLogs": 40
+      }
+    }
+  ],
+  "largeRequestBytes": 1270338,
+  "status": "PASS_REAL_KESTREL_DATABASE",
+  "boundary": "Only owned synthetic QA24; API/database proof separate from Chrome UI and human/pilot acceptance"
+}

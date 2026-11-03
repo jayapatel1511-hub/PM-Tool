@@ -1,0 +1,26 @@
+{
+  "tests/task-sections.cjs": {
+    "exitCode": 0,
+    "stderr": ""
+  },
+  "tests/task-sections.fixture.cjs": {
+    "exitCode": 0,
+    "stderr": ""
+  },
+  "tests/task-contribution.cjs": {
+    "exitCode": 0,
+    "stderr": ""
+  },
+  "tests/task-contribution.fixture.cjs": {
+    "exitCode": 0,
+    "stderr": ""
+  },
+  "tests/calendar-screen.cjs": {
+    "exitCode": 0,
+    "stderr": ""
+  },
+  "../.review/checkpoint30-review/capture-task.cjs": {
+    "exitCode": 0,
+    "stderr": ""
+  }
+}

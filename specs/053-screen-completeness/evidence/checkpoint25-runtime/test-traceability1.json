@@ -1,0 +1,55 @@
+{
+  "atUtc": "2026-11-02T10:28:39.972586+00:00",
+  "status": "PASS_AC_TEST_LINKAGE",
+  "backend": {
+    "SearchScreenTests.Eit_and_home_discipline_match_actual_optional_directory_fields_without_granting_person_panel_access": [
+      "AC-SCR-79",
+      "AC-SCR-84",
+      "FR-SCR-79",
+      "FR-SCR-84"
+    ],
+    "SearchScreenTests.Task_filters_apply_before_counts_and_paging_keep_legacy_ranking_and_suppress_filtered_exact_jumps": [
+      "AC-SCR-79",
+      "AC-SCR-84",
+      "FR-SCR-79",
+      "FR-SCR-84"
+    ],
+    "SearchScreenTests.Active_filters_refuse_illegal_or_inapplicable_values_without_writes": [
+      "AC-SCR-79",
+      "AC-SCR-84",
+      "FR-SCR-79",
+      "FR-SCR-84"
+    ],
+    "SearchScreenTests.Every_applicable_tab_uses_its_real_status_and_discipline_including_derived_current_and_target_relations": [
+      "AC-SCR-79",
+      "AC-SCR-84",
+      "FR-SCR-79",
+      "FR-SCR-84"
+    ],
+    "SearchScreenTests.Normally_completed_then_cancelled_milestone_matches_complete_and_not_cancelled": [
+      "AC-SCR-79",
+      "AC-SCR-84",
+      "FR-SCR-79",
+      "FR-SCR-84"
+    ],
+    "SearchScreenTests.Hidden_and_archived_projects_never_gain_scope_through_controls_or_option_metadata": [
+      "AC-SCR-79",
+      "AC-SCR-84",
+      "FR-SCR-79",
+      "FR-SCR-84"
+    ],
+    "SearchScreenTests.Metadata_is_bounded_and_empty_search_stays_empty_without_persisting_recents_or_other_writes": [
+      "AC-SCR-79",
+      "AC-SCR-84",
+      "FR-SCR-79",
+      "FR-SCR-84"
+    ]
+  },
+  "browser": {
+    "browser:test:search-screen": [
+      "AC-SCR-79",
+      "AC-SCR-84"
+    ]
+  },
+  "note": "7 declarations (6Facts +10caseTheory) expand to16 executed cases. Post-execution changes are comments plus a package script registration only; no test assertion or application changed. Earlier exact execution bytes remain valid behaviour evidence. Initial mapping helper guessed15declarations, refused, then corrected to observed7; no test rerun implied."
+}

@@ -1,0 +1,22 @@
+# Generation20 S29 BACKEND READY — all D C# held
+
+New PersonFacts.cs, narrow Team.cs read/DTO integration and new CapacityPersonFactsTests.cs are authored and held. No C#/API-test edit or process in flight. No lane execution/build/test/browser/generator/migration/helper/goal ran. Root schema/settings/bridges/metadata/generation remain independently owned. Earlier capacity sources remain held.
+
+Exact stable public reader/DTO/wire/editor contract: `s29-reader-contract.md`; server errors5: `s29-server-text.json`. **Required root middleware seam**: `s29-idempotency-replay-seam.md`. New CertificationCreateGuard metadata + AuthoriseCreateReplay public preflight reuse the existing generic idempotency receipts but require current flag/Admin/self permission before cached return. D did not edit middleware; root must merge before replay-off test. Existing interfaces Read/ReadNotices/Facts/Notices/Map are fixed; wire personFacts/personNotices aligns root bridges. Picker reader never queries certifications.
+
+All writes use existing Tx/Http version/Check.Reason/audit infrastructure. Target User row locks serialize certificate/fact writes; post-lock Reload refreshes the authentication-tracked AppUser before version/active checks. Create requires parent version, unique active tag; child patch/delete require exact child/user/version; no tag/user reassignment. Inactive tag remains readable/editable/removable on unchanged records, inactive people Admin-only correction with reason. Parent strict whitelist/exact enum/date order rejects invalid state. Physical child removal preserves canonical **Removed** activity with prior Snapshot. Coordinator's independent review found the authored test incorrectly expected Deleted; root will correct/strengthen that test after the current compiler exits. Production audit behavior stays unchanged. No capacity/calendar/person-date version/activation/roles/membership/HR mutation.
+
+Project Team capacity-only RepeatableRead snapshot: filter within original authorised current-member cohort before projecting facts; raw selector ignored completely off, on requires nonempty configured GUID. Enabled-only null-omitted LeadName retains discipline lead labels when tag filters remove a lead from displayed members. Off keeps old property order/bytes and no new metadata. No count/rank/usage endpoint.
+
+Eight meaningful normal-command Facts authored, all runtime UNRUN:
+
+1. Omar self Confined space +20→same ExpiryIn20 fact on own/Lena Staff/project Team/Workspace Team; scoped tag filter, pure durable equality/no person certification count/rank.
+2. Null/past/today/warn30/+31 exact states, changed warning31, same instant Halifax Oct31 vs UTC Nov1 server-day boundary.
+3. Jill Co-op end Dec18 at Oct31 plus future start, picker notices only, candidate IDs/order and canonical planner people/activation/capacity unchanged; end61/60/0/-1 and configured window0; no person-date invalidation.
+4. Own exact child ID/version/duplicates/extra-user payload/foreign-child/stale refusal all atomic; Admin reason correction actor/before-after history; explicit removal leaves Removed activity with prior Snapshot (root owns the frozen test expectation repair).
+5. ReadOnly self and Supervisor/PM/lead/Executive proxy denial; inactive self blocked by canonical auth, Admin inactive correction requires reason and never reactivates/reassigns.
+6. Invalid type/capacity-field/date-order/date-type/reason parent bodies and stale versions rollback; inactive tag preserved, new assignment denied, existing expiry update allowed.
+7. Already-authorised-ID readers (empty remains empty), Sam scope excludes Omar tag, hidden project denied/empty workspace, invalid/empty/unconfigured tag selectors reject on.
+8. people_screens alone off, capacity_screens alone on, legacy Team exact/off malformed selector ignored; same create receipt once, same-key retry404 after owner flagoff, stored child remains and off legacy bytes return.
+
+Direct DB calls inspect fixtures/state only; all setup/corrections/tag/role/activation/facts operations use normal APIs. Root foundation cases separately own schema/settings/name uniqueness/FK gates. Static tracked Team diff whitespace PASS only; no compilation/runtime acceptance claimed. Root should review/merge shared seam, freeze every C# writer, generate additive migration/types and run dedicated8 plus foundation/Admin/Staff/Team/picker/version/idempotency/capacity regressions proportionately. D now finishes only assigned frontend/scripts, then ALL SOURCE READY/hold.

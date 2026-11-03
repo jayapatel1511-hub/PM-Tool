@@ -1,0 +1,12 @@
+locator.waitFor: Error: strict mode violation: locator('[data-staff-person="00000000-0000-0000-0000-000000007801"]') resolved to 2 elements:
+    1) <li class="rounded-lg border bg-card p-4 text-sm" data-staff-person="00000000-0000-0000-0000-000000007801">…</li> aka getByText('RARemaining AlexSynthetic designer · Team')
+    2) <tr class="border-t hover:bg-muted" data-staff-person="00000000-0000-0000-0000-000000007801">…</tr> aka getByText('RARemaining AlexSynthetic designer10000000—Team')
+
+Call log:
+[2m  - waiting for locator('[data-staff-person="00000000-0000-0000-0000-000000007801"]') to be visible[22m
+
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/person-remaining-surfaces.cjs:246:66 {
+  log: [
+    `  - waiting for locator('[data-staff-person="00000000-0000-0000-0000-000000007801"]') to be visible`
+  ]
+}

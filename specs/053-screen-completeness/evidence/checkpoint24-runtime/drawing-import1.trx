@@ -1,0 +1,618 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="9c9a9de0-3781-4c9c-aa75-f25883e1260c" name="@Jays-MacBook-Pro 2026-11-02 03:12:04" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-11-02T03:12:04.6314510-04:00" queuing="2026-11-02T03:12:04.6314510-04:00" start="2026-11-02T03:11:53.1972930-04:00" finish="2026-11-02T03:12:42.3484680-04:00" />
+  <TestSettings name="default" id="7bf9e804-6ec2-47ee-a254-4b809fb88f76">
+    <Deployment runDeploymentRoot="_Jays-MacBook-Pro_2026-11-02_03_12_04" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="0fc4b57d-b66b-4fef-adf0-967829947db0" testId="81963429-a366-060f-dc91-72fd508440a2" testName="Hub.Tests.Api.DrawingImportTests.Pm_can_import_both_disciplines_dl_own_only_and_global_pm_or_readonly_grants_no_other_project_authority" computerName="Jays-MacBook-Pro" duration="00:00:02.3607736" startTime="2026-11-02T03:12:39.9500220-04:00" endTime="2026-11-02T03:12:42.3107980-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0fc4b57d-b66b-4fef-adf0-967829947db0" />
+    <UnitTestResult executionId="f3a9a17f-3e5f-4003-b112-a1fb3a5b59bf" testId="9baa8e37-f4bc-0dad-7498-09f4d1a8faa9" testName="Hub.Tests.Api.DrawingImportTests.Late_fortieth_insert_failure_rolls_back_creates_keys_members_notifications_private_publication_logs_and_receipt" computerName="Jays-MacBook-Pro" duration="00:00:03.5549645" startTime="2026-11-02T03:12:04.6184790-04:00" endTime="2026-11-02T03:12:08.1666740-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f3a9a17f-3e5f-4003-b112-a1fb3a5b59bf" />
+    <UnitTestResult executionId="edc3c7af-b425-4350-953e-f3c30193dcff" testId="e72fcf19-a913-3411-077c-89bc56e9448e" testName="Hub.Tests.Api.DrawingImportTests.Unsafe_or_lossy_xlsx_values_and_forbidden_headers_never_become_creates(kind: &quot;formula&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:02.2324451" startTime="2026-11-02T03:12:15.4493170-04:00" endTime="2026-11-02T03:12:17.6817430-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="edc3c7af-b425-4350-953e-f3c30193dcff" />
+    <UnitTestResult executionId="a9236e6e-4d69-4ed3-9abf-813a3a0ec077" testId="42c78233-e235-dc49-682d-2f7ec842ebf5" testName="Hub.Tests.Api.DrawingImportTests.Unsafe_or_lossy_xlsx_values_and_forbidden_headers_never_become_creates(kind: &quot;time&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:02.1834908" startTime="2026-11-02T03:12:10.9757720-04:00" endTime="2026-11-02T03:12:13.1591440-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a9236e6e-4d69-4ed3-9abf-813a3a0ec077" />
+    <UnitTestResult executionId="fe3a368e-9b09-4482-a34f-9e0a94181d28" testId="f637ec28-0685-9b00-53dc-c690ecba6cee" testName="Hub.Tests.Api.DrawingImportTests.Body_envelope_limits_and_unknown_members_are_refused_and_hidden_rows_stay_in_preview" computerName="Jays-MacBook-Pro" duration="00:00:02.3491935" startTime="2026-11-02T03:12:37.6006140-04:00" endTime="2026-11-02T03:12:39.9497860-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="fe3a368e-9b09-4482-a34f-9e0a94181d28" />
+    <UnitTestResult executionId="7531723b-2d21-4410-b012-d96c3b3ff8e2" testId="1840ecc0-e083-78ba-ef68-3a8d94a02016" testName="Hub.Tests.Api.DrawingImportTests.Same_key_concurrent_and_lost_response_retry_create_once_changed_body_or_path_refuses_and_new_intent_creates_new_records" computerName="Jays-MacBook-Pro" duration="00:00:11.0212251" startTime="2026-11-02T03:11:53.5861540-04:00" endTime="2026-11-02T03:12:04.6107250-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7531723b-2d21-4410-b012-d96c3b3ff8e2" />
+    <UnitTestResult executionId="9308d67a-ec1f-4b55-943a-1a95f152a69c" testId="332ae946-7518-b3db-c20c-57ad2a2341e6" testName="Hub.Tests.Api.DrawingImportTests.Restricted_owner_and_reviewer_nonmembership_are_preview_errors_before_any_auto_add" computerName="Jays-MacBook-Pro" duration="00:00:02.8085339" startTime="2026-11-02T03:12:08.1676090-04:00" endTime="2026-11-02T03:12:10.9754350-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9308d67a-ec1f-4b55-943a-1a95f152a69c" />
+    <UnitTestResult executionId="b67edb42-977e-4fcc-8742-901364fb86b6" testId="325e1397-ab70-8f7c-0422-1b24d16b16ee" testName="Hub.Tests.Api.DrawingImportTests.Unsafe_or_lossy_xlsx_values_and_forbidden_headers_never_become_creates(kind: &quot;numeric&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:02.2897484" startTime="2026-11-02T03:12:13.1594060-04:00" endTime="2026-11-02T03:12:15.4490980-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b67edb42-977e-4fcc-8742-901364fb86b6" />
+    <UnitTestResult executionId="65fb4fb7-9e22-439e-93b4-8d84e0da6cfb" testId="facf4090-400f-b09d-2aa3-2db18782cf40" testName="Hub.Tests.Api.DrawingImportTests.Title_only_defaults_are_explicit_mapping_is_named_and_supplied_provenance_stays_optional" computerName="Jays-MacBook-Pro" duration="00:00:02.2865890" startTime="2026-11-02T03:12:19.9078770-04:00" endTime="2026-11-02T03:12:22.1944400-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="65fb4fb7-9e22-439e-93b4-8d84e0da6cfb" />
+    <UnitTestResult executionId="769f590e-801e-4aae-b3f3-fb76ae9af224" testId="1e73e8bb-5258-5e1a-f26d-05e287a75a24" testName="Hub.Tests.Api.DrawingImportTests.Foreign_generic_pending_claim_is_never_abandoned_and_no_import_effect_escapes" computerName="Jays-MacBook-Pro" duration="00:00:02.3247378" startTime="2026-11-02T03:12:22.1946730-04:00" endTime="2026-11-02T03:12:24.5194020-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="769f590e-801e-4aae-b3f3-fb76ae9af224" />
+    <UnitTestResult executionId="3fcfc0bf-61c9-40a2-8715-275f43570de9" testId="279b3f91-abd1-b089-c9aa-ffdeacc7a111" testName="Hub.Tests.Api.DrawingImportTests.Replay_rechecks_current_flag_and_discipline_authority_but_not_old_reference_or_project_baseline" computerName="Jays-MacBook-Pro" duration="00:00:02.2256627" startTime="2026-11-02T03:12:17.6819840-04:00" endTime="2026-11-02T03:12:19.9076330-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3fcfc0bf-61c9-40a2-8715-275f43570de9" />
+    <UnitTestResult executionId="399aa9e0-2926-47b5-80c3-d0ea9e2d8022" testId="1860df26-49a6-97f5-93f0-48e558063f87" testName="Hub.Tests.Api.DrawingImportTests.Client_number_pattern_is_a_warning_duplicates_create_and_deleted_records_are_never_restored" computerName="Jays-MacBook-Pro" duration="00:00:02.2815599" startTime="2026-11-02T03:12:35.3188100-04:00" endTime="2026-11-02T03:12:37.6003960-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="399aa9e0-2926-47b5-80c3-d0ea9e2d8022" />
+    <UnitTestResult executionId="1324b5d6-105c-4e8d-a35f-16ada4e9a3fa" testId="386ab8b5-8521-cc74-4bac-8bc3ed313388" testName="Hub.Tests.Api.DrawingImportTests.Every_row_is_previewed_bad_title_refuses_all_and_corrected_ordinary_file_creates_forty_normal_records(format: &quot;csv&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:03.0917613" startTime="2026-11-02T03:12:24.5196270-04:00" endTime="2026-11-02T03:12:27.6114010-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1324b5d6-105c-4e8d-a35f-16ada4e9a3fa" />
+    <UnitTestResult executionId="ddca88dc-93e1-40cb-989d-45edd8ebc993" testId="a6f62af7-1266-7ad0-1400-fb5881f47603" testName="Hub.Tests.Api.DrawingImportTests.Every_row_is_previewed_bad_title_refuses_all_and_corrected_ordinary_file_creates_forty_normal_records(format: &quot;xlsx&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:03.0200299" startTime="2026-11-02T03:12:27.6118940-04:00" endTime="2026-11-02T03:12:30.6316430-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ddca88dc-93e1-40cb-989d-45edd8ebc993" />
+    <UnitTestResult executionId="bda0464f-131e-4ae2-a9a4-1483e5acad85" testId="148a1085-540b-9af7-eab7-e0202d8fd594" testName="Hub.Tests.Api.DrawingImportTests.Missing_or_stale_baselines_changed_reference_versions_and_removed_restricted_memberships_refuse_without_writes" computerName="Jays-MacBook-Pro" duration="00:00:02.3747315" startTime="2026-11-02T03:12:30.6318800-04:00" endTime="2026-11-02T03:12:33.0066060-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="bda0464f-131e-4ae2-a9a4-1483e5acad85" />
+    <UnitTestResult executionId="299c60ff-5664-4b28-b5a5-998ff902e0ca" testId="a8849d93-bcb9-c704-85ab-745795308b34" testName="Hub.Tests.Api.DrawingImportTests.Archived_is_readonly_and_complete_requires_a_correction_reason_without_changing_manual_create" computerName="Jays-MacBook-Pro" duration="00:00:02.3117637" startTime="2026-11-02T03:12:33.0068200-04:00" endTime="2026-11-02T03:12:35.3185930-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="299c60ff-5664-4b28-b5a5-998ff902e0ca" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="Hub.Tests.Api.DrawingImportTests.Title_only_defaults_are_explicit_mapping_is_named_and_supplied_provenance_stays_optional" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="facf4090-400f-b09d-2aa3-2db18782cf40">
+      <Execution id="65fb4fb7-9e22-439e-93b4-8d84e0da6cfb" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.DrawingImportTests" name="Title_only_defaults_are_explicit_mapping_is_named_and_supplied_provenance_stays_optional" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.DrawingImportTests.Replay_rechecks_current_flag_and_discipline_authority_but_not_old_reference_or_project_baseline" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="279b3f91-abd1-b089-c9aa-ffdeacc7a111">
+      <Execution id="3fcfc0bf-61c9-40a2-8715-275f43570de9" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.DrawingImportTests" name="Replay_rechecks_current_flag_and_discipline_authority_but_not_old_reference_or_project_baseline" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.DrawingImportTests.Missing_or_stale_baselines_changed_reference_versions_and_removed_restricted_memberships_refuse_without_writes" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="148a1085-540b-9af7-eab7-e0202d8fd594">
+      <Execution id="bda0464f-131e-4ae2-a9a4-1483e5acad85" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.DrawingImportTests" name="Missing_or_stale_baselines_changed_reference_versions_and_removed_restricted_memberships_refuse_without_writes" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.DrawingImportTests.Client_number_pattern_is_a_warning_duplicates_create_and_deleted_records_are_never_restored" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="1860df26-49a6-97f5-93f0-48e558063f87">
+      <Execution id="399aa9e0-2926-47b5-80c3-d0ea9e2d8022" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.DrawingImportTests" name="Client_number_pattern_is_a_warning_duplicates_create_and_deleted_records_are_never_restored" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.DrawingImportTests.Foreign_generic_pending_claim_is_never_abandoned_and_no_import_effect_escapes" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="1e73e8bb-5258-5e1a-f26d-05e287a75a24">
+      <Execution id="769f590e-801e-4aae-b3f3-fb76ae9af224" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.DrawingImportTests" name="Foreign_generic_pending_claim_is_never_abandoned_and_no_import_effect_escapes" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.DrawingImportTests.Every_row_is_previewed_bad_title_refuses_all_and_corrected_ordinary_file_creates_forty_normal_records(format: &quot;csv&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="386ab8b5-8521-cc74-4bac-8bc3ed313388">
+      <Execution id="1324b5d6-105c-4e8d-a35f-16ada4e9a3fa" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.DrawingImportTests" name="Every_row_is_previewed_bad_title_refuses_all_and_corrected_ordinary_file_creates_forty_normal_records" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.DrawingImportTests.Unsafe_or_lossy_xlsx_values_and_forbidden_headers_never_become_creates(kind: &quot;numeric&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="325e1397-ab70-8f7c-0422-1b24d16b16ee">
+      <Execution id="b67edb42-977e-4fcc-8742-901364fb86b6" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.DrawingImportTests" name="Unsafe_or_lossy_xlsx_values_and_forbidden_headers_never_become_creates" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.DrawingImportTests.Body_envelope_limits_and_unknown_members_are_refused_and_hidden_rows_stay_in_preview" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="f637ec28-0685-9b00-53dc-c690ecba6cee">
+      <Execution id="fe3a368e-9b09-4482-a34f-9e0a94181d28" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.DrawingImportTests" name="Body_envelope_limits_and_unknown_members_are_refused_and_hidden_rows_stay_in_preview" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.DrawingImportTests.Restricted_owner_and_reviewer_nonmembership_are_preview_errors_before_any_auto_add" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="332ae946-7518-b3db-c20c-57ad2a2341e6">
+      <Execution id="9308d67a-ec1f-4b55-943a-1a95f152a69c" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.DrawingImportTests" name="Restricted_owner_and_reviewer_nonmembership_are_preview_errors_before_any_auto_add" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.DrawingImportTests.Late_fortieth_insert_failure_rolls_back_creates_keys_members_notifications_private_publication_logs_and_receipt" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="9baa8e37-f4bc-0dad-7498-09f4d1a8faa9">
+      <Execution id="f3a9a17f-3e5f-4003-b112-a1fb3a5b59bf" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.DrawingImportTests" name="Late_fortieth_insert_failure_rolls_back_creates_keys_members_notifications_private_publication_logs_and_receipt" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.DrawingImportTests.Archived_is_readonly_and_complete_requires_a_correction_reason_without_changing_manual_create" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="a8849d93-bcb9-c704-85ab-745795308b34">
+      <Execution id="299c60ff-5664-4b28-b5a5-998ff902e0ca" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.DrawingImportTests" name="Archived_is_readonly_and_complete_requires_a_correction_reason_without_changing_manual_create" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.DrawingImportTests.Every_row_is_previewed_bad_title_refuses_all_and_corrected_ordinary_file_creates_forty_normal_records(format: &quot;xlsx&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="a6f62af7-1266-7ad0-1400-fb5881f47603">
+      <Execution id="ddca88dc-93e1-40cb-989d-45edd8ebc993" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.DrawingImportTests" name="Every_row_is_previewed_bad_title_refuses_all_and_corrected_ordinary_file_creates_forty_normal_records" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.DrawingImportTests.Unsafe_or_lossy_xlsx_values_and_forbidden_headers_never_become_creates(kind: &quot;formula&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="e72fcf19-a913-3411-077c-89bc56e9448e">
+      <Execution id="edc3c7af-b425-4350-953e-f3c30193dcff" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.DrawingImportTests" name="Unsafe_or_lossy_xlsx_values_and_forbidden_headers_never_become_creates" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.DrawingImportTests.Pm_can_import_both_disciplines_dl_own_only_and_global_pm_or_readonly_grants_no_other_project_authority" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="81963429-a366-060f-dc91-72fd508440a2">
+      <Execution id="0fc4b57d-b66b-4fef-adf0-967829947db0" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.DrawingImportTests" name="Pm_can_import_both_disciplines_dl_own_only_and_global_pm_or_readonly_grants_no_other_project_authority" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.DrawingImportTests.Unsafe_or_lossy_xlsx_values_and_forbidden_headers_never_become_creates(kind: &quot;time&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="42c78233-e235-dc49-682d-2f7ec842ebf5">
+      <Execution id="a9236e6e-4d69-4ed3-9abf-813a3a0ec077" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.DrawingImportTests" name="Unsafe_or_lossy_xlsx_values_and_forbidden_headers_never_become_creates" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.DrawingImportTests.Same_key_concurrent_and_lost_response_retry_create_once_changed_body_or_path_refuses_and_new_intent_creates_new_records" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="1840ecc0-e083-78ba-ef68-3a8d94a02016">
+      <Execution id="7531723b-2d21-4410-b012-d96c3b3ff8e2" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.DrawingImportTests" name="Same_key_concurrent_and_lost_response_retry_create_once_changed_body_or_path_refuses_and_new_intent_creates_new_records" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="81963429-a366-060f-dc91-72fd508440a2" executionId="0fc4b57d-b66b-4fef-adf0-967829947db0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9baa8e37-f4bc-0dad-7498-09f4d1a8faa9" executionId="f3a9a17f-3e5f-4003-b112-a1fb3a5b59bf" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e72fcf19-a913-3411-077c-89bc56e9448e" executionId="edc3c7af-b425-4350-953e-f3c30193dcff" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="42c78233-e235-dc49-682d-2f7ec842ebf5" executionId="a9236e6e-4d69-4ed3-9abf-813a3a0ec077" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f637ec28-0685-9b00-53dc-c690ecba6cee" executionId="fe3a368e-9b09-4482-a34f-9e0a94181d28" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1840ecc0-e083-78ba-ef68-3a8d94a02016" executionId="7531723b-2d21-4410-b012-d96c3b3ff8e2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="332ae946-7518-b3db-c20c-57ad2a2341e6" executionId="9308d67a-ec1f-4b55-943a-1a95f152a69c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="325e1397-ab70-8f7c-0422-1b24d16b16ee" executionId="b67edb42-977e-4fcc-8742-901364fb86b6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="facf4090-400f-b09d-2aa3-2db18782cf40" executionId="65fb4fb7-9e22-439e-93b4-8d84e0da6cfb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1e73e8bb-5258-5e1a-f26d-05e287a75a24" executionId="769f590e-801e-4aae-b3f3-fb76ae9af224" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="279b3f91-abd1-b089-c9aa-ffdeacc7a111" executionId="3fcfc0bf-61c9-40a2-8715-275f43570de9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1860df26-49a6-97f5-93f0-48e558063f87" executionId="399aa9e0-2926-47b5-80c3-d0ea9e2d8022" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="386ab8b5-8521-cc74-4bac-8bc3ed313388" executionId="1324b5d6-105c-4e8d-a35f-16ada4e9a3fa" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a6f62af7-1266-7ad0-1400-fb5881f47603" executionId="ddca88dc-93e1-40cb-989d-45edd8ebc993" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="148a1085-540b-9af7-eab7-e0202d8fd594" executionId="bda0464f-131e-4ae2-a9a4-1483e5acad85" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a8849d93-bcb9-c704-85ab-745795308b34" executionId="299c60ff-5664-4b28-b5a5-998ff902e0ca" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="16" executed="16" passed="16" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.11)
+[xUnit.net 00:00:00.08]   Discovering: Hub.Tests
+[xUnit.net 00:00:00.20]   Discovered:  Hub.Tests
+[xUnit.net 00:00:00.21]   Starting:    Hub.Tests
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+warn: Microsoft.EntityFrameworkCore.Query[10103]
+      The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?', @p2='?', @p3='?' (DbType = Guid), @p4='?' (DbType = Object), @p5='?' (DbType = Guid), @p6='?' (DbType = Int64), @p7='?' (DbType = Object), @p8='?' (DbType = Guid), @p9='?' (DbType = Guid), @p10='?', @p11='?', @p12='?', @p13='?' (DbType = DateTime), @p14='?', @p15='?' (DbType = Guid), @p16='?' (DbType = Guid), @p17='?', @p18='?', @p19='?' (DbType = Object), @p20='?', @p21='?' (DbType = Guid), @p22='?' (DbType = Date), @p23='?' (DbType = Date), @p24='?' (DbType = Date), @p25='?', @p26='?', @p27='?' (DbType = DateTime), @p28='?' (DbType = Guid), @p29='?' (DbType = Guid), @p30='?' (DbType = Guid), @p31='?' (DbType = DateTime), @p32='?' (DbType = Guid), @p33='?' (DbType = Guid), @p34='?', @p35='?' (DbType = Date), @p36='?', @p37='?' (DbType = Date), @p38='?', @p39='?', @p40='?' (DbType = DateTime), @p41='?' (DbType = Guid), @p42='?', @p43='?', @p44='?' (DbType = Date), @p45='?' (DbType = Date), @p46='?' (DbType = Guid), @p47='?', @p48='?', @p49='?' (DbType = Guid), @p50='?' (DbType = Guid), @p51='?' (DbType = Guid), @p52='?' (DbType = Boolean), @p53='?' (DbType = Guid), @p54='?', @p55='?' (DbType = Int32), @p56='?' (DbType = Int32), @p57='?' (DbType = Int32), @p58='?' (DbType = Date), @p59='?' (DbType = DateTime), @p60='?', @p61='?' (DbType = DateTime), @p62='?' (DbType = Guid), @p63='?', @p64='?' (DbType = DateTime), @p65='?' (DbType = Guid), @p66='?' (DbType = Guid), @p67='?' (DbType = Int32), @p68='?' (DbType = DateTime), @p69='?' (DbType = DateTime), @p70='?', @p71='?', @p72='?' (DbType = Object), @p73='?' (DbType = DateTime), @p74='?' (DbType = Guid), @p75='?' (DbType = Guid), @p76='?' (DbType = Guid), @p77='?', @p78='?' (DbType = Guid), @p79='?', @p80='?' (DbType = Guid), @p81='?' (DbType = DateTime), @p82='?', @p83='?' (DbType = Guid), @p84='?' (DbType = DateTime), @p85='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO hub.activity_log (id, action, actor_type, actor_user_id, categories, chain_id, chain_seq, changes, correlation_id, item_id, item_key, item_name, item_type, occurred_at, prev_hash, project_discipline_id, project_id, reason, row_hash, snapshot, source)
+      VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17, @p18, @p19, @p20);
+      INSERT INTO hub.deliverable (id, accepted_date, baseline_due_date, baseline_start_date, cancelled_reason, client_drawing_number, created_at, created_by, current_baseline_id, current_issue_id, deleted_at, deleted_by, deliverable_type_id, description, due_date, issue_note, issued_date, issued_to, key, last_activity_at, milestone_id, name, on_hold_reason, original_due_date, original_start_date, owner_id, previous_status, priority, project_discipline_id, project_id, required_review_package_id, requires_review, reviewer_id, revision, row_version, seq, sort_order, start_date, started_at, status, status_changed_at, template_deliverable_id, transmittal_url, updated_at, updated_by)
+      VALUES (@p21, @p22, @p23, @p24, @p25, @p26, @p27, @p28, @p29, @p30, @p31, @p32, @p33, @p34, @p35, @p36, @p37, @p38, @p39, @p40, @p41, @p42, @p43, @p44, @p45, @p46, @p47, @p48, @p49, @p50, @p51, @p52, @p53, @p54, @p55, @p56, @p57, @p58, @p59, @p60, @p61, @p62, @p63, @p64, @p65);
+      INSERT INTO hub.outbox_event (id, attempts, created_at, dead_lettered_at, event_type, last_error, payload, processed_at, project_id)
+      VALUES (@p66, @p67, @p68, @p69, @p70, @p71, @p72, @p73, @p74);
+      INSERT INTO hub.work_assignment_occurrence (token, item_id, item_type, project_id, provenance, recipient_id, recorded_at, role, source_activity_id, source_occurred_at, source_version)
+      VALUES (@p75, @p76, @p77, @p78, @p79, @p80, @p81, @p82, @p83, @p84, @p85);
+fail: Microsoft.EntityFrameworkCore.Update[10000]
+      An exception occurred in the database while saving changes for context type 'Hub.Api.Data.HubDb'.
+      Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+       ---&gt; Npgsql.PostgresException (0x80004005): P0001: Synthetic final-row storage failure
+         at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource&lt;TResult&gt;.GetResult(Int16 token)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+        Exception data:
+          Severity: ERROR
+          SqlState: P0001
+          MessageText: Synthetic final-row storage failure
+          Where: PL/pgSQL function drawing_import_fail() line 4 at RAISE
+          File: pl_exec.c
+          Line: 3897
+          Routine: exec_stmt_raise
+         --- End of inner exception stack trace ---
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+         at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+      Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+       ---&gt; Npgsql.PostgresException (0x80004005): P0001: Synthetic final-row storage failure
+         at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource&lt;TResult&gt;.GetResult(Int16 token)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+        Exception data:
+          Severity: ERROR
+          SqlState: P0001
+          MessageText: Synthetic final-row storage failure
+          Where: PL/pgSQL function drawing_import_fail() line 4 at RAISE
+          File: pl_exec.c
+          Line: 3897
+          Routine: exec_stmt_raise
+         --- End of inner exception stack trace ---
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+         at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+fail: Hub.Api.Infrastructure.ProblemMiddleware[0]
+      Unhandled error 0HNPOM2AMUKTK
+      Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+       ---&gt; Npgsql.PostgresException (0x80004005): P0001: Synthetic final-row storage failure
+         at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource&lt;TResult&gt;.GetResult(Int16 token)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+        Exception data:
+          Severity: ERROR
+          SqlState: P0001
+          MessageText: Synthetic final-row storage failure
+          Where: PL/pgSQL function drawing_import_fail() line 4 at RAISE
+          File: pl_exec.c
+          Line: 3897
+          Routine: exec_stmt_raise
+         --- End of inner exception stack trace ---
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+         at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+         at Hub.Api.Data.HubDb.SaveChangesAsync(CancellationToken ct) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Data/HubDb.cs:line 1204
+         at Hub.Api.Features.DeliverableEndpoints.&lt;&gt;c__DisplayClass2_0.&lt;&lt;CreatePrepared&gt;b__0&gt;d.MoveNext() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Features/DeliverableCreation.cs:line 69
+      --- End of stack trace from previous location ---
+         at Hub.Api.Infrastructure.Tx.Run[T](HubDb db, Func`1 work)
+         at Hub.Api.Features.DeliverableEndpoints.CreatePrepared(CreatePlan plan, Access access, HubDb db, TeamService team, Notifier notify, String importSnapshot) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Features/DeliverableCreation.cs:line 52
+         at Hub.Api.Features.DrawingImportEndpoints.&lt;&gt;c__DisplayClass3_0.&lt;&lt;Commit&gt;b__0&gt;d.MoveNext() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Features/DrawingImport.cs:line 108
+      --- End of stack trace from previous location ---
+         at Hub.Api.Features.DrawingImportReceipts.&lt;&gt;c__DisplayClass3_0`1.&lt;&lt;Execute&gt;b__0&gt;d.MoveNext() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Features/DrawingImportReceipts.cs:line 73
+      --- End of stack trace from previous location ---
+         at Hub.Api.Infrastructure.Tx.Run[T](HubDb db, Func`1 work)
+         at Hub.Api.Infrastructure.Tx.Run[T](HubDb db, Func`1 work) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Infrastructure/Keys.cs:line 52
+         at Hub.Api.Features.DrawingImportReceipts.Execute[T](Guid projectId, Object payload, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock, Func`3 create, Func`4 authoriseReplay) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Features/DrawingImportReceipts.cs:line 30
+         at Hub.Api.Features.DrawingImportEndpoints.Commit(Guid projectId, DrawingImportCommitBody body, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock, TeamService team, Notifier notify) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Features/DrawingImport.cs:line 79
+         at Microsoft.AspNetCore.Http.RequestDelegateFactory.&lt;TaskOfTToValueTaskOfObject&gt;g__ExecuteAwaited|92_0[T](Task`1 task)
+         at Hub.Api.Infrastructure.Http.&lt;&gt;c__DisplayClass7_0`1.&lt;&lt;RequireFlag&gt;b__0&gt;d.MoveNext() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Infrastructure/Http.cs:line 53
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Http.RequestDelegateFactory.&lt;ExecuteValueTaskOfObject&gt;g__ExecuteAwaited|130_0(ValueTask`1 valueTask, HttpContext httpContext, JsonTypeInfo`1 jsonTypeInfo)
+         at Microsoft.AspNetCore.Http.RequestDelegateFactory.&lt;&gt;c__DisplayClass102_2.&lt;&lt;HandleRequestBodyAndCompileRequestDelegateForJson&gt;b__2&gt;d.MoveNext()
+      --- End of stack trace from previous location ---
+         at Hub.Api.Infrastructure.IdempotencyMiddleware.Invoke(HttpContext ctx, HubDb db, CurrentUser me, TimeProvider clock) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Infrastructure/Idempotency.cs:line 36
+         at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+         at Microsoft.AspNetCore.RateLimiting.RateLimitingMiddleware.InvokeInternal(HttpContext context, EnableRateLimitingAttribute enableRateLimitingAttribute)
+         at Hub.Api.Infrastructure.ProvisioningMiddleware.Invoke(HttpContext ctx, HubDb db, CurrentUser me, AuditContext audit) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Infrastructure/Auth.cs:line 282
+         at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+         at Program.&lt;&gt;c.&lt;&lt;&lt;Main&gt;$&gt;b__0_12&gt;d.MoveNext() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Program.cs:line 185
+      --- End of stack trace from previous location ---
+         at Hub.Api.Infrastructure.ProblemMiddleware.Invoke(HttpContext ctx) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Infrastructure/Errors.cs:line 57
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+warn: Microsoft.AspNetCore.Routing.EndpointRoutingMiddleware[9]
+      A request body size limit could not be applied. This server does not support the IHttpMaxRequestBodySizeFeature.
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+[xUnit.net 00:00:48.94]   Finished:    Hub.Tests
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

@@ -1,3 +1,5 @@
+import { PersonPanelTrigger } from '@/components/hub/person-panel-trigger'
+import { personOptionLabel } from '@/components/hub/person-option-label'
 import { useId, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { toast } from 'sonner'
@@ -24,7 +26,7 @@ export type SourceHead = Schemas['SourceHeadRow']
 export type CoordOptions = Schemas['CoordinationOptions']
 export type InputUse = Schemas['InputUseRow']
 export type Choice = { value: string; label: string }
-export const peopleChoices = (o: CoordOptions): Choice[] => o.people.map(p => ({ value: p.id, label: p.displayName }))
+export const peopleChoices = (o: CoordOptions, noticesOn: boolean): Choice[] => o.people.map(p => ({ value: p.id, label: personOptionLabel(p.displayName, p.personNotices, noticesOn) }))
 export const disciplineChoices = (o: CoordOptions): Choice[] => o.disciplines.map(p => ({ value: p.id, label: p.name }))
 export const sourceChoices = (o: CoordOptions): Choice[] => o.sources.filter(s => s.published && s.isCurrent).map(s => ({ value: s.revision.id, label: `${s.revision.sourceKey} · ${s.revision.revision} · ${s.revision.title}` }))
 export const workChoices = (o: CoordOptions): Choice[] => [...o.tasks.map(w => ({ value: `Task:${w.id}`, label: `${w.key} · ${w.name}` })), ...o.deliverables.map(w => ({ value: `Deliverable:${w.id}`, label: `${w.key} · ${w.name}` }))]
@@ -49,10 +51,10 @@ export function Count({ n, tone }: { n?: number | null; tone: 'bad' | 'warn' }) 
   return <span className={cn('font-semibold', tone === 'bad' ? 'text-bad' : 'text-warn')}><span aria-hidden>{tone === 'bad' ? '■ ' : '▲ '}</span>{n}</span>
 }
 /** A person with their stable identity mark; someone no longer listed reads as unavailable, never as a blank. */
-export function PersonLabel({ id, name, options }: { id?: string | null; name?: string | null; options?: CoordOptions }) {
+export function PersonLabel({ id, name, options, focusKey }: { id?: string | null; name?: string | null; options?: CoordOptions; focusKey?: string }) {
   const shown = name ?? options?.people.find(p => p.id === id)?.displayName
-  if (!shown) return <span className="text-muted-foreground">{t('coord.unavailable')}</span>
-  return <span className="inline-flex min-w-0 items-center gap-2 align-middle"><Avatar id={id} name={shown} /><span className="break-words">{shown}</span></span>
+  if (!shown?.trim()) return <span className="text-muted-foreground">{t('coord.unavailable')}</span>
+  return <span className="inline-flex min-w-0 items-center gap-2 align-middle"><Avatar id={id} name={shown} />{id ? <PersonPanelTrigger userId={id} name={shown} focusKey={focusKey} className="break-words" /> : <span className="break-words">{shown}</span>}</span>
 }
 /** A register's pages (§13.0): a labelled navigation landmark with Previous, the page of the total, and Next. */
 export function RegisterPager({ label, page, total, pageSize, onPage }: { label: string; page: number; total: number; pageSize: number; onPage: (page: number) => void }) {
@@ -64,11 +66,11 @@ export function RegisterPager({ label, page, total, pageSize, onPage }: { label:
   </nav>
 }
 
-export function CommandForm({ path, title, hint, payload, children, onClose, onDone, submitLabel, safe }: { path: string; title: string; hint?: string; payload: () => object; children?: ReactNode; onClose: () => void; onDone: (id: string) => void; submitLabel?: string; safe?: SafeForm }) {
+export function CommandForm({ path, title, hint, payload, children, onClose, onDone, submitLabel, submitDisabled, safe }: { path: string; title: string; hint?: string; payload: () => object; children?: ReactNode; onClose: () => void; onDone: (id: string) => void; submitLabel?: string; submitDisabled?: boolean; safe?: SafeForm }) {
   const [busy, setBusy] = useState(false), [error, setError] = useState<unknown>(null)
   const receipt = useRef<{ signature: string; id: string } | null>(null)
   async function submit(e: React.FormEvent) {
-    e.preventDefault(); setError(null); setBusy(true)
+    e.preventDefault(); if (submitDisabled) return; setError(null); setBusy(true)
     try {
       const body = payload(), signature = JSON.stringify(body)
       if (!receipt.current || receipt.current.signature !== signature) receipt.current = { signature, id: crypto.randomUUID() }
@@ -85,7 +87,7 @@ export function CommandForm({ path, title, hint, payload, children, onClose, onD
         {refusals.map(r => <li key={r.key}>{r.message}</li>)}
       </ul></div>}
       {error instanceof ApiError && error.status === 409 && <p role="status" className="flex gap-2 rounded-md border border-warn/40 bg-warn-bg px-4 py-3 text-sm text-warn"><span aria-hidden>▲</span><span>{t('coord.stale')}</span></p>}
-      <DialogFooter><Button type="button" variant="outline" disabled={busy} onClick={() => safe ? safe.close(onClose) : onClose()}>{t('common.cancel')}</Button><Button type="submit" disabled={busy}>{busy && <Spinner />}{busy ? t('common.saving') : submitLabel ?? t('coord.confirm')}</Button></DialogFooter>
+      <DialogFooter><Button type="button" variant="outline" disabled={busy} onClick={() => safe ? safe.close(onClose) : onClose()}>{t('common.cancel')}</Button><Button type="submit" disabled={busy || submitDisabled}>{busy && <Spinner />}{busy ? t('common.saving') : submitLabel ?? t('coord.confirm')}</Button></DialogFooter>
     </form></DialogContent></Dialog>
 }
 export type FormField = { name: string; label: string; type?: 'text' | 'textarea' | 'url' | 'date' | 'datetime-local' | 'number'; choices?: Choice[]; optional?: boolean; min?: number }

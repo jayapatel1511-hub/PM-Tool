@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils'
 import { t, tv , runtimeText } from '@/lib/i18n'
+import './semantic-colours.css'
 
 // Status colour language (§13.0): every colour carries text and an icon; colour is never the only signal.
 type Tone = 'ok' | 'warn' | 'bad' | 'idle' | 'done' | 'work'
@@ -34,7 +35,7 @@ export function toneOf(status?: string | null): Tone { return (status && STATUS_
 export function Pill({ tone, children, className, title, icon = true }: { tone: Tone; children: React.ReactNode; className?: string; title?: string; icon?: boolean }) {
   const s = TONE[tone]
   return (
-    <span title={title} className={cn('inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border border-transparent px-2 py-0.5 text-xs/[18px] font-medium', s.cls, className)}>
+    <span title={title} data-semantic-tone={tone} className={cn('semantic-pill inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border border-transparent px-2 py-0.5 text-xs/[18px] font-medium', s.cls, className)}>
       {icon && <span aria-hidden className="text-xs">{s.icon}</span>}{children}
     </span>
   )
@@ -61,10 +62,10 @@ export function PriorityBadge({ priority }: { priority?: string | null }) {
 /** Small indicator chip with icon and short text ("Overdue 3d", "Blocked", "Waiting", "Review r2"). */
 export function Chip({ tone, children, title, onClick }: { tone: Tone; children: React.ReactNode; title?: string; onClick?: () => void }) {
   const s = TONE[tone]
-  const cls = cn('inline-flex items-center gap-1 whitespace-nowrap rounded-md border border-transparent px-1.5 py-px text-xs/[18px] font-medium', s.cls, onClick && 'cursor-pointer hover:brightness-95')
+  const cls = cn('semantic-pill inline-flex items-center gap-1 whitespace-nowrap rounded-md border border-transparent px-1.5 py-px text-xs/[18px] font-medium', s.cls, onClick && 'cursor-pointer hover:brightness-95')
   return onClick
-    ? <button type="button" title={title} onClick={onClick} className={cls}><span aria-hidden className="text-xs">{s.icon}</span>{children}</button>
-    : <span title={title} className={cls}><span aria-hidden className="text-xs">{s.icon}</span>{children}</span>
+    ? <button type="button" title={title} data-semantic-tone={tone} onClick={onClick} className={cls}><span aria-hidden className="text-xs">{s.icon}</span>{children}</button>
+    : <span title={title} data-semantic-tone={tone} className={cls}><span aria-hidden className="text-xs">{s.icon}</span>{children}</span>
 }
 
 export function Key({ children }: { children: React.ReactNode }) {

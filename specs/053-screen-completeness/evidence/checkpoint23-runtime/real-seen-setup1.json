@@ -1,0 +1,129 @@
+{
+  "database": "hub_qa_checkpoint23",
+  "apiBase": "http://127.0.0.1:5088",
+  "uiBase": "http://127.0.0.1:8853",
+  "projectId": "01a19ad8-43ef-7ad6-af63-f90bcbd8468e",
+  "projectNumber": "QA23-MVYUO4PT",
+  "disciplineId": "01a19ad8-442f-7b1c-8f16-643e340ad4a3",
+  "today": "2026-11-02",
+  "oldTask": {
+    "id": "01a19ad8-4652-7399-bbc2-ff6e3f040669",
+    "key": "QA23-MVYUO4PT-T0001",
+    "rowVersion": 0,
+    "warnings": []
+  },
+  "people": {
+    "admin": {
+      "id": "01a19acd-9edd-705d-a834-631031fcb1ec",
+      "name": "Jordan Lee"
+    },
+    "pm": {
+      "id": "01a19acd-9edd-7b6f-8f0a-d2d6f83f12bf",
+      "name": "Priya Nair"
+    },
+    "alex": {
+      "id": "01a19acd-9edd-7488-8e32-3e632aed017c",
+      "name": "Alex Chen"
+    },
+    "marc": {
+      "id": "01a19acd-9edd-7895-9e28-96dd0f9ba11a",
+      "name": "Marc Dubois"
+    },
+    "jill": {
+      "id": "01a19acd-9edd-783b-8d9a-75534ab735ee",
+      "name": "Jill Martin"
+    },
+    "readOnly": {
+      "id": "01a19acd-9edd-766c-8d79-e27f01497aa8",
+      "name": "Rita Gomez"
+    }
+  },
+  "calls": [
+    {
+      "method": "GET",
+      "route": "me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "me",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "route": "admin/settings/flag.work_screens",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "route": "admin/settings/flag.people_screens",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "route": "admin/settings/flag.screen_patterns",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "route": "admin/settings/flag.visual_system",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "reference",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "route": "projects",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "route": "projects/01a19ad8-43ef-7ad6-af63-f90bcbd8468e",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "route": "projects/01a19ad8-43ef-7ad6-af63-f90bcbd8468e/transition",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "projects/01a19ad8-43ef-7ad6-af63-f90bcbd8468e",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "me/work",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "route": "projects/01a19ad8-43ef-7ad6-af63-f90bcbd8468e/tasks",
+      "status": 201
+    }
+  ],
+  "status": "SETUP PASS; no private visit/open/mark-all was sent by setup; browser join still unrun"
+}

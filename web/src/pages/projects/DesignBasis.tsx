@@ -1,3 +1,5 @@
+import { useFlag } from '@/lib/auth'
+import { personOptionLabel } from '@/components/hub/person-option-label'
 import { ViewMenu } from '@/components/hub/views'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Plus } from 'lucide-react'
@@ -114,7 +116,7 @@ export function DesignBasisTab() {
           <td className={cn(tdCls, 'min-w-64')}><button className="break-words text-left font-semibold text-primary underline-offset-4 hover:underline" aria-current={selected === row.id || undefined} onClick={() => set('basis', row.id)}><span className="key font-normal">{row.key}</span> · {row.title}</button></td>
           <td className={tdCls}><Kind kind={row.kind} /></td>
           <td className={tdCls}>{discName(row.projectDisciplineId) ?? <span className="text-muted-foreground">{t('coord.unavailable')}</span>}</td>
-          <td className={tdCls}><PersonLabel id={row.ownerId} name={member(row.ownerId)} /></td>
+          <td className={tdCls}><PersonLabel id={row.ownerId} name={member(row.ownerId)} focusKey={`design-basis:${row.id}:owner`} /></td>
           <td className={tdCls}>{row.currentStatus ? <CoordStatus status={row.currentStatus} /> : <Pill tone="idle">{t('basis.notConfirmed')}</Pill>}</td>
           <td className={tdCls}>{row.latestStatus === 'Proposed' ? <CoordStatus status={row.latestStatus} /> : <span className="text-muted-foreground">{t('common.dash')}</span>}</td>
           <td className={cn(tdCls, 'text-right tabular-nums')}><Count n={row.conflictCount} tone="warn" /></td></tr>)}</tbody>
@@ -145,6 +147,7 @@ function VersionFields({ draft, setDraft }: { draft: VersionDraft; setDraft: (v:
 
 function BasisForm({ base, number, options, onClose, onDone, existing, editing, allowedDisciplines, assignIn }: { base: string; number: string; options: CoordOptions;
   onClose: () => void; onDone: (id: string) => void; existing?: Detail; editing?: Version; allowedDisciplines?: string[]; assignIn?: string[] }) {
+  const noticesOn = useFlag('capacity_screens')
   const current = editing ?? existing?.versions.find(v => v.version.id === existing.entry.currentVersionId)?.version
   const [kind, setKind] = useState(existing?.entry.kind ?? 'Assumption'), [title, setTitle] = useState(existing?.entry.title ?? '')
   const [ownerId, setOwnerId] = useState(existing?.entry.ownerId ?? options.actorId)
@@ -184,10 +187,10 @@ function BasisForm({ base, number, options, onClose, onDone, existing, editing, 
     <form onSubmit={submit} className="space-y-4"><fieldset disabled={busy} className="space-y-4">
       {!existing && <><SelectField label={t('basis.kind')} value={kind} onChange={setKind} choices={[{ value: 'Criterion', label: t('basis.criterion') }, { value: 'Assumption', label: t('basis.assumption') }]} />
         <Field label={t('coord.title')} htmlFor="basis-title"><Input id="basis-title" required maxLength={200} value={title} onChange={e => setTitle(e.target.value)} /></Field>
-        {canAssign && <SelectField label={t('basis.owner')} value={ownerId} onChange={setOwnerId} choices={options.people.map(p => ({ value: p.id, label: p.displayName }))} />}
+        {canAssign && <SelectField label={t('basis.owner')} value={ownerId} onChange={setOwnerId} choices={options.people.map(p => ({ value: p.id, label: personOptionLabel(p.displayName, p.personNotices, noticesOn) }))} />}
         <SelectField label={t('basis.discipline')} value={disciplineId} onChange={setDisciplineId}
           choices={options.disciplines.filter(d => !allowedDisciplines || allowedDisciplines.includes(d.id)).map(d => ({ value: d.id, label: d.name }))} />
-        {canAssign && <SelectField label={t('basis.approver')} value={approverId} onChange={setApproverId} required={false} choices={options.people.map(p => ({ value: p.id, label: p.displayName }))} />}</>}
+        {canAssign && <SelectField label={t('basis.approver')} value={approverId} onChange={setApproverId} required={false} choices={options.people.map(p => ({ value: p.id, label: personOptionLabel(p.displayName, p.personNotices, noticesOn) }))} />}</>}
       <VersionFields draft={draft} setDraft={setDraft} />
       {decisions.error && <ErrorBanner error={decisions.error} retry={() => decisions.refetch()} />}
       <SelectField label={t('basis.sourceDecision')} value={draft.decisionId}
@@ -290,15 +293,16 @@ function BasisDetail({ projectId, base, id, number, options, name, close, refres
 
 function AssignForm({ base, entry, options, close, done }: { base: string; entry: Entry; options: CoordOptions;
   close: () => void; done: () => void }) {
+  const noticesOn = useFlag('capacity_screens')
   const [ownerId, setOwnerId] = useState(entry.ownerId)
   const [approverId, setApproverId] = useState(entry.independentApproverId ?? '')
   const [reason, setReason] = useState('')
   return <CommandForm path={`${base}/${entry.id}/assign`} title={t('basis.owner')} onClose={close} onDone={done}
     payload={() => ({ entryRowVersion: entry.rowVersion, ownerId, independentApproverId: approverId || null, reason })}>
     <SelectField label={t('basis.owner')} value={ownerId} onChange={setOwnerId}
-      choices={options.people.map(p => ({ value: p.id, label: p.displayName }))} />
+      choices={options.people.map(p => ({ value: p.id, label: personOptionLabel(p.displayName, p.personNotices, noticesOn) }))} />
     <SelectField label={t('basis.approver')} value={approverId} onChange={setApproverId} required={false}
-      choices={options.people.map(p => ({ value: p.id, label: p.displayName }))} />
+      choices={options.people.map(p => ({ value: p.id, label: personOptionLabel(p.displayName, p.personNotices, noticesOn) }))} />
     <Field label={t('basis.reason')} htmlFor="basis-assign-reason"><Textarea id="basis-assign-reason" required minLength={5}
       value={reason} onChange={e => setReason(e.target.value)} /></Field>
   </CommandForm>
@@ -352,12 +356,13 @@ function ImpactForm({ base, id, number, row, impactId, options, close, done }: {
 
 function ProceedForm({ base, id, version, options, close, done }: { base: string; id: string; version: Version;
   options: CoordOptions; close: () => void; done: () => void }) {
+  const noticesOn = useFlag('capacity_screens')
   const [ownerId, setOwnerId] = useState(''), [expiry, setExpiry] = useState(''), [reason, setReason] = useState('')
   return <CommandForm path={`${base}/${id}/versions/${version.id}/proceed`} title={t('basis.proceed')}
     hint={t('basis.proceedHint')} onClose={close} onDone={done}
     payload={() => ({ versionRowVersion: version.rowVersion, scope: version.scope, ownerId, expiresOn: expiry, reason })}>
     <p className="rounded-md bg-muted px-4 py-3 text-sm">{t('basis.scope')}: {version.scope}</p><SelectField label={t('basis.owner')} value={ownerId} onChange={setOwnerId}
-      choices={options.people.map(p => ({ value: p.id, label: p.displayName }))} />
+      choices={options.people.map(p => ({ value: p.id, label: personOptionLabel(p.displayName, p.personNotices, noticesOn) }))} />
     <Field label={t('basis.expiry')} htmlFor="basis-expiry"><Input id="basis-expiry" type="date" required value={expiry} onChange={e => setExpiry(e.target.value)} /></Field>
     <Field label={t('basis.reason')} htmlFor="basis-proceed-reason"><Textarea id="basis-proceed-reason" required minLength={5} value={reason} onChange={e => setReason(e.target.value)} /></Field>
   </CommandForm>

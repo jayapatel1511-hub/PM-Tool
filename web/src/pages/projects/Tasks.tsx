@@ -1,3 +1,5 @@
+import { TaskLastActivity } from './work-activity-comments'
+import { PersonPanelTrigger } from '@/components/hub/person-panel-trigger'
 import { disciplineColour } from '@/lib/discipline-colour'
 import { UrlSearchInput } from '@/components/hub/url-search'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
@@ -6,6 +8,7 @@ import { ArrowDown, ArrowUp, ChevronDown, Columns3, Ellipsis, Inbox, KanbanSquar
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
+import { TaskBulkCommandDialog, TaskBulkToolbar, useTaskBulkSelection, type TaskBulkOperation } from '@/components/hub/task-bulk-command'
 import { ActiveFilters, ChipToggle, ConfirmDialog, Empty, ErrorBanner, Field, FilterBar, Loading, Page, Spinner, TableRegion, selectCls, tdCls, thCls, useIsPhone } from '@/components/hub/common'
 import { InlineDate, InlineText } from '@/components/hub/fields'
 import { useItemPanel } from '@/components/hub/panel-host'
@@ -38,6 +41,8 @@ import { DeletedList, DeletedToggle, useShowDeleted } from '@/components/hub/del
 import { StartAuthorisationDialog, type StartRequest } from './TaskStart'
 import { DraftNotice } from '@/components/hub/drafts'
 import { useSafeForm } from '@/hooks/drafts'
+import { TaskCommentCount } from './work-activity-comments'
+import { TaskGroupSummary, TaskGroupReadStatus, groupHeading, mergeTaskGroupPages, taskGroupEntries, type TaskListGroup } from './task-group-presentation'
 
 // ---------- Shapes (GET /projects/{id}/tasks, /tasks/{id}) ----------
 
@@ -77,12 +82,13 @@ export function blockerReasons(s?: TaskStateView | null): Reason[] {
 
 /** Indicator chips (§10.3) from the stored derived state: one per row in lists (§41 R7), every one with `all` in the task
  *  panel. The blocked and waiting chips open their blockers without opening the panel (§13.3 UX). */
-function taskSignals(r: TaskRow) {
+function taskSignals(r: TaskRow, reviewPresentation = false) {
   const s = r.state
   const why = (tone: 'bad' | 'warn', label: string) => <Why reasons={blockerReasons(s)} title={t('task.blockersOf', { key: r.key })}><Chip tone={tone}>{label}</Chip></Why>
   const blocked = s && (s.daysBlocked > 0 ? t('ind.blockedD', { n: s.daysBlocked }) : t('ind.blocked'))
   const signals = ([
     s?.isOverdue && { key: 'overdue', tone: 'bad', label: t('ind.overdueD', { n: s.daysOverdue }) },
+    reviewPresentation && r.requiresReview && !r.reviewerId && { key: 'reviewerMissing', tone: 'warn', label: t('workReview.missing') },
     s?.isDueSoon && !s.isOverdue && { key: 'dueSoon', tone: 'warn', label: t('ind.dueSoon') },
     s?.isBlocked && { key: 'blocked', tone: 'bad', label: blocked!, node: why('bad', blocked!) },
     s?.isWaiting && !s.isBlocked && { key: 'waiting', tone: 'warn', label: t('ind.waiting'), node: why('warn', t('ind.waiting')) },
@@ -102,7 +108,8 @@ function taskSignals(r: TaskRow) {
 }
 
 export function TaskIndicators({ r, all }: { r: TaskRow; all?: boolean }) {
-  return <span className="inline-flex flex-wrap items-center gap-1"><OneSignal signals={taskSignals(r)} all={all} />{r.pickupOfferOpen && <Chip tone="work">{t('pickup.title')}</Chip>}</span>
+  const patternsOn = useFlag('screen_patterns')
+  return <span className="inline-flex flex-wrap items-center gap-1"><OneSignal signals={taskSignals(r, patternsOn)} all={all} />{r.pickupOfferOpen && <Chip tone="work">{t('pickup.title')}</Chip>}</span>
 }
 
 /** A toolbar menu button for one choice, such as Group or Sort (§41 R1): the button shows the current choice, the menu is a
@@ -150,9 +157,14 @@ export function useTaskHints(_p: Pick<ProjectDetail, 'status' | 'permissions'>) 
 const needsStartAuthorisation = (e: unknown) => e instanceof ApiError && e.code === 'start_authorisation_required'
 
 /** Saves, transitions and the follow-up offers shared by the list, board and panel (T-16 reasons, T-20 progress offers, G-07 conflicts). */
+export type PendingTaskAction =
+  | { readonly kind: 'edit'; readonly id: string; readonly fields: readonly string[] }
+  | { readonly kind: 'transition'; readonly id: string; readonly to: string }
+  | { readonly kind: 'authoriseStart'; readonly id: string }
+
 /** `onSaved` hears about every change that was actually saved, including ones completed in a dialog (meeting tray, §12.13). */
 export function useTaskActions(onChanged: () => void, onSaved?: (id: string, key: string, what: string) => void) {
-  const [ask, setAsk] = useState<{ title: string; run: (reason: string) => Promise<unknown>; cancel: () => void } | null>(null)
+  const [ask, setAsk] = useState<{ title: string; action: Extract<PendingTaskAction, { kind: 'edit' }>; run: (reason: string) => Promise<unknown>; cancel: () => void } | null>(null)
   const [moving, setMoving] = useState<MoveRequest | null>(null)
   const [offer, setOffer] = useState<{ id: string; key: string; rowVersion: number; to: string } | null>(null)
   const [starting, setStarting] = useState<StartRequest | null>(null)
@@ -168,6 +180,7 @@ export function useTaskActions(onChanged: () => void, onSaved?: (id: string, key
       if (err.fieldErrors?.reason && !body.reason) {
         return await new Promise<number | null | undefined>((resolve) => setAsk({
           title: t('task.reasonTitle', { key: r.key }),
+          action: { kind: 'edit', id: r.id, fields: Object.keys(body).filter(field => field !== 'reason') },
           cancel: () => resolve(undefined),
           run: async (reason) => {
             try {
@@ -229,7 +242,11 @@ export function useTaskActions(onChanged: () => void, onSaved?: (id: string, key
       )}
     </>
   )
-  return { save, move, setProgress, authoriseStart, dialogs }
+  // Match the foreground dialog order without exposing or changing its captured body/version.
+  const pendingAction: PendingTaskAction | undefined = offer ? { kind: 'transition', id: offer.id, to: offer.to }
+    : starting ? starting.to ? { kind: 'transition', id: starting.id, to: starting.to } : { kind: 'authoriseStart', id: starting.id }
+    : moving ? { kind: 'transition', id: moving.id, to: moving.to } : ask?.action
+  return { save, move, setProgress, authoriseStart, dialogs, pendingAction, dialogOpen: !!(ask || moving || offer || starting) }
 }
 
 /** A short description of a saved change for the meeting tray. */
@@ -241,20 +258,39 @@ function describe(body: Record<string, unknown>): string {
 
 /** Status change with the reason, review comment, reviewer or status note it needs (R-03, AC-TSK-03, G-09, C-08). */
 export function TransitionDialog({ m, onClose, onStart }: { m: MoveRequest; onClose: (done: boolean) => void; onStart?: (body: TransitionBody) => void }) {
+  const patternsOn = useFlag('screen_patterns')
+  const viewer = useMe(), workOn = useFlag('work_screens'), peopleOn = useFlag('people_screens')
+  const needsGuidance = patternsOn && !!m.needsReviewer
+  // Re-read the same canonical detail used by the status menu. A transition may also originate from a progress offer,
+  // so neither a list-row performer nor a possibly stale /me setting is sufficient reviewer guidance.
+  const guidance = useQuery({ queryKey: ['task-reviewer-transition-guidance', m.id, m.rowVersion, viewer.id, workOn, peopleOn], queryFn: () => readTask(m.id),
+    enabled: needsGuidance, staleTime: 0, refetchOnMount: 'always' })
+  const guidanceReady = !!guidance.data && !guidance.error && !guidance.isFetching
+  const allowSelfReview = guidance.data?.permissions.allowSelfReview === true
+  const performer = guidance.data?.task.assigneeId
   const revision = m.to === 'Revision Required'
   const [comment, setComment] = useState('')
   const [reviewer, setReviewer] = useState<string | null>(null)
+  const invalidReviewer = needsGuidance && (!guidanceReady || (!allowSelfReview && !!performer && reviewer === performer))
   return (
     <ConfirmDialog open onOpenChange={(o) => !o && onClose(false)} title={t('task.moveTitle', { key: m.key, to: tv(m.to) })}
       body={m.via ? t('task.via', { via: tv(m.via) }) : undefined} confirmLabel={tv(m.to)}
-      reason={m.needsReason ? true : undefined} busy={(revision && !comment.trim()) || (!!m.needsReviewer && !reviewer)}
+      reason={m.needsReason ? true : undefined} busy={(revision && !comment.trim()) || (!!m.needsReviewer && !reviewer) || invalidReviewer}
       onConfirm={async (reason) => {
+        if (invalidReviewer) return
         const body = transitionBody({ toStatus: m.to, reason: reason || undefined, comment: comment.trim() || undefined, reviewerId: reviewer ?? undefined, rowVersion: m.rowVersion })
         try { await moveTask(m.id, body) }
         catch (e) { if (onStart && needsStartAuthorisation(e)) { onStart(body); return } throw e } // FR-RDY-02: the readiness dialog takes over
         onClose(true)
       }}>
-      {m.needsReviewer && <Field label={t('field.ReviewerId')} htmlFor="tt-reviewer" hint={t('task.reviewerNeeded')}><PeoplePicker id="tt-reviewer" value={reviewer} onChange={setReviewer} /></Field>}
+      {m.needsReviewer && <Field label={t(needsGuidance && guidanceReady && !allowSelfReview ? 'workReview.reviewer' : 'field.ReviewerId')} htmlFor="tt-reviewer" hint={t('task.reviewerNeeded')}>
+        <PeoplePicker id="tt-reviewer" value={reviewer} onChange={setReviewer} disabled={needsGuidance && !guidanceReady}
+          exclude={needsGuidance && guidanceReady && !allowSelfReview && performer ? [performer] : undefined} />
+        {needsGuidance && guidance.isPending && <p role="status" className="text-xs text-muted-foreground">{t('app.loading')}</p>}
+        {needsGuidance && guidance.error && <ErrorBanner error={guidance.error} retry={() => guidance.refetch()} />}
+        {needsGuidance && guidanceReady && !allowSelfReview && <p className="text-xs text-muted-foreground">{t('workReview.independentHint')}</p>}
+        {needsGuidance && guidanceReady && allowSelfReview && !!performer && reviewer === performer && <p className="text-xs text-muted-foreground">{t('workReview.selfAllowed')}</p>}
+      </Field>}
       <Field label={revision ? t('task.revisionComment') : t('deliverable.statusNote')} htmlFor="tt-comment" hint={revision ? t('task.revisionHint') : undefined} optional={!revision}>
         <Textarea id="tt-comment" rows={3} value={comment} onChange={(e) => setComment(e.target.value)} />
       </Field>
@@ -274,9 +310,10 @@ export const readableDisabled = 'data-[disabled]:opacity-100 data-[disabled]:tex
 export function StatusMenu({ r, onMove, disabled }: { r: TaskRow; onMove: (m: MoveRequest) => Promise<boolean | null> | void; disabled?: boolean }) {
   const [open, setOpen] = useState(false)
   const optimistic = useFlag('small_ux')
+  const viewer = useMe(), workOn = useFlag('work_screens'), peopleOn = useFlag('people_screens')
   const [pending, setPending] = useState<string | null>(null)
   const requestMove = async (m: MoveRequest) => { if (optimistic && (r.status !== 'Not Started' || readiness.data?.needsAuthorisation === false) && !m.needsReason && m.to !== 'Revision Required' && !m.needsReviewer) setPending(m.to); try { await onMove(m) } finally { setPending(null) } }
-  const q = useQuery({ queryKey: ['task', r.id, r.rowVersion], queryFn: () => readTask(r.id), enabled: open })
+  const q = useQuery({ queryKey: ['task', r.id, r.rowVersion, viewer.id, workOn, peopleOn], queryFn: () => readTask(r.id), enabled: open })
   const readiness = useQuery({ queryKey: ['task-start-readiness', r.id, r.rowVersion], enabled: optimistic && open && r.status === 'Not Started', queryFn: () => typedRequest('get', '/api/v1/tasks/{id}/start-readiness', { params: { id: r.id } }) })
   if (disabled) return <StatusPill status={r.status} />
   const list: Transition[] = q.data?.permissions.transitions ?? []
@@ -408,7 +445,7 @@ export function useProjectLists(projectId: string | undefined) {
 
 /** `num` columns are right-aligned with tabular figures; `pad` replaces the text padding in cells that hold a control. */
 interface Col { id: string; label: string; sort?: string; optional?: boolean; cls?: string; num?: boolean; pad?: string; cell: (r: TaskRow) => ReactNode }
-type Flat = { kind: 'group'; id: string; label: string; count: number; deliverableId?: string; status?: string; progress?: number | null } | { kind: 'row'; r: TaskRow }
+type Flat = { kind: 'group'; personId?: string; id: string; label: string; count: number; deliverableId?: string; status?: string; progress?: number | null; summary?: TaskListGroup; shown?: number; summaryUnavailable?: boolean } | { kind: 'row'; r: TaskRow }
 
 const GROUPS = ['deliverable', 'discipline', 'milestone', 'assignee', 'status', 'due', 'none']
 const GROUP_LABEL: Record<string, string> = { deliverable: 'task.deliverable', discipline: 'common.discipline', milestone: 'field.MilestoneId', assignee: 'field.AssigneeId', status: 'common.status', due: 'common.due', none: 'tgroup.none' }
@@ -431,6 +468,10 @@ export function dueBucket(r: TaskRow, now: string) {
   if (r.dueDate <= weekEnd) return 'thisWeek'
   if (r.dueDate <= addDays(weekEnd, 7)) return 'nextWeek'
   return 'later'
+}
+
+function PersonGroupName({ group, surface }: { group: Extract<Flat, { kind: 'group' }>; surface: string }) {
+  return group.personId ? <PersonPanelTrigger userId={group.personId} name={group.label} focusKey={`task-group:${group.id}:${surface}:assignee`} /> : <>{group.label}</>
 }
 
 function groupRows(rows: TaskRow[], by: string, deliverables: Map<string, DeliverableRow>): Flat[] {
@@ -456,7 +497,7 @@ function groupRows(rows: TaskRow[], by: string, deliverables: Map<string, Delive
   const out: Flat[] = []
   for (const [id, g] of [...groups.entries()].sort((a, b) => (a[1].order < b[1].order ? -1 : a[1].order > b[1].order ? 1 : a[1].label.localeCompare(b[1].label)))) {
     const d = by === 'deliverable' && id ? deliverables.get(id) : undefined
-    out.push({ kind: 'group', id, label: g.label, count: g.rows.length, deliverableId: by === 'deliverable' ? id || undefined : undefined, status: d?.status, progress: d?.state?.progressPct })
+    out.push({ kind: 'group', personId: by === 'assignee' && id && g.rows[0]?.assigneeName?.trim() && g.rows.every(row => row.assigneeName === g.rows[0].assigneeName) ? id : undefined, id, label: g.label, count: g.rows.length, deliverableId: by === 'deliverable' ? id || undefined : undefined, status: d?.status, progress: d?.state?.progressPct })
     for (const r of g.rows) out.push({ kind: 'row', r })
   }
   return out
@@ -467,6 +508,8 @@ function readCols(): string[] | null {
 }
 
 function LiveTasksTab() {
+  const groupsOn = useFlag('work_screens')
+  const visualSystem = useFlag('visual_system')
   const quick = useFlag('row_quick_actions')
   const phone = useIsPhone()
   const focusRestore = useRef<{ id: string; control: 'key' | 'title'; mode: 'phone' | 'desktop' } | null>(null)
@@ -509,7 +552,7 @@ function LiveTasksTab() {
   const { deliverables, milestones } = useProjectLists(p.id)
   const byId = useMemo(() => new Map(deliverables.map((d) => [d.id, d])), [deliverables])
   const [creating, setCreating] = useState<{ deliverableId?: string } | null>(null)
-  const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [legacySelected, setSelected] = useState<Set<string>>(new Set())
   const [bulk, setBulk] = useState<string | null>(null)
   const [editingName, setEditingName] = useState<string | null>(null)
   const [block, setBlock] = useState<TaskRow | null>(null)
@@ -522,7 +565,7 @@ function LiveTasksTab() {
   const group = sp.get('group') ?? defaultGroup
   const panel = sp.get('panel')
   const current = panel?.startsWith('Task:') ? panel.slice('Task:'.length) : null // the task open in the side panel
-  const params = { ...filters, backlog: backlog || undefined, sort: sort || undefined, pageSize: 200 }
+  const params = { ...filters, backlog: backlog || undefined, sort: sort || undefined, pageSize: 200, ...(groupsOn ? { group } : {}) }
   const q = useInfiniteQuery({
     queryKey: ['p', p.id, 'tasks', params],
     queryFn: ({ pageParam }) => typedRequest('get', '/api/v1/projects/{id}/tasks', { params: { id: p.id }, query: { ...params, page: pageParam } }),
@@ -532,8 +575,20 @@ function LiveTasksTab() {
   // Pages load in the background so grouping and selection see every row; only visible rows render (E-22).
   useEffect(() => { if (q.hasNextPage && !q.isFetchingNextPage) q.fetchNextPage() }, [q.hasNextPage, q.isFetchingNextPage, q.fetchNextPage])
   const rows = useMemo(() => q.data?.pages.flatMap((x) => x.items) ?? [], [q.data])
+  const bulkActor = useMe()
+  const bulkScopeKey = JSON.stringify([bulkActor.id, p.id, filters, backlog])
+  const bulkSelection = useTaskBulkSelection(bulkScopeKey, groupsOn)
+  const selected = groupsOn ? new Set(bulkSelection.selected.keys()) : legacySelected
+  const bulkPage = q.data?.pages[0]?.items ?? []
+  const pageSelected = groupsOn ? bulkPage.length > 0 && bulkPage.every(row => selected.has(row.id)) : rows.length > 0 && selected.size === rows.length
+  const selectPage = (on: boolean) => { if (groupsOn) bulkSelection.page(bulkPage, on); else setSelected(on ? new Set(rows.map(row => row.id)) : new Set()) }
   const total = q.data?.pages[0]?.totalCount ?? 0
-  const flat = useMemo(() => groupRows(rows, group, byId), [rows, group, byId])
+  const groupRead = useMemo(() => mergeTaskGroupPages(q.data?.pages ?? []), [q.data])
+  const grouped = useMemo(() => taskGroupEntries(rows, groupRead.groups, groupRead.unavailable), [rows, groupRead])
+  const flat = useMemo<Flat[]>(() => groupsOn && group !== 'none' ? grouped.entries.map(entry => entry.kind === 'row' ? { kind: 'row', r: entry.row } : {
+    kind: 'group', personId: entry.group.dimension === 'assignee' && entry.group.referenceAvailable && entry.group.label?.trim() ? entry.group.value ?? undefined : undefined, id: entry.group.key, label: groupHeading(entry.group), count: entry.group.rowCount, summary: entry.group, shown: entry.shown, summaryUnavailable: entry.unavailable,
+    deliverableId: entry.group.dimension === 'deliverable' && entry.group.referenceAvailable ? entry.group.value ?? undefined : undefined,
+  }) : groupRows(rows, group, byId), [groupsOn, grouped, rows, group, byId])
   const reload = () => { q.refetch(); refresh(p.id) }
   const actions = useTaskActions(reload)
   const startTask = async (r: TaskRow) => {
@@ -545,12 +600,13 @@ function LiveTasksTab() {
     } catch (e) { toast.error(errorText(e)) }
   }
   const canCreate = p.permissions.createTaskIn.length > 0
-  const toggle = (id: string) => setSelected((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n })
+  const toggle = (id: string) => { if (groupsOn) { const row = rows.find(row => row.id === id); if (row) bulkSelection.toggle(row) } else setSelected((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n }) }
   const dash = <span className="text-muted-foreground">{t('common.dash')}</span>
 
+  const peopleOn = useFlag('people_screens')
   const all: Col[] = [
     { id: 'key', label: 'milestone.key', sort: 'key', cls: 'whitespace-nowrap', cell: (r) => <button type="button" data-task-focus="key" data-task-id={r.id} className="hover:underline" onClick={() => openPanel('Task', r.id)}><Key>{r.key}</Key></button> },
-    { id: 'name', label: 'task.name', sort: 'name', cls: 'min-w-56', cell: (r) => editingName === r.id ? <InlineText initiallyEditing onCancel={()=>setEditingName(null)} value={r.name} title={t('common.name')} onSave={async (v) => { if (!v?.trim()) return false; const result = await actions.save(r, {name:v.trim()}); if (result != null) setEditingName(null); return result }} /> : <span className="group/name inline-flex items-center gap-1"><button type="button" data-task-focus="title" data-task-id={r.id} aria-current={current === r.id || undefined} className="text-left font-medium hover:underline" onClick={() => openPanel('Task', r.id)}>{r.name}</button>{quick && !phone && hints.edit(r) && <Button size="icon-sm" variant="ghost" className="opacity-0 group-hover/task:opacity-100 group-focus-within/task:opacity-100" aria-label={t('interaction.rename',{key:r.key})} onClick={()=>setEditingName(r.id)}><Pencil className="size-3.5" /></Button>}</span> },
+    { id: 'name', label: 'task.name', sort: 'name', cls: 'min-w-56', cell: (r) => editingName === r.id ? <InlineText initiallyEditing onCancel={()=>setEditingName(null)} value={r.name} title={t('common.name')} onSave={async (v) => { if (!v?.trim()) return false; const result = await actions.save(r, {name:v.trim()}); if (result != null) setEditingName(null); return result }} /> : <span className="group/name inline-flex items-center gap-1"><button type="button" data-task-focus="title" data-task-id={r.id} aria-current={current === r.id || undefined} className="text-left font-medium hover:underline" onClick={() => openPanel('Task', r.id)}>{r.name}</button>{quick && !phone && hints.edit(r) && <Button size="icon-sm" variant="ghost" className="opacity-0 group-hover/task:opacity-100 group-focus-within/task:opacity-100" aria-label={t('interaction.rename',{key:r.key})} onClick={()=>setEditingName(r.id)}><Pencil className="size-3.5" /></Button>}<TaskCommentCount row={r} /></span> },
     { id: 'deliverable', label: 'task.deliverable', cell: (r) => r.deliverableId ? <button type="button" className="block max-w-44 truncate text-left hover:underline" title={`${r.deliverableKey} ${r.deliverableName}`} onClick={() => openPanel('Deliverable', r.deliverableId!)}>{r.deliverableName}</button> : dash },
     { id: 'discipline', label: 'common.discipline', cls: 'whitespace-nowrap', cell: (r) => <span className="inline-flex items-center gap-1.5"><span className="size-2.5 shrink-0 rounded-sm" style={{ background: disciplineColour(r.disciplineColour) }} aria-hidden />{r.disciplineName}</span> },
     { id: 'assignee', label: 'field.AssigneeId', cls: 'min-w-48', pad: CONTROL, cell: (r) => {
@@ -560,10 +616,11 @@ function LiveTasksTab() {
           {r.assigneeId ? <Avatar id={r.assigneeId} name={r.assigneeName} /> : <span aria-hidden className="size-7 shrink-0 rounded-full border border-dashed border-input" />}
           {hints.manages(r)
             ? <div className="min-w-0 flex-1"><PeoplePicker compact value={r.assigneeId} valueName={name} placeholder={t('ind.unassigned')} label={t('task.assigneeOf', { key: r.key })} onChange={(id) => actions.save(r, { assigneeId: id })} /></div>
-            : <span className={cn('min-w-0', (!r.assigneeName || !r.assigneeActive) && 'text-muted-foreground')}>{name ?? t('ind.unassigned')}</span>}
+            : <span className={cn('min-w-0', (!r.assigneeName || !r.assigneeActive) && 'text-muted-foreground')}>{r.assigneeId && r.assigneeName ? <PersonPanelTrigger userId={r.assigneeId} name={r.assigneeName} active={r.assigneeActive} focusKey={`task:${r.id}:assignee:${phone ? 'card' : 'table'}`} /> : name ?? t('ind.unassigned')}</span>}
+        {peopleOn && hints.manages(r) && r.assigneeId && r.assigneeName && <PersonPanelTrigger userId={r.assigneeId} name={r.assigneeName} focusKey={`task:${r.id}:assignee-details:${phone ? 'card' : 'table'}`}>{t('common.details')}</PersonPanelTrigger>}
         </div>
       ) } },
-    { id: 'reviewer', label: 'field.ReviewerId', cls: 'whitespace-nowrap', cell: (r) => r.reviewerName ?? (r.requiresReview ? <span className="text-warn"><span aria-hidden>▲ </span>{t('task.noReviewer')}</span> : dash) },
+    { id: 'reviewer', label: 'field.ReviewerId', cls: 'whitespace-nowrap', cell: (r) => r.reviewerId && r.reviewerName ? <PersonPanelTrigger userId={r.reviewerId} name={r.reviewerName} focusKey={`task:${r.id}:reviewer:${phone ? 'card' : 'table'}`} /> : r.reviewerName ?? (r.requiresReview ? <span className="text-warn"><span aria-hidden>▲ </span>{t('task.noReviewer')}</span> : dash) },
     { id: 'status', label: 'common.status', sort: 'status', pad: PILL, cell: (r) => <StatusMenu r={r} onMove={actions.move} disabled={p.status === 'Archived' || p.status === 'Cancelled'} /> },
     { id: 'indicators', label: 'deliverable.indicators', cls: 'min-w-32', cell: (r) => <TaskIndicators r={r} /> },
     { id: 'priority', label: 'common.priority', sort: 'priority', pad: CONTROL, cell: (r) => hints.edit(r)
@@ -578,7 +635,7 @@ function LiveTasksTab() {
       ? <select className={rowSelect} value={r.progressPct} aria-label={t('task.progressOf', { key: r.key })} onChange={(e) => actions.setProgress(r, Number(e.target.value))}>{PROGRESS.map((x) => <option key={x} value={x}>{x}%</option>)}</select>
       : <span className="flex min-h-(--control-row-h) items-center justify-end">{r.progressPct}%</span> },
     { id: 'estimate', label: 'task.estimate', sort: 'estimate', num: true, cls: 'whitespace-nowrap', cell: (r) => r.estimatedHours == null ? <span className="text-muted-foreground">{t('task.unestimated')}</span> : hours(r.estimatedHours) },
-    { id: 'lastActivity', label: 'task.lastActivity', sort: 'lastActivity', cls: 'whitespace-nowrap text-muted-foreground', cell: (r) => <span title={r.lastActivityAt}>{ago(r.lastActivityAt)}{r.lastActivityActorName && ` · ${r.lastActivityActorName}`}</span> },
+    { id: 'lastActivity', label: 'task.lastActivity', sort: 'lastActivity', cls: 'whitespace-nowrap text-muted-foreground', cell: (r) => <TaskLastActivity row={r} focusKey={`task:${r.id}:activity:${phone ? 'card' : 'table'}`} /> },
     { id: 'milestone', label: 'field.MilestoneId', optional: true, cls: 'whitespace-nowrap', cell: (r) => r.milestoneKey ? <span title={r.milestoneName ?? undefined}><span className="key">{r.milestoneKey}</span>{r.milestoneDerived && <span className="text-muted-foreground"> ↳</span>}</span> : dash },
     { id: 'created', label: 'task.createdCol', sort: 'created', optional: true, cls: 'whitespace-nowrap tabular-nums', cell: (r) => fmtDate(r.createdAt) },
     { id: 'completed', label: 'task.completedCol', sort: 'completed', optional: true, cls: 'whitespace-nowrap tabular-nums', cell: (r) => fmtDate(r.completedAt) },
@@ -601,15 +658,17 @@ function LiveTasksTab() {
   const backlogSearch = (() => { const n = new URLSearchParams(sp); n.delete('panel'); if (backlog) n.delete('backlog'); else n.set('backlog', 'true'); return n.toString() })()
   const exportAs = (format: 'csv' | 'xlsx') => download(`/api/v1/projects/${p.id}/tasks/export${qs({ ...filters, backlog: backlog || undefined, sort: sort || undefined, format })}`, `${p.projectNumber}-tasks.${format}`)
     .catch((e) => toast.error(e instanceof ApiError ? e.message : t('app.error')))
+  const sourceStatus = groupsOn && group !== 'none' && q.data ? <TaskGroupReadStatus asOf={groupRead.asOf} complete={grouped.complete} changed={groupRead.unavailable.size > 0} /> : null
 
   return (
-    <Page title={backlog ? t('backlog.title') : t('ptab.tasks')} subtitle={q.data ? plural(total, 'decision.task1', 'task.count') + (backlog ? ` · ${t('backlog.rule')}` : '') : undefined}
+    <Page className={visualSystem ? 'visual-project-task-page' : undefined} title={backlog ? t('backlog.title') : t('ptab.tasks')} subtitle={q.data ? plural(total, 'decision.task1', 'task.count') + (backlog ? ` · ${t('backlog.rule')}` : '') : undefined}
       actions={<>
         {backlogOn && <Button asChild variant="outline"><Link to={{ search: backlogSearch }}>{backlog ? <><List className="size-4" aria-hidden />{t('backlog.allTasks')}</> : <><Inbox className="size-4" aria-hidden />{t('backlog.title')}</>}</Link></Button>}
         {/* The Work group's second-level links also lead to the board; this link keeps the filters (FR-VIS-04). */}
         <Button asChild variant="outline"><Link to={{ pathname: '../board', search: boardSearch }} relative="path"><KanbanSquare className="size-4" aria-hidden />{t('ptab.board')}</Link></Button>
         <ViewMenu listType="tasks" projectId={p.id} extra={() => ({ cols: shown.map((c) => c.id).join(',') })} />
         {canCreate && <Button onClick={() => setCreating({})}><Plus className="size-4" />{t('task.new')}</Button>}
+        {visualSystem && sourceStatus && <div className="visual-project-task-source">{sourceStatus}</div>}
       </>}>
       {/* §41 R1: the quick filters sit in the Filters popover, Group is a menu, and Export and Columns share the overflow. */}
       <TaskFilterBar p={p} deliverables={deliverables} pinned={[]} showDeleted
@@ -633,7 +692,8 @@ function LiveTasksTab() {
         </DropdownMenu>
       } />
       {backlog && canCreate && <BacklogQuickAdd p={p} onCreated={reload} />}
-      {selected.size > 0 && (
+      {groupsOn && <TaskBulkToolbar selected={bulkSelection.selected} pageIds={bulkPage.map(row => row.id)} onAction={setBulk} onClear={bulkSelection.clear} omitShift={backlog} />}
+      {!groupsOn && selected.size > 0 && (
         <div className="flex flex-wrap items-center gap-2 rounded-lg border border-primary/40 bg-accent px-4 py-3 text-sm" role="region" aria-label={t('bulk.actions')}>
           <span className="mr-2 font-semibold text-accent-foreground tabular-nums">{t('bulk.selected', { n: selected.size })}</span>
           {BULK.filter((op) => !backlog || op !== 'shiftDueDates').map((op) => ( // undated work has no due date to shift
@@ -642,7 +702,10 @@ function LiveTasksTab() {
           <Button variant="ghost" className="sm:ml-auto" onClick={() => setSelected(new Set())}>{t('common.clear')}</Button>
         </div>
       )}
+      {!visualSystem && sourceStatus}
+      {visualSystem && sourceStatus && <div className="visual-project-task-source-print hidden print:block">{sourceStatus}</div>}
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
+      <div className={groupsOn ? 'min-w-0 outline-offset-4' : 'contents'} data-task-bulk-list={groupsOn ? '' : undefined} role={groupsOn ? 'region' : undefined} aria-label={groupsOn ? t('ptab.tasks') : undefined} tabIndex={groupsOn ? -1 : undefined}>
       {q.isPending ? <div className="rounded-lg border bg-card"><Loading rows={8} /></div> : rows.length === 0 ? !q.error && (
         <div className="rounded-lg border bg-card">
           {backlog && !active ? <Empty title={t('backlog.empty')}>{t('backlog.rule')}</Empty> : active
@@ -650,7 +713,7 @@ function LiveTasksTab() {
             : <Empty title={t('task.emptyTitle')} action={canCreate && <Button variant="outline" onClick={() => setCreating({})}><Plus className="size-4" />{t('task.new')}</Button>}>{t('task.emptyHint')}</Empty>}
         </div>
       ) : (
-        phone ? <div data-task-layout="phone" className="space-y-2"><Checkbox aria-label={t('bulk.selectAll')} checked={rows.length > 0 && selected.size === rows.length} onCheckedChange={c => setSelected(c ? new Set(rows.map(r => r.id)) : new Set())} /><ul className="space-y-2">{flat.map(f => f.kind === 'group' ? <li key={`g-${f.id}`} className="flex flex-wrap items-center gap-2 py-2"><h3 className="break-words text-sm font-semibold">{f.label}</h3><span className="text-xs text-muted-foreground">{f.count}</span>{f.status && <StatusPill status={f.status} />}{group === 'deliverable' && canCreate && <Button size="sm" variant="outline" onClick={() => setCreating({ deliverableId: f.deliverableId })}><Plus className="size-4" />{t('task.addHere')}</Button>}</li> : <li key={f.r.id} className={cn('rounded-lg border bg-card p-4', (current === f.r.id || selected.has(f.r.id)) && 'bg-accent', current === f.r.id && 'shadow-[inset_3px_0_0_var(--primary)]')}>
+        phone ? <div data-task-layout="phone" className="space-y-2"><Checkbox aria-label={t(groupsOn ? 'bulkCommand.selectPage' : 'bulk.selectAll')} checked={pageSelected} onCheckedChange={c => selectPage(c === true)} /><ul className="space-y-2">{flat.map(f => f.kind === 'group' ? <li key={`g-${f.id}`} className="flex flex-wrap items-center gap-2 py-2" data-task-group={groupsOn ? f.id : undefined}><h3 className="break-words text-sm font-semibold"><PersonGroupName group={f} surface="card" /></h3>{groupsOn ? <TaskGroupSummary summary={f.summary} shown={f.shown} unavailable={f.summaryUnavailable} /> : <span className="text-xs text-muted-foreground">{f.count}</span>}{f.status && <StatusPill status={f.status} />}{group === 'deliverable' && canCreate && (!groupsOn || (f.summary?.dimension === 'deliverable' && f.summary.referenceAvailable)) && <Button size="sm" variant="outline" onClick={() => setCreating({ deliverableId: f.deliverableId })}><Plus className="size-4" />{t('task.addHere')}</Button>}</li> : <li key={f.r.id} className={cn('rounded-lg border bg-card p-4', (current === f.r.id || selected.has(f.r.id)) && 'bg-accent', current === f.r.id && 'shadow-[inset_3px_0_0_var(--primary)]')}>
           <div className="mb-3 flex items-start gap-3"><Checkbox aria-label={`${t('bulk.select')} ${f.r.key}`} checked={selected.has(f.r.id)} onCheckedChange={() => toggle(f.r.id)} /><div className="min-w-0 flex-1">{all.find(c => c.id === 'key')?.cell(f.r)}<div className="mt-1 break-words font-semibold">{all.find(c => c.id === 'name')?.cell(f.r)}</div></div></div>
           <dl className="grid grid-cols-[minmax(5rem,auto)_minmax(0,1fr)] gap-x-3 gap-y-2 text-sm">{shown.filter(c => c.id !== 'key' && c.id !== 'name' && c.id !== 'quick' && showPhoneTaskField(c.id, f.r) && (c.id !== 'indicators' || taskSignals(f.r).length > 0)).map(c => <div key={c.id} className="contents"><dt className="text-muted-foreground">{runtimeText(c.label)}</dt><dd className="min-w-0 break-words">{c.cell(f.r)}</dd></div>)}</dl>
         </li>)}</ul>{q.isFetchingNextPage && <p role="status" className="text-xs text-muted-foreground">{t('task.loadingMore', { n: rows.length, total })}</p>}</div> :
@@ -659,7 +722,7 @@ function LiveTasksTab() {
             <caption className="sr-only">{t('ptab.tasks')}</caption>
             <thead className="sticky top-0 z-10 bg-muted">
               <tr>
-                <th scope="col" className={cn(thCls, 'sticky left-0 z-30 w-10 min-w-10 bg-muted')}><Checkbox className="mt-0.5" aria-label={t('bulk.selectAll')} checked={rows.length > 0 && selected.size === rows.length} onCheckedChange={(c) => setSelected(c ? new Set(rows.map((r) => r.id)) : new Set())} /></th>
+                <th scope="col" className={cn(thCls, 'sticky left-0 z-30 w-10 min-w-10 bg-muted')}><Checkbox className="mt-0.5" aria-label={t(groupsOn ? 'bulkCommand.selectPage' : 'bulk.selectAll')} checked={pageSelected} onCheckedChange={c => selectPage(c === true)} /></th>
                 {shown.map((c) => {
                   const dir = sort === c.sort ? 'ascending' : sort === `${c.sort}:desc` ? 'descending' : undefined
                   return (
@@ -676,14 +739,14 @@ function LiveTasksTab() {
               {items.map((vi) => {
                 const f = flat[vi.index]
                 if (f.kind === 'group') return (
-                  <tr key={`g-${f.id}`} data-index={vi.index} ref={virtual.measureElement} className="border-t bg-muted">
+                  <tr key={`g-${f.id}`} data-index={vi.index} data-task-group={groupsOn ? f.id : undefined} ref={virtual.measureElement} className="border-t bg-muted">
                     <th colSpan={shown.length + 1} scope="rowgroup" className="px-(--cell-px) py-2 text-left font-normal">
                       <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                        <span className="font-semibold">{f.label}</span>
-                        <span className="rounded-md bg-card px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{f.count}</span>
+                        <span className="font-semibold"><PersonGroupName group={f} surface="table" /></span>
+                        {groupsOn ? <TaskGroupSummary summary={f.summary} shown={f.shown} unavailable={f.summaryUnavailable} /> : <span className="rounded-md bg-card px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{f.count}</span>}
                         {f.status && <StatusPill status={f.status} />}
-                        {f.progress != null && <span className="text-xs/[18px] text-muted-foreground tabular-nums"><span className="sr-only">{t('deliverable.progress')} </span>{f.progress}%</span>}
-                        {group === 'deliverable' && canCreate && <button type="button" className="inline-flex items-center gap-1 text-primary underline-offset-4 hover:underline" onClick={() => setCreating({ deliverableId: f.deliverableId })}><Plus className="size-4" aria-hidden />{t('task.addHere')}</button>}
+                        {!groupsOn && f.progress != null && <span className="text-xs/[18px] text-muted-foreground tabular-nums"><span className="sr-only">{t('deliverable.progress')} </span>{f.progress}%</span>}
+                        {group === 'deliverable' && canCreate && (!groupsOn || (f.summary?.dimension === 'deliverable' && f.summary.referenceAvailable)) && <button type="button" className="inline-flex items-center gap-1 text-primary underline-offset-4 hover:underline" onClick={() => setCreating({ deliverableId: f.deliverableId })}><Plus className="size-4" aria-hidden />{t('task.addHere')}</button>}
                       </span>
                     </th>
                   </tr>
@@ -704,9 +767,10 @@ function LiveTasksTab() {
           {q.isFetchingNextPage && <div role="status" className="flex items-center gap-2 border-t px-(--cell-px) py-2 text-xs/[18px] text-muted-foreground"><Spinner />{t('task.loadingMore', { n: rows.length, total })}</div>}
         </TableRegion>
       )}
+      </div>
       {block && <BlockDialog r={block} onClose={(ok) => { setBlock(null); if (ok) reload() }} />}
       {creating && <CreateTask p={p} deliverables={deliverables} milestones={milestones} defaults={creating} onClose={(id) => { setCreating(null); if (id) { reload(); openPanel('Task', id) } }} />}
-      {bulk && <TaskBulkDialog p={p} op={bulk} ids={[...selected]} deliverables={deliverables} onClose={(ok) => { setBulk(null); if (ok) { setSelected(new Set()); reload() } }} />}
+      {bulk && (groupsOn ? <TaskBulkCommandDialog operation={bulk as TaskBulkOperation} scopeKey={bulkScopeKey} rows={[...bulkSelection.selected.values()]} onChanged={async () => { await q.refetch(); refresh(p.id) }} onClose={ok => { setBulk(null); if (ok) bulkSelection.clear() }} /> : <TaskBulkDialog p={p} op={bulk} ids={[...selected]} deliverables={deliverables} onClose={(ok) => { setBulk(null); if (ok) { setSelected(new Set()); reload() } }} />)}
       {actions.dialogs}
     </Page>
   )

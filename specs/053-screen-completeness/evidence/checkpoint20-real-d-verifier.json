@@ -1,0 +1,72 @@
+{
+  "observedAtUtc": "2026-11-01T13:56:36.711Z",
+  "rows": [
+    {
+      "viewport": "desktop",
+      "status": 200,
+      "url": "http://127.0.0.1:8853/projects/QA20-REAL-001/issues?panel=Issue:01a19765-b18d-7083-acae-74adde1ca2f1",
+      "options": [
+        "High",
+        "Medium",
+        "Low",
+        "General",
+        "Coordination",
+        "None",
+        "Civil",
+        "Site area",
+        "Building",
+        "Alignment",
+        "Coordinate",
+        "Drawing",
+        "Model",
+        "Markup",
+        "Screenshot",
+        "Jill Martin",
+        "Marc DuboisCo-op · Starts 2026-11-02 · Ends 2026-11-11"
+      ],
+      "hasMarc": true,
+      "excluded": true,
+      "write": null,
+      "hasNotice": true,
+      "contained": true,
+      "errors": []
+    },
+    {
+      "viewport": "phone",
+      "status": 200,
+      "url": "http://127.0.0.1:8853/projects/QA20-REAL-001/issues",
+      "options": [
+        "High",
+        "Medium",
+        "Low",
+        "General",
+        "Coordination",
+        "None",
+        "Civil",
+        "Site area",
+        "Building",
+        "Alignment",
+        "Coordinate",
+        "Drawing",
+        "Model",
+        "Markup",
+        "Screenshot",
+        "Jill Martin",
+        "Marc DuboisCo-op · Starts 2026-11-02 · Ends 2026-11-11"
+      ],
+      "hasMarc": true,
+      "excluded": true,
+      "write": {
+        "verifierId": "01a19751-d447-780f-8722-3aaa0a0c4d21",
+        "status": "Proposed",
+        "evidenceUrl": null,
+        "note": "QA20 recorded independent verifier",
+        "rowVersion": 0
+      },
+      "hasNotice": false,
+      "contained": true,
+      "errors": []
+    }
+  ],
+  "errors": []
+}

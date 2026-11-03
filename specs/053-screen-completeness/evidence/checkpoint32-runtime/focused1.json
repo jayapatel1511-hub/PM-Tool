@@ -1,0 +1,58 @@
+{
+  "exitCode": 1,
+  "args": [
+    "/opt/homebrew/bin/dotnet",
+    "test",
+    "tests/Hub.Tests/Hub.Tests.csproj",
+    "-c",
+    "Release",
+    "--no-build",
+    "--no-restore",
+    "--artifacts-path",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint32-artifacts",
+    "--filter",
+    "FullyQualifiedName~NotificationAwayDeliveryTests|FullyQualifiedName~NoticeDeliveryProofTests|FullyQualifiedName~NotificationDigestCompositionTests|FullyQualifiedName~TimeEntryReminderTests|FullyQualifiedName~NoticeDeliveryModelTests|FullyQualifiedName~NoticeProducerIntegrationTests",
+    "--logger",
+    "trx;LogFileName=focused1.trx",
+    "--results-directory",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint32-runtime/trx-focused1",
+    "-m:1",
+    "-p:UseSharedCompilation=false",
+    "-p:NuGetAudit=false"
+  ],
+  "atUtc": "2026-11-02T23:52:38.573020+00:00",
+  "boundary": "Fresh HubFactory-owned synthetic databases via authorized tunnel; no retained QA/operational data or mail",
+  "producer": false,
+  "counters": {
+    "total": "102",
+    "executed": "102",
+    "passed": "99",
+    "failed": "3",
+    "error": "0",
+    "timeout": "0",
+    "aborted": "0",
+    "inconclusive": "0",
+    "passedButRunAborted": "0",
+    "notRunnable": "0",
+    "notExecuted": "0",
+    "disconnected": "0",
+    "warning": "0",
+    "completed": "0",
+    "inProgress": "0",
+    "pending": "0"
+  },
+  "failures": [
+    {
+      "name": "Hub.Tests.Api.NotificationAwayDeliveryTests.Context_requires_owners_live_ReadCommitted_transaction",
+      "message": "Assert.Throws() Failure: Exception type was not an exact match\nExpected: typeof(System.InvalidOperationException)\nActual:   typeof(System.ObjectDisposedException)\n---- System.ObjectDisposedException : Cannot access a disposed context instance. A common cause of this error is disposing a context instance that was resolved from dependency injection and then later trying to use the same context instance elsewhere in your application. This may occur if you are calling 'Dispose' on the context instance, or wrapping it in a using statement. If you are using dependency injection, you should let the dependency injection container take care of disposing context instances.\nObject name: 'HubDb'."
+    },
+    {
+      "name": "Hub.Tests.Api.NoticeProducerIntegrationTests.Operations_counts_a_captured_weekly_dispatch_on_Tuesday_without_creating_another_slot_or_alarm_for_a_reminder",
+      "message": "Assert.Equal() Failure: Values differ\nExpected: Queued\nActual:   Empty"
+    },
+    {
+      "name": "Hub.Tests.Api.NotificationDigestCompositionTests.A_safely_suppressed_third_version_reaches_core_exhaustion_instead_of_resetting_or_stalling_its_slot",
+      "message": "Assert.Equal() Failure: Strings differ\n           \u2193 (pos 0)\nExpected: \"Recompose\"\nActual:   \"Send\"\n           \u2191 (pos 0)"
+    }
+  ]
+}

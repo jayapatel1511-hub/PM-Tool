@@ -27,13 +27,49 @@ public sealed class IdempotencyMiddleware(RequestDelegate next)
 
     public async Task Invoke(HttpContext ctx, HubDb db, CurrentUser me, TimeProvider clock)
     {
+        if (ctx.GetEndpoint()?.Metadata.GetMetadata<Hub.Api.Features.DrawingImportReceipts.AtomicRequest>() is not null)
+        {
+            // This runs before minimal-API JSON binding. The global1MiB limit stays
+            // intact elsewhere; base64 for a bounded2MiB XLSX fits this route's3MiB.
+            var limit = ctx.Features.Get<Microsoft.AspNetCore.Http.Features.IHttpMaxRequestBodySizeFeature>();
+            if (limit is { IsReadOnly: false }) limit.MaxRequestBodySize = 3 * 1024 * 1024;
+            await next(ctx); return;
+        }
         // Handoff commands use an atomic, permission-checked receipt in their own transaction.
         if (ctx.GetEndpoint()?.Metadata.GetMetadata<Hub.Api.Features.HandoffEndpoints.AtomicCommand>() is not null
-            || ctx.GetEndpoint()?.Metadata.GetMetadata<Coordination.AtomicCommand>() is not null)
+            || ctx.GetEndpoint()?.Metadata.GetMetadata<Coordination.AtomicCommand>() is not null
+            || ctx.GetEndpoint()?.Metadata.GetMetadata<Hub.Api.Features.MyWorkSeenEndpoints.AtomicCommand>() is not null
+            || ctx.GetEndpoint()?.Metadata.GetMetadata<Hub.Api.Features.TaskBulkCommandEndpoints.AtomicCommand>() is not null)
         { await next(ctx); return; }
         if (ctx.Request.Path == "/api/v1/route-counts" || ctx.Request.Path.StartsWithSegments("/api/v1/me/calendar-subscription")) { await next(ctx); return; }
         var key = ctx.Request.Headers["Idempotency-Key"].FirstOrDefault()?.Trim();
         if (!HttpMethods.IsPost(ctx.Request.Method) || string.IsNullOrEmpty(key) || !me.Resolved) { await next(ctx); return; }
+        if (ctx.GetEndpoint()?.Metadata.GetMetadata<Hub.Api.Features.CalendarViewReplay.Guard>() is not null)
+            await Hub.Api.Features.CalendarViewReplay.Authorise(ctx, ctx.RequestServices.GetRequiredService<Access>(), db,
+                ctx.RequestServices.GetRequiredService<SettingsStore>(), key);
+        if (ctx.GetEndpoint()?.Metadata.GetMetadata<Hub.Api.Features.DecisionMetadataReplay.Guard>() is not null)
+            await Hub.Api.Features.DecisionMetadataReplay.Authorise(ctx, ctx.RequestServices.GetRequiredService<Access>(), db,
+                ctx.RequestServices.GetRequiredService<SettingsStore>());
+        if (ctx.GetEndpoint()?.Metadata.GetMetadata<Hub.Api.Features.IssueRootCauseReplay.Guard>() is not null)
+            await Hub.Api.Features.IssueRootCauseReplay.Authorise(ctx, ctx.RequestServices.GetRequiredService<Access>(), db,
+                ctx.RequestServices.GetRequiredService<SettingsStore>());
+        if (ctx.GetEndpoint()?.Metadata.GetMetadata<Hub.Api.Features.DocumentLinkCreateReplay.Guard>() is not null)
+            await Hub.Api.Features.DocumentLinkCreateReplay.Authorise(ctx, ctx.RequestServices.GetRequiredService<Access>(), db,
+                ctx.RequestServices.GetRequiredService<SettingsStore>());
+        // These new personal-fact receipts must recheck current authority even when no handler runs on replay.
+        if (ctx.GetEndpoint()?.Metadata.GetMetadata<Hub.Api.Features.PersonFacts.CertificationCreateGuard>() is not null)
+            await Hub.Api.Features.PersonFacts.AuthoriseCreateReplay(ctx, ctx.RequestServices.GetRequiredService<Access>(), db,
+                ctx.RequestServices.GetRequiredService<SettingsStore>());
+        if (ctx.GetEndpoint()?.Metadata.GetMetadata<Hub.Api.Features.AdminEndpoints.CertificationVocabularyCreateGuard>() is not null)
+        {
+            Http.RequireFlag(await ctx.RequestServices.GetRequiredService<SettingsStore>().Get(db), "capacity_screens");
+            Access.Demand(Hub.Domain.Permissions.Administer(me.Actor));
+        }
+        if (ctx.GetEndpoint()?.Metadata.GetMetadata<Hub.Api.Features.AdminEndpoints.RegisterVocabularyCreateGuard>() is not null)
+        {
+            Http.RequireFlag(await ctx.RequestServices.GetRequiredService<SettingsStore>().Get(db), "register_screens");
+            Access.Demand(Hub.Domain.Permissions.Administer(me.Actor));
+        }
         Check.That(key.Length <= 100, "Idempotency-Key", "error.too_long", 100);
         if (ctx.Request.Path.StartsWithSegments("/api/v1/planning") || ctx.Request.Path == "/api/v1/projects/import")
         {
@@ -58,6 +94,10 @@ public sealed class IdempotencyMiddleware(RequestDelegate next)
                     ctx.Response.OnStarting(() => { ctx.Response.Headers.RetryAfter = "1"; return Task.CompletedTask; });
                     throw ApiException.Conflict("idempotency_in_progress", "error.idempotency_in_progress");
                 }
+                // Authorize the exact successful row being replayed, including one completed after pre-claim checks.
+                if (ctx.GetEndpoint()?.Metadata.GetMetadata<Hub.Api.Features.CalendarViewReplay.Guard>() is not null)
+                    await Hub.Api.Features.CalendarViewReplay.AuthoriseStored(seen, ctx.RequestServices.GetRequiredService<Access>(), db,
+                        ctx.RequestServices.GetRequiredService<SettingsStore>());
                 ctx.Response.StatusCode = seen.Status;
                 if (seen.ContentType is { } type) ctx.Response.ContentType = type;
                 ctx.Response.Headers["Idempotent-Replayed"] = "true";
@@ -67,7 +107,8 @@ public sealed class IdempotencyMiddleware(RequestDelegate next)
             // An old receipt or an abandoned claim is replaced; the row's previous values guard against a racing replacement.
             var replaced = await db.Idempotency.Where(x => x.Id == seen.Id && x.Status == seen.Status && x.CreatedAt == seen.CreatedAt)
                 .ExecuteUpdateAsync(u => u.SetProperty(x => x.Path, path).SetProperty(x => x.Status, Pending).SetProperty(x => x.ContentType, (string?)null)
-                    .SetProperty(x => x.Body, Array.Empty<byte>()).SetProperty(x => x.CreatedAt, now.AddDays(-1)));
+                    .SetProperty(x => x.Body, Array.Empty<byte>()).SetProperty(x => x.CreatedAt, now.AddDays(-1))
+                    .SetProperty(x => x.CalendarViewScope, (string?)null).SetProperty(x => x.CalendarViewProjectId, (Guid?)null));
             if (replaced == 1) claim = seen.Id;
         }
         var id = claim.Value;
@@ -81,8 +122,11 @@ public sealed class IdempotencyMiddleware(RequestDelegate next)
         {
             // Filled with ExecuteUpdate so entities the handler left tracked are never flushed here.
             int status = ctx.Response.StatusCode; string? type = ctx.Response.ContentType; var body = buffer.ToArray(); var at = clock.GetUtcNow();
+            var calendarView = Hub.Api.Features.CalendarViewReplay.Context(ctx);
             await db.Idempotency.Where(x => x.Id == id && x.Status == Pending).ExecuteUpdateAsync(u => u.SetProperty(x => x.Status, status)
-                .SetProperty(x => x.ContentType, type).SetProperty(x => x.Body, body).SetProperty(x => x.CreatedAt, at));
+                .SetProperty(x => x.ContentType, type).SetProperty(x => x.Body, body).SetProperty(x => x.CreatedAt, at)
+                .SetProperty(x => x.CalendarViewScope, calendarView == null ? null : calendarView.Scope)
+                .SetProperty(x => x.CalendarViewProjectId, calendarView == null ? null : calendarView.ProjectId));
         }
         else await Release(db, id);
         buffer.Position = 0;

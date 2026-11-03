@@ -1,0 +1,14 @@
+{
+  "atUtc": "2026-11-02T10:27:01.411991+00:00",
+  "status": "PASS_FROZEN_SOURCE_AND_RETAINED_OUTPUT",
+  "csharpFiles": 606,
+  "webBaselineFiles": 443,
+  "changedHarnessOnly": [
+    "web/tests/review-register.cjs",
+    "web/tests/search-screen.cjs"
+  ],
+  "oldApiDllSha256": "80658bd2ad102063a6042355ff0d5fb417a5fc3428b2eb5b1ae67916e57145f3",
+  "oldWwwrootFiles": 129,
+  "newServedAssetCheck": "preview-build1.json; fresh HTTP parity follows",
+  "boundaries": "No old service stop/restart/database mutation; app/fixtures remain the built bytes."
+}

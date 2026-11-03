@@ -1,0 +1,90 @@
+{
+  "observedAtUtc": "2026-11-01T13:54:13.503Z",
+  "project": "01a19754-b327-78af-b89f-a3a43edcffd7",
+  "issue": "01a19761-6bd7-74fa-918a-674e4c3cac4f",
+  "options": {
+    "status": 200,
+    "actorId": "01a19751-d447-79d4-91a8-0895553dde52",
+    "canWrite": true,
+    "canCreate": {
+      "changes": true,
+      "reviews": true
+    },
+    "manageDisciplineIds": [
+      "01a19754-b36a-760b-835a-73075c55e499"
+    ],
+    "people": [
+      {
+        "id": "01a19751-d447-7e1f-9a5f-23c4303d03a4",
+        "displayName": "Alex Chen",
+        "personNotices": {
+          "personType": null,
+          "startDate": null,
+          "endDate": null,
+          "starts": false,
+          "ends": false
+        }
+      },
+      {
+        "id": "01a19751-d447-7f75-a176-926ba05c6c3e",
+        "displayName": "Jill Martin",
+        "personNotices": {
+          "personType": null,
+          "startDate": null,
+          "endDate": null,
+          "starts": false,
+          "ends": false
+        }
+      },
+      {
+        "id": "01a19751-d447-780f-8722-3aaa0a0c4d21",
+        "displayName": "Marc Dubois",
+        "personNotices": {
+          "personType": "Co-op",
+          "startDate": "2026-11-02",
+          "endDate": "2026-11-11",
+          "starts": true,
+          "ends": true
+        }
+      },
+      {
+        "id": "01a19751-d447-79d4-91a8-0895553dde52",
+        "displayName": "Priya Nair",
+        "personNotices": {
+          "personType": null,
+          "startDate": null,
+          "endDate": null,
+          "starts": false,
+          "ends": false
+        }
+      }
+    ]
+  },
+  "issueRows": {
+    "status": 200,
+    "rows": [
+      {
+        "id": "01a19761-6bd7-74fa-918a-674e4c3cac4f",
+        "key": "QA20-REAL-001-I01",
+        "ownerId": "01a19751-d447-7e1f-9a5f-23c4303d03a4",
+        "raisedById": "01a19751-d447-79d4-91a8-0895553dde52",
+        "verificationStatus": "Proposed",
+        "rowVersion": 1
+      }
+    ]
+  },
+  "verification": {
+    "status": 200,
+    "body": [
+      {
+        "id": "01a19762-e5b9-7dcf-83c7-023ce84490ee",
+        "verifierId": "01a19751-d447-780f-8722-3aaa0a0c4d21",
+        "status": "Proposed",
+        "evidenceUrl": null,
+        "note": "QA20 normal appointment for recorded notice acceptance",
+        "verifiedAt": null,
+        "rowVersion": 0
+      }
+    ]
+  }
+}

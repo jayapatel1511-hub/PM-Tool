@@ -1,0 +1,12 @@
+{
+  "exitCode": 0,
+  "args": [
+    "node",
+    "node_modules/typescript/bin/tsc",
+    "-p",
+    "tsconfig.app.json",
+    "--noEmit"
+  ],
+  "atUtc": "2026-11-02T20:03:11.983524+00:00",
+  "boundary": "All app sources READY/HOLD; A owns only browser driver/fixture authoring excluded from app graph"
+}

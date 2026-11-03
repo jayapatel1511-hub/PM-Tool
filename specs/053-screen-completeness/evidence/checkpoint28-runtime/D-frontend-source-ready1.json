@@ -1,0 +1,14 @@
+{
+  "status": "READY_HOLD_UNRUN",
+  "files": {
+    "web/src/pages/admin/Admin.tsx": "967dd17b7083e00c7994dc42a2e421ac8ad3652a5e4423463d6713623c8413fd",
+    "web/src/pages/admin/admin-role-explanations.tsx": "75297c9a2aac3b26c5a7aad3b1d30ab00b551a0cafa7126cb3f8d5caaf3572eb",
+    "web/tests/admin-screen.cjs": "c172729931453d9a311dacb6e413198370e6a5d539bdfb668c2cd136ead88b16",
+    "web/tests/admin-screen.fixture.cjs": "311784e644eea534789acc51c1044ca9b8090456dcea78eb2ffdf0819a423a7a",
+    "tools/check_permission_explainer_coverage.py": "96bf8ca68c55a9bde7f3ef49872455fcfbdda89b213f9a69c583c7d70f894c94",
+    "tools/test_permission_explainer_coverage.py": "df8b7d30f309033d6f1ea93c1a32e2c8da62d24c789f9bfb2df0eab1c873c70f",
+    "tests/Hub.Tests/Snapshots/permission-explainer-bindings.json": "415b05468b9e803f3bac1af4701e4af09d7c5c4d6ffc292421379b6465e9e9c6",
+    "specs/053-screen-completeness/parallel-build/capacity-people/requests/g56-admin-phase1-labels.json": "e7eb4bb18dc0a1514b1c3d5e82951a23a1d22924d56e2ae12eb211cbf3e72488",
+    "specs/053-screen-completeness/parallel-build/capacity-people/requests/g56-handoff.md": "abb212fc4dcfc16994f94d9b38768a4b7555c63d53d452e9b138772f5b5ab019"
+  }
+}

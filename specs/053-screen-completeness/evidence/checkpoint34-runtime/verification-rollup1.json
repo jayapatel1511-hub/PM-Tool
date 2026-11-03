@@ -1,0 +1,58 @@
+{
+  "atUtc": "2026-11-03T05:46:15.805607+00:00",
+  "screen": "S35",
+  "localVerdict": "PASS",
+  "locallyCheckedScreens": 46,
+  "totalScreens": 49,
+  "selectedDotnetDistinct": 121,
+  "browserDistinct": 27,
+  "browserSuites": {
+    "external": 10,
+    "register": 7,
+    "response": 10
+  },
+  "remaining": [
+    "S12",
+    "S37",
+    "S49"
+  ],
+  "gallery": "http://127.0.0.1:8877/#addition-11",
+  "earlierImagesUnchanged": 20,
+  "boundaries": {
+    "committed": false,
+    "pushed": false,
+    "deployed": false,
+    "maintainedFlagsActivated": false,
+    "humanAccepted": false,
+    "goalComplete": false
+  },
+  "evidence": {
+    "dotnet": "all-provider-contract-rollup2.json",
+    "externalBrowser": "external-browser6.json",
+    "registerBrowser": "review-register-browser2.json",
+    "responseBrowser": "review-response-browser1.json",
+    "compiledCsharp": "compiled-csharp-source5.json",
+    "spa": "spa-build4-files.json",
+    "httpSPA": "http-spa-final1.json",
+    "httpGallery": "http-gallery-final2.json",
+    "preservation": "retained-output-preservation2.json",
+    "spec": "spec-freshness1.json",
+    "traceability": "traceability1.json",
+    "decisions": "decision-checks1.json",
+    "appTypes": "app-types2.json",
+    "fixtureTypes": "fixture-types2.json",
+    "lint": "final-web-lint5.json",
+    "whitespace": "whitespace-check1.json"
+  },
+  "sourceCounts": {
+    "csharp": 707,
+    "web": 275,
+    "bundle": 143,
+    "publicSPAHTTP": 142,
+    "galleryHTTP": 23
+  },
+  "migration": "20261103042711_ExternalIssuedReviewSources",
+  "schemaReview": "Up/no backfill and protectedDown independently source PASS; actual legacy downgrade/reupgrade and authorship55000/noeffects provider PASS",
+  "warnings": "Solution1205 existing/current analyzer warnings; scoped frontend lint warnings retained, zero errors",
+  "scope": "Mac local synthetic provider/browser verification only; no real SMTP/Graph transport, hosted, pilot or human acceptance"
+}

@@ -1,0 +1,67 @@
+{
+  "status": "PASS",
+  "checks": [
+    "Actual first visible visit baselines the existing assignment",
+    "Second visit preserves New; actual selected-project scope hides the other new assignment",
+    "Actual detail acknowledges its exact token; Mark all covers a filtered-out project assignment",
+    "Actual foreign-person response/UI at375 omits private Seen state and personal commands"
+  ],
+  "setupCalls": [
+    {
+      "method": "POST",
+      "route": "projects/01a19ad8-43ef-7ad6-af63-f90bcbd8468e/tasks",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "route": "projects",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "route": "projects/01a19ae5-9e12-7a11-9a28-b3bc8a229079/transition",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "route": "projects/01a19ae5-9e12-7a11-9a28-b3bc8a229079/tasks",
+      "status": 201
+    }
+  ],
+  "personal": [
+    {
+      "path": "/api/v1/me/work/visits",
+      "body": {
+        "requestId": "44e773e5-f407-45c2-9f73-58693d76b6cc"
+      }
+    },
+    {
+      "path": "/api/v1/me/work/visits",
+      "body": {
+        "requestId": "937d7a79-641c-45e8-92ed-e1d03a89c91d"
+      }
+    },
+    {
+      "path": "/api/v1/me/work/opened",
+      "body": {
+        "requestId": "2259464b-2905-4db6-b9a4-036c312eb71d",
+        "itemType": "Task",
+        "itemId": "01a19ae5-9de8-72cb-a820-c9943f9a4ce3",
+        "observedTokens": [
+          "01a19ae5-9ded-72ea-891f-1387fc753ae8"
+        ]
+      }
+    },
+    {
+      "path": "/api/v1/me/work/seen-all",
+      "body": {
+        "requestId": "42ab9588-91a5-4969-9986-58353f553377"
+      }
+    }
+  ],
+  "businessWritesFromBrowser": [],
+  "canonicalFingerprintUnchanged": true,
+  "newTaskId": "01a19ae5-9de8-72cb-a820-c9943f9a4ce3",
+  "outsideTaskId": "01a19ae5-9e9b-73bb-a224-442d7ca17c2a",
+  "boundary": "Actual synthetic QA23 API/database +build2 SPA; no lost-TCP or human/pilot acceptance claim"
+}

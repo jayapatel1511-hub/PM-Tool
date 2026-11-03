@@ -1,0 +1,9 @@
+AssertionError [ERR_ASSERTION]: Dashboard identity header must preserve 64px at 375px: 68
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/count-card-overlap.cjs:164:14 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}

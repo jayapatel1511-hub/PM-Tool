@@ -1,0 +1,30 @@
+{
+  "name": "timeline-task-keyboard-return",
+  "actor": "priya@hub.test",
+  "width": 375,
+  "status": "PASS",
+  "startedAtUtc": "2026-11-02T02:38:41.453Z",
+  "facts": {
+    "taskId": "01a19a1f-0fec-7a50-a9df-d928c8c0e317",
+    "openScreenshot": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint22-real-browser-2026-11-02T02-38-25-414Z-93a8de2d/017-timeline-task-open-priya-375.png",
+    "origin": {
+      "url": "http://127.0.0.1:8853/projects/QA22-TL-mvynfza0-370564-A/timeline?to=2026-12-13&cols=items%2Cdates&from=2026-10-18&zoom=month&group=discipline&layers=dependencies%2Cmilestones&expanded=loose%3A01a19a1f-0f9e-7a21-9238-e2fbe75419cd&collapsed=none&disciplineId=01a19a1f-0f9e-7a21-9238-e2fbe75419cd&hideCompleted=false&view=01a19a1f-1072-78fd-b71f-92461202bb2e",
+      "top": 249,
+      "left": 0,
+      "focusId": null
+    },
+    "returnedUrl": "http://127.0.0.1:8853/projects/QA22-TL-mvynfza0-370564-A/timeline?to=2026-12-13&cols=items%2Cdates&from=2026-10-18&zoom=month&group=discipline&layers=dependencies%2Cmilestones&expanded=loose%3A01a19a1f-0f9e-7a21-9238-e2fbe75419cd&collapsed=none&disciplineId=01a19a1f-0f9e-7a21-9238-e2fbe75419cd&hideCompleted=false&view=01a19a1f-1072-78fd-b71f-92461202bb2e",
+    "focusReturned": true,
+    "scrollReturnedWithinPx": 1,
+    "contained": {
+      "viewport": 375,
+      "document": 375,
+      "content": {
+        "client": 375,
+        "scroll": 451
+      }
+    }
+  },
+  "screenshot": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint22-real-browser-2026-11-02T02-38-25-414Z-93a8de2d/018-priya-375-timeline-task-keyboard-return.png",
+  "finishedAtUtc": "2026-11-02T02:38:42.789Z"
+}

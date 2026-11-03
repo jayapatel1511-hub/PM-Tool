@@ -1,0 +1,92 @@
+{
+  "observedAtUtc": "2026-11-01T13:54:29.836Z",
+  "rows": [
+    {
+      "name": "issue",
+      "viewport": "desktop",
+      "status": 200,
+      "url": "http://127.0.0.1:8853/projects/QA20-REAL-001/issues?panel=Issue:01a19762-fecc-72ac-be72-5d1fd4ffaa5b",
+      "hasMarc": false,
+      "hasNotice": false,
+      "items": [],
+      "buttons": [
+        "Start work",
+        "Resolve",
+        "Cancel issue",
+        "QA20 verifier picker visible issue",
+        "UI picker capture",
+        "Alex Chen",
+        "Priya Nair",
+        "2026-11-01",
+        "—",
+        "Add",
+        "Add",
+        "Choose a person…",
+        "Propose verifier",
+        "Link an item"
+      ],
+      "textSample": "Skip to content\nt\nTuesday\nMy Work\nHome\nProjects\nTasks\nResources\nTime\nReports\nTeam\nFiles\nTuesday\nProjects\nQA20-REAL-001 Checkpoint 20 real QA project\nIssues\nSearch\n/\nMy projects\nNew\n2\nPN\nQA20-REAL-001\nCheckpoint 20 real QA project\n◐\nActive\n○\nGrey\nOwner (PM): Priya Nair\nClient: Internal / TBD\nTarget date: 2026-11-30\nOverview\nWork\nDeliverables\nCoordination\nPeople\nFiles\nActivity\nSettings\nWeekly Coordination\nHandoffs\nChanges\nDesign basis\nDecisions\nRisks\nIssues\nMeetings & Actions\nIssues\n\nWhat has gone wrong and needs resolving, by severity and target date\n\nColumns\nViews\nExport\nRaise issue\nSearch\nFilters\nOverdue\nIssues\nKey\tTitle\tIssue type\tSeverity\tStatus\tOwner\tDiscipline\tDate raised\tTarget resolution\tStructured locations\tIndependent verification\nQA20-REAL-001-I01\tQA20 verifier notice issue\tGeneral\t\n▲\nMedium\t\n◐\nOpen\t\nAC\nAlex Chen\t—\nUnavailable\n\t2026-11-01\t\n2026-11-20\n\t—\nUnavailable\n\t\n◐\nProposed\nQA20-REAL-001-I02\tQA20 verifier picker visible issue\tGeneral\t\n○\nLow\t\n◐\nOpen\t\nAC\nAlex Chen\t—\nUnavailable\n\t2026-11-01\t\n—\nUnavailable\n\t—\nUnavailable\n\tNo verification\n\nItem details\n\nIssue\nQA20-REAL-001-I02\n◐\nOpen\n○\nLow\nQA20 verifier picker visible issue\nStart work\nResolve\nCancel issue\nDetails\nTitle\nQA20 verifier picker visible issue\nDescription\nUI picker capture\nSeverity\nHigh\nMedium\nLow\nIssue type\nGeneral\nCoordination\nOwnership\nOwner\nAC\nAlex Chen\nRaised by\nPN\nPriya Nair\nDiscipline\nNone\nCivil\nAffected disciplines\nAffected disciplines\nCivil\nDates\nDate raised\n2026-11-01\nTarget resolution\n—\nLocation and evidence\nStructured locations\n\nNo structured locations recorded yet.\n\nLocation kind\nSite area\nBuilding\nAlignment\nCoordinate\nSite area\nAsset or system\nAdd\nDrawing and model references\nReference kind\nDrawing\nModel\nMarkup\nScreenshot\nDrawing or model identifier\nRevision\nSource system\nStable source ID\nSource link\nExternal topic\nModel element GUID\nViewpoint link\nAvailable\nAdd\nIndependent verification\nVerifier\nChoose a person…\nAppointment reason\nPropose verifier\nSource reference impact0\n\nWhen a linked source revision changes, the issue owner and independent verifier must record whether this issue is unaffected or needs reopening.\n\nNo source revision impacts recorded.\n\nLinked items\nComments\nHistory\n\nNo linked items.\n\nLink an item",
+      "errors": []
+    },
+    {
+      "name": "issue",
+      "viewport": "phone",
+      "status": 200,
+      "url": "http://127.0.0.1:8853/projects/QA20-REAL-001/issues?panel=Issue:01a19762-fecc-72ac-be72-5d1fd4ffaa5b",
+      "hasMarc": false,
+      "hasNotice": false,
+      "items": [],
+      "buttons": [
+        "Start work",
+        "Resolve",
+        "Cancel issue",
+        "QA20 verifier picker visible issue",
+        "UI picker capture",
+        "Alex Chen",
+        "Priya Nair",
+        "2026-11-01",
+        "—",
+        "Add",
+        "Add",
+        "Choose a person…",
+        "Propose verifier",
+        "Link an item"
+      ],
+      "textSample": "Skip to content\n2\nPN\nQA20-REAL-001\nCheckpoint 20 real QA project\n◐\nActive\n○\nGrey\nOwner (PM): Priya Nair\nClient: Internal / TBD\nTarget date: 2026-11-30\nOverview\nWork\nDeliverables\nCoordination\nPeople\nFiles\nActivity\nSettings\nWeekly Coordination\nHandoffs\nChanges\nDesign basis\nDecisions\nRisks\nIssues\nMeetings & Actions\nIssues\n\nWhat has gone wrong and needs resolving, by severity and target date\n\nColumns\nViews\nExport\nRaise issue\nSearch\nFilters\nOverdue\nKey\nQA20-REAL-001-I01\nTitle\nQA20 verifier notice issue\nIssue type\nGeneral\nSeverity\n▲\nMedium\nStatus\n◐\nOpen\nOwner\nAC\nAlex Chen\nDiscipline\n—\nUnavailable\nDate raised\n2026-11-01\nTarget resolution\n2026-11-20\nStructured locations\n—\nUnavailable\nIndependent verification\n◐\nProposed\nKey\nQA20-REAL-001-I02\nTitle\nQA20 verifier picker visible issue\nIssue type\nGeneral\nSeverity\n○\nLow\nStatus\n◐\nOpen\nOwner\nAC\nAlex Chen\nDiscipline\n—\nUnavailable\nDate raised\n2026-11-01\nTarget resolution\n—\nUnavailable\nStructured locations\n—\nUnavailable\nIndependent verification\nNo verification\nMy Work\nSearch\nNotifications\n\nItem details\n\nIssue\nQA20-REAL-001-I02\n◐\nOpen\n○\nLow\nQA20 verifier picker visible issue\nStart work\nResolve\nCancel issue\nDetails\nTitle\nQA20 verifier picker visible issue\nDescription\nUI picker capture\nSeverity\nHigh\nMedium\nLow\nIssue type\nGeneral\nCoordination\nOwnership\nOwner\nAC\nAlex Chen\nRaised by\nPN\nPriya Nair\nDiscipline\nNone\nCivil\nAffected disciplines\nAffected disciplines\nCivil\nDates\nDate raised\n2026-11-01\nTarget resolution\n—\nLocation and evidence\nStructured locations\n\nNo structured locations recorded yet.\n\nLocation kind\nSite area\nBuilding\nAlignment\nCoordinate\nSite area\nAsset or system\nAdd\nDrawing and model references\nReference kind\nDrawing\nModel\nMarkup\nScreenshot\nDrawing or model identifier\nRevision\nSource system\nStable source ID\nSource link\nExternal topic\nModel element GUID\nViewpoint link\nAvailable\nAdd\nIndependent verification\nVerifier\nChoose a person…\nAppointment reason\nPropose verifier\nSource reference impact0\n\nWhen a linked source revision changes, the issue owner and independent verifier must record whether this issue is unaffected or needs reopening.\n\nNo source revision impacts recorded.\n\nLinked items\nComments\nHistory\n\nNo linked items.\n\nLink an item",
+      "errors": []
+    },
+    {
+      "name": "changes",
+      "viewport": "desktop",
+      "status": 200,
+      "url": "http://127.0.0.1:8853/projects/QA20-REAL-001/changes",
+      "hasMarc": true,
+      "hasNotice": true,
+      "items": [],
+      "buttons": [
+        "Cancel",
+        "Confirm",
+        "Close"
+      ],
+      "textSample": "Skip to content\nt\nTuesday\nMy Work\nHome\nProjects\nTasks\nResources\nTime\nReports\nTeam\nFiles\nTuesday\nProjects\nQA20-REAL-001 Checkpoint 20 real QA project\nChanges\nSearch\n/\nMy projects\nNew\n2\nPN\nQA20-REAL-001\nCheckpoint 20 real QA project\n◐\nActive\n○\nGrey\nOwner (PM): Priya Nair\nClient: Internal / TBD\nTarget date: 2026-11-30\nOverview\nWork\nDeliverables\nCoordination\nPeople\nFiles\nActivity\nSettings\nWeekly Coordination\nHandoffs\nChanges\nDesign basis\nDecisions\nRisks\nIssues\nMeetings & Actions\nRevisions and change impact\n\nTrack the inputs each team used and assess the work affected by a new registered revision.\n\nViews\nExport\nRegister source revision\nSearch\nFilters\nAssigned to me\n\n0 records in this view\n\nNo change notices in this view\n\nRegister a baseline source, record where it is used, then register an explicit replacement revision.\n\nInputs used by receiving work\n\nOnly explicitly linked work and added targets are assessed. Unlinked work has not been checked.\n\nRecord input use\nFilters\n\nNo input use is recorded in this view.\n\nRegistered source history\nRegister source revision\n\nRegister an exact reference. Tuesday records the declared revision and does not inspect the external document.\n\nCurrent revision being replaced (leave blank for a new source)\nChoose…\nQA20-REAL-001-D001 · A · QA20 real deliverable\nSource type\nChoose…\nDeliverables\nExternal reference\nSource deliverable\nChoose…\nQA20-REAL-001-D001 · QA20 real deliverable\nAccountable owner\nChoose…\nAlex Chen\nJill Martin\nMarc Dubois · Co-op · Starts 2026-11-02 · Ends 2026-11-11\nPriya Nair\nDiscipline\nChoose…\nCivil\nSource system\nExternal document identifier\nSource title\nDeclared revision\nExact source link\nIssuer\nSource last checked\n(optional)\nAffected scope\nCancel\nConfirm\nClose",
+      "errors": []
+    },
+    {
+      "name": "changes",
+      "viewport": "phone",
+      "status": 200,
+      "url": "http://127.0.0.1:8853/projects/QA20-REAL-001/changes",
+      "hasMarc": true,
+      "hasNotice": true,
+      "items": [],
+      "buttons": [
+        "Cancel",
+        "Confirm",
+        "Close"
+      ],
+      "textSample": "Skip to content\n2\nPN\nQA20-REAL-001\nCheckpoint 20 real QA project\n◐\nActive\n○\nGrey\nOwner (PM): Priya Nair\nClient: Internal / TBD\nTarget date: 2026-11-30\nOverview\nWork\nDeliverables\nCoordination\nPeople\nFiles\nActivity\nSettings\nWeekly Coordination\nHandoffs\nChanges\nDesign basis\nDecisions\nRisks\nIssues\nMeetings & Actions\nRevisions and change impact\n\nTrack the inputs each team used and assess the work affected by a new registered revision.\n\nViews\nExport\nRegister source revision\nSearch\nFilters\nAssigned to me\n\n0 records in this view\n\nNo change notices in this view\n\nRegister a baseline source, record where it is used, then register an explicit replacement revision.\n\nInputs used by receiving work\n\nOnly explicitly linked work and added targets are assessed. Unlinked work has not been checked.\n\nRecord input use\nFilters\n\nNo input use is recorded in this view.\n\nRegistered source history\nMy Work\nSearch\nNotifications\nRegister source revision\n\nRegister an exact reference. Tuesday records the declared revision and does not inspect the external document.\n\nCurrent revision being replaced (leave blank for a new source)\nChoose…\nQA20-REAL-001-D001 · A · QA20 real deliverable\nSource type\nChoose…\nDeliverables\nExternal reference\nSource deliverable\nChoose…\nQA20-REAL-001-D001 · QA20 real deliverable\nAccountable owner\nChoose…\nAlex Chen\nJill Martin\nMarc Dubois · Co-op · Starts 2026-11-02 · Ends 2026-11-11\nPriya Nair\nDiscipline\nChoose…\nCivil\nSource system\nExternal document identifier\nSource title\nDeclared revision\nExact source link\nIssuer\nSource last checked\n(optional)\nAffected scope\nCancel\nConfirm\nClose",
+      "errors": []
+    }
+  ],
+  "errors": []
+}

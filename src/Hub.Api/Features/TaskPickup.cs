@@ -19,7 +19,7 @@ public static class TaskPickupEndpoints
     public sealed record ListRow(Guid Id, Guid TaskId, Guid OfferedById, string OfferedBy, string Reason, decimal? HoursRemaining, DateOnly? NeededBy, string? Note, DateTimeOffset OpenedAt, ListTask Task, bool CanPickUp, bool CanAssign);
     public sealed record DetailTask(string Key, string Name, Guid ProjectId, Guid ProjectDisciplineId, DateOnly? DueDate);
     public sealed record Allowed(bool PickUp, bool Assign, bool Withdraw);
-    public sealed record Candidate(Guid Id, string? DisplayName);
+    public sealed record Candidate(Guid Id, string? DisplayName, [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] PersonFacts.Notices? PersonNotices = null);
     public sealed record DetailResult(Guid Id, string Reason, string? Note, DateTimeOffset OpenedAt, bool KeepWatching, int RowVersion,
         DetailTask Task, Allowed Allowed, IReadOnlyList<Candidate> Candidates);
 
@@ -192,24 +192,27 @@ public static class TaskPickupEndpoints
         return TypedResults.Ok<IReadOnlyList<ListRow>>(result);
     }
 
-    static async Task<Ok<DetailResult>> Detail(Guid id, Access access, HubDb db, CurrentUser me, SettingsStore store)
+    static async Task<Ok<DetailResult>> Detail(Guid id, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock)
     {
         if (!await Enabled(db, store)) throw ApiException.NotFound();
+        var settings = await store.Get(db);
+        await using var noticeSnapshot = settings.IsFlagOn("capacity_screens") ? await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead) : null;
         var (task, project, ctx) = await TaskEndpoints.Load(db, access, id);
         var offer = await db.Set<TaskPickupOffer>().AsNoTracking().FirstOrDefaultAsync(x => x.TaskId == id && x.ClosedAt == null) ?? throw ApiException.NotFound();
         var viewer = await db.Users.AsNoTracking().FirstAsync(u => u.Id == me.Id);
         var owner = task.AssigneeId is { } ownerId ? await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == ownerId) : null;
-        var org = (await store.Get(db)).IsFlagOn("org_structure");
+        var org = settings.IsFlagOn("org_structure");
         var sameTeam = owner is not null && owner.Id != me.Id && TaskPickupRules.SameTeam(org, owner.UnitId, viewer.UnitId, owner.SupervisorId, viewer.SupervisorId, owner.IsActive, viewer.IsActive);
         var canAssign = TaskPickupRules.CanAssign(access.Actor, ctx, task.ProjectDisciplineId, owner?.SupervisorId);
         var candidates = canAssign ? await db.Users.AsNoTracking().Where(u => u.IsActive && u.Id != task.AssigneeId).ToListAsync() : [];
         var eligible = candidates.Where(u => owner is not null && TaskPickupRules.SameTeam(org, owner.UnitId, u.UnitId, owner.SupervisorId, u.SupervisorId, owner.IsActive, u.IsActive))
             .Select(u => new { u.Id, u.DisplayName }).ToList();
+        var notices = await PersonFacts.ReadNotices(db, eligible.Select(person => person.Id).ToArray(), settings, clock);
         return TypedResults.Ok(new DetailResult(offer.Id, offer.Reason, offer.Note, offer.OpenedAt, offer.KeepWatching, task.RowVersion,
             new DetailTask(task.Key, task.Name, task.ProjectId, task.ProjectDisciplineId, task.DueDate),
             new Allowed(sameTeam && Permissions.Writable(access.Actor, ctx).Ok, canAssign && Permissions.Writable(access.Actor, ctx).Ok,
                 Permissions.Writable(access.Actor, ctx).Ok && TaskPickupRules.CanWithdraw(access.Actor, ctx, task.ProjectDisciplineId, offer)),
-            eligible.Select(u => new Candidate(u.Id, u.DisplayName)).ToList()));
+            eligible.Select(u => new Candidate(u.Id, u.DisplayName, notices.GetValueOrDefault(u.Id))).ToList()));
     }
 
 }
@@ -312,12 +315,17 @@ public sealed class PickupCommandFilter : IEndpointFilter
         var id = Guid.Parse(context.HttpContext.Request.RouteValues["id"]!.ToString()!);
         var projectId = await db.Tasks.Where(t => t.Id == id).Select(t => (Guid?)t.ProjectId).SingleOrDefaultAsync() ?? throw ApiException.NotFound();
         await using var tx = await db.Database.BeginTransactionAsync();
-        await Coordination.Lock(db, projectId);
-        await db.Database.SqlQuery<Guid>($"SELECT id AS \"Value\" FROM hub.task WHERE id={id} FOR UPDATE").ToListAsync();
-        var (_, ctx) = await access.Project(projectId, false);
-        Access.Demand(Permissions.Writable(access.Actor, ctx));
-        var result = await next(context);
-        await tx.CommitAsync();
-        return result;
+        try
+        {
+            await Coordination.Lock(db, projectId);
+            await db.Database.SqlQuery<Guid>($"SELECT id AS \"Value\" FROM hub.task WHERE id={id} FOR UPDATE").ToListAsync();
+            var (_, ctx) = await access.Project(projectId, false);
+            Access.Demand(Permissions.Writable(access.Actor, ctx));
+            var result = await next(context);
+            await db.FlushNotices(context.HttpContext.RequestAborted);
+            await tx.CommitAsync();
+            return result;
+        }
+        finally { db.DiscardNotices(); }
     }
 }

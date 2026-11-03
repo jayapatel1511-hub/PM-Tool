@@ -1,0 +1,76 @@
+{
+  "environment": {
+    "api": "http://127.0.0.1:5088",
+    "preview": "http://127.0.0.1:8853",
+    "apiConfig": "Development",
+    "project": "SYN-JOIN17-1101",
+    "projectId": "01a19560-81ff-747e-948a-bb0fdfa53de9",
+    "name": "Synthetic joined journeys 17"
+  },
+  "journeys": {
+    "allocationShift": {
+      "verdict": "PASS",
+      "createdProject": { "status": 201, "projectId": "01a19560-81ff-747e-948a-bb0fdfa53de9" },
+      "tasks": [
+        "01a19560-bb14-7f41-b38a-4889d9d01051",
+        "01a19560-bb27-75c4-b79f-722be11e3596",
+        "01a19560-bb35-7e0a-9b7f-c73645475c63"
+      ],
+      "allocations": [
+        "01a19560-cf5b-7d95-bf39-8e54eaeb42d9",
+        "01a19560-cf76-7987-9501-bc4d07759120",
+        "01a19560-cf8b-789e-939d-26cb81fc88b5"
+      ],
+      "normalApiStatuses": { "taskCreates": 201, "allocationCreates": 200, "confirmationPreview": 200, "confirm": 200, "shiftPreview": 200, "shiftApply": 200 },
+      "chrome": {
+        "allocationRows": 3,
+        "shiftMode": "WholeProject",
+        "weeks": 2,
+        "previewDates": "2026-11-30 – 2026-12-04",
+        "confirmedRowReturnedToProposed": true,
+        "firstWorkingRowY": 477,
+        "screenshots": [
+          "checkpoint17-real-journeys-allocation-before.png",
+          "checkpoint17-real-journeys-allocation-preview.png",
+          "checkpoint17-real-journeys-allocation-after.png"
+        ]
+      },
+      "postconditions": {
+        "allPeopleAndHoursRetained": true,
+        "allTaskLinksTranslatedToNov30Dec4": true,
+        "taskDueDatesUnchanged": true,
+        "confirmedBySamRetained": true
+      }
+    },
+    "readiness": {
+      "verdict": "PASS",
+      "window": "2026-11-16..2026-11-20",
+      "rows": 3,
+      "allNeedsAssessment": true,
+      "allHasAssessmentFalseBeforeAndAfterInspectorRead": true,
+      "inspectorUrl": "/projects/SYN-JOIN17-1101/readiness?from=2026-11-16&to=2026-11-20&inspect=1&inspectWork=Task%3A01a19560-bb14-7f41-b38a-4889d9d01051",
+      "closeUrl": "/projects/SYN-JOIN17-1101/readiness?from=2026-11-16&to=2026-11-20",
+      "firstWorkingRowY": 1611,
+      "normalApiStatuses": { "window": 200, "absentAssessmentRead": 404 },
+      "expectedAbsentAssessment404": true,
+      "screenshots": ["checkpoint17-real-journeys-readiness.png", "checkpoint17-real-journeys-readiness-inspector.png"]
+    },
+    "reportAndPersonalView": {
+      "verdict": "PASS",
+      "url": "/reports/tasks-due-this-week?projectId=01a19560-81ff-747e-948a-bb0fdfa53de9&week=2026-11-16",
+      "priyaRows": 3,
+      "samRows": 3,
+      "savedParameters": { "projectId": "01a19560-81ff-747e-948a-bb0fdfa53de9", "week": "2026-11-16" },
+      "personalViewScope": "Personal",
+      "samPersonalViews": 0,
+      "firstWorkingRowY": 691,
+      "normalApiStatuses": { "report": 200, "viewsRead": 200, "viewCreate": 201 },
+      "screenshots": ["checkpoint17-real-journeys-report-priya.png", "checkpoint17-real-journeys-report-saved.png", "checkpoint17-real-journeys-report-sam.png", "checkpoint17-real-journeys-report-views-menu.png"]
+    }
+  },
+  "limits": [
+    "No human, production, deployment, or provider acceptance claimed.",
+    "The readiness inspector's 404 is the expected absent-assessment read; it did not create an assessment.",
+    "Two identical personal QA views were created during safe browser-selector retries; both contain only projectId and week and remain disposable records."
+  ]
+}

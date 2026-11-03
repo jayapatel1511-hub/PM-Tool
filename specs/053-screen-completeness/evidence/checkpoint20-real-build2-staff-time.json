@@ -1,0 +1,200 @@
+{
+  "observedAtUtc": "2026-11-01T13:57:08.922Z",
+  "rows": [
+    {
+      "name": "staff",
+      "who": "sam",
+      "viewport": "desktop",
+      "status": 200,
+      "url": "http://127.0.0.1:8853/staff?scope=direct&showInactive=true",
+      "rowCount": 5,
+      "rects": [
+        {
+          "top": 399.5,
+          "bottom": 454.5,
+          "height": 55
+        },
+        {
+          "top": 454.5,
+          "bottom": 509.5,
+          "height": 55
+        },
+        {
+          "top": 509.5,
+          "bottom": 600.5,
+          "height": 91
+        },
+        {
+          "top": 600.5,
+          "bottom": 645.5,
+          "height": 45
+        },
+        {
+          "top": 645.5,
+          "bottom": 690,
+          "height": 44.5
+        }
+      ],
+      "focus": {
+        "hash": "",
+        "active": null,
+        "scrollWidth": 1440,
+        "innerWidth": 1440
+      },
+      "has4h": true,
+      "hasPriya": false,
+      "hasStaffCard": true,
+      "textSample": "Skip to content\nt\nTuesday\nMy Work\nHome\nProjects\nTasks\nResources\nTime\nReports\nTeam\nFiles\nMy Staff\nTuesday\nMy Staff\nSearch\n/\nMy projects\nNew\n4\nSP\n\nResources\n\nMy Staff\nCurrent values\n2026-11-01 09:57\nViews\n\nYour direct reports\n\nOffice\nAny office\nHead Office\nDiscipline\nAny discipline\nProject Management\nSurvey\nCivil\nGeotechnical\nElectrical\nEnvironmental\nStructural\nTransportation\nArchitecture\nShow inactive\nStaff\n5\nMy direct reports · 5 people shown\nProject assignments\n6\nMy direct reports · sum of Projects for 5 people shown\nWith overdue work\n0\nMy direct reports · 5 people shown\nWith blocked work\n0\nMy direct reports · 5 people shown\nReviews waiting too long\n0\nMy direct reports · sum of stalled reviews for 5 people shown\nDetails\n\tName\tProjects\tOpen\tOverdue\tBlocked\tBlocking\tReviews\tStalled reviews\tDue ≤ 14 d\tLast activity\tThis week\tRoles\n\n\t\nAC\nAlex Chen\nCivil Designer (EIT) · Head Office\n\t1\t1\t0\t0\t0\t0\t0\t1\t8 min ago\t40 h free\tTeam 1\n\n\t\nJM\nJill Martin\nCivil Designer · Head Office\n\t1\t0\t0\t0\t0\t0\t0\t0\t—\t40 h free\tTeam 1\n\n\t\nMD\nMarc Dubois\nSenior Civil Engineer · Head Office\nCo-op · Starts 2026-11-02 · Ends 2026-11-11\n\t2\t0\t0\t0\t0\t0\t0\t0\t7 min ago\t40 h free\tDL 2 · Team 2\n\n\t\nQ\nqa20-report-a\n\t1\t20\t0\t0\t0\t0\t0\t0\t—\t40 h free\tTeam 1\n\n\t\nQ\nqa20-report-b\n\t1\t15\t0\t0\t0\t0\t0\t0\t—\t32 h free\tTeam 1",
+      "errors": []
+    },
+    {
+      "name": "staff",
+      "who": "sam",
+      "viewport": "phone",
+      "status": 200,
+      "url": "http://127.0.0.1:8853/staff?scope=direct&showInactive=true",
+      "rowCount": 5,
+      "rects": [
+        {
+          "top": 0,
+          "bottom": 0,
+          "height": 0
+        },
+        {
+          "top": 0,
+          "bottom": 0,
+          "height": 0
+        },
+        {
+          "top": 0,
+          "bottom": 0,
+          "height": 0
+        },
+        {
+          "top": 0,
+          "bottom": 0,
+          "height": 0
+        },
+        {
+          "top": 0,
+          "bottom": 0,
+          "height": 0
+        }
+      ],
+      "focus": {
+        "hash": "",
+        "active": null,
+        "scrollWidth": 375,
+        "innerWidth": 375
+      },
+      "has4h": true,
+      "hasPriya": false,
+      "hasStaffCard": true,
+      "textSample": "Skip to content\n4\nSP\n\nResources\n\nMy Staff\nCurrent values\n2026-11-01 09:57\nViews\n\nYour direct reports\n\nOffice\nAny office\nHead Office\nDiscipline\nAny discipline\nProject Management\nSurvey\nCivil\nGeotechnical\nElectrical\nEnvironmental\nStructural\nTransportation\nArchitecture\nShow inactive\nStaff\n5\nMy direct reports · 5 people shown\nProject assignments\n6\nMy direct reports · sum of Projects for 5 people shown\nWith overdue work\n0\nMy direct reports · 5 people shown\nWith blocked work\n0\nMy direct reports · 5 people shown\nReviews waiting too long\n0\nMy direct reports · sum of stalled reviews for 5 people shown\nAC\nAlex Chen\nCivil Designer (EIT) · Head Office · Team 1\nThis week40 h free\nProjects\n1\nOpen\n1\nOverdue\n0\nBlocked\n0\nReviews\n0\nStalled reviews\n0\nJM\nJill Martin\nCivil Designer · Head Office · Team 1\nThis week40 h free\nProjects\n1\nOpen\n0\nOverdue\n0\nBlocked\n0\nReviews\n0\nStalled reviews\n0\nMD\nMarc Dubois\nSenior Civil Engineer · Head Office · DL 2 · Team 2\nCo-op · Starts 2026-11-02 · Ends 2026-11-11\nThis week40 h free\nProjects\n2\nOpen\n0\nOverdue\n0\nBlocked\n0\nReviews\n0\nStalled reviews\n0\nQ\nqa20-report-a\nTeam 1\nThis week40 h free\nProjects\n1\nOpen\n20\nOverdue\n0\nBlocked\n0\nReviews\n0\nStalled reviews\n0\nQ\nqa20-report-b\nTeam 1\nThis week32 h free\nProjects\n1\nOpen\n15\nOverdue\n0\nBlocked\n0\nReviews\n0\nStalled reviews\n0\nMy Work\nSearch\nNotifications",
+      "errors": []
+    },
+    {
+      "name": "time",
+      "who": "priya",
+      "viewport": "desktop",
+      "status": 200,
+      "url": "http://127.0.0.1:8853/time?from=2026-10-26&to=2026-11-01&scope=mine#time-entries",
+      "rowCount": 6,
+      "rects": [
+        {
+          "top": 333.5,
+          "bottom": 446.5,
+          "height": 113
+        },
+        {
+          "top": 446.5,
+          "bottom": 543.5,
+          "height": 97
+        },
+        {
+          "top": 543.5,
+          "bottom": 656.5,
+          "height": 113
+        },
+        {
+          "top": 808,
+          "bottom": 844,
+          "height": 36
+        },
+        {
+          "top": 808,
+          "bottom": 844.5,
+          "height": 36.5
+        },
+        {
+          "top": 844.5,
+          "bottom": 881,
+          "height": 36.5
+        }
+      ],
+      "focus": {
+        "hash": "#time-entries",
+        "active": "time-entries",
+        "scrollWidth": 1440,
+        "innerWidth": 1440
+      },
+      "has4h": true,
+      "hasPriya": false,
+      "hasStaffCard": false,
+      "textSample": "Skip to content\nt\nTuesday\nMy Work\nHome\nProjects\nTasks\nResources\nTime\nReports\nTeam\nFiles\nTuesday\nTime\nSearch\n/\nMy projects\nNew\n2\nPN\nTime\n\nHours you worked on tasks. Actual hours are kept apart from estimates, progress and workload.\n\nCurrent values\n2026-11-01 09:57\nTask Hours report\nExport\nAdd time\nFilters\n2026-10-26 – 2026-11-01\nThis week\nMine\nEveryone I can review\n\nCapacity 40 h this week\n\nYour task hours by day\nTask\t\nMon\n2026-10-26\nAvailable 8 h\n\t\nTue\n2026-10-27\nAvailable 8 h\n\t\nWed\n2026-10-28\nAvailable 8 h\n\t\nThu\n2026-10-29\nAvailable 8 h\n\t\nFri\n2026-10-30\nAvailable 8 h\n\t\nSat\n2026-10-31\nAvailable 0 h\n\t\nSun\n2026-11-01\nAvailable 0 h\n\tRecorded hours\nQA20-REAL-001-T0001\nQA20 real task one\nQA20-REAL-001 Checkpoint 20 real QA project\nAssigned to you\n\t\n\t\nEntry details\t\n\t\n\t\n\t\n\t\n\t2 h\nQA20-REAL-001-T0002\nQA20 real task two\nQA20-REAL-001 Checkpoint 20 real QA project\n\t\n\t\n\t\nEntry details\t\n\t\n\t\n\t\n\t2 h\nQA20-REAL-001-T0003\nQA20 Known null workspace task\nQA20-REAL-001 Checkpoint 20 real QA project\nAssigned to you\n\t\n\t\n\t\n\t\n\t\n\t\n\t\n\t0 h\nHours per day\t0 h\t2 h\t2 h\t0 h\t0 h\t0 h\t0 h\t4 h\n\nBlank cells are suggestions. Enter hours, then press Enter or leave the cell to save. Hatched days show time away; you can still record work on those days. Use entry details for notes or explicit removal. Totals include recorded entries only.\n\nTotal shown\n4 h\n2026-10-26 – 2026-11-01 · Mine\nBy project\nQA20-REAL-001 Checkpoint 20 real QA project\t4 h\nBy task\nQA20-REAL-001-T0001 QA20 real task one\t2 h\nQA20-REAL-001-T0002 QA20 real task two\t2 h\n\nThese are recorded hours only. They do not change estimates, progress, health, workload, invoices or payroll.",
+      "errors": []
+    },
+    {
+      "name": "time",
+      "who": "priya",
+      "viewport": "phone",
+      "status": 200,
+      "url": "http://127.0.0.1:8853/time?from=2026-10-26&to=2026-11-01&scope=mine#time-entries",
+      "rowCount": 6,
+      "rects": [
+        {
+          "top": 173.5,
+          "bottom": 286.5,
+          "height": 113
+        },
+        {
+          "top": 286.5,
+          "bottom": 383.5,
+          "height": 97
+        },
+        {
+          "top": 383.5,
+          "bottom": 516.5,
+          "height": 133
+        },
+        {
+          "top": 872,
+          "bottom": 908,
+          "height": 36
+        },
+        {
+          "top": 967,
+          "bottom": 1003.5,
+          "height": 36.5
+        },
+        {
+          "top": 1003.5,
+          "bottom": 1040,
+          "height": 36.5
+        }
+      ],
+      "focus": {
+        "hash": "#time-entries",
+        "active": "time-entries",
+        "scrollWidth": 375,
+        "innerWidth": 375
+      },
+      "has4h": true,
+      "hasPriya": false,
+      "hasStaffCard": false,
+      "textSample": "Skip to content\n2\nPN\nTime\n\nHours you worked on tasks. Actual hours are kept apart from estimates, progress and workload.\n\nCurrent values\n2026-11-01 09:57\nTask Hours report\nExport\nAdd time\nFilters\n2026-10-26 – 2026-11-01\nThis week\nMine\nEveryone I can review\n\nCapacity 40 h this week\n\nYour task hours by day\nTask\t\nMon\n2026-10-26\nAvailable 8 h\n\t\nTue\n2026-10-27\nAvailable 8 h\n\t\nWed\n2026-10-28\nAvailable 8 h\n\t\nThu\n2026-10-29\nAvailable 8 h\n\t\nFri\n2026-10-30\nAvailable 8 h\n\t\nSat\n2026-10-31\nAvailable 0 h\n\t\nSun\n2026-11-01\nAvailable 0 h\n\tRecorded hours\nQA20-REAL-001-T0001\nQA20 real task one\nQA20-REAL-001 Checkpoint 20 real QA project\nAssigned to you\n\t\n\t\nEntry details\t\n\t\n\t\n\t\n\t\n\t2 h\nQA20-REAL-001-T0002\nQA20 real task two\nQA20-REAL-001 Checkpoint 20 real QA project\n\t\n\t\n\t\nEntry details\t\n\t\n\t\n\t\n\t2 h\nQA20-REAL-001-T0003\nQA20 Known null workspace task\nQA20-REAL-001 Checkpoint 20 real QA project\nAssigned to you\n\t\n\t\n\t\n\t\n\t\n\t\n\t\n\t0 h\nHours per day\t0 h\t2 h\t2 h\t0 h\t0 h\t0 h\t0 h\t4 h\n\nBlank cells are suggestions. Enter hours, then press Enter or leave the cell to save. Hatched days show time away; you can still record work on those days. Use entry details for notes or explicit removal. Totals include recorded entries only.\n\nTotal shown\n4 h\n2026-10-26 – 2026-11-01 · Mine\nBy project\nQA20-REAL-001 Checkpoint 20 real QA project\t4 h\nBy task\nQA20-REAL-001-T0001 QA20 real task one\t2 h\nQA20-REAL-001-T0002 QA20 real task two\t2 h\n\nThese are recorded hours only. They do not change estimates, progress, health, workload, invoices or payroll.\n\nMy Work\nSearch\nNotifications",
+      "errors": []
+    }
+  ],
+  "errors": []
+}

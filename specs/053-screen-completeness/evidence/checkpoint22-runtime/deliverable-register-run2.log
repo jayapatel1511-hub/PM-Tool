@@ -1,0 +1,11 @@
+{"diagnostic":"deliverable-register failure","url":"http://127.0.0.1:8853/projects/P-MOCK/deliverables?panel=Deliverable:00000000-0000-0000-0033-000000000001","visibleHeadings":["Client drawing number"],"visibleAlerts":[],"pageErrors":[],"unknownGets":[],"apiErrors":[],"lastListRead":{"includeTasks":"true"},"recentMutations":["PATCH /api/v1/deliverables/00000000-0000-0000-0033-000000000001/issues/00000000-0000-0000-0033-000000000202/response","PATCH /api/v1/deliverables/00000000-0000-0000-0033-000000000001/issues/00000000-0000-0000-0033-000000000202/response"],"unexpectedMutations":[],"rejectedMutations":[]}
+locator.fill: Timeout 12000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('dialog').last().getByLabel('Client drawing number', { exact: true })[22m
+
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/deliverable-register.cjs:207:73 {
+  log: [
+    "  - waiting for getByRole('dialog').last().getByLabel('Client drawing number', { exact: true })"
+  ],
+  name: 'TimeoutError'
+}

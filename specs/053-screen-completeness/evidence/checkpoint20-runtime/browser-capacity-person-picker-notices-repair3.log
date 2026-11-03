@@ -1,0 +1,15 @@
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
++ actual - expected
+
++ '00000000-0000-0000-0000-000000002401'
+- '00000000-0000-0000-0000-000000000002'
+                                   ^
+
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/capacity-person-picker-notices.cjs:211:12 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: '00000000-0000-0000-0000-000000002401',
+  expected: '00000000-0000-0000-0000-000000000002',
+  operator: 'strictEqual',
+  diff: 'simple'
+}

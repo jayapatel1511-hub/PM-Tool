@@ -1,0 +1,125 @@
+{"status":"FAIL","suite":"decision-metadata","url":"http://127.0.0.1:8860/projects/P-MOCK/decisions?panel=Decision%3A00000000-0000-0000-0000-000000007200","recentScreens":[{"query":{},"enabled":true,"refused":false},{"query":{},"enabled":true,"refused":false},{"query":{},"enabled":true,"refused":false},{"query":{},"enabled":true,"refused":false},{"query":{},"enabled":true,"refused":false},{"query":{},"enabled":true,"refused":false},{"query":{},"enabled":true,"refused":false},{"query":{},"enabled":true,"refused":false}],"recentLists":[{"status":"Pending"},{"status":"Pending"},{"status":"Pending"},{"status":"Pending"},{},{},{},{}],"attempts":[{"method":"POST","name":"/api/v1/projects/00000000-0000-0000-0000-000000000010/decisions","body":"{\"subject\":\"Synthetic created decision\",\"description\":\"Synthetic creation context\",\"requestedById\":null,\"ownerUserId\":null,\"ownerExternalPartyId\":\"00000000-0000-0000-0000-000000000302\",\"dateRequested\":\"2026-11-14\",\"requiredByDate\":\"2026-11-20\",\"impactLevel\":\"Medium\",\"impactDescription\":\"Synthetic impact\",\"links\":[],\"categoryId\":\"00000000-0000-0000-0000-000000007110\",\"optionsConsidered\":[\"Synthetic new option 1\",\"Synthetic new option 2\"]}","key":"24f25faf-7359-456c-a8b6-4505b4479fec"},{"method":"PATCH","name":"/api/v1/decisions/00000000-0000-0000-0000-000000007999","body":"{\"categoryId\":\"00000000-0000-0000-0000-000000007110\",\"optionsConsidered\":[\"Complete context correction\",\"Synthetic new option 2\"]}","version":"\"1\""},{"method":"PATCH","name":"/api/v1/decisions/00000000-0000-0000-0000-000000007999","body":"{\"categoryId\":\"00000000-0000-0000-0000-000000007110\",\"optionsConsidered\":[\"Complete context correction\",\"Synthetic new option 2\"],\"reason\":\"Complete project context correction\"}","version":"\"1\""},{"method":"POST","name":"/api/v1/decisions/00000000-0000-0000-0000-000000007999/transition","body":"{\"toStatus\":\"Decided\",\"decisionText\":\"Complete chosen outcome\",\"decisionDate\":\"2026-11-14\",\"rationale\":\"Complete outcome rationale\",\"notifyAssignees\":true,\"rowVersion\":2}","key":"f2397d93-52d6-41e2-bdb1-0902d8e54b17","version":"\"2\""},{"method":"POST","name":"/api/v1/decisions/00000000-0000-0000-0000-000000007999/transition","body":"{\"toStatus\":\"Decided\",\"decisionText\":\"Complete chosen outcome\",\"decisionDate\":\"2026-11-14\",\"rationale\":\"Complete outcome rationale\",\"notifyAssignees\":true,\"rowVersion\":2,\"reason\":\"Complete project outcome correction\"}","key":"f394b6f1-42ab-4856-880f-7a97fd7c7203","version":"\"2\""},{"method":"POST","name":"/api/v1/decisions/00000000-0000-0000-0000-000000007999/transition","body":"{\"toStatus\":\"Decided\",\"decisionText\":\"Complete chosen outcome\",\"decisionDate\":\"2026-11-14\",\"rationale\":\"Complete outcome rationale\",\"notifyAssignees\":true,\"rowVersion\":2,\"reason\":\"Complete project outcome correction\"}","key":"f394b6f1-42ab-4856-880f-7a97fd7c7203","version":"\"2\""}],"unexpected":[],"unknownGets":[],"observations":["AC69: client4/10/12→10, internal4/11→7.5, full-project basis/denominator and no contact/recorder/person figures despite row filter","AC69: inactive category retained, genuine Person return, pending rationale hidden, stale refusal retains draft and original version; direct explicit Cancel makes no extra command","AC69/84:375px distinct outcome/rationale, lost committed reply retries same body/key/version once; actual current-key refusal withholds cached figures, natural panel Close exposes the canonical ErrorBanner and its real Retry recovers","AC69:375px typed create uses existing owner picker, mounts link picker, active category and ordered options; lost committed create reply returns one actual ID with immutable intent","Complete: definite missing-reason context/outcome refusals retain original versions; supplied canonical reason succeeds, no new maxlength, and lost committed outcome retries identical reason/body/key/version"]}
+locator.click: Timeout 15000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('button', { name: 'Raise decision', exact: true })[22m
+[2m    - locator resolved to <button data-slot="button" data-size="default" data-variant="default" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors duration-[120ms] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-action text-action-foreground hover:bg-action-hov…>…</button>[22m
+[2m  - attempting click action[22m
+[2m    - waiting for element to be visible, enabled and stable[22m
+[2m    - element is visible, enabled and stable[22m
+[2m    - scrolling into view if needed[22m
+[2m    - done scrolling[22m
+[2m    - <div data-state="open" aria-hidden="true" data-aria-hidden="true" data-slot="sheet-overlay" class="fixed inset-0 z-50 bg-[rgba(25,27,32,0.3)] data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0"></div> intercepts pointer events[22m
+[2m  - retrying click action[22m
+[2m    - waiting for element to be visible, enabled and stable[22m
+[2m    - element is visible, enabled and stable[22m
+[2m    - scrolling into view if needed[22m
+[2m    - done scrolling[22m
+[2m    - <div role="dialog" tabindex="-1" id="radix-_r_2a_" data-state="open" data-slot="sheet-content" aria-labelledby="radix-_r_2b_" aria-describedby="radix-_r_2c_" class="fixed z-50 flex flex-col bg-background shadow-overlay transition ease-in-out data-[state=closed]:animate-out data-[state=closed]:duration-[180ms] data-[state=open]:animate-in data-[state=open]:duration-[180ms] inset-y-0 right-0 h-full border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right w-full gap-0 over…>…</div> intercepts pointer events[22m
+[2m  - retrying click action[22m
+[2m    - waiting 20ms[22m
+[2m    2 × waiting for element to be visible, enabled and stable[22m
+[2m      - element is visible, enabled and stable[22m
+[2m      - scrolling into view if needed[22m
+[2m      - done scrolling[22m
+[2m      - <div data-slot="skeleton" class="animate-pulse rounded-md bg-secondary h-(--row-min) w-full"></div> from <div role="dialog" tabindex="-1" id="radix-_r_2a_" data-state="open" data-slot="sheet-content" aria-labelledby="radix-_r_2b_" aria-describedby="radix-_r_2c_" class="fixed z-50 flex flex-col bg-background shadow-overlay transition ease-in-out data-[state=closed]:animate-out data-[state=closed]:duration-[180ms] data-[state=open]:animate-in data-[state=open]:duration-[180ms] inset-y-0 right-0 h-full border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right w-full gap-0 over…>…</div> subtree intercepts pointer events[22m
+[2m    - retrying click action[22m
+[2m      - waiting 100ms[22m
+[2m    7 × waiting for element to be visible, enabled and stable[22m
+[2m      - element is visible, enabled and stable[22m
+[2m      - scrolling into view if needed[22m
+[2m      - done scrolling[22m
+[2m      - <div class="flex flex-wrap items-center gap-2">…</div> from <div role="dialog" tabindex="-1" id="radix-_r_2a_" data-state="open" data-slot="sheet-content" aria-labelledby="radix-_r_2b_" aria-describedby="radix-_r_2c_" class="fixed z-50 flex flex-col bg-background shadow-overlay transition ease-in-out data-[state=closed]:animate-out data-[state=closed]:duration-[180ms] data-[state=open]:animate-in data-[state=open]:duration-[180ms] inset-y-0 right-0 h-full border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right w-full gap-0 over…>…</div> subtree intercepts pointer events[22m
+[2m    - retrying click action[22m
+[2m      - waiting 500ms[22m
+[2m      - waiting for element to be visible, enabled and stable[22m
+[2m      - element is visible, enabled and stable[22m
+[2m      - scrolling into view if needed[22m
+[2m      - done scrolling[22m
+[2m      - <select title="An external party" aria-label="An external party" class="h-(--control-row-h) w-full rounded-md border border-transparent bg-transparent px-1.5 text-sm hover:border-input hover:bg-muted focus-visible:border-input">…</select> from <div role="dialog" tabindex="-1" id="radix-_r_2a_" data-state="open" data-slot="sheet-content" aria-labelledby="radix-_r_2b_" aria-describedby="radix-_r_2c_" class="fixed z-50 flex flex-col bg-background shadow-overlay transition ease-in-out data-[state=closed]:animate-out data-[state=closed]:duration-[180ms] data-[state=open]:animate-in data-[state=open]:duration-[180ms] inset-y-0 right-0 h-full border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right w-full gap-0 over…>…</div> subtree intercepts pointer events[22m
+[2m    - retrying click action[22m
+[2m      - waiting 500ms[22m
+[2m      - waiting for element to be visible, enabled and stable[22m
+[2m      - element is visible, enabled and stable[22m
+[2m      - scrolling into view if needed[22m
+[2m      - done scrolling[22m
+[2m      - <button type="button" class="group flex min-h-(--control-row-h) w-full items-center justify-between gap-2 rounded-md border border-transparent px-2 py-1 text-left hover:border-input hover:bg-muted focus-visible:bg-muted">…</button> from <div role="dialog" tabindex="-1" id="radix-_r_2a_" data-state="open" data-slot="sheet-content" aria-labelledby="radix-_r_2b_" aria-describedby="radix-_r_2c_" class="fixed z-50 flex flex-col bg-background shadow-overlay transition ease-in-out data-[state=closed]:animate-out data-[state=closed]:duration-[180ms] data-[state=open]:animate-in data-[state=open]:duration-[180ms] inset-y-0 right-0 h-full border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right w-full gap-0 over…>…</div> subtree intercepts pointer events[22m
+[2m    - retrying click action[22m
+[2m      - waiting 500ms[22m
+[2m      - waiting for element to be visible, enabled and stable[22m
+[2m      - element is visible, enabled and stable[22m
+[2m      - scrolling into view if needed[22m
+[2m      - done scrolling[22m
+[2m      - <div class="flex flex-wrap items-center gap-2">…</div> from <div role="dialog" tabindex="-1" id="radix-_r_2a_" data-state="open" data-slot="sheet-content" aria-labelledby="radix-_r_2b_" aria-describedby="radix-_r_2c_" class="fixed z-50 flex flex-col bg-background shadow-overlay transition ease-in-out data-[state=closed]:animate-out data-[state=closed]:duration-[180ms] data-[state=open]:animate-in data-[state=open]:duration-[180ms] inset-y-0 right-0 h-full border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right w-full gap-0 over…>…</div> subtree intercepts pointer events[22m
+[2m    - retrying click action[22m
+[2m      - waiting 500ms[22m
+[2m    - waiting for element to be visible, enabled and stable[22m
+[2m    - element is visible, enabled and stable[22m
+[2m    - scrolling into view if needed[22m
+[2m    - done scrolling[22m
+[2m    - <div class="flex flex-wrap items-center gap-2">…</div> from <div role="dialog" tabindex="-1" id="radix-_r_2a_" data-state="open" data-slot="sheet-content" aria-labelledby="radix-_r_2b_" aria-describedby="radix-_r_2c_" class="fixed z-50 flex flex-col bg-background shadow-overlay transition ease-in-out data-[state=closed]:animate-out data-[state=closed]:duration-[180ms] data-[state=open]:animate-in data-[state=open]:duration-[180ms] inset-y-0 right-0 h-full border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right w-full gap-0 over…>…</div> subtree intercepts pointer events[22m
+[2m  - retrying click action[22m
+[2m    - waiting 500ms[22m
+
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/decision-metadata.cjs:248:114 {
+  log: [
+    "  - waiting for getByRole('button', { name: 'Raise decision', exact: true })",
+    `    - locator resolved to <button data-slot="button" data-size="default" data-variant="default" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors duration-[120ms] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-action text-action-foreground hover:bg-action-hov…>…</button>`,
+    '  - attempting click action',
+    '    - waiting for element to be visible, enabled and stable',
+    '    - element is visible, enabled and stable',
+    '    - scrolling into view if needed',
+    '    - done scrolling',
+    '    - <div data-state="open" aria-hidden="true" data-aria-hidden="true" data-slot="sheet-overlay" class="fixed inset-0 z-50 bg-[rgba(25,27,32,0.3)] data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0"></div> intercepts pointer events',
+    '  - retrying click action',
+    '    - waiting for element to be visible, enabled and stable',
+    '    - element is visible, enabled and stable',
+    '    - scrolling into view if needed',
+    '    - done scrolling',
+    '    - <div role="dialog" tabindex="-1" id="radix-_r_2a_" data-state="open" data-slot="sheet-content" aria-labelledby="radix-_r_2b_" aria-describedby="radix-_r_2c_" class="fixed z-50 flex flex-col bg-background shadow-overlay transition ease-in-out data-[state=closed]:animate-out data-[state=closed]:duration-[180ms] data-[state=open]:animate-in data-[state=open]:duration-[180ms] inset-y-0 right-0 h-full border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right w-full gap-0 over…>…</div> intercepts pointer events',
+    '  - retrying click action',
+    '    - waiting 20ms',
+    '    2 × waiting for element to be visible, enabled and stable',
+    '      - element is visible, enabled and stable',
+    '      - scrolling into view if needed',
+    '      - done scrolling',
+    '      - <div data-slot="skeleton" class="animate-pulse rounded-md bg-secondary h-(--row-min) w-full"></div> from <div role="dialog" tabindex="-1" id="radix-_r_2a_" data-state="open" data-slot="sheet-content" aria-labelledby="radix-_r_2b_" aria-describedby="radix-_r_2c_" class="fixed z-50 flex flex-col bg-background shadow-overlay transition ease-in-out data-[state=closed]:animate-out data-[state=closed]:duration-[180ms] data-[state=open]:animate-in data-[state=open]:duration-[180ms] inset-y-0 right-0 h-full border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right w-full gap-0 over…>…</div> subtree intercepts pointer events',
+    '    - retrying click action',
+    '      - waiting 100ms',
+    '    7 × waiting for element to be visible, enabled and stable',
+    '      - element is visible, enabled and stable',
+    '      - scrolling into view if needed',
+    '      - done scrolling',
+    '      - <div class="flex flex-wrap items-center gap-2">…</div> from <div role="dialog" tabindex="-1" id="radix-_r_2a_" data-state="open" data-slot="sheet-content" aria-labelledby="radix-_r_2b_" aria-describedby="radix-_r_2c_" class="fixed z-50 flex flex-col bg-background shadow-overlay transition ease-in-out data-[state=closed]:animate-out data-[state=closed]:duration-[180ms] data-[state=open]:animate-in data-[state=open]:duration-[180ms] inset-y-0 right-0 h-full border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right w-full gap-0 over…>…</div> subtree intercepts pointer events',
+    '    - retrying click action',
+    '      - waiting 500ms',
+    '      - waiting for element to be visible, enabled and stable',
+    '      - element is visible, enabled and stable',
+    '      - scrolling into view if needed',
+    '      - done scrolling',
+    '      - <select title="An external party" aria-label="An external party" class="h-(--control-row-h) w-full rounded-md border border-transparent bg-transparent px-1.5 text-sm hover:border-input hover:bg-muted focus-visible:border-input">…</select> from <div role="dialog" tabindex="-1" id="radix-_r_2a_" data-state="open" data-slot="sheet-content" aria-labelledby="radix-_r_2b_" aria-describedby="radix-_r_2c_" class="fixed z-50 flex flex-col bg-background shadow-overlay transition ease-in-out data-[state=closed]:animate-out data-[state=closed]:duration-[180ms] data-[state=open]:animate-in data-[state=open]:duration-[180ms] inset-y-0 right-0 h-full border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right w-full gap-0 over…>…</div> subtree intercepts pointer events',
+    '    - retrying click action',
+    '      - waiting 500ms',
+    '      - waiting for element to be visible, enabled and stable',
+    '      - element is visible, enabled and stable',
+    '      - scrolling into view if needed',
+    '      - done scrolling',
+    '      - <button type="button" class="group flex min-h-(--control-row-h) w-full items-center justify-between gap-2 rounded-md border border-transparent px-2 py-1 text-left hover:border-input hover:bg-muted focus-visible:bg-muted">…</button> from <div role="dialog" tabindex="-1" id="radix-_r_2a_" data-state="open" data-slot="sheet-content" aria-labelledby="radix-_r_2b_" aria-describedby="radix-_r_2c_" class="fixed z-50 flex flex-col bg-background shadow-overlay transition ease-in-out data-[state=closed]:animate-out data-[state=closed]:duration-[180ms] data-[state=open]:animate-in data-[state=open]:duration-[180ms] inset-y-0 right-0 h-full border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right w-full gap-0 over…>…</div> subtree intercepts pointer events',
+    '    - retrying click action',
+    '      - waiting 500ms',
+    '      - waiting for element to be visible, enabled and stable',
+    '      - element is visible, enabled and stable',
+    '      - scrolling into view if needed',
+    '      - done scrolling',
+    '      - <div class="flex flex-wrap items-center gap-2">…</div> from <div role="dialog" tabindex="-1" id="radix-_r_2a_" data-state="open" data-slot="sheet-content" aria-labelledby="radix-_r_2b_" aria-describedby="radix-_r_2c_" class="fixed z-50 flex flex-col bg-background shadow-overlay transition ease-in-out data-[state=closed]:animate-out data-[state=closed]:duration-[180ms] data-[state=open]:animate-in data-[state=open]:duration-[180ms] inset-y-0 right-0 h-full border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right w-full gap-0 over…>…</div> subtree intercepts pointer events',
+    '    - retrying click action',
+    '      - waiting 500ms',
+    '    - waiting for element to be visible, enabled and stable',
+    '    - element is visible, enabled and stable',
+    '    - scrolling into view if needed',
+    '    - done scrolling',
+    '    - <div class="flex flex-wrap items-center gap-2">…</div> from <div role="dialog" tabindex="-1" id="radix-_r_2a_" data-state="open" data-slot="sheet-content" aria-labelledby="radix-_r_2b_" aria-describedby="radix-_r_2c_" class="fixed z-50 flex flex-col bg-background shadow-overlay transition ease-in-out data-[state=closed]:animate-out data-[state=closed]:duration-[180ms] data-[state=open]:animate-in data-[state=open]:duration-[180ms] inset-y-0 right-0 h-full border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right w-full gap-0 over…>…</div> subtree intercepts pointer events',
+    '  - retrying click action',
+    '    - waiting 500ms'
+  ],
+  name: 'TimeoutError'
+}

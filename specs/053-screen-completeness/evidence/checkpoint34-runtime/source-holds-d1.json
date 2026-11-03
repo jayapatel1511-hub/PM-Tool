@@ -1,0 +1,9 @@
+{
+  "atUtc": "2026-11-03T04:12:08.420256+00:00",
+  "status": "D final repair held; independent review pending",
+  "files": {
+    "src/Hub.Api/Infrastructure/ReviewFindingContextData.cs": "7069e13a175fac502b97c158eabd0251c02d35895575ca6e2cc02683544dae10",
+    "src/Hub.Api/Infrastructure/IssuedAuthorship.cs": "6a368c513af0afb26273ef404870f3211fddf5a83fd3d90806f966a1837b5a52",
+    "src/Hub.Api/Data/HubDb.cs": "60f3d0b60fde4ca2638e7dc9c8d95bb4131b1b629680555090ae4add146a2780"
+  }
+}

@@ -1,0 +1,5 @@
+.home-trend-chip { display: inline-block; max-width: 100%; border-radius: 6px; padding: 4px 8px; background: var(--pill-idle-bg, var(--muted)); color: var(--pill-idle, var(--muted-foreground)); font-size: 11px; line-height: 16px; font-variant-numeric: tabular-nums; }
+.count-card__top > .home-trend-chip { text-align: right; }
+:root[data-visual="v2"] .count-card__top > .home-trend-chip { max-width: calc(100% - 40px); }
+.home-trend-chip[data-trend-tone="Good"] { background: var(--pill-ok-bg, var(--ok-bg)); color: var(--pill-ok, var(--ok)); }
+.home-trend-chip[data-trend-tone="Bad"] { background: var(--pill-critical-bg, var(--bad-bg)); color: var(--pill-critical, var(--bad)); }

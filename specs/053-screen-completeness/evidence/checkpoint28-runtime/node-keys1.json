@@ -1,0 +1,10 @@
+{
+  "exitCode": 0,
+  "args": [
+    "node",
+    "--test",
+    "src/lib/keys.test.ts",
+    "src/lib/page-mode.test.ts",
+    "src/lib/drafts.test.ts"
+  ]
+}

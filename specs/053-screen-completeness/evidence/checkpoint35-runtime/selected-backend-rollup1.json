@@ -1,0 +1,137 @@
+{
+  "atUtc": "2026-11-03T06:51:17.397982+00:00",
+  "distinctPassed": 31,
+  "byType": {
+    "Hub.Tests.Api.": 12,
+    "Hub.Tests.Domain.": 19
+  },
+  "cases": [
+    {
+      "receipt": "role-final4",
+      "name": "Hub.Tests.Domain.PermissionOperationExplanationTests.Pending_report_policy_and_successful_role_factors_never_become_whole_command_authority"
+    },
+    {
+      "receipt": "role-final4",
+      "name": "Hub.Tests.Api.AdminRoleExplanationTests.Current_role_examples_are_admin_only_bounded_translated_readonly_and_dark_off"
+    },
+    {
+      "receipt": "role-final4",
+      "name": "Hub.Tests.Domain.PermissionOperationExplanationTests.Coordination_snapshot_uses_project_management_and_does_not_mask_a_definitive_denial"
+    },
+    {
+      "receipt": "role-final4",
+      "name": "Hub.Tests.Domain.PermissionOperationExplanationTests.A_resolver_or_discipline_reviewer_does_not_acquire_the_findings_verifier_signature"
+    },
+    {
+      "receipt": "role-final4",
+      "name": "Hub.Tests.Api.AdminRoleOperationExplanationTests.Valid_rows_are_translated_identifier_free_and_readonly_even_when_examples_are_ineligible_or_policy_pending"
+    },
+    {
+      "receipt": "role-final4",
+      "name": "Hub.Tests.Domain.PermissionOperationExplanationTests.Stored_readonly_admin_precedence_does_not_erase_inactivity_or_private_entry_boundaries"
+    },
+    {
+      "receipt": "role-final4",
+      "name": "Hub.Tests.Api.AdminRoleOperationExplanationTests.Selected_operation_echoes_explicit_membership_without_silently_adding_a_team_role"
+    },
+    {
+      "receipt": "role-final4",
+      "name": "Hub.Tests.Api.AdminRoleOperationExplanationTests.Query_accepts_only_closed_single_choices_and_never_accepts_live_identity_inputs"
+    },
+    {
+      "receipt": "role-final4",
+      "name": "Hub.Tests.Domain.PermissionOperationExplanationTests.Distinct_lifecycle_commands_retain_their_actual_actor_and_source_requirements"
+    },
+    {
+      "receipt": "command-witnesses6",
+      "name": "Hub.Tests.Domain.PermissionOperationExplanationTests.Dedicated_issue_command_allows_management_from_review_while_retaining_source_and_review_checks"
+    },
+    {
+      "receipt": "role-final4",
+      "name": "Hub.Tests.Domain.PermissionExplanationTests.Discipline_lead_examples_call_current_own_other_scope_and_milestone_rules"
+    },
+    {
+      "receipt": "role-final4",
+      "name": "Hub.Tests.Domain.PermissionOperationExplanationTests.Copying_a_direct_reports_self_entry_needs_target_creation_not_source_edit_ownership"
+    },
+    {
+      "receipt": "role-final4",
+      "name": "Hub.Tests.Domain.PermissionOperationExplanationTests.Management_alternative_is_retained_for_staffing_completed_projects"
+    },
+    {
+      "receipt": "role-final4",
+      "name": "Hub.Tests.Domain.PermissionOperationExplanationTests.Blocking_withdrawal_acknowledgement_belongs_to_the_package_coordinator_not_the_verifier"
+    },
+    {
+      "receipt": "role-final4",
+      "name": "Hub.Tests.Domain.PermissionExplanationTests.Contribution_examples_require_own_actual_membership_even_for_admin_and_pm"
+    },
+    {
+      "receipt": "role-final4",
+      "name": "Hub.Tests.Domain.PermissionExplanationTests.Current_overrides_privacy_boolean_reasons_and_resolved_template_policy_stay_canonical"
+    },
+    {
+      "receipt": "command-witnesses6",
+      "name": "Hub.Tests.Domain.PermissionOperationExplanationTests.Deliverable_hold_requires_a_reason_and_resumes_only_the_retained_previous_state"
+    },
+    {
+      "receipt": "role-final4",
+      "name": "Hub.Tests.Api.ContractTests.Openapi_matches_the_committed_golden_document"
+    },
+    {
+      "receipt": "role-final4",
+      "name": "Hub.Tests.Domain.PermissionOperationExplanationTests.Default_and_system_project_manager_examples_do_not_imply_team_membership"
+    },
+    {
+      "receipt": "role-final4",
+      "name": "Hub.Tests.Domain.PermissionOperationExplanationTests.Private_entry_refusal_does_not_veto_capacity_or_time_away_source_kinds"
+    },
+    {
+      "receipt": "command-witnesses6",
+      "name": "Hub.Tests.Domain.PermissionOperationExplanationTests.A_project_lead_can_record_any_project_meeting_without_owning_its_register_item"
+    },
+    {
+      "receipt": "role-final4",
+      "name": "Hub.Tests.Domain.PermissionExplanationTests.Every_public_allow_bool_and_correction_tuple_has_one_actual_method_binding"
+    },
+    {
+      "receipt": "role-final4",
+      "name": "Hub.Tests.Domain.PermissionOperationExplanationTests.Package_coordination_uses_the_named_coordinator_instead_of_the_unrelated_owner"
+    },
+    {
+      "receipt": "role-final4",
+      "name": "Hub.Tests.Domain.PermissionExplanationTests.Public_examples_are_bounded_labelled_and_never_publish_synthetic_identifiers"
+    },
+    {
+      "receipt": "role-final4",
+      "name": "Hub.Tests.Api.PlanningLeaveReplayAuthorityTests.Effective_read_only_supervisor_cannot_replay_previously_authorized_leave_success(operation: \"manual\")"
+    },
+    {
+      "receipt": "role-final4",
+      "name": "Hub.Tests.Api.PlanningLeaveReplayAuthorityTests.Effective_read_only_supervisor_cannot_replay_previously_authorized_leave_success(operation: \"reconcile\")"
+    },
+    {
+      "receipt": "role-final4",
+      "name": "Hub.Tests.Api.RegistryTests.Generated_key_families_match_the_registry_and_vocabulary"
+    },
+    {
+      "receipt": "command-witnesses6",
+      "name": "Hub.Tests.Api.DeliverableRegisterTests.Real_issue_for_review_then_explicit_B_response_matches_current_register_history_and_reference_filters"
+    },
+    {
+      "receipt": "command-witnesses6",
+      "name": "Hub.Tests.Api.RoleCommandWitnessTests.Civil_only_project_lead_can_create_edit_and_join_an_electrical_context_meeting_while_team_member_is_refused"
+    },
+    {
+      "receipt": "command-witnesses6",
+      "name": "Hub.Tests.Api.RoleCommandWitnessTests.Actual_deliverable_hold_retains_reason_and_previous_status_and_only_resumes_that_status_without_refusal_effects"
+    },
+    {
+      "receipt": "command-witnesses6",
+      "name": "Hub.Tests.Api.MilestonesDeliverablesTests.Lifecycle_guards_review_comment_issue_and_reissue"
+    }
+  ],
+  "roleFinal4SourceStillMatches": true,
+  "newCommandRun": "command-witnesses6",
+  "boundary": "Selected actual provider/API and pure domain cases; not full suite/matrix/equivalence/human acceptance"
+}

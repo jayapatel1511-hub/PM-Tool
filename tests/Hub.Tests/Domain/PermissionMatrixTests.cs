@@ -61,12 +61,33 @@ public sealed class PermissionMatrixTests
         Assert.False(Permissions.StaffOnProject(Sup, Ctx("none", ProjectStatus.Complete), Me).Ok);
     }
 
-    [Fact]
-    public void Templates_need_admin_or_the_template_editor_flag()
+    [Theory]
+    [InlineData("Admin", false, true)] [InlineData("Admin", true, true)]
+    [InlineData("ProjectManager", false, true)] [InlineData("ProjectManager", true, true)]
+    [InlineData("Standard", false, false)] [InlineData("Standard", true, true)]
+    [InlineData("Executive", false, false)] [InlineData("Executive", true, true)]
+    [InlineData("Supervisor", false, false)] [InlineData("Supervisor", true, true)]
+    [InlineData("ReadOnly", false, false)] [InlineData("ReadOnly", true, false)]
+    [InlineData("ProjectManager+ReadOnly", false, false)] [InlineData("ProjectManager+ReadOnly", true, false)]
+    [InlineData("Admin+ReadOnly", false, true)] [InlineData("Admin+ReadOnly", true, true)]
+    public void Templates_allow_admin_or_non_readonly_system_pm_or_editor(string role, bool editor, bool expected)
     {
-        Assert.True(Permissions.ManageTemplates(Admin, false).Ok);
+        var actor = role switch {
+            "Admin" => Admin, "ProjectManager" => SysPm, "Executive" => Exec, "Supervisor" => Sup, "ReadOnly" => RO,
+            "ProjectManager+ReadOnly" => A(SystemRole.ProjectManager, SystemRole.ReadOnly),
+            "Admin+ReadOnly" => A(SystemRole.Admin, SystemRole.ReadOnly), _ => Std,
+        };
+        var outcome = Permissions.ManageTemplates(actor, editor);
+        Assert.Equal(expected, outcome.Ok);
+        Assert.Equal(expected ? null : "perm.templates", outcome.Why);
+    }
+
+    [Fact]
+    public void Project_pm_membership_does_not_grant_system_template_management()
+    {
+        Assert.True(Permissions.ManageTeam(Std, Ctx("PM")).Ok);
+        Assert.False(Permissions.ManageTemplates(Std, false).Ok);
         Assert.True(Permissions.ManageTemplates(Std, true).Ok);
-        Assert.False(Permissions.ManageTemplates(SysPm, false).Ok);
     }
 
     // ---------- §8.7 visibility ----------

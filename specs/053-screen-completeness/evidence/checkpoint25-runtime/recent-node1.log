@@ -1,0 +1,15 @@
+✔ last ten searches are trimmed, case-deduplicated and most recent first without changing internal search meaning (0.819292ms)
+✔ actual viewer IDs partition read, record and Clear, leaving another account and unrelated browser data intact (0.102ms)
+✔ history accepts bounded well-formed single-line Unicode strings and never truncates or coerces invalid input (0.109625ms)
+✔ corrupt, mixed, oversized or old unbounded storage is read safely without auto-writing a repair (0.127916ms)
+✔ module off and invalid viewer IDs never resolve or touch browser storage (0.44575ms)
+✔ denied getters/reads, full storage and refused Clear are nonthrowing and never claim deletion or overwrite unknown history (0.117958ms)
+✔ committed term navigation records once while Person returns, type/filter/paging changes and module re-renders do not (0.0885ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 61.256666

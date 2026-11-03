@@ -32,8 +32,9 @@ export const hoursLabel = (value: number) => `${value.toFixed(1).replace(/\.0$/,
  *  value form a "Not set" group, listed last and never hidden. Grouping is done here, over the rows already loaded. */
 export const GROUP_BY = ['supervisor', 'office', 'jobTitle', 'homeDiscipline', 'none'] as const
 export const GROUP_LABEL: Record<(typeof GROUP_BY)[number], TextKey> = { supervisor: 'staff.group.supervisor', office: 'admin.office', jobTitle: 'admin.jobTitle', homeDiscipline: 'admin.homeDiscipline', none: 'tgroup.none' }
-type Groupable = { supervisorName?: string | null; officeId?: string | null; jobTitle?: string | null; homeDisciplineId?: string | null }
-export function groupPeople<T extends Groupable>(rows: T[], by: string, ref?: { offices?: { id: string; name: string }[]; disciplines?: { id: string; name: string }[] }): [string, T[]][] {
+type Groupable = { supervisorId?: string | null; supervisorName?: string | null; officeId?: string | null; jobTitle?: string | null; homeDisciplineId?: string | null }
+export type PeopleGroup<T> = [label: string, rows: T[], supervisor?: { id: string; name: string }, key?: string]
+export function groupPeople<T extends Groupable>(rows: T[], by: string, ref?: { offices?: { id: string; name: string }[]; disciplines?: { id: string; name: string }[] }, personLinks = false): PeopleGroup<T>[] {
   const notSet = t('staff.group.notSet')
   const label = (p: T): string => {
     switch (by) {
@@ -44,8 +45,17 @@ export function groupPeople<T extends Groupable>(rows: T[], by: string, ref?: { 
       default: return p.supervisorName ? t('workload.reportsTo', { name: p.supervisorName }) : t('workload.noSupervisor')
     }
   }
-  const groups = new Map<string, T[]>()
-  for (const p of rows) { const g = label(p); groups.set(g, [...(groups.get(g) ?? []), p]) }
+  const groups = new Map<string, PeopleGroup<T>>()
+  for (const p of rows) {
+    const supervisorGroup = personLinks && !['none', 'office', 'jobTitle', 'homeDiscipline'].includes(by)
+    const key = supervisorGroup ? p.supervisorId ? `supervisor:${p.supervisorId}` : `unknown:${label(p)}` : label(p)
+    const existing = groups.get(key)
+    if (existing) {
+      existing[1].push(p)
+      if (supervisorGroup && !existing[2] && p.supervisorId && p.supervisorName) { existing[0] = label(p); existing[2] = { id: p.supervisorId, name: p.supervisorName } }
+    }
+    else groups.set(key, [label(p), [p], supervisorGroup && p.supervisorId && p.supervisorName ? { id: p.supervisorId, name: p.supervisorName } : undefined, key])
+  }
   const notSetLast = (a: string) => (a === notSet ? 1 : 0)
-  return [...groups.entries()].sort(([a], [b]) => notSetLast(a) - notSetLast(b))
+  return [...groups.values()].sort(([a], [b]) => notSetLast(a) - notSetLast(b))
 }

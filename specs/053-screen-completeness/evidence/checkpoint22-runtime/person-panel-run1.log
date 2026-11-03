@@ -1,0 +1,10 @@
+locator.waitFor: Timeout 12000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('alert').filter({ hasText: 'Synthetic person is no longer visible' }) to be visible[22m
+
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/person-panel.cjs:153:125 {
+  log: [
+    "  - waiting for getByRole('alert').filter({ hasText: 'Synthetic person is no longer visible' }) to be visible"
+  ],
+  name: 'TimeoutError'
+}

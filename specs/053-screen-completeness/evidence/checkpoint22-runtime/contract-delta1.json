@@ -1,0 +1,313 @@
+{
+  "addedPaths": [
+    "/api/v1/admin/issuePurposes",
+    "/api/v1/admin/issuePurposes/{id}",
+    "/api/v1/admin/issuePurposes/{id}/usage",
+    "/api/v1/admin/issueReturnCodes",
+    "/api/v1/admin/issueReturnCodes/{id}",
+    "/api/v1/admin/issueReturnCodes/{id}/usage",
+    "/api/v1/deliverables/{id}/issues/{issueId}/response",
+    "/api/v1/people/{userId}/panel",
+    "/api/v1/projects/{id}/deliverable-numbering",
+    "/api/v1/projects/{projectId}/members/{memberId}/responsibility"
+  ],
+  "removedPaths": [],
+  "addedSchemas": [
+    "DeliverableCurrentIssue",
+    "DeliverableIssueRegisterInfo",
+    "DeliverableRegisterInfo",
+    "IssueResponseBody",
+    "IssueResponseSaved",
+    "IssueReturnCodeRow",
+    "NumberingBody",
+    "NumberingRead",
+    "NumberingSaved",
+    "PersonPanelRead",
+    "PersonProjectMembership",
+    "PersonProjectPage",
+    "ReferenceIssuePurpose",
+    "ReferenceIssueReturnCode",
+    "ResponsibilityRead",
+    "ResponsibilitySaved",
+    "SetResponsibilityBody"
+  ],
+  "existingSchemaChanges": {
+    "ReferenceView": {
+      "addedProperties": [
+        "issuePurposes",
+        "issueReturnCodes"
+      ],
+      "removedProperties": [],
+      "requiredBefore": [
+        "disciplines",
+        "clients",
+        "offices",
+        "deliverableTypes",
+        "phases",
+        "projectTypes",
+        "limits"
+      ],
+      "requiredAfter": [
+        "disciplines",
+        "clients",
+        "offices",
+        "deliverableTypes",
+        "phases",
+        "projectTypes",
+        "limits"
+      ]
+    },
+    "DeliverablePermissions": {
+      "addedProperties": [
+        "recordIssueResponse"
+      ],
+      "removedProperties": [],
+      "requiredBefore": [
+        "edit",
+        "delete",
+        "transitions",
+        "issue",
+        "linkDeliverables",
+        "issueNeedsConfirm",
+        "readyToIssueGuard",
+        "comment",
+        "createTask",
+        "needsReason"
+      ],
+      "requiredAfter": [
+        "edit",
+        "delete",
+        "transitions",
+        "issue",
+        "linkDeliverables",
+        "issueNeedsConfirm",
+        "readyToIssueGuard",
+        "comment",
+        "createTask",
+        "needsReason"
+      ]
+    },
+    "ProjectTeamMember": {
+      "addedProperties": [
+        "responsibility"
+      ],
+      "removedProperties": [],
+      "requiredBefore": [
+        "id",
+        "userId",
+        "displayName",
+        "email",
+        "jobTitle",
+        "officeId",
+        "isActive",
+        "roles",
+        "primaryDisciplineId",
+        "addedAt",
+        "addedBy",
+        "rowVersion",
+        "leadOf",
+        "isPrimaryPm",
+        "canStaff"
+      ],
+      "requiredAfter": [
+        "id",
+        "userId",
+        "displayName",
+        "email",
+        "jobTitle",
+        "officeId",
+        "isActive",
+        "roles",
+        "primaryDisciplineId",
+        "addedAt",
+        "addedBy",
+        "rowVersion",
+        "leadOf",
+        "isPrimaryPm",
+        "canStaff"
+      ]
+    },
+    "DeliverableIssueBody": {
+      "addedProperties": [
+        "purposeOfIssueId"
+      ],
+      "removedProperties": [],
+      "requiredBefore": [
+        "issuedDate",
+        "revision",
+        "issuedTo",
+        "transmittalUrl",
+        "note",
+        "confirmOpenTasks",
+        "rowVersion"
+      ],
+      "requiredAfter": [
+        "issuedDate",
+        "revision",
+        "issuedTo",
+        "transmittalUrl",
+        "note",
+        "confirmOpenTasks",
+        "rowVersion"
+      ]
+    },
+    "DeliverableIssueRead": {
+      "addedProperties": [
+        "registerInfo"
+      ],
+      "removedProperties": [],
+      "requiredBefore": [
+        "id",
+        "issuedDate",
+        "revision",
+        "issuedTo",
+        "transmittalUrl",
+        "note",
+        "issuedBy"
+      ],
+      "requiredAfter": [
+        "id",
+        "issuedDate",
+        "revision",
+        "issuedTo",
+        "transmittalUrl",
+        "note",
+        "issuedBy"
+      ]
+    },
+    "DeliverableRow": {
+      "addedProperties": [
+        "registerInfo"
+      ],
+      "removedProperties": [],
+      "requiredBefore": [
+        "id",
+        "projectId",
+        "key",
+        "name",
+        "projectDisciplineId",
+        "deliverableTypeId",
+        "ownerId",
+        "reviewerId",
+        "milestoneId",
+        "startDate",
+        "dueDate",
+        "originalDueDate",
+        "originalStartDate",
+        "priority",
+        "status",
+        "revision",
+        "issuedDate",
+        "issuedTo",
+        "requiresReview",
+        "requiredReviewPackageId",
+        "rowVersion",
+        "createdAt",
+        "lastActivityAt",
+        "disciplineName",
+        "disciplineColour",
+        "disciplineOrder",
+        "typeName",
+        "ownerName",
+        "ownerActive",
+        "reviewerName",
+        "milestoneKey",
+        "milestoneName",
+        "milestoneDate",
+        "state",
+        "tasks"
+      ],
+      "requiredAfter": [
+        "id",
+        "projectId",
+        "key",
+        "name",
+        "projectDisciplineId",
+        "deliverableTypeId",
+        "ownerId",
+        "reviewerId",
+        "milestoneId",
+        "startDate",
+        "dueDate",
+        "originalDueDate",
+        "originalStartDate",
+        "priority",
+        "status",
+        "revision",
+        "issuedDate",
+        "issuedTo",
+        "requiresReview",
+        "requiredReviewPackageId",
+        "rowVersion",
+        "createdAt",
+        "lastActivityAt",
+        "disciplineName",
+        "disciplineColour",
+        "disciplineOrder",
+        "typeName",
+        "ownerName",
+        "ownerActive",
+        "reviewerName",
+        "milestoneKey",
+        "milestoneName",
+        "milestoneDate",
+        "state",
+        "tasks"
+      ]
+    },
+    "DeliverableCreateBody": {
+      "addedProperties": [
+        "clientDrawingNumber"
+      ],
+      "removedProperties": [],
+      "requiredBefore": [
+        "name",
+        "projectDisciplineId",
+        "deliverableTypeId",
+        "description",
+        "ownerId",
+        "reviewerId",
+        "milestoneId",
+        "startDate",
+        "dueDate",
+        "priority",
+        "revision",
+        "requiresReview"
+      ],
+      "requiredAfter": [
+        "name",
+        "projectDisciplineId",
+        "deliverableTypeId",
+        "description",
+        "ownerId",
+        "reviewerId",
+        "milestoneId",
+        "startDate",
+        "dueDate",
+        "priority",
+        "revision",
+        "requiresReview"
+      ]
+    },
+    "TeamProjectRow": {
+      "addedProperties": [
+        "responsibilityNote"
+      ],
+      "removedProperties": [],
+      "requiredBefore": [
+        "projectId",
+        "projectNumber",
+        "projectName",
+        "roles",
+        "leads"
+      ],
+      "requiredAfter": [
+        "projectId",
+        "projectNumber",
+        "projectName",
+        "roles",
+        "leads"
+      ]
+    }
+  }
+}

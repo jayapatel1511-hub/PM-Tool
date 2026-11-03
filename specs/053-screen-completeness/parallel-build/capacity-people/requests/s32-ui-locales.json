@@ -1,0 +1,33 @@
+{
+  "web/src/i18n/en.ts": {
+    "timeWeek.title": "Your time week",
+    "timeWeek.region": "Your task hours by day",
+    "timeWeek.capacity": "Capacity {hours} h this week",
+    "timeWeek.capacityUnknown": "Capacity unavailable this week",
+    "timeWeek.unavailable": "Availability unavailable",
+    "timeWeek.available": "Available {hours} h",
+    "timeWeek.provisionalAvailable": "Provisional available {hours} h",
+    "timeWeek.away": "Time away {hours} h",
+    "timeWeek.holiday": "Holiday {hours} h",
+    "timeWeek.additional": "Additional {hours} h",
+    "timeWeek.actualTotal": "Recorded hours",
+    "timeWeek.assigned": "Assigned to you",
+    "timeWeek.previous": "Logged last week",
+    "timeWeek.deletedTask": "Deleted task · existing entries only",
+    "timeWeek.cell": "Hours for {key} {task} on {date}",
+    "timeWeek.multiple": "{label} · {hours} h across {n} entries · choose an entry",
+    "timeWeek.entryCount": "{n} entries",
+    "timeWeek.noCreate": "New entries unavailable",
+    "timeWeek.detailsFor": "Entry details for {label}",
+    "timeWeek.details": "Entry details",
+    "timeWeek.empty": "No assigned open tasks, last-week tasks or current entries match this scope. Use Add time to choose another permitted task.",
+    "timeWeek.hint": "Blank cells are suggestions. Enter hours, then press Enter or leave the cell to save. Hatched days show time away; you can still record work on those days. Use entry details for notes or explicit removal. Totals include recorded entries only.",
+    "timeWeek.unknownHint": "Provisional or unavailable daily inputs leave the week’s capacity unavailable. Daily provisional figures stay labelled.",
+    "timeWeek.detailsTitle": "{key} · entries on {date}",
+    "timeWeek.multipleHint": "Each entry keeps its own hours and note. Choose an entry to edit or remove; the cell’s total is never saved over an individual entry.",
+    "timeWeek.noNote": "No note",
+    "timeWeek.hoursRule": "Enter positive hours up to 24 with at most two decimal places. Clear or zero does not remove an entry; use entry details to remove it.",
+    "timeWeek.retryHint": "The save result is unknown. Retry these same hours to check the original request safely.",
+    "timeWeek.savedAwaiting": "Saved. Waiting for the recorded entry to refresh; use Reload if it does not appear."
+  }
+}

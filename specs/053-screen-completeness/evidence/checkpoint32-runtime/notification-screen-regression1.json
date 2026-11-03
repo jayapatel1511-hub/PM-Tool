@@ -1,0 +1,142 @@
+{
+  "exitCode": 0,
+  "args": [
+    "node",
+    "tests/notification-screen.cjs"
+  ],
+  "base": "http://127.0.0.1:8874",
+  "visualSystem": false,
+  "atUtc": "2026-11-03T00:08:07.346823+00:00",
+  "scope": "Actual isolated SPA; finite synthetic intercepted HTTP; no real business writes or mail",
+  "driverSHA256": "e05b8bfa7da411843180209959f147c802e810b26fd193428c39c4508248d298",
+  "tail": [
+    "{\"status\":\"PASS\",\"scope\":\"Synthetic S45-A only; transport evidence and S47 remain open\",\"cases\":[\"Five current rows, explicit unknown context, honest unavailable email history; no inferred Emailed/Held or initial command\",\"Needs-your-action/type/project combine through actual screen GET; two rows despite a collapsed notification count of three\",\"Follow menu is a sibling action; Escape restores natural source focus; exact own PUT persists after server reply with no read/navigation\",\"Refused follow write keeps stored level, hides refused follow control and never marks read or navigates\",\"Existing Mark read and row-open/read are separate explicit actions; row open preserves the supplied deep link\",\"375px keeps usable sibling menu, natural focus and no page overflow\",\"Zero confirmed matches with unknown context stays explicitly unassessed; all-known zero retains the ordinary empty-action label\",\"Same populated query refetch403 after real tab visibility/freshness removes cached rows/count/follow controls with unchanged URL and query\",\"AC84: legacy personal list/rows remain off, with no new GET/filter/footer/delivery line and no extra command\"],\"screenReads\":[{\"page\":\"1\",\"pageSize\":\"50\"},{\"needsAction\":\"true\",\"page\":\"1\",\"pageSize\":\"50\"},{\"type\":\"TaskAssigned\",\"needsAction\":\"true\",\"page\":\"1\",\"pageSize\":\"50\"},{\"type\":\"TaskAssigned\",\"projectId\":\"00000000-0000-0000-0000-000000057001\",\"needsAction\":\"true\",\"page\":\"1\",\"pageSize\":\"50\"},{\"type\":\"TaskAssigned\",\"projectId\":\"00000000-0000-0000-0000-000000057001\",\"needsAction\":\"true\",\"page\":\"1\",\"pageSize\":\"50\"},{\"type\":\"TaskAssigned\",\"projectId\":\"00000000-0000-0000-0000-000000057001\",\"needsAction\":\"true\",\"page\":\"1\",\"pageSize\":\"50\"},{\"page\":\"1\",\"pageSize\":\"50\"},{\"page\":\"1\",\"pageSize\":\"50\"},{\"page\":\"1\",\"pageSize\":\"50\"},{\"page\":\"1\",\"pageSize\":\"50\"},{\"needsAction\":\"true\",\"page\":\"1\",\"pageSize\":\"50\"},{\"needsAction\":\"true\",\"page\":\"1\",\"pageSize\":\"50\"},{\"page\":\"1\",\"pageSize\":\"50\"},{\"page\":\"1\",\"pageSize\":\"50\"}],\"oldReads\":[{\"page\":\"1\",\"pageSize\":\"50\"}],\"commands\":[{\"method\":\"PUT\",\"path\":\"projects/00000000-0000-0000-0000-000000057001/follow\",\"body\":{\"level\":\"Muted\"}},{\"method\":\"PUT\",\"path\":\"projects/00000000-0000-0000-0000-000000057001/follow\",\"body\":{\"level\":\"AllActivity\"}},{\"method\":\"POST\",\"path\":\"me/notifications/read\",\"body\":{\"ids\":[\"00000000-0000-0000-0000-000000057102\"]}},{\"method\":\"POST\",\"path\":\"me/notifications/read\",\"body\":{\"ids\":[\"00000000-0000-0000-0000-000000057101\"]}}]}"
+  ],
+  "browserResult": {
+    "status": "PASS",
+    "scope": "Synthetic S45-A only; transport evidence and S47 remain open",
+    "cases": [
+      "Five current rows, explicit unknown context, honest unavailable email history; no inferred Emailed/Held or initial command",
+      "Needs-your-action/type/project combine through actual screen GET; two rows despite a collapsed notification count of three",
+      "Follow menu is a sibling action; Escape restores natural source focus; exact own PUT persists after server reply with no read/navigation",
+      "Refused follow write keeps stored level, hides refused follow control and never marks read or navigates",
+      "Existing Mark read and row-open/read are separate explicit actions; row open preserves the supplied deep link",
+      "375px keeps usable sibling menu, natural focus and no page overflow",
+      "Zero confirmed matches with unknown context stays explicitly unassessed; all-known zero retains the ordinary empty-action label",
+      "Same populated query refetch403 after real tab visibility/freshness removes cached rows/count/follow controls with unchanged URL and query",
+      "AC84: legacy personal list/rows remain off, with no new GET/filter/footer/delivery line and no extra command"
+    ],
+    "screenReads": [
+      {
+        "page": "1",
+        "pageSize": "50"
+      },
+      {
+        "needsAction": "true",
+        "page": "1",
+        "pageSize": "50"
+      },
+      {
+        "type": "TaskAssigned",
+        "needsAction": "true",
+        "page": "1",
+        "pageSize": "50"
+      },
+      {
+        "type": "TaskAssigned",
+        "projectId": "00000000-0000-0000-0000-000000057001",
+        "needsAction": "true",
+        "page": "1",
+        "pageSize": "50"
+      },
+      {
+        "type": "TaskAssigned",
+        "projectId": "00000000-0000-0000-0000-000000057001",
+        "needsAction": "true",
+        "page": "1",
+        "pageSize": "50"
+      },
+      {
+        "type": "TaskAssigned",
+        "projectId": "00000000-0000-0000-0000-000000057001",
+        "needsAction": "true",
+        "page": "1",
+        "pageSize": "50"
+      },
+      {
+        "page": "1",
+        "pageSize": "50"
+      },
+      {
+        "page": "1",
+        "pageSize": "50"
+      },
+      {
+        "page": "1",
+        "pageSize": "50"
+      },
+      {
+        "page": "1",
+        "pageSize": "50"
+      },
+      {
+        "needsAction": "true",
+        "page": "1",
+        "pageSize": "50"
+      },
+      {
+        "needsAction": "true",
+        "page": "1",
+        "pageSize": "50"
+      },
+      {
+        "page": "1",
+        "pageSize": "50"
+      },
+      {
+        "page": "1",
+        "pageSize": "50"
+      }
+    ],
+    "oldReads": [
+      {
+        "page": "1",
+        "pageSize": "50"
+      }
+    ],
+    "commands": [
+      {
+        "method": "PUT",
+        "path": "projects/00000000-0000-0000-0000-000000057001/follow",
+        "body": {
+          "level": "Muted"
+        }
+      },
+      {
+        "method": "PUT",
+        "path": "projects/00000000-0000-0000-0000-000000057001/follow",
+        "body": {
+          "level": "AllActivity"
+        }
+      },
+      {
+        "method": "POST",
+        "path": "me/notifications/read",
+        "body": {
+          "ids": [
+            "00000000-0000-0000-0000-000000057102"
+          ]
+        }
+      },
+      {
+        "method": "POST",
+        "path": "me/notifications/read",
+        "body": {
+          "ids": [
+            "00000000-0000-0000-0000-000000057101"
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+✔ a preserved overlay bypasses only its own form, while unload, close, other navigation and other dirty forms stay guarded (0.479458ms)
+✔ a draft is read back until draft_keep_days, then dropped when read or pruned (FR-SAV-03) (1.201ms)
+✔ a browser that refuses the write gives no draft (0.06525ms)
+✔ leaving asks only while something typed is neither saved nor drafted (FR-SAV-04, FR-SAV-06) (0.096083ms)
+✔ a save cut off by an expired sign-in waits for the same user, record and field, and is spent once (FR-SAV-05) (0.341417ms)
+✔ a 401 from any request asks every form to keep its typed input (FR-SAV-05) (0.069ms)
+✔ an explicit sign-out drops the person's drafts and waiting fields, and only theirs (051-D2) (0.10825ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 81.4055

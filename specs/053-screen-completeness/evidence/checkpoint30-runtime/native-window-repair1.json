@@ -1,0 +1,20 @@
+{
+  "atUtc": "2026-11-02T20:27:31.106311+00:00",
+  "proof": "browser4 after-failure actual native-window resize +same real wheel moved sheet2313->2758 and activeReview->History",
+  "nativeWindowBefore": {
+    "width": 756,
+    "height": 556
+  },
+  "emulatedViewport": {
+    "width": 1440,
+    "height": 1000
+  },
+  "nativeWindowAfter": {
+    "width": 1440,
+    "height": 1100
+  },
+  "repair": "Only isolated Chrome CLI window-size=1440,1100. Same noDefaults/native visibility and exact original strict driver9real15100ms boundaries. No production code change.",
+  "nativeHelperBeforeSha": "5cb1f46f38f09a9145b73011e7173e9042f48e4a0400bcea16a79711b4d16096",
+  "nativeHelperAfterSha": "b641e7ddb06c17b934e8e7cef5832901ed6e955b5b8ab6c2e6f59d331445bb07",
+  "strictDriverRestoredSha": "92df7ff97fb64271b2e43da32f160891f32d6bc886c2ae30f732e764102e767b"
+}

@@ -1,0 +1,13 @@
+{
+  "exitCode": 1,
+  "args": [
+    "dotnet",
+    "vstest",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint28-artifacts/bin/Hub.Tests/release/Hub.Tests.dll",
+    "--TestCaseFilter:FullyQualifiedName~Hub.Tests.Api.DecisionMetadataTests.|FullyQualifiedName~Hub.Tests.Api.DecisionLagTests.|FullyQualifiedName~Hub.Tests.Api.DecisionMetadataReplayTests.|FullyQualifiedName~Hub.Tests.Api.TemplateRiskSeedTests.|FullyQualifiedName~Hub.Tests.Api.TemplateVersionProvenanceTests.|FullyQualifiedName~Hub.Tests.Api.TemplateDraftDiffTests.|FullyQualifiedName~Hub.Tests.Api.IssueRootCauseTests.|FullyQualifiedName~Hub.Tests.Api.IssueRootCauseReadTests.|FullyQualifiedName~Hub.Tests.Api.IssueRootCauseVocabularyTests.|FullyQualifiedName~Hub.Tests.Api.IssueRootCauseSavedViewsTests.|FullyQualifiedName~Hub.Tests.Api.AdminUserScreenTests.|FullyQualifiedName~Hub.Tests.Api.AdminRoleExplanationTests.|FullyQualifiedName~Hub.Tests.Domain.PermissionExplanationTests.",
+    "--Logger:trx;LogFileName=g56-focused1.trx",
+    "--ResultsDirectory:/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint28-runtime/test-results"
+  ],
+  "atUtc": "2026-11-02T14:59:00.504713+00:00",
+  "boundary": "Trusted HubFactory disposable hub_test_* only; retainedQA24 untouched"
+}

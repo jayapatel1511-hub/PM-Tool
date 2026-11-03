@@ -1,0 +1,26 @@
+{
+  "atUtc": "2026-11-02T10:46:26.362109+00:00",
+  "status": "READY_HOLD_SOURCE_ONLY",
+  "files": [
+    {
+      "path": "src/Hub.Api/Features/ReviewResponses.cs",
+      "sha256": "eee7528aae64731cc16b6d4e3d56126b16d7d419364a5f75e16abec12e17e7d9"
+    },
+    {
+      "path": "src/Hub.Api/Features/ReviewResponseExport.cs",
+      "sha256": "606cb93d922fa4c64db2fb8b291e92e2386a5132c938010e22e8b5430152d421"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ReviewResponseTests.cs",
+      "sha256": "c99a3216ac659f8ac1942371a77a987c45eb33c08b4518ac0ed9a7ce430b0e71"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ReviewResponseExportTests.cs",
+      "sha256": "0992c35619b63d4b730baaddda911cc666d99ccc8266cd3524ebfadd15c6a15d"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ReviewResponseReceiptTests.cs",
+      "sha256": "2d784652e942577df0fd195b1f82ccaedb1e4c51ea6504dcfc47b15ad220e956"
+    }
+  ]
+}

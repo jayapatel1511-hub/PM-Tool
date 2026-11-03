@@ -1,0 +1,8 @@
+{
+  "ui": {
+    "views.param.purposeOfIssueId": "Purpose of issue",
+    "views.param.returnCodeId": "Return code",
+    "views.param.noDueDate": "No due date",
+    "views.param.layout": "View layout"
+  }
+}

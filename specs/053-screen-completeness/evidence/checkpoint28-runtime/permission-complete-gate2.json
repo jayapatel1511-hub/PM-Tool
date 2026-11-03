@@ -1,0 +1,12 @@
+{
+  "exitCode": 1,
+  "expectedExitCode": 1,
+  "structuralPass": false,
+  "coverageComplete": false,
+  "errors": [
+    "Complete FR-SCR-83 gate refused: pending policy/compound coverage"
+  ],
+  "pendingCount": 105,
+  "rows": 83,
+  "canonicalMethods": 79
+}

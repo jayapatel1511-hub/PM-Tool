@@ -1,0 +1,9 @@
+{
+  "viteManifestSha256": "7ed0539db479c3b6c5341e4422c593d2da90c6718addc23ed884870dccd794cc",
+  "webFiles": 403,
+  "generated": {
+    "api.d.ts": "da5cf19193847587223de713840e8a25b8d9884392d95ed432098909a6422b5a",
+    "registry.gen.ts": "38a1143c6e00840014d23a68c46b62a7e58f8920685d9075fb98d35d0de2a20a",
+    "openapi.json": "86618faa485f5103a2d7fb6f5349b555dc97f361f5d99a042db11fcded419a0f"
+  }
+}

@@ -1,0 +1,21 @@
+Test run for /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint30-artifacts/bin/Hub.Tests/release/Hub.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:12.84]     Hub.Tests.Api.TaskHistoryActorTests.Restricted_project_current_visibility_governs_actor_choices_and_history_without_directory_leakage [FAIL]
+  Failed Hub.Tests.Api.TaskHistoryActorTests.Restricted_project_current_visibility_governs_actor_choices_and_history_without_directory_leakage [4 s]
+  Error Message:
+   Expected 200 but got 400: {"type":"https://hub.local/errors/validation","title":"Validation failed","status":400,"code":"validation","detail":"One or more fields are invalid.","traceId":"0HNPP33LF6O51","errors":{"visibility":["Restricted projects are not enabled for this organisation."]}}
+  Stack Trace:
+     at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118
+   at Hub.Tests.Api.TaskHistoryActorTests.Restricted_project_current_visibility_governs_actor_choices_and_history_without_directory_leakage() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/TaskHistoryActorTests.cs:line 138
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:28.57]     Hub.Tests.Api.TaskContributionTests.Read_only_inactive_and_current_hidden_project_memberships_are_refused_without_mutation [FAIL]
+  Failed Hub.Tests.Api.TaskContributionTests.Read_only_inactive_and_current_hidden_project_memberships_are_refused_without_mutation [3 s]
+  Error Message:
+   Expected 200 but got 400: {"type":"https://hub.local/errors/validation","title":"Validation failed","status":400,"code":"validation","detail":"One or more fields are invalid.","traceId":"0HNPP33LF6O8I","errors":{"visibility":["Restricted projects are not enabled for this organisation."]}}
+  Stack Trace:
+     at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118
+   at Hub.Tests.Api.TaskContributionTests.Read_only_inactive_and_current_hidden_project_memberships_are_refused_without_mutation() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/TaskContributionTests.cs:line 143
+--- End of stack trace from previous location ---
+Results File: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint30-runtime/trx-focused1/focused1.trx
+
+Failed!  - Failed:     2, Passed:    30, Skipped:     0, Total:    32, Duration: 1 m 8 s - Hub.Tests.dll (net10.0)

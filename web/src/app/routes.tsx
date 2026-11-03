@@ -1,6 +1,6 @@
 import { useFlag } from '@/lib/auth-context'
 import type { RouteObject } from 'react-router'
-import { Navigate } from 'react-router'
+import { Navigate, useLocation } from 'react-router'
 import { lazy, Suspense, type ComponentType } from 'react'
 import { MyWorkPage } from '@/pages/MyWork'
 import { ProjectLayout, useCurrentProject } from '@/pages/projects/ProjectLayout'
@@ -100,6 +100,12 @@ export const PROJECT_ROUTES: RouteObject[] = []
 /** The tab a project opens on: the dashboard once packet 007 is in place. */
 export const PROJECT_HOME = 'dashboard'
 
+/** The project landing alias keeps the copied query, anchor and source-return context. */
+function ProjectIndex() {
+  const location = useLocation()
+  return <Navigate to={{ pathname: PROJECT_HOME, search: location.search, hash: location.hash }} state={location.state} replace />
+}
+
 /** Route table; each packet adds its screens here. */
 export const routes: RouteObject[] = [
   { index: true, element: <Navigate to="/my-work" replace /> },
@@ -118,7 +124,7 @@ export const routes: RouteObject[] = [
   { path: 'projects', ...routed(ProjectListPage) },
   {
     path: 'projects/:number', element: <ProjectLayout />, children: [
-      { index: true, element: <Navigate to={PROJECT_HOME} replace /> },
+      { index: true, element: <ProjectIndex /> },
       { path: 'dashboard', ...routed(DashboardTab) },
       { path: 'coordination', ...routed(CoordinationTab) },
       { path: 'readiness', ...routed(ReadinessTab) },

@@ -1,0 +1,12 @@
+{
+  "status": "PASS_READ_ONLY_CAPTURE",
+  "boundary": "Synthetic data on actual isolated SPA; no POST, live API join, persistence or human acceptance.",
+  "screenshots": [
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint26-runtime/response-history-desktop4.png",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint26-runtime/response-form-desktop4.png",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint26-runtime/response-form-phone4.png"
+  ],
+  "writes": [],
+  "errors": [],
+  "unknown": []
+}

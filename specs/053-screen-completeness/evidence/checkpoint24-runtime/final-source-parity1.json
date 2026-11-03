@@ -1,0 +1,8 @@
+{
+  "atUtc": "2026-11-02T08:27:14.585546+00:00",
+  "compiledCSharpFiles": 602,
+  "compiledCSharpChanged": [],
+  "appConfigChangedSinceWebBuild3": [],
+  "browserHarnessDelta": "Only import.cjs diagnostic ledger/stable idle pulse/exact shared-cycle assertions after build3; no app input change",
+  "status": "PASS"
+}

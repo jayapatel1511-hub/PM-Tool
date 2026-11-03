@@ -1,0 +1,15 @@
+{
+  "observedAtUtc": "2026-11-01T13:56:47.528Z",
+  "status": 200,
+  "body": [
+    {
+      "id": "01a19765-e4f1-7d97-8e8a-25effdebde3b",
+      "verifierId": "01a19751-d447-780f-8722-3aaa0a0c4d21",
+      "status": "Proposed",
+      "evidenceUrl": null,
+      "note": "QA20 recorded independent verifier",
+      "verifiedAt": null,
+      "rowVersion": 0
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
@@ -11,7 +12,8 @@ namespace Hub.Api.Features;
 public sealed class AllocationPreviewFilter : IEndpointFilter
 {
     public sealed record PreviewWeek(Guid PersonId, DateOnly Week, decimal Capacity, decimal Planned, decimal Free, string Band, string[] Indicators);
-    public sealed record AllocationPreviewResponse(bool Preview, IReadOnlyList<PreviewWeek> Weeks);
+    public sealed record AllocationPreviewResponse(bool Preview, IReadOnlyList<PreviewWeek> Weeks,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] AllocationScreenReads.ProposalCapacityRead? Comparison = null);
 
     // The filter returns preview data at the same status as the normal saved command.
     public static async Task Describe(OpenApiOperation operation, OpenApiOperationTransformerContext context, CancellationToken cancellationToken)
@@ -39,6 +41,11 @@ public sealed class AllocationPreviewFilter : IEndpointFilter
             if (result is not Coordination.Result saved) return result;
             var allocation = await db.Allocations.AsNoTracking().SingleAsync(a => a.Id == saved.Id);
             var access = sp.GetRequiredService<Access>(); var clock = sp.GetRequiredService<TimeProvider>();
+            // Only S30 create/Fill adds the scoped before/after read. Edits and confirmation preserve their existing contract and checks.
+            var comparison = settings.IsFlagOn("capacity_screens") && before is null && !http.Request.RouteValues.ContainsKey("id")
+                ? await AllocationScreenReads.Proposal(allocation, true, access, db, store, clock) : null;
+            if (comparison is not null && comparison.State != "Complete")
+                return TypedResults.Ok(new AllocationPreviewResponse(true, [], comparison));
             var weeks = new List<PreviewWeek>();
             async Task Add(ResourceAllocation candidate, DateOnly from, DateOnly through)
             {
@@ -59,8 +66,8 @@ public sealed class AllocationPreviewFilter : IEndpointFilter
             if (before != null && before.PersonId != allocation.PersonId)
                 await Add(new ResourceAllocation { ProjectId = before.ProjectId, PersonId = before.PersonId, FromDate = before.FromDate,
                     ThroughDate = before.ThroughDate, PlannedHours = 0 }, before.FromDate, before.ThroughDate);
-            return TypedResults.Ok(new AllocationPreviewResponse(true, weeks));
+            return TypedResults.Ok(new AllocationPreviewResponse(true, weeks, comparison));
         }
-        finally { await tx.RollbackAsync(); db.ChangeTracker.Clear(); }
+        finally { await tx.RollbackAsync(); db.DiscardNotices(); db.ChangeTracker.Clear(); }
     }
 }

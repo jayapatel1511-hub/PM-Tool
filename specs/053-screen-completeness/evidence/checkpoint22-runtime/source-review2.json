@@ -1,0 +1,89 @@
+{
+  "checkpoint": 22,
+  "generation": 50,
+  "checkedAtUtc": "2026-11-01T22:10:25.725779+00:00",
+  "status": "PASS_SOURCE_ONLY",
+  "runtime": "NOT_RUN: automatic approval review could not complete because account usage limit was reached; no bypass attempted",
+  "chatSnapshot": "A/B completed; C/D latest turns failed at usage limit; all four inactive/notLoaded, no new output",
+  "sourceHashes": {
+    "web-freeze2.json": {
+      "checked": 438,
+      "changed": [
+        "web/tests/count-card-overlap.cjs",
+        "web/tests/project-dashboard-completeness.cjs",
+        "web/tests/project-header-compact.cjs"
+      ]
+    },
+    "csharp-freeze2.json": {
+      "checked": 567,
+      "changed": []
+    }
+  },
+  "syntaxChecks": [
+    {
+      "command": [
+        "node",
+        "--check",
+        "specs/053-screen-completeness/evidence/checkpoint22-real-browser.cjs"
+      ],
+      "exitCode": 0,
+      "sha256": "8506f240e172370d00b79e46b4978f4120e5b12a794ee150c663a41e86b3ccd7"
+    },
+    {
+      "command": [
+        "node",
+        "--check",
+        "specs/053-screen-completeness/evidence/checkpoint22-real-timeline-setup.cjs"
+      ],
+      "exitCode": 0,
+      "sha256": "13f7b8637657cc1ddc13db7184ed8bb3dc811967ef267a0293ad93cf02a11e15"
+    },
+    {
+      "command": [
+        "node",
+        "--check",
+        "web/tests/count-card-overlap.cjs"
+      ],
+      "exitCode": 0,
+      "sha256": "ce00cb6302b3a31bc0d22c09df246075c0fbba0fca23ab0b99e90f5d4dcaff85"
+    },
+    {
+      "command": [
+        "node",
+        "--check",
+        "web/tests/project-dashboard-completeness.cjs"
+      ],
+      "exitCode": 0,
+      "sha256": "22e591cc6d96ce5e647bb6ec01593f56a5ab8ba7c35d9ed5a177d5680af58d4c"
+    },
+    {
+      "command": [
+        "node",
+        "--check",
+        "web/tests/project-header-compact.cjs"
+      ],
+      "exitCode": 0,
+      "sha256": "3b28b7c7207ee861ebb8bdaf633a7fdbad664d3c845300588cf956fe689f0773"
+    }
+  ],
+  "localManifest": {
+    "path": "src/Hub.Api/wwwroot/.vite/manifest.json",
+    "sha256": "edd862804b02d669b3d16e1b47b18b46b4ab8885e3a54dc324185cda0cf21635",
+    "matchesRetainedBuild2": true,
+    "manifestAssetCount": 133,
+    "priorIdentityAssetSubsetCount": 55,
+    "servedBytesRechecked": false
+  },
+  "independentReview": {
+    "timelineProjection": "PASS source only; derived milestone health/deliverable progress excluded consistently with evaluator; persisted fields retained; exposed DTO lacks milestone/handoff row versions",
+    "realBrowserBoundedRepair": "PASS final source recheck; actual configured output directory, prior asset subset and all-manifest byte verification, natural stable-ID focus assertion; no browser execution"
+  },
+  "remaining": [
+    "Rerun overlap and two adjacent browser suites on verified final build2",
+    "Preserve failed Timeline attempt then execute only repaired Timeline setup on QA22",
+    "Execute real API/browser joins only after all setup receipts pass",
+    "Verify current owned runtime handles before any use or cleanup; QA22 retained",
+    "Full remaining packets052/053, S10/globalS43/product decisions/human gates remain open"
+  ],
+  "boundary": "No product/C# changes in this review; no checkbox/commit/push/deployment/pilot activation/Accepted claim"
+}

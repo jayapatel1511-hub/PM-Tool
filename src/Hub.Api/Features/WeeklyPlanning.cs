@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -92,7 +93,14 @@ public static class WeeklyPlanningEndpoints
             if (body.Operation == "Publish")
                 foreach (var group in changed.GroupBy(e => e.PersonId)) {
                     var first = group.First();
-                    await notify.Send(NotificationEvents.PlanningEntryChanged, [group.Key], new NotifyItem(null, "PlanningEntry", first.Id, null, $"/my-work?myWeek={body.Week:yyyy-MM-dd}", null), Text.Get("planning.week_published", body.Week.ToString("yyyy-MM-dd"), group.Count()));
+                    var link = $"/my-work?myWeek={body.Week:yyyy-MM-dd}";
+                    var source = new NoticeRawSource(NoticeSourceKind.PlanningGroup, null, "PlanningEntry", first.Id, null, link,
+                        new(group.Select(entry => entry.ProjectId).OfType<Guid>().Distinct().Order().ToImmutableArray(),
+                            group.Select(entry => entry.Id).Distinct().Order().ToImmutableArray()),
+                        "PlanningEntryChanged", new("PlanningEntry", first.Id, null, link));
+                    await notify.Send(NotificationEvents.PlanningEntryChanged, [group.Key],
+                        new NotifyItem(null, "PlanningEntry", first.Id, null, link, NoticeSource: source),
+                        Text.Get("planning.week_published", body.Week.ToString("yyyy-MM-dd"), group.Count()));
                 }
             await db.SaveChangesAsync();
             return TypedResults.Ok(new WeekApplied(changed.Count, changed.Select(e => new AppliedEntry(e.Id, e.PersonId, e.RowVersion)).ToArray(), body.Week));

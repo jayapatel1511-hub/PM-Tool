@@ -1,0 +1,13 @@
+{
+  "failed": 21,
+  "passed": 46,
+  "groups": {
+    "A": "18 failures same version0 rejected; exactproduct/testloan2",
+    "B": "2 fixtures Visibility ignored onCreate; canonicalPATCH realRestricted+assertactual404",
+    "D": "1 fixture same ignored Visibility, no baseline-event pollution asReadalreadyfiltersSyntheticEvent"
+  },
+  "BReady": {
+    "tests/Hub.Tests/Api/CalendarScreenTests.cs": "5c6bcaf8e13e6298ccbca563ac36b456b56f809d829893e677cfbe13387cd7db",
+    "tests/Hub.Tests/Api/CalendarRescheduleTests.cs": "f572cf9aec00165cf2e7391f1a3550f156e305ef1a687e22c65469b8f7c19452"
+  }
+}

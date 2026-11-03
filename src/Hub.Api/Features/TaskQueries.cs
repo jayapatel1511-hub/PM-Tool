@@ -18,7 +18,7 @@ public sealed class TaskFilter
     /// A named workspace whose personal manual order a board sorted by "board" uses (§36.3); checked by the endpoint.
     public Guid? WorkspaceId;
     public bool? RequiresReview, HasDependencies, Mine, IncludeCancelled, OnHold;
-    public bool Unassigned, NoDeliverable;
+    public bool Unassigned, NoDeliverable, WithoutDueDate;
     public string? Q, Sort;
     public int Page = 1, PageSize = 200;
 
@@ -36,9 +36,9 @@ public sealed class TaskFilter
         }
         var text = () => new OpenApiSchema { Type = JsonSchemaType.String };
         var list = () => new OpenApiSchema { AnyOf = [text(), new OpenApiSchema { Type = JsonSchemaType.Array, Items = text() }] };
-        foreach (var name in new[] { "status", "priority", "indicator", "assigneeId", "reviewerId", "disciplineId", "deliverableId", "milestoneId", "projectId", "createdBy", "ids" }) Add(name, list());
-        foreach (var name in new[] { "dueFrom", "dueTo", "startFrom", "startTo", "completedFrom", "completedTo", "doneSince", "workspaceId", "q", "sort" }) Add(name, text());
-        foreach (var name in (string[])["requiresReview", "hasDependencies", "mine", "includeCancelled", "onHold", "noDeliverable", .. IndicatorFlags]) Add(name, new OpenApiSchema { Type = JsonSchemaType.Boolean | JsonSchemaType.String });
+        foreach (var name in new[] { "status", "priority", "indicator", "assigneeId", "reviewerId", "disciplineId", "deliverableId", "milestoneId", "projectId", "createdBy", "ids", "homeProjectStatus" }) Add(name, list());
+        foreach (var name in new[] { "dueFrom", "dueTo", "startFrom", "startTo", "completedFrom", "completedTo", "doneSince", "workspaceId", "q", "sort", "homePreset", "group" }) Add(name, text());
+        foreach (var name in (string[])["requiresReview", "hasDependencies", "mine", "includeCancelled", "onHold", "noDeliverable", "withoutDueDate", .. IndicatorFlags]) Add(name, new OpenApiSchema { Type = JsonSchemaType.Boolean | JsonSchemaType.String });
         foreach (var name in new[] { "page", "pageSize" }) Add(name, new OpenApiSchema { Type = JsonSchemaType.Integer | JsonSchemaType.String });
         return Task.CompletedTask;
     }
@@ -61,7 +61,7 @@ public sealed class TaskFilter
             DueFrom = D("dueFrom"), DueTo = D("dueTo"), StartFrom = D("startFrom"), StartTo = D("startTo"), CompletedFrom = D("completedFrom"), CompletedTo = D("completedTo"), DoneSince = D("doneSince"),
             WorkspaceId = Guid.TryParse(q["workspaceId"], out var ws) ? ws : null,
             RequiresReview = B("requiresReview"), HasDependencies = B("hasDependencies"), Mine = B("mine"), IncludeCancelled = B("includeCancelled"), OnHold = B("onHold"),
-            Q = q["q"], Sort = q["sort"], NoDeliverable = B("noDeliverable") == true,
+            Q = q["q"], Sort = q["sort"], NoDeliverable = B("noDeliverable") == true, WithoutDueDate = B("withoutDueDate") == true,
         };
         f.Unassigned = f.Indicators.Contains("unassigned");
         var (page, size) = Http.Paging(int.TryParse(q["page"], out var p) ? p : null, int.TryParse(q["pageSize"], out var s) ? s : 200);
@@ -70,10 +70,11 @@ public sealed class TaskFilter
     }
 }
 
-public static class TaskQueries
+public static partial class TaskQueries
 {
     [System.Text.Json.Serialization.JsonDerivedType(typeof(ActivityRow))]
-    public record Row
+    [System.Text.Json.Serialization.JsonDerivedType(typeof(CompoundActivityRow))]
+    public partial record Row
     {
         public required Guid Id { get; init; }
         public required Guid ProjectId { get; init; }
@@ -136,10 +137,22 @@ public static class TaskQueries
         [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         public virtual string? LastActivityActorName { get; init; }
         [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public Guid? LastActivityActorId { get; init; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? LastActivityActorType { get; init; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public virtual DateTimeOffset? LastActivityEventAt { get; init; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         public bool? PickupOfferOpen { get; init; }
         /// FR-BKL-01: present only while `flag.backlog` is on, so the row is unchanged with it off.
         [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         public bool? Backlog { get; init; }
+        /// FR-SCR-18: list-page-only context. Omitted with work_screens off and from other row readers.
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public TaskSubmissionDates.SubmissionDateFact? SubmissionDate { get; init; }
+        /// FR-SCR-21/22: current board facts for authorised list-page rows only while work_screens is on.
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public BoardScreenReads.BoardFact? Board { get; init; }
     }
     public sealed record ActivityRow : Row
     {
@@ -148,6 +161,19 @@ public static class TaskQueries
 
         [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
         public override string? LastActivityActorName { get; init; }
+    }
+    public sealed record CompoundActivityRow : Row
+    {
+        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
+        public CompoundActivityRow(Row source, string? actor) : base(source)
+        {
+            LastActivityActorName = actor;
+            LastActivityEventAt = source.LastActivityEventAt;
+        }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public override string? LastActivityActorName { get; init; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public override DateTimeOffset? LastActivityEventAt { get; init; }
     }
 
     public sealed record Can(bool Assign, bool Edit, bool ChangeDue, bool Block);
@@ -168,6 +194,8 @@ public static class TaskQueries
         if (f.DisciplineIds.Length > 0) q = q.Where(t => f.DisciplineIds.Contains(t.ProjectDisciplineId));
         if (f.DeliverableIds.Length > 0) q = q.Where(t => t.DeliverableId != null && f.DeliverableIds.Contains(t.DeliverableId.Value));
         if (f.NoDeliverable) q = q.Where(t => t.DeliverableId == null);
+        // The Home undated count includes backlog too; the existing noDueDate signal keeps its narrower meaning.
+        if (s.IsFlagOn("home_overview") && f.WithoutDueDate) q = q.Where(t => t.DueDate == null);
         if (f.MilestoneIds.Length > 0) q = q.Where(t => (t.MilestoneId != null && f.MilestoneIds.Contains(t.MilestoneId.Value))
             || db.Deliverables.Any(d => d.Id == t.DeliverableId && d.MilestoneId != null && f.MilestoneIds.Contains(d.MilestoneId.Value)));
         if (f.CreatedBy.Length > 0) q = q.Where(t => t.CreatedBy != null && f.CreatedBy.Contains(t.CreatedBy.Value));
@@ -242,6 +270,8 @@ public static class TaskQueries
 
     public static async Task<List<Row>> Rows(HubDb db, IQueryable<WorkTask> q, Actor? actor = null, bool includeActivityActor = false)
     {
+        var settings = await db.CurrentSettings();
+        var compoundActivity = includeActivityActor && (settings.IsFlagOn("work_screens") || settings.IsFlagOn("people_screens"));
         // Scalar columns and counts in one query; related rows by id in a few keyed ones. (Multi-column First() inside the
         // projection made EF rank whole tables — every task state, project and person — per list: packet 011 scale run.)
         var rows = await q.Select(t => new
@@ -254,11 +284,16 @@ public static class TaskQueries
             Comments = db.Comments.Count(c => c.ItemType == ItemType.Task && c.ItemId == t.Id && c.DeletedAt == null),
             Predecessors = db.Dependencies.Count(d => d.SuccessorTaskId == t.Id),
             Successors = db.Dependencies.Count(d => d.PredecessorTaskId == t.Id),
-            ActivityActorName = includeActivityActor ? db.ActivityLog.Where(log => log.ItemType == ItemType.Task && log.ItemId == t.Id)
+            LegacyActivityActorName = includeActivityActor && !compoundActivity ? db.ActivityLog.Where(log => log.ItemType == ItemType.Task && log.ItemId == t.Id)
                 .OrderByDescending(log => log.OccurredAt).ThenByDescending(log => log.Id)
                 .Select(log => log.ActorType == "System" ? Text.Get("common.system") : db.Users.Where(u => u.Id == log.ActorUserId).Select(u => u.DisplayName).FirstOrDefault()).FirstOrDefault() : null,
         }).ToListAsync();
         var ids = rows.Select(t => t.Id).ToList();
+        // These exact rows have already been selected by the caller's authorised canonical scope.
+        // Event time, actor identity and live comments come from one shared page-level facts adapter.
+        IReadOnlyDictionary<WorkSeenKey, WorkActivityFact> activityFacts = compoundActivity
+            ? await WorkActivityFacts.ReadAuthorisedAsync(db, ids.Select(id => new WorkSeenKey(ItemType.Task, id)).ToArray())
+            : new Dictionary<WorkSeenKey, WorkActivityFact>();
         var pids = rows.Select(t => t.ProjectId).Distinct().ToList();
         var pdIds = rows.Select(t => t.ProjectDisciplineId).Distinct().ToList();
         var dIds = rows.Select(t => t.DeliverableId).OfType<Guid>().Distinct().ToList();
@@ -283,11 +318,10 @@ public static class TaskQueries
             Assignee = t.AssigneeId is { } a ? users.GetValueOrDefault(a) : null,
             Reviewer = t.ReviewerId is { } r ? users.GetValueOrDefault(r) : null,
             CreatedByName = t.CreatedBy is { } c ? users.GetValueOrDefault(c)?.DisplayName : null,
-            t.CreatorWindowOpen, t.AssigneeSupervisorId, t.ActivityActorName, t.Comments, t.Predecessors, t.Successors, Collaborators = collaborators[t.Id].ToList(), State = states.GetValueOrDefault(t.Id),
+            t.CreatorWindowOpen, t.AssigneeSupervisorId, t.LegacyActivityActorName, t.Comments, t.Predecessors, t.Successors, Collaborators = collaborators[t.Id].ToList(), State = states.GetValueOrDefault(t.Id),
         }).ToList();
         var msIds = list.Select(t => t.MilestoneId ?? t.Deliverable?.MilestoneId).OfType<Guid>().Distinct().ToList();
         var ms = await db.Milestones.AsNoTracking().Where(m => msIds.Contains(m.Id)).Select(m => new { m.Id, m.Key, m.Name, m.Date }).ToDictionaryAsync(m => m.Id);
-        var settings = await db.CurrentSettings();
         var pickupOn = settings.IsFlagOn("task_pickup");
         var backlogOn = settings.IsFlagOn(TaskRules.BacklogFlag);
         var offers = pickupOn ? (await db.Set<TaskPickupOffer>().AsNoTracking().Where(o => ids.Contains(o.TaskId) && o.ClosedAt == null).Select(o => o.TaskId).ToListAsync()).ToHashSet() : [];
@@ -296,6 +330,7 @@ public static class TaskQueries
             var mid = t.MilestoneId ?? t.Deliverable?.MilestoneId;
             var m = mid is { } x && ms.TryGetValue(x, out var mm) ? mm : null;
             var p = t.Project;
+            var activity = activityFacts.GetValueOrDefault(new WorkSeenKey(ItemType.Task, t.Id));
             var ctx = actor is null ? null : new ProjectContext(p.Id, p.Status, p.Visibility, p.ProjectManagerId, p.AllowViewerComments,
                 memberships.Where(x => x.ProjectId == p.Id).SelectMany(x => x.Roles).ToHashSet(), leads.Contains(t.ProjectDisciplineId) ? new[] { t.ProjectDisciplineId }.ToHashSet() : new HashSet<Guid>(), null);
             var facts = new TaskFacts(t.ProjectDisciplineId, t.AssigneeId, t.ReviewerId, t.CreatedBy, t.Collaborators.ToHashSet(), t.Status, t.Predecessors + t.Successors > 0, t.CreatorWindowOpen, t.AssigneeSupervisorId);
@@ -316,25 +351,51 @@ public static class TaskQueries
                 LastActivityAt = t.LastActivityAt, StatusChangedAt = t.StatusChangedAt, CompletedAt = t.CompletedAt, CreatedAt = t.CreatedAt,
                 CreatedBy = t.CreatedBy, CreatedByName = t.CreatedByName, SortOrder = t.SortOrder, RowVersion = t.RowVersion,
                 ManualBlockType = t.ManualBlockType, ManualBlockReason = t.ManualBlockReason, ManualBlockSetAt = t.ManualBlockSetAt,
-                CommentCount = t.Comments, PredecessorCount = t.Predecessors, SuccessorCount = t.Successors, CollaboratorIds = t.Collaborators,
+                CommentCount = compoundActivity && activity?.CommentCount is { } comments ? comments : t.Comments,
+                PredecessorCount = t.Predecessors, SuccessorCount = t.Successors, CollaboratorIds = t.Collaborators,
                 Can = can is null ? null : new Can(can.Assign, can.Edit, can.ChangeDue, can.Block),
                 State = t.State is null ? null : new State(t.State.IsOverdue, t.State.DaysOverdue, t.State.IsDueSoon, t.State.IsWaiting, t.State.IsBlocked,
                     t.State.BlockedSince, t.State.DaysBlocked, J.El(t.State.BlockedBy), t.State.IsBlocking, t.State.BlockingCount,
                     t.State.BlockingTaskIds, t.State.IsStale, t.State.StaleDays, t.State.IsUnassigned, t.State.IsMissingDueDate,
                     t.State.IsDateInconsistent, J.El(t.State.InconsistencyDetail), t.State.IsInactiveOwner, t.State.IsHeldPastDue,
                     t.State.IsReviewStalled, t.State.AffectedMilestoneIds, t.State.Notes, t.State.EvaluatedAt),
-                LastActivityActorName = includeActivityActor ? t.ActivityActorName : null,
+                LastActivityActorName = compoundActivity ? activity?.ActorName : t.LegacyActivityActorName,
+                LastActivityActorId = activity?.ActorId,
+                LastActivityActorType = activity?.ActorType,
+                LastActivityEventAt = activity?.OccurredAt,
+                WorkActivity = settings.IsFlagOn("work_screens") ? activity : null,
                 PickupOfferOpen = pickupOn ? offers.Contains(t.Id) : null,
                 Backlog = backlogOn ? TaskRules.IsBacklog(t.Status, t.StartDate, t.DueDate) : null,
             };
-            return includeActivityActor ? new ActivityRow(row, t.ActivityActorName) : row;
+            return compoundActivity ? new CompoundActivityRow(row, activity?.ActorName) : includeActivityActor ? new ActivityRow(row, t.LegacyActivityActorName) : row;
         }).ToList();
     }
 
-    public static async Task<Page<Row>> Page(HubDb db, IQueryable<WorkTask> q, TaskFilter f, Actor? actor = null, bool includeActivityActor = false)
+    public sealed record ListPage(IReadOnlyList<Row> Items, [property: System.Text.Json.Serialization.JsonPropertyName("page")] int PageNumber,
+        int PageSize, int TotalCount, string? Sort = null, object? Filters = null,
+        [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<TaskGroupReads.TaskListGroup>? Groups = null,
+        [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] DateTimeOffset? AsOf = null);
+
+    public static async Task<ListPage> Page(HubDb db, IQueryable<WorkTask> q, TaskFilter f, Actor? actor = null, bool includeActivityActor = false,
+        string? group = null, DateTimeOffset? asOf = null, DateOnly? today = null, bool includeSubmissionDate = false,
+        OrgSettings? boardSettings = null, DateTimeOffset? boardNow = null)
     {
+        if (group is not null)
+        {
+            var grouped = await TaskGroupReads.Read(db, q, f, group, today!.Value);
+            var ids = grouped.PageIds;
+            var rowsById = (await Rows(db, q.Where(t => ids.Contains(t.Id)), actor, includeActivityActor)).ToDictionary(r => r.Id);
+            IReadOnlyList<Row> ordered = [.. ids.Select(id => rowsById[id])];
+            if (includeSubmissionDate) ordered = await TaskSubmissionDates.Apply(db, ordered);
+            if (boardSettings is not null) ordered = await BoardScreenReads.Apply(db, ordered, boardSettings,
+                boardNow ?? throw new ArgumentException("Board facts require the captured read instant.", nameof(boardNow)));
+            return new(ordered, f.Page, f.PageSize, grouped.Total, f.Sort, null, grouped.Groups, asOf);
+        }
         var total = await q.CountAsync();
-        var rows = await Rows(db, Sort(q, f.Sort, db, f.WorkspaceId).Skip((f.Page - 1) * f.PageSize).Take(f.PageSize), actor, includeActivityActor);
-        return new Page<Row>(rows, f.Page, f.PageSize, total, f.Sort);
+        IReadOnlyList<Row> rows = await Rows(db, Sort(q, f.Sort, db, f.WorkspaceId).Skip((f.Page - 1) * f.PageSize).Take(f.PageSize), actor, includeActivityActor);
+        if (includeSubmissionDate) rows = await TaskSubmissionDates.Apply(db, rows);
+        if (boardSettings is not null) rows = await BoardScreenReads.Apply(db, rows, boardSettings,
+            boardNow ?? throw new ArgumentException("Board facts require the captured read instant.", nameof(boardNow)));
+        return new ListPage(rows, f.Page, f.PageSize, total, f.Sort);
     }
 }

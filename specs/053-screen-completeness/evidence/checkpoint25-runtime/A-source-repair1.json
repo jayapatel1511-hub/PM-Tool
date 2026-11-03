@@ -1,0 +1,7 @@
+{
+  "atUtc": "2026-11-02T10:17:06.201757+00:00",
+  "file": "web/tests/search-screen.cjs",
+  "sha256": "5ffbc1eb6855a2f48b2d763ed2a1e168293e299751a9bffcb89f9ce47f06d10b",
+  "repair": "Actual responsive filter trigger/open content and actual closed-hidden settling before phone viewport transition; all assertions retained",
+  "status": "READY_HOLD"
+}

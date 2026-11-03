@@ -2,7 +2,7 @@ using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 namespace Hub.Api.Records;
-public static class ProjectRecord { public static RegistryEntry Entry { get; } = new(typeof(Hub.Api.Data.Project), "Project", ["ProjectNumber", "Name", "ClientId", "ClientReference", "ProjectManagerId", "OfficeId", "ProjectTypeId", "Description", "Location", "Status", "PhaseId", "StartDate", "TargetCompletionDate", "Priority", "Visibility", "InternalNotes", "CoordinationDay", "AllowViewerComments", "HealthOverride", "HealthOverrideNote", "HealthOverrideExpiresAt", "LastCoordinationReviewedAt", "LeadUnitId", "RevisionConvention", "StatusNote", "StatusNoteBy", "StatusNoteAt"], true, null)
+public static class ProjectRecord { public static RegistryEntry Entry { get; } = new(typeof(Hub.Api.Data.Project), "Project", ["ProjectNumber", "Name", "ClientId", "ClientReference", "ProjectManagerId", "OfficeId", "ProjectTypeId", "Description", "Location", "Status", "PhaseId", "StartDate", "TargetCompletionDate", "Priority", "Visibility", "InternalNotes", "CoordinationDay", "AllowViewerComments", "HealthOverride", "HealthOverrideNote", "HealthOverrideExpiresAt", "LastCoordinationReviewedAt", "LeadUnitId", "RevisionConvention", "ClientDrawingNumberPattern", "StatusNote", "StatusNoteBy", "StatusNoteAt", "IdentityColour"], true, null)
     {
         NameOrder = 11,
         Names = async (db, list) => (await db.Projects.Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.ProjectNumber, x.Name }).ToListAsync()).Select(x => (x.Id, $"{x.ProjectNumber} {x.Name}")),

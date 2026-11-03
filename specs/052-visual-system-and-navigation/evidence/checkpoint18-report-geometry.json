@@ -1,0 +1,67 @@
+{
+  "environment": "Production build4, Chrome with explicitly synthetic mocked API; not real API acceptance",
+  "sourceLog": "/private/tmp/tuesday-checkpoint18-browser-report-task-inputs-3.log",
+  "meaningfulFirstReportRows": [
+    {
+      "name": "compact visual report with overlapping inputs",
+      "code": "stale-work",
+      "compact": true,
+      "top": 379.5,
+      "height": 41
+    },
+    {
+      "name": "complex scoped overdue-tasks",
+      "code": "overdue-tasks",
+      "compact": true,
+      "top": 379.5,
+      "height": 77
+    },
+    {
+      "name": "complex scoped blocked-tasks",
+      "code": "blocked-tasks",
+      "compact": true,
+      "top": 379.5,
+      "height": 77
+    },
+    {
+      "name": "complex scoped tasks-blocking-others",
+      "code": "tasks-blocking-others",
+      "compact": true,
+      "top": 379.5,
+      "height": 77
+    },
+    {
+      "name": "complex scoped review-queue",
+      "code": "review-queue",
+      "compact": true,
+      "top": 379.5,
+      "height": 77
+    },
+    {
+      "name": "complex scoped tasks-due-this-week",
+      "code": "tasks-due-this-week",
+      "compact": true,
+      "top": 379.5,
+      "height": 76.5
+    },
+    {
+      "name": "expanded controls with visual system disabled",
+      "code": "stale-work",
+      "compact": false,
+      "top": 653.5,
+      "height": 41
+    },
+    {
+      "name": "compact visual system enabled",
+      "code": "stale-work",
+      "compact": true,
+      "top": 379.5,
+      "height": 41
+    }
+  ],
+  "limits": [
+    "Visual-off expanded controls preserved;653.5px exceeds old405px target and is not waived.",
+    "Exact6enabled report-table rows measured379.5px; not a whole17screen census.",
+    "No native200percent browser zoom or human acceptance claimed."
+  ]
+}

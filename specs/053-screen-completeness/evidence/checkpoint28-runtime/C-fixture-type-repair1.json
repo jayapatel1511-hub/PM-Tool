@@ -1,0 +1,7 @@
+{
+  "file": "web/tests/issue-root-cause.fixture.cjs",
+  "before": "c0529c24cf77b7f714fa79b945fad952e1bc0cdf4f84920fc48700c7e41688af",
+  "after": "61095561a815a16c9f4360eb36fc77044f10f68df5860a758fcce96761303b59",
+  "observed": "fixture-types1 TS7006 implicit any on synthetic numeric ID helper",
+  "repair": "Add number JSDoc only; no runtime change; all typechecks stopped"
+}

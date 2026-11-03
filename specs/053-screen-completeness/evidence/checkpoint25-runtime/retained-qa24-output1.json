@@ -1,0 +1,7 @@
+{
+  "atUtc": "2026-11-02T09:22:47.967375+00:00",
+  "status": "PASS_FILES_UNCHANGED",
+  "oldApiDllSha256": "80658bd2ad102063a6042355ff0d5fb417a5fc3428b2eb5b1ae67916e57145f3",
+  "oldWwwrootFiles": 129,
+  "serviceBoundary": "No stop/restart/drop action; permission remains pending. This is local file parity, not a fresh HTTP health claim."
+}

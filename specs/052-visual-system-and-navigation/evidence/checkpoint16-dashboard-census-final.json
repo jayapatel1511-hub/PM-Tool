@@ -1,0 +1,87 @@
+{
+  "base": "http://127.0.0.1:5088",
+  "screens": [
+    "/projects/SYN-101/dashboard"
+  ],
+  "partMode": "all",
+  "flagNames": [
+    "visual_system",
+    "screen_patterns",
+    "home_overview",
+    "work_screens",
+    "project_screens",
+    "capacity_screens",
+    "register_screens",
+    "people_screens"
+  ],
+  "scope": "Real local API, new synthetic fixtures; not hosted or human acceptance",
+  "buildEvidence": {
+    "label": "Unlabelled local build",
+    "apiAssemblySha256": "809a701fe7292e0703bd41a04c542e70be92ebe0bca2f79ae91d0141f6a41ddc",
+    "uiIndexSha256": "71269d29a3eb744e8bbd49fd7befd1116bf6de83da2f6f60af93efdbffc20671"
+  },
+  "rows": [
+    {
+      "enabled": false,
+      "who": "priya",
+      "route": "/projects/SYN-101/dashboard",
+      "metrics": {
+        "chromeControls": 13,
+        "filterFields": 1,
+        "chromeWords": 51,
+        "firstDataY": 270,
+        "fills": 1,
+        "groupTabs": 6,
+        "sidebarItems": 7
+      },
+      "violations": []
+    },
+    {
+      "enabled": false,
+      "who": "sam",
+      "route": "/projects/SYN-101/dashboard",
+      "metrics": {
+        "chromeControls": 13,
+        "filterFields": 1,
+        "chromeWords": 51,
+        "firstDataY": 270,
+        "fills": 1,
+        "groupTabs": 6,
+        "sidebarItems": 7
+      },
+      "violations": []
+    },
+    {
+      "enabled": true,
+      "who": "priya",
+      "route": "/projects/SYN-101/dashboard",
+      "metrics": {
+        "chromeControls": 14,
+        "filterFields": 1,
+        "chromeWords": 63,
+        "firstDataY": 267,
+        "fills": 5,
+        "groupTabs": 8,
+        "sidebarItems": 9
+      },
+      "violations": []
+    },
+    {
+      "enabled": true,
+      "who": "sam",
+      "route": "/projects/SYN-101/dashboard",
+      "metrics": {
+        "chromeControls": 14,
+        "filterFields": 1,
+        "chromeWords": 63,
+        "firstDataY": 267,
+        "fills": 5,
+        "groupTabs": 8,
+        "sidebarItems": 10
+      },
+      "violations": []
+    }
+  ],
+  "pageErrors": [],
+  "externalFonts": []
+}

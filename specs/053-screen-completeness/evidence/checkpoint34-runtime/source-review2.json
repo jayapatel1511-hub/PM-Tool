@@ -1,0 +1,30 @@
+{
+  "atUtc": "2026-11-03T04:19:09.987991+00:00",
+  "boundary": "Source inspection only; new compilation/provider/browser checks remain unrun",
+  "frontendRepair": "PASS; four P2s closed",
+  "contextModelRepair": "PASS; three context P2s closed; prior soft-delete serialization retained",
+  "rootSharedReaders": "PASS; eight held diffs, no actionable findings",
+  "backendReview": {
+    "status": "BOUNDED_SOURCE_PASS_AFTER_THREE_P2_REPAIRS",
+    "findings": [
+      "Tracked pre-lock package can bypass stale package-version precondition",
+      "Named external replay authorization can change while waiting on project lock",
+      "Inactive-discipline-lead-only recorder currently allowed"
+    ],
+    "rootCanonicalSeam": "Coordination.Run optional beforeReplay callback after lock/current scope/generic gate and before receipt lookup",
+    "writers": "C five backend files; B two test files; all other source HOLD",
+    "reviewedRepairFiles": {
+      "src/Hub.Api/Features/Reviews.cs": "8d614010739ffe944cb971ec1dfcd748b7363a248e0f03a72db1ca349612507e",
+      "src/Hub.Api/Features/ExternalReviews.cs": "3e198c5f763ba5878c0161c05b97d11747efd8db5bee69dee8e333512d83756b"
+    }
+  },
+  "browser1": {
+    "status": "FAIL_DRIVER_LOCATOR",
+    "firstCase": "PASS",
+    "unexpectedRequests": 0,
+    "pageErrors": 0,
+    "diagnosis": "Exact text matched hidden history text instead of visible semantic status pill with checkmark",
+    "repair": "Driver now targets actual done status pill; app unchanged by this fix",
+    "evidence": "external-browser1.json"
+  }
+}

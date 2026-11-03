@@ -1,0 +1,34 @@
+{
+  "name": "deliverable-returned-response-history",
+  "actor": "priya@hub.test",
+  "width": 1440,
+  "status": "PASS",
+  "startedAtUtc": "2026-11-02T02:40:13.736Z",
+  "facts": {
+    "deliverableId": "01a19847-70b1-7952-af40-f0d9aeecef9a",
+    "issueId": "01a19847-7135-7dd3-88c3-b16af678d1dd",
+    "registerCurrent": {
+      "id": "01a19847-7135-7dd3-88c3-b16af678d1dd",
+      "revision": "A",
+      "issuedDate": "2026-10-31",
+      "purposeOfIssueId": "01a19834-0b59-7b5e-8900-564db19b60dc",
+      "purpose": "For review",
+      "returnCodeId": "01a19834-0b62-7dba-9bfc-26a85161ace8",
+      "returnCode": "B",
+      "returnLabel": "Accepted with comments",
+      "responseDate": "2026-11-01"
+    },
+    "historyResponse": {
+      "rowVersion": 1,
+      "purposeOfIssueId": "01a19834-0b59-7b5e-8900-564db19b60dc",
+      "purpose": "For review",
+      "returnCodeId": "01a19834-0b62-7dba-9bfc-26a85161ace8",
+      "returnCode": "B",
+      "returnLabel": "Accepted with comments",
+      "responseDate": "2026-11-01"
+    },
+    "status": "Issued"
+  },
+  "screenshot": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint22-real-browser-2026-11-02T02-40-03-222Z-b3a269a5/012-priya-1440-deliverable-returned-response-history.png",
+  "finishedAtUtc": "2026-11-02T02:40:14.733Z"
+}

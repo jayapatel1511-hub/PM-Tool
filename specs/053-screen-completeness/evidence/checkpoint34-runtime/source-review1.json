@@ -1,0 +1,25 @@
+{
+  "atUtc": "2026-11-03T04:04:09.377588+00:00",
+  "scope": "Source-only; no compilation/provider/concurrency/browser claims",
+  "modelReview": {
+    "initialP2": "Task delete/restore omitted from flag-independent capture serialization",
+    "repairSourceVerdict": "PASS",
+    "reviewedHubDbSha": "9df06ab0d977e74f235e3d1bdf7921c2685383983a18c71a1efb14deabf7e303",
+    "reviewedIssuedAuthorshipSha": "bac76e39b22171493cea8aebeb7f3a8423e98496b2e39d4a437bd7cffb915c3c",
+    "laterAdditionalLoan": "Context carry validation and shared batch helper; prior two hashes will change"
+  },
+  "contextReview": {
+    "reviewedSha": "cd37019652542d7c3d7d0cd18bc616fd7fb611d87f4c69eecd0b2750af4d4d51",
+    "findings": [
+      "R2 justified source removal incorrectly demands repeat impact at R3 carry",
+      "Issued ancestry accepts unrelated receipt/deliverable or non-older rounds and any matching historical manifest",
+      "Per-issue author helper performs three queries each; requires canonical batch helper"
+    ],
+    "repairOwner": "D, exactly ContextData+IssuedAuthorship+HubDb",
+    "status": "AUTHORING_UNCOMPILED"
+  },
+  "frontendSourceChecks": {
+    "nodeParsers": "Both new CJS parsers PASS",
+    "oxlint": "Exit0; warnings retained in frontend-source-lint2.log; runtime not proven"
+  }
+}

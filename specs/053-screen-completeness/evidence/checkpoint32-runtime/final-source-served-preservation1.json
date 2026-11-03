@@ -1,0 +1,25 @@
+{
+  "atUtc": "2026-11-03T00:15:48.068066+00:00",
+  "priorOutputs": 4606,
+  "priorChangedOrMissing": [],
+  "compiledCSharp": 697,
+  "csharpChangedOrMissing": [],
+  "webSources": 274,
+  "webChangedOrMissing": [],
+  "bundleFiles": 143,
+  "bundleChangedOrMissing": [],
+  "galleryPublic": 21,
+  "spaPublic": 142,
+  "httpFailures": [],
+  "connectEx": {
+    "5105": 61,
+    "5088": 0
+  },
+  "noFinalAPI": true,
+  "retainedQA24StillListening": true,
+  "pass": true,
+  "unexpectedCSharp": [],
+  "missingCSharp": [],
+  "unexpectedWeb": [],
+  "missingWeb": []
+}

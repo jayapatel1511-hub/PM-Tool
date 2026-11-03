@@ -1,0 +1,3931 @@
+{
+  "commands": [
+    {
+      "method": "PATCH",
+      "route": "/admin/users/01a197d6-d485-78f1-963e-028d4856cce5",
+      "status": 200,
+      "value": {
+        "id": "01a197d6-d485-78f1-963e-028d4856cce5",
+        "rowVersion": 1
+      }
+    },
+    {
+      "method": "POST",
+      "route": "/planning/entries",
+      "status": 201,
+      "value": {
+        "id": "01a197d6-d4df-741b-ab23-db9b0c3aaa4e",
+        "personId": "01a197d6-d485-78f1-963e-028d4856cce5",
+        "personName": "qa21-capacity-person",
+        "ownerId": "01a197bd-ba3c-7336-8ac0-f688d331ccfa",
+        "ownerName": "Jordan Lee",
+        "ownerKind": "Manager",
+        "label": "Synthetic QA21 Confirmed capacity input",
+        "sourceCategory": "Admin",
+        "projectId": null,
+        "projectNumber": null,
+        "projectName": null,
+        "projectDisciplineId": null,
+        "disciplineName": null,
+        "hoursPerWeek": 45,
+        "startWeek": "2026-10-26",
+        "endWeek": "2026-10-26",
+        "confidence": "Confirmed",
+        "visibility": "Published",
+        "notes": null,
+        "lastValidatedAt": "2026-11-01T16:00:01.247359+00:00",
+        "stale": false,
+        "warnings": [
+          "AboveCapacity"
+        ],
+        "canEdit": true,
+        "canChangeVisibility": true,
+        "correctionOnly": false,
+        "rowVersion": 0,
+        "matchesFilter": true,
+        "weekHours": null,
+        "countedHours": null,
+        "coveredHours": null
+      }
+    },
+    {
+      "method": "POST",
+      "route": "/planning/entries",
+      "status": 201,
+      "value": {
+        "id": "01a197d6-d511-7b59-8897-86c1096270ce",
+        "personId": "01a197d6-d485-78f1-963e-028d4856cce5",
+        "personName": "qa21-capacity-person",
+        "ownerId": "01a197bd-ba3c-7336-8ac0-f688d331ccfa",
+        "ownerName": "Jordan Lee",
+        "ownerKind": "Manager",
+        "label": "Synthetic QA21 Expected capacity input",
+        "sourceCategory": "Admin",
+        "projectId": null,
+        "projectNumber": null,
+        "projectName": null,
+        "projectDisciplineId": null,
+        "disciplineName": null,
+        "hoursPerWeek": 5,
+        "startWeek": "2026-10-26",
+        "endWeek": "2026-10-26",
+        "confidence": "Expected",
+        "visibility": "Published",
+        "notes": null,
+        "lastValidatedAt": "2026-11-01T16:00:01.29796+00:00",
+        "stale": false,
+        "warnings": [],
+        "canEdit": true,
+        "canChangeVisibility": true,
+        "correctionOnly": false,
+        "rowVersion": 0,
+        "matchesFilter": true,
+        "weekHours": null,
+        "countedHours": null,
+        "coveredHours": null
+      }
+    },
+    {
+      "method": "POST",
+      "route": "/planning/entries",
+      "status": 201,
+      "value": {
+        "id": "01a197d6-d51e-794d-a854-bab13431ab1e",
+        "personId": "01a197d6-d485-78f1-963e-028d4856cce5",
+        "personName": "qa21-capacity-person",
+        "ownerId": "01a197bd-ba3c-7336-8ac0-f688d331ccfa",
+        "ownerName": "Jordan Lee",
+        "ownerKind": "Manager",
+        "label": "Synthetic QA21 Possible capacity input",
+        "sourceCategory": "Admin",
+        "projectId": null,
+        "projectNumber": null,
+        "projectName": null,
+        "projectDisciplineId": null,
+        "disciplineName": null,
+        "hoursPerWeek": 20,
+        "startWeek": "2026-10-26",
+        "endWeek": "2026-10-26",
+        "confidence": "Possible",
+        "visibility": "Published",
+        "notes": null,
+        "lastValidatedAt": "2026-11-01T16:00:01.310569+00:00",
+        "stale": false,
+        "warnings": [],
+        "canEdit": true,
+        "canChangeVisibility": true,
+        "correctionOnly": false,
+        "rowVersion": 0,
+        "matchesFilter": true,
+        "weekHours": null,
+        "countedHours": null,
+        "coveredHours": null
+      }
+    }
+  ],
+  "reads": [
+    {
+      "method": "GET",
+      "route": "/me",
+      "status": 200,
+      "value": {
+        "id": "01a197bd-ba3c-7336-8ac0-f688d331ccfa",
+        "displayName": "Jordan Lee",
+        "email": "jordan@hub.test",
+        "jobTitle": "Applications Administrator",
+        "officeId": "01a197bd-b99d-7182-b168-be4cf3245483",
+        "supervisorId": null,
+        "isTemplateEditor": false,
+        "roles": [
+          {
+            "role": "Admin",
+            "source": "Manual"
+          }
+        ],
+        "systemRoles": [
+          "Admin"
+        ],
+        "capabilities": {
+          "createProject": true,
+          "createTask": false,
+          "portfolio": true,
+          "workload": true,
+          "staff": true,
+          "allStaff": true,
+          "admin": true,
+          "templates": true,
+          "readOnly": false,
+          "directReports": 0
+        },
+        "settings": {
+          "dateFormat": "yyyy-MM-dd",
+          "orgTimeZone": "America/Halifax",
+          "today": "2026-11-01",
+          "idleTimeoutHours": 8,
+          "restrictedProjectsEnabled": false,
+          "allowSelfReview": false,
+          "taskDueSoonDays": 5,
+          "milestoneApproachingDays": 14,
+          "chainDepthLimit": 10,
+          "defaultWeeklyCapacityHours": 40,
+          "coordinationLookaheadWeeks": 3,
+          "workingDaysEnabled": false,
+          "activityBurstMinutes": 10
+        },
+        "preferences": {
+          "digestEnabled": true,
+          "digestTimeLocal": null,
+          "denseRows": true,
+          "weeklySummaryEnabled": true
+        },
+        "flags": {
+          "verifiable_log": false,
+          "commitment_reliability": false,
+          "allocation_preview": false,
+          "baseline_history": false,
+          "revision_check": false,
+          "task_pickup": false,
+          "org_structure": true,
+          "figure_names": false,
+          "planner_kept_rows": false,
+          "show_deleted": false,
+          "template_working_days": false,
+          "status_rollups": false,
+          "picker_project_rank": false,
+          "row_quick_actions": false,
+          "date_context": false,
+          "schedule_baseline": false,
+          "small_ux": true,
+          "timeline_handoffs_chain": false,
+          "onboarding_card": false,
+          "capacity_reports": true,
+          "route_counter": false,
+          "template_roles": false,
+          "unfilled_beside_capacity": false,
+          "project_status_note": false,
+          "my_work_follow_up": false,
+          "project_import": false,
+          "capacity_polish": false,
+          "record_engine_additions": false,
+          "live_project_stamp": false,
+          "live_events": false,
+          "admin_review": false,
+          "data_entry_safety": false,
+          "backlog": false,
+          "visual_system": true,
+          "screen_patterns": false,
+          "home_overview": false,
+          "work_screens": true,
+          "project_screens": true,
+          "capacity_screens": true,
+          "register_screens": false,
+          "people_screens": true
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "route": "/reference",
+      "status": 200,
+      "value": {
+        "disciplines": [
+          {
+            "id": "01a197bd-b976-7e53-bf85-b9ca14ba046d",
+            "name": "Project Management",
+            "code": "PM",
+            "colour": "#475569",
+            "isActive": true,
+            "sortOrder": 0
+          },
+          {
+            "id": "01a197bd-b98a-771b-a551-19c87d52316e",
+            "name": "Survey",
+            "code": "SUR",
+            "colour": "#0891b2",
+            "isActive": true,
+            "sortOrder": 1
+          },
+          {
+            "id": "01a197bd-b98a-7b9e-833e-8ab59cfa4aac",
+            "name": "Civil",
+            "code": "CIV",
+            "colour": "#2563eb",
+            "isActive": true,
+            "sortOrder": 2
+          },
+          {
+            "id": "01a197bd-b98a-74d4-b246-c7ac95b499d5",
+            "name": "Geotechnical",
+            "code": "GEO",
+            "colour": "#a16207",
+            "isActive": true,
+            "sortOrder": 3
+          },
+          {
+            "id": "01a197bd-b98a-76d0-8f88-26ef0f45b06b",
+            "name": "Electrical",
+            "code": "ELE",
+            "colour": "#ca8a04",
+            "isActive": true,
+            "sortOrder": 4
+          },
+          {
+            "id": "01a197bd-b98a-7b94-aeaf-79cb4168d209",
+            "name": "Environmental",
+            "code": "ENV",
+            "colour": "#16a34a",
+            "isActive": true,
+            "sortOrder": 5
+          },
+          {
+            "id": "01a197bd-b98a-7f5a-a883-5aab690a0aa0",
+            "name": "Structural",
+            "code": "STR",
+            "colour": "#7c3aed",
+            "isActive": true,
+            "sortOrder": 6
+          },
+          {
+            "id": "01a197bd-b98a-76bf-b645-be4b56e3a272",
+            "name": "Transportation",
+            "code": "TRN",
+            "colour": "#db2777",
+            "isActive": true,
+            "sortOrder": 7
+          },
+          {
+            "id": "01a197bd-b98a-75ba-948c-42b4d31e986e",
+            "name": "Architecture",
+            "code": "ARC",
+            "colour": "#ea580c",
+            "isActive": true,
+            "sortOrder": 8
+          }
+        ],
+        "clients": [
+          {
+            "id": "01a197bd-b998-74a6-bcb7-aefddf563909",
+            "name": "Internal / TBD",
+            "shortName": "Internal",
+            "isActive": true
+          }
+        ],
+        "offices": [
+          {
+            "id": "01a197bd-b99d-7182-b168-be4cf3245483",
+            "name": "Head Office",
+            "code": "HO",
+            "timeZone": "America/Halifax",
+            "isActive": true
+          }
+        ],
+        "deliverableTypes": [
+          {
+            "id": "01a197bd-b991-7536-9c18-dd626bb32fb6",
+            "name": "Drawing Package",
+            "defaultDisciplineId": null,
+            "isActive": true
+          },
+          {
+            "id": "01a197bd-b996-793d-9cb5-1d7699b86a7d",
+            "name": "Report",
+            "defaultDisciplineId": null,
+            "isActive": true
+          },
+          {
+            "id": "01a197bd-b996-7cf6-994f-bbf4879f63cb",
+            "name": "Specification",
+            "defaultDisciplineId": null,
+            "isActive": true
+          },
+          {
+            "id": "01a197bd-b996-76d6-af33-714668d11aef",
+            "name": "Calculation",
+            "defaultDisciplineId": null,
+            "isActive": true
+          },
+          {
+            "id": "01a197bd-b996-7655-bf6d-0d196fba56ae",
+            "name": "Cost Estimate",
+            "defaultDisciplineId": null,
+            "isActive": true
+          },
+          {
+            "id": "01a197bd-b996-7d9a-b05e-862ed91f9366",
+            "name": "Quantity Estimate",
+            "defaultDisciplineId": null,
+            "isActive": true
+          },
+          {
+            "id": "01a197bd-b996-7d9a-8e50-8d1f3b0cdea9",
+            "name": "Permit Submission",
+            "defaultDisciplineId": null,
+            "isActive": true
+          },
+          {
+            "id": "01a197bd-b996-7761-87c5-aa45cb5bb325",
+            "name": "Tender Package",
+            "defaultDisciplineId": null,
+            "isActive": true
+          },
+          {
+            "id": "01a197bd-b996-7b38-85e8-2e6d1b2662a3",
+            "name": "IFC Package",
+            "defaultDisciplineId": null,
+            "isActive": true
+          },
+          {
+            "id": "01a197bd-b996-7a58-bfa7-04f508bc061e",
+            "name": "Record Drawings",
+            "defaultDisciplineId": null,
+            "isActive": true
+          },
+          {
+            "id": "01a197bd-b996-787d-8af1-55b9e0dab9bf",
+            "name": "Certification",
+            "defaultDisciplineId": null,
+            "isActive": true
+          },
+          {
+            "id": "01a197bd-b996-7ec5-9348-a4a0e24d8e55",
+            "name": "Memo",
+            "defaultDisciplineId": null,
+            "isActive": true
+          },
+          {
+            "id": "01a197bd-b996-72e5-8fb6-c23551e1a4b4",
+            "name": "Model/Base Plan",
+            "defaultDisciplineId": null,
+            "isActive": true
+          },
+          {
+            "id": "01a197bd-b996-72f6-9ecc-b98b12251553",
+            "name": "Other",
+            "defaultDisciplineId": null,
+            "isActive": true
+          }
+        ],
+        "phases": [
+          {
+            "id": "01a197bd-b98c-781c-bc65-007922fe197b",
+            "name": "Proposal/Setup",
+            "isActive": true,
+            "sortOrder": 0
+          },
+          {
+            "id": "01a197bd-b990-7deb-b57e-7f8795962fc1",
+            "name": "Kickoff",
+            "isActive": true,
+            "sortOrder": 1
+          },
+          {
+            "id": "01a197bd-b990-7bcd-8e0e-e1110fd1ff30",
+            "name": "Field Investigation",
+            "isActive": true,
+            "sortOrder": 2
+          },
+          {
+            "id": "01a197bd-b990-72be-aee5-3aa216d919f9",
+            "name": "Preliminary Design",
+            "isActive": true,
+            "sortOrder": 3
+          },
+          {
+            "id": "01a197bd-b990-7591-95b8-423ce9d7dcab",
+            "name": "Detailed Design",
+            "isActive": true,
+            "sortOrder": 4
+          },
+          {
+            "id": "01a197bd-b990-72ba-8f00-564e5247b69d",
+            "name": "IFC",
+            "isActive": true,
+            "sortOrder": 5
+          },
+          {
+            "id": "01a197bd-b990-7edc-a671-f2ebdd1145da",
+            "name": "Tender",
+            "isActive": true,
+            "sortOrder": 6
+          },
+          {
+            "id": "01a197bd-b990-74fe-9142-64502d613631",
+            "name": "Construction",
+            "isActive": true,
+            "sortOrder": 7
+          },
+          {
+            "id": "01a197bd-b990-7439-865d-7736443222b0",
+            "name": "Closeout",
+            "isActive": true,
+            "sortOrder": 8
+          }
+        ],
+        "projectTypes": [
+          {
+            "id": "01a197bd-b9a2-7da1-be13-84a278d4509c",
+            "name": "Municipal Infrastructure",
+            "isActive": true
+          },
+          {
+            "id": "01a197bd-b9a5-7610-bfd7-68a91b8c4672",
+            "name": "Building",
+            "isActive": true
+          },
+          {
+            "id": "01a197bd-b9a5-79d2-b935-16b50623f611",
+            "name": "Environmental Assessment",
+            "isActive": true
+          },
+          {
+            "id": "01a197bd-b9a5-70ad-bb3d-fc0f2d1a5f36",
+            "name": "Transportation",
+            "isActive": true
+          }
+        ],
+        "limits": {
+          "roleLabel": 80
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "route": "/me",
+      "status": 200,
+      "value": {
+        "id": "01a197d6-d485-78f1-963e-028d4856cce5",
+        "displayName": "qa21-capacity-person",
+        "email": "qa21-capacity-person@hub.test",
+        "jobTitle": null,
+        "officeId": null,
+        "supervisorId": null,
+        "isTemplateEditor": false,
+        "roles": [],
+        "systemRoles": [],
+        "capabilities": {
+          "createProject": false,
+          "createTask": false,
+          "portfolio": false,
+          "workload": false,
+          "staff": false,
+          "allStaff": false,
+          "admin": false,
+          "templates": false,
+          "readOnly": false,
+          "directReports": 0
+        },
+        "settings": {
+          "dateFormat": "yyyy-MM-dd",
+          "orgTimeZone": "America/Halifax",
+          "today": "2026-11-01",
+          "idleTimeoutHours": 8,
+          "restrictedProjectsEnabled": false,
+          "allowSelfReview": false,
+          "taskDueSoonDays": 5,
+          "milestoneApproachingDays": 14,
+          "chainDepthLimit": 10,
+          "defaultWeeklyCapacityHours": 40,
+          "coordinationLookaheadWeeks": 3,
+          "workingDaysEnabled": false,
+          "activityBurstMinutes": 10
+        },
+        "preferences": {
+          "digestEnabled": true,
+          "digestTimeLocal": null,
+          "denseRows": true,
+          "weeklySummaryEnabled": true
+        },
+        "flags": {
+          "verifiable_log": false,
+          "commitment_reliability": false,
+          "allocation_preview": false,
+          "baseline_history": false,
+          "revision_check": false,
+          "task_pickup": false,
+          "org_structure": true,
+          "figure_names": false,
+          "planner_kept_rows": false,
+          "show_deleted": false,
+          "template_working_days": false,
+          "status_rollups": false,
+          "picker_project_rank": false,
+          "row_quick_actions": false,
+          "date_context": false,
+          "schedule_baseline": false,
+          "small_ux": true,
+          "timeline_handoffs_chain": false,
+          "onboarding_card": false,
+          "capacity_reports": true,
+          "route_counter": false,
+          "template_roles": false,
+          "unfilled_beside_capacity": false,
+          "project_status_note": false,
+          "my_work_follow_up": false,
+          "project_import": false,
+          "capacity_polish": false,
+          "record_engine_additions": false,
+          "live_project_stamp": false,
+          "live_events": false,
+          "admin_review": false,
+          "data_entry_safety": false,
+          "backlog": false,
+          "visual_system": true,
+          "screen_patterns": false,
+          "home_overview": false,
+          "work_screens": true,
+          "project_screens": true,
+          "capacity_screens": true,
+          "register_screens": false,
+          "people_screens": true
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "route": "/admin/users",
+      "status": 200,
+      "value": [
+        {
+          "id": "01a197bd-ba3c-7a2c-91b0-ae7a7140aeb9",
+          "displayName": "Alex Chen",
+          "email": "alex@hub.test",
+          "jobTitle": "Civil Designer (EIT)",
+          "officeId": "01a197bd-b99d-7182-b168-be4cf3245483",
+          "supervisorId": "01a197bd-ba3c-7258-adc0-8330b4dec463",
+          "homeDisciplineId": null,
+          "isActive": true,
+          "weeklyCapacityHours": null,
+          "isTemplateEditor": false,
+          "lastSignInAt": null,
+          "rowVersion": 0,
+          "roles": [],
+          "personFacts": {
+            "notices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            },
+            "certifications": []
+          }
+        },
+        {
+          "id": "01a197bd-ba3c-7810-ade7-48c382890f96",
+          "displayName": "Diane Roy",
+          "email": "diane@hub.test",
+          "jobTitle": "Senior Technical Reviewer",
+          "officeId": "01a197bd-b99d-7182-b168-be4cf3245483",
+          "supervisorId": "01a197bd-ba3c-7b3b-a27a-5114a13f4e92",
+          "homeDisciplineId": null,
+          "isActive": true,
+          "weeklyCapacityHours": null,
+          "isTemplateEditor": false,
+          "lastSignInAt": null,
+          "rowVersion": 0,
+          "roles": [],
+          "personFacts": {
+            "notices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            },
+            "certifications": []
+          }
+        },
+        {
+          "id": "01a197bd-ba3c-7024-a2a4-c6581e4b7428",
+          "displayName": "Jill Martin",
+          "email": "jill@hub.test",
+          "jobTitle": "Civil Designer",
+          "officeId": "01a197bd-b99d-7182-b168-be4cf3245483",
+          "supervisorId": "01a197bd-ba3c-7258-adc0-8330b4dec463",
+          "homeDisciplineId": null,
+          "isActive": true,
+          "weeklyCapacityHours": null,
+          "isTemplateEditor": false,
+          "lastSignInAt": null,
+          "rowVersion": 0,
+          "roles": [],
+          "personFacts": {
+            "notices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            },
+            "certifications": []
+          }
+        },
+        {
+          "id": "01a197bd-ba3c-7336-8ac0-f688d331ccfa",
+          "displayName": "Jordan Lee",
+          "email": "jordan@hub.test",
+          "jobTitle": "Applications Administrator",
+          "officeId": "01a197bd-b99d-7182-b168-be4cf3245483",
+          "supervisorId": null,
+          "homeDisciplineId": null,
+          "isActive": true,
+          "weeklyCapacityHours": null,
+          "isTemplateEditor": false,
+          "lastSignInAt": null,
+          "rowVersion": 0,
+          "roles": [
+            {
+              "role": "Admin",
+              "source": "Manual"
+            }
+          ],
+          "personFacts": {
+            "notices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            },
+            "certifications": []
+          }
+        },
+        {
+          "id": "01a197bd-ba3c-7b3b-a27a-5114a13f4e92",
+          "displayName": "Lena Brooks",
+          "email": "lena@hub.test",
+          "jobTitle": "Regional Manager",
+          "officeId": "01a197bd-b99d-7182-b168-be4cf3245483",
+          "supervisorId": null,
+          "homeDisciplineId": null,
+          "isActive": true,
+          "weeklyCapacityHours": null,
+          "isTemplateEditor": false,
+          "lastSignInAt": null,
+          "rowVersion": 0,
+          "roles": [
+            {
+              "role": "Supervisor",
+              "source": "Manual"
+            },
+            {
+              "role": "Executive",
+              "source": "Manual"
+            }
+          ],
+          "personFacts": {
+            "notices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            },
+            "certifications": []
+          }
+        },
+        {
+          "id": "01a197bd-ba3c-749e-a252-425184b403b0",
+          "displayName": "Marc Dubois",
+          "email": "marc@hub.test",
+          "jobTitle": "Senior Civil Engineer",
+          "officeId": "01a197bd-b99d-7182-b168-be4cf3245483",
+          "supervisorId": "01a197bd-ba3c-7258-adc0-8330b4dec463",
+          "homeDisciplineId": null,
+          "isActive": true,
+          "weeklyCapacityHours": null,
+          "isTemplateEditor": false,
+          "lastSignInAt": null,
+          "rowVersion": 0,
+          "roles": [
+            {
+              "role": "Supervisor",
+              "source": "Manual"
+            },
+            {
+              "role": "ProjectManager",
+              "source": "Manual"
+            }
+          ],
+          "personFacts": {
+            "notices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            },
+            "certifications": []
+          }
+        },
+        {
+          "id": "01a197bd-ba3c-7f94-afd9-343012f0c4e4",
+          "displayName": "Omar Haddad",
+          "email": "omar@hub.test",
+          "jobTitle": "Geotechnical Lead",
+          "officeId": "01a197bd-b99d-7182-b168-be4cf3245483",
+          "supervisorId": "01a197bd-ba3c-7b3b-a27a-5114a13f4e92",
+          "homeDisciplineId": null,
+          "isActive": true,
+          "weeklyCapacityHours": null,
+          "isTemplateEditor": false,
+          "lastSignInAt": null,
+          "rowVersion": 0,
+          "roles": [],
+          "personFacts": {
+            "notices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            },
+            "certifications": []
+          }
+        },
+        {
+          "id": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+          "displayName": "Priya Nair",
+          "email": "priya@hub.test",
+          "jobTitle": "Project Manager",
+          "officeId": "01a197bd-b99d-7182-b168-be4cf3245483",
+          "supervisorId": "01a197bd-ba3c-7b3b-a27a-5114a13f4e92",
+          "homeDisciplineId": null,
+          "isActive": true,
+          "weeklyCapacityHours": null,
+          "isTemplateEditor": false,
+          "lastSignInAt": null,
+          "rowVersion": 0,
+          "roles": [
+            {
+              "role": "ProjectManager",
+              "source": "Manual"
+            }
+          ],
+          "personFacts": {
+            "notices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            },
+            "certifications": []
+          }
+        },
+        {
+          "id": "01a197bd-ba3c-73ba-8c85-e218d235ca08",
+          "displayName": "Rita Gomez",
+          "email": "rita@hub.test",
+          "jobTitle": "Auditor",
+          "officeId": "01a197bd-b99d-7182-b168-be4cf3245483",
+          "supervisorId": null,
+          "homeDisciplineId": null,
+          "isActive": true,
+          "weeklyCapacityHours": null,
+          "isTemplateEditor": false,
+          "lastSignInAt": null,
+          "rowVersion": 0,
+          "roles": [
+            {
+              "role": "ReadOnly",
+              "source": "Manual"
+            }
+          ],
+          "personFacts": {
+            "notices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            },
+            "certifications": []
+          }
+        },
+        {
+          "id": "01a197bd-ba3c-7258-adc0-8330b4dec463",
+          "displayName": "Sam Patel",
+          "email": "sam@hub.test",
+          "jobTitle": "Civil Group Manager",
+          "officeId": "01a197bd-b99d-7182-b168-be4cf3245483",
+          "supervisorId": "01a197bd-ba3c-7b3b-a27a-5114a13f4e92",
+          "homeDisciplineId": null,
+          "isActive": true,
+          "weeklyCapacityHours": null,
+          "isTemplateEditor": false,
+          "lastSignInAt": null,
+          "rowVersion": 0,
+          "roles": [
+            {
+              "role": "Supervisor",
+              "source": "Manual"
+            }
+          ],
+          "personFacts": {
+            "notices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            },
+            "certifications": []
+          }
+        },
+        {
+          "id": "01a197d6-d485-78f1-963e-028d4856cce5",
+          "displayName": "qa21-capacity-person",
+          "email": "qa21-capacity-person@hub.test",
+          "jobTitle": null,
+          "officeId": null,
+          "supervisorId": null,
+          "homeDisciplineId": null,
+          "isActive": true,
+          "weeklyCapacityHours": null,
+          "isTemplateEditor": false,
+          "lastSignInAt": null,
+          "rowVersion": 0,
+          "roles": [],
+          "personFacts": {
+            "notices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            },
+            "certifications": []
+          }
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/reports/team-capacity?supervisorId=01a197bd-ba3c-7b3b-a27a-5114a13f4e92&from=2026-10-26&weeks=1&includeMyDrafts=false&unit=hours&period=weeks",
+      "status": 200,
+      "value": {
+        "code": "team-capacity",
+        "title": "Team Capacity",
+        "itemType": null,
+        "columns": [
+          {
+            "path": "measure",
+            "header": "Measure",
+            "type": "text"
+          },
+          {
+            "path": "unit",
+            "header": "Unit",
+            "type": "text"
+          },
+          {
+            "path": "unitPath",
+            "header": "Unit path",
+            "type": "text"
+          },
+          {
+            "path": "w0",
+            "header": "2026-10-26",
+            "type": "number"
+          }
+        ],
+        "rows": [
+          {
+            "measure": "Capacity",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 200
+          },
+          {
+            "measure": "Time away",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 0
+          },
+          {
+            "measure": "Confirmed",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 45
+          },
+          {
+            "measure": "Expected",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 5
+          },
+          {
+            "measure": "Possible",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 20
+          },
+          {
+            "measure": "Remaining capacity",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 150
+          },
+          {
+            "measure": "People over-planned",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 1
+          },
+          {
+            "measure": "People under-planned",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 4
+          },
+          {
+            "measure": "People with partial view",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 0
+          }
+        ],
+        "total": 9,
+        "totalIsLowerBound": false,
+        "truncated": false,
+        "listLink": "/planner?view=grid&supervisorId=01a197bd-ba3c-7b3b-a27a-5114a13f4e92&from=2026-10-26&weeks=1&includeMyDrafts=false",
+        "parameters": [
+          {
+            "label": "Supervisor",
+            "value": "Lena Brooks"
+          },
+          {
+            "label": "From",
+            "value": "2026-10-26"
+          },
+          {
+            "label": "Weeks",
+            "value": "1"
+          },
+          {
+            "label": "Include my private drafts",
+            "value": "No"
+          },
+          {
+            "label": "Report unit",
+            "value": "Hours"
+          },
+          {
+            "label": "Period",
+            "value": "Weeks"
+          }
+        ],
+        "asOf": "2026-11-01T16:00:01.325081+00:00",
+        "savedParameters": {
+          "supervisorId": "01a197bd-ba3c-7b3b-a27a-5114a13f4e92",
+          "from": "2026-10-26",
+          "weeks": "1",
+          "includeMyDrafts": "false",
+          "unit": "hours",
+          "period": "weeks"
+        },
+        "taskInputs": {
+          "basis": "PlannerPeopleContext",
+          "scopeCoverage": "CompleteForVisibleParameters",
+          "unavailableReferences": 0,
+          "unestimated": {
+            "count": 0,
+            "knownCount": 0,
+            "href": "/reports/team-capacity?supervisorId=01a197bd-ba3c-7b3b-a27a-5114a13f4e92&from=2026-10-26&weeks=1&includeMyDrafts=false&unit=hours&period=weeks&taskInput=unestimated&inputPage=1&inputPageSize=50"
+          },
+          "openUndated": {
+            "count": 0,
+            "knownCount": 0,
+            "href": "/reports/team-capacity?supervisorId=01a197bd-ba3c-7b3b-a27a-5114a13f4e92&from=2026-10-26&weeks=1&includeMyDrafts=false&unit=hours&period=weeks&taskInput=open-undated&inputPage=1&inputPageSize=50"
+          },
+          "parameters": {
+            "supervisorId": "01a197bd-ba3c-7b3b-a27a-5114a13f4e92",
+            "from": "2026-10-26",
+            "weeks": "1",
+            "includeMyDrafts": "false",
+            "unit": "hours",
+            "period": "weeks"
+          },
+          "asOf": "2026-11-01T16:00:01.325081+00:00"
+        },
+        "unitView": {
+          "unit": "hours",
+          "period": "weeks",
+          "standardWeeklyHours": 40,
+          "displayedWeekCount": 1,
+          "periods": [
+            {
+              "key": "2026-10-26",
+              "label": "2026-10-26",
+              "weeks": [
+                "2026-10-26"
+              ],
+              "weekCount": 1,
+              "denominatorHours": 40
+            }
+          ],
+          "columns": [
+            {
+              "path": "measure",
+              "header": "Measure",
+              "type": "text"
+            },
+            {
+              "path": "unit",
+              "header": "Unit",
+              "type": "text"
+            },
+            {
+              "path": "unitPath",
+              "header": "Unit path",
+              "type": "text"
+            },
+            {
+              "path": "w0",
+              "header": "2026-10-26",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            {
+              "rowIndex": 0,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "w0",
+                  "kind": "Hours",
+                  "value": 200,
+                  "knownHours": 200,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                }
+              ]
+            },
+            {
+              "rowIndex": 1,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "w0",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                }
+              ]
+            },
+            {
+              "rowIndex": 2,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "w0",
+                  "kind": "Hours",
+                  "value": 45,
+                  "knownHours": 45,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                }
+              ]
+            },
+            {
+              "rowIndex": 3,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "w0",
+                  "kind": "Hours",
+                  "value": 5,
+                  "knownHours": 5,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                }
+              ]
+            },
+            {
+              "rowIndex": 4,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "w0",
+                  "kind": "Hours",
+                  "value": 20,
+                  "knownHours": 20,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                }
+              ]
+            },
+            {
+              "rowIndex": 5,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "w0",
+                  "kind": "Hours",
+                  "value": 150,
+                  "knownHours": 150,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                }
+              ]
+            },
+            {
+              "rowIndex": 6,
+              "kind": "Count",
+              "cells": [
+                {
+                  "path": "w0",
+                  "kind": "Count",
+                  "value": 1,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "AvailabilityDependentCount"
+                }
+              ]
+            },
+            {
+              "rowIndex": 7,
+              "kind": "Count",
+              "cells": [
+                {
+                  "path": "w0",
+                  "kind": "Count",
+                  "value": 4,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "AvailabilityDependentCount"
+                }
+              ]
+            },
+            {
+              "rowIndex": 8,
+              "kind": "Count",
+              "cells": [
+                {
+                  "path": "w0",
+                  "kind": "Count",
+                  "value": 0,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                }
+              ]
+            }
+          ],
+          "scopeCoverage": "CompleteForVisibleParameters",
+          "unestimatedTasks": 0
+        },
+        "capacityComparison": {
+          "groupBy": "homeDiscipline",
+          "basis": "PLN09ConfirmedExpected",
+          "unit": "hours",
+          "asOf": "2026-11-01T16:00:01.325081+00:00",
+          "scopeCoverage": "CompleteForVisibleParameters",
+          "periods": [
+            {
+              "key": "2026-10-26",
+              "label": "2026-10-26",
+              "weeks": [
+                "2026-10-26"
+              ],
+              "weekCount": 1,
+              "denominatorHours": 40
+            }
+          ],
+          "rows": [
+            {
+              "key": "discipline:01a197bd-b98a-7b9e-833e-8ab59cfa4aac",
+              "disciplineId": "01a197bd-b98a-7b9e-833e-8ab59cfa4aac",
+              "discipline": "Civil",
+              "periodKey": "2026-10-26",
+              "capacity": {
+                "path": "capacity",
+                "kind": "Hours",
+                "value": 40,
+                "knownHours": 40,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "confirmed": {
+                "path": "confirmed",
+                "kind": "Hours",
+                "value": 45,
+                "knownHours": 45,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "expected": {
+                "path": "expected",
+                "kind": "Hours",
+                "value": 5,
+                "knownHours": 5,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "possible": {
+                "path": "possible",
+                "kind": "Hours",
+                "value": 20,
+                "knownHours": 20,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "demand": {
+                "path": "demand",
+                "kind": "Hours",
+                "value": 50,
+                "knownHours": 50,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "deficit": {
+                "path": "deficit",
+                "kind": "Hours",
+                "value": 10,
+                "knownHours": 10,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "partialPeople": 0,
+              "provisionalPeople": 0
+            },
+            {
+              "key": "discipline:none",
+              "disciplineId": null,
+              "discipline": "Not set",
+              "periodKey": "2026-10-26",
+              "capacity": {
+                "path": "capacity",
+                "kind": "Hours",
+                "value": 160,
+                "knownHours": 160,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "confirmed": {
+                "path": "confirmed",
+                "kind": "Hours",
+                "value": 0,
+                "knownHours": 0,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "expected": {
+                "path": "expected",
+                "kind": "Hours",
+                "value": 0,
+                "knownHours": 0,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "possible": {
+                "path": "possible",
+                "kind": "Hours",
+                "value": 0,
+                "knownHours": 0,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "demand": {
+                "path": "demand",
+                "kind": "Hours",
+                "value": 0,
+                "knownHours": 0,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "deficit": {
+                "path": "deficit",
+                "kind": "Hours",
+                "value": 0,
+                "knownHours": 0,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "partialPeople": 0,
+              "provisionalPeople": 0
+            }
+          ],
+          "returnedGroups": 2,
+          "totalGroups": 2,
+          "truncated": false
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "route": "/reports/team-capacity?supervisorId=01a197bd-ba3c-7b3b-a27a-5114a13f4e92&from=2026-10-26&weeks=1&includeMyDrafts=false&unit=fte&period=months",
+      "status": 200,
+      "value": {
+        "code": "team-capacity",
+        "title": "Team Capacity",
+        "itemType": null,
+        "columns": [
+          {
+            "path": "measure",
+            "header": "Measure",
+            "type": "text"
+          },
+          {
+            "path": "unit",
+            "header": "Unit",
+            "type": "text"
+          },
+          {
+            "path": "unitPath",
+            "header": "Unit path",
+            "type": "text"
+          },
+          {
+            "path": "w0",
+            "header": "2026-10-26",
+            "type": "number"
+          }
+        ],
+        "rows": [
+          {
+            "measure": "Capacity",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 200
+          },
+          {
+            "measure": "Time away",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 0
+          },
+          {
+            "measure": "Confirmed",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 45
+          },
+          {
+            "measure": "Expected",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 5
+          },
+          {
+            "measure": "Possible",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 20
+          },
+          {
+            "measure": "Remaining capacity",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 150
+          },
+          {
+            "measure": "People over-planned",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 1
+          },
+          {
+            "measure": "People under-planned",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 4
+          },
+          {
+            "measure": "People with partial view",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 0
+          }
+        ],
+        "total": 9,
+        "totalIsLowerBound": false,
+        "truncated": false,
+        "listLink": "/planner?view=grid&supervisorId=01a197bd-ba3c-7b3b-a27a-5114a13f4e92&from=2026-10-26&weeks=1&includeMyDrafts=false",
+        "parameters": [
+          {
+            "label": "Supervisor",
+            "value": "Lena Brooks"
+          },
+          {
+            "label": "From",
+            "value": "2026-10-26"
+          },
+          {
+            "label": "Weeks",
+            "value": "1"
+          },
+          {
+            "label": "Include my private drafts",
+            "value": "No"
+          },
+          {
+            "label": "Report unit",
+            "value": "FTE"
+          },
+          {
+            "label": "Period",
+            "value": "Months"
+          }
+        ],
+        "asOf": "2026-11-01T16:00:01.425053+00:00",
+        "savedParameters": {
+          "supervisorId": "01a197bd-ba3c-7b3b-a27a-5114a13f4e92",
+          "from": "2026-10-26",
+          "weeks": "1",
+          "includeMyDrafts": "false",
+          "unit": "fte",
+          "period": "months"
+        },
+        "taskInputs": {
+          "basis": "PlannerPeopleContext",
+          "scopeCoverage": "CompleteForVisibleParameters",
+          "unavailableReferences": 0,
+          "unestimated": {
+            "count": 0,
+            "knownCount": 0,
+            "href": "/reports/team-capacity?supervisorId=01a197bd-ba3c-7b3b-a27a-5114a13f4e92&from=2026-10-26&weeks=1&includeMyDrafts=false&unit=fte&period=months&taskInput=unestimated&inputPage=1&inputPageSize=50"
+          },
+          "openUndated": {
+            "count": 0,
+            "knownCount": 0,
+            "href": "/reports/team-capacity?supervisorId=01a197bd-ba3c-7b3b-a27a-5114a13f4e92&from=2026-10-26&weeks=1&includeMyDrafts=false&unit=fte&period=months&taskInput=open-undated&inputPage=1&inputPageSize=50"
+          },
+          "parameters": {
+            "supervisorId": "01a197bd-ba3c-7b3b-a27a-5114a13f4e92",
+            "from": "2026-10-26",
+            "weeks": "1",
+            "includeMyDrafts": "false",
+            "unit": "fte",
+            "period": "months"
+          },
+          "asOf": "2026-11-01T16:00:01.425053+00:00"
+        },
+        "unitView": {
+          "unit": "fte",
+          "period": "months",
+          "standardWeeklyHours": 40,
+          "displayedWeekCount": 1,
+          "periods": [
+            {
+              "key": "2026-10",
+              "label": "2026-10",
+              "weeks": [
+                "2026-10-26"
+              ],
+              "weekCount": 1,
+              "denominatorHours": 40
+            }
+          ],
+          "columns": [
+            {
+              "path": "measure",
+              "header": "Measure",
+              "type": "text"
+            },
+            {
+              "path": "unit",
+              "header": "Unit",
+              "type": "text"
+            },
+            {
+              "path": "unitPath",
+              "header": "Unit path",
+              "type": "text"
+            },
+            {
+              "path": "u0",
+              "header": "2026-10 (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "countW0",
+              "header": "2026-10-26 · weekly people count",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            {
+              "rowIndex": 0,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "u0",
+                  "kind": "Hours",
+                  "value": 5,
+                  "knownHours": 200,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                },
+                {
+                  "path": "countW0",
+                  "kind": "NotApplicable",
+                  "value": null,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "NotApplicable"
+                }
+              ]
+            },
+            {
+              "rowIndex": 1,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "u0",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                },
+                {
+                  "path": "countW0",
+                  "kind": "NotApplicable",
+                  "value": null,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "NotApplicable"
+                }
+              ]
+            },
+            {
+              "rowIndex": 2,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "u0",
+                  "kind": "Hours",
+                  "value": 1.125,
+                  "knownHours": 45,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                },
+                {
+                  "path": "countW0",
+                  "kind": "NotApplicable",
+                  "value": null,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "NotApplicable"
+                }
+              ]
+            },
+            {
+              "rowIndex": 3,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "u0",
+                  "kind": "Hours",
+                  "value": 0.125,
+                  "knownHours": 5,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                },
+                {
+                  "path": "countW0",
+                  "kind": "NotApplicable",
+                  "value": null,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "NotApplicable"
+                }
+              ]
+            },
+            {
+              "rowIndex": 4,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "u0",
+                  "kind": "Hours",
+                  "value": 0.5,
+                  "knownHours": 20,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                },
+                {
+                  "path": "countW0",
+                  "kind": "NotApplicable",
+                  "value": null,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "NotApplicable"
+                }
+              ]
+            },
+            {
+              "rowIndex": 5,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "u0",
+                  "kind": "Hours",
+                  "value": 3.75,
+                  "knownHours": 150,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                },
+                {
+                  "path": "countW0",
+                  "kind": "NotApplicable",
+                  "value": null,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "NotApplicable"
+                }
+              ]
+            },
+            {
+              "rowIndex": 6,
+              "kind": "Count",
+              "cells": [
+                {
+                  "path": "u0",
+                  "kind": "NotApplicable",
+                  "value": null,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "NotApplicable"
+                },
+                {
+                  "path": "countW0",
+                  "kind": "Count",
+                  "value": 1,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "AvailabilityDependentCount"
+                }
+              ]
+            },
+            {
+              "rowIndex": 7,
+              "kind": "Count",
+              "cells": [
+                {
+                  "path": "u0",
+                  "kind": "NotApplicable",
+                  "value": null,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "NotApplicable"
+                },
+                {
+                  "path": "countW0",
+                  "kind": "Count",
+                  "value": 4,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "AvailabilityDependentCount"
+                }
+              ]
+            },
+            {
+              "rowIndex": 8,
+              "kind": "Count",
+              "cells": [
+                {
+                  "path": "u0",
+                  "kind": "NotApplicable",
+                  "value": null,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "NotApplicable"
+                },
+                {
+                  "path": "countW0",
+                  "kind": "Count",
+                  "value": 0,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                }
+              ]
+            }
+          ],
+          "scopeCoverage": "CompleteForVisibleParameters",
+          "unestimatedTasks": 0
+        },
+        "capacityComparison": {
+          "groupBy": "homeDiscipline",
+          "basis": "PLN09ConfirmedExpected",
+          "unit": "fte",
+          "asOf": "2026-11-01T16:00:01.425053+00:00",
+          "scopeCoverage": "CompleteForVisibleParameters",
+          "periods": [
+            {
+              "key": "2026-10",
+              "label": "2026-10",
+              "weeks": [
+                "2026-10-26"
+              ],
+              "weekCount": 1,
+              "denominatorHours": 40
+            }
+          ],
+          "rows": [
+            {
+              "key": "discipline:01a197bd-b98a-7b9e-833e-8ab59cfa4aac",
+              "disciplineId": "01a197bd-b98a-7b9e-833e-8ab59cfa4aac",
+              "discipline": "Civil",
+              "periodKey": "2026-10",
+              "capacity": {
+                "path": "capacity",
+                "kind": "Hours",
+                "value": 1,
+                "knownHours": 40,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "confirmed": {
+                "path": "confirmed",
+                "kind": "Hours",
+                "value": 1.125,
+                "knownHours": 45,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "expected": {
+                "path": "expected",
+                "kind": "Hours",
+                "value": 0.125,
+                "knownHours": 5,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "possible": {
+                "path": "possible",
+                "kind": "Hours",
+                "value": 0.5,
+                "knownHours": 20,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "demand": {
+                "path": "demand",
+                "kind": "Hours",
+                "value": 1.25,
+                "knownHours": 50,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "deficit": {
+                "path": "deficit",
+                "kind": "Hours",
+                "value": 0.25,
+                "knownHours": 10,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "partialPeople": 0,
+              "provisionalPeople": 0
+            },
+            {
+              "key": "discipline:none",
+              "disciplineId": null,
+              "discipline": "Not set",
+              "periodKey": "2026-10",
+              "capacity": {
+                "path": "capacity",
+                "kind": "Hours",
+                "value": 4,
+                "knownHours": 160,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "confirmed": {
+                "path": "confirmed",
+                "kind": "Hours",
+                "value": 0,
+                "knownHours": 0,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "expected": {
+                "path": "expected",
+                "kind": "Hours",
+                "value": 0,
+                "knownHours": 0,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "possible": {
+                "path": "possible",
+                "kind": "Hours",
+                "value": 0,
+                "knownHours": 0,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "demand": {
+                "path": "demand",
+                "kind": "Hours",
+                "value": 0,
+                "knownHours": 0,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "deficit": {
+                "path": "deficit",
+                "kind": "Hours",
+                "value": 0,
+                "knownHours": 0,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "partialPeople": 0,
+              "provisionalPeople": 0
+            }
+          ],
+          "returnedGroups": 2,
+          "totalGroups": 2,
+          "truncated": false
+        }
+      }
+    }
+  ],
+  "browser": [
+    {
+      "name": "hours",
+      "width": 1440,
+      "url": "http://127.0.0.1:8853/reports/team-capacity?supervisorId=01a197bd-ba3c-7b3b-a27a-5114a13f4e92&from=2026-10-26&weeks=1&includeMyDrafts=false&unit=hours&period=weeks",
+      "matrix": {
+        "x": 553,
+        "y": 379.5,
+        "width": 755.828125,
+        "height": 37
+      },
+      "values": [
+        40,
+        50,
+        10
+      ],
+      "actualResponse": {
+        "code": "team-capacity",
+        "title": "Team Capacity",
+        "itemType": null,
+        "columns": [
+          {
+            "path": "measure",
+            "header": "Measure",
+            "type": "text"
+          },
+          {
+            "path": "unit",
+            "header": "Unit",
+            "type": "text"
+          },
+          {
+            "path": "unitPath",
+            "header": "Unit path",
+            "type": "text"
+          },
+          {
+            "path": "w0",
+            "header": "2026-10-26",
+            "type": "number"
+          }
+        ],
+        "rows": [
+          {
+            "measure": "Capacity",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 200
+          },
+          {
+            "measure": "Time away",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 0
+          },
+          {
+            "measure": "Confirmed",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 45
+          },
+          {
+            "measure": "Expected",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 5
+          },
+          {
+            "measure": "Possible",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 20
+          },
+          {
+            "measure": "Remaining capacity",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 150
+          },
+          {
+            "measure": "People over-planned",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 1
+          },
+          {
+            "measure": "People under-planned",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 4
+          },
+          {
+            "measure": "People with partial view",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 0
+          }
+        ],
+        "total": 9,
+        "totalIsLowerBound": false,
+        "truncated": false,
+        "listLink": "/planner?view=grid&supervisorId=01a197bd-ba3c-7b3b-a27a-5114a13f4e92&from=2026-10-26&weeks=1&includeMyDrafts=false",
+        "parameters": [
+          {
+            "label": "Supervisor",
+            "value": "Lena Brooks"
+          },
+          {
+            "label": "From",
+            "value": "2026-10-26"
+          },
+          {
+            "label": "Weeks",
+            "value": "1"
+          },
+          {
+            "label": "Include my private drafts",
+            "value": "No"
+          },
+          {
+            "label": "Report unit",
+            "value": "Hours"
+          },
+          {
+            "label": "Period",
+            "value": "Weeks"
+          }
+        ],
+        "asOf": "2026-11-01T16:00:01.974283+00:00",
+        "savedParameters": {
+          "supervisorId": "01a197bd-ba3c-7b3b-a27a-5114a13f4e92",
+          "from": "2026-10-26",
+          "weeks": "1",
+          "includeMyDrafts": "false",
+          "unit": "hours",
+          "period": "weeks"
+        },
+        "taskInputs": {
+          "basis": "PlannerPeopleContext",
+          "scopeCoverage": "CompleteForVisibleParameters",
+          "unavailableReferences": 0,
+          "unestimated": {
+            "count": 0,
+            "knownCount": 0,
+            "href": "/reports/team-capacity?supervisorId=01a197bd-ba3c-7b3b-a27a-5114a13f4e92&from=2026-10-26&weeks=1&includeMyDrafts=false&unit=hours&period=weeks&taskInput=unestimated&inputPage=1&inputPageSize=50"
+          },
+          "openUndated": {
+            "count": 0,
+            "knownCount": 0,
+            "href": "/reports/team-capacity?supervisorId=01a197bd-ba3c-7b3b-a27a-5114a13f4e92&from=2026-10-26&weeks=1&includeMyDrafts=false&unit=hours&period=weeks&taskInput=open-undated&inputPage=1&inputPageSize=50"
+          },
+          "parameters": {
+            "supervisorId": "01a197bd-ba3c-7b3b-a27a-5114a13f4e92",
+            "from": "2026-10-26",
+            "weeks": "1",
+            "includeMyDrafts": "false",
+            "unit": "hours",
+            "period": "weeks"
+          },
+          "asOf": "2026-11-01T16:00:01.974283+00:00"
+        },
+        "unitView": {
+          "unit": "hours",
+          "period": "weeks",
+          "standardWeeklyHours": 40,
+          "displayedWeekCount": 1,
+          "periods": [
+            {
+              "key": "2026-10-26",
+              "label": "2026-10-26",
+              "weeks": [
+                "2026-10-26"
+              ],
+              "weekCount": 1,
+              "denominatorHours": 40
+            }
+          ],
+          "columns": [
+            {
+              "path": "measure",
+              "header": "Measure",
+              "type": "text"
+            },
+            {
+              "path": "unit",
+              "header": "Unit",
+              "type": "text"
+            },
+            {
+              "path": "unitPath",
+              "header": "Unit path",
+              "type": "text"
+            },
+            {
+              "path": "w0",
+              "header": "2026-10-26",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            {
+              "rowIndex": 0,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "w0",
+                  "kind": "Hours",
+                  "value": 200,
+                  "knownHours": 200,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                }
+              ]
+            },
+            {
+              "rowIndex": 1,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "w0",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                }
+              ]
+            },
+            {
+              "rowIndex": 2,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "w0",
+                  "kind": "Hours",
+                  "value": 45,
+                  "knownHours": 45,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                }
+              ]
+            },
+            {
+              "rowIndex": 3,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "w0",
+                  "kind": "Hours",
+                  "value": 5,
+                  "knownHours": 5,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                }
+              ]
+            },
+            {
+              "rowIndex": 4,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "w0",
+                  "kind": "Hours",
+                  "value": 20,
+                  "knownHours": 20,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                }
+              ]
+            },
+            {
+              "rowIndex": 5,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "w0",
+                  "kind": "Hours",
+                  "value": 150,
+                  "knownHours": 150,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                }
+              ]
+            },
+            {
+              "rowIndex": 6,
+              "kind": "Count",
+              "cells": [
+                {
+                  "path": "w0",
+                  "kind": "Count",
+                  "value": 1,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "AvailabilityDependentCount"
+                }
+              ]
+            },
+            {
+              "rowIndex": 7,
+              "kind": "Count",
+              "cells": [
+                {
+                  "path": "w0",
+                  "kind": "Count",
+                  "value": 4,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "AvailabilityDependentCount"
+                }
+              ]
+            },
+            {
+              "rowIndex": 8,
+              "kind": "Count",
+              "cells": [
+                {
+                  "path": "w0",
+                  "kind": "Count",
+                  "value": 0,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                }
+              ]
+            }
+          ],
+          "scopeCoverage": "CompleteForVisibleParameters",
+          "unestimatedTasks": 0
+        },
+        "capacityComparison": {
+          "groupBy": "homeDiscipline",
+          "basis": "PLN09ConfirmedExpected",
+          "unit": "hours",
+          "asOf": "2026-11-01T16:00:01.974283+00:00",
+          "scopeCoverage": "CompleteForVisibleParameters",
+          "periods": [
+            {
+              "key": "2026-10-26",
+              "label": "2026-10-26",
+              "weeks": [
+                "2026-10-26"
+              ],
+              "weekCount": 1,
+              "denominatorHours": 40
+            }
+          ],
+          "rows": [
+            {
+              "key": "discipline:01a197bd-b98a-7b9e-833e-8ab59cfa4aac",
+              "disciplineId": "01a197bd-b98a-7b9e-833e-8ab59cfa4aac",
+              "discipline": "Civil",
+              "periodKey": "2026-10-26",
+              "capacity": {
+                "path": "capacity",
+                "kind": "Hours",
+                "value": 40,
+                "knownHours": 40,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "confirmed": {
+                "path": "confirmed",
+                "kind": "Hours",
+                "value": 45,
+                "knownHours": 45,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "expected": {
+                "path": "expected",
+                "kind": "Hours",
+                "value": 5,
+                "knownHours": 5,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "possible": {
+                "path": "possible",
+                "kind": "Hours",
+                "value": 20,
+                "knownHours": 20,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "demand": {
+                "path": "demand",
+                "kind": "Hours",
+                "value": 50,
+                "knownHours": 50,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "deficit": {
+                "path": "deficit",
+                "kind": "Hours",
+                "value": 10,
+                "knownHours": 10,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "partialPeople": 0,
+              "provisionalPeople": 0
+            },
+            {
+              "key": "discipline:none",
+              "disciplineId": null,
+              "discipline": "Not set",
+              "periodKey": "2026-10-26",
+              "capacity": {
+                "path": "capacity",
+                "kind": "Hours",
+                "value": 160,
+                "knownHours": 160,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "confirmed": {
+                "path": "confirmed",
+                "kind": "Hours",
+                "value": 0,
+                "knownHours": 0,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "expected": {
+                "path": "expected",
+                "kind": "Hours",
+                "value": 0,
+                "knownHours": 0,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "possible": {
+                "path": "possible",
+                "kind": "Hours",
+                "value": 0,
+                "knownHours": 0,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "demand": {
+                "path": "demand",
+                "kind": "Hours",
+                "value": 0,
+                "knownHours": 0,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "deficit": {
+                "path": "deficit",
+                "kind": "Hours",
+                "value": 0,
+                "knownHours": 0,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "partialPeople": 0,
+              "provisionalPeople": 0
+            }
+          ],
+          "returnedGroups": 2,
+          "totalGroups": 2,
+          "truncated": false
+        }
+      },
+      "screenshot": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint21-real-capacity-hours-1440.png",
+      "errors": []
+    },
+    {
+      "name": "hours",
+      "width": 375,
+      "url": "http://127.0.0.1:8853/reports/team-capacity?supervisorId=01a197bd-ba3c-7b3b-a27a-5114a13f4e92&from=2026-10-26&weeks=1&includeMyDrafts=false&unit=hours&period=weeks",
+      "matrix": {
+        "x": 17,
+        "y": 681.515625,
+        "width": 755.828125,
+        "height": 37
+      },
+      "values": [
+        40,
+        50,
+        10
+      ],
+      "actualResponse": {
+        "code": "team-capacity",
+        "title": "Team Capacity",
+        "itemType": null,
+        "columns": [
+          {
+            "path": "measure",
+            "header": "Measure",
+            "type": "text"
+          },
+          {
+            "path": "unit",
+            "header": "Unit",
+            "type": "text"
+          },
+          {
+            "path": "unitPath",
+            "header": "Unit path",
+            "type": "text"
+          },
+          {
+            "path": "w0",
+            "header": "2026-10-26",
+            "type": "number"
+          }
+        ],
+        "rows": [
+          {
+            "measure": "Capacity",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 200
+          },
+          {
+            "measure": "Time away",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 0
+          },
+          {
+            "measure": "Confirmed",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 45
+          },
+          {
+            "measure": "Expected",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 5
+          },
+          {
+            "measure": "Possible",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 20
+          },
+          {
+            "measure": "Remaining capacity",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 150
+          },
+          {
+            "measure": "People over-planned",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 1
+          },
+          {
+            "measure": "People under-planned",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 4
+          },
+          {
+            "measure": "People with partial view",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 0
+          }
+        ],
+        "total": 9,
+        "totalIsLowerBound": false,
+        "truncated": false,
+        "listLink": "/planner?view=grid&supervisorId=01a197bd-ba3c-7b3b-a27a-5114a13f4e92&from=2026-10-26&weeks=1&includeMyDrafts=false",
+        "parameters": [
+          {
+            "label": "Supervisor",
+            "value": "Lena Brooks"
+          },
+          {
+            "label": "From",
+            "value": "2026-10-26"
+          },
+          {
+            "label": "Weeks",
+            "value": "1"
+          },
+          {
+            "label": "Include my private drafts",
+            "value": "No"
+          },
+          {
+            "label": "Report unit",
+            "value": "Hours"
+          },
+          {
+            "label": "Period",
+            "value": "Weeks"
+          }
+        ],
+        "asOf": "2026-11-01T16:00:02.286228+00:00",
+        "savedParameters": {
+          "supervisorId": "01a197bd-ba3c-7b3b-a27a-5114a13f4e92",
+          "from": "2026-10-26",
+          "weeks": "1",
+          "includeMyDrafts": "false",
+          "unit": "hours",
+          "period": "weeks"
+        },
+        "taskInputs": {
+          "basis": "PlannerPeopleContext",
+          "scopeCoverage": "CompleteForVisibleParameters",
+          "unavailableReferences": 0,
+          "unestimated": {
+            "count": 0,
+            "knownCount": 0,
+            "href": "/reports/team-capacity?supervisorId=01a197bd-ba3c-7b3b-a27a-5114a13f4e92&from=2026-10-26&weeks=1&includeMyDrafts=false&unit=hours&period=weeks&taskInput=unestimated&inputPage=1&inputPageSize=50"
+          },
+          "openUndated": {
+            "count": 0,
+            "knownCount": 0,
+            "href": "/reports/team-capacity?supervisorId=01a197bd-ba3c-7b3b-a27a-5114a13f4e92&from=2026-10-26&weeks=1&includeMyDrafts=false&unit=hours&period=weeks&taskInput=open-undated&inputPage=1&inputPageSize=50"
+          },
+          "parameters": {
+            "supervisorId": "01a197bd-ba3c-7b3b-a27a-5114a13f4e92",
+            "from": "2026-10-26",
+            "weeks": "1",
+            "includeMyDrafts": "false",
+            "unit": "hours",
+            "period": "weeks"
+          },
+          "asOf": "2026-11-01T16:00:02.286228+00:00"
+        },
+        "unitView": {
+          "unit": "hours",
+          "period": "weeks",
+          "standardWeeklyHours": 40,
+          "displayedWeekCount": 1,
+          "periods": [
+            {
+              "key": "2026-10-26",
+              "label": "2026-10-26",
+              "weeks": [
+                "2026-10-26"
+              ],
+              "weekCount": 1,
+              "denominatorHours": 40
+            }
+          ],
+          "columns": [
+            {
+              "path": "measure",
+              "header": "Measure",
+              "type": "text"
+            },
+            {
+              "path": "unit",
+              "header": "Unit",
+              "type": "text"
+            },
+            {
+              "path": "unitPath",
+              "header": "Unit path",
+              "type": "text"
+            },
+            {
+              "path": "w0",
+              "header": "2026-10-26",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            {
+              "rowIndex": 0,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "w0",
+                  "kind": "Hours",
+                  "value": 200,
+                  "knownHours": 200,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                }
+              ]
+            },
+            {
+              "rowIndex": 1,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "w0",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                }
+              ]
+            },
+            {
+              "rowIndex": 2,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "w0",
+                  "kind": "Hours",
+                  "value": 45,
+                  "knownHours": 45,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                }
+              ]
+            },
+            {
+              "rowIndex": 3,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "w0",
+                  "kind": "Hours",
+                  "value": 5,
+                  "knownHours": 5,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                }
+              ]
+            },
+            {
+              "rowIndex": 4,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "w0",
+                  "kind": "Hours",
+                  "value": 20,
+                  "knownHours": 20,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                }
+              ]
+            },
+            {
+              "rowIndex": 5,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "w0",
+                  "kind": "Hours",
+                  "value": 150,
+                  "knownHours": 150,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                }
+              ]
+            },
+            {
+              "rowIndex": 6,
+              "kind": "Count",
+              "cells": [
+                {
+                  "path": "w0",
+                  "kind": "Count",
+                  "value": 1,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "AvailabilityDependentCount"
+                }
+              ]
+            },
+            {
+              "rowIndex": 7,
+              "kind": "Count",
+              "cells": [
+                {
+                  "path": "w0",
+                  "kind": "Count",
+                  "value": 4,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "AvailabilityDependentCount"
+                }
+              ]
+            },
+            {
+              "rowIndex": 8,
+              "kind": "Count",
+              "cells": [
+                {
+                  "path": "w0",
+                  "kind": "Count",
+                  "value": 0,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                }
+              ]
+            }
+          ],
+          "scopeCoverage": "CompleteForVisibleParameters",
+          "unestimatedTasks": 0
+        },
+        "capacityComparison": {
+          "groupBy": "homeDiscipline",
+          "basis": "PLN09ConfirmedExpected",
+          "unit": "hours",
+          "asOf": "2026-11-01T16:00:02.286228+00:00",
+          "scopeCoverage": "CompleteForVisibleParameters",
+          "periods": [
+            {
+              "key": "2026-10-26",
+              "label": "2026-10-26",
+              "weeks": [
+                "2026-10-26"
+              ],
+              "weekCount": 1,
+              "denominatorHours": 40
+            }
+          ],
+          "rows": [
+            {
+              "key": "discipline:01a197bd-b98a-7b9e-833e-8ab59cfa4aac",
+              "disciplineId": "01a197bd-b98a-7b9e-833e-8ab59cfa4aac",
+              "discipline": "Civil",
+              "periodKey": "2026-10-26",
+              "capacity": {
+                "path": "capacity",
+                "kind": "Hours",
+                "value": 40,
+                "knownHours": 40,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "confirmed": {
+                "path": "confirmed",
+                "kind": "Hours",
+                "value": 45,
+                "knownHours": 45,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "expected": {
+                "path": "expected",
+                "kind": "Hours",
+                "value": 5,
+                "knownHours": 5,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "possible": {
+                "path": "possible",
+                "kind": "Hours",
+                "value": 20,
+                "knownHours": 20,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "demand": {
+                "path": "demand",
+                "kind": "Hours",
+                "value": 50,
+                "knownHours": 50,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "deficit": {
+                "path": "deficit",
+                "kind": "Hours",
+                "value": 10,
+                "knownHours": 10,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "partialPeople": 0,
+              "provisionalPeople": 0
+            },
+            {
+              "key": "discipline:none",
+              "disciplineId": null,
+              "discipline": "Not set",
+              "periodKey": "2026-10-26",
+              "capacity": {
+                "path": "capacity",
+                "kind": "Hours",
+                "value": 160,
+                "knownHours": 160,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "confirmed": {
+                "path": "confirmed",
+                "kind": "Hours",
+                "value": 0,
+                "knownHours": 0,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "expected": {
+                "path": "expected",
+                "kind": "Hours",
+                "value": 0,
+                "knownHours": 0,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "possible": {
+                "path": "possible",
+                "kind": "Hours",
+                "value": 0,
+                "knownHours": 0,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "demand": {
+                "path": "demand",
+                "kind": "Hours",
+                "value": 0,
+                "knownHours": 0,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "deficit": {
+                "path": "deficit",
+                "kind": "Hours",
+                "value": 0,
+                "knownHours": 0,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "partialPeople": 0,
+              "provisionalPeople": 0
+            }
+          ],
+          "returnedGroups": 2,
+          "totalGroups": 2,
+          "truncated": false
+        }
+      },
+      "screenshot": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint21-real-capacity-hours-375.png",
+      "chartScreenshot": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint21-real-capacity-chart-hours-375.png",
+      "errors": []
+    },
+    {
+      "name": "fte-month",
+      "width": 1440,
+      "url": "http://127.0.0.1:8853/reports/team-capacity?supervisorId=01a197bd-ba3c-7b3b-a27a-5114a13f4e92&from=2026-10-26&weeks=1&includeMyDrafts=false&unit=fte&period=months",
+      "matrix": {
+        "x": 553,
+        "y": 379.5,
+        "width": 965.171875,
+        "height": 37
+      },
+      "values": [
+        1,
+        1.25,
+        0.25
+      ],
+      "actualResponse": {
+        "code": "team-capacity",
+        "title": "Team Capacity",
+        "itemType": null,
+        "columns": [
+          {
+            "path": "measure",
+            "header": "Measure",
+            "type": "text"
+          },
+          {
+            "path": "unit",
+            "header": "Unit",
+            "type": "text"
+          },
+          {
+            "path": "unitPath",
+            "header": "Unit path",
+            "type": "text"
+          },
+          {
+            "path": "w0",
+            "header": "2026-10-26",
+            "type": "number"
+          }
+        ],
+        "rows": [
+          {
+            "measure": "Capacity",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 200
+          },
+          {
+            "measure": "Time away",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 0
+          },
+          {
+            "measure": "Confirmed",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 45
+          },
+          {
+            "measure": "Expected",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 5
+          },
+          {
+            "measure": "Possible",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 20
+          },
+          {
+            "measure": "Remaining capacity",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 150
+          },
+          {
+            "measure": "People over-planned",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 1
+          },
+          {
+            "measure": "People under-planned",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 4
+          },
+          {
+            "measure": "People with partial view",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 0
+          }
+        ],
+        "total": 9,
+        "totalIsLowerBound": false,
+        "truncated": false,
+        "listLink": "/planner?view=grid&supervisorId=01a197bd-ba3c-7b3b-a27a-5114a13f4e92&from=2026-10-26&weeks=1&includeMyDrafts=false",
+        "parameters": [
+          {
+            "label": "Supervisor",
+            "value": "Lena Brooks"
+          },
+          {
+            "label": "From",
+            "value": "2026-10-26"
+          },
+          {
+            "label": "Weeks",
+            "value": "1"
+          },
+          {
+            "label": "Include my private drafts",
+            "value": "No"
+          },
+          {
+            "label": "Report unit",
+            "value": "FTE"
+          },
+          {
+            "label": "Period",
+            "value": "Months"
+          }
+        ],
+        "asOf": "2026-11-01T16:00:02.632043+00:00",
+        "savedParameters": {
+          "supervisorId": "01a197bd-ba3c-7b3b-a27a-5114a13f4e92",
+          "from": "2026-10-26",
+          "weeks": "1",
+          "includeMyDrafts": "false",
+          "unit": "fte",
+          "period": "months"
+        },
+        "taskInputs": {
+          "basis": "PlannerPeopleContext",
+          "scopeCoverage": "CompleteForVisibleParameters",
+          "unavailableReferences": 0,
+          "unestimated": {
+            "count": 0,
+            "knownCount": 0,
+            "href": "/reports/team-capacity?supervisorId=01a197bd-ba3c-7b3b-a27a-5114a13f4e92&from=2026-10-26&weeks=1&includeMyDrafts=false&unit=fte&period=months&taskInput=unestimated&inputPage=1&inputPageSize=50"
+          },
+          "openUndated": {
+            "count": 0,
+            "knownCount": 0,
+            "href": "/reports/team-capacity?supervisorId=01a197bd-ba3c-7b3b-a27a-5114a13f4e92&from=2026-10-26&weeks=1&includeMyDrafts=false&unit=fte&period=months&taskInput=open-undated&inputPage=1&inputPageSize=50"
+          },
+          "parameters": {
+            "supervisorId": "01a197bd-ba3c-7b3b-a27a-5114a13f4e92",
+            "from": "2026-10-26",
+            "weeks": "1",
+            "includeMyDrafts": "false",
+            "unit": "fte",
+            "period": "months"
+          },
+          "asOf": "2026-11-01T16:00:02.632043+00:00"
+        },
+        "unitView": {
+          "unit": "fte",
+          "period": "months",
+          "standardWeeklyHours": 40,
+          "displayedWeekCount": 1,
+          "periods": [
+            {
+              "key": "2026-10",
+              "label": "2026-10",
+              "weeks": [
+                "2026-10-26"
+              ],
+              "weekCount": 1,
+              "denominatorHours": 40
+            }
+          ],
+          "columns": [
+            {
+              "path": "measure",
+              "header": "Measure",
+              "type": "text"
+            },
+            {
+              "path": "unit",
+              "header": "Unit",
+              "type": "text"
+            },
+            {
+              "path": "unitPath",
+              "header": "Unit path",
+              "type": "text"
+            },
+            {
+              "path": "u0",
+              "header": "2026-10 (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "countW0",
+              "header": "2026-10-26 · weekly people count",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            {
+              "rowIndex": 0,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "u0",
+                  "kind": "Hours",
+                  "value": 5,
+                  "knownHours": 200,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                },
+                {
+                  "path": "countW0",
+                  "kind": "NotApplicable",
+                  "value": null,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "NotApplicable"
+                }
+              ]
+            },
+            {
+              "rowIndex": 1,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "u0",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                },
+                {
+                  "path": "countW0",
+                  "kind": "NotApplicable",
+                  "value": null,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "NotApplicable"
+                }
+              ]
+            },
+            {
+              "rowIndex": 2,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "u0",
+                  "kind": "Hours",
+                  "value": 1.125,
+                  "knownHours": 45,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                },
+                {
+                  "path": "countW0",
+                  "kind": "NotApplicable",
+                  "value": null,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "NotApplicable"
+                }
+              ]
+            },
+            {
+              "rowIndex": 3,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "u0",
+                  "kind": "Hours",
+                  "value": 0.125,
+                  "knownHours": 5,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                },
+                {
+                  "path": "countW0",
+                  "kind": "NotApplicable",
+                  "value": null,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "NotApplicable"
+                }
+              ]
+            },
+            {
+              "rowIndex": 4,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "u0",
+                  "kind": "Hours",
+                  "value": 0.5,
+                  "knownHours": 20,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                },
+                {
+                  "path": "countW0",
+                  "kind": "NotApplicable",
+                  "value": null,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "NotApplicable"
+                }
+              ]
+            },
+            {
+              "rowIndex": 5,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "u0",
+                  "kind": "Hours",
+                  "value": 3.75,
+                  "knownHours": 150,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                },
+                {
+                  "path": "countW0",
+                  "kind": "NotApplicable",
+                  "value": null,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "NotApplicable"
+                }
+              ]
+            },
+            {
+              "rowIndex": 6,
+              "kind": "Count",
+              "cells": [
+                {
+                  "path": "u0",
+                  "kind": "NotApplicable",
+                  "value": null,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "NotApplicable"
+                },
+                {
+                  "path": "countW0",
+                  "kind": "Count",
+                  "value": 1,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "AvailabilityDependentCount"
+                }
+              ]
+            },
+            {
+              "rowIndex": 7,
+              "kind": "Count",
+              "cells": [
+                {
+                  "path": "u0",
+                  "kind": "NotApplicable",
+                  "value": null,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "NotApplicable"
+                },
+                {
+                  "path": "countW0",
+                  "kind": "Count",
+                  "value": 4,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "AvailabilityDependentCount"
+                }
+              ]
+            },
+            {
+              "rowIndex": 8,
+              "kind": "Count",
+              "cells": [
+                {
+                  "path": "u0",
+                  "kind": "NotApplicable",
+                  "value": null,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "NotApplicable"
+                },
+                {
+                  "path": "countW0",
+                  "kind": "Count",
+                  "value": 0,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                }
+              ]
+            }
+          ],
+          "scopeCoverage": "CompleteForVisibleParameters",
+          "unestimatedTasks": 0
+        },
+        "capacityComparison": {
+          "groupBy": "homeDiscipline",
+          "basis": "PLN09ConfirmedExpected",
+          "unit": "fte",
+          "asOf": "2026-11-01T16:00:02.632043+00:00",
+          "scopeCoverage": "CompleteForVisibleParameters",
+          "periods": [
+            {
+              "key": "2026-10",
+              "label": "2026-10",
+              "weeks": [
+                "2026-10-26"
+              ],
+              "weekCount": 1,
+              "denominatorHours": 40
+            }
+          ],
+          "rows": [
+            {
+              "key": "discipline:01a197bd-b98a-7b9e-833e-8ab59cfa4aac",
+              "disciplineId": "01a197bd-b98a-7b9e-833e-8ab59cfa4aac",
+              "discipline": "Civil",
+              "periodKey": "2026-10",
+              "capacity": {
+                "path": "capacity",
+                "kind": "Hours",
+                "value": 1,
+                "knownHours": 40,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "confirmed": {
+                "path": "confirmed",
+                "kind": "Hours",
+                "value": 1.125,
+                "knownHours": 45,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "expected": {
+                "path": "expected",
+                "kind": "Hours",
+                "value": 0.125,
+                "knownHours": 5,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "possible": {
+                "path": "possible",
+                "kind": "Hours",
+                "value": 0.5,
+                "knownHours": 20,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "demand": {
+                "path": "demand",
+                "kind": "Hours",
+                "value": 1.25,
+                "knownHours": 50,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "deficit": {
+                "path": "deficit",
+                "kind": "Hours",
+                "value": 0.25,
+                "knownHours": 10,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "partialPeople": 0,
+              "provisionalPeople": 0
+            },
+            {
+              "key": "discipline:none",
+              "disciplineId": null,
+              "discipline": "Not set",
+              "periodKey": "2026-10",
+              "capacity": {
+                "path": "capacity",
+                "kind": "Hours",
+                "value": 4,
+                "knownHours": 160,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "confirmed": {
+                "path": "confirmed",
+                "kind": "Hours",
+                "value": 0,
+                "knownHours": 0,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "expected": {
+                "path": "expected",
+                "kind": "Hours",
+                "value": 0,
+                "knownHours": 0,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "possible": {
+                "path": "possible",
+                "kind": "Hours",
+                "value": 0,
+                "knownHours": 0,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "demand": {
+                "path": "demand",
+                "kind": "Hours",
+                "value": 0,
+                "knownHours": 0,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "deficit": {
+                "path": "deficit",
+                "kind": "Hours",
+                "value": 0,
+                "knownHours": 0,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "partialPeople": 0,
+              "provisionalPeople": 0
+            }
+          ],
+          "returnedGroups": 2,
+          "totalGroups": 2,
+          "truncated": false
+        }
+      },
+      "screenshot": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint21-real-capacity-fte-month-1440.png",
+      "errors": []
+    },
+    {
+      "name": "fte-month",
+      "width": 375,
+      "url": "http://127.0.0.1:8853/reports/team-capacity?supervisorId=01a197bd-ba3c-7b3b-a27a-5114a13f4e92&from=2026-10-26&weeks=1&includeMyDrafts=false&unit=fte&period=months",
+      "matrix": {
+        "x": 17,
+        "y": 681.515625,
+        "width": 965.171875,
+        "height": 37
+      },
+      "values": [
+        1,
+        1.25,
+        0.25
+      ],
+      "actualResponse": {
+        "code": "team-capacity",
+        "title": "Team Capacity",
+        "itemType": null,
+        "columns": [
+          {
+            "path": "measure",
+            "header": "Measure",
+            "type": "text"
+          },
+          {
+            "path": "unit",
+            "header": "Unit",
+            "type": "text"
+          },
+          {
+            "path": "unitPath",
+            "header": "Unit path",
+            "type": "text"
+          },
+          {
+            "path": "w0",
+            "header": "2026-10-26",
+            "type": "number"
+          }
+        ],
+        "rows": [
+          {
+            "measure": "Capacity",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 200
+          },
+          {
+            "measure": "Time away",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 0
+          },
+          {
+            "measure": "Confirmed",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 45
+          },
+          {
+            "measure": "Expected",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 5
+          },
+          {
+            "measure": "Possible",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 20
+          },
+          {
+            "measure": "Remaining capacity",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 150
+          },
+          {
+            "measure": "People over-planned",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 1
+          },
+          {
+            "measure": "People under-planned",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 4
+          },
+          {
+            "measure": "People with partial view",
+            "unit": "No unit",
+            "unitPath": "",
+            "w0": 0
+          }
+        ],
+        "total": 9,
+        "totalIsLowerBound": false,
+        "truncated": false,
+        "listLink": "/planner?view=grid&supervisorId=01a197bd-ba3c-7b3b-a27a-5114a13f4e92&from=2026-10-26&weeks=1&includeMyDrafts=false",
+        "parameters": [
+          {
+            "label": "Supervisor",
+            "value": "Lena Brooks"
+          },
+          {
+            "label": "From",
+            "value": "2026-10-26"
+          },
+          {
+            "label": "Weeks",
+            "value": "1"
+          },
+          {
+            "label": "Include my private drafts",
+            "value": "No"
+          },
+          {
+            "label": "Report unit",
+            "value": "FTE"
+          },
+          {
+            "label": "Period",
+            "value": "Months"
+          }
+        ],
+        "asOf": "2026-11-01T16:00:02.936116+00:00",
+        "savedParameters": {
+          "supervisorId": "01a197bd-ba3c-7b3b-a27a-5114a13f4e92",
+          "from": "2026-10-26",
+          "weeks": "1",
+          "includeMyDrafts": "false",
+          "unit": "fte",
+          "period": "months"
+        },
+        "taskInputs": {
+          "basis": "PlannerPeopleContext",
+          "scopeCoverage": "CompleteForVisibleParameters",
+          "unavailableReferences": 0,
+          "unestimated": {
+            "count": 0,
+            "knownCount": 0,
+            "href": "/reports/team-capacity?supervisorId=01a197bd-ba3c-7b3b-a27a-5114a13f4e92&from=2026-10-26&weeks=1&includeMyDrafts=false&unit=fte&period=months&taskInput=unestimated&inputPage=1&inputPageSize=50"
+          },
+          "openUndated": {
+            "count": 0,
+            "knownCount": 0,
+            "href": "/reports/team-capacity?supervisorId=01a197bd-ba3c-7b3b-a27a-5114a13f4e92&from=2026-10-26&weeks=1&includeMyDrafts=false&unit=fte&period=months&taskInput=open-undated&inputPage=1&inputPageSize=50"
+          },
+          "parameters": {
+            "supervisorId": "01a197bd-ba3c-7b3b-a27a-5114a13f4e92",
+            "from": "2026-10-26",
+            "weeks": "1",
+            "includeMyDrafts": "false",
+            "unit": "fte",
+            "period": "months"
+          },
+          "asOf": "2026-11-01T16:00:02.936116+00:00"
+        },
+        "unitView": {
+          "unit": "fte",
+          "period": "months",
+          "standardWeeklyHours": 40,
+          "displayedWeekCount": 1,
+          "periods": [
+            {
+              "key": "2026-10",
+              "label": "2026-10",
+              "weeks": [
+                "2026-10-26"
+              ],
+              "weekCount": 1,
+              "denominatorHours": 40
+            }
+          ],
+          "columns": [
+            {
+              "path": "measure",
+              "header": "Measure",
+              "type": "text"
+            },
+            {
+              "path": "unit",
+              "header": "Unit",
+              "type": "text"
+            },
+            {
+              "path": "unitPath",
+              "header": "Unit path",
+              "type": "text"
+            },
+            {
+              "path": "u0",
+              "header": "2026-10 (FTE; ISO weeks: 1)",
+              "type": "number"
+            },
+            {
+              "path": "countW0",
+              "header": "2026-10-26 · weekly people count",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            {
+              "rowIndex": 0,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "u0",
+                  "kind": "Hours",
+                  "value": 5,
+                  "knownHours": 200,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                },
+                {
+                  "path": "countW0",
+                  "kind": "NotApplicable",
+                  "value": null,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "NotApplicable"
+                }
+              ]
+            },
+            {
+              "rowIndex": 1,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "u0",
+                  "kind": "Hours",
+                  "value": 0,
+                  "knownHours": 0,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                },
+                {
+                  "path": "countW0",
+                  "kind": "NotApplicable",
+                  "value": null,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "NotApplicable"
+                }
+              ]
+            },
+            {
+              "rowIndex": 2,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "u0",
+                  "kind": "Hours",
+                  "value": 1.125,
+                  "knownHours": 45,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                },
+                {
+                  "path": "countW0",
+                  "kind": "NotApplicable",
+                  "value": null,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "NotApplicable"
+                }
+              ]
+            },
+            {
+              "rowIndex": 3,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "u0",
+                  "kind": "Hours",
+                  "value": 0.125,
+                  "knownHours": 5,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                },
+                {
+                  "path": "countW0",
+                  "kind": "NotApplicable",
+                  "value": null,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "NotApplicable"
+                }
+              ]
+            },
+            {
+              "rowIndex": 4,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "u0",
+                  "kind": "Hours",
+                  "value": 0.5,
+                  "knownHours": 20,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                },
+                {
+                  "path": "countW0",
+                  "kind": "NotApplicable",
+                  "value": null,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "NotApplicable"
+                }
+              ]
+            },
+            {
+              "rowIndex": 5,
+              "kind": "Hours",
+              "cells": [
+                {
+                  "path": "u0",
+                  "kind": "Hours",
+                  "value": 3.75,
+                  "knownHours": 150,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                },
+                {
+                  "path": "countW0",
+                  "kind": "NotApplicable",
+                  "value": null,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "NotApplicable"
+                }
+              ]
+            },
+            {
+              "rowIndex": 6,
+              "kind": "Count",
+              "cells": [
+                {
+                  "path": "u0",
+                  "kind": "NotApplicable",
+                  "value": null,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "NotApplicable"
+                },
+                {
+                  "path": "countW0",
+                  "kind": "Count",
+                  "value": 1,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "AvailabilityDependentCount"
+                }
+              ]
+            },
+            {
+              "rowIndex": 7,
+              "kind": "Count",
+              "cells": [
+                {
+                  "path": "u0",
+                  "kind": "NotApplicable",
+                  "value": null,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "NotApplicable"
+                },
+                {
+                  "path": "countW0",
+                  "kind": "Count",
+                  "value": 4,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "AvailabilityDependentCount"
+                }
+              ]
+            },
+            {
+              "rowIndex": 8,
+              "kind": "Count",
+              "cells": [
+                {
+                  "path": "u0",
+                  "kind": "NotApplicable",
+                  "value": null,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "NotApplicable"
+                },
+                {
+                  "path": "countW0",
+                  "kind": "Count",
+                  "value": 0,
+                  "knownHours": null,
+                  "missingInputs": 0,
+                  "coverage": "CompleteForVisibleParameters"
+                }
+              ]
+            }
+          ],
+          "scopeCoverage": "CompleteForVisibleParameters",
+          "unestimatedTasks": 0
+        },
+        "capacityComparison": {
+          "groupBy": "homeDiscipline",
+          "basis": "PLN09ConfirmedExpected",
+          "unit": "fte",
+          "asOf": "2026-11-01T16:00:02.936116+00:00",
+          "scopeCoverage": "CompleteForVisibleParameters",
+          "periods": [
+            {
+              "key": "2026-10",
+              "label": "2026-10",
+              "weeks": [
+                "2026-10-26"
+              ],
+              "weekCount": 1,
+              "denominatorHours": 40
+            }
+          ],
+          "rows": [
+            {
+              "key": "discipline:01a197bd-b98a-7b9e-833e-8ab59cfa4aac",
+              "disciplineId": "01a197bd-b98a-7b9e-833e-8ab59cfa4aac",
+              "discipline": "Civil",
+              "periodKey": "2026-10",
+              "capacity": {
+                "path": "capacity",
+                "kind": "Hours",
+                "value": 1,
+                "knownHours": 40,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "confirmed": {
+                "path": "confirmed",
+                "kind": "Hours",
+                "value": 1.125,
+                "knownHours": 45,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "expected": {
+                "path": "expected",
+                "kind": "Hours",
+                "value": 0.125,
+                "knownHours": 5,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "possible": {
+                "path": "possible",
+                "kind": "Hours",
+                "value": 0.5,
+                "knownHours": 20,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "demand": {
+                "path": "demand",
+                "kind": "Hours",
+                "value": 1.25,
+                "knownHours": 50,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "deficit": {
+                "path": "deficit",
+                "kind": "Hours",
+                "value": 0.25,
+                "knownHours": 10,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "partialPeople": 0,
+              "provisionalPeople": 0
+            },
+            {
+              "key": "discipline:none",
+              "disciplineId": null,
+              "discipline": "Not set",
+              "periodKey": "2026-10",
+              "capacity": {
+                "path": "capacity",
+                "kind": "Hours",
+                "value": 4,
+                "knownHours": 160,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "confirmed": {
+                "path": "confirmed",
+                "kind": "Hours",
+                "value": 0,
+                "knownHours": 0,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "expected": {
+                "path": "expected",
+                "kind": "Hours",
+                "value": 0,
+                "knownHours": 0,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "possible": {
+                "path": "possible",
+                "kind": "Hours",
+                "value": 0,
+                "knownHours": 0,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "demand": {
+                "path": "demand",
+                "kind": "Hours",
+                "value": 0,
+                "knownHours": 0,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "deficit": {
+                "path": "deficit",
+                "kind": "Hours",
+                "value": 0,
+                "knownHours": 0,
+                "missingInputs": 0,
+                "coverage": "CompleteForVisibleParameters"
+              },
+              "partialPeople": 0,
+              "provisionalPeople": 0
+            }
+          ],
+          "returnedGroups": 2,
+          "totalGroups": 2,
+          "truncated": false
+        }
+      },
+      "screenshot": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint21-real-capacity-fte-month-375.png",
+      "chartScreenshot": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint21-real-capacity-chart-fte-month-375.png",
+      "errors": []
+    }
+  ],
+  "limits": [
+    "Disposable local QA21 only; not hosted, pilot, or human acceptance. One displayed ISO week uses a 40-hour standard denominator."
+  ],
+  "fixture": {
+    "personId": "01a197d6-d485-78f1-963e-028d4856cce5",
+    "managerId": "01a197bd-ba3c-7b3b-a27a-5114a13f4e92",
+    "civilId": "01a197bd-b98a-7b9e-833e-8ab59cfa4aac",
+    "week": "2026-10-26"
+  },
+  "status": "PASS"
+}

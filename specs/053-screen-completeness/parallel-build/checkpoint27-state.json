@@ -1,0 +1,70 @@
+{
+  "generation": 55,
+  "checkpoint": 27,
+  "startedAtUtc": "2026-11-02T12:09:08.810918+00:00",
+  "status": "CLOSED_LOCAL_S44_PASS",
+  "target": "FR/AC-SCR77Filemissinglinks/manualrevisioncontext/filters;AC84off",
+  "previous": "Checkpoint26localR2FR61PASS149.NET/finalChrome3(10/66)/visual4/parity;S35R3open34/49",
+  "contract": "g55-file-link-freeze.md",
+  "sourceLoans": {
+    "A": [
+      "web/src/pages/Files.tsx",
+      "web/tests/file-screen.cjs",
+      "web/tests/file-screen.fixture.cjs"
+    ],
+    "B": [
+      "src/Hub.Api/Features/Workspace.cs",
+      "src/Hub.Api/Features/FileScreenReads.cs",
+      "tests/Hub.Tests/Api/FileScreenTests.cs"
+    ],
+    "C": [
+      "src/Hub.Api/Features/DocumentLinks.cs",
+      "src/Hub.Api/Features/DocumentLinkReferences.cs",
+      "tests/Hub.Tests/Api/DocumentLinkReferenceTests.cs",
+      "tests/Hub.Tests/Api/DocumentLinkReferenceReadTests.cs"
+    ],
+    "D": [
+      "web/src/components/hub/links.tsx",
+      "web/src/components/hub/document-link-reference.tsx",
+      "web/tests/document-link-reference.cjs",
+      "web/tests/document-link-reference.fixture.cjs"
+    ],
+    "root": [
+      "src/Hub.Api/Data/Entities.cs",
+      "src/Hub.Api/Data/HubDb.cs",
+      "src/Hub.Api/Records/DocumentLink.cs",
+      "src/Hub.Api/Data/Migrations/HubDbModelSnapshot.cs",
+      "src/Hub.Api/Text.cs",
+      "web/src/i18n/en.ts",
+      "web/src/lib/keys.ts",
+      "web/tests/tsconfig.json",
+      "web/package.json"
+    ]
+  },
+  "baseline": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint27-baseline",
+  "checkedSlices": 35,
+  "pending": [
+    "Other unchecked052/053",
+    "External legacy-authorship choice: no dependent R3 code",
+    "QA24 cleanup explicit confirmation: preserve old runtime/outputs",
+    "Broad visual/native/zoom/human acceptance"
+  ],
+  "questions": "Neither elapsedtimenorrecommendedpreselection is an answer.",
+  "updatedAtUtc": "2026-11-02T12:31:14.198237+00:00",
+  "rootIntegration": [
+    "Exactly6nullablemanualreferencefields+complete-registrationcheck+2RestrictFKs/registryauthored; migrationnotgenerated",
+    "A/Dlocale keys+manualauditfieldlabels added;serverinvalidtaskparenttextadded",
+    "SelectiveFilescacheinvalidationforrevision/Taskparent/author/member/discipline/flagchanges +QueryClientcontracttestauthoredunrun",
+    "LegacyWorkspaceFilePersonTestcomparison stripsnewtop-levelscreenonly, allPerson/legacyassertionsretained",
+    "AdjacentFilesfixturesneedintentionalnewScreenmetadata, exactrootloanplannedafterinterfacesstable"
+  ],
+  "helpers": "All source writers/reviewers completed; current app and tests HOLD",
+  "checks": "103 distinct API,27 Node, types/fixtures/lint/UI review, isolated SPA2, four feature+adjacent Chrome, visual4, parity, spec/trace/decisions PASS",
+  "sourceReady": {
+    "A": true,
+    "B": true,
+    "C": true,
+    "D": true
+  },
+  "closedAtUtc": "2026-11-02T13:01:45.417999+00:00"
+}

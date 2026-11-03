@@ -1,0 +1,12 @@
+Test run for /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint35-artifacts/bin/Hub.Tests/release/Hub.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:07.37]     Hub.Tests.Api.ContractTests.Openapi_matches_the_committed_golden_document [FAIL]
+  Failed Hub.Tests.Api.ContractTests.Openapi_matches_the_committed_golden_document [7 s]
+  Error Message:
+   Updated web/src/gen/openapi.json; review the diff, run npm run gen, and rerun without HUB_UPDATE_CONTRACT
+  Stack Trace:
+     at Hub.Tests.Api.ContractTests.Openapi_matches_the_committed_golden_document() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ContractTests.cs:line 50
+--- End of stack trace from previous location ---
+Results File: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint35-runtime/trx-contract-produce1/contract-produce1.trx
+
+Failed!  - Failed:     1, Passed:     1, Skipped:     0, Total:     2, Duration: 7 s - Hub.Tests.dll (net10.0)

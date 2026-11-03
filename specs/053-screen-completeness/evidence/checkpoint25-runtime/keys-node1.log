@@ -1,0 +1,26 @@
+✔ a personal seen commit refreshes its readers while preserving unrelated business and preference caches (1.617292ms)
+✔ follow-up rows refetch typed owners and activity after flags, assignment and comment changes (0.89575ms)
+✔ person fact commands refresh mounted staff, both Teams, editor and date-only picker facts (0.738834ms)
+✔ successful discussion refreshes its originating project task count without a live event (0.161125ms)
+✔ activity, own-week candidates and report inputs refetch otherwise fresh cached facts (1.937042ms)
+✔ a project colour change refreshes an already cached workspace Team identity (0.118ms)
+✔ item changes keep the previous project and item-specific invalidations (AC-PLAT-19) (0.2425ms)
+✔ project refresh retains its 1.5 second derived-state pass (0.606334ms)
+✔ child audit types refresh mounted details and dependent pickers; reconnect repairs missed events (0.500292ms)
+✔ invalidation prefixes match actual mounted screen query keys (0.275708ms)
+✔ a person's own workspaces and dashboard layout refresh the screens that read them (0.106167ms)
+✔ workload changes refresh the pickup own-load hint (0.053958ms)
+✔ notification and preference commands refresh the bell, the centre, the Following tab and the preferences page (0.059167ms)
+✔ new batch mutations refresh their mounted views and await active refetches (0.073833ms)
+✔ person date and setting changes refresh all authorised candidate sources; submission events refresh workspace dates (1.5305ms)
+✔ board leads and thresholds, Team organisation labels and candidate capacity refresh cached reads (2.66625ms)
+✔ person panels refetch after membership, scope and permitted-fact changes without touching unrelated personal state (0.646875ms)
+✔ an owning flag change refreshes the cached reference vocabulary (0.106333ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 109.206583

@@ -1,0 +1,8 @@
+{
+  "atUtc": "2026-11-02T11:17:57.049263+00:00",
+  "status": "PASS_OUTPUT_LABEL_ONLY",
+  "path": "web/tests/review-response.cjs",
+  "executedSha256": "9870e7462d509e6ee1a67ad17e9e56493ca5ef6df5cd94f8c29ff05044da96f6",
+  "currentSha256": "d7587fd07b93d47eda61dd240e9872051643ebe0f9cb7a2a36dbd630c7079585",
+  "proof": "Exactreplacementofconsolescopewording reconstructsexecutedhash. Noassertion/request/helper/app/fixturechange. RawPASSlogretained; externalR3explicitlyUNIMPLEMENTED."
+}

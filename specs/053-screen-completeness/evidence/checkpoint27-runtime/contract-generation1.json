@@ -1,0 +1,5 @@
+{
+  "status": "TWO_INTENTIONAL_GOLDEN_UPDATE_FAILURES",
+  "exitCode": 1,
+  "boundary": "Review new golden diff then rerun without update environment"
+}

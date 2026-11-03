@@ -1,0 +1,15 @@
+{
+  "exitCode": 0,
+  "args": [
+    "node",
+    "tests/calendar-screen.cjs"
+  ],
+  "atUtc": "2026-11-02T20:07:09.091358+00:00",
+  "base": "http://127.0.0.1:8866",
+  "scope": "Calendar regression on new shared portal primitives and canonical >4100char correction Reason retention; finite synthetic HTTP",
+  "driverHash": "135bb03dedb94629acbcba408cbf362a1e02a1e077dc2604adeff900d9ff7a99",
+  "screenshots": [
+    "calendar-screen-phone.png",
+    "calendar-screen-desktop.png"
+  ]
+}

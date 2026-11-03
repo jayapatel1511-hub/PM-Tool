@@ -1,0 +1,1 @@
+Independent bounded migration source PASS. Exactly six nullable columns, one all-null-or-complete constraint, two Restrict foreign keys and indexes; no defaults/backfill/unrelated schema changes. Down removes only additions in dependency-safe order. Snapshot model equals new Designer; prior Designer delta limited to feature. No SQL/application proof by reviewer.

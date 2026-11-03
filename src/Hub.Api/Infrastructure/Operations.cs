@@ -10,7 +10,8 @@ namespace Hub.Api.Infrastructure;
 public sealed record OpsFacts(
     DateTimeOffset Now, OrgSettings Settings,
     DateTimeOffset? OldestPendingOutbox, DateTimeOffset? LastNightlySuccess, DateTimeOffset? FirstJobRun,
-    IReadOnlyList<(string Job, DateTimeOffset At)> FailedSince, int DigestsNotBuilt, int DigestsUnsent, int DeadLettered = 0);
+    IReadOnlyList<(string Job, DateTimeOffset At)> FailedSince, int DigestsNotBuilt, int DigestsUnsent, int DeadLettered = 0,
+    int CapturedDigestsNotBuilt = 0, int CapturedDigestsUnsent = 0, int TimeRemindersDue = 0);
 
 public sealed record OpsProblem(string Kind, string Detail);
 
@@ -33,8 +34,11 @@ public static class OpsChecks
         if (since is { } s && f.Now - s > NightlyGrace)
             problems.Add(new("NightlyMissed", f.LastNightlySuccess is null ? "no successful nightly run yet" : $"last success {s:u}"));
         foreach (var (job, at) in f.FailedSince) problems.Add(new("JobFailed", $"{job} at {at:u}"));
-        if (DigestDue(f.Now, f.Settings) && f.DigestsNotBuilt + f.DigestsUnsent > 0)
-            problems.Add(new("DigestLate", $"{f.DigestsNotBuilt} not built, {f.DigestsUnsent} not sent by {DigestDeadline:HH\\:mm}"));
+        var legacyDue = DigestDue(f.Now, f.Settings);
+        var notBuilt = (legacyDue ? f.DigestsNotBuilt : 0) + f.CapturedDigestsNotBuilt;
+        var unsent = (legacyDue ? f.DigestsUnsent : 0) + f.CapturedDigestsUnsent;
+        if (notBuilt + unsent > 0)
+            problems.Add(new("DigestLate", $"{notBuilt} not built, {unsent} not sent by {DigestDeadline:HH\\:mm}"));
         return problems;
     }
 
@@ -56,7 +60,40 @@ public static class OpsChecks
         var failed = (await db.JobRuns.Where(r => r.Status == "Failed" && r.StartedAt >= since).OrderBy(r => r.StartedAt).Select(r => new { r.JobName, r.StartedAt }).ToListAsync(ct))
             .Select(r => (r.JobName, r.StartedAt)).ToList();
         int notBuilt = 0, unsent = 0;
-        if (OpsChecks.DigestDue(now, s))
+        int capturedNotBuilt = 0, capturedUnsent = 0, remindersDue = 0;
+        if (s.IsFlagOn("people_screens"))
+        {
+            Guid? cursor = null;
+            while (true)
+            {
+                var query = db.Users.AsNoTracking().Where(user => user.IsActive);
+                if (cursor is { } after) query = query.Where(user => user.Id.CompareTo(after) > 0);
+                var batch = await query.OrderBy(user => user.Id).Select(user => user.Id).Take(100).ToArrayAsync(ct);
+                if (batch.Length == 0) break;
+                foreach (var id in batch)
+                {
+                    // Read-only policy facts use the exact same recipient lock and fresh readers as the jobs.
+                    await using var tx = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted, ct);
+                    var context = await NotificationDelivery.LockRecipientAsync(db, id, ct);
+                    var due = await NotificationDigestComposition.ReadDueAsync(context, now, ct);
+                    if (due.CreationDecision == "Due" && due.CreationSchedule is { } scheduled
+                        && LateByDeadline(scheduled.OrgTimeZoneId, scheduled.RequestedDate, scheduled.ScheduledAtUtc, now, s))
+                        capturedNotBuilt++;
+                    foreach (var work in due.Existing.Where(row => row.Work is NoticeDigestWorkKind.Compose
+                        or NoticeDigestWorkKind.Recompose or NoticeDigestWorkKind.DispatchExisting))
+                    {
+                        var slot = await db.NoticeDeliverySlots.AsNoTracking().SingleAsync(row => row.Id == work.SlotId && row.UserId == id, ct);
+                        if (!LateByDeadline(slot.OrgTimeZoneId, slot.ScheduledLocalDate, slot.ScheduledAtUtc, now, s)) continue;
+                        if (work.Work == NoticeDigestWorkKind.DispatchExisting) capturedUnsent++; else capturedNotBuilt++;
+                    }
+                    if ((await TimeEntryReminderJob.ReadDueAsync(context, now, ct)).Kind == TimeEntryReminderDueKind.Due) remindersDue++;
+                    await tx.CommitAsync(ct);
+                }
+                cursor = batch[^1];
+                if (batch.Length < 100) break;
+            }
+        }
+        else if (OpsChecks.DigestDue(now, s))
         {
             var zone = Clock.Zone(s);
             var today = DateOnly.FromDateTime(Clock.Local(now, s).DateTime);
@@ -74,9 +111,21 @@ public static class OpsChecks
                 var scheduled = new DateTimeOffset(today.ToDateTime(at), zone.GetUtcOffset(today.ToDateTime(at))).ToUniversalTime();
                 if (p?.LastDigestAt is not { } last || last < scheduled) notBuilt++;
             }
-            unsent = await db.Emails.CountAsync(e => e.Kind == "Digest" && e.CreatedAt >= dayStart && e.SentAt == null, ct);
+            unsent = await NotificationDelivery.LegacyEmails(db.Emails).CountAsync(e => e.Kind == "Digest" && e.CreatedAt >= dayStart && e.SentAt == null, ct);
         }
-        return new OpsFacts(now, s, oldest, nightly, first, failed, notBuilt, unsent, deadLettered);
+        return new OpsFacts(now, s, oldest, nightly, first, failed, notBuilt, unsent, deadLettered,
+            capturedNotBuilt, capturedUnsent, remindersDue);
+    }
+
+    static bool LateByDeadline(string zone, DateOnly date, DateTimeOffset scheduledAt, DateTimeOffset now, OrgSettings settings)
+    {
+        try
+        {
+            _ = TimeZoneInfo.FindSystemTimeZoneById(zone);
+            var deadline = NotificationDelivery.ResolveLocal(settings with { OrgTimeZone = zone }, date, DigestDeadline).ScheduledAtUtc;
+            return scheduledAt <= deadline && now >= deadline;
+        }
+        catch (Exception error) when (error is ArgumentException or TimeZoneNotFoundException or InvalidTimeZoneException) { return false; }
     }
 }
 

@@ -1,0 +1,8 @@
+{
+  "exitCode": 0,
+  "args": [
+    "npm",
+    "run",
+    "test:ui-review"
+  ]
+}

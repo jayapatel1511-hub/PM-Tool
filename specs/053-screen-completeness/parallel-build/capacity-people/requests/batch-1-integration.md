@@ -1,0 +1,9 @@
+# Batch 1 integration requests (S26 / S28)
+
+1. Apply the exact additive locale entries in `batch-1-locales.json` to the root-owned web and server dictionaries. No schema or permission change needed.
+   Root has applied the initial entries. Also apply the four replacements in `batch-1-locale-unit-fix.json`: the canonical `hours()` formatter already includes ` h`, so the initial text would duplicate the unit. The browser fixture expects one unit.
+2. After an acknowledged source freeze, regenerate OpenAPI/API types for the new `GET /planning/find-room`, additive Workload scenario query and optional response fields. Child code intentionally uses generated types and will need that normal root regeneration before typecheck.
+3. Review FR-SCR-47's free-hours basis: this implementation uses canonical **PLN-09 signed remaining capacity**, per §45's definition of “free”, for Workload-scoped home-discipline people. It counts own drafts, keeps Expected/Possible semantics, and states this basis beside the table. Project filters limit demand, not the person's complete supply. Indicator filters and the proposed scenario affect ordinary Workload rows, not planner supply. If the intended basis was Workload's `Uncommitted`, amend/clarify the contract rather than silently relabel it “free”. No decision status is changed here.
+4. Find room conservatively separates people with provisional availability (including unreconciled manual away records) as Unavailable. Their names are already within permitted planner scope; no reasons/hidden projects/amounts are returned. Partial-view people never appear among matches.
+
+The new scenario reuses `AllocationRules.Committed` and counts Proposed allocation work links in the same way as Confirmed ones, preventing duplicate linked task demand. Proposed demand remains visible as source data but is not drawn twice in the scenario's meter. No allocations, plans, activity or person versions are written by either read.

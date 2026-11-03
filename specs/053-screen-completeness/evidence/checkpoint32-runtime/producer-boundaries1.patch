@@ -1,0 +1,425 @@
+--- /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint32-baseline/src/Hub.Api/Features/Tasks.cs	2026-11-02 15:12:23
++++ /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Features/Tasks.cs	2026-11-02 18:13:13
+@@ -488,6 +488,7 @@
+     // ---------- Transitions (T-10..T-14, R-01..R-04, C-07, C-08, DL-02) ----------
+ 
+     static async Task<Ok<TaskTransitioned>> Transition(Guid id, TransitionBody body, HttpContext http, Access access, HubDb db, Notifier notify, TeamService team, SettingsStore store, TimeProvider clock)
++        => await Tx.Notice<Ok<TaskTransitioned>>(db, store, async () =>
+     {
+         var (t, p, ctx) = await Load(db, access, id);
+         await Http.CheckVersion(db, http, t, body.RowVersion);
+@@ -501,7 +502,7 @@
+         if (t.Status != previousStatus) await TransitionNotices(notify, p, t, body.Comment);
+         await db.SaveChangesAsync();
+         return TypedResults.Ok(new TaskTransitioned(t.Id, t.Status, t.RowVersion, t.ProgressPct, t.ReviewRound, warnings));
+-    }
++    });
+ 
+     public static async Task ApplyTransition(HubDb db, Access access, ProjectContext ctx, Project p, WorkTask t, string to, string? reason, string? comment,
+         Guid? reviewerId, OrgSettings s, TimeProvider clock, TeamService team, List<string> warnings,
+@@ -691,7 +692,8 @@
+                 db.Tasks.Where(x => x.Id == (d.PredecessorTaskId == id ? d.SuccessorTaskId : d.PredecessorTaskId)).Select(x => new OtherEnd(x.Key, x.Name, x.AssigneeId)).First()))
+             .ToListAsync()).Select(d => new TaskDeleteLink(d.Id, d.PredecessorTaskId, d.SuccessorTaskId, d.Other.Key, d.Other.Name, d.PredecessorTaskId == id ? "blocks" : "dependsOn", d.Other.AssigneeId)).ToList();
+ 
+-    static async Task<Ok<TaskDeleted>> Delete(Guid id, Access access, HubDb db, Notifier notify, TimeProvider clock, CurrentUser me)
++    static async Task<Ok<TaskDeleted>> Delete(Guid id, Access access, HubDb db, Notifier notify, TimeProvider clock, CurrentUser me, SettingsStore store)
++        => await Tx.Notice<Ok<TaskDeleted>>(db, store, async () =>
+     {
+         var (t, p, ctx) = await Load(db, access, id);
+         Access.Demand(Permissions.DeleteTask(access.Actor, ctx, await Facts(db, t)));
+@@ -712,7 +714,7 @@
+             Text.Get("notify.dependency_removed_deleted", actor, t.Key, t.Name));
+         await db.SaveChangesAsync();
+         return TypedResults.Ok(new TaskDeleted(edges.Count));
+-    }
++    });
+ 
+     static async Task<Ok<TaskVersion>> Restore(Guid id, HttpContext http, Access access, HubDb db, SettingsStore store)
+     {
+@@ -737,6 +739,7 @@
+     // ---------- Bulk (FR-TSK-09, T-23, E-20, AC-NOT-06) ----------
+ 
+     static async Task<Ok<TaskBulkResult>> Bulk(Guid id, BulkBody body, Access access, HubDb db, TeamService team, Notifier notify, SettingsStore store, TimeProvider clock)
++        => await Tx.Notice<Ok<TaskBulkResult>>(db, store, async () =>
+     {
+         var (p, ctx) = await access.Project(id);
+         var s = await store.Get(db);
+@@ -824,7 +827,7 @@
+                 await notify.Send(NotificationEvents.DueDateChanged, g.Key, item, Text.Get("notify.bulk_due", actor, g.Count(), p.ProjectNumber), reason);
+         await db.SaveChangesAsync();
+         return TypedResults.Ok(new TaskBulkResult(updated.Count, skipped, warnings));
+-    }
++    });
+ 
+     public static NotifyItem Item(Project p, WorkTask t) => new(p.Id, ItemType.Task, t.Id, t.Key, $"/projects/{p.ProjectNumber}/tasks?panel=Task:{t.Id}", p.ProjectNumber);
+     // One mutation path for normal reassignment and same-team pickup; callers enforce their own authorization.
+
+--- /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint32-baseline/src/Hub.Api/Features/Deliverables.cs	2026-11-02 02:28:35
++++ /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Features/Deliverables.cs	2026-11-02 18:13:13
+@@ -313,6 +313,7 @@
+     // ---------- Edit (FR-DEL-01, DL-10, E-16) ----------
+ 
+     static async Task<Ok<DeliverableEdited>> Edit(Guid id, JsonElement body, HttpContext http, Access access, HubDb db, TeamService team, Notifier notify, SettingsStore store)
++        => await Tx.Notice<Ok<DeliverableEdited>>(db, store, async () =>
+     {
+         var (d, p, ctx) = await Load(db, access, id);
+         var facts = await Facts(db, d);
+@@ -372,7 +373,7 @@
+         }
+         Http.ETag(http, d);
+         return TypedResults.Ok(new DeliverableEdited(d.Id, d.RowVersion, Warnings(d, ms).Concat(registerEnabled ? await NumberWarnings(db, d) : []).ToArray()));
+-    }
++    });
+ 
+     // ---------- Lifecycle (DL-02, DL-04, AC-DEL-03, AC-DEL-04, E-24) ----------
+ 
+
+--- /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint32-baseline/src/Hub.Api/Features/Dependencies.cs	2026-11-02 12:28:39
++++ /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Features/Dependencies.cs	2026-11-02 18:13:13
+@@ -57,7 +57,8 @@
+             return TypedResults.Created($"/api/v1/dependencies/{edge.Id}", new DependencyAdded(edge.Id, warnings));
+         });
+ 
+-        api.MapDelete("/dependencies/{id:guid}", async Task<NoContent> (Guid id, Access access, HubDb db, Notifier notify, TimeProvider clock, CurrentUser me) =>
++        api.MapDelete("/dependencies/{id:guid}", async Task<NoContent> (Guid id, Access access, HubDb db, Notifier notify, TimeProvider clock, CurrentUser me, SettingsStore store) =>
++            await Tx.Notice<NoContent>(db, store, async () =>
+         {
+             var e = await db.Dependencies.FirstOrDefaultAsync(x => x.Id == id) ?? throw ApiException.NotFound();
+             var (p, ctx) = await access.Project(e.ProjectId);
+@@ -72,7 +73,7 @@
+                 Text.Get("notify.dependency_removed", await notify.ActorName(), pred.Key, succ.Key, succ.Name));
+             await db.SaveChangesAsync();
+             return TypedResults.NoContent();
+-        });
++        }));
+ 
+         // FR-DEP-09 (packet 021): explicit links between deliverables, typed (FR-DEPT-01), with an optional lag; loops refused (D-03).
+         api.MapPost("/deliverables/{id:guid}/dependencies", async Task<Created<DeliverableDependencyAdded>> (Guid id, DeliverableBody body, Access access, HubDb db) =>
+
+--- /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint32-baseline/src/Hub.Api/Features/Milestones.cs	2026-11-02 12:28:39
++++ /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Features/Milestones.cs	2026-11-02 18:13:13
+@@ -241,7 +241,8 @@
+         return (preview, deliverables, tasks);
+     }
+ 
+-    static async Task<Results<Ok<DatePreview>, Ok<DateChanged>>> ChangeDate(Guid id, ChangeDateBody body, HttpContext http, Access access, HubDb db, Notifier notify)
++    static async Task<Results<Ok<DatePreview>, Ok<DateChanged>>> ChangeDate(Guid id, ChangeDateBody body, HttpContext http, Access access, HubDb db, Notifier notify, SettingsStore store)
++        => await Tx.Notice<Results<Ok<DatePreview>, Ok<DateChanged>>>(db, store, async () =>
+     {
+         var (m, p, ctx) = await Load(db, access, id);
+         Access.Demand(Permissions.ManageMilestones(access.Actor, ctx));
+@@ -263,7 +264,7 @@
+             Text.Get("notify.milestone_moved", await notify.ActorName(), m.Key, m.Name, old?.ToString("yyyy-MM-dd") ?? "—", body.NewDate.ToString("yyyy-MM-dd"), (delta >= 0 ? "+" : "") + delta), reason);
+         await db.SaveChangesAsync();
+         return TypedResults.Ok(new DateChanged(m.Id, m.RowVersion, deliverables.Count + tasks.Count, preview));
+-    }
++    });
+ 
+     static async Task<Ok<MilestoneCompleted>> Complete(Guid id, CompleteBody body, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock)
+     {
+
+--- /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint32-baseline/src/Hub.Api/Features/Comments.cs	2026-10-31 16:34:44
++++ /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Features/Comments.cs	2026-11-02 18:13:13
+@@ -93,7 +93,8 @@
+ 
+         });
+ 
+-        api.MapPost("/items/{type}/{id:guid}/comments", async (string type, Guid id, CommentBody body, Access access, HubDb db, Notifier notify, TimeProvider clock) =>
++        api.MapPost("/items/{type}/{id:guid}/comments", async (string type, Guid id, CommentBody body, Access access, HubDb db, Notifier notify, TimeProvider clock, SettingsStore store) =>
++            await Tx.Notice(db, store, async () =>
+         {
+             Check.OneOf(type, ItemType.Commentable, "type");
+             var target = await Item(db, type, id) ?? throw ApiException.NotFound();
+@@ -107,9 +108,10 @@
+             await Notices(db, notify, p, type, id, target, mentioned, []);
+             await db.SaveChangesAsync();
+             return TypedResults.Created($"/api/v1/comments/{c.Id}", new CommentCreated(c.Id));
+-        });
++        }));
+ 
+-        api.MapPatch("/comments/{id:guid}", async (Guid id, CommentBody body, Access access, HubDb db, Notifier notify, TimeProvider clock) =>
++        api.MapPatch("/comments/{id:guid}", async (Guid id, CommentBody body, Access access, HubDb db, Notifier notify, TimeProvider clock, SettingsStore store) =>
++            await Tx.Notice(db, store, async () =>
+         {
+             var c = await db.Comments.FirstOrDefaultAsync(x => x.Id == id) ?? throw ApiException.NotFound();
+             var (p, ctx) = await access.Project(c.ProjectId);
+@@ -126,7 +128,7 @@
+             await Notices(db, notify, p, c.ItemType, c.ItemId, target, mentioned.Where(m => !before.Contains(m)).ToList(), [], commentOnItem: false);
+             await db.SaveChangesAsync();
+             return TypedResults.NoContent();
+-        });
++        }));
+ 
+         api.MapDelete("/comments/{id:guid}", async (Guid id, Access access, HubDb db, TimeProvider clock) =>
+         {
+
+--- /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint32-baseline/src/Hub.Api/Features/TaskPickup.cs	2026-11-01 03:05:43
++++ /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Features/TaskPickup.cs	2026-11-02 18:13:13
+@@ -320,6 +320,7 @@
+         var (_, ctx) = await access.Project(projectId, false);
+         Access.Demand(Permissions.Writable(access.Actor, ctx));
+         var result = await next(context);
++        await db.FlushNotices(context.HttpContext.RequestAborted);
+         await tx.CommitAsync();
+         return result;
+     }
+
+--- /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint32-baseline/src/Hub.Api/Features/Planning.cs	2026-11-02 12:56:33
++++ /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Features/Planning.cs	2026-11-02 18:13:25
+@@ -665,80 +665,92 @@
+ 
+     static async Task<Created<EntryRow>> Create(CreateBody body, Access access, HubDb db, SettingsStore store, TimeProvider clock, Notifier notify)
+     {
+-        var person = await db.Users.AsNoTracking().SingleOrDefaultAsync(u => u.Id == body.PersonId && u.IsActive) ?? throw ApiException.NotFound();
+-        Access.Demand(Permissions.CreatePlanningEntry(access.Actor, person.Id, person.SupervisorId));
+-        var defaults = PlanningRules.Defaults(person.Id == access.Actor.Id, false);
+-        var entry = new PlanningEntry { PersonId = body.PersonId, CreatedBy = access.Actor.Id, HoursPerWeek = body.HoursPerWeek,
+-            StartWeek = body.StartWeek, EndWeek = body.EndWeek, Label = body.Label, SourceCategory = body.SourceCategory,
+-            ProjectId = body.ProjectId, ProjectDisciplineId = body.ProjectDisciplineId, Confidence = body.Confidence ?? defaults.Confidence,
+-            Visibility = body.Visibility ?? defaults.Visibility, Notes = body.Notes, LastValidatedAt = clock.GetUtcNow() };
+-        var settings = await store.Get(db); await Validate(db, access, entry, settings, true);
+-        db.PlanningEntries.Add(entry);
+-        await Notice(db, access, notify, entry, false, clock);
+-        await db.SaveChangesAsync(); // Entry, immutable audit, notice and email share this transaction.
+-        return TypedResults.Created($"/api/v1/planning/entries/{entry.Id}", (await Rows(db, access, [entry], settings, clock))[0]);
++        return await Tx.Notice<Created<EntryRow>>(db, store, async () =>
++        {
++            var person = await db.Users.AsNoTracking().SingleOrDefaultAsync(u => u.Id == body.PersonId && u.IsActive) ?? throw ApiException.NotFound();
++            Access.Demand(Permissions.CreatePlanningEntry(access.Actor, person.Id, person.SupervisorId));
++            var defaults = PlanningRules.Defaults(person.Id == access.Actor.Id, false);
++            var entry = new PlanningEntry { PersonId = body.PersonId, CreatedBy = access.Actor.Id, HoursPerWeek = body.HoursPerWeek,
++                StartWeek = body.StartWeek, EndWeek = body.EndWeek, Label = body.Label, SourceCategory = body.SourceCategory,
++                ProjectId = body.ProjectId, ProjectDisciplineId = body.ProjectDisciplineId, Confidence = body.Confidence ?? defaults.Confidence,
++                Visibility = body.Visibility ?? defaults.Visibility, Notes = body.Notes, LastValidatedAt = clock.GetUtcNow() };
++            var settings = await store.Get(db); await Validate(db, access, entry, settings, true);
++            db.PlanningEntries.Add(entry);
++            await Notice(db, access, notify, entry, false, clock);
++            await db.SaveChangesAsync(); // Entry, immutable audit, notice and email share this transaction.
++            return TypedResults.Created($"/api/v1/planning/entries/{entry.Id}", (await Rows(db, access, [entry], settings, clock))[0]);
++        });
+     }
+ 
+     static async Task<Created<EntryRow>> Quick(QuickBody body, Access access, HubDb db, SettingsStore store, TimeProvider clock, Notifier notify)
+     {
+-        var value = PlanningRules.ParseQuickAdd(body.Text, (await store.Get(db)).PlanningMaxHoursPerWeek);
+-        Check.That(value is not null, "text", "planning.quick_add_format");
+-        var defaults = PlanningRules.Defaults(body.PersonId == access.Actor.Id, value!.Possible);
+-        return await Create(new(body.PersonId, value.Hours, body.Week, body.Week, value.Label, PlanningSource.OtherProject,
+-            Confidence: defaults.Confidence, Visibility: defaults.Visibility), access, db, store, clock, notify);
++        return await Tx.Notice<Created<EntryRow>>(db, store, async () =>
++        {
++            var value = PlanningRules.ParseQuickAdd(body.Text, (await store.Get(db)).PlanningMaxHoursPerWeek);
++            Check.That(value is not null, "text", "planning.quick_add_format");
++            var defaults = PlanningRules.Defaults(body.PersonId == access.Actor.Id, value!.Possible);
++            return await Create(new(body.PersonId, value.Hours, body.Week, body.Week, value.Label, PlanningSource.OtherProject,
++                Confidence: defaults.Confidence, Visibility: defaults.Visibility), access, db, store, clock, notify);
++        });
+     }
+ 
+     static async Task<Ok<EntryRow>> Edit(Guid id, JsonElement body, HttpContext http, Access access, HubDb db,
+         SettingsStore store, TimeProvider clock, Notifier notify)
+     {
+-        var patch = new Patch(body); var reason = patch.Str("reason");
+-        var entry = await Writable(id, reason, access, db, store, clock);
+-        await Http.CheckVersion(db, http, entry, patch.RowVersion);
+-        var wasVisible = entry.Visibility != PlanningVisibility.Draft;
+-        var originalProject = entry.ProjectId; var originalDiscipline = entry.ProjectDisciplineId; var originalPerson = entry.PersonId;
+-        if (patch.Has("personId"))
++        return await Tx.Notice<Ok<EntryRow>>(db, store, async () =>
+         {
+-            var personId = patch.Id("personId") ?? throw ApiException.Invalid("personId", "error.required");
+-            if (personId != entry.PersonId)
++            var patch = new Patch(body); var reason = patch.Str("reason");
++            var entry = await Writable(id, reason, access, db, store, clock);
++            await Http.CheckVersion(db, http, entry, patch.RowVersion);
++            var wasVisible = entry.Visibility != PlanningVisibility.Draft;
++            var originalProject = entry.ProjectId; var originalDiscipline = entry.ProjectDisciplineId; var originalPerson = entry.PersonId;
++            if (patch.Has("personId"))
+             {
+-                Check.That(entry.CreatedBy != entry.PersonId && personId != entry.CreatedBy, "personId", "planning.person_fixed");
+-                var target = await db.Users.AsNoTracking().SingleOrDefaultAsync(u => u.Id == personId && u.IsActive) ?? throw ApiException.NotFound();
+-                Access.Demand(Permissions.CreatePlanningEntry(access.Actor, target.Id, target.SupervisorId)); entry.PersonId = personId;
++                var personId = patch.Id("personId") ?? throw ApiException.Invalid("personId", "error.required");
++                if (personId != entry.PersonId)
++                {
++                    Check.That(entry.CreatedBy != entry.PersonId && personId != entry.CreatedBy, "personId", "planning.person_fixed");
++                    var target = await db.Users.AsNoTracking().SingleOrDefaultAsync(u => u.Id == personId && u.IsActive) ?? throw ApiException.NotFound();
++                    Access.Demand(Permissions.CreatePlanningEntry(access.Actor, target.Id, target.SupervisorId)); entry.PersonId = personId;
++                }
+             }
+-        }
+-        if (patch.Has("hoursPerWeek")) entry.HoursPerWeek = patch.Dec("hoursPerWeek") ?? 0;
+-        if (patch.Has("startWeek")) entry.StartWeek = patch.Date("startWeek") ?? default;
+-        if (patch.Has("endWeek")) entry.EndWeek = patch.Date("endWeek") ?? default;
+-        if (patch.Has("label")) entry.Label = patch.Str("label") ?? "";
+-        if (patch.Has("sourceCategory")) entry.SourceCategory = patch.Str("sourceCategory") ?? "";
+-        if (patch.Has("projectId")) entry.ProjectId = patch.Id("projectId");
+-        if (patch.Has("projectDisciplineId")) entry.ProjectDisciplineId = patch.Id("projectDisciplineId");
+-        if (patch.Has("confidence")) entry.Confidence = patch.Str("confidence") ?? "";
+-        if (patch.Has("notes")) entry.Notes = patch.Str("notes");
+-        var settings = await store.Get(db);
+-        await Validate(db, access, entry, settings, originalProject != entry.ProjectId || originalDiscipline != entry.ProjectDisciplineId || originalPerson != entry.PersonId);
+-        entry.LastValidatedAt = clock.GetUtcNow();
+-        db.Entry(entry).Property(e => e.LastValidatedAt).IsModified = true;
+-        AuditChange(db, access, entry, originalPerson != entry.PersonId ? "Moved" : "Changed", reason);
+-        if (originalPerson != entry.PersonId && wasVisible)
+-        {
+-            var moved = new PlanningEntry { Id = entry.Id, PersonId = originalPerson, CreatedBy = entry.CreatedBy, Visibility = PlanningVisibility.Draft };
+-            await Notice(db, access, notify, moved, true, clock);
+-        }
+-        await Notice(db, access, notify, entry, wasVisible && originalPerson == entry.PersonId, clock);
+-        await db.SaveChangesAsync(); return TypedResults.Ok((await Rows(db, access, [entry], settings, clock))[0]);
++            if (patch.Has("hoursPerWeek")) entry.HoursPerWeek = patch.Dec("hoursPerWeek") ?? 0;
++            if (patch.Has("startWeek")) entry.StartWeek = patch.Date("startWeek") ?? default;
++            if (patch.Has("endWeek")) entry.EndWeek = patch.Date("endWeek") ?? default;
++            if (patch.Has("label")) entry.Label = patch.Str("label") ?? "";
++            if (patch.Has("sourceCategory")) entry.SourceCategory = patch.Str("sourceCategory") ?? "";
++            if (patch.Has("projectId")) entry.ProjectId = patch.Id("projectId");
++            if (patch.Has("projectDisciplineId")) entry.ProjectDisciplineId = patch.Id("projectDisciplineId");
++            if (patch.Has("confidence")) entry.Confidence = patch.Str("confidence") ?? "";
++            if (patch.Has("notes")) entry.Notes = patch.Str("notes");
++            var settings = await store.Get(db);
++            await Validate(db, access, entry, settings, originalProject != entry.ProjectId || originalDiscipline != entry.ProjectDisciplineId || originalPerson != entry.PersonId);
++            entry.LastValidatedAt = clock.GetUtcNow();
++            db.Entry(entry).Property(e => e.LastValidatedAt).IsModified = true;
++            AuditChange(db, access, entry, originalPerson != entry.PersonId ? "Moved" : "Changed", reason);
++            if (originalPerson != entry.PersonId && wasVisible)
++            {
++                var moved = new PlanningEntry { Id = entry.Id, PersonId = originalPerson, CreatedBy = entry.CreatedBy, Visibility = PlanningVisibility.Draft };
++                await Notice(db, access, notify, moved, true, clock);
++            }
++            await Notice(db, access, notify, entry, wasVisible && originalPerson == entry.PersonId, clock);
++            await db.SaveChangesAsync(); return TypedResults.Ok((await Rows(db, access, [entry], settings, clock))[0]);
++        });
+     }
+ 
+     static async Task<Ok<EntryRow>> ChangeVisibility(Guid id, VisibilityBody body, HttpContext http, Access access, HubDb db,
+         SettingsStore store, TimeProvider clock, Notifier notify)
+     {
+-        var entry = await Writable(id, body.Reason, access, db, store, clock);
+-        await Http.CheckVersion(db, http, entry, body.RowVersion);
+-        Check.That(PlanningRules.StepVisibility(entry.CreatedBy == entry.PersonId, entry.Visibility, body.Visibility), "visibility", "planning.visibility");
+-        var wasVisible = entry.Visibility != PlanningVisibility.Draft; entry.Visibility = body.Visibility;
+-        entry.LastValidatedAt = clock.GetUtcNow(); db.Entry(entry).Property(e => e.LastValidatedAt).IsModified = true;
+-        AuditChange(db, access, entry, "VisibilityChanged", body.Reason); await Notice(db, access, notify, entry, wasVisible, clock);
+-        await db.SaveChangesAsync(); return TypedResults.Ok((await Rows(db, access, [entry], await store.Get(db), clock))[0]);
++        return await Tx.Notice<Ok<EntryRow>>(db, store, async () =>
++        {
++            var entry = await Writable(id, body.Reason, access, db, store, clock);
++            await Http.CheckVersion(db, http, entry, body.RowVersion);
++            Check.That(PlanningRules.StepVisibility(entry.CreatedBy == entry.PersonId, entry.Visibility, body.Visibility), "visibility", "planning.visibility");
++            var wasVisible = entry.Visibility != PlanningVisibility.Draft; entry.Visibility = body.Visibility;
++            entry.LastValidatedAt = clock.GetUtcNow(); db.Entry(entry).Property(e => e.LastValidatedAt).IsModified = true;
++            AuditChange(db, access, entry, "VisibilityChanged", body.Reason); await Notice(db, access, notify, entry, wasVisible, clock);
++            await db.SaveChangesAsync(); return TypedResults.Ok((await Rows(db, access, [entry], await store.Get(db), clock))[0]);
++        });
+     }
+ 
+     static async Task<Ok<EntryRow>> StillValid(Guid id, VersionBody body, HttpContext http, Access access, HubDb db,
+@@ -753,11 +765,14 @@
+     static async Task<NoContent> Delete(Guid id, int? rowVersion, string? reason, HttpContext http, Access access, HubDb db,
+         SettingsStore store, TimeProvider clock, Notifier notify)
+     {
+-        var entry = await Writable(id, reason, access, db, store, clock); await Http.CheckVersion(db, http, entry, rowVersion);
+-        var wasVisible = entry.Visibility != PlanningVisibility.Draft;
+-        entry.DeletedAt = clock.GetUtcNow(); entry.DeletedBy = access.Actor.Id;
+-        AuditChange(db, access, entry, "Deleted", reason); await Notice(db, access, notify, entry, wasVisible, clock, true);
+-        await db.SaveChangesAsync(); return TypedResults.NoContent();
++        return await Tx.Notice<NoContent>(db, store, async () =>
++        {
++            var entry = await Writable(id, reason, access, db, store, clock); await Http.CheckVersion(db, http, entry, rowVersion);
++            var wasVisible = entry.Visibility != PlanningVisibility.Draft;
++            entry.DeletedAt = clock.GetUtcNow(); entry.DeletedBy = access.Actor.Id;
++            AuditChange(db, access, entry, "Deleted", reason); await Notice(db, access, notify, entry, wasVisible, clock, true);
++            await db.SaveChangesAsync(); return TypedResults.NoContent();
++        });
+     }
+ 
+     static async Task<IResult> TimeAway(TimeAwayBody body, Access access, HubDb db)
+
+--- /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint32-baseline/src/Hub.Api/Infrastructure/Keys.cs	2026-10-31 16:34:44
++++ /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Infrastructure/Keys.cs	2026-11-02 18:12:01
+@@ -42,12 +42,19 @@
+ 
+ public static class Tx
+ {
++    /// Enhanced notice producers need one outer boundary across every business save and captured recipient.
++    /// The legacy path keeps its original transaction ownership while the notice feature is disabled.
++    public static async Task<T> Notice<T>(HubDb db, SettingsStore store, Func<Task<T>> work)
++        => (await store.Get(db)).IsFlagOn("people_screens") ? await Run(db, work) : await work();
++
+     /// Runs work in one database transaction (keys, the change and its log entries commit together).
+     public static async Task<T> Run<T>(HubDb db, Func<Task<T>> work)
+     {
+         if (db.Database.CurrentTransaction is not null) return await work();
+         await using var tx = await db.Database.BeginTransactionAsync();
+         var r = await work();
++        // A joined command never drains an incomplete recipient set; only the actual owner flushes.
++        await db.FlushNotices();
+         await tx.CommitAsync();
+         return r;
+     }
+
+--- /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint32-baseline/src/Hub.Api/Infrastructure/EvaluationService.cs	2026-10-31 22:40:23
++++ /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Infrastructure/EvaluationService.cs	2026-11-02 18:14:15
+@@ -165,9 +165,11 @@
+         if (notifyTransitions && p.Status == ProjectStatus.Active)
+         {
+             try { await Notices(p, r, was, tasksRaw, byKey, msTransitions, decBecameOverdue, newCritical, newA03, disciplines, deliverablesRaw); }
+-            catch (Exception e) { log.LogError(e, "Transition notices failed for project {ProjectId}", projectId); }
++            catch (Exception e) when (!s.IsFlagOn("people_screens")) { log.LogError(e, "Transition notices failed for project {ProjectId}", projectId); }
+             await db.SaveChangesAsync(ct);
+         }
++        // Enhanced capture is part of this manual transaction; admission failure must roll back the materialization.
++        await db.FlushNotices(ct);
+         await tx.CommitAsync(ct);
+         return r;
+     }
+@@ -344,26 +346,31 @@
+     {
+         var db = sp.GetRequiredService<HubDb>();
+         var clock = sp.GetRequiredService<TimeProvider>();
+-        var s = await sp.GetRequiredService<SettingsStore>().Get(db);
++        var store = sp.GetRequiredService<SettingsStore>();
++        var s = await store.Get(db);
+         var now = clock.GetUtcNow();
+         var today = clock.Today(s);
+         var notify = sp.GetRequiredService<Notifier>();
+-        var expired = 0;
+-        foreach (var p in await db.Projects.Where(p => p.HealthOverride != null && p.HealthOverrideExpiresAt <= now).ToListAsync(ct))
+-        {
+-            var reported = p.HealthOverride;
+-            p.HealthOverride = null; // AC-HLT-03: removed by the system and logged with actor System
+-            db.Audit.Note(p, action: "HealthOverrideExpired");
+-            await notify.Send(NotificationEvents.HealthOverride, [p.ProjectManagerId], new NotifyItem(p.Id, ItemType.Project, p.Id, p.ProjectNumber, $"/projects/{p.ProjectNumber}", p.ProjectNumber),
+-                Text.Get("notify.override_expired", p.ProjectNumber, p.Name, reported ?? ""));
+-            expired++;
+-        }
+-        foreach (var z in await db.Snoozes.Where(z => z.EndedAt == null && z.SnoozedUntil <= now).ToListAsync(ct))
++        var expired = await Tx.Notice<int>(db, store, async () =>
+         {
+-            z.EndedAt = now;
+-            db.LogEvent(ItemType.Snooze, z.Id, "SnoozeExpired", "attention", z.ProjectId, z.RuleId, null);
+-        }
+-        await db.SaveChangesAsync(ct);
++            var expiredCount = 0;
++            foreach (var p in await db.Projects.Where(p => p.HealthOverride != null && p.HealthOverrideExpiresAt <= now).ToListAsync(ct))
++            {
++                var reported = p.HealthOverride;
++                p.HealthOverride = null; // AC-HLT-03: removed by the system and logged with actor System
++                db.Audit.Note(p, action: "HealthOverrideExpired");
++                await notify.Send(NotificationEvents.HealthOverride, [p.ProjectManagerId], new NotifyItem(p.Id, ItemType.Project, p.Id, p.ProjectNumber, $"/projects/{p.ProjectNumber}", p.ProjectNumber),
++                    Text.Get("notify.override_expired", p.ProjectNumber, p.Name, reported ?? ""));
++                expiredCount++;
++            }
++            foreach (var z in await db.Snoozes.Where(z => z.EndedAt == null && z.SnoozedUntil <= now).ToListAsync(ct))
++            {
++                z.EndedAt = now;
++                db.LogEvent(ItemType.Snooze, z.Id, "SnoozeExpired", "attention", z.ProjectId, z.RuleId, null);
++            }
++            await db.SaveChangesAsync(ct);
++            return expiredCount;
++        });
+         var ids = await db.Projects.Where(p => p.Status == ProjectStatus.Active).Select(p => p.Id).ToListAsync(ct);
+         foreach (var pid in ids)
+         {

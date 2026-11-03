@@ -1,0 +1,27 @@
+{
+  "paths": {
+    "added": [],
+    "removed": [],
+    "changed": []
+  },
+  "schemas": {
+    "added": [
+      "ReportPeriod",
+      "ReportUnitCell",
+      "ReportUnitRow",
+      "ReportUnitView",
+      "SubmissionDateFact"
+    ],
+    "removed": [],
+    "changed": [
+      "CoordinationPerson",
+      "HandoffPerson",
+      "HrIdentity",
+      "OrganisationPersonRow",
+      "ReportView",
+      "TaskPickupCandidate",
+      "TaskQueriesRowBase",
+      "WorkspaceOwnerChoice"
+    ]
+  }
+}

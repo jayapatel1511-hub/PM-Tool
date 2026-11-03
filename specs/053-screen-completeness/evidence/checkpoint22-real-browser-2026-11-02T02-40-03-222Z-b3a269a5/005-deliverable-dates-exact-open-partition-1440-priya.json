@@ -1,0 +1,35 @@
+{
+  "name": "deliverable-dates-exact-open-partition",
+  "actor": "priya@hub.test",
+  "width": 1440,
+  "status": "PASS",
+  "startedAtUtc": "2026-11-02T02:40:09.351Z",
+  "facts": {
+    "projectId": "01a19847-7051-74b1-81b9-2dc73cfe0447",
+    "trayIds": [
+      "01a19847-72b6-7193-917d-74aa43c98fb8",
+      "01a19847-72d0-7cdd-bceb-0628aa69bdda",
+      "01a19847-730c-7e64-a269-7a5a95fe918e",
+      "01a19847-7343-70b2-8fa2-47ed32f2ef53"
+    ],
+    "datedIds": [
+      "01a19847-7479-7eec-8aa5-db3707e69f7b"
+    ],
+    "statuses": {
+      "01a19847-72b6-7193-917d-74aa43c98fb8": "Not Started",
+      "01a19847-72d0-7cdd-bceb-0628aa69bdda": "In Progress",
+      "01a19847-730c-7e64-a269-7a5a95fe918e": "On Hold",
+      "01a19847-7343-70b2-8fa2-47ed32f2ef53": "Revision Required"
+    },
+    "contained": {
+      "viewport": 1440,
+      "document": 1440,
+      "content": {
+        "client": 1200,
+        "scroll": 1200
+      }
+    }
+  },
+  "screenshot": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint22-real-browser-2026-11-02T02-40-03-222Z-b3a269a5/007-priya-1440-deliverable-dates-exact-open-partition.png",
+  "finishedAtUtc": "2026-11-02T02:40:10.317Z"
+}

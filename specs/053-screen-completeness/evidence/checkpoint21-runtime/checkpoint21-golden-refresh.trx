@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="82a0e0a5-aceb-4ed0-971b-7ce9da8d3e84" name="@Jays-MacBook-Pro 2026-11-01 11:15:26" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-11-01T11:15:26.5993970-04:00" queuing="2026-11-01T11:15:26.5993970-04:00" start="2026-11-01T11:15:24.9302800-04:00" finish="2026-11-01T11:15:31.1886070-04:00" />
+  <TestSettings name="default" id="a71a2330-4dc9-447c-9e80-b5eafd244b5e">
+    <Deployment runDeploymentRoot="_Jays-MacBook-Pro_2026-11-01_11_15_26" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="40c1c5e3-d041-44e9-a14f-5f37d5188f62" testId="49ffbb51-b125-18fc-ff07-1628bdcaedea" testName="Hub.Tests.Api.ContractTests.Openapi_matches_the_committed_golden_document" computerName="Jays-MacBook-Pro" duration="00:00:05.5747905" startTime="2026-11-01T11:15:25.2981320-04:00" endTime="2026-11-01T11:15:30.8753650-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="40c1c5e3-d041-44e9-a14f-5f37d5188f62">
+      <Output>
+        <ErrorInfo>
+          <Message>Updated web/src/gen/openapi.json; review the diff, run npm run gen, and rerun without HUB_UPDATE_CONTRACT</Message>
+          <StackTrace>   at Hub.Tests.Api.ContractTests.Openapi_matches_the_committed_golden_document() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ContractTests.cs:line 50
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="327e2cc7-282f-4fa5-ac13-d91c3d5be510" testId="f823530b-0397-face-1834-35cd784e44bb" testName="Hub.Tests.Api.RegistryTests.Generated_key_families_match_the_registry_and_vocabulary" computerName="Jays-MacBook-Pro" duration="00:00:00.0461518" startTime="2026-11-01T11:15:25.2976230-04:00" endTime="2026-11-01T11:15:25.3497820-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="327e2cc7-282f-4fa5-ac13-d91c3d5be510">
+      <Output>
+        <ErrorInfo>
+          <Message>Updated web/src/gen/registry.gen.ts; review the diff and rerun without HUB_UPDATE_REGISTRY</Message>
+          <StackTrace>   at Hub.Tests.Api.RegistryTests.Generated_key_families_match_the_registry_and_vocabulary() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/RegistryTests.cs:line 135
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="Hub.Tests.Api.ContractTests.Openapi_matches_the_committed_golden_document" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="49ffbb51-b125-18fc-ff07-1628bdcaedea">
+      <Execution id="40c1c5e3-d041-44e9-a14f-5f37d5188f62" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="Openapi_matches_the_committed_golden_document" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.RegistryTests.Generated_key_families_match_the_registry_and_vocabulary" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="f823530b-0397-face-1834-35cd784e44bb">
+      <Execution id="327e2cc7-282f-4fa5-ac13-d91c3d5be510" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.RegistryTests" name="Generated_key_families_match_the_registry_and_vocabulary" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="49ffbb51-b125-18fc-ff07-1628bdcaedea" executionId="40c1c5e3-d041-44e9-a14f-5f37d5188f62" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f823530b-0397-face-1834-35cd784e44bb" executionId="327e2cc7-282f-4fa5-ac13-d91c3d5be510" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="2" executed="2" passed="0" failed="2" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.11)
+[xUnit.net 00:00:00.08]   Discovering: Hub.Tests
+[xUnit.net 00:00:00.19]   Discovered:  Hub.Tests
+[xUnit.net 00:00:00.19]   Starting:    Hub.Tests
+[xUnit.net 00:00:00.26]       Updated web/src/gen/registry.gen.ts; review the diff and rerun without HUB_UPDATE_REGISTRY
+[xUnit.net 00:00:00.26]       Stack Trace:
+[xUnit.net 00:00:00.26]         /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/RegistryTests.cs(135,0): at Hub.Tests.Api.RegistryTests.Generated_key_families_match_the_registry_and_vocabulary()
+[xUnit.net 00:00:00.26]            at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+[xUnit.net 00:00:00.26]            at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+warn: Microsoft.EntityFrameworkCore.Query[10103]
+      The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+[xUnit.net 00:00:05.78]       Updated web/src/gen/openapi.json; review the diff, run npm run gen, and rerun without HUB_UPDATE_CONTRACT
+[xUnit.net 00:00:05.78]       Stack Trace:
+[xUnit.net 00:00:05.78]         /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ContractTests.cs(50,0): at Hub.Tests.Api.ContractTests.Openapi_matches_the_committed_golden_document()
+[xUnit.net 00:00:05.78]         --- End of stack trace from previous location ---
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+[xUnit.net 00:00:06.07]   Finished:    Hub.Tests
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="Jays-MacBook-Pro" outcome="Error" timestamp="2026-11-01T11:15:25.3508450-04:00">
+        <Text>[xUnit.net 00:00:00.25]     Hub.Tests.Api.RegistryTests.Generated_key_families_match_the_registry_and_vocabulary [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="Jays-MacBook-Pro" outcome="Error" timestamp="2026-11-01T11:15:30.8757240-04:00">
+        <Text>[xUnit.net 00:00:05.78]     Hub.Tests.Api.ContractTests.Openapi_matches_the_committed_golden_document [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

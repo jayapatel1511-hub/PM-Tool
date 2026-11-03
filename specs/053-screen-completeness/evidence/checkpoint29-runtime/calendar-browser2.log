@@ -1,0 +1,11 @@
+{"status":"FAIL","suite":"calendar-screen","url":"http://127.0.0.1:8862/calendar?projects=00000000-0000-0000-0000-000000009102&date=2026-11-02&personId=00000000-0000-0000-0000-000000009101","errors":[],"unknown":[],"writes":[],"previews":[],"reads":[{"path":"me/notifications/pulse","query":{}},{"path":"me/notifications/unread-count","query":{}},{"path":"me","query":{}},{"path":"views","query":{"listType":"calendar","projectId":"00000000-0000-0000-0000-000000009102"}},{"path":"calendar/screen","query":{"from":"2026-11-02","to":"2026-11-08","projectIds":"00000000-0000-0000-0000-000000009102","types":"Deadline,Meeting,Site Work,Internal Task","personId":"00000000-0000-0000-0000-000000009101","undatedPage":"1","undatedPageSize":"50"}},{"path":"me/notifications/unread-count","query":{}},{"path":"me/notifications/pulse","query":{}},{"path":"me/notifications/unread-count","query":{}},{"path":"me","query":{}},{"path":"views","query":{"listType":"calendar","projectId":"00000000-0000-0000-0000-000000009102"}},{"path":"calendar/screen","query":{"from":"2026-11-02","to":"2026-11-08","projectIds":"00000000-0000-0000-0000-000000009102","types":"Deadline,Meeting,Site Work,Internal Task","personId":"00000000-0000-0000-0000-000000009101","undatedPage":"1","undatedPageSize":"50"}},{"path":"me/notifications/unread-count","query":{}}],"observations":["actual all-business-layers-off sends standalone types=none through qs, suppresses entries/tray, and keeps nonempty permitted Away"]}
+locator.waitFor: Timeout 15000ms exceeded.
+Call log:
+[2m  - waiting for getByText('Time away is unavailable for this people scope.', { exact: true }) to be visible[22m
+
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/calendar-screen.cjs:116:94 {
+  log: [
+    "  - waiting for getByText('Time away is unavailable for this people scope.', { exact: true }) to be visible"
+  ],
+  name: 'TimeoutError'
+}

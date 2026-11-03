@@ -1,0 +1,6 @@
+{
+  "exitCode": 0,
+  "onlyChangedInput": [
+    "tests/Hub.Tests/Api/FileScreenTests.cs"
+  ]
+}

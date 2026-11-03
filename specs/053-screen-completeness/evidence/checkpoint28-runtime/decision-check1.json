@@ -1,0 +1,7 @@
+{
+  "exitCode": 0,
+  "args": [
+    "python3",
+    "tools/test_decisions.py"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "status": "READY_HASH_MATCH_HOLD_UNEXECUTED",
+  "files": {
+    "src/Hub.Api/Features/CalendarScreen.cs": "0b79250755be06fc0cf73fa8cc101673dd332060716e43eb9f46725d11b293ed",
+    "tests/Hub.Tests/Api/CalendarScreenTests.cs": "b2ad36ddaf67808c3bcdf9d38b57705413940b495115eeceac4a3d0508818bf7",
+    "tests/Hub.Tests/Api/CalendarRescheduleTests.cs": "abca4c993ec1c2eef3a20ab8d9f0f449b607d50eefaeec601a8539b83aa72fae",
+    "web/src/pages/calendar-screen-state.ts": "f3e97839730d02e5f88a29f2f1d22a5aeaf5f6110729de00878277750c2a0e7f",
+    "web/src/components/hub/deadline-date-dialog.tsx": "ce25687eb4e4664c35b99faeff7b02aac1474410720b867d9e30adda094d9916",
+    "web/tests/calendar-screen.cjs": "7a19f637a54ecd16eb48f95d519836526c23328d3c6e6e8cfe051e8e119df401",
+    "web/tests/calendar-screen.fixture.cjs": "ea05dc2e75f3de25eb14e4d6929ba8900f41239a868ef41714ac03e23d13bc72",
+    "web/src/pages/Calendar.tsx": "f5ab81e2b498731ce43954778defe600469ef0582e7b44a15348b00e6d334381",
+    "src/Hub.Api/Features/Calendar.cs": "032850a2505c69479853e979fd8fb59144ea46c573287c6b6edc7ec365268542",
+    "src/Hub.Api/Features/Dependencies.cs": "0d2ba9621f6f84e8431e8218bf5e59c6d3db5254d5315e2d985b502639621ea0",
+    "src/Hub.Api/Features/Milestones.cs": "97ac2e887120f44315ae2dabcd3bc24f21ff0e4dd8f826b515f2d00ea3a713c6"
+  }
+}

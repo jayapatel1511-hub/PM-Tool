@@ -1,0 +1,47 @@
+{
+  "status": "complete",
+  "results": [
+    {
+      "suite": "project-header-compact",
+      "exitCode": 1,
+      "seconds": 7.07,
+      "log": "project-header-compact-adjacent1.log"
+    },
+    {
+      "suite": "staff-time-count-cards",
+      "exitCode": 0,
+      "seconds": 2.62,
+      "log": "staff-time-count-cards-adjacent1.log"
+    },
+    {
+      "suite": "project-dashboard-completeness",
+      "exitCode": 1,
+      "seconds": 1.5,
+      "log": "project-dashboard-completeness-adjacent1.log"
+    },
+    {
+      "suite": "work-task-columns",
+      "exitCode": 0,
+      "seconds": 4.04,
+      "log": "work-task-columns-adjacent1.log"
+    },
+    {
+      "suite": "report-capacity-comparison",
+      "exitCode": 0,
+      "seconds": 3.64,
+      "log": "report-capacity-comparison-adjacent1.log"
+    },
+    {
+      "suite": "record-context-details",
+      "exitCode": 0,
+      "seconds": 8.53,
+      "log": "record-context-details-adjacent1.log"
+    },
+    {
+      "suite": "team-completeness",
+      "exitCode": 0,
+      "seconds": 6.93,
+      "log": "team-completeness-adjacent1.log"
+    }
+  ]
+}

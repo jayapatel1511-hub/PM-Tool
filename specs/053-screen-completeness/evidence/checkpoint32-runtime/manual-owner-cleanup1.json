@@ -1,0 +1,9 @@
+{
+  "atUtc": "2026-11-02T23:11:26.736924+00:00",
+  "status": "AUTHORED_UNCOMPILED",
+  "paths": [
+    "src/Hub.Api/Infrastructure/EvaluationService.cs",
+    "src/Hub.Api/Features/TaskPickup.cs"
+  ],
+  "scope": "Manual owners discard raw capture on success and every failure; transaction/locks/handler/flush/commit unchanged inside try"
+}

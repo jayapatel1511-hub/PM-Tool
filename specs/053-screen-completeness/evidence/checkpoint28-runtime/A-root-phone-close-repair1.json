@@ -1,0 +1,7 @@
+{
+  "file": "web/tests/decision-metadata.cjs",
+  "before": "5eb6a9f61eaf8296189eb8535900f0c4a92e9cd611b3d3b31005354f8a9e9f83",
+  "after": "b35bdd89444450499c0ba7bc7da62fe12424f42ef1b2526f5e0976cd3a8829c8",
+  "observed": "browser4 all10writes/4mutations reached legacyoffphone, Escape did not close sheet",
+  "repair": "Use actual phone Close and wait hidden/URL before opening legacy form; no request/assertion/product changes"
+}

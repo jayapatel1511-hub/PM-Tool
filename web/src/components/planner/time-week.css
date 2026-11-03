@@ -1,0 +1,16 @@
+.time-week-table { min-width: 1040px; }
+.time-week-table th:first-child { width: 240px; min-width: 200px; }
+.time-week-table th:not(:first-child), .time-week-table td { min-width: 96px; }
+.time-week-table [data-time-away="true"] {
+  background-image: repeating-linear-gradient(135deg, transparent 0, transparent 5px, color-mix(in srgb, currentColor 7%, transparent) 5px, color-mix(in srgb, currentColor 7%, transparent) 6px);
+}
+/* Recorded time away uses the same named hatch as the Planner. The header's
+   small labels need ink against both opaque stripe colours, including its
+   otherwise-muted availability line. Legacy styling above remains unchanged. */
+:root[data-visual="v2"] .time-week-table [data-time-away="true"] {
+  background-image: var(--time-away-hatch);
+}
+:root[data-visual="v2"] .time-week-table th[data-time-away="true"],
+:root[data-visual="v2"] .time-week-table th[data-time-away="true"] > span {
+  color: var(--ink);
+}

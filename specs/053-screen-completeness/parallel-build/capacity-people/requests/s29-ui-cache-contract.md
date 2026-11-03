@@ -1,0 +1,7 @@
+# S29 actual UI query/invalidation keys
+
+Editor: `['person-facts', targetId, admin ? 'admin' : 'self']`; targetId defaults authenticated me. Vocabulary filter: `['certification-tags']` GET /certification-tags. Dedicated vocabulary editor: `['admin','certificationTags']` GET Admin endpoint. Existing Staff ['staff',f], Workspace ['wteam',...scope/home/tag], project ['p',projectId,'team',...(enabled tag)] and picker ['people',...] remain existing scoped prefixes.
+
+After certificate create/edit/remove: await invalidateChange(qc,'UserCertification'); after Admin type/date save: 'PersonFacts'; after tag create/name/activation: 'CertificationTag'. Root owns keys.ts, its generic project refresh includes ['p',projectId] when provided; new fact/tag changes may require a predicate/prefix ['p'] for all mounted team reads. Tags never count assignments. UserDialog updates its legacy AppUser version only when its baseline still equals the captured prior version actually used for its own facts PATCH; newer child reads cannot conceal another Admin's simultaneous legacy-field edit.
+
+Admin.tsx Settings save will conditionally await 'PersonFacts' invalidation for certification_warn_days/availability_window_days in addition to existing 'Setting'; this is the exact callback loan root approved. Shared setting labels requested with locales. Known successful creates hold the form until authoritative refresh, while unknown result preserves exact logical body/key and disables changes until retry/reload. No lane shared-cache edits.

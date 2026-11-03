@@ -1,0 +1,79 @@
+{
+  "atUtc": "2026-11-02T23:56:57.059308+00:00",
+  "addedPaths": [],
+  "removedPaths": [],
+  "addedSchemas": [],
+  "removedSchemas": [],
+  "changedSchemas": [
+    "NotificationScreenDelivery"
+  ],
+  "deliveryBefore": {
+    "properties": {
+      "historyCoverage": {
+        "type": "string"
+      },
+      "state": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "state",
+      "historyCoverage"
+    ],
+    "type": "object"
+  },
+  "deliveryAfter": {
+    "properties": {
+      "acceptedAt": {
+        "format": "date-time",
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "historyCoverage": {
+        "type": "string"
+      },
+      "knownOccurrences": {
+        "format": "int32",
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "type": [
+          "null",
+          "integer"
+        ]
+      },
+      "realEmailedOccurrences": {
+        "format": "int32",
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "type": [
+          "null",
+          "integer"
+        ]
+      },
+      "state": {
+        "type": "string"
+      },
+      "totalOccurrences": {
+        "format": "int32",
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "type": [
+          "null",
+          "integer"
+        ]
+      },
+      "uncertainOccurrences": {
+        "format": "int32",
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "type": [
+          "null",
+          "integer"
+        ]
+      }
+    },
+    "required": [
+      "state",
+      "historyCoverage"
+    ],
+    "type": "object"
+  }
+}

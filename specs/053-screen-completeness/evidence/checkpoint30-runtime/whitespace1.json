@@ -1,0 +1,93 @@
+{
+  "atUtc": "2026-11-02T20:39:20.435769+00:00",
+  "filesChecked": 45,
+  "newTrailingWhitespace": [],
+  "preexistingUnchangedTrailingWhitespace": [
+    {
+      "file": "web/src/i18n/en.ts",
+      "line": 779
+    },
+    {
+      "file": "web/src/i18n/en.ts",
+      "line": 1408
+    },
+    {
+      "file": "web/src/i18n/en.ts",
+      "line": 1464
+    },
+    {
+      "file": "web/src/i18n/en.ts",
+      "line": 1466
+    },
+    {
+      "file": "web/src/i18n/en.ts",
+      "line": 1577
+    },
+    {
+      "file": "web/src/i18n/en.ts",
+      "line": 1630
+    },
+    {
+      "file": "web/src/i18n/en.ts",
+      "line": 1647
+    },
+    {
+      "file": "web/src/i18n/en.ts",
+      "line": 1674
+    },
+    {
+      "file": "web/src/i18n/en.ts",
+      "line": 1675
+    },
+    {
+      "file": "web/src/i18n/en.ts",
+      "line": 2168
+    },
+    {
+      "file": "web/src/i18n/en.ts",
+      "line": 2383
+    },
+    {
+      "file": "web/src/i18n/en.ts",
+      "line": 2393
+    },
+    {
+      "file": "web/src/i18n/en.ts",
+      "line": 2478
+    },
+    {
+      "file": "web/src/i18n/en.ts",
+      "line": 2706
+    },
+    {
+      "file": "web/src/i18n/en.ts",
+      "line": 2709
+    },
+    {
+      "file": "web/src/i18n/en.ts",
+      "line": 2712
+    },
+    {
+      "file": "web/src/i18n/en.ts",
+      "line": 2736
+    },
+    {
+      "file": "web/src/i18n/en.ts",
+      "line": 2737
+    },
+    {
+      "file": "web/src/i18n/en.ts",
+      "line": 3193
+    },
+    {
+      "file": "web/src/i18n/en.ts",
+      "line": 3195
+    },
+    {
+      "file": "web/src/i18n/en.ts",
+      "line": 3196
+    }
+  ],
+  "gitDiffCheckExit": 0,
+  "boundary": "Preserved unrelated preexisting locale whitespace, verified same multiset as preimage"
+}

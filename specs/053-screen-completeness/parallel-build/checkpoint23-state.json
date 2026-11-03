@@ -1,0 +1,162 @@
+{
+  "checkpoint": 23,
+  "generation": 51,
+  "mode": "checkpoint23-closed-local",
+  "previous": "checkpoint22 closed-local;053 S14/S33 checked,30of49;052 remains partial; full goal active",
+  "buildRoot": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053",
+  "runtime": "QA23 API77813 gracefully stopped after exact PID/command/cwd/listener check; only hub_qa_checkpoint23 dropped. Cleanup receipt evidence/checkpoint23-runtime/qa23-cleanup1.json. TestPG55432 and verified preview8853 retained.",
+  "owners": {
+    "A": {
+      "source": [
+        "web/src/components/planner/time-week.css",
+        "web/tests/capacity-time-week.cjs",
+        "web/src/components/planner/PlannerGrid.tsx",
+        "web/src/components/planner/PlannerMonthGrid.tsx",
+        "web/src/components/planner/labels.ts",
+        "web/src/components/hub/team-organisation-controls.tsx",
+        "web/src/components/hub/team-organisation.ts",
+        "web/src/components/hub/person-panel.tsx",
+        "web/src/components/hub/registers.tsx",
+        "web/src/pages/projects/Team.tsx",
+        "web/src/pages/WorkspaceTeam.tsx",
+        "web/src/pages/Organisation.tsx",
+        "web/src/pages/admin/Admin.tsx",
+        "web/src/pages/admin/Structure.tsx",
+        "web/src/pages/Vacation.tsx",
+        "web/src/pages/Time.tsx",
+        "web/src/pages/Workload.tsx",
+        "web/src/pages/Portfolio.tsx",
+        "web/src/pages/projects/Dashboard.tsx",
+        "web/tests/person-organisation-surfaces.cjs",
+        "web/tests/person-organisation-surfaces.fixture.cjs",
+        "web/src/pages/MyWork.tsx",
+        "web/src/components/hub/work-seen.tsx",
+        "web/tests/work-seen-state.cjs",
+        "web/tests/work-seen-state.fixture.cjs"
+      ],
+      "scope": "Global S43 frontend, exact structured files only; A organisation/supervisor/PM/Vacation/Time +held hatch; D comments/activity/coordination/work/planner dialogs. No math/command/permissions writes; no execution. New S10 sharedUI helper +MyWork visible own visit/MarkAll/rowbadges/activity/person labels, exact4additionalfiles; earlierfilesremainheld exceptprovenrepairs."
+    },
+    "B": {
+      "documents": [
+        "specs/053-screen-completeness/parallel-build/work-delivery/requests/g51-seen-state-build-plan.md"
+      ],
+      "scope": "Full S10 new-only private publication/eligible snapshot/read decoration/own commands/FR15 activity helpers +focused tests. Root two architecture decisions applied before loan; existing shared source root only.",
+      "source": [
+        "src/Hub.Api/Infrastructure/WorkAssignmentPublication.cs",
+        "src/Hub.Api/Features/WorkSeenEligibility.cs",
+        "src/Hub.Api/Features/WorkSeenReads.cs",
+        "src/Hub.Api/Features/MyWorkSeen.cs",
+        "src/Hub.Api/Features/WorkActivityFacts.cs",
+        "src/Hub.Api/Features/WorkSeenContracts.cs",
+        "tests/Hub.Tests/Api/WorkAssignmentPublicationTests.cs",
+        "tests/Hub.Tests/Api/MyWorkSeenTests.cs",
+        "tests/Hub.Tests/Api/MyWorkSeenRaceTests.cs",
+        "tests/Hub.Tests/Api/WorkSeenEligibilityTests.cs",
+        "tests/Hub.Tests/Api/WorkActivityCoverageTests.cs",
+        "src/Hub.Api/Features/WorkScreenReads.cs",
+        "tests/Hub.Tests/Api/WorkScreenReadEnvelopeTests.cs",
+        "tests/Hub.Tests/Api/WorkAssignmentProducerPathsTests.cs"
+      ]
+    },
+    "C": {
+      "source": [
+        "src/Hub.Api/Features/DeliverableClientExport.cs",
+        "tests/Hub.Tests/Api/DeliverableClientExportTests.cs",
+        "web/src/pages/projects/deliverable-client-export.tsx"
+      ],
+      "scope": "S34 client-safe export only first source loan; BOTH CSV/XLSX atomic import remain required subsequent half. Root owns shared route/module/metadata/locales/Deliverables UI integration"
+    },
+    "D": {
+      "scope": "Global S43 frontend, exact structured files only; A organisation/supervisor/PM/Vacation/Time +held hatch; D comments/activity/coordination/work/planner dialogs. No math/command/permissions writes; no execution.",
+      "source": [
+        "web/src/components/hub/activity.tsx",
+        "web/src/components/hub/fields.tsx",
+        "web/src/components/hub/comments.tsx",
+        "web/src/components/hub/richtext.tsx",
+        "web/src/pages/Notifications.tsx",
+        "web/src/pages/WorkspaceTasks.tsx",
+        "web/src/components/planner/EntryPanel.tsx",
+        "web/src/components/planner/AllocationShiftDialog.tsx",
+        "web/src/components/planner/ProjectPlanningGrid.tsx",
+        "web/src/components/planner/ContributionList.tsx",
+        "web/src/components/planner/BulkWeekDialog.tsx",
+        "web/src/components/planner/FindRoomDialog.tsx",
+        "web/src/pages/projects/CoordinationForms.tsx",
+        "web/src/pages/projects/CoordinationRegister.tsx",
+        "web/src/pages/projects/Changes.tsx",
+        "web/src/pages/projects/Reviews.tsx",
+        "web/src/pages/projects/Submissions.tsx",
+        "web/src/pages/projects/delivery-presentation.tsx",
+        "web/src/pages/projects/ReadinessForms.tsx",
+        "web/src/pages/projects/Readiness.tsx",
+        "web/src/pages/projects/readiness-delivery-presentation.tsx",
+        "web/src/pages/projects/DesignBasis.tsx",
+        "web/src/pages/projects/TaskPanel.tsx",
+        "web/src/pages/projects/Board.tsx",
+        "web/src/pages/projects/board-screen-presentation.tsx",
+        "web/src/pages/projects/Coordination.tsx",
+        "web/src/pages/projects/Handoffs.tsx",
+        "web/src/pages/projects/Milestones.tsx",
+        "web/src/pages/projects/Registers.tsx",
+        "web/src/pages/projects/Meetings.tsx",
+        "web/tests/person-surface-completeness.cjs",
+        "web/tests/person-surface-completeness.fixture.cjs"
+      ]
+    },
+    "root": [
+      "schema/migrations",
+      "shared HubDb/Audit/UserPreferences/idempotency",
+      "MyWork/FollowUp owner-kind and FR15/seen envelopes",
+      "module/registry/locales/generated/cache/shared UI bridges",
+      "ledgers/integration/independent review/final execution"
+    ]
+  },
+  "pendingProductChoices": [],
+  "pendingBuild": [
+    "Finish bounded source review of D6private-detailcachekeys and opt-in isolatednativeVisibility helper; types3/lint2 thenwebbuild2/sourceparity/previewmatching",
+    "Run seenChrome suite with actualnativeVisibilitycase, thenPersonOrganisation/PersonSurface/Timehatch and meaningfuladjacent suites; preserveallfailreceipts and strict zero-business-write/unknownGET guards",
+    "Run actual disposableQA23 API/browser join for ownSeen/privatecommands and Person/Report/exports as needed; no product/humanAcceptance inferred frommocks",
+    "S43Search/remainingPersoncontexts and S34fullCSV+XLSXatomicimport remainrequired subsequent work; full052/053scopeactive",
+    "No commit/push/deploy/pilot/Accepted; onlyretainedPG55432andpreview8853known."
+  ],
+  "boundary": "No helper execution/runtime/generator/schema writes, no new helpers while four chats active, no commit/push/deploy/pilot/Accepted/decision closure",
+  "productChoices": {
+    "052-D11": "CONFIRMED Jay2026-11-01: separate Green/all-evaluated ratio links",
+    "052-D12": "CONFIRMED Jay2026-11-01: Search/Notifications/Preferences no sidebar item; Vacation\u2192Time unchanged"
+  },
+  "rootAuthored": [
+    "Private WorkSeenEntities +UserSetting JsonIgnored fields/EF/immutability; NO migration/build yet",
+    "HubDb atomic producer transaction guard and exact BuildLog/Publish hook, normal private-state nonaudited boundaries",
+    "MyWorkSeen atomic middleware bypass/module registration, new B helper definitions in progress",
+    "FollowUp optional ownerKind consuming-flag union +canonical typed name dictionaries +4combo API test source incl User/external GUID collision; UNRUN",
+    "TaskQueries optional paired activity actor ID/type/eventAt and shared B authorised-page facts seam; ActivityRow old ctor retained; UNCOMPILED pendinghelper",
+    "TaskLastActivity/TaskActivityComments optional focusKey and typedUser/Admin link +exact eventtime fallback; new API wire adapter/generation unrun",
+    "KanbanCard optional overlayChildren clone-only seam consumed by D; no runtime proof",
+    "User-confirmed052-D11/D12 only: separate ratio links and utility no sidebar; \u00a741AC06 utility clarification; combined spec regenerated1546IDs/438sections",
+    "Decisionlog32 malformed pending rows normalized to8columns preservingOpen; validatorOpen statusdocumented,053rangeparsewording corrected;8actualchecksPASS; independent source reviewPASS",
+    "Route matrix policy metadata changedpending\u2192confirmed with same no-parent assertions; syntaxPASS, runtimererunpending",
+    "S10 read bridge +response metadata: same-snapshot MyWork union dedup, task-page seenSubjectId own-only presentation, nine canonical outer detail envelopes and held typed DTO partials; independent source reviewPASS after ActionDetail partial repair; UNCOMPILED/UNRUN",
+    "Root shared detail owner +Deliverable/Decision/Project lifecycle, scoped recordTab +stable role trigger IDs, viewer/flag cache dimensions; independent source reviewPASS, actual visibility/freshness/retry/browser UNPROVEN",
+    "Root TaskQueries legacy small_ux shape restored with compound DTO registered; focused list/detail wire-test source repaired after reviewer caught wrong endpoint; UNRUN",
+    "Root Reports explicit User references +source-key projection/test, C client-export module/locale/menu integration independently sourcePASS; API/download/browser UNPROVEN",
+    "Follow-up/Attention New +exact activity +canonical User owner triggers, cross-project batched Coordination metadata/UI evidence with distinct repeated-row source keys and narrowed private-cache invalidation; NEW unreviewed source, UNRUN",
+    "Root locale workSeen keys and fixture typecheck inclusion authored; generated contracts and all runtime/migration remain pending",
+    "Actual 20261102045615_PrivateWorkSeenLedger migration+designer+snapshot generated; reviewed draft BaselineSeedSQL embedded after additive schema. Not applied; full migration constraints/upgrade/down test pending."
+  ],
+  "updatedAtUtc": "2026-11-02T04:45:45.174077+00:00",
+  "independentReview": {
+    "A_TimeHatch": "PASS source only, unchanged legacyhash and meaningful visual-only pair/contrast/recorded boundaries; runtimeUNPROVEN",
+    "B_S10Architecture": "Approved bounded direction after two required root settlements: unlimited-age Completed arm membership+sharedcohort; requestID lifetime exactimmutableobservedpayload. DirectPM/Handoff defaults explicit; noD20closure",
+    "UserDecisionsAndLog": "PASS source independent, onlyD11/D12confirmed; D1-D10andall053Openpreserved; format/status validatornotweakened",
+    "BRepairs": "PASS source snooze/creator/current-role, forced lock waits/response-loss/seven commentable kinds; executionUNRUN",
+    "DRepairs": "PASS source fulldiscipline-owner focus IDs and dark native summaries; browserUNRUN",
+    "RootReadBridges": "PASS bounded source after ActionDetail partial fix; extra Coordination seams excluded/new",
+    "RootDetailOwners": "PASS bounded source wrapper/Deliverable/Decision/Project/scopedtabs/cache/locales; Acommand+Downers excluded active",
+    "A_S10Module": "PASS product source; one browser listener ordering race corrected by root before any execution. Suite/runtime unproven.",
+    "B_TestAndMigration": "PASS source after ActorUserId fixes; actual first run exposed .Result helper concurrency bug, fixed by root realasync and isolated race actualPASS6s. Full affected71 rerun in progress.",
+    "CoordinationAndOwners": "PASS bounded source; all A/B/D sources now READY/HOLD. Observer/modal actual timing pending browser."
+  },
+  "verification": "S10 independent local acceptance PASS. 117distinctAPI/18cache/types/lint(warnings)/SSR/build2 PASS;4focusedChrome suites PASS. Actual seen4steps/4privatecommands, ReportPerson1440/375 and2clientdownloads PASS. 593C# inputs unchanged;254app/configmanifest;130servedfiles byte-identical. Spec/trace1546IDs438sections0unknown/decisions8/whitespace PASS. S43/S34 still open; remaining goal active.",
+  "lastUpdatedUtc": "2026-11-02T06:26:55.752940+00:00",
+  "checkedSlices": 31
+}

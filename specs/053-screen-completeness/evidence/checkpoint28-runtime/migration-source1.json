@@ -1,0 +1,5 @@
+{
+  "src/Hub.Api/Data/Migrations/20261102145256_RegisterMetadataAndTemplateLineage.cs": "19460faddefbd703cc7d964ce9c504f8ca537a2211803fbaf3ab810ff98485d4",
+  "src/Hub.Api/Data/Migrations/20261102145256_RegisterMetadataAndTemplateLineage.Designer.cs": "16da317866657351128b5415d5a0fc7607b92ff828b1e9fdf384c396823814d4",
+  "src/Hub.Api/Data/Migrations/HubDbModelSnapshot.cs": "1f78f552c5dcbc4deeb1958109059544ee8b3251ba923f8cb8ea77f7c53b3ec0"
+}

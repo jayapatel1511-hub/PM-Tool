@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
@@ -26,7 +27,8 @@ public static class SubmissionEndpoints
 
     /// One package of the Submissions list; Status is the derived status (Checking or Ready from live readiness) and BlockerCount the blockers behind it.
     public sealed record ListRow(Guid Id, string Key, string Title, string Purpose, string Status, Guid CoordinatorId, string? CoordinatorName,
-        Guid MilestoneId, string? MilestoneName, DateOnly TargetDate, int ManifestVersion, int RowVersion, int BlockerCount);
+        Guid MilestoneId, string? MilestoneName, DateOnly TargetDate, int ManifestVersion, int RowVersion, int BlockerCount,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] DeliverySummary? Delivery = null);
 
     // The rows below mirror the stored rows, audit fields included, in the order each row has always been written (the OrgStructure `*Response` precedent).
     public sealed record SubmissionPackageRow(string Title, string Purpose, string RecipientReference, Guid CoordinatorId, Guid MilestoneId, DateOnly TargetDate,
@@ -48,7 +50,9 @@ public static class SubmissionEndpoints
     public sealed record SubmissionCheckRow(Guid PackageId, int ManifestVersion, string Kind, Guid? SourceId, Guid? ProjectDisciplineId, Guid OwnerId, bool Required,
         string Status, string? EvidenceRule, string? EvidenceUrl, string? Reason, Guid? ApprovedBy, DateTimeOffset? ApprovedAt, string AuditType, Guid ProjectId,
         Guid? AuditProjectId, string? AuditKey, string? AuditName, DateTimeOffset CreatedAt, Guid? CreatedBy, DateTimeOffset UpdatedAt, Guid? UpdatedBy,
-        int RowVersion, Guid Id)
+        int RowVersion, Guid Id,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] RecordContextView? Context = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? EffectiveStatus = null)
     {
         public static SubmissionCheckRow From(SubmissionCheck c) => new(c.PackageId, c.ManifestVersion, c.Kind, c.SourceId, c.ProjectDisciplineId, c.OwnerId, c.Required,
             c.Status, c.EvidenceRule, c.EvidenceUrl, c.Reason, c.ApprovedBy, c.ApprovedAt, c.AuditType, c.ProjectId, c.AuditProjectId, c.AuditKey, c.AuditName,
@@ -69,13 +73,17 @@ public static class SubmissionEndpoints
     }
     /// One package as the detail panel reads it. Readiness is null once the package is issued, superseded or cancelled; Issue is null until it is issued.
     public sealed record SubmissionDetail(SubmissionPackageRow Package, SubmissionReadinessResult? Readiness, string EffectiveStatus, IReadOnlyList<SubmissionManifestRow> Manifest,
-        IReadOnlyList<SubmissionCheckRow> Checks, IReadOnlyList<SubmissionEvidenceRow> Evidence, SubmissionIssueRow? Issue, bool CanCoordinate, bool CanAuthorise);
+        IReadOnlyList<SubmissionCheckRow> Checks, IReadOnlyList<SubmissionEvidenceRow> Evidence, SubmissionIssueRow? Issue, bool CanCoordinate, bool CanAuthorise,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] RecordContextView? Context = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] DeliveryPresentation? Delivery = null);
+    public sealed record SubmissionCheckLocation(Guid Id, Guid PackageId, int ManifestVersion, string Key, string Title, RecordContextView Context);
 
     public static void Map(RouteGroupBuilder api)
     {
         api.MapGet("/projects/{projectId:guid}/submissions", List);
         api.MapGet("/projects/{projectId:guid}/submissions/export", ExportRows);
         api.MapGet("/projects/{projectId:guid}/submissions/{id:guid}", Detail);
+        api.MapGet("/projects/{projectId:guid}/submission-checks/{id:guid}", CheckDetail);
         api.MapGet("/projects/{projectId:guid}/submissions/{id:guid}/export", ExportSnapshot);
         api.MapPost("/projects/{projectId:guid}/submissions", Create).WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/submissions/{id:guid}/manifest", ReplaceManifest).WithMetadata(new Coordination.AtomicCommand());
@@ -419,9 +427,34 @@ public static class SubmissionEndpoints
         return await Rows(db, packages, filter.Status);
     }
 
-    static async Task<Ok<Page<ListRow>>> List(Guid projectId, [AsParameters] Filter filter, int? page, int? pageSize, Access access, HubDb db)
+    static async Task<Ok<Page<ListRow>>> List(Guid projectId, [AsParameters] Filter filter, int? page, int? pageSize, Access access, HubDb db, SettingsStore store)
     {
         var (pg, size) = Http.Paging(page, pageSize);
+        var settings = await store.Get(db);
+        if (settings.IsFlagOn("screen_patterns"))
+        {
+            await access.Project(projectId, false);
+            await using var snapshot = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead);
+            var (project, _) = await access.Project(projectId, false);
+            Check.That(!filter.TargetFrom.HasValue || !filter.TargetTo.HasValue || filter.TargetTo >= filter.TargetFrom, "targetTo", "error.date_range");
+            var packages = await Query(db, projectId, filter).Take(Export.MaxRows + 1).ToListAsync();
+            if (packages.Count > Export.MaxRows) throw ApiException.Rule("delivery_scope_too_large", "delivery.scope_limit", null, Export.MaxRows);
+            var userIds = packages.Select(p => p.CoordinatorId).Distinct().ToArray();
+            var milestoneIds = packages.Select(p => p.MilestoneId).Distinct().ToArray();
+            var names = await db.Users.AsNoTracking().Where(u => userIds.Contains(u.Id)).ToDictionaryAsync(u => u.Id, u => u.DisplayName);
+            var milestones = await db.Milestones.AsNoTracking().Where(m => m.ProjectId == projectId && milestoneIds.Contains(m.Id)).ToDictionaryAsync(m => m.Id, m => m.Name);
+            var ordered = new List<ListRow>();
+            foreach (var package in packages)
+            {
+                var read = await DeliveryScreenReads.Summary(db, project, package);
+                if (!string.IsNullOrWhiteSpace(filter.Status) && read.State != filter.Status) continue;
+                var legacyCount = package.Status is SubmissionStatus.Checking or SubmissionStatus.Ready ? read.Readiness?.Blockers.Count ?? 0 : 0;
+                ordered.Add(new(package.Id, package.Key, package.Title, package.Purpose, read.State, package.CoordinatorId, names.GetValueOrDefault(package.CoordinatorId),
+                    package.MilestoneId, milestones.GetValueOrDefault(package.MilestoneId), package.TargetDate, package.ManifestVersion, package.RowVersion, legacyCount, read.Summary));
+            }
+            var enabledRows = ordered.OrderBy(r => DeliveryScreenReads.Priority(r.Delivery!)).ThenBy(r => r.TargetDate).ThenBy(r => r.Key, StringComparer.Ordinal).ThenBy(r => r.Id).ToArray();
+            return TypedResults.Ok(new Page<ListRow>(enabledRows.Skip((pg - 1) * size).Take(size).ToList(), pg, size, enabledRows.Length));
+        }
         if (filter.Status is SubmissionStatus.Ready or SubmissionStatus.Checking) {
             // ponytail: derived status evaluates at most 50,000 candidates; move the shared readiness projection into SQL if projects reach this ceiling.
             var filtered = await FilteredRows(projectId, filter, access, db);
@@ -443,20 +476,50 @@ public static class SubmissionEndpoints
             $"{project.ProjectNumber}-submissions", clock);
     }
 
-    static async Task<Ok<SubmissionDetail>> Detail(Guid projectId, Guid id, Access access, HubDb db)
+    static async Task<Ok<SubmissionDetail>> Detail(Guid projectId, Guid id, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
-        var (_, ctx) = await access.Project(projectId, false);
+        var (project, ctx) = await access.Project(projectId, false);
+        var settings = await store.Get(db);
+        await using var snapshot = settings.IsFlagOn("screen_patterns") ? await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead) : null;
+        if (snapshot is not null) (project, ctx) = await access.Project(projectId, false);
         var package = await Load(db, projectId, id);
         var readiness = package.Status is SubmissionStatus.Issued or SubmissionStatus.Superseded or SubmissionStatus.Cancelled ? null : await SubmissionReadiness.Evaluate(db, package);
         var manifest = await db.SubmissionManifestItems.Where(m => m.PackageId == id && m.ManifestVersion == package.ManifestVersion).ToListAsync();
         var checks = await db.SubmissionChecks.Where(c => c.PackageId == id && c.ManifestVersion == package.ManifestVersion).ToListAsync();
         var evidence = await db.CheckEvidences.Where(e => db.SubmissionChecks.Any(c => c.Id == e.CheckId && c.PackageId == id)).ToListAsync();
         var issue = await db.SubmissionIssues.SingleOrDefaultAsync(i => i.PackageId == id);
-        return TypedResults.Ok(new SubmissionDetail(SubmissionPackageRow.From(package), readiness,
-            readiness is null || package.Status == SubmissionStatus.Draft ? package.Status : readiness.Ready ? SubmissionStatus.Ready : SubmissionStatus.Checking,
-            manifest.Select(SubmissionManifestRow.From).ToList(), checks.Select(SubmissionCheckRow.From).ToList(), evidence.Select(SubmissionEvidenceRow.From).ToList(),
+        var state = readiness is null || package.Status == SubmissionStatus.Draft ? package.Status : readiness.Ready ? SubmissionStatus.Ready : SubmissionStatus.Checking;
+        var reader = new RecordContextReader(db, project, settings);
+        reader.SeedSubmission(package, checks, readiness, state);
+        var context = await reader.Read(RecordContextKind.SubmissionPackage, id);
+        var checkRows = new List<SubmissionCheckRow>();
+        foreach (var check in checks)
+        {
+            var row = SubmissionCheckRow.From(check);
+            if (context is not null && check.ProjectId == projectId)
+                row = row with { Context = await reader.ReadLoaded(RecordContextKind.SubmissionCheck, check.Id), EffectiveStatus = reader.SubmissionCheckStatus(check.Id) };
+            checkRows.Add(row);
+        }
+        var delivery = snapshot is null ? null : await DeliveryScreenReads.Detail(db, project, package,
+            await DeliveryScreenReads.Summary(db, project, package, readiness, checks), checkRows, manifest, issue, clock.GetUtcNow());
+        return TypedResults.Ok(new SubmissionDetail(SubmissionPackageRow.From(package), readiness, state,
+            manifest.Select(SubmissionManifestRow.From).ToList(), checkRows, evidence.Select(SubmissionEvidenceRow.From).ToList(),
             issue is null ? null : SubmissionIssueRow.From(issue),
-            Permissions.CoordinateSubmission(access.Actor, ctx, package.CoordinatorId).Ok, Permissions.AuthoriseSubmission(access.Actor, ctx).Ok));
+            Permissions.CoordinateSubmission(access.Actor, ctx, package.CoordinatorId).Ok, Permissions.AuthoriseSubmission(access.Actor, ctx).Ok, context, delivery));
+    }
+
+    static async Task<Ok<SubmissionCheckLocation>> CheckDetail(Guid projectId, Guid id, Access access, HubDb db, SettingsStore store)
+    {
+        var (project, _) = await access.Project(projectId, false);
+        var settings = await store.Get(db);
+        if (!settings.IsFlagOn("screen_patterns")) throw ApiException.NotFound();
+        var check = await db.SubmissionChecks.AsNoTracking().SingleOrDefaultAsync(c => c.ProjectId == projectId && c.Id == id) ?? throw ApiException.NotFound();
+        var package = await Load(db, projectId, check.PackageId);
+        if (check.ManifestVersion != package.ManifestVersion) throw ApiException.NotFound();
+        var reader = new RecordContextReader(db, project, settings);
+        var context = await reader.Read(RecordContextKind.SubmissionCheck, id) ?? throw ApiException.NotFound();
+        var identity = reader.Identity(RecordContextKind.SubmissionCheck, id);
+        return TypedResults.Ok(new SubmissionCheckLocation(id, package.Id, package.ManifestVersion, identity.Key, identity.Title, context));
     }
 
     static async Task<IResult> ExportSnapshot(Guid projectId, Guid id, Access access, HubDb db, TimeProvider clock)

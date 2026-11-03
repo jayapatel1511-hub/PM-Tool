@@ -1,0 +1,10 @@
+{
+  "exitCode": 0,
+  "expectedExitCode": 0,
+  "structuralPass": true,
+  "coverageComplete": false,
+  "errors": [],
+  "pendingCount": 105,
+  "rows": 83,
+  "canonicalMethods": 79
+}

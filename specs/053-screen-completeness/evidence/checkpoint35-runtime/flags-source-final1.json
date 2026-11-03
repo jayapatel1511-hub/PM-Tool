@@ -1,0 +1,16 @@
+{
+  "atUtc": "2026-11-03T06:57:20.823743+00:00",
+  "CSharpFiles": 711,
+  "compiledSourceChanged": [],
+  "maintainedFlagSourcesUnchanged": [
+    {
+      "path": "src/Hub.Domain/Flags.cs",
+      "sha256": "10e50c9fd2b3fbe1c55fa5b655a9a30a10dc0d9e5384858d18a71a2984f87439"
+    },
+    {
+      "path": "src/Hub.Domain/Settings.cs",
+      "sha256": "7e596cf06c1d2fc1c8acdeedcf34578f735faff83350bd9a30b6e8bade7f5031"
+    }
+  ],
+  "status": "PASS"
+}

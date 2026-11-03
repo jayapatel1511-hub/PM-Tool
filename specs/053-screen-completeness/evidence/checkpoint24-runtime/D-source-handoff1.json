@@ -1,0 +1,14 @@
+{
+  "status": "PASS_exacthandoffhashes",
+  "capturedAtUtc": "2026-11-02T07:22:22.069463+00:00",
+  "files": {
+    "web/src/pages/projects/ProjectList.tsx": "c1b462b2a74cd52accd486286eef08833bbbd7453cd8b2a92d94a3ba67c6a1f6",
+    "web/src/pages/Calendar.tsx": "31090d4c355cff3003c601f489f0089eb6b583928cf0b409a369d737d23e698a",
+    "web/src/pages/Staff.tsx": "5ac2db8e861e7a829706087dece23229fc20244cbc4e4349180a136d27423dbe",
+    "web/src/components/planner/TimeAwayDialog.tsx": "ed16c04541c5110a1d76ae436408266f819188c4009e4f2cebbdeed841b8ef0c",
+    "web/src/pages/projects/ProjectSettings.tsx": "cdb521ab2308589011a795134b084bef169e1d7948f269c0a17e7d26730d8222",
+    "web/src/pages/Files.tsx": "68a55308e8e9c1df9fa7753e219522459ef65be84c22c0d03c00ce944e00b492",
+    "web/tests/person-remaining-surfaces.cjs": "b8401b5087334868ce54cb90be792ec1c0d8abe9f902e914812451dfbc8e6a23",
+    "web/tests/person-remaining-surfaces.fixture.cjs": "d123c5806e8854eeff4cead619967d2ec1dcfdf5ffe571cad5c79cf6d3697a50"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "web/src/i18n/en.ts": {
+    "allocationShift.shiftAll": "Shift all",
+    "allocationShift.title": "Shift allocation dates",
+    "allocationShift.select": "Select",
+    "allocationShift.selectRow": "Select {person} · {from}–{through} · {hours}",
+    "allocationShift.selected": "Shift selected ({n})",
+    "allocationShift.whole": "Shift whole project · Proposed and Confirmed",
+    "allocationShift.clear": "Clear selection",
+    "allocationShift.selectedHint": "Preview and shift the {n} selected allocations. Moving a Confirmed allocation returns it to Proposed for confirmation.",
+    "allocationShift.wholeHint": "Preview every Proposed and Confirmed allocation in this project, across all pages and filters. Other statuses stay unchanged. Moving a Confirmed allocation returns it to Proposed for confirmation.",
+    "allocationShift.weeks": "Weeks to shift",
+    "allocationShift.weeksHint": "Positive moves later; negative moves earlier. Enter a whole number of weeks.",
+    "allocationShift.preview": "Preview shift",
+    "allocationShift.previewing": "Preparing preview…",
+    "allocationShift.previewTitle": "Allocations to move: {n}",
+    "allocationShift.previewRegion": "Allocation shift preview",
+    "allocationShift.before": "Current dates",
+    "allocationShift.after": "Shifted dates",
+    "allocationShift.childrenHint": "Day splits and linked work dates move by the same number of weeks. Hours, people, work identity and task or review due dates stay unchanged.",
+    "allocationShift.roleUnchanged": "Filled role {role} keeps its dates: {from}–{through}",
+    "allocationShift.reconfirm": "Returns to Proposed · confirmation required",
+    "allocationShift.apply": "Apply shift",
+    "allocationShift.saved": "Allocation dates shifted",
+    "allocationShift.retryHint": "The result could not be confirmed. Retry with the same inputs to check the original request safely."
+  }
+}

@@ -1,0 +1,8 @@
+locator.selectOption: Timeout 12000ms exceeded.
+Call log:
+[2m  - waiting for locator('#mw-priority')[22m
+
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/work-seen-state.cjs:120:68 {
+  log: [ "  - waiting for locator('#mw-priority')" ],
+  name: 'TimeoutError'
+}

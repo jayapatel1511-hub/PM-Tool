@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Tooltip as TooltipPrimitive } from "radix-ui"
+import { useAvailablePortalOpen } from "@/components/hub/form-navigation-context"
 
 function TooltipProvider({
   delayDuration = 0,
@@ -18,7 +19,8 @@ function TooltipProvider({
 function Tooltip({
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Root>) {
-  return <TooltipPrimitive.Root data-slot="tooltip" {...props} />
+  const availability = useAvailablePortalOpen(props, false)
+  return <TooltipPrimitive.Root data-slot="tooltip" {...props} {...availability} />
 }
 
 function TooltipTrigger({

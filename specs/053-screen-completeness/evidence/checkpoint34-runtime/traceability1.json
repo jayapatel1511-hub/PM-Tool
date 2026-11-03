@@ -1,0 +1,14 @@
+{
+  "exitCode": 0,
+  "args": [
+    "python3",
+    "tools/trace_spec.py",
+    "--check"
+  ],
+  "atUtc": "2026-11-03T05:37:17.617650+00:00",
+  "elapsedSeconds": 0.2,
+  "errors": [],
+  "tail": [
+    "1546 IDs, 0 not cited; 438 sections, 0 not cited; 0 unknown"
+  ]
+}

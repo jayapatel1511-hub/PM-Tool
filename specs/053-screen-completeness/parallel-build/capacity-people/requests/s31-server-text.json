@@ -1,0 +1,7 @@
+{
+  "src/Hub.Api/Text.cs": {
+    "allocation.shift_changed": "The allocation set changed after the preview. Preview the shift again.",
+    "allocation.shift_empty": "No Proposed or Confirmed allocations are available to shift.",
+    "allocation.shift_conflict": "Shifted work dates conflict with another active allocation. No allocations were moved."
+  }
+}

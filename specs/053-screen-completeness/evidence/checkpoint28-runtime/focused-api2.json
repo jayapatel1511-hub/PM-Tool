@@ -1,0 +1,12 @@
+{
+  "exitCode": 0,
+  "args": [
+    "dotnet",
+    "vstest",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint28-artifacts/bin/Hub.Tests/release/Hub.Tests.dll",
+    "--TestCaseFilter:FullyQualifiedName~Hub.Tests.Api.AdminUserScreenTests.|FullyQualifiedName~Hub.Tests.Api.TemplateVersionProvenanceTests.Successful_old_POST_receipts_contain_no_new_feature_payload_when_replayed_after_flags_turn_off|FullyQualifiedName~Hub.Tests.Api.TemplateDraftDiffTests.Every_structural_kind_uses_recorded_identity_including_basis_remove_add_roles_order_and_working_day_header",
+    "--Logger:trx;LogFileName=g56-focused2.trx",
+    "--ResultsDirectory:/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint28-runtime/test-results"
+  ],
+  "atUtc": "2026-11-02T15:02:54.053444+00:00"
+}

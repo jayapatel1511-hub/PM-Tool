@@ -1,0 +1,11 @@
+{
+  "exitCode": 0,
+  "args": [
+    "python3",
+    "-m",
+    "unittest",
+    "tools/test_decisions.py"
+  ],
+  "atUtc": "2026-11-02T21:27:22.662815+00:00",
+  "boundary": "Pure root-owned cache/navigation graph or specification tooling only; no app author graph/.NET/provider/browser"
+}

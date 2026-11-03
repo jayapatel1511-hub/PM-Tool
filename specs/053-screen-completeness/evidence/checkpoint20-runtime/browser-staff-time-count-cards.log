@@ -1,0 +1,9 @@
+AssertionError [ERR_ASSERTION]: nonempty1440 Staff first row must remain<=405px; got425.5: {".visual-topbar":{"top":0,"height":56,"bottom":56},".staff-count-view > .visual-page-band":{"top":56,"height":74,"bottom":130},".staff-count-view__filters":{"top":138,"height":40,"bottom":178},"[data-staff-counts]":{"top":186,"height":186,"bottom":372},"#staff-people thead":{"top":381,"height":44.5,"bottom":425.5},"#staff-people tbody tr[data-staff-person]":{"top":425.5,"height":77,"bottom":502.5}}
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/staff-time-count-cards.cjs:81:12 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}

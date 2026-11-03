@@ -1,0 +1,12 @@
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+8 !== 7
+
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/work-task-columns.cjs:172:69 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 8,
+  expected: 7,
+  operator: 'strictEqual',
+  diff: 'simple'
+}

@@ -1,0 +1,1151 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="dbef62b1-8dd2-4a60-96d6-11910e2db979" name="@Jays-MacBook-Pro 2026-11-01 13:24:04" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-11-01T13:24:04.8613150-04:00" queuing="2026-11-01T13:24:04.8613150-04:00" start="2026-11-01T13:24:03.1944600-04:00" finish="2026-11-01T13:24:32.3824880-04:00" />
+  <TestSettings name="default" id="52b2052f-7e9c-4a38-9aac-70965b609ec4">
+    <Deployment runDeploymentRoot="_Jays-MacBook-Pro_2026-11-01_13_24_04" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="727db55b-7905-4baa-9530-6a8aa5e99a3a" testId="a7f290fc-f04f-537a-3b42-98a436169cc6" testName="Hub.Tests.Api.ContractTests.Normalization_removes_servers_and_orders_objects_without_reordering_arrays" computerName="Jays-MacBook-Pro" duration="00:00:00.0000956" startTime="2026-11-01T13:24:30.3244610-04:00" endTime="2026-11-01T13:24:30.3244910-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="727db55b-7905-4baa-9530-6a8aa5e99a3a" />
+    <UnitTestResult executionId="a5b2411e-09cc-4567-8f2c-eab28186a5db" testId="f51f96f3-e5ef-f9d4-aeb5-8d8b2b82a309" testName="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/me/work/requested&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;total&quot;, type: &quot;integer&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.2786059" startTime="2026-11-01T13:24:24.9342380-04:00" endTime="2026-11-01T13:24:25.2128950-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a5b2411e-09cc-4567-8f2c-eab28186a5db" />
+    <UnitTestResult executionId="65325753-2281-4f0e-9d1f-511540baf0dd" testId="72831e46-8dc1-a091-700d-f0027ea832d5" testName="Hub.Tests.Api.TimelineTests.Latest_planned_note_is_omitted_without_an_active_project_and_target(status: &quot;Complete&quot;, targetKnown: True)" computerName="Jays-MacBook-Pro" duration="00:00:00.2276991" startTime="2026-11-01T13:24:13.7876810-04:00" endTime="2026-11-01T13:24:14.0155360-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="65325753-2281-4f0e-9d1f-511540baf0dd" />
+    <UnitTestResult executionId="141488ec-2e25-4783-ba16-c909ed5ff803" testId="6f777131-6eb5-69b4-62d8-0b841c7fff47" testName="Hub.Tests.Api.TeamCompletenessTests.Picker_current_week_read_keeps_existing_planner_scope_free_and_away_and_refuses_unknown_people" computerName="Jays-MacBook-Pro" duration="00:00:03.1427431" startTime="2026-11-01T13:24:23.5497090-04:00" endTime="2026-11-01T13:24:26.6925750-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="141488ec-2e25-4783-ba16-c909ed5ff803" />
+    <UnitTestResult executionId="d4fd6570-e5fa-4a47-bdbf-e0016d9a7cdc" testId="71906152-d6af-7cd9-ce09-4b1d27df0278" testName="Hub.Tests.Api.RegistryTests.Saved_views_exports_names_and_search_are_snapshot_supersets" computerName="Jays-MacBook-Pro" duration="00:00:00.0162997" startTime="2026-11-01T13:24:03.6304140-04:00" endTime="2026-11-01T13:24:03.6431340-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d4fd6570-e5fa-4a47-bdbf-e0016d9a7cdc" />
+    <UnitTestResult executionId="018dacfe-9ee7-4c4f-b7b0-78b2aa532f37" testId="856ea745-f032-76a3-bb28-88b85b21f3d4" testName="Hub.Tests.Api.PersonFactsFoundationTests.Database_rejects_invalid_person_facts_case_duplicate_tags_and_duplicate_or_foreign_certifications" computerName="Jays-MacBook-Pro" duration="00:00:02.7817190" startTime="2026-11-01T13:24:10.7479830-04:00" endTime="2026-11-01T13:24:13.5296020-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="018dacfe-9ee7-4c4f-b7b0-78b2aa532f37" />
+    <UnitTestResult executionId="4f753903-f818-4317-bb80-38c042c99441" testId="f2dc409e-04d2-945b-aece-e1648b53e296" testName="Hub.Tests.Api.TeamCompletenessTests.Two_open_roles_are_separate_canonical_records_and_never_change_Team_people_or_membership" computerName="Jays-MacBook-Pro" duration="00:00:02.9578633" startTime="2026-11-01T13:24:20.5916800-04:00" endTime="2026-11-01T13:24:23.5496200-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4f753903-f818-4317-bb80-38c042c99441" />
+    <UnitTestResult executionId="545a71a7-2a9a-4f6b-956b-89879ec2e456" testId="8f5b1d15-31bb-12ca-a387-726054dc1282" testName="Hub.Tests.Api.TimelineTests.Latest_planned_uses_current_deliverable_dates_on_each_read_and_omits_equal_or_earlier_dates" computerName="Jays-MacBook-Pro" duration="00:00:00.2907404" startTime="2026-11-01T13:24:19.5237360-04:00" endTime="2026-11-01T13:24:19.8145500-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="545a71a7-2a9a-4f6b-956b-89879ec2e456" />
+    <UnitTestResult executionId="4c7fb07d-5e7a-417a-a240-023a149ac362" testId="820422da-edf2-57b1-4cdf-4dda181f2b22" testName="Hub.Tests.Api.TimelineTests.Latest_planned_note_is_omitted_without_an_active_project_and_target(status: &quot;Archived&quot;, targetKnown: True)" computerName="Jays-MacBook-Pro" duration="00:00:00.2090844" startTime="2026-11-01T13:24:14.3996720-04:00" endTime="2026-11-01T13:24:14.6088290-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4c7fb07d-5e7a-417a-a240-023a149ac362" />
+    <UnitTestResult executionId="139a5e8d-1645-4864-8556-eace52b65c57" testId="1e565737-e675-d4e3-b140-dcae18bc02f3" testName="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/projects/{projectId}/commitment-reliabilit&quot;···, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;misses[].commitments[]&quot;, type: &quot;string&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.2770162" startTime="2026-11-01T13:24:26.0257020-04:00" endTime="2026-11-01T13:24:26.3027670-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="139a5e8d-1645-4864-8556-eace52b65c57" />
+    <UnitTestResult executionId="05636a01-ec89-4dff-a411-7968e323e3ad" testId="9cb06cce-0885-6d00-9806-e47586aff4f7" testName="Hub.Tests.Api.ViewsTests.Personal_views_restore_their_definition_and_one_is_default" computerName="Jays-MacBook-Pro" duration="00:00:00.1648980" startTime="2026-11-01T13:24:13.6225610-04:00" endTime="2026-11-01T13:24:13.7875310-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="05636a01-ec89-4dff-a411-7968e323e3ad" />
+    <UnitTestResult executionId="1befa684-e89b-4161-b56c-cbd7ff8d759e" testId="8dec45b3-1040-bcdf-d4a1-bf88bd595c78" testName="Hub.Tests.Api.ViewsTests.A_view_whose_references_are_gone_opens_without_them" computerName="Jays-MacBook-Pro" duration="00:00:00.2122070" startTime="2026-11-01T13:24:12.4886660-04:00" endTime="2026-11-01T13:24:12.7009430-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1befa684-e89b-4161-b56c-cbd7ff8d759e" />
+    <UnitTestResult executionId="04c7ad87-04dc-4ff0-8bea-f32f4caab55c" testId="f91831e8-c312-5d7f-9c0c-6e4d80113508" testName="Hub.Tests.Api.RegistryParityTests.Activity_history_and_export_parameters_match_the_pre_registry_snapshot" computerName="Jays-MacBook-Pro" duration="00:00:01.1146550" startTime="2026-11-01T13:24:20.0160580-04:00" endTime="2026-11-01T13:24:21.1308390-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="04c7ad87-04dc-4ff0-8bea-f32f4caab55c" />
+    <UnitTestResult executionId="4eb230e6-1988-4484-a4dc-58fb8b06fa21" testId="a454b14f-76e0-d470-3e6b-8e34313fbb10" testName="Hub.Tests.Api.ViewsTests.Coordination_views_keep_supported_filters_and_do_not_share_personal_or_hidden_project_data(kind: &quot;issues&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.2038841" startTime="2026-11-01T13:24:11.6667710-04:00" endTime="2026-11-01T13:24:11.8707080-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4eb230e6-1988-4484-a4dc-58fb8b06fa21" />
+    <UnitTestResult executionId="8515069d-0a1d-4da7-803a-9944635aa6f8" testId="e3ab8e96-0252-9782-b386-87c80b4f2563" testName="Hub.Tests.Api.TimelineTests.Latest_planned_note_is_omitted_without_an_active_project_and_target(status: &quot;Cancelled&quot;, targetKnown: True)" computerName="Jays-MacBook-Pro" duration="00:00:00.1723860" startTime="2026-11-01T13:24:14.6089340-04:00" endTime="2026-11-01T13:24:14.7813720-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8515069d-0a1d-4da7-803a-9944635aa6f8" />
+    <UnitTestResult executionId="c0fc0e5f-b653-47bf-8ef2-869cd2961298" testId="bcf2e52c-95b7-e5c7-70da-f844663935b4" testName="Hub.Tests.Api.TeamCompletenessTests.Home_discipline_is_distinct_from_project_primary_and_shared_with_workspace_without_changing_legacy_cohort" computerName="Jays-MacBook-Pro" duration="00:00:02.6345891" startTime="2026-11-01T13:24:29.7083820-04:00" endTime="2026-11-01T13:24:32.3430370-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c0fc0e5f-b653-47bf-8ef2-869cd2961298" />
+    <UnitTestResult executionId="b52fb601-7053-49ea-a5b5-6dac87989518" testId="12afdb82-813a-327a-af92-eebfbcdbaf79" testName="Hub.Tests.Api.TimelineTests.Project_timeline_handoffs_match_list_visibility_and_rules_without_changing_old_reads_or_cross_project_gantt(enabled: False)" computerName="Jays-MacBook-Pro" duration="00:00:00.3487549" startTime="2026-11-01T13:24:15.6189370-04:00" endTime="2026-11-01T13:24:15.9677640-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b52fb601-7053-49ea-a5b5-6dac87989518" />
+    <UnitTestResult executionId="81cd157d-c8cd-457a-989c-d3992f889fb1" testId="544603b2-2695-983e-44df-23a07884ded2" testName="Hub.Tests.Api.AdminContractTests.Organisation_activity_keeps_its_page_envelope_and_row_names" computerName="Jays-MacBook-Pro" duration="00:00:00.0522758" startTime="2026-11-01T13:24:30.8096870-04:00" endTime="2026-11-01T13:24:30.8620040-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="81cd157d-c8cd-457a-989c-d3992f889fb1" />
+    <UnitTestResult executionId="18d60b32-ec20-439d-8fde-7f8c828c54f9" testId="a9319e37-4623-231a-8981-06bf077a8a11" testName="Hub.Tests.Api.MilestonesDeliverablesTests.Milestone_date_change_keeps_original_logs_notifies_and_cascades" computerName="Jays-MacBook-Pro" duration="00:00:00.1531539" startTime="2026-11-01T13:24:22.2483220-04:00" endTime="2026-11-01T13:24:22.4015360-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="18d60b32-ec20-439d-8fde-7f8c828c54f9" />
+    <UnitTestResult executionId="d8d0f60d-36e3-4f8d-a7b2-6f732c714e28" testId="d6b3202e-f85e-2173-1faf-7a1dacb12f92" testName="Hub.Tests.Api.ContractTests.Template_preview_contract_keeps_nested_counts_and_role_fields" computerName="Jays-MacBook-Pro" duration="00:00:00.4415798" startTime="2026-11-01T13:24:29.8827350-04:00" endTime="2026-11-01T13:24:30.3243420-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d8d0f60d-36e3-4f8d-a7b2-6f732c714e28" />
+    <UnitTestResult executionId="c0df76fc-96e1-44ec-b3e4-0e256970a33a" testId="910f9df9-2fce-1011-5030-83bb13a6f634" testName="Hub.Tests.Api.ViewsTests.Project_views_are_shared_and_changed_only_by_the_pm_and_leads" computerName="Jays-MacBook-Pro" duration="00:00:07.6191164" startTime="2026-11-01T13:24:03.5727310-04:00" endTime="2026-11-01T13:24:11.1934970-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c0df76fc-96e1-44ec-b3e4-0e256970a33a" />
+    <UnitTestResult executionId="7c3c2344-1b7a-4a5f-851e-af76c0a42e75" testId="d520f722-9f4f-7edd-2951-97e718ceb65e" testName="Hub.Tests.Api.MilestonesDeliverablesTests.Changing_discipline_moves_tasks_after_confirmation" computerName="Jays-MacBook-Pro" duration="00:00:00.1382166" startTime="2026-11-01T13:24:21.9117310-04:00" endTime="2026-11-01T13:24:22.0500040-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7c3c2344-1b7a-4a5f-851e-af76c0a42e75" />
+    <UnitTestResult executionId="1c6da08f-0f99-4c1d-85fa-f03312eb8d7d" testId="362be386-f432-c4d0-d194-e63d2a609950" testName="Hub.Tests.Api.TeamCompletenessTests.Team_saved_view_group_validation_and_reference_cleanup_keep_known_ids_and_distinct_unknown_sentinels" computerName="Jays-MacBook-Pro" duration="00:00:02.8461384" startTime="2026-11-01T13:24:15.0274370-04:00" endTime="2026-11-01T13:24:17.8736390-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1c6da08f-0f99-4c1d-85fa-f03312eb8d7d" />
+    <UnitTestResult executionId="e6cdd471-9b8f-47ee-bdae-22a1d011d42b" testId="93983a98-ed2d-de99-cb8c-61d3c65b23b0" testName="Hub.Tests.Api.DeliverableContractTests.Detail_keeps_its_envelope_nested_records_and_the_small_ux_related_tasks" computerName="Jays-MacBook-Pro" duration="00:00:08.2749671" startTime="2026-11-01T13:24:03.5727390-04:00" endTime="2026-11-01T13:24:11.8494040-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e6cdd471-9b8f-47ee-bdae-22a1d011d42b" />
+    <UnitTestResult executionId="a592d04b-5a67-4c09-8f81-bb91ca2aeb1d" testId="c20e30c1-922a-cc5e-efd3-68b4387df5b2" testName="Hub.Tests.Api.RegistryTests.Every_audited_type_has_one_valid_declaration" computerName="Jays-MacBook-Pro" duration="00:00:00.0031580" startTime="2026-11-01T13:24:03.6620360-04:00" endTime="2026-11-01T13:24:03.6651160-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a592d04b-5a67-4c09-8f81-bb91ca2aeb1d" />
+    <UnitTestResult executionId="bed35b4d-6162-408b-a163-fe6611773542" testId="472d2d2f-e4a8-5c19-001c-12af53979819" testName="Hub.Tests.Api.ViewsTests.Risk_views_keep_filters_sort_and_columns_and_follow_project_access" computerName="Jays-MacBook-Pro" duration="00:00:00.1867663" startTime="2026-11-01T13:24:12.3017160-04:00" endTime="2026-11-01T13:24:12.4885680-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="bed35b4d-6162-408b-a163-fe6611773542" />
+    <UnitTestResult executionId="8e9e8dc7-c9bb-476d-9b04-0b1db51ac72d" testId="5d5bfda3-7da3-b267-289b-c9470bf36c3c" testName="Hub.Tests.Api.ViewsTests.Coordination_views_keep_supported_filters_and_do_not_share_personal_or_hidden_project_data(kind: &quot;allocations&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.2010103" startTime="2026-11-01T13:24:11.4655720-04:00" endTime="2026-11-01T13:24:11.6666660-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8e9e8dc7-c9bb-476d-9b04-0b1db51ac72d" />
+    <UnitTestResult executionId="6745d616-fe13-4f74-9035-87a07f3d9f99" testId="38cfb4bf-77dc-5925-8f41-5412e5968650" testName="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/tasks/{id}/pickup-offer&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;allowed.pickUp&quot;, type: &quot;boolean&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.2507096" startTime="2026-11-01T13:24:22.9102830-04:00" endTime="2026-11-01T13:24:23.1610400-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6745d616-fe13-4f74-9035-87a07f3d9f99" />
+    <UnitTestResult executionId="9618cb71-1d82-4013-bdb5-60ec92209906" testId="cda4a7df-0b55-f38e-f02f-dd1196abfed2" testName="Hub.Tests.Api.TimelineTests.Handoff_needed_date_overdue_is_suppressed_on_hold_and_deleted_rows_are_excluded" computerName="Jays-MacBook-Pro" duration="00:00:00.1783006" startTime="2026-11-01T13:24:19.3452770-04:00" endTime="2026-11-01T13:24:19.5236350-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9618cb71-1d82-4013-bdb5-60ec92209906" />
+    <UnitTestResult executionId="c0277029-1acd-482d-b81c-413f5ba8ea8d" testId="a7c96bd3-79b2-f8db-31f7-5807ddcb7523" testName="Hub.Tests.Api.TimelineTests.Timeline_uses_stored_affected_milestones_at_the_evaluators_depth_without_recalculating_or_changing_cross_project_reads(enabled: True)" computerName="Jays-MacBook-Pro" duration="00:00:00.4596307" startTime="2026-11-01T13:24:14.7818460-04:00" endTime="2026-11-01T13:24:15.2411690-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c0277029-1acd-482d-b81c-413f5ba8ea8d" />
+    <UnitTestResult executionId="6b206fce-e0c7-4917-937d-051a0b3ff5e7" testId="af1e1246-4096-e701-0868-591c6935c777" testName="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/projects/{projectId}/revision-check&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;deliverables[].issues[].marks[]&quot;, type: &quot;string&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.3042604" startTime="2026-11-01T13:24:23.4227230-04:00" endTime="2026-11-01T13:24:23.7271000-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6b206fce-e0c7-4917-937d-051a0b3ff5e7" />
+    <UnitTestResult executionId="393551ef-93fd-464c-8b85-9cbc5d608dee" testId="4805dd1f-3a71-3ad3-c8c3-c48d5c4d31eb" testName="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/admin/organisation/units&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;[].rowVersion&quot;, type: &quot;integer&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.2891379" startTime="2026-11-01T13:24:24.6449670-04:00" endTime="2026-11-01T13:24:24.9341280-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="393551ef-93fd-464c-8b85-9cbc5d608dee" />
+    <UnitTestResult executionId="20981958-16b4-499e-a98e-4a742bcdd75f" testId="39ff8743-7796-9af8-5d29-7cf9310c2a2f" testName="Hub.Tests.Api.TimelineTests.A_dragged_task_changes_only_its_own_dates_and_keeps_a_baseline" computerName="Jays-MacBook-Pro" duration="00:00:00.1748336" startTime="2026-11-01T13:24:17.6808320-04:00" endTime="2026-11-01T13:24:17.8557140-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="20981958-16b4-499e-a98e-4a742bcdd75f" />
+    <UnitTestResult executionId="16ab42e9-6703-4aa1-9dc5-668a04571df0" testId="3a2e48a8-7bd0-0a48-fbb0-3b27a9a0beab" testName="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/admin/organisation/levels&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;[].name&quot;, type: &quot;string&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.2811935" startTime="2026-11-01T13:24:25.2130020-04:00" endTime="2026-11-01T13:24:25.4942560-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="16ab42e9-6703-4aa1-9dc5-668a04571df0" />
+    <UnitTestResult executionId="2aacb16c-f4e6-4ae6-8364-d5cf99844941" testId="9620dd00-d526-4d71-e568-dfd810a8a2a8" testName="Hub.Tests.Api.AdminContractTests.Reference_lists_and_commands_keep_their_names_order_nulls_and_answers" computerName="Jays-MacBook-Pro" duration="00:00:00.2496779" startTime="2026-11-01T13:24:30.8621170-04:00" endTime="2026-11-01T13:24:31.1118390-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2aacb16c-f4e6-4ae6-8364-d5cf99844941" />
+    <UnitTestResult executionId="b2d2325e-a539-4b83-8e09-2a9bd1fb24cf" testId="ab7e9965-fac0-59cf-6484-f00b6e149f23" testName="Hub.Tests.Api.ViewsTests.Portfolio_views_keep_group_and_overdue_decisions_and_refuse_unknown_groups" computerName="Jays-MacBook-Pro" duration="00:00:00.0117803" startTime="2026-11-01T13:24:13.6105640-04:00" endTime="2026-11-01T13:24:13.6224750-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b2d2325e-a539-4b83-8e09-2a9bd1fb24cf" />
+    <UnitTestResult executionId="d4e5ca21-2a60-4dee-8192-1a2aaa389798" testId="554ac8cd-3ee0-efbf-da72-3c9f71c1eed0" testName="Hub.Tests.Api.TeamCompletenessTests.Unknown_references_stay_null_and_workspace_deduplicates_members_across_selected_projects" computerName="Jays-MacBook-Pro" duration="00:00:03.6717874" startTime="2026-11-01T13:24:11.3554000-04:00" endTime="2026-11-01T13:24:15.0273320-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d4e5ca21-2a60-4dee-8192-1a2aaa389798" />
+    <UnitTestResult executionId="21a6d60e-f609-485b-b636-2b839edac8a1" testId="b6682e38-2244-8877-7b5d-2471c20c5dee" testName="Hub.Tests.Api.TimelineTests.Tasks_arrows_and_permissions_for_the_timeline" computerName="Jays-MacBook-Pro" duration="00:00:00.2800701" startTime="2026-11-01T13:24:16.3661520-04:00" endTime="2026-11-01T13:24:16.6462580-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="21a6d60e-f609-485b-b636-2b839edac8a1" />
+    <UnitTestResult executionId="f09d28f0-3c41-47c6-992a-daaebbb551b5" testId="8a83c118-aef0-128c-4fa3-35ce2d26d90f" testName="Hub.Tests.Api.TimelineTests.Latest_planned_note_is_omitted_without_an_active_project_and_target(status: &quot;Setup&quot;, targetKnown: True)" computerName="Jays-MacBook-Pro" duration="00:00:00.1877965" startTime="2026-11-01T13:24:14.0156370-04:00" endTime="2026-11-01T13:24:14.2035100-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f09d28f0-3c41-47c6-992a-daaebbb551b5" />
+    <UnitTestResult executionId="a516451f-7e2a-4f6c-acd4-bfadb1b27594" testId="55695d93-c482-9101-7797-1f97e9d4e01e" testName="Hub.Tests.Api.TimelineTests.Slip_display_is_server_decided_without_changing_slip_filters_or_exports(enabled: True)" computerName="Jays-MacBook-Pro" duration="00:00:00.5378799" startTime="2026-11-01T13:24:17.8558040-04:00" endTime="2026-11-01T13:24:18.3937550-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a516451f-7e2a-4f6c-acd4-bfadb1b27594" />
+    <UnitTestResult executionId="33726fc4-b8cd-494d-a1ea-2c4f3d837858" testId="a730e45a-548a-1051-54c1-ccceaf2c8308" testName="Hub.Tests.Api.AdminContractTests.Users_and_roles_keep_their_row_names_order_nulls_and_empty_answers" computerName="Jays-MacBook-Pro" duration="00:00:00.1817728" startTime="2026-11-01T13:24:30.3245920-04:00" endTime="2026-11-01T13:24:30.5065350-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="33726fc4-b8cd-494d-a1ea-2c4f3d837858" />
+    <UnitTestResult executionId="8af4957a-a698-418d-83b8-b58be6742d01" testId="b0d608c5-f349-ce09-e180-0a946b428d8e" testName="Hub.Tests.Api.MilestonesDeliverablesTests.Deliverable_defaults_and_discipline_permissions" computerName="Jays-MacBook-Pro" duration="00:00:00.1838454" startTime="2026-11-01T13:24:21.5779170-04:00" endTime="2026-11-01T13:24:21.7618120-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8af4957a-a698-418d-83b8-b58be6742d01" />
+    <UnitTestResult executionId="b650e35e-2d06-4772-bc64-428754a01a31" testId="6bb6633a-6805-1ea9-b8c8-bee026326049" testName="Hub.Tests.Api.MilestonesDeliverablesTests.A_milestone_s_discipline_must_belong_to_its_project" computerName="Jays-MacBook-Pro" duration="00:00:00.1980790" startTime="2026-11-01T13:24:22.0500960-04:00" endTime="2026-11-01T13:24:22.2482270-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b650e35e-2d06-4772-bc64-428754a01a31" />
+    <UnitTestResult executionId="cb154e11-7418-494f-8b6c-457b1cfc53be" testId="cf54798e-b3f8-7193-69af-ddddd1eee466" testName="Hub.Tests.Api.TeamCompletenessTests.Team_saved_views_require_owner_flag_and_keep_workspace_personal_and_project_access_sharing_guards" computerName="Jays-MacBook-Pro" duration="00:00:07.7808955" startTime="2026-11-01T13:24:03.5727170-04:00" endTime="2026-11-01T13:24:11.3552740-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="cb154e11-7418-494f-8b6c-457b1cfc53be" />
+    <UnitTestResult executionId="306d0c85-e034-4abf-977e-1d52f872c712" testId="e7b83363-f6ac-c347-be21-44a550d2e252" testName="Hub.Tests.Api.ContractTests.Client_error_report_success_is_documented_as_bodyless_204" computerName="Jays-MacBook-Pro" duration="00:00:00.3071953" startTime="2026-11-01T13:24:29.5753630-04:00" endTime="2026-11-01T13:24:29.8826110-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="306d0c85-e034-4abf-977e-1d52f872c712" />
+    <UnitTestResult executionId="4a5bb626-5dd2-4178-839b-199c3fdc97e8" testId="f0c2c1b8-00c3-7823-3ef5-9bfb01ed3854" testName="Hub.Tests.Api.ContractTests.Allocation_preview_contract_describes_both_saved_and_preview_responses(route: &quot;/api/v1/projects/{projectId}/allocations/{id}/conf&quot;···)" computerName="Jays-MacBook-Pro" duration="00:00:00.4971670" startTime="2026-11-01T13:24:28.5350580-04:00" endTime="2026-11-01T13:24:29.0322800-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4a5bb626-5dd2-4178-839b-199c3fdc97e8" />
+    <UnitTestResult executionId="b6a2367e-49fd-450c-b48c-aee72ee0e0f2" testId="5bed0395-6f0f-b255-cdaf-f5d5b6864fa5" testName="Hub.Tests.Api.TimelineTests.An_empty_project_has_an_empty_handoff_group_read_only_while_enabled" computerName="Jays-MacBook-Pro" duration="00:00:00.1000646" startTime="2026-11-01T13:24:16.9844120-04:00" endTime="2026-11-01T13:24:17.0845260-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b6a2367e-49fd-450c-b48c-aee72ee0e0f2" />
+    <UnitTestResult executionId="ff14bdf4-c316-4a0e-9988-66c4492cfc35" testId="16c94c65-98e0-d415-de3e-5184260ac08c" testName="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/deliverables/{id}/baselines&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;people[].displayName&quot;, type: &quot;string&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.2856577" startTime="2026-11-01T13:24:26.3028780-04:00" endTime="2026-11-01T13:24:26.5885900-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ff14bdf4-c316-4a0e-9988-66c4492cfc35" />
+    <UnitTestResult executionId="19b30932-9b7c-4119-9926-a442d4aca9eb" testId="3c652c39-3bbb-8bdf-1903-66a7a618fd70" testName="Hub.Tests.Api.ContractTests.Nested_dtos_with_equal_names_have_distinct_contract_schemas" computerName="Jays-MacBook-Pro" duration="00:00:00.5084712" startTime="2026-11-01T13:24:22.4016480-04:00" endTime="2026-11-01T13:24:22.9101750-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="19b30932-9b7c-4119-9926-a442d4aca9eb" />
+    <UnitTestResult executionId="87c13f43-8c75-4039-a737-803a82dd0d4e" testId="498d90a5-8339-d926-9ed7-2517ec0538ea" testName="Hub.Tests.Api.ViewsTests.Coordination_views_restore_filters_without_copying_rows_or_crossing_project_scope" computerName="Jays-MacBook-Pro" duration="00:00:00.2130575" startTime="2026-11-01T13:24:13.3973460-04:00" endTime="2026-11-01T13:24:13.6104540-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="87c13f43-8c75-4039-a737-803a82dd0d4e" />
+    <UnitTestResult executionId="2dde0651-c3ca-43fe-864d-e4e9a5edcbf2" testId="cc67ea3f-ebbd-510c-c3c5-a6749044b337" testName="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/pickup-offers&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;[].task.rowVersion&quot;, type: &quot;integer&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.3124937" startTime="2026-11-01T13:24:27.6096260-04:00" endTime="2026-11-01T13:24:27.9221320-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2dde0651-c3ca-43fe-864d-e4e9a5edcbf2" />
+    <UnitTestResult executionId="c6cf5c38-a7b3-43ec-a597-58ae465c7135" testId="2aa9bed9-129d-7d63-0cd0-123a4a8a5b66" testName="Hub.Tests.Api.TimelineTests.Latest_planned_note_matches_project_and_both_timelines_without_changing_health_or_storing_state(enabled: False)" computerName="Jays-MacBook-Pro" duration="00:00:00.2963107" startTime="2026-11-01T13:24:17.3843300-04:00" endTime="2026-11-01T13:24:17.6807180-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c6cf5c38-a7b3-43ec-a597-58ae465c7135" />
+    <UnitTestResult executionId="424482b0-f0fb-491b-b6f6-b4337d040ae7" testId="9c39e606-7b28-dd81-b5dc-fc4db1748dbc" testName="Hub.Tests.Api.ContractTests.Me_settings_are_typed_and_route_counter_field_is_flag_scoped" computerName="Jays-MacBook-Pro" duration="00:00:00.2743060" startTime="2026-11-01T13:24:29.3008500-04:00" endTime="2026-11-01T13:24:29.5752270-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="424482b0-f0fb-491b-b6f6-b4337d040ae7" />
+    <UnitTestResult executionId="8a471733-1826-4f6a-907c-16e592b94ccb" testId="49ffbb51-b125-18fc-ff07-1628bdcaedea" testName="Hub.Tests.Api.ContractTests.Openapi_matches_the_committed_golden_document" computerName="Jays-MacBook-Pro" duration="00:00:00.3243160" startTime="2026-11-01T13:24:27.9222570-04:00" endTime="2026-11-01T13:24:28.2466280-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8a471733-1826-4f6a-907c-16e592b94ccb" />
+    <UnitTestResult executionId="a775d5d4-3fbb-4921-8cc7-da5fec010334" testId="24a2a3e8-962c-020b-c749-25bf3d792955" testName="Hub.Tests.Api.AdminContractTests.Operations_keep_their_names_order_and_row_shapes_and_retry_answers" computerName="Jays-MacBook-Pro" duration="00:00:00.0759362" startTime="2026-11-01T13:24:30.7336020-04:00" endTime="2026-11-01T13:24:30.8095720-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a775d5d4-3fbb-4921-8cc7-da5fec010334" />
+    <UnitTestResult executionId="f3176530-5fe2-4e19-b57f-8baf9c73a0fd" testId="ba410c6e-98b7-d8b8-ced5-d046574ddb34" testName="Hub.Tests.Api.RegistryTests.Audit_fields_and_history_types_preserve_the_original_snapshots" computerName="Jays-MacBook-Pro" duration="00:00:00.0518049" startTime="2026-11-01T13:24:03.5727460-04:00" endTime="2026-11-01T13:24:03.6267170-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f3176530-5fe2-4e19-b57f-8baf9c73a0fd" />
+    <UnitTestResult executionId="827f75cd-1590-4580-aa5b-73719cbaf5fe" testId="9832b10a-cfc9-506b-0831-6d8076dd640f" testName="Hub.Tests.Api.TeamCompletenessTests.Certification_filter_and_lead_references_remain_independent_of_people_flag_and_hidden_scope" computerName="Jays-MacBook-Pro" duration="00:00:02.7177285" startTime="2026-11-01T13:24:17.8737210-04:00" endTime="2026-11-01T13:24:20.5915800-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="827f75cd-1590-4580-aa5b-73719cbaf5fe" />
+    <UnitTestResult executionId="f4b4a7f3-4e99-47a0-83a3-80d955b01cf7" testId="4d68ec52-5d92-c3fe-e78b-0c8d277eaaa3" testName="Hub.Tests.Api.ViewsTests.Staff_views_are_personal_restore_filters_and_name_missing_references" computerName="Jays-MacBook-Pro" duration="00:00:00.0459512" startTime="2026-11-01T13:24:13.1731320-04:00" endTime="2026-11-01T13:24:13.2191280-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f4b4a7f3-4e99-47a0-83a3-80d955b01cf7" />
+    <UnitTestResult executionId="aee9d12d-45ec-40b5-8770-e102a90a49cf" testId="77c4b081-2927-c668-6200-cd967c46e59e" testName="Hub.Tests.Api.ContractTests.Allocation_preview_contract_describes_both_saved_and_preview_responses(route: &quot;/api/v1/projects/{projectId}/allocations&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.2881580" startTime="2026-11-01T13:24:28.2467500-04:00" endTime="2026-11-01T13:24:28.5349550-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="aee9d12d-45ec-40b5-8770-e102a90a49cf" />
+    <UnitTestResult executionId="164af875-a517-437f-b41d-677a5a044e9f" testId="ffe78e3f-62f1-83f3-b5c0-cd5561c2d48e" testName="Hub.Tests.Api.ContractTests.Allocation_preview_contract_describes_both_saved_and_preview_responses(route: &quot;/api/v1/projects/{projectId}/allocations/{id}/edit&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.2682771" startTime="2026-11-01T13:24:29.0323880-04:00" endTime="2026-11-01T13:24:29.3007310-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="164af875-a517-437f-b41d-677a5a044e9f" />
+    <UnitTestResult executionId="e9ed7002-558d-4af7-a1f5-3272af2f8d07" testId="c6b17f9a-1101-45d5-df9c-7b78a98de111" testName="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/admin/operations/outbox/retry&quot;, method: &quot;post&quot;, status: &quot;200&quot;, field: &quot;retried&quot;, type: &quot;integer&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.3081632" startTime="2026-11-01T13:24:26.9161850-04:00" endTime="2026-11-01T13:24:27.2244540-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e9ed7002-558d-4af7-a1f5-3272af2f8d07" />
+    <UnitTestResult executionId="79ca3a58-6edf-4fa1-851c-a7ae2c439cb6" testId="d49e18ce-6cb9-123f-1fcd-ed36af5a6fe2" testName="Hub.Tests.Api.AdminContractTests.Settings_keep_their_row_names_order_and_the_flag_packet_and_save_answers" computerName="Jays-MacBook-Pro" duration="00:00:00.0568358" startTime="2026-11-01T13:24:30.5066660-04:00" endTime="2026-11-01T13:24:30.5635810-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="79ca3a58-6edf-4fa1-851c-a7ae2c439cb6" />
+    <UnitTestResult executionId="2f748576-f14b-49d1-a3a4-98f3bd0ef4d3" testId="a61394f5-7a5f-1953-ae2c-a3866581e9bc" testName="Hub.Tests.Api.MilestonesDeliverablesTests.Lifecycle_guards_review_comment_issue_and_reissue" computerName="Jays-MacBook-Pro" duration="00:00:00.4467115" startTime="2026-11-01T13:24:21.1309490-04:00" endTime="2026-11-01T13:24:21.5778140-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2f748576-f14b-49d1-a3a4-98f3bd0ef4d3" />
+    <UnitTestResult executionId="7cfeac7e-58ea-40e6-acd9-a171e0b89fda" testId="9ae4fc25-73fe-15e9-e8f7-60b7200505b3" testName="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/admin/organisation/import/preview&quot;, method: &quot;post&quot;, status: &quot;200&quot;, field: &quot;rows&quot;, type: &quot;integer&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.2797000" startTime="2026-11-01T13:24:23.7271870-04:00" endTime="2026-11-01T13:24:24.0069620-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7cfeac7e-58ea-40e6-acd9-a171e0b89fda" />
+    <UnitTestResult executionId="a9f1e366-d896-4464-8064-c13fc37b9e8d" testId="38d8e039-0ff4-c763-e782-aba82f93f836" testName="Hub.Tests.Api.RegistryTests.Registry_checks_fail_on_seeded_defects" computerName="Jays-MacBook-Pro" duration="00:00:00.0121400" startTime="2026-11-01T13:24:03.6498160-04:00" endTime="2026-11-01T13:24:03.6619300-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a9f1e366-d896-4464-8064-c13fc37b9e8d" />
+    <UnitTestResult executionId="13a83b76-eed3-413f-be97-4e427b214394" testId="b33300c4-f539-e8be-558c-11b822f2c693" testName="Hub.Tests.Api.PersonFactsFoundationTests.Vocabulary_and_warning_settings_are_dark_without_usage_counts_and_keep_stored_values_when_disabled" computerName="Jays-MacBook-Pro" duration="00:00:02.9683264" startTime="2026-11-01T13:24:13.5307830-04:00" endTime="2026-11-01T13:24:16.4981590-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="13a83b76-eed3-413f-be97-4e427b214394" />
+    <UnitTestResult executionId="82b3ebec-dbbc-4a74-a41a-9fc8b06881cb" testId="54afbf01-732e-ad0c-ccf1-8445fae92745" testName="Hub.Tests.Api.TimelineTests.Latest_planned_note_is_omitted_without_an_active_project_and_target(status: &quot;Active&quot;, targetKnown: False)" computerName="Jays-MacBook-Pro" duration="00:00:00.1959059" startTime="2026-11-01T13:24:14.2036050-04:00" endTime="2026-11-01T13:24:14.3995790-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="82b3ebec-dbbc-4a74-a41a-9fc8b06881cb" />
+    <UnitTestResult executionId="0349fda8-302a-45c2-a7f5-630ec34f7007" testId="cd0b1e53-ef27-72ef-354c-3c69ba642824" testName="Hub.Tests.Api.ViewsTests.Saved_view_answers_keep_their_property_names_order_and_status_codes" computerName="Jays-MacBook-Pro" duration="00:00:00.1778797" startTime="2026-11-01T13:24:13.2192380-04:00" endTime="2026-11-01T13:24:13.3972210-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0349fda8-302a-45c2-a7f5-630ec34f7007" />
+    <UnitTestResult executionId="4f7311ad-46ea-4a11-96d7-cb839a799c49" testId="c21b3684-1553-4871-e653-8c2b1892190e" testName="Hub.Tests.Api.TimelineTests.Handoff_timeline_refuses_an_unreadable_project_and_an_unknown_project(enabled: True)" computerName="Jays-MacBook-Pro" duration="00:00:00.1800833" startTime="2026-11-01T13:24:16.8041760-04:00" endTime="2026-11-01T13:24:16.9843140-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4f7311ad-46ea-4a11-96d7-cb839a799c49" />
+    <UnitTestResult executionId="43e5e354-821c-406a-b270-952d5218d5b7" testId="9d82dc3a-a9de-2cc3-279d-2ec2da6e2ab6" testName="Hub.Tests.Api.DeliverableContractTests.Register_rows_keep_their_order_and_omit_the_baseline_fields_while_their_flag_is_off" computerName="Jays-MacBook-Pro" duration="00:00:00.3007396" startTime="2026-11-01T13:24:11.8495410-04:00" endTime="2026-11-01T13:24:12.1503410-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="43e5e354-821c-406a-b270-952d5218d5b7" />
+    <UnitTestResult executionId="af2958fa-d8ca-4fef-90d7-a312b8be5206" testId="f823530b-0397-face-1834-35cd784e44bb" testName="Hub.Tests.Api.RegistryTests.Generated_key_families_match_the_registry_and_vocabulary" computerName="Jays-MacBook-Pro" duration="00:00:00.0065698" startTime="2026-11-01T13:24:03.6434620-04:00" endTime="2026-11-01T13:24:03.6497320-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="af2958fa-d8ca-4fef-90d7-a312b8be5206" />
+    <UnitTestResult executionId="64e7516f-b5b2-476a-870b-5bc167597619" testId="43d77fae-a93a-fb9d-3019-f06664f9d85e" testName="Hub.Tests.Api.DeliverableContractTests.Create_edit_transition_issue_delete_restore_and_bulk_answers_keep_their_property_names_and_order" computerName="Jays-MacBook-Pro" duration="00:00:00.6196642" startTime="2026-11-01T13:24:12.1504500-04:00" endTime="2026-11-01T13:24:12.7701950-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="64e7516f-b5b2-476a-870b-5bc167597619" />
+    <UnitTestResult executionId="d289d656-70b5-4b36-b499-49f2e0a1aa77" testId="6f651603-7186-cf09-6252-eb0a058f81e4" testName="Hub.Tests.Api.PersonFactsFoundationTests.Existing_people_have_unknown_nullable_facts_without_defaults_or_seeded_certifications" computerName="Jays-MacBook-Pro" duration="00:00:07.1719376" startTime="2026-11-01T13:24:03.5721880-04:00" endTime="2026-11-01T13:24:10.7471600-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d289d656-70b5-4b36-b499-49f2e0a1aa77" />
+    <UnitTestResult executionId="3654c81d-644c-4230-8f01-983614e064c7" testId="92745d94-7e4d-6dd5-2bf6-a8f5d011e8d8" testName="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/admin/audit-chains&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;[].chainId&quot;, type: &quot;string&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.6377221" startTime="2026-11-01T13:24:24.0070660-04:00" endTime="2026-11-01T13:24:24.6448530-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3654c81d-644c-4230-8f01-983614e064c7" />
+    <UnitTestResult executionId="5943ba3b-4c07-4ce4-891f-d1537eb57d87" testId="f184ca3a-0745-86cc-a31f-346b3c7a1c95" testName="Hub.Tests.Api.TimelineTests.Timeline_uses_stored_affected_milestones_at_the_evaluators_depth_without_recalculating_or_changing_cross_project_reads(enabled: False)" computerName="Jays-MacBook-Pro" duration="00:00:00.3774891" startTime="2026-11-01T13:24:15.2412620-04:00" endTime="2026-11-01T13:24:15.6188380-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5943ba3b-4c07-4ce4-891f-d1537eb57d87" />
+    <UnitTestResult executionId="ee7a1c47-85f8-471e-98c0-0acd4508158c" testId="659d8339-11b8-59f6-3e88-bae2be519bf6" testName="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/projects/import-preview&quot;, method: &quot;post&quot;, status: &quot;200&quot;, field: &quot;rows[].projectNumber&quot;, type: &quot;string&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.3273379" startTime="2026-11-01T13:24:26.5886900-04:00" endTime="2026-11-01T13:24:26.9160770-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ee7a1c47-85f8-471e-98c0-0acd4508158c" />
+    <UnitTestResult executionId="f45fd849-32ff-431b-aa98-d19e3ae208d5" testId="36a4fe5d-3e03-a6e2-cfc0-3f18bf580457" testName="Hub.Tests.Api.ViewsTests.Coordination_views_keep_supported_filters_and_do_not_share_personal_or_hidden_project_data(kind: &quot;submissions&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.1992152" startTime="2026-11-01T13:24:12.1030010-04:00" endTime="2026-11-01T13:24:12.3015860-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f45fd849-32ff-431b-aa98-d19e3ae208d5" />
+    <UnitTestResult executionId="555e22eb-56e4-4e46-a4b5-b6e0417b64e9" testId="76065eab-e344-e175-93c7-de7992d53248" testName="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/admin/organisation/import/preview&quot;, method: &quot;post&quot;, status: &quot;200&quot;, field: &quot;applied&quot;, type: &quot;boolean&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.2650481" startTime="2026-11-01T13:24:25.7604770-04:00" endTime="2026-11-01T13:24:26.0255990-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="555e22eb-56e4-4e46-a4b5-b6e0417b64e9" />
+    <UnitTestResult executionId="d0d0e80a-d38a-4f54-bb7a-3d72488ddac4" testId="34b49e09-8339-d78e-eb01-cb64fa206afe" testName="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/me/work/watching&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;items[].projectNumber&quot;, type: &quot;string&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.3848420" startTime="2026-11-01T13:24:27.2245700-04:00" endTime="2026-11-01T13:24:27.6094880-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d0d0e80a-d38a-4f54-bb7a-3d72488ddac4" />
+    <UnitTestResult executionId="0a2357f2-fd98-430d-b659-da790679b2e5" testId="f80b312e-cc25-bd12-bf9a-ab6ade073418" testName="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/me/onboarding&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;groups[].steps[].done&quot;, type: &quot;boolean&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.2614387" startTime="2026-11-01T13:24:23.1611220-04:00" endTime="2026-11-01T13:24:23.4226230-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0a2357f2-fd98-430d-b659-da790679b2e5" />
+    <UnitTestResult executionId="293f13f3-9913-47f7-bba6-6025d06a8df8" testId="dbb272cd-063b-2241-c627-125b8a190a2b" testName="Hub.Tests.Api.TimelineTests.Both_timelines_keep_their_property_names_order_and_types" computerName="Jays-MacBook-Pro" duration="00:00:00.4439246" startTime="2026-11-01T13:24:18.9012080-04:00" endTime="2026-11-01T13:24:19.3451780-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="293f13f3-9913-47f7-bba6-6025d06a8df8" />
+    <UnitTestResult executionId="a345a746-6602-4255-87c9-dbb9428be10e" testId="b2d5443f-2f57-dc30-059a-0de778daefbc" testName="Hub.Tests.Api.TimelineTests.Latest_planned_note_matches_project_and_both_timelines_without_changing_health_or_storing_state(enabled: True)" computerName="Jays-MacBook-Pro" duration="00:00:00.2995480" startTime="2026-11-01T13:24:17.0846250-04:00" endTime="2026-11-01T13:24:17.3842420-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a345a746-6602-4255-87c9-dbb9428be10e" />
+    <UnitTestResult executionId="85196ac9-af70-47b6-85fd-b8392ed4ae85" testId="68415e79-f769-03c5-7552-95ee139d55a9" testName="Hub.Tests.Api.MilestonesDeliverablesTests.Completing_with_unissued_deliverables_needs_confirmation" computerName="Jays-MacBook-Pro" duration="00:00:00.1496881" startTime="2026-11-01T13:24:21.7619130-04:00" endTime="2026-11-01T13:24:21.9116400-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="85196ac9-af70-47b6-85fd-b8392ed4ae85" />
+    <UnitTestResult executionId="ec8f6521-f267-4b14-93ff-31fb8ff71ef1" testId="9247b461-dc06-d6c7-3522-9a1d5dfa07c2" testName="Hub.Tests.Api.TimelineTests.The_milestone_cascade_can_include_tasks" computerName="Jays-MacBook-Pro" duration="00:00:00.2012527" startTime="2026-11-01T13:24:19.8146460-04:00" endTime="2026-11-01T13:24:20.0159440-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ec8f6521-f267-4b14-93ff-31fb8ff71ef1" />
+    <UnitTestResult executionId="3e3d5d8d-1eac-467f-aa44-016fe0af567e" testId="2bffb9e3-ba4b-f69b-9f02-98ce04a77fa0" testName="Hub.Tests.Api.TimelineTests.Handoff_timeline_refuses_an_unreadable_project_and_an_unknown_project(enabled: False)" computerName="Jays-MacBook-Pro" duration="00:00:00.1576669" startTime="2026-11-01T13:24:16.6463580-04:00" endTime="2026-11-01T13:24:16.8040920-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3e3d5d8d-1eac-467f-aa44-016fe0af567e" />
+    <UnitTestResult executionId="e31d24de-ad84-40e7-9c49-6577b90b3166" testId="c8169f43-69aa-8941-3443-6dc984974e0f" testName="Hub.Tests.Api.TimelineTests.Project_timeline_handoffs_match_list_visibility_and_rules_without_changing_old_reads_or_cross_project_gantt(enabled: True)" computerName="Jays-MacBook-Pro" duration="00:00:00.3980552" startTime="2026-11-01T13:24:15.9678540-04:00" endTime="2026-11-01T13:24:16.3660300-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e31d24de-ad84-40e7-9c49-6577b90b3166" />
+    <UnitTestResult executionId="7fcffd3f-092b-4bd1-94a0-9a1535cb46df" testId="e28fb7cd-76ae-24f5-cef3-d326527726df" testName="Hub.Tests.Api.ViewsTests.Coordination_views_keep_supported_filters_and_do_not_share_personal_or_hidden_project_data(kind: &quot;readiness&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.2313054" startTime="2026-11-01T13:24:11.8708040-04:00" endTime="2026-11-01T13:24:12.1021520-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7fcffd3f-092b-4bd1-94a0-9a1535cb46df" />
+    <UnitTestResult executionId="466f4e92-23d1-464d-8ad3-e6b0d6eb3ea8" testId="23dfe79c-ddd3-2362-3c27-b5847eee7f6c" testName="Hub.Tests.Api.TeamCompletenessTests.Unit_uses_current_placement_and_is_omitted_with_org_flag_off_without_widening_Team" computerName="Jays-MacBook-Pro" duration="00:00:03.0154823" startTime="2026-11-01T13:24:26.6926990-04:00" endTime="2026-11-01T13:24:29.7082600-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="466f4e92-23d1-464d-8ad3-e6b0d6eb3ea8" />
+    <UnitTestResult executionId="178ed23f-d468-410a-9236-3627f7dbb124" testId="96d81604-08f3-8132-b2a4-250930fcdf2f" testName="Hub.Tests.Api.AdminContractTests.Holidays_keep_their_row_names_order_nulls_and_empty_answers" computerName="Jays-MacBook-Pro" duration="00:00:00.1697256" startTime="2026-11-01T13:24:30.5636940-04:00" endTime="2026-11-01T13:24:30.7334790-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="178ed23f-d468-410a-9236-3627f7dbb124" />
+    <UnitTestResult executionId="6a9b4384-e4a4-492d-90bd-2adc4128d8f9" testId="63b24ef8-523b-8d79-3987-9f4d31878a47" testName="Hub.Tests.Api.TimelineTests.Slip_display_is_server_decided_without_changing_slip_filters_or_exports(enabled: False)" computerName="Jays-MacBook-Pro" duration="00:00:00.5071875" startTime="2026-11-01T13:24:18.3938500-04:00" endTime="2026-11-01T13:24:18.9010950-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6a9b4384-e4a4-492d-90bd-2adc4128d8f9" />
+    <UnitTestResult executionId="ed8d2368-d6aa-4c53-aea8-d1724c0ec60f" testId="7e2521d7-5f5a-7b77-ecd0-5500a7a72bb3" testName="Hub.Tests.Api.ViewsTests.Coordination_views_keep_supported_filters_and_do_not_share_personal_or_hidden_project_data(kind: &quot;design-basis&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.2717912" startTime="2026-11-01T13:24:11.1936340-04:00" endTime="2026-11-01T13:24:11.4654740-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ed8d2368-d6aa-4c53-aea8-d1724c0ec60f" />
+    <UnitTestResult executionId="77e3cb7d-2f1d-4216-8cd1-487542c69895" testId="5c50f393-d00c-150b-2514-1cdfbb87e371" testName="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/tasks/{id}&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;permissions.transitions[].allowed&quot;, type: &quot;boolean&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:00.2659875" startTime="2026-11-01T13:24:25.4943610-04:00" endTime="2026-11-01T13:24:25.7603810-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="77e3cb7d-2f1d-4216-8cd1-487542c69895" />
+    <UnitTestResult executionId="ad8ef717-11ca-4aa5-b1ec-7168c3a7fd6f" testId="5543d201-43a0-41d7-c681-5af9a317892d" testName="Hub.Tests.Api.ViewsTests.Manual_board_order_is_shared_by_the_team" computerName="Jays-MacBook-Pro" duration="00:00:00.4718885" startTime="2026-11-01T13:24:12.7010640-04:00" endTime="2026-11-01T13:24:13.1730210-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ad8ef717-11ca-4aa5-b1ec-7168c3a7fd6f" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/admin/organisation/levels&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;[].name&quot;, type: &quot;string&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="3a2e48a8-7bd0-0a48-fbb0-3b27a9a0beab">
+      <Execution id="16ab42e9-6703-4aa1-9dc5-668a04571df0" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="New_endpoint_contracts_keep_required_nested_wire_types" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ViewsTests.Coordination_views_keep_supported_filters_and_do_not_share_personal_or_hidden_project_data(kind: &quot;issues&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="a454b14f-76e0-d470-3e6b-8e34313fbb10">
+      <Execution id="4eb230e6-1988-4484-a4dc-58fb8b06fa21" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ViewsTests" name="Coordination_views_keep_supported_filters_and_do_not_share_personal_or_hidden_project_data" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ViewsTests.Manual_board_order_is_shared_by_the_team" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="5543d201-43a0-41d7-c681-5af9a317892d">
+      <Execution id="ad8ef717-11ca-4aa5-b1ec-7168c3a7fd6f" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ViewsTests" name="Manual_board_order_is_shared_by_the_team" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TimelineTests.Tasks_arrows_and_permissions_for_the_timeline" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="b6682e38-2244-8877-7b5d-2471c20c5dee">
+      <Execution id="21a6d60e-f609-485b-b636-2b839edac8a1" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TimelineTests" name="Tasks_arrows_and_permissions_for_the_timeline" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TimelineTests.Handoff_timeline_refuses_an_unreadable_project_and_an_unknown_project(enabled: True)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="c21b3684-1553-4871-e653-8c2b1892190e">
+      <Execution id="4f7311ad-46ea-4a11-96d7-cb839a799c49" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TimelineTests" name="Handoff_timeline_refuses_an_unreadable_project_and_an_unknown_project" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.DeliverableContractTests.Create_edit_transition_issue_delete_restore_and_bulk_answers_keep_their_property_names_and_order" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="43d77fae-a93a-fb9d-3019-f06664f9d85e">
+      <Execution id="64e7516f-b5b2-476a-870b-5bc167597619" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.DeliverableContractTests" name="Create_edit_transition_issue_delete_restore_and_bulk_answers_keep_their_property_names_and_order" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.AdminContractTests.Settings_keep_their_row_names_order_and_the_flag_packet_and_save_answers" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="d49e18ce-6cb9-123f-1fcd-ed36af5a6fe2">
+      <Execution id="79ca3a58-6edf-4fa1-851c-a7ae2c439cb6" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.AdminContractTests" name="Settings_keep_their_row_names_order_and_the_flag_packet_and_save_answers" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TimelineTests.Handoff_needed_date_overdue_is_suppressed_on_hold_and_deleted_rows_are_excluded" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="cda4a7df-0b55-f38e-f02f-dd1196abfed2">
+      <Execution id="9618cb71-1d82-4013-bdb5-60ec92209906" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TimelineTests" name="Handoff_needed_date_overdue_is_suppressed_on_hold_and_deleted_rows_are_excluded" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ViewsTests.Coordination_views_restore_filters_without_copying_rows_or_crossing_project_scope" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="498d90a5-8339-d926-9ed7-2517ec0538ea">
+      <Execution id="87c13f43-8c75-4039-a737-803a82dd0d4e" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ViewsTests" name="Coordination_views_restore_filters_without_copying_rows_or_crossing_project_scope" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ViewsTests.Coordination_views_keep_supported_filters_and_do_not_share_personal_or_hidden_project_data(kind: &quot;allocations&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="5d5bfda3-7da3-b267-289b-c9470bf36c3c">
+      <Execution id="8e9e8dc7-c9bb-476d-9b04-0b1db51ac72d" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ViewsTests" name="Coordination_views_keep_supported_filters_and_do_not_share_personal_or_hidden_project_data" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ViewsTests.Saved_view_answers_keep_their_property_names_order_and_status_codes" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="cd0b1e53-ef27-72ef-354c-3c69ba642824">
+      <Execution id="0349fda8-302a-45c2-a7f5-630ec34f7007" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ViewsTests" name="Saved_view_answers_keep_their_property_names_order_and_status_codes" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TeamCompletenessTests.Unknown_references_stay_null_and_workspace_deduplicates_members_across_selected_projects" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="554ac8cd-3ee0-efbf-da72-3c9f71c1eed0">
+      <Execution id="d4e5ca21-2a60-4dee-8192-1a2aaa389798" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TeamCompletenessTests" name="Unknown_references_stay_null_and_workspace_deduplicates_members_across_selected_projects" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.Template_preview_contract_keeps_nested_counts_and_role_fields" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="d6b3202e-f85e-2173-1faf-7a1dacb12f92">
+      <Execution id="d8d0f60d-36e3-4f8d-a7b2-6f732c714e28" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="Template_preview_contract_keeps_nested_counts_and_role_fields" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.AdminContractTests.Operations_keep_their_names_order_and_row_shapes_and_retry_answers" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="24a2a3e8-962c-020b-c749-25bf3d792955">
+      <Execution id="a775d5d4-3fbb-4921-8cc7-da5fec010334" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.AdminContractTests" name="Operations_keep_their_names_order_and_row_shapes_and_retry_answers" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.AdminContractTests.Users_and_roles_keep_their_row_names_order_nulls_and_empty_answers" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="a730e45a-548a-1051-54c1-ccceaf2c8308">
+      <Execution id="33726fc4-b8cd-494d-a1ea-2c4f3d837858" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.AdminContractTests" name="Users_and_roles_keep_their_row_names_order_nulls_and_empty_answers" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.Allocation_preview_contract_describes_both_saved_and_preview_responses(route: &quot;/api/v1/projects/{projectId}/allocations/{id}/edit&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="ffe78e3f-62f1-83f3-b5c0-cd5561c2d48e">
+      <Execution id="164af875-a517-437f-b41d-677a5a044e9f" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="Allocation_preview_contract_describes_both_saved_and_preview_responses" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TeamCompletenessTests.Certification_filter_and_lead_references_remain_independent_of_people_flag_and_hidden_scope" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="9832b10a-cfc9-506b-0831-6d8076dd640f">
+      <Execution id="827f75cd-1590-4580-aa5b-73719cbaf5fe" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TeamCompletenessTests" name="Certification_filter_and_lead_references_remain_independent_of_people_flag_and_hidden_scope" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/pickup-offers&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;[].task.rowVersion&quot;, type: &quot;integer&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="cc67ea3f-ebbd-510c-c3c5-a6749044b337">
+      <Execution id="2dde0651-c3ca-43fe-864d-e4e9a5edcbf2" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="New_endpoint_contracts_keep_required_nested_wire_types" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.MilestonesDeliverablesTests.Lifecycle_guards_review_comment_issue_and_reissue" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="a61394f5-7a5f-1953-ae2c-a3866581e9bc">
+      <Execution id="2f748576-f14b-49d1-a3a4-98f3bd0ef4d3" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.MilestonesDeliverablesTests" name="Lifecycle_guards_review_comment_issue_and_reissue" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/admin/operations/outbox/retry&quot;, method: &quot;post&quot;, status: &quot;200&quot;, field: &quot;retried&quot;, type: &quot;integer&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="c6b17f9a-1101-45d5-df9c-7b78a98de111">
+      <Execution id="e9ed7002-558d-4af7-a1f5-3272af2f8d07" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="New_endpoint_contracts_keep_required_nested_wire_types" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TimelineTests.Handoff_timeline_refuses_an_unreadable_project_and_an_unknown_project(enabled: False)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="2bffb9e3-ba4b-f69b-9f02-98ce04a77fa0">
+      <Execution id="3e3d5d8d-1eac-467f-aa44-016fe0af567e" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TimelineTests" name="Handoff_timeline_refuses_an_unreadable_project_and_an_unknown_project" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.MilestonesDeliverablesTests.Completing_with_unissued_deliverables_needs_confirmation" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="68415e79-f769-03c5-7552-95ee139d55a9">
+      <Execution id="85196ac9-af70-47b6-85fd-b8392ed4ae85" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.MilestonesDeliverablesTests" name="Completing_with_unissued_deliverables_needs_confirmation" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.Nested_dtos_with_equal_names_have_distinct_contract_schemas" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="3c652c39-3bbb-8bdf-1903-66a7a618fd70">
+      <Execution id="19b30932-9b7c-4119-9926-a442d4aca9eb" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="Nested_dtos_with_equal_names_have_distinct_contract_schemas" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ViewsTests.Coordination_views_keep_supported_filters_and_do_not_share_personal_or_hidden_project_data(kind: &quot;design-basis&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="7e2521d7-5f5a-7b77-ecd0-5500a7a72bb3">
+      <Execution id="ed8d2368-d6aa-4c53-aea8-d1724c0ec60f" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ViewsTests" name="Coordination_views_keep_supported_filters_and_do_not_share_personal_or_hidden_project_data" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ViewsTests.Coordination_views_keep_supported_filters_and_do_not_share_personal_or_hidden_project_data(kind: &quot;submissions&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="36a4fe5d-3e03-a6e2-cfc0-3f18bf580457">
+      <Execution id="f45fd849-32ff-431b-aa98-d19e3ae208d5" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ViewsTests" name="Coordination_views_keep_supported_filters_and_do_not_share_personal_or_hidden_project_data" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/tasks/{id}/pickup-offer&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;allowed.pickUp&quot;, type: &quot;boolean&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="38cfb4bf-77dc-5925-8f41-5412e5968650">
+      <Execution id="6745d616-fe13-4f74-9035-87a07f3d9f99" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="New_endpoint_contracts_keep_required_nested_wire_types" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.RegistryTests.Generated_key_families_match_the_registry_and_vocabulary" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="f823530b-0397-face-1834-35cd784e44bb">
+      <Execution id="af2958fa-d8ca-4fef-90d7-a312b8be5206" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.RegistryTests" name="Generated_key_families_match_the_registry_and_vocabulary" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TeamCompletenessTests.Picker_current_week_read_keeps_existing_planner_scope_free_and_away_and_refuses_unknown_people" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="6f777131-6eb5-69b4-62d8-0b841c7fff47">
+      <Execution id="141488ec-2e25-4783-ba16-c909ed5ff803" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TeamCompletenessTests" name="Picker_current_week_read_keeps_existing_planner_scope_free_and_away_and_refuses_unknown_people" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TeamCompletenessTests.Unit_uses_current_placement_and_is_omitted_with_org_flag_off_without_widening_Team" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="23dfe79c-ddd3-2362-3c27-b5847eee7f6c">
+      <Execution id="466f4e92-23d1-464d-8ad3-e6b0d6eb3ea8" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TeamCompletenessTests" name="Unit_uses_current_placement_and_is_omitted_with_org_flag_off_without_widening_Team" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TimelineTests.Slip_display_is_server_decided_without_changing_slip_filters_or_exports(enabled: True)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="55695d93-c482-9101-7797-1f97e9d4e01e">
+      <Execution id="a516451f-7e2a-4f6c-acd4-bfadb1b27594" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TimelineTests" name="Slip_display_is_server_decided_without_changing_slip_filters_or_exports" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.RegistryTests.Registry_checks_fail_on_seeded_defects" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="38d8e039-0ff4-c763-e782-aba82f93f836">
+      <Execution id="a9f1e366-d896-4464-8064-c13fc37b9e8d" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.RegistryTests" name="Registry_checks_fail_on_seeded_defects" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.AdminContractTests.Organisation_activity_keeps_its_page_envelope_and_row_names" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="544603b2-2695-983e-44df-23a07884ded2">
+      <Execution id="81cd157d-c8cd-457a-989c-d3992f889fb1" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.AdminContractTests" name="Organisation_activity_keeps_its_page_envelope_and_row_names" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TimelineTests.Latest_planned_uses_current_deliverable_dates_on_each_read_and_omits_equal_or_earlier_dates" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="8f5b1d15-31bb-12ca-a387-726054dc1282">
+      <Execution id="545a71a7-2a9a-4f6b-956b-89879ec2e456" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TimelineTests" name="Latest_planned_uses_current_deliverable_dates_on_each_read_and_omits_equal_or_earlier_dates" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TimelineTests.Timeline_uses_stored_affected_milestones_at_the_evaluators_depth_without_recalculating_or_changing_cross_project_reads(enabled: True)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="a7c96bd3-79b2-f8db-31f7-5807ddcb7523">
+      <Execution id="c0277029-1acd-482d-b81c-413f5ba8ea8d" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TimelineTests" name="Timeline_uses_stored_affected_milestones_at_the_evaluators_depth_without_recalculating_or_changing_cross_project_reads" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/me/work/requested&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;total&quot;, type: &quot;integer&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="f51f96f3-e5ef-f9d4-aeb5-8d8b2b82a309">
+      <Execution id="a5b2411e-09cc-4567-8f2c-eab28186a5db" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="New_endpoint_contracts_keep_required_nested_wire_types" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TimelineTests.Latest_planned_note_is_omitted_without_an_active_project_and_target(status: &quot;Cancelled&quot;, targetKnown: True)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="e3ab8e96-0252-9782-b386-87c80b4f2563">
+      <Execution id="8515069d-0a1d-4da7-803a-9944635aa6f8" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TimelineTests" name="Latest_planned_note_is_omitted_without_an_active_project_and_target" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.Normalization_removes_servers_and_orders_objects_without_reordering_arrays" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="a7f290fc-f04f-537a-3b42-98a436169cc6">
+      <Execution id="727db55b-7905-4baa-9530-6a8aa5e99a3a" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="Normalization_removes_servers_and_orders_objects_without_reordering_arrays" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/admin/organisation/import/preview&quot;, method: &quot;post&quot;, status: &quot;200&quot;, field: &quot;rows&quot;, type: &quot;integer&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="9ae4fc25-73fe-15e9-e8f7-60b7200505b3">
+      <Execution id="7cfeac7e-58ea-40e6-acd9-a171e0b89fda" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="New_endpoint_contracts_keep_required_nested_wire_types" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TimelineTests.Project_timeline_handoffs_match_list_visibility_and_rules_without_changing_old_reads_or_cross_project_gantt(enabled: True)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="c8169f43-69aa-8941-3443-6dc984974e0f">
+      <Execution id="e31d24de-ad84-40e7-9c49-6577b90b3166" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TimelineTests" name="Project_timeline_handoffs_match_list_visibility_and_rules_without_changing_old_reads_or_cross_project_gantt" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TimelineTests.Project_timeline_handoffs_match_list_visibility_and_rules_without_changing_old_reads_or_cross_project_gantt(enabled: False)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="12afdb82-813a-327a-af92-eebfbcdbaf79">
+      <Execution id="b52fb601-7053-49ea-a5b5-6dac87989518" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TimelineTests" name="Project_timeline_handoffs_match_list_visibility_and_rules_without_changing_old_reads_or_cross_project_gantt" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TimelineTests.Latest_planned_note_is_omitted_without_an_active_project_and_target(status: &quot;Setup&quot;, targetKnown: True)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="8a83c118-aef0-128c-4fa3-35ce2d26d90f">
+      <Execution id="f09d28f0-3c41-47c6-992a-daaebbb551b5" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TimelineTests" name="Latest_planned_note_is_omitted_without_an_active_project_and_target" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TimelineTests.Latest_planned_note_matches_project_and_both_timelines_without_changing_health_or_storing_state(enabled: False)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="2aa9bed9-129d-7d63-0cd0-123a4a8a5b66">
+      <Execution id="c6cf5c38-a7b3-43ec-a597-58ae465c7135" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TimelineTests" name="Latest_planned_note_matches_project_and_both_timelines_without_changing_health_or_storing_state" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.PersonFactsFoundationTests.Vocabulary_and_warning_settings_are_dark_without_usage_counts_and_keep_stored_values_when_disabled" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="b33300c4-f539-e8be-558c-11b822f2c693">
+      <Execution id="13a83b76-eed3-413f-be97-4e427b214394" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.PersonFactsFoundationTests" name="Vocabulary_and_warning_settings_are_dark_without_usage_counts_and_keep_stored_values_when_disabled" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ViewsTests.Personal_views_restore_their_definition_and_one_is_default" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="9cb06cce-0885-6d00-9806-e47586aff4f7">
+      <Execution id="05636a01-ec89-4dff-a411-7968e323e3ad" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ViewsTests" name="Personal_views_restore_their_definition_and_one_is_default" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TimelineTests.Latest_planned_note_is_omitted_without_an_active_project_and_target(status: &quot;Active&quot;, targetKnown: False)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="54afbf01-732e-ad0c-ccf1-8445fae92745">
+      <Execution id="82b3ebec-dbbc-4a74-a41a-9fc8b06881cb" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TimelineTests" name="Latest_planned_note_is_omitted_without_an_active_project_and_target" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.Allocation_preview_contract_describes_both_saved_and_preview_responses(route: &quot;/api/v1/projects/{projectId}/allocations/{id}/conf&quot;···)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="f0c2c1b8-00c3-7823-3ef5-9bfb01ed3854">
+      <Execution id="4a5bb626-5dd2-4178-839b-199c3fdc97e8" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="Allocation_preview_contract_describes_both_saved_and_preview_responses" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.DeliverableContractTests.Detail_keeps_its_envelope_nested_records_and_the_small_ux_related_tasks" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="93983a98-ed2d-de99-cb8c-61d3c65b23b0">
+      <Execution id="e6cdd471-9b8f-47ee-bdae-22a1d011d42b" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.DeliverableContractTests" name="Detail_keeps_its_envelope_nested_records_and_the_small_ux_related_tasks" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.MilestonesDeliverablesTests.Milestone_date_change_keeps_original_logs_notifies_and_cascades" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="a9319e37-4623-231a-8981-06bf077a8a11">
+      <Execution id="18d60b32-ec20-439d-8fde-7f8c828c54f9" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.MilestonesDeliverablesTests" name="Milestone_date_change_keeps_original_logs_notifies_and_cascades" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ViewsTests.Coordination_views_keep_supported_filters_and_do_not_share_personal_or_hidden_project_data(kind: &quot;readiness&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="e28fb7cd-76ae-24f5-cef3-d326527726df">
+      <Execution id="7fcffd3f-092b-4bd1-94a0-9a1535cb46df" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ViewsTests" name="Coordination_views_keep_supported_filters_and_do_not_share_personal_or_hidden_project_data" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ViewsTests.Risk_views_keep_filters_sort_and_columns_and_follow_project_access" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="472d2d2f-e4a8-5c19-001c-12af53979819">
+      <Execution id="bed35b4d-6162-408b-a163-fe6611773542" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ViewsTests" name="Risk_views_keep_filters_sort_and_columns_and_follow_project_access" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.MilestonesDeliverablesTests.Deliverable_defaults_and_discipline_permissions" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="b0d608c5-f349-ce09-e180-0a946b428d8e">
+      <Execution id="8af4957a-a698-418d-83b8-b58be6742d01" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.MilestonesDeliverablesTests" name="Deliverable_defaults_and_discipline_permissions" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TimelineTests.A_dragged_task_changes_only_its_own_dates_and_keeps_a_baseline" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="39ff8743-7796-9af8-5d29-7cf9310c2a2f">
+      <Execution id="20981958-16b4-499e-a98e-4a742bcdd75f" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TimelineTests" name="A_dragged_task_changes_only_its_own_dates_and_keeps_a_baseline" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/projects/import-preview&quot;, method: &quot;post&quot;, status: &quot;200&quot;, field: &quot;rows[].projectNumber&quot;, type: &quot;string&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="659d8339-11b8-59f6-3e88-bae2be519bf6">
+      <Execution id="ee7a1c47-85f8-471e-98c0-0acd4508158c" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="New_endpoint_contracts_keep_required_nested_wire_types" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/me/onboarding&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;groups[].steps[].done&quot;, type: &quot;boolean&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="f80b312e-cc25-bd12-bf9a-ab6ade073418">
+      <Execution id="0a2357f2-fd98-430d-b659-da790679b2e5" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="New_endpoint_contracts_keep_required_nested_wire_types" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.AdminContractTests.Holidays_keep_their_row_names_order_nulls_and_empty_answers" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="96d81604-08f3-8132-b2a4-250930fcdf2f">
+      <Execution id="178ed23f-d468-410a-9236-3627f7dbb124" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.AdminContractTests" name="Holidays_keep_their_row_names_order_nulls_and_empty_answers" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.Openapi_matches_the_committed_golden_document" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="49ffbb51-b125-18fc-ff07-1628bdcaedea">
+      <Execution id="8a471733-1826-4f6a-907c-16e592b94ccb" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="Openapi_matches_the_committed_golden_document" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/projects/{projectId}/commitment-reliabilit&quot;···, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;misses[].commitments[]&quot;, type: &quot;string&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="1e565737-e675-d4e3-b140-dcae18bc02f3">
+      <Execution id="139a5e8d-1645-4864-8556-eace52b65c57" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="New_endpoint_contracts_keep_required_nested_wire_types" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.Client_error_report_success_is_documented_as_bodyless_204" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="e7b83363-f6ac-c347-be21-44a550d2e252">
+      <Execution id="306d0c85-e034-4abf-977e-1d52f872c712" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="Client_error_report_success_is_documented_as_bodyless_204" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.MilestonesDeliverablesTests.Changing_discipline_moves_tasks_after_confirmation" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="d520f722-9f4f-7edd-2951-97e718ceb65e">
+      <Execution id="7c3c2344-1b7a-4a5f-851e-af76c0a42e75" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.MilestonesDeliverablesTests" name="Changing_discipline_moves_tasks_after_confirmation" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.PersonFactsFoundationTests.Existing_people_have_unknown_nullable_facts_without_defaults_or_seeded_certifications" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="6f651603-7186-cf09-6252-eb0a058f81e4">
+      <Execution id="d289d656-70b5-4b36-b499-49f2e0a1aa77" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.PersonFactsFoundationTests" name="Existing_people_have_unknown_nullable_facts_without_defaults_or_seeded_certifications" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/projects/{projectId}/revision-check&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;deliverables[].issues[].marks[]&quot;, type: &quot;string&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="af1e1246-4096-e701-0868-591c6935c777">
+      <Execution id="6b206fce-e0c7-4917-937d-051a0b3ff5e7" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="New_endpoint_contracts_keep_required_nested_wire_types" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/me/work/watching&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;items[].projectNumber&quot;, type: &quot;string&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="34b49e09-8339-d78e-eb01-cb64fa206afe">
+      <Execution id="d0d0e80a-d38a-4f54-bb7a-3d72488ddac4" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="New_endpoint_contracts_keep_required_nested_wire_types" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TimelineTests.Latest_planned_note_is_omitted_without_an_active_project_and_target(status: &quot;Archived&quot;, targetKnown: True)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="820422da-edf2-57b1-4cdf-4dda181f2b22">
+      <Execution id="4c7fb07d-5e7a-417a-a240-023a149ac362" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TimelineTests" name="Latest_planned_note_is_omitted_without_an_active_project_and_target" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.DeliverableContractTests.Register_rows_keep_their_order_and_omit_the_baseline_fields_while_their_flag_is_off" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="9d82dc3a-a9de-2cc3-279d-2ec2da6e2ab6">
+      <Execution id="43e5e354-821c-406a-b270-952d5218d5b7" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.DeliverableContractTests" name="Register_rows_keep_their_order_and_omit_the_baseline_fields_while_their_flag_is_off" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.RegistryTests.Every_audited_type_has_one_valid_declaration" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="c20e30c1-922a-cc5e-efd3-68b4387df5b2">
+      <Execution id="a592d04b-5a67-4c09-8f81-bb91ca2aeb1d" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.RegistryTests" name="Every_audited_type_has_one_valid_declaration" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ViewsTests.Project_views_are_shared_and_changed_only_by_the_pm_and_leads" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="910f9df9-2fce-1011-5030-83bb13a6f634">
+      <Execution id="c0df76fc-96e1-44ec-b3e4-0e256970a33a" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ViewsTests" name="Project_views_are_shared_and_changed_only_by_the_pm_and_leads" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TeamCompletenessTests.Team_saved_views_require_owner_flag_and_keep_workspace_personal_and_project_access_sharing_guards" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="cf54798e-b3f8-7193-69af-ddddd1eee466">
+      <Execution id="cb154e11-7418-494f-8b6c-457b1cfc53be" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TeamCompletenessTests" name="Team_saved_views_require_owner_flag_and_keep_workspace_personal_and_project_access_sharing_guards" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/admin/audit-chains&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;[].chainId&quot;, type: &quot;string&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="92745d94-7e4d-6dd5-2bf6-a8f5d011e8d8">
+      <Execution id="3654c81d-644c-4230-8f01-983614e064c7" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="New_endpoint_contracts_keep_required_nested_wire_types" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.Me_settings_are_typed_and_route_counter_field_is_flag_scoped" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="9c39e606-7b28-dd81-b5dc-fc4db1748dbc">
+      <Execution id="424482b0-f0fb-491b-b6f6-b4337d040ae7" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="Me_settings_are_typed_and_route_counter_field_is_flag_scoped" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.MilestonesDeliverablesTests.A_milestone_s_discipline_must_belong_to_its_project" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="6bb6633a-6805-1ea9-b8c8-bee026326049">
+      <Execution id="b650e35e-2d06-4772-bc64-428754a01a31" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.MilestonesDeliverablesTests" name="A_milestone_s_discipline_must_belong_to_its_project" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TeamCompletenessTests.Team_saved_view_group_validation_and_reference_cleanup_keep_known_ids_and_distinct_unknown_sentinels" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="362be386-f432-c4d0-d194-e63d2a609950">
+      <Execution id="1c6da08f-0f99-4c1d-85fa-f03312eb8d7d" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TeamCompletenessTests" name="Team_saved_view_group_validation_and_reference_cleanup_keep_known_ids_and_distinct_unknown_sentinels" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.RegistryTests.Saved_views_exports_names_and_search_are_snapshot_supersets" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="71906152-d6af-7cd9-ce09-4b1d27df0278">
+      <Execution id="d4fd6570-e5fa-4a47-bdbf-e0016d9a7cdc" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.RegistryTests" name="Saved_views_exports_names_and_search_are_snapshot_supersets" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TimelineTests.Both_timelines_keep_their_property_names_order_and_types" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="dbb272cd-063b-2241-c627-125b8a190a2b">
+      <Execution id="293f13f3-9913-47f7-bba6-6025d06a8df8" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TimelineTests" name="Both_timelines_keep_their_property_names_order_and_types" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.AdminContractTests.Reference_lists_and_commands_keep_their_names_order_nulls_and_answers" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="9620dd00-d526-4d71-e568-dfd810a8a2a8">
+      <Execution id="2aacb16c-f4e6-4ae6-8364-d5cf99844941" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.AdminContractTests" name="Reference_lists_and_commands_keep_their_names_order_nulls_and_answers" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.RegistryTests.Audit_fields_and_history_types_preserve_the_original_snapshots" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="ba410c6e-98b7-d8b8-ced5-d046574ddb34">
+      <Execution id="f3176530-5fe2-4e19-b57f-8baf9c73a0fd" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.RegistryTests" name="Audit_fields_and_history_types_preserve_the_original_snapshots" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ViewsTests.Portfolio_views_keep_group_and_overdue_decisions_and_refuse_unknown_groups" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="ab7e9965-fac0-59cf-6484-f00b6e149f23">
+      <Execution id="b2d2325e-a539-4b83-8e09-2a9bd1fb24cf" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ViewsTests" name="Portfolio_views_keep_group_and_overdue_decisions_and_refuse_unknown_groups" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.PersonFactsFoundationTests.Database_rejects_invalid_person_facts_case_duplicate_tags_and_duplicate_or_foreign_certifications" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="856ea745-f032-76a3-bb28-88b85b21f3d4">
+      <Execution id="018dacfe-9ee7-4c4f-b7b0-78b2aa532f37" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.PersonFactsFoundationTests" name="Database_rejects_invalid_person_facts_case_duplicate_tags_and_duplicate_or_foreign_certifications" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/admin/organisation/import/preview&quot;, method: &quot;post&quot;, status: &quot;200&quot;, field: &quot;applied&quot;, type: &quot;boolean&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="76065eab-e344-e175-93c7-de7992d53248">
+      <Execution id="555e22eb-56e4-4e46-a4b5-b6e0417b64e9" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="New_endpoint_contracts_keep_required_nested_wire_types" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TimelineTests.Slip_display_is_server_decided_without_changing_slip_filters_or_exports(enabled: False)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="63b24ef8-523b-8d79-3987-9f4d31878a47">
+      <Execution id="6a9b4384-e4a4-492d-90bd-2adc4128d8f9" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TimelineTests" name="Slip_display_is_server_decided_without_changing_slip_filters_or_exports" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TimelineTests.An_empty_project_has_an_empty_handoff_group_read_only_while_enabled" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="5bed0395-6f0f-b255-cdaf-f5d5b6864fa5">
+      <Execution id="b6a2367e-49fd-450c-b48c-aee72ee0e0f2" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TimelineTests" name="An_empty_project_has_an_empty_handoff_group_read_only_while_enabled" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/tasks/{id}&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;permissions.transitions[].allowed&quot;, type: &quot;boolean&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="5c50f393-d00c-150b-2514-1cdfbb87e371">
+      <Execution id="77e3cb7d-2f1d-4216-8cd1-487542c69895" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="New_endpoint_contracts_keep_required_nested_wire_types" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.Allocation_preview_contract_describes_both_saved_and_preview_responses(route: &quot;/api/v1/projects/{projectId}/allocations&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="77c4b081-2927-c668-6200-cd967c46e59e">
+      <Execution id="aee9d12d-45ec-40b5-8770-e102a90a49cf" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="Allocation_preview_contract_describes_both_saved_and_preview_responses" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TimelineTests.Timeline_uses_stored_affected_milestones_at_the_evaluators_depth_without_recalculating_or_changing_cross_project_reads(enabled: False)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="f184ca3a-0745-86cc-a31f-346b3c7a1c95">
+      <Execution id="5943ba3b-4c07-4ce4-891f-d1537eb57d87" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TimelineTests" name="Timeline_uses_stored_affected_milestones_at_the_evaluators_depth_without_recalculating_or_changing_cross_project_reads" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ViewsTests.Staff_views_are_personal_restore_filters_and_name_missing_references" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="4d68ec52-5d92-c3fe-e78b-0c8d277eaaa3">
+      <Execution id="f4b4a7f3-4e99-47a0-83a3-80d955b01cf7" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ViewsTests" name="Staff_views_are_personal_restore_filters_and_name_missing_references" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/admin/organisation/units&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;[].rowVersion&quot;, type: &quot;integer&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="4805dd1f-3a71-3ad3-c8c3-c48d5c4d31eb">
+      <Execution id="393551ef-93fd-464c-8b85-9cbc5d608dee" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="New_endpoint_contracts_keep_required_nested_wire_types" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TimelineTests.The_milestone_cascade_can_include_tasks" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="9247b461-dc06-d6c7-3522-9a1d5dfa07c2">
+      <Execution id="ec8f6521-f267-4b14-93ff-31fb8ff71ef1" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TimelineTests" name="The_milestone_cascade_can_include_tasks" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ViewsTests.A_view_whose_references_are_gone_opens_without_them" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="8dec45b3-1040-bcdf-d4a1-bf88bd595c78">
+      <Execution id="1befa684-e89b-4161-b56c-cbd7ff8d759e" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ViewsTests" name="A_view_whose_references_are_gone_opens_without_them" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TeamCompletenessTests.Two_open_roles_are_separate_canonical_records_and_never_change_Team_people_or_membership" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="f2dc409e-04d2-945b-aece-e1648b53e296">
+      <Execution id="4f753903-f818-4317-bb80-38c042c99441" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TeamCompletenessTests" name="Two_open_roles_are_separate_canonical_records_and_never_change_Team_people_or_membership" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.RegistryParityTests.Activity_history_and_export_parameters_match_the_pre_registry_snapshot" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="f91831e8-c312-5d7f-9c0c-6e4d80113508">
+      <Execution id="04c7ad87-04dc-4ff0-8bea-f32f4caab55c" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.RegistryParityTests" name="Activity_history_and_export_parameters_match_the_pre_registry_snapshot" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TimelineTests.Latest_planned_note_is_omitted_without_an_active_project_and_target(status: &quot;Complete&quot;, targetKnown: True)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="72831e46-8dc1-a091-700d-f0027ea832d5">
+      <Execution id="65325753-2281-4f0e-9d1f-511540baf0dd" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TimelineTests" name="Latest_planned_note_is_omitted_without_an_active_project_and_target" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TimelineTests.Latest_planned_note_matches_project_and_both_timelines_without_changing_health_or_storing_state(enabled: True)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="b2d5443f-2f57-dc30-059a-0de778daefbc">
+      <Execution id="a345a746-6602-4255-87c9-dbb9428be10e" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TimelineTests" name="Latest_planned_note_matches_project_and_both_timelines_without_changing_health_or_storing_state" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: &quot;/api/v1/deliverables/{id}/baselines&quot;, method: &quot;get&quot;, status: &quot;200&quot;, field: &quot;people[].displayName&quot;, type: &quot;string&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="16c94c65-98e0-d415-de3e-5184260ac08c">
+      <Execution id="ff14bdf4-c316-4a0e-9988-66c4492cfc35" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="New_endpoint_contracts_keep_required_nested_wire_types" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TeamCompletenessTests.Home_discipline_is_distinct_from_project_primary_and_shared_with_workspace_without_changing_legacy_cohort" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="bcf2e52c-95b7-e5c7-70da-f844663935b4">
+      <Execution id="c0fc0e5f-b653-47bf-8ef2-869cd2961298" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TeamCompletenessTests" name="Home_discipline_is_distinct_from_project_primary_and_shared_with_workspace_without_changing_legacy_cohort" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="a7f290fc-f04f-537a-3b42-98a436169cc6" executionId="727db55b-7905-4baa-9530-6a8aa5e99a3a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f51f96f3-e5ef-f9d4-aeb5-8d8b2b82a309" executionId="a5b2411e-09cc-4567-8f2c-eab28186a5db" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="72831e46-8dc1-a091-700d-f0027ea832d5" executionId="65325753-2281-4f0e-9d1f-511540baf0dd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6f777131-6eb5-69b4-62d8-0b841c7fff47" executionId="141488ec-2e25-4783-ba16-c909ed5ff803" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="71906152-d6af-7cd9-ce09-4b1d27df0278" executionId="d4fd6570-e5fa-4a47-bdbf-e0016d9a7cdc" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="856ea745-f032-76a3-bb28-88b85b21f3d4" executionId="018dacfe-9ee7-4c4f-b7b0-78b2aa532f37" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f2dc409e-04d2-945b-aece-e1648b53e296" executionId="4f753903-f818-4317-bb80-38c042c99441" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8f5b1d15-31bb-12ca-a387-726054dc1282" executionId="545a71a7-2a9a-4f6b-956b-89879ec2e456" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="820422da-edf2-57b1-4cdf-4dda181f2b22" executionId="4c7fb07d-5e7a-417a-a240-023a149ac362" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1e565737-e675-d4e3-b140-dcae18bc02f3" executionId="139a5e8d-1645-4864-8556-eace52b65c57" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9cb06cce-0885-6d00-9806-e47586aff4f7" executionId="05636a01-ec89-4dff-a411-7968e323e3ad" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8dec45b3-1040-bcdf-d4a1-bf88bd595c78" executionId="1befa684-e89b-4161-b56c-cbd7ff8d759e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f91831e8-c312-5d7f-9c0c-6e4d80113508" executionId="04c7ad87-04dc-4ff0-8bea-f32f4caab55c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a454b14f-76e0-d470-3e6b-8e34313fbb10" executionId="4eb230e6-1988-4484-a4dc-58fb8b06fa21" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e3ab8e96-0252-9782-b386-87c80b4f2563" executionId="8515069d-0a1d-4da7-803a-9944635aa6f8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="bcf2e52c-95b7-e5c7-70da-f844663935b4" executionId="c0fc0e5f-b653-47bf-8ef2-869cd2961298" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="12afdb82-813a-327a-af92-eebfbcdbaf79" executionId="b52fb601-7053-49ea-a5b5-6dac87989518" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="544603b2-2695-983e-44df-23a07884ded2" executionId="81cd157d-c8cd-457a-989c-d3992f889fb1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a9319e37-4623-231a-8981-06bf077a8a11" executionId="18d60b32-ec20-439d-8fde-7f8c828c54f9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d6b3202e-f85e-2173-1faf-7a1dacb12f92" executionId="d8d0f60d-36e3-4f8d-a7b2-6f732c714e28" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="910f9df9-2fce-1011-5030-83bb13a6f634" executionId="c0df76fc-96e1-44ec-b3e4-0e256970a33a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d520f722-9f4f-7edd-2951-97e718ceb65e" executionId="7c3c2344-1b7a-4a5f-851e-af76c0a42e75" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="362be386-f432-c4d0-d194-e63d2a609950" executionId="1c6da08f-0f99-4c1d-85fa-f03312eb8d7d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="93983a98-ed2d-de99-cb8c-61d3c65b23b0" executionId="e6cdd471-9b8f-47ee-bdae-22a1d011d42b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c20e30c1-922a-cc5e-efd3-68b4387df5b2" executionId="a592d04b-5a67-4c09-8f81-bb91ca2aeb1d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="472d2d2f-e4a8-5c19-001c-12af53979819" executionId="bed35b4d-6162-408b-a163-fe6611773542" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5d5bfda3-7da3-b267-289b-c9470bf36c3c" executionId="8e9e8dc7-c9bb-476d-9b04-0b1db51ac72d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="38cfb4bf-77dc-5925-8f41-5412e5968650" executionId="6745d616-fe13-4f74-9035-87a07f3d9f99" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="cda4a7df-0b55-f38e-f02f-dd1196abfed2" executionId="9618cb71-1d82-4013-bdb5-60ec92209906" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a7c96bd3-79b2-f8db-31f7-5807ddcb7523" executionId="c0277029-1acd-482d-b81c-413f5ba8ea8d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="af1e1246-4096-e701-0868-591c6935c777" executionId="6b206fce-e0c7-4917-937d-051a0b3ff5e7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4805dd1f-3a71-3ad3-c8c3-c48d5c4d31eb" executionId="393551ef-93fd-464c-8b85-9cbc5d608dee" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="39ff8743-7796-9af8-5d29-7cf9310c2a2f" executionId="20981958-16b4-499e-a98e-4a742bcdd75f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3a2e48a8-7bd0-0a48-fbb0-3b27a9a0beab" executionId="16ab42e9-6703-4aa1-9dc5-668a04571df0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9620dd00-d526-4d71-e568-dfd810a8a2a8" executionId="2aacb16c-f4e6-4ae6-8364-d5cf99844941" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ab7e9965-fac0-59cf-6484-f00b6e149f23" executionId="b2d2325e-a539-4b83-8e09-2a9bd1fb24cf" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="554ac8cd-3ee0-efbf-da72-3c9f71c1eed0" executionId="d4e5ca21-2a60-4dee-8192-1a2aaa389798" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b6682e38-2244-8877-7b5d-2471c20c5dee" executionId="21a6d60e-f609-485b-b636-2b839edac8a1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8a83c118-aef0-128c-4fa3-35ce2d26d90f" executionId="f09d28f0-3c41-47c6-992a-daaebbb551b5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="55695d93-c482-9101-7797-1f97e9d4e01e" executionId="a516451f-7e2a-4f6c-acd4-bfadb1b27594" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a730e45a-548a-1051-54c1-ccceaf2c8308" executionId="33726fc4-b8cd-494d-a1ea-2c4f3d837858" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b0d608c5-f349-ce09-e180-0a946b428d8e" executionId="8af4957a-a698-418d-83b8-b58be6742d01" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6bb6633a-6805-1ea9-b8c8-bee026326049" executionId="b650e35e-2d06-4772-bc64-428754a01a31" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="cf54798e-b3f8-7193-69af-ddddd1eee466" executionId="cb154e11-7418-494f-8b6c-457b1cfc53be" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e7b83363-f6ac-c347-be21-44a550d2e252" executionId="306d0c85-e034-4abf-977e-1d52f872c712" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f0c2c1b8-00c3-7823-3ef5-9bfb01ed3854" executionId="4a5bb626-5dd2-4178-839b-199c3fdc97e8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5bed0395-6f0f-b255-cdaf-f5d5b6864fa5" executionId="b6a2367e-49fd-450c-b48c-aee72ee0e0f2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="16c94c65-98e0-d415-de3e-5184260ac08c" executionId="ff14bdf4-c316-4a0e-9988-66c4492cfc35" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3c652c39-3bbb-8bdf-1903-66a7a618fd70" executionId="19b30932-9b7c-4119-9926-a442d4aca9eb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="498d90a5-8339-d926-9ed7-2517ec0538ea" executionId="87c13f43-8c75-4039-a737-803a82dd0d4e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="cc67ea3f-ebbd-510c-c3c5-a6749044b337" executionId="2dde0651-c3ca-43fe-864d-e4e9a5edcbf2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2aa9bed9-129d-7d63-0cd0-123a4a8a5b66" executionId="c6cf5c38-a7b3-43ec-a597-58ae465c7135" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9c39e606-7b28-dd81-b5dc-fc4db1748dbc" executionId="424482b0-f0fb-491b-b6f6-b4337d040ae7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="49ffbb51-b125-18fc-ff07-1628bdcaedea" executionId="8a471733-1826-4f6a-907c-16e592b94ccb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="24a2a3e8-962c-020b-c749-25bf3d792955" executionId="a775d5d4-3fbb-4921-8cc7-da5fec010334" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ba410c6e-98b7-d8b8-ced5-d046574ddb34" executionId="f3176530-5fe2-4e19-b57f-8baf9c73a0fd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9832b10a-cfc9-506b-0831-6d8076dd640f" executionId="827f75cd-1590-4580-aa5b-73719cbaf5fe" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4d68ec52-5d92-c3fe-e78b-0c8d277eaaa3" executionId="f4b4a7f3-4e99-47a0-83a3-80d955b01cf7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="77c4b081-2927-c668-6200-cd967c46e59e" executionId="aee9d12d-45ec-40b5-8770-e102a90a49cf" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ffe78e3f-62f1-83f3-b5c0-cd5561c2d48e" executionId="164af875-a517-437f-b41d-677a5a044e9f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c6b17f9a-1101-45d5-df9c-7b78a98de111" executionId="e9ed7002-558d-4af7-a1f5-3272af2f8d07" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d49e18ce-6cb9-123f-1fcd-ed36af5a6fe2" executionId="79ca3a58-6edf-4fa1-851c-a7ae2c439cb6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a61394f5-7a5f-1953-ae2c-a3866581e9bc" executionId="2f748576-f14b-49d1-a3a4-98f3bd0ef4d3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9ae4fc25-73fe-15e9-e8f7-60b7200505b3" executionId="7cfeac7e-58ea-40e6-acd9-a171e0b89fda" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="38d8e039-0ff4-c763-e782-aba82f93f836" executionId="a9f1e366-d896-4464-8064-c13fc37b9e8d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b33300c4-f539-e8be-558c-11b822f2c693" executionId="13a83b76-eed3-413f-be97-4e427b214394" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="54afbf01-732e-ad0c-ccf1-8445fae92745" executionId="82b3ebec-dbbc-4a74-a41a-9fc8b06881cb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="cd0b1e53-ef27-72ef-354c-3c69ba642824" executionId="0349fda8-302a-45c2-a7f5-630ec34f7007" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c21b3684-1553-4871-e653-8c2b1892190e" executionId="4f7311ad-46ea-4a11-96d7-cb839a799c49" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9d82dc3a-a9de-2cc3-279d-2ec2da6e2ab6" executionId="43e5e354-821c-406a-b270-952d5218d5b7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f823530b-0397-face-1834-35cd784e44bb" executionId="af2958fa-d8ca-4fef-90d7-a312b8be5206" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="43d77fae-a93a-fb9d-3019-f06664f9d85e" executionId="64e7516f-b5b2-476a-870b-5bc167597619" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6f651603-7186-cf09-6252-eb0a058f81e4" executionId="d289d656-70b5-4b36-b499-49f2e0a1aa77" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="92745d94-7e4d-6dd5-2bf6-a8f5d011e8d8" executionId="3654c81d-644c-4230-8f01-983614e064c7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f184ca3a-0745-86cc-a31f-346b3c7a1c95" executionId="5943ba3b-4c07-4ce4-891f-d1537eb57d87" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="659d8339-11b8-59f6-3e88-bae2be519bf6" executionId="ee7a1c47-85f8-471e-98c0-0acd4508158c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="36a4fe5d-3e03-a6e2-cfc0-3f18bf580457" executionId="f45fd849-32ff-431b-aa98-d19e3ae208d5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="76065eab-e344-e175-93c7-de7992d53248" executionId="555e22eb-56e4-4e46-a4b5-b6e0417b64e9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="34b49e09-8339-d78e-eb01-cb64fa206afe" executionId="d0d0e80a-d38a-4f54-bb7a-3d72488ddac4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f80b312e-cc25-bd12-bf9a-ab6ade073418" executionId="0a2357f2-fd98-430d-b659-da790679b2e5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="dbb272cd-063b-2241-c627-125b8a190a2b" executionId="293f13f3-9913-47f7-bba6-6025d06a8df8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b2d5443f-2f57-dc30-059a-0de778daefbc" executionId="a345a746-6602-4255-87c9-dbb9428be10e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="68415e79-f769-03c5-7552-95ee139d55a9" executionId="85196ac9-af70-47b6-85fd-b8392ed4ae85" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9247b461-dc06-d6c7-3522-9a1d5dfa07c2" executionId="ec8f6521-f267-4b14-93ff-31fb8ff71ef1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2bffb9e3-ba4b-f69b-9f02-98ce04a77fa0" executionId="3e3d5d8d-1eac-467f-aa44-016fe0af567e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c8169f43-69aa-8941-3443-6dc984974e0f" executionId="e31d24de-ad84-40e7-9c49-6577b90b3166" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e28fb7cd-76ae-24f5-cef3-d326527726df" executionId="7fcffd3f-092b-4bd1-94a0-9a1535cb46df" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="23dfe79c-ddd3-2362-3c27-b5847eee7f6c" executionId="466f4e92-23d1-464d-8ad3-e6b0d6eb3ea8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="96d81604-08f3-8132-b2a4-250930fcdf2f" executionId="178ed23f-d468-410a-9236-3627f7dbb124" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="63b24ef8-523b-8d79-3987-9f4d31878a47" executionId="6a9b4384-e4a4-492d-90bd-2adc4128d8f9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7e2521d7-5f5a-7b77-ecd0-5500a7a72bb3" executionId="ed8d2368-d6aa-4c53-aea8-d1724c0ec60f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5c50f393-d00c-150b-2514-1cdfbb87e371" executionId="77e3cb7d-2f1d-4216-8cd1-487542c69895" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5543d201-43a0-41d7-c681-5af9a317892d" executionId="ad8ef717-11ca-4aa5-b1ec-7168c3a7fd6f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="93" executed="93" passed="93" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.11)
+[xUnit.net 00:00:00.08]   Discovering: Hub.Tests
+[xUnit.net 00:00:00.18]   Discovered:  Hub.Tests
+[xUnit.net 00:00:00.20]   Starting:    Hub.Tests
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+warn: Microsoft.EntityFrameworkCore.Query[10103]
+      The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[@p0='?' (DbType = Guid)], CommandType='Text', CommandTimeout='30']
+      UPDATE hub.app_user SET person_type='Invented' WHERE id=@p0
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[@p0='?' (DbType = Guid)], CommandType='Text', CommandTimeout='30']
+      UPDATE hub.app_user SET person_start_date='2026-12-02',person_end_date='2026-12-01' WHERE id=@p0
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?', @p2='?', @p3='?' (DbType = Guid), @p4='?' (DbType = Object), @p5='?' (DbType = Guid), @p6='?' (DbType = Int64), @p7='?' (DbType = Object), @p8='?' (DbType = Guid), @p9='?' (DbType = Guid), @p10='?', @p11='?', @p12='?', @p13='?' (DbType = DateTime), @p14='?', @p15='?' (DbType = Guid), @p16='?' (DbType = Guid), @p17='?', @p18='?', @p19='?' (DbType = Object), @p20='?', @p21='?' (DbType = Guid), @p22='?' (DbType = DateTime), @p23='?' (DbType = Guid), @p24='?' (DbType = Boolean), @p25='?', @p26='?' (DbType = Int32), @p27='?' (DbType = Int32), @p28='?' (DbType = DateTime), @p29='?' (DbType = Guid)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO hub.activity_log (id, action, actor_type, actor_user_id, categories, chain_id, chain_seq, changes, correlation_id, item_id, item_key, item_name, item_type, occurred_at, prev_hash, project_discipline_id, project_id, reason, row_hash, snapshot, source)
+      VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17, @p18, @p19, @p20);
+      INSERT INTO hub.certification_tag (id, created_at, created_by, is_active, name, row_version, sort_order, updated_at, updated_by)
+      VALUES (@p21, @p22, @p23, @p24, @p25, @p26, @p27, @p28, @p29);
+fail: Microsoft.EntityFrameworkCore.Update[10000]
+      An exception occurred in the database while saving changes for context type 'Hub.Api.Data.HubDb'.
+      Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+       ---&gt; Npgsql.PostgresException (0x80004005): 23505: duplicate key value violates unique constraint "ix_certification_tag_name"
+      DETAIL: Key (name)=(SYNTHETIC SAFETY TAG) already exists.
+         at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource&lt;TResult&gt;.GetResult(Int16 token)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+        Exception data:
+          Severity: ERROR
+          SqlState: 23505
+          MessageText: duplicate key value violates unique constraint "ix_certification_tag_name"
+          Detail: Key (name)=(SYNTHETIC SAFETY TAG) already exists.
+          SchemaName: hub
+          TableName: certification_tag
+          ConstraintName: ix_certification_tag_name
+          File: nbtinsert.c
+          Line: 666
+          Routine: _bt_check_unique
+         --- End of inner exception stack trace ---
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+         at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+      Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+       ---&gt; Npgsql.PostgresException (0x80004005): 23505: duplicate key value violates unique constraint "ix_certification_tag_name"
+      DETAIL: Key (name)=(SYNTHETIC SAFETY TAG) already exists.
+         at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource&lt;TResult&gt;.GetResult(Int16 token)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+        Exception data:
+          Severity: ERROR
+          SqlState: 23505
+          MessageText: duplicate key value violates unique constraint "ix_certification_tag_name"
+          Detail: Key (name)=(SYNTHETIC SAFETY TAG) already exists.
+          SchemaName: hub
+          TableName: certification_tag
+          ConstraintName: ix_certification_tag_name
+          File: nbtinsert.c
+          Line: 666
+          Routine: _bt_check_unique
+         --- End of inner exception stack trace ---
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+         at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?', @p2='?', @p3='?' (DbType = Guid), @p4='?' (DbType = Object), @p5='?' (DbType = Guid), @p6='?' (DbType = Int64), @p7='?' (DbType = Object), @p8='?' (DbType = Guid), @p9='?' (DbType = Guid), @p10='?', @p11='?', @p12='?', @p13='?' (DbType = DateTime), @p14='?', @p15='?' (DbType = Guid), @p16='?' (DbType = Guid), @p17='?', @p18='?', @p19='?' (DbType = Object), @p20='?', @p21='?' (DbType = Guid), @p22='?' (DbType = DateTime), @p23='?' (DbType = Guid), @p24='?' (DbType = Boolean), @p25='?', @p26='?' (DbType = Int32), @p27='?' (DbType = Int32), @p28='?' (DbType = DateTime), @p29='?' (DbType = Guid)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO hub.activity_log (id, action, actor_type, actor_user_id, categories, chain_id, chain_seq, changes, correlation_id, item_id, item_key, item_name, item_type, occurred_at, prev_hash, project_discipline_id, project_id, reason, row_hash, snapshot, source)
+      VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17, @p18, @p19, @p20);
+      INSERT INTO hub.certification_tag (id, created_at, created_by, is_active, name, row_version, sort_order, updated_at, updated_by)
+      VALUES (@p21, @p22, @p23, @p24, @p25, @p26, @p27, @p28, @p29);
+fail: Microsoft.EntityFrameworkCore.Update[10000]
+      An exception occurred in the database while saving changes for context type 'Hub.Api.Data.HubDb'.
+      Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+       ---&gt; Npgsql.PostgresException (0x80004005): 23514: new row for relation "certification_tag" violates check constraint "ck_certification_tag_name"
+      DETAIL: Failing row contains (01a19823-ebc9-7256-b8fd-f4c7513fdaa0, 2026-09-14 13:00:00+00, null, 2026-09-14 13:00:00+00, null, 0,  , t, 0).
+         at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource&lt;TResult&gt;.GetResult(Int16 token)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+        Exception data:
+          Severity: ERROR
+          SqlState: 23514
+          MessageText: new row for relation "certification_tag" violates check constraint "ck_certification_tag_name"
+          Detail: Failing row contains (01a19823-ebc9-7256-b8fd-f4c7513fdaa0, 2026-09-14 13:00:00+00, null, 2026-09-14 13:00:00+00, null, 0,  , t, 0).
+          SchemaName: hub
+          TableName: certification_tag
+          ConstraintName: ck_certification_tag_name
+          File: execMain.c
+          Line: 2074
+          Routine: ExecConstraints
+         --- End of inner exception stack trace ---
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+         at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+      Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+       ---&gt; Npgsql.PostgresException (0x80004005): 23514: new row for relation "certification_tag" violates check constraint "ck_certification_tag_name"
+      DETAIL: Failing row contains (01a19823-ebc9-7256-b8fd-f4c7513fdaa0, 2026-09-14 13:00:00+00, null, 2026-09-14 13:00:00+00, null, 0,  , t, 0).
+         at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource&lt;TResult&gt;.GetResult(Int16 token)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+        Exception data:
+          Severity: ERROR
+          SqlState: 23514
+          MessageText: new row for relation "certification_tag" violates check constraint "ck_certification_tag_name"
+          Detail: Failing row contains (01a19823-ebc9-7256-b8fd-f4c7513fdaa0, 2026-09-14 13:00:00+00, null, 2026-09-14 13:00:00+00, null, 0,  , t, 0).
+          SchemaName: hub
+          TableName: certification_tag
+          ConstraintName: ck_certification_tag_name
+          File: execMain.c
+          Line: 2074
+          Routine: ExecConstraints
+         --- End of inner exception stack trace ---
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+         at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?', @p2='?', @p3='?' (DbType = Guid), @p4='?' (DbType = Object), @p5='?' (DbType = Guid), @p6='?' (DbType = Int64), @p7='?' (DbType = Object), @p8='?' (DbType = Guid), @p9='?' (DbType = Guid), @p10='?', @p11='?', @p12='?', @p13='?' (DbType = DateTime), @p14='?', @p15='?' (DbType = Guid), @p16='?' (DbType = Guid), @p17='?', @p18='?', @p19='?' (DbType = Object), @p20='?', @p21='?' (DbType = Guid), @p22='?' (DbType = Guid), @p23='?' (DbType = DateTime), @p24='?' (DbType = Guid), @p25='?' (DbType = Date), @p26='?' (DbType = Int32), @p27='?' (DbType = DateTime), @p28='?' (DbType = Guid), @p29='?' (DbType = Guid)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO hub.activity_log (id, action, actor_type, actor_user_id, categories, chain_id, chain_seq, changes, correlation_id, item_id, item_key, item_name, item_type, occurred_at, prev_hash, project_discipline_id, project_id, reason, row_hash, snapshot, source)
+      VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17, @p18, @p19, @p20);
+      INSERT INTO hub.user_certification (id, certification_tag_id, created_at, created_by, expires_on, row_version, updated_at, updated_by, user_id)
+      VALUES (@p21, @p22, @p23, @p24, @p25, @p26, @p27, @p28, @p29);
+fail: Microsoft.EntityFrameworkCore.Update[10000]
+      An exception occurred in the database while saving changes for context type 'Hub.Api.Data.HubDb'.
+      Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+       ---&gt; Npgsql.PostgresException (0x80004005): 23505: duplicate key value violates unique constraint "ix_user_certification_user_id_certification_tag_id"
+      DETAIL: Key (user_id, certification_tag_id)=(01a19823-e858-7f68-b1c1-f82fa1e50593, 01a19823-ebb8-7660-ab2e-95f8320910ab) already exists.
+         at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource&lt;TResult&gt;.GetResult(Int16 token)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+        Exception data:
+          Severity: ERROR
+          SqlState: 23505
+          MessageText: duplicate key value violates unique constraint "ix_user_certification_user_id_certification_tag_id"
+          Detail: Key (user_id, certification_tag_id)=(01a19823-e858-7f68-b1c1-f82fa1e50593, 01a19823-ebb8-7660-ab2e-95f8320910ab) already exists.
+          SchemaName: hub
+          TableName: user_certification
+          ConstraintName: ix_user_certification_user_id_certification_tag_id
+          File: nbtinsert.c
+          Line: 666
+          Routine: _bt_check_unique
+         --- End of inner exception stack trace ---
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+         at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+      Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+       ---&gt; Npgsql.PostgresException (0x80004005): 23505: duplicate key value violates unique constraint "ix_user_certification_user_id_certification_tag_id"
+      DETAIL: Key (user_id, certification_tag_id)=(01a19823-e858-7f68-b1c1-f82fa1e50593, 01a19823-ebb8-7660-ab2e-95f8320910ab) already exists.
+         at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource&lt;TResult&gt;.GetResult(Int16 token)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+        Exception data:
+          Severity: ERROR
+          SqlState: 23505
+          MessageText: duplicate key value violates unique constraint "ix_user_certification_user_id_certification_tag_id"
+          Detail: Key (user_id, certification_tag_id)=(01a19823-e858-7f68-b1c1-f82fa1e50593, 01a19823-ebb8-7660-ab2e-95f8320910ab) already exists.
+          SchemaName: hub
+          TableName: user_certification
+          ConstraintName: ix_user_certification_user_id_certification_tag_id
+          File: nbtinsert.c
+          Line: 666
+          Routine: _bt_check_unique
+         --- End of inner exception stack trace ---
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+         at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?', @p2='?', @p3='?' (DbType = Guid), @p4='?' (DbType = Object), @p5='?' (DbType = Guid), @p6='?' (DbType = Int64), @p7='?' (DbType = Object), @p8='?' (DbType = Guid), @p9='?' (DbType = Guid), @p10='?', @p11='?', @p12='?', @p13='?' (DbType = DateTime), @p14='?', @p15='?' (DbType = Guid), @p16='?' (DbType = Guid), @p17='?', @p18='?', @p19='?' (DbType = Object), @p20='?', @p21='?' (DbType = Guid), @p22='?' (DbType = Guid), @p23='?' (DbType = DateTime), @p24='?' (DbType = Guid), @p25='?' (DbType = Date), @p26='?' (DbType = Int32), @p27='?' (DbType = DateTime), @p28='?' (DbType = Guid), @p29='?' (DbType = Guid)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO hub.activity_log (id, action, actor_type, actor_user_id, categories, chain_id, chain_seq, changes, correlation_id, item_id, item_key, item_name, item_type, occurred_at, prev_hash, project_discipline_id, project_id, reason, row_hash, snapshot, source)
+      VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17, @p18, @p19, @p20);
+      INSERT INTO hub.user_certification (id, certification_tag_id, created_at, created_by, expires_on, row_version, updated_at, updated_by, user_id)
+      VALUES (@p21, @p22, @p23, @p24, @p25, @p26, @p27, @p28, @p29);
+fail: Microsoft.EntityFrameworkCore.Update[10000]
+      An exception occurred in the database while saving changes for context type 'Hub.Api.Data.HubDb'.
+      Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+       ---&gt; Npgsql.PostgresException (0x80004005): 23503: insert or update on table "user_certification" violates foreign key constraint "fk_user_certification_app_user_user_id"
+      DETAIL: Key (user_id)=(a9c19e77-ddc9-40fe-8117-836368d450fa) is not present in table "app_user".
+         at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource&lt;TResult&gt;.GetResult(Int16 token)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+        Exception data:
+          Severity: ERROR
+          SqlState: 23503
+          MessageText: insert or update on table "user_certification" violates foreign key constraint "fk_user_certification_app_user_user_id"
+          Detail: Key (user_id)=(a9c19e77-ddc9-40fe-8117-836368d450fa) is not present in table "app_user".
+          SchemaName: hub
+          TableName: user_certification
+          ConstraintName: fk_user_certification_app_user_user_id
+          File: ri_triggers.c
+          Line: 2599
+          Routine: ri_ReportViolation
+         --- End of inner exception stack trace ---
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+         at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+      Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+       ---&gt; Npgsql.PostgresException (0x80004005): 23503: insert or update on table "user_certification" violates foreign key constraint "fk_user_certification_app_user_user_id"
+      DETAIL: Key (user_id)=(a9c19e77-ddc9-40fe-8117-836368d450fa) is not present in table "app_user".
+         at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource&lt;TResult&gt;.GetResult(Int16 token)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+        Exception data:
+          Severity: ERROR
+          SqlState: 23503
+          MessageText: insert or update on table "user_certification" violates foreign key constraint "fk_user_certification_app_user_user_id"
+          Detail: Key (user_id)=(a9c19e77-ddc9-40fe-8117-836368d450fa) is not present in table "app_user".
+          SchemaName: hub
+          TableName: user_certification
+          ConstraintName: fk_user_certification_app_user_user_id
+          File: ri_triggers.c
+          Line: 2599
+          Routine: ri_ReportViolation
+         --- End of inner exception stack trace ---
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+         at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?', @p2='?', @p3='?' (DbType = Guid), @p4='?' (DbType = Object), @p5='?' (DbType = Guid), @p6='?' (DbType = Int64), @p7='?' (DbType = Object), @p8='?' (DbType = Guid), @p9='?' (DbType = Guid), @p10='?', @p11='?', @p12='?', @p13='?' (DbType = DateTime), @p14='?', @p15='?' (DbType = Guid), @p16='?' (DbType = Guid), @p17='?', @p18='?', @p19='?' (DbType = Object), @p20='?', @p21='?' (DbType = Guid), @p22='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO hub.activity_log (id, action, actor_type, actor_user_id, categories, chain_id, chain_seq, changes, correlation_id, item_id, item_key, item_name, item_type, occurred_at, prev_hash, project_discipline_id, project_id, reason, row_hash, snapshot, source)
+      VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17, @p18, @p19, @p20);
+      DELETE FROM hub.certification_tag
+      WHERE id = @p21 AND row_version = @p22;
+fail: Microsoft.EntityFrameworkCore.Update[10000]
+      An exception occurred in the database while saving changes for context type 'Hub.Api.Data.HubDb'.
+      Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+       ---&gt; Npgsql.PostgresException (0x80004005): 23503: update or delete on table "certification_tag" violates foreign key constraint "fk_user_certification_certification_tag_certification_tag_id" on table "user_certification"
+      DETAIL: Key (id)=(01a19823-ebb8-7660-ab2e-95f8320910ab) is still referenced from table "user_certification".
+         at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource&lt;TResult&gt;.GetResult(Int16 token)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+        Exception data:
+          Severity: ERROR
+          SqlState: 23503
+          MessageText: update or delete on table "certification_tag" violates foreign key constraint "fk_user_certification_certification_tag_certification_tag_id" on table "user_certification"
+          Detail: Key (id)=(01a19823-ebb8-7660-ab2e-95f8320910ab) is still referenced from table "user_certification".
+          SchemaName: hub
+          TableName: user_certification
+          ConstraintName: fk_user_certification_certification_tag_certification_tag_id
+          File: ri_triggers.c
+          Line: 2612
+          Routine: ri_ReportViolation
+         --- End of inner exception stack trace ---
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+         at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+      Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+       ---&gt; Npgsql.PostgresException (0x80004005): 23503: update or delete on table "certification_tag" violates foreign key constraint "fk_user_certification_certification_tag_certification_tag_id" on table "user_certification"
+      DETAIL: Key (id)=(01a19823-ebb8-7660-ab2e-95f8320910ab) is still referenced from table "user_certification".
+         at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource&lt;TResult&gt;.GetResult(Int16 token)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+        Exception data:
+          Severity: ERROR
+          SqlState: 23503
+          MessageText: update or delete on table "certification_tag" violates foreign key constraint "fk_user_certification_certification_tag_certification_tag_id" on table "user_certification"
+          Detail: Key (id)=(01a19823-ebb8-7660-ab2e-95f8320910ab) is still referenced from table "user_certification".
+          SchemaName: hub
+          TableName: user_certification
+          ConstraintName: fk_user_certification_certification_tag_certification_tag_id
+          File: ri_triggers.c
+          Line: 2612
+          Routine: ri_ReportViolation
+         --- End of inner exception stack trace ---
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+         at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+warn: Microsoft.EntityFrameworkCore.Query[10102]
+      The query uses a row limiting operator ('Skip'/'Take') without an 'OrderBy' operator. This may lead to unpredictable results. If the 'Distinct' operator is used after 'OrderBy', then make sure to use the 'OrderBy' operator after 'Distinct' as the ordering would otherwise get erased.
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Hub.Operations[0]
+      Admin 01a19823-da12-7af3-81cb-fca39c530d3d retried 1 dead-lettered outbox events
+info: Hub.Operations[0]
+      Admin 01a19823-da12-7af3-81cb-fca39c530d3d retried 0 dead-lettered outbox events
+info: Hub.Operations[0]
+      Admin 01a19823-da12-7af3-81cb-fca39c530d3d retried 0 dead-lettered outbox events
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+[xUnit.net 00:00:28.99]   Finished:    Hub.Tests
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

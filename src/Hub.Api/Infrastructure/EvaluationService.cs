@@ -18,158 +18,164 @@ public sealed class EvaluationService(HubDb db, SettingsStore store, TimeProvide
         // into duplicate primary-key inserts. The project row is already the coordination lock used by
         // other project-wide commands and is held until every state/attention write is committed.
         await using var tx = await db.Database.BeginTransactionAsync(ct);
-        await Coordination.Lock(db, projectId);
-        var p = await db.Projects.AsNoTracking().FirstOrDefaultAsync(x => x.Id == projectId, ct);
-        if (p is null) return null;
-        var s = await store.Get(db);
-        var now = clock.GetUtcNow();
-        var today = clock.Today(s);
-        DateOnly L(DateTimeOffset t) => Clock.LocalDate(t, s);
-
-        var members = await db.ProjectMembers.AsNoTracking().Where(m => m.ProjectId == projectId && m.RemovedAt == null).Select(m => new { m.UserId, m.Roles }).ToListAsync(ct);
-        var disciplines = await db.ProjectDisciplines.AsNoTracking().Where(d => d.ProjectId == projectId).Select(d => new DisciplineSnap(d.Id, d.Discipline!.Name, d.LeadUserId, d.IsActive, d.SortOrder)).ToListAsync(ct);
-        var milestones = await db.Milestones.AsNoTracking().Where(m => m.ProjectId == projectId)
-            .Select(m => new MilestoneSnap(m.Id, m.Key, m.Name, m.MilestoneType, m.Date, m.OriginalDate, m.IsComplete, m.IsCancelled, m.ProjectDisciplineId, m.BaselineDate)).ToListAsync(ct);
-        var deliverablesRaw = await db.Deliverables.AsNoTracking().Where(d => d.ProjectId == projectId).ToListAsync(ct);
-        var deliverables = deliverablesRaw.Select(d => new DeliverableSnap(d.Id, d.Key, d.Name, d.ProjectDisciplineId, d.OwnerId, d.ReviewerId, d.MilestoneId, d.StartDate,
-            d.DueDate, d.OriginalDueDate, d.Status, d.Priority, L(d.LastActivityAt), d.IssuedDate, d.StartedAt is { } ds ? L(ds) : null,
-            d.StatusChangedAt is { } dsc ? L(dsc) : null, d.BaselineStartDate, d.BaselineDueDate)).ToList();
-        var tasksRaw = await db.Tasks.AsNoTracking().Where(t => t.ProjectId == projectId).ToListAsync(ct);
-        var taskIds = tasksRaw.Select(t => t.Id).ToList();
-        var collaborators = await db.Collaborators.AsNoTracking().Where(c => taskIds.Contains(c.TaskId)).ToListAsync(ct);
-        var tasks = tasksRaw.Select(t => new TaskSnap(t.Id, t.Key, t.Name, t.ProjectDisciplineId, t.DeliverableId, t.MilestoneId, t.AssigneeId, t.ReviewerId, t.Status,
-            t.Priority, t.StartDate, t.DueDate, t.ProgressPct, t.EstimatedHours, t.ManualBlockType, t.ManualBlockReason, t.ManualBlockSetAt is { } mb ? L(mb) : null,
-            L(t.LastActivityAt), t.ReviewRequestedAt is { } rr ? L(rr) : null, t.DueDateChangeCount, t.CompletedAt is { } ca ? L(ca) : null,
-            collaborators.Where(c => c.TaskId == t.Id).Select(c => c.UserId).ToList(), t.StartedAt is { } ts ? L(ts) : null,
-            t.StatusChangedAt is { } tsc ? L(tsc) : null)).ToList();
-        var deps = await db.Dependencies.AsNoTracking().Where(d => d.ProjectId == projectId).Select(d => new DependencySnap(d.Id, d.PredecessorTaskId, d.SuccessorTaskId, d.LagDays, d.DependencyType)).ToListAsync(ct);
-        var links = await db.ItemLinks.AsNoTracking().Where(l => l.ProjectId == projectId && l.SourceType == ItemType.Decision && l.TargetType == ItemType.Task && l.Relation == ItemRelation.BlockedByDecision)
-            .Select(l => new { l.SourceId, l.TargetId }).ToListAsync(ct);
-        var decisions = (await db.Decisions.AsNoTracking().Where(d => d.ProjectId == projectId).ToListAsync(ct))
-            .Select(d => new DecisionSnap(d.Id, d.Key, d.Subject, d.Status, d.RequiredByDate, d.ImpactLevel, d.OwnerUserId, d.RequestedById,
-                links.Where(l => l.SourceId == d.Id).Select(l => l.TargetId).ToList())).ToList();
-        var issues = await db.Issues.AsNoTracking().Where(x => x.ProjectId == projectId).Select(x => new IssueSnap(x.Id, x.Key, x.Title, x.Status, x.Severity, x.OwnerId, x.TargetResolutionDate, x.ProjectDisciplineId)).ToListAsync(ct);
-        var risks = await db.Risks.AsNoTracking().Where(x => x.ProjectId == projectId).Select(x => new RiskSnap(x.Id, x.Key, x.Title, x.Status, x.Probability, x.Impact, x.ReviewDate, x.OwnerId, x.ProjectDisciplineId)).ToListAsync(ct);
-        var actions = await db.Actions.AsNoTracking().Where(x => x.ProjectId == projectId).Select(x => new ActionSnap(x.Id, x.Key, x.Text, x.Status, x.OwnerType, x.OwnerUserId, x.OwnerDisciplineId, x.DueDate)).ToListAsync(ct);
-        var dlDeps = await db.DeliverableDependencies.AsNoTracking().Where(d => d.ProjectId == projectId).Select(d => new DependencySnap(d.Id, d.PredecessorDeliverableId, d.SuccessorDeliverableId, d.LagDays, d.DependencyType)).ToListAsync(ct);
-        var snoozes = await db.Snoozes.AsNoTracking().Where(z => z.ProjectId == projectId && z.EndedAt == null && z.SnoozedUntil > now)
-            .Select(z => new SnoozeSnap(z.RuleId, z.ItemType, z.ItemId, z.SnoozedUntil, z.SeverityAtSnooze)).ToListAsync(ct);
-        var prevStates = await db.TaskStates.Where(x => x.ProjectId == projectId).ToDictionaryAsync(x => x.TaskId, ct);
-        var userIds = tasks.SelectMany(t => new[] { t.AssigneeId, t.ReviewerId }).Concat(deliverables.SelectMany(d => new[] { d.OwnerId, d.ReviewerId }))
-            .Concat(decisions.Select(d => d.OwnerUserId)).Concat(disciplines.Select(d => d.LeadId)).Concat(members.Select(m => (Guid?)m.UserId))
-            .Concat(tasks.SelectMany(t => t.Collaborators ?? []).Cast<Guid?>()).Append(p.ProjectManagerId).OfType<Guid>().Distinct().ToList();
-        var users = await db.Users.AsNoTracking().Where(u => userIds.Contains(u.Id)).Select(u => new UserSnap(u.Id, u.DisplayName, u.IsActive, u.SupervisorId)).ToListAsync(ct);
-        WorkCalendar? calendar = null;
-        if (s.WorkingDaysEnabled)
-            calendar = new WorkCalendar(await db.Holidays.AsNoTracking().Where(h => h.OfficeId == null || h.OfficeId == p.OfficeId).Select(h => h.Date).ToListAsync(ct));
-
-        var input = new EvalInput(
-            new ProjectSnap(p.Id, p.ProjectNumber, p.Status, p.ProjectManagerId, members.Where(m => m.Roles.Contains(ProjectRole.PM)).Select(m => m.UserId).ToList(),
-                p.HealthOverride, p.HealthOverrideExpiresAt, now),
-            today, s, users, disciplines, milestones, deliverables, tasks, deps, decisions, members.Select(m => m.UserId).ToHashSet(),
-            prevStates.Where(x => x.Value.IsBlocked && x.Value.BlockedSince is not null).ToDictionary(x => x.Key, x => x.Value.BlockedSince!.Value),
-            snoozes, issues, risks, actions, dlDeps, calendar);
-        var r = Evaluator.Evaluate(input);
-
-        // ---------- Materialise (reads use these tables; no rule logic in SQL, §23.5 step 6) ----------
-        var byKey = tasks.ToDictionary(t => t.Id);
-        var was = prevStates.ToDictionary(x => x.Key, x => (x.Value.IsBlocked, x.Value.IsWaiting)); // read before the rows below are overwritten
-        foreach (var tr in r.Tasks)
+        try
         {
-            if (!prevStates.TryGetValue(tr.TaskId, out var st)) { st = new TaskState { TaskId = tr.TaskId, ProjectId = projectId }; db.TaskStates.Add(st); }
-            st.IsOverdue = tr.IsOverdue; st.DaysOverdue = tr.DaysOverdue; st.IsDueSoon = tr.IsDueSoon; st.IsWaiting = tr.IsWaiting; st.IsBlocked = tr.IsBlocked;
-            st.BlockedSince = tr.BlockedSince; st.DaysBlocked = tr.DaysBlocked; st.BlockedBy = JsonSerializer.Serialize(tr.Blockers, Json);
-            st.IsBlocking = tr.IsBlocking; st.BlockingCount = tr.BlockingTaskIds.Count; st.BlockingTaskIds = [.. tr.BlockingTaskIds];
-            st.IsStale = tr.IsStale; st.StaleDays = tr.StaleDays; st.IsUnassigned = tr.IsUnassigned; st.IsMissingDueDate = tr.IsMissingDueDate;
-            st.IsDateInconsistent = tr.IsDateInconsistent; st.InconsistencyDetail = JsonSerializer.Serialize(tr.Inconsistencies, Json);
-            st.IsInactiveOwner = tr.IsInactiveOwner; st.IsHeldPastDue = tr.IsHeldPastDue; st.IsReviewStalled = tr.IsReviewStalled;
-            st.AffectedMilestoneIds = [.. tr.AffectedMilestoneIds]; st.Notes = [.. tr.Notes]; st.EvaluatedAt = now;
-        }
-        foreach (var gone in prevStates.Keys.Except(r.Tasks.Select(x => x.TaskId))) db.TaskStates.Remove(prevStates[gone]);
+            await Coordination.Lock(db, projectId);
+            var p = await db.Projects.AsNoTracking().FirstOrDefaultAsync(x => x.Id == projectId, ct);
+            if (p is null) return null;
+            var s = await store.Get(db);
+            var now = clock.GetUtcNow();
+            var today = clock.Today(s);
+            DateOnly L(DateTimeOffset t) => Clock.LocalDate(t, s);
 
-        var prevDel = await db.DeliverableStates.Where(x => x.ProjectId == projectId).ToDictionaryAsync(x => x.DeliverableId, ct);
-        foreach (var dr in r.Deliverables)
-        {
-            if (!prevDel.TryGetValue(dr.DeliverableId, out var st)) { st = new DeliverableState { DeliverableId = dr.DeliverableId, ProjectId = projectId }; db.DeliverableStates.Add(st); }
-            st.ProgressPct = dr.ProgressPct; st.TaskTotal = dr.TaskTotal; st.TaskComplete = dr.TaskComplete; st.TaskCancelled = dr.TaskCancelled; st.TaskOpen = dr.TaskOpen;
-            st.TaskOverdue = dr.TaskOverdue; st.TaskBlocked = dr.TaskBlocked; st.EstimatedHoursTotal = dr.EstimatedHoursTotal; st.RemainingHours = dr.RemainingHours;
-            st.IsOverdue = dr.IsOverdue; st.DaysOverdue = dr.DaysOverdue; st.IsDueSoon = dr.IsDueSoon; st.IsAtRisk = dr.IsAtRisk;
-            st.AtRiskReasons = JsonSerializer.Serialize(dr.AtRiskReasons, Json); st.IsUnassigned = dr.IsUnassigned; st.IsStale = dr.IsStale;
-            st.IsDateInconsistent = dr.IsDateInconsistent; st.InconsistencyDetail = JsonSerializer.Serialize(dr.Inconsistencies, Json); st.SlipDays = dr.SlipDays;
-            st.IsInactiveOwner = dr.IsInactiveOwner; st.IssuedWithOpenWork = dr.IssuedWithOpenWork; st.MilestoneCancelled = dr.MilestoneCancelled;
-            st.IsWaiting = dr.IsWaiting; st.IsBlocked = dr.IsBlocked; st.BlockedBy = JsonSerializer.Serialize(dr.Blockers, Json); st.BlockingCount = dr.BlockingCount;
-            st.DerivedPredecessorIds = [.. dr.DerivedPredecessorIds]; st.DerivedSuccessorIds = [.. dr.DerivedSuccessorIds]; st.EvaluatedAt = now;
-        }
-        foreach (var gone in prevDel.Keys.Except(r.Deliverables.Select(x => x.DeliverableId))) db.DeliverableStates.Remove(prevDel[gone]);
+            var members = await db.ProjectMembers.AsNoTracking().Where(m => m.ProjectId == projectId && m.RemovedAt == null).Select(m => new { m.UserId, m.Roles }).ToListAsync(ct);
+            var disciplines = await db.ProjectDisciplines.AsNoTracking().Where(d => d.ProjectId == projectId).Select(d => new DisciplineSnap(d.Id, d.Discipline!.Name, d.LeadUserId, d.IsActive, d.SortOrder)).ToListAsync(ct);
+            var milestones = await db.Milestones.AsNoTracking().Where(m => m.ProjectId == projectId)
+                .Select(m => new MilestoneSnap(m.Id, m.Key, m.Name, m.MilestoneType, m.Date, m.OriginalDate, m.IsComplete, m.IsCancelled, m.ProjectDisciplineId, m.BaselineDate)).ToListAsync(ct);
+            var deliverablesRaw = await db.Deliverables.AsNoTracking().Where(d => d.ProjectId == projectId).ToListAsync(ct);
+            var deliverables = deliverablesRaw.Select(d => new DeliverableSnap(d.Id, d.Key, d.Name, d.ProjectDisciplineId, d.OwnerId, d.ReviewerId, d.MilestoneId, d.StartDate,
+                d.DueDate, d.OriginalDueDate, d.Status, d.Priority, L(d.LastActivityAt), d.IssuedDate, d.StartedAt is { } ds ? L(ds) : null,
+                d.StatusChangedAt is { } dsc ? L(dsc) : null, d.BaselineStartDate, d.BaselineDueDate)).ToList();
+            var tasksRaw = await db.Tasks.AsNoTracking().Where(t => t.ProjectId == projectId).ToListAsync(ct);
+            var taskIds = tasksRaw.Select(t => t.Id).ToList();
+            var collaborators = await db.Collaborators.AsNoTracking().Where(c => taskIds.Contains(c.TaskId)).ToListAsync(ct);
+            var tasks = tasksRaw.Select(t => new TaskSnap(t.Id, t.Key, t.Name, t.ProjectDisciplineId, t.DeliverableId, t.MilestoneId, t.AssigneeId, t.ReviewerId, t.Status,
+                t.Priority, t.StartDate, t.DueDate, t.ProgressPct, t.EstimatedHours, t.ManualBlockType, t.ManualBlockReason, t.ManualBlockSetAt is { } mb ? L(mb) : null,
+                L(t.LastActivityAt), t.ReviewRequestedAt is { } rr ? L(rr) : null, t.DueDateChangeCount, t.CompletedAt is { } ca ? L(ca) : null,
+                collaborators.Where(c => c.TaskId == t.Id).Select(c => c.UserId).ToList(), t.StartedAt is { } ts ? L(ts) : null,
+                t.StatusChangedAt is { } tsc ? L(tsc) : null)).ToList();
+            var deps = await db.Dependencies.AsNoTracking().Where(d => d.ProjectId == projectId).Select(d => new DependencySnap(d.Id, d.PredecessorTaskId, d.SuccessorTaskId, d.LagDays, d.DependencyType)).ToListAsync(ct);
+            var links = await db.ItemLinks.AsNoTracking().Where(l => l.ProjectId == projectId && l.SourceType == ItemType.Decision && l.TargetType == ItemType.Task && l.Relation == ItemRelation.BlockedByDecision)
+                .Select(l => new { l.SourceId, l.TargetId }).ToListAsync(ct);
+            var decisions = (await db.Decisions.AsNoTracking().Where(d => d.ProjectId == projectId).ToListAsync(ct))
+                .Select(d => new DecisionSnap(d.Id, d.Key, d.Subject, d.Status, d.RequiredByDate, d.ImpactLevel, d.OwnerUserId, d.RequestedById,
+                    links.Where(l => l.SourceId == d.Id).Select(l => l.TargetId).ToList())).ToList();
+            var issues = await db.Issues.AsNoTracking().Where(x => x.ProjectId == projectId).Select(x => new IssueSnap(x.Id, x.Key, x.Title, x.Status, x.Severity, x.OwnerId, x.TargetResolutionDate, x.ProjectDisciplineId)).ToListAsync(ct);
+            var risks = await db.Risks.AsNoTracking().Where(x => x.ProjectId == projectId).Select(x => new RiskSnap(x.Id, x.Key, x.Title, x.Status, x.Probability, x.Impact, x.ReviewDate, x.OwnerId, x.ProjectDisciplineId)).ToListAsync(ct);
+            var actions = await db.Actions.AsNoTracking().Where(x => x.ProjectId == projectId).Select(x => new ActionSnap(x.Id, x.Key, x.Text, x.Status, x.OwnerType, x.OwnerUserId, x.OwnerDisciplineId, x.DueDate)).ToListAsync(ct);
+            var dlDeps = await db.DeliverableDependencies.AsNoTracking().Where(d => d.ProjectId == projectId).Select(d => new DependencySnap(d.Id, d.PredecessorDeliverableId, d.SuccessorDeliverableId, d.LagDays, d.DependencyType)).ToListAsync(ct);
+            var snoozes = await db.Snoozes.AsNoTracking().Where(z => z.ProjectId == projectId && z.EndedAt == null && z.SnoozedUntil > now)
+                .Select(z => new SnoozeSnap(z.RuleId, z.ItemType, z.ItemId, z.SnoozedUntil, z.SeverityAtSnooze)).ToListAsync(ct);
+            var prevStates = await db.TaskStates.Where(x => x.ProjectId == projectId).ToDictionaryAsync(x => x.TaskId, ct);
+            var userIds = tasks.SelectMany(t => new[] { t.AssigneeId, t.ReviewerId }).Concat(deliverables.SelectMany(d => new[] { d.OwnerId, d.ReviewerId }))
+                .Concat(decisions.Select(d => d.OwnerUserId)).Concat(disciplines.Select(d => d.LeadId)).Concat(members.Select(m => (Guid?)m.UserId))
+                .Concat(tasks.SelectMany(t => t.Collaborators ?? []).Cast<Guid?>()).Append(p.ProjectManagerId).OfType<Guid>().Distinct().ToList();
+            var users = await db.Users.AsNoTracking().Where(u => userIds.Contains(u.Id)).Select(u => new UserSnap(u.Id, u.DisplayName, u.IsActive, u.SupervisorId)).ToListAsync(ct);
+            WorkCalendar? calendar = null;
+            if (s.WorkingDaysEnabled)
+                calendar = new WorkCalendar(await db.Holidays.AsNoTracking().Where(h => h.OfficeId == null || h.OfficeId == p.OfficeId).Select(h => h.Date).ToListAsync(ct));
 
-        var prevMs = await db.MilestoneStates.Where(x => x.ProjectId == projectId).ToDictionaryAsync(x => x.MilestoneId, ct);
-        var msTransitions = new List<(MilestoneSnap M, string Status)>();
-        foreach (var mr in r.Milestones)
-        {
-            if (!prevMs.TryGetValue(mr.MilestoneId, out var st)) { st = new MilestoneState { MilestoneId = mr.MilestoneId, ProjectId = projectId }; db.MilestoneStates.Add(st); }
-            if (mr.Status is MilestoneStatus.AtRisk or MilestoneStatus.Overdue && st.Status != mr.Status && st.EvaluatedAt != default)
-                msTransitions.Add((milestones.First(m => m.Id == mr.MilestoneId), mr.Status));
-            st.Status = mr.Status; st.StatusReasons = JsonSerializer.Serialize(mr.Reasons, Json); st.DaysRemaining = mr.DaysRemaining; st.SlipDays = mr.SlipDays;
-            st.DeliverableTotal = mr.DeliverableTotal; st.DeliverableIssued = mr.DeliverableIssued; st.TaskTotal = mr.TaskTotal; st.TaskComplete = mr.TaskComplete;
-            st.TaskOpen = mr.TaskOpen; st.TaskOverdue = mr.TaskOverdue; st.TaskBlocked = mr.TaskBlocked; st.EvaluatedAt = now;
-        }
-        foreach (var gone in prevMs.Keys.Except(r.Milestones.Select(x => x.MilestoneId))) db.MilestoneStates.Remove(prevMs[gone]);
+            var input = new EvalInput(
+                new ProjectSnap(p.Id, p.ProjectNumber, p.Status, p.ProjectManagerId, members.Where(m => m.Roles.Contains(ProjectRole.PM)).Select(m => m.UserId).ToList(),
+                    p.HealthOverride, p.HealthOverrideExpiresAt, now),
+                today, s, users, disciplines, milestones, deliverables, tasks, deps, decisions, members.Select(m => m.UserId).ToHashSet(),
+                prevStates.Where(x => x.Value.IsBlocked && x.Value.BlockedSince is not null).ToDictionary(x => x.Key, x => x.Value.BlockedSince!.Value),
+                snoozes, issues, risks, actions, dlDeps, calendar);
+            var r = Evaluator.Evaluate(input);
 
-        var prevDec = await db.DecisionStates.Where(x => x.ProjectId == projectId).ToDictionaryAsync(x => x.DecisionId, ct);
-        var decBecameOverdue = new List<DecisionSnap>();
-        foreach (var dr in r.Decisions)
-        {
-            if (!prevDec.TryGetValue(dr.DecisionId, out var st)) { st = new DecisionState { DecisionId = dr.DecisionId, ProjectId = projectId }; db.DecisionStates.Add(st); }
-            if (dr.IsOverdue && !st.IsOverdue) decBecameOverdue.Add(decisions.First(d => d.Id == dr.DecisionId));
-            st.IsOverdue = dr.IsOverdue; st.DaysOverdue = dr.DaysOverdue; st.IsDueSoon = dr.IsDueSoon; st.BlockingCount = dr.BlockingTaskIds.Count;
-            st.BlockingTaskIds = [.. dr.BlockingTaskIds]; st.IsInactiveOwner = dr.IsInactiveOwner; st.EvaluatedAt = now;
-        }
-        foreach (var gone in prevDec.Keys.Except(r.Decisions.Select(x => x.DecisionId))) db.DecisionStates.Remove(prevDec[gone]);
-
-        var ps = await db.ProjectStates.FirstOrDefaultAsync(x => x.ProjectId == projectId, ct);
-        if (ps is null) { ps = new ProjectState { ProjectId = projectId }; db.ProjectStates.Add(ps); }
-        var visibleAttention = r.Attention.Where(a => !a.Snoozed).ToList();
-        ps.ComputedHealth = r.Project.Health.Health; ps.HealthReasons = JsonSerializer.Serialize(r.Project.Health.Reasons, Json);
-        ps.Inputs = JsonSerializer.Serialize(r.Project.Health.Inputs, Json); ps.Counts = JsonSerializer.Serialize(r.Project.Counts, Json);
-        ps.DisciplineStates = JsonSerializer.Serialize(r.Project.Disciplines, Json); ps.NextMilestoneId = r.Project.NextMilestoneId;
-        ps.NextSubmissionMilestoneId = r.Project.NextSubmissionId; ps.ProgressPct = r.Project.ProgressPct;
-        ps.OverdueTasks = r.Project.Counts["tasksOverdue"]; ps.BlockedTasks = r.Project.Counts["tasksBlocked"]; ps.OverdueDecisions = r.Project.Counts["decisionsOverdue"];
-        ps.HighIssues = r.Project.Counts["issuesHigh"]; ps.AttentionCritical = visibleAttention.Count(a => a.Severity == Severity.Critical);
-        ps.AttentionWarning = visibleAttention.Count(a => a.Severity == Severity.Warning); ps.EvaluatedAt = now;
-
-        // ATT-02: an item is identified by rule and item; it keeps its first-detected time while the condition holds.
-        var prevAtt = await db.Attention.Where(a => a.ProjectId == projectId).ToListAsync(ct);
-        var prevByKey = prevAtt.GroupBy(a => (a.RuleId, a.ItemType, a.ItemId)).ToDictionary(g => g.Key, g => g.First());
-        var newCritical = new List<AttentionResult>();
-        var newA03 = new List<AttentionResult>();
-        var seenKeys = new HashSet<(string, string, Guid)>();
-        foreach (var a in r.Attention)
-        {
-            var key = (a.RuleId, a.ItemType, a.ItemId);
-            if (!seenKeys.Add(key)) continue; // one item per rule and item
-            if (!prevByKey.TryGetValue(key, out var row))
+            // ---------- Materialise (reads use these tables; no rule logic in SQL, §23.5 step 6) ----------
+            var byKey = tasks.ToDictionary(t => t.Id);
+            var was = prevStates.ToDictionary(x => x.Key, x => (x.Value.IsBlocked, x.Value.IsWaiting)); // read before the rows below are overwritten
+            foreach (var tr in r.Tasks)
             {
-                row = new AttentionItem { ProjectId = projectId, RuleId = a.RuleId, ItemType = a.ItemType, ItemId = a.ItemId, FirstDetectedAt = now };
-                db.Attention.Add(row);
-                if (a.Severity == Severity.Critical && !a.Snoozed) newCritical.Add(a);
-                if (a.RuleId == "A-03") newA03.Add(a);
+                if (!prevStates.TryGetValue(tr.TaskId, out var st)) { st = new TaskState { TaskId = tr.TaskId, ProjectId = projectId }; db.TaskStates.Add(st); }
+                st.IsOverdue = tr.IsOverdue; st.DaysOverdue = tr.DaysOverdue; st.IsDueSoon = tr.IsDueSoon; st.IsWaiting = tr.IsWaiting; st.IsBlocked = tr.IsBlocked;
+                st.BlockedSince = tr.BlockedSince; st.DaysBlocked = tr.DaysBlocked; st.BlockedBy = JsonSerializer.Serialize(tr.Blockers, Json);
+                st.IsBlocking = tr.IsBlocking; st.BlockingCount = tr.BlockingTaskIds.Count; st.BlockingTaskIds = [.. tr.BlockingTaskIds];
+                st.IsStale = tr.IsStale; st.StaleDays = tr.StaleDays; st.IsUnassigned = tr.IsUnassigned; st.IsMissingDueDate = tr.IsMissingDueDate;
+                st.IsDateInconsistent = tr.IsDateInconsistent; st.InconsistencyDetail = JsonSerializer.Serialize(tr.Inconsistencies, Json);
+                st.IsInactiveOwner = tr.IsInactiveOwner; st.IsHeldPastDue = tr.IsHeldPastDue; st.IsReviewStalled = tr.IsReviewStalled;
+                st.AffectedMilestoneIds = [.. tr.AffectedMilestoneIds]; st.Notes = [.. tr.Notes]; st.EvaluatedAt = now;
             }
-            else if (a.Severity == Severity.Critical && row.Severity != Severity.Critical && !a.Snoozed) newCritical.Add(a);
-            row.ItemKey = a.ItemKey; row.ItemName = a.ItemName; row.Severity = a.Severity; row.Message = a.Message; row.Why = JsonSerializer.Serialize(a.Why, Json);
-            row.RouteToUserIds = [.. a.RouteTo]; row.OwnerUserId = a.OwnerId; row.ProjectDisciplineId = a.DisciplineId; row.DaysOverdueOrBlocked = a.DaysOverdueOrBlocked;
-            row.Priority = a.Priority; row.DueDate = a.DueDate; row.LastEvaluatedAt = now;
-        }
-        foreach (var gone in prevAtt.Where(a => !seenKeys.Contains((a.RuleId, a.ItemType, a.ItemId)))) db.Attention.Remove(gone);
-        await db.SaveChangesAsync(ct);
+            foreach (var gone in prevStates.Keys.Except(r.Tasks.Select(x => x.TaskId))) db.TaskStates.Remove(prevStates[gone]);
 
-        if (notifyTransitions && p.Status == ProjectStatus.Active)
-        {
-            try { await Notices(p, r, was, tasksRaw, byKey, msTransitions, decBecameOverdue, newCritical, newA03, disciplines, deliverablesRaw); }
-            catch (Exception e) { log.LogError(e, "Transition notices failed for project {ProjectId}", projectId); }
+            var prevDel = await db.DeliverableStates.Where(x => x.ProjectId == projectId).ToDictionaryAsync(x => x.DeliverableId, ct);
+            foreach (var dr in r.Deliverables)
+            {
+                if (!prevDel.TryGetValue(dr.DeliverableId, out var st)) { st = new DeliverableState { DeliverableId = dr.DeliverableId, ProjectId = projectId }; db.DeliverableStates.Add(st); }
+                st.ProgressPct = dr.ProgressPct; st.TaskTotal = dr.TaskTotal; st.TaskComplete = dr.TaskComplete; st.TaskCancelled = dr.TaskCancelled; st.TaskOpen = dr.TaskOpen;
+                st.TaskOverdue = dr.TaskOverdue; st.TaskBlocked = dr.TaskBlocked; st.EstimatedHoursTotal = dr.EstimatedHoursTotal; st.RemainingHours = dr.RemainingHours;
+                st.IsOverdue = dr.IsOverdue; st.DaysOverdue = dr.DaysOverdue; st.IsDueSoon = dr.IsDueSoon; st.IsAtRisk = dr.IsAtRisk;
+                st.AtRiskReasons = JsonSerializer.Serialize(dr.AtRiskReasons, Json); st.IsUnassigned = dr.IsUnassigned; st.IsStale = dr.IsStale;
+                st.IsDateInconsistent = dr.IsDateInconsistent; st.InconsistencyDetail = JsonSerializer.Serialize(dr.Inconsistencies, Json); st.SlipDays = dr.SlipDays;
+                st.IsInactiveOwner = dr.IsInactiveOwner; st.IssuedWithOpenWork = dr.IssuedWithOpenWork; st.MilestoneCancelled = dr.MilestoneCancelled;
+                st.IsWaiting = dr.IsWaiting; st.IsBlocked = dr.IsBlocked; st.BlockedBy = JsonSerializer.Serialize(dr.Blockers, Json); st.BlockingCount = dr.BlockingCount;
+                st.DerivedPredecessorIds = [.. dr.DerivedPredecessorIds]; st.DerivedSuccessorIds = [.. dr.DerivedSuccessorIds]; st.EvaluatedAt = now;
+            }
+            foreach (var gone in prevDel.Keys.Except(r.Deliverables.Select(x => x.DeliverableId))) db.DeliverableStates.Remove(prevDel[gone]);
+
+            var prevMs = await db.MilestoneStates.Where(x => x.ProjectId == projectId).ToDictionaryAsync(x => x.MilestoneId, ct);
+            var msTransitions = new List<(MilestoneSnap M, string Status)>();
+            foreach (var mr in r.Milestones)
+            {
+                if (!prevMs.TryGetValue(mr.MilestoneId, out var st)) { st = new MilestoneState { MilestoneId = mr.MilestoneId, ProjectId = projectId }; db.MilestoneStates.Add(st); }
+                if (mr.Status is MilestoneStatus.AtRisk or MilestoneStatus.Overdue && st.Status != mr.Status && st.EvaluatedAt != default)
+                    msTransitions.Add((milestones.First(m => m.Id == mr.MilestoneId), mr.Status));
+                st.Status = mr.Status; st.StatusReasons = JsonSerializer.Serialize(mr.Reasons, Json); st.DaysRemaining = mr.DaysRemaining; st.SlipDays = mr.SlipDays;
+                st.DeliverableTotal = mr.DeliverableTotal; st.DeliverableIssued = mr.DeliverableIssued; st.TaskTotal = mr.TaskTotal; st.TaskComplete = mr.TaskComplete;
+                st.TaskOpen = mr.TaskOpen; st.TaskOverdue = mr.TaskOverdue; st.TaskBlocked = mr.TaskBlocked; st.EvaluatedAt = now;
+            }
+            foreach (var gone in prevMs.Keys.Except(r.Milestones.Select(x => x.MilestoneId))) db.MilestoneStates.Remove(prevMs[gone]);
+
+            var prevDec = await db.DecisionStates.Where(x => x.ProjectId == projectId).ToDictionaryAsync(x => x.DecisionId, ct);
+            var decBecameOverdue = new List<DecisionSnap>();
+            foreach (var dr in r.Decisions)
+            {
+                if (!prevDec.TryGetValue(dr.DecisionId, out var st)) { st = new DecisionState { DecisionId = dr.DecisionId, ProjectId = projectId }; db.DecisionStates.Add(st); }
+                if (dr.IsOverdue && !st.IsOverdue) decBecameOverdue.Add(decisions.First(d => d.Id == dr.DecisionId));
+                st.IsOverdue = dr.IsOverdue; st.DaysOverdue = dr.DaysOverdue; st.IsDueSoon = dr.IsDueSoon; st.BlockingCount = dr.BlockingTaskIds.Count;
+                st.BlockingTaskIds = [.. dr.BlockingTaskIds]; st.IsInactiveOwner = dr.IsInactiveOwner; st.EvaluatedAt = now;
+            }
+            foreach (var gone in prevDec.Keys.Except(r.Decisions.Select(x => x.DecisionId))) db.DecisionStates.Remove(prevDec[gone]);
+
+            var ps = await db.ProjectStates.FirstOrDefaultAsync(x => x.ProjectId == projectId, ct);
+            if (ps is null) { ps = new ProjectState { ProjectId = projectId }; db.ProjectStates.Add(ps); }
+            var visibleAttention = r.Attention.Where(a => !a.Snoozed).ToList();
+            ps.ComputedHealth = r.Project.Health.Health; ps.HealthReasons = JsonSerializer.Serialize(r.Project.Health.Reasons, Json);
+            ps.Inputs = JsonSerializer.Serialize(r.Project.Health.Inputs, Json); ps.Counts = JsonSerializer.Serialize(r.Project.Counts, Json);
+            ps.DisciplineStates = JsonSerializer.Serialize(r.Project.Disciplines, Json); ps.NextMilestoneId = r.Project.NextMilestoneId;
+            ps.NextSubmissionMilestoneId = r.Project.NextSubmissionId; ps.ProgressPct = r.Project.ProgressPct;
+            ps.OverdueTasks = r.Project.Counts["tasksOverdue"]; ps.BlockedTasks = r.Project.Counts["tasksBlocked"]; ps.OverdueDecisions = r.Project.Counts["decisionsOverdue"];
+            ps.HighIssues = r.Project.Counts["issuesHigh"]; ps.AttentionCritical = visibleAttention.Count(a => a.Severity == Severity.Critical);
+            ps.AttentionWarning = visibleAttention.Count(a => a.Severity == Severity.Warning); ps.EvaluatedAt = now;
+
+            // ATT-02: an item is identified by rule and item; it keeps its first-detected time while the condition holds.
+            var prevAtt = await db.Attention.Where(a => a.ProjectId == projectId).ToListAsync(ct);
+            var prevByKey = prevAtt.GroupBy(a => (a.RuleId, a.ItemType, a.ItemId)).ToDictionary(g => g.Key, g => g.First());
+            var newCritical = new List<AttentionResult>();
+            var newA03 = new List<AttentionResult>();
+            var seenKeys = new HashSet<(string, string, Guid)>();
+            foreach (var a in r.Attention)
+            {
+                var key = (a.RuleId, a.ItemType, a.ItemId);
+                if (!seenKeys.Add(key)) continue; // one item per rule and item
+                if (!prevByKey.TryGetValue(key, out var row))
+                {
+                    row = new AttentionItem { ProjectId = projectId, RuleId = a.RuleId, ItemType = a.ItemType, ItemId = a.ItemId, FirstDetectedAt = now };
+                    db.Attention.Add(row);
+                    if (a.Severity == Severity.Critical && !a.Snoozed) newCritical.Add(a);
+                    if (a.RuleId == "A-03") newA03.Add(a);
+                }
+                else if (a.Severity == Severity.Critical && row.Severity != Severity.Critical && !a.Snoozed) newCritical.Add(a);
+                row.ItemKey = a.ItemKey; row.ItemName = a.ItemName; row.Severity = a.Severity; row.Message = a.Message; row.Why = JsonSerializer.Serialize(a.Why, Json);
+                row.RouteToUserIds = [.. a.RouteTo]; row.OwnerUserId = a.OwnerId; row.ProjectDisciplineId = a.DisciplineId; row.DaysOverdueOrBlocked = a.DaysOverdueOrBlocked;
+                row.Priority = a.Priority; row.DueDate = a.DueDate; row.LastEvaluatedAt = now;
+            }
+            foreach (var gone in prevAtt.Where(a => !seenKeys.Contains((a.RuleId, a.ItemType, a.ItemId)))) db.Attention.Remove(gone);
             await db.SaveChangesAsync(ct);
+
+            if (notifyTransitions && p.Status == ProjectStatus.Active)
+            {
+                try { await Notices(p, r, was, tasksRaw, byKey, msTransitions, decBecameOverdue, newCritical, newA03, disciplines, deliverablesRaw); }
+                catch (Exception e) when (!s.IsFlagOn("people_screens")) { log.LogError(e, "Transition notices failed for project {ProjectId}", projectId); }
+                await db.SaveChangesAsync(ct);
+            }
+            // Enhanced capture is part of this manual transaction; admission failure must roll back the materialization.
+            await db.FlushNotices(ct);
+            await tx.CommitAsync(ct);
+            return r;
         }
-        await tx.CommitAsync(ct);
-        return r;
+        finally { db.DiscardNotices(); }
     }
 
     async Task Notices(Project p, EvalResult r, Dictionary<Guid, (bool IsBlocked, bool IsWaiting)> prev, List<WorkTask> tasksRaw, Dictionary<Guid, TaskSnap> tasks,
@@ -344,26 +350,31 @@ public sealed class NightlyJob : IJob
     {
         var db = sp.GetRequiredService<HubDb>();
         var clock = sp.GetRequiredService<TimeProvider>();
-        var s = await sp.GetRequiredService<SettingsStore>().Get(db);
+        var store = sp.GetRequiredService<SettingsStore>();
+        var s = await store.Get(db);
         var now = clock.GetUtcNow();
         var today = clock.Today(s);
         var notify = sp.GetRequiredService<Notifier>();
-        var expired = 0;
-        foreach (var p in await db.Projects.Where(p => p.HealthOverride != null && p.HealthOverrideExpiresAt <= now).ToListAsync(ct))
+        var expired = await Tx.Notice<int>(db, store, async () =>
         {
-            var reported = p.HealthOverride;
-            p.HealthOverride = null; // AC-HLT-03: removed by the system and logged with actor System
-            db.Audit.Note(p, action: "HealthOverrideExpired");
-            await notify.Send(NotificationEvents.HealthOverride, [p.ProjectManagerId], new NotifyItem(p.Id, ItemType.Project, p.Id, p.ProjectNumber, $"/projects/{p.ProjectNumber}", p.ProjectNumber),
-                Text.Get("notify.override_expired", p.ProjectNumber, p.Name, reported ?? ""));
-            expired++;
-        }
-        foreach (var z in await db.Snoozes.Where(z => z.EndedAt == null && z.SnoozedUntil <= now).ToListAsync(ct))
-        {
-            z.EndedAt = now;
-            db.LogEvent(ItemType.Snooze, z.Id, "SnoozeExpired", "attention", z.ProjectId, z.RuleId, null);
-        }
-        await db.SaveChangesAsync(ct);
+            var expiredCount = 0;
+            foreach (var p in await db.Projects.Where(p => p.HealthOverride != null && p.HealthOverrideExpiresAt <= now).ToListAsync(ct))
+            {
+                var reported = p.HealthOverride;
+                p.HealthOverride = null; // AC-HLT-03: removed by the system and logged with actor System
+                db.Audit.Note(p, action: "HealthOverrideExpired");
+                await notify.Send(NotificationEvents.HealthOverride, [p.ProjectManagerId], new NotifyItem(p.Id, ItemType.Project, p.Id, p.ProjectNumber, $"/projects/{p.ProjectNumber}", p.ProjectNumber),
+                    Text.Get("notify.override_expired", p.ProjectNumber, p.Name, reported ?? ""));
+                expiredCount++;
+            }
+            foreach (var z in await db.Snoozes.Where(z => z.EndedAt == null && z.SnoozedUntil <= now).ToListAsync(ct))
+            {
+                z.EndedAt = now;
+                db.LogEvent(ItemType.Snooze, z.Id, "SnoozeExpired", "attention", z.ProjectId, z.RuleId, null);
+            }
+            await db.SaveChangesAsync(ct);
+            return expiredCount;
+        });
         var ids = await db.Projects.Where(p => p.Status == ProjectStatus.Active).Select(p => p.Id).ToListAsync(ct);
         foreach (var pid in ids)
         {
@@ -372,6 +383,10 @@ public sealed class NightlyJob : IJob
             var pdb = scope.ServiceProvider.GetRequiredService<HubDb>();
             var r = await scope.ServiceProvider.GetRequiredService<EvaluationService>().EvaluateProject(pid, ct: ct);
             if (r is null) continue;
+            // Home capture adds a consistent read after evaluation's own transaction.
+            // The legacy daily row/Counts policy is unchanged while the flag is off.
+            await using var homeCaptureRead = s.IsFlagOn("home_overview")
+                ? await pdb.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead, ct) : null;
             var p = await pdb.Projects.AsNoTracking().FirstAsync(x => x.Id == pid, ct);
             var reported = p.HealthOverride is { } ho && p.HealthOverrideExpiresAt > now ? ho : r.Project.Health.Health;
             var snap = await pdb.HealthSnapshots.FirstOrDefaultAsync(x => x.ProjectId == pid && x.SnapshotDate == today, ct);
@@ -380,7 +395,17 @@ public sealed class NightlyJob : IJob
             snap.ReportedHealth = reported;
             snap.Inputs = JsonSerializer.Serialize(r.Project.Health.Inputs, JsonOpts.Web);
             snap.Counts = JsonSerializer.Serialize(r.Project.Counts, JsonOpts.Web);
+            if (homeCaptureRead is not null)
+            {
+                var capturedAt = clock.GetUtcNow();
+                var captureDate = Clock.LocalDate(capturedAt, s);
+                // A delayed/forced run may cross local midnight. Keep the legacy
+                // row policy, but never put a different day's Home facts in it.
+                if (captureDate == today)
+                    snap.HomeMetrics = JsonSerializer.Serialize(await HomeSnapshots.Capture(pdb, s, pid, captureDate, capturedAt, ct), JsonOpts.Web);
+            }
             await pdb.SaveChangesAsync(ct);
+            if (homeCaptureRead is not null) await homeCaptureRead.CommitAsync(ct);
         }
         // Job run records are operational, not history: keep 90 days (the audit trail is the activity log).
         var pruned = await db.JobRuns.Where(r => r.StartedAt < now.AddDays(-90)).ExecuteDeleteAsync(ct);

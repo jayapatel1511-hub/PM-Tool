@@ -1,0 +1,44 @@
+{
+  "scope": "Isolated native HTML select in the installed headless macOS Google Chrome, no app or QA data.",
+  "initialValue": "jill",
+  "observed": [
+    {
+      "keys": [
+        "ArrowUp",
+        "Enter"
+      ],
+      "value": "jill"
+    },
+    {
+      "keys": [
+        "ArrowUp",
+        "ArrowUp",
+        "Enter"
+      ],
+      "value": "jill"
+    },
+    {
+      "keys": [
+        "Space",
+        "Home",
+        "ArrowDown",
+        "Enter"
+      ],
+      "value": "jill"
+    },
+    {
+      "keys": [
+        "a"
+      ],
+      "value": "alex"
+    },
+    {
+      "keys": [
+        "Home",
+        "ArrowDown"
+      ],
+      "value": "jill"
+    }
+  ],
+  "conclusion": "Type-ahead supplies a real keyboard selection while OS-popup navigation is uncommitted in this headless runtime."
+}

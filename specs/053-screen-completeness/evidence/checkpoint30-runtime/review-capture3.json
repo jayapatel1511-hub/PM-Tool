@@ -1,0 +1,10 @@
+{
+  "exitCode": 0,
+  "args": [
+    "node",
+    "../.review/checkpoint30-review/capture-task.cjs"
+  ],
+  "atUtc": "2026-11-02T20:34:08.471044+00:00",
+  "boundary": "Read-only framing; People screenshot includes its actual full section instead of only heading. No app/test changes.",
+  "captureHash": "80d3f7f8b9f4aaa5ad0556cdcf2f51837fd1cd09d0121a32ef02ecaf67fa2960"
+}

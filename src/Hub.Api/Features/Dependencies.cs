@@ -57,7 +57,8 @@ public static class DependencyEndpoints
             return TypedResults.Created($"/api/v1/dependencies/{edge.Id}", new DependencyAdded(edge.Id, warnings));
         });
 
-        api.MapDelete("/dependencies/{id:guid}", async Task<NoContent> (Guid id, Access access, HubDb db, Notifier notify, TimeProvider clock, CurrentUser me) =>
+        api.MapDelete("/dependencies/{id:guid}", async Task<NoContent> (Guid id, Access access, HubDb db, Notifier notify, TimeProvider clock, CurrentUser me, SettingsStore store) =>
+            await Tx.Notice<NoContent>(db, store, async () =>
         {
             var e = await db.Dependencies.FirstOrDefaultAsync(x => x.Id == id) ?? throw ApiException.NotFound();
             var (p, ctx) = await access.Project(e.ProjectId);
@@ -72,7 +73,7 @@ public static class DependencyEndpoints
                 Text.Get("notify.dependency_removed", await notify.ActorName(), pred.Key, succ.Key, succ.Name));
             await db.SaveChangesAsync();
             return TypedResults.NoContent();
-        });
+        }));
 
         // FR-DEP-09 (packet 021): explicit links between deliverables, typed (FR-DEPT-01), with an optional lag; loops refused (D-03).
         api.MapPost("/deliverables/{id:guid}/dependencies", async Task<Created<DeliverableDependencyAdded>> (Guid id, DeliverableBody body, Access access, HubDb db) =>
@@ -178,6 +179,13 @@ public static class DependencyEndpoints
     {
         var settings = await store.Get(db);
         Http.RequireFlag(settings, "date_context");
+        return TypedResults.Ok(await ReadDateContext(type, id, startDate, dueDate, access, db, settings, clock));
+    }
+
+    // Pure canonical projection shared by the independently flagged Calendar screen. The public route retains its own guard.
+    internal static async Task<DateContextRead> ReadDateContext(string type, Guid id, string? startDate, string? dueDate,
+        Access access, HubDb db, OrgSettings settings, TimeProvider clock)
+    {
         Project project; Guid? person; DateLimit? parent = null; List<DateItem> items; List<DependencySnap> links;
         var task = type == ItemType.Task;
         if (task)
@@ -235,7 +243,7 @@ public static class DependencyEndpoints
             }
             availability = warnings.ToArray();
         }
-        return TypedResults.Ok(new DateContextRead(dates, availability, children));
+        return new DateContextRead(dates, availability, children);
     }
 
     static async Task<List<TaskDependencyEdge>> Edges(HubDb db, LinkJudge judge, Guid taskId, bool predecessors) =>

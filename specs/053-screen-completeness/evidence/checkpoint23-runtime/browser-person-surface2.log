@@ -1,0 +1,11 @@
+locator.waitFor: Timeout 15000ms exceeded.
+Call log:
+[2m  - waiting for locator('[data-person-panel-trigger="00000000-0000-0000-0000-000000007101"][id*="review%3A00000000-0000-0000-0000-000000007140%3Acoordinator"]:visible').first() to be visible[22m
+
+    at roundTrip (/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/person-surface-completeness.cjs:134:20)
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/person-surface-completeness.cjs:301:11 {
+  log: [
+    `  - waiting for locator('[data-person-panel-trigger="00000000-0000-0000-0000-000000007101"][id*="review%3A00000000-0000-0000-0000-000000007140%3Acoordinator"]:visible').first() to be visible`
+  ],
+  name: 'TimeoutError'
+}

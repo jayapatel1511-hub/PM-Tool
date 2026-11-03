@@ -1,0 +1,10 @@
+{
+  "exitCode": 1,
+  "classes": [
+    "FileScreenTests",
+    "DocumentLinkReferenceTests",
+    "DocumentLinkReferenceReadTests",
+    "DocumentLinkReferenceReplayTests"
+  ],
+  "boundary": "Real PostgreSQL-backed in-process API tests; HubFactory own disposable hub_test_* DBs only. No QA24 runtime mutation."
+}

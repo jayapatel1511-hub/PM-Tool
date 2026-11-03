@@ -1,0 +1,312 @@
+{
+  "observedAtUtc": "2026-11-01T14:16:39.793Z",
+  "reports": {
+    "workload-employee": {
+      "headers": [
+        {
+          "path": "u0",
+          "header": "2026-10 · Estimated work (FTE; ISO weeks: 1)",
+          "type": "number"
+        },
+        {
+          "path": "u0Available",
+          "header": "2026-10 · Available (FTE; ISO weeks: 1)",
+          "type": "number"
+        },
+        {
+          "path": "u0Confirmed",
+          "header": "2026-10 · Confirmed reservation (FTE; ISO weeks: 1)",
+          "type": "number"
+        },
+        {
+          "path": "u0Proposed",
+          "header": "2026-10 · Proposed request (FTE; ISO weeks: 1)",
+          "type": "number"
+        },
+        {
+          "path": "u0Committed",
+          "header": "2026-10 · Committed load (FTE; ISO weeks: 1)",
+          "type": "number"
+        },
+        {
+          "path": "u1",
+          "header": "2026-11 · Estimated work (FTE; ISO weeks: 4)",
+          "type": "number"
+        },
+        {
+          "path": "u1Available",
+          "header": "2026-11 · Available (FTE; ISO weeks: 4)",
+          "type": "number"
+        },
+        {
+          "path": "u1Confirmed",
+          "header": "2026-11 · Confirmed reservation (FTE; ISO weeks: 4)",
+          "type": "number"
+        },
+        {
+          "path": "u1Proposed",
+          "header": "2026-11 · Proposed request (FTE; ISO weeks: 4)",
+          "type": "number"
+        },
+        {
+          "path": "u1Committed",
+          "header": "2026-11 · Committed load (FTE; ISO weeks: 4)",
+          "type": "number"
+        },
+        {
+          "path": "u2",
+          "header": "2026-12 · Estimated work (FTE; ISO weeks: 3)",
+          "type": "number"
+        },
+        {
+          "path": "u2Available",
+          "header": "2026-12 · Available (FTE; ISO weeks: 3)",
+          "type": "number"
+        },
+        {
+          "path": "u2Confirmed",
+          "header": "2026-12 · Confirmed reservation (FTE; ISO weeks: 3)",
+          "type": "number"
+        },
+        {
+          "path": "u2Proposed",
+          "header": "2026-12 · Proposed request (FTE; ISO weeks: 3)",
+          "type": "number"
+        },
+        {
+          "path": "u2Committed",
+          "header": "2026-12 · Committed load (FTE; ISO weeks: 3)",
+          "type": "number"
+        }
+      ],
+      "periods": [
+        {
+          "key": "2026-10",
+          "label": "2026-10",
+          "weeks": [
+            "2026-10-26"
+          ],
+          "weekCount": 1,
+          "denominatorHours": 40
+        },
+        {
+          "key": "2026-11",
+          "label": "2026-11",
+          "weeks": [
+            "2026-11-02",
+            "2026-11-09",
+            "2026-11-16",
+            "2026-11-23"
+          ],
+          "weekCount": 4,
+          "denominatorHours": 160
+        },
+        {
+          "key": "2026-12",
+          "label": "2026-12",
+          "weeks": [
+            "2026-11-30",
+            "2026-12-07",
+            "2026-12-14"
+          ],
+          "weekCount": 3,
+          "denominatorHours": 120
+        }
+      ],
+      "contextHeaders": [
+        {
+          "path": "capacity",
+          "header": "Capacity (h/week)",
+          "type": "number"
+        },
+        {
+          "path": "noDueDate",
+          "header": "No due date (h)",
+          "type": "number"
+        }
+      ],
+      "csvHeadersMatch": true
+    },
+    "workload-discipline": {
+      "headers": [
+        {
+          "path": "u0",
+          "header": "2026-10 · Estimated work (FTE; ISO weeks: 1)",
+          "type": "number"
+        },
+        {
+          "path": "u1",
+          "header": "2026-11 · Estimated work (FTE; ISO weeks: 4)",
+          "type": "number"
+        },
+        {
+          "path": "u2",
+          "header": "2026-12 · Estimated work (FTE; ISO weeks: 3)",
+          "type": "number"
+        }
+      ],
+      "periods": [
+        {
+          "key": "2026-10",
+          "label": "2026-10",
+          "weeks": [
+            "2026-10-26"
+          ],
+          "weekCount": 1,
+          "denominatorHours": 40
+        },
+        {
+          "key": "2026-11",
+          "label": "2026-11",
+          "weeks": [
+            "2026-11-02",
+            "2026-11-09",
+            "2026-11-16",
+            "2026-11-23"
+          ],
+          "weekCount": 4,
+          "denominatorHours": 160
+        },
+        {
+          "key": "2026-12",
+          "label": "2026-12",
+          "weeks": [
+            "2026-11-30",
+            "2026-12-07",
+            "2026-12-14"
+          ],
+          "weekCount": 3,
+          "denominatorHours": 120
+        }
+      ],
+      "contextHeaders": [
+        {
+          "path": "noDueDate",
+          "header": "No due date (h)",
+          "type": "number"
+        }
+      ],
+      "csvHeadersMatch": true
+    },
+    "team-capacity": {
+      "headers": [
+        {
+          "path": "u0",
+          "header": "2026-11 (FTE; ISO weeks: 4)",
+          "type": "number"
+        }
+      ],
+      "periods": [
+        {
+          "key": "2026-11",
+          "label": "2026-11",
+          "weeks": [
+            "2026-11-02",
+            "2026-11-09",
+            "2026-11-16",
+            "2026-11-23"
+          ],
+          "weekCount": 4,
+          "denominatorHours": 160
+        }
+      ],
+      "contextHeaders": [],
+      "csvHeadersMatch": true
+    },
+    "allocations-by-source": {
+      "headers": [
+        {
+          "path": "u0",
+          "header": "2026-11 (FTE; ISO weeks: 4)",
+          "type": "number"
+        }
+      ],
+      "periods": [
+        {
+          "key": "2026-11",
+          "label": "2026-11",
+          "weeks": [
+            "2026-11-02",
+            "2026-11-09",
+            "2026-11-16",
+            "2026-11-23"
+          ],
+          "weekCount": 4,
+          "denominatorHours": 160
+        }
+      ],
+      "contextHeaders": [],
+      "csvHeadersMatch": true
+    }
+  },
+  "errors": [],
+  "pickup": {
+    "code": "pickup-offers",
+    "title": "Task pickup offers",
+    "description": "Pickup offers by project and discipline, including outcomes and days open.",
+    "params": [
+      {
+        "key": "projectId",
+        "label": "Projects",
+        "type": "projects",
+        "default": null,
+        "options": null
+      },
+      {
+        "key": "disciplineId",
+        "label": "Discipline",
+        "type": "discipline",
+        "default": null,
+        "options": null
+      },
+      {
+        "key": "from",
+        "label": "From",
+        "type": "date",
+        "default": null,
+        "options": null
+      },
+      {
+        "key": "to",
+        "label": "To",
+        "type": "date",
+        "default": null,
+        "options": null
+      }
+    ],
+    "itemType": "Task",
+    "columns": [
+      {
+        "path": "project",
+        "header": "Project",
+        "type": "text"
+      },
+      {
+        "path": "discipline",
+        "header": "Discipline",
+        "type": "text"
+      },
+      {
+        "path": "offered",
+        "header": "Offered",
+        "type": "datetime"
+      },
+      {
+        "path": "closed",
+        "header": "Closed",
+        "type": "datetime"
+      },
+      {
+        "path": "closeCause",
+        "header": "Closing cause",
+        "type": "text"
+      },
+      {
+        "path": "daysOpen",
+        "header": "Days open",
+        "type": "number"
+      }
+    ],
+    "question": "How are pickup and commitments working?"
+  }
+}

@@ -1,0 +1,139 @@
+/* 052 S02: the v2 shell/page band. All selectors are scoped to the dark-shipped
+   root switch; v1 keeps its existing layout and utility classes unchanged. */
+.visual-project-main { display: contents; }
+:root[data-visual="v2"] .visual-topbar {
+  height: 56px;
+  background: var(--navy);
+  border-color: transparent;
+  color: var(--on-navy);
+}
+:root[data-visual="v2"] .font-sans { font-family: var(--font-sans); }
+:root[data-visual="v2"] .font-mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+:root[data-visual="v2"] .visual-topbar :is(button, a) { color: var(--on-navy); }
+:root[data-visual="v2"] .visual-topbar [aria-current="page"] { color: var(--on-navy); }
+:root[data-visual="v2"] .visual-topbar [data-variant="outline"] { background: transparent; color: var(--on-navy); border-color: var(--on-navy-boundary); }
+:root[data-visual="v2"] .visual-topbar :is(button, a):hover { background: var(--on-navy-hover); }
+:root[data-visual="v2"] .visual-topbar :focus-visible { outline-color: var(--on-navy-focus); }
+:root[data-visual="v2"] .visual-sidebar { background: var(--side); }
+@media (min-width: 1280px) {
+  :root[data-visual="v2"] .visual-sidebar[data-rail="open"] { width: 240px; }
+  :root[data-visual="v2"] .visual-sidebar[data-rail="collapsed"] { width: 76px; }
+}
+:root[data-visual="v2"] .visual-page { gap: 0; padding: 0; }
+:root[data-visual="v2"] .visual-page-band {
+  background: var(--navy);
+  color: var(--on-navy);
+  padding: 24px 32px 20px;
+}
+:root[data-visual="v2"] .visual-page-band :is(h1, h2) { font-size: 28px; line-height: 36px; font-weight: 500; }
+:root[data-visual="v2"] .visual-page-band p { color: var(--on-navy-secondary); }
+:root[data-visual="v2"] .visual-page-band .visual-page-actions :is(button, a) { background: transparent; color: var(--on-navy); border-color: var(--on-navy-boundary); }
+:root[data-visual="v2"] .visual-page-content { padding: 24px 32px 32px; }
+:root[data-visual="v2"] .visual-page--overlap .visual-page-band { padding-bottom: 92px; }
+:root[data-visual="v2"] .visual-page--overlap > .visual-page-content { margin-top: -72px; padding-top: 0; }
+:root[data-visual="v2"] .visual-page--project .visual-page-band { background: transparent; color: var(--ink); padding: 20px 32px 0; }
+:root[data-visual="v2"] .visual-page--project .visual-page-band p { color: var(--ink-2); }
+:root[data-visual="v2"] .visual-page--project .visual-page-actions :is(button, a) { color: var(--ink); border-color: var(--input); }
+:root[data-visual="v2"] .visual-page--project .visual-page-actions [data-variant="default"] { background: var(--navy); color: var(--on-navy); border-color: transparent; }
+:root[data-visual="v2"] .visual-page--project .visual-page-actions [data-variant="default"]:hover { background: var(--action-hover); }
+:root[data-visual="v2"] .visual-page--project .visual-page-actions [data-variant="outline"] { background: var(--card); color: var(--ink); border-color: var(--input); }
+:root[data-visual="v2"] .visual-page--project .visual-page-actions [data-variant="outline"]:hover { background: var(--raised); }
+:root[data-visual="v2"] .visual-page--project .visual-page-actions [data-variant]:disabled { background: var(--disabled); color: var(--disabled-foreground); border-color: var(--line); }
+:root[data-visual="v2"] .visual-page--project .visual-page-content { padding-top: 16px; }
+:root[data-visual="v2"] .visual-project-header {
+  min-height: 64px;
+  max-height: 72px;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  justify-content: center;
+  gap: 0;
+  border: 0;
+  background: var(--navy);
+  color: var(--on-navy);
+  padding: 4px 32px;
+}
+:root[data-visual="v2"] .visual-project-main { display: flex; width: 100%; min-width: 0; align-items: center; gap: 12px; }
+:root[data-visual="v2"] .visual-project-main h1 { min-width: 0; flex: 1 1 auto; color: var(--on-navy); font-size: 20px; line-height: 28px; font-weight: 500; }
+:root[data-visual="v2"] .visual-project-name { order: initial; display: block; white-space: nowrap; }
+:root[data-visual="v2"] .visual-project-main .visual-project-number { color: var(--on-navy); background: var(--on-navy-number-bg); }
+:root[data-visual="v2"] .visual-project-main :is(button, a) { color: var(--on-navy); }
+:root[data-visual="v2"] .visual-project-main .visual-project-number { color: var(--on-navy); background: var(--on-navy-number-bg); }
+:root[data-visual="v2"] .visual-project-meta { display: flex; min-width: 0; gap: 16px; padding-left: 2px; color: var(--on-navy-muted); font-size: 12px; line-height: 16px; }
+:root[data-visual="v2"] .visual-project-meta span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+:root[data-visual="v2"] .visual-project-meta > span:last-child { flex-shrink: 0; }
+:root[data-visual="v2"] [data-visual-project-details] :is(p, dd) { min-width: 0; overflow-wrap: anywhere; }
+:root[data-visual="v2"] [data-visual-project-details] dl { grid-template-columns: auto minmax(0, 1fr); }
+:root[data-visual="v2"] .visual-project-main .visual-project-health-summary { width: auto; min-width: 0; gap: 4px; padding-inline: 4px; }
+:root[data-visual="v2"] .visual-project-health-pills { display: flex; flex-direction: column; align-items: flex-start; gap: 0; }
+:root[data-visual="v2"] .visual-project-health-details > span { min-width: 0; max-width: 100%; }
+:root[data-visual="v2"] .visual-project-health-details button { min-width: 0; max-width: 100%; white-space: normal; text-align: left; }
+:root[data-visual="v2"] .visual-project-health-details button > span { min-width: 0; overflow-wrap: anywhere; }
+:root[data-visual="v2"] .visual-project-tabs { background: var(--navy); border-color: var(--on-navy-divider); }
+:root[data-visual="v2"] .visual-project-tabs :is(a, button) { color: var(--on-navy-secondary); }
+:root[data-visual="v2"] .visual-project-tabs :is(a, button):hover { background: var(--on-navy-hover); color: var(--on-navy); }
+:root[data-visual="v2"] .visual-project-tabs [aria-current="page"],
+:root[data-visual="v2"] .visual-project-tabs [aria-current="true"] { color: var(--on-navy); box-shadow: inset 0 -2px 0 var(--on-navy-focus); }
+:root[data-visual="v2"] .visual-project-header :focus-visible,
+:root[data-visual="v2"] .visual-project-tabs :focus-visible { outline-color: var(--on-navy-focus); }
+:root[data-visual="v2"] .visual-topbar [data-variant="default"] { background: var(--card); color: var(--navy); }
+:root[data-visual="v2"] .visual-topbar [data-variant="default"]:hover { background: var(--brand-tint); color: var(--navy); }
+/* A segmented control is a light control inside the band, not a quiet navy action.
+   Preserve its white selected segment and use the light-surface text roles in both states. */
+:root[data-visual="v2"] .visual-page-band .visual-page-actions [role="group"].bg-muted > :is(a, button) { background: transparent; color: var(--ink-2); }
+:root[data-visual="v2"] .visual-page-band .visual-page-actions [role="group"].bg-muted > :is(a, button):hover { background: var(--brand-tint); color: var(--brand); }
+:root[data-visual="v2"] .visual-page-band .visual-page-actions [role="group"].bg-muted > :is(a[aria-current="page"], button[aria-pressed="true"]) { background: var(--card); color: var(--ink); }
+@media (min-width: 768px) {
+  /* One compact heading/band rhythm for data screens. The 72px project identity
+     header, all controls, reference times and every destination stay present. */
+  :root[data-visual="v2"] .visual-page-band { padding-block: 16px; }
+  :root[data-visual="v2"] .visual-page-band-tabs { margin-top: 8px; }
+  :root[data-visual="v2"] .visual-page-content { gap: 16px; padding-top: 16px; }
+  :root[data-visual="v2"] .visual-page--project .visual-page-band { padding-top: 12px; padding-bottom: 0; }
+  :root[data-visual="v2"] .visual-page--project .visual-page-band h2 { font-size: 20px; line-height: 28px; }
+  :root[data-visual="v2"] .visual-page--project .visual-page-content { padding-top: 12px; }
+  /* Project list headings keep their count subtitle on the same line. Computed
+     title/reference blocks retain their separate original arrangement. */
+  :root[data-visual="v2"] [data-visual-project-layout] .visual-page--project > .visual-page-band > .mx-auto > :has(> h2):not(:has(> .visual-title-block)) { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 12px; }
+  :root[data-visual="v2"] [data-visual-project-layout] .visual-page--project > .visual-page-band > .mx-auto > :has(> h2):not(:has(> .visual-title-block)) > p { margin-top: 0; }
+  :root[data-visual="v2"] [data-visual-project-layout] .visual-project-task-page [data-task-layout="desktop"] thead th { padding-block: 8px; }
+}
+:root[data-visual="v2"] [data-visual-project-layout] .visual-project-task-source { min-width: 0; max-width: 512px; overflow-wrap: anywhere; }
+@media (max-width: 767.98px) {
+  :root[data-visual="v2"] .visual-page-band { padding: 16px; }
+  :root[data-visual="v2"] .visual-page-band :is(h1, h2) { font-size: 24px; line-height: 32px; }
+  :root[data-visual="v2"] .visual-page-content { padding: 16px; }
+  :root[data-visual="v2"] .visual-page--overlap .visual-page-band { padding-bottom: 80px; }
+  :root[data-visual="v2"] .visual-page--overlap > .visual-page-content { margin-top: -64px; padding-top: 0; }
+  :root[data-visual="v2"] .visual-project-header { padding: 6px 16px; }
+  :root[data-visual="v2"] .visual-project-main h1 { font-size: 16px; line-height: 24px; }
+  :root[data-visual="v2"] .visual-project-main:has(.visual-project-health-summary) { gap: 4px; }
+  :root[data-visual="v2"] .visual-project-meta { gap: 8px; }
+  :root[data-visual="v2"] .visual-project-meta > span:last-child { flex-shrink: 0; }
+  :root[data-visual="v2"] .visual-page-band > .mx-auto > :has(> .visual-title-block) { flex-basis: 100%; width: 100%; max-width: 100%; }
+}
+
+:root[data-visual="v2"] .visual-project-name:focus-visible {
+  outline: 2px solid var(--on-navy-focus);
+  outline-offset: 2px;
+}
+
+/* Dashboard alone has count cards crossing its own reserved navy band. Other
+   project lists/registers retain their light nested headings and current density. */
+:root[data-visual="v2"] [data-visual-project-layout] .visual-dashboard-band > .visual-page-band { background: var(--navy); color: var(--on-navy); padding-bottom: 12px; }
+:root[data-visual="v2"] [data-visual-project-layout] .visual-dashboard-band.visual-page--overlap > .visual-page-band { padding-bottom: 80px; }
+:root[data-visual="v2"] [data-visual-project-layout] .visual-dashboard-band.visual-page--overlap > .visual-page-content { margin-top: -72px; padding-top: 0; }
+:root[data-visual="v2"] [data-visual-project-layout] .visual-dashboard-band > .visual-page-band p { color: var(--on-navy-secondary); }
+:root[data-visual="v2"] [data-visual-project-layout] .visual-dashboard-band > .visual-page-band .visual-title-block { background: var(--on-navy-reference-bg); border-color: var(--on-navy-reference-border); color: var(--on-navy-secondary); }
+:root[data-visual="v2"] [data-visual-project-layout] .visual-dashboard-band > .visual-page-band .visual-title-block dt { color: var(--on-navy-muted); }
+:root[data-visual="v2"] [data-visual-project-layout] .visual-dashboard-band > .visual-page-band .visual-title-block dd { color: var(--on-navy); }
+:root[data-visual="v2"] [data-visual-project-layout] .visual-dashboard-band .visual-page-actions select { background: var(--card); color: var(--ink); border-color: var(--input); }
+:root[data-visual="v2"] [data-visual-project-layout] .visual-dashboard-band .visual-page-actions [data-variant="outline"]:not(:disabled) { background: transparent; color: var(--on-navy); border-color: var(--on-navy-boundary); }
+:root[data-visual="v2"] [data-visual-project-layout] .visual-dashboard-band .visual-page-actions [data-variant="outline"]:not(:disabled):hover { background: var(--on-navy-hover); }
+:root[data-visual="v2"] [data-visual-project-layout] .visual-dashboard-band .visual-page-actions [data-variant="default"]:not(:disabled) { background: var(--card); color: var(--navy); }
+:root[data-visual="v2"] [data-visual-project-layout] .visual-dashboard-band .visual-page-actions [data-variant="default"]:not(:disabled):hover { background: var(--brand-tint); }
+:root[data-visual="v2"] [data-visual-project-layout] .visual-dashboard-band > .visual-page-band :focus-visible { outline-color: var(--on-navy-focus); }
+@media (max-width: 767.98px) {
+  :root[data-visual="v2"] [data-visual-project-layout] .visual-dashboard-band.visual-page--overlap > .visual-page-band { padding-bottom: 72px; }
+  :root[data-visual="v2"] [data-visual-project-layout] .visual-dashboard-band.visual-page--overlap > .visual-page-content { margin-top: -64px; }
+}

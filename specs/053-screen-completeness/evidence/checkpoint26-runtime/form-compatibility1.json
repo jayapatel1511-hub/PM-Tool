@@ -1,0 +1,21 @@
+{
+  "status": "READY_HOLD_NEW_CLIENT_CAP_REMOVED",
+  "files": [
+    {
+      "path": "web/src/pages/projects/review-response-form.tsx",
+      "sha256": "2b8ed8c45c37761161bd65b0dbe744d683adcadd1c239191729a1a0d3887315c"
+    },
+    {
+      "path": "web/tests/review-response.cjs",
+      "sha256": "63e2a5d77fa7341ab03d46d7bfbd9f8536d4ba981561fa85af6a708e9fb6b08e"
+    },
+    {
+      "path": "web/tests/review-response.fixture.cjs",
+      "sha256": "ca069722246d53c26ebc7bb20f28e61f0ca1f5c29f620ca5135159e6a6d7d7b1"
+    }
+  ],
+  "productionChange": "ExactreinsertionofreasonmaxLength4000reconstructspriortestedform787ae...; nootherproductionchange",
+  "server": "UnchangedCheck.Reasononlymin5/Response+FindingEvent.Reason textunbounded by field model; standardexistingrequestsizeguardunchanged",
+  "newCase": "Explicit>4000multilineexplanation/fullinput/fullbody/onecommand+event; currentR2browserexpected66mockcommands",
+  "priorEvidence": "149.NET/fixturetypes/SSR/adjacentflowsunchanged; affectedtypes/lint/newbuild+newChrome required"
+}

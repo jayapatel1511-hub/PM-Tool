@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "boundary": "Synthetic strict transport against real built SPA; no provider authorization/persistence claim",
+  "cases": [
+    "Normal current-started record with explicit actual IDs, four versions, disabled blank confirmation, native invalid-date refusal, reason over4000 preserved in wire, typed party provenance, original/current issued revision, no automatic verifier",
+    "Explicit PM designation and separate verifier reason/evidence; resolver evidence remains distinct; closure event retains verifier evidence",
+    "409 preserves typed draft and originally selected issue/party/code/package versions after normal options reread; no silent promotion",
+    "Lost response after synthetic commit retries byte-identical body/request ID; later 403 stays uncertain; explicit success produces one synthetic receipt",
+    "Malformed success is unconfirmed and locks the exact command rather than clearing the draft",
+    "Normal command 403 retains editable draft; options 403 and canRecord=false disable retained form; parent 403 hides portal without unmounting draft; explicit reread restores it; reads issue zero writes",
+    "375px real form has no overflow; Enter opens and cancels; dirty Keep editing preserves text; Discard restores actual opener focus and list filters",
+    "Issued new-round parent403/404 and successful canCoordinate=false hide confirmation with focus on exact parent title, preserve mounted draft/source/assignment, recover only after explicit successful reread, and dirty Cancel naturally focuses the current exact new-round trigger",
+    "Create and next round use actual issued IDs plus empty internal IDs, Unknown catalog revisions disabled, captured-author exclusion, supplementary false, immutable source mode, reviewed package version",
+    "Role-off hides record/designation; register_screens off has no new controls/reads and retains exact internal create body"
+  ],
+  "counters": {
+    "commands": 12,
+    "unexpectedGets": 0,
+    "unexpectedWrites": 0,
+    "pageErrors": 0
+  },
+  "desktopAnd375": true,
+  "visualSystem": true
+}

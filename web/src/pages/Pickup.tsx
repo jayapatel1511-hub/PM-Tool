@@ -1,9 +1,11 @@
+import type { PersonDateNotices } from '@/components/hub/person-facts'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { Empty, ErrorBanner, Loading, Page } from '@/components/hub/common'
 import { Key } from '@/components/hub/pills'
+import { PersonPanelTrigger } from '@/components/hub/person-panel-trigger'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { typedRequest } from '@/lib/api'
@@ -22,7 +24,7 @@ export interface PickupOffer {
   canPickUp?: boolean; canAssign?: boolean
   rowVersion?: number
   allowed?: { pickUp: boolean; assign: boolean; withdraw?: boolean }
-  candidates?: { id: string; displayName: string }[]
+  candidates?: { id: string; displayName: string; personNotices?: PersonDateNotices | null }[]
 }
 
 /** Open for pickup (§53.3). The server remains authoritative for team and visibility rules. */
@@ -54,7 +56,7 @@ export function PickupPage() {
         {q.data.map((o) => <li key={o.id} className="flex flex-wrap items-center gap-3 p-4">
           <Key>{o.task.key}</Key><span className="min-w-48 flex-1 font-medium">{o.task.name}</span>
           <span className="text-sm text-muted-foreground">{o.reason}</span>
-          <span className="text-xs text-muted-foreground">{o.task.projectNumber ?? projects.data?.find(p => p.id === o.task.projectId)?.projectNumber} · {o.task.disciplineName} · {o.offeredBy} · {ago(o.openedAt)} · {t('pickup.remaining', { h: o.hoursRemaining ?? '—' })}</span>
+          <span className="text-xs text-muted-foreground">{o.task.projectNumber ?? projects.data?.find(p => p.id === o.task.projectId)?.projectNumber} · {o.task.disciplineName} · <PersonPanelTrigger userId={o.offeredById} name={o.offeredBy} focusKey={`pickup:${o.id}:offered-by`} /> · {ago(o.openedAt)} · {t('pickup.remaining', { h: o.hoursRemaining ?? '—' })}</span>
           <span className="text-xs text-muted-foreground">{t('pickup.neededDue', { needed: fmtDate(o.neededBy), due: fmtDate(o.task.dueDate) })}</span>
           {o.canPickUp && <OwnLoadHint date={o.neededBy ?? undefined} />}
           {o.canPickUp && <Button size="sm" onClick={() => setSelected(o)}>{t('pickup.pickUp')}</Button>}

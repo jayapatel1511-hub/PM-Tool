@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "cleanedAtUtc": "2026-11-02T06:24:09.109038+00:00",
+  "verifiedApiPid": 77813,
+  "verifiedCommand": "dotnet bin/Release/net10.0/Hub.Api.dll --urls http://127.0.0.1:5088",
+  "verifiedCwd": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api",
+  "signal": "SIGINT",
+  "databaseDropped": "hub_qa_checkpoint23",
+  "otherDatabaseMutation": false,
+  "retained": "Existing testPG55432 and builtpreview8853 retained",
+  "preflightNote": "First cleanup attempt stopped before mutation because lsof includes f319 fd records; retry filters p records and retains exact PID/cwd/command checks"
+}

@@ -1,0 +1,15 @@
+{
+  "exitCode": 2,
+  "args": [
+    "node",
+    "node_modules/typescript/bin/tsc",
+    "-b",
+    "--pretty",
+    "false"
+  ],
+  "atUtc": "2026-11-02T21:49:09.986701+00:00",
+  "tail": [
+    "src/pages/notice-preferences.tsx(50,129): error TS2322: Type 'string | null' is not assignable to type 'string'.",
+    "  Type 'null' is not assignable to type 'string'."
+  ]
+}

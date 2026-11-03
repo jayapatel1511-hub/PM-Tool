@@ -1,0 +1,50 @@
+{
+  "base": "http://127.0.0.1:5088",
+  "project": "SYN-JOIN19-1101",
+  "reports": {
+    "employee": {
+      "url": "http://127.0.0.1:5088/reports/workload-employee?projectId=01a195dd-3df4-797f-b1ea-b2dbb79b6d75",
+      "rows": 2,
+      "firstRow": {
+        "x": 553,
+        "y": 395.5,
+        "width": 11854.5,
+        "height": 57
+      },
+      "nonempty": true,
+      "text": "26 · Available (h)\tWeek of 2026-10-26 · Confirmed reservation (h)\tWeek of 2026-10-26 · Proposed request (h)\tWeek of 2026-10-26 · Committed load (h)\tWeek of 2026-11-02\tWeek of 2026-11-02 · Available (h)\tWeek of 2026-11-02 · Confirmed reservation (h)\tWeek of 2026-11-02 · Proposed request (h)\tWeek of 2026-11-02 · Committed load (h)\tWeek of 2026-11-09\tWeek of 2026-11-09 · Available (h)\tWeek of 2026-11-09 · Confirmed reservation (h)\tWeek of 2026-11-09 · Proposed request (h)\tWeek of 2026-11-09 · Committed load (h)\tWeek of 2026-11-16\tWeek of 2026-11-16 · Available (h)\tWeek of 2026-11-16 · Confirmed reservation (h)\tWeek of 2026-11-16 · Proposed request (h)\tWeek of 2026-11-16 · Committed load (h)\tWeek of 2026-11-23\tWeek of 2026-11-23 · Available (h)\tWeek of 2026-11-23 · Confirmed reservation (h)\tWeek of 2026-11-23 · Proposed request (h)\tWeek of 2026-11-23 · Committed load (h)\tWeek of 2026-11-30\tWeek of 2026-11-30 · Available (h)\tWeek of 2026-11-30 · Confirmed reservation (h)\tWeek of 2026-11-30 · Proposed request (h)\tWeek of 2026-11-30 · Committed load (h)\tWeek of 2026-12-07\tWeek of 2026-12-07 · Available (h)\tWeek of 2026-12-07 · Confirmed reservation (h)\tWeek of 2026-12-07 · Proposed request (h)\tWeek of 2026-12-07 · Committed load (h)\tWeek of 2026-12-14\tWeek of 2026-12-14 · Available (h)\tWeek of 2026-12-14 · Confirmed reservation (h)\tWeek of 2026-12-14 · Proposed request (h)\tWeek of 2026-12-14 · Committed load (h)\tNo due date (h)\tOpen tasks\tUnestimated\tOverdue tasks\tProjects\tIndicator\nAlex Chen\tSam Patel\t40\tPartial project scope\t0\t40\t0\t0\t0\t20\t40\t0\t0\t20\t0\t40\t0\t0\t0\t0\t40\t0\t0\t0\t0\t40\t0\t0\t0\t0\t40\t0\t0\t0\t0\t40\t0\t0\t0\t0\t40\t0\t0\t0\t0\t2\t0\t0\t1\tOK\nOmar Haddad\tLena Brooks\t40\tPartial project scope\t0\t40\t0\t0\t0\t20\t40\t0\t0\t20\t0\t40\t0\t0\t0\t0\t40\t0\t0\t0\t0\t40\t0\t0\t0\t0\t40\t0\t0\t0\t0\t40\t0\t0\t0\t0\t40\t0\t0\t0\t0\t2\t0\t0\t1\tOK"
+    },
+    "discipline": {
+      "url": "http://127.0.0.1:5088/reports/workload-discipline",
+      "rows": 2,
+      "firstRow": {
+        "x": 553,
+        "y": 395.5,
+        "width": 1780.8125,
+        "height": 37
+      },
+      "nonempty": false,
+      "text": "atus by Project\nEvery deliverable by project with status, due and issue dates.\nUpcoming Milestones\nMilestones in the coming days with readiness and slip.\nWhat needs a decision, response or review?\nOpen Decisions\nDecisions still to be made, by required-by date.\nOpen Issues / High Risks\nOpen issues and open risks, most severe first. Without a severity, every open issue and the High risks.\nMeeting Actions Outstanding\nOpen actions from project meetings, by due date, with who owns them.\nReview Queue\nTasks and deliverables waiting for review, longest first.\nWhat changed and which projects need attention?\nProject Activity Log\nEvery recorded change on one project.\nProjects At Risk\nActive projects whose computed or reported health is Red or Yellow, and why.\nHealth History\nNightly computed and reported health by project.\nWhere is work concentrated by discipline?\nWorkload by Discipline\nEstimated hours per week by discipline.\nWhat do pilot activity and screen measurements show?\nPilot measures\nWeekly readings of the pilot goals on chosen projects: coordination reviews, tasks without an owner or due date, blocked tasks, and people updating task status.\nWhat task time was recorded?\nTask Hours\nActual hours recorded against tasks, by date and person.\nParameters and views\n2 rows\n0 unestimated tasks\n0 open tasks with no due date\n\nTasks assigned to people in this report scope, including their other visible disciplines. A task can appear in both counts. Only task records you may view in this report scope are counted.\n\nDiscipline\tWeek of 2026-10-26\tWeek of 2026-11-02\tWeek of 2026-11-09\tWeek of 2026-11-16\tWeek of 2026-11-23\tWeek of 2026-11-30\tWeek of 2026-12-07\tWeek of 2026-12-14\tNo due date (h)\tOpen tasks\tUnestimated\tPeople\nCivil\t0\t20\t0\t0\t0\t0\t0\t0\t0\t2\t0\t1\nGeotechnical\t0\t20\t0\t0\t0\t0\t0\t0\t0\t2\t0\t1"
+    },
+    "hours": {
+      "url": "http://127.0.0.1:5088/reports/task-hours?projectId=01a195dd-3df4-797f-b1ea-b2dbb79b6d75&userId=01a195db-15ab-7cfd-8481-4ee914d8fe58&from=2026-11-02&to=2026-11-08&scope=mine",
+      "rows": 1,
+      "firstRow": {
+        "x": 553,
+        "y": 383.5,
+        "width": 854,
+        "height": 36.5
+      },
+      "nonempty": true,
+      "text": "t is due, issued or approaching submission?\nUpcoming Deliverables\nOpen deliverables due in the coming days.\nDeliverable Status by Project\nEvery deliverable by project with status, due and issue dates.\nUpcoming Milestones\nMilestones in the coming days with readiness and slip.\nWhat needs a decision, response or review?\nOpen Decisions\nDecisions still to be made, by required-by date.\nOpen Issues / High Risks\nOpen issues and open risks, most severe first. Without a severity, every open issue and the High risks.\nMeeting Actions Outstanding\nOpen actions from project meetings, by due date, with who owns them.\nReview Queue\nTasks and deliverables waiting for review, longest first.\nWhat changed and which projects need attention?\nProject Activity Log\nEvery recorded change on one project.\nProjects At Risk\nActive projects whose computed or reported health is Red or Yellow, and why.\nHealth History\nNightly computed and reported health by project.\nWhere is work concentrated by discipline?\nWorkload by Discipline\nEstimated hours per week by discipline.\nWhat do pilot activity and screen measurements show?\nPilot measures\nWeekly readings of the pilot goals on chosen projects: coordination reviews, tasks without an owner or due date, blocked tasks, and people updating task status.\nWhat task time was recorded?\nTask Hours\nActual hours recorded against tasks, by date and person.\nParameters and views\n1 row\nProjects: SYN-JOIN19-1101\nPerson: Alex Chen\nFrom: 2026-11-02\nTo: 2026-11-08\nStaff: Mine\n0 unestimated tasks\n0 open tasks with no due date\n\nCurrent inputs for distinct tasks referenced by permitted time entries. Recorded hours stay separate; a task can appear in both counts.\n\nDate\tPerson\tProject\tKey\tTask\tHours\tNote\n—\nUnavailable\n\tTotal\t—\nUnavailable\n\t—\nUnavailable\n\t—\nUnavailable\n\t0\t—\nUnavailable"
+    }
+  },
+  "task": {
+    "origin": "http://127.0.0.1:5088/projects/SYN-JOIN19-1101/tasks?sort=dueDate",
+    "child": "http://127.0.0.1:5088/projects/SYN-JOIN19-1101/tasks?sort=dueDate&panel=Task%3A01a195dd-776d-7e7d-8000-54af7a3eaeda",
+    "closed": "http://127.0.0.1:5088/projects/SYN-JOIN19-1101/tasks?sort=dueDate",
+    "preserved": true
+  },
+  "errors": [],
+  "mutations": []
+}

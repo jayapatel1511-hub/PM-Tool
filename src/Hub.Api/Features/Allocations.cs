@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Api.Features;
 
-public static class AllocationEndpoints
+public static partial class AllocationEndpoints
 {
     public sealed record DayInput(DateOnly WorkDate, decimal Hours);
     public sealed record LinkInput(string WorkType, Guid WorkId, DateOnly WorkDate, decimal? ReviewHours = null);
@@ -49,6 +49,11 @@ public static class AllocationEndpoints
         api.MapGet("/projects/{projectId:guid}/allocations", List);
         api.MapGet("/projects/{projectId:guid}/allocations/export", ExportRows);
         api.MapGet("/projects/{projectId:guid}/allocations/review-options", ReviewOptions);
+        api.MapGet("/projects/{projectId:guid}/allocations/deadlines", Deadlines);
+        api.MapGet("/projects/{projectId:guid}/allocations/discipline-context", DisciplineContext);
+        api.MapPost("/projects/{projectId:guid}/allocations/capacity-preview", ProposalCapacity);
+        api.MapPost("/projects/{projectId:guid}/allocations/shift-preview", ShiftPreview).WithMetadata(new Coordination.AtomicCommand());
+        api.MapPost("/projects/{projectId:guid}/allocations/shift", Shift).WithMetadata(new Coordination.AtomicCommand());
         api.MapGet("/projects/{projectId:guid}/allocations/{id:guid}", Detail);
         api.MapPost("/projects/{projectId:guid}/allocations", Create).AddEndpointFilter<AllocationPreviewFilter>().AddOpenApiOperationTransformer(AllocationPreviewFilter.Describe).WithMetadata(new Coordination.AtomicCommand());
         api.MapPost("/projects/{projectId:guid}/allocations/{id:guid}/edit", Edit).AddEndpointFilter<AllocationPreviewFilter>().AddOpenApiOperationTransformer(AllocationPreviewFilter.Describe).WithMetadata(new Coordination.AtomicCommand());
@@ -116,7 +121,8 @@ public static class AllocationEndpoints
     }
 
     internal static async Task<List<CapacityDay>> Capacity(HubDb db, Access access, ResourceAllocation candidate,
-        SettingsStore store, TimeProvider clock, DateOnly? viewFrom = null, DateOnly? viewThrough = null)
+        SettingsStore store, TimeProvider clock, DateOnly? viewFrom = null, DateOnly? viewThrough = null,
+        DayInput[]? candidateDays = null, LinkInput[]? candidateLinks = null)
     {
         var settings = await store.Get(db);
         var first = viewFrom ?? candidate.FromDate; var last = viewThrough ?? candidate.ThroughDate;
@@ -141,6 +147,18 @@ public static class AllocationEndpoints
         var allocationIds = all.Select(a => a.Id).ToArray();
         var overrides = await db.AllocationDayOverrides.AsNoTracking().Where(d => allocationIds.Contains(d.AllocationId)).ToListAsync();
         var links = await db.AllocationWorkLinks.AsNoTracking().Where(l => allocationIds.Contains(l.AllocationId) && l.ReleasedAt == null).ToListAsync();
+        // Pure preview drafts override only the hypothetical candidate's inputs. Persisted commands keep their original read path.
+        if (candidateDays is not null)
+        {
+            overrides.RemoveAll(day => day.AllocationId == candidate.Id);
+            overrides.AddRange(candidateDays.Select(day => new AllocationDayOverride { AllocationId = candidate.Id, WorkDate = day.WorkDate, Hours = day.Hours }));
+        }
+        if (candidateLinks is not null)
+        {
+            links.RemoveAll(link => link.AllocationId == candidate.Id);
+            links.AddRange(candidateLinks.Select(link => new AllocationWorkLink { AllocationId = candidate.Id, PersonId = candidate.PersonId,
+                WorkType = link.WorkType, WorkId = link.WorkId, WorkDate = link.WorkDate, ReviewHours = link.ReviewHours }));
+        }
         var personCalendar = (await PersonCapacity.Calendars(db, [person.Id], new[] { last, all.Max(a => a.ThroughDate) }.Max()))[person.Id];
         var reservations = new Dictionary<Guid, IReadOnlyDictionary<DateOnly, decimal>>();
         foreach (var a in all)
@@ -293,6 +311,64 @@ public static class AllocationEndpoints
                     : eligible.Any(u => u.Id == a.PersonId) ? "Eligible" : "Removed"));
     }
 
+    /// S30 baseline while inputs are incomplete, or canonical proposal comparison when §52 preview is off. Never persists a draft.
+    static async Task<Ok<AllocationScreenReads.ProposalCapacityRead>> ProposalCapacity(Guid projectId, AllocationScreenReads.ProposalCapacityBody body,
+        Access access, HubDb db, SettingsStore store, TimeProvider clock)
+    {
+        var settings = await store.Get(db);
+        if (!settings.IsFlagOn("capacity_screens")) throw ApiException.NotFound();
+        await using var snapshot = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead);
+        var (project, context) = await access.Project(projectId, false);
+        Access.Demand(Permissions.ProposeAllocation(access.Actor, context));
+        Check.That(body.FromDate != default && body.ThroughDate >= body.FromDate && body.ThroughDate.DayNumber - body.FromDate.DayNumber <= 366,
+            "throughDate", "error.date_range");
+        if (!await AllocationScreenReads.InPlannerScope(body.PersonId, access, db))
+            return TypedResults.Ok(AllocationScreenReads.OutsideScope(body.FromDate, body.ThroughDate, clock));
+        await Coordination.Person(db, project, body.PersonId, "personId");
+        if (body.IncludeProposal)
+        {
+            await Validate(db, project, body.PersonId, body.Purpose, body.FromDate, body.ThroughDate, body.PlannedHours, body.Days, body.Links, store);
+            // The command's active-link unique index would reject these inputs. Do not preview a second reservation of the same work slice.
+            var reserved = await db.AllocationWorkLinks.AsNoTracking().Where(link => link.PersonId == body.PersonId && link.ReleasedAt == null
+                && link.WorkDate >= body.FromDate && link.WorkDate <= body.ThroughDate)
+                .Select(link => new { link.WorkType, link.WorkId, link.WorkDate }).ToArrayAsync();
+            Check.That(!body.Links.Any(link => reserved.Any(existing => existing.WorkType == link.WorkType && existing.WorkId == link.WorkId && existing.WorkDate == link.WorkDate)),
+                "links", "error.invalid");
+        }
+        var candidate = new ResourceAllocation { ProjectId = projectId, PersonId = body.PersonId, Purpose = body.Purpose,
+            FromDate = body.FromDate, ThroughDate = body.ThroughDate, PlannedHours = body.IncludeProposal ? body.PlannedHours : 0 };
+        return TypedResults.Ok(await AllocationScreenReads.Proposal(candidate, body.IncludeProposal, access, db, store, clock,
+            body.IncludeProposal ? body.Days : [], body.IncludeProposal ? body.Links : []));
+    }
+
+    static async Task<Ok<AllocationScreenReads.DisciplineComparison>> DisciplineContext(Guid projectId, DateOnly? from, int? weeks,
+        Access access, HubDb db, SettingsStore store, TimeProvider clock)
+    {
+        var settings = await store.Get(db);
+        if (!settings.IsFlagOn("capacity_screens")) throw ApiException.NotFound();
+        await using var snapshot = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead);
+        var (_, context) = await access.Project(projectId, false);
+        Check.That(weeks is null or (>= 1 and <= 26), "weeks", "error.range");
+        var first = Workload.WeekOf(from ?? clock.Today(settings));
+        var window = Enumerable.Range(0, weeks ?? settings.PlanningHorizonWeeks).Select(index => first.AddDays(index * 7)).ToArray();
+        var isPm = Permissions.IsPM(access.Actor, context);
+        var managed = db.Projects.Where(project => project.Id == projectId && isPm).Select(project => project.Id);
+        var visible = VisibleQuery(db, access.Actor, managed).Where(allocation => allocation.ProjectId == projectId);
+        return TypedResults.Ok(await AllocationScreenReads.Compare(projectId, window, visible, isPm || access.Actor.Admin, db, clock));
+    }
+
+    static async Task<Ok<PlanningDeadlines.PlanningDeadlineContext>> Deadlines(Guid projectId, DateOnly? from, int? weeks,
+        Access access, HubDb db, SettingsStore store, TimeProvider clock)
+    {
+        var settings = await store.Get(db);
+        if (!settings.IsFlagOn("capacity_screens")) throw ApiException.NotFound();
+        await access.Project(projectId, false);
+        Check.That(weeks is null or (>= 1 and <= 26), "weeks", "error.range");
+        var first = Workload.WeekOf(from ?? clock.Today(settings));
+        var window = Enumerable.Range(0, weeks ?? settings.PlanningHorizonWeeks).Select(i => first.AddDays(i * 7)).ToArray();
+        return TypedResults.Ok(await PlanningDeadlines.Read([projectId], window, access, db, clock));
+    }
+
     static async Task<Ok<Page<AllocationRow>>> List(Guid projectId, [AsParameters] Filter filter, int? page, int? pageSize, Access access, HubDb db)
     {
         var (project, ctx) = await access.Project(projectId, false);
@@ -425,33 +501,43 @@ public static class AllocationEndpoints
             Access.Demand(Permissions.IsPM(access.Actor, ctx) || a.CreatedBy == access.Actor.Id
                 ? Allow.Yes : Allow.No("perm.owner"));
             Check.That(a.Status is AllocationStatus.Proposed or AllocationStatus.Confirmed, "status", "error.invalid");
-            var wasConfirmed = a.Status == AllocationStatus.Confirmed;
-            var priorPerson = a.PersonId; var priorFrom = a.FromDate; var priorThrough = a.ThroughDate;
-            if (wasConfirmed) await LockPerson(db, priorPerson);
+            if (a.Status == AllocationStatus.Confirmed) await LockPerson(db, a.PersonId);
             await Validate(db, project, body.PersonId, body.Purpose, body.FromDate, body.ThroughDate,
                 body.PlannedHours, body.Days, body.Links, store);
-            var oldLinks = await db.AllocationWorkLinks.Where(l => l.AllocationId == a.Id && l.ReleasedAt == null).ToListAsync();
-            var oldDays = await db.AllocationDayOverrides.Where(d => d.AllocationId == a.Id).ToListAsync();
-            var now = clock.GetUtcNow();
-            foreach (var link in oldLinks) link.ReleasedAt = now;
-            db.AllocationDayOverrides.RemoveRange(oldDays);
-            // Free unique person/work/day slices before replacement, within Coordination.Run's transaction.
-            await db.SaveChangesAsync();
-            foreach (var day in body.Days)
-                db.AllocationDayOverrides.Add(new AllocationDayOverride { AllocationId = a.Id, WorkDate = day.WorkDate, Hours = day.Hours });
-            foreach (var link in body.Links)
-                db.AllocationWorkLinks.Add(new AllocationWorkLink { AllocationId = a.Id, PersonId = body.PersonId,
-                    WorkType = link.WorkType, WorkId = link.WorkId, WorkDate = link.WorkDate, ReviewHours = link.ReviewHours });
-            a.PersonId = body.PersonId; a.Purpose = body.Purpose; a.FromDate = body.FromDate; a.ThroughDate = body.ThroughDate;
-            a.PlannedHours = body.PlannedHours; a.Status = AllocationRules.AfterMaterialEdit(a.Status);
-            if (wasConfirmed) await TouchDates(db, priorPerson, Enumerable.Range(0, priorThrough.DayNumber - priorFrom.DayNumber + 1)
-                .Select(i => priorFrom.AddDays(i)));
-            // A child-only edit must invalidate the allocation version seen by another editor.
-            db.Entry(a).Property(x => x.PlannedHours).IsModified = true;
-            db.Audit.Note(a, reason: Check.Reason(body.Reason));
-            await NotifyChanged(db, notify, project, a);
-            return a;
+            await ReleaseMaterial(db, [a.Id], clock.GetUtcNow());
+            return await ApplyMaterial(project, a, body, db, notify);
         });
+
+    /// Release all source slices together, inside the caller's existing material-edit transaction.
+    static async Task ReleaseMaterial(HubDb db, Guid[] ids, DateTimeOffset now)
+    {
+        var oldLinks = await db.AllocationWorkLinks.Where(link => ids.Contains(link.AllocationId) && link.ReleasedAt == null).ToListAsync();
+        var oldDays = await db.AllocationDayOverrides.Where(day => ids.Contains(day.AllocationId)).ToListAsync();
+        foreach (var link in oldLinks) link.ReleasedAt = now;
+        db.AllocationDayOverrides.RemoveRange(oldDays);
+        await db.SaveChangesAsync();
+    }
+
+    /// Canonical single/bulk material replacement. Batch callers invalidate old confirmed date unions once per person.
+    static async Task<ResourceAllocation> ApplyMaterial(Project project, ResourceAllocation a, EditBody body, HubDb db, Notifier notify, bool touchDates = true)
+    {
+        var wasConfirmed = a.Status == AllocationStatus.Confirmed;
+        var priorPerson = a.PersonId; var priorFrom = a.FromDate; var priorThrough = a.ThroughDate;
+        foreach (var day in body.Days)
+            db.AllocationDayOverrides.Add(new AllocationDayOverride { AllocationId = a.Id, WorkDate = day.WorkDate, Hours = day.Hours });
+        foreach (var link in body.Links)
+            db.AllocationWorkLinks.Add(new AllocationWorkLink { AllocationId = a.Id, PersonId = body.PersonId,
+                WorkType = link.WorkType, WorkId = link.WorkId, WorkDate = link.WorkDate, ReviewHours = link.ReviewHours });
+        a.PersonId = body.PersonId; a.Purpose = body.Purpose; a.FromDate = body.FromDate; a.ThroughDate = body.ThroughDate;
+        a.PlannedHours = body.PlannedHours; a.Status = AllocationRules.AfterMaterialEdit(a.Status);
+        if (wasConfirmed && touchDates) await TouchDates(db, priorPerson, Enumerable.Range(0, priorThrough.DayNumber - priorFrom.DayNumber + 1)
+            .Select(i => priorFrom.AddDays(i)));
+        // A child-only edit must invalidate the allocation version seen by another editor.
+        db.Entry(a).Property(x => x.PlannedHours).IsModified = true;
+        db.Audit.Note(a, reason: Check.Reason(body.Reason));
+        await NotifyChanged(db, notify, project, a);
+        return a;
+    }
 
     static Task<Coordination.Result> Cancel(Guid projectId, Guid id, CancelBody body, Access access, HubDb db, TimeProvider clock, Notifier notify) =>
         Coordination.Run(projectId, body.RequestId, new { operation = "allocation.cancel", id, body }, access, db, clock, async (project, ctx) =>

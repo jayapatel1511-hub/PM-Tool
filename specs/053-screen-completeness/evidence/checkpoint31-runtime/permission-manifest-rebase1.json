@@ -1,0 +1,11 @@
+{
+  "atUtc": "2026-11-02T21:43:59.607443+00:00",
+  "reviewedChangedGuards": [
+    "src/Hub.Api/Features/Availability.cs",
+    "src/Hub.Api/Features/Handoffs.cs",
+    "src/Hub.Api/Features/Readiness.cs",
+    "src/Hub.Api/Features/WeeklyCommitments.cs"
+  ],
+  "review": "Independent Availability/C source reviews; canonical predicate/unchanged query extraction and read-only additions; existing enforcement unchanged apart from canonical ReadOnly correction",
+  "coverage": "Structural hashes only; completeFR83 not claimed"
+}

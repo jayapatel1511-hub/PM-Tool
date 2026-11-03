@@ -1,0 +1,47 @@
+--- previous-latest-model
++++ response-outcome-model
+@@ -3542,6 +3542,11 @@
+                         .HasColumnType("text")
+                         .HasColumnName("reason");
+ 
++                    b.Property<string>("ResponseOutcome")
++                        .HasMaxLength(32)
++                        .HasColumnType("character varying(32)")
++                        .HasColumnName("response_outcome");
++
+                     b.Property<int>("RowVersion")
+                         .IsConcurrencyToken()
+                         .HasColumnType("integer")
+@@ -3564,7 +3569,10 @@
+                     b.HasIndex("ProjectId")
+                         .HasDatabaseName("ix_finding_event_project_id");
+ 
+-                    b.ToTable("finding_event", "hub");
++                    b.ToTable("finding_event", "hub", t =>
++                        {
++                            t.HasCheckConstraint("ck_finding_event_response_outcome", "response_outcome IS NULL OR (response_outcome IN ('Incorporated','Not incorporated','Clarified','Noted') AND action = 'Responded')");
++                        });
+                 });
+ 
+             modelBuilder.Entity("Hub.Api.Data.Handoff", b =>
+@@ -7868,6 +7876,11 @@
+                         .HasColumnType("text")
+                         .HasColumnName("response");
+ 
++                    b.Property<string>("ResponseOutcome")
++                        .HasMaxLength(32)
++                        .HasColumnType("character varying(32)")
++                        .HasColumnName("response_outcome");
++
+                     b.Property<Guid>("RoundId")
+                         .HasColumnType("uuid")
+                         .HasColumnName("round_id");
+@@ -7947,6 +7960,8 @@
+ 
+                     b.ToTable("review_finding", "hub", t =>
+                         {
++                            t.HasCheckConstraint("ck_review_finding_response_outcome", "response_outcome IS NULL OR (response_outcome IN ('Incorporated','Not incorporated','Clarified','Noted') AND response IS NOT NULL)");
++
+                             t.HasCheckConstraint("ck_review_finding_severity", "severity IN ('Blocking', 'Advisory')");
+ 
+                             t.HasCheckConstraint("ck_review_finding_status", "status IN ('Open','Responded','Verified Closed','Withdrawn')");

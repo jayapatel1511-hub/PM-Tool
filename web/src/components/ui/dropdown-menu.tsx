@@ -2,6 +2,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react"
 import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui"
+import { useAvailablePortalOpen } from "@/components/hub/form-navigation-context"
 
 // Not modal by default: a modal menu hides the rest of the page with aria-hidden while its controls stay focusable
 // (axe aria-hidden-focus). Focus still moves into the menu, arrow keys move inside it and Escape returns to the trigger.
@@ -9,7 +10,8 @@ function DropdownMenu({
   modal = false,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Root>) {
-  return <DropdownMenuPrimitive.Root data-slot="dropdown-menu" modal={modal} {...props} />
+  const availability = useAvailablePortalOpen(props, false)
+  return <DropdownMenuPrimitive.Root data-slot="dropdown-menu" modal={modal} {...props} {...availability} />
 }
 
 function DropdownMenuPortal({

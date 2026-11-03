@@ -1,0 +1,7 @@
+{
+  "atUtc": "2026-11-02T20:38:45.507613+00:00",
+  "changedAfterPassingCalendar": [
+    "src/pages/projects/TaskPanel.tsx"
+  ],
+  "meaning": "Calendar/source/shared primitive files unchanged after Calendar-browser1. Final SPA2 changes only TaskPanel availability/paused UI; no unnecessary Calendar repeat."
+}

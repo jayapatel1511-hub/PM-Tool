@@ -13,12 +13,25 @@ import { t } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { PlannerGrid } from './PlannerGrid'
 import { hoursLabel, type PlannerEntry } from './labels'
+import { useFlag } from '@/lib/auth'
 
 /** My Week on My Work (§41 R10): one summary line for the first week shown, with its most severe indicator; the six-week
  *  strip opens on request, and a link to a week or a planning entry opens it straight away. */
-export function MyWeekStrip({ personId, canPlan: _canPlan, id }: { personId: string; canPlan: boolean; id?: string }) {
+export function MyWeekStrip({ personId, canPlan: _canPlan, id, view = 'today' }: { personId: string; canPlan: boolean; id?: string; view?: 'today' | 'overview' }) {
+  const patternsOn = useFlag('screen_patterns')
   const [sp, setSp] = useSearchParams(); const requestedWeek = sp.get('myWeek'); const requestedEntry = sp.get('planningEntry')
-  const [open, setOpen] = useState(!!(requestedWeek || requestedEntry))
+  const storageKey = `hub.myWeek.expanded.${personId}.${view}`
+  const [open, setOpen] = useState(() => {
+    if (requestedWeek || requestedEntry) return true
+    if (!patternsOn) return false
+    try { const saved = localStorage.getItem(storageKey); return saved === null ? view === 'overview' : saved === 'true' } catch { return view === 'overview' }
+  })
+  useEffect(() => { if (patternsOn && (requestedWeek || requestedEntry)) setOpen(true) }, [patternsOn, requestedWeek, requestedEntry])
+  const toggle = () => {
+    const next = !open
+    setOpen(next)
+    if (patternsOn) { try { localStorage.setItem(storageKey, String(next)) } catch { /* Device storage may be unavailable; in-session choice still works. */ } }
+  }
   const [wide, setWide] = useState(() => window.matchMedia('(min-width: 1280px)').matches)
   useEffect(() => { const media = window.matchMedia('(min-width: 1280px)'); const update = () => setWide(media.matches); media.addEventListener('change', update); return () => media.removeEventListener('change', update) }, [])
   const entryQ = useQuery({ queryKey: ['my-week-entry', requestedEntry], queryFn: () => typedRequest('get', '/api/v1/planning/entries/{id}', { params: { id: requestedEntry! } }), enabled: !!requestedEntry })
@@ -30,6 +43,9 @@ export function MyWeekStrip({ personId, canPlan: _canPlan, id }: { personId: str
   const q = useQuery({ queryKey: ['my-week', personId, requestedWeek], queryFn: () => typedRequest('get', '/api/v1/planning/grid', { query }) })
   const mine = q.data?.people.find((p) => p.id === personId)
   const first = mine?.cells.find((c) => c.week === q.data?.currentWeek) ?? mine?.cells[0]
+  const partial = mine?.partial === true || q.data?.partialView === true
+  const free = !first || first.provisional ? t('mywork.weekFreeUnavailable') : partial
+    ? t('planner.atMost', { hours: hoursLabel(first.remaining) }) : hoursLabel(first.remaining)
   const signal = !first ? null : first.overPlanned ? <Chip tone="warn">{t('planner.indicator.over')}</Chip>
     : first.staleEntries > 0 ? <Chip tone="warn">{t('planner.indicator.stale')}</Chip> : first.underPlanned && <Chip tone="idle">{t('planner.indicator.under')}</Chip>
   const strip = (): ReactNode => {
@@ -42,12 +58,14 @@ export function MyWeekStrip({ personId, canPlan: _canPlan, id }: { personId: str
   return (
     <section id={id} aria-labelledby="my-week-h" className="overflow-hidden rounded-lg border bg-card">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-5 py-2">
-        <h2 id="my-week-h" className="text-base/6 font-semibold">{t('planner.myWeek')}</h2>
+        <h2 id="my-week-h" className={patternsOn ? 'sr-only' : 'text-base/6 font-semibold'}>{t('planner.myWeek')}</h2>
         <span className="text-sm text-muted-foreground tabular-nums">{q.isPending ? t('app.loading') : first
-          ? t('mywork.weekSummary', { week: shortDate(first.week), planned: hoursLabel(first.confirmed + first.expected + first.possible), capacity: hoursLabel(first.capacity) })
+          ? patternsOn ? t('mywork.weekCompact', { planned: hoursLabel(first.confirmed + first.expected), free })
+            : t('mywork.weekSummary', { week: shortDate(first.week), planned: hoursLabel(first.confirmed + first.expected + first.possible), capacity: hoursLabel(first.capacity) })
           : t('planner.myWeekUnavailable')}</span>
+        {patternsOn && partial && <span className="text-xs text-muted-foreground">{t('planner.partialTitle')}</span>}
         {signal}
-        <Button variant="ghost" size="sm" className="ml-auto" aria-expanded={open} aria-controls="my-week-body" onClick={() => setOpen(!open)}>
+        <Button variant="ghost" size="sm" className="ml-auto" aria-expanded={open} aria-controls="my-week-body" onClick={toggle}>
           {open ? t('mywork.weekHide') : t('mywork.weekShow')}<ChevronDown className={cn('size-4', open && 'rotate-180')} aria-hidden />
         </Button>
       </div>

@@ -1,0 +1,25 @@
+/* The named Staff-only compact composition; no global Page or CountCard override. */
+:root[data-visual="v2"] .staff-count-view .visual-page-content { gap: 8px; padding-top: 8px; }
+:root[data-visual="v2"] .staff-count-view .visual-page-actions { min-width: 0; }
+:root[data-visual="v2"] .staff-count-view .visual-page-actions .visual-title-block { margin-top: 0; }
+:root[data-visual="v2"] .staff-count-view.visual-page--overlap > .visual-page-band { padding-bottom: 80px; }
+:root[data-visual="v2"] .staff-count-view.visual-page--overlap > .visual-page-content { margin-top: -72px; padding-top: 0; }
+@media (min-width: 768px) {
+  /* Keep the existing eyebrow and h1 semantics/fonts, on one desktop line. */
+  :root[data-visual="v2"] .staff-count-view > .visual-page-band > .mx-auto > :has(> h1) { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 12px; }
+  :root[data-visual="v2"] .staff-count-view > .visual-page-band > .mx-auto > :has(> h1) > p { margin-bottom: 0; }
+  :root[data-visual="v2"] .staff-count-view > .visual-page-band { padding-block: 8px; }
+  :root[data-visual="v2"] .staff-count-view > .visual-page-content { gap: 4px; padding-top: 4px; }
+  :root[data-visual="v2"] .staff-count-view .staff-count-view__filters { align-items: center; gap: 8px; border: 0; padding: 0; background: transparent; }
+  :root[data-visual="v2"] .staff-count-view .staff-count-view__field { display: flex; width: auto; align-items: center; gap: 8px; }
+  :root[data-visual="v2"] .staff-count-view .staff-count-view__field > * { margin-block: 0; }
+  :root[data-visual="v2"] .staff-count-view .staff-count-view__field > label { white-space: nowrap; }
+  :root[data-visual="v2"] .staff-count-view #staff-office { width: 144px; }
+  :root[data-visual="v2"] .staff-count-view #staff-discipline { width: 160px; }
+  :root[data-visual="v2"] .staff-count-view #staff-people thead th { padding-block: 8px; }
+}
+@media (max-width: 767.98px) {
+  :root[data-visual="v2"] .staff-count-view.visual-page--overlap > .visual-page-band { padding-bottom: 72px; }
+  :root[data-visual="v2"] .staff-count-view.visual-page--overlap > .visual-page-content { margin-top: -64px; }
+  :root[data-visual="v2"] .staff-count-view .visual-page-actions { width: 100%; }
+}

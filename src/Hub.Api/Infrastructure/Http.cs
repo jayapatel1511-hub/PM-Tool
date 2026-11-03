@@ -15,9 +15,12 @@ public static class Http
     }
 
     /// Refuses a stale write with who changed the item and when (AC-TSK-12).
-    public static async Task CheckVersion(HubDb db, HttpContext ctx, IVersioned entity, int? bodyVersion = null)
+    public static Task CheckVersion(HubDb db, HttpContext ctx, IVersioned entity, int? bodyVersion = null) => CheckBodyVersion(db, entity, IfMatch(ctx, bodyVersion));
+
+    /// A version for a nested record must not inherit the parent's If-Match header.
+    public static async Task CheckBodyVersion(HubDb db, IVersioned entity, int? bodyVersion)
     {
-        var v = IfMatch(ctx, bodyVersion) ?? throw new ApiException(428, "precondition_required", Text.Get("error.if_match"));
+        var v = bodyVersion ?? throw new ApiException(428, "precondition_required", Text.Get("error.if_match"));
         if (v == entity.RowVersion) return;
         if (entity is Audited audited)
         {

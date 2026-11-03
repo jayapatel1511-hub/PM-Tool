@@ -1,0 +1,14 @@
+{
+  "exitCode": 0,
+  "args": [
+    "python3",
+    "tools/build_spec.py",
+    "--check"
+  ],
+  "atUtc": "2026-11-03T06:40:09.167485+00:00",
+  "elapsedSeconds": 1.03,
+  "errors": [],
+  "tail": [
+    "up to date"
+  ]
+}

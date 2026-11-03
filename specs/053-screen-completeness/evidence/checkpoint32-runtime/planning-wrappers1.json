@@ -1,0 +1,37 @@
+{
+  "atUtc": "2026-11-02T22:13:25.975724+00:00",
+  "status": "AUTHORED_UNCOMPILED",
+  "changes": [
+    {
+      "handler": "Create",
+      "originalBodyPreserved": true,
+      "wrapper": "Tx.Notice",
+      "returnType": "Created<EntryRow>"
+    },
+    {
+      "handler": "Quick",
+      "originalBodyPreserved": true,
+      "wrapper": "Tx.Notice",
+      "returnType": "Created<EntryRow>"
+    },
+    {
+      "handler": "Edit",
+      "originalBodyPreserved": true,
+      "wrapper": "Tx.Notice",
+      "returnType": "Ok<EntryRow>"
+    },
+    {
+      "handler": "ChangeVisibility",
+      "originalBodyPreserved": true,
+      "wrapper": "Tx.Notice",
+      "returnType": "Ok<EntryRow>"
+    },
+    {
+      "handler": "Delete",
+      "originalBodyPreserved": true,
+      "wrapper": "Tx.Notice",
+      "returnType": "NoContent"
+    }
+  ],
+  "scope": "Only people_screens-on whole producer boundaries; exact original body remains inside lambda"
+}

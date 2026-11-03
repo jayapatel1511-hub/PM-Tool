@@ -28,7 +28,7 @@ function current(sp: URLSearchParams, extra?: Record<string, string | undefined>
 
 /** Saved views (§18.4, FR-VIEW-04): switch, save, share with the project (PM and leads), set a default, delete. The default
  *  applies when the list opens without parameters, so a shared link always wins. */
-export function ViewMenu({ listType, projectId, extra, fixed, panelParam = 'panel' }: { listType: string; projectId?: string; extra?: () => Record<string, string | undefined>; fixed?: Record<string, string>; panelParam?: string }) {
+export function ViewMenu({ listType, projectId, extra, fixed, panelParam = 'panel', captureParams, captureReady = true, requireCompleteParams = false }: { listType: string; projectId?: string; extra?: () => Record<string, string | undefined>; fixed?: Record<string, string>; panelParam?: string; captureParams?: () => Record<string, string>; captureReady?: boolean; requireCompleteParams?: boolean }) {
   const [sp, setSp] = useSearchParams()
   const qc = useQueryClient()
   const key = ['views', listType, projectId ?? null]
@@ -36,9 +36,18 @@ export function ViewMenu({ listType, projectId, extra, fixed, panelParam = 'pane
   const small = useFlag('small_ux')
   const [saving, setSaving] = useState(false)
   const [copying, setCopying] = useState(false)
+  const [capturedForSave, setCapturedForSave] = useState<Record<string, string> | null>(null)
   const applied = useRef(false)
   const active = q.data?.views.find((v) => v.id === sp.get('view'))
+  const complete = (v: SavedView) => !requireCompleteParams || v.dropped.length === 0
+  const captured = () => captureParams ? captureParams() : current(sp, extra?.(), panelParam)
+  const openSave = (copy: boolean) => {
+    if (copy ? !active || !complete(active) : !captureReady) return
+    setCapturedForSave(copy && active ? { ...active.params } : captured())
+    setCopying(copy); setSaving(true)
+  }
   const apply = (v: SavedView, replace = false) => {
+    if (!complete(v)) { toast.warning(t('views.reportUnavailable')); return }
     const n = new URLSearchParams({ ...v.params, ...fixed, view: v.id })
     for (const key of new Set(['panel', panelParam])) { const panel = sp.get(key); if (panel) n.set(key, panel) }
     setSp(n, { replace })
@@ -56,7 +65,7 @@ export function ViewMenu({ listType, projectId, extra, fixed, panelParam = 'pane
   const personal = q.data?.views.filter((v) => v.scope === 'Personal') ?? []
   const shared = q.data?.views.filter((v) => v.scope === 'Project') ?? []
   const item = (v: SavedView) => (
-    <DropdownMenuItem key={v.id} onSelect={() => apply(v)} className="gap-2">
+    <DropdownMenuItem key={v.id} disabled={!complete(v)} title={!complete(v) ? t('views.reportUnavailable') : undefined} onSelect={() => apply(v)} className="gap-2">
       <Check className={cn('size-3.5', active?.id === v.id ? 'opacity-100' : 'opacity-0')} />
       <span className="flex-1 truncate">{v.name}</span>
       {v.isDefault && <Star className="size-3.5 fill-current text-warn" aria-label={t('views.default')} />}
@@ -74,17 +83,19 @@ export function ViewMenu({ listType, projectId, extra, fixed, panelParam = 'pane
           {shared.length > 0 && <><DropdownMenuLabel>{t('views.project')}</DropdownMenuLabel>{shared.map(item)}</>}
           {personal.length + shared.length === 0 && <DropdownMenuLabel className="font-normal text-muted-foreground">{t('views.none')}</DropdownMenuLabel>}
           <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={() => { setCopying(false); setSaving(true) }}>{t('views.save')}</DropdownMenuItem>
+          <DropdownMenuItem disabled={!captureReady} title={!captureReady ? t('views.reportCapturePending') : undefined} onSelect={() => openSave(false)}>{t('views.save')}</DropdownMenuItem>
+          {q.data?.views.filter(v => v.canEdit && !complete(v) && v.id !== active?.id).map(v => <DropdownMenuItem key={`repair-${v.id}`} disabled={!captureReady} title={t(captureReady ? 'views.reportUnavailable' : 'views.reportCapturePending')}
+            onSelect={() => run(() => typedRequest('patch', '/api/v1/views/{id}', { params: { id: v.id }, body: { params: captured() }, ifMatch: v.rowVersion }), t('views.updated', { name: v.name }))}>{t('views.update', { name: v.name })}</DropdownMenuItem>)}
           {active?.canEdit && <>
-            <DropdownMenuItem onSelect={() => run(() => typedRequest('patch', '/api/v1/views/{id}', { params: { id: active.id }, body: { params: current(sp, extra?.(), panelParam) }, ifMatch: active.rowVersion }), t('views.updated', { name: active.name }))}>{t('views.update', { name: active.name })}</DropdownMenuItem>
-            {!active.isDefault && active.scope === 'Personal' && <DropdownMenuItem onSelect={() => run(() => typedRequest('patch', '/api/v1/views/{id}', { params: { id: active.id }, body: { isDefault: true }, ifMatch: active.rowVersion }), t('views.madeDefault', { name: active.name }))}>{t('views.makeDefault')}</DropdownMenuItem>}
+            <DropdownMenuItem disabled={!captureReady} title={!captureReady ? t('views.reportCapturePending') : undefined} onSelect={() => run(() => typedRequest('patch', '/api/v1/views/{id}', { params: { id: active.id }, body: { params: captured() }, ifMatch: active.rowVersion }), t('views.updated', { name: active.name }))}>{t('views.update', { name: active.name })}</DropdownMenuItem>
+            {!active.isDefault && active.scope === 'Personal' && <DropdownMenuItem disabled={!complete(active)} title={!complete(active) ? t('views.reportUnavailable') : undefined} onSelect={() => run(() => typedRequest('patch', '/api/v1/views/{id}', { params: { id: active.id }, body: { isDefault: true }, ifMatch: active.rowVersion }), t('views.madeDefault', { name: active.name }))}>{t('views.makeDefault')}</DropdownMenuItem>}
             <DropdownMenuItem className="text-bad" onSelect={() => run(async () => { await typedRequest('delete', '/api/v1/views/{id}', { params: { id: active.id } }); const n = new URLSearchParams(sp); n.delete('view'); setSp(n, { replace: true }) }, t('views.deleted', { name: active.name }))}>{t('views.delete')}</DropdownMenuItem>
           </>}
-          {small && active && <DropdownMenuItem onSelect={() => { setCopying(true); setSaving(true) }}>{t('views.copyPersonal')}</DropdownMenuItem>}
+          {small && active && <DropdownMenuItem disabled={!complete(active)} title={!complete(active) ? t('views.reportUnavailable') : undefined} onSelect={() => openSave(true)}>{t('views.copyPersonal')}</DropdownMenuItem>}
           {sp.get('view') && <DropdownMenuItem onSelect={() => { const n = new URLSearchParams(fixed); for (const key of new Set(['panel', panelParam])) { const panel = sp.get(key); if (panel) n.set(key, panel) } setSp(n) }}>{t('views.clear')}</DropdownMenuItem>}
         </DropdownMenuContent>
       </DropdownMenu>
-      {saving && <SaveDialog listType={listType} projectId={projectId} canShare={!copying && !!q.data?.canShare} initialName={copying && active ? t('views.copyName', { name: active.name }) : ''} params={copying && active ? active.params : current(sp, extra?.(), panelParam)}
+      {saving && (!captureParams || capturedForSave !== null) && <SaveDialog listType={listType} projectId={projectId} canShare={!copying && !!q.data?.canShare} initialName={copying && active ? t('views.copyName', { name: active.name }) : ''} params={captureParams ? capturedForSave! : copying && active ? active.params : captured()}
         onClose={(id) => { setSaving(false); if (id) { refresh(); const n = new URLSearchParams(sp); n.set('view', id); setSp(n, { replace: true }) } }} />}
     </>
   )

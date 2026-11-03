@@ -1,0 +1,136 @@
+{
+  "generatedAt": "2026-11-01T05:29:43.231Z",
+  "base": "http://127.0.0.1:5088",
+  "project": "SYN-JOIN18-1101",
+  "journeys": {
+    "workActivity": {
+      "status": "PASS",
+      "seededComments": 3,
+      "uiPostedComment": true,
+      "uiCommentCount": 4,
+      "commentActor": "Priya Nair",
+      "panelURL": "Task:01a19593-a549-737e-be2a-e0078e2ba9b6",
+      "closeURLPreservedQuery": true,
+      "originScrollY": 0,
+      "closeScrollY": 0,
+      "errors": []
+    },
+    "ownTime": {
+      "status": "UNPROVEN_CAPACITY32",
+      "week": "2026-11-02..2026-11-08",
+      "person": "Alex Chen",
+      "taskRows": 4,
+      "blankLoadCreatedNothing": true,
+      "uiEntryHours": 2,
+      "uiEntryTask": "SYN-JOIN18-1101-T0002",
+      "uiEntryDate": "2026-11-04",
+      "postCountThisRun": 0,
+      "postCountObservedDuringJourney": 1,
+      "observedCapacityText": "Capacity 40 h this week",
+      "observedTotalText": "Total shown 2 h",
+      "limitation": "Required synthetic 8h ManualHR/time-away reference could not be created because the bounded instruction forbids leave writes and no existing reference was present."
+    },
+    "reports": {
+      "status": "PARTIAL",
+      "reportRows": 3,
+      "firstRowBox": {
+        "x": 553,
+        "y": 379.5,
+        "width": 1171.0625,
+        "height": 57
+      },
+      "unestimatedCount": 0,
+      "openUndatedCount": 0,
+      "openedNonFirstTask": true,
+      "closedToReportURLPreserved": false,
+      "closeURL": "http://127.0.0.1:5088/projects/SYN-JOIN18-1101/tasks",
+      "reportOrigin": "http://127.0.0.1:5088/reports/tasks-due-this-week?projectId=01a19593-8092-79f4-a9a7-7f1f6a1ac5fd&week=2026-11-02",
+      "limitation": "Task panel close returned to project task list without the originating report query; report parameters remained server-verified before navigation."
+    }
+  },
+  "layout": {
+    "desktopReportRow": {
+      "x": 553,
+      "y": 379.5,
+      "width": 1171.0625,
+      "height": 57
+    },
+    "mobile": {
+      "width": 375,
+      "scrollWidth": 375,
+      "bodyScrollWidth": 375,
+      "scrollHeight": 900,
+      "regions": [
+        {
+          "tag": "MAIN",
+          "scrollWidth": 375,
+          "clientWidth": 375
+        },
+        {
+          "tag": "SECTION",
+          "scrollWidth": 309,
+          "clientWidth": 309
+        },
+        {
+          "tag": "SECTION",
+          "scrollWidth": 309,
+          "clientWidth": 309
+        },
+        {
+          "tag": "SECTION",
+          "scrollWidth": 309,
+          "clientWidth": 309
+        },
+        {
+          "tag": "SECTION",
+          "scrollWidth": 309,
+          "clientWidth": 309
+        },
+        {
+          "tag": "SECTION",
+          "scrollWidth": 309,
+          "clientWidth": 309
+        },
+        {
+          "tag": "SECTION",
+          "scrollWidth": 309,
+          "clientWidth": 309
+        },
+        {
+          "tag": "SECTION",
+          "scrollWidth": 309,
+          "clientWidth": 309
+        },
+        {
+          "tag": "SECTION",
+          "scrollWidth": 309,
+          "clientWidth": 309
+        },
+        {
+          "tag": "SECTION",
+          "scrollWidth": 299,
+          "clientWidth": 299
+        },
+        {
+          "tag": "DIV",
+          "scrollWidth": 1171,
+          "clientWidth": 341
+        },
+        {
+          "tag": "TABLE",
+          "scrollWidth": 1171,
+          "clientWidth": 1171
+        },
+        {
+          "tag": "SECTION",
+          "scrollWidth": 375,
+          "clientWidth": 375
+        }
+      ]
+    }
+  },
+  "errors": {
+    "time": [],
+    "report": []
+  }
+}

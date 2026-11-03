@@ -1,0 +1,17 @@
+{
+  "exitCode": 2,
+  "args": [
+    "web/node_modules/.bin/tsc",
+    "-b",
+    "web"
+  ],
+  "atUtc": "2026-11-03T04:59:43.487981+00:00",
+  "elapsedSeconds": 10.01,
+  "errors": [
+    "web/src/pages/projects/external-review-form.tsx(59,48): error TS2352: Conversion of type 'ReceiptInput<B> & { requestId: `${string}-${string}-${string}-${string}-${string}`; }' to type 'B' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first."
+  ],
+  "tail": [
+    "web/src/pages/projects/external-review-form.tsx(59,48): error TS2352: Conversion of type 'ReceiptInput<B> & { requestId: `${string}-${string}-${string}-${string}-${string}`; }' to type 'B' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.",
+    "  'ReceiptInput<B> & { requestId: `${string}-${string}-${string}-${string}-${string}`; }' is assignable to the constraint of type 'B', but 'B' could be instantiated with a different subtype of constraint '{ requestId: string; }'."
+  ]
+}

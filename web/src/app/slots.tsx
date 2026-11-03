@@ -16,7 +16,7 @@ function SearchBox({ inputRef }: { inputRef: RefObject<HTMLInputElement | null> 
 }
 
 export const ShellSlots: {
-  Search: ComponentType<{ inputRef: RefObject<HTMLInputElement | null> }>; Workspace: ComponentType; QuickCreate: ComponentType; Bell: ComponentType
+  Search: ComponentType<{ inputRef: RefObject<HTMLInputElement | null>; onNavigate?: () => void }>; Workspace: ComponentType; QuickCreate: ComponentType; Bell: ComponentType
 } = {
   Search: SearchBox,
   Workspace: () => null,

@@ -1,0 +1,47 @@
+# G60 planning — S12-B1 task assignee Undo
+
+2026-11-02. **READY / HOLD — documentation only.** Saved from the read-only brief sent to the coordinator after G59. Canonical checkout `/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053`, branch `codex/build-052-053`. G59 application/test/model sources remain HOLD. No implementation, tests, compiler, generator, browser, jobs, flags or mail were run or changed. This is a proposed later source freeze, not an implementation loan or completion claim.
+
+## Smallest complete useful increment
+
+Implement **assignee Undo for both ordinary single-task reassignment and existing task-bulk assign, up to the existing 200-row bound**. Capture the previous nullable assignee, then compensate through current assignment permissions, active-person/reference/authorship/team checks and canonical save hooks. This covers AC-SCR-20's six-task example plus its single-action counterpart. It does not complete S12/FR-SCR-20: reviewer, fields, dates, workflow composites, recovery and non-task families remain explicitly open. No generic command framework, arbitrary JSON inverse, client-supplied old values, Undo-of-Undo or redo is needed for B1.
+
+Authority: `home-visual/requests/g58-task-undo-and-breadth-plan.md`; `spec-parts/32-screen-completeness.md:196` FR-SCR-20 and `:433` AC-SCR-20. Prefer the newer G58 plan over the earlier `g53-s12-implementation-plan.md` where their retry/storage proposals differ.
+
+## Maintained implementation and missing proof
+
+- `src/Hub.Api/Features/TaskBulkCommands.cs:113` owns actor/request advisory serialization, normalized versioned intent hashing, matching logical replay and deterministic project-then-task locks. Validation classifies per-row refusals without tracked mutation; successful rows, save-hook effects, activity/channel IDs and immutable receipt commit in one transaction. An unexpected apply/provider failure aborts the entire attempt; there is no task-only tracker reload/savepoint recovery.
+- Internal `FieldFacts`/`TerminalRow` retain nullable old assignee and post-change version; the original submitted version remains in `IntentJson`. `:267` re-projects results using current visibility, making missing/hidden rows exactly opaque unavailable entries and withholding their warnings. There is no Undo deadline, reverse authority, endpoint, terminal reverse receipt or durable structured ancestry.
+- `Tasks.cs:393` ordinary assignment sends TaskAssigned, WorkReassignedAway and, when applicable, SupervisorStaffing. Bulk uses capture/coalesced notices. A one-row bulk request is **not** a drop-in replacement for the ordinary single path unless those current semantics are preserved.
+- `Infrastructure/Idempotency.cs:38` bypasses generic POST caching for `TaskBulkCommandEndpoints.AtomicCommand`. New atomic single/reverse endpoints need the same root-approved bypass; appending a token to a cached response after mutation is not atomic forward proof.
+- `Infrastructure/Notify.cs:65` derives summary identity from the captured command; `:71` hardcodes Notification ItemType=`TaskBulkCommand` and ItemId=`capture.CommandId`. Root must define a valid Undo result/source-summary binding rather than pass a new Undo receipt ID as though it were an existing bulk receipt.
+
+## Required backend delta
+
+1. **Prospective bulk proof only:** add versioned assign-specific proof and an optional offer to new existing bulk receipts, not a duplicate bulk-forward row. Capture actor, exact changed task/project IDs, before/after versions, nullable old/new assignee, actual original activity IDs, server completion/deadline and factual irreversible effects. Refused/noop rows get no inverse candidate. Existing receipt bytes remain immutable and acquire no retroactive Undo capability.
+2. **Atomic single proof:** one narrowly typed assignee-only forward wrapper with explicit request identity, sharing the extracted canonical assignment core and preserving normal single notices. Keep old PATCH/off paths and shapes intact. The later broader edit/transition wrapper is not required to ship B1.
+3. **One new task-only receipt table:** the G58 `TaskUndoReceipt` proposal uses closed kinds `singleChange`/`undoResult`, unique actor/request+canonical hash and one terminal logical reverse per `(actor,sourceKind,sourceId)`. Bulk forward identity stays its existing receipt ID; single identity is its new forward receipt. Root freezes schema, proof bounds, source locks, retention and immutability.
+4. **Reverse:** serialize actor/request and original source. A matching committed result replays through current-visibility projection before fresh expiry/write checks. A new attempt samples server time after source lock, requiring `now < expiresAt`; equality expires. Lock current visible projects/tasks deterministically, require the stored exact post-version and current reverse permissions/target validity, then derive all refusals without mutating. Apply valid siblings and persist canonical effects, new Undo ancestry and terminal reverse receipt atomically.
+5. **Terminal retry semantics:** same or different request IDs for a consumed source recover the one terminal logical result, including partial/refused rows; they do not reopen refused rows. This follows G58, superseding G53's earlier new-key retry suggestion. A lost reply can recover a committed result after expiry without new mutation. A genuinely rolled-back attempt can retry under its original identity only while still eligible/in-window.
+6. **History/effects:** add durable, permission-safe Undo-of ancestry to new canonical activity, preserving its real action/diff/reason. Never rewrite original logs/receipts/notices or rewind versions, assignment occurrences, memberships/follows or pickup history. A reverse reassignment creates new factual assignment/publication/notification effects. Hidden original context must remain undisclosed on history/export/replay.
+
+## Bounded ownership for a later freeze
+
+| Owner | Proposed exact scope |
+| --- | --- |
+| Backend | NEW `Features/TaskUndo.cs`, narrow assignment-core extraction in `Features/Tasks.cs`, assign-only prospective proof/offer in `Features/TaskBulkCommands.cs`, NEW `Api/TaskUndoTests.cs`. No other bulk operations, role policy or workflow expansion. |
+| UI | NEW `components/hub/task-undo.tsx`, assignee branch of `pages/projects/Tasks.tsx` task actions, offer/result in `components/hub/task-bulk-command.tsx`. Add individual direct host paths only where a real caller bypasses the shared hook; do not loan every board/panel/date surface by default. |
+| Browser | NEW `web/tests/task-undo.cjs` and fixture after DTO/proof freeze. Existing bulk/recovery tests stay frozen unless separately loaned. |
+| Root | Receipt model/index/migration/guards, audit metadata and authorized history/export/chain projection, atomic marker/registration, notification source binding, keys/cache/locales/generated contracts and final integration/verification. |
+
+UI offers name the committed action, use the returned server deadline, retain full mixed results beyond toast dismissal and preserve one immutable reverse request during uncertainty. Actor switches revoke local offers. Delayed replies, reason dialogs, tab suspension, navigation or refresh never restart ten seconds. Keep the existing leave protection, natural focus/scroll, filters and owning panel URL; success stays definite if a subsequent read refresh fails.
+
+## Focused acceptance, all unrun
+
+1. Six actual previous nullable assignees restored, six new authorized Undo-of activities; one intervening edit produces five changes plus one exact-version refusal. Include original version0. Noop has no active offer, fake activity/version or notice.
+2. Current initiating Supervisor loses assignment authority after assigning away; current rights revoked, old assignee inactive, project hidden/restricted/deleted, foreign actor and flag off. Safe result recovery and new mutation authority remain distinct; unavailable rows leak no identities/values/ancestry and do not inflate visible counts.
+3. Just before/equal/after server deadline, including waiting across expiry behind the source lock; same-key/hash, changed payload, concurrent same/different reverse requests, lost reply and terminal recovery after expiry. No duplicate reverse effects or fresh deadline.
+4. Inject failure after member/follow/activity/publication/notices stage but before receipt commit: full rollback; identical eligible retry. Original logs, receipt and notices remain byte-preserved, while allowed reverse effects are new factual records.
+5. Existing `TaskBulkCommandTests` and affected canonical assignment tests remain focused regressions. Actual SPA desktop/375px single list/board/panel and bulk flow verify named offer, complete mixed results, unchanged uncertain retry identity, expiry/actor switch, keyboard focus/scroll/cache refresh, flag-off and existing deletion Restore behavior.
+
+Before implementation root records the proposed completion-based 10-second deadline/retention, source-summary binding and durable ancestry projection. `053-D9` is still Open and §13.0's older notification-side-effect wording conflicts with FR20's compensation requirement; this document changes neither. B2 task fields/date callers, B3 guarded transition composites and the C-family non-task breadth remain open ledger work, not legitimate refusals merely because their adapters have not been built.

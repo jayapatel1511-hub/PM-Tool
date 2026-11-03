@@ -1,0 +1,15 @@
+{
+  "status": "PLAN_ONLY_SOURCE_AUTHORS_ACTIVE_NO_EXECUTION",
+  "artifactsPath": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint28-artifacts",
+  "retainedFiles": 857,
+  "guards": [
+    "All C# authors/root HOLD before compiler/EF/provider/generator",
+    "All frontend app authors HOLD before types/lint/Vite",
+    "No production Vite and .NET concurrently; single Chrome",
+    "DOTNET_HOSTBUILDER__RELOADCONFIGONCHANGE=false for .NET/EF/test startup to avoid observed recursive configuration-watcher stall",
+    "Direct EF isolated new assembly with Db__Migrate=false; independently review only additive intended schema",
+    "No old API/DB/process/output replacement. QA24 cleanup still awaits explicit confirmation",
+    "External legacy authorship and template policy unanswered; no assumed authorization change",
+    "No flags/deps/commit/push/deploy/pilot/Accepted"
+  ]
+}

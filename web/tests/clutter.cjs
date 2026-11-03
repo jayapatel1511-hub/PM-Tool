@@ -43,12 +43,12 @@ function census(extraData) {
   const H = innerHeight
   const vis = el => { const r = el.getBoundingClientRect(); const s = getComputedStyle(el); return r.width > 0 && r.height > 0 && s.visibility !== 'hidden' && s.display !== 'none' && s.opacity !== '0' }
   const main = document.querySelector('main') || document.body
-  const inData = el => !!el.closest('table, [role=grid], [role=table], [role=treegrid], [role=dialog]') || (!!el.closest('article, li, [role=listitem]') && !el.closest('nav'))
+  const inData = el => !!el.closest('table, [role=grid], [role=table], [role=treegrid], [role=dialog], [data-count-card]') || (!!el.closest('article, li, [role=listitem]') && !el.closest('nav'))
   const fold = el => { const r = el.getBoundingClientRect(); return r.top < H && r.bottom > 0 }
   const all = [...main.querySelectorAll('button, a[href], input, select, textarea, [role=button], [role=tab], [role=checkbox], [role=combobox], [role=switch]')].filter(vis)
   const chrome = all.filter(e => !inData(e))
   const fields = chrome.filter(e => e.matches('input:not([type=checkbox]):not([type=radio]), select, textarea, [role=combobox]'))
-  const dataSel = ['table tbody tr, [role=row], [role=gridcell], article', extraData].filter(Boolean).join(', ')
+  const dataSel = ['table tbody tr, [role=row], [role=gridcell], article, [data-count-card]', extraData].filter(Boolean).join(', ')
   const firstData = [...main.querySelectorAll(dataSel)].filter(vis).map(e => e.getBoundingClientRect().top).sort((a, b) => a - b)[0]
   let cw = 0; const tw = document.createTreeWalker(main, NodeFilter.SHOW_TEXT)
   while (tw.nextNode()) { const n = tw.currentNode, p = n.parentElement; if (!p || !vis(p) || inData(p) || !fold(p)) continue; cw += n.textContent.split(/\s+/).filter(Boolean).length }

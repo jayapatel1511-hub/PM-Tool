@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useFlag, useMe } from '@/lib/auth'
 import { typedRequest } from '@/lib/api'
 import { refreshProject } from '@/lib/keys'
 import type { ProjectDetail } from '@/lib/types'
@@ -9,7 +10,8 @@ export function useReference() {
 }
 
 export function useProject(idOrNumber: string | undefined) {
-  return useQuery({ queryKey: ['project', idOrNumber], queryFn: async () => (await typedRequest('get', '/api/v1/projects/{idOrNumber}', { params: { idOrNumber: idOrNumber! } })) as ProjectDetail, enabled: !!idOrNumber })
+  const me = useMe(), workOn = useFlag('work_screens'), peopleOn = useFlag('people_screens')
+  return useQuery({ queryKey: ['project', idOrNumber, me.id, workOn, peopleOn], queryFn: async () => (await typedRequest('get', '/api/v1/projects/{idOrNumber}', { params: { idOrNumber: idOrNumber! } })) as ProjectDetail, enabled: !!idOrNumber })
 }
 
 /** Invalidate everything derived from one project after a change (lists, header, derived state). */

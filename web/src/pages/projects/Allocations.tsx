@@ -1,3 +1,5 @@
+import { PersonPanelTrigger } from '@/components/hub/person-panel-trigger'
+import { personOptionLabel } from '@/components/hub/person-option-label'
 import type { components, paths } from '@/gen/api'
 import { usePageMode } from '@/hooks/page-mode'
 import { UrlSearchInput } from '@/components/hub/url-search'
@@ -33,6 +35,10 @@ import { CommandForm, SelectField, type CoordOptions, WorkLink } from './Coordin
 import { useCurrentProject } from './ProjectLayout'
 import { DraftNotice } from '@/components/hub/drafts'
 import { useSafeForm } from '@/hooks/drafts'
+import { AllocationDeadlineHeaders } from '@/components/planner/PlanningDeadlines'
+import { AllocationDisciplineComparison } from '@/components/planner/AllocationDisciplineComparison'
+import { ProposalCapacityPreview } from '@/components/planner/ProposalCapacityPreview'
+import { AllocationShiftDialog, type AllocationShiftMode } from '@/components/planner/AllocationShiftDialog'
 
 type Allocation = components['schemas']['AllocationRow']
 type Detail = components['schemas']['AllocationDetail']
@@ -75,10 +81,23 @@ function Allocations(header: { title: string; subtitle: ReactNode }) {
   const open = (id: string | null) => { const next = new URLSearchParams(sp); if (id) next.set('allocation', id); else next.delete('allocation'); setSp(next) }
   const base = `projects/${project.id}/allocations`
   const list = useQuery({ queryKey: ['allocations', project.id, filters, page], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/allocations', { params: { projectId: project.id }, query: { ...filters, page } }) })
+  const capacityScreens = useFlag('capacity_screens')
+  const [shiftSelection, setShiftSelection] = useState<{ projectId: string; ids: string[] }>({ projectId: project.id, ids: [] })
+  const shiftIds = shiftSelection.projectId === project.id ? shiftSelection.ids : []
+  const [shiftFor, setShiftFor] = useState<{ projectId: string; mode: AllocationShiftMode } | null>(null)
+  const toggleShift = (id: string) => setShiftSelection(previous => { const ids = previous.projectId === project.id ? previous.ids : []; return { projectId: project.id, ids: ids.includes(id) ? ids.filter(value => value !== id) : [...ids, id] } })
+
+  const projectScreens = useFlag('project_screens')
+  const roleStatus = projectScreens && ['Open', 'Filled', 'Cancelled'].includes(sp.get('roleStatus') ?? '') ? sp.get('roleStatus') : null
+  const roleTokens = roleStatus ? [{ key: 'roleStatus', label: t('openRole.statusFilter'), value: runtimeText(`openRole.status.${roleStatus}`) }] : []
+  const deadlines = useQuery({ queryKey: ['allocations', project.id, 'deadlines', filters.from], enabled: capacityScreens,
+    queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/allocations/deadlines', { params: { projectId: project.id }, query: { from: filters.from || undefined } }) })
+  const comparison = useQuery({ queryKey: ['allocations', project.id, 'discipline-context', filters.from], enabled: capacityScreens,
+    queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/allocations/discipline-context', { params: { projectId: project.id }, query: { from: filters.from || undefined } }) })
   const options = useQuery({ queryKey: ['coord-options', project.id], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/changes/options', { params: { projectId: project.id } }) })
   const proposal = useOffer()(project.permissions.proposeAllocation, project.status) // FR-FIG-08 decision 1
   // §47.5 FR-REC-12, behind flag.record_engine_additions: the open roles as CSV or Excel, after the page's own entries.
-  const roleExport = useFlag('record_engine_additions') ? [{ path: 'lists/open-roles/export', params: { projectId: project.id }, name: `${project.projectNumber}-open-roles`, label: t('openRole.tab') }] : undefined
+  const roleExport = useFlag('record_engine_additions') ? [{ path: 'lists/open-roles/export', params: { projectId: project.id }, name: `${project.projectNumber}-open-roles`, label: t(projectScreens ? 'openRole.exportAllStatuses' : 'openRole.tab') }] : undefined
   const [roleForm, setRoleForm] = useState<OpenRole | 'new' | null>(null), [filling, setFilling] = useState<Fill | null>(null), [cancelling, setCancelling] = useState<OpenRole | null>(null)
   const refresh = () => { void invalidateChange(qc, 'ResourceAllocation', project.id) }
   const change = (key: string, value: string) => { const next = new URLSearchParams(sp); if (value) next.set(key, value); else next.delete(key); if (key !== 'page' && key !== 'allocation') next.delete('page'); setSp(next) }
@@ -113,6 +132,9 @@ function Allocations(header: { title: string; subtitle: ReactNode }) {
   ] as const).filter(([k]) => filters[k]).map(([key, label, value]) => ({ key, label, value: value || t('common.dash') }))
   // The list's columns, fixed and unsorted as the hand-rolled table was (§47.7): the server filters, orders and pages the rows.
   const table = useTable<Allocation>('hub.allocationColumns', [
+    ...(capacityScreens && proposal.shown ? [{ id: 'shiftSelection', label: t('allocationShift.select'), fixed: true, className: 'w-12', cell: (a: Allocation) => ['Proposed', 'Confirmed'].includes(a.status)
+      ? <input type="checkbox" checked={shiftIds.includes(a.id)} disabled={proposal.props.disabled} onChange={() => toggleShift(a.id)} aria-label={t('allocationShift.selectRow', { person: a.personName ?? t('allocation.personUnavailable'), from: fmtDate(a.fromDate), through: fmtDate(a.throughDate), hours: hours(a.plannedHours) })} /> : null }] : []),
+
     { id: 'person', label: t('workload.person'), fixed: true, className: 'align-top', cell: a => <div className="flex items-start gap-2.5">
       <Avatar id={a.personId} name={a.personName} />
       <div className="min-w-0">
@@ -125,22 +147,23 @@ function Allocations(header: { title: string; subtitle: ReactNode }) {
     { id: 'hours', label: t('allocation.plannedHours'), fixed: true, className: 'text-right align-top font-medium tabular-nums', cell: a => hours(a.plannedHours) },
     { id: 'status', label: t('allocation.status'), fixed: true, className: 'align-top', cell: a => <AllocationStatus status={a.status} /> },
   ], list.data?.items ?? [], a => [a.fromDate, a.personName])
-  return <Page {...header} actions={<><ViewMenu listType="allocations" projectId={project.id} panelParam="allocation" /><ExportMenu path={`${base}/export`} params={filters} name={`${project.projectNumber}-allocations`} extra={roleExport} />{proposal.shown && propose}</>}>
-    <FilterBar activeCount={tokens.length}
+  return <Page {...header} actions={<><ViewMenu listType="allocations" projectId={project.id} panelParam="allocation" /><ExportMenu path={`${base}/export`} params={filters} name={`${project.projectNumber}-allocations`} extra={roleExport} />{capacityScreens && proposal.shown && <DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline" {...proposal.props}>{t('allocationShift.shiftAll')}</Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem disabled={!shiftIds.length} onSelect={() => setShiftFor({ projectId: project.id, mode: 'Selected' })}>{t('allocationShift.selected', { n: shiftIds.length })}</DropdownMenuItem>{project.permissions.isPm && <DropdownMenuItem onSelect={() => setShiftFor({ projectId: project.id, mode: 'WholeProject' })}>{t('allocationShift.whole')}</DropdownMenuItem>}<DropdownMenuItem disabled={!shiftIds.length} onSelect={() => setShiftSelection({ projectId: project.id, ids: [] })}>{t('allocationShift.clear')}</DropdownMenuItem></DropdownMenuContent></DropdownMenu>}{proposal.shown && propose}</>}>
+    <FilterBar activeCount={view === 'roles' && projectScreens ? roleTokens.length : tokens.length}
       search={view === 'allocations' && <Field label={t('common.search')} htmlFor="allocation-search"><UrlSearchInput id="allocation-search" placeholder={t('allocation.search')} value={filters.q} onValueChange={value => change('q', value)} /></Field>}
-      active={view === 'allocations' && <ActiveFilters tokens={tokens} onRemove={k => change(k, '')} onClear={clear} />}
+      active={view === 'allocations' ? <ActiveFilters tokens={tokens} onRemove={k => change(k, '')} onClear={clear} /> : projectScreens && <ActiveFilters tokens={roleTokens} onRemove={() => change('roleStatus', '')} onClear={() => change('roleStatus', '')} />}
       actions={<Segmented label={t('openRole.view')} value={view} onChange={v => change('tab', v === 'roles' ? 'roles' : '')}
         options={[{ value: 'allocations', label: t('allocation.title') }, { value: 'roles', label: openRoles ? t('openRole.tabCount', { n: openRoles }) : t('openRole.tab') }]} />}>
       {view === 'allocations' && <div className="flex flex-wrap items-end gap-3">
-        <div className="w-full sm:w-48"><SelectField label={t('workload.person')} value={filters.personId} onChange={v => change('personId', v)} required={false} choices={options.data?.people.map(p => ({ value: p.id, label: p.displayName })) ?? []} /></div>
+        <div className="w-full sm:w-48"><SelectField label={t('workload.person')} value={filters.personId} onChange={v => change('personId', v)} required={false} choices={options.data?.people.map(p => ({ value: p.id, label: personOptionLabel(p.displayName, p.personNotices, capacityScreens) })) ?? []} /></div>
         <div className="w-full sm:w-40"><SelectField label={t('allocation.purpose')} value={filters.purpose} onChange={v => change('purpose', v)} required={false} choices={['Production', 'Review'].map(v => ({ value: v, label: runtimeText(`allocation.purpose.${v}`) }))} /></div>
         <div className="w-full sm:w-44"><SelectField label={t('allocation.status')} value={filters.status} onChange={v => change('status', v)} required={false} choices={['Proposed', 'Confirmed', 'Declined', 'Cancelled', 'Completed'].map(v => ({ value: v, label: tv(v) }))} /></div>
         <Field label={t('allocation.from')} htmlFor="allocation-filter-from" className="w-full sm:w-40"><Input id="allocation-filter-from" type="date" value={filters.from} onChange={e => change('from', e.target.value)} /></Field>
         <Field label={t('allocation.through')} htmlFor="allocation-filter-to" className="w-full sm:w-40"><Input id="allocation-filter-to" type="date" value={filters.to} onChange={e => change('to', e.target.value)} /></Field>
       </div>}
+      {view === 'roles' && projectScreens && <Field label={t('openRole.statusFilter')} htmlFor="open-role-status" className="w-full sm:w-48"><select id="open-role-status" className={selectCls} value={roleStatus ?? ''} onChange={event => change('roleStatus', event.target.value)}><option value="">{t('openRole.allStatuses')}</option>{['Open', 'Filled', 'Cancelled'].map(status => <option key={status} value={status}>{runtimeText(`openRole.status.${status}`)}</option>)}</select></Field>}
     </FilterBar>
     {options.error && <ErrorBanner error={options.error} retry={() => options.refetch()} />}
-    {view === 'roles' ? <OpenRoles roles={roles} projectId={project.id} proposal={proposal} canFill={proposal.shown && !!options.data}
+    {view === 'roles' ? <OpenRoles roles={roles} roleStatus={roleStatus} projectId={project.id} proposal={proposal} canFill={proposal.shown && !!options.data}
       onAdd={() => setRoleForm('new')} onEdit={setRoleForm} onCancel={setCancelling} onOpenAllocation={open}
       onFill={r => setFilling({ openRoleId: r.id, roleLabel: r.roleLabel, fromDate: r.fromDate, throughDate: r.throughDate, plannedHours: r.plannedHours })} /> : <>
     {list.error ? <ErrorBanner error={list.error} retry={() => list.refetch()} />
@@ -154,6 +177,11 @@ function Allocations(header: { title: string; subtitle: ReactNode }) {
       <Button variant="outline" disabled={page * list.data.pageSize >= list.data.totalCount} onClick={() => change('page', String(page + 1))}>{t('handoff.next')}</Button>
     </nav>}
     </>}
+    {capacityScreens && deadlines.data && <AllocationDeadlineHeaders context={deadlines.data} />}
+    {capacityScreens && deadlines.error && <ErrorBanner error={deadlines.error} retry={() => deadlines.refetch()} />}
+    {capacityScreens && comparison.data && <AllocationDisciplineComparison data={comparison.data} />}
+    {capacityScreens && comparison.error && <ErrorBanner error={comparison.error} retry={() => comparison.refetch()} />}
+    {capacityScreens && shiftFor?.projectId === project.id && <AllocationShiftDialog projectId={project.id} mode={shiftFor.mode} selectedIds={shiftIds} onClose={() => setShiftFor(null)} onDone={() => { setShiftFor(null); setShiftSelection({ projectId: project.id, ids: [] }); refresh() }} />}
     {adding && options.data && <Proposal projectId={project.id} base={base} options={options.data} complete={complete} close={() => setAdding(false)} done={id => { setAdding(false); refresh(); open(id) }} />}
     {filling && options.data && <Proposal projectId={project.id} base={base} options={options.data} complete={complete} fill={filling} close={() => { setFilling(null); if (sp.has('fill')) { const next = new URLSearchParams(sp); next.delete('fill'); setSp(next, { replace: true }) } }}
       done={id => { setFilling(null); refresh(); const next = new URLSearchParams(sp); next.delete('fill'); next.set('allocation', id); setSp(next) }} />}
@@ -175,6 +203,8 @@ const legend = 'px-1 text-sm font-semibold'
  *  sending `openRoleId` so the role is marked Filled in the same transaction (FR-ROLE-03, AC-ROLE-03). */
 function Proposal({ projectId, base, options, close, done, existing, fill, complete }: { projectId: string; base: string; options: CoordOptions; close: () => void; done: (id: string) => void; existing?: Detail; fill?: Fill; complete?: boolean }) {
   const previewEnabled = useFlag('allocation_preview')
+  const capacityScreens = useFlag('capacity_screens')
+  const capacityPreviewEnabled = capacityScreens && !existing
   const [purpose, setPurpose] = useState<'Production' | 'Review'>((existing?.purpose as 'Production' | 'Review') ?? 'Production')
   const start = existing?.fromDate ?? fill?.fromDate ?? today()
   const [personId, setPersonId] = useState(existing?.personId ?? ''), [fromDate, setFromDate] = useState(start), [throughDate, setThroughDate] = useState(existing?.throughDate ?? fill?.throughDate ?? today())
@@ -183,7 +213,7 @@ function Proposal({ projectId, base, options, close, done, existing, fill, compl
     [{ key: crypto.randomUUID(), workId: '', workDate: start, reviewHours: '' }])
   const [days, setDays] = useState<DayDraft[]>(() => existing?.days.map(d => ({ key: crypto.randomUUID(), workDate: d.workDate, hours: String(d.hours) })) ?? [])
   const [reason, setReason] = useState('')
-  const [allocationPreview, setAllocationPreview] = useState<AllocationPreview | null>(null), [previewError, setPreviewError] = useState<unknown>(null)
+  const [previewResult, setPreviewResult] = useState<{ key: string; allocation?: AllocationPreview; capacity?: components['schemas']['ProposalCapacityRead']; error?: unknown } | null>(null)
   const reviewOptions = useQuery({ queryKey: ['allocation-review-options', projectId], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/allocations/review-options', { params: { projectId } }) })
   const tasks = options.tasks.filter(w => w.ownerId === personId && !['Complete', 'Cancelled', 'On Hold'].includes(w.status))
   const reviews = (reviewOptions.data ?? []).filter(r => r.reviewerId === personId)
@@ -194,20 +224,34 @@ function Proposal({ projectId, base, options, close, done, existing, fill, compl
   const needsReason = !!existing || !!complete
   const previewBody = () => ({ ...(existing ? { rowVersion: existing.rowVersion } : {}), ...(needsReason ? { reason } : {}), ...(fill ? { openRoleId: fill.openRoleId } : {}), requestId: crypto.randomUUID(), personId, purpose, fromDate, throughDate,
     plannedHours: Number(plannedHours), days: days.map(d => ({ workDate: d.workDate, hours: Number(d.hours) })), links: links.map(l => ({ workType: purpose === 'Production' ? 'Task' : 'Review', workId: l.workId, workDate: l.workDate, reviewHours: purpose === 'Review' ? Number(l.reviewHours) : null })) })
-  const previewReady = previewEnabled && !!personId && /^\d{4}-\d{2}-\d{2}$/.test(fromDate) && /^\d{4}-\d{2}-\d{2}$/.test(throughDate) && fromDate <= throughDate && Number(plannedHours) > 0 && links.every(l => !!l.workId && /^\d{4}-\d{2}-\d{2}$/.test(l.workDate) && (purpose !== 'Review' || Number(l.reviewHours) > 0)) && days.every(d => /^\d{4}-\d{2}-\d{2}$/.test(d.workDate) && Number(d.hours) >= 0) && (!needsReason || reason.trim().length >= 5)
+  const previewReady = !!personId && /^\d{4}-\d{2}-\d{2}$/.test(fromDate) && /^\d{4}-\d{2}-\d{2}$/.test(throughDate) && fromDate <= throughDate && Number(plannedHours) > 0 && links.every(l => !!l.workId && /^\d{4}-\d{2}-\d{2}$/.test(l.workDate) && (purpose !== 'Review' || Number(l.reviewHours) > 0)) && days.every(d => /^\d{4}-\d{2}-\d{2}$/.test(d.workDate) && Number(d.hours) >= 0) && (!needsReason || reason.trim().length >= 5)
+  const datesReady = !!personId && /^\d{4}-\d{2}-\d{2}$/.test(fromDate) && /^\d{4}-\d{2}-\d{2}$/.test(throughDate) && fromDate <= throughDate && (Date.parse(throughDate) - Date.parse(fromDate)) / 86400000 <= 366
+  const previewKey = JSON.stringify({ projectId, existing: existing?.id, personId, purpose, fromDate, throughDate, plannedHours, reason, fill: fill?.openRoleId, links, days, previewEnabled, capacityPreviewEnabled })
+  const currentPreview = previewResult?.key === previewKey ? previewResult : null
   useEffect(() => {
-    if (!previewReady) { setAllocationPreview(null); setPreviewError(null); return }
+    if (!(previewEnabled && previewReady) && !(capacityPreviewEnabled && datesReady)) return
     let cancelled = false
     const timer = window.setTimeout(async () => {
-      try { setPreviewError(null); const body = previewBody(); const result = existing
-          ? await typedRequest('post', '/api/v1/projects/{projectId}/allocations/{id}/edit', { params: { projectId, id: existing.id }, query: { preview: true }, body: { ...body, rowVersion: existing.rowVersion, reason } })
-          : await typedRequest('post', '/api/v1/projects/{projectId}/allocations', { params: { projectId }, query: { preview: true }, body: { ...body, reason: needsReason ? reason : null, openRoleId: fill?.openRoleId ?? null } });
-        if (!('preview' in result)) throw new Error(t('app.error')); if (!cancelled) setAllocationPreview(result) }
-      catch (e) { if (!cancelled) { setAllocationPreview(null); setPreviewError(e) } }
+      try {
+        if (previewEnabled && previewReady) {
+          const body = previewBody()
+          const result = existing
+            ? await typedRequest('post', '/api/v1/projects/{projectId}/allocations/{id}/edit', { params: { projectId, id: existing.id }, query: { preview: true }, body: { ...body, rowVersion: existing.rowVersion, reason } })
+            : await typedRequest('post', '/api/v1/projects/{projectId}/allocations', { params: { projectId }, query: { preview: true }, body: { ...body, reason: needsReason ? reason : null, openRoleId: fill?.openRoleId ?? null } })
+          if (!('preview' in result)) throw new Error(t('app.error'))
+          if (!cancelled) setPreviewResult({ key: previewKey, allocation: result, capacity: result.comparison ?? undefined })
+        } else {
+          const body = previewReady ? previewBody() : null
+          const capacity = await typedRequest('post', '/api/v1/projects/{projectId}/allocations/capacity-preview', { params: { projectId }, body: {
+            personId, fromDate, throughDate, includeProposal: previewReady, purpose, plannedHours: body?.plannedHours ?? 0, days: body?.days ?? [], links: body?.links ?? [],
+          } })
+          if (!cancelled) setPreviewResult({ key: previewKey, capacity })
+        }
+      } catch (error) { if (!cancelled) setPreviewResult({ key: previewKey, error }) }
     }, 300)
     return () => { cancelled = true; window.clearTimeout(timer) }
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- fields are the explicit preview inputs
-  }, [previewReady, projectId, base, existing?.id, personId, purpose, fromDate, throughDate, plannedHours, reason, fill?.openRoleId, JSON.stringify(links), JSON.stringify(days)])
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- the key contains every explicit preview input; old responses never render for another key
+  }, [previewKey, previewReady, datesReady])
   return <CommandForm path={existing ? `${base}/${existing.id}/edit` : base} title={fill ? t('openRole.fillTitle', { role: fill.roleLabel }) : t(existing ? 'allocation.edit' : 'allocation.new')}
     hint={fill ? t('openRole.fillHint', { role: fill.roleLabel, from: fmtDate(fill.fromDate), through: fmtDate(fill.throughDate) }) : t(existing?.status === 'Confirmed' ? 'allocation.editConfirmedHint' : 'allocation.proposalHint')} onClose={close} onDone={done}
     submitLabel={t(existing ? 'allocation.saveChanges' : 'allocation.submitProposal')}
@@ -218,7 +262,7 @@ function Proposal({ projectId, base, options, close, done, existing, fill, compl
     <div className="grid gap-3 sm:grid-cols-2">
       <SelectField label={t('allocation.purpose')} value={purpose} onChange={v => { setPurpose(v as 'Production' | 'Review'); setLinks([{ key: crypto.randomUUID(), workId: '', workDate: fromDate, reviewHours: '' }]) }}
         choices={[{ value: 'Production', label: t('allocation.purpose.Production') }, { value: 'Review', label: t('allocation.purpose.Review') }]} />
-      <SelectField label={t('workload.person')} value={personId} onChange={v => { setPersonId(v); setLinks([{ key: crypto.randomUUID(), workId: '', workDate: fromDate, reviewHours: '' }]) }} choices={options.people.map(p => ({ value: p.id, label: p.displayName }))} />
+      <SelectField label={t('workload.person')} value={personId} onChange={v => { setPersonId(v); setLinks([{ key: crypto.randomUUID(), workId: '', workDate: fromDate, reviewHours: '' }]) }} choices={options.people.map(p => ({ value: p.id, label: personOptionLabel(p.displayName, p.personNotices, capacityScreens) }))} />
     </div>
     {purpose === 'Review' && reviewOptions.error && <ErrorBanner error={reviewOptions.error} retry={() => reviewOptions.refetch()} />}
     {!choices.length && personId && <Notice title={t(purpose === 'Production' ? 'allocation.noTasks' : 'allocation.noReviews')} />}
@@ -237,7 +281,7 @@ function Proposal({ projectId, base, options, close, done, existing, fill, compl
       <Button type="button" size="sm" variant="outline" className="self-end" onClick={() => setDays(rows => rows.filter(row => row.key !== d.key))}>{t('allocation.removeDay')} {i + 1}</Button>
     </div>)}<Button type="button" size="sm" variant="outline" disabled={days.length >= 366} onClick={() => setDays(rows => [...rows, { key: crypto.randomUUID(), workDate: fromDate, hours: '' }])}><Plus className="size-4" />{t('allocation.addDay')}</Button></fieldset>
     {needsReason && <Field label={t('common.reason')} htmlFor="allocation-reason" hint={t(existing ? 'common.reasonHint' : 'openRole.correctionHint')}><Textarea id="allocation-reason" required minLength={5} value={reason} onChange={e => setReason(e.target.value)} /></Field>}
-    {previewEnabled && (previewError ? <ErrorBanner error={previewError} /> : allocationPreview && <section className="rounded-md border bg-muted px-4 py-3 text-sm" aria-live="polite"><h3 className="font-semibold">{t('preview.title')}</h3><ul className="mt-2 space-y-1">{allocationPreview.weeks.map(w => <li key={`${w.personId}:${w.week}`} className="flex flex-wrap justify-between gap-2"><span>{t('preview.after', { planned: w.planned, capacity: w.capacity, band: loadBandText(w.band) })}</span>{w.indicators.length > 0 && <span className="text-muted-foreground">{previewIndicators(w.indicators)}</span>}</li>)}</ul></section>)}
+    {currentPreview?.error ? <ErrorBanner error={currentPreview.error} /> : capacityPreviewEnabled ? currentPreview?.capacity && <ProposalCapacityPreview data={currentPreview.capacity} /> : currentPreview?.allocation && <section className="rounded-md border bg-muted px-4 py-3 text-sm" aria-live="polite"><h3 className="font-semibold">{t('preview.title')}</h3><ul className="mt-2 space-y-1">{currentPreview.allocation.weeks.map(w => <li key={`${w.personId}:${w.week}`} className="flex flex-wrap justify-between gap-2"><span>{t('preview.after', { planned: w.planned, capacity: w.capacity, band: loadBandText(w.band) })}</span>{w.indicators.length > 0 && <span className="text-muted-foreground">{previewIndicators(w.indicators)}</span>}</li>)}</ul></section>}
   </CommandForm>
 }
 
@@ -289,7 +333,7 @@ function AllocationDetail({ projectId, base, id, projectNumber, options, close, 
         <div className="flex items-start gap-4">
           <Avatar id={row.personId} name={row.personName} className="size-12 text-base" />
           <div className="min-w-0 space-y-2">
-            <h3 className="break-words text-2xl/8 font-semibold tracking-[-0.4px]">{row.personName ?? t('allocation.personUnavailable')}</h3>
+            <h3 className="break-words text-2xl/8 font-semibold tracking-[-0.4px]">{row.personId && row.personName ? <PersonPanelTrigger userId={row.personId} name={row.personName} /> : t('allocation.personUnavailable')}</h3>
             <div className="flex flex-wrap items-center gap-2"><Purpose purpose={row.purpose} /><AllocationStatus status={row.status} /></div>
           </div>
         </div>
@@ -373,8 +417,8 @@ function AllocationDetail({ projectId, base, id, projectNumber, options, close, 
 
 /** The project's open roles (FR-ROLE-01..04): demand before a person is named. Fill proposes a normal allocation for it.
  *  Behind flag.record_engine_additions (§47.5 FR-REC-12) the headers sort and the role label opens the read-only panel. */
-function OpenRoles({ roles, projectId, proposal, canFill, onAdd, onEdit, onCancel, onFill, onOpenAllocation }: {
-  roles: ReturnType<typeof useQuery<OpenRole[]>>; projectId: string; proposal: Offer; canFill: boolean
+function OpenRoles({ roles, roleStatus, projectId, proposal, canFill, onAdd, onEdit, onCancel, onFill, onOpenAllocation }: {
+  roles: ReturnType<typeof useQuery<OpenRole[]>>; roleStatus?: string | null; projectId: string; proposal: Offer; canFill: boolean
   onAdd: () => void; onEdit: (r: OpenRole) => void; onCancel: (r: OpenRole) => void; onFill: (r: OpenRole) => void; onOpenAllocation: (id: string) => void
 }) {
   const additions = useFlag('record_engine_additions'), openPanel = useItemPanel(), [sp] = useSearchParams()
@@ -400,7 +444,8 @@ function OpenRoles({ roles, projectId, proposal, canFill, onAdd, onEdit, onCance
     </div> },
   ]
   // Flag off: static headers and the API's order, as before; the sort functions apply only behind the flag. `page` is the allocations list's.
-  const table = useTable('hub.openRoleColumns', additions ? columns : columns.map(c => ({ ...c, sort: undefined })), roles.data ?? [], r => [r.fromDate, r.roleLabel], null)
+  const rows = roleStatus ? roles.data?.filter(role => role.status === roleStatus) ?? [] : roles.data ?? []
+  const table = useTable('hub.openRoleColumns', additions ? columns : columns.map(c => ({ ...c, sort: undefined })), rows, r => [r.fromDate, r.roleLabel], null)
   if (roles.error) return <ErrorBanner error={roles.error} retry={() => roles.refetch()} />
   // `wide` keeps the scrolling table below md, as before; open roles never had phone cards (FR-REC-14).
   return <DataTable table={table} rows={table.sorted} loading={roles.isPending} wide caption={t('openRole.tab')} current={current}

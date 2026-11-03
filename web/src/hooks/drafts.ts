@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useFlag, useMe } from '@/lib/auth-context'
-import { clearDraft, draftStorageKey, leave, readDraft, registerForm, writeDraft } from '@/lib/drafts'
+import { clearDraft, draftStorageKey, leave, readDraft, registerForm, writeDraft, type PreservesFormNavigation } from '@/lib/drafts'
+import { useFormNavigationPreserver } from '@/components/hub/form-navigation-context'
 
 /** A form is compared as its content: an empty text or a cleared choice counts the same as one never touched. */
 const content = (v: unknown) => JSON.stringify(v, (_, x) => (x === '' || x === null ? undefined : x)) ?? ''
@@ -63,17 +64,19 @@ export function useDraft<T>(key: string | null | undefined, value: T, setValue: 
 
 /** FR-SAV-04: the form tells the leave guard when it holds input nothing has saved, so closing the page or tab, going to another
  *  page and Reload after a build update ask "Keep editing or discard?". */
-export function useUnsavedGuard(unsaved: () => boolean, discard: () => void) {
-  const latest = useRef({ unsaved, discard })
-  useEffect(() => { latest.current = { unsaved, discard } })
-  useEffect(() => registerForm({ unsaved: () => latest.current.unsaved(), discard: () => latest.current.discard() }), [])
+export function useUnsavedGuard(unsaved: () => boolean, discard: () => void, preservesNavigation?: PreservesFormNavigation) {
+  const inherited = useFormNavigationPreserver(), preserve = preservesNavigation ?? inherited
+  const latest = useRef({ unsaved, discard, preservesNavigation: preserve })
+  useEffect(() => { latest.current = { unsaved, discard, preservesNavigation: preserve } })
+  useEffect(() => registerForm({ unsaved: () => latest.current.unsaved(), discard: () => latest.current.discard(),
+    preservesNavigation: (from, to) => latest.current.preservesNavigation?.(from, to) ?? false }), [])
 }
 
 /** The draft and the guard together, for a form that keeps both. `close(onClose)` is for every way a person closes it (the close
  *  control, Escape, a click outside, Cancel); a successful submit calls `clear()` and then its own close. */
-export function useSafeForm<T>(key: string | null | undefined, value: T, setValue: (v: T) => void) {
+export function useSafeForm<T>(key: string | null | undefined, value: T, setValue: (v: T) => void, preservesNavigation?: PreservesFormNavigation) {
   const draft = useDraft(key, value, setValue)
-  useUnsavedGuard(draft.unsaved, draft.discard)
+  useUnsavedGuard(draft.unsaved, draft.discard, preservesNavigation)
   return { ...draft, close: leave }
 }
 export type SafeForm = ReturnType<typeof useSafeForm>

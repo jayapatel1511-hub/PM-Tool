@@ -1,3 +1,4 @@
+import { PersonPanelTrigger } from './person-panel-trigger'
 import { Fragment, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
@@ -6,10 +7,16 @@ import { cn } from '@/lib/utils'
 const INLINE = /(@\[[^\]\n]{1,120}\]\([0-9a-fA-F-]{36}\)|\*\*[^*]+\*\*|`[^`\n]+`|\*[^*\s][^*]*\*|_[^_\s][^_]*_|\[[^\]]+\]\(https?:\/\/[^\s)]+\)|https?:\/\/[^\s<]+)/g
 const link = 'text-primary underline underline-offset-4'
 
-function inline(text: string): ReactNode[] {
+type StoredMention = { id: string; name?: string | null }
+function inline(text: string, mentions: readonly StoredMention[] | undefined, focusKey: string): ReactNode[] {
   return text.split(INLINE).map((part, i) => {
     const mention = /^@\[([^\]]+)\]\(([0-9a-fA-F-]{36})\)$/.exec(part)
-    if (mention) return <span key={i} className="rounded bg-accent px-1 font-medium text-accent-foreground">@{mention[1]}</span>
+    if (mention) {
+      // Only the server's stored mention rows prove this token is a User reference.
+      const person = mentions?.find(row => row.id.toLowerCase() === mention[2].toLowerCase())
+      const label = <span className="rounded bg-accent px-1 font-medium text-accent-foreground">@{person?.name ?? mention[1]}</span>
+      return person?.name ? <PersonPanelTrigger key={i} userId={person.id} name={person.name} focusKey={`${focusKey}:mention:${i}:${person.id}`}>{label}</PersonPanelTrigger> : <Fragment key={i}>{label}</Fragment>
+    }
     if (part.length > 4 && part.startsWith('**') && part.endsWith('**')) return <strong key={i}>{part.slice(2, -2)}</strong>
     if (part.length > 2 && part.startsWith('`') && part.endsWith('`')) return <code key={i} className="rounded bg-muted px-1 font-mono text-[0.9em]">{part.slice(1, -1)}</code>
     if (part.length > 2 && ((part.startsWith('*') && part.endsWith('*')) || (part.startsWith('_') && part.endsWith('_')))) return <em key={i}>{part.slice(1, -1)}</em>
@@ -20,14 +27,14 @@ function inline(text: string): ReactNode[] {
   })
 }
 
-export function RichText({ text, className }: { text?: string | null; className?: string }) {
+export function RichText({ text, className, mentions, focusKey }: { text?: string | null; className?: string; mentions?: readonly StoredMention[]; focusKey?: string }) {
   if (!text) return null
   const blocks: ReactNode[] = []
   let list = null as { ordered: boolean; items: string[] } | null
   const flush = () => {
     if (!list) return
     const L = list.ordered ? 'ol' : 'ul'
-    blocks.push(<L key={blocks.length} className={list.ordered ? 'list-decimal pl-5' : 'list-disc pl-5'}>{list.items.map((x, i) => <li key={i}>{inline(x)}</li>)}</L>)
+    blocks.push(<L key={blocks.length} className={list.ordered ? 'list-decimal pl-5' : 'list-disc pl-5'}>{list.items.map((x, i) => <li key={i}>{inline(x, focusKey ? mentions : undefined, `${focusKey}:block:${blocks.length}:item:${i}`)}</li>)}</L>)
     list = null
   }
   for (const line of text.split('\n')) {
@@ -40,7 +47,7 @@ export function RichText({ text, className }: { text?: string | null; className?
       continue
     }
     flush()
-    if (line.trim()) blocks.push(<p key={blocks.length}>{inline(line)}</p>)
+    if (line.trim()) blocks.push(<p key={blocks.length}>{inline(line, focusKey ? mentions : undefined, `${focusKey}:block:${blocks.length}`)}</p>)
   }
   flush()
   return <div className={cn('space-y-1.5 break-words', className)}>{blocks}</div>

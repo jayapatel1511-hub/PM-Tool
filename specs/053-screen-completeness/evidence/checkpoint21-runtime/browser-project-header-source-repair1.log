@@ -1,0 +1,14 @@
+{"group":"none","name":"spaced120","header":64,"firstMeaningfulY":364.5,"firstTaskY":364.5}
+{"group":"deliverable","name":"spaced120","header":64,"firstMeaningfulY":364.5,"firstTaskY":401.5}
+{"group":"none","name":"unbroken120","header":64,"firstMeaningfulY":364.5,"firstTaskY":364.5}
+{"group":"deliverable","name":"unbroken120","header":64,"firstMeaningfulY":364.5,"firstTaskY":401.5}
+locator.click: Timeout 10000ms exceeded.
+Call log:
+[2m  - waiting for locator('[data-visual-project-header]').getByRole('button', { name: 'Project details', exact: true })[22m
+
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/project-header-compact.cjs:118:82 {
+  log: [
+    "  - waiting for locator('[data-visual-project-header]').getByRole('button', { name: 'Project details', exact: true })"
+  ],
+  name: 'TimeoutError'
+}

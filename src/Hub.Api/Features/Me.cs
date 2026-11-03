@@ -10,7 +10,8 @@ namespace Hub.Api.Features;
 public static class MeEndpoints
 {
     public sealed record PickerUser(Guid Id, string? DisplayName, string? Email, string? JobTitle, Guid? OfficeId,
-        Guid? HomeDisciplineId, bool IsActive, Guid? SupervisorId, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] bool? OnProject = null);
+        Guid? HomeDisciplineId, bool IsActive, Guid? SupervisorId, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] bool? OnProject = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] PersonFacts.Notices? PersonNotices = null);
     public sealed record CurrentSettings(string? DateFormat, string? OrgTimeZone, DateOnly Today, int IdleTimeoutHours, bool RestrictedProjectsEnabled, bool AllowSelfReview,
         int TaskDueSoonDays, int MilestoneApproachingDays, int ChainDepthLimit, int DefaultWeeklyCapacityHours, int CoordinationLookaheadWeeks, bool WorkingDaysEnabled,
         [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? ActivityBurstMinutes = null,
@@ -30,8 +31,13 @@ public static class MeEndpoints
     public sealed record ReferencePhase(Guid Id, string Name, bool IsActive, int SortOrder);
     public sealed record ReferenceProjectType(Guid Id, string Name, bool IsActive);
     public sealed record ReferenceLimits(int RoleLabel);
+    public sealed record ReferenceIssuePurpose(Guid Id, string Name, bool IsActive, int SortOrder);
+    public sealed record ReferenceIssueReturnCode(Guid Id, string Code, string Name, bool IsActive, int SortOrder);
     public sealed record ReferenceView(IReadOnlyList<ReferenceDiscipline> Disciplines, IReadOnlyList<ReferenceClient> Clients, IReadOnlyList<ReferenceOffice> Offices,
-        IReadOnlyList<ReferenceDeliverableType> DeliverableTypes, IReadOnlyList<ReferencePhase> Phases, IReadOnlyList<ReferenceProjectType> ProjectTypes, ReferenceLimits Limits);
+        IReadOnlyList<ReferenceDeliverableType> DeliverableTypes, IReadOnlyList<ReferencePhase> Phases, IReadOnlyList<ReferenceProjectType> ProjectTypes, ReferenceLimits Limits,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<ReferenceIssuePurpose>? IssuePurposes = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<ReferenceIssueReturnCode>? IssueReturnCodes = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<IssueRootCauseChoice>? IssueRootCauses = null);
 
     /// One person with the facts the picker orders by. Built with an initializer so the ordering can still be translated to SQL.
     sealed record PickerMatch { public required AppUser User { get; init; } public bool OnProject { get; init; } public bool Direct { get; init; } }
@@ -84,6 +90,7 @@ public static class MeEndpoints
         api.MapGet("/users", async (HubDb db, string? q, bool? active, string? ids, int? limit, Guid? projectId, Access access, CurrentUser me, SettingsStore store, TimeProvider clock) =>
         {
             var settings = await store.Get(db);
+            await using var snapshot = settings.IsFlagOn("capacity_screens") ? await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead) : null;
             var rank = settings.IsFlagOn("picker_project_rank");
             var project = rank ? projectId : null;
             if (project is { } pid) await access.Project(pid, track: false);
@@ -103,18 +110,27 @@ public static class MeEndpoints
             if (rank && project != null) ordered = matches.OrderBy(row => row.User.Id == me.Id ? 0 : row.OnProject ? 1 : 2)
                 .ThenByDescending(row => row.Direct).ThenBy(row => row.User.DisplayName);
             else if (rank && pattern != null) ordered = matches.OrderByDescending(row => row.Direct).ThenBy(row => row.User.DisplayName);
-            return await ordered.Take(Math.Clamp(limit ?? 50, 1, 500)).Select(row => new PickerUser(row.User.Id, row.User.DisplayName, row.User.Email,
-                row.User.JobTitle, row.User.OfficeId, row.User.HomeDisciplineId, row.User.IsActive, row.User.SupervisorId, project != null ? row.OnProject : null)).ToListAsync();
+            var rows = await ordered.Take(Math.Clamp(limit ?? 50, 1, 500)).Select(row => new PickerUser(row.User.Id, row.User.DisplayName, row.User.Email,
+                row.User.JobTitle, row.User.OfficeId, row.User.HomeDisciplineId, row.User.IsActive, row.User.SupervisorId, project != null ? row.OnProject : null, null)).ToListAsync();
+            var notices = await PersonFacts.ReadNotices(db, rows.Select(row => row.Id).ToArray(), settings, clock);
+            return notices.Count > 0 ? rows.Select(row => row with { PersonNotices = notices.GetValueOrDefault(row.Id) }).ToList() : rows;
         });
 
         // Active reference data for every picker; inactive entries only appear on items that already use them.
-        api.MapGet("/reference", async Task<Ok<ReferenceView>> (HubDb db) => TypedResults.Ok(new ReferenceView(
+        api.MapGet("/reference", async Task<Ok<ReferenceView>> (HubDb db, SettingsStore store) =>
+        {
+            var register = (await store.Get(db)).IsFlagOn("register_screens");
+            return TypedResults.Ok(new ReferenceView(
             await db.Disciplines.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Name).Select(x => new ReferenceDiscipline(x.Id, x.Name, x.Code, x.Colour, x.IsActive, x.SortOrder)).ToListAsync(),
             await db.Clients.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Name).Select(x => new ReferenceClient(x.Id, x.Name, x.ShortName, x.IsActive)).ToListAsync(),
             await db.Offices.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Name).Select(x => new ReferenceOffice(x.Id, x.Name, x.Code, x.TimeZone, x.IsActive)).ToListAsync(),
             await db.DeliverableTypes.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Name).Select(x => new ReferenceDeliverableType(x.Id, x.Name, x.DefaultDisciplineId, x.IsActive)).ToListAsync(),
             await db.Phases.AsNoTracking().OrderBy(x => x.SortOrder).Select(x => new ReferencePhase(x.Id, x.Name, x.IsActive, x.SortOrder)).ToListAsync(),
             await db.ProjectTypes.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Name).Select(x => new ReferenceProjectType(x.Id, x.Name, x.IsActive)).ToListAsync(),
-            new ReferenceLimits(OpenRoleLimits.Label))));
+            new ReferenceLimits(OpenRoleLimits.Label),
+            register ? await db.IssuePurposes.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Name).Select(x => new ReferenceIssuePurpose(x.Id, x.Name, x.IsActive, x.SortOrder)).ToListAsync() : null,
+            register ? await db.IssueReturnCodes.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Name).Select(x => new ReferenceIssueReturnCode(x.Id, x.Code, x.Name, x.IsActive, x.SortOrder)).ToListAsync() : null,
+            register ? await db.IssueRootCauseCategories.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Name).ThenBy(x => x.Id).Select(x => new IssueRootCauseChoice(x.Id, x.Name, x.IsActive, x.SortOrder)).ToListAsync() : null));
+        });
     }
 }

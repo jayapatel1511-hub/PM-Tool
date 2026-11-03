@@ -1,0 +1,6 @@
+{
+  "src/Hub.Api/Text.cs": {
+    "time.week_own": "The week grid is available only for your own time. Use the entries list to review another person.",
+    "time.week_range": "Choose a Monday through Sunday week for the time grid. Custom date ranges remain available in the entries list."
+  }
+}

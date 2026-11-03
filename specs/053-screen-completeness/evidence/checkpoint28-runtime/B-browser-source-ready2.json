@@ -1,0 +1,8 @@
+{
+  "status": "READY_HOLD_UNRUN",
+  "files": {
+    "web/tests/template-risk-provenance.cjs": "e1b7acd478b9c72f2a40c4d637317169d2d9675104cb700d0e1c1cdb9f39a58e",
+    "web/tests/template-risk-provenance.fixture.cjs": "b50823e0301bde280983276decbb44fcd51e079f1d1c1b1718ef9ccc9ab17f8c",
+    "specs/053-screen-completeness/parallel-build/work-delivery/requests/g56-handoff.md": "759e1da61e37466ffe852d61c7064d7d4c25ead9d97bcb9f346f51a2e2e46661"
+  }
+}

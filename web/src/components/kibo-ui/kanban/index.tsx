@@ -89,6 +89,8 @@ export const KanbanBoard = ({ id, children, className }: KanbanBoardProps) => {
 
 export type KanbanCardProps<T extends KanbanItemProps = KanbanItemProps> = T & {
   children?: ReactNode;
+  /** Optional passive copy for the drag overlay, avoiding duplicate interactive control identifiers. */
+  overlayChildren?: ReactNode;
   className?: string;
   /** Accessible name of the keyboard drag handle (defaults to the card name). */
   handleLabel?: string;
@@ -98,6 +100,7 @@ export const KanbanCard = <T extends KanbanItemProps = KanbanItemProps>({
   id,
   name,
   children,
+  overlayChildren,
   className,
   handleLabel,
 }: KanbanCardProps<T>) => {
@@ -151,7 +154,7 @@ export const KanbanCard = <T extends KanbanItemProps = KanbanItemProps>({
               className
             )}
           >
-            {children ?? <p className="m-0 font-medium text-sm">{name}</p>}
+            {overlayChildren ?? children ?? <p className="m-0 font-medium text-sm">{name}</p>}
           </div>
         </t.In>
       )}

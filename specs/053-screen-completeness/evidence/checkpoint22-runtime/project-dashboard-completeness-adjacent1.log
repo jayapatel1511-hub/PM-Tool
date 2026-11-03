@@ -1,0 +1,208 @@
+Skip to content
+t
+Tuesday
+My Work
+Home
+Projects
+Tasks
+Resources
+Time
+Reports
+Team
+Files
+Admin
+Tuesday
+Projects
+P-MOCK Synthetic live project
+Dashboard
+Search
+/
+My projects
+New
+AC
+P-MOCK
+Synthetic live project
+◐
+Active
+●
+Green
+Owner (PM): Alex Chen
+Client: Synthetic client
+Target date: —
+Overview
+Work
+Deliverables
+Coordination
+People
+Files
+Activity
+Settings
+Dashboard
+Current values
+2026-11-16 09:00
+Discipline scope
+All disciplines
+Civil
+Tasks in progress
+7
+Project P-MOCK · Civil
+Tasks for review
+6
+Project P-MOCK · Civil
+Overdue tasks
+5
+Project P-MOCK · Civil
+■ Needs attention
+Deliverables due within 14 days
+8
+Project P-MOCK · Civil
+Pending decisions
+4
+Project P-MOCK · whole project
+Open issues
+3
+Project P-MOCK · whole project
+Tasks
+Total
+31
+Complete
+9
+Blocked
+4
+Waiting
+3
+Unassigned
+2
+Backlog
+1
+Deliverables
+Total
+13
+At risk
+3
+Issued
+2
+DecisionsWhole project
+Overdue
+2
+Issues and risksWhole project
+High issues
+2
+High risks
+1
+
+Health
+
+●
+Green
+
+Next milestone
+
+None
+
+Next submission
+
+None
+
+Phase
+
+—
+Unavailable
+
+◐
+Active
+Staffing until the next submission
+
+Next milestone fallback: M-001 Synthetic milestone
+
+Inclusive window 2026-11-16 to 2026-11-27
+
+Remaining estimates for open tasks due in this window, confirmed reservations and open-role demand are separate figures. On Hold tasks are open; Complete and Cancelled are excluded. Open roles never enter confirmed hours, a person's load or the comparison.
+
+Staffing until the next submission
+Discipline	Remaining estimates	Confirmed allocated	Open-role demand	Remaining vs allocated
+Civil	
+
+120 h
+
+	
+
+80 h
+
+	
+
+24 h
+
+	Remaining exceeds allocated by 40 h
+Needs attention
+Task
+6
+Issue
+2
+Deliverable
+2
+Risk
+2
+▲
+Warning
+T-001 Synthetic Task firing 1
+A-01 Synthetic rule 1
+Overdue and blocking 1 task
+Synthetic owner · first seen 7 days ago
+Snooze
+▲
+Warning
+T-001 Synthetic Task firing 3
+A-03 Synthetic rule 3
+Overdue and blocking 1 task
+Synthetic owner · first seen 7 days ago
+Snooze
+▲
+Warning
+T-001 Synthetic Task firing 6
+A-06 Synthetic rule 6
+Overdue and blocking 1 task
+Synthetic owner · first seen 7 days ago
+Snooze
+▲
+Warning
+T-001 Synthetic Task firing 8
+A-08 Synthetic rule 8
+Overdue and blocking 1 task
+Synthetic owner · first seen 7 days ago
+Snooze
+▲
+Warning
+T-001 Synthetic Task firing 10
+A-10 Synthetic rule 10
+Overdue and blocking 1 task
+Synthetic owner · first seen 7 days ago
+Snooze
+Show all 6
+Disciplines
+
+Not evaluated yet.
+
+Due this week0
+
+Nothing is due this week. Open tasks due this week appear here.
+
+Blocked0
+
+No tasks are blocked. Blocked tasks appear here when a predecessor is incomplete or a manual block is set.
+
+Recent activity
+Important only
+
+No activity recorded yet.
+
+All activity [] []
+AssertionError [ERR_ASSERTION]: Dashboard cards must clear the title/reference/controls at 1440px: {"headerBottom":327,"firstCardTop":255}
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/project-dashboard-completeness.cjs:103:14 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}

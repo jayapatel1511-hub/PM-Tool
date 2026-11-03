@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
@@ -11,7 +12,7 @@ namespace Hub.Api.Features;
 
 /// Task time entries (§36.8 FR-VIS-10, AC-VIS-08): actual effort recorded against tasks by the person who did it. Hours
 /// stay apart from estimates, progress, health, workload, billing and payroll (FR-005): nothing here writes to them.
-public static class TimeEndpoints
+public static partial class TimeEndpoints
 {
     public sealed record EntryBody(Guid TaskId, DateOnly WorkDate, decimal Hours, string? Note);
     public sealed record TimeQuery(DateOnly? From, DateOnly? To, Guid? ProjectId, Guid? TaskId, Guid? UserId, string? Scope);
@@ -23,13 +24,15 @@ public static class TimeEndpoints
     public sealed record ProjectHours(Guid ProjectId, string ProjectNumber, string ProjectName, decimal Hours);
     /// One range of entries with the totals the Time page shows beside them; every total is a sum of `Entries` (§36.8).
     public sealed record TimeView(DateOnly From, DateOnly To, IReadOnlyList<Row> Entries, decimal Total, IReadOnlyList<DayHours> ByDay,
-        IReadOnlyList<TaskHours> ByTask, IReadOnlyList<ProjectHours> ByProject, bool CanReview);
+        IReadOnlyList<TaskHours> ByTask, IReadOnlyList<ProjectHours> ByProject, bool CanReview,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] DateTimeOffset? AsOf = null);
     sealed record ExportRow(DateOnly WorkDate, string Person, string ProjectNumber, string TaskKey, string TaskName, decimal Hours, string? Note);
 
     static readonly Col[] Cols = Hub.Api.Records.TaskTimeEntryRecord.TimeCols;
 
     public static void Map(RouteGroupBuilder api)
     {
+        api.MapGet("/time/week", OwnWeek);
         api.MapGet("/time", async Task<Ok<TimeView>> ([AsParameters] TimeQuery f, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock) =>
         {
             var (from, to) = await Range(f, db, store, clock);
@@ -38,7 +41,7 @@ public static class TimeEndpoints
                 [.. rows.GroupBy(r => r.WorkDate).OrderBy(g => g.Key).Select(g => new DayHours(g.Key, g.Sum(r => r.Hours)))],
                 [.. rows.GroupBy(r => (r.TaskId, r.TaskKey, r.TaskName, r.ProjectNumber)).Select(g => new TaskHours(g.Key.TaskId, g.Key.TaskKey, g.Key.TaskName, g.Key.ProjectNumber, g.Sum(r => r.Hours))).OrderBy(x => x.TaskKey)],
                 [.. rows.GroupBy(r => (r.ProjectId, r.ProjectNumber, r.ProjectName)).Select(g => new ProjectHours(g.Key.ProjectId, g.Key.ProjectNumber, g.Key.ProjectName, g.Sum(r => r.Hours))).OrderBy(x => x.ProjectNumber)],
-                await CanReview(access, db, me)));
+                await CanReview(access, db, me), (await store.Get(db)).IsFlagOn("visual_system") ? clock.GetUtcNow() : null));
         });
         api.MapGet("/time/export", async (string? format, [AsParameters] TimeQuery f, HttpContext http, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock) =>
         {

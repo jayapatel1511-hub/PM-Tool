@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "caseCount": 10,
+  "detail": "external-browser-detail5.json",
+  "runner": "external-browser5.json",
+  "scope": "Synthetic strict transport against real built SPA; no provider authorization/persistence claim",
+  "note": "Original runner only parsed single-line JSON; detail file was independently read and validated without overwriting prior evidence",
+  "counters": {
+    "commands": 12,
+    "unexpectedGets": 0,
+    "unexpectedWrites": 0,
+    "pageErrors": 0
+  }
+}

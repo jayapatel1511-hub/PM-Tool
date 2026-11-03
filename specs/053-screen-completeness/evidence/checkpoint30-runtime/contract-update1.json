@@ -1,0 +1,55 @@
+{
+  "exitCode": 1,
+  "args": [
+    "/opt/homebrew/bin/dotnet",
+    "test",
+    "tests/Hub.Tests/Hub.Tests.csproj",
+    "-c",
+    "Release",
+    "--no-build",
+    "--no-restore",
+    "--artifacts-path",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint30-artifacts",
+    "--filter",
+    "FullyQualifiedName=Hub.Tests.Api.ContractTests.Openapi_matches_the_committed_golden_document|FullyQualifiedName=Hub.Tests.Api.RegistryTests.Generated_key_families_match_the_registry_and_vocabulary",
+    "--logger",
+    "trx;LogFileName=contract-update1.trx",
+    "--results-directory",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint30-runtime/trx-contract-update1",
+    "-m:1",
+    "-p:UseSharedCompilation=false",
+    "-p:NuGetAudit=false"
+  ],
+  "atUtc": "2026-11-02T19:56:57.825916+00:00",
+  "boundary": "Explicit golden producers only. Intentional drift failure requires diff review and no-update verification.",
+  "counters": {
+    "total": "2",
+    "executed": "2",
+    "passed": "0",
+    "failed": "2",
+    "error": "0",
+    "timeout": "0",
+    "aborted": "0",
+    "inconclusive": "0",
+    "passedButRunAborted": "0",
+    "notRunnable": "0",
+    "notExecuted": "0",
+    "disconnected": "0",
+    "warning": "0",
+    "completed": "0",
+    "inProgress": "0",
+    "pending": "0"
+  },
+  "cases": [
+    {
+      "name": "Hub.Tests.Api.RegistryTests.Generated_key_families_match_the_registry_and_vocabulary",
+      "outcome": "Failed",
+      "message": "Updated web/src/gen/registry.gen.ts; review the diff and rerun without HUB_UPDATE_REGISTRY"
+    },
+    {
+      "name": "Hub.Tests.Api.ContractTests.Openapi_matches_the_committed_golden_document",
+      "outcome": "Failed",
+      "message": "Updated web/src/gen/openapi.json; review the diff, run npm run gen, and rerun without HUB_UPDATE_CONTRACT"
+    }
+  ]
+}

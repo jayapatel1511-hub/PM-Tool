@@ -1,0 +1,46 @@
+AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
++ actual - expected
+
++ [
++   'workspaces',
++   'workspaces',
++   'workspaces',
++   'workspaces',
++   'workspaces',
++   'workspaces',
++   'workspaces',
++   'workspaces',
++   'workspaces',
++   'workspaces',
++   'workspaces',
++   'workspaces',
++   'workspaces',
++   'workspaces',
++   'workspaces',
++   'workspaces',
++   'projects/00000000-0000-0000-0000-000000000010/allocations/discipline-context',
++   'workspaces',
++   'projects/00000000-0000-0000-0000-000000000010/allocations/discipline-context',
++   'workspaces',
++   'workspaces',
++   'workspaces',
++   'workspaces',
++   'me/work',
++   'workspaces',
++   'workspaces',
++   'workspaces',
++   'workspaces',
++   'workspaces',
++   'workspaces',
++   'workspaces'
++ ]
+- []
+
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/person-surface-completeness.cjs:372:12 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: [Array],
+  expected: [],
+  operator: 'deepStrictEqual',
+  diff: 'simple'
+}

@@ -1,0 +1,187 @@
+{
+  "observedAtUtc": "2026-11-01T13:39:30.277Z",
+  "base": "http://127.0.0.1:8853",
+  "rows": [
+    {
+      "viewport": "desktop",
+      "route": "/staff",
+      "status": 200,
+      "url": "http://127.0.0.1:8853/staff",
+      "hasMain": true,
+      "textSample": "Skip to content\nt\nTuesday\nMy Work\nHome\nProjects\nTasks\nResources\nTime\nReports\nTeam\nFiles\nMy Staff\nTuesday\nMy Staff\nSearch\n/\nMy projects\nNew\n2\nSP\n\nResources\n\nMy Staff\nCurrent values\n2026-11-01 09:39\nViews\n\nYour direct reports\n\nOffice\nAny office\nHead Office\nDiscipline\nAny discipline\nProject Management\nSurvey\nCivil\nGeotechnical\nElectrical\nEnvironmental\nStructural\nTransportation\nArchitecture\nShow inactive\nStaff\n3\nMy direct reports · 3 people shown\nProject assignments\n3\nMy direct reports · sum of Projects for 3 people shown\nWith overdue work\n0\nMy direct reports · 3 people shown\nWith blocked work\n0\nMy direct reports · 3 people shown\nReviews waiting too long\n0\nMy direct reports · sum of stalled reviews for 3 people shown\nDetails\n\tName\tProjects\tOpen\tOverdue\tBlocked\tBlocking\tReviews\tStalled reviews\t",
+      "overflow": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "mainText": "Resources\n\nMy Staff\nCurrent values\n2026-11-01 09:39\nViews\n\nYour direct reports\n\nOffice\nAny office\nHead Office\nDiscipline\nAny discipline\nProject Management\nSurvey\nCivil\nGeotechnical\nElectrical\nEnvironmental\nStructural\nTransportation\nArchitecture\nShow inactive\nStaff\n3\nMy direct reports · 3 people shown\nProject assignments\n3\nMy direct reports · sum of Projects for 3 people shown\nWith overdue work\n0\nMy direct reports · 3 people shown\nWith blocked work\n0\nMy direct reports · 3 people shown\nReviews wai",
+        "firstDataY": 437.5
+      },
+      "errors": []
+    },
+    {
+      "viewport": "desktop",
+      "route": "/time",
+      "status": 200,
+      "url": "http://127.0.0.1:8853/time",
+      "hasMain": true,
+      "textSample": "Skip to content\nt\nTuesday\nMy Work\nHome\nProjects\nTasks\nResources\nTime\nReports\nTeam\nFiles\nMy Staff\nTuesday\nTime\nSearch\n/\nMy projects\nNew\n2\nSP\nTime\n\nHours you worked on tasks. Actual hours are kept apart from estimates, progress and workload.\n\nCurrent values\n2026-11-01 09:39\nTask Hours report\nExport\nAdd time\nFilters\n2026-10-26 – 2026-11-01\nThis week\nMine\nEveryone I can review\n\nCapacity 40 h this week\n\nYour task hours by day\nTask\t\nMon\n2026-10-26\nAvailable 8 h\n\t\nTue\n2026-10-27\nAvailable 8 h\n\t\nWed\n2026-10-28\nAvailable 8 h\n\t\nThu\n2026-10-29\nAvailable 8 h\n\t\nFri\n2026-10-30\nAvailable 8 h\n\t\nSat\n2026-10-31\nAvailable 0 h\n\t\nSun\n2026-11-01\nAvailable 0 h\n\tRecorded hours\nHours per day\t0 h\t0 h\t0 h\t0 h\t0 h\t0 h\t0 h\t0 h\n\nNo assigned open tasks, last-week tasks or current entries match this scope. Use Add time t",
+      "overflow": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "mainText": "Time\n\nHours you worked on tasks. Actual hours are kept apart from estimates, progress and workload.\n\nCurrent values\n2026-11-01 09:39\nTask Hours report\nExport\nAdd time\nFilters\n2026-10-26 – 2026-11-01\nThis week\nMine\nEveryone I can review\n\nCapacity 40 h this week\n\nYour task hours by day\nTask\t\nMon\n2026-10-26\nAvailable 8 h\n\t\nTue\n2026-10-27\nAvailable 8 h\n\t\nWed\n2026-10-28\nAvailable 8 h\n\t\nThu\n2026-10-29\nAvailable 8 h\n\t\nFri\n2026-10-30\nAvailable 8 h\n\t\nSat\n2026-10-31\nAvailable 0 h\n\t\nSun\n2026-11-01\nAvailabl",
+        "firstDataY": null
+      },
+      "errors": []
+    },
+    {
+      "viewport": "desktop",
+      "route": "/tasks",
+      "status": 200,
+      "url": "http://127.0.0.1:8853/tasks",
+      "hasMain": true,
+      "textSample": "Skip to content\nt\nTuesday\nMy Work\nHome\nProjects\nTasks\nResources\nTime\nReports\nTeam\nFiles\nMy Staff\nTuesday\nTasks\nSearch\n/\nMy projects\nNew\n2\nSP\nTasks\n\n0 tasks\n\nViews\nList\nBoard\nDashboard\nBoard\nList\nTimeline\nCalendar\nFiles\nTeam\nWorkload\nMy projects\nCopy link\nSearch\nNo grouping\nFilters\nMine\nOverdue\nBlocked\nColumns\n\nNo tasks match these projects and filters.",
+      "overflow": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "mainText": "Tasks\n\n0 tasks\n\nViews\nList\nBoard\nDashboard\nBoard\nList\nTimeline\nCalendar\nFiles\nTeam\nWorkload\nMy projects\nCopy link\nSearch\nNo grouping\nFilters\nMine\nOverdue\nBlocked\nColumns\n\nNo tasks match these projects and filters.",
+        "firstDataY": null
+      },
+      "errors": []
+    },
+    {
+      "viewport": "desktop",
+      "route": "/projects/QA20-REAL-001/tasks",
+      "status": 200,
+      "url": "http://127.0.0.1:8853/projects/QA20-REAL-001/tasks",
+      "hasMain": true,
+      "textSample": "Skip to content\nt\nTuesday\nMy Work\nHome\nProjects\nTasks\nResources\nTime\nReports\nTeam\nFiles\nMy Staff\nTuesday\nProjects\nQA20-REAL-001 Checkpoint 20 real QA project\nTasks\nSearch\n/\nMy projects\nNew\n2\nSP\nQA20-REAL-001\nCheckpoint 20 real QA project\n◐\nActive\n○\nGrey\nOwner (PM): Priya Nair\nClient: Internal / TBD\nTarget date: 2026-11-30\nOverview\nWork\nDeliverables\nCoordination\nPeople\nFiles\nActivity\nSettings\nTasks\nBoard\nTimeline\nCalendar\nMilestones\nTasks\n\n2 tasks\n\nBoard\nViews\nSearch\nFilters\nDeliverable\n\nGroup totals: first read 2026-11-01 09:39; later pages are separate live reads.\n\nTasks\n\tKey\tTask\tDeliverable\tDiscipline\tAssignee\tReviewer\tStatus\tIndicators\tPriority\tStart date\tDue\tProgress\tEst. hrs\tLast activity\n\nQA20-REAL-001-D001 QA20 real deliverable\n2 shown / 2 matched tasks\n0 known overdue · 2 state un",
+      "overflow": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "mainText": "QA20-REAL-001\nCheckpoint 20 real QA project\n◐\nActive\n○\nGrey\nOwner (PM): Priya Nair\nClient: Internal / TBD\nTarget date: 2026-11-30\nOverview\nWork\nDeliverables\nCoordination\nPeople\nFiles\nActivity\nSettings\nTasks\nBoard\nTimeline\nCalendar\nMilestones\nTasks\n\n2 tasks\n\nBoard\nViews\nSearch\nFilters\nDeliverable\n\nGroup totals: first read 2026-11-01 09:39; later pages are separate live reads.\n\nTasks\n\tKey\tTask\tDeliverable\tDiscipline\tAssignee\tReviewer\tStatus\tIndicators\tPriority\tStart date\tDue\tProgress\tEst. hrs\tLast",
+        "firstDataY": 424.5
+      },
+      "errors": []
+    },
+    {
+      "viewport": "desktop",
+      "route": "/reports",
+      "status": 200,
+      "url": "http://127.0.0.1:8853/reports",
+      "hasMain": true,
+      "textSample": "Skip to content\nt\nTuesday\nMy Work\nHome\nProjects\nTasks\nResources\nTime\nReports\nTeam\nFiles\nMy Staff\nTuesday\nReports\nSearch\n/\nMy projects\nNew\n2\nSP\nReports\n\n21 reports\n\nSearch reports\nHow are pickup and commitments working?\nreport.pickup-offers\nreport.pickup-offers.about\nWhat needs action this week or is holding work up?\nTasks Due This Week\nOpen tasks due Monday to Sunday of the chosen week.\nOverdue Tasks\nTasks past their due date, with what they hold up.\nBlocked Tasks\nTasks that cannot proceed and what blocks them.\nTasks Blocking Others\nTasks whose successors are waiting or blocked on them.\nStale Work\nOpen tasks with no activity for a number of days.\nWhat is due, issued or approaching submission?\nUpcoming Deliverables\nOpen deliverables due in the coming days.\nDeliverable Status by Project\nEver",
+      "overflow": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "mainText": "Reports\n\n21 reports\n\nSearch reports\nHow are pickup and commitments working?\nreport.pickup-offers\nreport.pickup-offers.about\nWhat needs action this week or is holding work up?\nTasks Due This Week\nOpen tasks due Monday to Sunday of the chosen week.\nOverdue Tasks\nTasks past their due date, with what they hold up.\nBlocked Tasks\nTasks that cannot proceed and what blocks them.\nTasks Blocking Others\nTasks whose successors are waiting or blocked on them.\nStale Work\nOpen tasks with no activity for a numb",
+        "firstDataY": 299
+      },
+      "errors": []
+    },
+    {
+      "viewport": "desktop",
+      "route": "/reports/workload-employee?projectId=01a19754-b327-78af-b89f-a3a43edcffd7&unit=fte&period=weeks",
+      "status": 200,
+      "url": "http://127.0.0.1:8853/reports/workload-employee?projectId=01a19754-b327-78af-b89f-a3a43edcffd7&unit=fte&period=weeks",
+      "hasMain": true,
+      "textSample": "Skip to content\nt\nTuesday\nMy Work\nHome\nProjects\nTasks\nResources\nTime\nReports\nTeam\nFiles\nMy Staff\nTuesday\nReports\nSearch\n/\nMy projects\nNew\n2\nSP\n\nReports\n\nWorkload by Employee\n\nEach person's estimated hours per week against capacity, with open, unestimated and overdue tasks.\n\nCurrent values\n2026-11-01 09:39\nReports\nExport\nSearch reports\nHow are pickup and commitments working?\nreport.pickup-offers\nreport.pickup-offers.about\nWhat needs action this week or is holding work up?\nTasks Due This Week\nOpen tasks due Monday to Sunday of the chosen week.\nOverdue Tasks\nTasks past their due date, with what they hold up.\nBlocked Tasks\nTasks that cannot proceed and what blocks them.\nTasks Blocking Others\nTasks whose successors are waiting or blocked on them.\nStale Work\nOpen tasks with no activity for a num",
+      "overflow": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "mainText": "Reports\n\nWorkload by Employee\n\nEach person's estimated hours per week against capacity, with open, unestimated and overdue tasks.\n\nCurrent values\n2026-11-01 09:39\nReports\nExport\nSearch reports\nHow are pickup and commitments working?\nreport.pickup-offers\nreport.pickup-offers.about\nWhat needs action this week or is holding work up?\nTasks Due This Week\nOpen tasks due Monday to Sunday of the chosen week.\nOverdue Tasks\nTasks past their due date, with what they hold up.\nBlocked Tasks\nTasks that cannot",
+        "firstDataY": 379
+      },
+      "errors": []
+    },
+    {
+      "viewport": "phone",
+      "route": "/staff",
+      "status": 200,
+      "url": "http://127.0.0.1:8853/staff",
+      "hasMain": true,
+      "textSample": "Skip to content\n2\nSP\n\nResources\n\nMy Staff\nCurrent values\n2026-11-01 09:39\nViews\n\nYour direct reports\n\nOffice\nAny office\nHead Office\nDiscipline\nAny discipline\nProject Management\nSurvey\nCivil\nGeotechnical\nElectrical\nEnvironmental\nStructural\nTransportation\nArchitecture\nShow inactive\nStaff\n3\nMy direct reports · 3 people shown\nProject assignments\n3\nMy direct reports · sum of Projects for 3 people shown\nWith overdue work\n0\nMy direct reports · 3 people shown\nWith blocked work\n0\nMy direct reports · 3 people shown\nReviews waiting too long\n0\nMy direct reports · sum of stalled reviews for 3 people shown\nAC\nAlex Chen\nCivil Designer (EIT) · Head Office · Team 1\nThis week40 h free\nProjects\n1\nOpen\n1\nOverdue\n0\nBlocked\n0\nReviews\n0\nStalled reviews\n0\nJM\nJill Martin\nCivil Designer · Head Office · Team 1\nThis ",
+      "overflow": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "mainText": "Resources\n\nMy Staff\nCurrent values\n2026-11-01 09:39\nViews\n\nYour direct reports\n\nOffice\nAny office\nHead Office\nDiscipline\nAny discipline\nProject Management\nSurvey\nCivil\nGeotechnical\nElectrical\nEnvironmental\nStructural\nTransportation\nArchitecture\nShow inactive\nStaff\n3\nMy direct reports · 3 people shown\nProject assignments\n3\nMy direct reports · sum of Projects for 3 people shown\nWith overdue work\n0\nMy direct reports · 3 people shown\nWith blocked work\n0\nMy direct reports · 3 people shown\nReviews wai",
+        "firstDataY": 1120
+      },
+      "errors": []
+    },
+    {
+      "viewport": "phone",
+      "route": "/time",
+      "status": 200,
+      "url": "http://127.0.0.1:8853/time",
+      "hasMain": true,
+      "textSample": "Skip to content\n2\nSP\nTime\n\nHours you worked on tasks. Actual hours are kept apart from estimates, progress and workload.\n\nCurrent values\n2026-11-01 09:39\nTask Hours report\nExport\nAdd time\nFilters\n2026-10-26 – 2026-11-01\nThis week\nMine\nEveryone I can review\n\nCapacity 40 h this week\n\nYour task hours by day\nTask\t\nMon\n2026-10-26\nAvailable 8 h\n\t\nTue\n2026-10-27\nAvailable 8 h\n\t\nWed\n2026-10-28\nAvailable 8 h\n\t\nThu\n2026-10-29\nAvailable 8 h\n\t\nFri\n2026-10-30\nAvailable 8 h\n\t\nSat\n2026-10-31\nAvailable 0 h\n\t\nSun\n2026-11-01\nAvailable 0 h\n\tRecorded hours\nHours per day\t0 h\t0 h\t0 h\t0 h\t0 h\t0 h\t0 h\t0 h\n\nNo assigned open tasks, last-week tasks or current entries match this scope. Use Add time to choose another permitted task.\n\nBlank cells are suggestions. Enter hours, then press Enter or leave the cell to save.",
+      "overflow": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "mainText": "Time\n\nHours you worked on tasks. Actual hours are kept apart from estimates, progress and workload.\n\nCurrent values\n2026-11-01 09:39\nTask Hours report\nExport\nAdd time\nFilters\n2026-10-26 – 2026-11-01\nThis week\nMine\nEveryone I can review\n\nCapacity 40 h this week\n\nYour task hours by day\nTask\t\nMon\n2026-10-26\nAvailable 8 h\n\t\nTue\n2026-10-27\nAvailable 8 h\n\t\nWed\n2026-10-28\nAvailable 8 h\n\t\nThu\n2026-10-29\nAvailable 8 h\n\t\nFri\n2026-10-30\nAvailable 8 h\n\t\nSat\n2026-10-31\nAvailable 0 h\n\t\nSun\n2026-11-01\nAvailabl",
+        "firstDataY": null
+      },
+      "errors": []
+    },
+    {
+      "viewport": "phone",
+      "route": "/tasks",
+      "status": 200,
+      "url": "http://127.0.0.1:8853/tasks",
+      "hasMain": true,
+      "textSample": "Skip to content\n2\nSP\nTasks\n\n0 tasks\n\nViews\nList\nBoard\nDashboard\nBoard\nList\nTimeline\nCalendar\nFiles\nTeam\nWorkload\nCopy link\nSearch\nNo grouping\nFilters\nMine\nOverdue\nBlocked\nColumns\n\nNo tasks match these projects and filters.\n\nMy Work\nSearch\nNotifications",
+      "overflow": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "mainText": "Tasks\n\n0 tasks\n\nViews\nList\nBoard\nDashboard\nBoard\nList\nTimeline\nCalendar\nFiles\nTeam\nWorkload\nCopy link\nSearch\nNo grouping\nFilters\nMine\nOverdue\nBlocked\nColumns\n\nNo tasks match these projects and filters.",
+        "firstDataY": null
+      },
+      "errors": []
+    },
+    {
+      "viewport": "phone",
+      "route": "/projects/QA20-REAL-001/tasks",
+      "status": 200,
+      "url": "http://127.0.0.1:8853/projects/QA20-REAL-001/tasks",
+      "hasMain": true,
+      "textSample": "Skip to content\n2\nSP\nQA20-REAL-001\nCheckpoint 20 real QA project\n◐\nActive\n○\nGrey\nOwner (PM): Priya Nair\nClient: Internal / TBD\nTarget date: 2026-11-30\nOverview\nWork\nDeliverables\nCoordination\nPeople\nFiles\nActivity\nSettings\nTasks\nBoard\nTimeline\nCalendar\nMilestones\nTasks\n\n2 tasks\n\nBoard\nViews\nSearch\nFilters\nDeliverable\n\nGroup totals: first read 2026-11-01 09:39; later pages are separate live reads.\n\nQA20-REAL-001-D001 QA20 real deliverable\n2 shown / 2 matched tasks\n0 known overdue · 2 state unavailable\n16 h estimated across matched rows · 0 unestimated\n0% by hours\nNext due 2026-11-05 · 0 undated open\nQA20-REAL-001-T0001\nQA20 real task one\nDeliverable\nQA20 real deliverable\nDiscipline\nCivil\nAssignee\nPN\nPriya Nair\nStatus\n○\nNot Started\nPriority\nMedium\nStart date\n2026-10-26\nDue\n2026-11-05\nProgress",
+      "overflow": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "mainText": "QA20-REAL-001\nCheckpoint 20 real QA project\n◐\nActive\n○\nGrey\nOwner (PM): Priya Nair\nClient: Internal / TBD\nTarget date: 2026-11-30\nOverview\nWork\nDeliverables\nCoordination\nPeople\nFiles\nActivity\nSettings\nTasks\nBoard\nTimeline\nCalendar\nMilestones\nTasks\n\n2 tasks\n\nBoard\nViews\nSearch\nFilters\nDeliverable\n\nGroup totals: first read 2026-11-01 09:39; later pages are separate live reads.\n\nQA20-REAL-001-D001 QA20 real deliverable\n2 shown / 2 matched tasks\n0 known overdue · 2 state unavailable\n16 h estimated a",
+        "firstDataY": null
+      },
+      "errors": []
+    },
+    {
+      "viewport": "phone",
+      "route": "/reports",
+      "status": 200,
+      "url": "http://127.0.0.1:8853/reports",
+      "hasMain": true,
+      "textSample": "Skip to content\n2\nSP\nReports\n\n21 reports\n\nReport catalogue\nSearch reports\nHow are pickup and commitments working?\nreport.pickup-offers\nreport.pickup-offers.about\nWhat needs action this week or is holding work up?\nTasks Due This Week\nOpen tasks due Monday to Sunday of the chosen week.\nOverdue Tasks\nTasks past their due date, with what they hold up.\nBlocked Tasks\nTasks that cannot proceed and what blocks them.\nTasks Blocking Others\nTasks whose successors are waiting or blocked on them.\nStale Work\nOpen tasks with no activity for a number of days.\nWhat is due, issued or approaching submission?\nUpcoming Deliverables\nOpen deliverables due in the coming days.\nDeliverable Status by Project\nEvery deliverable by project with status, due and issue dates.\nUpcoming Milestones\nMilestones in the coming d",
+      "overflow": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "mainText": "Reports\n\n21 reports\n\nReport catalogue\nSearch reports\nHow are pickup and commitments working?\nreport.pickup-offers\nreport.pickup-offers.about\nWhat needs action this week or is holding work up?\nTasks Due This Week\nOpen tasks due Monday to Sunday of the chosen week.\nOverdue Tasks\nTasks past their due date, with what they hold up.\nBlocked Tasks\nTasks that cannot proceed and what blocks them.\nTasks Blocking Others\nTasks whose successors are waiting or blocked on them.\nStale Work\nOpen tasks with no ac",
+        "firstDataY": 347.015625
+      },
+      "errors": []
+    },
+    {
+      "viewport": "phone",
+      "route": "/reports/workload-employee?projectId=01a19754-b327-78af-b89f-a3a43edcffd7&unit=fte&period=weeks",
+      "status": 200,
+      "url": "http://127.0.0.1:8853/reports/workload-employee?projectId=01a19754-b327-78af-b89f-a3a43edcffd7&unit=fte&period=weeks",
+      "hasMain": true,
+      "textSample": "Skip to content\n2\nSP\n\nReports\n\nWorkload by Employee\n\nEach person's estimated hours per week against capacity, with open, unestimated and overdue tasks.\n\nCurrent values\n2026-11-01 09:39\nReports\nExport\nReport catalogue\nParameters and views\n1 row Projects: QA20-REAL-001Report unit: FTEPeriod: Weeks\n0 unestimated tasks\n0 open tasks with no due date\n\nTasks assigned to people in this report scope, including their other visible disciplines. A task can appear in both counts. Only task records you may view in this report scope are counted.\n\nPerson\tSupervisor\tCapacity (h/week)\tScope\t2026-10-26 · Estimated work (FTE; ISO weeks: 1)\t2026-10-26 · Available (h) (FTE; ISO weeks: 1)\t2026-10-26 · Confirmed reservation (h) (FTE; ISO weeks: 1)\t2026-10-26 · Proposed request (h) (FTE; ISO weeks: 1)\t2026-10-26 ·",
+      "overflow": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "mainText": "Reports\n\nWorkload by Employee\n\nEach person's estimated hours per week against capacity, with open, unestimated and overdue tasks.\n\nCurrent values\n2026-11-01 09:39\nReports\nExport\nReport catalogue\nParameters and views\n1 row Projects: QA20-REAL-001Report unit: FTEPeriod: Weeks\n0 unestimated tasks\n0 open tasks with no due date\n\nTasks assigned to people in this report scope, including their other visible disciplines. A task can appear in both counts. Only task records you may view in this report scop",
+        "firstDataY": 601.515625
+      },
+      "errors": []
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,20 @@
+QA22 Timeline setup FAIL_OR_UNPROVEN: Expected values to be strictly deep-equal:
++ actual - expected
+... Skipped lines
+
+  {
+    deliverableLinks: [],
+    deliverables: [],
+    dependencies: [
+      {
+...
+        name: 'QA22 mvy51hpc-f22b02 Timeline milestone',
++       status: 'At Risk'
+-       status: null
+      }
+    ],
+    tasks: [
+      {
+        deliverableId: null,
+
+{"status":"FAIL_OR_UNPROVEN","receipt":"/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint22-real-timeline-setup.json","run":"mvy51hpc-f22b02","browser":"NOT_RUN","checks":3,"failures":1}

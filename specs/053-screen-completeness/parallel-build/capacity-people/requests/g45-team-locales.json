@@ -1,0 +1,14 @@
+{
+  "teamOrganisation.group": "Group by",
+  "teamOrganisation.none": "No grouping",
+  "teamOrganisation.homeDiscipline": "Home discipline",
+  "teamOrganisation.office": "Office",
+  "teamOrganisation.supervisor": "Supervisor",
+  "teamOrganisation.unit": "Current unit",
+  "teamOrganisation.notSet": "Not set",
+  "teamOrganisation.all": "All",
+  "teamOrganisation.visible": "{n} people shown",
+  "teamOrganisation.rolesTitle": "Unfilled roles",
+  "teamOrganisation.rolesBasis": "Unfilled roles are separate from people and capacity.",
+  "teamOrganisation.rolesEmpty": "No unfilled roles."
+}

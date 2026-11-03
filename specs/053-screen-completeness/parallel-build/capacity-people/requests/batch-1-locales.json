@@ -1,0 +1,36 @@
+{
+  "web/src/i18n/en.ts": {
+    "capacity.findRoom": "Find room",
+    "capacity.findRoomBasis": "Search your permitted planner people by home discipline. Free hours use capacity minus Confirmed and Expected plans, including your drafts; Possible stays separate. Other grid filters do not limit this search.",
+    "capacity.hoursPerWeek": "Hours per week",
+    "capacity.numberOfWeeks": "Number of weeks",
+    "capacity.homeDiscipline": "Home discipline",
+    "capacity.roomMatches": "{n} matches with at least {h} h free in every one of {weeks} weeks",
+    "capacity.noRoomTitle": "No verified matches",
+    "capacity.noRoomHint": "Try fewer hours, fewer weeks or another start week",
+    "capacity.roomResults": "Verified free hours by person and week, ordered by name",
+    "capacity.freeHours": "{h} h free",
+    "capacity.roomUnavailable": "Availability not verified",
+    "capacity.roomUnavailableHint": "These people are not matches because the requested weeks include partial or provisional facts",
+    "capacity.partialView": "Partial view",
+    "capacity.provisionalAvailability": "Provisional availability",
+    "capacity.showProposedAsConfirmed": "Show proposed as confirmed",
+    "capacity.includesProposed": "Includes proposed",
+    "capacity.disciplineContext": "Capacity and demand by home discipline",
+    "capacity.disciplineBasis": "Free to plan is the Weekly Planner's signed capacity minus Confirmed and Expected hours for the people in your scope, including your drafts. Role hours and unassigned estimates are separate demand on visible projects. Project filters limit demand; indicators and the proposed scenario affect the Workload rows only.",
+    "capacity.disciplineNotSet": "Discipline not set",
+    "capacity.peopleInScope": "{n} people in scope",
+    "capacity.undatedDemand": "{n} unassigned tasks with no due date",
+    "capacity.freeToPlan": "Free to plan",
+    "capacity.openRoleHours": "Open roles",
+    "capacity.unassignedTaskHours": "Unassigned estimates",
+    "capacity.hoursValue": "{h} h",
+    "capacity.unestimatedDemand": "{n} unestimated",
+    "capacity.unverifiedSupply": "Free hours unavailable for {n} people",
+    "capacity.shortBy": "Short by {h} h"
+  },
+  "src/Hub.Api/Text.cs": {
+    "capacity.scenario": "Scenario",
+    "capacity.includesProposed": "Includes proposed"
+  }
+}

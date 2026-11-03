@@ -1,0 +1,15 @@
+{
+  "status": "HASHES_MATCH_UNCOMPILED_UNRUN",
+  "files": {
+    "src/Hub.Api/Features/Registers.cs ": "6c52da67e6f4e16e877014c3d6045c1380227a2f9aae15e0064819b3ffd52034",
+    "src/Hub.Api/Features/IssueRootCauses.cs ": "b5116407cd722efb117c57589739967e176da7005dce1b532cfe084eb4d5c6c2",
+    "src/Hub.Api/Features/IssueRootCauseReplay.cs ": "dc9958eae1dc1204065fa8a93f31ffc7cc77ee5eca035f9f97ac600e1f1a6ac5",
+    "tests/Hub.Tests/Api/IssueRootCauseTests.cs ": "9572bca47652ce418959d7de5860b74332ac211a6fbf962980f072bd1783033a",
+    "tests/Hub.Tests/Api/IssueRootCauseReadTests.cs ": "c1c0955546a71c785879c93506acd859468b7042f053cb85ffdd97ba563e14cf",
+    "tests/Hub.Tests/Api/IssueRootCauseVocabularyTests.cs ": "38eb26e0d43b00953b009ecfd8c2accb98b19e674ad4b8d8648e1d7dd5b5371b",
+    "web/src/pages/projects/Registers.tsx ": "6a38613008c63fa8b9cff675c66c3c60bd386d6e165fc1f3196e8aaf1d5d7a49",
+    "web/src/pages/projects/issue-root-cause.tsx ": "99934936f6e3fba76d20a58c5e2e743dcb58e9c8c6db44b05fa57353f8fc6739",
+    "web/tests/issue-root-cause.cjs ": "53e75d0e0f0b3f68f1a77667d7b8fb313190ac699e130ecb9488c89334e11665",
+    "web/tests/issue-root-cause.fixture.cjs ": "c0529c24cf77b7f714fa79b945fad952e1bc0cdf4f84920fc48700c7e41688af"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "errors": [
+    "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+  ],
+  "people": [
+    {
+      "k": "staff",
+      "omar": false,
+      "jill": false,
+      "cert": false,
+      "coop": false,
+      "text": "Skip to content\nt\nTuesday\nMy Work\nHome\nProjects\nTasks\nResources\nTime\nReports\nTeam\nFiles\nTuesday\nMy Staff\nSearch\n/\nMy projects\nNew\nPN\n\nResources\n\nMy Staff\nOnly Supervisors, Executives and Admins can open My Staff."
+    },
+    {
+      "k": "team",
+      "omar": true,
+      "jill": false,
+      "cert": true,
+      "coop": false,
+      "text": "Skip to content\nt\nTuesday\nMy Work\nHome\nProjects\nTasks\nResources\nTime\nReports\nTeam\nFiles\nTuesday\nTeam\nSearch\n/\nMy projects\nNew\nPN\nTeam\n\n5 people\n\nDashboard\nBoard\nList\nTimeline\nCalendar\nFiles\nTeam\nWorkload\nMy projects\nCopy link\nSearch\nFilters\nTeam\nPerson\tProjects and roles\n\nAC\nAlex Chen\nCivil Designer (EIT)\n\t\nSYN-JOIN19-1101\nSynthetic Checkpoint 19 joined journeys\nTeam Member\n\n\nDR\nDiane Roy\nSenior Technical Reviewer\n\t\nSYN-JOIN19-1101\nSynthetic Checkpoint 19 joined journeys\nReviewer\n\n\nMD\nMarc Dubois\nSenior Civil Engineer\n\t\nSYN-JOIN19-1101\nSynthetic Checkpoint 19 joined journeys\nTeam Member\nLead: Civil\n\n\nOH\nOmar Haddad\nGeotechnical Lead\nSynthetic QA19 Certification\n· Expires in 20 days\n\t\nSYN-JOIN19-1101\nSynthetic Checkpoint 19 joined journeys\nTeam Member\nLead: Geotechnical\n\n\nPN\nPriya Nair\nProject Manager\n\t\nSYN-JOIN19-1101\nSynthetic Checkpoint 19 joined journeys\nProject Manager"
+    }
+  ]
+}

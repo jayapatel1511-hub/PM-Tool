@@ -1,0 +1,13 @@
+{
+  "reportScreens.catalogue": "Report catalogue",
+  "reportScreens.search": "Search reports",
+  "reportScreens.searchHint": "Search titles, questions and descriptions",
+  "reportScreens.noMatches": "No reports match this search",
+  "reportScreens.viewProject": "Views for project",
+  "reportScreens.personalOnly": "Personal views",
+  "reportScreens.containerHint": "This project contains saved views. It does not filter report data.",
+  "reportScreens.copy": "Copy link",
+  "reportScreens.copied": "Report link copied",
+  "reportScreens.copyUnavailable": "Run the report successfully before saving or copying its parameters.",
+  "reportScreens.live": "Saved views and links contain parameters; data and permissions are checked when opened."
+}

@@ -1,0 +1,185 @@
+{
+  "distinctCases": 40,
+  "apiCases": 34,
+  "arithmeticCases": 6,
+  "runs": [
+    {
+      "file": "checkpoint20-focused.trx",
+      "passed": 34,
+      "failed": 6
+    },
+    {
+      "file": "checkpoint20-focused-repair1.trx",
+      "passed": 5,
+      "failed": 1
+    },
+    {
+      "file": "checkpoint20-focused-repair2.trx",
+      "passed": 1,
+      "failed": 0
+    }
+  ],
+  "cases": {
+    "Hub.Tests.Api.ReportUnitsTests.Saved_views_copy_parameters_and_crossfield_cleaning_retain_unit_period_without_widening_scope": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.CapacityPersonPickerNoticeTests.Populated_own_certification_stays_out_of_all_six_authorised_candidate_arrays": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsTests.Capacity_partial_month_uses_displayed_weeks_only_and_horizon_not_internal_lookahead": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsArithmeticTests.Zero_or_unknown_standard_is_unavailable_and_known_zero_hours_remains_zero": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsTests.Every_unit_period_pair_keeps_identical_S23_task_cohort_and_exact_canonical_metric_scope(unit: \"fte\", period: \"months\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.CapacityPersonPickerNoticeTests.HR_notice_refresh_keeps_canonical_stale_mapping_refusal_and_admin_only_write": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.WorkTaskColumnsTests.Three_projects_twelve_normal_tasks_keep_same_named_deliverables_separate_with_column_facts": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.WorkTaskColumnsTests.Optional_manifest_membership_counts_but_deleted_and_foreign_import_references_do_not": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsTests.Every_unit_period_pair_keeps_identical_S23_task_cohort_and_exact_canonical_metric_scope(unit: \"hours\", period: \"months\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsTests.Every_unit_period_pair_keeps_identical_S23_task_cohort_and_exact_canonical_metric_scope(unit: \"fte\", period: \"weeks\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.WorkTaskColumnsTests.Date_projection_is_work_list_only_and_off_wire_remains_unchanged(work: True, small: False)": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.WorkTaskColumnsTests.Known_no_package_null_deliverable_and_unavailable_recorded_reference_remain_distinct_without_get_writes": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsTests.Missing_estimates_zero_estimates_partial_scope_and_zero_standard_remain_explicitly_distinct": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.WorkTaskColumnsTests.Date_projection_is_work_list_only_and_off_wire_remains_unchanged(work: False, small: False)": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.CapacityPersonPickerNoticeTests.Hidden_projects_empty_workspace_scopes_and_nonadmin_HR_requests_keep_existing_boundaries": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.WorkTaskColumnsTests.Two_hundred_and_one_command_created_tasks_keep_page_membership_and_date_facts_on_three_pages": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsTests.Employee_and_discipline_months_use_exact_sub_tenth_source_instead_of_preformatted_week_values": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused-repair1.trx"
+    },
+    "Hub.Tests.Api.WorkTaskColumnsTests.Date_projection_is_work_list_only_and_off_wire_remains_unchanged(work: False, small: True)": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.CapacityPersonPickerNoticeTests.Inactive_people_and_nonmember_dates_keep_each_source_own_existing_cohort": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.WorkTaskColumnsTests.Normally_issued_superseded_and_cancelled_packages_never_supply_the_date": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused-repair1.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsTests.Reduced_availability_stays_provisional_in_employee_and_team_months_counts_and_both_exports": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused-repair1.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsTests.Dark_flag_keeps_original_wire_and_export_and_hidden_scope_remains_visible_only_without_private_hours": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused-repair2.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsTests.Every_unit_period_pair_keeps_identical_S23_task_cohort_and_exact_canonical_metric_scope(unit: \"hours\", period: \"weeks\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.WorkTaskColumnsTests.Workspace_saved_columns_preserve_identity_and_scope_while_own_views_remain_private": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsArithmeticTests.Invalid_periods_units_and_noncanonical_displayed_weeks_refuse": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsTests.Team_capacity_months_keep_weekly_people_counts_separate_and_never_convert_or_sum_them": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.CapacityPersonPickerNoticeTests.Six_sources_keep_exact_candidate_order_versions_and_fields_across_owner_flag_pairs_without_writes": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.CapacityPersonPickerNoticeTests.Populated_units_override_shared_supervisor_and_recorded_dates_keep_pickup_candidates_unchanged": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsArithmeticTests.Period_conversion_uses_sub_tenth_source_hours_and_does_not_sum_weekly_FTE": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.CapacityPersonPickerNoticeTests.Pickup_refusal_current_owner_and_outside_team_never_gain_candidates_from_dates": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsTests.Employee_month_FTE_uses_standard40_despite_custom32_and_exact_aggregate_while_workload_stays8_weeks": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsArithmeticTests.Thursday_assigns_cross_month_and_year_weeks_and_partial_month_uses_only_displayed_weeks": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.WorkTaskColumnsTests.Earliest_current_manifest_date_changes_after_normal_edit_replacement_and_cancellation": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused-repair1.trx"
+    },
+    "Hub.Tests.Api.CapacityPersonPickerNoticeTests.New_bridges_use_organisation_timezone_at_a_UTC_midnight_boundary": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsArithmeticTests.Four_exact_weeks_use_one_standard_denominator_for_rows_and_aggregate": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsTests.Strict_unit_period_and_nonmatrix_forms_refuse_instead_of_silently_becoming_a_different_display": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsArithmeticTests.Unknown_hours_and_unestimated_inputs_keep_known_subtotals_and_coverage": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.CapacityPersonPickerNoticeTests.All_six_bridges_share_recorded_unknown_start_and_inclusive_end_window_without_status_inference": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.WorkTaskColumnsTests.Date_projection_is_work_list_only_and_off_wire_remains_unchanged(work: True, small: True)": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsTests.Positive_undated_known_subtotal_and_missing_inputs_survive_both_exports_without_FTE_conversion": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused-repair1.trx"
+    }
+  },
+  "sourceNote": "Only two reviewed fixture files changed after initial run; production source hashes unchanged."
+}

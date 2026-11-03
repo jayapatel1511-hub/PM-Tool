@@ -1,0 +1,7 @@
+{
+  "source": "web/tests/template-risk-provenance.cjs",
+  "sourceHash": "75e8f3d2633c3e95689eeabf4189e63b1fc0e9183724492cbe80c87966344a05",
+  "instrumented": "specs/053-screen-completeness/evidence/checkpoint28-runtime/template-provenance-visual-only.cjs",
+  "instrumentedHash": "e1718f50c910fa78ca57664992bb776d0ca8b352f3170b0996e627a5bd5f409e",
+  "changes": "Resolve2imports to same absolute modules; replace one screenshot hook with natural scroll+capture+early return through finally. Maintained test unchanged; full browser3 PASS remains acceptance proof."
+}

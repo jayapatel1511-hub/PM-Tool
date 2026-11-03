@@ -1,0 +1,13 @@
+{
+  "files": {
+    "web/src/pages/projects/TaskPanel.tsx": "f33cd4d4c510bed3b312b28f4820d0873e507ae61be703ef31336137d84a7ffb",
+    "web/src/pages/projects/task-section-navigation.tsx": "62ed1cd97ac0009459a2cf2843c52361d212c1e9b86c14eaeef6ac96e8dde6c3",
+    "web/src/pages/projects/task-contribution.tsx": "22ea5d44ce92ed6722c128336a5610f35369da243544383492c446c7b959fe61",
+    "web/src/components/hub/fields.tsx": "070664970a89e9a38217b08b78f966c73bd3da105b2b661720edebf4a6900cdf",
+    "web/tests/task-sections.cjs": "6d1689e77f6779f09d76e87f2c3ef68586ce8734029746433cb156e9c85804ec",
+    "web/tests/task-sections.fixture.cjs": "2e45b9bd6d9598e5244945ad70850d4af1e9b85d043c4b26c1f87544785544fd",
+    "web/tests/task-contribution.cjs": "cb984fe5e5fb1711cfa7266620b23f2da344d498a68fbb8e6af0979a6dd915ff",
+    "web/tests/task-contribution.fixture.cjs": "f6608c114351ff91c2f9330af20bdb70748c26db670a524bf16fa2e75bb35277"
+  },
+  "status": "REPAIRED8_READY_HASH_MATCH_ALL_HOLD_UNRUN"
+}

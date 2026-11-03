@@ -1,0 +1,20 @@
+{
+  "checkpoint": 19,
+  "suites": {
+    "checkpoint19-adjacent.trx": {
+      "passed": 50,
+      "failed": 0
+    },
+    "checkpoint19-focused.trx": {
+      "passed": 41,
+      "failed": 1
+    },
+    "checkpoint19-privacy-repaired.trx": {
+      "passed": 1,
+      "failed": 0
+    }
+  },
+  "distinctPassing": 92,
+  "distinctWithoutPassing": [],
+  "limits": "Includes initial fixture failure and its passing repaired rerun; no production guard relaxed. Browser and joined QA are separate evidence."
+}

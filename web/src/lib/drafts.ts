@@ -2,6 +2,8 @@
 // it is never sent to the server and is dropped after `draft_keep_days`. Storage can be missing or full (private window, blocked
 // site data), so every access is guarded; a draft that could not be written does not count as a draft, and the leave guard asks.
 
+import { recordContextReturn } from './record-context-navigation.ts'
+
 const PREFIX = 'draft.'
 const DAY = 86_400_000
 
@@ -95,7 +97,91 @@ export const onToast = (target: EventTarget | null) =>
 
 // ---- The leave guard: forms holding typed input that nothing has saved ----
 
-type Form = { unsaved: () => boolean; discard: () => void; /** FR-SAV-05: put typed input where it outlives the sign-in flow. */ keep?: () => void }
+export type FormNavigationLocation = { pathname: string; search: string; hash: string; state?: unknown }
+export type FormNavigation = { currentLocation: FormNavigationLocation; nextLocation: FormNavigationLocation }
+export type PreservesFormNavigation = (from: FormNavigationLocation, to: FormNavigationLocation) => boolean
+
+const taskPresentationKeys = ['taskSection', 'taskHistoryActor', 'taskHistoryPage', 'groupChanges', 'recordTab', 'recordTabItem']
+const personPresentationKeys = ['personStaffScope', 'personProjectsPage', 'personProjectsPageSize']
+const taskSections = ['details', 'dependencies', 'review', 'time', 'comments', 'links', 'history']
+const locationUrl = (location: FormNavigationLocation) => `${location.pathname}${location.search}${location.hash}`
+const parsedLocation = (url: string): FormNavigationLocation => {
+  const parsed = new URL(url, 'http://hub.local')
+  return { pathname: parsed.pathname, search: parsed.search, hash: parsed.hash }
+}
+const taskOwner = (location: FormNavigationLocation, taskId: string, ownerId: string) => {
+  const params = new URLSearchParams(location.search), panels = params.getAll('panel')
+  if (panels.length) return panels.length === 1 && [taskId, ownerId].some(id => panels[0] === `Task:${id}`)
+  try { return [taskId, ownerId].some(id => decodeURIComponent(location.pathname) === `/tasks/${id}`) } catch { return false }
+}
+const personOwner = (location: FormNavigationLocation) => {
+  const panels = new URLSearchParams(location.search).getAll('panel')
+  return panels.length === 1 && /^Person:[A-Za-z0-9-]+$/.test(panels[0])
+}
+const taskPresentation = (location: FormNavigationLocation, taskId: string, ownerId: string) => {
+  const params = new URLSearchParams(location.search)
+  if (taskPresentationKeys.some(key => params.getAll(key).length > 1)) return false
+  const section = params.get('taskSection'), actor = params.get('taskHistoryActor'), page = params.get('taskHistoryPage')
+  const item = params.get('recordTabItem'), tab = params.get('recordTab'), group = params.get('groupChanges')
+  return (!section || taskSections.includes(section))
+    && (!actor || actor.startsWith(`${taskId}:`) && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(actor.slice(taskId.length + 1)))
+    && (!page || page.startsWith(`${taskId}:`) && /^[1-9][0-9]*$/.test(page.slice(taskId.length + 1)))
+    && (!item || [taskId, ownerId].some(id => item === `Task:${id}`))
+    && (!tab || ['comments', 'history'].includes(tab)) && (!group || ['true', 'false'].includes(group))
+}
+const presentationBase = (location: FormNavigationLocation, person = false) => {
+  const params = new URLSearchParams(location.search)
+  for (const key of [...taskPresentationKeys, ...(person ? ['panel', ...personPresentationKeys] : [])]) params.delete(key)
+  return JSON.stringify([location.pathname, location.hash, [...params].sort(([ak, av], [bk, bv]) => ak.localeCompare(bk) || av.localeCompare(bv))])
+}
+
+/** The exact Task source under a bounded chain of Person overlays; modal sources remain guarded. */
+export function taskDetailReturnOrigin(state: unknown, taskId: string, ownerId = taskId) {
+  let current = state
+  for (let depth = 0; depth < 8; depth++) {
+    const returned = recordContextReturn(current)
+    if (!returned) return null
+    const source = parsedLocation(returned.url)
+    const slot = returned.state?.recordContextRestore?.surface?.slot
+    if (slot === 'dialog-body' || slot === 'dialog-content') return null
+    if (taskOwner(source, taskId, ownerId)) return returned
+    if (!personOwner(source)) return null
+    current = returned.state
+  }
+  return null
+}
+
+/** Only same-Task presentation or its recorded Person round trip keeps mounted memory input. */
+export function preservesTaskDetailNavigation(taskId: string, ownerId = taskId): PreservesFormNavigation {
+  return (from, to) => {
+    const fromTask = taskOwner(from, taskId, ownerId), toTask = taskOwner(to, taskId, ownerId)
+    if (fromTask && toTask) return taskPresentation(from, taskId, ownerId) && taskPresentation(to, taskId, ownerId)
+      && presentationBase(from) === presentationBase(to)
+    if (from.pathname !== to.pathname || from.hash !== to.hash) return false
+    if (fromTask && personOwner(to)) {
+      const source = taskDetailReturnOrigin(to.state, taskId, ownerId)
+      return !!source && source.url === locationUrl(from) && taskPresentation(from, taskId, ownerId)
+        && presentationBase(from, true) === presentationBase(to, true)
+    }
+    if (personOwner(from) && toTask) {
+      const source = taskDetailReturnOrigin(from.state, taskId, ownerId), parent = recordContextReturn(from.state)
+      return !!source && source.url === locationUrl(to) && parent?.url === locationUrl(to) && taskPresentation(to, taskId, ownerId)
+        && presentationBase(from, true) === presentationBase(to, true)
+    }
+    if (personOwner(from) && personOwner(to)) {
+      const parent = recordContextReturn(to.state), fromSource = taskDetailReturnOrigin(from.state, taskId, ownerId), toSource = taskDetailReturnOrigin(to.state, taskId, ownerId)
+      const returning = recordContextReturn(from.state)
+      return !!fromSource && !!toSource && fromSource.url === toSource.url
+        && (new URLSearchParams(from.search).get('panel') === new URLSearchParams(to.search).get('panel')
+          || parent?.url === locationUrl(from) || returning?.url === locationUrl(to))
+        && presentationBase(from, true) === presentationBase(to, true)
+    }
+    return false
+  }
+}
+
+type Form = { unsaved: () => boolean; discard: () => void; /** FR-SAV-05: put typed input where it outlives the sign-in flow. */ keep?: () => void;
+  /** A mounted memory-only form may explicitly identify an overlay round trip that retains all its input. */ preservesNavigation?: PreservesFormNavigation }
 const forms = new Set<Form>()
 let listening = false
 const warnOnUnload = (e: BeforeUnloadEvent) => { if (hasUnsaved()) { e.preventDefault(); e.returnValue = '' } }
@@ -109,6 +195,10 @@ export function registerForm(form: Form) {
 }
 
 export const hasUnsaved = () => { for (const f of forms) if (f.unsaved()) return true; return false }
+export const blocksUnsavedNavigation = ({ currentLocation, nextLocation }: FormNavigation) => {
+  for (const form of forms) if (form.unsaved() && !form.preservesNavigation?.(currentLocation, nextLocation)) return true
+  return false
+}
 
 /** FR-SAV-06: Reload once the person has answered (or nothing needed asking); the browser's own prompt would ask a second time, before the
  *  discarded forms have rendered empty. */
@@ -137,6 +227,6 @@ export const leaveQuestion = {
 
 /** Leaving through `proceed` (closing a dialog, the Reload action): at once when nothing typed would be lost, otherwise after the
  *  question. A form with a draft, or with no change, never asks (FR-SAV-04). */
-export function leave(proceed: () => void) {
-  if (hasUnsaved()) leaveQuestion.show({ proceed }); else proceed()
+export function leave(proceed: () => void, navigation?: FormNavigation) {
+  if (navigation ? blocksUnsavedNavigation(navigation) : hasUnsaved()) leaveQuestion.show({ proceed }); else proceed()
 }

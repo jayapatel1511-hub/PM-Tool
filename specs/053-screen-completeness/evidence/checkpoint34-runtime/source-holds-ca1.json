@@ -1,0 +1,15 @@
+{
+  "atUtc": "2026-11-03T04:11:05.231718+00:00",
+  "status": "A and C held source; C# compilation still waits for B and D",
+  "files": {
+    "src/Hub.Api/Features/Reviews.cs": "663cf6256ff9b5f9dfe7691f2842cdd78349ad1d70175b65d372b24793d6b659",
+    "src/Hub.Api/Features/ReviewRegister.cs": "43e1c4fb6d6f7d35ab54f3b16731772242a335afb1923f51744165e91033793e",
+    "src/Hub.Api/Features/ReviewResponseExport.cs": "cb3ec0d2bf3cc6f91d5d7735abc5b72a47d579abc4a3568d6ffbfaf23d1fcf4d",
+    "src/Hub.Api/Features/ExternalReviews.cs": "931385c95cc7c2d21ff89f033c34726a46b7683c51798ced34956cd725ce951d",
+    "src/Hub.Api/Features/ReviewIssuedSources.cs": "309e59528e05995fa0b91ad7b5793ba84edc9c01204203dc20d3657c32b08913",
+    "web/src/pages/projects/Reviews.tsx": "cdd3c4232d0eb125dff909dbafd9a490c9bd4e1d7f55b19657626fdd8fa63798",
+    "web/src/pages/projects/external-review-form.tsx": "d05ef3db77dedb9e01e855586c2303bdbe563617ec5b9f0af0852422e210d48b",
+    "web/tests/external-review.cjs": "60b69635098136bb0ec93e8cbbdd74903a4a5e1d803f69c906f0c8ea7cb7de30",
+    "web/tests/external-review.fixture.cjs": "99aa3bf9d7e1c81292ac51eedd8f96926f1c8b8c2826f782ccc14ade4a3dbbc9"
+  }
+}

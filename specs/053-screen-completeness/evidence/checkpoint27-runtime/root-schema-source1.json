@@ -1,0 +1,19 @@
+{
+  "atUtc": "2026-11-02T12:10:22.613697+00:00",
+  "status": "ROOT_SCHEMA_SOURCE_AUTHORED_UNCOMPILED",
+  "files": [
+    {
+      "path": "src/Hub.Api/Data/Entities.cs",
+      "sha256": "3756733d7e58fa0d9feab623f1f6d0a72a3041b85ca5e7b32a32f3522edfd12f"
+    },
+    {
+      "path": "src/Hub.Api/Data/HubDb.cs",
+      "sha256": "af112b5626024f38130a681a83aad9aa82140c3d7fbdc2c0b9ba63221052f016"
+    },
+    {
+      "path": "src/Hub.Api/Records/DocumentLink.cs",
+      "sha256": "d78fa29fcd21b16ae079f5c32dc6f482b89baa2459c584ea7154436f2b8554b8"
+    }
+  ],
+  "model": "Exactly6nullablemanualreferencefields;max200/200/50;all-nullorcomplete-registrationcheck;2nullableRestrictFKs. No defaults/backfill or AddedBy/AddedAt changes. Migration waits for all CSharp authors HOLD."
+}

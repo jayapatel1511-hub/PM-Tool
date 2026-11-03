@@ -1,0 +1,9 @@
+{
+  "source": ".review/checkpoint32-review",
+  "copy": ".review/checkpoint34-review",
+  "oldAssetCount": 20,
+  "oldAssetsUnchanged": true,
+  "newSection": 11,
+  "newImage": "external-review-dialog5.png",
+  "state": "Browser verified; provider/final contracts in progress"
+}

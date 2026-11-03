@@ -1,0 +1,17 @@
+{
+  "status": "HASHES_MATCH_SOURCE_UNCOMPILED_UNRUN",
+  "files": {
+    "A": {
+      "web/src/pages/Files.tsx": "71dc204b388d3beed56bd73791f43a17c258fbb4b89110c5c0953e2ae27aefdb",
+      "web/tests/file-screen.cjs": "60a61efb0009847eb1582472389e9087a319063a9d9256cc819638b26a88c3da",
+      "web/tests/file-screen.fixture.cjs": "29f15ac2ae11cb2d77580126221771766e8cb449a461d4f1796641c2d71c009f"
+    },
+    "B": {
+      "src/Hub.Api/Features/Workspace.cs": "9a859e9ff88ee6110ced47b327fc7720d21561b009baf40c1f84e8525e51b19b",
+      "src/Hub.Api/Features/FileScreenReads.cs": "3c07619366bb8a190610e338d334cf21e4f593ba9b3cd9d01b7c46ce17635878",
+      "tests/Hub.Tests/Api/FileScreenTests.cs": "625f1284f6b57b0e9ddd0f4d194b22167b2105c4d8c1acef14614cfb954dbe21"
+    }
+  },
+  "AReview": "Bounded source PASS; no execution; B/C/D interfaces only",
+  "BReview": "Independent source review active"
+}

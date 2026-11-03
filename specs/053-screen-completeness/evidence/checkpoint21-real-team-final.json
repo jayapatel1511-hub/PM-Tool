@@ -1,0 +1,62 @@
+{
+  "observedAtUtc": "2026-11-01T16:11:09.259Z",
+  "rows": [
+    {
+      "name": "project",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "status": 200,
+      "contained": true,
+      "fillLinks": [
+        "/projects/QA21-REAL-001/allocations?fill=01a197d2-999b-7f92-b2ae-394a7ed831ee",
+        "/projects/QA21-REAL-001/allocations?fill=01a197d2-99b7-7486-bb99-d5eb0135f066"
+      ],
+      "optionText": "Diane Roy\nSenior Technical Reviewer\n12 h free · 8 h away",
+      "capacity": "12 h free · 8 h away",
+      "optionBox": {
+        "x": 767,
+        "y": 785,
+        "width": 374,
+        "height": 32
+      },
+      "capacityBox": {
+        "x": 1027.625,
+        "y": 793,
+        "width": 105.375,
+        "height": 16
+      },
+      "textSample": "Skip to content\nt\nTuesday\nMy Work\nHome\nProjects\nTasks\nResources\nTime\nReports\nTeam\nFiles\nMy Staff\nTuesday\nProjects\nQA21-REAL-001 Checkpoint 21 real Board Team project\nTeam & Disciplines\nSearch\n/\nMy projects\nNew\n1\nPN\nQA21-REAL-001\nCheckpoint 21 real Board Team project\n◐\nActive\n●\nGreen\nOwner (PM): Priya Nair\nClient: Internal / TBD\nTarget date: 2026-11-30\nOverview\nWork\nDeliverables\nCoordination\nPeople\nFiles\nActivity\nSettings\nTeam & Disciplines\nAllocations\nWorkload\nTeam & Disciplines\nUnfilled roles2\n\nUnfilled roles are separate from people and capacity.\n\nQA21 Civil reviewer\n\nCivil · 2026-11-02 – 2026-11-06 · 10 h\n\nFill\n\nQA21 Civil technologist\n\nCivil · 2026-11-02 – 2026-11-06 · 20 h\n\nFill\nDisciplines1\nCivil\nMarc Dubois\nRemove\nAdd discipline\nChoose…\nProject Management\nSurvey\nGeotechnical\nElectrical\nEnvironmental\nStructural\nTransportation\nArchitecture\nAdd\nAdd from template\nMembers2\nCertification tag\nAll certification tags\nPerson\nAdd a person…\nRole\nTeam Member\nReviewer\nViewer\nProject Manager\nPrimary discipline\n(optional)\nNo primary discipline\nCivil\nAdd\nGroup by\nNo grouping\nHome discipline\nOffice\nSupervisor\nCurrent unit\nFilters\n1\n1 active\nColumns\nViews\n\n2 people shown\n\nMembers\nName\tHome discipline\tOffice\tSupervisor\tCurrent unit\tProject Manager\tTeam Member\tReviewer\tViewer\tPrimary discipline\tAdded\t\nActions\n\nCivil1\n\nAC\nAlex Chen\nCivil Designer (EIT)\n\tCivil\tQA21 Halifax\tSam Patel\tNot set\t\t\n\t\t\t\nNo primary discipline\nCivil\n\t2026-11-01\tRemove\nNot set1\n\nJM\nJill Martin\nCivil Designer\n\tNot set\tQA21 Halifax\tSam Patel\tNot set\t\t\n\t\t\t\nNo primary discipline\nCivil\n\t2026-11-01\tRemove"
+    },
+    {
+      "name": "project",
+      "viewport": [
+        375,
+        812
+      ],
+      "status": 200,
+      "contained": true,
+      "fillLinks": [
+        "/projects/QA21-REAL-001/allocations?fill=01a197d2-999b-7f92-b2ae-394a7ed831ee",
+        "/projects/QA21-REAL-001/allocations?fill=01a197d2-99b7-7486-bb99-d5eb0135f066"
+      ],
+      "optionText": "Diane Roy\nSenior Technical Reviewer\n12 h free · 8 h away",
+      "capacity": "12 h free · 8 h away",
+      "optionBox": {
+        "x": 21,
+        "y": 503,
+        "width": 333,
+        "height": 32
+      },
+      "capacityBox": {
+        "x": 240.625,
+        "y": 511,
+        "width": 105.375,
+        "height": 16
+      },
+      "textSample": "Skip to content\n1\nPN\nQA21-REAL-001\nCheckpoint 21 real Board Team project\n◐\nActive\n●\nGreen\nOwner (PM): Priya Nair\nClient: Internal / TBD\nTarget date: 2026-11-30\nOverview\nWork\nDeliverables\nCoordination\nPeople\nFiles\nActivity\nSettings\nTeam & Disciplines\nAllocations\nWorkload\nTeam & Disciplines\nUnfilled roles2\n\nUnfilled roles are separate from people and capacity.\n\nQA21 Civil reviewer\n\nCivil · 2026-11-02 – 2026-11-06 · 10 h\n\nFill\n\nQA21 Civil technologist\n\nCivil · 2026-11-02 – 2026-11-06 · 20 h\n\nFill\nDisciplines1\nCivil\nMarc Dubois\nRemove\nAdd discipline\nChoose…\nProject Management\nSurvey\nGeotechnical\nElectrical\nEnvironmental\nStructural\nTransportation\nArchitecture\nAdd\nAdd from template\nMembers2\nCertification tag\nAll certification tags\nPerson\nAdd a person…\nRole\nTeam Member\nReviewer\nViewer\nProject Manager\nPrimary discipline\n(optional)\nNo primary discipline\nCivil\nAdd\nGroup by\nNo grouping\nHome discipline\nOffice\nSupervisor\nCurrent unit\nFilters\n1\n1 active\nColumns\nViews\n\n2 people shown\n\nCivil\nAC\nAlex Chen\n\nCivil Designer (EIT)\n\nHome discipline\nCivil\nOffice\nQA21 Halifax\nSupervisor\nSam Patel\nCurrent unit\nNot set\nRole\nProject Manager\nTeam Member\nReviewer\nViewer\nPrimary discipline\nNo primary discipline\nCivil\n\nAdded: 2026-11-01\n\nRemove\nNot set\nJM\nJill Martin\n\nCivil Designer\n\nHome discipline\nNot set\nOffice\nQA21 Halifax\nSupervisor\nSam Patel\nCurrent unit\nNot set\nRole\nProject Manager\nTeam Member\nReviewer\nViewer\nPrimary discipline\nNo primary discipline\nCivil\n\nAdded: 2026-11-01\n\nRemove\nMy Work\nSearch\nNotifications"
+    }
+  ],
+  "failures": []
+}

@@ -1,0 +1,15 @@
+{
+  "exitCode": 0,
+  "args": [
+    "node",
+    "node_modules/oxlint/bin/oxlint",
+    "src/pages/projects/handoff-consequences.tsx",
+    "src/pages/projects/weekly-readiness-agenda.tsx",
+    "tests/coordination-consequence-agenda.cjs"
+  ],
+  "atUtc": "2026-11-02T21:57:38.925423+00:00",
+  "tail": [
+    "src/pages/projects/weekly-readiness-agenda.tsx:13:17: warning react(only-export-components): Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.",
+    "src/pages/projects/weekly-readiness-agenda.tsx:33:17: warning react(only-export-components): Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components."
+  ]
+}

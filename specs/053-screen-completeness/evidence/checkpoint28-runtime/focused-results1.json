@@ -1,0 +1,14 @@
+{
+  "counts": {
+    "Passed": 70,
+    "Failed": 6
+  },
+  "failed": [
+    "Hub.Tests.Api.TemplateVersionProvenanceTests.Successful_old_POST_receipts_contain_no_new_feature_payload_when_replayed_after_flags_turn_off",
+    "Hub.Tests.Api.AdminUserScreenTests.Structure_on_uses_target_scope_with_overlap_self_and_existing_closed_unit_behavior(indirect: False, expected: 4)",
+    "Hub.Tests.Api.AdminUserScreenTests.Structure_off_is_direct_reports_even_for_mixed_admin_and_capacity_is_only_base_configuration",
+    "Hub.Tests.Api.TemplateDraftDiffTests.Every_structural_kind_uses_recorded_identity_including_basis_remove_add_roles_order_and_working_day_header",
+    "Hub.Tests.Api.AdminUserScreenTests.Http_screen_is_admin_only_coherent_and_absent_off_without_removing_old_fields",
+    "Hub.Tests.Api.AdminUserScreenTests.Structure_on_uses_target_scope_with_overlap_self_and_existing_closed_unit_behavior(indirect: True, expected: 5)"
+  ]
+}

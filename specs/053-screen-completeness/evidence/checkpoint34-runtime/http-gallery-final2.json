@@ -1,0 +1,122 @@
+{
+  "status": "PASS",
+  "atUtc": "2026-11-03T05:47:24.854041+00:00",
+  "files": 23,
+  "rows": [
+    {
+      "path": "index.html",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/07-readiness-links-phone.png",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/04-notifications-desktop.png",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/01-calendar-phone.png",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/07-readiness-links-desktop.png",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/06-contribution-phone.png",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/11-external-review-final-desktop.png",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/02-reviews-phone.png",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/05-task-history-phone.png",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/06-contribution-desktop.png",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/10-notice-delivery-phone.png",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/09-notice-preferences-desktop.png",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/01-calendar-desktop.png",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/04-notifications-phone.png",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/08-readiness-agenda-desktop.png",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/03-bulk-phone.png",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/02-reviews-desktop.png",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/10-notice-delivery-desktop.png",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/03-bulk-desktop.png",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/11-external-review-desktop.png",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/05-task-sections-desktop.png",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/09-notice-preferences-phone.png",
+      "status": 200,
+      "matches": true
+    },
+    {
+      "path": "assets/08-readiness-agenda-phone.png",
+      "status": 200,
+      "matches": true
+    }
+  ]
+}

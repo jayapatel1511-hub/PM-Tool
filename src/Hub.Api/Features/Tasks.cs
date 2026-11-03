@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Hub.Api.Features;
 
 /// Tasks and review (§12.5, §13.3, §13.4, §15.6, §15.7).
-public static class TaskEndpoints
+public static partial class TaskEndpoints
 {
     public sealed record TaskDetailProject(Guid Id, string ProjectNumber, string Name, string Status);
     public sealed record TaskDetailTransition(string To, bool Allowed, string? Reason, bool NeedsReason, string? Via);
@@ -20,14 +20,24 @@ public static class TaskEndpoints
         bool NeedsReason, bool AllowSelfReview, bool AuthoriseStart,
         [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         bool? OfferPickup = null);
-    public sealed record TaskDetailCollaborator(Guid Id, string DisplayName, bool IsActive);
+    public sealed record TaskDetailCollaborator(Guid Id, string DisplayName, bool IsActive,
+        [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        TaskContributionRead? Contribution = null);
     public sealed record TaskDetailWatcher(Guid Id, string DisplayName, string Source);
     public sealed record TaskRelatedDeliverable(Guid Id, string Key, string Name, string Status);
-    public sealed record TaskDetailResponse(TaskQueries.Row Task, string? Description, string? OnHoldReason, string? CancelledReason,
+    public sealed partial record TaskDetailResponse(TaskQueries.Row Task, string? Description, string? OnHoldReason, string? CancelledReason,
         string? PreviousStatus, DateTimeOffset? ReviewRequestedAt, TaskDetailProject Project, IReadOnlyList<TaskDetailCollaborator> Collaborators,
         IReadOnlyList<TaskDetailWatcher> Watchers, TaskDetailPermissions Permissions,
         [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-        IReadOnlyList<TaskRelatedDeliverable>? RelatedDeliverables = null);
+        IReadOnlyList<TaskRelatedDeliverable>? RelatedDeliverables = null,
+        [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        RecordContextView? Context = null,
+        [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        IReadOnlyList<WorkInputEffect>? InputEffects = null,
+        [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        IReadOnlyList<WorkInputSourceUse>? SourceUses = null,
+        [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        WorkReadinessInputs? ReadinessInputs = null);
     public sealed record CreateBody(string Name, string? Description, Guid? ProjectDisciplineId, Guid? DeliverableId, Guid? MilestoneId, Guid? AssigneeId,
         Guid? ReviewerId, bool? RequiresReview, string? Priority, DateOnly? StartDate, DateOnly? DueDate, decimal? EstimatedHours, Guid[]? DependsOn);
     public sealed record TransitionBody(string ToStatus, string? Reason, string? Comment, Guid? ReviewerId, int? RowVersion, bool? AcknowledgeReadiness = null);
@@ -55,21 +65,50 @@ public static class TaskEndpoints
 
     public static void Map(RouteGroupBuilder api)
     {
-        api.MapGet("/projects/{id:guid}/tasks", async (Guid id, HttpContext http, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock) =>
+        api.MapGet("/projects/{id:guid}/tasks", async (Guid id, Guid? seenSubjectId, HttpContext http, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock) =>
         {
             await access.Project(id, track: false);
             var s = await store.Get(db);
+            var group = s.IsFlagOn("work_screens") ? TaskGroupReads.Group(http.Request.Query["group"]) : null;
+            var presetCode = http.Request.Query["homePreset"].ToString();
+            var projectStatuses = s.IsFlagOn("home_overview") ? Http.List(http.Request.Query["homeProjectStatus"]) : [];
+            foreach (var status in projectStatuses) Check.OneOf(status, ProjectStatus.All, "homeProjectStatus");
+            await using var snapshot = s.IsFlagOn("work_screens") || s.IsFlagOn("home_overview") && (!string.IsNullOrWhiteSpace(presetCode) || projectStatuses.Length > 0)
+                ? await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead) : null;
+            if (snapshot is not null) await access.Project(id, track: false);
+            var preset = await HomePresets.Resolve(access, db, s, presetCode);
             var f = TaskFilter.From(http.Request.Query);
-            return await TaskQueries.Page(db, TaskQueries.Apply(db, db.Tasks.AsNoTracking().Where(t => t.ProjectId == id), f, me.Id, clock.Today(s), s), f, access.Actor, s.IsFlagOn("small_ux"));
+            var tasks = db.Tasks.AsNoTracking().Where(t => t.ProjectId == id);
+            if (projectStatuses.Length > 0) tasks = tasks.Where(t => db.Projects.Any(p => p.Id == t.ProjectId && projectStatuses.Contains(p.Status)));
+            if (preset is not null) tasks = preset.ApplyTasks(tasks);
+            var now = clock.GetUtcNow(); var today = DateOnly.FromDateTime(Clock.Local(now, s).DateTime);
+            var page = await TaskQueries.Page(db, TaskQueries.Apply(db, tasks, f, me.Id, today, s), f, access.Actor,
+                s.IsFlagOn("small_ux") || s.IsFlagOn("work_screens"), group, group is null ? null : now, today, includeSubmissionDate: s.IsFlagOn("work_screens"),
+                boardSettings: s.IsFlagOn("work_screens") ? s : null, boardNow: now);
+            return await DecorateSeenPage(page, seenSubjectId ?? me.Id, today, now, access, db, s);
         }).AddOpenApiOperationTransformer(TaskFilter.Describe);
         // Cross-project task list for the workspace views (§36.1, §36.3): only projects the caller may see, within the
         // selected scope; a workspace's manual order applies only to its owner.
-        api.MapGet("/tasks", async (string? projects, HttpContext http, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock) =>
+        api.MapGet("/tasks", async (string? projects, Guid? seenSubjectId, HttpContext http, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock) =>
         {
             var s = await store.Get(db);
+            var group = s.IsFlagOn("work_screens") ? TaskGroupReads.Group(http.Request.Query["group"]) : null;
+            var presetCode = http.Request.Query["homePreset"].ToString();
+            var projectStatuses = s.IsFlagOn("home_overview") ? Http.List(http.Request.Query["homeProjectStatus"]) : [];
+            foreach (var status in projectStatuses) Check.OneOf(status, ProjectStatus.All, "homeProjectStatus");
+            await using var snapshot = s.IsFlagOn("work_screens") || s.IsFlagOn("home_overview") && (!string.IsNullOrWhiteSpace(presetCode) || projectStatuses.Length > 0)
+                ? await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead) : null;
+            var preset = await HomePresets.Resolve(access, db, s, presetCode);
             var f = TaskFilter.From(http.Request.Query);
             if (f.WorkspaceId is { } ws && !await db.Workspaces.AnyAsync(w => w.Id == ws && w.OwnerId == me.Id)) f.WorkspaceId = null;
-            return await TaskQueries.Page(db, TaskQueries.Apply(db, InScope(access, db, projects), f, me.Id, clock.Today(s), s), f, access.Actor, s.IsFlagOn("small_ux"));
+            var tasks = InScope(access, db, projects);
+            if (projectStatuses.Length > 0) tasks = tasks.Where(t => db.Projects.Any(p => p.Id == t.ProjectId && projectStatuses.Contains(p.Status)));
+            if (preset is not null) tasks = preset.ApplyTasks(tasks);
+            var now = clock.GetUtcNow(); var today = DateOnly.FromDateTime(Clock.Local(now, s).DateTime);
+            var page = await TaskQueries.Page(db, TaskQueries.Apply(db, tasks, f, me.Id, today, s), f, access.Actor,
+                s.IsFlagOn("small_ux") || s.IsFlagOn("work_screens"), group, group is null ? null : now, today, includeSubmissionDate: s.IsFlagOn("work_screens"),
+                boardSettings: s.IsFlagOn("work_screens") ? s : null, boardNow: now);
+            return await DecorateSeenPage(page, seenSubjectId ?? me.Id, today, now, access, db, s);
         }).AddOpenApiOperationTransformer(TaskFilter.Describe);
         api.MapPost("/projects/{id:guid}/tasks", Create);
         api.MapPost("/projects/{id:guid}/tasks/bulk", Bulk);
@@ -155,7 +194,7 @@ public static class TaskEndpoints
     }
 
     static string Reason(Allow a, string arg) => Text.Get(a.Why ?? "perm.admin", a.Arg ?? arg);
-    static async Task<string> DisciplineName(HubDb db, Guid pdId) => await db.ProjectDisciplines.Where(x => x.Id == pdId).Select(x => x.Discipline!.Name).FirstAsync();
+    internal static async Task<string> DisciplineName(HubDb db, Guid pdId) => await db.ProjectDisciplines.Where(x => x.Id == pdId).Select(x => x.Discipline!.Name).FirstAsync();
 
     // ---------- Create (FR-TSK-01, TM-06, R-02, Workflow 4) ----------
 
@@ -217,14 +256,42 @@ public static class TaskEndpoints
         return (t, warnings);
     }
 
+    // seenSubjectId is presentation context only. It never changes task scope or grants another person's private state.
+    static async Task<TaskQueries.ListPage> DecorateSeenPage(TaskQueries.ListPage page, Guid subjectId, DateOnly today,
+        DateTimeOffset now, Access access, HubDb db, OrgSettings settings)
+    {
+        var context = new WorkSeenContext(subjectId, today, now);
+        if (!WorkSeenEligibility.Own(access, settings, context)) return page;
+        var bounds = page.Items.Select(row => new WorkSeenReadBound(new(ItemType.Task, row.Id), row.ProjectId, row.RowVersion,
+            TaskReadRoles(row))).ToArray();
+        var seen = await WorkSeenReads.DecorateAsync(db, access, settings, context, bounds);
+        foreach (var row in page.Items) row.Seen = seen.GetValueOrDefault(new(ItemType.Task, row.Id));
+        return page;
+    }
+
+    static IReadOnlyList<WorkSeenRoleRecipient> TaskReadRoles(TaskQueries.Row row)
+    {
+        var roles = new List<WorkSeenRoleRecipient>();
+        if (row.AssigneeId is { } assignee) roles.Add(new("Assignee", assignee));
+        if (row.ReviewerId is { } reviewer) roles.Add(new("Reviewer", reviewer));
+        return roles;
+    }
+
     // ---------- Detail (§13.3.1, §25.9 permissions.allowedTransitions) ----------
 
-    static async Task<TaskDetailResponse> Get(string id, Access access, HubDb db, SettingsStore store)
+    static async Task<TaskDetailResponse> Get(string id, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
         var t = (Guid.TryParse(id, out var g) ? await db.Tasks.AsNoTracking().FirstOrDefaultAsync(x => x.Id == g)
             : await db.Tasks.AsNoTracking().FirstOrDefaultAsync(x => x.Key == id)) ?? throw ApiException.NotFound();
         var (p, ctx) = await access.Project(t.ProjectId, track: false);
         var s = await store.Get(db);
+        await using var snapshot = (s.IsFlagOn("screen_patterns") || s.IsFlagOn("work_screens"))
+            ? await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead) : null;
+        if (snapshot is not null)
+        {
+            t = await db.Tasks.AsNoTracking().SingleOrDefaultAsync(x => x.Id == t.Id) ?? throw ApiException.NotFound();
+            (p, ctx) = await access.Project(t.ProjectId, track: false);
+        }
         var row = (await TaskQueries.Rows(db, db.Tasks.AsNoTracking().Where(x => x.Id == t.Id), access.Actor)).Single();
         var facts = await Facts(db, t);
         var a = access.Actor;
@@ -238,7 +305,16 @@ public static class TaskEndpoints
                 return new TaskDetailTransition(x.to, allow.Ok, allow.Ok ? null : Reason(allow, dname), Workflow.TaskNeedsReason(t.Status, x.to), x.path!.Length > 1 ? x.path[0] : null);
             }).ToList();
         var notAllowedComplete = t.RequiresReview && t.Status == TaskStatuses.InProgress ? Text.Get("task.requires_review_hint") : null;
-        var collaborators = await db.Collaborators.Where(c => c.TaskId == t.Id).Join(db.Users, c => c.UserId, u => u.Id, (c, u) => new TaskDetailCollaborator(u.Id, u.DisplayName, u.IsActive)).ToListAsync();
+        List<TaskDetailCollaborator> collaborators;
+        if (s.IsFlagOn("work_screens"))
+        {
+            var members = await db.Collaborators.AsNoTracking().Where(c => c.TaskId == t.Id).Join(db.Users, c => c.UserId, u => u.Id,
+                (c, u) => new { Membership = c, u.Id, u.DisplayName, u.IsActive }).ToListAsync();
+            var contributions = await TaskContributions.ReadMany(db, access, ctx, members.Select(m => m.Membership).ToArray());
+            collaborators = members.Select(m => new TaskDetailCollaborator(m.Id, m.DisplayName, m.IsActive, contributions[m.Membership.Id])).ToList();
+        }
+        else collaborators = await db.Collaborators.Where(c => c.TaskId == t.Id).Join(db.Users, c => c.UserId, u => u.Id,
+            (c, u) => new TaskDetailCollaborator(u.Id, u.DisplayName, u.IsActive, null)).ToListAsync();
         var watchers = await db.Watchers.Where(w => w.ItemType == ItemType.Task && w.ItemId == t.Id).Join(db.Users, w => w.UserId, u => u.Id, (w, u) => new TaskDetailWatcher(u.Id, u.DisplayName, w.Source)).ToListAsync();
         var edit = Permissions.EditTask(a, ctx, facts);
         var assign = Permissions.AssignTask(a, ctx, facts);
@@ -257,13 +333,18 @@ public static class TaskEndpoints
             && db.ItemLinks.Any(l => l.ProjectId == p.Id && l.SourceType == ItemType.Task && l.SourceId == t.Id
                 && l.TargetType == ItemType.Deliverable && l.TargetId == d.Id && l.Relation == ItemRelation.Related))
             .OrderBy(d => d.Key).Select(d => new TaskRelatedDeliverable(d.Id, d.Key, d.Name, d.Status)).ToListAsync() : null;
-        return new TaskDetailResponse(row, t.Description, t.OnHoldReason, t.CancelledReason, t.PreviousStatus, t.ReviewRequestedAt,
-            new TaskDetailProject(p.Id, p.ProjectNumber, p.Name, p.Status), collaborators, watchers, permissions, related);
+        var context = await new RecordContextReader(db, p, s).Task(t);
+        return await WorkScreenResponseMetadata.AttachDetailAsync(new TaskDetailResponse(row, t.Description, t.OnHoldReason, t.CancelledReason, t.PreviousStatus, t.ReviewRequestedAt,
+            new TaskDetailProject(p.Id, p.ProjectNumber, p.Name, p.Status), collaborators, watchers, permissions, related,
+            context, context is null ? null : await WorkInputPatterns.Effects(db, p.Id, t.Id, context),
+            context is null ? null : await WorkInputPatterns.Sources(db, p.Id, t.Id),
+            context is null ? null : await WorkReadinessInputReader.Read(db, p, t.Id, s, store, clock)), t, access, db, s, clock);
     }
 
     // ---------- Edit (T-15..T-22, R-02, R-04, E-03) ----------
 
     static async Task<Ok<TaskEdited>> Edit(Guid id, JsonElement body, HttpContext http, Access access, HubDb db, TeamService team, Notifier notify, SettingsStore store, TimeProvider clock)
+        => await Tx.Notice<Ok<TaskEdited>>(db, store, async () =>
     {
         var (t, p, ctx) = await Load(db, access, id);
         var patch = new Patch(body);
@@ -378,7 +459,7 @@ public static class TaskEndpoints
         if (t.DeliverableId is { } dId && await db.Deliverables.Where(d => d.Id == dId).Select(d => d.DueDate).FirstOrDefaultAsync() is { } ddue && t.DueDate > ddue)
             warnings.Add(Text.Get("task.after_deliverable", t.Key, "", ddue.ToString("yyyy-MM-dd")));
         return TypedResults.Ok(new TaskEdited(t.Id, t.RowVersion, t.DueDateChangeCount, warnings));
-    }
+    });
 
     /// AC-BKL-03 (§36.3), from the save hook on every path (edit, bulk, transition) while `flag.backlog` is on. Board positions are
     /// per lane, so a task leaving the Backlog drops its Backlog place and joins its new lane after the cards arranged there; a task
@@ -408,6 +489,7 @@ public static class TaskEndpoints
     // ---------- Transitions (T-10..T-14, R-01..R-04, C-07, C-08, DL-02) ----------
 
     static async Task<Ok<TaskTransitioned>> Transition(Guid id, TransitionBody body, HttpContext http, Access access, HubDb db, Notifier notify, TeamService team, SettingsStore store, TimeProvider clock)
+        => await Tx.Notice<Ok<TaskTransitioned>>(db, store, async () =>
     {
         var (t, p, ctx) = await Load(db, access, id);
         await Http.CheckVersion(db, http, t, body.RowVersion);
@@ -421,7 +503,7 @@ public static class TaskEndpoints
         if (t.Status != previousStatus) await TransitionNotices(notify, p, t, body.Comment);
         await db.SaveChangesAsync();
         return TypedResults.Ok(new TaskTransitioned(t.Id, t.Status, t.RowVersion, t.ProgressPct, t.ReviewRound, warnings));
-    }
+    });
 
     public static async Task ApplyTransition(HubDb db, Access access, ProjectContext ctx, Project p, WorkTask t, string to, string? reason, string? comment,
         Guid? reviewerId, OrgSettings s, TimeProvider clock, TeamService team, List<string> warnings,
@@ -559,7 +641,8 @@ public static class TaskEndpoints
 
     // ---------- Collaborators (FR-TSK-08, T-15, E-07) ----------
 
-    static async Task<NoContent> AddCollaborator(Guid id, UserBody body, Access access, HubDb db, TeamService team, Notifier notify, TimeProvider clock)
+    static async Task<NoContent> AddCollaborator(Guid id, UserBody body, Access access, HubDb db, TeamService team, Notifier notify, TimeProvider clock, SettingsStore store)
+        => await Tx.Notice<NoContent>(db, store, async () =>
     {
         var (t, p, ctx) = await Load(db, access, id);
         Access.Demand(Permissions.Writable(access.Actor, ctx));
@@ -575,7 +658,7 @@ public static class TaskEndpoints
             await db.SaveChangesAsync();
         }
         return TypedResults.NoContent();
-    }
+    });
 
     static async Task<NoContent> RemoveCollaborator(Guid id, Guid userId, Access access, HubDb db)
     {
@@ -611,7 +694,8 @@ public static class TaskEndpoints
                 db.Tasks.Where(x => x.Id == (d.PredecessorTaskId == id ? d.SuccessorTaskId : d.PredecessorTaskId)).Select(x => new OtherEnd(x.Key, x.Name, x.AssigneeId)).First()))
             .ToListAsync()).Select(d => new TaskDeleteLink(d.Id, d.PredecessorTaskId, d.SuccessorTaskId, d.Other.Key, d.Other.Name, d.PredecessorTaskId == id ? "blocks" : "dependsOn", d.Other.AssigneeId)).ToList();
 
-    static async Task<Ok<TaskDeleted>> Delete(Guid id, Access access, HubDb db, Notifier notify, TimeProvider clock, CurrentUser me)
+    static async Task<Ok<TaskDeleted>> Delete(Guid id, Access access, HubDb db, Notifier notify, TimeProvider clock, CurrentUser me, SettingsStore store)
+        => await Tx.Notice<Ok<TaskDeleted>>(db, store, async () =>
     {
         var (t, p, ctx) = await Load(db, access, id);
         Access.Demand(Permissions.DeleteTask(access.Actor, ctx, await Facts(db, t)));
@@ -632,7 +716,7 @@ public static class TaskEndpoints
             Text.Get("notify.dependency_removed_deleted", actor, t.Key, t.Name));
         await db.SaveChangesAsync();
         return TypedResults.Ok(new TaskDeleted(edges.Count));
-    }
+    });
 
     static async Task<Ok<TaskVersion>> Restore(Guid id, HttpContext http, Access access, HubDb db, SettingsStore store)
     {
@@ -657,6 +741,7 @@ public static class TaskEndpoints
     // ---------- Bulk (FR-TSK-09, T-23, E-20, AC-NOT-06) ----------
 
     static async Task<Ok<TaskBulkResult>> Bulk(Guid id, BulkBody body, Access access, HubDb db, TeamService team, Notifier notify, SettingsStore store, TimeProvider clock)
+        => await Tx.Notice<Ok<TaskBulkResult>>(db, store, async () =>
     {
         var (p, ctx) = await access.Project(id);
         var s = await store.Get(db);
@@ -744,7 +829,7 @@ public static class TaskEndpoints
                 await notify.Send(NotificationEvents.DueDateChanged, g.Key, item, Text.Get("notify.bulk_due", actor, g.Count(), p.ProjectNumber), reason);
         await db.SaveChangesAsync();
         return TypedResults.Ok(new TaskBulkResult(updated.Count, skipped, warnings));
-    }
+    });
 
     public static NotifyItem Item(Project p, WorkTask t) => new(p.Id, ItemType.Task, t.Id, t.Key, $"/projects/{p.ProjectNumber}/tasks?panel=Task:{t.Id}", p.ProjectNumber);
     // One mutation path for normal reassignment and same-team pickup; callers enforce their own authorization.

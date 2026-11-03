@@ -1,10 +1,13 @@
+import { useWorkSeenDetailOwner, WorkSeenDetailNotice } from '@/components/hub/work-seen-detail-owner'
+import type { WorkSeenFields } from '@/components/hub/work-seen'
+import { PersonPanelTrigger } from '@/components/hub/person-panel-trigger'
 import { useQuery } from '@tanstack/react-query'
 import { CalendarClock, ChevronDown, ExternalLink, FolderOpen, MoreHorizontal, Star } from 'lucide-react'
 import { createContext, useContext, useState } from 'react'
 import { Link, NavLink, Outlet, useMatch, useParams } from 'react-router'
 import { toast } from 'sonner'
 import { ErrorBanner, InProject, Loading, Spinner } from '@/components/hub/common'
-import { StatusPill } from '@/components/hub/pills'
+import { HealthPill, StatusPill } from '@/components/hub/pills'
 import { useProject, useProjectRefresh } from '@/hooks/data'
 import { typedRequest } from '@/lib/api'
 import { fmtDate, relative } from '@/lib/format'
@@ -15,9 +18,11 @@ import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { useMe, type Me } from '@/lib/auth-context'
+import { useFlag, useMe, type Me } from '@/lib/auth-context'
 import { ProjectSlots } from './slots'
 import { PickerProject } from '@/components/hub/people'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import '@/components/hub/visual-tabs.css'
 
 const Ctx = createContext<ProjectDetail | null>(null)
 export const useCurrentProject = () => useContext(Ctx)!
@@ -41,18 +46,24 @@ const PROJECT_GROUPS: { id: string; label: string; pages: ProjectPage[] }[] = [
 const PROJECT_MORE: ProjectPage[] = [page('activity', 'ptab.activity'), page('settings', 'ptab.settings')]
 /** Every project page, for breadcrumbs and route checks. */
 export const PROJECT_TABS: ProjectPage[] = [...PROJECT_GROUPS.flatMap((g) => g.pages), ...PROJECT_MORE]
+/** Existing embedded URLs may select People and name the breadcrumb without adding a new project view. */
+export const PROJECT_VISUAL_PEOPLE_ALIASES: ProjectPage[] = [page('vacation', 'availability.title', (_, me) => !me.capabilities.readOnly)]
 
 export function ProjectLayout() {
   const { number } = useParams()
   const me = useMe()
+  const visualSystem = useFlag('visual_system')
   const q = useProject(number)
+  const seenOwner = useWorkSeenDetailOwner({ itemType: 'Project', itemId: q.data?.id ?? number ?? '',
+    sourceVersion: q.data?.rowVersion, seen: (q.data as WorkSeenFields | undefined)?.seen, read: q })
   if (q.isPending) return <Loading rows={6} />
   if (q.error) return <div className="p-6"><ErrorBanner error={q.error} retry={() => q.refetch()} /></div>
   const p = q.data
   return (
     <Ctx.Provider value={p}>
-      <div className="flex min-h-full flex-col">
+      <div ref={seenOwner.surfaceRef} data-visual-project-layout={visualSystem ? '' : undefined} className="flex min-h-full flex-col">
         <ProjectHeader p={p} />
+        <WorkSeenDetailNotice state={seenOwner.state} />
         <ProjectTabs p={p} me={me} />
         <StatusBanner p={p} />
         {p.status === 'Active' && p.permissions.reviewDates.ok && <DateReviewBanner p={p} />}
@@ -65,19 +76,20 @@ export function ProjectLayout() {
 /** Group tabs, More for Activity and Settings, and the active group's pages as a small switch beside them (on a second
  *  line when they do not fit). All are real links, so a page opens in a new tab and history works as before. */
 function ProjectTabs({ p, me }: { p: ProjectDetail; me: Me }) {
+  const visualSystem = useFlag('visual_system')
   const segment = useMatch('/projects/:number/*')?.params['*']?.split('/')[0]
   const visible = (pages: ProjectPage[]) => pages.filter((x) => !x.show || x.show(p, me))
   const to = (x: ProjectPage) => typeof x.path === 'string' ? x.path : x.path(p)
   const groups = PROJECT_GROUPS.map((g) => ({ ...g, pages: visible(g.pages) })).filter((g) => g.pages.length)
-  const current = groups.find((g) => g.pages.some((x) => x.path === segment))
+  const legacyPeople = visualSystem && visible(PROJECT_VISUAL_PEOPLE_ALIASES).some((x) => x.path === segment)
+  const current = groups.find((g) => (legacyPeople && g.id === 'people') || g.pages.some((x) => to(x).split(/[/?]/)[0] === segment))
   const more = visible(PROJECT_MORE)
   const moreActive = more.find((x) => x.path === segment)
   const tab = (on: boolean) => cn('inline-flex min-h-11 items-center px-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground', on && 'font-semibold text-foreground shadow-[inset_0_-2px_0_var(--primary)]')
-  return (
-    <div className="no-print flex min-w-0 flex-wrap items-center gap-x-6 border-b bg-card px-4 md:sticky md:top-0 md:z-20 md:px-6 xl:px-8">
-      <nav aria-label={t('ptab.label')} className="flex min-w-0 flex-wrap items-center gap-1">
-        {groups.map((g) => <Link key={g.id} to={to(g.pages[0])} aria-current={g === current ? (g.pages[0].path === segment ? 'page' : 'true') : undefined} className={tab(g === current)}>{runtimeText(g.label)}</Link>)}
-        {more.length > 0 && (
+  const primary = (
+    <nav aria-label={t('ptab.label')} className={visualSystem ? 'visual-project-tabs-v2__primary' : 'flex min-w-0 flex-wrap items-center gap-1'}>
+      {groups.map((g) => <Link key={g.id} to={to(g.pages[0])} aria-current={g === current ? (to(g.pages[0]).split(/[/?]/)[0] === segment ? 'page' : 'true') : undefined} className={tab(g === current)}>{runtimeText(g.label)}</Link>)}
+      {visualSystem ? more.map((x, index) => <Link key={x.label} to={to(x)} aria-current={x === moreActive ? 'page' : undefined} className={cn(tab(x === moreActive), 'visual-project-tabs-v2__quiet', index === 0 && 'visual-project-tabs-v2__quiet--first')}>{runtimeText(x.label)}</Link>) : more.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger className={cn(tab(!!moreActive), 'gap-1')}>{moreActive ? runtimeText(moreActive.label) : t('calm.more')}<ChevronDown className="size-4" aria-hidden /></DropdownMenuTrigger>
             <DropdownMenuContent align="start">
@@ -85,12 +97,22 @@ function ProjectTabs({ p, me }: { p: ProjectDetail; me: Me }) {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-      </nav>
-      {current && current.pages.length > 1 && (
-        <nav aria-label={t('calm.groupPages', { group: runtimeText(current.label) })} className="flex min-w-0 flex-wrap gap-0.5 py-1.5">
-          {current.pages.map((x) => <NavLink key={x.label} to={to(x)} className={({ isActive }) => cn('inline-flex min-h-8 items-center rounded-md px-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground', isActive && 'bg-muted font-semibold text-foreground')}>{runtimeText(x.label)}</NavLink>)}
-        </nav>
-      )}
+    </nav>
+  )
+  const secondary = current && current.pages.length > 1 && (
+    <nav aria-label={t('calm.groupPages', { group: runtimeText(current.label) })} className={visualSystem ? 'visual-project-tabs-v2__secondary' : 'flex min-w-0 flex-wrap gap-0.5 py-1.5'}>
+      {current.pages.map((x) => <NavLink key={x.label} to={to(x)} className={({ isActive }) => cn('inline-flex min-h-8 items-center rounded-md px-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground', isActive && 'bg-muted font-semibold text-foreground')}>{runtimeText(x.label)}</NavLink>)}
+    </nav>
+  )
+  return visualSystem ? (
+    <div data-visual-project-tabs data-visual-tabs="v2" className="visual-project-tabs-v2 no-print border-b px-4 md:sticky md:top-0 md:z-20 md:px-6 xl:px-8">
+      {primary}
+      {secondary}
+    </div>
+  ) : (
+    <div data-visual-project-tabs className="visual-project-tabs no-print flex min-w-0 flex-wrap items-center gap-x-6 border-b bg-card px-4 md:sticky md:top-0 md:z-20 md:px-6 xl:px-8">
+      {primary}
+      {secondary}
     </div>
   )
 }
@@ -102,28 +124,40 @@ const linkCls = 'flex min-h-(--control-row-h) w-full items-center gap-2 rounded-
  *  sit in the details popover. */
 function ProjectHeader({ p }: { p: ProjectDetail }) {
   const refresh = useProjectRefresh()
+  const visualSystem = useFlag('visual_system')
+  const peopleOn = useFlag('people_screens')
+  const compactOverride = visualSystem && p.health.overrideActive
   return (
-    <header data-accent={accentOf(p.id)} className="flex min-w-0 flex-wrap items-center gap-3 border-b border-t-4 md:flex-nowrap border-t-(color:--acc-stripe) bg-card px-4 py-2.5 md:px-6 xl:px-8">
-      <button className="key shrink-0 rounded-md bg-(--acc-bg) px-2 py-0.5 text-(--acc-fg) hover:underline" title={t('common.copyLink')}
+    <header data-visual-project-header data-accent={accentOf(p.id)} className="visual-project-header flex min-w-0 flex-wrap items-center gap-3 border-b border-t-4 md:flex-nowrap border-t-(color:--acc-stripe) bg-card px-4 py-2.5 md:px-6 xl:px-8">
+      <div className="visual-project-main">
+      <button className="visual-project-number key shrink-0 rounded-md bg-(--acc-bg) px-2 py-0.5 text-(--acc-fg) hover:underline" title={t('common.copyLink')}
         onClick={() => { navigator.clipboard?.writeText(p.projectNumber); toast.success(t('common.copied')) }}>{p.projectNumber}</button>
-      <h1 title={p.name} className="min-w-0 truncate text-lg/7 font-semibold tracking-[-0.2px] max-md:order-last max-md:line-clamp-2 max-md:basis-full max-md:whitespace-normal">{p.name}</h1>
+      {visualSystem ? <Tooltip><TooltipTrigger asChild><h1 tabIndex={0} title={p.name} className="visual-project-name min-w-0 truncate text-lg/7 font-semibold tracking-[-0.2px]">{p.name}</h1></TooltipTrigger><TooltipContent side="bottom" className="max-w-xs break-words">{p.name}</TooltipContent></Tooltip> : <h1 title={p.name} className="min-w-0 truncate text-lg/7 font-semibold tracking-[-0.2px] max-md:order-last max-md:line-clamp-2 max-md:basis-full max-md:whitespace-normal">{p.name}</h1>}
       {p.starred && <span title={t('projects.starred')} className="shrink-0 text-warn"><Star className="size-4 fill-current" aria-hidden /><span className="sr-only">{t('projects.starred')}</span></span>}
-      <div className="flex shrink-0 items-center gap-2 text-sm"><StatusPill status={p.status} /><ProjectSlots.Health p={p} /></div>
+      <div className="flex shrink-0 items-center gap-2 text-sm"><StatusPill status={p.status} />{!compactOverride && <ProjectSlots.Health p={p} />}</div>
       <div className="ml-auto flex shrink-0 items-center gap-2">
         {/* A labelled popover, not a menu: the details are text that keyboard and screen-reader users read in order. */}
         <Popover>
-          <PopoverTrigger asChild><Button variant="ghost" size="icon" aria-label={t('calm.projectDetails')}><MoreHorizontal className="size-5" /></Button></PopoverTrigger>
-          <PopoverContent align="end" aria-label={t('calm.projectDetails')} className="w-80 p-0 text-sm outline-none" tabIndex={-1}
+          <PopoverTrigger asChild><Button variant="ghost" size="icon" className={compactOverride ? 'visual-project-health-summary' : undefined} aria-label={t('calm.projectDetails')} aria-describedby={compactOverride ? `project-health-summary-${p.id}` : undefined}>
+            {compactOverride ? <><span id={`project-health-summary-${p.id}`} className="visual-project-health-pills"><HealthPill health={p.health.reported} label={t('health.reported')} className="py-0" /><HealthPill health={p.health.computed} label={t('health.computed')} className="py-0" /></span><MoreHorizontal className="size-3.5 shrink-0" /></> : <MoreHorizontal className="size-5" />}
+          </Button></PopoverTrigger>
+          <PopoverContent align="end" data-visual-project-details={visualSystem ? '' : undefined} aria-label={t('calm.projectDetails')} className="w-80 p-0 text-sm outline-none" tabIndex={-1}
+            onInteractOutside={event => {
+              // A nested Person sheet temporarily owns focus; retain its source popover for return.
+              if (peopleOn && new URLSearchParams(window.location.search).get('panel')?.startsWith('Person:')) event.preventDefault()
+            }}
             onOpenAutoFocus={(e) => { e.preventDefault(); (e.currentTarget as HTMLElement).focus() }}>
             <div className="space-y-1 px-4 py-3">
               <p className="font-semibold">{p.name}</p>
               <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-muted-foreground">
                 <dt>{t('projects.col.client')}</dt><dd className="text-foreground">{p.client}</dd>
-                <dt>{t('projects.col.pm')}</dt><dd className="text-foreground">{p.pmName}</dd>
+                <dt>{t('projects.col.pm')}</dt><dd className="text-foreground">{p.projectManagerId && p.pmName ? <PersonPanelTrigger userId={p.projectManagerId} name={p.pmName} focusKey={`project:${p.id}:pm:popover`} /> : p.pmName}</dd>
+                {visualSystem && <><dt>{t('submissions.targetDate')}</dt><dd className="text-foreground font-mono">{p.targetCompletionDate ? fmtDate(p.targetCompletionDate) : t('common.dash')}</dd></>}
                 {p.phase && <><dt>{t('projects.col.phase')}</dt><dd className="text-foreground">{p.phase}</dd></>}
                 {p.nextMilestone && <><dt>{t('projects.nextMilestone')}</dt><dd className="text-foreground">◆ {p.nextMilestone.name} · {fmtDate(p.nextMilestone.date)} ({relative(p.nextMilestone.date)})</dd></>}
               </dl>
             </div>
+            {compactOverride && <div className="visual-project-health-details border-t px-4 py-3"><ProjectSlots.Health p={p} /></div>}
             {p.links.length > 0 && (
               <ul className="border-t p-1">
                 {p.links.slice(0, 4).map((l) => (
@@ -146,6 +180,12 @@ function ProjectHeader({ p }: { p: ProjectDetail }) {
           </PopoverContent>
         </Popover>
       </div>
+      </div>
+      {visualSystem && <div className="visual-project-meta" aria-label={t('calm.projectDetails')}>
+        <span title={`${t('projects.col.pm')}: ${p.pmName}`}>{t('projects.col.pm')}: {p.projectManagerId && p.pmName ? <PersonPanelTrigger userId={p.projectManagerId} name={p.pmName} focusKey={`project:${p.id}:pm:meta`} /> : p.pmName}</span>
+        <span title={`${t('projects.col.client')}: ${p.client}`}>{t('projects.col.client')}: {p.client}</span>
+        <span title={`${t('submissions.targetDate')}: ${p.targetCompletionDate ? fmtDate(p.targetCompletionDate) : t('common.dash')}`}>{t('submissions.targetDate')}: {p.targetCompletionDate ? fmtDate(p.targetCompletionDate) : t('common.dash')}</span>
+      </div>}
     </header>
   )
 }

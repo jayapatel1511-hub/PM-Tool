@@ -1,0 +1,25 @@
+.count-card { display: flex; min-width: 0; flex-direction: column; gap: 4px; border: 1px solid var(--border); border-radius: 8px; padding: 16px; background: var(--card); color: var(--foreground); text-align: left; }
+.count-card__icon { display: none; }
+.count-card__top { display: flex; min-width: 0; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.count-card__label { font-size: 13px; line-height: 20px; font-weight: 500; }
+.count-card__value { font-size: 28px; line-height: 36px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.count-card__where, .count-card__meta { color: var(--muted-foreground); font-size: 12px; line-height: 16px; }
+:root[data-visual="v2"] .count-card { --metric: var(--metric-blue); --metric-tint: var(--metric-blue-tint); min-height: 168px; border-radius: var(--card-radius); padding: 20px; box-shadow: var(--shadow-count); }
+:root[data-visual="v2"] .count-card--violet { --metric: var(--metric-violet); --metric-tint: var(--metric-violet-tint); }
+:root[data-visual="v2"] .count-card--red { --metric: var(--metric-red); --metric-tint: var(--metric-red-tint); }
+:root[data-visual="v2"] .count-card--amber { --metric: var(--metric-amber); --metric-tint: var(--metric-amber-tint); }
+:root[data-visual="v2"] .count-card--green { --metric: var(--metric-green); --metric-tint: var(--metric-green-tint); }
+:root[data-visual="v2"] .count-card--teal { --metric: var(--metric-teal); --metric-tint: var(--metric-teal-tint); }
+:root[data-visual="v2"] .count-card__icon { display: grid; width: 32px; height: 32px; margin-bottom: 4px; place-items: center; border-radius: 8px; background: var(--metric-tint); color: var(--metric); }
+:root[data-visual="v2"] .count-card__value { color: var(--metric); font-size: 32px; line-height: 40px; }
+:root[data-visual="v2"] .count-card--red .count-card__value:not([data-alert]) { color: var(--ink); }
+:root[data-visual="v2"] .count-card__meta { color: var(--pill-critical); }
+:root[data-visual="v2"] .count-card--link { transition: border-color 120ms, box-shadow 120ms; }
+:root[data-visual="v2"] .count-card--link:hover { border-color: var(--input); box-shadow: var(--shadow-card); }
+:root[data-visual="v2"] .home-count-cards { display: grid; grid-template-columns: repeat(var(--count-columns, 6), minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 1179.98px) { :root[data-visual="v2"] .home-count-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 767.98px) {
+  :root[data-visual="v2"] .home-count-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  :root[data-visual="v2"] .count-card { min-height: 156px; padding: 16px; }
+  :root[data-visual="v2"] .count-card__value { font-size: 28px; line-height: 36px; }
+}

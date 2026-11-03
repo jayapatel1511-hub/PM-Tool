@@ -1,0 +1,30 @@
+{
+  "exitCode": 0,
+  "args": [
+    "/opt/homebrew/bin/dotnet",
+    "build",
+    "src/Hub.Api/Hub.Api.csproj",
+    "-c",
+    "Release",
+    "--no-restore",
+    "--artifacts-path",
+    ".review/checkpoint34-artifacts",
+    "--disable-build-servers",
+    "-m:1",
+    "-p:UseSharedCompilation=false",
+    "-p:NuGetAudit=false"
+  ],
+  "atUtc": "2026-11-03T04:31:21.158902+00:00",
+  "elapsedSeconds": 65.52,
+  "errors": [],
+  "tail": [
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Infrastructure/NoticeDeliveryProof.cs(387,18): warning CS8602: Dereference of a possibly null reference. [/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Hub.Api.csproj]",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Infrastructure/NotificationDelivery.cs(1220,119): warning CS8602: Dereference of a possibly null reference. [/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Hub.Api.csproj]",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Features/WorkSeenEligibility.cs(183,38): warning EF1003: Method 'SqlQueryRaw' inserts concatenated strings directly into the SQL, without any protection against SQL injection. Consider using 'SqlQuery' instead, which protects against SQL injection, or make sure that the value is sanitized and suppress the warning. [/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Hub.Api.csproj]",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Features/WorkSeenEligibility.cs(202,38): warning EF1003: Method 'SqlQueryRaw' inserts concatenated strings directly into the SQL, without any protection against SQL injection. Consider using 'SqlQuery' instead, which protects against SQL injection, or make sure that the value is sanitized and suppress the warning. [/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Hub.Api.csproj]",
+    "    22 Warning(s)",
+    "    0 Error(s)",
+    "",
+    "Time Elapsed 00:01:05.41"
+  ]
+}

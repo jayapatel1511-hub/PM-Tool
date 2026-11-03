@@ -74,6 +74,11 @@ public static class Workflow
         _ => false,
     };
 
+    // Issuing is a dedicated command: managers may issue reviewed work directly from In Review.
+    public static bool DeliverableIssueAllowedFrom(string status, bool manager, bool requiresReview) =>
+        status == DeliverableStatus.ReadyToIssue || manager &&
+        (status == DeliverableStatus.InReview || !requiresReview && status is DeliverableStatus.InProgress or DeliverableStatus.NotStarted);
+
     public static bool DeliverableNeedsReason(string to) => to is DeliverableStatus.OnHold or DeliverableStatus.Cancelled;
 
     /// Explains a refused deliverable step (§13.6 "status guard messages are explicit").

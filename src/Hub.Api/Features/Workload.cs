@@ -13,13 +13,15 @@ namespace Hub.Api.Features;
 /// eight weeks, from projects the viewer may see, with the unestimated count always beside the hours.
 public static class WorkloadEndpoints
 {
-    public sealed record WorkloadQuery(Guid? SupervisorId, Guid? DisciplineId, Guid? OfficeId, Guid? ProjectId, string? Indicator, DateOnly? From, string? Sort, Guid? UnitId = null);
+    public sealed record WorkloadQuery(Guid? SupervisorId, Guid? DisciplineId, Guid? OfficeId, Guid? ProjectId, string? Indicator, DateOnly? From, string? Sort, Guid? UnitId = null,
+        bool ShowProposedAsConfirmed = false);
     public sealed record CapacityBody(decimal? Hours);
     public sealed record CapacitySet(Guid Id, decimal? WeeklyCapacityHours);
 
     public sealed record LoadThresholds(int OverPct, int AmberPct, int UnderPct);
     public sealed record LoadCell(DateOnly Week, decimal Hours, decimal Pct, decimal Available, decimal Confirmed, decimal Proposed,
-        decimal Committed, string Band, decimal? Uncommitted);
+        decimal Committed, string Band, decimal? Uncommitted,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] bool? IncludesProposed = null);
     public sealed record LoadPerson(Guid Id, string DisplayName, Guid? SupervisorId, string? SupervisorName, Guid? OfficeId,
         string? JobTitle, Guid? HomeDisciplineId, decimal Capacity, bool CapacityOverride, IEnumerable<LoadCell> Cells, decimal NoDueDate,
         int OpenTasks, int Unestimated, int Overdue, int Projects, bool OverAssigned, bool UnderAssigned, bool Cluster,
@@ -31,7 +33,13 @@ public static class WorkloadEndpoints
         [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? FillPath = null);
     public sealed record WorkloadGrid(IEnumerable<DateOnly> Weeks, DateOnly Today, DateOnly CurrentWeek, decimal DefaultCapacity,
         LoadThresholds Thresholds, IEnumerable<LoadPerson> People, UnfilledRole[] UnfilledRoles,
-        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] UnassignedWork? Unassigned = null);
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] UnassignedWork? Unassigned = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] DateTimeOffset? AsOf = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] bool? IncludesProposed = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] DisciplineCapacity[]? DisciplineContext = null);
+    public sealed record DisciplineCapacity(Guid? DisciplineId, string? DisciplineName, int People, int UndatedUnassignedTasks, DisciplineCapacityWeek[] Weeks);
+    public sealed record DisciplineCapacityWeek(DateOnly Week, decimal? FreeHours, int UnavailablePeople, decimal UnfilledRoleHours,
+        decimal KnownUnassignedTaskHours, int UnestimatedTasks, decimal? ShortfallHours);
     public sealed record UnassignedWork(int TotalCount, string ShowAllPath, List<UnassignedTask> Tasks);
     public sealed record UnassignedTask(Guid Id, string Key, string Name, Guid ProjectId, string ProjectNumber, string ProjectName, Guid ProjectDisciplineId,
         string? DisciplineName, DateOnly? StartDate, DateOnly? DueDate, decimal? EstimatedHours, int RowVersion, bool CanAssign, string EditPath);
@@ -52,31 +60,42 @@ public static class WorkloadEndpoints
         IReadOnlyList<(DateOnly Week, decimal Hours, decimal Pct, decimal Available, decimal Confirmed, decimal Proposed, decimal Committed, Workload.Band Band)> Cells,
         decimal NoDueDate, int OpenTasks, int Unestimated, int Overdue, int Projects,
         bool OverAssigned, bool UnderAssigned, bool Cluster, bool CanSetCapacity, bool PartialScope,
-        Guid? OfficeId = null, string? JobTitle = null, Guid? HomeDisciplineId = null, DateOnly? OverWeek = null);
+        Guid? OfficeId = null, string? JobTitle = null, Guid? HomeDisciplineId = null, DateOnly? OverWeek = null,
+        DateOnly[]? IncludesProposedWeeks = null,
+        [property: JsonIgnore] DateOnly[]? ProvisionalWeeks = null);
 
     public static void Map(RouteGroupBuilder api)
     {
         api.MapGet("/workload", async ([AsParameters] WorkloadQuery f, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock) =>
         {
-            var (weeks, people, today) = await Grid(f, access, db, me, store, clock);
             var s = await store.Get(db);
+            await using var snapshot = s.IsFlagOn("capacity_screens")
+                ? await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead) : null;
+            var (weeks, people, today) = await Grid(f, access, db, me, store, clock);
             return TypedResults.Ok(new WorkloadGrid(weeks, today, Workload.WeekOf(today), s.DefaultWeeklyCapacityHours,
                 new LoadThresholds(s.WorkloadOverPct, s.WorkloadAmberPct, s.WorkloadUnderPct),
                 people.Select(p => new LoadPerson(p.Id, p.DisplayName, p.SupervisorId, p.SupervisorName, p.OfficeId, p.JobTitle,
                     p.HomeDisciplineId, p.Capacity, p.CapacityOverride,
                     p.Cells.Select(c => new LoadCell(c.Week, Math.Round(c.Hours, 1), c.Pct, Math.Round(c.Available, 1),
                         Math.Round(c.Confirmed, 1), Math.Round(c.Proposed, 1), Math.Round(c.Committed, 1), c.Band.ToString().ToLowerInvariant(),
-                        Workload.Uncommitted(Math.Round(c.Available, 1), Math.Round(c.Committed, 1), p.PartialScope))),
+                        Workload.Uncommitted(Math.Round(c.Available, 1), Math.Round(c.Committed, 1), p.PartialScope),
+                        p.IncludesProposedWeeks?.Contains(c.Week) == true ? true : null)),
                     Math.Round(p.NoDueDate, 1), p.OpenTasks, p.Unestimated, p.Overdue, p.Projects, p.OverAssigned, p.UnderAssigned,
                     p.Cluster, p.CanSetCapacity, p.PartialScope, p.OverWeek, p.OverAssigned ? "over" : p.UnderAssigned ? "under" : "ok")),
-                await UnfilledRoles(f, weeks, access, db), s.IsFlagOn("unfilled_beside_capacity") ? await Unassigned(f, access, db) : null));
+                await UnfilledRoles(f, weeks, access, db), s.IsFlagOn("unfilled_beside_capacity") ? await Unassigned(f, access, db) : null,
+                s.IsFlagOn("visual_system") ? clock.GetUtcNow() : null,
+                s.IsFlagOn("capacity_screens") && f.ShowProposedAsConfirmed ? true : null,
+                s.IsFlagOn("capacity_screens") ? await DisciplineContext(f, weeks, access, db, me, store, clock) : null));
 
         });
         api.MapGet("/workload/export", async (string? format, [AsParameters] WorkloadQuery f, HttpContext http, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock) =>
         {
             var (weeks, people, _) = await Grid(f, access, db, me, store, clock);
             var (cols, rows) = EmployeeRows(weeks, people);
-            var parameters = http.Request.Query.Where(k => k.Key != "format" && !string.IsNullOrWhiteSpace(k.Value)).Select(k => (Text.Get($"param.{k.Key}"), k.Value.ToString())).ToList();
+            var parameters = http.Request.Query.Where(k => k.Key != "format" && !k.Key.Equals("showProposedAsConfirmed", StringComparison.OrdinalIgnoreCase)
+                && !string.IsNullOrWhiteSpace(k.Value)).Select(k => (Text.Get($"param.{k.Key}"), k.Value.ToString())).ToList();
+            if ((await store.Get(db)).IsFlagOn("capacity_screens") && f.ShowProposedAsConfirmed)
+                parameters.Add((Text.Get("capacity.scenario"), Text.Get("capacity.includesProposed")));
             return await ExportFile.Send(db, store, format, Text.Get("nav.workload"), cols, rows, parameters, null, "workload", clock);
         });
         api.MapGet("/workload/{userId:guid}/tasks", PersonTasks);
@@ -104,21 +123,25 @@ public static class WorkloadEndpoints
         return users.Where(u => (a.Supervisor && u.SupervisorId == me.Id) || (a.SystemPM && members.Contains(u.Id)));
     }
 
-    internal static async Task<List<TaskRow>> Tasks(HubDb db, Access access, IQueryable<Guid> people, Guid? disciplineId, Guid? projectId)
+    internal static IQueryable<WorkTask> TaskQuery(HubDb db, Access access, IQueryable<Guid> people, Guid? disciplineId, Guid? projectId)
     {
         var projects = access.VisibleProjects().Where(p => LiveProjects.Contains(p.Status)).Select(p => p.Id);
         var q = db.Tasks.AsNoTracking().Where(t => t.AssigneeId != null && people.Contains(t.AssigneeId.Value) && projects.Contains(t.ProjectId)
             && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled && t.Status != TaskStatuses.OnHold);
         if (projectId is { } pid) q = q.Where(t => t.ProjectId == pid);
         if (disciplineId is { } d) q = q.Where(t => db.ProjectDisciplines.Any(pd => pd.Id == t.ProjectDisciplineId && pd.DisciplineId == d));
-        return await q.Select(t => new TaskRow(t.Id, t.ProjectId, t.Key, t.Name, t.AssigneeId!.Value, t.ProjectDisciplineId, t.EstimatedHours, t.ProgressPct,
-            t.StartDate, t.DueDate, t.Status, t.RowVersion)).ToListAsync();
+        return q;
     }
+
+    internal static async Task<List<TaskRow>> Tasks(HubDb db, Access access, IQueryable<Guid> people, Guid? disciplineId, Guid? projectId)
+        => await TaskQuery(db, access, people, disciplineId, projectId).Select(t => new TaskRow(t.Id, t.ProjectId, t.Key, t.Name, t.AssigneeId!.Value, t.ProjectDisciplineId, t.EstimatedHours, t.ProgressPct,
+            t.StartDate, t.DueDate, t.Status, t.RowVersion)).ToListAsync();
 
     public static async Task<(List<DateOnly> Weeks, List<PersonLoad> People, DateOnly Today)> Grid(WorkloadQuery f, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock, bool ownOnly = false)
     {
         var actor = access.Actor;
         var s = await store.Get(db);
+        var includeProposed = s.IsFlagOn("capacity_screens") && f.ShowProposedAsConfirmed;
         var unitRead = await PeopleScope.ReadsAsUnitLeader(db, s, actor);
         Access.Demand(ownOnly || Permissions.ViewWorkload(actor).Ok || unitRead ? Allow.Yes : Permissions.ViewWorkload(actor));
         var today = clock.Today(s);
@@ -186,9 +209,9 @@ public static class WorkloadEndpoints
             }
             var cells = weeks.Select(w =>
             {
-                var weekReservations = personAllocations.Where(a => a.Status == AllocationStatus.Confirmed)
+                var weekReservations = personAllocations.Where(a => a.Status == AllocationStatus.Confirmed || includeProposed && a.Status == AllocationStatus.Proposed)
                     .Select(a => new AllocationDemand(allocationsByWeek[a.Id].Reserved.GetValueOrDefault(w), allocationsByWeek[a.Id].Linked.GetValueOrDefault(w))).ToArray();
-                var linkedTaskHours = personAllocations.Where(a => a.Status == AllocationStatus.Confirmed)
+                var linkedTaskHours = personAllocations.Where(a => a.Status == AllocationStatus.Confirmed || includeProposed && a.Status == AllocationStatus.Proposed)
                     .Sum(a => allocationsByWeek[a.Id].LinkedTasks.GetValueOrDefault(w));
                 var committed = AllocationRules.Committed(weekReservations, Math.Max(0, Hours(w) - linkedTaskHours));
                 var proposed = personAllocations.Where(a => a.Status == AllocationStatus.Proposed)
@@ -213,7 +236,9 @@ public static class WorkloadEndpoints
                 access.SeesAllRestricted && f.ProjectId is null && Workload.UnderAssigned(thisWeek, nextWeek, unestimated, s.WorkloadUnderPct),
                 Workload.DeadlineCluster(mine.Where(t => t.DueDate is not null).Select(t => (t.DueDate!.Value, t.ProjectId)), today),
                 Permissions.ActOnStaff(actor, u.SupervisorId).Ok, !access.SeesAllRestricted || f.ProjectId is not null,
-                u.OfficeId, u.JobTitle, u.HomeDisciplineId, overWeek));
+                u.OfficeId, u.JobTitle, u.HomeDisciplineId, overWeek, includeProposed ? weeks.Where(w => personAllocations.Any(a => a.Status == AllocationStatus.Proposed
+                    && (allocationsByWeek[a.Id].Reserved.GetValueOrDefault(w) != 0 || allocationsByWeek[a.Id].Linked.GetValueOrDefault(w) != 0))).ToArray() : null,
+                s.IsFlagOn("capacity_screens") ? weeks.Where(week => Enumerable.Range(0, 7).Any(index => availability[(u.Id, week.AddDays(index))].Provisional)).ToArray() : null));
         }
         result = f.Indicator switch
         {
@@ -233,6 +258,57 @@ public static class WorkloadEndpoints
             _ => [.. result.OrderByDescending(Load).ThenBy(p => p.DisplayName)],
         };
         return (weeks, result, today);
+    }
+
+    /// FR-SCR-47: supply is the canonical PLN-09 free-to-plan figure for scoped home-discipline people;
+    /// role/task demand stays separate, never in a person's load. Aggregate exact hours before display rounding.
+    static async Task<DisciplineCapacity[]> DisciplineContext(WorkloadQuery f, List<DateOnly> weeks, Access access, HubDb db,
+        CurrentUser me, SettingsStore store, TimeProvider clock)
+    {
+        var scopedPeople = await PeopleScope.Widen(db, access.Actor, People(db, access, me));
+        scopedPeople = await PeopleScope.FilterUnit(db, scopedPeople, f.UnitId);
+        if (f.SupervisorId is { } supervisor) scopedPeople = scopedPeople.Where(p => p.SupervisorId == supervisor);
+        if (f.OfficeId is { } office) scopedPeople = scopedPeople.Where(p => p.OfficeId == office);
+        var personIds = (await scopedPeople.Select(p => p.Id).ToArrayAsync()).ToHashSet();
+        var planner = await PlanningEndpoints.ReportGrid(new(From: weeks[0], Weeks: weeks.Count, IncludeMyDrafts: true), access, db, store, clock);
+        var people = planner.People.Where(p => personIds.Contains(p.Id) && (f.DisciplineId == null || p.HomeDisciplineId == f.DisciplineId)).ToArray();
+        var visibleProjects = access.VisibleProjects().Where(p => LiveProjects.Contains(p.Status));
+        if (f.ProjectId is { } project) visibleProjects = visibleProjects.Where(p => p.Id == project);
+        var projectIds = visibleProjects.Select(p => p.Id);
+        var first = weeks[0]; var last = weeks[^1].AddDays(6);
+        var roles = await db.OpenRoles.AsNoTracking().Where(r => r.Status == OpenRoleStatus.Open && projectIds.Contains(r.ProjectId)
+                && r.FromDate <= last && r.ThroughDate >= first)
+            .Select(r => new { Role = r, DisciplineId = db.ProjectDisciplines.Where(pd => pd.Id == r.ProjectDisciplineId && pd.ProjectId == r.ProjectId)
+                .Select(pd => (Guid?)pd.DisciplineId).FirstOrDefault() }).ToListAsync();
+        var tasks = await db.Tasks.AsNoTracking().Where(t => t.AssigneeId == null && projectIds.Contains(t.ProjectId)
+                && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled && (t.DueDate == null || t.DueDate >= first && t.DueDate <= last))
+            .Select(t => new { t.DueDate, t.EstimatedHours, DisciplineId = db.ProjectDisciplines.Where(pd => pd.Id == t.ProjectDisciplineId && pd.ProjectId == t.ProjectId)
+                .Select(pd => (Guid?)pd.DisciplineId).FirstOrDefault() }).ToListAsync();
+        if (f.DisciplineId is { } discipline)
+        {
+            roles = roles.Where(r => r.DisciplineId == discipline).ToList();
+            tasks = tasks.Where(t => t.DisciplineId == discipline).ToList();
+        }
+        var calendar = await OpenRoleEndpoints.Calendars(db, roles.Select(r => r.Role.ProjectId).Distinct().ToArray());
+        var roleHours = roles.Select(r => new { r.DisciplineId, Days = OpenRoleEndpoints.Spread(r.Role, calendar(r.Role.ProjectId)) }).ToArray();
+        var disciplineIds = people.Select(p => p.HomeDisciplineId).Concat(roles.Select(r => r.DisciplineId)).Concat(tasks.Select(t => t.DisciplineId)).Distinct().ToArray();
+        var names = await db.Disciplines.AsNoTracking().Where(d => disciplineIds.Contains(d.Id)).ToDictionaryAsync(d => d.Id, d => d.Name);
+        return disciplineIds.OrderBy(id => id is null).ThenBy(id => id is { } key ? names.GetValueOrDefault(key) : null, StringComparer.OrdinalIgnoreCase).ThenBy(id => id)
+            .Select(id =>
+            {
+                var group = people.Where(p => p.HomeDisciplineId == id).ToArray();
+                return new DisciplineCapacity(id, id is { } key ? names.GetValueOrDefault(key) : null, group.Length,
+                    tasks.Count(t => t.DisciplineId == id && t.DueDate == null), weeks.Select(w =>
+                    {
+                        var unknown = group.Count(p => p.Partial || !p.Cells.Any(c => c.Week == w) || p.Cells.Any(c => c.Week == w && c.Provisional));
+                        decimal? free = unknown == 0 ? group.Sum(p => p.Cells.Single(c => c.Week == w).Remaining) : null;
+                        var role = roleHours.Where(r => r.DisciplineId == id).Sum(r => r.Days.Where(d => Workload.WeekOf(d.Key) == w).Sum(d => d.Value));
+                        var due = tasks.Where(t => t.DisciplineId == id && t.DueDate is { } date && Workload.WeekOf(date) == w).ToArray();
+                        var known = due.Sum(t => t.EstimatedHours ?? 0); var unestimated = due.Count(t => t.EstimatedHours == null);
+                        decimal? shortfall = free is { } supply && unestimated == 0 ? Math.Max(0, role + known - supply) : null;
+                        return new DisciplineCapacityWeek(w, free, unknown, role, known, unestimated, shortfall);
+                    }).ToArray());
+            }).ToArray();
     }
 
     /// FR-ROLE-04 (D3): Open roles on visible Setup and Active projects, spread over working days like an allocation. They are
@@ -331,6 +407,15 @@ public static class WorkloadEndpoints
     /// Workload by Discipline (§19): the same hours summed by discipline across the people in the viewer's scope.
     public static async Task<(Col[] Cols, JsonArray Rows)> DisciplineRows(Guid? officeId, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock)
     {
+        var read = await ReadDisciplineReport(officeId, access, db, me, store, clock);
+        return (read.Columns, read.Rows);
+    }
+
+    internal sealed record DisciplineReportRead(Col[] Columns, JsonArray Rows, List<DateOnly> Weeks, IReadOnlyList<decimal[]> ExactHours);
+
+    /// The exact source before report formatting; the legacy wrapper retains its original rounded output.
+    internal static async Task<DisciplineReportRead> ReadDisciplineReport(Guid? officeId, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock)
+    {
         await PeopleScope.DemandWorkload(db, access.Actor);
         var s = await store.Get(db);
         var today = clock.Today(s);
@@ -347,15 +432,17 @@ public static class WorkloadEndpoints
             new("noDueDate", "noDueDate", "number"), new("openTasks", "openTasks", "number"), new("unestimated", "unestimated", "number"), new("people", "peopleCount", "number"),
         ];
         var rows = new JsonArray();
+        var exactHours = new List<decimal[]>();
         foreach (var g in tasks.GroupBy(t => names.GetValueOrDefault(t.ProjectDisciplineId) ?? "").OrderBy(g => g.Key))
         {
             var loads = g.Select(t => Workload.Spread(new LoadTask(t.Id, t.ProjectId, t.EstimatedHours, t.ProgressPct, t.StartDate, t.DueDate), today, cal(t.ProjectId))).ToList();
             var row = new JsonObject { ["discipline"] = g.Key, ["noDueDate"] = Math.Round(loads.Sum(l => l.NoDueDate), 1), ["openTasks"] = g.Count(),
                 ["unestimated"] = g.Count(t => t.EstimatedHours is null), ["people"] = g.Select(t => t.AssigneeId).Distinct().Count() };
-            for (var i = 0; i < weeks.Count; i++) row[$"w{i}"] = Math.Round(loads.Sum(l => l.ByWeek.GetValueOrDefault(weeks[i])), 1);
-            rows.Add(row);
+            var hours = weeks.Select(week => loads.Sum(load => load.ByWeek.GetValueOrDefault(week))).ToArray();
+            for (var i = 0; i < weeks.Count; i++) row[$"w{i}"] = Math.Round(hours[i], 1);
+            rows.Add(row); exactHours.Add(hours);
         }
-        return (cols, rows);
+        return new DisciplineReportRead(cols, rows, weeks, exactHours);
     }
 
     /// Workload by Employee (§19): one row per person with a column per week.

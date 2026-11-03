@@ -31,8 +31,8 @@ const taskRow = (r) => ({
 /**
  * One page of a task list: every row on one page, with the total the rows make unless given.
  * @param {Schemas['TaskQueriesRow'][]} items
- * @param {Partial<Schemas['PageOfRow']>} [r]
- * @returns {Schemas['PageOfRow']}
+ * @param {Partial<Schemas['ListPage']>} [r]
+ * @returns {Schemas['ListPage']}
  */
 const taskPage = (items, r = {}) => ({ items, page: 1, pageSize: 200, totalCount: items.length, sort: null, ...r })
 

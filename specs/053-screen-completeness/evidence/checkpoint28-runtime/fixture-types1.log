@@ -1,0 +1,5 @@
+
+> web@0.0.0 typecheck:tests
+> tsc -p tests/tsconfig.json
+
+tests/issue-root-cause.fixture.cjs(5,12): error TS7006: Parameter 'n' implicitly has an 'any' type.

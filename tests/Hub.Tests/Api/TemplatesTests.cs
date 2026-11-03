@@ -18,6 +18,95 @@ public sealed class TemplatesTests(HubFactory f)
     async Task<Guid> Reference() => await f.DbAsync(db => ReferenceTemplate.Seed(db));
     async Task<JsonNode> Template(Guid id, string as_ = TestData.Pm) => await f.As(as_).GetAsync($"/api/v1/templates/{id}").Result.Json();
 
+    async Task<(HttpClient Client, JsonNode Me)> TemplateUser(string? appRoles, bool editor = false)
+    {
+        var client = f.As($"synthetic-template-policy-{Guid.NewGuid():N}@hub.test", appRoles);
+        var me = await (await client.GetAsync("/api/v1/me")).Json();
+        if (editor)
+        {
+            var id = me.G("id");
+            var version = f.Db(db => db.Users.AsNoTracking().Single(row => row.Id == id).RowVersion);
+            (await f.As(TestData.Admin).Patch($"/api/v1/admin/users/{id}", new { isTemplateEditor = true }, version)).EnsureSuccessStatusCode();
+            me = await (await client.GetAsync("/api/v1/me")).Json();
+        }
+        return (client, me);
+    }
+
+    [Fact]
+    public async Task System_pm_without_editor_flag_builds_publishes_versions_and_retires_through_real_commands()
+    {
+        var (pm, me) = await TemplateUser("Hub.ProjectManager");
+        var userId = me.G("id");
+        Assert.False(me["isTemplateEditor"]!.GetValue<bool>());
+        Assert.Contains(me["roles"]!.AsArray(), role => role!.S("role") == SystemRole.ProjectManager);
+        Assert.True(me["capabilities"]!["templates"]!.GetValue<bool>());
+        Assert.False(me["capabilities"]!["readOnly"]!.GetValue<bool>());
+        var name = "Synthetic PM template " + Guid.NewGuid().ToString("N")[..8];
+        var created = await (await pm.Post("/api/v1/templates", new { name })).Json(201); var id = created.G("id");
+        var list = await (await pm.GetAsync("/api/v1/templates")).Json();
+        Assert.True(list["canEdit"]!.GetValue<bool>());
+        Assert.Contains(list["templates"]!.AsArray(), row => row!.G("id") == id);
+        Assert.True((await (await pm.GetAsync($"/api/v1/templates/{id}")).Json())["canEdit"]!.GetValue<bool>());
+        var civil = await d.Discipline("Civil"); var geo = await d.Discipline("Geotechnical"); var report = await d.DeliverableType("Report");
+        var saved = await (await pm.Put($"/api/v1/templates/{id}/structure", Culverts(created.I("rowVersion"), name, civil, geo, report))).Json();
+        var discipline = saved["disciplines"]!.AsArray().Single(row => row!.G("disciplineId") == civil)!.G("templateDisciplineId");
+        var basis = await (await pm.Post($"/api/v1/templates/{id}/design-basis", new {
+            templateDisciplineId = discipline, kind = BasisKind.Assumption, title = "Synthetic PM source",
+            scope = "Synthetic site", statement = "Review for the project before approval",
+        })).Json(201);
+        Assert.Equal(HttpStatusCode.NoContent, (await pm.DeleteAsync($"/api/v1/templates/{id}/design-basis/{basis.G("id")}")).StatusCode);
+        await (await pm.Post($"/api/v1/templates/{id}/preview", new { startDate = "2026-11-02" })).Json();
+        var draft = await (await pm.GetAsync($"/api/v1/templates/{id}")).Json();
+        var published = await (await pm.Post($"/api/v1/templates/{id}/publish", new { rowVersion = draft.I("rowVersion") })).Json();
+        Assert.Equal(TemplateStatus.Published, published.S("status"));
+        var next = await (await pm.Post($"/api/v1/templates/{id}/draft", new { })).Json(201); var nextId = next.G("id");
+        Assert.True((await (await pm.GetAsync($"/api/v1/templates/{nextId}")).Json())["canEdit"]!.GetValue<bool>());
+        Assert.Equal(HttpStatusCode.NoContent, (await pm.DeleteAsync($"/api/v1/templates/{nextId}")).StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, (await pm.Post($"/api/v1/templates/{id}/retire", new { })).StatusCode);
+        Assert.Equal(TemplateStatus.Retired, (await (await pm.GetAsync($"/api/v1/templates/{id}")).Json()).S("status"));
+        Assert.False(f.Db(db => db.Users.AsNoTracking().Single(row => row.Id == userId).IsTemplateEditor));
+    }
+
+    [Theory]
+    [InlineData(null, false, false, false)]
+    [InlineData(null, true, true, false)]
+    [InlineData("Hub.ReadOnly", true, false, true)]
+    [InlineData("Hub.ProjectManager,Hub.ReadOnly", false, false, true)]
+    [InlineData("Hub.ProjectManager,Hub.ReadOnly", true, false, true)]
+    [InlineData("Hub.Admin", false, true, false)]
+    [InlineData("Hub.Admin,Hub.ReadOnly", false, true, false)]
+    public async Task Own_template_capability_and_real_writes_preserve_editor_readonly_and_admin_boundaries(
+        string? appRoles, bool editor, bool allowed, bool effectiveReadOnly)
+    {
+        var (client, me) = await TemplateUser(appRoles, editor);
+        Assert.Equal(editor, me["isTemplateEditor"]!.GetValue<bool>());
+        Assert.Equal(allowed, me["capabilities"]!["templates"]!.GetValue<bool>());
+        Assert.Equal(effectiveReadOnly, me["capabilities"]!["readOnly"]!.GetValue<bool>());
+        if (appRoles is null) Assert.False(me["capabilities"]!["createProject"]!.GetValue<bool>()); // Editor does not grant a system role.
+        var count = f.Db(db => db.Templates.Count());
+        var response = await client.Post("/api/v1/templates", new { name = "Synthetic template boundary " + Guid.NewGuid().ToString("N")[..8] });
+        if (allowed)
+        {
+            var made = await response.Json(201); var id = made.G("id");
+            Assert.True((await (await client.GetAsync($"/api/v1/templates/{id}")).Json())["canEdit"]!.GetValue<bool>());
+            Assert.Equal(HttpStatusCode.NoContent, (await client.DeleteAsync($"/api/v1/templates/{id}")).StatusCode);
+        }
+        else
+        {
+            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode); Assert.Equal(count, f.Db(db => db.Templates.Count()));
+            var admin = f.As(TestData.Admin);
+            var probe = await (await admin.Post("/api/v1/templates", new { name = "Synthetic protected draft " + Guid.NewGuid().ToString("N")[..8] })).Json(201);
+            var id = probe.G("id"); var original = await Template(id, TestData.Admin);
+            Assert.Equal(HttpStatusCode.NotFound, (await client.GetAsync($"/api/v1/templates/{id}")).StatusCode);
+            Assert.Equal(HttpStatusCode.Forbidden, (await client.Put($"/api/v1/templates/{id}/structure",
+                Culverts(probe.I("rowVersion"), "Refused edit", await d.Discipline("Civil"), await d.Discipline("Geotechnical"), await d.DeliverableType("Report")))).StatusCode);
+            Assert.Equal(HttpStatusCode.Forbidden, (await client.DeleteAsync($"/api/v1/templates/{id}")).StatusCode);
+            Assert.True(JsonNode.DeepEquals(original, await Template(id, TestData.Admin)));
+            Assert.Equal(HttpStatusCode.NoContent, (await admin.DeleteAsync($"/api/v1/templates/{id}")).StatusCode);
+        }
+        Assert.Equal(count, f.Db(db => db.Templates.Count()));
+    }
+
     /// Appendix A.2: contractual dates for M03–M07, M08–M11 left blank, the six default disciplines with leads.
     async Task<(HttpResponseMessage Res, string Number)> FromTemplate(Guid templateId, string[]? disciplines = null, Guid? tplOverride = null)
     {
@@ -181,7 +270,7 @@ public sealed class TemplatesTests(HubFactory f)
             templateDisciplineId = saved["disciplines"]!.AsArray().Single()!.G("templateDisciplineId"), kind = BasisKind.Criterion, title = "Design storm",
             scope = "Site / storm sewers", statement = "Minor system return period", numericValue = 5m, units = "years", sourceUrl = "https://example.test/standard",
         };
-        Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Pm).Post($"/api/v1/templates/{id}/design-basis", body)).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Alex).Post($"/api/v1/templates/{id}/design-basis", body)).StatusCode);
         var unitless = await (await admin.Post($"/api/v1/templates/{id}/design-basis", body with { units = " " })).Json(400);
         Assert.Equal("A numeric value needs its units.", unitless["errors"]!["units"]![0]!.GetValue<string>());
         var added = await (await admin.Post($"/api/v1/templates/{id}/design-basis", body)).Json(201);
@@ -235,7 +324,7 @@ public sealed class TemplatesTests(HubFactory f)
 
         // Only editors remove a suggestion; then Civil can go.
         var path = $"/api/v1/templates/{id}/design-basis/{added.S("id")}";
-        Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Pm).DeleteAsync(path)).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await f.As(TestData.Alex).DeleteAsync(path)).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await admin.DeleteAsync($"/api/v1/templates/{id}/design-basis/{Guid.NewGuid()}")).StatusCode);
         Assert.Equal(HttpStatusCode.NoContent, (await admin.DeleteAsync(path)).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await admin.DeleteAsync(path)).StatusCode);
@@ -344,7 +433,7 @@ public sealed class TemplatesTests(HubFactory f)
         var preview = await admin.Post($"/api/v1/templates/{id}/preview", new { startDate = "2026-10-05" }).Result.Json();
         Assert.Equal(new[] { "2026-10-10", "2026-11-09", "2026-11-29" }, preview["milestones"]!.AsArray().Select(m => m!.S("date")));
         Assert.Equal((4, 8, 5, 1), (preview["counts"]!.I("deliverables"), preview["counts"]!.I("tasks"), preview["counts"]!.I("dependencies"), preview["undated"]!.I("deliverables")));
-        Assert.DoesNotContain((await f.As(TestData.Pm).GetAsync("/api/v1/templates").Result.Json())["templates"]!.AsArray(), x => x!.G("id") == id); // drafts are for editors
+        Assert.DoesNotContain((await f.As(TestData.Alex).GetAsync("/api/v1/templates").Result.Json())["templates"]!.AsArray(), x => x!.G("id") == id); // drafts are for editors
 
         var v1 = await admin.Post($"/api/v1/templates/{id}/publish", new { rowVersion = saved.I("rowVersion") }).Result.Json();
         Assert.Equal((1, "Published"), (v1.I("version"), v1.S("status")));
@@ -377,7 +466,7 @@ public sealed class TemplatesTests(HubFactory f)
         Assert.Equal(HttpStatusCode.UnprocessableEntity, refused.StatusCode);
         Assert.False(await f.DbAsync(db => db.Projects.AnyAsync(x => x.ProjectNumber == refusedNumber)));
         (await admin.Post($"/api/v1/templates/{draft.S("id")}/retire", new { })).EnsureSuccessStatusCode();
-        Assert.DoesNotContain((await f.As(TestData.Pm).GetAsync("/api/v1/templates").Result.Json())["templates"]!.AsArray(), x => x!.G("id") == id || x!.G("id") == draft.G("id"));
+        Assert.DoesNotContain((await f.As(TestData.Alex).GetAsync("/api/v1/templates").Result.Json())["templates"]!.AsArray(), x => x!.G("id") == id || x!.G("id") == draft.G("id"));
     }
 
     [Fact]
@@ -589,7 +678,7 @@ public sealed class TemplatesTests(HubFactory f)
     [Fact, Trait("flag-off", "template_roles"), Trait("flag-on", "template_roles"), Trait("flag-off", "template_working_days"), Trait("flag-on", "template_working_days")]
     public async Task Template_create_read_save_and_list_keep_their_answers_and_shape() // 040-S15-Templates
     {
-        var (admin, pm) = (f.As(TestData.Admin), f.As(TestData.Pm));
+        var admin = f.As(TestData.Admin);
         var (civil, geo, report) = (await d.Discipline("Civil"), await d.Discipline("Geotechnical"), await d.DeliverableType("Report"));
         try
         {
@@ -616,7 +705,7 @@ public sealed class TemplatesTests(HubFactory f)
                 Assert.Equal(["id", "version", "status", "publishedAt"], Keys(Assert.Single(fresh["family"]!.AsArray())));
                 if (roles) Assert.Empty(fresh["roles"]!.AsArray());
                 if (workingDays) Assert.Equal(DayKind.WorkingDays, fresh.S("offsetDayKind"));
-                Assert.Equal(HttpStatusCode.NotFound, (await pm.GetAsync($"/api/v1/templates/{id}")).StatusCode); // drafts are for editors
+                Assert.Equal(HttpStatusCode.NotFound, (await f.As(TestData.Alex).GetAsync($"/api/v1/templates/{id}")).StatusCode); // drafts are for editors
                 Assert.Equal(HttpStatusCode.NotFound, (await admin.GetAsync($"/api/v1/templates/{Guid.NewGuid()}")).StatusCode);
 
                 // Saving: the answer is the read, byte for byte, with every nested row written in its order.
@@ -658,7 +747,7 @@ public sealed class TemplatesTests(HubFactory f)
                 if (roles) Assert.Equal(2, row.I("roles"));
                 Assert.Equal((name, "Draft", "Culverts"), (row.S("name"), row.S("status"), row.S("description")));
                 Assert.Equal(saved.I("rowVersion"), row.I("rowVersion"));
-                var visible = await (await pm.GetAsync("/api/v1/templates")).Json();
+                var visible = await (await f.As(TestData.Alex).GetAsync("/api/v1/templates")).Json();
                 Assert.False(visible["canEdit"]!.GetValue<bool>());
                 Assert.DoesNotContain(visible["templates"]!.AsArray(), x => x!.G("id") == id);
             }
@@ -669,7 +758,7 @@ public sealed class TemplatesTests(HubFactory f)
     [Fact, Trait("flag-off", "template_roles"), Trait("flag-on", "template_roles")]
     public async Task Template_preview_publish_and_draft_keep_their_answers_and_shape() // 040-S15-Templates
     {
-        var (admin, pm, alex) = (f.As(TestData.Admin), f.As(TestData.Pm), f.As(TestData.Alex));
+        var (admin, alex) = (f.As(TestData.Admin), f.As(TestData.Alex));
         var (civil, geo, report) = (await d.Discipline("Civil"), await d.Discipline("Geotechnical"), await d.DeliverableType("Report"));
         var name = "Lifecycle " + Guid.NewGuid().ToString("N")[..6];
         var t = await (await admin.Post("/api/v1/templates", new { name })).Json(201);
@@ -681,7 +770,7 @@ public sealed class TemplatesTests(HubFactory f)
             var saved = await (await admin.Put($"/api/v1/templates/{id}/structure", Culverts(t.I("rowVersion"), name, civil, geo, report))).Json();
 
             // Preview: the dated milestones, what a project would get and what stays undated; roles only while their flag is on.
-            var on = await pm.Post($"/api/v1/templates/{id}/preview", new { startDate = "2026-10-05", disciplineIds = new[] { civil } }); // a Draft is not the PM's to see
+            var on = await alex.Post($"/api/v1/templates/{id}/preview", new { startDate = "2026-10-05", disciplineIds = new[] { civil } }); // Non-editors cannot preview a Draft.
             Assert.Equal(HttpStatusCode.NotFound, on.StatusCode);
             var preview = await (await admin.Post($"/api/v1/templates/{id}/preview", new { startDate = "2026-10-05", disciplineIds = new[] { civil } })).Json();
             Assert.Equal(["milestones", "counts", "undated", "roles"], Keys(preview));
@@ -736,6 +825,7 @@ public sealed class TemplatesTests(HubFactory f)
     public async Task Retiring_and_discarding_templates_answer_204_and_refuse_what_cannot_change() // POST retire and DELETE template were uncalled (040-S15-Templates)
     {
         var (admin, pm, alex) = (f.As(TestData.Admin), f.As(TestData.Pm), f.As(TestData.Alex));
+        var readOnlyPm = f.As($"synthetic-template-readonly-pm-{Guid.NewGuid():N}@hub.test", "Hub.ProjectManager,Hub.ReadOnly");
         var (civil, geo, report) = (await d.Discipline("Civil"), await d.Discipline("Geotechnical"), await d.DeliverableType("Report"));
         async Task<(Guid Id, int Version)> Build(string tag)
         {
@@ -753,7 +843,7 @@ public sealed class TemplatesTests(HubFactory f)
         var (live, rv) = await Build("Retire");
         Assert.Equal("template_not_published", (await (await admin.Post($"/api/v1/templates/{live}/retire", new { })).Json(422)).S("code")); // a Draft
         (await admin.Post($"/api/v1/templates/{live}/publish", new { rowVersion = rv })).EnsureSuccessStatusCode();
-        Assert.Equal(HttpStatusCode.Forbidden, (await pm.Post($"/api/v1/templates/{live}/retire", new { })).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await readOnlyPm.Post($"/api/v1/templates/{live}/retire", new { })).StatusCode);
         Assert.Equal(HttpStatusCode.Forbidden, (await alex.Post($"/api/v1/templates/{live}/retire", new { })).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await admin.Post($"/api/v1/templates/{Guid.NewGuid()}/retire", new { })).StatusCode);
         Assert.Equal("Published", await Status(live));
@@ -763,14 +853,14 @@ public sealed class TemplatesTests(HubFactory f)
         Assert.True(await Logged(live, "Retired"));
         Assert.Equal("template_not_published", (await (await admin.Post($"/api/v1/templates/{live}/retire", new { })).Json(422)).S("code")); // already retired
         Assert.Equal("Retired", (await Template(live, TestData.Admin)).S("status"));
-        Assert.DoesNotContain((await (await pm.GetAsync("/api/v1/templates")).Json())["templates"]!.AsArray(), x => x!.G("id") == live);
+        Assert.DoesNotContain((await (await alex.GetAsync("/api/v1/templates")).Json())["templates"]!.AsArray(), x => x!.G("id") == live);
         Assert.Equal("template_unavailable", (await (await pm.Post("/api/v1/projects", new { projectNumber = TestData.Number(), name = "Retired source", clientId = await d.Client(), officeId = await d.Office(), startDate = "2026-10-05",
             disciplines = new[] { new { disciplineId = civil, leadUserId = (Guid?)U(TestData.Marc) } }, templateId = live })).Json(422)).S("code")); // the wizard is refused
 
         // Discarding: only a Draft, only an editor; 204 and no body, and the whole structure goes with it.
         var (draft, _) = await Build("Discard");
         Assert.True(await Rows(draft) > 0);
-        Assert.Equal(HttpStatusCode.Forbidden, (await pm.DeleteAsync($"/api/v1/templates/{draft}")).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await readOnlyPm.DeleteAsync($"/api/v1/templates/{draft}")).StatusCode);
         Assert.Equal(HttpStatusCode.Forbidden, (await alex.DeleteAsync($"/api/v1/templates/{draft}")).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await admin.DeleteAsync($"/api/v1/templates/{Guid.NewGuid()}")).StatusCode);
         Assert.Equal("template_not_draft", (await (await admin.DeleteAsync($"/api/v1/templates/{live}")).Json(422)).S("code")); // retired
@@ -814,7 +904,13 @@ public sealed class TemplatesTests(HubFactory f)
         Assert.Equal(HttpStatusCode.NotFound, (await pm.GetAsync($"/api/v1/projects/{Guid.NewGuid()}/template-packs?templateId={tid}")).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await pm.GetAsync($"{root}?templateId={Guid.NewGuid()}")).StatusCode);
         var draft = await (await admin.Post("/api/v1/templates", new { name = "Pack draft " + Guid.NewGuid().ToString("N")[..6] })).Json(201);
-        Assert.Equal(HttpStatusCode.NotFound, (await pm.GetAsync($"{root}?templateId={draft.S("id")}")).StatusCode);
+        var (projectOnlyPm, projectOnlyMe) = await TemplateUser(null);
+        await (await pm.Post($"/api/v1/projects/{pid}/members", new {
+            userId = projectOnlyMe.G("id"), roles = new[] { ProjectRole.PM }, primaryDisciplineId = (Guid?)null,
+        })).Json(201);
+        Assert.False((await (await projectOnlyPm.GetAsync("/api/v1/me")).Json())["capabilities"]!["templates"]!.GetValue<bool>());
+        Assert.Equal(HttpStatusCode.NotFound, (await projectOnlyPm.GetAsync($"{root}?templateId={draft.S("id")}")).StatusCode);
+        Assert.Equal("template_unavailable", (await (await pm.GetAsync($"{root}?templateId={draft.S("id")}")).Json(422)).S("code"));
         Assert.Equal("template_unavailable", (await (await admin.GetAsync($"{root}?templateId={draft.S("id")}")).Json(422)).S("code"));
 
         // Adding: 200 with what was created, in that order; adding again reactivates the discipline and adds its items again.

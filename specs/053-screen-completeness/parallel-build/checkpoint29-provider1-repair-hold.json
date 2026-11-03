@@ -1,0 +1,8 @@
+{
+  "status": "ALL_CSHARP_READY_HASH_MATCH_HOLD",
+  "files": {
+    "src/Hub.Api/Features/TaskBulkCommands.cs": "b7e2826d6e26939f419c9bd3b7c97c18ffe771b723b489ef3e501ac9e35ae199",
+    "tests/Hub.Tests/Api/TaskBulkCommandTests.cs": "2000765c1410708d6ea58e6fafe3cdf4d6343d2c4048f8f5088eb277856d5ffc",
+    "tests/Hub.Tests/Api/NotificationScreenTests.cs": "0968ad00ddc57f60eace32681bbe029eb37229e0fef85c9d4fc79ada50dd461a"
+  }
+}

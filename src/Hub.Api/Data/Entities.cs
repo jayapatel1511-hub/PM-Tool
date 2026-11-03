@@ -1,4 +1,5 @@
 using Hub.Domain;
+using System.Text.Json.Serialization;
 
 namespace Hub.Api.Data;
 
@@ -37,6 +38,13 @@ public class AppUser : Audited, IAuditable
     public string Email { get; set; } = "";
     public string DisplayName { get; set; } = "";
     public string? JobTitle { get; set; }
+    // FR-SCR-49/50: optional display facts, exposed only by explicitly gated readers.
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string? PersonType { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
+    public DateOnly? PersonStartDate { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
+    public DateOnly? PersonEndDate { get; set; }
     public Guid? OfficeId { get; set; }
     [System.Text.Json.Serialization.JsonIgnore]
     public Guid? UnitId { get; set; }
@@ -85,6 +93,10 @@ public class Client : RefData { public string? ShortName { get; set; } }
 public class ProjectType : RefData { }
 public class Phase : RefData { }
 public class DeliverableType : RefData { public Guid? DefaultDisciplineId { get; set; } }
+public class IssuePurpose : RefData { }
+public class IssueReturnCode : RefData { public string Code { get; set; } = ""; }
+public class DecisionCategory : RefData { }
+public class IssueRootCauseCategory : RefData { }
 
 public class OrgSetting : IAuditable
 {
@@ -101,6 +113,7 @@ public class OrgSetting : IAuditable
 public class UserSetting
 {
     public Guid UserId { get; set; }
+    public string? HomePreset { get; set; } // explicit own-person scope choice; retained while home_overview is off
     public DateTimeOffset? OnboardingHiddenAt { get; set; }
     public bool DigestEnabled { get; set; } = true;
     public bool HoldDigestWhenAway { get; set; } = true;
@@ -110,11 +123,27 @@ public class UserSetting
     public string DigestSectionsOff { get; set; } = "[]"; // jsonb array of section codes (packet 020)
     public DateTimeOffset? LastDigestAt { get; set; }
     public DateTimeOffset? LastWeeklySummaryAt { get; set; }
+    // Private enhanced notice fragment; legacy preference responses keep their exact shape.
+    [JsonIgnore] public string? NoticeDigestFrequency { get; set; }
+    [JsonIgnore] public bool? HoldImmediateEmailWhenAway { get; set; }
+    [JsonIgnore] public bool? TimeReminderEnabled { get; set; }
+    [JsonIgnore] public int? TimeReminderWeekday { get; set; }
+    [JsonIgnore] public string? TimeReminderTimeLocal { get; set; }
+    [JsonIgnore] public int? NoticePreferencesRevision { get; set; }
+    // Private My Work state; its own commands serialize on this row, independently of digest/density writers.
+    [JsonIgnore] public DateTimeOffset? MyWorkFirstVisitAt { get; set; }
+    [JsonIgnore] public DateTimeOffset? MyWorkPreviousVisitAt { get; set; }
+    [JsonIgnore] public DateTimeOffset? MyWorkLastVisitAt { get; set; }
+    [JsonIgnore] public DateTimeOffset? MyWorkLastMarkAllAt { get; set; }
+    [JsonIgnore] public int MyWorkSeenRevision { get; set; }
 }
 
 /// A replayable response to a retried create (§25, Idempotency-Key, Rec); kept for a day.
 public class IdempotencyRecord : Entity
 {
+    // Private authorization context for new Calendar views; null preserves legacy receipts.
+    [JsonIgnore] public string? CalendarViewScope { get; set; }
+    [JsonIgnore] public Guid? CalendarViewProjectId { get; set; }
     public Guid UserId { get; set; }
     public string Key { get; set; } = "";
     public string Path { get; set; } = "";
@@ -164,6 +193,8 @@ public class Project : Audited, IAuditable
     public Guid? LeadUnitId { get; set; }
     [System.Text.Json.Serialization.JsonIgnore]
     public string? RevisionConvention { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string? ClientDrawingNumberPattern { get; set; }
     public string? ClientReference { get; set; }
     public Guid ProjectManagerId { get; set; }
     public Guid OfficeId { get; set; }
@@ -195,6 +226,7 @@ public class Project : Audited, IAuditable
     public DateTimeOffset? ActivatedAt { get; set; }
     public DateTimeOffset? CompletedAt { get; set; }
     public DateTimeOffset? ArchivedAt { get; set; }
+    public string? IdentityColour { get; set; }
     public int NextTaskSeq { get; set; } = 1;
     public int NextDeliverableSeq { get; set; } = 1;
     public int NextMilestoneSeq { get; set; } = 1;
@@ -240,6 +272,9 @@ public class ProjectMember : Entity, IAuditable, IVersioned
     public Guid UserId { get; set; }
     public List<string> Roles { get; set; } = [];
     public Guid? PrimaryDisciplineId { get; set; }
+    // Exposed only through flag-owned read DTOs, never a raw membership/role payload.
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string? ResponsibilityNote { get; set; }
     public Guid? AddedBy { get; set; }
     public DateTimeOffset AddedAt { get; set; }
     public DateTimeOffset? RemovedAt { get; set; }
@@ -277,6 +312,8 @@ public class ProjectHealthSnapshot : Entity
     public string Inputs { get; set; } = "{}";
     /// The day's task and register counts, for weekly trends such as the pilot measures (packet 011).
     public string Counts { get; set; } = "{}";
+    /// Versioned Home definitions and capture/access basis, absent for legacy snapshots. Never backfilled.
+    public string? HomeMetrics { get; set; }
 }
 
 // ---------- Work ----------
@@ -318,6 +355,10 @@ public class Milestone : ProjectItem, IAuditable
 public class Deliverable : ProjectItem, IAuditable
 {
     public Guid? RequiredReviewPackageId { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string? ClientDrawingNumber { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
+    public Guid? CurrentIssueId { get; set; }
 
     public string Name { get; set; } = "";
     public Guid ProjectDisciplineId { get; set; }
@@ -454,8 +495,29 @@ public class HandoffCommand : Entity
     public DateTimeOffset CreatedAt { get; set; }
 }
 
-public class DeliverableIssue : Entity
+public class DeliverableIssue : Entity, IVersioned
 {
+    // Private issue-time canonical provenance. Null is Unknown and can never be repaired in place.
+    [System.Text.Json.Serialization.JsonIgnore]
+    public Guid[]? IssuedAuthorIds { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
+    public int RowVersion { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
+    public Guid? PurposeOfIssueId { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string? PurposeLabelSnapshot { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
+    public Guid? ReturnCodeId { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string? ReturnCodeSnapshot { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string? ReturnLabelSnapshot { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
+    public DateOnly? ResponseDate { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
+    public Guid? ResponseRecordedBy { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
+    public DateTimeOffset? ResponseRecordedAt { get; set; }
     public Guid ProjectId { get; set; }
     public Guid DeliverableId { get; set; }
     public DateOnly IssuedDate { get; set; }
@@ -603,6 +665,9 @@ public class Decision : ProjectItem, IAuditable
     public string? DecisionText { get; set; }
     public DateOnly? DecisionDate { get; set; }
     public Guid? DecidedById { get; set; }
+    public Guid? CategoryId { get; set; }
+    public string[]? OptionsConsidered { get; set; }
+    public string? Rationale { get; set; }
     public string? DeferralReason { get; set; }
     public string? CancelledReason { get; set; }
     public DateTimeOffset? StatusChangedAt { get; set; }
@@ -644,6 +709,7 @@ public class Risk : ProjectItem, IAuditable
     public string Status { get; set; } = RiskStatus.Open;
     public Guid? RealisedIssueId { get; set; }
     public Guid? ProjectDisciplineId { get; set; }
+    public Guid? TemplateRiskId { get; set; }
     public DateTimeOffset? StatusChangedAt { get; set; }
     public DateTimeOffset LastActivityAt { get; set; }
     public string AuditType => ItemType.Risk;
@@ -664,6 +730,8 @@ public class Issue : ProjectItem, IAuditable
     public DateOnly? TargetResolutionDate { get; set; }
     public string? Resolution { get; set; }
     public DateOnly? ResolvedDate { get; set; }
+    public Guid? RootCauseCategoryId { get; set; }
+    public string? RootCauseLabelSnapshot { get; set; }
     public string Status { get; set; } = IssueStatus.Open;
     public string IssueType { get; set; } = Domain.IssueType.General;
     public Guid? OriginRiskId { get; set; }
@@ -749,6 +817,12 @@ public class DocumentLink : Entity, ISoftDeletable, IAuditable, IVersioned
     public string LinkType { get; set; } = Domain.LinkType.Other;
     public Guid AddedBy { get; set; }
     public DateTimeOffset AddedAt { get; set; }
+    public string? SourceSystem { get; set; }
+    public string? StableSourceId { get; set; }
+    public string? DeclaredRevision { get; set; }
+    public Guid? ReferenceRegisteredBy { get; set; }
+    public DateTimeOffset? ReferenceRegisteredAt { get; set; }
+    public Guid? ReferenceDeliverableId { get; set; }
     public DateTimeOffset? DeletedAt { get; set; }
     public Guid? DeletedBy { get; set; }
     public string AuditType => Domain.ItemType.DocumentLink;
@@ -788,8 +862,23 @@ public class ActivityLog
     public string? Snapshot { get; set; } // jsonb, deletions only
 }
 
+/// One immutable terminal result for an actor's bounded cross-project task command.
+public class TaskBulkCommandReceipt : Entity
+{
+    public Guid ActorId { get; set; }
+    public Guid RequestId { get; set; }
+    public int HashVersion { get; set; }
+    public string IntentHash { get; set; } = "";
+    public string IntentJson { get; set; } = "{}";
+    public string ResponseJson { get; set; } = "{}";
+    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset CompletedAt { get; set; }
+}
+
 public class Notification : Entity
 {
+    // Null preserves legacy scope. New cross-project summaries require every listed project.
+    public Guid[]? RequiredProjectIds { get; set; }
     public Guid UserId { get; set; }
     public string EventType { get; set; } = "";
     public Guid? ProjectId { get; set; }
@@ -812,6 +901,21 @@ public class Notification : Entity
 
 public class EmailMessage : Entity
 {
+    // Nullable, private protocol linkage. Null across this entire fragment identifies legacy mail.
+    [JsonIgnore] public int? NoticeProtocolVersion { get; set; }
+    [JsonIgnore] public Guid? NoticeSlotId { get; set; }
+    [JsonIgnore] public int? NoticeCompositionVersion { get; set; }
+    [JsonIgnore] public Guid[]? RenderedOccurrenceIds { get; set; }
+    [JsonIgnore] public string? BulkRenderedMembershipJson { get; set; }
+    [JsonIgnore] public string? NoticeDigestPolicyJson { get; set; }
+    [JsonIgnore] public Guid? NoticeClaimToken { get; set; }
+    [JsonIgnore] public int? NoticeClaimVersion { get; set; }
+    [JsonIgnore] public DateTimeOffset? NoticeClaimedAt { get; set; }
+    [JsonIgnore] public string? TransportKind { get; set; }
+    [JsonIgnore] public string? TransportOutcome { get; set; }
+    [JsonIgnore] public DateTimeOffset? TransportObservedAt { get; set; }
+    [JsonIgnore] public DateTimeOffset? ProviderAcceptedAt { get; set; }
+    [JsonIgnore] public DateTimeOffset? AcceptanceUncertainAt { get; set; }
     public Guid[] RequiredPlanningEntryIds { get; set; } = [];
     public Guid[] RequiredProjectIds { get; set; } = [];
     public DateTimeOffset? SuppressedAt { get; set; }
@@ -1072,6 +1176,8 @@ public class ProjectTemplate : Audited, IAuditable
     public int? Version { get; set; }
     public string Status { get; set; } = TemplateStatus.Draft;
     public DateTimeOffset? PublishedAt { get; set; }
+    public Guid? CopiedFromTemplateId { get; set; }
+    public string? CopiedFromSnapshot { get; set; }
     public string OffsetDayKind { get; set; } = DayKind.CalendarDays; // FR-RCV-10
     public string AuditType => ItemType.Template;
     public Guid? AuditProjectId => null;
@@ -1080,6 +1186,17 @@ public class ProjectTemplate : Audited, IAuditable
 }
 
 public class TemplateDiscipline : Entity { public Guid TemplateId { get; set; } public Guid DisciplineId { get; set; } public int SortOrder { get; set; } public bool IsDefaultIncluded { get; set; } = true; }
+
+public class TemplateRisk : Entity
+{
+    public Guid TemplateId { get; set; }
+    public int SortOrder { get; set; }
+    public string Title { get; set; } = "";
+    public int Probability { get; set; } = 1;
+    public int Impact { get; set; } = 1;
+    public string? Mitigation { get; set; }
+    public string? TriggerIndicator { get; set; }
+}
 
 public class TemplateDesignBasis : Entity
 {
@@ -1138,3 +1255,10 @@ public class TemplateTask : Entity
 }
 
 public class TemplateDependency : Entity { public Guid TemplateId { get; set; } public Guid PredecessorTemplateTaskId { get; set; } public Guid SuccessorTemplateTaskId { get; set; } }
+
+/// Advisory review configuration; it never creates project membership or approvals.
+public sealed class DeliverableReviewDefault
+{
+    public Guid DeliverableTypeId { get; set; }
+    public Guid DisciplineId { get; set; }
+}

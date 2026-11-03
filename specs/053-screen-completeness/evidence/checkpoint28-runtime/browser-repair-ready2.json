@@ -1,0 +1,11 @@
+{
+  "status": "ALL_FRONTEND_HARNESS_READY_HOLD_UNRUN",
+  "files": {
+    "web/tests/decision-metadata.cjs": "cbf168055b9661987d26c5b36558bc431a3a3728e2b8116a25b262071b3a867c",
+    "web/tests/template-risk-provenance.cjs": "65df77e37aa96f19ca061f3d72a65590e981129ad9a714e835264e92eb1a8d7b",
+    "web/tests/template-risk-provenance.fixture.cjs": "8798e164f4aefcc40452b334e7c82b6a0df1972fca2d3283d6e8316afec6ec93",
+    "web/tests/admin-screen.cjs": "314a347859c1fd86deee73cfdbd16a144c4b32efab69f619a46098bc85b0b09a",
+    "web/tests/issue-root-cause.cjs": "9f05716b099ef39cb6248d4ecf20fffc0ed7ed8fa2db35d8eb89b76480fe50d4",
+    "web/tests/issue-root-cause.fixture.cjs": "1606cf08efe35a6baa29a1a57ad74cdd1146962c4518434ff552f03017fc7295"
+  }
+}

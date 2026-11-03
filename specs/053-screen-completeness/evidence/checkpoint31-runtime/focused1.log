@@ -1,0 +1,14 @@
+Test run for /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint31-artifacts/bin/Hub.Tests/release/Hub.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:53.93]     Hub.Tests.Api.CoordinationConsequenceAgendaTests.Meeting_carryover_all_categories_and_recorded_weeks_keep_actual_performer_and_independent_states [FAIL]
+  Failed Hub.Tests.Api.CoordinationConsequenceAgendaTests.Meeting_carryover_all_categories_and_recorded_weeks_keep_actual_performer_and_independent_states [2 s]
+  Error Message:
+   Expected 200 but got 400: {"type":"https://hub.local/errors/validation","title":"Validation failed","status":400,"code":"validation","detail":"One or more fields are invalid.","traceId":"0HNPP58410NHK","errors":{"readiness":["This record cannot take that step from its current state."]}}
+  Stack Trace:
+     at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118
+   at Hub.Tests.Api.CoordinationConsequenceAgendaTests.Post(String who, String path, Object body, Int32 status) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/CoordinationConsequenceAgendaTests.cs:line 24
+   at Hub.Tests.Api.CoordinationConsequenceAgendaTests.Meeting_carryover_all_categories_and_recorded_weeks_keep_actual_performer_and_independent_states() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/CoordinationConsequenceAgendaTests.cs:line 178
+--- End of stack trace from previous location ---
+Results File: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint31-runtime/trx-focused1/focused1.trx
+
+Failed!  - Failed:     1, Passed:    55, Skipped:     0, Total:    56, Duration: 53 s - Hub.Tests.dll (net10.0)

@@ -5,3 +5,10 @@ src/Hub.Api/Data/Migrations/HubDbModelSnapshot.cs linguist-generated -diff
 /Engineering-Project-Coordination-Hub-Specification.html linguist-generated -diff
 specs/TRACEABILITY.md linguist-generated -diff
 web/package-lock.json linguist-generated -diff
+
+# Verification records are byte-pinned evidence, including raw tool output and CSV fixtures.
+specs/052-visual-system-and-navigation/evidence/** -text whitespace=-trailing-space,-blank-at-eof
+specs/053-screen-completeness/evidence/** -text whitespace=-trailing-space,-blank-at-eof
+# Preserve saved coordination records and the bundled font license verbatim.
+specs/053-screen-completeness/parallel-build/** -text whitespace=-blank-at-eof
+web/src/assets/fonts/OFL.txt -text whitespace=-trailing-space

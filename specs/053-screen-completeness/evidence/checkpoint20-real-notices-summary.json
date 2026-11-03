@@ -1,0 +1,11 @@
+{
+  "status": "PASS_WITH_LIMITS",
+  "recordedFact": {"person": "Marc Dubois", "type": "Co-op", "startDate": "2026-11-02", "endDate": "2026-11-11", "starts": true, "ends": true},
+  "sourceReads": {"changes": 4, "pickup": 4, "handoffs": 4, "organisation": 12, "discipline": 4, "hr": 12},
+  "candidateCohort": "IDs/order preserved before and after notice decoration; pickup cohort includes Marc after normal Alex pickup-offer command.",
+  "certifications": "Admin editor read had zero certifications; source payloads contained no certification fields.",
+  "hrStale": {"apiStalePut": 409, "apiFreshPut": 200, "browserAdvance": 200, "browserDirtyFieldsRetained": true, "browserConflictVisible": true},
+  "rendered": {"handoffsNativePicker": "PASS", "taskPickupNativePicker": "PASS", "hrChooser": "PASS", "phoneHandoffs": "PASS", "phoneTaskPanel": "PASS", "phoneHrChooser": "PASS"},
+  "unproven": ["Changes native picker was not opened because current project had no new-change dialog action", "custom Registers Issue verifier was unavailable: project Registers route returned Page not available and no issue candidate existed", "person-notice browser checks did not mutate business records"],
+  "evidence": ["checkpoint20-real-notices.json", "checkpoint20-real-notices-pickup.json", "checkpoint20-real-notices-browser-focused.json", "checkpoint20-real-hr-stale-browser-v4.json"]
+}

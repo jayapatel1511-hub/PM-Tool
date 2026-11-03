@@ -9,6 +9,12 @@ public sealed record ScreenList(string Code, string[] Keys)
     public IReadOnlyDictionary<string, string> NotKept { get; } = new Dictionary<string, string>
     {
         ["page"] = "paging is transient", ["panel"] = "panel selection is transient", ["draftAccessReason"] = "access reasons must be supplied again",
+        ["taskSection"] = "task panel section is transient", ["taskInput"] = "report task-input selection is transient",
+        ["recordTab"] = "record detail section is transient", ["recordTabItem"] = "record detail section target is transient",
+        ["seenSubjectId"] = "private My Work presentation context is transient",
+        ["inputPage"] = "report task-input paging is transient", ["inputPageSize"] = "report task-input paging is transient",
+        ["personStaffScope"] = "person panel staff context is transient", ["personProjectsPage"] = "person panel paging is transient",
+        ["personProjectsPageSize"] = "person panel paging is transient",
     };
 }
 
@@ -22,37 +28,68 @@ public static class ScreenLists
         new("changes", ["q", "status", "ownerId", "mine"]),
         new("handoffs", ["q", "status", "direction", "disciplineId", "overdue"]),
         new("submissions", ["q", "status", "coordinatorId", "milestoneId", "targetFrom", "targetTo"]),
-        new("allocations", ["q", "personId", "purpose", "status", "from", "to", "tab"]),
+        new("allocations", ["q", "personId", "purpose", "status", "from", "to", "tab", "roleStatus"]),
         new("design-basis", ["kind", "status", "discipline", "scope", "overdue", "affectedWorkId"]),
         new("readiness", ["from", "to"]),
         new("risks", ["q", "status", "severity", "ownerId", "disciplineId", "indicator", "sort", "cols"]),
-        new("issues", ["q", "status", "severity", "ownerId", "disciplineId", "indicator", "location", "document", "revision", "verification", "alignment", "issueType", "stationFrom", "stationTo", "stationUnits", "group", "sort", "cols"]),
+        new("issues", ["q", "status", "severity", "ownerId", "disciplineId", "indicator", "location", "document", "revision", "verification", "alignment", "issueType", "stationFrom", "stationTo", "stationUnits", "group", "sort", "cols", "rootCause"]),
         new("board", ["q", "disciplineId", "deliverableId", "status", "priority", "mine", "overdue", "blocked", "blocking", "dueThisWeek", "unassigned", "readyForReview", "waiting", "open", "stale", "dueSoon", "noDueDate", "dateInconsistent", "heldPastDue", "dueFrom", "dueTo", "milestoneId", "assigneeId", "ids", "sort", "group", "cols", "swim", "side", "onHold"]),
-        new("deliverables", ["q", "disciplineId", "status", "milestoneId", "ownerId", "typeId", "indicator", "dueFrom", "dueTo", "requiresReview", "group", "sort", "cols", "revisionWarning"]),
+        new("deliverables", ["q", "disciplineId", "status", "milestoneId", "ownerId", "typeId", "indicator", "dueFrom", "dueTo", "requiresReview", "group", "sort", "cols", "revisionWarning", "purposeOfIssueId", "returnCodeId", "noDueDate", "layout"]),
         new("decisions", ["q", "status", "ownerId", "ownerType", "impact", "requiredFrom", "requiredTo", "blocking", "indicator", "sort", "cols", "tab"]),
         new("milestones", ["type", "showCompleted"]),
-        new("projects", ["q", "status", "pmId", "clientId", "officeId", "phaseId", "disciplineId", "health", "projectTypeId", "includeArchived", "mine", "starred", "priority", "sort", "submissionWithinDays", "computedHealth", "leadUnitId", "ids"]),
+        new("calendar", ["mode", "date", "hide", "projects", "ws", "showAway", "personId", "disciplineId"]),
+        new("projects", ["q", "homePreset", "homeProjects", "status", "pmId", "clientId", "officeId", "phaseId", "disciplineId", "health", "projectTypeId", "includeArchived", "mine", "starred", "priority", "sort", "submissionWithinDays", "computedHealth", "leadUnitId", "ids", "group"]),
         new("portfolio", ["q", "status", "pmId", "clientId", "officeId", "phaseId", "disciplineId", "health", "projectTypeId", "mine", "submissionWithinDays", "computedHealth", "group", "overdueDecisions", "leadUnitId"]),
-        new("staff", ["scope", "inactive", "office", "discipline", "indicator", "unitId"]),
+        new("staff", ["scope", "inactive", "office", "discipline", "indicator", "unitId", "cardIndicators"]),
+        new("project-team", ["q", "group", "homeDisciplineId", "officeId", "supervisorId", "unitId", "sort", "cols", "certificationTagId"]),
+        new("workspace-team", ["q", "group", "homeDisciplineId", "officeId", "supervisorId", "unitId", "sort", "cols", "certificationTagId", "homePreset", "homeProjectStatus", "projects", "ws"]),
+        new("timeline", ["disciplineId", "milestoneId", "status", "hideCompleted", "from", "to", "zoom", "chainTo", "collapsed", "expanded", "group", "cols", "layers"]),
+        new("workspace-timeline", ["projects", "ws", "zoom", "start", "hideCompleted", "collapsed", "group", "cols", "layers"]),
         new("workload", ["supervisorId", "disciplineId", "officeId", "projectId", "indicator", "from", "sort", "groupBy", "unitId"]),
-        new("planner", ["view", "from", "weeks", "week", "supervisorId", "disciplineId", "officeId", "personId", "projectId", "source", "confidence", "visibility", "indicator", "q", "sort", "includeMyDrafts", "groupBy", "layout", "stale", "to", "unitId", "withoutProject"]),
-        new("workspace-tasks", ["q", "disciplineId", "deliverableId", "status", "priority", "mine", "overdue", "blocked", "blocking", "dueThisWeek", "unassigned", "readyForReview", "waiting", "open", "stale", "dueSoon", "noDueDate", "dateInconsistent", "heldPastDue", "dueFrom", "dueTo", "milestoneId", "assigneeId", "ids", "sort", "group", "cols", "projects", "ws", "projectId", "onHold", "createdBy"]),
-        new("workspace-board", ["q", "disciplineId", "deliverableId", "status", "priority", "mine", "overdue", "blocked", "blocking", "dueThisWeek", "unassigned", "readyForReview", "waiting", "open", "stale", "dueSoon", "noDueDate", "dateInconsistent", "heldPastDue", "dueFrom", "dueTo", "milestoneId", "assigneeId", "ids", "sort", "group", "cols", "projects", "ws", "projectId", "swim", "side", "onHold", "createdBy"]),
-        new("mywork", ["tab", "who", "projects", "ws", "project", "discipline", "status", "priority", "from", "to", "hideWaiting", "sort"]),
+        new("planner", ["view", "from", "weeks", "week", "supervisorId", "disciplineId", "officeId", "personId", "projectId", "source", "confidence", "visibility", "indicator", "q", "sort", "includeMyDrafts", "groupBy", "layout", "stale", "to", "unitId", "withoutProject", "teamProjectId", "homeDisciplineId", "unit", "zoom"]),
+        new("workspace-tasks", ["q", "homePreset", "homeProjectStatus", "disciplineId", "deliverableId", "status", "priority", "mine", "overdue", "blocked", "blocking", "dueThisWeek", "unassigned", "readyForReview", "waiting", "open", "stale", "dueSoon", "noDueDate", "dateInconsistent", "heldPastDue", "dueFrom", "dueTo", "milestoneId", "assigneeId", "ids", "sort", "group", "cols", "projects", "ws", "projectId", "onHold", "createdBy"]),
+        new("workspace-board", ["q", "homePreset", "homeProjectStatus", "disciplineId", "deliverableId", "status", "priority", "mine", "overdue", "blocked", "blocking", "dueThisWeek", "unassigned", "readyForReview", "waiting", "open", "stale", "dueSoon", "noDueDate", "dateInconsistent", "heldPastDue", "dueFrom", "dueTo", "milestoneId", "assigneeId", "ids", "sort", "group", "cols", "projects", "ws", "projectId", "swim", "side", "onHold", "createdBy"]),
+        new("mywork", ["tab", "who", "projects", "ws", "project", "discipline", "status", "priority", "from", "to", "hideWaiting", "sort", "group"]),
         new("coordination", ["discipline", "owner", "from", "to"]),
         new("workspace-coordination", ["tab", "projects", "ws", "projectId", "disciplineId", "ownerId", "from", "to"]),
+        .. Hub.Api.Features.ReportEndpoints.SavedViewParameterKeys.Select(report => new ScreenList(report.Key, report.Value)),
     ];
     public static IReadOnlyDictionary<string, string[]> SavedViewKeys { get; } = All.ToDictionary(l => l.Code, l => l.Keys);
     public static readonly string[] SearchGroups = ["projects", "tasks", "deliverables", "milestones", "decisions", "handoffs", "reviews", "changes", "submissions", "allocations", "planning", "design-basis", "constraints", "commitments", "comments", "people"];
 
-    public static async Task<bool> ValidReference(HubDb db, Guid? projectId, string k, string value)
+    public static async Task<bool> ValidReference(HubDb db, Guid? projectId, string k, string value, string? listType = null)
     {
+        if (listType == "issues" && k == "rootCause")
+        {
+            if (!(await db.CurrentSettings()).IsFlagOn("register_screens")) return false;
+            return value == "not-recorded" || Guid.TryParse(value, out var cause) && cause != Guid.Empty
+                && await db.IssueRootCauseCategories.AnyAsync(category => category.Id == cause);
+        }
+        if (listType is "project-team" or "workspace-team")
+        {
+            if (k == "group") return value is "none" or "homeDiscipline" or "office" or "supervisor" or "unit";
+            if (k is "homeDisciplineId" or "officeId" or "supervisorId" or "unitId")
+            {
+                if (value is "not-set" or "unavailable") return true;
+                if (!Guid.TryParse(value, out var id) || id == Guid.Empty) return false;
+                return k switch
+                {
+                    "homeDisciplineId" => await db.Disciplines.AnyAsync(d => d.Id == id),
+                    "officeId" => await db.Offices.AnyAsync(o => o.Id == id),
+                    "supervisorId" => await db.Users.AnyAsync(u => u.Id == id),
+                    _ => await db.Set<OrgUnit>().AnyAsync(u => u.Id == id),
+                };
+            }
+            if (k == "certificationTagId") return Guid.TryParse(value, out var tag) && await db.CertificationTags.AnyAsync(t => t.Id == tag);
+        }
         var ids = Http.Ids(value);
         return k switch
             {
+                "cardIndicators" => value.Split(',').All(token => token is "overdue" or "blocked" or "reviewsStalled"),
                 "disciplineId" when projectId is not null => await Count(db.ProjectDisciplines.Where(x => ids.Contains(x.Id) && x.ProjectId == projectId && x.IsActive).Select(x => x.Id), ids),
                 "discipline" when projectId is not null => await Count(db.ProjectDisciplines.Where(x => ids.Contains(x.Id) && x.ProjectId == projectId && x.IsActive).Select(x => x.Id), ids),
                 "disciplineId" or "discipline" => await Count(db.Disciplines.Where(x => ids.Contains(x.Id) && x.IsActive).Select(x => x.Id), ids),
+                "homeDisciplineId" => ids.Length == 1 && ids[0] == Guid.Empty || await Count(db.Disciplines.Where(x => ids.Contains(x.Id) && x.IsActive).Select(x => x.Id), ids),
                 "owner" when projectId is not null => await Count(db.Users.Where(x => ids.Contains(x.Id) && x.IsActive).Select(x => x.Id), ids),
                 "deliverableId" => await Count(db.Deliverables.Where(x => ids.Contains(x.Id)).Select(x => x.Id), ids),
                 "milestoneId" => await Count(db.Milestones.Where(x => ids.Contains(x.Id) && !x.IsCancelled).Select(x => x.Id), ids),
@@ -69,6 +106,12 @@ public static class ScreenLists
                 "projectTypeId" => await Count(db.ProjectTypes.Where(x => ids.Contains(x.Id) && x.IsActive).Select(x => x.Id), ids),
                 "unitId" or "leadUnitId" => ids.Length == 1 && ids[0] == Guid.Empty || await Count(db.Set<OrgUnit>().Where(u => ids.Contains(u.Id)).Select(u => u.Id), ids),
                 "projectId" => await Count(db.Projects.Where(x => ids.Contains(x.Id)).Select(x => x.Id), ids),
+                // Preserve this opaque people-selector ID without probing another project's existence here.
+                // The planner authorizes it under the recipient's current permissions before deriving membership.
+                "teamProjectId" => ids.Length == 1,
+                "homePreset" => HomePresets.Codes.Contains(value),
+                "homeProjects" => value is "all" or "mine" or "none" || ids.Length > 0,
+                "homeProjectStatus" => Http.List(value) is { Length: > 0 } statuses && statuses.All(Hub.Domain.ProjectStatus.All.Contains),
                 _ => true,
             };
     }

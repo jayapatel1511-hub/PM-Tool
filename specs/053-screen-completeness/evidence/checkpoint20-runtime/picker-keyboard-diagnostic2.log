@@ -1,0 +1,15 @@
+NATIVE_BEFORE {
+  value: '00000000-0000-0000-0000-000000002401',
+  disabled: false,
+  active: '<textarea data-slot="textarea" class="flex field-sizing-content min-h-16 w-full rounded-md border border-input bg-card px-3 py-2 text-base outline-none placeholder:text-placeholder focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:border-border disabled:bg-disabled disabled:text-disabled-foreground [&amp;[readonly]]:bg-muted aria-invalid:border-destructive md:text-sm" id="leave-csv" rows="5"></textarea>'
+}
+NATIVE_AFTER {
+  value: '00000000-0000-0000-0000-000000002401',
+  disabled: false,
+  active: '<select id="hr-person" class="h-(--control-h) w-full rounded-md border border-input bg-card px-3 text-sm outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:border-border disabled:bg-disabled disabled:text-disabled-foreground"><option value="">Choose an employee</option><option value="00000000-0000-0000-0000-000000000002">Alex Chen</option><option value="00000000-0000-0000-0000-000000002402">Recorded owner</option><option value="00000000-0000-0000-0000-000000002401">Jill Martin · Co-op · Starts 2026-11-01 · Ends 2026-12-18</option><option value="00000000-0000-0000-0000-000000002403">Unknown dates</option></select>'
+}
+page.waitForFunction: Timeout 3000ms exceeded.
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/capacity-person-picker-notices.cjs:211:16 {
+  log: [],
+  name: 'TimeoutError'
+}

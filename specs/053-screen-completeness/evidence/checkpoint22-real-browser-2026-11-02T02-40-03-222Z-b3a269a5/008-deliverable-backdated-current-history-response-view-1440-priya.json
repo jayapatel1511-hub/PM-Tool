@@ -1,0 +1,42 @@
+{
+  "name": "deliverable-backdated-current-history-response-view",
+  "actor": "priya@hub.test",
+  "width": 1440,
+  "status": "PASS",
+  "startedAtUtc": "2026-11-02T02:40:12.575Z",
+  "facts": {
+    "deliverableId": "01a19847-71a0-7a65-b343-b5961050aa90",
+    "currentIssueId": "01a19847-7277-7a8c-8313-3ca7e665c102",
+    "olderIssueId": "01a19847-71c7-7d54-ba28-46b3fe851fd8",
+    "currentResponse": {
+      "rowVersion": 0,
+      "purposeOfIssueId": "01a19834-0b5d-7f1c-9913-845e7bed0323",
+      "purpose": "For construction",
+      "returnCodeId": null,
+      "returnCode": null,
+      "returnLabel": null,
+      "responseDate": null
+    },
+    "olderResponse": {
+      "rowVersion": 2,
+      "purposeOfIssueId": "01a19834-0b59-7b5e-8900-564db19b60dc",
+      "purpose": "For review",
+      "returnCodeId": "01a19834-0b62-7fb1-b0a4-97eaf836b541",
+      "returnCode": "C",
+      "returnLabel": "Revise and resubmit",
+      "responseDate": "2026-11-01"
+    },
+    "responseView": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint22-real-browser-2026-11-02T02-40-03-222Z-b3a269a5/010-response-view-only-1440.png",
+    "fieldsOpenedWithoutEditing": true,
+    "contained": {
+      "viewport": 1440,
+      "document": 1440,
+      "content": {
+        "client": 1200,
+        "scroll": 1200
+      }
+    }
+  },
+  "screenshot": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint22-real-browser-2026-11-02T02-40-03-222Z-b3a269a5/011-priya-1440-deliverable-backdated-current-history-response-view.png",
+  "finishedAtUtc": "2026-11-02T02:40:13.735Z"
+}

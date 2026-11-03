@@ -1,0 +1,32 @@
+{
+  "status": "PASS",
+  "scope": "synthetic R2 UI only; API/export/storage are verified separately; external intake remains unimplemented",
+  "cases": [
+    "AC-SCR-61: explicit outcome; one explanation; required trimmed reason and HTTP(S) evidence; clean/dirty Cancel zero POST and natural opener focus",
+    "AC-SCR-61: explanation over 4000 characters has no invented maxlength and is submitted unchanged in one command",
+    "AC-SCR-61: 400/403/404/409 retain input and named blockers; correction never adopts server currentRowVersion",
+    "AC-SCR-61: uncertain command remains immutable through later 403/404/409; exact retry resolves one simulated receipt without a second event",
+    "AC-SCR-61: explicitly discarding an uncertain form does not send or manufacture another command",
+    "AC-SCR-61: four current/event outcomes; Responded never implies closure; historical and unknown outcomes remain Not recorded",
+    "AC-SCR-61: actual CSV browser download bytes match all-round synthetic dataset; Excel menu sends format=xlsx and presents refusal without a command",
+    "AC-SCR-61: actual finding/round/filter source returns with natural keyboard focus and original scroll",
+    "AC-SCR-61: 375px outcome/explanation/evidence and Cancel remain reachable without horizontal overflow",
+    "AC-SCR-84: flag-off legacy form/command remain usable and omit new outcome; new list/outcome/history/export presentation absent"
+  ],
+  "commandCount": 66,
+  "exportRequests": [
+    {
+      "path": "projects/00000000-0000-0000-0000-000000000010/reviews/00000000-0000-0000-0000-000000009201/response-sheet",
+      "query": {
+        "format": "csv"
+      }
+    },
+    {
+      "path": "projects/00000000-0000-0000-0000-000000000010/reviews/00000000-0000-0000-0000-000000009201/response-sheet",
+      "query": {
+        "format": "xlsx"
+      }
+    }
+  ],
+  "rootBoundary": "FinalSPA2/8856 +syntheticHTTP;66explicitmockcommands/2mockdownloads, strictunexpectedreads/writes/pageerrors0.149actualprovider/adjacentchecksseparate; externalR3unimplemented/noKestreljoin."
+}

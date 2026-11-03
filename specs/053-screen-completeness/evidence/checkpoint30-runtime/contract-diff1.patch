@@ -1,0 +1,246 @@
+--- g57/openapi
++++ g58/openapi
+@@ -39179,6 +39179,88 @@
+         ],
+         "type": "object"
+       },
++      "TaskContributionRead": {
++        "properties": {
++          "canMark": {
++            "type": "boolean"
++          },
++          "canWithdraw": {
++            "type": "boolean"
++          },
++          "collaboratorId": {
++            "format": "uuid",
++            "type": "string"
++          },
++          "markedAt": {
++            "format": "date-time",
++            "type": [
++              "null",
++              "string"
++            ]
++          },
++          "note": {
++            "type": [
++              "null",
++              "string"
++            ]
++          },
++          "refusalReason": {
++            "type": [
++              "null",
++              "string"
++            ]
++          },
++          "rowVersion": {
++            "format": "int32",
++            "pattern": "^-?(?:0|[1-9]\\d*)$",
++            "type": "integer"
++          }
++        },
++        "required": [
++          "collaboratorId",
++          "rowVersion",
++          "markedAt",
++          "note",
++          "canMark",
++          "canWithdraw",
++          "refusalReason"
++        ],
++        "type": "object"
++      },
++      "TaskContributionSetBody": {
++        "additionalProperties": false,
++        "properties": {
++          "collaboratorId": {
++            "format": "uuid",
++            "type": "string"
++          },
++          "marked": {
++            "type": "boolean"
++          },
++          "note": {
++            "type": [
++              "null",
++              "string"
++            ]
++          },
++          "reason": {
++            "type": [
++              "null",
++              "string"
++            ]
++          },
++          "rowVersion": {
++            "format": "int32",
++            "type": "integer"
++          }
++        },
++        "required": [
++          "collaboratorId",
++          "rowVersion",
++          "marked"
++        ],
++        "type": "object"
++      },
+       "TaskCreateBody": {
+         "properties": {
+           "assigneeId": {
+@@ -39457,6 +39539,16 @@
+       },
+       "TaskDetailCollaborator": {
+         "properties": {
++          "contribution": {
++            "oneOf": [
++              {
++                "type": "null"
++              },
++              {
++                "$ref": "#/components/schemas/TaskContributionRead"
++              }
++            ]
++          },
+           "displayName": {
+             "type": "string"
+           },
+@@ -39821,6 +39913,26 @@
+           "rowVersion",
+           "dueDateChangeCount",
+           "warnings"
++        ],
++        "type": "object"
++      },
++      "TaskHistoryActorChoice": {
++        "properties": {
++          "displayName": {
++            "type": "string"
++          },
++          "id": {
++            "format": "uuid",
++            "type": "string"
++          },
++          "isActive": {
++            "type": "boolean"
++          }
++        },
++        "required": [
++          "id",
++          "displayName",
++          "isActive"
+         ],
+         "type": "object"
+       },
+@@ -50378,6 +50490,13 @@
+             "required": true,
+             "schema": {
+               "format": "uuid",
++              "type": "string"
++            }
++          },
++          {
++            "in": "query",
++            "name": "actorId",
++            "schema": {
+               "type": "string"
+             }
+           },
+@@ -67294,6 +67413,39 @@
+         ]
+       }
+     },
++    "/api/v1/tasks/{id}/activity/actors": {
++      "get": {
++        "parameters": [
++          {
++            "in": "path",
++            "name": "id",
++            "required": true,
++            "schema": {
++              "format": "uuid",
++              "type": "string"
++            }
++          }
++        ],
++        "responses": {
++          "200": {
++            "content": {
++              "application/json": {
++                "schema": {
++                  "items": {
++                    "$ref": "#/components/schemas/TaskHistoryActorChoice"
++                  },
++                  "type": "array"
++                }
++              }
++            },
++            "description": "OK"
++          }
++        },
++        "tags": [
++          "Hub.Api"
++        ]
++      }
++    },
+     "/api/v1/tasks/{id}/block": {
+       "post": {
+         "parameters": [
+@@ -67435,6 +67587,46 @@
+         },
+         "tags": [
+           "TaskEndpoints"
++        ]
++      }
++    },
++    "/api/v1/tasks/{id}/contribution": {
++      "patch": {
++        "parameters": [
++          {
++            "in": "path",
++            "name": "id",
++            "required": true,
++            "schema": {
++              "format": "uuid",
++              "type": "string"
++            }
++          }
++        ],
++        "requestBody": {
++          "content": {
++            "application/json": {
++              "schema": {
++                "$ref": "#/components/schemas/TaskContributionSetBody"
++              }
++            }
++          },
++          "required": true
++        },
++        "responses": {
++          "200": {
++            "content": {
++              "application/json": {
++                "schema": {
++                  "$ref": "#/components/schemas/TaskContributionRead"
++                }
++              }
++            },
++            "description": "OK"
++          }
++        },
++        "tags": [
++          "TaskContributions"
+         ]
+       }
+     },
+@@ -69535,6 +69727,9 @@
+     },
+     {
+       "name": "TaskBulkCommandEndpoints"
++    },
++    {
++      "name": "TaskContributions"
+     },
+     {
+       "name": "DependencyEndpoints"

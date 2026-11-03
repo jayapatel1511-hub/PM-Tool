@@ -1,0 +1,53 @@
+{
+  "atUtc": "2026-11-03T03:00:38.904724+00:00",
+  "authorization": "Jay explicitly approved QA24 cleanup in question reply",
+  "database": {
+    "name": "hub_qa_checkpoint24",
+    "owner": "hub",
+    "bytes": 18175667
+  },
+  "apiPid": 4323,
+  "apiCommand": "dotnet bin/Release/net10.0/Hub.Api.dll --urls http://127.0.0.1:5088",
+  "apiCwd": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api",
+  "apiDllSha256": "80658bd2ad102063a6042355ff0d5fb417a5fc3428b2eb5b1ae67916e57145f3",
+  "syntheticProjects": [
+    {
+      "id": "01a19b30-62e7-7b49-9eb1-c9b8b5971e3e",
+      "number": "QA24-MVYY3WT5",
+      "name": "Synthetic QA24 drawing intake and people"
+    }
+  ],
+  "otherDatabases": [
+    {
+      "oid": "1",
+      "name": "template1"
+    },
+    {
+      "oid": "4",
+      "name": "template0"
+    },
+    {
+      "oid": "5",
+      "name": "postgres"
+    },
+    {
+      "oid": "16384",
+      "name": "hub"
+    }
+  ],
+  "containerId": "118c1882bf15",
+  "galleryIndexSHA256": "ded3813f9fb769a9e761111d77cbf1047302379f2d221f58683919ac81b62a26",
+  "mode": "--execute",
+  "status": "PASS_APPROVED_QA24_CLEANUP",
+  "completedAtUtc": "2026-11-03T03:00:39.150229+00:00",
+  "apiStopped": true,
+  "databaseAbsent": true,
+  "clientsBeforeDrop": 0,
+  "dropResult": "DROP DATABASE",
+  "otherDatabaseIdentitiesUnchanged": true,
+  "sharedContainerUnchanged": true,
+  "sharedTestPostgresListening": true,
+  "reviewGalleryAndPreviewListening": true,
+  "galleryBytesUnchanged": true,
+  "apiBinaryPreserved": true
+}

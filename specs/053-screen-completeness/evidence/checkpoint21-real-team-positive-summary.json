@@ -1,0 +1,54 @@
+{
+  "observedAtUtc": "2026-11-01T16:07:25.305Z",
+  "status": "FAIL_OR_UNPROVEN",
+  "fixture": {
+    "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+    "projectNumber": "QA21-REAL-001",
+    "officeId": "01a197dc-62e6-784d-830f-7932b9b488c6",
+    "civil": "01a197bd-b98a-7b9e-833e-8ab59cfa4aac",
+    "ids": {
+      "alex": "01a197bd-ba3c-7a2c-91b0-ae7a7140aeb9",
+      "jill": "01a197bd-ba3c-7024-a2a4-c6581e4b7428",
+      "diane": "01a197bd-ba3c-7810-ade7-48c382890f96",
+      "omar": "01a197bd-ba3c-7f94-afd9-343012f0c4e4",
+      "priya": "01a197bd-ba3c-7004-8608-b9ff012100b9"
+    },
+    "today": "2026-11-01",
+    "week": "2026-10-26",
+    "gridPersonIds": [
+      "01a197bd-ba3c-7810-ade7-48c382890f96"
+    ]
+  },
+  "failures": [
+    {
+      "fatal": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Add a person…', exact: true })\u001b[22m\n"
+    }
+  ],
+  "browser": [
+    {
+      "name": "workspace",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "status": 200,
+      "contained": true,
+      "textSample": "Skip to content\nt\nTuesday\nMy Work\nHome\nProjects\nTasks\nResources\nTime\nReports\nTeam\nFiles\nMy Staff\nTuesday\nTeam\nSearch\n/\nMy projects\nNew\n1\nPN\nTeam\n\n2 people\n\nViews\nDashboard\nBoard\nList\nTimeline\nCalendar\nFiles\nTeam\nWorkload\nMy projects\nCopy link\nSearch\nGroup by\nNo grouping\nHome discipline\nOffice\nSupervisor\nCurrent unit\nFilters\n1\n1 active\nColumns\nTeam\nPerson\tHome discipline\tOffice\tSupervisor\tCurrent unit\tProjects and roles\nCivil1\n\nAC\nAlex Chen\nCivil Designer (EIT)\n\tCivil\tQA21 Halifax\tSam Patel\tNot set\t\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTeam Member\n\nNot set1\n\nJM\nJill Martin\nCivil Designer\n\tNot set\tQA21 Halifax\tSam Patel\tNot set\t\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTeam Member",
+      "errors": []
+    },
+    {
+      "name": "workspace",
+      "viewport": [
+        375,
+        812
+      ],
+      "status": 200,
+      "contained": true,
+      "textSample": "Skip to content\n1\nPN\nTeam\n\n2 people\n\nViews\nDashboard\nBoard\nList\nTimeline\nCalendar\nFiles\nTeam\nWorkload\nCopy link\nSearch\nGroup by\nNo grouping\nHome discipline\nOffice\nSupervisor\nCurrent unit\nFilters\n1\n1 active\nColumns\nCivil1\nPerson\nAC\nAlex Chen\nCivil Designer (EIT)\nHome discipline\nCivil\nOffice\nQA21 Halifax\nSupervisor\nSam Patel\nCurrent unit\nNot set\nProjects and roles\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTeam Member\nNot set1\nPerson\nJM\nJill Martin\nCivil Designer\nHome discipline\nNot set\nOffice\nQA21 Halifax\nSupervisor\nSam Patel\nCurrent unit\nNot set\nProjects and roles\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTeam Member\nMy Work\nSearch\nNotifications",
+      "errors": []
+    }
+  ],
+  "limits": [
+    "QA21 only; normal API commands; no fill/save membership; all browser contexts closed"
+  ]
+}

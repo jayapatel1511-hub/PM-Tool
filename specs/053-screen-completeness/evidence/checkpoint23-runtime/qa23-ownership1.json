@@ -1,0 +1,14 @@
+{
+  "createdAtUtc": "2026-11-02T05:48:43.906340+00:00",
+  "database": "hub_qa_checkpoint23",
+  "container": "codex-pm-052-053-tests",
+  "postgresLoopbackPort": 55432,
+  "apiLoopbackPort": 5088,
+  "ownership": "Root checked database absent and API port unused, then CREATE DATABASE succeeded; only this new QA database may be cleaned",
+  "apiDllSha256": "3c46b9c03fa1c1e5546c0e1b7ea38472eb07d0f9db4129faf1b74973d9cbdc1e",
+  "runtime": "health200; ownership listener/cwd verified; new API DB migrations applied, no product setup flags changed yet",
+  "boundaries": "synthetic local only; no operational dataset/pilot/deployment; source flags remain off",
+  "apiPid": 77813,
+  "apiSession": 50431,
+  "apiCwd": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api"
+}

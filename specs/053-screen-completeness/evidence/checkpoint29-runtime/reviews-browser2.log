@@ -1,0 +1,24 @@
+locator.click: Timeout 15000ms exceeded.
+Call log:
+[2m  - waiting for locator('[data-review-default-settings="00000000-0000-0000-0000-000000057104"]').getByRole('alert').filter({ hasText: 'Synthetic discipline catalogue read failure' }).getByRole('button', { name: 'Retry', exact: true })[22m
+[2m    - locator resolved to <button data-size="sm" data-slot="button" data-variant="outline" class="inline-flex shrink-0 items-center justify-center rounded-md text-sm font-medium whitespace-nowrap transition-colors duration-[120ms] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 border border-input bg-card text-foreground hover:bg-muted disa…>Retry</button>[22m
+[2m  - attempting click action[22m
+[2m    - waiting for element to be visible, enabled and stable[22m
+[2m    - element is not stable[22m
+[2m  - retrying click action[22m
+[2m    - waiting for element to be visible, enabled and stable[22m
+[2m  - element was detached from the DOM, retrying[22m
+
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/review-discipline-patterns.cjs:155:157 {
+  log: [
+    `  - waiting for locator('[data-review-default-settings="00000000-0000-0000-0000-000000057104"]').getByRole('alert').filter({ hasText: 'Synthetic discipline catalogue read failure' }).getByRole('button', { name: 'Retry', exact: true })`,
+    `    - locator resolved to <button data-size="sm" data-slot="button" data-variant="outline" class="inline-flex shrink-0 items-center justify-center rounded-md text-sm font-medium whitespace-nowrap transition-colors duration-[120ms] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 border border-input bg-card text-foreground hover:bg-muted disa…>Retry</button>`,
+    '  - attempting click action',
+    '    - waiting for element to be visible, enabled and stable',
+    '    - element is not stable',
+    '  - retrying click action',
+    '    - waiting for element to be visible, enabled and stable',
+    '  - element was detached from the DOM, retrying'
+  ],
+  name: 'TimeoutError'
+}

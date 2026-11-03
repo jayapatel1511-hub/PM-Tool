@@ -1,0 +1,14 @@
+{
+  "status": "ALL_SOURCE_READY_HASH_MATCH_HOLD_SOURCE_REVIEW_PASS_PROVIDER68PASS_TYPES_REPAIR",
+  "files": {
+    "src/Hub.Api/Features/TaskBulkCommands.cs": "b7e2826d6e26939f419c9bd3b7c97c18ffe771b723b489ef3e501ac9e35ae199",
+    "src/Hub.Api/Features/Tasks.cs": "7657a9afb48edefb508d5bb699d1081367b184b4c86a8142fb257b139a25fd88",
+    "tests/Hub.Tests/Api/TaskBulkCommandTests.cs": "2000765c1410708d6ea58e6fafe3cdf4d6343d2c4048f8f5088eb277856d5ffc",
+    "web/src/components/hub/task-bulk-command.tsx": "7b9746bb2274c25afe18bbc1fa87488a05124abbe0955efee9804c3faa2894f4",
+    "web/src/pages/WorkspaceTasks.tsx": "3bcb23f424cae56f05f5905f8b360e6612721f68ef750a13d659bc3ec12d87b2",
+    "web/src/pages/projects/Tasks.tsx": "a7aab62469632116d98c13b6b29016e018400383d7e1746b5b372f50296a1468",
+    "web/src/pages/ReassignWork.tsx": "cb1c123ee04e82c41044a5679b0f89d96a4b02bdc881dda81d43556d82dcb13c",
+    "web/tests/task-cross-project-bulk.cjs": "62749297414c0874ddd65225af142e69410d94ae75f084a0fca734c1fe3e11a3",
+    "web/tests/task-cross-project-bulk.fixture.cjs": "78f41e6a3ebc95a653be3b7493797cb0600df557479a7c5d5b8abf1237f7ebf5"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "atUtc": "2026-11-02T10:12:41.953968+00:00",
+  "status": "PASS_APP_AND_FIXTURES_UNCHANGED",
+  "changedHarnessFiles": [
+    "web/tests/review-register.cjs"
+  ],
+  "scope": "443-input baseline; allowedonly2observedCJShelperrepairs; currentSPA1 remainsfinalappbytes"
+}

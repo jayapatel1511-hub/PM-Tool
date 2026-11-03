@@ -1,0 +1,27 @@
+{
+  "exitCode": 1,
+  "args": [
+    "node",
+    "tests/external-review.cjs"
+  ],
+  "base": "http://127.0.0.1:8875",
+  "visualSystem": true,
+  "atUtc": "2026-11-03T04:20:16.739401+00:00",
+  "scope": "Actual isolated SPA; finite synthetic intercepted HTTP; no real business writes or mail",
+  "driverSHA256": "60b69635098136bb0ec93e8cbbdd74903a4a5e1d803f69c906f0c8ea7cb7de30",
+  "tail": [
+    "{\"stage\":\"PM verifier and own closure evidence\",\"completedCases\":[\"Normal current-started record with explicit actual IDs, four versions, disabled blank confirmation, native invalid-date refusal, reason over4000 preserved in wire, typed party provenance, original/current issued revision, no automatic verifier\"],\"currentUrl\":\"http://127.0.0.1:8875/projects/P-MOCK/reviews?q=Synthetic&page=1&findingSeverity=Advisory&panel=ReviewPackage:00000000-0000-0000-0000-000000018201\",\"commands\":3,\"unexpectedGets\":[],\"unexpectedWrites\":[],\"pageErrors\":[],\"baseUnknownGets\":[]}",
+    "locator.waitFor: Timeout 15000ms exceeded.",
+    "Call log:",
+    "\u001b[2m  - waiting for getByRole('dialog').filter({ has: getByRole('heading', { name: 'RV-EXT \u00b7 Synthetic issued review', exact: true }) }).locator('article').filter({ has: getByText('Synthetic carried external comment', { exact: true }) }).getByText('Verified Closed', { exact: true }) to be visible\u001b[22m",
+    "\u001b[2m    33 \u00d7 locator resolved to hidden <span class=\"font-medium\">Verified Closed</span>\u001b[22m",
+    "",
+    "    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/external-review.cjs:186:65 {",
+    "  log: [",
+    "    \"  - waiting for getByRole('dialog').filter({ has: getByRole('heading', { name: 'RV-EXT \u00b7 Synthetic issued review', exact: true }) }).locator('article').filter({ has: getByText('Synthetic carried external comment', { exact: true }) }).getByText('Verified Closed', { exact: true }) to be visible\",",
+    "    '    33 \u00d7 locator resolved to hidden <span class=\"font-medium\">Verified Closed</span>'",
+    "  ],",
+    "  name: 'TimeoutError'",
+    "}"
+  ]
+}

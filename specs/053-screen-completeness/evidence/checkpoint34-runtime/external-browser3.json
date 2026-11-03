@@ -1,0 +1,21 @@
+{
+  "exitCode": 1,
+  "args": [
+    "node",
+    "tests/external-review.cjs"
+  ],
+  "base": "http://127.0.0.1:8876",
+  "visualSystem": true,
+  "atUtc": "2026-11-03T04:26:05.765801+00:00",
+  "scope": "Actual isolated SPA; finite synthetic intercepted HTTP; no real business writes or mail",
+  "driverSHA256": "b8a4457669d497f8cf6c68468c4ecd97bb4f87aa299023266efbee48eb6a399d",
+  "tail": [
+    "{\"stage\":\"read and permission loss\",\"completedCases\":[\"Normal current-started record with explicit actual IDs, four versions, disabled blank confirmation, native invalid-date refusal, reason over4000 preserved in wire, typed party provenance, original/current issued revision, no automatic verifier\",\"Explicit PM designation and separate verifier reason/evidence; resolver evidence remains distinct; closure event retains verifier evidence\",\"409 preserves typed draft and originally selected issue/party/code/package versions after normal options reread; no silent promotion\",\"Lost response after synthetic commit retries byte-identical body/request ID; later 403 stays uncertain; explicit success produces one synthetic receipt\",\"Malformed success is unconfirmed and locks the exact command rather than clearing the draft\"],\"currentUrl\":\"http://127.0.0.1:8876/projects/P-MOCK/reviews?q=Synthetic&page=1&findingSeverity=Advisory&panel=ReviewPackage:00000000-0000-0000-0000-000000018201\",\"commands\":9,\"unexpectedGets\":[],\"unexpectedWrites\":[],\"pageErrors\":[],\"baseUnknownGets\":[]}",
+    "page.waitForFunction: Timeout 15000ms exceeded.",
+    "    at cancel (/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/external-review.cjs:125:31)",
+    "    at async /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/external-review.cjs:267:5 {",
+    "  log: [],",
+    "  name: 'TimeoutError'",
+    "}"
+  ]
+}

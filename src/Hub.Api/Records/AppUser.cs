@@ -2,7 +2,7 @@ using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 namespace Hub.Api.Records;
-public static class AppUserRecord { public static RegistryEntry Entry { get; } = new(typeof(Hub.Api.Data.AppUser), "User", ["DisplayName", "Email", "JobTitle", "OfficeId", "SupervisorId", "HomeDisciplineId", "IsActive", "WeeklyCapacityHours", "IsTemplateEditor", "HrSourceSystem", "HrPersonKey", "UnitId"], false, "no item-history surface today; child and organisation history retain existing queries")
+public static class AppUserRecord { public static RegistryEntry Entry { get; } = new(typeof(Hub.Api.Data.AppUser), "User", ["DisplayName", "Email", "JobTitle", "OfficeId", "SupervisorId", "HomeDisciplineId", "IsActive", "WeeklyCapacityHours", "IsTemplateEditor", "HrSourceSystem", "HrPersonKey", "UnitId", "PersonType", "PersonStartDate", "PersonEndDate"], false, "no item-history surface today; child and organisation history retain existing queries")
     {
         NameOrder = 0,
         Names = async (db, list) => (await db.Users.Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.DisplayName, x.IsActive }).ToListAsync())

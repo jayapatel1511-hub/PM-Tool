@@ -1,0 +1,135 @@
+{
+  "backend": {
+    "DocumentLinkReferenceReadTests.Known_label_comparison_is_ordinal_and_missing_values_do_not_match": [
+      "AC-SCR-77",
+      "AC-SCR-84"
+    ],
+    "DocumentLinkReferenceReadTests.No_deliverable_is_distinct_from_no_declaration": [
+      "AC-SCR-77",
+      "AC-SCR-84"
+    ],
+    "DocumentLinkReferenceReadTests.Changed_task_parent_never_becomes_a_new_match_until_explicit_reregistration": [
+      "AC-SCR-77",
+      "AC-SCR-84"
+    ],
+    "DocumentLinkReferenceReadTests.Undeclared_or_legacy_link_never_claims_a_revision_match": [
+      "AC-SCR-77",
+      "AC-SCR-84"
+    ],
+    "DocumentLinkReferenceReadTests.Direct_deliverable_link_is_not_self_inherited_and_task_inheritance_keeps_real_id_version_and_readonly": [
+      "AC-SCR-77",
+      "AC-SCR-84"
+    ],
+    "DocumentLinkReferenceReadTests.Unavailable_captured_target_does_not_leak_foreign_or_deleted_metadata": [
+      "AC-SCR-77",
+      "AC-SCR-84"
+    ],
+    "DocumentLinkReferenceReadTests.Actual_inactive_and_unknown_registrars_are_not_guessed_or_replaced_by_original_author": [
+      "AC-SCR-77",
+      "AC-SCR-84"
+    ],
+    "DocumentLinkReferenceReadTests.Batch_reader_excludes_unreadable_links_and_hides_mismatched_owner_metadata": [
+      "AC-SCR-77",
+      "AC-SCR-84"
+    ],
+    "DocumentLinkReferenceReadTests.Reference_reads_batch_owner_target_and_registrar_queries_instead_of_querying_each_link": [
+      "AC-SCR-77",
+      "AC-SCR-84"
+    ],
+    "DocumentLinkReferenceReadTests.Off_reads_omit_context_and_preserve_legacy_unc_sharepoint_and_inheritance_shapes": [
+      "AC-SCR-77",
+      "AC-SCR-84"
+    ],
+    "DocumentLinkReferenceReplayTests.Reference_receipt_replays_exactly_but_refuses_disabled_archived_and_deleted_owner_without_claiming": [
+      "AC-SCR-77",
+      "AC-SCR-84"
+    ],
+    "DocumentLinkReferenceReplayTests.Omitted_and_explicit_null_reference_keep_old_create_and_replay_when_feature_is_off": [
+      "AC-SCR-77",
+      "AC-SCR-84"
+    ],
+    "DocumentLinkReferenceTests.Registration_records_six_fields_and_compares_declared_C_with_current_D_without_other_effects": [
+      "AC-SCR-77",
+      "AC-SCR-84"
+    ],
+    "DocumentLinkReferenceTests.Replacement_title_only_edit_and_clear_keep_original_link_authorship": [
+      "AC-SCR-77",
+      "AC-SCR-84"
+    ],
+    "DocumentLinkReferenceTests.Url_replacement_invalidates_unless_explicitly_reregistered_and_dark_reads_do_not_erase_data": [
+      "AC-SCR-77",
+      "AC-SCR-84"
+    ],
+    "DocumentLinkReferenceTests.Invalid_nested_input_cannot_change_link_url_version_audit_or_provenance": [
+      "AC-SCR-77",
+      "AC-SCR-84"
+    ],
+    "DocumentLinkReferenceTests.Shared_creator_requires_explicit_enablement_and_old_body_shape_remains_exact": [
+      "AC-SCR-77",
+      "AC-SCR-84"
+    ],
+    "DocumentLinkReferenceTests.Reference_edits_preserve_authority_missing_stale_version_and_invalid_url_refusals": [
+      "AC-SCR-77",
+      "AC-SCR-84"
+    ],
+    "DocumentLinkReferenceTests.Foreign_parent_and_deleted_owner_refuse_metadata_without_partial_links_or_changes": [
+      "AC-SCR-77",
+      "AC-SCR-84"
+    ],
+    "FileScreenTests.Shared_global_discipline_and_actual_added_by_filter_before_projection_and_reuse_the_manual_C_versus_D_context": [
+      "AC-SCR-77",
+      "AC-SCR-84"
+    ],
+    "FileScreenTests.Same_name_inactive_and_missing_authors_use_actual_added_by_without_inventing_person_or_choice_identity": [
+      "AC-SCR-77",
+      "AC-SCR-84"
+    ],
+    "FileScreenTests.Missing_is_an_independent_live_direct_link_anti_join_including_on_hold_and_ignoring_link_filters": [
+      "AC-SCR-77",
+      "AC-SCR-84"
+    ],
+    "FileScreenTests.Actual_comment_author_PM_viewer_read_only_and_project_state_rules_control_current_actions_and_commands": [
+      "AC-SCR-77",
+      "AC-SCR-84"
+    ],
+    "FileScreenTests.Scope_deleted_owners_and_project_mismatches_are_removed_before_counts_choices_and_missing_membership": [
+      "AC-SCR-77",
+      "AC-SCR-84"
+    ],
+    "FileScreenTests.Malformed_new_raw_controls_are_ignored_off_and_refused_on_without_side_effects": [
+      "AC-SCR-77",
+      "AC-SCR-84"
+    ],
+    "FileScreenTests.Added_week_uses_actual_org_Monday_and_DST_offsets_and_never_includes_future_or_registration_time": [
+      "AC-SCR-77",
+      "AC-SCR-84"
+    ],
+    "FileScreenTests.Every_new_predicate_runs_before_the_link_cap_and_equal_titles_have_an_ID_tiebreak": [
+      "AC-SCR-77",
+      "AC-SCR-84"
+    ],
+    "FileScreenTests.Missing_count_is_exact_beyond_its_independent_cap_with_stable_project_key_ID_order": [
+      "AC-SCR-77",
+      "AC-SCR-84"
+    ],
+    "FileScreenTests.Choice_caps_are_scoped_and_independent_of_selected_filters_with_honest_sentinels": [
+      "AC-SCR-77",
+      "AC-SCR-84"
+    ],
+    "FileScreenTests.Disabling_omits_all_screen_context_and_keeps_legacy_fields_colours_URL_actions_and_original_author_wire": [
+      "AC-SCR-77",
+      "AC-SCR-84"
+    ]
+  },
+  "browser": {
+    "browser:test:file-screen": [
+      "AC-SCR-77",
+      "AC-SCR-84"
+    ],
+    "browser:test:document-link-reference": [
+      "AC-SCR-77",
+      "AC-SCR-84"
+    ]
+  },
+  "boundary": "Actual repository citation parser; execution evidence separate"
+}

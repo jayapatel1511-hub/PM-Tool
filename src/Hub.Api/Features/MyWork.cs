@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
@@ -9,7 +10,7 @@ namespace Hub.Api.Features;
 
 /// My Work (§13.10, FR-MYW-01) and My Staff (§13.19, FR-ASG-05/06, ASG-08..ASG-10). Both read the same permitted,
 /// materialised state, so a person's My Staff row reconciles with their My Work.
-public static class MyWorkEndpoints
+public static partial class MyWorkEndpoints
 {
     static readonly string[] Live = [ProjectStatus.Setup, ProjectStatus.Active, ProjectStatus.OnHold];
     static readonly string[] OpenDecision = [DecisionStatus.Pending, DecisionStatus.UnderReview, DecisionStatus.Deferred];
@@ -22,20 +23,23 @@ public static class MyWorkEndpoints
     /// What the person is asked to review: tasks ready for or in review, and deliverables in review.
     public sealed record MyWorkReviews(IReadOnlyList<TaskQueries.Row> Tasks, IReadOnlyList<DeliverableEndpoints.DeliverableRow> Deliverables);
     /// A task that waits on one of the person's tasks, with its assignee's name.
-    public sealed record MyWorkSuccessor(Guid Id, string Key, string Name, string Status, DateOnly? DueDate, string? AssigneeName);
-    public sealed record MyWorkDecision(Guid Id, Guid ProjectId, string ProjectNumber, string Key, string Subject, string Status, DateOnly RequiredByDate, string ImpactLevel, string Role, bool IsOverdue, bool IsDueSoon);
+    public sealed record MyWorkSuccessor(Guid Id, string Key, string Name, string Status, DateOnly? DueDate, string? AssigneeName,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] Guid? AssigneeId = null);
+    public sealed partial record MyWorkDecision(Guid Id, Guid ProjectId, string ProjectNumber, string Key, string Subject, string Status, DateOnly RequiredByDate, string ImpactLevel, string Role, bool IsOverdue, bool IsDueSoon);
     /// A project the person manages, belongs to, leads a discipline on or follows, with their roles, follow level and next milestone.
-    public sealed record MyWorkProject(Guid Id, string ProjectNumber, string Name, string Status, IReadOnlyList<string> Roles, IReadOnlyList<string> Leads, MyWorkFollow? Follow,
+    public sealed partial record MyWorkProject(Guid Id, string ProjectNumber, string Name, string Status, IReadOnlyList<string> Roles, IReadOnlyList<string> Leads, MyWorkFollow? Follow,
         string ComputedHealth, string ReportedHealth, MyWorkNextMilestone? NextMilestone);
     public sealed record MyWorkFollow(string Level, string Source);
     public sealed record MyWorkNextMilestone(Guid Id, string Key, string Name, DateOnly Date);
-    public sealed record MyWorkMilestone(Guid Id, Guid ProjectId, string ProjectNumber, string Key, string Name, string MilestoneType, DateOnly Date, string? Status);
+    public sealed partial record MyWorkMilestone(Guid Id, Guid ProjectId, string ProjectNumber, string Key, string Name, string MilestoneType, DateOnly Date, string? Status);
 
     /// My Staff: the viewer's reports with their work counts, and the tiles over them (§13.19).
-    public sealed record MyStaffList(string Scope, bool CanSeeAll, MyStaffTiles Tiles, IReadOnlyList<MyStaffPerson> People);
+    public sealed record MyStaffList(string Scope, bool CanSeeAll, MyStaffTiles Tiles, IReadOnlyList<MyStaffPerson> People,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] DateTimeOffset? AsOf = null);
     public sealed record MyStaffTiles(int Staff, int Assignments, int WithOverdue, int WithBlocked, int ReviewsStalled);
     public sealed record MyStaffPerson(Guid Id, string DisplayName, string? JobTitle, Guid? OfficeId, bool IsActive, int Projects, MyStaffRoles Roles, int Open, int Overdue, int Blocked, int Blocking,
-        int Reviews, int ReviewsStalled, int DeliverablesDue, DateTimeOffset? LastActivityAt);
+        int Reviews, int ReviewsStalled, int DeliverablesDue, DateTimeOffset? LastActivityAt,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] PersonFacts.Facts? PersonFacts = null);
     /// The person's memberships by role: projects as PM, team member, reviewer and viewer, and the disciplines they lead (DL).
     public sealed record MyStaffRoles(int PM, int DL, int Team, int Reviewer, int Viewer);
     /// One of a person's project assignments, with their open work on it and whether the viewer may remove them.
@@ -68,8 +72,10 @@ public static class MyWorkEndpoints
 
     static async Task<Ok<MyWorkView>> Work(Guid? userId, Access access, HubDb db, SettingsStore store, TimeProvider clock, CurrentUser me)
     {
-        var person = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == (userId ?? me.Id)) ?? throw ApiException.NotFound();
         var s = await store.Get(db);
+        await using var snapshot = s.IsFlagOn("work_screens")
+            ? await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead) : null;
+        var person = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == (userId ?? me.Id)) ?? throw ApiException.NotFound();
         var pids = await Scope(db, access, person.Id, person.SupervisorId, s);
         var today = clock.Today(s);
         var now = clock.GetUtcNow();
@@ -125,15 +131,36 @@ public static class MyWorkEndpoints
             .OrderByDescending(t => t.CompletedAt), access.Actor);
         var attention = await EvaluationEndpoints.Items(db, db.Attention.AsNoTracking().Where(a => pids.Contains(a.ProjectId) && a.RouteToUserIds.Contains(pid)), now, false, limit: 100);
 
-        return TypedResults.Ok(new MyWorkView(new MyWorkPerson(person.Id, person.DisplayName, person.JobTitle, person.IsActive), pid != me.Id, today,
+        var view = new MyWorkView(new MyWorkPerson(person.Id, person.DisplayName, person.JobTitle, person.IsActive), pid != me.Id, today,
             attention, tasks, new MyWorkReviews(reviewTasks, reviewDeliverables), deliverables,
-            people, [.. successors.Select(x => new MyWorkSuccessor(x.Id, x.Key, x.Name, x.Status, x.DueDate, x.AssigneeId is { } a ? people.GetValueOrDefault(a) : null))],
+            people, [.. successors.Select(x => new MyWorkSuccessor(x.Id, x.Key, x.Name, x.Status, x.DueDate, x.AssigneeId is { } a ? people.GetValueOrDefault(a) : null,
+                s.IsFlagOn("people_screens") ? x.AssigneeId : null))],
             decisions, actions,
             [.. projects.Select(p => new MyWorkProject(p.Id, p.ProjectNumber, p.Name, p.Status, [.. (p.Roles ?? []).Concat(p.Leads.Count > 0 ? ["DisciplineLead"] : []).Distinct()], p.Leads, p.Follow,
                 p.Status == ProjectStatus.Active ? p.Computed ?? Health.Grey : Health.Grey,
                 p.Status == ProjectStatus.Active && p.HealthOverride is { } ho && p.HealthOverrideExpiresAt > now ? ho : p.Status == ProjectStatus.Active ? p.Computed ?? Health.Grey : Health.Grey,
                 p.Next))],
-            milestones, completed));
+            milestones, completed);
+        if (s.IsFlagOn("work_screens"))
+        {
+            // One exact authorized union: repeated rows share the same paired event and token evidence.
+            var keys = tasks.Concat(reviewTasks).Concat(completed).Select(r => new WorkSeenKey(ItemType.Task, r.Id))
+                .Concat(deliverables.Concat(reviewDeliverables).Select(r => new WorkSeenKey(ItemType.Deliverable, r.Id)))
+                .Concat(decisions.Select(r => new WorkSeenKey(ItemType.Decision, r.Id)))
+                .Concat(actions.Select(r => new WorkSeenKey(ItemType.Action, r.Id)))
+                .Concat(view.Projects.Select(r => new WorkSeenKey(ItemType.Project, r.Id)))
+                .Concat(milestones.Select(r => new WorkSeenKey(ItemType.Milestone, r.Id)))
+                .Concat(attention.Items.Select(r => new WorkSeenKey(r.ItemType, r.ItemId))).Distinct().ToArray();
+            var read = await WorkScreenReads.ReadAuthorisedAsync(db, access, s, new(pid, today, now), keys);
+            foreach (var row in tasks.Concat(reviewTasks).Concat(completed)) WorkScreenResponseMetadata.Attach(row, ItemType.Task, row.Id, read);
+            foreach (var row in deliverables.Concat(reviewDeliverables)) WorkScreenResponseMetadata.Attach(row, ItemType.Deliverable, row.Id, read);
+            foreach (var row in decisions) WorkScreenResponseMetadata.Attach(row, ItemType.Decision, row.Id, read);
+            foreach (var row in actions) WorkScreenResponseMetadata.Attach(row, ItemType.Action, row.Id, read);
+            foreach (var row in view.Projects) WorkScreenResponseMetadata.Attach(row, ItemType.Project, row.Id, read);
+            foreach (var row in milestones) WorkScreenResponseMetadata.Attach(row, ItemType.Milestone, row.Id, read);
+            foreach (var row in attention.Items) WorkScreenResponseMetadata.Attach(row, row.ItemType, row.ItemId, read);
+        }
+        return TypedResults.Ok(view);
     }
 
     // The deliverable rows are already DeliverableRow records; their helper still lists them as objects.
@@ -145,12 +172,12 @@ public static class MyWorkEndpoints
 
     // ---------- My Staff (§13.19) ----------
 
-    sealed record PersonRow(Guid Id, string DisplayName, string? JobTitle, Guid? OfficeId, bool IsActive, Guid? SupervisorId);
+    internal sealed record PersonRow(Guid Id, string DisplayName, string? JobTitle, Guid? OfficeId, bool IsActive, Guid? SupervisorId);
 
-    static async Task<(List<PersonRow> People, List<Guid> Visible)> StaffScope(HubDb db, Access access, string? scope, bool? showInactive, SettingsStore? store = null)
+    internal static async Task<(List<PersonRow> People, List<Guid> Visible)> StaffScope(HubDb db, Access access, string? scope, bool? showInactive, SettingsStore? store = null, OrgSettings? snapshotSettings = null)
     {
         var a = access.Actor;
-        var settings = store == null ? new OrgSettings() : await store.Get(db);
+        var settings = snapshotSettings ?? (store == null ? new OrgSettings() : await store.Get(db));
         var structure = settings.IsFlagOn("org_structure");
         var unitLeader = structure && await PeopleScope.LeadsUnit(db, a);
         Access.Demand(Permissions.ViewStaff(a).Ok || unitLeader ? Allow.Yes : Permissions.ViewStaff(a));
@@ -185,8 +212,9 @@ public static class MyWorkEndpoints
     static async Task<Ok<MyStaffList>> Staff(string? scope, bool? showInactive, Guid? officeId, Guid? disciplineId, Guid? projectId, string? indicator,
         Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
-        var (people, visible) = await StaffScope(db, access, scope, showInactive, store);
         var s = await store.Get(db);
+        await using var snapshot = s.IsFlagOn("capacity_screens") ? await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead) : null;
+        var (people, visible) = await StaffScope(db, access, scope, showInactive, store);
         var today = clock.Today(s);
         if (officeId is { } o) people = people.Where(p => p.OfficeId == o).ToList();
         var ids = people.Select(p => p.Id).ToList();
@@ -237,9 +265,11 @@ public static class MyWorkEndpoints
             _ => rows,
         };
         rows = [.. rows.OrderByDescending(r => r.Overdue).ThenByDescending(r => r.Blocked).ThenBy(r => r.DisplayName)]; // FR-017 default sort
+        var personFacts = await PersonFacts.Read(db, rows.Select(row => row.Id).ToArray(), s, clock);
+        if (personFacts.Count > 0) rows = rows.Select(row => row with { PersonFacts = personFacts.GetValueOrDefault(row.Id) }).ToList();
         return TypedResults.Ok(new MyStaffList(scope ?? "direct", Permissions.ViewAllStaff(access.Actor),
             new MyStaffTiles(rows.Count, rows.Sum(r => r.Projects), rows.Count(r => r.Overdue > 0), rows.Count(r => r.Blocked > 0), rows.Sum(r => r.ReviewsStalled)),
-            rows));
+            rows, s.IsFlagOn("visual_system") ? clock.GetUtcNow() : null));
     }
 
     sealed record MemberFacts(Guid UserId, Guid ProjectId, List<string> Roles, Guid? Discipline);

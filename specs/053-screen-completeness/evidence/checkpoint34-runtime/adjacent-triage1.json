@@ -1,0 +1,14 @@
+{
+  "total": 95,
+  "passed": 91,
+  "failed": 4,
+  "failureFamily": "Existing internal malformed relationships must omit safely, new broad integrity guard wrongly refuses409",
+  "repairOwner": "C ReviewRegister.cs only",
+  "testsUnchanged": "Existing4legacy cases retained",
+  "newWitness": "B adds one actual issued provenance refusal case",
+  "passedBoundaries": [
+    "Real explicit-null issued detail response",
+    "Strict API and registry golden comparison",
+    "Other existing review response/export/context/receipt behavior"
+  ]
+}

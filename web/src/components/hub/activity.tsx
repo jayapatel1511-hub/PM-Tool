@@ -1,3 +1,5 @@
+import { useFlag } from '@/lib/auth'
+import { PersonPanelTrigger } from './person-panel-trigger'
 import type { components } from '@/gen/api'
 import { Button } from '@/components/ui/button'
 import { Empty, tdCls, thCls } from '@/components/hub/common'
@@ -5,6 +7,13 @@ import { fmtDate, fmtTime } from '@/lib/format'
 import { runtimeText, t, tv } from '@/lib/i18n'
 
 export type ActivityRow = components['schemas']['ActivityEntry']
+
+/** ActorUserId is a User identity for User/Admin audit events, never the event's item ID. */
+export function ActivityActor({ row, focusKey }: { row: Pick<ActivityRow, 'actorId' | 'actorName' | 'actorType'>; focusKey: string }) {
+  const name = row.actorName?.trim() ? row.actorName : t(row.actorType === 'System' ? 'common.system' : 'common.unavailable')
+  return row.actorId && row.actorName?.trim() && (row.actorType === 'User' || row.actorType === 'Admin')
+    ? <PersonPanelTrigger userId={row.actorId} name={row.actorName} focusKey={focusKey} /> : <>{name}</>
+}
 
 export interface ActivityGroup { rows: ActivityRow[] }
 /** Groups adjacent changes by actor and item. The API rows remain untouched; this only changes presentation. */
@@ -57,10 +66,11 @@ export function ChangeList({ row }: { row: ActivityRow }) {
 export function ActivityTable({ rows, total, page, pageSize, onPage, onOpen, grouped = false, burst = 10 }: {
   rows: ActivityRow[]; total: number; page: number; pageSize: number; onPage: (p: number) => void; onOpen?: (r: ActivityRow) => void; grouped?: boolean; burst?: number
 }) {
+  const peopleOn = useFlag('people_screens')
   if (!rows.length) return <div className="rounded-lg border bg-card"><Empty>{t('activity.empty')}</Empty></div>
   return (
     <div className="rounded-lg border bg-card">
-      {grouped ? <ol className="divide-y">{groupActivity(rows, burst).map(g=><li key={g.rows[0].id} className="p-3"><details><summary className="cursor-pointer text-sm">{t('activity.groupSummary',{name:g.rows[0].actorName??t('common.system'),n:g.rows.length})} · {fmtTime(g.rows[g.rows.length-1].occurredAt)} – {fmtTime(g.rows[0].occurredAt)}</summary><ActivityTable rows={g.rows} total={g.rows.length} page={1} pageSize={g.rows.length} onPage={()=>{}} onOpen={onOpen}/></details></li>)}</ol> : <>
+      {grouped ? <ol className="divide-y">{groupActivity(rows, burst).map(g=><li key={g.rows[0].id} className="p-3">{peopleOn && <ActivityActor row={g.rows[0]} focusKey={`activity-group:${g.rows[0].id}:actor`} />}<details id={`activity-group-${g.rows[0].id}`} data-person-source-disclosure={peopleOn ? '' : undefined}><summary className="cursor-pointer text-sm">{peopleOn ? t('activity.groupSummary',{name:'',n:g.rows.length}).trim() : t('activity.groupSummary',{name:g.rows[0].actorName ?? t('common.system'),n:g.rows.length})} · {fmtTime(g.rows[g.rows.length-1].occurredAt)} – {fmtTime(g.rows[0].occurredAt)}</summary><ActivityTable rows={g.rows} total={g.rows.length} page={1} pageSize={g.rows.length} onPage={()=>{}} onOpen={onOpen}/></details></li>)}</ol> : <>
       {/* Text-only rows: the scroll region itself takes focus so the keyboard can scroll it (WCAG 2.1.1). */}
       <div className="scroll-region overflow-x-auto" tabIndex={0} role="region" aria-label={t('activity.tableLabel')}>
         <table className="w-full text-sm">
@@ -69,16 +79,19 @@ export function ActivityTable({ rows, total, page, pageSize, onPage, onOpen, gro
           </thead>
           <tbody>
             {rows.map((r) => {
-              const itemName = r.itemType === 'User' && r.changes.some(c => c.field === 'Role' && c.new === r.itemName) ? tv(r.itemName ?? '') : r.itemName
+              const roleLabel = r.itemType === 'User' && r.changes.some(c => c.field === 'Role' && c.new === r.itemName)
+              const itemName = roleLabel ? tv(r.itemName ?? '') : r.itemName
+              const userItem = !roleLabel && r.itemType === 'User' && r.itemId && r.itemName?.trim()
               return (
               <tr key={r.id} className="border-t align-top">
                 <td className={`${tdCls} whitespace-nowrap tabular-nums`} title={r.occurredAt}>{fmtTime(r.occurredAt)}</td>
-                <td className={tdCls}>{r.actorName ?? t('common.system')}</td>
+                <td className={tdCls}>{peopleOn ? <ActivityActor row={r} focusKey={`activity:${r.id}:actor:table`} /> : r.actorName ?? t('common.system')}</td>
                 <td className={tdCls}>{actionLabel(r.action)}</td>
                 <td className={tdCls}>
                   {/* Some records (allocation links, availability) have no key or name: fall back to the item type so the button is named. */}
                   {onOpen && r.itemId ? <button className="text-left hover:underline" onClick={() => onOpen(r)}>{r.itemKey || itemName ? <><span className="key">{r.itemKey}</span> {itemName}</> : runtimeText(`itemType.${r.itemType}`)}</button>
-                    : <><span className="key">{r.itemKey}</span> {itemName}</>}
+                    : <><span className="key">{r.itemKey}</span> {userItem ? <PersonPanelTrigger userId={r.itemId!} name={r.itemName!} focusKey={`activity:${r.id}:item-user`} /> : itemName}</>}
+                  {peopleOn && onOpen && userItem && <PersonPanelTrigger userId={r.itemId!} name={r.itemName!} focusKey={`activity:${r.id}:item-user-details`}>{t('common.details')}</PersonPanelTrigger>}
                   <div className="text-xs text-muted-foreground">{runtimeText(`itemType.${r.itemType}`)}</div>
                 </td>
                 <td className={`${tdCls} min-w-64`}><ChangeList row={r} /></td>

@@ -1,0 +1,31 @@
+{
+  "atUtc": "2026-11-02T10:29:13.719584+00:00",
+  "status": "PASS_POST_EXECUTION_METADATA_ONLY",
+  "proof": [
+    {
+      "path": "tests/Hub.Tests/Api/SearchScreenTests.cs",
+      "beforeSha256": "4b819ba00088b2d60c0ae91c446a21e2dcee546a84008c5dfe79441a07493b54",
+      "afterSha256": "8d59f5d3766e22c935aca29d3df91ac9ced4d2ac582f3998bd973abbeb95be7a",
+      "change": "comment only"
+    },
+    {
+      "path": "web/src/lib/recent-searches.test.ts",
+      "beforeSha256": "f7409a07d4b6844ca6e7e5455710065b50199ea841111cc3870cae925a86ea92",
+      "afterSha256": "4e3f36d4c2ffd40d7b0aa868963e4011d03176f8f187bfc2c83473d4ae9a746a",
+      "change": "comment only"
+    },
+    {
+      "path": "web/package.json",
+      "beforeSha256": "a6727436f050395f85d8a7f8fe92c8aa1fd0abfee1e6b3e7334434161e2ebd01",
+      "afterSha256": "8e50a59ed0b4eb290b0a2aa8380d745564eff54e0716e94accf1ab1e21b42dd5",
+      "change": "one test script registration only"
+    },
+    {
+      "path": "web/tests/search-screen.cjs",
+      "beforeSha256": "eeb7a8e039e157402a9dc0b9e25fe0d2735f6993964313262e2a8ab58fae7e55",
+      "afterSha256": "6911a3a922867a962225fc64c25c8f1051f1849fc170dbf44f3a8a7d0b968cf6",
+      "change": "comment only"
+    }
+  ],
+  "boundary": "No app/fixture/assertion/dependency change; previous builds and behaviour checks apply. Compiled SearchScreenTests source differs only by XML documentation, explicitly not exact final test-source byte parity."
+}

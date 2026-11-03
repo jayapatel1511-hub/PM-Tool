@@ -2,7 +2,7 @@ import { disciplineColour } from '@/lib/discipline-colour'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ChevronDown, ChevronRight, ChevronsDownUp, ChevronsUpDown, ListTree, Monitor, Printer, ZoomIn } from 'lucide-react'
 import { Fragment, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react'
-import { Link, useSearchParams } from 'react-router'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import type { components } from '@/gen/api'
 import { useFlag } from '@/lib/auth'
@@ -10,7 +10,10 @@ import { ScheduleNote } from '@/components/hub/schedule-note'
 import { ActiveFilters, ChoiceMenu, ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Notice, Page, Section, selectCls, useIsPhone } from '@/components/hub/common'
 import { useItemPanel } from '@/components/hub/panel-host'
 import { Key, toneOf } from '@/components/hub/pills'
+import { ItemMark } from '@/components/hub/identity-colour'
+import { LANE_FILLS, laneFill } from '@/components/hub/semantic-colours'
 import { Button } from '@/components/ui/button'
+import { ViewMenu } from '@/components/hub/views'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -19,6 +22,8 @@ import { typedRequest } from '@/lib/api'
 import { addDays, daysBetween, fmtDate, monthLabel, shortDate, today } from '@/lib/format'
 import { plural, t, tv , runtimeText } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
+import { captureTimelineView, timelineLayerChoices, timelineViewLayers, timelineViewSet, timelineViewSetParam, timelineViewZoom } from './timeline-view-state'
+import { TimelineLayerControls } from './timeline-view-controls'
 import type { DeliverableRow } from './Deliverables'
 import { ChangeDateDialog, milestoneStatusLabel, type MilestoneRow } from './Milestones'
 import { useCurrentProject } from './ProjectLayout'
@@ -63,6 +68,20 @@ export const toneBg = (status?: string | null) => `var(--${toneOf(status)}-bg)`
 const min = (xs: (string | null | undefined)[]) => xs.filter(Boolean).reduce<string | undefined>((a, b) => (!a || b! < a ? b! : a), undefined)
 const max = (xs: (string | null | undefined)[]) => xs.filter(Boolean).reduce<string | undefined>((a, b) => (!a || b! > a ? b! : a), undefined)
 export const HATCH = 'repeating-linear-gradient(135deg, var(--bad) 0 3px, transparent 3px 7px)'
+/** Overdue is an explicit critical extension. Away/on-hold alone owns the v2 hatch. */
+export const overdueAppearance = (enabled: boolean) => enabled
+  ? { background: 'var(--metric-red-tint)', borderColor: 'var(--metric-red)' }
+  : { background: HATCH }
+/** Consume the server's canonical lane, never infer it from status. A neutral track
+ * keeps percentage text readable; its edge and progress use the full lane colour. */
+export function taskLaneAppearance(lane?: string | null) {
+  const fill = laneFill(lane ?? '')
+  return {
+    borderColor: lane === 'On Hold' ? 'var(--hatch-strong)' : fill ?? 'var(--ink-2)',
+    background: lane === 'On Hold' && fill ? fill : 'var(--raised)',
+    progress: lane === 'On Hold' ? 'var(--ink-2)' : fill ?? 'var(--ink-2)',
+  }
+}
 const FILTERS = ['disciplineId', 'milestoneId', 'status', 'hideCompleted', 'from', 'to', 'chainTo'] as const
 
 type TimelineTask = components['schemas']['TimelineTask']
@@ -81,14 +100,25 @@ export type Move = { kind: 'task' | 'deliverable'; id: string; key: string; name
  *  dependency arrows (red while the predecessor is unfinished and overdue), ghost bars at original dates, and dragging
  *  to a new date with a confirmation. Only the confirmed item's dates change; nothing is rescheduled automatically. */
 export function TimelineTab() {
+  const viewsOn = useFlag('work_screens')
+  const baselineEnabled = useFlag('schedule_baseline')
   const chainEnabled = useFlag('timeline_handoffs_chain')
+  const visualSystem = useFlag('visual_system')
   const p = useCurrentProject()
+  const identityColour = (p as typeof p & { identityColour?: string | null }).identityColour
   const [sp, setSp] = useSearchParams()
+  const location = useLocation(), navigate = useNavigate()
   const openPanel = useItemPanel()
   const refresh = useProjectRefresh()
   const qc = useQueryClient()
-  const [closed, setClosed] = useState<Set<string>>(new Set())
-  const [expanded, setExpanded] = useState<Set<string>>(new Set())
+  const [localClosed, setLocalClosed] = useState<Set<string>>(new Set())
+  const [localExpanded, setLocalExpanded] = useState<Set<string>>(new Set())
+  const closed = viewsOn ? timelineViewSet(sp.get('collapsed')) : localClosed
+  const expanded = viewsOn ? timelineViewSet(sp.get('expanded')) : localExpanded
+  const layout = (key: string, value: string) => { const next = new URLSearchParams(sp); next.set(key, value); navigate(`${location.pathname}?${next}${location.hash}`, { replace: true, preventScrollReset: true, state: location.state }) }
+  type SetUpdate = Set<string> | ((before: Set<string>) => Set<string>)
+  const setClosed = (update: SetUpdate) => { if (!viewsOn) { setLocalClosed(update); return } const next = typeof update === 'function' ? update(closed) : update; layout('collapsed', timelineViewSetParam(next)) }
+  const setExpanded = (update: SetUpdate) => { if (!viewsOn) { setLocalExpanded(update); return } const next = typeof update === 'function' ? update(expanded) : update; layout('expanded', timelineViewSetParam(next)) }
   const [shift, setShift] = useState<{ id: string; days: number } | null>(null)
   const [move, setMove] = useState<Move | null>(null)
   const [msMove, setMsMove] = useState<{ m: MilestoneRow; date: string } | null>(null)
@@ -96,7 +126,10 @@ export function TimelineTab() {
   const suppress = useRef(false)
   const phone = useIsPhone() // milestone editing is desktop/tablet only (§13.0); on phones the diamonds open the milestone instead
   const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); n.delete('panel'); setSp(n, { replace: true }) }
-  const zoom = (sp.get('zoom') as Zoom | null) ?? 'month'
+  const zoom = viewsOn ? timelineViewZoom(sp.get('zoom')) : (sp.get('zoom') as Zoom | null) ?? 'month'
+  const layerChoices = timelineLayerChoices('project', chainEnabled, baselineEnabled)
+  const layers = timelineViewLayers(sp.get('layers'), layerChoices)
+  const shown = (layer: (typeof layerChoices)[number]) => !viewsOn || layers.has(layer)
   const f = { disciplineId: sp.get('disciplineId'), milestoneId: sp.get('milestoneId'), status: sp.get('status'), hide: sp.get('hideCompleted') === 'true', from: sp.get('from'), to: sp.get('to') }
   const ms = useQuery({ queryKey: ['p', p.id, 'milestones', true, ''], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/milestones', { params: { id: p.id }, query: { ShowCompleted: true } }) })
   const dels = useQuery({ queryKey: ['p', p.id, 'deliverables', {}], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/deliverables', { params: { id: p.id } }) })
@@ -163,7 +196,7 @@ export function TimelineTab() {
       if (expanded.has(`loose:${pd}`)) for (const tk of solo.sort((a, b) => a.dueDate!.localeCompare(b.dueDate!))) rows.push({ kind: 'task', id: tk.id, tk, span: taskSpan(tk)! })
     }
   }
-  if (handoffs.length) { rows.push({ kind: 'group', id: 'handoffs', name: t('ptab.handoffs'), count: handoffs.length }); if (!closed.has('handoffs')) handoffs.forEach(h => rows.push({ kind: 'handoff', id: h.id, h })) }
+  if (handoffs.length && shown('handoffs')) { rows.push({ kind: 'group', id: 'handoffs', name: t('ptab.handoffs'), count: handoffs.length }); if (!closed.has('handoffs')) handoffs.forEach(h => rows.push({ kind: 'handoff', id: h.id, h })) }
   const spans = rows.flatMap((r) => (r.kind === 'deliverable' || r.kind === 'task' ? [r.span] : []))
 
   const start = addDays(f.from ?? min([p.startDate, addDays(now, -7), ...spans.flatMap((s) => [s.start, s.ghost?.start, s.baseline?.start]), ...milestones.flatMap((m) => [m.date, m.originalDate, m.baselineDate]), ...handoffs.flatMap(h => [h.neededBy, h.promisedBy])])!, -3)
@@ -257,35 +290,38 @@ export function TimelineTab() {
   ] as const).filter(([k]) => sp.get(k) && (k !== 'chainTo' || chainEnabled)) // a chainTo link does nothing while its flag is off
   const clear = () => { const n = new URLSearchParams(sp); for (const k of FILTERS) n.delete(k); n.delete('panel'); setSp(n, { replace: true }) }
 
-  const bar = (id: string, span: Span, status: string, pct: number, text: string, thin: boolean, can: boolean, onDrop: (n: number) => void, open: () => void) => {
-    const label = span.assumed ? `${text} · ${t('sig.startNotSet')}` : text
+  const bar = (id: string, span: Span, status: string, pct: number, text: string, thin: boolean, can: boolean, onDrop: (n: number) => void, open: () => void, lane?: string | null) => {
+    const taskVisual = visualSystem && thin
+    const laneRole = taskVisual ? taskLaneAppearance(lane) : null
+    const label = [text, span.assumed && t('sig.startNotSet'), visualSystem && span.late && plural(daysBetween(span.end, now), 'timeline.overdueByOne', 'timeline.overdueBy')].filter(Boolean).join(' · ')
     const left = Math.max(x(span.start), 0)
     const w = Math.max((daysBetween(span.start, span.end) + 1) * px, 4)
     const top = thin ? 7 : 7
     const height = thin ? 10 : 18
     return (
       <>
-        {span.ghost && visible(span.ghost.end) && (
+        {shown('originalDates') && span.ghost && visible(span.ghost.end) && (
           <span aria-hidden className="absolute rounded-sm border border-dashed border-foreground/40" title={t('timeline.baseline', { from: fmtDate(span.ghost.start), to: fmtDate(span.ghost.end) })}
             style={{ left: Math.max(x(span.ghost.start), 0), width: Math.max((daysBetween(span.ghost.start, span.ghost.end) + 1) * px, 4), top: top - 3, height: height + 6 }} />
         )}
-        {span.baseline && visible(span.baseline.end) && <span aria-hidden className="absolute rounded-sm border-2 border-dotted border-primary/60" title={t('interaction.baselineRange', { from: fmtDate(span.baseline.start), to: fmtDate(span.baseline.end) })} style={{ left: Math.max(x(span.baseline.start), 0), width: Math.max((daysBetween(span.baseline.start, span.baseline.end) + 1) * px, 4), top: top - 5, height: height + 10 }} />}
+        {shown('baselineDates') && span.baseline && visible(span.baseline.end) && <span aria-hidden className="absolute rounded-sm border-2 border-dotted border-primary/60" title={t('interaction.baselineRange', { from: fmtDate(span.baseline.start), to: fmtDate(span.baseline.end) })} style={{ left: Math.max(x(span.baseline.start), 0), width: Math.max((daysBetween(span.baseline.start, span.baseline.end) + 1) * px, 4), top: top - 5, height: height + 10 }} />}
         <button type="button" {...dragProps(id, can, onDrop, open)} aria-label={label} title={label + (can ? ` · ${t('timeline.dragHint')}` : '')}
+          data-visual-timeline-bar={visualSystem ? id : undefined} data-task-lane={taskVisual ? laneFill(lane ?? '') ? lane : 'unknown' : undefined}
           className={cn('absolute overflow-hidden rounded-sm border text-left focus-visible:ring-2', shift?.id === id && 'ring-2 ring-primary')}
-          style={{ ...dragProps(id, can, onDrop, open).style, left: left + dx(id), width: w, top, height, borderColor: tone(status), background: toneBg(status) }}>
-          <span className="absolute inset-y-0 left-0 opacity-40" style={{ width: `${pct}%`, background: tone(status) }} />
+          style={{ ...dragProps(id, can, onDrop, open).style, left: left + dx(id), width: w, top, height, borderColor: laneRole?.borderColor ?? tone(status), background: laneRole?.background ?? toneBg(status) }}>
+          <span aria-hidden={taskVisual || undefined} data-visual-progress={taskVisual || undefined} className={taskVisual ? 'absolute bottom-0 left-0 h-[2px]' : 'absolute inset-y-0 left-0 opacity-40'} style={{ width: `${pct}%`, background: laneRole?.progress ?? tone(status) }} />
           {span.assumed && <span aria-hidden className="absolute inset-y-0 left-0 bg-card/65" style={{ width: assumedWidth(span, now, px) }} />}
           {!thin && w > 44 && <span className="relative px-1 text-xs/4 tabular-nums">{pct}%</span>}
         </button>
         {shift?.id === id && <span className="absolute z-30 whitespace-nowrap rounded-md bg-primary px-1.5 text-xs/[18px] text-primary-foreground tabular-nums" style={{ left: left + dx(id) + w + 4, top: top - 1 }}>{shift.days > 0 ? '+' : ''}{shift.days} d</span>}
-        {span.late && <span aria-hidden className="absolute rounded-r-sm border border-l-0 border-bad" title={plural(daysBetween(span.end, now), 'timeline.overdueByOne', 'timeline.overdueBy')}
-          style={{ left: x(span.end) + px, width: Math.max(daysBetween(span.end, now) * px, 2), top, height, background: HATCH }} />}
+        {span.late && <span aria-hidden data-visual-overdue={visualSystem ? id : undefined} className="absolute rounded-r-sm border border-l-0 border-bad" title={plural(daysBetween(span.end, now), 'timeline.overdueByOne', 'timeline.overdueBy')}
+          style={{ left: x(span.end) + px, width: Math.max(daysBetween(span.end, now) * px, 2), top, height, ...overdueAppearance(visualSystem) }} />}
       </>
     )
   }
 
   return (
-    <Page {...header} actions={<Button variant="outline" className="no-print" onClick={() => window.print()}><Printer className="size-4" />{t('wc.print')}</Button>}>
+    <Page {...header} actions={<>{viewsOn && <ViewMenu listType="timeline" projectId={p.id} captureParams={() => captureTimelineView(sp, 'project', { zoom, layers: layerChoices.filter(layer => layers.has(layer)), collapsed: closed, expanded, chainEnabled })} />}<Button variant="outline" className="no-print" onClick={() => window.print()}><Printer className="size-4" />{t('wc.print')}</Button></>}>
       <ScheduleNote value={data.latestPlanned} />
       {chainTo && <p role="status" className="text-sm">{t('interaction.chainCount', { n: chain.size, m: data.tasks.length })}</p>}
       <FilterBar className="no-print" activeCount={tokens.length}
@@ -316,6 +352,7 @@ export function TimelineTab() {
           <Field label={t('common.from')} htmlFor="tl-from" className="w-full sm:w-40"><Input id="tl-from" type="date" value={f.from ?? ''} onChange={(e) => set('from', e.target.value)} /></Field>
           <Field label={t('common.to')} htmlFor="tl-to" className="w-full sm:w-40"><Input id="tl-to" type="date" value={f.to ?? ''} onChange={(e) => set('to', e.target.value)} /></Field>
           <label className="flex min-h-(--control-h) items-center gap-2 text-sm"><Checkbox checked={f.hide} onCheckedChange={(c) => set('hideCompleted', c ? 'true' : null)} />{t('timeline.hideCompleted')}</label>
+          {viewsOn && <TimelineLayerControls choices={layerChoices} selected={layers} onChange={value => layout('layers', [...value].sort().join(',') || 'none')} />}
         </div>
       </FilterBar>
       <PrintLegend />
@@ -339,20 +376,20 @@ export function TimelineTab() {
             <div className="flex border-b" style={{ height: laneHeight }} role="row">
               <div className="sticky left-0 z-20 flex shrink-0 items-center border-r bg-card px-3 text-sm font-semibold" style={{ width: LABEL }} role="rowheader">{t('ptab.milestones')}</div>
               <div className="relative" style={{ width }} role="cell">
-                {placed.map(({ m, left, w, row }) => {
+                {shown('milestones') && placed.map(({ m, left, w, row }) => {
                   const status = milestoneStatusLabel(m)
                   const slipped = m.slipShown !== false && m.originalDate && m.originalDate !== m.date && !m.isComplete && visible(m.originalDate)
                   const can = data.permissions.manageMilestones && !m.isComplete && !phone
                   const drop = (n: number) => setMsMove({ m, date: addDays(m.date!, n) })
                   return (
                     <Fragment key={m.id}>
-                      {slipped && <span aria-hidden title={t('timeline.originalDate', { date: fmtDate(m.originalDate) })} className="absolute top-[7px] size-3 rotate-45 border-2 bg-card"
+                      {shown('originalDates') && slipped && <span aria-hidden title={t('timeline.originalDate', { date: fmtDate(m.originalDate) })} className="absolute top-[7px] size-3 rotate-45 border-2 bg-card"
                         style={{ left: x(m.originalDate!) - 6 + px / 2, borderColor: tone(status) }} />}
-                      {m.baselineDate && m.baselineSlipShown !== false && visible(m.baselineDate) && <span aria-hidden className="absolute top-[5px] size-4 rotate-45 border-2 border-dotted border-primary bg-card" style={{ left: x(m.baselineDate) - 8 + px / 2 }} title={t('interaction.baselineDate', { date: fmtDate(m.baselineDate) })} />}
+                      {shown('baselineDates') && m.baselineDate && m.baselineSlipShown !== false && visible(m.baselineDate) && <span aria-hidden className="absolute top-[5px] size-4 rotate-45 border-2 border-dotted border-primary bg-card" style={{ left: x(m.baselineDate) - 8 + px / 2 }} title={t('interaction.baselineDate', { date: fmtDate(m.baselineDate) })} />}
                       <button type="button" {...dragProps(m.id, can, drop, () => openPanel('Milestone', m.id))} className="group absolute top-px grid size-6 -translate-x-1/2 place-items-center rounded-md"
                         style={{ ...dragProps(m.id, can, drop, () => openPanel('Milestone', m.id)).style, left: left + px / 2 + dx(m.id) }}
                         aria-label={t('timeline.milestoneLabel', { key: m.key, name: m.name, date: fmtDate(m.date), status: tv(status) })} title={`${m.key} ${m.name} · ${fmtDate(m.date)} · ${tv(status)}`}>
-                        <span className={cn('block size-4 rotate-45 border border-white shadow-[0_0_0_1px_rgba(25,27,32,0.3)]', shift?.id === m.id && 'ring-2 ring-primary')} style={{ background: tone(status) }} />
+                        <ItemMark kind="Milestone" colour={identityColour} className={cn('size-4 border-white shadow-[0_0_0_1px_rgba(25,27,32,0.3)]', shift?.id === m.id && 'ring-2 ring-primary')} fallback={<span className={cn('block size-4 rotate-45 border border-white shadow-[0_0_0_1px_rgba(25,27,32,0.3)]', shift?.id === m.id && 'ring-2 ring-primary')} style={{ background: tone(status) }} />} />
                       </button>
                       {shift?.id === m.id && <span className="absolute z-30 whitespace-nowrap rounded-md bg-primary px-1.5 text-xs/[18px] text-primary-foreground tabular-nums" style={{ left: left + px / 2 + dx(m.id) + 12, top: 3 }}>{shift.days > 0 ? '+' : ''}{shift.days} d</span>}
                       <span className="pointer-events-none absolute truncate text-xs/4" style={{ left: left + px / 2 - 6, top: 24 + row * 16, maxWidth: w }} title={m.name}>
@@ -399,7 +436,7 @@ export function TimelineTab() {
                         {r.tasks > 0 ? <button type="button" className="grid size-6 shrink-0 place-items-center rounded-md hover:bg-muted" aria-expanded={expanded.has(d.id)} aria-label={t('timeline.showTasks', { key: d.key, n: r.tasks })} onClick={() => toggle(setExpanded, d.id)}>
                           {expanded.has(d.id) ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}</button> : <span className="w-6 shrink-0" />}
                         <button type="button" className="flex min-w-0 flex-1 items-center gap-2 text-left hover:underline" onClick={() => openPanel('Deliverable', d.id)} title={`${d.key} ${d.name}`} aria-label={chainTo && chainDeliverables.has(d.id) ? `${d.key} ${d.name} · ${t('interaction.inChain', { key: chainLabel })}` : undefined}>
-                          <Key>{d.key.split('-').pop()}</Key><span className="truncate">{d.name}</span>
+                          <ItemMark kind="Deliverable" colour={identityColour} /><Key>{d.key.split('-').pop()}</Key><span className="truncate">{d.name}</span>
                         </button>
                       </div>
                       <div className="relative" style={{ width }} role="cell">
@@ -417,19 +454,19 @@ export function TimelineTab() {
                     <div role="rowheader" className="sticky left-0 z-20 flex shrink-0 border-r bg-card" style={{ width: LABEL }}>
                       <button type="button" className="flex w-full min-w-0 items-center gap-2 pl-8 pr-3 text-left text-xs/4 hover:bg-muted"
                         aria-label={chainTo && chain.has(tk.id) ? `${tk.key} ${tk.name} · ${t('interaction.inChain', { key: chainLabel })}` : undefined} onClick={() => openPanel('Task', tk.id)} title={`${tk.key} ${tk.name}${tk.assignee ? ` · ${tk.assignee}` : ''}`}>
-                        <span className="key text-muted-foreground">{tk.key.split('-').pop()}</span><span className="truncate">{tk.name}</span>
+                        <ItemMark kind="Task" colour={identityColour} /><span className="key text-muted-foreground">{tk.key.split('-').pop()}</span><span className="truncate">{tk.name}</span>
                       </button>
                     </div>
                     <div className="relative" style={{ width }} role="cell">
                       {bar(tk.id, r.span, tk.status, tk.progressPct, t('timeline.barLabel', { key: tk.key, name: tk.name, from: fmtDate(r.span.start), to: fmtDate(r.span.end), status: tv(tk.status), pct: tk.progressPct }), true, tk.canEditDates,
                         (n) => setMove({ kind: 'task', id: tk.id, key: tk.key, name: tk.name, start: tk.startDate, due: tk.dueDate!, days: n, rowVersion: tk.rowVersion, needsReason: tk.dueNeedsReason }),
-                        () => openPanel('Task', tk.id))}
+                        () => openPanel('Task', tk.id), tk.lane)}
                     </div>
                   </div>
                 )
               })}
-              {arrows.length > 0 && (
-                <svg aria-hidden className="pointer-events-none absolute top-0 z-10" style={{ left: LABEL, width, height: bodyHeight }} width={width} height={bodyHeight}>
+              {shown('dependencies') && arrows.length > 0 && (
+                <svg data-timeline-layer={viewsOn ? 'dependencies' : undefined} aria-hidden className="pointer-events-none absolute top-0 z-10" style={{ left: LABEL, width, height: bodyHeight }} width={width} height={bodyHeight}>
                   <defs>
                     {(['hot', 'cold'] as const).map((k) => (
                       <marker key={k} id={`arrow-${k}`} viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -496,16 +533,19 @@ export function MoveDialog({ move, projectComplete, onClose }: { move: Move; pro
 
 /** The legend's marks: what a bar spans, the assumed start (§40 AC-TL-01), status, overdue, moved dates and link types. */
 function LegendItems({ className }: { className: string }) {
+  const visualSystem = useFlag('visual_system')
   const swatch = (status: string) => <span className="inline-block h-3 w-5 rounded-sm border" style={{ borderColor: tone(status), background: toneBg(status) }} aria-hidden />
   const arrow = (d: string, head: string) => <svg width="22" height="14" aria-hidden><path d={d} fill="none" stroke="var(--muted-foreground)" strokeWidth="1.2" /><path d={head} fill="var(--muted-foreground)" /></svg>
   return (
     <ul className={className}>
       <li className="flex items-center gap-2"><span className="inline-block h-3 w-5 rounded-sm border border-foreground/50 bg-muted" aria-hidden />{t('sig.legendBar')}</li>
-      <li className="flex items-center gap-2"><span className="relative inline-block h-3 w-5 overflow-hidden rounded-sm border" style={{ borderColor: tone('In Progress'), background: toneBg('In Progress') }} aria-hidden><span className="absolute inset-y-0 left-0 w-3 bg-card/65" /></span>{t('sig.legendAssumed')}</li>
-      {['Not Started', 'In Progress', 'Revision Required', 'Issued'].map((st) => <li key={st} className="flex items-center gap-2">{swatch(st)}{tv(st)}</li>)}
-      <li className="flex items-center gap-2"><span className="inline-block h-3 w-5 rounded-sm border border-bad" style={{ background: HATCH }} aria-hidden />{t('timeline.legendOverdue')}</li>
+      <li className="flex items-center gap-2"><span className="relative inline-block h-3 w-5 overflow-hidden rounded-sm border" style={{ borderColor: visualSystem ? 'var(--ink-2)' : tone('In Progress'), background: visualSystem ? 'var(--raised)' : toneBg('In Progress') }} aria-hidden><span className="absolute inset-y-0 left-0 w-3 bg-card/65" /></span>{t('sig.legendAssumed')}</li>
+      {visualSystem && Object.keys(LANE_FILLS).map(lane => <li data-task-lane-legend={lane} key={`lane-${lane}`} className="flex items-center gap-2"><span className="relative inline-block h-3 w-5 overflow-hidden rounded-sm border" style={{ borderColor: taskLaneAppearance(lane).borderColor, background: taskLaneAppearance(lane).background }} aria-hidden><span className="absolute bottom-0 left-0 h-[2px] w-3" style={{ background: taskLaneAppearance(lane).progress }} /></span>{t('itemType.Task')}: {lane === 'Review' ? t('sig.laneReview') : runtimeText(`lane.${lane}`)}</li>)}
+      {['Not Started', 'In Progress', 'Revision Required', 'Issued'].map((st) => <li key={st} className="flex items-center gap-2">{swatch(st)}{visualSystem && <>{t('itemType.Deliverable')}: </>}{tv(st)}</li>)}
+      <li className="flex items-center gap-2"><span data-visual-overdue-legend={visualSystem || undefined} className="inline-block h-3 w-5 rounded-sm border border-bad" style={overdueAppearance(visualSystem)} aria-hidden />{t('timeline.legendOverdue')}</li>
       <li className="flex items-center gap-2"><span className="inline-block h-3 w-5 rounded-sm border border-dashed border-foreground/40" aria-hidden />{t('timeline.legendBaseline')}</li>
-      <li className="flex items-center gap-2"><span className="mx-1 inline-block size-2.5 rotate-45" style={{ background: 'var(--ok)' }} aria-hidden />{t('timeline.legendMilestone')}</li>
+      {visualSystem && <li className="flex flex-wrap items-center gap-x-3 gap-y-1">{(['Task', 'Deliverable'] as const).map(kind => <span key={kind} className="inline-flex items-center gap-2"><ItemMark kind={kind} />{runtimeText(`itemType.${kind}`)}</span>)}</li>}
+      <li className="flex items-center gap-2"><ItemMark kind="Milestone" fallback={<span className="mx-1 inline-block size-2.5 rotate-45" style={{ background: 'var(--ok)' }} aria-hidden />} />{t('timeline.legendMilestone')}</li>
       <li className="flex items-center gap-2"><span className="mx-1 inline-block size-2.5 rotate-45 border-2" style={{ borderColor: 'var(--warn)' }} aria-hidden />{t('timeline.legendOriginal')}</li>
       <li className="flex items-center gap-2"><svg width="22" height="8" aria-hidden><path d="M1 4 H18" stroke="var(--bad)" strokeWidth="1.6" /><path d="M16 1 L21 4 L16 7 z" fill="var(--bad)" /></svg>{t('timeline.legendLate')}</li>
       <li className="flex items-center gap-2">{arrow('M2 3 C 12 3, 8 11, 17 11', 'M16 8 L21 11 L16 14 z')}{t('sig.dep.FinishToStart')}</li>
@@ -518,10 +558,11 @@ function LegendItems({ className }: { className: string }) {
 
 /** The legend behind a Legend button (§41 R1). `children` adds the page's own help, such as how dragging works. */
 export function Legend({ children }: { children?: ReactNode }) {
+  const visualSystem = useFlag('visual_system')
   return (
     <Popover>
       <PopoverTrigger asChild><Button variant="outline"><ListTree className="size-4" aria-hidden />{t('timeline.legend')}</Button></PopoverTrigger>
-      <PopoverContent align="end" aria-label={t('timeline.legend')} className="w-80">
+      <PopoverContent align="end" aria-label={t('timeline.legend')} className={cn('w-80', visualSystem && 'max-h-[80dvh] overflow-y-auto print:hidden')} tabIndex={visualSystem ? 0 : undefined}>
         <LegendItems className="space-y-2 text-sm" />
         <p className="mt-3 text-xs/[18px] text-muted-foreground">{t('sig.legendArrows')}</p>
         {children && <p className="mt-2 text-xs/[18px] text-muted-foreground">{children}</p>}

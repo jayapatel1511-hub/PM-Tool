@@ -1,0 +1,23 @@
+{
+  "exitCode": 0,
+  "args": [
+    "node",
+    "tests/task-contribution.cjs"
+  ],
+  "atUtc": "2026-11-02T20:30:59.430575+00:00",
+  "base": "http://127.0.0.1:8867",
+  "bundle": "checkpoint30 SPA2",
+  "transport": "Final held fixture dependencies; finite synthetic HTTP, no real API",
+  "sourceHashes": {
+    "tests/task-contribution.cjs": "cb984fe5e5fb1711cfa7266620b23f2da344d498a68fbb8e6af0979a6dd915ff",
+    "tests/task-sections.fixture.cjs": "a157dc642e1b6e268833552ac1e7e7c5b09bd6935e0b2456ced1fcc66b5de1bd",
+    "tests/task-contribution.fixture.cjs": "b5737b979139702799c9cc3f4606a3ea49fde726bf0fba8d9cd2c81d4166bf3b",
+    "tests/platform-fixtures.cjs": "81091b5e9103fb69213fadff1a4a1e11eb6bf9e6b52d594d3a46bfd0bd948fb2"
+  },
+  "screenshots": [
+    "task-current-read-404.png",
+    "task-contribution-phone-refusal.png",
+    "task-current-read-403.png",
+    "task-current-read-503.png"
+  ]
+}

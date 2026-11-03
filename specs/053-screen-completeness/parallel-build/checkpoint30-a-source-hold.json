@@ -1,0 +1,13 @@
+{
+  "files": {
+    "web/src/pages/projects/TaskPanel.tsx": "72c106967a37f84c03ed58382a2251c5b97a22b95028400bc0271add348f2a08",
+    "web/src/pages/projects/task-section-navigation.tsx": "62ed1cd97ac0009459a2cf2843c52361d212c1e9b86c14eaeef6ac96e8dde6c3",
+    "web/src/pages/projects/task-contribution.tsx": "22ea5d44ce92ed6722c128336a5610f35369da243544383492c446c7b959fe61",
+    "web/src/components/hub/fields.tsx": "4aff9592a91541478a6832ff4175fb5c5a9d6f556613e512b6bf978ef21c907e",
+    "web/tests/task-sections.cjs": "4e3b8fdf51ce55cab97d9da5ee1d5fe118376eb1389e6fd16d61e1ed1e342f3e",
+    "web/tests/task-sections.fixture.cjs": "2e45b9bd6d9598e5244945ad70850d4af1e9b85d043c4b26c1f87544785544fd",
+    "web/tests/task-contribution.cjs": "d23f045aa365f63fd464df3a9fdf44e19b227c1d11bbbd37598012a3be33f8e9",
+    "web/tests/task-contribution.fixture.cjs": "f6608c114351ff91c2f9330af20bdb70748c26db670a524bf16fa2e75bb35277"
+  },
+  "status": "READY_HASH_MATCH_HOLD_UNRUN"
+}

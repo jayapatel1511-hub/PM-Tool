@@ -1,0 +1,6 @@
+{
+  "home.deadline.inReview": "in review {n} days",
+  "home.deadline.inReviewOne": "in review 1 day",
+  "home.deadline.baseline": "{n} days later than baseline",
+  "home.deadline.baselineOne": "1 day later than baseline"
+}

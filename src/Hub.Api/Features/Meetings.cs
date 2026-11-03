@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
@@ -11,7 +12,7 @@ namespace Hub.Api.Features;
 /// a person, a discipline (routed to its lead, or flagged to the PM when it has none) or an external party (nothing is sent
 /// outside the organisation); an action can become a task and then follows the task's completion. Agendas, minutes,
 /// attendance and recurring series are not built (§12.11).
-public static class MeetingEndpoints
+public static partial class MeetingEndpoints
 {
     public sealed record MeetingBody(string Title, DateOnly? MeetingDate, string? MeetingType, string? NotesLink, Guid? CalendarEventId);
     public sealed record ActionBody(string Text, string? OwnerType, Guid? OwnerUserId, Guid? OwnerDisciplineId, Guid? OwnerExternalPartyId, DateOnly? DueDate,
@@ -21,7 +22,7 @@ public static class MeetingEndpoints
     public sealed record ReuseBody(Guid RequestId, int? RowVersion, DecisionEndpoints.LinkInput[]? Links, string? Reason);
     public sealed record ActionQuery(string? Status, string? OwnerType, Guid? OwnerId, Guid? MeetingId, string? Indicator, string? Q);
     /// One action as the register, My Work and the coordination view read it: the stored action with the meeting, owner, lead and linked item names worked out beside it.
-    public sealed record MeetingActionRow(Guid Id, Guid ProjectId, string? ProjectNumber, string Key, Guid MeetingId, string? MeetingTitle, DateOnly MeetingDate, string Text, string OwnerType,
+    public sealed partial record MeetingActionRow(Guid Id, Guid ProjectId, string? ProjectNumber, string Key, Guid MeetingId, string? MeetingTitle, DateOnly MeetingDate, string Text, string OwnerType,
         string OwnerTypeLabel, Guid? OwnerUserId, Guid? OwnerDisciplineId, Guid? OwnerExternalPartyId, string? OwnerName, Guid? LeadId, string? LeadName, bool NoLead, bool PartyIsClient,
         DateOnly? DueDate, bool IsOverdue, int DaysOverdue, string Status, Guid? RelatedTaskId, string? TaskKey, Guid? RelatedDecisionId, string? DecisionKey, bool Converted, int RowVersion);
 
@@ -43,8 +44,9 @@ public static class MeetingEndpoints
     public sealed record ActionDecisionRef(Guid Id, string Key, string Subject, string Status);
     public sealed record ActionDetailPermissions(RegisterEndpoints.RegisterPermission Edit, IReadOnlyList<RegisterEndpoints.RegisterTransition> Transitions, bool Convert, bool Comment);
     /// One action with its meeting, project, related task and decision, links and what the caller may do with it.
-    public sealed record ActionDetail(MeetingActionRow Action, ActionMeetingRef Meeting, ActionProject Project, ActionTaskRef? Task, ActionDecisionRef? Decision,
-        IReadOnlyList<DecisionEndpoints.ItemLinkRow> Links, Guid? TaskDisciplineId, ActionDetailPermissions Permissions);
+    public sealed partial record ActionDetail(MeetingActionRow Action, ActionMeetingRef Meeting, ActionProject Project, ActionTaskRef? Task, ActionDecisionRef? Decision,
+        IReadOnlyList<DecisionEndpoints.ItemLinkRow> Links, Guid? TaskDisciplineId, ActionDetailPermissions Permissions,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] RecordContextView? Context = null);
     /// What the register's query reads for each action, before the names are put beside it.
     sealed record ActionJoin(Guid Id, Guid ProjectId, string Key, int Seq, Guid MeetingId, string Text, string OwnerType, Guid? OwnerUserId, Guid? OwnerDisciplineId, Guid? OwnerExternalPartyId,
         DateOnly? DueDate, string Status, Guid? RelatedTaskId, Guid? RelatedDecisionId, int RowVersion, string? ProjectNumber, string? MeetingTitle, DateOnly MeetingDate,
@@ -95,7 +97,7 @@ public static class MeetingEndpoints
             ? await db.ProjectMembers.Where(m => m.ProjectId == a.ProjectId && m.UserId == u && m.RemovedAt == null).Select(m => m.PrimaryDisciplineId).FirstOrDefaultAsync()
               ?? await db.ProjectDisciplines.Where(d => d.ProjectId == a.ProjectId && d.LeadUserId == u && d.IsActive).Select(d => (Guid?)d.Id).FirstOrDefaultAsync()
             : null)
-        ?? (a.RelatedTaskId is { } t ? await db.Tasks.Where(x => x.Id == t).Select(x => (Guid?)x.ProjectDisciplineId).FirstOrDefaultAsync() : null);
+        ?? (a.RelatedTaskId is { } t ? await db.Tasks.Where(x => x.Id == t && x.ProjectId == a.ProjectId).Select(x => (Guid?)x.ProjectDisciplineId).FirstOrDefaultAsync() : null);
 
     // ---------- Meetings (FR-001) ----------
 
@@ -190,16 +192,16 @@ public static class MeetingEndpoints
             a.Id, a.ProjectId, a.Key, a.Seq, a.MeetingId, a.Text, a.OwnerType, a.OwnerUserId, a.OwnerDisciplineId, a.OwnerExternalPartyId, a.DueDate, a.Status,
             a.RelatedTaskId, a.RelatedDecisionId, a.RowVersion,
             db.Projects.Where(p => p.Id == a.ProjectId).Select(p => p.ProjectNumber).FirstOrDefault(),
-            db.Meetings.Where(m => m.Id == a.MeetingId).Select(m => m.Title).FirstOrDefault(),
-            db.Meetings.Where(m => m.Id == a.MeetingId).Select(m => m.MeetingDate).FirstOrDefault(),
+            db.Meetings.Where(m => m.Id == a.MeetingId && m.ProjectId == a.ProjectId).Select(m => m.Title).FirstOrDefault(),
+            db.Meetings.Where(m => m.Id == a.MeetingId && m.ProjectId == a.ProjectId).Select(m => m.MeetingDate).FirstOrDefault(),
             db.Users.Where(u => u.Id == a.OwnerUserId).Select(u => u.IsActive ? u.DisplayName : u.DisplayName + " (Inactive)").FirstOrDefault(),
             db.ProjectDisciplines.Where(d => d.Id == a.OwnerDisciplineId).Select(d => d.Discipline!.Name).FirstOrDefault(),
             db.ProjectDisciplines.Where(d => d.Id == a.OwnerDisciplineId).Select(d => d.LeadUserId).FirstOrDefault(),
             db.ExternalParties.Where(e => e.Id == a.OwnerExternalPartyId).Select(e => e.Name).FirstOrDefault(),
             db.ExternalParties.Where(e => e.Id == a.OwnerExternalPartyId).Select(e => e.IsClient).FirstOrDefault(),
-            db.Tasks.Where(t => t.Id == a.RelatedTaskId).Select(t => t.Key).FirstOrDefault(),
-            db.Decisions.Where(d => d.Id == a.RelatedDecisionId).Select(d => d.Key).FirstOrDefault(),
-            db.ItemLinks.Any(l => l.SourceId == a.Id && l.Relation == ItemRelation.ConvertedToTask))).ToListAsync();
+            db.Tasks.Where(t => t.Id == a.RelatedTaskId && t.ProjectId == a.ProjectId).Select(t => t.Key).FirstOrDefault(),
+            db.Decisions.Where(d => d.Id == a.RelatedDecisionId && d.ProjectId == a.ProjectId).Select(d => d.Key).FirstOrDefault(),
+            db.ItemLinks.Any(l => l.ProjectId == a.ProjectId && l.SourceType == ItemType.Action && l.SourceId == a.Id && l.TargetType == ItemType.Task && l.Relation == ItemRelation.ConvertedToTask))).ToListAsync();
         var leads = rows.Select(r => r.LeadId).OfType<Guid>().Distinct().ToList();
         var leadNames = await db.Users.AsNoTracking().Where(u => leads.Contains(u.Id)).ToDictionaryAsync(u => u.Id, u => u.DisplayName);
         return [.. rows.OrderBy(r => r.DueDate ?? DateOnly.MaxValue).ThenBy(r => r.Seq).Select(r =>
@@ -288,29 +290,34 @@ public static class MeetingEndpoints
 
     static async Task<Ok<ActionDetail>> GetAction(string id, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
+        var settings = await store.Get(db);
+        await using var snapshot = settings.IsFlagOn("work_screens")
+            ? await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead) : null;
         var a = (Guid.TryParse(id, out var g) ? await db.Actions.AsNoTracking().FirstOrDefaultAsync(x => x.Id == g)
             : await db.Actions.AsNoTracking().FirstOrDefaultAsync(x => x.Key == id)) ?? throw ApiException.NotFound();
         var (p, ctx) = await access.Project(a.ProjectId, track: false);
-        var row = (await Rows(db, db.Actions.AsNoTracking().Where(x => x.Id == a.Id), clock.Today(await store.Get(db)))).Single();
+        var row = (await Rows(db, db.Actions.AsNoTracking().Where(x => x.Id == a.Id), clock.Today(settings))).Single();
         var edit = Permissions.EditRegisterItem(access.Actor, ctx, Facts(a));
-        var converted = await db.ItemLinks.AnyAsync(l => l.SourceId == a.Id && l.Relation == ItemRelation.ConvertedToTask);
+        var converted = await db.ItemLinks.AnyAsync(l => l.ProjectId == p.Id && l.SourceType == ItemType.Action && l.SourceId == a.Id && l.TargetType == ItemType.Task && l.Relation == ItemRelation.ConvertedToTask);
+        var context = await new RecordContextReader(db, p, settings).Read(RecordContextKind.Action, a.Id);
         string? Why(Allow x) => x.Ok ? null : Text.Get(x.Why!, x.Arg ?? p.Status);
-        return TypedResults.Ok(new ActionDetail(
+        return TypedResults.Ok(await WorkScreenResponseMetadata.AttachDetailAsync(new ActionDetail(
             row,
-            await db.Meetings.AsNoTracking().Where(m => m.Id == a.MeetingId).Select(m => new ActionMeetingRef(m.Id, m.Title, m.MeetingDate, m.MeetingType, m.NotesLink)).FirstAsync(),
+            await db.Meetings.AsNoTracking().Where(m => m.Id == a.MeetingId && m.ProjectId == p.Id).Select(m => new ActionMeetingRef(m.Id, m.Title, m.MeetingDate, m.MeetingType, m.NotesLink)).FirstOrDefaultAsync() ?? throw ApiException.NotFound(),
             new ActionProject(p.Id, p.ProjectNumber, p.Name, p.Status),
-            a.RelatedTaskId is { } tid ? await db.Tasks.AsNoTracking().Where(t => t.Id == tid).Select(t => new ActionTaskRef(t.Id, t.Key, t.Name, t.Status)).FirstOrDefaultAsync() : null,
-            a.RelatedDecisionId is { } did ? await db.Decisions.AsNoTracking().Where(d => d.Id == did).Select(d => new ActionDecisionRef(d.Id, d.Key, d.Subject, d.Status)).FirstOrDefaultAsync() : null,
-            await DecisionEndpoints.LinkRows(db, a.Id),
+            a.RelatedTaskId is { } tid ? await db.Tasks.AsNoTracking().Where(t => t.Id == tid && t.ProjectId == p.Id).Select(t => new ActionTaskRef(t.Id, t.Key, t.Name, t.Status)).FirstOrDefaultAsync() : null,
+            a.RelatedDecisionId is { } did ? await db.Decisions.AsNoTracking().Where(d => d.Id == did && d.ProjectId == p.Id).Select(d => new ActionDecisionRef(d.Id, d.Key, d.Subject, d.Status)).FirstOrDefaultAsync() : null,
+            await DecisionEndpoints.LinkRows(db, p.Id, ItemType.Action, a.Id, settings.IsFlagOn("screen_patterns"), settings.IsFlagOn("people_screens")),
             converted ? null : await TaskDiscipline(db, a),
             new ActionDetailPermissions(
                 new RegisterEndpoints.RegisterPermission(edit.Ok, Why(edit)),
                 converted ? [] : [.. ActionStatus.All.Where(to => Workflow.ActionStep(a.Status, to)).Select(to => new RegisterEndpoints.RegisterTransition(to, edit.Ok, Why(edit)))],
                 !converted && ActionStatus.IsOpen(a.Status) && edit.Ok,
-                Permissions.Comment(access.Actor, ctx).Ok)));
+                Permissions.Comment(access.Actor, ctx).Ok), context), a, access, db, settings, clock));
     }
 
-    static async Task<Ok<ActionMutation>> EditAction(Guid id, JsonElement body, HttpContext http, Access access, HubDb db, Notifier notify, TeamService team, TimeProvider clock)
+    static async Task<Ok<ActionMutation>> EditAction(Guid id, JsonElement body, HttpContext http, Access access, HubDb db, Notifier notify, TeamService team, TimeProvider clock, SettingsStore store)
+        => await Tx.Notice<Ok<ActionMutation>>(db, store, async () =>
     {
         var (a, p, ctx) = await Load(db, access, id);
         Access.Demand(Permissions.EditRegisterItem(access.Actor, ctx, Facts(a)));
@@ -346,7 +353,7 @@ public static class MeetingEndpoints
         await db.SaveChangesAsync();
         Http.ETag(http, a);
         return TypedResults.Ok(new ActionMutation(a.Id, a.RowVersion));
-    }
+    });
 
     static async Task<Ok<ActionMoved>> MoveAction(Guid id, ActionMove body, HttpContext http, Access access, HubDb db, TimeProvider clock)
     {

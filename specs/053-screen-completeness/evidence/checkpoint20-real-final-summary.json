@@ -1,0 +1,24 @@
+{
+  "observedAtUtc": "2026-11-01",
+  "customIssueVerifier": {
+    "status": "PASS",
+    "issue": "QA20-REAL-001-I03",
+    "desktop": "Verifier PeoplePicker opened; exact options included Jill and Marc only; Marc rendered Co-op, Starts 2026-11-02, Ends 2026-11-11; Alex owner and Priya self excluded; 1440px containment passed",
+    "phone": "Same exact candidate subset rendered before submit at 375px; Marc selected; Appointment reason filled; normal POST captured verifierId Marc, status Proposed, rowVersion 0; API receipt 200 and Proposed",
+    "artifacts": ["checkpoint20-real-d-verifier.json","checkpoint20-real-d-verifier-receipt.json","checkpoint20-real-d-verifier-desktop.png","checkpoint20-real-d-verifier-phone.png"]
+  },
+  "build2Staff": {
+    "status": "PASS",
+    "api": "Sam staff response 200, 5 nonempty people, tiles staff 5 / assignments 6 / overdue 0 / blocked 0 / reviewsStalled 0",
+    "desktop": "First rendered Staff row top 399.5px at 1440x1000, satisfying <=405 after settled load",
+    "phone": "375px document containment passed (scrollWidth 375)",
+    "artifacts": ["checkpoint20-real-build2-api.json","checkpoint20-real-build2-staff-time.json","checkpoint20-real-build2-staff-desktop.png","checkpoint20-real-build2-staff-phone.png"]
+  },
+  "build2Time": {
+    "status": "PASS",
+    "api": "Priya actual-owner scope 200, exactly two real entries totaling 4h on 2026-10-27 and 2026-10-28",
+    "browser": "Desktop and phone rendered 4h total and both task rows; exact query preserved and #time-entries focus active; phone containment passed",
+    "artifacts": ["checkpoint20-real-build2-api.json","checkpoint20-real-build2-staff-time.json","checkpoint20-real-build2-time-desktop.png","checkpoint20-real-build2-time-phone.png"]
+  },
+  "limits": ["Initial pre-build2 Staff geometry failure remains preserved in earlier artifacts; final build2 check passed", "No source/test/SQL/service/production mutation"]
+}

@@ -1,0 +1,12 @@
+{
+  "exitCode": 0,
+  "args": [
+    "node",
+    "--check",
+    "web/tests/external-review.cjs"
+  ],
+  "atUtc": "2026-11-03T04:08:38.277598+00:00",
+  "elapsedSeconds": 0.02,
+  "errors": [],
+  "tail": []
+}

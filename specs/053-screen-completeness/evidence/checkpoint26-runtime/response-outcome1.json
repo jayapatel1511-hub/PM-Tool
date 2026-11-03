@@ -1,0 +1,9 @@
+{
+  "atUtc": "2026-11-02T10:58:00.279947+00:00",
+  "status": "PASS",
+  "passed": 52,
+  "failed": 0,
+  "skipped": 0,
+  "evidence": "response-outcome1.trx",
+  "boundary": "Three new classes, actual PostgreSQL-backed API/receipts/export-byte/schema checks; no newKestrel/Chromejoin or fullS35acceptance."
+}

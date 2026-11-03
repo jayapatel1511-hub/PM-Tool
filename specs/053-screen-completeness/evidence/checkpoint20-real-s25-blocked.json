@@ -1,0 +1,18 @@
+{
+  "status": "BLOCKED_SETUP",
+  "observedAtUtc": "2026-11-01T13:41:00Z",
+  "scope": "S25 real four-week November month case",
+  "required": "Two synthetic direct reports of Sam, second custom capacity 32h, exact 160h and 120h task cohorts",
+  "normalCommandAttempt": {
+    "method": "POST",
+    "path": "/api/v1/admin/users",
+    "actor": "jordan@hub.test",
+    "status": 422,
+    "code": "local_sign_in_only",
+    "detail": "People are added when they first sign in with Microsoft. Creating them here is only for password sign-in."
+  },
+  "mutationsFromThisAttempt": "none",
+  "unsafeAlternativeNotUsed": "Existing Alex/Jill accounts and existing QA20 tasks were not repurposed or edited.",
+  "priorEvidence": "checkpoint20-real-reads.json contains the earlier nonempty 8-week workload read, but not the required exact 4-week 160/120 month fixture.",
+  "untested": ["November period weekCount=4 denominator160", "person FTE 1/.75", "aggregate FTE 1.75", "monthly CSV/XLSX numeric parity", "rendered monthly report exact values", "S23 cohort return for S25 fixture"]
+}

@@ -1,0 +1,3 @@
+# G56 migration independent review
+
+Reviewer checkpoint24_import_backend_review: bounded source PASS, exact3 hashes match migration-source1.json. Up has exactly3new tables and8nullable existing columns, intended checks/indexes/FKs, no defaults/seeds/backfill/AlterColumn/raw SQL. Existing null rows satisfy checks. TemplateRisk parent Cascade and origin/catalogue Restrict match freezes. Down orders incoming FKs/checks/indexes safely before tables/columns. Designer model body equals current snapshot; previous Designer delta contains only G56 additions. No unrelated drift. SQL generation/application/provider tests UNRUN at review.

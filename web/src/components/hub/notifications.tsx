@@ -3,7 +3,7 @@ import {
   Activity, AlertTriangle, AtSign, Bell, CalendarClock, Check, CheckCircle2, Eye, Flag, Link2Off, MessageSquare, Scale, Unlock, UserPlus, Users,
   type LucideIcon,
 } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import { Empty, Loading } from '@/components/hub/common'
@@ -71,20 +71,20 @@ export function useMarkRead() {
 
 /** One notification: icon by type, sentence, project and time; opening it marks it read. Unread is a dot, a bold
  *  sentence and the word "Unread" for screen readers, never the tint alone. */
-export function NotificationItem({ n, onOpen }: { n: NotificationRow; onOpen: (n: NotificationRow) => void }) {
+export function NotificationItem({ n, onOpen, footer }: { n: NotificationRow; onOpen: (n: NotificationRow) => void; footer?: ReactNode }) {
   const Icon = eventIcon(n.eventType)
   const unread = !n.readAt
   const markRead = useMarkRead()
   const [marking, setMarking] = useState(false)
   return (
-    <div className={cn('flex items-center', unread && 'bg-accent/40')}>
+    <div data-notification-screen={footer ? n.id : undefined} className={cn('flex items-center', footer && 'flex-wrap', unread && 'bg-accent/40')}>
     <button type="button" onClick={() => onOpen(n)} className="flex min-w-0 flex-1 items-start gap-3 px-4 py-3 text-left text-sm hover:bg-muted">
       <Icon className="mt-0.5 size-[18px] shrink-0 text-muted-foreground" aria-hidden />
       <span className="min-w-0 flex-1">
         <span className={cn('block break-words', unread && 'font-semibold')}>{n.title}</span>
         {n.body && <span className="block truncate text-muted-foreground">{n.body}</span>}
         <span className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-xs/[18px] text-muted-foreground">
-          {n.projectNumber && <><span className="key">{n.projectNumber}</span><span aria-hidden>·</span></>}
+          {!footer && n.projectNumber && <><span className="key">{n.projectNumber}</span><span aria-hidden>·</span></>}
           <time dateTime={n.updatedAt} title={fmtTime(n.updatedAt)}>{ago(n.updatedAt)}</time>
         </span>
       </span>
@@ -92,6 +92,7 @@ export function NotificationItem({ n, onOpen }: { n: NotificationRow; onOpen: (n
     </button>
     {unread && <Button variant="ghost" size="icon-sm" className="mr-3 shrink-0" disabled={marking} aria-label={t('notif.markOne', { title: n.title })}
       onClick={async () => { setMarking(true); try { await markRead({ ids: [n.id] }) } catch (e) { toast.error(e instanceof Error ? e.message : t('notif.markFailed')) } finally { setMarking(false) } }}><Check className="size-4" /></Button>}
+    {footer && <div className="w-full px-4 pb-3 pl-[50px]">{footer}</div>}
     </div>
   )
 }

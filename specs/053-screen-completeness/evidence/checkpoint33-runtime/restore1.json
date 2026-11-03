@@ -1,0 +1,22 @@
+{
+  "exitCode": 0,
+  "args": [
+    "/opt/homebrew/bin/dotnet",
+    "restore",
+    "Hub.slnx",
+    "--artifacts-path",
+    ".review/checkpoint33-artifacts",
+    "--ignore-failed-sources",
+    "-p:NuGetAudit=false",
+    "--disable-parallel"
+  ],
+  "atUtc": "2026-11-03T03:12:59.020386+00:00",
+  "elapsedSeconds": 0.84,
+  "errors": [],
+  "tail": [
+    "  Determining projects to restore...",
+    "  Restored /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Domain/Hub.Domain.csproj (in 25 ms).",
+    "  Restored /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Hub.Tests.csproj (in 137 ms).",
+    "  Restored /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Hub.Api.csproj (in 52 ms)."
+  ]
+}

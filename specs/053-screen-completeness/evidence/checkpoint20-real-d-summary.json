@@ -1,0 +1,32 @@
+{
+  "observedAtUtc": "2026-11-01",
+  "status": "PASS_WITH_LIMITS",
+  "scope": "Real QA20 D closure: project issue verifier and PM Changes action",
+  "api": {
+    "changesOptions": "PASS",
+    "changesOptionsStatus": 200,
+    "actor": "Priya Nair",
+    "canWrite": true,
+    "canCreateChanges": true,
+    "marcCandidate": {"displayName":"Marc Dubois","personType":"Co-op","startDate":"2026-11-02","endDate":"2026-11-11","starts":true,"ends":true},
+    "issueCreate": "PASS: normal POST created QA20-REAL-001-I01 and I02",
+    "issueAppointment": "PASS: normal POST appointed Marc to I01; verification status Proposed, rowVersion advanced to 1",
+    "selfOwnerExclusions": "PASS in API/UI fixture: Priya raised issue, Alex owner; Marc is distinct candidate",
+    "certificationExpansion": "PASS: no certification data was requested or created; earlier editor read had zero certs"
+  },
+  "browser": {
+    "changes": "PASS_WITH_LIMITS: /projects/QA20-REAL-001/changes rendered desktop and phone; opening New > Register source revision rendered the form and Marc notice text",
+    "issuePanel": "PASS: /projects/QA20-REAL-001/issues?panel=Issue:01a19762-fecc-72ac-be72-5d1fd4ffaa5b rendered desktop and phone with native Choose a person button",
+    "issueCustomPickerContents": "UNPROVEN: the live Playwright run did not expose the popover option list after click; API options and normal appointment prove source/command data, not the missing rendered list"
+  },
+  "artifacts": [
+    "checkpoint20-real-d-api.json",
+    "checkpoint20-real-d-browser.json",
+    "checkpoint20-real-d-browser.cjs",
+    "checkpoint20-real-d-issue-desktop.png",
+    "checkpoint20-real-d-issue-phone.png",
+    "checkpoint20-real-d-changes-desktop.png",
+    "checkpoint20-real-d-changes-phone.png"
+  ],
+  "limitations": ["No service restart, source/test/SQL mutation, deployment, or production data mutation", "Custom issue picker popover contents remain unproven despite API and normal write evidence"]
+}

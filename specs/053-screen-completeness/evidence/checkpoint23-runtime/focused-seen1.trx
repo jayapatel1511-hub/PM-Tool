@@ -1,0 +1,1258 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="55bb4156-0319-4e5a-9b09-5b9121eb0dc9" name="@Jays-MacBook-Pro 2026-11-02 01:01:00" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-11-02T01:01:00.9388610-04:00" queuing="2026-11-02T01:01:00.9388610-04:00" start="2026-11-02T01:00:50.6040420-04:00" finish="2026-11-02T01:02:30.3250960-04:00" />
+  <TestSettings name="default" id="74948248-ec92-480a-8502-919a2c72f99e">
+    <Deployment runDeploymentRoot="_Jays-MacBook-Pro_2026-11-02_01_01_00" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="3c3789e8-07e3-4d8c-9740-701337408dc4" testId="062bbb01-9418-1ac5-1c4e-ee96b7bd521b" testName="Hub.Tests.Api.WorkScreenReadEnvelopeTests.Returned_envelopes_are_read_only_and_private_seen_is_omitted_for_other_subjects_and_dark_flags" computerName="Jays-MacBook-Pro" duration="00:00:04.5280524" startTime="2026-11-02T01:01:16.1340090-04:00" endTime="2026-11-02T01:01:20.6619960-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3c3789e8-07e3-4d8c-9740-701337408dc4" />
+    <UnitTestResult executionId="7d831332-e851-497e-b2ae-62d0492e2351" testId="d59e0f6d-8300-7828-7430-cfd669f7d415" testName="Hub.Tests.Api.WorkSeenEligibilityTests.Sole_attention_arm_obeys_actual_snooze_visibility_until_expiry_escalation_or_typed_mismatch(branch: &quot;wrong-rule&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:05.3581677" startTime="2026-11-02T01:01:18.2003930-04:00" endTime="2026-11-02T01:01:23.5586250-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7d831332-e851-497e-b2ae-62d0492e2351" />
+    <UnitTestResult executionId="4673e98d-7969-4434-999a-ae8cba2a3334" testId="cfe02b0a-e1a3-dd46-bf63-cbecd44310d6" testName="Hub.Tests.Api.WorkSeenEligibilityTests.Created_query_with_current_reviewer_role_is_eligible_without_mine_or_review_stage_membership(complete: True)" computerName="Jays-MacBook-Pro" duration="00:00:03.7442414" startTime="2026-11-02T01:01:54.4402140-04:00" endTime="2026-11-02T01:01:58.1846040-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4673e98d-7969-4434-999a-ae8cba2a3334" />
+    <UnitTestResult executionId="9143092b-3d6e-4c31-907b-f3023e1c00e4" testId="6a2b17f6-77c6-4378-40e8-1d9538a5421b" testName="Hub.Tests.Api.WorkAssignmentProducerPathsTests.Template_project_and_discipline_pack_publish_only_the_copied_items_actual_assignees(pack: True)" computerName="Jays-MacBook-Pro" duration="00:00:06.2314619" startTime="2026-11-02T01:01:06.3195830-04:00" endTime="2026-11-02T01:01:12.5509030-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9143092b-3d6e-4c31-907b-f3023e1c00e4" />
+    <UnitTestResult executionId="16daa4d4-5271-437d-97ac-7f0fe649b7f3" testId="40efd1d4-f035-1171-1cac-9610f499ce34" testName="Hub.Tests.Api.WorkSeenEligibilityTests.Created_query_with_current_reviewer_role_is_eligible_without_mine_or_review_stage_membership(complete: False)" computerName="Jays-MacBook-Pro" duration="00:00:02.8686952" startTime="2026-11-02T01:01:58.1848040-04:00" endTime="2026-11-02T01:02:01.0534740-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="16daa4d4-5271-437d-97ac-7f0fe649b7f3" />
+    <UnitTestResult executionId="450adaee-3ac7-4127-b56d-b5013e215b58" testId="2d1ca54e-a71f-19da-90eb-2e55dbd720ff" testName="Hub.Tests.Api.WorkSeenEligibilityTests.Sole_attention_arm_obeys_actual_snooze_visibility_until_expiry_escalation_or_typed_mismatch(branch: &quot;ended&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:09.9245653" startTime="2026-11-02T01:00:50.9971610-04:00" endTime="2026-11-02T01:01:00.9280020-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="450adaee-3ac7-4127-b56d-b5013e215b58" />
+    <UnitTestResult executionId="317fc691-59b0-49c4-8592-a4cf3fee3afd" testId="83fdbcc6-bdd2-18ba-0ba4-efce4385e33c" testName="Hub.Tests.Api.WorkActivityCoverageTests.Every_commentable_Watching_kind_uses_normal_create_comments_delete_and_current_parent_event(kind: &quot;Deliverable&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:05.3985582" startTime="2026-11-02T01:01:00.9279780-04:00" endTime="2026-11-02T01:01:06.3218820-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="317fc691-59b0-49c4-8592-a4cf3fee3afd" />
+    <UnitTestResult executionId="c41154d8-73bf-40bc-aca1-36492e14f559" testId="0a66a6dc-26d0-da33-db86-7137aa45063d" testName="Hub.Tests.Api.MyWorkSeenRaceTests.Preference_writer_and_visit_preserve_separate_fields_without_global_revision_conflict" computerName="Jays-MacBook-Pro" duration="00:00:02.9788475" startTime="2026-11-02T01:02:24.5151260-04:00" endTime="2026-11-02T01:02:27.4940100-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c41154d8-73bf-40bc-aca1-36492e14f559" />
+    <UnitTestResult executionId="ac41a107-57d8-4863-892a-830bc2dca08a" testId="85a6bd46-de6b-45bd-8796-43b589608bca" testName="Hub.Tests.Api.WorkSeenEligibilityTests.Sole_attention_arm_obeys_actual_snooze_visibility_until_expiry_escalation_or_typed_mismatch(branch: &quot;wrong-kind&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:05.3958266" startTime="2026-11-02T01:01:00.9281290-04:00" endTime="2026-11-02T01:01:06.3196250-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ac41a107-57d8-4863-892a-830bc2dca08a" />
+    <UnitTestResult executionId="63191f1a-39ad-420c-9aa6-ad8f8275823b" testId="bfa49f2d-37d3-4757-6d6e-9936a0954af2" testName="Hub.Tests.Api.MyWorkSeenTests.Atomic_seen_metadata_bypasses_generic_receipts_and_action_reuse_refuses" computerName="Jays-MacBook-Pro" duration="00:00:04.9650736" startTime="2026-11-02T01:01:18.2053780-04:00" endTime="2026-11-02T01:01:23.1700550-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="63191f1a-39ad-420c-9aa6-ad8f8275823b" />
+    <UnitTestResult executionId="79781b6d-78b5-4beb-b80f-207a0954364d" testId="0699fca0-48c6-08a9-8804-b3eca18ea7d1" testName="Hub.Tests.Api.WorkActivityCoverageTests.Every_commentable_Watching_kind_uses_normal_create_comments_delete_and_current_parent_event(kind: &quot;Decision&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:05.4981463" startTime="2026-11-02T01:01:23.5539250-04:00" endTime="2026-11-02T01:01:29.0521510-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="79781b6d-78b5-4beb-b80f-207a0954364d" />
+    <UnitTestResult executionId="3a159091-a42f-4c42-bb1b-816c6d2247fa" testId="436eefef-575a-d2d7-61d1-b76ee4a152b9" testName="Hub.Tests.Api.WorkAssignmentProducerPathsTests.Primary_project_manager_away_and_back_publishes_new_occurrences_while_membership_roles_do_not" computerName="Jays-MacBook-Pro" duration="00:00:05.3974850" startTime="2026-11-02T01:01:00.9276290-04:00" endTime="2026-11-02T01:01:06.3192380-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3a159091-a42f-4c42-bb1b-816c6d2247fa" />
+    <UnitTestResult executionId="ee49a4c3-feb0-49c4-998c-0d3f15b48ed1" testId="b91c77cb-fed3-b69a-e484-c8c97283c645" testName="Hub.Tests.Api.WorkSeenEligibilityTests.Action_discriminator_switch_back_creates_new_occurrence_but_discipline_fallback_is_not_person_assignment" computerName="Jays-MacBook-Pro" duration="00:00:03.4652089" startTime="2026-11-02T01:01:50.9749520-04:00" endTime="2026-11-02T01:01:54.4401620-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ee49a4c3-feb0-49c4-998c-0d3f15b48ed1" />
+    <UnitTestResult executionId="caaadc67-9269-4273-9ca9-6514558e7e4e" testId="7ebdc0ec-f852-17bc-b027-894c7076e839" testName="Hub.Tests.Api.WorkActivityCoverageTests.Every_commentable_Watching_kind_uses_normal_create_comments_delete_and_current_parent_event(kind: &quot;Task&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:09.9244179" startTime="2026-11-02T01:00:50.9971700-04:00" endTime="2026-11-02T01:01:00.9276950-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="caaadc67-9269-4273-9ca9-6514558e7e4e" />
+    <UnitTestResult executionId="5bf9d091-9cdc-4b8e-a057-147253b9b05c" testId="88f5e480-112a-d299-61f5-608455da1af7" testName="Hub.Tests.Api.WorkScreenReadEnvelopeTests.Restricted_project_hides_all_nine_details_before_any_private_or_activity_evidence_can_escape" computerName="Jays-MacBook-Pro" duration="00:00:05.1042567" startTime="2026-11-02T01:01:30.3677900-04:00" endTime="2026-11-02T01:01:35.4721390-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5bf9d091-9cdc-4b8e-a057-147253b9b05c" />
+    <UnitTestResult executionId="d8e31679-d948-4f4b-a4aa-ebfa9b8ff918" testId="5a620e23-e8a9-19e0-7069-19f0f56896e3" testName="Hub.Tests.Api.MyWorkSeenRaceTests.Producers_commit_under_actual_personal_lock_contention_then_competing_commands_replay_once" computerName="Jays-MacBook-Pro" duration="00:01:24.9629953" startTime="2026-11-02T01:00:50.9971500-04:00" endTime="2026-11-02T01:02:15.9661410-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d8e31679-d948-4f4b-a4aa-ebfa9b8ff918">
+      <Output>
+        <ErrorInfo>
+          <Message>System.OperationCanceledException : The operation was canceled.</Message>
+          <StackTrace>   at System.Threading.CancellationToken.ThrowOperationCanceledException()
+   at Hub.Tests.Api.MyWorkSeenRaceTests.Producers_commit_under_actual_personal_lock_contention_then_competing_commands_replay_once() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/MyWorkSeenRaceTests.cs:line 92
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="c21b722f-b422-43b0-bae4-2b41bbadd9cd" testId="c6732ebc-4a59-b267-b0e0-d0fa0ea2853e" testName="Hub.Tests.Api.WorkActivityCoverageTests.Typed_colliding_ids_and_real_System_or_unknown_actors_do_not_borrow_facts" computerName="Jays-MacBook-Pro" duration="00:00:05.8819044" startTime="2026-11-02T01:01:34.1708510-04:00" endTime="2026-11-02T01:01:40.0529400-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c21b722f-b422-43b0-bae4-2b41bbadd9cd" />
+    <UnitTestResult executionId="372629b2-0b79-4294-94a9-5527f065555c" testId="a9189657-773d-54a3-a7f3-0b0407317ac2" testName="Hub.Tests.Api.WorkActivityCoverageTests.Every_commentable_Watching_kind_uses_normal_create_comments_delete_and_current_parent_event(kind: &quot;Risk&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:06.2338895" startTime="2026-11-02T01:01:06.3219610-04:00" endTime="2026-11-02T01:01:12.5560110-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="372629b2-0b79-4294-94a9-5527f065555c" />
+    <UnitTestResult executionId="68515ea9-65ed-45d6-89b1-cd38f4924d9a" testId="29423ce6-ad70-fb3e-729b-916bf8174380" testName="Hub.Tests.Api.WorkSeenEligibilityTests.Sole_attention_arm_obeys_actual_snooze_visibility_until_expiry_escalation_or_typed_mismatch(branch: &quot;expiry&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:06.2300195" startTime="2026-11-02T01:01:06.3196690-04:00" endTime="2026-11-02T01:01:12.5496310-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="68515ea9-65ed-45d6-89b1-cd38f4924d9a" />
+    <UnitTestResult executionId="4d7cef90-3715-48a3-82fe-a127b7c91505" testId="cbfd72ef-3e3d-131b-acaf-74532675f0ed" testName="Hub.Tests.Api.MyWorkSeenTests.First_visit_baselines_without_GET_writes_and_later_visits_preserve_pending_tokens" computerName="Jays-MacBook-Pro" duration="00:00:10.0901350" startTime="2026-11-02T01:00:50.9971160-04:00" endTime="2026-11-02T01:01:01.0888260-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4d7cef90-3715-48a3-82fe-a127b7c91505" />
+    <UnitTestResult executionId="c2cc269d-7159-459c-a153-0d379db75710" testId="ff962349-eff4-b236-74e2-0cfa77963c12" testName="Hub.Tests.Api.WorkActivityCoverageTests.Exact_event_time_and_actor_stay_paired_when_three_comments_advance_cached_activity_time" computerName="Jays-MacBook-Pro" duration="00:00:05.5991289" startTime="2026-11-02T01:01:45.3744060-04:00" endTime="2026-11-02T01:01:50.9735530-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c2cc269d-7159-459c-a153-0d379db75710" />
+    <UnitTestResult executionId="9bf82dbd-2456-4a5a-ac2a-22ccdbae0364" testId="57957bb3-c06c-39de-3f8e-7988cca0d499" testName="Hub.Tests.Api.MyWorkSeenTests.Private_ReadOnly_commands_are_allowed_but_flagoff_extra_subject_and_foreign_tokens_refuse" computerName="Jays-MacBook-Pro" duration="00:00:05.2334771" startTime="2026-11-02T01:01:01.0889820-04:00" endTime="2026-11-02T01:01:06.3225010-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9bf82dbd-2456-4a5a-ac2a-22ccdbae0364" />
+    <UnitTestResult executionId="7e98eb5e-3d36-44e4-b1cd-60ff6a60f2f8" testId="b22de160-28da-b1c5-788c-f40a8d1a4b97" testName="Hub.Tests.Api.WorkAssignmentProducerPathsTests.Supervisor_reassigns_all_five_supported_canonical_roles_with_one_source_version_per_item" computerName="Jays-MacBook-Pro" duration="00:00:05.3223889" startTime="2026-11-02T01:01:40.0566680-04:00" endTime="2026-11-02T01:01:45.3792370-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7e98eb5e-3d36-44e4-b1cd-60ff6a60f2f8" />
+    <UnitTestResult executionId="899c66db-3e3c-497e-bb98-cd045445e89b" testId="e82618c7-0466-b0ae-6b59-99390e2fe6e1" testName="Hub.Tests.Api.WorkScreenReadEnvelopeTests.Same_task_in_work_review_and_watching_uses_identical_current_event_and_assignment_evidence" computerName="Jays-MacBook-Pro" duration="00:00:04.5323657" startTime="2026-11-02T01:01:25.8351910-04:00" endTime="2026-11-02T01:01:30.3676810-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="899c66db-3e3c-497e-bb98-cd045445e89b" />
+    <UnitTestResult executionId="54ed7b38-894d-4c88-99e2-f1fc304d888e" testId="786f48ee-fc50-817f-49f4-a24395fab497" testName="Hub.Tests.Api.WorkActivityCoverageTests.Every_commentable_Watching_kind_uses_normal_create_comments_delete_and_current_parent_event(kind: &quot;Action&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:05.6484515" startTime="2026-11-02T01:01:12.5561040-04:00" endTime="2026-11-02T01:01:18.2046890-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="54ed7b38-894d-4c88-99e2-f1fc304d888e" />
+    <UnitTestResult executionId="f4d9f05c-b697-4c23-a647-3fb4d8130cad" testId="68114643-f717-df78-1ee9-da1b7a7135ed" testName="Hub.Tests.Api.WorkScreenReadEnvelopeTests.All_nine_authorised_details_omit_dark_metadata_and_return_exact_private_tokens_without_get_writes" computerName="Jays-MacBook-Pro" duration="00:00:11.8023695" startTime="2026-11-02T01:00:50.9971380-04:00" endTime="2026-11-02T01:01:02.8011440-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f4d9f05c-b697-4c23-a647-3fb4d8130cad" />
+    <UnitTestResult executionId="570aa05c-f079-4a37-b7d9-7e7bb1df7f1b" testId="882dc34a-5942-1b8b-7bf7-730d99ba0e88" testName="Hub.Tests.Api.WorkSeenEligibilityTests.NonTask_requested_closed_age_keeps_its_real_fourteen_day_rule(daysOld: 25, eligible: False)" computerName="Jays-MacBook-Pro" duration="00:00:05.3685940" startTime="2026-11-02T01:01:23.5587470-04:00" endTime="2026-11-02T01:01:28.9274890-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="570aa05c-f079-4a37-b7d9-7e7bb1df7f1b" />
+    <UnitTestResult executionId="d437dc17-fb1b-449c-8a10-45806ac4d3b9" testId="23615f11-74ee-0d3e-f166-39f9027c1aa6" testName="Hub.Tests.Api.MyWorkSeenRaceTests.Late_committed_assignment_is_not_in_visit_or_MarkAll_cut_even_with_same_source_clock(markAll: True)" computerName="Jays-MacBook-Pro" duration="00:00:02.7636224" startTime="2026-11-02T01:02:21.7512800-04:00" endTime="2026-11-02T01:02:24.5149310-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d437dc17-fb1b-449c-8a10-45806ac4d3b9" />
+    <UnitTestResult executionId="77bb461c-9788-4c20-983f-057a73eefc9f" testId="034a2e8f-e177-c6e3-a1fb-f228f6499ee2" testName="Hub.Tests.Api.WorkScreenReadEnvelopeTests.Detail_snapshot_keeps_original_version_event_and_token_across_committed_away_and_back_assignment" computerName="Jays-MacBook-Pro" duration="00:00:07.8934106" startTime="2026-11-02T01:01:02.8012920-04:00" endTime="2026-11-02T01:01:10.6948230-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="77bb461c-9788-4c20-983f-057a73eefc9f" />
+    <UnitTestResult executionId="d97a8cf4-ebfc-445e-93dd-8224f1ff5676" testId="7fe4fe6f-f4c9-1c37-57dd-ed8e1e5b22f6" testName="Hub.Tests.Api.WorkScreenReadEnvelopeTests.Milestone_and_open_role_never_receive_fabricated_assignment_seen_state" computerName="Jays-MacBook-Pro" duration="00:00:05.4859105" startTime="2026-11-02T01:01:35.4722390-04:00" endTime="2026-11-02T01:01:40.9582730-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d97a8cf4-ebfc-445e-93dd-8224f1ff5676" />
+    <UnitTestResult executionId="01088afe-f8b7-4ee4-9bf4-7a0247f95e8f" testId="5af7ec54-03fc-56d5-2917-426009b126b5" testName="Hub.Tests.Api.WorkActivityCoverageTests.Every_commentable_Watching_kind_uses_normal_create_comments_delete_and_current_parent_event(kind: &quot;Issue&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:05.3488635" startTime="2026-11-02T01:01:18.2048250-04:00" endTime="2026-11-02T01:01:23.5538060-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="01088afe-f8b7-4ee4-9bf4-7a0247f95e8f" />
+    <UnitTestResult executionId="6251ea8b-b414-4419-8139-c963ad5f51c7" testId="e9f17df5-332e-fe8e-da4f-064908374d80" testName="Hub.Tests.Api.WorkScreenReadEnvelopeTests.Other_person_view_omits_the_current_actors_real_assignment_state_on_the_same_task" computerName="Jays-MacBook-Pro" duration="00:00:05.4386386" startTime="2026-11-02T01:01:10.6953860-04:00" endTime="2026-11-02T01:01:16.1336790-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6251ea8b-b414-4419-8139-c963ad5f51c7" />
+    <UnitTestResult executionId="539413ed-a4ea-460c-abee-0fb28136cd42" testId="09d5d365-8783-2560-0e89-36988cdaadcd" testName="Hub.Tests.Api.WorkAssignmentProducerPathsTests.Pickup_claim_and_manager_offer_assignment_publish_canonical_recipient_not_offer_snapshot(managerAssigns: False)" computerName="Jays-MacBook-Pro" duration="00:00:06.0389502" startTime="2026-11-02T01:01:34.0175850-04:00" endTime="2026-11-02T01:01:40.0565850-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="539413ed-a4ea-460c-abee-0fb28136cd42" />
+    <UnitTestResult executionId="af716844-824a-4893-9a6e-f0ddacc9e5bf" testId="e8c3e035-44b9-c6e3-aefb-87d926019ca4" testName="Hub.Tests.Api.MyWorkSeenTests.Client_transport_failure_after_real_commit_replays_exact_durable_cut_not_late_assignments" computerName="Jays-MacBook-Pro" duration="00:00:05.6547729" startTime="2026-11-02T01:01:12.5500290-04:00" endTime="2026-11-02T01:01:18.2052880-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="af716844-824a-4893-9a6e-f0ddacc9e5bf" />
+    <UnitTestResult executionId="2a0b5872-b42f-4106-8c74-ad42b7615914" testId="5f79eece-8b20-7295-a797-0f17a42779eb" testName="Hub.Tests.Api.WorkAssignmentProducerPathsTests.Pickup_claim_and_manager_offer_assignment_publish_canonical_recipient_not_offer_snapshot(managerAssigns: True)" computerName="Jays-MacBook-Pro" duration="00:00:05.2080623" startTime="2026-11-02T01:01:28.8093000-04:00" endTime="2026-11-02T01:01:34.0173580-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2a0b5872-b42f-4106-8c74-ad42b7615914" />
+    <UnitTestResult executionId="392b0e06-423a-4789-88d5-ec4160ffd172" testId="dfd7ccb0-f7f2-6758-5507-102a89924c54" testName="Hub.Tests.Api.MyWorkSeenRaceTests.Missing_projection_fails_whole_MarkAll_without_acknowledging_other_new_tokens" computerName="Jays-MacBook-Pro" duration="00:00:02.7699859" startTime="2026-11-02T01:02:27.4941850-04:00" endTime="2026-11-02T01:02:30.2641890-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="392b0e06-423a-4789-88d5-ec4160ffd172" />
+    <UnitTestResult executionId="0c70e0bb-9e2e-4505-b15f-0bccb3e5d155" testId="6968017d-66ad-7058-b107-8d68a87a9484" testName="Hub.Tests.Api.WorkAssignmentProducerPathsTests.Bulk_task_assignment_and_deliverable_owner_changes_publish_each_changed_row_while_dark" computerName="Jays-MacBook-Pro" duration="00:00:05.7076718" startTime="2026-11-02T01:01:45.3793230-04:00" endTime="2026-11-02T01:01:51.0871520-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0c70e0bb-9e2e-4505-b15f-0bccb3e5d155" />
+    <UnitTestResult executionId="77568a50-f648-46f6-88ea-a8e05f656cfd" testId="73cb7a80-e6a8-3b7c-f86a-2eb704dbdcf0" testName="Hub.Tests.Api.WorkAssignmentProducerPathsTests.Member_removal_publishes_only_the_task_assignee_reviewer_and_deliverable_owner_it_reassigns" computerName="Jays-MacBook-Pro" duration="00:00:03.7485744" startTime="2026-11-02T01:01:54.4377430-04:00" endTime="2026-11-02T01:01:58.1862870-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="77568a50-f648-46f6-88ea-a8e05f656cfd" />
+    <UnitTestResult executionId="524752cd-d51f-428b-83cd-39a0065c0f91" testId="44845f02-c2e4-3365-28c3-1a1874fcf39f" testName="Hub.Tests.Api.WorkAssignmentProducerPathsTests.Ordinary_edits_and_handoff_assign_publish_every_changed_recipient_role_while_dark" computerName="Jays-MacBook-Pro" duration="00:00:05.8271497" startTime="2026-11-02T01:01:22.9819180-04:00" endTime="2026-11-02T01:01:28.8090390-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="524752cd-d51f-428b-83cd-39a0065c0f91" />
+    <UnitTestResult executionId="68711ad2-bee9-46c4-acf7-52fd9baa30f9" testId="c9083041-343a-9e24-bbe4-148aa41cbd11" testName="Hub.Tests.Api.WorkAssignmentProducerPathsTests.Implemented_project_csv_import_publishes_primary_pm_in_the_import_transaction_without_private_writes" computerName="Jays-MacBook-Pro" duration="00:00:03.3502011" startTime="2026-11-02T01:01:51.0945980-04:00" endTime="2026-11-02T01:01:54.4375480-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="68711ad2-bee9-46c4-acf7-52fd9baa30f9" />
+    <UnitTestResult executionId="3ddaaf9e-68c9-4321-b993-41aae176372d" testId="28309969-c97e-b2ad-6608-3a06b4e85b5f" testName="Hub.Tests.Api.MyWorkSeenTests.First_visit_token_baseline_includes_hidden_closed_legacy_occurrences_without_public_item_facts" computerName="Jays-MacBook-Pro" duration="00:00:05.8230782" startTime="2026-11-02T01:01:35.1255930-04:00" endTime="2026-11-02T01:01:40.9487550-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3ddaaf9e-68c9-4321-b993-41aae176372d" />
+    <UnitTestResult executionId="90ffbcee-51d4-4a25-ac0c-b8347a126a9d" testId="1f940dcd-71f6-0fe7-4260-19daa55b4491" testName="Hub.Tests.Api.WorkActivityCoverageTests.Every_commentable_Watching_kind_uses_normal_create_comments_delete_and_current_parent_event(kind: &quot;Milestone&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:05.1183875" startTime="2026-11-02T01:01:29.0522430-04:00" endTime="2026-11-02T01:01:34.1707630-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="90ffbcee-51d4-4a25-ac0c-b8347a126a9d" />
+    <UnitTestResult executionId="ae1e484e-6891-4f88-a04b-c77568643548" testId="b6a3fce1-5821-5451-f825-b05e63f7021f" testName="Hub.Tests.Api.WorkSeenEligibilityTests.Arbitrary_age_Completed_mine_rows_with_a_direct_role_clear_in_shared_MarkAll(collaboratorReviewer: False)" computerName="Jays-MacBook-Pro" duration="00:00:05.3279638" startTime="2026-11-02T01:01:40.0538970-04:00" endTime="2026-11-02T01:01:45.3819960-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ae1e484e-6891-4f88-a04b-c77568643548" />
+    <UnitTestResult executionId="e6632d15-fb9b-421d-96e8-4ac4fdc6cd3e" testId="0d6925db-c635-131b-5bf7-9935f50f462e" testName="Hub.Tests.Api.MyWorkSeenRaceTests.Late_committed_assignment_is_not_in_visit_or_MarkAll_cut_even_with_same_source_clock(markAll: False)" computerName="Jays-MacBook-Pro" duration="00:00:03.0645646" startTime="2026-11-02T01:02:18.6865190-04:00" endTime="2026-11-02T01:02:21.7511130-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e6632d15-fb9b-421d-96e8-4ac4fdc6cd3e" />
+    <UnitTestResult executionId="b27af0b4-5d5f-4239-ae51-dfcab81c4f37" testId="f4a7680e-b8a5-cbf2-f3a6-98c2817e76f1" testName="Hub.Tests.Api.WorkAssignmentProducerPathsTests.Action_conversion_risk_realisation_and_deliverable_from_task_publish_new_canonical_assignments" computerName="Jays-MacBook-Pro" duration="00:00:05.0624334" startTime="2026-11-02T01:01:17.9192550-04:00" endTime="2026-11-02T01:01:22.9816410-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b27af0b4-5d5f-4239-ae51-dfcab81c4f37" />
+    <UnitTestResult executionId="bbd77b64-1919-429c-8f46-60c9cfe3df59" testId="9fa32963-b05c-572a-0738-3854354f962e" testName="Hub.Tests.Api.MyWorkSeenTests.MarkAll_clears_beyond_a_task_page_and_replay_does_not_select_newer_assignments" computerName="Jays-MacBook-Pro" duration="00:00:11.9551353" startTime="2026-11-02T01:01:23.1701950-04:00" endTime="2026-11-02T01:01:35.1254670-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="bbd77b64-1919-429c-8f46-60c9cfe3df59" />
+    <UnitTestResult executionId="4683af7b-2d18-4b84-9f37-b8c524da3d33" testId="dcfcb23e-f292-738c-7896-9e73f6ad2d36" testName="Hub.Tests.Api.WorkSeenEligibilityTests.Sole_attention_arm_obeys_actual_snooze_visibility_until_expiry_escalation_or_typed_mismatch(branch: &quot;escalation&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:05.6504126" startTime="2026-11-02T01:01:12.5499210-04:00" endTime="2026-11-02T01:01:18.2002820-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4683af7b-2d18-4b84-9f37-b8c524da3d33" />
+    <UnitTestResult executionId="9ba34642-adb6-42e8-a4e1-43d09cf7cd0d" testId="4014dbea-f68c-a296-733b-1541f8747657" testName="Hub.Tests.Api.WorkSeenEligibilityTests.NonTask_requested_closed_age_keeps_its_real_fourteen_day_rule(daysOld: 2, eligible: True)" computerName="Jays-MacBook-Pro" duration="00:00:05.0907367" startTime="2026-11-02T01:01:28.9275800-04:00" endTime="2026-11-02T01:01:34.0184300-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9ba34642-adb6-42e8-a4e1-43d09cf7cd0d" />
+    <UnitTestResult executionId="c8ea9927-914f-4a29-889f-7d76296ab36a" testId="3afa69a6-ebeb-54d4-22f7-5f5918e1fb06" testName="Hub.Tests.Api.MyWorkSeenTests.Off_period_reassignment_survives_and_replay_after_recipient_revocation_refuses" computerName="Jays-MacBook-Pro" duration="00:00:05.2366132" startTime="2026-11-02T01:01:40.9488430-04:00" endTime="2026-11-02T01:01:46.1855840-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c8ea9927-914f-4a29-889f-7d76296ab36a" />
+    <UnitTestResult executionId="f8698741-361a-444e-90b1-6c1b72645c23" testId="92ccb2d2-e6ab-a28a-937d-df414f7680d3" testName="Hub.Tests.Api.WorkSeenEligibilityTests.Arbitrary_age_Completed_mine_rows_with_a_direct_role_clear_in_shared_MarkAll(collaboratorReviewer: True)" computerName="Jays-MacBook-Pro" duration="00:00:05.5926047" startTime="2026-11-02T01:01:45.3820790-04:00" endTime="2026-11-02T01:01:50.9747750-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f8698741-361a-444e-90b1-6c1b72645c23" />
+    <UnitTestResult executionId="22d5ad1c-7b8a-46dc-8dca-949e4906af50" testId="5734f4e1-4ffd-9c65-fb19-7655e41e0a16" testName="Hub.Tests.Api.WorkSeenEligibilityTests.Detail_bound_at_old_version_never_receives_a_future_away_back_token" computerName="Jays-MacBook-Pro" duration="00:00:03.2199298" startTime="2026-11-02T01:02:01.0535500-04:00" endTime="2026-11-02T01:02:04.2735900-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="22d5ad1c-7b8a-46dc-8dca-949e4906af50" />
+    <UnitTestResult executionId="bdf549ce-e9f0-4c8e-8551-64ec7d21fb05" testId="7820ad5a-abb4-5671-9d98-daecf839f42d" testName="Hub.Tests.Api.MyWorkSeenTests.Mounted_replacement_payload_requires_new_requestId_and_old_open_never_clears_new_token" computerName="Jays-MacBook-Pro" duration="00:00:06.2269321" startTime="2026-11-02T01:01:06.3225750-04:00" endTime="2026-11-02T01:01:12.5499560-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="bdf549ce-e9f0-4c8e-8551-64ec7d21fb05" />
+    <UnitTestResult executionId="b2eb577f-a825-42fd-b5fc-119c797161b8" testId="48bd73c1-c8c9-3586-b22c-a36c4a10f975" testName="Hub.Tests.Api.MyWorkSeenRaceTests.Canonical_outer_rollback_removes_published_occurrence_and_source_log_together" computerName="Jays-MacBook-Pro" duration="00:00:02.7203506" startTime="2026-11-02T01:02:15.9686130-04:00" endTime="2026-11-02T01:02:18.6863360-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b2eb577f-a825-42fd-b5fc-119c797161b8" />
+    <UnitTestResult executionId="ebf4c3d3-b7e5-448e-b040-78ed3a518383" testId="fa8d2821-6979-767a-07cd-7df56e411671" testName="Hub.Tests.Api.WorkActivityCoverageTests.Unauthorized_typed_keys_and_flagoff_return_no_facts" computerName="Jays-MacBook-Pro" duration="00:00:05.3210145" startTime="2026-11-02T01:01:40.0532000-04:00" endTime="2026-11-02T01:01:45.3742010-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ebf4c3d3-b7e5-448e-b040-78ed3a518383" />
+    <UnitTestResult executionId="cc0d0a27-3135-4fa7-8310-8773dc070392" testId="1c41a01b-f9d4-4bb5-b2ab-fd4ab8d43481" testName="Hub.Tests.Api.WorkSeenEligibilityTests.Collaborator_creator_and_readable_unwatched_Risk_do_not_become_assignments_or_MarkAll_targets" computerName="Jays-MacBook-Pro" duration="00:00:06.0351756" startTime="2026-11-02T01:01:34.0184930-04:00" endTime="2026-11-02T01:01:40.0538430-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="cc0d0a27-3135-4fa7-8310-8773dc070392" />
+    <UnitTestResult executionId="587ca00f-27da-4580-998d-83c2e9d077af" testId="00463a76-5492-c6a9-396d-88dc6654b4ad" testName="Hub.Tests.Api.WorkAssignmentProducerPathsTests.Template_project_and_discipline_pack_publish_only_the_copied_items_actual_assignees(pack: False)" computerName="Jays-MacBook-Pro" duration="00:00:05.3678523" startTime="2026-11-02T01:01:12.5509890-04:00" endTime="2026-11-02T01:01:17.9189690-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="587ca00f-27da-4580-998d-83c2e9d077af" />
+    <UnitTestResult executionId="db5c24b6-c387-4afb-9434-9379dfb7620d" testId="d256e995-39c6-a15d-3ec0-b78b562ed6d3" testName="Hub.Tests.Api.WorkScreenReadEnvelopeTests.Coordination_reuses_the_handoff_detail_evidence_in_register_outgoing_and_blocker_rows_without_get_writes" computerName="Jays-MacBook-Pro" duration="00:00:05.1728543" startTime="2026-11-02T01:01:20.6621270-04:00" endTime="2026-11-02T01:01:25.8350800-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="db5c24b6-c387-4afb-9434-9379dfb7620d" />
+    <UnitTestResult executionId="91a46ac9-d5aa-4fee-9f9b-41fb50849fe8" testId="8b42a9ed-3153-7a1a-34e0-c08075311949" testName="Hub.Tests.Api.WorkAssignmentProducerPathsTests.Reviewer_selected_by_normal_review_transition_publishes_only_the_new_reviewer_role" computerName="Jays-MacBook-Pro" duration="00:00:09.9207667" startTime="2026-11-02T01:00:50.9966330-04:00" endTime="2026-11-02T01:01:00.9210950-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="91a46ac9-d5aa-4fee-9f9b-41fb50849fe8" />
+    <UnitTestResult executionId="58708391-73e9-455b-897e-837d1656b1f4" testId="72530237-9378-1317-cb6b-952b494cbe43" testName="Hub.Tests.Api.MyWorkSeenTests.Each_observed_role_is_acknowledged_individually_and_receipts_do_not_expire_after_a_day" computerName="Jays-MacBook-Pro" duration="00:00:05.1372467" startTime="2026-11-02T01:01:46.1856630-04:00" endTime="2026-11-02T01:01:51.3231160-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="58708391-73e9-455b-897e-837d1656b1f4" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="Hub.Tests.Api.WorkScreenReadEnvelopeTests.Returned_envelopes_are_read_only_and_private_seen_is_omitted_for_other_subjects_and_dark_flags" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="062bbb01-9418-1ac5-1c4e-ee96b7bd521b">
+      <Execution id="3c3789e8-07e3-4d8c-9740-701337408dc4" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkScreenReadEnvelopeTests" name="Returned_envelopes_are_read_only_and_private_seen_is_omitted_for_other_subjects_and_dark_flags" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkSeenEligibilityTests.NonTask_requested_closed_age_keeps_its_real_fourteen_day_rule(daysOld: 25, eligible: False)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="882dc34a-5942-1b8b-7bf7-730d99ba0e88">
+      <Execution id="570aa05c-f079-4a37-b7d9-7e7bb1df7f1b" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkSeenEligibilityTests" name="NonTask_requested_closed_age_keeps_its_real_fourteen_day_rule" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.MyWorkSeenRaceTests.Late_committed_assignment_is_not_in_visit_or_MarkAll_cut_even_with_same_source_clock(markAll: True)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="23615f11-74ee-0d3e-f166-39f9027c1aa6">
+      <Execution id="d437dc17-fb1b-449c-8a10-45806ac4d3b9" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.MyWorkSeenRaceTests" name="Late_committed_assignment_is_not_in_visit_or_MarkAll_cut_even_with_same_source_clock" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkSeenEligibilityTests.Created_query_with_current_reviewer_role_is_eligible_without_mine_or_review_stage_membership(complete: False)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="40efd1d4-f035-1171-1cac-9610f499ce34">
+      <Execution id="16daa4d4-5271-437d-97ac-7f0fe649b7f3" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkSeenEligibilityTests" name="Created_query_with_current_reviewer_role_is_eligible_without_mine_or_review_stage_membership" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkAssignmentProducerPathsTests.Primary_project_manager_away_and_back_publishes_new_occurrences_while_membership_roles_do_not" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="436eefef-575a-d2d7-61d1-b76ee4a152b9">
+      <Execution id="3a159091-a42f-4c42-bb1b-816c6d2247fa" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkAssignmentProducerPathsTests" name="Primary_project_manager_away_and_back_publishes_new_occurrences_while_membership_roles_do_not" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkActivityCoverageTests.Every_commentable_Watching_kind_uses_normal_create_comments_delete_and_current_parent_event(kind: &quot;Issue&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="5af7ec54-03fc-56d5-2917-426009b126b5">
+      <Execution id="01088afe-f8b7-4ee4-9bf4-7a0247f95e8f" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkActivityCoverageTests" name="Every_commentable_Watching_kind_uses_normal_create_comments_delete_and_current_parent_event" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkSeenEligibilityTests.Created_query_with_current_reviewer_role_is_eligible_without_mine_or_review_stage_membership(complete: True)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="cfe02b0a-e1a3-dd46-bf63-cbecd44310d6">
+      <Execution id="4673e98d-7969-4434-999a-ae8cba2a3334" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkSeenEligibilityTests" name="Created_query_with_current_reviewer_role_is_eligible_without_mine_or_review_stage_membership" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkAssignmentProducerPathsTests.Action_conversion_risk_realisation_and_deliverable_from_task_publish_new_canonical_assignments" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="f4a7680e-b8a5-cbf2-f3a6-98c2817e76f1">
+      <Execution id="b27af0b4-5d5f-4239-ae51-dfcab81c4f37" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkAssignmentProducerPathsTests" name="Action_conversion_risk_realisation_and_deliverable_from_task_publish_new_canonical_assignments" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkSeenEligibilityTests.Action_discriminator_switch_back_creates_new_occurrence_but_discipline_fallback_is_not_person_assignment" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="b91c77cb-fed3-b69a-e484-c8c97283c645">
+      <Execution id="ee49a4c3-feb0-49c4-998c-0d3f15b48ed1" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkSeenEligibilityTests" name="Action_discriminator_switch_back_creates_new_occurrence_but_discipline_fallback_is_not_person_assignment" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkActivityCoverageTests.Typed_colliding_ids_and_real_System_or_unknown_actors_do_not_borrow_facts" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="c6732ebc-4a59-b267-b0e0-d0fa0ea2853e">
+      <Execution id="c21b722f-b422-43b0-bae4-2b41bbadd9cd" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkActivityCoverageTests" name="Typed_colliding_ids_and_real_System_or_unknown_actors_do_not_borrow_facts" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.MyWorkSeenTests.Mounted_replacement_payload_requires_new_requestId_and_old_open_never_clears_new_token" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="7820ad5a-abb4-5671-9d98-daecf839f42d">
+      <Execution id="bdf549ce-e9f0-4c8e-8551-64ec7d21fb05" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.MyWorkSeenTests" name="Mounted_replacement_payload_requires_new_requestId_and_old_open_never_clears_new_token" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkActivityCoverageTests.Every_commentable_Watching_kind_uses_normal_create_comments_delete_and_current_parent_event(kind: &quot;Action&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="786f48ee-fc50-817f-49f4-a24395fab497">
+      <Execution id="54ed7b38-894d-4c88-99e2-f1fc304d888e" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkActivityCoverageTests" name="Every_commentable_Watching_kind_uses_normal_create_comments_delete_and_current_parent_event" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkActivityCoverageTests.Every_commentable_Watching_kind_uses_normal_create_comments_delete_and_current_parent_event(kind: &quot;Deliverable&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="83fdbcc6-bdd2-18ba-0ba4-efce4385e33c">
+      <Execution id="317fc691-59b0-49c4-8592-a4cf3fee3afd" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkActivityCoverageTests" name="Every_commentable_Watching_kind_uses_normal_create_comments_delete_and_current_parent_event" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkActivityCoverageTests.Every_commentable_Watching_kind_uses_normal_create_comments_delete_and_current_parent_event(kind: &quot;Decision&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="0699fca0-48c6-08a9-8804-b3eca18ea7d1">
+      <Execution id="79781b6d-78b5-4beb-b80f-207a0954364d" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkActivityCoverageTests" name="Every_commentable_Watching_kind_uses_normal_create_comments_delete_and_current_parent_event" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkScreenReadEnvelopeTests.Milestone_and_open_role_never_receive_fabricated_assignment_seen_state" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="7fe4fe6f-f4c9-1c37-57dd-ed8e1e5b22f6">
+      <Execution id="d97a8cf4-ebfc-445e-93dd-8224f1ff5676" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkScreenReadEnvelopeTests" name="Milestone_and_open_role_never_receive_fabricated_assignment_seen_state" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkActivityCoverageTests.Every_commentable_Watching_kind_uses_normal_create_comments_delete_and_current_parent_event(kind: &quot;Risk&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="a9189657-773d-54a3-a7f3-0b0407317ac2">
+      <Execution id="372629b2-0b79-4294-94a9-5527f065555c" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkActivityCoverageTests" name="Every_commentable_Watching_kind_uses_normal_create_comments_delete_and_current_parent_event" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkScreenReadEnvelopeTests.Detail_snapshot_keeps_original_version_event_and_token_across_committed_away_and_back_assignment" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="034a2e8f-e177-c6e3-a1fb-f228f6499ee2">
+      <Execution id="77bb461c-9788-4c20-983f-057a73eefc9f" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkScreenReadEnvelopeTests" name="Detail_snapshot_keeps_original_version_event_and_token_across_committed_away_and_back_assignment" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkActivityCoverageTests.Every_commentable_Watching_kind_uses_normal_create_comments_delete_and_current_parent_event(kind: &quot;Task&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="7ebdc0ec-f852-17bc-b027-894c7076e839">
+      <Execution id="caaadc67-9269-4273-9ca9-6514558e7e4e" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkActivityCoverageTests" name="Every_commentable_Watching_kind_uses_normal_create_comments_delete_and_current_parent_event" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.MyWorkSeenTests.MarkAll_clears_beyond_a_task_page_and_replay_does_not_select_newer_assignments" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="9fa32963-b05c-572a-0738-3854354f962e">
+      <Execution id="bbd77b64-1919-429c-8f46-60c9cfe3df59" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.MyWorkSeenTests" name="MarkAll_clears_beyond_a_task_page_and_replay_does_not_select_newer_assignments" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkAssignmentProducerPathsTests.Supervisor_reassigns_all_five_supported_canonical_roles_with_one_source_version_per_item" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="b22de160-28da-b1c5-788c-f40a8d1a4b97">
+      <Execution id="7e98eb5e-3d36-44e4-b1cd-60ff6a60f2f8" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkAssignmentProducerPathsTests" name="Supervisor_reassigns_all_five_supported_canonical_roles_with_one_source_version_per_item" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkSeenEligibilityTests.NonTask_requested_closed_age_keeps_its_real_fourteen_day_rule(daysOld: 2, eligible: True)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="4014dbea-f68c-a296-733b-1541f8747657">
+      <Execution id="9ba34642-adb6-42e8-a4e1-43d09cf7cd0d" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkSeenEligibilityTests" name="NonTask_requested_closed_age_keeps_its_real_fourteen_day_rule" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkSeenEligibilityTests.Arbitrary_age_Completed_mine_rows_with_a_direct_role_clear_in_shared_MarkAll(collaboratorReviewer: True)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="92ccb2d2-e6ab-a28a-937d-df414f7680d3">
+      <Execution id="f8698741-361a-444e-90b1-6c1b72645c23" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkSeenEligibilityTests" name="Arbitrary_age_Completed_mine_rows_with_a_direct_role_clear_in_shared_MarkAll" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkScreenReadEnvelopeTests.Other_person_view_omits_the_current_actors_real_assignment_state_on_the_same_task" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="e9f17df5-332e-fe8e-da4f-064908374d80">
+      <Execution id="6251ea8b-b414-4419-8139-c963ad5f51c7" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkScreenReadEnvelopeTests" name="Other_person_view_omits_the_current_actors_real_assignment_state_on_the_same_task" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkSeenEligibilityTests.Sole_attention_arm_obeys_actual_snooze_visibility_until_expiry_escalation_or_typed_mismatch(branch: &quot;escalation&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="dcfcb23e-f292-738c-7896-9e73f6ad2d36">
+      <Execution id="4683af7b-2d18-4b84-9f37-b8c524da3d33" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkSeenEligibilityTests" name="Sole_attention_arm_obeys_actual_snooze_visibility_until_expiry_escalation_or_typed_mismatch" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkSeenEligibilityTests.Collaborator_creator_and_readable_unwatched_Risk_do_not_become_assignments_or_MarkAll_targets" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="1c41a01b-f9d4-4bb5-b2ab-fd4ab8d43481">
+      <Execution id="cc0d0a27-3135-4fa7-8310-8773dc070392" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkSeenEligibilityTests" name="Collaborator_creator_and_readable_unwatched_Risk_do_not_become_assignments_or_MarkAll_targets" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.MyWorkSeenTests.First_visit_baselines_without_GET_writes_and_later_visits_preserve_pending_tokens" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="cbfd72ef-3e3d-131b-acaf-74532675f0ed">
+      <Execution id="4d7cef90-3715-48a3-82fe-a127b7c91505" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.MyWorkSeenTests" name="First_visit_baselines_without_GET_writes_and_later_visits_preserve_pending_tokens" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkActivityCoverageTests.Unauthorized_typed_keys_and_flagoff_return_no_facts" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="fa8d2821-6979-767a-07cd-7df56e411671">
+      <Execution id="ebf4c3d3-b7e5-448e-b040-78ed3a518383" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkActivityCoverageTests" name="Unauthorized_typed_keys_and_flagoff_return_no_facts" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkAssignmentProducerPathsTests.Reviewer_selected_by_normal_review_transition_publishes_only_the_new_reviewer_role" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="8b42a9ed-3153-7a1a-34e0-c08075311949">
+      <Execution id="91a46ac9-d5aa-4fee-9f9b-41fb50849fe8" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkAssignmentProducerPathsTests" name="Reviewer_selected_by_normal_review_transition_publishes_only_the_new_reviewer_role" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkScreenReadEnvelopeTests.Same_task_in_work_review_and_watching_uses_identical_current_event_and_assignment_evidence" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="e82618c7-0466-b0ae-6b59-99390e2fe6e1">
+      <Execution id="899c66db-3e3c-497e-bb98-cd045445e89b" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkScreenReadEnvelopeTests" name="Same_task_in_work_review_and_watching_uses_identical_current_event_and_assignment_evidence" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.MyWorkSeenTests.First_visit_token_baseline_includes_hidden_closed_legacy_occurrences_without_public_item_facts" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="28309969-c97e-b2ad-6608-3a06b4e85b5f">
+      <Execution id="3ddaaf9e-68c9-4321-b993-41aae176372d" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.MyWorkSeenTests" name="First_visit_token_baseline_includes_hidden_closed_legacy_occurrences_without_public_item_facts" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkActivityCoverageTests.Exact_event_time_and_actor_stay_paired_when_three_comments_advance_cached_activity_time" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="ff962349-eff4-b236-74e2-0cfa77963c12">
+      <Execution id="c2cc269d-7159-459c-a153-0d379db75710" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkActivityCoverageTests" name="Exact_event_time_and_actor_stay_paired_when_three_comments_advance_cached_activity_time" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.MyWorkSeenTests.Off_period_reassignment_survives_and_replay_after_recipient_revocation_refuses" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="3afa69a6-ebeb-54d4-22f7-5f5918e1fb06">
+      <Execution id="c8ea9927-914f-4a29-889f-7d76296ab36a" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.MyWorkSeenTests" name="Off_period_reassignment_survives_and_replay_after_recipient_revocation_refuses" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.MyWorkSeenTests.Atomic_seen_metadata_bypasses_generic_receipts_and_action_reuse_refuses" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="bfa49f2d-37d3-4757-6d6e-9936a0954af2">
+      <Execution id="63191f1a-39ad-420c-9aa6-ad8f8275823b" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.MyWorkSeenTests" name="Atomic_seen_metadata_bypasses_generic_receipts_and_action_reuse_refuses" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkSeenEligibilityTests.Arbitrary_age_Completed_mine_rows_with_a_direct_role_clear_in_shared_MarkAll(collaboratorReviewer: False)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="b6a3fce1-5821-5451-f825-b05e63f7021f">
+      <Execution id="ae1e484e-6891-4f88-a04b-c77568643548" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkSeenEligibilityTests" name="Arbitrary_age_Completed_mine_rows_with_a_direct_role_clear_in_shared_MarkAll" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkSeenEligibilityTests.Sole_attention_arm_obeys_actual_snooze_visibility_until_expiry_escalation_or_typed_mismatch(branch: &quot;wrong-rule&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="d59e0f6d-8300-7828-7430-cfd669f7d415">
+      <Execution id="7d831332-e851-497e-b2ae-62d0492e2351" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkSeenEligibilityTests" name="Sole_attention_arm_obeys_actual_snooze_visibility_until_expiry_escalation_or_typed_mismatch" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkAssignmentProducerPathsTests.Pickup_claim_and_manager_offer_assignment_publish_canonical_recipient_not_offer_snapshot(managerAssigns: True)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="5f79eece-8b20-7295-a797-0f17a42779eb">
+      <Execution id="2a0b5872-b42f-4106-8c74-ad42b7615914" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkAssignmentProducerPathsTests" name="Pickup_claim_and_manager_offer_assignment_publish_canonical_recipient_not_offer_snapshot" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.MyWorkSeenRaceTests.Producers_commit_under_actual_personal_lock_contention_then_competing_commands_replay_once" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="5a620e23-e8a9-19e0-7069-19f0f56896e3">
+      <Execution id="d8e31679-d948-4f4b-a4aa-ebfa9b8ff918" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.MyWorkSeenRaceTests" name="Producers_commit_under_actual_personal_lock_contention_then_competing_commands_replay_once" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.MyWorkSeenTests.Private_ReadOnly_commands_are_allowed_but_flagoff_extra_subject_and_foreign_tokens_refuse" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="57957bb3-c06c-39de-3f8e-7988cca0d499">
+      <Execution id="9bf82dbd-2456-4a5a-ac2a-22ccdbae0364" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.MyWorkSeenTests" name="Private_ReadOnly_commands_are_allowed_but_flagoff_extra_subject_and_foreign_tokens_refuse" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.MyWorkSeenRaceTests.Preference_writer_and_visit_preserve_separate_fields_without_global_revision_conflict" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="0a66a6dc-26d0-da33-db86-7137aa45063d">
+      <Execution id="c41154d8-73bf-40bc-aca1-36492e14f559" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.MyWorkSeenRaceTests" name="Preference_writer_and_visit_preserve_separate_fields_without_global_revision_conflict" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkScreenReadEnvelopeTests.Restricted_project_hides_all_nine_details_before_any_private_or_activity_evidence_can_escape" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="88f5e480-112a-d299-61f5-608455da1af7">
+      <Execution id="5bf9d091-9cdc-4b8e-a057-147253b9b05c" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkScreenReadEnvelopeTests" name="Restricted_project_hides_all_nine_details_before_any_private_or_activity_evidence_can_escape" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkActivityCoverageTests.Every_commentable_Watching_kind_uses_normal_create_comments_delete_and_current_parent_event(kind: &quot;Milestone&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="1f940dcd-71f6-0fe7-4260-19daa55b4491">
+      <Execution id="90ffbcee-51d4-4a25-ac0c-b8347a126a9d" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkActivityCoverageTests" name="Every_commentable_Watching_kind_uses_normal_create_comments_delete_and_current_parent_event" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.MyWorkSeenTests.Each_observed_role_is_acknowledged_individually_and_receipts_do_not_expire_after_a_day" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="72530237-9378-1317-cb6b-952b494cbe43">
+      <Execution id="58708391-73e9-455b-897e-837d1656b1f4" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.MyWorkSeenTests" name="Each_observed_role_is_acknowledged_individually_and_receipts_do_not_expire_after_a_day" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkAssignmentProducerPathsTests.Ordinary_edits_and_handoff_assign_publish_every_changed_recipient_role_while_dark" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="44845f02-c2e4-3365-28c3-1a1874fcf39f">
+      <Execution id="524752cd-d51f-428b-83cd-39a0065c0f91" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkAssignmentProducerPathsTests" name="Ordinary_edits_and_handoff_assign_publish_every_changed_recipient_role_while_dark" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkAssignmentProducerPathsTests.Member_removal_publishes_only_the_task_assignee_reviewer_and_deliverable_owner_it_reassigns" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="73cb7a80-e6a8-3b7c-f86a-2eb704dbdcf0">
+      <Execution id="77568a50-f648-46f6-88ea-a8e05f656cfd" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkAssignmentProducerPathsTests" name="Member_removal_publishes_only_the_task_assignee_reviewer_and_deliverable_owner_it_reassigns" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkSeenEligibilityTests.Sole_attention_arm_obeys_actual_snooze_visibility_until_expiry_escalation_or_typed_mismatch(branch: &quot;expiry&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="29423ce6-ad70-fb3e-729b-916bf8174380">
+      <Execution id="68515ea9-65ed-45d6-89b1-cd38f4924d9a" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkSeenEligibilityTests" name="Sole_attention_arm_obeys_actual_snooze_visibility_until_expiry_escalation_or_typed_mismatch" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkScreenReadEnvelopeTests.Coordination_reuses_the_handoff_detail_evidence_in_register_outgoing_and_blocker_rows_without_get_writes" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="d256e995-39c6-a15d-3ec0-b78b562ed6d3">
+      <Execution id="db5c24b6-c387-4afb-9434-9379dfb7620d" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkScreenReadEnvelopeTests" name="Coordination_reuses_the_handoff_detail_evidence_in_register_outgoing_and_blocker_rows_without_get_writes" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.MyWorkSeenRaceTests.Missing_projection_fails_whole_MarkAll_without_acknowledging_other_new_tokens" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="dfd7ccb0-f7f2-6758-5507-102a89924c54">
+      <Execution id="392b0e06-423a-4789-88d5-ec4160ffd172" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.MyWorkSeenRaceTests" name="Missing_projection_fails_whole_MarkAll_without_acknowledging_other_new_tokens" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkAssignmentProducerPathsTests.Implemented_project_csv_import_publishes_primary_pm_in_the_import_transaction_without_private_writes" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="c9083041-343a-9e24-bbe4-148aa41cbd11">
+      <Execution id="68711ad2-bee9-46c4-acf7-52fd9baa30f9" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkAssignmentProducerPathsTests" name="Implemented_project_csv_import_publishes_primary_pm_in_the_import_transaction_without_private_writes" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkAssignmentProducerPathsTests.Bulk_task_assignment_and_deliverable_owner_changes_publish_each_changed_row_while_dark" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="6968017d-66ad-7058-b107-8d68a87a9484">
+      <Execution id="0c70e0bb-9e2e-4505-b15f-0bccb3e5d155" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkAssignmentProducerPathsTests" name="Bulk_task_assignment_and_deliverable_owner_changes_publish_each_changed_row_while_dark" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkAssignmentProducerPathsTests.Template_project_and_discipline_pack_publish_only_the_copied_items_actual_assignees(pack: True)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="6a2b17f6-77c6-4378-40e8-1d9538a5421b">
+      <Execution id="9143092b-3d6e-4c31-907b-f3023e1c00e4" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkAssignmentProducerPathsTests" name="Template_project_and_discipline_pack_publish_only_the_copied_items_actual_assignees" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkAssignmentProducerPathsTests.Pickup_claim_and_manager_offer_assignment_publish_canonical_recipient_not_offer_snapshot(managerAssigns: False)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="09d5d365-8783-2560-0e89-36988cdaadcd">
+      <Execution id="539413ed-a4ea-460c-abee-0fb28136cd42" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkAssignmentProducerPathsTests" name="Pickup_claim_and_manager_offer_assignment_publish_canonical_recipient_not_offer_snapshot" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkSeenEligibilityTests.Sole_attention_arm_obeys_actual_snooze_visibility_until_expiry_escalation_or_typed_mismatch(branch: &quot;ended&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="2d1ca54e-a71f-19da-90eb-2e55dbd720ff">
+      <Execution id="450adaee-3ac7-4127-b56d-b5013e215b58" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkSeenEligibilityTests" name="Sole_attention_arm_obeys_actual_snooze_visibility_until_expiry_escalation_or_typed_mismatch" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkAssignmentProducerPathsTests.Template_project_and_discipline_pack_publish_only_the_copied_items_actual_assignees(pack: False)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="00463a76-5492-c6a9-396d-88dc6654b4ad">
+      <Execution id="587ca00f-27da-4580-998d-83c2e9d077af" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkAssignmentProducerPathsTests" name="Template_project_and_discipline_pack_publish_only_the_copied_items_actual_assignees" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.MyWorkSeenRaceTests.Canonical_outer_rollback_removes_published_occurrence_and_source_log_together" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="48bd73c1-c8c9-3586-b22c-a36c4a10f975">
+      <Execution id="b2eb577f-a825-42fd-b5fc-119c797161b8" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.MyWorkSeenRaceTests" name="Canonical_outer_rollback_removes_published_occurrence_and_source_log_together" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.MyWorkSeenTests.Client_transport_failure_after_real_commit_replays_exact_durable_cut_not_late_assignments" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="e8c3e035-44b9-c6e3-aefb-87d926019ca4">
+      <Execution id="af716844-824a-4893-9a6e-f0ddacc9e5bf" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.MyWorkSeenTests" name="Client_transport_failure_after_real_commit_replays_exact_durable_cut_not_late_assignments" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkScreenReadEnvelopeTests.All_nine_authorised_details_omit_dark_metadata_and_return_exact_private_tokens_without_get_writes" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="68114643-f717-df78-1ee9-da1b7a7135ed">
+      <Execution id="f4d9f05c-b697-4c23-a647-3fb4d8130cad" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkScreenReadEnvelopeTests" name="All_nine_authorised_details_omit_dark_metadata_and_return_exact_private_tokens_without_get_writes" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkSeenEligibilityTests.Detail_bound_at_old_version_never_receives_a_future_away_back_token" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="5734f4e1-4ffd-9c65-fb19-7655e41e0a16">
+      <Execution id="22d5ad1c-7b8a-46dc-8dca-949e4906af50" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkSeenEligibilityTests" name="Detail_bound_at_old_version_never_receives_a_future_away_back_token" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkSeenEligibilityTests.Sole_attention_arm_obeys_actual_snooze_visibility_until_expiry_escalation_or_typed_mismatch(branch: &quot;wrong-kind&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="85a6bd46-de6b-45bd-8796-43b589608bca">
+      <Execution id="ac41a107-57d8-4863-892a-830bc2dca08a" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkSeenEligibilityTests" name="Sole_attention_arm_obeys_actual_snooze_visibility_until_expiry_escalation_or_typed_mismatch" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.MyWorkSeenRaceTests.Late_committed_assignment_is_not_in_visit_or_MarkAll_cut_even_with_same_source_clock(markAll: False)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="0d6925db-c635-131b-5bf7-9935f50f462e">
+      <Execution id="e6632d15-fb9b-421d-96e8-4ac4fdc6cd3e" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.MyWorkSeenRaceTests" name="Late_committed_assignment_is_not_in_visit_or_MarkAll_cut_even_with_same_source_clock" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="062bbb01-9418-1ac5-1c4e-ee96b7bd521b" executionId="3c3789e8-07e3-4d8c-9740-701337408dc4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d59e0f6d-8300-7828-7430-cfd669f7d415" executionId="7d831332-e851-497e-b2ae-62d0492e2351" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="cfe02b0a-e1a3-dd46-bf63-cbecd44310d6" executionId="4673e98d-7969-4434-999a-ae8cba2a3334" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6a2b17f6-77c6-4378-40e8-1d9538a5421b" executionId="9143092b-3d6e-4c31-907b-f3023e1c00e4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="40efd1d4-f035-1171-1cac-9610f499ce34" executionId="16daa4d4-5271-437d-97ac-7f0fe649b7f3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2d1ca54e-a71f-19da-90eb-2e55dbd720ff" executionId="450adaee-3ac7-4127-b56d-b5013e215b58" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="83fdbcc6-bdd2-18ba-0ba4-efce4385e33c" executionId="317fc691-59b0-49c4-8592-a4cf3fee3afd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0a66a6dc-26d0-da33-db86-7137aa45063d" executionId="c41154d8-73bf-40bc-aca1-36492e14f559" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="85a6bd46-de6b-45bd-8796-43b589608bca" executionId="ac41a107-57d8-4863-892a-830bc2dca08a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="bfa49f2d-37d3-4757-6d6e-9936a0954af2" executionId="63191f1a-39ad-420c-9aa6-ad8f8275823b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0699fca0-48c6-08a9-8804-b3eca18ea7d1" executionId="79781b6d-78b5-4beb-b80f-207a0954364d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="436eefef-575a-d2d7-61d1-b76ee4a152b9" executionId="3a159091-a42f-4c42-bb1b-816c6d2247fa" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b91c77cb-fed3-b69a-e484-c8c97283c645" executionId="ee49a4c3-feb0-49c4-998c-0d3f15b48ed1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7ebdc0ec-f852-17bc-b027-894c7076e839" executionId="caaadc67-9269-4273-9ca9-6514558e7e4e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="88f5e480-112a-d299-61f5-608455da1af7" executionId="5bf9d091-9cdc-4b8e-a057-147253b9b05c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5a620e23-e8a9-19e0-7069-19f0f56896e3" executionId="d8e31679-d948-4f4b-a4aa-ebfa9b8ff918" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c6732ebc-4a59-b267-b0e0-d0fa0ea2853e" executionId="c21b722f-b422-43b0-bae4-2b41bbadd9cd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a9189657-773d-54a3-a7f3-0b0407317ac2" executionId="372629b2-0b79-4294-94a9-5527f065555c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="29423ce6-ad70-fb3e-729b-916bf8174380" executionId="68515ea9-65ed-45d6-89b1-cd38f4924d9a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="cbfd72ef-3e3d-131b-acaf-74532675f0ed" executionId="4d7cef90-3715-48a3-82fe-a127b7c91505" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ff962349-eff4-b236-74e2-0cfa77963c12" executionId="c2cc269d-7159-459c-a153-0d379db75710" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="57957bb3-c06c-39de-3f8e-7988cca0d499" executionId="9bf82dbd-2456-4a5a-ac2a-22ccdbae0364" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b22de160-28da-b1c5-788c-f40a8d1a4b97" executionId="7e98eb5e-3d36-44e4-b1cd-60ff6a60f2f8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e82618c7-0466-b0ae-6b59-99390e2fe6e1" executionId="899c66db-3e3c-497e-bb98-cd045445e89b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="786f48ee-fc50-817f-49f4-a24395fab497" executionId="54ed7b38-894d-4c88-99e2-f1fc304d888e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="68114643-f717-df78-1ee9-da1b7a7135ed" executionId="f4d9f05c-b697-4c23-a647-3fb4d8130cad" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="882dc34a-5942-1b8b-7bf7-730d99ba0e88" executionId="570aa05c-f079-4a37-b7d9-7e7bb1df7f1b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="23615f11-74ee-0d3e-f166-39f9027c1aa6" executionId="d437dc17-fb1b-449c-8a10-45806ac4d3b9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="034a2e8f-e177-c6e3-a1fb-f228f6499ee2" executionId="77bb461c-9788-4c20-983f-057a73eefc9f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7fe4fe6f-f4c9-1c37-57dd-ed8e1e5b22f6" executionId="d97a8cf4-ebfc-445e-93dd-8224f1ff5676" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5af7ec54-03fc-56d5-2917-426009b126b5" executionId="01088afe-f8b7-4ee4-9bf4-7a0247f95e8f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e9f17df5-332e-fe8e-da4f-064908374d80" executionId="6251ea8b-b414-4419-8139-c963ad5f51c7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="09d5d365-8783-2560-0e89-36988cdaadcd" executionId="539413ed-a4ea-460c-abee-0fb28136cd42" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e8c3e035-44b9-c6e3-aefb-87d926019ca4" executionId="af716844-824a-4893-9a6e-f0ddacc9e5bf" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5f79eece-8b20-7295-a797-0f17a42779eb" executionId="2a0b5872-b42f-4106-8c74-ad42b7615914" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="dfd7ccb0-f7f2-6758-5507-102a89924c54" executionId="392b0e06-423a-4789-88d5-ec4160ffd172" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6968017d-66ad-7058-b107-8d68a87a9484" executionId="0c70e0bb-9e2e-4505-b15f-0bccb3e5d155" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="73cb7a80-e6a8-3b7c-f86a-2eb704dbdcf0" executionId="77568a50-f648-46f6-88ea-a8e05f656cfd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="44845f02-c2e4-3365-28c3-1a1874fcf39f" executionId="524752cd-d51f-428b-83cd-39a0065c0f91" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c9083041-343a-9e24-bbe4-148aa41cbd11" executionId="68711ad2-bee9-46c4-acf7-52fd9baa30f9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="28309969-c97e-b2ad-6608-3a06b4e85b5f" executionId="3ddaaf9e-68c9-4321-b993-41aae176372d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1f940dcd-71f6-0fe7-4260-19daa55b4491" executionId="90ffbcee-51d4-4a25-ac0c-b8347a126a9d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b6a3fce1-5821-5451-f825-b05e63f7021f" executionId="ae1e484e-6891-4f88-a04b-c77568643548" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0d6925db-c635-131b-5bf7-9935f50f462e" executionId="e6632d15-fb9b-421d-96e8-4ac4fdc6cd3e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f4a7680e-b8a5-cbf2-f3a6-98c2817e76f1" executionId="b27af0b4-5d5f-4239-ae51-dfcab81c4f37" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9fa32963-b05c-572a-0738-3854354f962e" executionId="bbd77b64-1919-429c-8f46-60c9cfe3df59" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="dcfcb23e-f292-738c-7896-9e73f6ad2d36" executionId="4683af7b-2d18-4b84-9f37-b8c524da3d33" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4014dbea-f68c-a296-733b-1541f8747657" executionId="9ba34642-adb6-42e8-a4e1-43d09cf7cd0d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3afa69a6-ebeb-54d4-22f7-5f5918e1fb06" executionId="c8ea9927-914f-4a29-889f-7d76296ab36a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="92ccb2d2-e6ab-a28a-937d-df414f7680d3" executionId="f8698741-361a-444e-90b1-6c1b72645c23" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5734f4e1-4ffd-9c65-fb19-7655e41e0a16" executionId="22d5ad1c-7b8a-46dc-8dca-949e4906af50" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7820ad5a-abb4-5671-9d98-daecf839f42d" executionId="bdf549ce-e9f0-4c8e-8551-64ec7d21fb05" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="48bd73c1-c8c9-3586-b22c-a36c4a10f975" executionId="b2eb577f-a825-42fd-b5fc-119c797161b8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="fa8d2821-6979-767a-07cd-7df56e411671" executionId="ebf4c3d3-b7e5-448e-b040-78ed3a518383" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1c41a01b-f9d4-4bb5-b2ab-fd4ab8d43481" executionId="cc0d0a27-3135-4fa7-8310-8773dc070392" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="00463a76-5492-c6a9-396d-88dc6654b4ad" executionId="587ca00f-27da-4580-998d-83c2e9d077af" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d256e995-39c6-a15d-3ec0-b78b562ed6d3" executionId="db5c24b6-c387-4afb-9434-9379dfb7620d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8b42a9ed-3153-7a1a-34e0-c08075311949" executionId="91a46ac9-d5aa-4fee-9f9b-41fb50849fe8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="72530237-9378-1317-cb6b-952b494cbe43" executionId="58708391-73e9-455b-897e-837d1656b1f4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="59" executed="59" passed="58" failed="1" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.11)
+[xUnit.net 00:00:00.08]   Discovering: Hub.Tests
+[xUnit.net 00:00:00.19]   Discovered:  Hub.Tests
+[xUnit.net 00:00:00.21]   Starting:    Hub.Tests
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+warn: Microsoft.EntityFrameworkCore.Query[10103]
+      The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+warn: Microsoft.EntityFrameworkCore.Query[20504]
+      Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w =&gt; w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (6ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (30,008ms) [Parameters=[p0='?' (DbType = Guid)], CommandType='Text', CommandTimeout='30']
+      SELECT user_id AS "Value" FROM hub.user_setting WHERE user_id=@p0 FOR UPDATE
+fail: Microsoft.EntityFrameworkCore.Query[10100]
+      An exception occurred while iterating over the results of a query for context type 'Hub.Api.Data.HubDb'.
+      System.InvalidOperationException: An exception has been raised that is likely due to a transient failure.
+       ---&gt; Npgsql.NpgsqlException (0x80004005): Exception while reading from stream
+       ---&gt; System.TimeoutException: Timeout during reading attempt
+         at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource&lt;TResult&gt;.GetResult(Int16 token)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Query.Internal.FromSqlQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+         at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Query.Internal.FromSqlQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+      System.InvalidOperationException: An exception has been raised that is likely due to a transient failure.
+       ---&gt; Npgsql.NpgsqlException (0x80004005): Exception while reading from stream
+       ---&gt; System.TimeoutException: Timeout during reading attempt
+         at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource&lt;TResult&gt;.GetResult(Int16 token)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Query.Internal.FromSqlQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+         at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Query.Internal.FromSqlQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+fail: Hub.Api.Infrastructure.ProblemMiddleware[0]
+      Unhandled error 0HNPOJP4FE1QO
+      System.InvalidOperationException: An exception has been raised that is likely due to a transient failure.
+       ---&gt; Npgsql.NpgsqlException (0x80004005): Exception while reading from stream
+       ---&gt; System.TimeoutException: Timeout during reading attempt
+         at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource&lt;TResult&gt;.GetResult(Int16 token)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Query.Internal.FromSqlQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+         at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Query.Internal.FromSqlQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+         at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+         at Hub.Api.Features.MyWorkSeenEndpoints.&lt;&gt;c__DisplayClass5_0.&lt;&lt;Run&gt;b__0&gt;d.MoveNext() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Features/MyWorkSeen.cs:line 77
+      --- End of stack trace from previous location ---
+         at Hub.Api.Infrastructure.Tx.Run[T](HubDb db, Func`1 work) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Infrastructure/Keys.cs:line 50
+         at Hub.Api.Infrastructure.Tx.Run[T](HubDb db, Func`1 work) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Infrastructure/Keys.cs:line 52
+         at Hub.Api.Features.MyWorkSeenEndpoints.Run(String action, Guid requestId, Object payload, WorkSeenOpenedBody opened, HubDb db, Access access, SettingsStore store, TimeProvider clock) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Features/MyWorkSeen.cs:line 75
+         at Hub.Api.Features.MyWorkSeenEndpoints.&lt;&gt;c.&lt;&lt;Map&gt;b__1_0&gt;d.MoveNext() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Features/MyWorkSeen.cs:line 19
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Http.RequestDelegateFactory.ExecuteTaskResult[T](Task`1 task, HttpContext httpContext)
+         at Microsoft.AspNetCore.Http.RequestDelegateFactory.&lt;&gt;c__DisplayClass102_2.&lt;&lt;HandleRequestBodyAndCompileRequestDelegateForJson&gt;b__2&gt;d.MoveNext()
+      --- End of stack trace from previous location ---
+         at Hub.Api.Infrastructure.IdempotencyMiddleware.Invoke(HttpContext ctx, HubDb db, CurrentUser me, TimeProvider clock) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Infrastructure/Idempotency.cs:line 34
+         at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+         at Microsoft.AspNetCore.RateLimiting.RateLimitingMiddleware.InvokeInternal(HttpContext context, EnableRateLimitingAttribute enableRateLimitingAttribute)
+         at Hub.Api.Infrastructure.ProvisioningMiddleware.Invoke(HttpContext ctx, HubDb db, CurrentUser me, AuditContext audit) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Infrastructure/Auth.cs:line 282
+         at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+         at Program.&lt;&gt;c.&lt;&lt;&lt;Main&gt;$&gt;b__0_12&gt;d.MoveNext() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Program.cs:line 184
+      --- End of stack trace from previous location ---
+         at Hub.Api.Infrastructure.ProblemMiddleware.Invoke(HttpContext ctx) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Infrastructure/Errors.cs:line 57
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+[xUnit.net 00:01:25.19]       System.OperationCanceledException : The operation was canceled.
+[xUnit.net 00:01:25.19]       Stack Trace:
+[xUnit.net 00:01:25.19]            at System.Threading.CancellationToken.ThrowOperationCanceledException()
+[xUnit.net 00:01:25.19]         /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/MyWorkSeenRaceTests.cs(92,0): at Hub.Tests.Api.MyWorkSeenRaceTests.Producers_commit_under_actual_personal_lock_contention_then_competing_commands_replay_once()
+[xUnit.net 00:01:25.19]         --- End of stack trace from previous location ---
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+[xUnit.net 00:01:39.49]   Finished:    Hub.Tests
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="Jays-MacBook-Pro" outcome="Error" timestamp="2026-11-02T01:02:15.9674470-04:00">
+        <Text>[xUnit.net 00:01:25.19]     Hub.Tests.Api.MyWorkSeenRaceTests.Producers_commit_under_actual_personal_lock_contention_then_competing_commands_replay_once [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

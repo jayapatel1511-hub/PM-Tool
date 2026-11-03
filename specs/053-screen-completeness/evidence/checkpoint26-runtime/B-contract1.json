@@ -1,0 +1,7 @@
+{
+  "status": "READY_HOLD_CONTRACT_ONLY",
+  "path": "specs/053-screen-completeness/parallel-build/work-delivery/requests/g54-notification-row-actions-contract.md",
+  "sha256": "c65e42c854c5cc6dc86256b9762ac83d932e70e895d8f8055b6328e181d6a9cd",
+  "notImplemented": "S45 deliveryprovenance/actualauthorityreads/followactions; nohistoricdeliveryinferredfromcurrentprefs",
+  "atUtc": "2026-11-02T10:50:46.927594+00:00"
+}

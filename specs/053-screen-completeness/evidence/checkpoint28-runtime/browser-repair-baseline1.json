@@ -1,0 +1,8 @@
+{
+  "web/tests/decision-metadata.cjs": "c8328bf91f1b744a58c37700bb9d7265d20a19611dd228c742951f07f3d3d714",
+  "web/tests/template-risk-provenance.cjs": "e1b7acd478b9c72f2a40c4d637317169d2d9675104cb700d0e1c1cdb9f39a58e",
+  "web/tests/template-risk-provenance.fixture.cjs": "b50823e0301bde280983276decbb44fcd51e079f1d1c1b1718ef9ccc9ab17f8c",
+  "web/tests/issue-root-cause.cjs": "53e75d0e0f0b3f68f1a77667d7b8fb313190ac699e130ecb9488c89334e11665",
+  "web/tests/issue-root-cause.fixture.cjs": "61095561a815a16c9f4360eb36fc77044f10f68df5860a758fcce96761303b59",
+  "web/tests/admin-screen.cjs": "c172729931453d9a311dacb6e413198370e6a5d539bdfb668c2cd136ead88b16"
+}

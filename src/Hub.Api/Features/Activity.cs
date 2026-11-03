@@ -9,6 +9,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Api.Features;
 
+public sealed record TaskHistoryActorChoice(Guid Id, string DisplayName, bool IsActive);
+
 /// Activity History (§13.14, FR-VIEW-03, FR-AUD-02, FR-AUD-03). The log is read-only everywhere.
 public static class ActivityEndpoints
 {
@@ -33,21 +35,52 @@ public static class ActivityEndpoints
             return TypedResults.Ok(new Page<ActivityEntry>(await Render(db, rows), pg, size, total));
         });
 
-        api.MapGet("/items/{type}/{id:guid}/activity", async Task<Ok<Page<ActivityEntry>>> (string type, Guid id, HubDb db, Access access, int? page, int? pageSize) =>
+        api.MapGet("/items/{type}/{id:guid}/activity", async Task<Ok<Page<ActivityEntry>>> (string type, Guid id, HubDb db, Access access,
+            SettingsStore store, string? actorId, int? page, int? pageSize) =>
         {
-            var projectId = await ItemProject(db, type, id) ?? throw ApiException.NotFound();
-            await access.Project(projectId, track: false);
+            var enhanced = type == ItemType.Task && (await store.Get(db)).IsFlagOn("work_screens");
             var (pg, size) = Http.Paging(page, pageSize ?? 100);
-            // The item's own rows plus comments, links, hours and dependencies that name it by key ("T1 → T2", "deleted with T1").
-            // A project's own history is its rows only: the project number is part of every item key.
-            var key = type == ItemType.Project ? null : await db.ActivityLog.Where(a => a.ItemId == id && a.ItemKey != null).Select(a => a.ItemKey).FirstOrDefaultAsync();
-            var q = (await Visible(db, access, projectId)).Where(a => (a.ItemId == id || (key != null && a.ItemId != id
-                && ((a.ItemType != ItemType.Dependency && a.ItemKey == key)
-                    || (a.ItemType == ItemType.Dependency && (a.ItemKey!.StartsWith(key + " ") || a.ItemKey.EndsWith(" " + key)))))));
+            var q = await ItemQuery(db, access, type, id, enhanced);
+            // Raw string intentionally preserves the off-state treatment of new, even malformed parameters.
+            if (enhanced && !string.IsNullOrEmpty(actorId))
+            {
+                Check.That(Guid.TryParse(actorId, out var actor) && actor != Guid.Empty, "actorId", "error.invalid");
+                q = q.Where(row => row.ActorUserId == actor);
+            }
             var total = await q.CountAsync();
             var rows = await q.OrderByDescending(a => a.OccurredAt).ThenByDescending(a => a.Id).Skip((pg - 1) * size).Take(size).ToListAsync();
             return TypedResults.Ok(new Page<ActivityEntry>(await Render(db, rows), pg, size, total));
         });
+
+        api.MapGet("/tasks/{id:guid}/activity/actors", async Task<Ok<TaskHistoryActorChoice[]>> (Guid id, HubDb db, Access access, SettingsStore store) =>
+        {
+            Http.RequireFlag(await store.Get(db), "work_screens");
+            var q = await ItemQuery(db, access, ItemType.Task, id, canonicalTaskKey: true);
+            var ids = await q.Where(row => row.ActorUserId != null).Select(row => row.ActorUserId!.Value).Distinct().ToListAsync();
+            var users = await db.Users.AsNoTracking().Where(user => ids.Contains(user.Id))
+                .Select(user => new { user.Id, user.DisplayName, user.IsActive }).ToDictionaryAsync(user => user.Id);
+            var choices = ids.Select(actor => users.TryGetValue(actor, out var user)
+                ? new TaskHistoryActorChoice(actor, user.DisplayName, user.IsActive)
+                : new TaskHistoryActorChoice(actor, Text.Get("taskHistory.actorUnavailable"), false))
+                .OrderBy(choice => choice.DisplayName, StringComparer.OrdinalIgnoreCase).ThenBy(choice => choice.Id).ToArray();
+            return TypedResults.Ok(choices);
+        }).RequireFlag("work_screens");
+    }
+
+    /// The canonical item history population, shared by paging and its complete actor choices.
+    public static async Task<IQueryable<ActivityLog>> ItemQuery(HubDb db, Access access, string type, Guid id, bool canonicalTaskKey = false)
+    {
+        var projectId = await ItemProject(db, type, id) ?? throw ApiException.NotFound();
+        await access.Project(projectId, track: false);
+        // A legacy/imported Task can have its first history supplied by a contribution child.
+        var key = canonicalTaskKey && type == ItemType.Task
+            ? await db.Tasks.AsNoTracking().Where(task => task.Id == id && task.ProjectId == projectId).Select(task => task.Key).FirstOrDefaultAsync()
+            : null;
+        key ??= type == ItemType.Project ? null
+            : await db.ActivityLog.Where(row => row.ItemId == id && row.ItemKey != null).Select(row => row.ItemKey).FirstOrDefaultAsync();
+        return (await Visible(db, access, projectId)).Where(row => row.ItemId == id || key != null && row.ItemId != id
+            && (row.ItemType != ItemType.Dependency && row.ItemKey == key
+                || row.ItemType == ItemType.Dependency && (row.ItemKey!.StartsWith(key + " ") || row.ItemKey.EndsWith(" " + key))));
     }
 
     /// Apply the source records' privacy boundaries to every project/item history and export, including old log rows.
@@ -71,7 +104,7 @@ public static class ActivityEndpoints
         var visibleEntries = db.TimeEntries.IgnoreQueryFilters().Where(e => visibleProjects.Contains(e.ProjectId) &&
             (e.UserId == actor.Id || pmProjects.Contains(e.ProjectId) || leadTasks.Contains(e.TaskId)
                 || actor.Supervisor && directReports.Contains(e.UserId))).Select(e => e.Id);
-        return db.ActivityLog.AsNoTracking().Where(a => a.ProjectId != null && visibleProjects.Contains(a.ProjectId.Value)
+        return ActivityScreenFields.VisibleStored(db, db.ActivityLog.AsNoTracking()).Where(a => a.ProjectId != null && visibleProjects.Contains(a.ProjectId.Value)
             && (a.ItemType != ItemType.TimeEntry || visibleEntries.Select(id => (Guid?)id).Contains(a.ItemId))
             && (a.ItemType != ItemType.CalendarEvent || !db.CalendarEvents.Any(e => e.Id == a.ItemId && e.Visibility == EventVisibility.Private)));
     }
@@ -95,10 +128,13 @@ public static class ActivityEndpoints
         Hub.Api.Records.EntityRegistry.History(type)?.Project!(db, id) ?? Task.FromResult<Guid?>(null);
 
     /// Renders log rows for people: IDs resolved to names at read time (§20.3), and a one-line summary.
-    public static async Task<List<ActivityEntry>> Render(HubDb db, List<ActivityLog> rows)
+    public static async Task<List<ActivityEntry>> Render(HubDb db, List<ActivityLog> rows, ActivityScreenFields? visibility = null)
     {
-        var parsed = rows.Select(r => (Row: r, Changes: JsonSerializer.Deserialize<List<Change>>(r.Changes, JsonOpts.Web) ?? [],
-            Snapshot: r.Snapshot is null ? (JsonElement?)null : Unshown(JsonSerializer.Deserialize<JsonElement>(r.Snapshot)))).ToList();
+        if (rows.Count == 0) return [];
+        var screenFields = visibility ?? await ActivityScreenFields.Read(db);
+        var parsed = rows.Where(screenFields.Visible).Select(r => (Row: r,
+            Changes: (JsonSerializer.Deserialize<List<Change>>(r.Changes, JsonOpts.Web) ?? []).Where(c => !screenFields.Hidden(r.ItemType, c.Field)).ToList(),
+            Snapshot: r.Snapshot is null ? (JsonElement?)null : Unshown(screenFields.MaskSnapshot(r.ItemType, JsonSerializer.Deserialize<JsonElement>(r.Snapshot))))).ToList();
         var ids = new HashSet<Guid>();
         foreach (var (r, cs, snapshot) in parsed)
         {

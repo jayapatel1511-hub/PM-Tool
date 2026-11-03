@@ -19,7 +19,8 @@ public static class TimelineEndpoints
         DateOnly? StartDate, DateOnly? DueDate, DateOnly? OriginalStartDate, DateOnly? OriginalDueDate, string Status, int ProgressPct,
         string? Assignee, int RowVersion, DateOnly CreatedOn, bool IsOverdue, bool CanEditDates, bool DueNeedsReason,
         [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] bool? SlipShown = null,
-        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<Guid>? AffectedMilestoneIds = null);
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<Guid>? AffectedMilestoneIds = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Lane = null);
     public sealed record TimelineDeliverable(Guid Id, string Key, string Name, DateOnly? StartDate, DateOnly? DueDate,
         DateOnly? OriginalStartDate, DateOnly? OriginalDueDate, string Status, int RowVersion, DateOnly CreatedOn, int ProgressPct,
         bool IsOverdue, bool CanEditDates, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] bool? SlipShown = null,
@@ -42,7 +43,8 @@ public static class TimelineEndpoints
         IReadOnlyList<TimelineDeliverableLink> DeliverableLinks, IReadOnlyList<TimelineDeliverable> Deliverables, IReadOnlyList<TimelineMilestone> Milestones,
         [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] Evaluator.PlannedTarget? LatestPlanned = null,
         [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<TimelineHandoff>? Handoffs = null);
-    public sealed record TimelineProject(Guid Id, string ProjectNumber, string Name, string Status, DateOnly? StartDate, DateOnly? TargetCompletionDate);
+    public sealed record TimelineProject(Guid Id, string ProjectNumber, string Name, string Status, DateOnly? StartDate, DateOnly? TargetCompletionDate,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? IdentityColour = null);
     public sealed record TimelineProjectGroup(TimelineProject Project, TimelineData Data);
     public sealed record TimelineGantt(IReadOnlyList<TimelineProjectGroup> Projects, bool Truncated, int Max);
 
@@ -79,7 +81,8 @@ public static class TimelineEndpoints
             var rows = new List<TimelineProjectGroup>();
             // ponytail: one project at a time (five queries each), fine up to MaxProjects; batch per query if scopes grow.
             foreach (var p in list.Take(MaxProjects))
-                rows.Add(new(new(p.Id, p.ProjectNumber, p.Name, p.Status, p.StartDate, p.TargetCompletionDate), await Build(p, await access.Context(p), access, db, s)));
+                rows.Add(new(new(p.Id, p.ProjectNumber, p.Name, p.Status, p.StartDate, p.TargetCompletionDate,
+                    s.IsFlagOn("visual_system") ? p.IdentityColour : null), await Build(p, await access.Context(p), access, db, s)));
             return TypedResults.Ok(new TimelineGantt(rows, list.Count > MaxProjects, MaxProjects));
         });
     }
@@ -105,7 +108,8 @@ public static class TimelineEndpoints
             return new TimelineTask(t.Id, t.Key, t.Name, t.DeliverableId, t.ProjectDisciplineId, t.MilestoneId, t.StartDate, t.DueDate, t.OriginalStartDate, t.OriginalDueDate,
                 t.Status, t.ProgressPct, t.Assignee, t.RowVersion, Clock.LocalDate(t.CreatedAt, s), t.Overdue,
                 canEdit, canEdit && Permissions.DueChangeNeedsReason(a, ctx, facts),
-                schedule ? Evaluator.SlipShown(t.StartDate, t.DueDate, t.OriginalStartDate, t.OriginalDueDate, s.SlipDisplayDays) : null);
+                schedule ? Evaluator.SlipShown(t.StartDate, t.DueDate, t.OriginalStartDate, t.OriginalDueDate, s.SlipDisplayDays) : null,
+                Lane: s.IsFlagOn("visual_system") ? Workflow.Lane(t.Status) : null);
         }).ToList();
         var byId = tasks.ToDictionary(t => t.Id);
         var ids = byId.Keys.ToList();

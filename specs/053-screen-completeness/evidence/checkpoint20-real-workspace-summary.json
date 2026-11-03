@@ -1,0 +1,9 @@
+{
+  "status": "PASS_WITH_LIMITS",
+  "project": "QA20-REAL-001",
+  "commands": {"milestone": 201, "sourceRevision": 200, "draftPackage": 200, "knownNullTask": 201, "packageEdit": 200, "savedView": 201},
+  "api": {"taskCount": 3, "knownDateAfterEdit": "2026-11-18", "knownNullTarget": null, "groupedRows": [2, 1], "savedColumns": "key,name,project,deliverable,reviewer,estimate,lastActivity,submissionDate", "savedScope": "project + deliverable group + key:asc sort"},
+  "browser": {"desktop": "PASS", "phone": "PASS", "selectedHeaders": ["Key", "Task", "Project", "Deliverable", "Reviewer", "Est. hrs", "Last activity", "Submission date"], "knownDateRendered": true, "knownNullRendered": true, "savedReturnRendered": true},
+  "unproven": ["SSE/live invalidation was not independently asserted; normal API edit and subsequent same-page read reflected 2026-11-18", "page 2 was not needed for the three-row scoped cohort"],
+  "evidence": ["checkpoint20-real-workspace.json", "checkpoint20-real-workspace-browser.json", "checkpoint20-real-workspace-desktop-url.png", "checkpoint20-real-workspace-phone-url.png", "checkpoint20-real-workspace-desktop-saved.png", "checkpoint20-real-workspace-phone-saved.png"]
+}

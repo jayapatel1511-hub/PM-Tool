@@ -1,0 +1,1 @@
+Bounded source PASS for four D files at CD-source-ready1 hashes. Exact legacy off body/key/layout, actual matching registrar identity, own permission/inherited read-only, immutable original-version PATCH and idempotency-key create retries, full reply validation, seven honest manual states, natural source scroll/focus/phone and strict finite requests reviewed. No execution.

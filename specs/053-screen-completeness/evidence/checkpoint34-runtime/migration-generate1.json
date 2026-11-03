@@ -1,0 +1,43 @@
+{
+  "exitCode": 0,
+  "args": [
+    "/opt/homebrew/bin/dotnet",
+    "exec",
+    "--depsfile",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint34-artifacts/bin/Hub.Api/release/Hub.Api.deps.json",
+    "--runtimeconfig",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint34-artifacts/bin/Hub.Api/release/Hub.Api.runtimeconfig.json",
+    "/Users/jaypatel/.nuget/packages/dotnet-ef/10.0.12/tools/net8.0/any/tools/net8.0/any/ef.dll",
+    "migrations",
+    "add",
+    "ExternalIssuedReviewSources",
+    "--assembly",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint34-artifacts/bin/Hub.Api/release/Hub.Api.dll",
+    "--startup-assembly",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint34-artifacts/bin/Hub.Api/release/Hub.Api.dll",
+    "--project",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Hub.Api.csproj",
+    "--startup-project",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Hub.Api.csproj",
+    "--project-dir",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api",
+    "--root-namespace",
+    "Hub.Api",
+    "--language",
+    "C#",
+    "--nullable",
+    "--working-dir",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053",
+    "--context",
+    "HubDb",
+    "--output-dir",
+    "Data/Migrations",
+    "--verbose"
+  ],
+  "newFiles": [
+    "src/Hub.Api/Data/Migrations/20261103042711_ExternalIssuedReviewSources.Designer.cs",
+    "src/Hub.Api/Data/Migrations/20261103042711_ExternalIssuedReviewSources.cs"
+  ],
+  "atUtc": "2026-11-03T04:27:11.670347+00:00",
+  "boundary": "Design generation only. Db.Migrate false; background jobs/evaluation/mail disabled; no database apply or runtime/flags changes."
+}

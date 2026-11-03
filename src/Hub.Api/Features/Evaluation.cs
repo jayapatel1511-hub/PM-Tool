@@ -1,4 +1,6 @@
+using System.Data;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
@@ -8,15 +10,16 @@ using Microsoft.EntityFrameworkCore;
 namespace Hub.Api.Features;
 
 /// Attention items, snoozes and the health override (§12.12, §16.4, FR-ATT-01..03, FR-HLT-01..03).
-public static class EvaluationEndpoints
+public static partial class EvaluationEndpoints
 {
     public sealed record SnoozeBody(int Days, string Note);
     public sealed record OverrideBody(string Health, string Note, int? RowVersion);
     /// One ranked attention item with its rule, owner and age; `Snoozed*` stay null on an item that is not snoozed (§12.12).
-    public sealed record AttentionRow(Guid Id, Guid ProjectId, string? ProjectNumber, string RuleId, string RuleName, string ItemType, Guid ItemId,
+    public sealed partial record AttentionRow(Guid Id, Guid ProjectId, string? ProjectNumber, string RuleId, string RuleName, string ItemType, Guid ItemId,
         string? ItemKey, string? ItemName, string Severity, string Message, JsonElement? Why, List<Guid> RouteToUserIds, Guid? OwnerUserId,
         string? OwnerName, Guid? ProjectDisciplineId, int DaysOverdueOrBlocked, string? Priority, DateOnly? DueDate,
-        DateTimeOffset FirstDetectedAt, int AgeDays, bool Snoozed, DateTimeOffset? SnoozedUntil, string? SnoozeNote);
+        DateTimeOffset FirstDetectedAt, int AgeDays, bool Snoozed, DateTimeOffset? SnoozedUntil, string? SnoozeNote,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] RecordContextView? Context = null);
     /// `Items` hides snoozed rows unless asked; `Snoozed` and `Total` count the two kinds; `Truncated` says a limit cut the list (ATT-03, ATT-04).
     public sealed record AttentionList(IReadOnlyList<AttentionRow> Items, int Snoozed, int Total, bool Truncated);
     public sealed record AttentionSnoozed(Guid Id, DateTimeOffset SnoozedUntil);
@@ -28,11 +31,27 @@ public static class EvaluationEndpoints
 
     public static void Map(RouteGroupBuilder api)
     {
-        api.MapGet("/projects/{id:guid}/attention", async Task<Ok<AttentionList>> (Guid id, bool? includeSnoozed, Guid? disciplineId, string? severity, Access access, HubDb db, EvaluationService eval, TimeProvider clock) =>
+        api.MapGet("/projects/{id:guid}/attention", async Task<Ok<AttentionList>> (Guid id, bool? includeSnoozed, Guid? disciplineId, string? severity, Access access, HubDb db, EvaluationService eval, TimeProvider clock, SettingsStore store) =>
         {
             await access.Project(id, track: false);
             await eval.EnsureFresh(id);
-            return TypedResults.Ok(await Items(db, db.Attention.AsNoTracking().Where(a => a.ProjectId == id), clock.GetUtcNow(), includeSnoozed == true, disciplineId, severity));
+            var settings = await store.Get(db);
+            await using var snapshot = settings.IsFlagOn("screen_patterns")
+                ? await db.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead) : null;
+            var project = snapshot is not null ? (await access.Project(id, track: false)).Project : null;
+            var result = await Items(db, db.Attention.AsNoTracking().Where(a => a.ProjectId == id), clock.GetUtcNow(), includeSnoozed == true, disciplineId, severity);
+            if (project is null) return TypedResults.Ok(result);
+            var reader = new RecordContextReader(db, project, settings);
+            var contexts = new Dictionary<(string, Guid), RecordContextView>();
+            var rows = new List<AttentionRow>();
+            foreach (var row in result.Items)
+            {
+                if (!contexts.TryGetValue((row.ItemType, row.ItemId), out var context))
+                    contexts[(row.ItemType, row.ItemId)] = context = await reader.ReadIfAvailable(row.ItemType, row.ItemId) is { } current
+                        ? current with { Available = true } : RecordContextReader.Unavailable();
+                rows.Add(row with { Context = context });
+            }
+            return TypedResults.Ok(result with { Items = rows });
         });
 
         api.MapPost("/attention/{id:guid}/snooze", async Task<Ok<AttentionSnoozed>> (Guid id, SnoozeBody body, Access access, HubDb db, TimeProvider clock, CurrentUser me) =>

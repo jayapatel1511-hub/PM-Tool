@@ -1,0 +1,8 @@
+{
+  "exitCode": 0,
+  "args": [
+    "python3",
+    "tools/build_spec.py",
+    "--check"
+  ]
+}

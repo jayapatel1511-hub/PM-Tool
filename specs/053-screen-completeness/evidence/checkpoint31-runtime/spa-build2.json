@@ -1,0 +1,21 @@
+{
+  "exitCode": 0,
+  "args": [
+    "node",
+    "node_modules/vite/bin/vite.js",
+    "build",
+    "--outDir",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint31-artifacts/bin/spa-wwwroot-build2"
+  ],
+  "APIOrigin": "http://127.0.0.1:5103",
+  "noRealAPI": true,
+  "atUtc": "2026-11-02T21:57:52.358139+00:00",
+  "sourceFiles": 274,
+  "bundleFiles": 143,
+  "scope": "Only four stable focus IDs changed since SPA1; all source held",
+  "tail": [
+    "\u001b[33m[INEFFECTIVE_DYNAMIC_IMPORT] \u001b[0msrc/pages/projects/Follow.tsx is dynamically imported by src/app/registrations.tsx but also statically imported by src/pages/MyWork.tsx, src/pages/Preferences.tsx, dynamic import will not move module into another chunk.",
+    "",
+    "\u2713 built in 309ms"
+  ]
+}

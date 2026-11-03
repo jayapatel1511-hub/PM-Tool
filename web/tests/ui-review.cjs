@@ -4,6 +4,7 @@ const fs = require('node:fs')
 const path = require('node:path')
 const React = require('react')
 const { renderToStaticMarkup } = require('react-dom/server')
+const { meView } = require('./me.fixture.cjs')
 
 ;(async () => {
   const { createServer } = await import('vite')
@@ -13,6 +14,11 @@ const { renderToStaticMarkup } = require('react-dom/server')
   const server = await createServer({ root, cacheDir, configFile: false, resolve: { alias: { '@': path.join(root, 'src') } }, server: { middlewareMode: true, hmr: false, ws: false }, appType: 'custom' })
   try {
     const { ChangeList, ActivityTable } = await server.ssrLoadModule('/src/components/hub/activity.tsx')
+    const { Ctx: AuthContext } = await server.ssrLoadModule('/src/lib/auth-context.ts')
+    const { MemoryRouter } = await import('react-router')
+    const renderActivity = props => renderToStaticMarkup(React.createElement(AuthContext.Provider,
+      { value: { me: meView({ flags: { people_screens: false, work_screens: false } }), signOut: () => {} } },
+      React.createElement(MemoryRouter, null, React.createElement(ActivityTable, props))))
     const { showPhoneTaskField } = await server.ssrLoadModule('/src/pages/projects/phone-task-fields.ts')
     const { milestoneLabelLayout } = await server.ssrLoadModule('/src/pages/gantt-labels.ts')
     const { plural, tv } = await server.ssrLoadModule('/src/lib/i18n.ts')
@@ -38,10 +44,10 @@ const { renderToStaticMarkup } = require('react-dom/server')
     assert.ok(roles.includes('Read Only') && roles.includes('Project Manager'), 'audit roles use readable enum labels')
     const roleRow = { id: 'role', occurredAt: stamp, itemType: 'User', itemId: guid, itemName: 'ProjectManager', action: 'Created', changes: [{ field: 'Role', new: 'ProjectManager' }] }
     for (const onOpen of [undefined, () => {}]) {
-      const table = renderToStaticMarkup(React.createElement(ActivityTable, { rows: [roleRow], total: 1, page: 1, pageSize: 50, onPage: () => {}, onOpen }))
+      const table = renderActivity({ rows: [roleRow], total: 1, page: 1, pageSize: 50, onPage: () => {}, onOpen })
       assert.ok(table.includes('Project Manager') && !table.includes('ProjectManager'), 'role item headings use the same readable label')
     }
-    const namedPerson = renderToStaticMarkup(React.createElement(ActivityTable, { rows: [{ ...roleRow, changes: [{ field: 'Name', new: 'ProjectManager' }] }], total: 1, page: 1, pageSize: 50, onPage: () => {} }))
+    const namedPerson = renderActivity({ rows: [{ ...roleRow, changes: [{ field: 'Name', new: 'ProjectManager' }] }], total: 1, page: 1, pageSize: 50, onPage: () => {} })
     assert.ok(namedPerson.includes('ProjectManager'), 'ordinary record names remain verbatim')
 
     const deleted = draw({ action: 'Deleted', snapshot: { PredecessorTaskId: guid, UnknownId: guid, DependencyType: 'StartToStart', Count: 0, Flag: false },

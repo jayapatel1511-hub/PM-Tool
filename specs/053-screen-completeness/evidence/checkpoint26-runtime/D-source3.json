@@ -1,0 +1,19 @@
+{
+  "atUtc": "2026-11-02T11:15:51.300528+00:00",
+  "status": "READY_HOLD_CJS_ONLY_OBSERVED_REPAIR",
+  "files": [
+    {
+      "path": "web/tests/review-response.cjs",
+      "sha256": "9870e7462d509e6ee1a67ad17e9e56493ca5ef6df5cd94f8c29ff05044da96f6"
+    },
+    {
+      "path": "web/src/pages/projects/review-response-form.tsx",
+      "sha256": "787ae51f8f68b5b1a7cc958ba01787466c10d79cf8866aba364ed0b74b8baf6d"
+    },
+    {
+      "path": "web/tests/review-response.fixture.cjs",
+      "sha256": "ca069722246d53c26ebc7bb20f28e61f0ca1f5c29f620ca5135159e6a6d7d7b1"
+    }
+  ],
+  "repair": "Observeactualclosingquestion/formhidden+detached/naturalopenerfocus beforeEscape; boundedfailureDOM/URL/focus/scroll/casediagnostics; noapp/fixture/assertionweakening"
+}

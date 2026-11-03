@@ -2,7 +2,7 @@ import { useFlag } from '@/lib/auth'
 import { MyWorkFollowUp } from '@/components/hub/my-work-follow-up'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { CheckCheck, ChevronDown, Plus } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { createContext, Fragment, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { AttentionRows } from '@/components/hub/attention'
 import { AccentDot, ActiveFilters, ChipToggle, Empty, ErrorBanner, Field, FilterBar, Loading, Page, Section, Segmented, selectCls } from '@/components/hub/common'
@@ -18,7 +18,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Input } from '@/components/ui/input'
 import type { components } from '@/gen/api'
 import { typedRequest } from '@/lib/api'
-import { invalidateChange } from '@/lib/keys'
+import { invalidateChange, invalidateWorkSeen } from '@/lib/keys'
+import { PersonPanelTrigger } from '@/components/hub/person-panel-trigger'
+import { WorkActivityComments, WorkNewBadge, WorkSeenControls, useOwnWorkSeenVisit, useWorkDocumentVisible, type WorkSeenFields } from '@/components/hub/work-seen'
 import { useMe } from '@/lib/auth-context'
 import { addDays, fmtDate, relative, today } from '@/lib/format'
 import { plural, t, tv , runtimeText } from '@/lib/i18n'
@@ -27,16 +29,22 @@ import { useLaneDrop } from './projects/Board'
 import type { DeliverableRow } from './projects/Deliverables'
 import { ActionOwner, type ActionRow } from './projects/Meetings'
 import { FollowLevelSelect } from './projects/Follow'
-import { BUCKETS, PRIORITIES, StatusMenu, TASK_STATUSES, TaskIndicators, blockersOf, dueBucket, useTaskActions, type TaskRow } from './projects/Tasks'
+import { BUCKETS, PRIORITIES, MenuSelect, StatusMenu, TASK_STATUSES, TaskIndicators, blockersOf, dueBucket, useTaskActions, type TaskRow } from './projects/Tasks'
 import { WorkspaceCoordination } from './WorkspaceCoordination'
 import { MyWeekStrip } from '@/components/planner/MyWeekStrip'
 import { OnboardingCard } from '@/components/hub/onboarding'
+import { TaskGroupSummary, TaskGroupReadStatus, groupHeading, summarizeTaskRows, taskGroupChoices, taskGroupEntries, taskGroupLabel } from './projects/task-group-presentation'
 
 type MyWorkView = components['schemas']['MyWorkView']
 /** My Work's own shapes come from the contract; the task, deliverable and action rows keep the page types of the files that own them. */
-interface Work extends Omit<MyWorkView, 'tasks' | 'reviews' | 'deliverables' | 'actions' | 'completed'> {
-  tasks: TaskRow[]; reviews: { tasks: TaskRow[]; deliverables: DeliverableRow[] }; deliverables: DeliverableRow[]; actions: ActionRow[]; completed: TaskRow[]
+type WorkTask = TaskRow & WorkSeenFields
+type WorkDeliverable = DeliverableRow & WorkSeenFields
+interface Work extends Omit<MyWorkView, 'tasks' | 'reviews' | 'deliverables' | 'actions' | 'completed' | 'decisions' | 'projects' | 'milestones' | 'successors'> {
+  tasks: WorkTask[]; reviews: { tasks: WorkTask[]; deliverables: WorkDeliverable[] }; deliverables: WorkDeliverable[]; actions: (ActionRow & WorkSeenFields)[]; completed: WorkTask[]
+  decisions: (MyWorkView['decisions'][number] & WorkSeenFields)[]; projects: (MyWorkView['projects'][number] & WorkSeenFields)[]; milestones: (MyWorkView['milestones'][number] & WorkSeenFields)[]
+  successors: (MyWorkView['successors'][number] & { assigneeId?: string | null })[]
 }
+const SeenVisit = createContext<ReturnType<typeof useOwnWorkSeenVisit> | null>(null)
 
 const SORTS = ['due', 'priority', 'project', 'activity']
 const RANK: Record<string, number> = { Critical: 0, High: 1, Medium: 2, Low: 3 }
@@ -59,20 +67,37 @@ const ProjectTag = ({ id, number, name }: { id: string; number: string | null; n
  *  Overview of everything assigned to, waiting on or held up by them are one menu away, all within the selected scope. */
 export function MyWorkPage() {
   const [sp] = useSearchParams()
+  const workOn = useFlag('work_screens'), peopleOn = useFlag('people_screens'), me = useMe(), qc = useQueryClient(), visible = useWorkDocumentVisible()
+  const surfaceRef = useRef<HTMLDivElement | null>(null), userId = sp.get('userId') ?? undefined
+  // The same observer key as Overview: one base read and one mounted visit across all tab/filter changes.
+  const base = useQuery({ queryKey: ['mywork', userId, me.id, workOn, peopleOn], enabled: workOn && !userId,
+    queryFn: async () => (await typedRequest('get', '/api/v1/me/work', { query: { userId } })) as Work,
+    staleTime: 0, refetchOnMount: 'always', refetchOnWindowFocus: 'always', refetchOnReconnect: 'always',
+    refetchInterval: workOn && !userId && visible && !sp.has('panel') ? 15000 : false, refetchIntervalInBackground: false })
+  const visit = useOwnWorkSeenVisit({ enabled: workOn, own: !userId, visible: !sp.has('panel'), subjectId: base.data?.person.id, read: base, surfaceRef, onCommitted: () => invalidateWorkSeen(qc) })
+  const ownSurfaceVisible = workOn && !userId && visible && !sp.has('panel')
+  const wasVisible = useRef(ownSurfaceVisible)
+  useEffect(() => {
+    if (ownSurfaceVisible && !wasVisible.current) void base.refetch({ cancelRefetch: false })
+    wasVisible.current = ownSurfaceVisible
+  }, [ownSurfaceVisible, base.refetch])
   const followUp = useFlag('my_work_follow_up')
   const backlog = useFlag('backlog')
   const tab = sp.get('userId') ? 'overview' : sp.get('tab') ?? 'today'
-  if (followUp && !sp.get('userId') && (tab === 'watching' || tab === 'requested')) return <MyWorkFollowUp view={tab} menu={<MyWorkViews />} />
-  if (tab === 'coordination') return <><div className="px-4 pt-4 md:px-6 md:pt-6 xl:px-8 xl:pt-8"><MyWorkViews /></div><WorkspaceCoordination /></>
-  if (tab === 'inbox') return <Inbox />
+  let content: ReactNode
+  if (followUp && !userId && (tab === 'watching' || tab === 'requested')) content = <MyWorkFollowUp view={tab} menu={<MyWorkViews />} />
+  else if (tab === 'coordination') content = <><div className="px-4 pt-4 md:px-6 md:pt-6 xl:px-8 xl:pt-8"><MyWorkViews /></div><WorkspaceCoordination /></>
+  else if (tab === 'inbox') content = <Inbox />
   // Today for Assigned to Me or Created by Me stays the due-today task view; My Tasks today is the focus list.
-  if (tab === 'upcoming' || tab === 'overdue' || tab === 'completed' || (backlog && tab === 'nodate') || (tab === 'today' && WHO.slice(1).includes(sp.get('who') as never))) return <TaskView tab={tab} />
-  return <Overview focus={tab !== 'overview'} />
+  else if (tab === 'upcoming' || tab === 'overdue' || tab === 'completed' || (backlog && tab === 'nodate') || (tab === 'today' && WHO.slice(1).includes(sp.get('who') as never))) content = <TaskView tab={tab} />
+  else content = <Overview focus={tab !== 'overview'} />
+  return <SeenVisit.Provider value={visit}>{workOn ? <div ref={surfaceRef} className="min-w-0" data-own-work-page={!userId ? '' : undefined}>{content}</div> : content}</SeenVisit.Provider>
 }
 
 /** The compact view switch (§41 R1, R10): the views, then the Overview's sections with their counts. Each choice keeps
  *  the scope and the membership view; a section opens the Overview there and moves focus to it. */
 function MyWorkViews({ sections }: { sections?: { id: string; title: string; count?: number }[] }) {
+  const visit = useContext(SeenVisit)
   const [sp] = useSearchParams()
   const navigate = useNavigate()
   const followUp = useFlag('my_work_follow_up') && !sp.get('userId')
@@ -86,7 +111,7 @@ function MyWorkViews({ sections }: { sections?: { id: string; title: string; cou
     if (x !== 'today') n.set('tab', x)
     return `?${n}${hash}`
   }
-  return (
+  const menu = (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="no-print self-start" aria-label={`${t('mywork.views')}: ${runtimeText(`mywork.tab.${current}`)}`}>{runtimeText(`mywork.tab.${current}`)}<ChevronDown className="size-4" aria-hidden /></Button>
@@ -108,6 +133,7 @@ function MyWorkViews({ sections }: { sections?: { id: string; title: string; cou
       </DropdownMenuContent>
     </DropdownMenu>
   )
+  return visit?.enabled ? <div className="flex min-w-0 flex-wrap items-start gap-2">{menu}<WorkSeenControls state={visit} /></div> : menu
 }
 
 /** Only the selected projects' rows when the scope names projects (FR-VIS-02). */
@@ -123,6 +149,10 @@ function scopeWork(w: Work, keep: (pid?: string | null) => boolean): Work {
 }
 
 function Overview({ focus }: { focus: boolean }) {
+  const visit = useContext(SeenVisit)
+  const groupsOn = useFlag('work_screens')
+  const peopleOn = useFlag('people_screens')
+  const patternsOn = useFlag('screen_patterns')
   const pickupOn = useFlag('task_pickup')
   const me = useMe()
   const qc = useQueryClient()
@@ -131,7 +161,7 @@ function Overview({ focus }: { focus: boolean }) {
   const scope = useScope()
   const keep = (pid?: string | null) => !scope.ids || (!!pid && scope.ids.includes(pid))
   const userId = sp.get('userId') ?? undefined
-  const q = useQuery({ queryKey: ['mywork', userId], queryFn: async () => (await typedRequest('get', '/api/v1/me/work', { query: { userId } })) as Work })
+  const q = useQuery({ queryKey: ['mywork', userId, me.id, groupsOn, peopleOn], queryFn: async () => (await typedRequest('get', '/api/v1/me/work', { query: { userId } })) as Work })
   const [creating, setCreating] = useState(false)
   const set = (k: string, v?: string) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
   const f = { project: sp.get('project') ?? '', discipline: sp.get('discipline') ?? '', status: sp.get('status') ?? '', priority: sp.get('priority') ?? '',
@@ -183,11 +213,12 @@ function Overview({ focus }: { focus: boolean }) {
   const clear = () => { const n = new URLSearchParams(sp); for (const [k] of tokens) n.delete(k); setSp(n, { replace: true }) }
   const newTask = !ro && me.capabilities.createTask && <Button variant="outline" onClick={() => setCreating(true)}><Plus className="size-4" />{t('task.new')}</Button>
 
-  const taskRow = (r: TaskRow, extra?: ReactNode) => (
+  const taskRow = (r: WorkTask, section: string, extra?: ReactNode) => (
     <li key={r.id} className={ROW}>
       <ProjectTag id={r.projectId} number={r.projectNumber} name={r.projectName} />
       <button type="button" className="hover:underline" onClick={() => openPanel('Task', r.id)}><Key>{r.key}</Key></button>
       <button type="button" className="min-w-[10rem] flex-1 break-words text-left font-medium hover:underline" onClick={() => openPanel('Task', r.id)}>{r.name}</button>
+      {!userId && <WorkNewBadge seen={r.seen} />}
       {extra}
       <span className={cn('tabular-nums', r.state?.isOverdue && 'font-semibold text-bad', r.state?.isDueSoon && !r.state.isOverdue && 'text-warn')}>{fmtDate(r.dueDate)}</span>
       <StatusMenu r={r} onMove={actions.move} disabled={ro} />
@@ -199,68 +230,73 @@ function Overview({ focus }: { focus: boolean }) {
       ) : <span className="tabular-nums text-muted-foreground">{r.progressPct}%</span>}
       <PriorityBadge priority={r.priority === 'High' || r.priority === 'Critical' ? r.priority : null} />
       <TaskIndicators r={r} />
+      <WorkActivityComments itemType="Task" itemId={r.id} itemKey={r.key} projectNumber={r.projectNumber} fact={r.workActivity} focusKey={`mywork:${focus ? 'today' : 'overview'}:${section}:task:${r.id}`} />
     </li>
   )
-  const delRow = (d: DeliverableRow) => (
+  const delRow = (d: WorkDeliverable, section: string) => (
     <li key={d.id} className={ROW}>
       <button type="button" className="hover:underline" onClick={() => openPanel('Deliverable', d.id)}><Key>{d.key}</Key></button>
       <button type="button" className="min-w-[10rem] flex-1 break-words text-left font-medium hover:underline" onClick={() => openPanel('Deliverable', d.id)}>{d.name}</button>
-      <span className={cn('tabular-nums', d.state?.isOverdue && 'font-semibold text-bad')}>{fmtDate(d.dueDate)}</span><StatusPill status={d.status} />
+      {!userId && <WorkNewBadge seen={d.seen} />}<span className={cn('tabular-nums', d.state?.isOverdue && 'font-semibold text-bad')}>{fmtDate(d.dueDate)}</span><StatusPill status={d.status} />
+      <WorkActivityComments itemType="Deliverable" itemId={d.id} itemKey={d.key} projectNumber={w.projects.find(project => project.id === d.projectId)?.projectNumber} fact={d.workActivity} focusKey={`mywork:overview:${section}:deliverable:${d.id}`} />
     </li>
   )
   const list = (rows: ReactNode[], empty: string) => rows.length ? <ul className="divide-y">{rows}</ul> : <Empty>{empty}</Empty>
-  const bucketList = (groups: (readonly [string, TaskRow[]])[], empty: string) => groups.length === 0
+  const groupStats = (rows: TaskRow[], taskOnly = false) => groupsOn && rows.length > 0 ? <div className="space-y-1 border-b px-5 py-2">{taskOnly && <p className="text-xs text-muted-foreground">{taskGroupLabel('taskRowsOnly')}</p>}<TaskGroupSummary summary={summarizeTaskRows(rows)} /></div> : null
+  const bucketList = (groups: (readonly [string, WorkTask[]])[], empty: string) => groups.length === 0
     ? <Empty action={tokens.length > 0 ? <Button variant="outline" onClick={clear}>{t('filters.clear')}</Button> : newTask}>{empty}</Empty>
-    : <div className="divide-y">{groups.map(([b, rows]) => (
-      <div key={b}>
+    : <div className="divide-y">{groups.map(([b, rows]) => {
+      const shown = groupsOn ? [...new Map(rows.map(row => [row.id, row])).values()] : rows
+      return <div key={b} data-task-group={groupsOn ? `mywork:${b}` : undefined}>
         <h3 className={cn('border-b bg-muted px-5 py-2 text-xs/[18px] font-semibold', b === 'overdue' ? 'text-bad' : 'text-muted-foreground')}>
-          {b === 'overdue' && <span aria-hidden>■ </span>}{b === 'blocked' ? t('ind.blocked') : runtimeText(`tbucket.${b}`)} <span className="tabular-nums">({rows.length})</span>
+          {b === 'overdue' && <span aria-hidden>■ </span>}{b === 'blocked' ? t('ind.blocked') : runtimeText(`tbucket.${b}`)} {!groupsOn && <span className="tabular-nums">({rows.length})</span>}
         </h3>
-        <ul className="divide-y">{rows.map((r) => taskRow(r))}</ul>
-      </div>))}</div>
+        {groupStats(shown)}
+        <ul className="divide-y">{shown.map((r) => taskRow(r, `tasks:${b}`))}</ul>
+      </div>})}</div>
   const sections: { id: string; title: string; count?: number; body: ReactNode; open?: boolean; accent?: Accent }[] = [
     { id: 'attention', title: t('mywork.attention'), count: w.attention.total, accent: 'peach', body: <>
       <AttentionRows items={w.attention.items} canSnooze={false} showProject onChanged={reload} />
       {w.attention.total > w.attention.items.length && <p className="border-t px-5 py-2.5 text-xs/[18px] text-muted-foreground">{t('mywork.attentionMore', { n: w.attention.items.length, total: w.attention.total })}</p>}
     </> },
     { id: 'tasks', title: t('mywork.tasks'), count: tasks.length, accent: 'blue', body: bucketList([...buckets], t('mywork.noTasks')) },
-    { id: 'reviews', title: t('mywork.reviews'), count: w.reviews.tasks.length + w.reviews.deliverables.length, accent: 'lavender', body: list([
-      ...w.reviews.tasks.map((r) => taskRow(r, !ro && r.status === 'Ready for Review' && <Button size="sm" variant="outline"
+    { id: 'reviews', title: t('mywork.reviews'), count: w.reviews.tasks.length + w.reviews.deliverables.length, accent: 'lavender', body: <>{groupStats(w.reviews.tasks, w.reviews.deliverables.length > 0)}{list([
+      ...w.reviews.tasks.map((r) => taskRow(r, 'reviews', !ro && r.status === 'Ready for Review' && <Button size="sm" variant="outline"
         onClick={() => actions.move({ id: r.id, key: r.key, rowVersion: r.rowVersion, to: 'In Review', needsReason: false })}>{t('task.startReview')}</Button>)),
-      ...w.reviews.deliverables.map(delRow)], t('mywork.noReviews')) },
-    { id: 'deliverables', title: t('mywork.deliverables'), count: w.deliverables.length, body: list(w.deliverables.map(delRow), t('mywork.noDeliverables')) },
-    { id: 'waiting', title: t('mywork.waiting'), count: waiting.length, body: list(waiting.map((r) => taskRow(r, (
+      ...w.reviews.deliverables.map(d => delRow(d, 'reviews'))], t('mywork.noReviews'))}</> },
+    { id: 'deliverables', title: t('mywork.deliverables'), count: w.deliverables.length, body: list(w.deliverables.map(d => delRow(d, 'deliverables')), t('mywork.noDeliverables')) },
+    { id: 'waiting', title: t('mywork.waiting'), count: waiting.length, body: <>{groupStats(waiting)}{list(waiting.map((r) => taskRow(r, 'waiting', (
       <span className="w-full text-xs/[18px] text-muted-foreground sm:w-auto">{blockersOf(r.state).map((b, i) => (
-        <span key={i} className="mr-2">{b.type === 'manual' ? t('task.manualBlocker', { type: tv(b.name ?? ''), reason: b.reason ?? '' }) : `${b.key} ${b.name}`}{b.ownerId && ` · ${w.people[b.ownerId] ?? ''}`}</span>
-      ))}</span>))), t('mywork.noWaiting')) },
-    { id: 'blocking', title: t('mywork.blocking'), count: blocking.length, body: list(blocking.map((r) => taskRow(r, (
-      <span className="w-full text-xs/[18px] text-bad sm:w-auto">{r.state!.blockingTaskIds.map((id) => w.successors.find((x) => x.id === id)).filter(Boolean).map((x) => `${x!.key} ${x!.name}${x!.assigneeName ? ` · ${x!.assigneeName}` : ''}`).join('; ')}</span>))), t('mywork.noBlocking')) },
+        <span key={`${b.type}:${b.id ?? b.key ?? i}:${b.ownerId ?? ''}`} className="mr-2">{b.type === 'manual' ? t('task.manualBlocker', { type: tv(b.name ?? ''), reason: b.reason ?? '' }) : `${b.key} ${b.name}`}{b.ownerId && w.people[b.ownerId] && <> · <PersonPanelTrigger userId={b.ownerId} name={w.people[b.ownerId]} focusKey={`mywork:overview:waiting:task:${r.id}:blocker:${b.type}:${b.id ?? b.key ?? i}:owner`} /></>}</span>
+      ))}</span>))), t('mywork.noWaiting'))}</> },
+    { id: 'blocking', title: t('mywork.blocking'), count: blocking.length, body: <>{groupStats(blocking)}{list(blocking.map((r) => taskRow(r, 'blocking', (
+      <span className="w-full text-xs/[18px] text-bad sm:w-auto">{r.state!.blockingTaskIds.map(id => w.successors.find(x => x.id === id)).filter((x): x is NonNullable<typeof x> => !!x).map((x, index) => <Fragment key={x.id}>{index > 0 && '; '}{x.key} {x.name}{x.assigneeName && <> · {x.assigneeId ? <PersonPanelTrigger userId={x.assigneeId} name={x.assigneeName} focusKey={`mywork:overview:blocking:task:${r.id}:successor:${x.id}:assignee`} /> : x.assigneeName}</>}</Fragment>)}</span>))), t('mywork.noBlocking'))}</> },
     { id: 'decisions', title: t('mywork.decisions'), count: w.decisions.length, body: list(w.decisions.map((d) => (
       <li key={d.id} className={ROW}>
         <ProjectTag id={d.projectId} number={d.projectNumber} />
         <button type="button" className="min-w-[10rem] flex-1 break-words text-left hover:underline" onClick={() => openPanel('Decision', d.id)}><Key>{d.key}</Key> <span className="font-medium">{d.subject}</span></button>
-        <span className="text-xs/[18px] text-muted-foreground">{runtimeText(`mywork.role.${d.role}`)}</span>
+        {!userId && <WorkNewBadge seen={d.seen} />}<span className="text-xs/[18px] text-muted-foreground">{runtimeText(`mywork.role.${d.role}`)}</span>
         <span className={cn('tabular-nums', d.isOverdue && 'font-semibold text-bad', d.isDueSoon && !d.isOverdue && 'text-warn')}>{t('wc.requiredBy', { date: fmtDate(d.requiredByDate) })}</span>
         {d.isOverdue ? <Chip tone="bad">{t('ind.overdue')}</Chip> : d.isDueSoon && <Chip tone="warn">{t('ind.dueSoon')}</Chip>}
-        <StatusPill status={d.status} />
+        <StatusPill status={d.status} /><WorkActivityComments itemType="Decision" itemId={d.id} itemKey={d.key} projectNumber={d.projectNumber} fact={d.workActivity} focusKey={`mywork:overview:decisions:decision:${d.id}`} />
       </li>)), t('mywork.noDecisions')) },
     { id: 'actions', title: t('mywork.actions'), count: w.actions.length, body: list(w.actions.map((a) => ( // MTG-01
       <li key={a.id} className={ROW}>
         <ProjectTag id={a.projectId} number={a.projectNumber} />
         <button type="button" className="min-w-[10rem] flex-1 break-words text-left hover:underline" onClick={() => openPanel('Action', a.id)}><Key>{a.key}</Key> <span className="font-medium">{a.text}</span></button>
-        {a.ownerType !== 'User' && <ActionOwner a={a} />}
+        {!userId && <WorkNewBadge seen={a.seen} />}{a.ownerType !== 'User' && <ActionOwner a={a} focusKey={`mywork:overview:actions:action:${a.id}`} />}
         <span className="text-xs/[18px] text-muted-foreground">{a.meetingTitle}</span>
         <span className={cn('tabular-nums', a.isOverdue && 'font-semibold text-bad')}>{fmtDate(a.dueDate)}</span>
         {a.isOverdue && <Chip tone="bad">{t('ind.overdueD', { n: a.daysOverdue })}</Chip>}
-        <StatusPill status={a.status} />
+        <StatusPill status={a.status} /><WorkActivityComments itemType="Action" itemId={a.id} itemKey={a.key} projectNumber={a.projectNumber} fact={a.workActivity} focusKey={`mywork:overview:actions:action:${a.id}`} />
       </li>)), t('mywork.noActions')) },
     { id: 'projects', title: t('mywork.projects'), count: w.projects.length, accent: 'mint', body: list(w.projects.map((p) => (
       <li key={p.id} className={ROW}>
         <Link className="flex min-w-[10rem] flex-1 items-center gap-2 hover:underline" to={`/projects/${p.projectNumber}`}>
           <AccentDot id={p.id} /><Key>{p.projectNumber}</Key><span className="min-w-0 truncate font-medium">{p.name}</span>
         </Link>
-        <span className="flex flex-wrap gap-1">{p.roles.map((r) => <span key={r} className="rounded-md bg-secondary px-2 py-0.5 text-xs/[18px] font-medium">{runtimeText(`role.${r}`)}</span>)}</span>
-        <HealthPill health={p.reportedHealth} />
+        {!userId && <WorkNewBadge seen={p.seen} />}<span className="flex flex-wrap gap-1">{p.roles.map((r) => <span key={r} className="rounded-md bg-secondary px-2 py-0.5 text-xs/[18px] font-medium">{runtimeText(`role.${r}`)}</span>)}</span>
+        <HealthPill health={p.reportedHealth} /><WorkActivityComments itemType="Project" itemId={p.id} itemKey={p.projectNumber} projectNumber={p.projectNumber} fact={p.workActivity} focusKey={`mywork:overview:projects:project:${p.id}`} />
         {p.nextMilestone && <span className="text-xs/[18px] text-muted-foreground"><span aria-hidden>◆ </span>{p.nextMilestone.name} {relative(p.nextMilestone.date)}</span>}
         {!ro && <span className="w-44"><FollowLevelSelect projectId={p.id} level={p.follow?.level} onChanged={reload} projectName={`${p.projectNumber} ${p.name}`} /></span>}
       </li>)), t('mywork.noProjects')) },
@@ -268,20 +304,30 @@ function Overview({ focus }: { focus: boolean }) {
       <li key={m.id} className={ROW}>
         <ProjectTag id={m.projectId} number={m.projectNumber} /><Key>{m.key}</Key><span className="min-w-[10rem] flex-1 break-words font-medium">{m.name}</span>
         <span className="tabular-nums">{fmtDate(m.date)} <span className="text-muted-foreground">({relative(m.date)})</span></span><StatusPill status={m.status} />
+        <WorkActivityComments itemType="Milestone" itemId={m.id} itemKey={m.key} projectNumber={m.projectNumber} fact={m.workActivity} focusKey={`mywork:overview:milestones:milestone:${m.id}`} />
       </li>)), t('mywork.noMilestones')) },
-    { id: 'completed', title: t('mywork.completed'), count: w.completed.length, open: false, body: list(w.completed.map((r) => taskRow(r)), t('mywork.noCompleted')) },
+    { id: 'completed', title: t('mywork.completed'), count: w.completed.length, open: false, body: <>{groupStats(w.completed)}{list(w.completed.map((r) => taskRow(r, 'completed')), t('mywork.noCompleted'))}</> },
   ]
 
   // Today shows what needs the person now; the Overview shows every section. The view switch lists them all.
   const shown: typeof sections = focus ? [sections.find((x) => x.id === 'attention')!, { id: 'today', title: t('mywork.focusTasks'), count: focusBuckets.reduce((n, [, rows]) => n + rows.length, 0), accent: 'blue' as Accent,
     body: bucketList(focusBuckets, t('mywork.focusNoTasks')) }] : sections
   const menu = [...(!userId ? [{ id: 'my-week', title: t('planner.myWeek') }] : []), ...sections]
+  const renderSection = (s: typeof sections[number]) => s.open === false
+    ? <details key={s.id} id={`mw-${s.id}`} data-person-source-disclosure={peopleOn ? '' : undefined} className="overflow-hidden rounded-lg border bg-card">
+        <summary className="cursor-pointer px-5 py-3 text-base/6 font-semibold hover:bg-muted">
+          {s.title}<span className="ml-2 rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{s.count}</span>
+        </summary>
+        <div className="border-t">{s.body}</div>
+      </details>
+    : <Section key={s.id} id={`mw-${s.id}`} title={s.title} count={s.count} accent={s.accent}>{s.body}</Section>
+  const week = !userId && <MyWeekStrip key={patternsOn ? `${me.id}:${focus ? 'today' : 'overview'}` : 'legacy'} id="mw-my-week" personId={me.id} canPlan={me.capabilities.workload} view={focus ? 'today' : 'overview'} />
 
   return (
-    <Page title={ro ? t('mywork.of', { name: w.person.displayName }) : t('mywork.title')} subtitle={ro && t('mywork.readOnly')}
+    <Page title={ro ? <>{t('mywork.of', { name: '' })}<PersonPanelTrigger userId={w.person.id} name={w.person.displayName} active={w.person.isActive} focusKey={`mywork:person:${w.person.id}:title`} /></> : t('mywork.title')} subtitle={ro && t('mywork.readOnly')}
       actions={!ro && <>{pickupOn && <Button variant="outline" asChild><Link to="/pickup">{t('pickup.title')}</Link></Button>}<ViewMenu listType="mywork" extra={() => scope.params} />{me.capabilities.createTask && <Button onClick={() => setCreating(true)}><Plus className="size-4" />{t('task.new')}</Button>}</>}>
       <div className="flex flex-wrap items-start gap-2">
-        {!ro && <MyWorkViews sections={menu} />}
+        {!ro ? <MyWorkViews sections={menu} /> : !userId && <WorkSeenControls state={visit} />}
         <FilterBar className="flex-1" activeCount={tokens.length}
           quick={<ChipToggle on={f.hideWaiting} onClick={() => set('hideWaiting', f.hideWaiting ? undefined : '1')}>{t('mywork.hideWaiting')}</ChipToggle>}
           active={<ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value || t('common.dash') }))} onRemove={(k) => set(k)} onClear={clear} />}>
@@ -320,15 +366,11 @@ function Overview({ focus }: { focus: boolean }) {
           </div>
         </FilterBar>
       </div>
-      {!userId && <MyWeekStrip id="mw-my-week" personId={me.id} canPlan={me.capabilities.workload} />}
-      {shown.map((s) => s.open === false
-        ? <details key={s.id} id={`mw-${s.id}`} className="overflow-hidden rounded-lg border bg-card">
-            <summary className="cursor-pointer px-5 py-3 text-base/6 font-semibold hover:bg-muted">
-              {s.title}<span className="ml-2 rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{s.count}</span>
-            </summary>
-            <div className="border-t">{s.body}</div>
-          </details>
-        : <Section key={s.id} id={`mw-${s.id}`} title={s.title} count={s.count} accent={s.accent}>{s.body}</Section>)}
+      {patternsOn && focus ? <>
+        {shown.filter(section => section.id === 'today').map(renderSection)}
+        {week}
+        {shown.filter(section => section.id !== 'today').map(renderSection)}
+      </> : <>{week}{shown.map(renderSection)}</>}
       {/* After the lists, so the card never pushes the first work row down (FR-PRO-01, AC-CALM-01). */}
       {!userId && !ro && <OnboardingCard />}
       {creating && <NewTaskDialog onClose={() => { setCreating(false); reload() }} />}
@@ -340,6 +382,8 @@ function Overview({ focus }: { focus: boolean }) {
 /** Today, Upcoming, Overdue and Completed (FR-VIS-08) for one membership view: My Tasks (assignee or collaborator),
  *  Assigned to Me (assignee) or Created by Me (creator). The checkbox completes through the guarded transition. */
 function TaskView({ tab }: { tab: string }) {
+  const groupsOn = useFlag('work_screens')
+  const peopleOn = useFlag('people_screens')
   const pickupOn = useFlag('task_pickup')
   const me = useMe()
   const qc = useQueryClient()
@@ -347,24 +391,30 @@ function TaskView({ tab }: { tab: string }) {
   const [sp, setSp] = useSearchParams()
   const openPanel = useItemPanel()
   const [creating, setCreating] = useState(false)
-  const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
+  const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); if (groupsOn && k !== 'page') n.delete('page'); setSp(n, { replace: true }) }
+  const group = groupsOn ? sp.get('group') ?? 'none' : 'none'
+  const groupedOn = groupsOn && group !== 'none'
+  const page = Math.max(1, Number(sp.get('page')) || 1)
   const who = (WHO as readonly string[]).includes(sp.get('who') ?? '') ? sp.get('who')! : 'mine'
   const now = today()
   const from = sp.get('from') ?? addDays(now, -14), to = sp.get('to') ?? now
   const whoParams = who === 'assigned' ? { assigneeId: me.id } : who === 'created' ? { createdBy: me.id } : { mine: true }
   const tabParams = tab === 'today' ? { dueFrom: now, dueTo: now, open: true } : tab === 'upcoming' ? { dueFrom: addDays(now, 1), open: true }
     : tab === 'overdue' ? { overdue: true } : tab === 'nodate' ? { backlog: true } : { status: 'Complete', completedFrom: from, completedTo: to, sort: 'completed:desc' }
-  const params = { projects: scope.api, ...whoParams, ...tabParams, pageSize: 200 }
-  const q = useQuery({ queryKey: ['mywork-tasks', params], enabled: scope.ready, queryFn: () => typedRequest('get', '/api/v1/tasks', { query: params }) })
+  const params = { projects: scope.api, ...whoParams, ...tabParams, pageSize: 200, ...(groupedOn ? { group, page } : {}), ...(groupsOn ? { seenSubjectId: sp.get('userId') ?? me.id } : {}) }
+  const q = useQuery({ queryKey: ['mywork-tasks', params, me.id, groupsOn, peopleOn], enabled: scope.ready, queryFn: () => typedRequest('get', '/api/v1/tasks', { query: params }) })
   const actions = useTaskActions(() => { q.refetch(); invalidateChange(qc, 'Task') })
   const lane = useLaneDrop(actions)
-  const rows = q.data?.items ?? []
+  const rows = (q.data?.items ?? []) as WorkTask[]
+  const grouped = taskGroupEntries(rows, q.data?.groups)
+  const entries = groupedOn ? grouped.entries : rows.map(row => ({ kind: 'row' as const, row }))
   return (
     <Page title={t('mywork.title')}
       actions={<>{pickupOn && <Button variant="outline" asChild><Link to="/pickup">{t('pickup.title')}</Link></Button>}<ViewMenu listType="mywork" extra={() => scope.params} />{me.capabilities.createTask && <Button onClick={() => setCreating(true)}><Plus className="size-4" />{t('task.new')}</Button>}</>}>
       <div className="flex flex-wrap items-start gap-2">
         <MyWorkViews />
         <FilterBar className="flex-1" activeCount={['from', 'to'].filter((k) => sp.has(k)).length}
+          lead={groupsOn && <MenuSelect label={t('common.groupBy')} value={group} options={taskGroupChoices()} onChange={value => set('group', value === 'none' ? null : value)} />}
           quick={<div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <Segmented label={t('mywork.show')} value={who} onChange={(x) => set('who', x === 'mine' ? null : x)} options={WHO.map((x) => ({ value: x, label: t(`mywork.who.${x}`) }))} />
             <p className="text-sm text-muted-foreground">{runtimeText(`mywork.who.${who}.about`)}</p>
@@ -383,25 +433,32 @@ function TaskView({ tab }: { tab: string }) {
       </div>
       {q.error && <ErrorBanner error={q.error} retry={() => q.refetch()} />}
       <Section title={runtimeText(`mywork.tab.${tab}`)} count={q.data?.totalCount} accent="blue">
+        {groupedOn && q.data && <div className="px-5 py-2"><TaskGroupReadStatus asOf={q.data.asOf} complete={grouped.complete} /></div>}
         {tab === 'nodate' && <p className="border-b px-5 py-2.5 text-sm text-muted-foreground">{t('mywork.rule.nodate')}</p>}
         {q.isPending ? <Loading rows={5} /> : rows.length === 0
           ? <Empty action={me.capabilities.createTask && <Button variant="outline" onClick={() => setCreating(true)}><Plus className="size-4" />{t('task.new')}</Button>}>{runtimeText(`mywork.empty.${tab}`)}</Empty> : (
           <ul className="divide-y">
-            {rows.map((r) => (
+            {entries.map(entry => { if (entry.kind === 'group') return <li key={entry.group.key} data-task-group={entry.group.key} className="space-y-1 border-b bg-muted/40 px-5 py-3"><h3 className="break-words text-sm font-semibold">{groupHeading(entry.group)}</h3><TaskGroupSummary summary={entry.group} shown={entry.shown} unavailable={entry.unavailable} /></li>
+              const r = entry.row as WorkTask
+              return (
               <li key={r.id} className={ROW}>
                 <Checkbox checked={r.status === 'Complete'} disabled={r.status === 'Complete' || r.status === 'Cancelled'} aria-label={t('mywork.complete', { key: r.key, name: r.name })}
                   onCheckedChange={() => lane.onDrop(r, 'Done', () => undefined)} />
                 <button type="button" className="hover:underline" onClick={() => openPanel('Task', r.id)}><Key>{r.key}</Key></button>
                 <button type="button" className="min-w-[10rem] flex-1 break-words text-left font-medium hover:underline" onClick={() => openPanel('Task', r.id)}>{r.name}</button>
-                <ProjectTag id={r.projectId} number={r.projectNumber} name={r.projectName} />
+                <WorkNewBadge seen={r.seen} /><ProjectTag id={r.projectId} number={r.projectNumber} name={r.projectName} />
                 {tab !== 'nodate' && <span className={cn('tabular-nums', r.state?.isOverdue && 'font-semibold text-bad')}>{tab === 'completed' ? fmtDate(r.completedAt?.slice(0, 10)) : fmtDate(r.dueDate)}</span>}
                 <PriorityBadge priority={r.priority} />
                 <StatusPill status={r.status} />
+                <WorkActivityComments itemType="Task" itemId={r.id} itemKey={r.key} projectNumber={r.projectNumber} fact={r.workActivity} focusKey={`mywork:query:${tab}:${who}:task:${r.id}`} />
               </li>
-            ))}
+            )})}
           </ul>
         )}
       </Section>
+      {groupedOn && q.data && q.data.totalCount > q.data.pageSize && <nav aria-label={taskGroupLabel('pages')} className="flex flex-wrap items-center justify-end gap-3">
+        <Button variant="outline" disabled={page <= 1} onClick={() => set('page', String(page - 1))}>{t('common.previous')}</Button><span className="text-sm tabular-nums">{t('common.pageOf', { page, pages: Math.ceil(q.data.totalCount / q.data.pageSize) })}</span><Button variant="outline" disabled={page * q.data.pageSize >= q.data.totalCount} onClick={() => set('page', String(page + 1))}>{t('common.next')}</Button>
+      </nav>}
       {creating && <NewTaskDialog onClose={(id) => { setCreating(false); if (id) q.refetch() }} />}
       {lane.dialog}
       {actions.dialogs}

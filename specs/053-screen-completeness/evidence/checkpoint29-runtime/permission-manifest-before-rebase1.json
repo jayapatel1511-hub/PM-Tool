@@ -1,0 +1,1300 @@
+{
+  "format": 1,
+  "scope": "S49 phase1 source bindings, not a copied grant matrix",
+  "completionGaps": [
+    "system-pm-template-policy",
+    "compound-and-transport-guards"
+  ],
+  "sections": {
+    "8.5.1": {
+      "fingerprint": "4bfe9f8e53d7feedaff69252d356592a5cd4a61bfeaca8df2e65dcda3ec11287",
+      "rows": [
+        "8.5.1:Sign in and use the application",
+        "8.5.1:View project list and any project (subject to 8.7)",
+        "8.5.1:Create a project",
+        "8.5.1:View Portfolio Dashboard",
+        "8.5.1:View Weekly Resource Planner (published and confirmed allocations)",
+        "8.5.1:View Private Draft allocations",
+        "8.5.1:Create / edit / delete manager allocations for a person",
+        "8.5.1:Publish / confirm / unpublish a manager allocation",
+        "8.5.1:Create / edit / delete own employee allocations",
+        "8.5.1:Record / correct a manual copy of HR-approved leave (with HR reference)",
+        "8.5.1:Preview / apply HR-approved leave CSV; configure office holidays",
+        "8.5.1:View Vacation & Coverage availability",
+        "8.5.1:Set a person's weekly capacity and working days",
+        "8.5.1:Reassign tasks across projects for supervised staff",
+        "8.5.1:Add or remove supervised staff on a project team (as Team Member)",
+        "8.5.1:Manage users, system roles, offices, disciplines, clients, deliverable types, phases",
+        "8.5.1:Manage project templates",
+        "8.5.1:Manage organisation thresholds and notification defaults",
+        "8.5.1:Unarchive a project",
+        "8.5.1:View all activity history",
+        "8.5.1:Export reports",
+        "8.5.1:Manage own notification preferences, project follow levels, and saved views"
+      ]
+    },
+    "8.5.2": {
+      "fingerprint": "7de46636de06f2d5201a81bb4172e69ea08bdec15256f793b8b4cb4f7249fe9d",
+      "rows": [
+        "8.5.2:View project, dashboard, all registers",
+        "8.5.2:Edit project information (name, client, description, dates, phase, links)",
+        "8.5.2:Change project status (Active, On Hold, Complete, Cancelled)",
+        "8.5.2:Archive project",
+        "8.5.2:Manage project team and roles (Supervisors may also add or remove their direct reports as Team Members, \u00a78.5.1)",
+        "8.5.2:Add/remove disciplines, set Discipline Lead",
+        "8.5.2:Set/clear health override",
+        "8.5.2:Create / edit / delete milestone; change milestone date",
+        "8.5.2:Re-baseline a milestone or deliverable, or return it to its original dates, with a reason (\u00a750.5)",
+        "8.5.2:Mark milestone Complete",
+        "8.5.2:Create deliverable",
+        "8.5.2:Edit deliverable (fields, owner, dates)",
+        "8.5.2:Change deliverable status",
+        "8.5.2:Delete / cancel deliverable",
+        "8.5.2:Create task",
+        "8.5.2:Create / edit / cancel calendar event tied to project",
+        "8.5.2:View task-hour entries",
+        "8.5.2:Add / edit / delete task-hour entries",
+        "8.5.2:Edit task fields",
+        "8.5.2:Assign / reassign task",
+        "8.5.2:Change task status",
+        "8.5.2:Set reviewer on a task",
+        "8.5.2:Add / remove task dependency",
+        "8.5.2:Set manual block / clear manual block",
+        "8.5.2:Change task due date",
+        "8.5.2:Delete task",
+        "8.5.2:Cancel task",
+        "8.5.2:Reopen completed task",
+        "8.5.2:Comment, @mention, add document link",
+        "8.5.2:Edit / delete own comment (within rules, Section 12.8)",
+        "8.5.2:Create / edit decision, risk, issue, meeting, action",
+        "8.5.2:Record a decision outcome",
+        "8.5.2:Run Weekly Coordination in meeting mode (record \"reviewed\" timestamp)"
+      ]
+    },
+    "8.10": {
+      "fingerprint": "85c711e3f84e390bf71cc817cd5fb188705d21477f59f17262a874ef36420982",
+      "rows": [
+        "8.10:Create/assign handoff",
+        "8.10:Submit/respond to handoff",
+        "8.10:Accept/incorporate handoff",
+        "8.10:Coordinate review package",
+        "8.10:Technical review approval",
+        "8.10:Respond to/verify review finding",
+        "8.10:Publish source revision/change",
+        "8.10:Assess changed input",
+        "8.10:Issue submission package",
+        "8.10:Propose allocation",
+        "8.10:Confirm allocation/change availability",
+        "8.10:Propose design basis/assumption",
+        "8.10:Confirm design basis",
+        "8.10:Approve Proceed under Assumption",
+        "8.10:Propose/verify constraint removal",
+        "8.10:Commit weekly output",
+        "8.10:Resolve/verify location issue",
+        "8.10:View coordination, sources and export"
+      ]
+    },
+    "8.11": {
+      "fingerprint": "493cfe33bb48166099afa568e0e9946642d26ee797aa79b26119611009ca918a",
+      "rows": [
+        "8.11:Open the Weekly Planner (\u00a713.21)",
+        "8.11:See a person's Self-entered entries, Proposed and Confirmed assignments, approved project allocations, capacity and time away",
+        "8.11:See a Private draft",
+        "8.11:Create a self entry",
+        "8.11:Create a manager entry",
+        "8.11:Change, move, extend, mark Still valid or delete an entry; copy creates a new entry and needs the create right for its person",
+        "8.11:Change a manager entry's visibility",
+        "8.11:Record or clear time away (availability overrides, \u00a739.3)",
+        "8.11:Export planner and entry lists; save personal planner views",
+        "8.11:Change planning settings (\u00a710.9)"
+      ]
+    }
+  },
+  "signatures": {
+    "CoordinationWrite": "Allow CoordinationWrite(Actor a, ProjectContext p)",
+    "CoordinateReview": "Allow CoordinateReview(Actor a, ProjectContext p, Guid discipline, Guid? coordinator = null)",
+    "PublishSource": "Allow PublishSource(Actor a, ProjectContext p, Guid discipline, Guid? owner)",
+    "NamedCoordinationAction": "Allow NamedCoordinationAction(Actor a, ProjectContext p, Guid owner)",
+    "ManageCoordination": "Allow ManageCoordination(Actor a, ProjectContext p, Guid discipline)",
+    "CreateSubmission": "Allow CreateSubmission(Actor a, ProjectContext p)",
+    "CreateBasis": "Allow CreateBasis(Actor a, ProjectContext p, Guid disciplineId, Guid ownerId, Guid? approverId)",
+    "ConfirmBasis": "Allow ConfirmBasis(Actor a, ProjectContext p, Guid disciplineId, Guid? approverId)",
+    "ProposeAllocation": "Allow ProposeAllocation(Actor a, ProjectContext p)",
+    "ManageOpenRole": "Allow ManageOpenRole(Actor a, ProjectContext p, Guid? createdBy)",
+    "ConfirmAllocation": "Allow ConfirmAllocation(Actor a, ProjectContext p, Guid? personSupervisorId)",
+    "CoordinateSubmission": "Allow CoordinateSubmission(Actor a, ProjectContext p, Guid coordinator)",
+    "SignSubmissionCheck": "Allow SignSubmissionCheck(Actor a, ProjectContext p, Guid owner)",
+    "AuthoriseSubmission": "Allow AuthoriseSubmission(Actor a, ProjectContext p)",
+    "CreateHandoff": "Allow CreateHandoff(Actor a, ProjectContext p, Guid sendingDiscipline, Guid receivingDiscipline, Guid? sourceOwner)",
+    "AssignHandoff": "Allow AssignHandoff(Actor a, ProjectContext p, HandoffFacts h)",
+    "EditHandoff": "Allow EditHandoff(Actor a, ProjectContext p, HandoffFacts h)",
+    "HandoffTransition": "Allow HandoffTransition(Actor a, ProjectContext p, HandoffFacts h, string to, bool allowSelfReview)",
+    "CreateProject": "Allow CreateProject(Actor a)",
+    "ViewPortfolio": "Allow ViewPortfolio(Actor a)",
+    "ViewWorkload": "Allow ViewWorkload(Actor a)",
+    "ViewStaff": "Allow ViewStaff(Actor a)",
+    "ViewAllStaff": "bool ViewAllStaff(Actor a)",
+    "Administer": "Allow Administer(Actor a)",
+    "ManageTemplates": "Allow ManageTemplates(Actor a, bool templateEditor)",
+    "ActOnStaff": "Allow ActOnStaff(Actor a, Guid? personSupervisorId)",
+    "CreatePlanningEntry": "Allow CreatePlanningEntry(Actor a, Guid personId, Guid? personSupervisorId)",
+    "ManagePlanningEntry": "Allow ManagePlanningEntry(Actor a, PlanningEntryFacts e)",
+    "SeePlanningEntry": "Allow SeePlanningEntry(Actor a, PlanningEntryFacts e, bool dataCorrection = false)",
+    "RecordTimeAway": "Allow RecordTimeAway(Actor a, Guid? personSupervisorId, Guid personId)",
+    "ViewPersonWork": "bool ViewPersonWork(Actor a, Guid personId, Guid? personSupervisorId)",
+    "CanView": "bool CanView(Actor a, ProjectContext p)",
+    "IsPM": "bool IsPM(Actor a, ProjectContext p)",
+    "IsDL": "bool IsDL(ProjectContext p, Guid disciplineId)",
+    "IsAnyDL": "bool IsAnyDL(ProjectContext p)",
+    "Writable": "Allow Writable(Actor a, ProjectContext p, bool pmOnly = false)",
+    "EditProject": "Allow EditProject(Actor a, ProjectContext p)",
+    "ManageTeam": "Allow ManageTeam(Actor a, ProjectContext p)",
+    "SetMemberResponsibility": "Allow SetMemberResponsibility(Actor a, ProjectContext p, bool leadsActivePrimaryDiscipline)",
+    "HealthOverride": "Allow HealthOverride(Actor a, ProjectContext p)",
+    "ManageMilestones": "Allow ManageMilestones(Actor a, ProjectContext p)",
+    "Rebaseline": "Allow Rebaseline(Actor a, ProjectContext p, bool closed)",
+    "ChangeProjectStatus": "Allow ChangeProjectStatus(Actor a, ProjectContext p, string to)",
+    "StaffOnProject": "Allow StaffOnProject(Actor a, ProjectContext p, Guid? personSupervisorId)",
+    "CreateDeliverable": "Allow CreateDeliverable(Actor a, ProjectContext p, Guid disciplineId)",
+    "EditDeliverable": "Allow EditDeliverable(Actor a, ProjectContext p, DeliverableFacts d)",
+    "DeliverableTransition": "Allow DeliverableTransition(Actor a, ProjectContext p, DeliverableFacts d, string from, string to)",
+    "DeleteDeliverable": "Allow DeleteDeliverable(Actor a, ProjectContext p, DeliverableFacts d)",
+    "CreateTask": "Allow CreateTask(Actor a, ProjectContext p, Guid disciplineId)",
+    "EditTask": "Allow EditTask(Actor a, ProjectContext p, TaskFacts t)",
+    "AssignTask": "Allow AssignTask(Actor a, ProjectContext p, TaskFacts t, bool atCreation = false)",
+    "ChangeDueDate": "Allow ChangeDueDate(Actor a, ProjectContext p, TaskFacts t, bool atCreation = false)",
+    "DueChangeNeedsReason": "bool DueChangeNeedsReason(Actor a, ProjectContext p, TaskFacts t)",
+    "TaskTransition": "Allow TaskTransition(Actor a, ProjectContext p, TaskFacts t, string from, string to)",
+    "SetReviewer": "Allow SetReviewer(Actor a, ProjectContext p, TaskFacts t, bool atCreation = false)",
+    "ManualBlock": "Allow ManualBlock(Actor a, ProjectContext p, TaskFacts t)",
+    "ManageDependency": "Allow ManageDependency(Actor a, ProjectContext p, TaskFacts predecessor, TaskFacts successor)",
+    "ManageDeliverableDependency": "Allow ManageDeliverableDependency(Actor a, ProjectContext p, Guid predecessorDisciplineId, Guid successorDisciplineId)",
+    "DeleteTask": "Allow DeleteTask(Actor a, ProjectContext p, TaskFacts t)",
+    "RestoreItem": "Allow RestoreItem(Actor a, ProjectContext p)",
+    "Comment": "Allow Comment(Actor a, ProjectContext p)",
+    "AddLink": "Allow AddLink(Actor a, ProjectContext p)",
+    "DeleteComment": "Allow DeleteComment(Actor a, ProjectContext p, Guid authorId)",
+    "EditComment": "Allow EditComment(Actor a, Guid authorId, DateTimeOffset createdAt, DateTimeOffset now)",
+    "RaiseRegisterItem": "Allow RaiseRegisterItem(Actor a, ProjectContext p)",
+    "EditRegisterItem": "Allow EditRegisterItem(Actor a, ProjectContext p, OwnedFacts i)",
+    "DecideOrDefer": "Allow DecideOrDefer(Actor a, ProjectContext p, OwnedFacts d)",
+    "RunCoordination": "Allow RunCoordination(Actor a, ProjectContext p)",
+    "Snooze": "Allow Snooze(Actor a, ProjectContext p)",
+    "ReviewDates": "Allow ReviewDates(Actor a, ProjectContext p)",
+    "ManageSavedProjectView": "Allow ManageSavedProjectView(Actor a, ProjectContext p)",
+    "ArrangeBoard": "Allow ArrangeBoard(Actor a, ProjectContext p)",
+    "ManageExternalParties": "Allow ManageExternalParties(Actor a, ProjectContext p)",
+    "CreateExternalParty": "Allow CreateExternalParty(Actor a, ProjectContext p)",
+    "CreateProjectEvent": "Allow CreateProjectEvent(Actor a, ProjectContext p)",
+    "EditEvent": "Allow EditEvent(Actor a, ProjectContext? p, Guid ownerId)",
+    "EnterTime": "Allow EnterTime(Actor a, ProjectContext p)",
+    "EditTime": "(Allow Allow, bool NeedsReason) EditTime(Actor a, ProjectContext p, Guid entryOwnerId)",
+    "ViewTimeEntry": "bool ViewTimeEntry(Actor a, ProjectContext p, Guid entryOwnerId, Guid taskDisciplineId, Guid? ownerSupervisorId)"
+  },
+  "guards": {
+    "src/Hub.Api/Infrastructure/Auth.cs": {
+      "sha256": "e6bb47e4b67dab2ad67eda7b97be77e82f4086dbef72473de795aa83f78df8f0",
+      "coverage": "Pending",
+      "binding": "Current transport/context/workflow source; independent compound evaluation still required"
+    },
+    "src/Hub.Api/Infrastructure/Access.cs": {
+      "sha256": "957e845ca5607b76687aa8769728c8e1152c1d7725b9d42c293f568565b1576d",
+      "coverage": "Pending",
+      "binding": "Current transport/context/workflow source; independent compound evaluation still required"
+    },
+    "src/Hub.Api/Infrastructure/PeopleScope.cs": {
+      "sha256": "5aa9e26ab279d69bbb6fd3d966d3c32d63fb65fa2a195381aed7fb2832642ea4",
+      "coverage": "Pending",
+      "binding": "Current transport/context/workflow source; independent compound evaluation still required"
+    },
+    "src/Hub.Api/Features/Admin.cs": {
+      "sha256": "7a19fa13503c519b8e885275102247e7ff5965a5b59fb97c895092ce339ebda4",
+      "coverage": "Pending",
+      "binding": "Current transport/context/workflow source; independent compound evaluation still required"
+    },
+    "src/Hub.Api/Features/Planning.cs": {
+      "sha256": "56609e4730d6bce5ddd6c53df80a1ea66a23eb7b7d9d002ea2ce864b1fbe6a87",
+      "coverage": "Pending",
+      "binding": "Current transport/context/workflow source; independent compound evaluation still required"
+    },
+    "src/Hub.Api/Features/Availability.cs": {
+      "sha256": "df463cb0ca60bc93cdd30ebf39636d07a14f4abbebd465bd410acbaff6e281e2",
+      "coverage": "Pending",
+      "binding": "Current transport/context/workflow source; independent compound evaluation still required"
+    },
+    "src/Hub.Api/Features/Extras.cs": {
+      "sha256": "11cbcdbf509d6327355354356617c03c5f47c3928dbe2fbf980743dce943f926",
+      "coverage": "Pending",
+      "binding": "Current transport/context/workflow source; independent compound evaluation still required"
+    },
+    "src/Hub.Api/Features/Handoffs.cs": {
+      "sha256": "d12d71e26a4b71cae00e9b80bd3f97854483748feffaeb3da008adf8f77b3492",
+      "coverage": "Pending",
+      "binding": "Current transport/context/workflow source; independent compound evaluation still required"
+    },
+    "src/Hub.Api/Features/Reviews.cs": {
+      "sha256": "6101aa1a733703c43bb539ce99f394dc66eb77d3ee8d06c96eca3318927f9a78",
+      "coverage": "Pending",
+      "binding": "Current transport/context/workflow source; independent compound evaluation still required"
+    },
+    "src/Hub.Api/Features/Changes.cs": {
+      "sha256": "85e2d5867a61472431584a54023c704c738994faa2b38abb66d67accbcf77446",
+      "coverage": "Pending",
+      "binding": "Current transport/context/workflow source; independent compound evaluation still required"
+    },
+    "src/Hub.Api/Features/Submissions.cs": {
+      "sha256": "2435aea92bfbc3a1efd85625f269cd00f63769922fe2e4d30d0e9a7b7f18001c",
+      "coverage": "Pending",
+      "binding": "Current transport/context/workflow source; independent compound evaluation still required"
+    },
+    "src/Hub.Api/Features/DesignBasis.cs": {
+      "sha256": "9781600667994990b86f28ea4809e69ae294a737fe75b3d032fcb4d4e85241cb",
+      "coverage": "Pending",
+      "binding": "Current transport/context/workflow source; independent compound evaluation still required"
+    },
+    "src/Hub.Api/Features/Readiness.cs": {
+      "sha256": "a796be11ae9e8ae849a132fa71d30a1d267a34a2e1195a21b575d8e2f7a8d7e6",
+      "coverage": "Pending",
+      "binding": "Current transport/context/workflow source; independent compound evaluation still required"
+    },
+    "src/Hub.Api/Features/WeeklyCommitments.cs": {
+      "sha256": "43af99db473ab95909bffce96af3e19a5f75ea6cc77b9080d6ab7e0854ee4f30",
+      "coverage": "Pending",
+      "binding": "Current transport/context/workflow source; independent compound evaluation still required"
+    },
+    "src/Hub.Api/Features/Registers.cs": {
+      "sha256": "6c52da67e6f4e16e877014c3d6045c1380227a2f9aae15e0064819b3ffd52034",
+      "coverage": "Pending",
+      "binding": "Current transport/context/workflow source; independent compound evaluation still required"
+    },
+    "src/Hub.Api/Features/Calendar.cs": {
+      "sha256": "01f49cf6b2cf2717cbd16a195c88b4b1fc667e601bd35ff1509f95c35ae33cd3",
+      "coverage": "Pending",
+      "binding": "Current transport/context/workflow source; independent compound evaluation still required"
+    },
+    "src/Hub.Api/Features/Time.cs": {
+      "sha256": "1ff77c13fc3ad239a35aae08557f32de692fbb50a3bea460fc10386a09b9628f",
+      "coverage": "Pending",
+      "binding": "Current transport/context/workflow source; independent compound evaluation still required"
+    },
+    "src/Hub.Api/Features/Reports.cs": {
+      "sha256": "6348281ec3f427010f139caf4e89ebc2a86f494d446c66678371de8a232c2cbb",
+      "coverage": "Pending",
+      "binding": "Current transport/context/workflow source; independent compound evaluation still required"
+    },
+    "src/Hub.Api/Features/Views.cs": {
+      "sha256": "ddad809f177734a547e9622bed893e22bd9e699af5a7b2fb70eabd5c79ba5f3f",
+      "coverage": "Pending",
+      "binding": "Current transport/context/workflow source; independent compound evaluation still required"
+    },
+    "src/Hub.Api/Features/Me.cs": {
+      "sha256": "f02f3b5ac7e43de89ce36a3f521f5442792ede24445593091f25bb2dd99df9f8",
+      "coverage": "Pending",
+      "binding": "Current transport/context/workflow source; independent compound evaluation still required"
+    }
+  },
+  "rowBindings": {
+    "8.5.1:Sign in and use the application": {
+      "methods": [],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Auth.cs",
+        "src/Hub.Api/Features/Admin.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.1:View project list and any project (subject to 8.7)": {
+      "methods": [
+        "CanView"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Auth.cs",
+        "src/Hub.Api/Features/Admin.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.1:Create a project": {
+      "methods": [
+        "CreateProject"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Auth.cs",
+        "src/Hub.Api/Features/Admin.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.1:View Portfolio Dashboard": {
+      "methods": [
+        "ViewPortfolio"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Auth.cs",
+        "src/Hub.Api/Features/Admin.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.1:View Weekly Resource Planner (published and confirmed allocations)": {
+      "methods": [
+        "ViewWorkload",
+        "SeePlanningEntry"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Auth.cs",
+        "src/Hub.Api/Features/Admin.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.1:View Private Draft allocations": {
+      "methods": [
+        "SeePlanningEntry"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Auth.cs",
+        "src/Hub.Api/Features/Admin.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.1:Create / edit / delete manager allocations for a person": {
+      "methods": [
+        "CreatePlanningEntry",
+        "ManagePlanningEntry"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Auth.cs",
+        "src/Hub.Api/Features/Admin.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.1:Publish / confirm / unpublish a manager allocation": {
+      "methods": [
+        "ManagePlanningEntry"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Auth.cs",
+        "src/Hub.Api/Features/Admin.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.1:Create / edit / delete own employee allocations": {
+      "methods": [
+        "CreatePlanningEntry",
+        "ManagePlanningEntry"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Auth.cs",
+        "src/Hub.Api/Features/Admin.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.1:Record / correct a manual copy of HR-approved leave (with HR reference)": {
+      "methods": [
+        "RecordTimeAway",
+        "ActOnStaff"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Auth.cs",
+        "src/Hub.Api/Features/Admin.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.1:Preview / apply HR-approved leave CSV; configure office holidays": {
+      "methods": [
+        "Administer"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Auth.cs",
+        "src/Hub.Api/Features/Admin.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.1:View Vacation & Coverage availability": {
+      "methods": [
+        "ViewPersonWork",
+        "ViewWorkload"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Auth.cs",
+        "src/Hub.Api/Features/Admin.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.1:Set a person's weekly capacity and working days": {
+      "methods": [
+        "ActOnStaff"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Auth.cs",
+        "src/Hub.Api/Features/Admin.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.1:Reassign tasks across projects for supervised staff": {
+      "methods": [
+        "AssignTask",
+        "ActOnStaff"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Auth.cs",
+        "src/Hub.Api/Features/Admin.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.1:Add or remove supervised staff on a project team (as Team Member)": {
+      "methods": [
+        "StaffOnProject"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Auth.cs",
+        "src/Hub.Api/Features/Admin.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.1:Manage users, system roles, offices, disciplines, clients, deliverable types, phases": {
+      "methods": [
+        "Administer"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Auth.cs",
+        "src/Hub.Api/Features/Admin.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.1:Manage project templates": {
+      "methods": [
+        "ManageTemplates"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Auth.cs",
+        "src/Hub.Api/Features/Admin.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.1:Manage organisation thresholds and notification defaults": {
+      "methods": [
+        "Administer"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Auth.cs",
+        "src/Hub.Api/Features/Admin.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.1:Unarchive a project": {
+      "methods": [
+        "ChangeProjectStatus"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Auth.cs",
+        "src/Hub.Api/Features/Admin.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.1:View all activity history": {
+      "methods": [
+        "Administer"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Auth.cs",
+        "src/Hub.Api/Features/Admin.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.1:Export reports": {
+      "methods": [
+        "ViewPortfolio",
+        "CanView"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Auth.cs",
+        "src/Hub.Api/Features/Admin.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.1:Manage own notification preferences, project follow levels, and saved views": {
+      "methods": [],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Auth.cs",
+        "src/Hub.Api/Features/Admin.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.2:View project, dashboard, all registers": {
+      "methods": [
+        "CanView"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Access.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.2:Edit project information (name, client, description, dates, phase, links)": {
+      "methods": [
+        "EditProject"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Access.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.2:Change project status (Active, On Hold, Complete, Cancelled)": {
+      "methods": [
+        "ChangeProjectStatus"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Access.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.2:Archive project": {
+      "methods": [
+        "ChangeProjectStatus"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Access.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.2:Manage project team and roles (Supervisors may also add or remove their direct reports as Team Members, \u00a78.5.1)": {
+      "methods": [
+        "ManageTeam",
+        "StaffOnProject"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Access.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.2:Add/remove disciplines, set Discipline Lead": {
+      "methods": [
+        "ManageTeam"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Access.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.2:Set/clear health override": {
+      "methods": [
+        "HealthOverride"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Access.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.2:Create / edit / delete milestone; change milestone date": {
+      "methods": [
+        "ManageMilestones"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Access.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.2:Re-baseline a milestone or deliverable, or return it to its original dates, with a reason (\u00a750.5)": {
+      "methods": [
+        "Rebaseline"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Access.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.2:Mark milestone Complete": {
+      "methods": [
+        "ManageMilestones"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Access.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.2:Create deliverable": {
+      "methods": [
+        "CreateDeliverable"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Access.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.2:Edit deliverable (fields, owner, dates)": {
+      "methods": [
+        "EditDeliverable"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Access.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.2:Change deliverable status": {
+      "methods": [
+        "DeliverableTransition"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Access.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.2:Delete / cancel deliverable": {
+      "methods": [
+        "DeleteDeliverable"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Access.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.2:Create task": {
+      "methods": [
+        "CreateTask"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Access.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.2:Create / edit / cancel calendar event tied to project": {
+      "methods": [
+        "CreateProjectEvent",
+        "EditEvent"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Access.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.2:View task-hour entries": {
+      "methods": [
+        "ViewTimeEntry"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Access.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.2:Add / edit / delete task-hour entries": {
+      "methods": [
+        "EnterTime",
+        "EditTime"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Access.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.2:Edit task fields": {
+      "methods": [
+        "EditTask"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Access.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.2:Assign / reassign task": {
+      "methods": [
+        "AssignTask"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Access.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.2:Change task status": {
+      "methods": [
+        "TaskTransition"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Access.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.2:Set reviewer on a task": {
+      "methods": [
+        "SetReviewer"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Access.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.2:Add / remove task dependency": {
+      "methods": [
+        "ManageDependency"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Access.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.2:Set manual block / clear manual block": {
+      "methods": [
+        "ManualBlock"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Access.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.2:Change task due date": {
+      "methods": [
+        "ChangeDueDate",
+        "DueChangeNeedsReason"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Access.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.2:Delete task": {
+      "methods": [
+        "DeleteTask"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Access.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.2:Cancel task": {
+      "methods": [
+        "TaskTransition"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Access.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.2:Reopen completed task": {
+      "methods": [
+        "TaskTransition"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Access.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.2:Comment, @mention, add document link": {
+      "methods": [
+        "Comment",
+        "AddLink"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Access.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.2:Edit / delete own comment (within rules, Section 12.8)": {
+      "methods": [
+        "EditComment",
+        "DeleteComment"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Access.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.2:Create / edit decision, risk, issue, meeting, action": {
+      "methods": [
+        "RaiseRegisterItem",
+        "EditRegisterItem"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Access.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.2:Record a decision outcome": {
+      "methods": [
+        "DecideOrDefer"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Access.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.5.2:Run Weekly Coordination in meeting mode (record \"reviewed\" timestamp)": {
+      "methods": [
+        "RunCoordination"
+      ],
+      "guards": [
+        "src/Hub.Api/Infrastructure/Access.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.10:Create/assign handoff": {
+      "methods": [
+        "CreateHandoff",
+        "AssignHandoff"
+      ],
+      "guards": [
+        "src/Hub.Api/Features/Handoffs.cs",
+        "src/Hub.Api/Features/Reviews.cs",
+        "src/Hub.Api/Features/Changes.cs",
+        "src/Hub.Api/Features/Submissions.cs",
+        "src/Hub.Api/Features/DesignBasis.cs",
+        "src/Hub.Api/Features/Readiness.cs",
+        "src/Hub.Api/Features/WeeklyCommitments.cs",
+        "src/Hub.Api/Features/Registers.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.10:Submit/respond to handoff": {
+      "methods": [
+        "HandoffTransition"
+      ],
+      "guards": [
+        "src/Hub.Api/Features/Handoffs.cs",
+        "src/Hub.Api/Features/Reviews.cs",
+        "src/Hub.Api/Features/Changes.cs",
+        "src/Hub.Api/Features/Submissions.cs",
+        "src/Hub.Api/Features/DesignBasis.cs",
+        "src/Hub.Api/Features/Readiness.cs",
+        "src/Hub.Api/Features/WeeklyCommitments.cs",
+        "src/Hub.Api/Features/Registers.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.10:Accept/incorporate handoff": {
+      "methods": [
+        "HandoffTransition"
+      ],
+      "guards": [
+        "src/Hub.Api/Features/Handoffs.cs",
+        "src/Hub.Api/Features/Reviews.cs",
+        "src/Hub.Api/Features/Changes.cs",
+        "src/Hub.Api/Features/Submissions.cs",
+        "src/Hub.Api/Features/DesignBasis.cs",
+        "src/Hub.Api/Features/Readiness.cs",
+        "src/Hub.Api/Features/WeeklyCommitments.cs",
+        "src/Hub.Api/Features/Registers.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.10:Coordinate review package": {
+      "methods": [
+        "CoordinateReview"
+      ],
+      "guards": [
+        "src/Hub.Api/Features/Handoffs.cs",
+        "src/Hub.Api/Features/Reviews.cs",
+        "src/Hub.Api/Features/Changes.cs",
+        "src/Hub.Api/Features/Submissions.cs",
+        "src/Hub.Api/Features/DesignBasis.cs",
+        "src/Hub.Api/Features/Readiness.cs",
+        "src/Hub.Api/Features/WeeklyCommitments.cs",
+        "src/Hub.Api/Features/Registers.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.10:Technical review approval": {
+      "methods": [
+        "NamedCoordinationAction"
+      ],
+      "guards": [
+        "src/Hub.Api/Features/Handoffs.cs",
+        "src/Hub.Api/Features/Reviews.cs",
+        "src/Hub.Api/Features/Changes.cs",
+        "src/Hub.Api/Features/Submissions.cs",
+        "src/Hub.Api/Features/DesignBasis.cs",
+        "src/Hub.Api/Features/Readiness.cs",
+        "src/Hub.Api/Features/WeeklyCommitments.cs",
+        "src/Hub.Api/Features/Registers.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.10:Respond to/verify review finding": {
+      "methods": [
+        "NamedCoordinationAction"
+      ],
+      "guards": [
+        "src/Hub.Api/Features/Handoffs.cs",
+        "src/Hub.Api/Features/Reviews.cs",
+        "src/Hub.Api/Features/Changes.cs",
+        "src/Hub.Api/Features/Submissions.cs",
+        "src/Hub.Api/Features/DesignBasis.cs",
+        "src/Hub.Api/Features/Readiness.cs",
+        "src/Hub.Api/Features/WeeklyCommitments.cs",
+        "src/Hub.Api/Features/Registers.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.10:Publish source revision/change": {
+      "methods": [
+        "PublishSource",
+        "ManageCoordination"
+      ],
+      "guards": [
+        "src/Hub.Api/Features/Handoffs.cs",
+        "src/Hub.Api/Features/Reviews.cs",
+        "src/Hub.Api/Features/Changes.cs",
+        "src/Hub.Api/Features/Submissions.cs",
+        "src/Hub.Api/Features/DesignBasis.cs",
+        "src/Hub.Api/Features/Readiness.cs",
+        "src/Hub.Api/Features/WeeklyCommitments.cs",
+        "src/Hub.Api/Features/Registers.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.10:Assess changed input": {
+      "methods": [
+        "NamedCoordinationAction"
+      ],
+      "guards": [
+        "src/Hub.Api/Features/Handoffs.cs",
+        "src/Hub.Api/Features/Reviews.cs",
+        "src/Hub.Api/Features/Changes.cs",
+        "src/Hub.Api/Features/Submissions.cs",
+        "src/Hub.Api/Features/DesignBasis.cs",
+        "src/Hub.Api/Features/Readiness.cs",
+        "src/Hub.Api/Features/WeeklyCommitments.cs",
+        "src/Hub.Api/Features/Registers.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.10:Issue submission package": {
+      "methods": [
+        "AuthoriseSubmission"
+      ],
+      "guards": [
+        "src/Hub.Api/Features/Handoffs.cs",
+        "src/Hub.Api/Features/Reviews.cs",
+        "src/Hub.Api/Features/Changes.cs",
+        "src/Hub.Api/Features/Submissions.cs",
+        "src/Hub.Api/Features/DesignBasis.cs",
+        "src/Hub.Api/Features/Readiness.cs",
+        "src/Hub.Api/Features/WeeklyCommitments.cs",
+        "src/Hub.Api/Features/Registers.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.10:Propose allocation": {
+      "methods": [
+        "ProposeAllocation"
+      ],
+      "guards": [
+        "src/Hub.Api/Features/Handoffs.cs",
+        "src/Hub.Api/Features/Reviews.cs",
+        "src/Hub.Api/Features/Changes.cs",
+        "src/Hub.Api/Features/Submissions.cs",
+        "src/Hub.Api/Features/DesignBasis.cs",
+        "src/Hub.Api/Features/Readiness.cs",
+        "src/Hub.Api/Features/WeeklyCommitments.cs",
+        "src/Hub.Api/Features/Registers.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.10:Confirm allocation/change availability": {
+      "methods": [
+        "ConfirmAllocation",
+        "ActOnStaff"
+      ],
+      "guards": [
+        "src/Hub.Api/Features/Handoffs.cs",
+        "src/Hub.Api/Features/Reviews.cs",
+        "src/Hub.Api/Features/Changes.cs",
+        "src/Hub.Api/Features/Submissions.cs",
+        "src/Hub.Api/Features/DesignBasis.cs",
+        "src/Hub.Api/Features/Readiness.cs",
+        "src/Hub.Api/Features/WeeklyCommitments.cs",
+        "src/Hub.Api/Features/Registers.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.10:Propose design basis/assumption": {
+      "methods": [
+        "CreateBasis"
+      ],
+      "guards": [
+        "src/Hub.Api/Features/Handoffs.cs",
+        "src/Hub.Api/Features/Reviews.cs",
+        "src/Hub.Api/Features/Changes.cs",
+        "src/Hub.Api/Features/Submissions.cs",
+        "src/Hub.Api/Features/DesignBasis.cs",
+        "src/Hub.Api/Features/Readiness.cs",
+        "src/Hub.Api/Features/WeeklyCommitments.cs",
+        "src/Hub.Api/Features/Registers.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.10:Confirm design basis": {
+      "methods": [
+        "ConfirmBasis"
+      ],
+      "guards": [
+        "src/Hub.Api/Features/Handoffs.cs",
+        "src/Hub.Api/Features/Reviews.cs",
+        "src/Hub.Api/Features/Changes.cs",
+        "src/Hub.Api/Features/Submissions.cs",
+        "src/Hub.Api/Features/DesignBasis.cs",
+        "src/Hub.Api/Features/Readiness.cs",
+        "src/Hub.Api/Features/WeeklyCommitments.cs",
+        "src/Hub.Api/Features/Registers.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.10:Approve Proceed under Assumption": {
+      "methods": [
+        "ManageCoordination"
+      ],
+      "guards": [
+        "src/Hub.Api/Features/Handoffs.cs",
+        "src/Hub.Api/Features/Reviews.cs",
+        "src/Hub.Api/Features/Changes.cs",
+        "src/Hub.Api/Features/Submissions.cs",
+        "src/Hub.Api/Features/DesignBasis.cs",
+        "src/Hub.Api/Features/Readiness.cs",
+        "src/Hub.Api/Features/WeeklyCommitments.cs",
+        "src/Hub.Api/Features/Registers.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.10:Propose/verify constraint removal": {
+      "methods": [
+        "NamedCoordinationAction"
+      ],
+      "guards": [
+        "src/Hub.Api/Features/Handoffs.cs",
+        "src/Hub.Api/Features/Reviews.cs",
+        "src/Hub.Api/Features/Changes.cs",
+        "src/Hub.Api/Features/Submissions.cs",
+        "src/Hub.Api/Features/DesignBasis.cs",
+        "src/Hub.Api/Features/Readiness.cs",
+        "src/Hub.Api/Features/WeeklyCommitments.cs",
+        "src/Hub.Api/Features/Registers.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.10:Commit weekly output": {
+      "methods": [],
+      "guards": [
+        "src/Hub.Api/Features/Handoffs.cs",
+        "src/Hub.Api/Features/Reviews.cs",
+        "src/Hub.Api/Features/Changes.cs",
+        "src/Hub.Api/Features/Submissions.cs",
+        "src/Hub.Api/Features/DesignBasis.cs",
+        "src/Hub.Api/Features/Readiness.cs",
+        "src/Hub.Api/Features/WeeklyCommitments.cs",
+        "src/Hub.Api/Features/Registers.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.10:Resolve/verify location issue": {
+      "methods": [
+        "NamedCoordinationAction"
+      ],
+      "guards": [
+        "src/Hub.Api/Features/Handoffs.cs",
+        "src/Hub.Api/Features/Reviews.cs",
+        "src/Hub.Api/Features/Changes.cs",
+        "src/Hub.Api/Features/Submissions.cs",
+        "src/Hub.Api/Features/DesignBasis.cs",
+        "src/Hub.Api/Features/Readiness.cs",
+        "src/Hub.Api/Features/WeeklyCommitments.cs",
+        "src/Hub.Api/Features/Registers.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.10:View coordination, sources and export": {
+      "methods": [
+        "CanView"
+      ],
+      "guards": [
+        "src/Hub.Api/Features/Handoffs.cs",
+        "src/Hub.Api/Features/Reviews.cs",
+        "src/Hub.Api/Features/Changes.cs",
+        "src/Hub.Api/Features/Submissions.cs",
+        "src/Hub.Api/Features/DesignBasis.cs",
+        "src/Hub.Api/Features/Readiness.cs",
+        "src/Hub.Api/Features/WeeklyCommitments.cs",
+        "src/Hub.Api/Features/Registers.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.11:Open the Weekly Planner (\u00a713.21)": {
+      "methods": [
+        "ViewWorkload",
+        "ViewPersonWork"
+      ],
+      "guards": [
+        "src/Hub.Api/Features/Planning.cs",
+        "src/Hub.Api/Infrastructure/PeopleScope.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.11:See a person's Self-entered entries, Proposed and Confirmed assignments, approved project allocations, capacity and time away": {
+      "methods": [
+        "SeePlanningEntry"
+      ],
+      "guards": [
+        "src/Hub.Api/Features/Planning.cs",
+        "src/Hub.Api/Infrastructure/PeopleScope.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.11:See a Private draft": {
+      "methods": [
+        "SeePlanningEntry"
+      ],
+      "guards": [
+        "src/Hub.Api/Features/Planning.cs",
+        "src/Hub.Api/Infrastructure/PeopleScope.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.11:Create a self entry": {
+      "methods": [
+        "CreatePlanningEntry"
+      ],
+      "guards": [
+        "src/Hub.Api/Features/Planning.cs",
+        "src/Hub.Api/Infrastructure/PeopleScope.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.11:Create a manager entry": {
+      "methods": [
+        "CreatePlanningEntry"
+      ],
+      "guards": [
+        "src/Hub.Api/Features/Planning.cs",
+        "src/Hub.Api/Infrastructure/PeopleScope.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.11:Change, move, extend, mark Still valid or delete an entry; copy creates a new entry and needs the create right for its person": {
+      "methods": [
+        "ManagePlanningEntry",
+        "CreatePlanningEntry"
+      ],
+      "guards": [
+        "src/Hub.Api/Features/Planning.cs",
+        "src/Hub.Api/Infrastructure/PeopleScope.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.11:Change a manager entry's visibility": {
+      "methods": [
+        "ManagePlanningEntry"
+      ],
+      "guards": [
+        "src/Hub.Api/Features/Planning.cs",
+        "src/Hub.Api/Infrastructure/PeopleScope.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.11:Record or clear time away (availability overrides, \u00a739.3)": {
+      "methods": [
+        "RecordTimeAway"
+      ],
+      "guards": [
+        "src/Hub.Api/Features/Planning.cs",
+        "src/Hub.Api/Infrastructure/PeopleScope.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.11:Export planner and entry lists; save personal planner views": {
+      "methods": [
+        "ViewWorkload",
+        "SeePlanningEntry"
+      ],
+      "guards": [
+        "src/Hub.Api/Features/Planning.cs",
+        "src/Hub.Api/Infrastructure/PeopleScope.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    },
+    "8.11:Change planning settings (\u00a710.9)": {
+      "methods": [
+        "Administer"
+      ],
+      "guards": [
+        "src/Hub.Api/Features/Planning.cs",
+        "src/Hub.Api/Infrastructure/PeopleScope.cs"
+      ],
+      "coverage": "Pending",
+      "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
+    }
+  }
+}

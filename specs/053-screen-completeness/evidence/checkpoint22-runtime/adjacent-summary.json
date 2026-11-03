@@ -1,0 +1,379 @@
+{
+  "count": 93,
+  "passed": 93,
+  "failed": 0,
+  "tests": [
+    {
+      "name": "Hub.Tests.Api.ContractTests.Normalization_removes_servers_and_orders_objects_without_reordering_arrays",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: \"/api/v1/me/work/requested\", method: \"get\", status: \"200\", field: \"total\", type: \"integer\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TimelineTests.Latest_planned_note_is_omitted_without_an_active_project_and_target(status: \"Complete\", targetKnown: True)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TeamCompletenessTests.Picker_current_week_read_keeps_existing_planner_scope_free_and_away_and_refuses_unknown_people",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.RegistryTests.Saved_views_exports_names_and_search_are_snapshot_supersets",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.PersonFactsFoundationTests.Database_rejects_invalid_person_facts_case_duplicate_tags_and_duplicate_or_foreign_certifications",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TeamCompletenessTests.Two_open_roles_are_separate_canonical_records_and_never_change_Team_people_or_membership",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TimelineTests.Latest_planned_uses_current_deliverable_dates_on_each_read_and_omits_equal_or_earlier_dates",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TimelineTests.Latest_planned_note_is_omitted_without_an_active_project_and_target(status: \"Archived\", targetKnown: True)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: \"/api/v1/projects/{projectId}/commitment-reliabilit\"\u00b7\u00b7\u00b7, method: \"get\", status: \"200\", field: \"misses[].commitments[]\", type: \"string\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ViewsTests.Personal_views_restore_their_definition_and_one_is_default",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ViewsTests.A_view_whose_references_are_gone_opens_without_them",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.RegistryParityTests.Activity_history_and_export_parameters_match_the_pre_registry_snapshot",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ViewsTests.Coordination_views_keep_supported_filters_and_do_not_share_personal_or_hidden_project_data(kind: \"issues\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TimelineTests.Latest_planned_note_is_omitted_without_an_active_project_and_target(status: \"Cancelled\", targetKnown: True)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TeamCompletenessTests.Home_discipline_is_distinct_from_project_primary_and_shared_with_workspace_without_changing_legacy_cohort",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TimelineTests.Project_timeline_handoffs_match_list_visibility_and_rules_without_changing_old_reads_or_cross_project_gantt(enabled: False)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.AdminContractTests.Organisation_activity_keeps_its_page_envelope_and_row_names",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.MilestonesDeliverablesTests.Milestone_date_change_keeps_original_logs_notifies_and_cascades",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ContractTests.Template_preview_contract_keeps_nested_counts_and_role_fields",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ViewsTests.Project_views_are_shared_and_changed_only_by_the_pm_and_leads",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.MilestonesDeliverablesTests.Changing_discipline_moves_tasks_after_confirmation",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TeamCompletenessTests.Team_saved_view_group_validation_and_reference_cleanup_keep_known_ids_and_distinct_unknown_sentinels",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.DeliverableContractTests.Detail_keeps_its_envelope_nested_records_and_the_small_ux_related_tasks",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.RegistryTests.Every_audited_type_has_one_valid_declaration",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ViewsTests.Risk_views_keep_filters_sort_and_columns_and_follow_project_access",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ViewsTests.Coordination_views_keep_supported_filters_and_do_not_share_personal_or_hidden_project_data(kind: \"allocations\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: \"/api/v1/tasks/{id}/pickup-offer\", method: \"get\", status: \"200\", field: \"allowed.pickUp\", type: \"boolean\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TimelineTests.Handoff_needed_date_overdue_is_suppressed_on_hold_and_deleted_rows_are_excluded",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TimelineTests.Timeline_uses_stored_affected_milestones_at_the_evaluators_depth_without_recalculating_or_changing_cross_project_reads(enabled: True)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: \"/api/v1/projects/{projectId}/revision-check\", method: \"get\", status: \"200\", field: \"deliverables[].issues[].marks[]\", type: \"string\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: \"/api/v1/admin/organisation/units\", method: \"get\", status: \"200\", field: \"[].rowVersion\", type: \"integer\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TimelineTests.A_dragged_task_changes_only_its_own_dates_and_keeps_a_baseline",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: \"/api/v1/admin/organisation/levels\", method: \"get\", status: \"200\", field: \"[].name\", type: \"string\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.AdminContractTests.Reference_lists_and_commands_keep_their_names_order_nulls_and_answers",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ViewsTests.Portfolio_views_keep_group_and_overdue_decisions_and_refuse_unknown_groups",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TeamCompletenessTests.Unknown_references_stay_null_and_workspace_deduplicates_members_across_selected_projects",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TimelineTests.Tasks_arrows_and_permissions_for_the_timeline",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TimelineTests.Latest_planned_note_is_omitted_without_an_active_project_and_target(status: \"Setup\", targetKnown: True)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TimelineTests.Slip_display_is_server_decided_without_changing_slip_filters_or_exports(enabled: True)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.AdminContractTests.Users_and_roles_keep_their_row_names_order_nulls_and_empty_answers",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.MilestonesDeliverablesTests.Deliverable_defaults_and_discipline_permissions",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.MilestonesDeliverablesTests.A_milestone_s_discipline_must_belong_to_its_project",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TeamCompletenessTests.Team_saved_views_require_owner_flag_and_keep_workspace_personal_and_project_access_sharing_guards",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ContractTests.Client_error_report_success_is_documented_as_bodyless_204",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ContractTests.Allocation_preview_contract_describes_both_saved_and_preview_responses(route: \"/api/v1/projects/{projectId}/allocations/{id}/conf\"\u00b7\u00b7\u00b7)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TimelineTests.An_empty_project_has_an_empty_handoff_group_read_only_while_enabled",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: \"/api/v1/deliverables/{id}/baselines\", method: \"get\", status: \"200\", field: \"people[].displayName\", type: \"string\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ContractTests.Nested_dtos_with_equal_names_have_distinct_contract_schemas",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ViewsTests.Coordination_views_restore_filters_without_copying_rows_or_crossing_project_scope",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: \"/api/v1/pickup-offers\", method: \"get\", status: \"200\", field: \"[].task.rowVersion\", type: \"integer\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TimelineTests.Latest_planned_note_matches_project_and_both_timelines_without_changing_health_or_storing_state(enabled: False)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ContractTests.Me_settings_are_typed_and_route_counter_field_is_flag_scoped",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ContractTests.Openapi_matches_the_committed_golden_document",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.AdminContractTests.Operations_keep_their_names_order_and_row_shapes_and_retry_answers",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.RegistryTests.Audit_fields_and_history_types_preserve_the_original_snapshots",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TeamCompletenessTests.Certification_filter_and_lead_references_remain_independent_of_people_flag_and_hidden_scope",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ViewsTests.Staff_views_are_personal_restore_filters_and_name_missing_references",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ContractTests.Allocation_preview_contract_describes_both_saved_and_preview_responses(route: \"/api/v1/projects/{projectId}/allocations\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ContractTests.Allocation_preview_contract_describes_both_saved_and_preview_responses(route: \"/api/v1/projects/{projectId}/allocations/{id}/edit\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: \"/api/v1/admin/operations/outbox/retry\", method: \"post\", status: \"200\", field: \"retried\", type: \"integer\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.AdminContractTests.Settings_keep_their_row_names_order_and_the_flag_packet_and_save_answers",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.MilestonesDeliverablesTests.Lifecycle_guards_review_comment_issue_and_reissue",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: \"/api/v1/admin/organisation/import/preview\", method: \"post\", status: \"200\", field: \"rows\", type: \"integer\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.RegistryTests.Registry_checks_fail_on_seeded_defects",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.PersonFactsFoundationTests.Vocabulary_and_warning_settings_are_dark_without_usage_counts_and_keep_stored_values_when_disabled",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TimelineTests.Latest_planned_note_is_omitted_without_an_active_project_and_target(status: \"Active\", targetKnown: False)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ViewsTests.Saved_view_answers_keep_their_property_names_order_and_status_codes",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TimelineTests.Handoff_timeline_refuses_an_unreadable_project_and_an_unknown_project(enabled: True)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.DeliverableContractTests.Register_rows_keep_their_order_and_omit_the_baseline_fields_while_their_flag_is_off",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.RegistryTests.Generated_key_families_match_the_registry_and_vocabulary",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.DeliverableContractTests.Create_edit_transition_issue_delete_restore_and_bulk_answers_keep_their_property_names_and_order",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.PersonFactsFoundationTests.Existing_people_have_unknown_nullable_facts_without_defaults_or_seeded_certifications",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: \"/api/v1/admin/audit-chains\", method: \"get\", status: \"200\", field: \"[].chainId\", type: \"string\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TimelineTests.Timeline_uses_stored_affected_milestones_at_the_evaluators_depth_without_recalculating_or_changing_cross_project_reads(enabled: False)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: \"/api/v1/projects/import-preview\", method: \"post\", status: \"200\", field: \"rows[].projectNumber\", type: \"string\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ViewsTests.Coordination_views_keep_supported_filters_and_do_not_share_personal_or_hidden_project_data(kind: \"submissions\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: \"/api/v1/admin/organisation/import/preview\", method: \"post\", status: \"200\", field: \"applied\", type: \"boolean\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: \"/api/v1/me/work/watching\", method: \"get\", status: \"200\", field: \"items[].projectNumber\", type: \"string\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: \"/api/v1/me/onboarding\", method: \"get\", status: \"200\", field: \"groups[].steps[].done\", type: \"boolean\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TimelineTests.Both_timelines_keep_their_property_names_order_and_types",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TimelineTests.Latest_planned_note_matches_project_and_both_timelines_without_changing_health_or_storing_state(enabled: True)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.MilestonesDeliverablesTests.Completing_with_unissued_deliverables_needs_confirmation",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TimelineTests.The_milestone_cascade_can_include_tasks",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TimelineTests.Handoff_timeline_refuses_an_unreadable_project_and_an_unknown_project(enabled: False)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TimelineTests.Project_timeline_handoffs_match_list_visibility_and_rules_without_changing_old_reads_or_cross_project_gantt(enabled: True)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ViewsTests.Coordination_views_keep_supported_filters_and_do_not_share_personal_or_hidden_project_data(kind: \"readiness\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TeamCompletenessTests.Unit_uses_current_placement_and_is_omitted_with_org_flag_off_without_widening_Team",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.AdminContractTests.Holidays_keep_their_row_names_order_nulls_and_empty_answers",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TimelineTests.Slip_display_is_server_decided_without_changing_slip_filters_or_exports(enabled: False)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ViewsTests.Coordination_views_keep_supported_filters_and_do_not_share_personal_or_hidden_project_data(kind: \"design-basis\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: \"/api/v1/tasks/{id}\", method: \"get\", status: \"200\", field: \"permissions.transitions[].allowed\", type: \"boolean\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ViewsTests.Manual_board_order_is_shared_by_the_team",
+      "outcome": "Passed"
+    }
+  ]
+}

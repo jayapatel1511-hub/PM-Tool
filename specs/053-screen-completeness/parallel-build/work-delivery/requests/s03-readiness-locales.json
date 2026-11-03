@@ -1,0 +1,13 @@
+{
+  "workInputs.readiness": "Readiness inputs",
+  "workInputs.noReadinessAssessment": "No readiness assessment recorded",
+  "workInputs.readinessUnavailable": "Readiness source details unavailable",
+  "workInputs.directTarget": "Direct handoff target",
+  "workInputs.viaConstraint": "Readiness constraint",
+  "workInputs.readinessSource": "Readiness source",
+  "workInputs.linkedSource": "Linked source",
+  "workInputs.constraintPersists": "The constraint remains until its own removal is verified",
+  "workInputs.linkedUnavailable": "Linked source unavailable",
+  "workInputs.readinessLinkedWork": "Readiness-linked work: {n}",
+  "workInputs.viaConstraintKey": "Via constraint {key}"
+}

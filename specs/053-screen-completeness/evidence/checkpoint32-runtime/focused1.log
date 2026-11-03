@@ -1,0 +1,44 @@
+Test run for /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint32-artifacts/bin/Hub.Tests/release/Hub.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:42.17]     Hub.Tests.Api.NoticeProducerIntegrationTests.Operations_counts_a_captured_weekly_dispatch_on_Tuesday_without_creating_another_slot_or_alarm_for_a_reminder [FAIL]
+  Failed Hub.Tests.Api.NoticeProducerIntegrationTests.Operations_counts_a_captured_weekly_dispatch_on_Tuesday_without_creating_another_slot_or_alarm_for_a_reminder [5 s]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: Queued
+Actual:   Empty
+  Stack Trace:
+     at Hub.Tests.Api.NoticeProducerIntegrationTests.<>c__DisplayClass7_1.<<Operations_counts_a_captured_weekly_dispatch_on_Tuesday_without_creating_another_slot_or_alarm_for_a_reminder>b__8>d.MoveNext() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/NoticeProducerIntegrationTests.cs:line 120
+--- End of stack trace from previous location ---
+   at Hub.Api.Infrastructure.Tx.Run[T](HubDb db, Func`1 work) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Infrastructure/Keys.cs:line 57
+   at Hub.Api.Infrastructure.Tx.Run[T](HubDb db, Func`1 work) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Infrastructure/Keys.cs:line 65
+   at Hub.Tests.Api.HubFactory.DbAsync[T](Func`2 f) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 104
+   at Hub.Tests.Api.NoticeProducerIntegrationTests.Operations_counts_a_captured_weekly_dispatch_on_Tuesday_without_creating_another_slot_or_alarm_for_a_reminder() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/NoticeProducerIntegrationTests.cs:line 115
+--- End of stack trace from previous location ---
+[xUnit.net 00:01:08.67]     Hub.Tests.Api.NotificationAwayDeliveryTests.Context_requires_owners_live_ReadCommitted_transaction [FAIL]
+  Failed Hub.Tests.Api.NotificationAwayDeliveryTests.Context_requires_owners_live_ReadCommitted_transaction [4 s]
+  Error Message:
+   Assert.Throws() Failure: Exception type was not an exact match
+Expected: typeof(System.InvalidOperationException)
+Actual:   typeof(System.ObjectDisposedException)
+---- System.ObjectDisposedException : Cannot access a disposed context instance. A common cause of this error is disposing a context instance that was resolved from dependency injection and then later trying to use the same context instance elsewhere in your application. This may occur if you are calling 'Dispose' on the context instance, or wrapping it in a using statement. If you are using dependency injection, you should let the dependency injection container take care of disposing context instances.
+Object name: 'HubDb'.
+  Stack Trace:
+     at Hub.Tests.Api.NotificationAwayDeliveryTests.Context_requires_owners_live_ReadCommitted_transaction() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/NotificationAwayDeliveryTests.cs:line 442
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at Hub.Api.Infrastructure.NotificationDelivery.Db(NoticeRecipientContext context) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Infrastructure/NotificationDelivery.cs:line 111
+   at Hub.Api.Infrastructure.NotificationDelivery.ReadRecipientPolicyAsync(NoticeRecipientContext context, CancellationToken ct) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Infrastructure/NotificationDelivery.cs:line 131
+[xUnit.net 00:01:10.92]     Hub.Tests.Api.NotificationDigestCompositionTests.A_safely_suppressed_third_version_reaches_core_exhaustion_instead_of_resetting_or_stalling_its_slot [FAIL]
+  Failed Hub.Tests.Api.NotificationDigestCompositionTests.A_safely_suppressed_third_version_reaches_core_exhaustion_instead_of_resetting_or_stalling_its_slot [5 s]
+  Error Message:
+   Assert.Equal() Failure: Strings differ
+           ↓ (pos 0)
+Expected: "Recompose"
+Actual:   "Send"
+           ↑ (pos 0)
+  Stack Trace:
+     at Hub.Tests.Api.NotificationDigestCompositionTests.A_safely_suppressed_third_version_reaches_core_exhaustion_instead_of_resetting_or_stalling_its_slot() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/NotificationDigestCompositionTests.cs:line 545
+--- End of stack trace from previous location ---
+Results File: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint32-runtime/trx-focused1/focused1.trx
+
+Failed!  - Failed:     3, Passed:    99, Skipped:     0, Total:   102, Duration: 2 m 11 s - Hub.Tests.dll (net10.0)

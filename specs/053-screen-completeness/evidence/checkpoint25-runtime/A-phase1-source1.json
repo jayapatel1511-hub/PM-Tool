@@ -1,0 +1,11 @@
+{
+  "atUtc": "2026-11-02T08:52:51.602789+00:00",
+  "files": {
+    "web/src/pages/Search.tsx": "63efcacb6ee9d36b214278f87223cdcc19156d0baf77454c30b0dd1574296492",
+    "web/src/lib/recent-searches.ts": "3a740deb05bfaec7632981eda382c465be4232cdf9a442889b13072acd13227d",
+    "web/src/lib/recent-searches.test.ts": "f7409a07d4b6844ca6e7e5455710065b50199ea841111cc3870cae925a86ea92"
+  },
+  "sourceHandoffParity": "PASS",
+  "tests": "7 pureNode tests PASS",
+  "harnessNote": "Initial evidence/setup Python ran from web cwd and failed before updating CONTROL; following shell command still ran frozen pure Node tests once and passed. Root corrected CONTROL/evidence setup from buildroot, did not rerun passing tests. No CSharp/build/generation/browser/API or mutable test state was executed."
+}

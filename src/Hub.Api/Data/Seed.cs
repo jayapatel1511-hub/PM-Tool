@@ -33,6 +33,13 @@ public static class Seed
         if (!await db.ProjectTypes.AnyAsync())
             db.ProjectTypes.AddRange(new[] { "Municipal Infrastructure", "Building", "Environmental Assessment", "Transportation" }
                 .Select((n, i) => new ProjectType { Name = n, SortOrder = i }));
+        // D12: editable organisation vocabulary. No issue record is backfilled or preselected.
+        if (!await db.IssuePurposes.AnyAsync())
+            db.IssuePurposes.AddRange(new[] { "For review", "For approval", "For construction", "For tender", "For information" }
+                .Select((name, order) => new IssuePurpose { Name = name, SortOrder = order }));
+        if (!await db.IssueReturnCodes.AnyAsync())
+            db.IssueReturnCodes.AddRange(new[] { ("A", "Accepted"), ("B", "Accepted with comments"), ("C", "Revise and resubmit"), ("D", "Rejected") }
+                .Select((entry, order) => new IssueReturnCode { Code = entry.Item1, Name = entry.Item2, SortOrder = order }));
         // Every setting exists as a row, so the first Admin change is logged as old → new (§20.1).
         var have = await db.Settings.Select(x => x.Key).ToListAsync();
         foreach (var d in OrgSettings.Defs.Where(d => !have.Contains(d.Key)))

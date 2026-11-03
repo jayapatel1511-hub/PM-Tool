@@ -1,0 +1,19 @@
+{
+  "exitCode": 0,
+  "args": [
+    "npm",
+    "--prefix",
+    "web",
+    "run",
+    "typecheck:tests"
+  ],
+  "atUtc": "2026-11-03T06:34:58.970751+00:00",
+  "elapsedSeconds": 0.8,
+  "errors": [],
+  "tail": [
+    "",
+    "> web@0.0.0 typecheck:tests",
+    "> tsc -p tests/tsconfig.json",
+    ""
+  ]
+}

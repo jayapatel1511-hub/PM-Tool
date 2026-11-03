@@ -20,7 +20,7 @@ public static class OrgStructureEndpoints
     public sealed record OrganisationLevelRow(Guid Id, string Name, int SortOrder);
     public sealed record OrganisationUnitRow(Guid Id, string Name, Guid? ParentId, Guid LevelId, string? Level, Guid? LeaderId, string? Leader,
         Guid? DisciplineId, Guid? OfficeId, DateOnly? ClosedOn, int HeadCount);
-    public sealed record OrganisationPersonRow(Guid Id, int RowVersion, string DisplayName, string Email, Guid? UnitId, Guid? SupervisorId);
+    public sealed record OrganisationPersonRow(Guid Id, int RowVersion, string DisplayName, string Email, Guid? UnitId, Guid? SupervisorId, [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] PersonFacts.Notices? PersonNotices = null);
     public sealed record ManagerCycleRow(Guid Id, string DisplayName);
     public sealed record OrganisationResponse(IEnumerable<OrganisationLevelRow> Levels, IEnumerable<OrganisationUnitRow> Units,
         IEnumerable<OrganisationPersonRow> People, IEnumerable<ManagerCycleRow>? ManagerCycles, bool IncludeIndirectReports);
@@ -49,8 +49,10 @@ public static class OrgStructureEndpoints
         api.MapGet("/projects/{id:guid}/lead-unit", async (Guid id, Access access) =>
         { var (project, _) = await access.Project(id, false); return TypedResults.Ok(new LeadUnitResponse(project.LeadUnitId)); }).RequireFlag("org_structure");
         var org = api.MapGroup("/organisation").RequireFlag("org_structure");
-        org.MapGet("", async (HubDb db, CurrentUser me) =>
+        org.MapGet("", async (HubDb db, CurrentUser me, TimeProvider clock) =>
         {
+            var orgSettings = await db.CurrentSettings();
+            await using var noticeSnapshot = orgSettings.IsFlagOn("capacity_screens") ? await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead) : null;
             var levels = await db.Set<OrgLevel>().AsNoTracking().OrderBy(x => x.SortOrder).Select(x => new OrganisationLevelRow(x.Id, x.Name, x.SortOrder)).ToListAsync();
             var unitRows = await db.Set<OrgUnit>().AsNoTracking().OrderBy(x => x.Name).Select(x => new
             {
@@ -60,13 +62,15 @@ public static class OrgStructureEndpoints
             }).ToListAsync();
             var units = unitRows.Select(x => new OrganisationUnitRow(x.Id, x.Name, x.ParentId, x.LevelId, x.Level, x.LeaderId, x.Leader,
                 x.DisciplineId, x.OfficeId, x.ClosedOn, x.HeadCount)).ToList();
-            var indirect = (await db.CurrentSettings()).IncludeIndirectReports;
+            var indirect = orgSettings.IncludeIndirectReports;
             var scope = await PeopleScope.Load(db, me.Actor, indirect);
             var placements = await db.Users.AsNoTracking().Where(u => u.IsActive).Select(u => u.UnitId).ToListAsync();
             var tree = units.Select(u => new OrgTree.Unit(u.Id, u.ParentId, 0, u.LeaderId)).ToArray();
             units = units.Select(u => u with { HeadCount = placements.Count(id => id != null && OrgTree.Descendants(u.Id, tree).Contains(id.Value)) }).ToList();
             var people = await db.Users.AsNoTracking().Where(u => u.IsActive && scope.Contains(u.Id)).Select(u => new OrganisationPersonRow(
-                u.Id, u.RowVersion, u.DisplayName, u.Email, EF.Property<Guid?>(u, "UnitId"), u.SupervisorId)).ToListAsync();
+                u.Id, u.RowVersion, u.DisplayName, u.Email, EF.Property<Guid?>(u, "UnitId"), u.SupervisorId, null)).ToListAsync();
+            var notices = await PersonFacts.ReadNotices(db, people.Select(person => person.Id).ToArray(), orgSettings, clock);
+            if (notices.Count > 0) people = people.Select(person => person with { PersonNotices = notices.GetValueOrDefault(person.Id) }).ToList();
             var managers = await db.Users.AsNoTracking().ToDictionaryAsync(u => u.Id, u => u.SupervisorId);
             var cycleIds = me.Actor.Admin ? managers.Where(u => OrgTree.CreatesCycle(u.Key, u.Value, managers)).Select(u => u.Key).ToArray() : [];
             var cycles = me.Actor.Admin ? await db.Users.AsNoTracking().Where(u => cycleIds.Contains(u.Id)).Select(u => new ManagerCycleRow(u.Id, u.DisplayName)).ToListAsync() : null;

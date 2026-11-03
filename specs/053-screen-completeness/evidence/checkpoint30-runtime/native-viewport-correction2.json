@@ -1,0 +1,7 @@
+{
+  "atUtc": "2026-11-02T20:22:08.703519+00:00",
+  "supersedes": "native-viewport-diagnostic1 inference only; its bare helper measurement remains valid",
+  "finding": "Actual newMockPage wrapper already setViewportSize1440x1000 since05:28UTC. Bare helper default did not represent test window. Explicit duplicate setup did not fix failure.",
+  "applicationChanged": false,
+  "next": "Read-only actual failure geometry/screenshot, no weakened assertions or injected observer/focus/cache"
+}

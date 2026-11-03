@@ -1,0 +1,3 @@
+# Proposed next R3 contract independently READY, not implementation
+
+/root/checkpoint24_import_backend_review verified b1fa446b...05b9a8e3. Actual issuedrevision/party identity, recording separatefromPMdesignated independentverifier, evidence, canonicalresponse/carry, noexternalaccount/notification, typedidentity/privacy/off/exportaddressed. RootmustsettlelegacyunknownauthorshiprestrictionbeforeR3source; currentproposeddefaultblocksunknownlegacyissues andnarrowscoverage, notsettledrequirement. Packagepreparation/recorder-verifier/gatepolicystatedasdefaults/Open. UserchoiceaskedblockvsPMattestation; noanswerorapprovalyet. NoR3code/S35acceptance/053D16closure.

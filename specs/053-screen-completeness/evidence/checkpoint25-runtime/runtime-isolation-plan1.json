@@ -1,0 +1,24 @@
+{
+  "status": "ISOLATED_BUILD1_PASS_NORMAL_FOCUSED_API_TESTS1_EXECUTED",
+  "artifactsPath": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts",
+  "spaOutput": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint25-artifacts/bin/spa-wwwroot",
+  "retainedQA24": {
+    "apiPid": 4323,
+    "database": "hub_qa_checkpoint24",
+    "apiDll": "src/Hub.Api/bin/Release/net10.0/Hub.Api.dll",
+    "sha256": "80658bd2ad102063a6042355ff0d5fb417a5fc3428b2eb5b1ae67916e57145f3",
+    "preview8853Output": "src/Hub.Api/wwwroot"
+  },
+  "reason": "Do not overwrite retained QA24 runtime while explicit cleanup confirmation is pending. Separate output directories preserve service and database; this does not stop/delete or bypass rejected cleanup.",
+  "verifiedLocalSDK": "10.0.400 Microsoft.NET.DefaultOutputPaths.targets explicitly excludes old bin/obj when UseArtifactsOutput=true; artifacts remain underrepo so existing Contract/Registry root discovery can find Hub.slnx.",
+  "previewProxyConfig": "Existing vite.config.ts supports HUB_API_ORIGIN; a later distinct preview/API port may be used only after port/ownership checks. No current process restart authorized.",
+  "guards": [
+    "CSharp authors must all HOLD before compilation/test/generation",
+    "A/D and root app source must HOLD before production SPA build",
+    "No .NET and production Vite concurrently",
+    "Before/after retained API DLL hash and old served output parity",
+    "Use existing testFactory isolated test databases only; do not touch QA24",
+    "No new real runtime/API producer loan yet"
+  ],
+  "buildResult": "0errors1163warnings;606CSharpinputsmatchedatbuild;38/40focusedAPItests (R124PASS,Search2repairs pending)"
+}

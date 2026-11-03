@@ -1,0 +1,257 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="7e5eedda-f43c-424b-b381-cad4e40ae0d1" name="@Jays-MacBook-Pro 2026-11-01 09:32:23" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-11-01T09:32:23.0586050-04:00" queuing="2026-11-01T09:32:23.0586050-04:00" start="2026-11-01T09:32:15.1983360-04:00" finish="2026-11-01T09:32:36.0203480-04:00" />
+  <TestSettings name="default" id="b43ee18d-a74f-4352-a8b9-f48de8ac1575">
+    <Deployment runDeploymentRoot="_Jays-MacBook-Pro_2026-11-01_09_32_23" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="926ca0e6-4b43-47e7-8ea3-dcfed71146cc" testId="8a4bc952-b7b3-85f6-fbb1-bef4f7d060fd" testName="Hub.Tests.Api.ReportCatalogueViewsTests.Additions_are_absent_off_and_do_not_change_existing_rows_parameters_or_export_bytes" computerName="Jays-MacBook-Pro" duration="00:00:07.3863348" startTime="2026-11-01T09:32:15.6472170-04:00" endTime="2026-11-01T09:32:23.0415620-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="926ca0e6-4b43-47e7-8ea3-dcfed71146cc" />
+    <UnitTestResult executionId="4cbe94cd-f055-4c2f-b69f-440c7062f6b4" testId="d046ebd5-5153-773e-a8fd-b8d523d92316" testName="Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(code: &quot;allocations-by-source&quot;, query: &quot;from=2026-09-14&amp;weeks=2&amp;show=entries-without-proje&quot;···)" computerName="Jays-MacBook-Pro" duration="00:00:02.4591045" startTime="2026-11-01T09:32:33.5290540-04:00" endTime="2026-11-01T09:32:35.9881490-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4cbe94cd-f055-4c2f-b69f-440c7062f6b4" />
+    <UnitTestResult executionId="bbfeb556-af1f-43f4-8eca-ee248534d648" testId="50d9e0b4-32e7-cbd4-c76e-df417e2cd5bc" testName="Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(code: &quot;team-capacity&quot;, query: &quot;from=2026-09-14&amp;weeks=2&amp;includeMyDrafts=false&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:02.5307462" startTime="2026-11-01T09:32:26.0833910-04:00" endTime="2026-11-01T09:32:28.6119400-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="bbfeb556-af1f-43f4-8eca-ee248534d648" />
+    <UnitTestResult executionId="97d6a742-ba0f-4f71-a899-d4081758b4a4" testId="f7d96918-43d7-c55e-a4db-c3bf82b10644" testName="Hub.Tests.Api.ReportCatalogueViewsTests.Capture_uses_actual_supported_defaults_and_normalized_values_without_ui_state" computerName="Jays-MacBook-Pro" duration="00:00:03.0363997" startTime="2026-11-01T09:32:23.0465930-04:00" endTime="2026-11-01T09:32:26.0772950-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="97d6a742-ba0f-4f71-a899-d4081758b4a4" />
+    <UnitTestResult executionId="a33fa2e4-0838-4f15-bcac-e06a8e58d1c1" testId="82bedb35-5e43-04eb-a346-f80138268d91" testName="Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(code: &quot;allocations-by-source&quot;, query: &quot;from=2026-09-14&amp;weeks=2&amp;show=hours-by-source&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:07.5231528" startTime="2026-11-01T09:32:15.6472000-04:00" endTime="2026-11-01T09:32:23.1719010-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a33fa2e4-0838-4f15-bcac-e06a8e58d1c1" />
+    <UnitTestResult executionId="3851e0ae-cbe1-415f-a6e4-4d9ca8f5c7f9" testId="fa0ca875-b859-f048-59ed-9d30241b2b7a" testName="Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(code: &quot;task-hours&quot;, query: &quot;from=2026-09-14&amp;to=2026-09-20&amp;scope=mine&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:02.3787781" startTime="2026-11-01T09:32:31.1505230-04:00" endTime="2026-11-01T09:32:33.5288220-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3851e0ae-cbe1-415f-a6e4-4d9ca8f5c7f9" />
+    <UnitTestResult executionId="b6d4679c-aca6-47de-b09a-be5d8f8f3c18" testId="acea7c44-c1bc-43e8-eab9-28b0edc252cd" testName="Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(code: &quot;workload-employee&quot;, query: &quot;&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:02.5374856" startTime="2026-11-01T09:32:28.6122880-04:00" endTime="2026-11-01T09:32:31.1498700-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b6d4679c-aca6-47de-b09a-be5d8f8f3c18">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.Equal() Failure: Strings differ
+           ↓ (pos 0)
+Expected: "Total"
+Actual:   "Visible report total"
+           ↑ (pos 0)</Message>
+          <StackTrace>   at Hub.Tests.Api.ReportCapacityTaskInputsTests.&lt;AssertMatrixExport&gt;g__EqualValue|25_2(JsonNode expected, String actual) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReportCapacityTaskInputsTests.cs:line 266
+   at Hub.Tests.Api.ReportCapacityTaskInputsTests.AssertMatrixExport(JsonNode view, JsonArray originalRows, Byte[] bytes) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReportCapacityTaskInputsTests.cs:line 276
+   at Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(String code, String query) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReportCapacityTaskInputsTests.cs:line 328
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="c45596d9-0e01-4ddc-a7c7-cb61bbc11090" testId="73c14796-e906-ac6c-5c88-8218d917f4ee" testName="Hub.Tests.Api.TaskGroupingTests.Disabled_group_parameter_preserves_legacy_bytes_and_enabled_ungrouped_shape" computerName="Jays-MacBook-Pro" duration="00:00:07.3902803" startTime="2026-11-01T09:32:15.6466620-04:00" endTime="2026-11-01T09:32:23.0401030-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c45596d9-0e01-4ddc-a7c7-cb61bbc11090" />
+    <UnitTestResult executionId="f47d5984-f998-4d23-b66b-1a50f6c63f69" testId="67988d29-1c7c-9fb7-4bfc-f255bd8e96a6" testName="Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(code: &quot;workload-discipline&quot;, query: &quot;&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:02.9051088" startTime="2026-11-01T09:32:23.1720050-04:00" endTime="2026-11-01T09:32:26.0813190-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f47d5984-f998-4d23-b66b-1a50f6c63f69">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.Equal() Failure: Strings differ
+           ↓ (pos 0)
+Expected: "Total"
+Actual:   "Visible report total"
+           ↑ (pos 0)</Message>
+          <StackTrace>   at Hub.Tests.Api.ReportCapacityTaskInputsTests.&lt;AssertMatrixExport&gt;g__EqualValue|25_2(JsonNode expected, String actual) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReportCapacityTaskInputsTests.cs:line 266
+   at Hub.Tests.Api.ReportCapacityTaskInputsTests.AssertMatrixExport(JsonNode view, JsonArray originalRows, Byte[] bytes) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReportCapacityTaskInputsTests.cs:line 276
+   at Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(String code, String query) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReportCapacityTaskInputsTests.cs:line 328
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(code: &quot;workload-discipline&quot;, query: &quot;&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="67988d29-1c7c-9fb7-4bfc-f255bd8e96a6">
+      <Execution id="f47d5984-f998-4d23-b66b-1a50f6c63f69" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ReportCapacityTaskInputsTests" name="New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(code: &quot;workload-employee&quot;, query: &quot;&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="acea7c44-c1bc-43e8-eab9-28b0edc252cd">
+      <Execution id="b6d4679c-aca6-47de-b09a-be5d8f8f3c18" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ReportCapacityTaskInputsTests" name="New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ReportCatalogueViewsTests.Capture_uses_actual_supported_defaults_and_normalized_values_without_ui_state" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="f7d96918-43d7-c55e-a4db-c3bf82b10644">
+      <Execution id="97d6a742-ba0f-4f71-a899-d4081758b4a4" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ReportCatalogueViewsTests" name="Capture_uses_actual_supported_defaults_and_normalized_values_without_ui_state" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(code: &quot;allocations-by-source&quot;, query: &quot;from=2026-09-14&amp;weeks=2&amp;show=hours-by-source&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="82bedb35-5e43-04eb-a346-f80138268d91">
+      <Execution id="a33fa2e4-0838-4f15-bcac-e06a8e58d1c1" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ReportCapacityTaskInputsTests" name="New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ReportCatalogueViewsTests.Additions_are_absent_off_and_do_not_change_existing_rows_parameters_or_export_bytes" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="8a4bc952-b7b3-85f6-fbb1-bef4f7d060fd">
+      <Execution id="926ca0e6-4b43-47e7-8ea3-dcfed71146cc" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ReportCatalogueViewsTests" name="Additions_are_absent_off_and_do_not_change_existing_rows_parameters_or_export_bytes" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(code: &quot;task-hours&quot;, query: &quot;from=2026-09-14&amp;to=2026-09-20&amp;scope=mine&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="fa0ca875-b859-f048-59ed-9d30241b2b7a">
+      <Execution id="3851e0ae-cbe1-415f-a6e4-4d9ca8f5c7f9" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ReportCapacityTaskInputsTests" name="New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(code: &quot;allocations-by-source&quot;, query: &quot;from=2026-09-14&amp;weeks=2&amp;show=entries-without-proje&quot;···)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="d046ebd5-5153-773e-a8fd-b8d523d92316">
+      <Execution id="4cbe94cd-f055-4c2f-b69f-440c7062f6b4" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ReportCapacityTaskInputsTests" name="New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(code: &quot;team-capacity&quot;, query: &quot;from=2026-09-14&amp;weeks=2&amp;includeMyDrafts=false&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="50d9e0b4-32e7-cbd4-c76e-df417e2cd5bc">
+      <Execution id="bbfeb556-af1f-43f4-8eca-ee248534d648" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ReportCapacityTaskInputsTests" name="New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.TaskGroupingTests.Disabled_group_parameter_preserves_legacy_bytes_and_enabled_ungrouped_shape" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/debug/net10.0/hub.tests.dll" id="73c14796-e906-ac6c-5c88-8218d917f4ee">
+      <Execution id="c45596d9-0e01-4ddc-a7c7-cb61bbc11090" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.TaskGroupingTests" name="Disabled_group_parameter_preserves_legacy_bytes_and_enabled_ungrouped_shape" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="8a4bc952-b7b3-85f6-fbb1-bef4f7d060fd" executionId="926ca0e6-4b43-47e7-8ea3-dcfed71146cc" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d046ebd5-5153-773e-a8fd-b8d523d92316" executionId="4cbe94cd-f055-4c2f-b69f-440c7062f6b4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="50d9e0b4-32e7-cbd4-c76e-df417e2cd5bc" executionId="bbfeb556-af1f-43f4-8eca-ee248534d648" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f7d96918-43d7-c55e-a4db-c3bf82b10644" executionId="97d6a742-ba0f-4f71-a899-d4081758b4a4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="82bedb35-5e43-04eb-a346-f80138268d91" executionId="a33fa2e4-0838-4f15-bcac-e06a8e58d1c1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="fa0ca875-b859-f048-59ed-9d30241b2b7a" executionId="3851e0ae-cbe1-415f-a6e4-4d9ca8f5c7f9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="acea7c44-c1bc-43e8-eab9-28b0edc252cd" executionId="b6d4679c-aca6-47de-b09a-be5d8f8f3c18" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="73c14796-e906-ac6c-5c88-8218d917f4ee" executionId="c45596d9-0e01-4ddc-a7c7-cb61bbc11090" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="67988d29-1c7c-9fb7-4bfc-f255bd8e96a6" executionId="f47d5984-f998-4d23-b66b-1a50f6c63f69" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="9" executed="9" passed="7" failed="2" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.11)
+[xUnit.net 00:00:00.11]   Discovering: Hub.Tests
+[xUnit.net 00:00:00.22]   Discovered:  Hub.Tests
+[xUnit.net 00:00:00.24]   Starting:    Hub.Tests
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+warn: Microsoft.EntityFrameworkCore.Query[10103]
+      The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+[xUnit.net 00:00:10.68]       Assert.Equal() Failure: Strings differ
+[xUnit.net 00:00:10.68]                  ↓ (pos 0)
+[xUnit.net 00:00:10.68]       Expected: "Total"
+[xUnit.net 00:00:10.68]       Actual:   "Visible report total"
+[xUnit.net 00:00:10.68]                  ↑ (pos 0)
+[xUnit.net 00:00:10.68]       Stack Trace:
+[xUnit.net 00:00:10.68]         /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReportCapacityTaskInputsTests.cs(266,0): at Hub.Tests.Api.ReportCapacityTaskInputsTests.&lt;AssertMatrixExport&gt;g__EqualValue|25_2(JsonNode expected, String actual)
+[xUnit.net 00:00:10.68]         /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReportCapacityTaskInputsTests.cs(276,0): at Hub.Tests.Api.ReportCapacityTaskInputsTests.AssertMatrixExport(JsonNode view, JsonArray originalRows, Byte[] bytes)
+[xUnit.net 00:00:10.68]         /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReportCapacityTaskInputsTests.cs(328,0): at Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(String code, String query)
+[xUnit.net 00:00:10.68]         --- End of stack trace from previous location ---
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+[xUnit.net 00:00:15.75]       Assert.Equal() Failure: Strings differ
+[xUnit.net 00:00:15.75]                  ↓ (pos 0)
+[xUnit.net 00:00:15.75]       Expected: "Total"
+[xUnit.net 00:00:15.75]       Actual:   "Visible report total"
+[xUnit.net 00:00:15.75]                  ↑ (pos 0)
+[xUnit.net 00:00:15.75]       Stack Trace:
+[xUnit.net 00:00:15.75]         /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReportCapacityTaskInputsTests.cs(266,0): at Hub.Tests.Api.ReportCapacityTaskInputsTests.&lt;AssertMatrixExport&gt;g__EqualValue|25_2(JsonNode expected, String actual)
+[xUnit.net 00:00:15.75]         /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReportCapacityTaskInputsTests.cs(276,0): at Hub.Tests.Api.ReportCapacityTaskInputsTests.AssertMatrixExport(JsonNode view, JsonArray originalRows, Byte[] bytes)
+[xUnit.net 00:00:15.75]         /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReportCapacityTaskInputsTests.cs(328,0): at Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(String code, String query)
+[xUnit.net 00:00:15.75]         --- End of stack trace from previous location ---
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+[xUnit.net 00:00:20.59]   Finished:    Hub.Tests
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="Jays-MacBook-Pro" outcome="Error" timestamp="2026-11-01T09:32:26.0824180-04:00">
+        <Text>[xUnit.net 00:00:10.68]     Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(code: "workload-discipline", query: "") [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="Jays-MacBook-Pro" outcome="Error" timestamp="2026-11-01T09:32:31.1501600-04:00">
+        <Text>[xUnit.net 00:00:15.75]     Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(code: "workload-employee", query: "") [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

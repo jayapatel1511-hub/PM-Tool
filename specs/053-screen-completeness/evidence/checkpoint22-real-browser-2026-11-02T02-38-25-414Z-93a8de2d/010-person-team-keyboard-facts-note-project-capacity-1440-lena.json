@@ -1,0 +1,85 @@
+{
+  "name": "person-team-keyboard-facts-note-project-capacity",
+  "actor": "lena@hub.test",
+  "width": 1440,
+  "status": "PASS",
+  "startedAtUtc": "2026-11-02T02:38:36.969Z",
+  "facts": {
+    "personId": "01a19834-0bfd-75e7-80db-4cbc24e4bd88",
+    "memberId": "01a19847-7535-7f5f-8cbb-729a3eebf4ed",
+    "note": "Synthetic QA22 own Civil lead responsibility note yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy",
+    "actualFacts": {
+      "notices": {
+        "personType": null,
+        "startDate": null,
+        "endDate": null,
+        "starts": false,
+        "ends": false
+      },
+      "certifications": []
+    },
+    "actualOrganisation": {
+      "homeDiscipline": null,
+      "office": {
+        "id": "01a19834-0b4f-7581-90a5-bcb28e5b4840",
+        "name": "Head Office"
+      },
+      "supervisor": {
+        "id": "01a19834-0bfd-7ebf-920e-7297a3b5a0a7",
+        "name": "Sam Patel"
+      }
+    },
+    "renderedProjectIds": [
+      "01a19847-7051-74b1-81b9-2dc73cfe0447",
+      "01a19847-7532-7add-84a2-9140b503a54f",
+      "01a19847-6d4d-7e40-a69d-4fde45b64133",
+      "01a19a1f-0f9a-7908-b131-b7b41c90fd3b"
+    ],
+    "capacity": {
+      "status": "ACTUAL_SCOPED_API_VALUE",
+      "week": "2026-10-26",
+      "personId": "01a19834-0bfd-75e7-80db-4cbc24e4bd88",
+      "cell": {
+        "week": "2026-10-26",
+        "capacity": 40,
+        "timeAway": 0,
+        "additionalAvailability": 0,
+        "approved": 0,
+        "confirmed": 0,
+        "expected": 0,
+        "possible": 0,
+        "remaining": 40,
+        "taskEstimates": 0,
+        "unestimatedTasks": 0,
+        "overPlanned": false,
+        "underPlanned": false,
+        "staleEntries": 0,
+        "ownDraftHours": 0,
+        "holidayHours": 0,
+        "provisional": false
+      },
+      "partial": false,
+      "visible": "40 h free"
+    },
+    "panelScreenshot": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint22-real-browser-2026-11-02T02-38-25-414Z-93a8de2d/012-person-open-lena-1440.png",
+    "origin": {
+      "url": "http://127.0.0.1:8853/projects/QA22-PER-MVY51JAX-1DBD8677/team",
+      "top": 0,
+      "left": 0,
+      "focusId": "_r_1m_"
+    },
+    "returnedUrl": "http://127.0.0.1:8853/projects/QA22-PER-MVY51JAX-1DBD8677/team",
+    "focusReturned": true,
+    "scrollReturnedWithinPx": 1,
+    "contained": {
+      "viewport": 1440,
+      "document": 1440,
+      "content": {
+        "client": 1200,
+        "scroll": 1200
+      }
+    }
+  },
+  "screenshot": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint22-real-browser-2026-11-02T02-38-25-414Z-93a8de2d/013-lena-1440-person-team-keyboard-facts-note-project-capacity.png",
+  "finishedAtUtc": "2026-11-02T02:38:38.562Z"
+}

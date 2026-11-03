@@ -1,0 +1,1 @@
+src/pages/admin/Admin.tsx(75,104): error TS2339: Property 'ClientRow' does not exist on type '{ ActionConverted: { id: string; rowVersion: number; status: string; taskId: string; taskKey: string; }; ActionCreated: { id: string; key: string; rowVersion: number; warnings: string[]; }; ActionDecisionRef: { ...; }; ... 884 more ...; WriteResponse: { ...; }; }'.

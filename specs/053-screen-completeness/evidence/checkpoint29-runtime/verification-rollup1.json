@@ -1,0 +1,56 @@
+{
+  "generation": 57,
+  "checkpoint": 29,
+  "status": "PASS_LOCAL_BOUNDED",
+  "atUtc": "2026-11-02T18:52:43.946816+00:00",
+  "locallyClosedSlices": [
+    "S15",
+    "S36"
+  ],
+  "checkedSlices": 41,
+  "totalSlices": 49,
+  "partialSlices": [
+    "S12-A",
+    "S45-A"
+  ],
+  "providerDistinctFinalPasses": 126,
+  "calendarWireRerunOverlaps": 19,
+  "nodeDistinctFinalPasses": 29,
+  "browserFinal": {
+    "Calendar": "calendar-browser4",
+    "Reviews": "reviews-browser3",
+    "Bulk": "bulk-browser5",
+    "Notifications": "notifications-browser2"
+  },
+  "source": {
+    "csharp": 668,
+    "web": 259,
+    "bundleFiles": 143,
+    "publicServedFiles": 142,
+    "retainedPriorFiles": 1143
+  },
+  "visualReview": ".review/checkpoint29-review/index.html",
+  "visualCaptures": 8,
+  "boundary": {
+    "browserHTTP": "finite synthetic",
+    "provider": "separate PostgreSQL-backed API tests",
+    "newLiveBrowserAPIJoin": false,
+    "newRealAPI": false,
+    "flagsActivated": false,
+    "committed": false,
+    "pushed": false,
+    "deployed": false,
+    "humanAccepted": false,
+    "goalComplete": false
+  },
+  "remainingSlices": [
+    "S12",
+    "S16",
+    "S35",
+    "S37",
+    "S38",
+    "S45",
+    "S47",
+    "S49"
+  ]
+}

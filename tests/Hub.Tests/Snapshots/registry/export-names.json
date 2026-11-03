@@ -16,5 +16,7 @@
   "Phase",
   "ProjectType",
   "DeliverableType",
-  "ExternalParty"
+  "ExternalParty",
+  "IssuePurpose",
+  "IssueReturnCode"
 ]

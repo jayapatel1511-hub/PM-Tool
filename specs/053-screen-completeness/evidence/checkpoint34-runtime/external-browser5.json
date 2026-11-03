@@ -1,0 +1,32 @@
+{
+  "exitCode": 0,
+  "args": [
+    "node",
+    "tests/external-review.cjs"
+  ],
+  "base": "http://127.0.0.1:8878",
+  "visualSystem": true,
+  "atUtc": "2026-11-03T04:45:28.954633+00:00",
+  "scope": "Actual isolated SPA; finite synthetic intercepted HTTP; no real business writes or mail",
+  "driverSHA256": "b681e4d4bf3083bc844d760b1c14c302eb9e8e884760afa28de573414c394118",
+  "tail": [
+    "    \"409 preserves typed draft and originally selected issue/party/code/package versions after normal options reread; no silent promotion\",",
+    "    \"Lost response after synthetic commit retries byte-identical body/request ID; later 403 stays uncertain; explicit success produces one synthetic receipt\",",
+    "    \"Malformed success is unconfirmed and locks the exact command rather than clearing the draft\",",
+    "    \"Normal command 403 retains editable draft; options 403 and canRecord=false disable retained form; parent 403 hides portal without unmounting draft; explicit reread restores it; reads issue zero writes\",",
+    "    \"375px real form has no overflow; Enter opens and cancels; dirty Keep editing preserves text; Discard restores actual opener focus and list filters\",",
+    "    \"Issued new-round parent403/404 and successful canCoordinate=false hide confirmation with focus on exact parent title, preserve mounted draft/source/assignment, recover only after explicit successful reread, and dirty Cancel naturally focuses the current exact new-round trigger\",",
+    "    \"Create and next round use actual issued IDs plus empty internal IDs, Unknown catalog revisions disabled, captured-author exclusion, supplementary false, immutable source mode, reviewed package version\",",
+    "    \"Role-off hides record/designation; register_screens off has no new controls/reads and retains exact internal create body\"",
+    "  ],",
+    "  \"counters\": {",
+    "    \"commands\": 12,",
+    "    \"unexpectedGets\": 0,",
+    "    \"unexpectedWrites\": 0,",
+    "    \"pageErrors\": 0",
+    "  },",
+    "  \"desktopAnd375\": true,",
+    "  \"visualSystem\": true",
+    "}"
+  ]
+}

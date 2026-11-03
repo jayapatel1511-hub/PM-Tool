@@ -1,0 +1,15 @@
+# G57 S12-A exact9 review repair loan
+
+Original nine A paths only reopen, baseline .review/checkpoint29-bulk-pre-repair. No extra shared files without exact loan; root owns HubDb/Notify canonical extraction and DB-scoped capture. No compiler/test/types/gen/EF/browser/helper/services/flags/commits/Accepted. All other held work remains preserved.
+
+Backend P2: known current discipline-review authorship conflict in canonical HubDb savehook must be per-row preview/refusal BEFORE staging. Root exposes internal HubDb.AllowSelfReviewForAuthorship(ct=default) ->Task<bool> using SAME actual DB setting (not a stale cloned flag) and DemandReviewAuthorship(Guid? deliverableId,Guid[] authorIds,bool allowSelf,CancellationToken ct=default) ->Task with SAME existing current-round/package/manifest query. Savehook uses them too; no rule duplication. Validate prospective assign/setDeliverable authors (after AssigneeId +existing CreatedBy) only when those fields actually change, matching savehook; same-currentnoop should not invent a new refusal. Mixed valid+conflicting row cases for assignment and deliverable-link required.
+
+Backend P2: savehook TaskPickupLifecycle constructed Notifier outside capture. Root now shares transient capture through SAME scoped HubDb (not static/global), so savehook-created Notifier joins request capture. Preserve canonical offer close/audit obligations. Author actual multiple-open-offer/task_pickup-on reassignment/cancel case: one summary per recipient/channel, all IDs in terminal receipt, no duplicates afterretry. Add zero-shift side-effect/noop and providerrollback full outbox/assignment-publication assertions.
+
+Frontend P2: dialog retains old rows while selection resets after actor/filter/project scope changes. Bind session to scope; close/invalidate UNSUBMITTED old session immediately, guard navigation during pending/uncertain recovery so original immutable request isn't lost or repurposed, and NEVER retry original actor intent under another actor. No old Apply after scope-change/reset. User's actual browser Back/Forward path must be exercised; no direct history/cache injection.
+
+Frontend P2: completed Close clears selection/removes opener toolbar before natural focus restoration. Provide stable row/list fallback, including filtered-out changed rows, and verify natural keyboard focus+scroll. Do not focus detached opener or temporarily fake DOM.
+
+Driver gaps to close: scope-change while dialog, same original request duringuncertainty, stable focus/scroll onclose/refetch, choose actual assignee (notonlyclear), DIFFERENT deliverable mappings across selected projects, flag-on project-list workflow, departure fixture MUST honor open and include excluded closed task. Every seven op remains distinct. Use real interactions, finite API allowlist, exact version/request checks; all execution root-owned.
+
+S12-B/C Undo remainsopen, no new offer/routes/inverse scope. Send early C#3fileHOLD+hashes once stable to allow root.NET after D3C#hold while UI/driver repairs continue; no FEtypes/Vite until FEHOLD. Final9 hashes READY/HOLD plus concrete unrun acceptance notes.

@@ -1,0 +1,30 @@
+{
+  "exitCode": 1,
+  "args": [
+    "/opt/homebrew/bin/dotnet",
+    "build",
+    "src/Hub.Api/Hub.Api.csproj",
+    "-c",
+    "Release",
+    "--artifacts-path",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint31-artifacts",
+    "--disable-build-servers",
+    "-m:1",
+    "-p:UseSharedCompilation=false",
+    "-p:NuGetAudit=false",
+    "-p:RestoreIgnoreFailedSources=true"
+  ],
+  "atUtc": "2026-11-02T21:35:15.485233+00:00",
+  "configWatching": false,
+  "csharpSourceFiles": 686,
+  "tail": [
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Data/HubDb.cs(1322,42): error CS0305: Using the generic type 'PropertyEntry<TEntity, TProperty>' requires 2 type arguments [/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Hub.Api.csproj]",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Data/HubDb.cs(1341,52): error CS1503: Argument 1: cannot convert from 'Microsoft.EntityFrameworkCore.ChangeTracking.PropertyEntry<Hub.Api.Data.NoticeDeliveryIntent, System.Guid?>' to 'Microsoft.EntityFrameworkCore.ChangeTracking.PropertyEntry<System.Guid?>' [/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Hub.Api.csproj]",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Data/HubDb.cs(1373,116): error CS1503: Argument 1: cannot convert from 'Microsoft.EntityFrameworkCore.ChangeTracking.PropertyEntry<Hub.Api.Data.NoticeDeliverySlot, System.Guid?>' to 'Microsoft.EntityFrameworkCore.ChangeTracking.PropertyEntry<System.Guid?>' [/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Hub.Api.csproj]",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Data/HubDb.cs(1375,107): error CS1503: Argument 1: cannot convert from 'Microsoft.EntityFrameworkCore.ChangeTracking.PropertyEntry<Hub.Api.Data.NoticeDeliverySlot, System.Guid?>' to 'Microsoft.EntityFrameworkCore.ChangeTracking.PropertyEntry<System.Guid?>' [/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Hub.Api.csproj]",
+    "    14 Warning(s)",
+    "    4 Error(s)",
+    "",
+    "Time Elapsed 00:01:00.06"
+  ]
+}

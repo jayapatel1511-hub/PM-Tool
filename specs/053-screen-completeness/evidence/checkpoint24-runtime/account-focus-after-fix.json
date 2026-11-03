@@ -1,0 +1,56 @@
+[
+  {
+    "stage": "Person open from account",
+    "url": "http://127.0.0.1:8853/home?projects=all&panel=Person%3A00000000-0000-0000-0000-000000000002",
+    "state": {
+      "usr": {
+        "recordContextReturn": {
+          "url": "/home?projects=all",
+          "scrollTop": 0,
+          "scrollLeft": 0,
+          "focusId": "account-menu-trigger",
+          "parent": null
+        }
+      },
+      "key": "n0t1jeh2",
+      "idx": 2
+    },
+    "active": {
+      "id": "",
+      "tag": "BUTTON",
+      "text": ""
+    },
+    "account": "<button data-slot=\"dropdown-menu-trigger\" data-variant=\"ghost\" data-size=\"default\" class=\"inline-flex shrink-0 items-center justify-center rounded-md text-sm font-medium whitespace-nowrap transition-colors duration-[120ms] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none aria-invalid:border-destructive [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 hover:bg-muted hover:text-foreground disabled:text-disabled-foreground min-h-(--control-h) py-2 has-[&gt;svg]:px-3 gap-2 px-1.5 lg:px-2\" id=\"account-menu-trigger\" aria-label=\"Account\" type=\"button\" aria-haspopup=\"menu\" aria-expanded=\"false\" data-state=\"closed\"><span title=\"Alex Chen\" aria-hidden=\"true\" data-visual-decoration=\"person\" data-accent=\"rose\" class=\"inline-grid shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card font-semibold text-(--acc-fg) size-8 text-xs\">AC</span><span class=\"hidden max-w-40 truncate 2xl:inline\">Alex Chen</span></button>",
+    "menus": 0,
+    "dialogs": [
+      {
+        "state": "open",
+        "hidden": null
+      }
+    ]
+  },
+  {
+    "stage": "Returned from account Person",
+    "url": "http://127.0.0.1:8853/home?projects=all",
+    "state": {
+      "usr": {
+        "recordContextReturn": null,
+        "recordContextRestore": {
+          "scrollTop": 0,
+          "scrollLeft": 0,
+          "focusId": "account-menu-trigger"
+        }
+      },
+      "key": "fmh8h2p4",
+      "idx": 2
+    },
+    "active": {
+      "id": "account-menu-trigger",
+      "tag": "BUTTON",
+      "text": "ACAlex Chen"
+    },
+    "account": "<button data-slot=\"dropdown-menu-trigger\" data-variant=\"ghost\" data-size=\"default\" class=\"inline-flex shrink-0 items-center justify-center rounded-md text-sm font-medium whitespace-nowrap transition-colors duration-[120ms] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none aria-invalid:border-destructive [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 hover:bg-muted hover:text-foreground disabled:text-disabled-foreground min-h-(--control-h) py-2 has-[&gt;svg]:px-3 gap-2 px-1.5 lg:px-2\" id=\"account-menu-trigger\" aria-label=\"Account\" type=\"button\" aria-haspopup=\"menu\" aria-expanded=\"false\" data-state=\"closed\"><span title=\"Alex Chen\" aria-hidden=\"true\" data-visual-decoration=\"person\" data-accent=\"rose\" class=\"inline-grid shrink-0 place-items-center rounded-full border-[1.5px] border-(--acc-stripe) bg-card font-semibold text-(--acc-fg) size-8 text-xs\">AC</span><span class=\"hidden max-w-40 truncate 2xl:inline\">Alex Chen</span></button>",
+    "menus": 0,
+    "dialogs": []
+  }
+]

@@ -41,12 +41,24 @@ public static class PeopleScope
     {
         var users = await db.Users.AsNoTracking().Where(x => x.IsActive)
             .Select(x => new { x.Id, x.SupervisorId, UnitId = EF.Property<Guid?>(x, "UnitId") }).ToListAsync();
-        if (actor.Admin || actor.Executive) return users.Select(x => x.Id).ToHashSet();
-        if (!includeLedUnits && !includeIndirectReports) return users.Where(x => x.SupervisorId == actor.Id).Select(x => x.Id).ToHashSet();
+        var people = users.Select(x => new OrgTree.Person(x.Id, x.SupervisorId, x.UnitId)).ToArray();
+        if (actor.Admin || actor.Executive || !includeLedUnits && !includeIndirectReports)
+            return FromSnapshot(actor, people, [], includeIndirectReports, includeLedUnits);
         var units = await db.Set<OrgUnit>().AsNoTracking().Select(x => new OrgTree.Unit(x.Id, x.ParentId,
             db.Set<OrgLevel>().Where(l => l.Id == x.LevelId).Select(l => l.SortOrder).FirstOrDefault(), x.LeaderId)).ToListAsync();
-        var people = users.Select(x => new OrgTree.Person(x.Id, x.SupervisorId, x.UnitId)).ToArray();
-        return [.. OrgTree.PeopleScope(people.FirstOrDefault(x => x.Id == actor.Id) ?? new(actor.Id, null, null), people, includeLedUnits ? units : [], includeIndirectReports)];
+        return FromSnapshot(actor, people, units, includeIndirectReports, includeLedUnits);
+    }
+
+    /// The same read-scope calculation over already loaded facts; this never grants write authorization.
+    public static HashSet<Guid> FromSnapshot(Actor actor, IReadOnlyCollection<OrgTree.Person> people,
+        IReadOnlyCollection<OrgTree.Unit> units, bool includeIndirectReports = false, bool includeLedUnits = true)
+    {
+        var active = people.Where(person => person.Active).ToArray();
+        if (actor.Admin || actor.Executive) return active.Select(person => person.Id).ToHashSet();
+        if (!includeLedUnits && !includeIndirectReports)
+            return active.Where(person => person.SupervisorId == actor.Id).Select(person => person.Id).ToHashSet();
+        return [.. OrgTree.PeopleScope(active.FirstOrDefault(person => person.Id == actor.Id) ?? new(actor.Id, null, null),
+            active, includeLedUnits ? units : [], includeIndirectReports)];
     }
 
     public static async Task<HashSet<Guid>> LoadUnit(HubDb db, Actor actor, Guid unitId)

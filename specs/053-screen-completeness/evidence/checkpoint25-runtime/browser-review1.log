@@ -1,0 +1,19 @@
+locator.selectOption: Timeout 15000ms exceeded.
+Call log:
+[2m  - waiting for locator('#finding-resolver')[22m
+[2m    - locator resolved to <select id="finding-resolver" class="h-(--control-h) w-full rounded-md border border-input bg-card px-3 text-sm outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:border-border disabled:bg-disabled disabled:text-disabled-foreground">…</select>[22m
+[2m  - attempting select option action[22m
+[2m    - waiting for element to be visible and enabled[22m
+[2m  - element was detached from the DOM, retrying[22m
+
+    at choose (/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/review-register.cjs:84:64)
+    at async /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/review-register.cjs:162:147 {
+  log: [
+    "  - waiting for locator('#finding-resolver')",
+    '    - locator resolved to <select id="finding-resolver" class="h-(--control-h) w-full rounded-md border border-input bg-card px-3 text-sm outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:border-border disabled:bg-disabled disabled:text-disabled-foreground">…</select>',
+    '  - attempting select option action',
+    '    - waiting for element to be visible and enabled',
+    '  - element was detached from the DOM, retrying'
+  ],
+  name: 'TimeoutError'
+}

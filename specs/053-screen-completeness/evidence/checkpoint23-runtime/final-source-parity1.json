@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "capturedAtUtc": "2026-11-02T06:18:35.053253+00:00",
+  "compiledCSharpCompared": 593,
+  "compiledCSharpChanges": [],
+  "webComparedToBuild1": 436,
+  "webChangesSinceBuild1": [
+    "web/src/pages/projects/Changes.tsx",
+    "web/src/pages/projects/Handoffs.tsx",
+    "web/src/pages/projects/Meetings.tsx",
+    "web/src/pages/projects/Registers.tsx",
+    "web/src/pages/projects/TaskPanel.tsx",
+    "web/src/pages/projects/Tasks.tsx",
+    "web/tests/person-organisation-surfaces.cjs",
+    "web/tests/person-surface-completeness.cjs",
+    "web/tests/person-surface-completeness.fixture.cjs",
+    "web/tests/platform-fixtures.cjs",
+    "web/tests/work-seen-state.cjs"
+  ],
+  "note": "Build2 recompiled reviewed detail/private-cache app changes. Later fixture/test repairs do not change served app; separate final app manifest next."
+}

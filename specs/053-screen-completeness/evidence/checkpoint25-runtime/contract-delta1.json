@@ -1,0 +1,49 @@
+{
+  "atUtc": "2026-11-02T09:44:39.463311+00:00",
+  "addedPaths": [
+    "/api/v1/projects/{projectId}/review-findings"
+  ],
+  "removedPaths": [],
+  "addedSchemas": [
+    "ReviewRegisterActionability",
+    "ReviewRegisterDiscipline",
+    "ReviewRegisterFilters",
+    "ReviewRegisterOptions",
+    "ReviewRegisterOriginator",
+    "ReviewRegisterPage",
+    "ReviewRegisterPerson",
+    "ReviewRegisterRow",
+    "ReviewRegisterSource",
+    "SearchScreenAppliedFilters",
+    "SearchScreenDisciplineChoice",
+    "SearchScreenMetadata",
+    "SearchScreenProjectChoice",
+    "SearchScreenTab"
+  ],
+  "removedSchemas": [],
+  "changedExistingSchemas": [
+    "ReviewFindingLocation",
+    "SearchResponse"
+  ],
+  "searchParams": [
+    "q",
+    "type",
+    "includeArchived",
+    "limit",
+    "page",
+    "projectId",
+    "status",
+    "disciplineId"
+  ],
+  "reviewRegisterParams": [
+    "projectId",
+    "DisciplineId",
+    "Severity",
+    "OriginatorKind",
+    "OriginatorId",
+    "ResolverId",
+    "AllRounds",
+    "Page",
+    "PageSize"
+  ]
+}

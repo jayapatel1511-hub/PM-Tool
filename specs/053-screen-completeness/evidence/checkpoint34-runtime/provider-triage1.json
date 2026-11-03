@@ -1,0 +1,18 @@
+{
+  "run": "external-provider1.json",
+  "total": 26,
+  "passed": 22,
+  "failed": 4,
+  "fixtureRepairs": [
+    "Feature-off reference metadata absent/cached; fresh gated reference read plus real configured seed ID for off setup",
+    "Actual source removal requires PM, not coordinator-only Marc"
+  ],
+  "productionDefect": {
+    "test": "Explicit_carry_keeps_incoming_identity_resets_response_and_rechecks_independence_against_both_issues",
+    "expected": "400 and no effects for inherited verifier who authored next issue",
+    "actual": "200 copies conflicting inherited verifier",
+    "authority": "G61 frozen contract line63; G62 explicit clarification",
+    "owner": "C Reviews.cs only"
+  },
+  "rerun": "Only affected4 after source/fixture repair, preserve22passed evidence"
+}

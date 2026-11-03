@@ -29,6 +29,124 @@ public sealed class AvailabilityBuildTests(HubFactory f)
     }
     async Task<JsonNode> View(Guid person, string as_ = TestData.Sam) => await (await f.As(as_).GetAsync($"/api/v1/planning/availability?from={W:yyyy-MM-dd}&through={W.AddDays(6):yyyy-MM-dd}&personId={person}")).Json();
 
+    sealed record ManagementIntent(Guid PersonId, string Source, Func<string, Task<HttpResponseMessage>> Send, Action<JsonNode> AssertSaved);
+
+    async Task<ManagementIntent> ValidManagementIntent(string operation)
+    {
+        var person = await Person(); var sam = f.As(TestData.Sam);
+        if (operation == "manual")
+        {
+            var initial = await (await sam.Post("/api/v1/planning/leave/manual", new { personId = person.Id, sourceSystem = person.Source,
+                externalId = "synthetic-readonly-manual", fromDate = W, throughDate = W, status = "Approved", rowVersion = 0 })).Json();
+            var id = initial.G("id"); var version = initial.I("rowVersion");
+            var body = new { personId = person.Id, sourceSystem = person.Source, externalId = "synthetic-readonly-manual",
+                fromDate = W, throughDate = W.AddDays(1), status = "Approved", rowVersion = version };
+            return new(person.Id, person.Source, who => f.As(who).Post("/api/v1/planning/leave/manual", body), result => {
+                Assert.Equal(["id", "rowVersion"], Keys(result)); Assert.Equal(id, result.G("id")); Assert.Equal(version + 1, result.I("rowVersion"));
+                Assert.Equal(W.AddDays(1), f.Db(db => db.ApprovedLeaves.Single(row => row.Id == id).ThroughDate));
+            });
+        }
+        if (operation == "schedule")
+        {
+            var path = $"/api/v1/planning/schedules/{person.Id}";
+            var initial = await (await sam.Put(path, new { fromDate = W, weeklyHours = 40m, workingDays = new[] { 1, 2, 3, 4, 5 }, rowVersion = 0 })).Json();
+            var id = initial.G("id"); var version = initial.I("rowVersion");
+            var body = new { fromDate = W, weeklyHours = 35m, workingDays = new[] { 1, 2, 3, 4, 5 }, rowVersion = version };
+            return new(person.Id, person.Source, who => f.As(who).Put(path, body), result => {
+                Assert.Equal(["id", "rowVersion"], Keys(result)); Assert.Equal(id, result.G("id")); Assert.Equal(version + 1, result.I("rowVersion"));
+                Assert.Equal(35m, f.Db(db => db.PersonSchedules.Single(row => row.Id == id).WeeklyHours));
+            });
+        }
+        Assert.Equal("reconcile", operation);
+        await Apply(await Preview(Csv(person.Source)));
+        var leave = f.Db(db => db.ApprovedLeaves.Single(row => row.PersonId == person.Id && row.ExternalId == "L-1").Id);
+        // Explicit legacy-unverified source setup, as in the existing reconciliation contract test; commands below are real HTTP.
+        await f.DbAsync(async db => {
+            db.AvailabilityOverrides.AddRange(new PersonAvailabilityOverride { PersonId = person.Id, WorkDate = W.AddDays(1), AvailableHours = 0, Category = AvailabilityCategory.Unavailable, RowVersion = 1 },
+                new PersonAvailabilityOverride { PersonId = person.Id, WorkDate = W.AddDays(2), AvailableHours = 0, Category = AvailabilityCategory.Unavailable, RowVersion = 1 });
+            return await db.SaveChangesAsync();
+        });
+        var firstVersion = f.Db(db => db.AvailabilityOverrides.Single(row => row.PersonId == person.Id && row.WorkDate == W.AddDays(1)).RowVersion);
+        var first = await (await sam.Post("/api/v1/planning/leave/reconcile", new { personId = person.Id, leaveId = leave,
+            dates = new[] { new { workDate = W.AddDays(1), rowVersion = firstVersion } } })).Json();
+        Assert.Equal(1, first.I("count"));
+        var observed = f.Db(db => db.AvailabilityOverrides.Single(row => row.PersonId == person.Id && row.WorkDate == W.AddDays(2)));
+        Assert.Null(observed.ReconciledLeaveId);
+        var reconcile = new { personId = person.Id, leaveId = leave, dates = new[] { new { workDate = observed.WorkDate, rowVersion = observed.RowVersion } } };
+        return new(person.Id, person.Source, who => f.As(who).Post("/api/v1/planning/leave/reconcile", reconcile), result => {
+            Assert.Equal(["count"], Keys(result)); Assert.Equal(1, result.I("count"));
+            Assert.Equal(leave, f.Db(db => db.AvailabilityOverrides.Single(row => row.Id == observed.Id).ReconciledLeaveId));
+            Assert.Equal(observed.RowVersion + 1, f.Db(db => db.AvailabilityOverrides.Single(row => row.Id == observed.Id).RowVersion));
+        });
+    }
+
+    string ManagementState(ManagementIntent intent) => f.Db(db => JsonSerializer.Serialize(new {
+        Person = db.Users.AsNoTracking().Where(row => row.Id == intent.PersonId).ToArray(),
+        Leaves = db.ApprovedLeaves.AsNoTracking().Where(row => row.PersonId == intent.PersonId).OrderBy(row => row.Id).ToArray(),
+        Schedules = db.PersonSchedules.AsNoTracking().Where(row => row.PersonId == intent.PersonId).OrderBy(row => row.Id).ToArray(),
+        Overrides = db.AvailabilityOverrides.AsNoTracking().Where(row => row.PersonId == intent.PersonId).OrderBy(row => row.Id).ToArray(),
+        CapacityVersions = db.PersonDateVersions.AsNoTracking().Where(row => row.PersonId == intent.PersonId).OrderBy(row => row.WorkDate).ToArray(),
+        ImportState = db.LeaveImportStates.AsNoTracking().Where(row => row.SourceSystem == intent.Source).ToArray(),
+        Activity = db.ActivityLog.AsNoTracking().OrderBy(row => row.Id).ToArray(), Outbox = db.Outbox.AsNoTracking().OrderBy(row => row.Id).ToArray(),
+        Notices = db.Notifications.AsNoTracking().OrderBy(row => row.Id).ToArray(), Emails = db.Emails.AsNoTracking().OrderBy(row => row.Id).ToArray()
+    }));
+
+    [Theory]
+    [InlineData("manual")] [InlineData("reconcile")] [InlineData("schedule")]
+    public async Task Management_commands_refuse_read_only_supervisor_without_writes_and_restore_supervisor_success(string operation)
+    {
+        var intent = await ValidManagementIntent(operation); var samId = d.User(TestData.Sam);
+        Assert.Equal(samId, f.Db(db => db.Users.Single(user => user.Id == intent.PersonId).SupervisorId));
+        // Resolve real personas before the no-write snapshots, so JIT identity setup is not mistaken for a command effect.
+        foreach (var who in new[] { TestData.Lena, TestData.Alex })
+        {
+            var me = await (await f.As(who).GetAsync("/api/v1/me")).Json(); Assert.False(me["capabilities"]!["admin"]!.GetValue<bool>());
+            if (who == TestData.Lena) Assert.Contains(SystemRole.Supervisor, me["systemRoles"]!.AsArray().Select(role => role!.GetValue<string>()));
+            var before = ManagementState(intent); var refused = await (await intent.Send(who)).Json(403);
+            Assert.Equal("forbidden", refused.S("code")); Assert.Equal(global::Hub.Api.Text.Get("perm.supervised_staff"), refused.S("detail"));
+            Assert.Equal(before, ManagementState(intent));
+        }
+        var original = await (await f.As(TestData.Sam).GetAsync("/api/v1/me")).Json();
+        Assert.False(original["capabilities"]!["readOnly"]!.GetValue<bool>());
+        Assert.DoesNotContain(SystemRole.ReadOnly, original["systemRoles"]!.AsArray().Select(role => role!.GetValue<string>()));
+        await (await f.As(TestData.Admin).Post($"/api/v1/admin/users/{samId}/roles", new { role = SystemRole.ReadOnly })).Json(204);
+        try
+        {
+            var current = await (await f.As(TestData.Sam).GetAsync("/api/v1/me")).Json();
+            var roles = current["systemRoles"]!.AsArray().Select(role => role!.GetValue<string>()).ToHashSet();
+            Assert.Contains(SystemRole.Supervisor, roles); Assert.Contains(SystemRole.ReadOnly, roles); Assert.DoesNotContain(SystemRole.Admin, roles);
+            Assert.True(current["capabilities"]!["readOnly"]!.GetValue<bool>());
+            var actor = new Actor(samId, true, roles); Assert.Equal("perm.read_only", Permissions.ActOnStaff(actor, samId).Why);
+            var before = ManagementState(intent); var refused = await (await intent.Send(TestData.Sam)).Json(403);
+            Assert.Equal("forbidden", refused.S("code")); Assert.Equal(global::Hub.Api.Text.Get("perm.read_only"), refused.S("detail"));
+            Assert.Equal(before, ManagementState(intent));
+        }
+        finally { await (await f.As(TestData.Admin).DeleteAsync($"/api/v1/admin/users/{samId}/roles/{SystemRole.ReadOnly}")).Json(204); }
+        var restored = await (await f.As(TestData.Sam).GetAsync("/api/v1/me")).Json(); Assert.False(restored["capabilities"]!["readOnly"]!.GetValue<bool>());
+        intent.AssertSaved(await (await intent.Send(TestData.Sam)).Json());
+    }
+
+    [Theory]
+    [InlineData("manual")] [InlineData("reconcile")] [InlineData("schedule")]
+    public async Task Management_commands_preserve_canonical_admin_with_stored_read_only_role(string operation)
+    {
+        var intent = await ValidManagementIntent(operation); var adminId = d.User(TestData.Admin);
+        var original = await (await f.As(TestData.Admin).GetAsync("/api/v1/me")).Json();
+        Assert.DoesNotContain(SystemRole.ReadOnly, original["systemRoles"]!.AsArray().Select(role => role!.GetValue<string>()));
+        await (await f.As(TestData.Admin).Post($"/api/v1/admin/users/{adminId}/roles", new { role = SystemRole.ReadOnly })).Json(204);
+        try
+        {
+            var current = await (await f.As(TestData.Admin).GetAsync("/api/v1/me")).Json();
+            var roles = current["systemRoles"]!.AsArray().Select(role => role!.GetValue<string>()).ToHashSet();
+            Assert.Contains(SystemRole.Admin, roles); Assert.Contains(SystemRole.ReadOnly, roles); Assert.True(current["capabilities"]!["admin"]!.GetValue<bool>());
+            Assert.False(current["capabilities"]!["readOnly"]!.GetValue<bool>());
+            var actor = new Actor(adminId, true, roles); Assert.False(actor.ReadOnly); Assert.True(Permissions.ActOnStaff(actor, d.User(TestData.Sam)));
+            intent.AssertSaved(await (await intent.Send(TestData.Admin)).Json());
+        }
+        finally { await (await f.As(TestData.Admin).DeleteAsync($"/api/v1/admin/users/{adminId}/roles/{SystemRole.ReadOnly}")).Json(204); }
+        Assert.False((await (await f.As(TestData.Admin).GetAsync("/api/v1/me")).Json())["capabilities"]!["readOnly"]!.GetValue<bool>());
+    }
+
     [Fact]
     public async Task HR_import_is_idempotent_explicit_cancellation_restores_capacity_and_no_missing_row_cancels()
     {

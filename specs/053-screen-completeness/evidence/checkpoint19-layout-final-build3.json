@@ -1,0 +1,123 @@
+{
+  "base": "http://127.0.0.1:5088",
+  "project": "SYN-JOIN19-1101",
+  "reports": [
+    {
+      "name": "employee",
+      "user": "priya@hub.test",
+      "url": "http://127.0.0.1:5088/reports/workload-employee?projectId=01a195dd-3df4-797f-b1ea-b2dbb79b6d75",
+      "rows": 2,
+      "firstDataRow": {
+        "x": 553,
+        "y": 379.5,
+        "width": 11854.5,
+        "height": 57
+      },
+      "docWidth": 1440,
+      "bodyWidth": 1440,
+      "namedRegions": 1,
+      "controlsVisible": true,
+      "formulaVisible": true,
+      "coverageVisible": true,
+      "rowText": "Alex Chen\tSam Patel\t40\tPartial project scope\t0\t40\t0\t0\t0\t20\t40\t0\t0\t20\t0\t40\t0\t0\t0\t0\t40\t0\t0\t0\t0\t40\t0\t0\t0\t0\t40\t0\t0\t0\t0\t40\t0\t0\t0\t0\t40\t0\t0\t0\t0\t2\t0\t0\t1\tOK",
+      "mobile": {
+        "docWidth": 375,
+        "bodyWidth": 375,
+        "innerRegions": [
+          {
+            "tag": "DIV",
+            "scrollWidth": 11855,
+            "clientWidth": 341
+          }
+        ]
+      }
+    },
+    {
+      "name": "discipline",
+      "user": "priya@hub.test",
+      "url": "http://127.0.0.1:5088/reports/workload-discipline",
+      "rows": 2,
+      "firstDataRow": {
+        "x": 553,
+        "y": 379.5,
+        "width": 1780.8125,
+        "height": 37
+      },
+      "docWidth": 1440,
+      "bodyWidth": 1440,
+      "namedRegions": 1,
+      "controlsVisible": true,
+      "formulaVisible": false,
+      "coverageVisible": true,
+      "rowText": "Civil\t0\t20\t0\t0\t0\t0\t0\t0\t0\t2\t0\t1",
+      "mobile": {
+        "docWidth": 375,
+        "bodyWidth": 375,
+        "innerRegions": [
+          {
+            "tag": "DIV",
+            "scrollWidth": 1781,
+            "clientWidth": 341
+          }
+        ]
+      }
+    },
+    {
+      "name": "teamCapacity",
+      "user": "priya@hub.test",
+      "url": "http://127.0.0.1:5088/reports/team-capacity?from=2026-11-02&weeks=2&includeMyDrafts=true",
+      "rows": 9,
+      "firstDataRow": {
+        "x": 553,
+        "y": 379.5,
+        "width": 854,
+        "height": 37
+      },
+      "docWidth": 1440,
+      "bodyWidth": 1440,
+      "namedRegions": 1,
+      "controlsVisible": true,
+      "formulaVisible": true,
+      "coverageVisible": true,
+      "rowText": "Capacity\t200\t200",
+      "mobile": {
+        "docWidth": 375,
+        "bodyWidth": 375,
+        "innerRegions": []
+      }
+    },
+    {
+      "name": "taskHoursAlex",
+      "user": "alex@hub.test",
+      "url": "http://127.0.0.1:5088/reports/task-hours?projectId=01a195dd-3df4-797f-b1ea-b2dbb79b6d75&userId=01a195db-15ab-7cfd-8481-4ee914d8fe58&from=2026-11-02&to=2026-11-08&scope=mine",
+      "rows": 2,
+      "firstDataRow": {
+        "x": 553,
+        "y": 363.5,
+        "width": 854,
+        "height": 57
+      },
+      "docWidth": 1440,
+      "bodyWidth": 1440,
+      "namedRegions": 1,
+      "controlsVisible": true,
+      "formulaVisible": true,
+      "coverageVisible": true,
+      "rowText": "2026-11-03\tAlex Chen\tSYN-JOIN19-1101\tSYN-JOIN19-1101-T0001\tSYN-JOIN19 CIV task 1\t2\tSynthetic QA19 report context",
+      "mobile": {
+        "docWidth": 375,
+        "bodyWidth": 375,
+        "innerRegions": [
+          {
+            "tag": "DIV",
+            "scrollWidth": 805,
+            "clientWidth": 341
+          }
+        ]
+      }
+    }
+  ],
+  "errors": [],
+  "mutations": [],
+  "status": true
+}

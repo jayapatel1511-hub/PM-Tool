@@ -9,7 +9,10 @@ namespace Hub.Api.Features;
 public static partial class ReportEndpoints
 {
     /// One planning entry with no project, as the Allocations by source report lists it.
-    sealed record UnlinkedEntryRow(string PersonName, string OwnerName, string Label, string Source, decimal HoursPerWeek, DateOnly StartWeek, DateOnly EndWeek, string Confidence, string Visibility);
+    sealed record UnlinkedEntryRow(string PersonName, string OwnerName, string Label, string Source, decimal HoursPerWeek, DateOnly StartWeek, DateOnly EndWeek, string Confidence, string Visibility,
+        [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] Guid? PersonId = null,
+        [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] Guid? OwnerId = null,
+        [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] Guid? EntryId = null);
     /// One route's opens in one week, bucketed by how long the page took, as the pilot route use report lists it.
     sealed record RouteUseRow(string RouteKey, DateOnly Week, int Opens, int Under500Ms, int From500To999Ms, int From1000To1999Ms, int From2000To4999Ms, int Over5000Ms);
 
@@ -17,11 +20,17 @@ public static partial class ReportEndpoints
 
     static async Task<PlanningEndpoints.GridResult> CapacityGrid(Ctx c)
     {
+        if (c.InputsEnabled && c.InputGrid is { } existing) return existing;
         var weeks = c.Int("weeks") ?? c.S.PlanningHorizonWeeks;
         Check.That(weeks is >= 1 and <= 26, "weeks", "error.range");
         var grid = await PlanningEndpoints.ReportGrid(new(From: c.Date("from"), Weeks: weeks, SupervisorId: c.Id("supervisorId"),
-            DisciplineId: c.Id("disciplineId"), IncludeMyDrafts: c.Str("includeMyDrafts") != "false"), c.Access, c.Db, c.Store, c.Clock);
+            DisciplineId: c.Id("disciplineId"), IncludeMyDrafts: c.Str("includeMyDrafts") != "false"), c.Access, c.Db, c.Store, c.InputsEnabled ? c.ReadClock : c.Clock);
         c.Partial = grid.PartialView;
+        if (c.InputsEnabled)
+        {
+            c.InputGrid = grid;
+            SetPeopleInputs(c, grid.People.Select(person => person.Id), "PlannerPeopleContext", grid.PartialView);
+        }
         return grid;
     }
 
@@ -44,12 +53,27 @@ public static partial class ReportEndpoints
         if (!c.S.IsFlagOn("org_structure"))
         {
             var rows = new JsonArray();
+            var exact = new List<ExactUnitRow>();
             foreach (var (key, value) in measures)
             {
                 var row = new JsonObject { ["measure"] = Text.Get($"capacityReport.{key}") };
-                for (var i = 0; i < grid.Weeks.Length; i++) row[$"w{i}"] = decimal.Round(grid.People.Sum(p => value(p, p.Cells[i])), 1);
+                var values = new decimal[grid.Weeks.Length]; var unavailable = new bool[grid.Weeks.Length]; var provisional = new bool[grid.Weeks.Length];
+                for (var i = 0; i < grid.Weeks.Length; i++)
+                {
+                    values[i] = grid.People.Sum(p => value(p, p.Cells[i]));
+                    row[$"w{i}"] = decimal.Round(values[i], 1);
+                    unavailable[i] = key == "remaining" && grid.PartialView;
+                    provisional[i] = key is "capacity" or "timeAway" or "remaining" or "overPlanned" && grid.People.Any(person => person.Cells[i].Provisional)
+                        || key == "underPlanned" && grid.People.Any(person => person.Cells.Any(cell => cell.Provisional));
+                }
+                if (c.InputsEnabled) exact.Add(new(rows.Count, key is "overPlanned" or "underPlanned" or "partial" ? "Count" : "Hours",
+                    key is "overPlanned" or "underPlanned" ? "AvailabilityDependentCount" : grid.PartialView ? "VisibleOnly" : InputCoverage,
+                    [UnitMeasure("", Text.Get("col.hours"), values, unavailable: unavailable, provisional: provisional)]));
                 rows.Add(row);
             }
+            if (c.InputsEnabled) { c.UnitMeasures = [("", Text.Get("col.hours"))]; c.UnitSource = new(grid.Weeks, CapacityColumns(grid), exact.ToArray()); }
+            if (c.CaptureCapacityComparison) await CaptureTeamCapacityComparison(c, grid,
+                grid.Weeks.Select(_ => (IReadOnlyList<PlanningEndpoints.PersonRow>)grid.People).ToArray());
             return new(rows, CapacityLink(c, "grid", grid), CapacityColumns(grid));
         }
 
@@ -75,6 +99,9 @@ public static partial class ReportEndpoints
             .ThenBy(id => id is null ? Text.Get("report.noUnit") : units.GetValueOrDefault(id.Value)?.Name ?? Text.Get("report.noUnit"), StringComparer.Ordinal)
             .ToArray();
         var data = new JsonArray();
+        var inputPeople = new HashSet<Guid>();
+        var exactRows = new List<ExactUnitRow>();
+        var comparisonMembers = c.CaptureCapacityComparison ? grid.Weeks.Select(_ => new List<PlanningEndpoints.PersonRow>()).ToArray() : null;
         foreach (var group in groupKeys)
         foreach (var (key, value) in measures)
         {
@@ -85,15 +112,28 @@ public static partial class ReportEndpoints
                 ["unit"] = unit,
                 ["unitPath"] = OrgStructureReports.UnitPath(group, units),
             };
+            var exactValues = new decimal[grid.Weeks.Length]; var unavailableWeeks = new bool[grid.Weeks.Length]; var provisionalWeeks = new bool[grid.Weeks.Length];
             for (var i = 0; i < grid.Weeks.Length; i++)
             {
-                var members = people.Where(p => placements[i].GetValueOrDefault(p.Id) == group);
-                row[$"w{i}"] = decimal.Round(members.Sum(p => value(p, p.Cells[i])), 1);
+                var members = people.Where(p => placements[i].GetValueOrDefault(p.Id) == group).ToArray();
+                if (key == "capacity" && comparisonMembers is not null) comparisonMembers[i].AddRange(members);
+                if (c.InputsEnabled) foreach (var person in members) inputPeople.Add(person.Id);
+                exactValues[i] = members.Sum(p => value(p, p.Cells[i]));
+                row[$"w{i}"] = decimal.Round(exactValues[i], 1);
+                unavailableWeeks[i] = key == "remaining" && grid.PartialView;
+                provisionalWeeks[i] = key is "capacity" or "timeAway" or "remaining" or "overPlanned" && members.Any(person => person.Cells[i].Provisional)
+                    || key == "underPlanned" && members.Any(person => person.Cells.Any(cell => cell.Provisional));
             }
+            if (c.InputsEnabled) exactRows.Add(new(data.Count, key is "overPlanned" or "underPlanned" or "partial" ? "Count" : "Hours",
+                key is "overPlanned" or "underPlanned" ? "AvailabilityDependentCount" : grid.PartialView ? "VisibleOnly" : InputCoverage,
+                [UnitMeasure("", Text.Get("col.hours"), exactValues, unavailable: unavailableWeeks, provisional: provisionalWeeks)]));
             data.Add(row);
         }
         var columns = new[] { new Col("measure", "measure"), new Col("unit", "unit"), new Col("unitPath", "unitPath") }
             .Concat(grid.Weeks.Select((w, i) => new Col($"w{i}", "hours", "number", w.ToString("yyyy-MM-dd")))).ToArray();
+        SetPeopleInputs(c, inputPeople, "PlannerPeopleContext", grid.PartialView);
+        if (c.InputsEnabled) { c.UnitMeasures = [("", Text.Get("col.hours"))]; c.UnitSource = new(grid.Weeks, columns, exactRows.ToArray()); }
+        if (comparisonMembers is not null) await CaptureTeamCapacityComparison(c, grid, comparisonMembers);
         return new(data, CapacityLink(c, "grid", grid, includeUnit: true), columns);
     }
 
@@ -104,7 +144,9 @@ public static partial class ReportEndpoints
             var entries = grid.People.SelectMany(p => p.Entries).Where(e => e.ProjectId == null && (c.Str("source") == null || e.SourceCategory == c.Str("source"))
                 && (c.Str("confidence") == null || e.Confidence == c.Str("confidence"))).Select(e => new UnlinkedEntryRow(e.PersonName, e.OwnerName, e.Label,
                     Text.Get($"planning.source.{e.SourceCategory}"), e.HoursPerWeek, e.StartWeek, e.EndWeek, e.Confidence,
-                    Text.Get(e.OwnerKind == "Self" ? "planning.visibility.Self" : $"planning.visibility.{e.Visibility}")));
+                    Text.Get(e.OwnerKind == "Self" ? "planning.visibility.Self" : $"planning.visibility.{e.Visibility}"),
+                    c.S.IsFlagOn("people_screens") ? e.PersonId : null, c.S.IsFlagOn("people_screens") ? e.OwnerId : null,
+                    c.S.IsFlagOn("people_screens") ? e.Id : null));
             return new(Json(entries), CapacityLink(c, "list", grid) + "&withoutProject=true", [new("personName", "person"), new("ownerName", "owner"), new("label", "label"),
                 new("source", "source"), new("hoursPerWeek", "hours", "number"), new("startWeek", "start", "date"), new("endWeek", "end", "date"), new("confidence", "confidence"), new("visibility", "visibility")]);
         }
@@ -122,11 +164,15 @@ public static partial class ReportEndpoints
                 values[entry.SourceCategory][i] += bands.Entries.Single(x => x.Id == entry.Id).Counted;
         }
         var rows = new JsonArray();
+        var exactRows = new List<ExactUnitRow>();
         foreach (var source in sources.Append("approved").Append("total")) {
             var row = new JsonObject { ["measure"] = Text.Get(source is "approved" or "total" ? $"capacityReport.{source}" : $"planning.source.{source}") };
-            for (var i = 0; i < grid.Weeks.Length; i++) row[$"w{i}"] = decimal.Round(source == "total" ? values.Values.Sum(x => x[i]) : values[source][i], 1);
+            var exact = new decimal[grid.Weeks.Length];
+            for (var i = 0; i < grid.Weeks.Length; i++) { exact[i] = source == "total" ? values.Values.Sum(x => x[i]) : values[source][i]; row[$"w{i}"] = decimal.Round(exact[i], 1); }
+            if (c.InputsEnabled) exactRows.Add(new(rows.Count, "Hours", grid.PartialView ? "VisibleOnly" : InputCoverage, [UnitMeasure("", Text.Get("col.hours"), exact)]));
             rows.Add(row);
         }
+        if (c.InputsEnabled) { c.UnitMeasures = [("", Text.Get("col.hours"))]; c.UnitSource = new(grid.Weeks, CapacityColumns(grid), exactRows.ToArray()); }
         return new(rows, CapacityLink(c, "list", grid), CapacityColumns(grid));
     }
     static async Task<Result> PilotRouteUse(Ctx c)

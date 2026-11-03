@@ -1,0 +1,32 @@
+{
+  "atUtc": "2026-11-02T11:04:15.351036+00:00",
+  "status": "PASS_149_DISTINCT_DOTNET_AND_FRONTEND_STATIC",
+  "dotnet": {
+    "response-outcome1.trx": 52,
+    "review-adjacent1.trx": 97
+  },
+  "distinctDotnet": 149,
+  "frontend": [
+    "generatedAPItypes",
+    "app types",
+    "fixturetypes",
+    "lintwithexistingwarnings",
+    "SSRreview",
+    "Ddriver/fixtureparse"
+  ],
+  "sourceCounts": {
+    "csharp": 613,
+    "web": 446
+  },
+  "pending": [
+    "SPAproductionbuild",
+    "focused/adjacentChrome",
+    "visualcapture",
+    "finalparity/spec/docsevidence"
+  ],
+  "limits": [
+    "R3/fullS35open",
+    "No newliveKestreljoin",
+    "QA24cleanuppendingexplicitconfirmation;preserved"
+  ]
+}

@@ -1,0 +1,226 @@
+{
+  "status": 200,
+  "cards": 5,
+  "states": [
+    {
+      "id": "01a197d2-986d-7dc9-8e06-3f76216fee08",
+      "key": "QA21-REAL-001-T0001",
+      "state": {
+        "isOverdue": true,
+        "daysOverdue": 12,
+        "isDueSoon": false,
+        "isWaiting": false,
+        "isBlocked": false,
+        "blockedSince": null,
+        "daysBlocked": 0,
+        "blockedBy": [],
+        "isBlocking": false,
+        "blockingCount": 0,
+        "blockingTaskIds": [],
+        "isStale": false,
+        "staleDays": 0,
+        "isUnassigned": false,
+        "isMissingDueDate": false,
+        "isDateInconsistent": false,
+        "inconsistencyDetail": [],
+        "isInactiveOwner": false,
+        "isHeldPastDue": false,
+        "isReviewStalled": false,
+        "affectedMilestoneIds": [],
+        "notes": [],
+        "evaluatedAt": "2026-11-01T15:58:23.114671+00:00"
+      },
+      "board": {
+        "reviewRequestedAt": null,
+        "reviewWaitingDays": null,
+        "reviewStaleDays": 5,
+        "disciplineLead": {
+          "state": "Known",
+          "id": "01a197bd-ba3c-749e-a252-425184b403b0",
+          "name": "Marc Dubois"
+        },
+        "projectManager": {
+          "state": "Known",
+          "id": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+          "name": "Priya Nair"
+        }
+      }
+    },
+    {
+      "id": "01a197d2-98b5-7b50-a4fe-7ff227951d8c",
+      "key": "QA21-REAL-001-T0004",
+      "state": {
+        "isOverdue": false,
+        "daysOverdue": 0,
+        "isDueSoon": true,
+        "isWaiting": false,
+        "isBlocked": false,
+        "blockedSince": null,
+        "daysBlocked": 0,
+        "blockedBy": [],
+        "isBlocking": false,
+        "blockingCount": 0,
+        "blockingTaskIds": [],
+        "isStale": false,
+        "staleDays": 0,
+        "isUnassigned": false,
+        "isMissingDueDate": false,
+        "isDateInconsistent": false,
+        "inconsistencyDetail": [],
+        "isInactiveOwner": false,
+        "isHeldPastDue": false,
+        "isReviewStalled": false,
+        "affectedMilestoneIds": [],
+        "notes": [],
+        "evaluatedAt": "2026-11-01T15:58:23.114671+00:00"
+      },
+      "board": {
+        "reviewRequestedAt": "2026-11-01T15:55:23.817916+00:00",
+        "reviewWaitingDays": 0,
+        "reviewStaleDays": 5,
+        "disciplineLead": {
+          "state": "Known",
+          "id": "01a197bd-ba3c-749e-a252-425184b403b0",
+          "name": "Marc Dubois"
+        },
+        "projectManager": {
+          "state": "Known",
+          "id": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+          "name": "Priya Nair"
+        }
+      }
+    },
+    {
+      "id": "01a197d2-98c9-7ec0-a591-71911fcc3b99",
+      "key": "QA21-REAL-001-T0005",
+      "state": {
+        "isOverdue": false,
+        "daysOverdue": 0,
+        "isDueSoon": false,
+        "isWaiting": false,
+        "isBlocked": false,
+        "blockedSince": null,
+        "daysBlocked": 0,
+        "blockedBy": [],
+        "isBlocking": false,
+        "blockingCount": 0,
+        "blockingTaskIds": [],
+        "isStale": false,
+        "staleDays": 0,
+        "isUnassigned": false,
+        "isMissingDueDate": false,
+        "isDateInconsistent": false,
+        "inconsistencyDetail": [],
+        "isInactiveOwner": false,
+        "isHeldPastDue": false,
+        "isReviewStalled": false,
+        "affectedMilestoneIds": [],
+        "notes": [],
+        "evaluatedAt": "2026-11-01T15:58:23.114671+00:00"
+      },
+      "board": {
+        "reviewRequestedAt": "2026-11-01T15:55:23.888077+00:00",
+        "reviewWaitingDays": 0,
+        "reviewStaleDays": 5,
+        "disciplineLead": {
+          "state": "Known",
+          "id": "01a197bd-ba3c-749e-a252-425184b403b0",
+          "name": "Marc Dubois"
+        },
+        "projectManager": {
+          "state": "Known",
+          "id": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+          "name": "Priya Nair"
+        }
+      }
+    },
+    {
+      "id": "01a197d2-98a9-7265-89ba-e5de3a283ee1",
+      "key": "QA21-REAL-001-T0003",
+      "state": {
+        "isOverdue": false,
+        "daysOverdue": 0,
+        "isDueSoon": false,
+        "isWaiting": false,
+        "isBlocked": false,
+        "blockedSince": null,
+        "daysBlocked": 0,
+        "blockedBy": [],
+        "isBlocking": false,
+        "blockingCount": 0,
+        "blockingTaskIds": [],
+        "isStale": false,
+        "staleDays": 0,
+        "isUnassigned": false,
+        "isMissingDueDate": false,
+        "isDateInconsistent": false,
+        "inconsistencyDetail": [],
+        "isInactiveOwner": false,
+        "isHeldPastDue": false,
+        "isReviewStalled": false,
+        "affectedMilestoneIds": [],
+        "notes": [],
+        "evaluatedAt": "2026-11-01T15:58:23.114671+00:00"
+      },
+      "board": {
+        "reviewRequestedAt": null,
+        "reviewWaitingDays": null,
+        "reviewStaleDays": 5,
+        "disciplineLead": {
+          "state": "Known",
+          "id": "01a197bd-ba3c-749e-a252-425184b403b0",
+          "name": "Marc Dubois"
+        },
+        "projectManager": {
+          "state": "Known",
+          "id": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+          "name": "Priya Nair"
+        }
+      }
+    },
+    {
+      "id": "01a197d2-9899-72ba-a182-963e99ee2847",
+      "key": "QA21-REAL-001-T0002",
+      "state": {
+        "isOverdue": false,
+        "daysOverdue": 0,
+        "isDueSoon": false,
+        "isWaiting": false,
+        "isBlocked": false,
+        "blockedSince": null,
+        "daysBlocked": 0,
+        "blockedBy": [],
+        "isBlocking": false,
+        "blockingCount": 0,
+        "blockingTaskIds": [],
+        "isStale": false,
+        "staleDays": 0,
+        "isUnassigned": false,
+        "isMissingDueDate": false,
+        "isDateInconsistent": false,
+        "inconsistencyDetail": [],
+        "isInactiveOwner": false,
+        "isHeldPastDue": false,
+        "isReviewStalled": false,
+        "affectedMilestoneIds": [],
+        "notes": [],
+        "evaluatedAt": "2026-11-01T15:58:23.114671+00:00"
+      },
+      "board": {
+        "reviewRequestedAt": null,
+        "reviewWaitingDays": null,
+        "reviewStaleDays": 5,
+        "disciplineLead": {
+          "state": "Known",
+          "id": "01a197bd-ba3c-749e-a252-425184b403b0",
+          "name": "Marc Dubois"
+        },
+        "projectManager": {
+          "state": "Known",
+          "id": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+          "name": "Priya Nair"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "newPaths": [
+    "/api/v1/projects/{projectId}/deliverables/import",
+    "/api/v1/projects/{projectId}/deliverables/import-options",
+    "/api/v1/projects/{projectId}/deliverables/import-preview"
+  ],
+  "removedSchemas": [],
+  "addedSchemas": [
+    "DrawingImportCommitBody",
+    "DrawingImportCreated",
+    "DrawingImportCreatedRow",
+    "DrawingImportDefaults",
+    "DrawingImportDiagnostic",
+    "DrawingImportDiagnosticSeverity",
+    "DrawingImportDisciplineOption",
+    "DrawingImportMessage",
+    "DrawingImportOptions",
+    "DrawingImportPreview",
+    "DrawingImportPreviewBody",
+    "DrawingImportPreviewRow",
+    "DrawingImportSheet",
+    "DrawingImportTypeOption",
+    "DrawingImportValues",
+    "SearchUserReference",
+    "WorkspaceFileUserReference"
+  ],
+  "changedOldSchemas": [
+    "FileLinkRow",
+    "SearchAllocationHit",
+    "SearchBasisHit",
+    "SearchCommentHit",
+    "SearchDeliverableHit",
+    "SearchOwnedHit",
+    "SearchPersonHit",
+    "SearchPlanningHit",
+    "SearchProjectHit",
+    "SearchSubmissionHit",
+    "SearchTaskHit"
+  ],
+  "hiddenPersonUserIdAbsent": true,
+  "legacyClientRowUnchanged": true,
+  "legacyFactsUnchanged": true
+}

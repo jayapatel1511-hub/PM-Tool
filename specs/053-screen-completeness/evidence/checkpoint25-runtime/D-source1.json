@@ -1,0 +1,9 @@
+{
+  "atUtc": "2026-11-02T09:36:13.169102+00:00",
+  "files": {
+    "web/src/pages/projects/review-open-findings.tsx": "a64ede3806915c123a2aa785452f24c55678b4d3cb33aa23197c7dbf4f303ead",
+    "web/tests/review-register.cjs": "3229827a423a4356e2da86e946685f29a795a17ecf5a2c68c380a01e984227b8",
+    "web/tests/review-register.fixture.cjs": "0a45958a82f1b4d3eb52705c49939b5af3ce2c0b28e2e003813df0361a7ae455"
+  },
+  "status": "HANDOFF_HASHES_PASS_TYPES_BROWSER_UNRUN"
+}

@@ -1,0 +1,35 @@
+# Generation14 — S05-B Readiness handoff
+
+Status: ALL SOURCE READY/HELD. C# was declared BACKEND READY, then the explicitly accepted ConstraintOwners repair loan was completed and BACKEND READY re-acknowledged. All seven named application/test files are now held; no edit or lane process remains in flight. Previous Work/Submissions sources are held and unchanged in this increment.
+
+Generation16 script-only runtime repair: Decision/Handoff panel waits compare decoded `URL.searchParams.get('panel')` with exact Kind:id and destination pathname, handling URLSearchParams colon encoding. Decision's exact inspectCheck, origin URL/heading, IDs/counts, real main/dialog-body scroll, no-write and reflow assertions remain. No other panel-regex wait exists in this script. Node syntax/scoped whitespace PASS; no product/C# change or runtime execution. All sources/scripts held again; root owns the browser rerun.
+
+## Implemented
+
+- `src/Hub.Api/Features/Readiness.cs`: omitted-null enabled Work page on the original window endpoint and Presentation on detail. Reuses the existing dated open Task/Deliverable cohort, including work without assessment. Evaluates the entire selected cohort before canonical Not Ready, Needs Assessment, Proceed under Assumption, Ready ordering; deterministic due/key/type/id ties; independent workPage/total/pageSize. Existing Ready outputs, constraints, weekly promises, exports and command paths remain. Enabled detail/window reauthorize in RepeatableRead and capture one read time. GET uses detached records and never saves an assessment, check, task or evaluation state.
+- `src/Hub.Api/Features/WorkReadinessInputs.cs`: internal Task/Deliverable evaluation and source hydration; seeded detached records avoid duplicate evaluation. Existing public Task wrapper/Inputs JSON fields are unchanged. Exact source context, direct Handoff target versus labelled constraint-linked provenance and independent constraints remain. New per-check unknown/blocking/reason facts are aggregate facts, not invented per-source failures. Applicability candidates come only from current primary/current member PMs and responsible active discipline lead, evaluated through current canonical Actor/ProjectContext/ManageCoordination and existing target eligibility. No RecordedBy, viewer or organisation-wide PM fallback. New Presentation.ConstraintOwners retains each exact constraint's removal owner and affected owner separately from nextActors, with explicit unknown/inactive/removed/unavailable metadata.
+- `web/src/pages/projects/Readiness.tsx`: full-work list leads retained sections; explicit dated-open-work scope/exclusions/read time, server order and independent pager. Window dates reset workPage with existing pages; off requests omit workPage. Existing inspect/inspectWork URL selection adds ephemeral inspectCheck; exact source return preserves window/pages/check selection.
+- `web/src/pages/projects/ReadinessForms.tsx`: enabled unresolved source actor/discipline groups, blocking/unknown check order, exact code selection/focus/scroll. Canonical forms, target-rowversion/applicability concurrency, viewer permission gates, exception/prerequisite/constraint commands and off order remain. RecordedBy stays historical provenance.
+- `web/src/pages/projects/readiness-delivery-presentation.tsx`: narrow read-side list and source grouping helper. Exact source actions/return use existing registered routes/navigation helpers; source-less unknowns and missing presentation remain explicit. Constraint removal/affected owners are shown independently after Resolution Proposed. Current eligibility is disclosed without granting viewer commands. No completion percentage or summary-to-complete-check inference.
+- `tests/Hub.Tests/Api/WorkDeliveryReadinessTests.cs`: six authored facts covering normal four-state ordering across page boundaries (including approved scoped assumption), no GET writes, dated-scope exclusions/unassessed Deliverable, Submitted Handoff and Open→Resolution Proposed independent constraint actors/owners, current/multiple/refused/inactive/removed PM/lead eligibility, readonly/stale command refusals, external Decision/source-less unknown/malformed import recovery, exact disabled window/detail parity and restricted404. Actual readiness/decision/handoff/constraint/assumption states are established through normal commands; synthetic roster damage and partial import cases are explicitly labelled.
+- `web/tests/work-delivery-readiness-order.cjs`: actual-app/mock-API acceptance authored for 52-row server cohort across two independent pages, source owner groups, exact Decision/Handoff click/return and actual main/dialog-body scroll restoration, no-assessment/readonly no-write, external and refused actors, independent constraint owners, partial list/detail, exact check-code selection, keyboard, 375/768/1280 list/dialog-body reflow, window/page reset and off query/layout.
+
+## Shared root integration
+
+Exact optional DTO/query contract: `requests/g14-readiness-contract.md`.
+
+Exact22 locale keys: `requests/g14-readiness-locales.json`; the final three disclose constraint owner availability/removed state. Root owns locale insertion, API/schema/registry generation and all execution. Root inspected existing readiness saved-view keys (from/to only) and confirmed no registry/saved-view change: workPage is an endpoint query and inspectCheck an ephemeral UI selection.
+
+## Verification boundary
+
+PASS: `node --check web/tests/work-delivery-readiness-order.cjs`.
+
+PASS: TypeScript createSourceFile parse-only diagnostics for Readiness.tsx, ReadinessForms.tsx and the new helper. This is not typechecking, transpilation, build or UI execution.
+
+PASS: scoped tracked `git diff --check` and trailing-whitespace scan of new/owned C#/UI/script files. Locale JSON parses and contains22 keys.
+
+UNRUN here: backend compile/tests; generated contracts; app/fixture types; lint/build; actual Chrome actions/reflow; current API-backed census, hosted, activation or human acceptance. No lane runtime/build/test/browser/generation/helpers/goals/migration/commit/push/deploy occurred.
+
+Root's focused execution: WorkDeliveryReadinessTests plus affected WorkReadinessSourceEvidenceTests and canonical ReadinessApiTests/ReadinessInvalidOwnerTests/ReadinessConstraintLinkTests/ReadinessSubmissionGateTests/ReadinessExportTests; root chooses the proportionate affected subset. After contract refresh/build, run `CHROME_EXECUTABLE_PATH='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' TUESDAY_UI_BASE_URL=http://127.0.0.1:8853 node tests/work-delivery-readiness-order.cjs` from web, retaining existing readiness and exact related-source-return coverage.
+
+The full dated cohort is evaluated rather than sampled; only page context/candidate metadata is hydrated. No latency/capacity proof is claimed. FR/AC-SCR06 and the Readiness half of FR/AC05 are authored, not accepted. S05 remains unchecked pending root full verification and Jay's acceptance gate. No user decision status was changed.

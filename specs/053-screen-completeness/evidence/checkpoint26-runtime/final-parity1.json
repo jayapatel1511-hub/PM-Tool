@@ -1,0 +1,16 @@
+{
+  "atUtc": "2026-11-02T11:40:13.375531+00:00",
+  "status": "PASS_FINAL_SOURCE_AND_SERVED_BYTES",
+  "csharpInputs": 613,
+  "webInputs": 446,
+  "finalServedFiles": 143,
+  "finalBase": "http://127.0.0.1:8856",
+  "retainedOutputFiles": [
+    129,
+    129,
+    143
+  ],
+  "retainedOutputTotal": 401,
+  "oldApiDllSha256": "80658bd2ad102063a6042355ff0d5fb417a5fc3428b2eb5b1ae67916e57145f3",
+  "boundary": "NooldAPI/DB/previewstop oroverwrite; noAPI5091 ornewliveKestreljoin. Finalprovidersusecurrentcompiledsource; visualcaptures4read-onlysyntheticactualSPA."
+}

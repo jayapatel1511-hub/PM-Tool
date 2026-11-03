@@ -1,10 +1,12 @@
+import { PersonPanelTrigger } from './person-panel-trigger'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Check, Pencil } from 'lucide-react'
-import { createContext, useContext, useEffect, useId, useRef, useState, type ReactNode } from 'react'
-import { ChangeList, actionLabel, groupActivity } from '@/components/hub/activity'
+import { createContext, useCallback, useContext, useEffect, useId, useRef, useState, type ReactNode } from 'react'
+import { ActivityActor, ChangeList, actionLabel, groupActivity } from '@/components/hub/activity'
 import { Empty, ErrorBanner, Loading, Spinner } from '@/components/hub/common'
 import { Avatar, PeoplePicker } from '@/components/hub/people'
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { useFlag, useMe } from '@/lib/auth'
 import { typedRequest, watchWrite, type ApiError, type WriteWatch } from '@/lib/api'
@@ -13,7 +15,8 @@ import { ago, fmtDate, fmtTime } from '@/lib/format'
 import { invalidateChange } from '@/lib/keys'
 import { t , runtimeText } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
-import { useSearchParams } from 'react-router'
+import { useLocation, useSearchParams } from 'react-router'
+import { useFormNavigationPreserver } from './form-navigation-context'
 
 // Inline edit on click for detail panels; each field saves on its own (§13.0 interaction, §13.3.1 autosave).
 
@@ -69,6 +72,7 @@ const since = (at?: string) => {
  *  first save captured a version, the field keeps both values for explicit review and never automatically overwrites the current value. */
 function useAutosaveField(current?: unknown, onSave?: (v: string | null) => Promise<unknown>, { delayMs, keep = !!onSave, field }: { delayMs?: number; keep?: boolean; field?: string } = {}) {
   const qc = useQueryClient()
+  const preservesNavigation = useFormNavigationPreserver()
   const me = useMe()
   const on = useFlag('data_entry_safety') && keep
   const name = on ? field : undefined
@@ -180,6 +184,7 @@ function useAutosaveField(current?: unknown, onSave?: (v: string | null) => Prom
     const off = on ? registerForm({
       unsaved: () => live.current.unsaved,
       discard: clear,
+      preservesNavigation,
       keep: () => {
         const { name, user, current, shown } = live.current, v = typed.current
         if (name && v && blank(v.value) !== blank(current)) keepPending(user, route, name, v.value, shown?.ifMatch)
@@ -300,18 +305,20 @@ export function InlineSelect({ value, options, onSave, disabled, allowEmpty, tit
   )
 }
 
-export function InlinePerson({ value, name, onSave, disabled, title, allowClear = true }: { value?: string | null; name?: string | null; onSave: (id: string | null) => Promise<unknown>; disabled?: boolean; title?: string; allowClear?: boolean }) {
+export function InlinePerson({ value, name, onSave, disabled, title, allowClear = true, exclude, focusKey }: { value?: string | null; name?: string | null; onSave: (id: string | null) => Promise<unknown>; disabled?: boolean; title?: string; allowClear?: boolean; exclude?: string[]; focusKey?: string }) {
+  const peopleOn = useFlag('people_screens')
   const save = useAutosaveField(value, onSave, { field: useContext(FieldNameContext) ?? title })
   const [candidate, setCandidate] = useState<{ id: string; displayName: string } | undefined>()
   const displayId = save.kept ? save.kept.value as string | null : value
   const displayName = save.kept && displayId !== value ? candidate?.displayName : name
   const avatar = displayId && <Avatar id={displayId} name={displayName} />
-  if (disabled) return <Display onEdit={() => {}} disabled title={title}><span className="flex items-center gap-2">{avatar}{displayName ?? t('common.dash')}</span></Display>
+  if (disabled) return <Display onEdit={() => {}} disabled title={title}><span className="flex items-center gap-2">{avatar}{displayId && displayName ? <PersonPanelTrigger userId={displayId} name={displayName} focusKey={focusKey} /> : displayName ?? t('common.dash')}</span></Display>
   return (
     <>
       <div className="flex items-center gap-2">
         {avatar}
-        <div className="min-w-0 flex-1"><PeoplePicker value={displayId} valueName={displayName} onChange={(id, person) => { setCandidate(person); save.commit(id) }} allowClear={allowClear} placeholder={t('common.none')} /></div>
+        <div className="min-w-0 flex-1"><PeoplePicker value={displayId} valueName={displayName} onChange={(id, person) => { setCandidate(person); save.commit(id) }} allowClear={allowClear} exclude={exclude} placeholder={t('common.none')} /></div>
+        {peopleOn && displayId && displayName && <PersonPanelTrigger userId={displayId} name={displayName} focusKey={focusKey}>{t('common.details')}</PersonPanelTrigger>}
       </div>
       <SaveNote save={save} show={(id) => (id === value ? name : id === candidate?.id ? candidate?.displayName : null) ?? t('common.dash')} />
     </>
@@ -319,19 +326,56 @@ export function InlinePerson({ value, name, onSave, disabled, title, allowClear 
 }
 
 /** Item History tab: field-level changes, newest first (FR-AUD-02, §12.8 "history is facts"). */
-export function HistoryList({ type, id }: { type: string; id: string }) {
+export function HistoryList({ type, id, taskActorFilter = false, projectId }: { type: string; id: string; taskActorFilter?: boolean; projectId?: string }) {
   const [sp, setSp] = useSearchParams()
-  const small = useFlag('small_ux')
-  const burst = (useMe().settings as { activityBurstMinutes?: number }).activityBurstMinutes ?? 10
+  const location = useLocation(), me = useMe()
+  const small = useFlag('small_ux'), peopleOn = useFlag('people_screens'), workOn = useFlag('work_screens')
+  const filtering = taskActorFilter && type === 'Task' && workOn
+  const scoped = (key: string) => { const raw = sp.get(key); return raw?.startsWith(id + ':') ? raw.slice(id.length + 1) : undefined }
+  const actorId = filtering ? scoped('taskHistoryActor') || undefined : undefined
+  const requestedPage = Number(scoped('taskHistoryPage') ?? 1)
+  const page = filtering && Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1
+  const burst = (me.settings as { activityBurstMinutes?: number }).activityBurstMinutes ?? 10
   const grouped = small && sp.get('groupChanges') === 'true'
-  const q = useQuery({ queryKey: ['history', type, id], queryFn: () => typedRequest('get', '/api/v1/items/{type}/{id}/activity', { params: { type, id }, query: { pageSize: 100 } }) })
-  if (q.isPending) return <Loading rows={3} />
-  if (q.error) return <div className="p-4"><ErrorBanner error={q.error} retry={() => q.refetch()} /></div>
-  if (!q.data?.items.length) return <Empty>{t('activity.empty')}</Empty>
-  const groups = grouped ? groupActivity(q.data.items, burst) : q.data.items.map((r) => ({ rows: [r] }))
+  const actors = useQuery({ queryKey: ['task-history-actors', id, projectId, me.id, workOn, peopleOn], enabled: filtering,
+    queryFn: () => typedRequest('get', '/api/v1/tasks/{id}/activity/actors', { params: { id } }) })
+  const q = useQuery({ queryKey: filtering ? ['history', type, id, projectId, me.id, workOn, peopleOn, actorId, page] : ['history', type, id],
+    queryFn: () => typedRequest('get', '/api/v1/items/{type}/{id}/activity', { params: { type, id }, query: { pageSize: 100, ...(filtering ? { actorId, page } : {}) } }) })
+  const change = (actor: string | undefined, nextPage: number) => {
+    const next = new URLSearchParams(sp)
+    if (actor) next.set('taskHistoryActor', id + ':' + actor); else next.delete('taskHistoryActor')
+    next.set('taskHistoryPage', id + ':' + nextPage)
+    setSp(next, { replace: true, state: location.state, preventScrollReset: true })
+  }
+  if (!filtering && q.isPending) return <Loading rows={3} />
+  if (!filtering && q.error) return <div className="p-4"><ErrorBanner error={q.error} retry={() => q.refetch()} /></div>
+  if (!filtering && !q.data?.items.length) return <Empty>{t('activity.empty')}</Empty>
+  const failed = q.isError || filtering && actors.isError
+  const currentUnavailable = failed || q.isPending || filtering && actors.isPending
+  const rows = currentUnavailable ? [] : q.data?.items ?? []
+  const choices = currentUnavailable ? [] : actors.data ?? []
+  const groups = grouped ? groupActivity(rows, burst) : rows.map((r) => ({ rows: [r] }))
+  const pages = Math.max(1, Math.ceil((q.data?.totalCount ?? 0) / (q.data?.pageSize ?? 100)))
   return (
     <>
-      {small && <label className="flex items-center gap-2 px-4 py-3 text-sm"><input type="checkbox" checked={grouped} onChange={(e) => { const n = new URLSearchParams(sp); if (e.target.checked) n.set('groupChanges', 'true'); else n.delete('groupChanges'); setSp(n, { replace: true }) }} />{t('activity.groupChanges')}</label>}
+      {filtering && <div className="space-y-2 px-4 py-3" data-task-history-controls={id}>
+        <label className="flex flex-wrap items-center gap-2 text-sm">{runtimeText('taskHistory.person')}
+          <select className="min-h-9 max-w-full rounded-md border bg-card px-2" value={currentUnavailable ? '' : actorId ?? ''} disabled={currentUnavailable} onChange={event => change(event.target.value || undefined, 1)}>
+            <option value="">{currentUnavailable ? t('common.unavailable') : runtimeText('taskHistory.all')}</option>
+            {!currentUnavailable && actorId && !choices.some(actor => actor.id === actorId) && <option value={actorId}>{t('common.unavailable')}</option>}
+            {choices.map(actor => <option key={actor.id} value={actor.id}>{actor.isActive ? actor.displayName : t('common.inactiveSuffix', { name: actor.displayName })}</option>)}
+          </select>
+        </label>
+        {!currentUnavailable && q.data && <div className="flex flex-wrap items-center gap-2 text-sm" aria-live="polite">
+          <Button size="sm" variant="outline" disabled={q.isFetching || page <= 1} onClick={() => change(actorId, page - 1)}>{t('common.previous')}</Button>
+          <span>{runtimeText('taskHistory.page', { page: q.data.page, pages, total: q.data.totalCount })}</span>
+          <Button size="sm" variant="outline" disabled={q.isFetching || page >= pages} onClick={() => change(actorId, page + 1)}>{t('common.next')}</Button>
+        </div>}
+      </div>}
+      {filtering && (q.isPending || actors.isPending) && <Loading rows={3} />}
+      {filtering && failed && <div className="space-y-3 p-4"><ErrorBanner error={q.error ?? actors.error} /><Button type="button" size="sm" variant="outline" disabled={q.isFetching || actors.isFetching} onClick={() => { void q.refetch(); void actors.refetch() }}>{runtimeText('taskContribution.checkCurrent')}</Button></div>}
+      {filtering && !failed && !q.isPending && !actors.isPending && !rows.length && <Empty>{t('activity.empty')}</Empty>}
+      {small && <label className="flex items-center gap-2 px-4 py-3 text-sm"><input type="checkbox" checked={grouped} onChange={(e) => { const n = new URLSearchParams(sp); if (e.target.checked) n.set('groupChanges', 'true'); else n.delete('groupChanges'); setSp(n, filtering ? { replace: true, state: location.state, preventScrollReset: true } : { replace: true }) }} />{t('activity.groupChanges')}</label>}
       <ol className="divide-y px-4">
       {groups.map((g) => {
         const r = g.rows[0]
@@ -340,11 +384,11 @@ export function HistoryList({ type, id }: { type: string; id: string }) {
           <Avatar id={r.actorId} name={r.actorName ?? t('common.system')} className="mt-0.5" />
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-baseline gap-x-2">
-              <span className="font-semibold">{r.actorName ?? t('common.system')}</span>
+              <span className="font-semibold">{peopleOn ? <ActivityActor row={r} focusKey={`history:${type}:${id}:${r.id}:actor`} /> : r.actorName ?? t('common.system')}</span>
               <span className="text-muted-foreground">{actionLabel(r.action)}{r.itemType !== type ? ` · ${runtimeText(`itemType.${r.itemType}`)} ${r.itemKey ?? ''}` : ''}</span>
               <time className="text-xs/[18px] text-muted-foreground tabular-nums" dateTime={r.occurredAt} title={r.occurredAt}>{fmtTime(r.occurredAt)}</time>
             </div>
-            {g.rows.length > 1 ? <details className="mt-1"><summary className="cursor-pointer text-muted-foreground">{t('activity.groupSummary', { name: r.actorName ?? t('common.system'), n: g.rows.length })} · {fmtTime(g.rows[g.rows.length-1].occurredAt)} – {fmtTime(r.occurredAt)}</summary><div className="mt-1 space-y-2">{g.rows.map((x) => <div key={x.id}><time dateTime={x.occurredAt}>{fmtTime(x.occurredAt)}</time> · {runtimeText(`action.${x.action}`)}<ChangeList row={x} />{x.reason && <p>{t('common.reason')}: {x.reason}</p>}</div>)}</div></details> : <div className="mt-1"><ChangeList row={r} /></div>}
+            {g.rows.length > 1 ? <details id={`history-group-${type}-${id}-${r.id}`} data-person-source-disclosure={peopleOn ? '' : undefined} className="mt-1"><summary className="cursor-pointer text-muted-foreground">{peopleOn ? t('activity.groupSummary', { name: '', n: g.rows.length }).trim() : t('activity.groupSummary', { name: r.actorName ?? t('common.system'), n: g.rows.length })} · {fmtTime(g.rows[g.rows.length-1].occurredAt)} – {fmtTime(r.occurredAt)}</summary><div className="mt-1 space-y-2">{g.rows.map((x) => <div key={x.id}><time dateTime={x.occurredAt}>{fmtTime(x.occurredAt)}</time> · {runtimeText(`action.${x.action}`)}<ChangeList row={x} />{x.reason && <p>{t('common.reason')}: {x.reason}</p>}</div>)}</div></details> : <div className="mt-1"><ChangeList row={r} /></div>}
             {r.reason && <p className="mt-1 text-xs/[18px] text-muted-foreground">{t('common.reason')}: {r.reason}</p>}
           </div>
         </li>
@@ -353,6 +397,28 @@ export function HistoryList({ type, id }: { type: string; id: string }) {
       </ol>
     </>
   )
+}
+
+/** Scoped source-tab state survives a record -> Person -> record remount. Never consume another record's tab. */
+export function useRecordTab(type: string, id: string, initial: string, allowedTabs: readonly string[]): [string, (value: string) => void] {
+  const peopleOn = useFlag('people_screens'), workOn = useFlag('work_screens')
+  const enabled = peopleOn || workOn, item = `${type}:${id}`
+  const [sp, setSp] = useSearchParams(), location = useLocation()
+  const [local, setLocal] = useState({ item, tab: initial })
+  const raw = sp.get('recordTab')
+  const selected = enabled && sp.get('recordTabItem') === item && raw && allowedTabs.includes(raw) ? raw : undefined
+  const current = useRef({ enabled, item, sp, setSp, state: location.state, allowedTabs })
+  current.current = { enabled, item, sp, setSp, state: location.state, allowedTabs }
+  // A stable setter is needed by Task's existing explicit-comments effect; no replace-navigation loop.
+  const choose = useCallback((value: string) => {
+    const context = current.current
+    if (!context.allowedTabs.includes(value)) return
+    setLocal(previous => previous.item === context.item && previous.tab === value ? previous : { item: context.item, tab: value })
+    if (!context.enabled || context.sp.get('recordTab') === value && context.sp.get('recordTabItem') === context.item) return
+    context.setSp(params => { const next = new URLSearchParams(params); next.set('recordTab', value); next.set('recordTabItem', context.item); return next }, { replace: true, state: context.state })
+  }, [])
+  const fallback = enabled && (local.item !== item || !allowedTabs.includes(local.tab)) ? initial : local.tab
+  return [selected ?? fallback, choose]
 }
 
 /** `label` names the tab list for assistive technology when the tabs need a group name; without it nothing changes. */

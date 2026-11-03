@@ -1,0 +1,11 @@
+{
+  "staffCards.peopleWhere": "{scope} · {n} people shown",
+  "staffCards.assignmentsWhere": "{scope} · sum of Projects for {n} people shown",
+  "staffCards.reviewsWhere": "{scope} · sum of stalled reviews for {n} people shown",
+  "staffCards.stalled": "Stalled reviews",
+  "staffCards.filter": "People with",
+  "staffCards.clearBase": "Clear staff filter",
+  "staffCards.unavailable": "{n} people could not be classified for these filters because their counts are unavailable",
+  "timeCards.where": "{from} – {to} · {scope}",
+  "timeCards.entries": "Entries shown"
+}

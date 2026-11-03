@@ -1,0 +1,42 @@
+{
+  "server": {
+    "reportChart.notSet": "Not set",
+    "reportChart.unknownDiscipline": "Unavailable discipline name"
+  },
+  "ui": {
+    "reportChart.hours": "h",
+    "reportChart.title": "Capacity by home discipline",
+    "reportChart.scope": "Current home disciplines; all visible planning work of the selected people. Capacity already includes time away; Confirmed already includes approved reservations.",
+    "reportChart.rule": "Planning demand is Confirmed + Expected. Possible is shown separately and excluded. Weekly shortfall sums positive discipline shortages in each displayed week; spare weeks do not cancel shortages.",
+    "reportChart.export": "Export downloads the original measure matrix; the comparison is shown on this screen.",
+    "reportChart.period": "Comparison period",
+    "reportChart.table": "Capacity comparison values",
+    "reportChart.figure": "Capacity, planning demand and weekly shortfall by home discipline",
+    "reportChart.discipline": "Home discipline",
+    "reportChart.capacity": "Capacity",
+    "reportChart.confirmed": "Confirmed",
+    "reportChart.expected": "Expected",
+    "reportChart.possible": "Possible (excluded)",
+    "reportChart.demand": "Planning demand",
+    "reportChart.deficit": "Weekly shortfall",
+    "reportChart.partial": "Visible work only; planning coverage may be incomplete.",
+    "reportChart.affected": "Partial people: {partial}; provisional availability: {provisional}.",
+    "reportChart.basis": "{period}: {weeks} displayed ISO weeks; standard denominator {hours} h. Read {asOf}.",
+    "reportChart.shown": "Showing {from}–{to} of {returned} returned disciplines.",
+    "reportChart.truncated": "{returned} of {total} disciplines returned within the 2,000-row limit. Refine the report scope to see excluded disciplines.",
+    "reportChart.previous": "Previous disciplines",
+    "reportChart.next": "Next disciplines",
+    "reportChart.short": "short by {hours} h",
+    "reportChart.shortFte": "short by {hours} h · {fte} FTE",
+    "reportChart.noShortfall": "No recorded weekly shortfall",
+    "reportChart.shortfallUnknown": "Weekly shortfall unavailable",
+    "reportChart.recorded": "Recorded source hours: {hours} h; coverage incomplete",
+    "reportChart.provisional": "Recorded provisional source hours: {hours} h",
+    "reportChart.unavailable": "Unavailable",
+    "reportChart.summary": "{discipline}, {period}: capacity {capacity}; planning demand {demand}; weekly shortfall {deficit}. {coverage}",
+    "reportChart.complete": "Complete for the visible report scope.",
+    "reportChart.empty": "No disciplines in the authorised comparison scope.",
+    "reportChart.fallback": "Chart unavailable. The comparison values remain in the table.",
+    "reportChart.focusReset": "Chart focus was reset to an available period and returned page."
+  }
+}

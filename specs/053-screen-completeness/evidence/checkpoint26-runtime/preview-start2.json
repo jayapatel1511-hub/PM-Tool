@@ -1,0 +1,9 @@
+{
+  "atUtc": "2026-11-02T11:28:51.643228+00:00",
+  "pid": 51321,
+  "execSession": 75968,
+  "base": "http://127.0.0.1:8856",
+  "command": "node /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/node_modules/.bin/vite preview --outDir /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint26-artifacts/bin/spa-wwwroot-build2 --host 127.0.0.1 --port 8856 --strictPort",
+  "output": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint26-artifacts/bin/spa-wwwroot-build2",
+  "boundary": "Finalstaticmockpreviewonly;noAPI5091/livejoin;old8855/build1preserved"
+}

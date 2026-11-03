@@ -1,0 +1,7 @@
+{
+  "file": "src/Hub.Api/Features/AdminRoleExplanations.cs",
+  "before": "c19fcd042093f2fcf7b2a9489c1ad0ce7051abd2d514dd8747dd357240c2559a",
+  "after": "881eb8e6c35772d0d1ac292e89d1b8b8adf2f3923e5301294aa5511b4ee4dfb9",
+  "observed": "bootstrap1 CS0819, implicit var cannot have multiple declarators",
+  "repair": "Split declaration only; compiler stopped before edit"
+}

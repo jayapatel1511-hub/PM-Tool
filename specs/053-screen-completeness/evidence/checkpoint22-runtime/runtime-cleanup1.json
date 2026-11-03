@@ -1,0 +1,19 @@
+{
+  "checkedAtUtc": "2026-11-02T02:43:40.732734+00:00",
+  "status": "PASS_OWNED_QA22_CLEANUP",
+  "stoppedApi": {
+    "pid": 72815,
+    "cwd": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api",
+    "port5088NoListener": true
+  },
+  "droppedDatabase": "hub_qa_checkpoint22",
+  "databasesBefore": [
+    "hub_qa_checkpoint22"
+  ],
+  "matchingDatabasesAfter": [],
+  "retained": [
+    "codex-pm-052-053-tests on55432",
+    "final build2 preview8853 PID11091"
+  ],
+  "boundary": "Only root-owned disposable QA22 data removed; primary/prototype/other databases untouched; no flag activation/commit/push/deployment"
+}

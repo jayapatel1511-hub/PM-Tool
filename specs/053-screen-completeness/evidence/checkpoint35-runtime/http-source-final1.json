@@ -1,0 +1,10 @@
+{
+  "atUtc": "2026-11-03T06:47:15.538561+00:00",
+  "spaBase": "http://127.0.0.1:8882",
+  "gallery": "http://127.0.0.1:8883/#addition-12",
+  "webSourceFiles": 275,
+  "bundleFiles": 143,
+  "servedSPA": 143,
+  "servedGallery": 25,
+  "allSourceBundleHTTPMatch": true
+}

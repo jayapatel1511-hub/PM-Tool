@@ -1,0 +1,26 @@
+
+> web@0.0.0 typecheck:tests
+> tsc -p tests/tsconfig.json
+
+tests/native-visibility-browser.cjs(16,7): error TS7034: Variable 'spawnError' implicitly has type 'any' in some locations where its type cannot be determined.
+tests/native-visibility-browser.cjs(19,66): error TS7005: Variable 'spawnError' implicitly has an 'any' type.
+tests/native-visibility-browser.cjs(24,112): error TS2810: Expected 1 argument, but got 0. 'new Promise()' needs a JSDoc hint to produce a 'resolve' that can be called without arguments.
+tests/platform-fixtures.cjs(49,85): error TS2339: Property 'outDir' does not exist on type '{}'.
+tests/platform-fixtures.cjs(58,26): error TS7006: Parameter 'page' implicitly has an 'any' type.
+tests/platform-fixtures.cjs(58,34): error TS2339: Property 'build' does not exist on type '{ buildIds?: string[] | undefined; events?: boolean | undefined; }'.
+tests/platform-fixtures.cjs(60,9): error TS7034: Variable 'eventRequests' implicitly has type 'any[]' in some locations where its type cannot be determined.
+tests/platform-fixtures.cjs(61,9): error TS7034: Variable 'pulseRequests' implicitly has type 'any[]' in some locations where its type cannot be determined.
+tests/platform-fixtures.cjs(62,9): error TS7034: Variable 'apiErrors' implicitly has type 'any[]' in some locations where its type cannot be determined.
+tests/platform-fixtures.cjs(62,31): error TS7034: Variable 'unknownGets' implicitly has type 'any[]' in some locations where its type cannot be determined.
+tests/platform-fixtures.cjs(63,54): error TS7006: Parameter 'route' implicitly has an 'any' type.
+tests/platform-fixtures.cjs(107,12): error TS7005: Variable 'eventRequests' implicitly has an 'any[]' type.
+tests/platform-fixtures.cjs(107,27): error TS7005: Variable 'pulseRequests' implicitly has an 'any[]' type.
+tests/platform-fixtures.cjs(107,42): error TS7005: Variable 'apiErrors' implicitly has an 'any[]' type.
+tests/platform-fixtures.cjs(107,53): error TS7005: Variable 'unknownGets' implicitly has an 'any[]' type.
+tests/platform-fixtures.cjs(107,77): error TS7006: Parameter 'next' implicitly has an 'any' type.
+tests/platform-fixtures.cjs(109,28): error TS7006: Parameter 'base' implicitly has an 'any' type.
+tests/platform-fixtures.cjs(109,34): error TS7006: Parameter 'opts' implicitly has an 'any' type.
+tests/task-cross-project-bulk.fixture.cjs(77,143): error TS2345: Argument of type '{ activatedAt: string | null; allowViewerComments: boolean; archivedAt: string | null; client: string; clientId: string; clientReference: string | null; completedAt: string | null; ... 43 more ...; workActivity?: { ...; } | ... 1 more ... | undefined; }' is not assignable to parameter of type 'Pick<{ attentionCritical: number; attentionWarning: number; blockedTasks: number; client: { id: string; name: string; }; computedHealth: string; healthOverrideAt: string | null; healthOverrideNote: string | null; ... 31 more ...; visibility: string; }, "id" | ... 1 more ... | "projectNumber"> & Partial<...>'.
+  Type '{ activatedAt: string | null; allowViewerComments: boolean; archivedAt: string | null; client: string; clientId: string; clientReference: string | null; completedAt: string | null; ... 43 more ...; workActivity?: { ...; } | ... 1 more ... | undefined; }' is not assignable to type 'Partial<{ attentionCritical: number; attentionWarning: number; blockedTasks: number; client: { id: string; name: string; }; computedHealth: string; healthOverrideAt: string | null; healthOverrideNote: string | null; ... 31 more ...; visibility: string; }>'.
+    Types of property 'client' are incompatible.
+      Type 'string' is not assignable to type '{ id: string; name: string; }'.

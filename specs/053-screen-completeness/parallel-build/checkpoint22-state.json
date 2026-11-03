@@ -1,0 +1,118 @@
+{
+  "checkpoint": 22,
+  "generation": 50,
+  "mode": "closed-local-checkpoint",
+  "previous": "checkpoint21 closed:28 of49 local053 checked;120 .NET,Node14,11 Chrome and real joins passed",
+  "lanes": {
+    "A": "ALL SOURCE READY/held: Dashboard/Staff overlap+focused browser source; Dashboard passive-only name loan D after A hold",
+    "B": "053 S14 Timeline saved views; prepared S10 remains required but no implementation loan yet",
+    "C": "053 S33 approved source loan: Deliverables/new isolated helpers/UI/tests; shared model/reference/schema root only",
+    "D": "Backend READY/held + frontend person panel/notes/Team; extended passive-name loan Workload/PlannerGrid/Planner/Allocations/Dashboard and actual Staff/shared register/context browser cases"
+  },
+  "services": "QA22 API PID72815 ownership verified then gracefully stopped;5088 no listener; only hub_qa_checkpoint22 dropped, no hub_test_* remains. TestPG55432 and finalbuild2 preview8853 PID11091 retained. See runtime-cleanup1.json.",
+  "pendingUserAnswer": "Utility nav none versus My Work unchanged and still pending",
+  "rootPending": [
+    "Review four restarted g51 preparation handoffs and issue bounded disjoint source loans",
+    "Implement all remaining052/053 buildable slices, including S10/S34/globalS43 and universal052 gates",
+    "Preserve pending utility policy and all human/pilot/native/transport boundaries; no commit/push/deployment/activation"
+  ],
+  "rootAuthored": [
+    "ProjectMember nullable JsonIgnored ResponsibilityNote +EF max80; additive root migration generated/reviewed and applied only to disposable test/QA databases",
+    "Member audit allow-list ResponsibilityNote; generic history surface unchanged",
+    "Permissions.SetMemberResponsibility with normal Writable then PM/server-proven active primary-DL, ManageTeam unchanged",
+    "PersonFacts DateOnly Read overload shares owning flag gate/ReadAt",
+    "MyWork.StaffScope internal +optional captured OrgSettings; legacy callers unchanged",
+    "PersonRow internal, both endpoint maps; Workspace same-member optional note bridge",
+    "Flag-owned Person panel registration, scoped context/transient close + real trigger focus return",
+    "Person-panel cache invalidation + transient NotKept metadata",
+    "Timeline scoped saved-view whitelists, guards, validation and six UI labels",
+    "S33 nullable model/EF + real issue version; Admin/reference bridges and dark Admin tabs; audit field registration",
+    "20 person labels plus shared Person/member/client numbering labels",
+    "S33 idempotent reference defaults and dark Admin list UI; no backfill/selection",
+    "Shared passive register Person and record-context User actor/owner triggers; external/no-id labels unchanged",
+    "Cached capacity errors clear old cells; owner flag toggles refresh reference vocab",
+    "S33 selected saved-view filters/layout/new columns with selective dark cleaning; existing view CRUD retained",
+    "Http.CheckBodyVersion preserves nested issue baseline independently of parent header",
+    "S33 numbering Settings/endpoint registration and export reference labels",
+    "Existing-pattern new vocabulary replay guard +2 normal-command authority/receipt tests",
+    "76 UI labels and12 server labels merged in generation50 so far"
+  ],
+  "sourceStatus": "Checkpoint22 final local gates PASS; S14/S33 checked,30of49. Core S43 verified but global names incomplete. Four chats active on disjoint g51 preparation only.",
+  "independentReview": {
+    "personBackend": "PASS source only; no actionable findings, no execution",
+    "timeline": "3P2 repairs independently rechecked PASS source only: inactive PD filters preserved, explicit Mine fixture, actual zero-business-mutation observation; API8/browser unrun",
+    "overlap": "Source coherent; header64px \u00b11 assertion repaired by A and held; actual geometry unrun",
+    "personUi": "PASSsource recheck after stable8Actor keys+actual nested reviewer remount regression; browserunrun",
+    "registerBackend": "Two fixture repairs and new vocabulary replay guard/test independently rechecked PASS source only; no residual findings. Runtime pending",
+    "timelineProjection": "PASS source; evaluator fields excluded correctly; persisted fields retained. No runtime retry; milestone/handoff row versions not exposed by canonical Timeline DTO",
+    "realBrowserBoundedRepair": "PASS final source; natural stable-ID focus and actualoutDir/all-manifest byte prerequisites. No runtime/browser execution"
+  },
+  "checks": {
+    "browserScriptSyntax": "PASS node --check A/B/D new suites; actual browser unrun",
+    "diffWhitespace": "PASS after root integrations and lane finalsource",
+    "backendBuild": "PASS both initial565 and final migration567 rebuilds,0errors/1147warnings; sourcehash verified",
+    "nodeCache": "PASS16/16 actual QueryClient cases",
+    "migration": "PASS independent source review;13addedcolumns (12nullable metadata+issueintversion0),2ref tables/3restrictFKs/checks; no metadata backfill orDBapply byEFgenerator",
+    "focusedDotnet": "PASS33/33 (Timeline8,Person10,Deliverable13,VocabularyReplay2)",
+    "appTypes": "PASS forced567-source generatedcontract app typecheck",
+    "fixtureTypes": "PASS including new deliverable-register fixture",
+    "contractRefresh": "Expected intentionalFAIL2; reviewed10addedpaths/17newschemas/8existingoptional schema additions,0removedpaths/requiredchanges; generatedapi.d.ts. Normalgoldens inadjacent nowrunning",
+    "adjacentDotnet": "PASS93/93 exact10existing classes; normal API/registry goldens+parity included",
+    "distinctDotnet": "PASS126 unique latest33focused+93adjacent",
+    "lint": "PASS with existing warnings",
+    "ssr": "PASS existingui-review",
+    "browserScriptSourceReview": "PASS final Aheader64, Bscope/mutation and Cmutation guard repairs; Dnested actor keys reviewed",
+    "frontendLabels": "80 UI labels +12 server labels merged in generation50; fixtureinclude final",
+    "productionBuild": "PASS build2,438webinputs hashverified and55previewassets/indexmatch; onlyappdelta2stablePMfocusprops",
+    "focusedBrowser": "Latest build2 Timeline/person/deliverable full suites PASS. Overlap last run failed only an invalid exact64 phone HEADER criterion; corrected desktop64\u00b11/phone64..72 test remains unrun. Exact64 phone count-card overlap retained.",
+    "overlapDiagnosis": "Observed sameconnectedDOM initial-16 withrunning0.01ms reduced-motion transitions\u2192after2frames72/reserve80/margin-72/top0, no appbug. Atestsettled-animationreadinessREADY.",
+    "personFocusRepair": "Two stable ProjectList PM table/card keys independently source-PASS, reversehash matched prior source, and full Person focused Chrome suite PASS on final build2",
+    "qaRunnerSource": "Initial three API setup guards independently source-PASS. Latest B derived/canonical projection repair independently source-PASS and unrun; latest A real-browser root repairs independently source-PASS and unrun",
+    "qaApiSetup": "CdeliverablePASS_API_SETUP95normalrequests22assertions; DpersonPASS_API_ONLYnormalPM/DLnote+403+realLena40free0away/partialfalse/provisionalfalse+RitanoWorkload. BfirstattemptFAILderivedmilestonestatusnull\u2192AtRiskasworkercompleted; canonicalprojectionrepairloan, preservefailreceipt beforefreshretry. Nobrowserrealclaimyet.",
+    "headerContractAudit": "SourceconfirmedFR-VSN12/AC-VSN05\u226472allwidths; prior64measurementdesktoponly. Phone68expected40control+16metadata+12padding; headerproductunchanged. Atestcorrectiondesktop64\u00b11/phone64..72authorized; countoverlapphoneEXACT64 unchanged.",
+    "interruptedTestRepairs": "Root took over only project-dashboard-completeness.cjs and project-header-compact.cjs after authoritative C/D failed turns. Dashboard measures actual rendered title/reference/control bounds after real layout readiness; reserved band bottom retained as diagnostic. Header awaits actual Details hidden + natural original-trigger focus after Escape. Both node--check PASS. No Chrome rerun yet; no product/C#/style change.",
+    "realBrowserSourceReview": "PASS final bounded independent review and node--check; all133manifest assets will be compared on execution, retained build2 identity55assets is a subset. Local manifest hash matches build2. No served-byte recheck/browser execution during approval outage.",
+    "currentSourceParity": "source-review2.json: all567 C# and245 appsource unchanged from finalbuild2; only3 frozen browser test sources changed (overlap/Dashboard/header); five prepared scripts parsePASS",
+    "finalBrowserRepairs": "PASS overlap run4/Dashboardrun2/headerrun2; all11 distinct latest focused+adjacent suites pass",
+    "realTimelineRetry": "PASS6 normal API joins; failed first receipt preserved as attempt1",
+    "realJoinedBrowser": "PASS22of22/4actors/1440+375/32screenshots/133manifestassets/zero attemptedAPIwrites; final real-browser report b3a269a5",
+    "cleanup": "PASS owned API stopped and only QA22 dropped; PG/preview retained"
+  },
+  "chatSnapshot": {
+    "A": {
+      "threadId": "01a19461-822c-7811-85fe-efd8e09bd7af",
+      "latestTurn": "completed",
+      "result": "real-browser runner source READY; not executed"
+    },
+    "B": {
+      "threadId": "01a19461-f283-7612-a5b7-e6638aa92196",
+      "latestTurn": "completed",
+      "result": "Timeline QA canonical/evaluator projection repair READY; failed first receipt preserved; retry not executed"
+    },
+    "C": {
+      "threadId": "01a19462-65cb-7ca2-9228-79a3c15c3549",
+      "latestTurn": "failed: account usage limit",
+      "result": "last Dashboard regression-test repair interrupted; main S33/API/mock-browser evidence remains passed"
+    },
+    "D": {
+      "threadId": "01a19462-d82f-7793-9dd3-315aec7437ad",
+      "latestTurn": "failed: account usage limit",
+      "result": "last header-focus regression-test repair interrupted; main S43/API/mock-browser evidence remains passed"
+    }
+  },
+  "verificationConstraint": {
+    "action": "Chrome overlap rerun (count-card-overlap run4)",
+    "executed": false,
+    "source": "automatic approval review",
+    "reason": "Account usage limit prevented approval review from completing; not a determination of unsafe action",
+    "resetShown": "Nov 4th, 2026 2:43 AM (timezone not specified by service)",
+    "boundary": "Do not retry the rejected action through a different approval path or weaker permissions. Read/source edits/static parsing are separate unaffected work.",
+    "resolved": "Resumed turn: proper require_escalated runtime probe approved and executed successfully; former usage failure no longer blocks this path."
+  },
+  "lastSourceReviewReceipt": "specs/053-screen-completeness/evidence/checkpoint22-runtime/source-review2.json",
+  "lastChatCheckUtc": "2026-11-01T22:10:25.725779+00:00",
+  "goalStatus": "active: full remaining052/053 scope preserved",
+  "runtimeRevalidatedAtUtc": "2026-11-02T02:35:58.560595+00:00",
+  "restartedLanes": "All four existing chats explicitly restarted with separate g51 preparation-only document loans; frozen application/test source stays root-controlled for checkpoint22.",
+  "closedFindings": "specs/053-screen-completeness/evidence/checkpoint22-findings.md"
+}

@@ -11,7 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { ApiError, typedRequest } from '@/lib/api'
-import { useMe } from '@/lib/auth'
+import { Ctx, useMe } from '@/lib/auth-context'
 import { ago } from '@/lib/format'
 import { t } from '@/lib/i18n'
 import { accentOf, cn, type Accent } from '@/lib/utils'
@@ -20,9 +20,29 @@ import { accentOf, cn, type Accent } from '@/lib/utils'
 export const InProject = createContext(false)
 
 /** Page header (design §6): optional eyebrow, a readable title, supporting text and the page's actions on the right. */
-export function Page({ title, subtitle, eyebrow, actions, children, className }: { title: ReactNode; subtitle?: ReactNode; eyebrow?: ReactNode; actions?: ReactNode; children: ReactNode; className?: string }) {
+export function Page({ title, subtitle, eyebrow, actions, titleBlock, bandFooter, tabs, overlap, children, className }: { title: ReactNode; subtitle?: ReactNode; eyebrow?: ReactNode; actions?: ReactNode; titleBlock?: ReactNode; bandFooter?: ReactNode; tabs?: ReactNode; overlap?: boolean; children: ReactNode; className?: string }) {
   const nested = useContext(InProject)
+  const auth = useContext(Ctx)
+  const visualSystem = auth?.me.flags?.visual_system === true
   const Heading = nested ? 'h2' : 'h1'
+  if (visualSystem) return (
+    <div className={cn('visual-page flex w-full flex-col', nested && 'visual-page--project', overlap && 'visual-page--overlap', className)}>
+      <div className="visual-page-band">
+        <div className="mx-auto flex w-full max-w-[1600px] flex-wrap items-start justify-between gap-x-6 gap-y-4">
+          <div className="min-w-0 max-w-3xl">
+            {eyebrow && <p className="mb-1 text-xs/[18px] font-medium text-muted-foreground">{eyebrow}</p>}
+            <Heading className="break-words">{title}</Heading>
+            {subtitle && <p className="mt-1 text-sm/5 text-muted-foreground">{subtitle}</p>}
+            {titleBlock}
+          </div>
+          {actions && <div className="visual-page-actions no-print flex flex-wrap items-center gap-2">{actions}</div>}
+        </div>
+        {bandFooter && <div className="visual-page-band-footer mx-auto mt-4 w-full max-w-[1600px]">{bandFooter}</div>}
+        {tabs && <div className="visual-page-band-tabs mx-auto mt-4 w-full max-w-[1600px]">{tabs}</div>}
+      </div>
+      <div className="visual-page-content mx-auto flex w-full max-w-[1600px] flex-col gap-6">{children}</div>
+    </div>
+  )
   return (
     <div className={cn('mx-auto flex w-full flex-col gap-6 p-4 md:p-6 xl:p-8', className)}>
       <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
@@ -30,20 +50,23 @@ export function Page({ title, subtitle, eyebrow, actions, children, className }:
           {eyebrow && <p className="mb-1 text-xs/[18px] font-semibold uppercase tracking-[1px] text-muted-foreground">{eyebrow}</p>}
           <Heading className={cn('break-words font-semibold', nested ? 'text-lg/[26px] tracking-[-0.2px]' : 'text-2xl/8 tracking-[-0.4px] md:text-[28px]/9 md:tracking-[-0.6px]')}>{title}</Heading>
           {subtitle && <p className="mt-1 text-base/6 text-muted-foreground">{subtitle}</p>}
+          {titleBlock}
         </div>
         {actions && <div className="no-print flex flex-wrap items-center gap-2">{actions}</div>}
       </div>
+      {bandFooter}
+      {tabs}
       {children}
     </div>
   )
 }
 
-/** A card with a titled header; `accent` tints the header for identity or grouping, never for status. */
+/** A card with a titled header. v1 keeps the accent; v2 section decoration is neutral, never a metric/status cue. */
 export function Section({ title, count, actions, children, className, id, headingId, accent }: { title: ReactNode; count?: number; actions?: ReactNode; children: ReactNode; className?: string; id?: string; headingId?: string; accent?: Accent }) {
   const Heading = useContext(InProject) ? 'h3' : 'h2' // one level below the page title
   return (
     <section id={id} className={cn('overflow-hidden rounded-lg border bg-card', className)} aria-labelledby={headingId ?? (id ? `${id}-h` : undefined)}>
-      <div data-accent={accent} className={cn('flex flex-wrap items-center justify-between gap-2 border-b px-5 py-3', accent && 'bg-(--acc-bg)')}>
+      <div data-visual-decoration="section" data-accent={accent} className={cn('flex flex-wrap items-center justify-between gap-2 border-b px-5 py-3', accent && 'bg-(--acc-bg)')}>
         <Heading id={headingId ?? (id ? `${id}-h` : undefined)} className="text-base/6 font-semibold">
           {title}{count != null && <span className="ml-2 rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">{count}</span>}
         </Heading>
@@ -80,7 +103,7 @@ export function ErrorBanner({ error, retry, retryLabel, details }: { error: unkn
     <div role="alert" className="flex flex-wrap items-center gap-3 rounded-md border border-bad/30 bg-bad-bg px-4 py-3 text-sm text-bad">
       <AlertTriangle className="size-4 shrink-0" aria-hidden />
       <span className="min-w-0 flex-1">{e?.status === 404 ? t('app.notFound') : msg}</span>
-      {retry && e?.status !== 403 && <Button size="sm" variant="outline" onClick={retry}>{retryLabel ?? (conflict ? t('error.reload') : t('app.retry'))}</Button>}
+      {retry && e?.status !== 403 && <Button type="button" size="sm" variant="outline" onClick={retry}>{retryLabel ?? (conflict ? t('error.reload') : t('app.retry'))}</Button>}
       {details && <div className="w-full">{details}</div>}
     </div>
   )
@@ -184,8 +207,8 @@ export function PageHelp({ children, label = t('calm.help') }: { children: React
 /** A list's toolbar (§13.0 Filters, §41 R1): one row with the search, a Filters (n) button whose popover (a sheet below
  *  1024 px) holds the labelled filter fields (`children`), up to three pinned quick chips, the active filters as removable
  *  chips while any are set, and the page's view or overflow controls on the right. URL handling stays with each page. */
-export function FilterBar({ search, quick, active, activeCount = 0, actions, children, className }: {
-  search?: ReactNode; quick?: ReactNode; active?: ReactNode; activeCount?: number; actions?: ReactNode; children?: ReactNode; className?: string
+export function FilterBar({ search, lead, quick, active, activeCount = 0, actions, children, className }: {
+  search?: ReactNode; lead?: ReactNode; quick?: ReactNode; active?: ReactNode; activeCount?: number; actions?: ReactNode; children?: ReactNode; className?: string
 }) {
   const narrow = useSyncExternalStore(subscribeTablet, () => matchMedia(tablet).matches)
   const trigger = (
@@ -198,6 +221,7 @@ export function FilterBar({ search, quick, active, activeCount = 0, actions, chi
   return (
     <div className={cn('flex flex-wrap items-center gap-2', className)}>
       {search && <div className="w-full sm:w-auto sm:min-w-64 [&_[data-slot=label]]:sr-only">{search}</div>}
+      {lead}
       {children && (narrow
         ? <Sheet><SheetTrigger asChild>{trigger}</SheetTrigger><SheetContent aria-describedby={undefined} className="overflow-y-auto"><SheetHeader><SheetTitle>{t('calm.filters')}</SheetTitle></SheetHeader><div className="px-4 pb-4">{fields}</div></SheetContent></Sheet>
         : <Popover><PopoverTrigger asChild>{trigger}</PopoverTrigger><PopoverContent align="start" aria-label={t('calm.filters')} className="w-[46rem]">{fields}</PopoverContent></Popover>)}
@@ -243,6 +267,7 @@ export function SummaryTile({ label, value, accent, hint, to, onClick, selected,
   label: ReactNode; value: ReactNode; accent: Accent; hint?: ReactNode; to?: string; onClick?: () => void; selected?: boolean; children?: ReactNode
 }) {
   const hintId = useId()
+  const countCard = useContext(Ctx)?.me.flags?.visual_system === true ? '' : undefined
   const desc = hint ? hintId : undefined
   const cls = cn('relative block rounded-lg border bg-(--acc-bg) px-4 py-3 text-left md:px-5', selected && 'border-primary ring-2 ring-primary')
   const icon = <Info className="size-3.5 opacity-70" aria-hidden />
@@ -256,10 +281,10 @@ export function SummaryTile({ label, value, accent, hint, to, onClick, selected,
     {info}
   </>
   const mark = hint && <span className={corner}>{icon}</span>
-  if (onClick) return <>{tip(<button type="button" data-accent={accent} aria-pressed={selected} aria-describedby={desc} onClick={onClick} className={cn(cls, 'hover:brightness-[0.98]')}>{head(mark)}{children}</button>)}{note}</>
-  if (to && !children) return <>{tip(<Link to={to} data-accent={accent} aria-describedby={desc} className={cn(cls, 'hover:brightness-[0.98]')}>{head(mark)}</Link>)}{note}</>
+  if (onClick) return <>{tip(<button type="button" data-count-card={countCard} data-accent={accent} aria-pressed={selected} aria-describedby={desc} onClick={onClick} className={cn(cls, 'hover:brightness-[0.98]')}>{head(mark)}{children}</button>)}{note}</>
+  if (to && !children) return <>{tip(<Link to={to} data-count-card={countCard} data-accent={accent} aria-describedby={desc} className={cn(cls, 'hover:brightness-[0.98]')}>{head(mark)}</Link>)}{note}</>
   return (
-    <div data-accent={accent} className={cls}>
+    <div data-count-card={countCard} data-accent={accent} className={cls}>
       {to ? tip(<Link to={to} aria-describedby={desc} className="block rounded-md [&:hover>span:nth-of-type(2)]:underline">{head(mark)}</Link>)
         : head(hint && tip(<button type="button" aria-label={t('sig.definition')} aria-describedby={desc} className={cn(corner, 'hover:bg-card/60')}>{icon}</button>))}
       {children}{note}

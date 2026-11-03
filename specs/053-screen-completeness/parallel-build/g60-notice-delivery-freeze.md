@@ -1,0 +1,44 @@
+# G60 exact staged freeze — initial A producer boundary loan
+
+G59/checkpoint31 locally closed43/49; all earlier outputs preserved. G60 B/C/D interface proposals remain documentation-only. A alone now has the six source files listed below. No .NET/compiler/EF/generator/runtime check while any C# author writes; max4 helpers excludingroot (A plus3 doc writers), no spawned reviewers until a writer holds. Root owns integration and all execution. No commit/push/deploy/maintained activation/Accepted.
+
+## A exact source ownership
+
+-Features/Tasks.cs: whole Transition, Delete and legacy Bulk handlers only.
+-Features/Deliverables.cs: whole Edit handler only.
+-Features/Dependencies.cs: whole Delete handler only.
+-Features/Milestones.cs: whole ChangeDate handler only.
+-Features/Comments.cs: whole Create/Edit, including old mention deletion.
+-Features/TaskPickup.cs: only PickupCommandFilter pre-commit FlushNotices call, preserving manual transaction/locks.
+
+All paths under src/Hub.Api. Use existing-style whole-command lambda wrappers and preserve every original guard, save, effect, refusal, status and response. No task single-edit/collaborator expansion or unrelated cleanup. Root provides exact Keys.cs helper `public static Task<T> Tx.Notice<T>(HubDb db, SettingsStore store, Func<Task<T>> work)`: people_screens on uses existing Tx.Run, off invokes work unchanged. A may add normal SettingsStore DI parameter only where missing and update actual direct callers. Root provides `public Task HubDb.FlushNotices(CancellationToken ct=default)`; pickup filter calls this immediately before its existing commit. No early inner-Tx flush.
+
+## Root-owned next integration, not yet authored
+
+Buffer full trusted enhanced raw Send calls on HubDb across all Notifier instances, preserve actor/direct/source/scopes/content and no-double-collapse identity. Seal one complete recipient set only AFTER business saves/lifecycle hooks. Source project/task locks precede sorted recipient keys, then fresh policy/private rows. Outer Tx.Run flushes before commit; manual evaluator/pickup need owner seams. Allocation previews must discard buffered raw facts with rollback. A broad mutation endpoint filter is rejected: it conflicts with AllocationPreviewFilter transaction rollback and Admin settings cache invalidation timing. Explicit producer wrappers are required.
+
+Root owns existing Notify/Keys/HubDb/Planning/WeeklyPlanning/Evaluation/preference-policy hooks/Operations/receipt projection/Modules/UI mount/locales/caches/gen/model ifneeded. B/C/D source files remain HOLD until exact interface docs are reviewed/frozen. Proposed D core+Email+proof codec, C composition+enhanced Digest core, B own reminder and later A UI are still proposals, not source authorization. Keep legacy WeeklySummary, old flag-off wire and ordinary Email path exact.
+
+Source preimages36 in .review/checkpoint32-baseline/manifest.json; retained prior outputs4606 in checkpoint32-runtime/retained-output-baseline1.json. Existing user-choice/QA24 cleanup boundaries unchanged. Full goal/S45/S47 remain incomplete.
+
+
+## Staged B and C source loans — 22:34 UTC
+
+B owns only NEW Infrastructure/TimeEntryReminderJob.cs and Api/TimeEntryReminderTests.cs. Final interface doc0b86c43... plus Root direct freeze: public shared CLR types/methods, opaque internal constructors; base Policy exactly UserId/IsActive/EmailAddress/Settings/Preferences/DigestEnabled/HoldDigestWhenAway/DigestTimeLocal/SectionsOff, no ReadAtUtc or eager capacity/Time query. Dedicated TimeEntryReminder own app event, generic noticeReminder.title/body, /time, RequiredProjectIds=null; no Event catalogue All addition, email, intent or Time permission change. Root event/locales/registration/Operations. Candidate batches100, fresh recipient scoped AuditContext/ReadCommitted. ReadDue rules and once-localMonday/Ready captured basis as final doc. No execution.
+
+C initial loan ONLY existing Infrastructure/Digest.cs enhanced shared Build core/overload, NEW Infrastructure/NotificationDigestComposition.cs C-owned public DTOs/build helpers, NEW Api/NotificationDigestCompositionTests.cs formatter/window/scope cases. No scheduling/slot/reservation/DigestJob branch until next exact reloan after D final contract. No stubs; omit unapproved methods. Preserve legacy Build output and WeeklySummary, one20-section core. Enhanced payload exact From/Through and actual rendered row/count scopes/witness; max10 parent held lines/no grouping, no all-off bypass. Add IncludesAdminReview bool to C RenderPolicy. D owns shared scope/window/schedule/context/policy/candidate/membership definitions. Root model witness NoticeDigestPolicyJson is chosen direction; exact codec/bounds still reviewed. No C model/locales/registration/EF.
+
+Root normal Notifier buffer, HubDb Flush/Discard and Save fallback authored against published D capture signatures, UNCOMPILED. Bulk/planning adapters and manual cleanup still incomplete. D remains DOC ONLY until exact core source loan. Max4 active helpers (B/C source +D doc +at most1reviewer); no.NET while C# authors write.
+
+
+## FINAL G60 shared source reconciliation (Root-owned, supersedes draft peers)
+
+All shared CLR DTOs/classes/methods PUBLIC, opaque context/preparation constructors INTERNAL; ctx.Db internal. Policy exact fields UserId/IsActive/EmailAddress/Settings/Preferences/DigestEnabled/HoldDigestWhenAway/DigestTimeLocal/SectionsOff. No ReadAt and no eager capacity/Time reads. Lazy ReadDayAvailability only holds. D source five files authorized (NotificationDelivery, Email, NoticeDeliveryProof, new NotificationAwayDeliveryTests, existing Domain ProofTests). C full three files authorized (Digest, NotificationDigestComposition, its tests). Root owns all models/callers/prefs/registration/Operations/UI/gen.
+
+Raw enhanced batch whose fresh feature flag is off refuses409 notice_policy_changed, WHOLE source rollback; never legacy fallback. Pure retained policy observations run while off through existing locked ObservePolicyChange, not capture Evaluate/Stage. Ordinary key includes actual actor token, with none distinct from Guid.Empty. Compatible actor/source/scope/AppReference duplicate first-content; incompatible identity or aliased legacy collapse source refuses409 notice_identity_conflict; legacy collapse key itself unchanged. Root buffers planning observations separately, acquires union raw+observer recipient keys after source locks, applies/saves observations before fresh raw evaluation. Core reentrant raw locks introduce no new key.
+
+One nullable private immutable Email.NoticeDigestPolicyJson jsonb witness, closed bound version/user/slot/composition/window/scope +C RenderPolicy(printed codes/update projects/direct reports/own staff notification IDs/activity contributors/IncludesAdminReview)+projection flags. Canonical1MiB/parse2MiB, exact IDs/members no truncation. Activity projection vector exact5 register_screens/people_screens/capacity_screens/visual_system/work_screens; restricting true->false recompose, widening alone does not. Current Digest.VisibleActivity/AllActivity/direct-report/notification/admin predicates rechecked. Old foundation protocol1 Digest may materialize NULL witness; queue/claim rejects/quarantines missing witness, never backfills it. Legacy+Immediate forbid witness.
+
+Slot.CarryForwardToSlotId nullable COMPOSITE selfFK(CarryID,UserId,Kind)->(Id,UserId,Kind), Restrict/alternate key. One assignment on original/current Exhausted Digest to actual tracked same-person Digest with target.From<=source.From,target.Through>source.Through; no Added pointer/clear/repoint/cycles/immutable-window or budget rewrite. D alone verifies actual safe-unsent email provenance. D ReadCarryForwardFromAsync(ctx,ct) reads safely exhausted uncovered leaves; TransferCarryForwardAsync(ctx,newSlotId,now,ct) moves contained safe leaves once. New slot/carry/compose/queue/watermark one transaction/one final Save. Accepted/simulated/unknown/Empty consume coverage; queued/inflight/uncertain never new replay authority. LastDigestAt=max(existing,slot.Through), while old window remains immutable. AddressChanged reason maps AccessRemoved and never rewrites pinned address.
+
+No core begins/saves/commits. Public shared LegacyEmails query +IsLegacyEmail use one complete marker definition before legacy Take/body rewrite; required scope/Kind alone are not markers. Strict BeginCapture REQUIRES live ReadCommitted before Send. Root therefore expanded exact producer wrappers (no global filter) and SaveChanges now starts people_screens owner BEFORE hook notifiers. Planning five handlers use unconditional Tx.Run so retained withdrawal observers are valid off; existing guards/wire remain. Root normal capture/app collapse/bulk receipt/scopes/group visibility/source withdraw/adapters authored, UNCOMPILED. No tests run G60.

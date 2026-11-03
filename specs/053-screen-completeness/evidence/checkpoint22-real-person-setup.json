@@ -1,0 +1,2433 @@
+{
+  "status": "PASS_API_ONLY",
+  "evidence": "normal-command local API only; no browser acceptance",
+  "runId": "MVY51JAX-1DBD8677",
+  "startedAtUtc": "2026-11-01T18:03:02.265Z",
+  "prerequisites": {
+    "databaseRequested": "hub_qa_checkpoint22",
+    "api": "http://127.0.0.1:5088/api/v1",
+    "authMode": "Development",
+    "existingActiveSeeds": [
+      {
+        "email": "jordan@hub.test",
+        "displayName": "Jordan Lee",
+        "presenceInActiveOnlyPicker": true
+      },
+      {
+        "email": "priya@hub.test",
+        "displayName": "Priya Nair",
+        "presenceInActiveOnlyPicker": true
+      },
+      {
+        "email": "marc@hub.test",
+        "displayName": "Marc Dubois",
+        "presenceInActiveOnlyPicker": true
+      },
+      {
+        "email": "alex@hub.test",
+        "displayName": "Alex Chen",
+        "presenceInActiveOnlyPicker": true
+      },
+      {
+        "email": "omar@hub.test",
+        "displayName": "Omar Haddad",
+        "presenceInActiveOnlyPicker": true
+      },
+      {
+        "email": "rita@hub.test",
+        "displayName": "Rita Gomez",
+        "presenceInActiveOnlyPicker": true
+      },
+      {
+        "email": "lena@hub.test",
+        "displayName": "Lena Brooks",
+        "presenceInActiveOnlyPicker": true
+      }
+    ]
+  },
+  "actors": {
+    "jordan": {
+      "id": "01a19834-0bfd-7663-a726-c0ab0cc8668c",
+      "displayName": "Jordan Lee",
+      "email": "jordan@hub.test",
+      "systemRoles": [
+        "Admin"
+      ],
+      "capabilities": {
+        "createProject": true,
+        "createTask": false,
+        "portfolio": true,
+        "workload": true,
+        "staff": true,
+        "allStaff": true,
+        "admin": true,
+        "templates": true,
+        "readOnly": false,
+        "directReports": 0
+      },
+      "flags": {
+        "verifiable_log": false,
+        "commitment_reliability": false,
+        "allocation_preview": false,
+        "baseline_history": false,
+        "revision_check": false,
+        "task_pickup": false,
+        "org_structure": false,
+        "figure_names": false,
+        "planner_kept_rows": false,
+        "show_deleted": false,
+        "template_working_days": false,
+        "status_rollups": false,
+        "picker_project_rank": false,
+        "row_quick_actions": false,
+        "date_context": false,
+        "schedule_baseline": false,
+        "small_ux": true,
+        "timeline_handoffs_chain": false,
+        "onboarding_card": false,
+        "capacity_reports": false,
+        "route_counter": false,
+        "template_roles": false,
+        "unfilled_beside_capacity": false,
+        "project_status_note": false,
+        "my_work_follow_up": false,
+        "project_import": false,
+        "capacity_polish": false,
+        "record_engine_additions": false,
+        "live_project_stamp": false,
+        "live_events": false,
+        "admin_review": false,
+        "data_entry_safety": false,
+        "backlog": false,
+        "visual_system": true,
+        "screen_patterns": false,
+        "home_overview": false,
+        "work_screens": true,
+        "project_screens": true,
+        "capacity_screens": true,
+        "register_screens": true,
+        "people_screens": true
+      },
+      "today": "2026-11-01",
+      "orgTimeZone": "America/Halifax"
+    },
+    "priya": {
+      "id": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a",
+      "displayName": "Priya Nair",
+      "email": "priya@hub.test",
+      "systemRoles": [
+        "ProjectManager"
+      ],
+      "capabilities": {
+        "createProject": true,
+        "createTask": true,
+        "portfolio": true,
+        "workload": true,
+        "staff": false,
+        "allStaff": false,
+        "admin": false,
+        "templates": false,
+        "readOnly": false,
+        "directReports": 0
+      },
+      "flags": {
+        "verifiable_log": false,
+        "commitment_reliability": false,
+        "allocation_preview": false,
+        "baseline_history": false,
+        "revision_check": false,
+        "task_pickup": false,
+        "org_structure": false,
+        "figure_names": false,
+        "planner_kept_rows": false,
+        "show_deleted": false,
+        "template_working_days": false,
+        "status_rollups": false,
+        "picker_project_rank": false,
+        "row_quick_actions": false,
+        "date_context": false,
+        "schedule_baseline": false,
+        "small_ux": true,
+        "timeline_handoffs_chain": false,
+        "onboarding_card": false,
+        "capacity_reports": false,
+        "route_counter": false,
+        "template_roles": false,
+        "unfilled_beside_capacity": false,
+        "project_status_note": false,
+        "my_work_follow_up": false,
+        "project_import": false,
+        "capacity_polish": false,
+        "record_engine_additions": false,
+        "live_project_stamp": false,
+        "live_events": false,
+        "admin_review": false,
+        "data_entry_safety": false,
+        "backlog": false,
+        "visual_system": true,
+        "screen_patterns": false,
+        "home_overview": false,
+        "work_screens": true,
+        "project_screens": true,
+        "capacity_screens": true,
+        "register_screens": true,
+        "people_screens": true
+      },
+      "today": "2026-11-01",
+      "orgTimeZone": "America/Halifax"
+    },
+    "marc": {
+      "id": "01a19834-0bfd-7712-a37f-3197da026009",
+      "displayName": "Marc Dubois",
+      "email": "marc@hub.test",
+      "systemRoles": [
+        "ProjectManager",
+        "Supervisor"
+      ],
+      "capabilities": {
+        "createProject": true,
+        "createTask": true,
+        "portfolio": true,
+        "workload": true,
+        "staff": true,
+        "allStaff": false,
+        "admin": false,
+        "templates": false,
+        "readOnly": false,
+        "directReports": 0
+      },
+      "flags": {
+        "verifiable_log": false,
+        "commitment_reliability": false,
+        "allocation_preview": false,
+        "baseline_history": false,
+        "revision_check": false,
+        "task_pickup": false,
+        "org_structure": false,
+        "figure_names": false,
+        "planner_kept_rows": false,
+        "show_deleted": false,
+        "template_working_days": false,
+        "status_rollups": false,
+        "picker_project_rank": false,
+        "row_quick_actions": false,
+        "date_context": false,
+        "schedule_baseline": false,
+        "small_ux": true,
+        "timeline_handoffs_chain": false,
+        "onboarding_card": false,
+        "capacity_reports": false,
+        "route_counter": false,
+        "template_roles": false,
+        "unfilled_beside_capacity": false,
+        "project_status_note": false,
+        "my_work_follow_up": false,
+        "project_import": false,
+        "capacity_polish": false,
+        "record_engine_additions": false,
+        "live_project_stamp": false,
+        "live_events": false,
+        "admin_review": false,
+        "data_entry_safety": false,
+        "backlog": false,
+        "visual_system": true,
+        "screen_patterns": false,
+        "home_overview": false,
+        "work_screens": true,
+        "project_screens": true,
+        "capacity_screens": true,
+        "register_screens": true,
+        "people_screens": true
+      },
+      "today": "2026-11-01",
+      "orgTimeZone": "America/Halifax"
+    },
+    "alex": {
+      "id": "01a19834-0bfd-75e7-80db-4cbc24e4bd88",
+      "displayName": "Alex Chen",
+      "email": "alex@hub.test",
+      "systemRoles": [],
+      "capabilities": {
+        "createProject": false,
+        "createTask": true,
+        "portfolio": false,
+        "workload": false,
+        "staff": false,
+        "allStaff": false,
+        "admin": false,
+        "templates": false,
+        "readOnly": false,
+        "directReports": 0
+      },
+      "flags": {
+        "verifiable_log": false,
+        "commitment_reliability": false,
+        "allocation_preview": false,
+        "baseline_history": false,
+        "revision_check": false,
+        "task_pickup": false,
+        "org_structure": false,
+        "figure_names": false,
+        "planner_kept_rows": false,
+        "show_deleted": false,
+        "template_working_days": false,
+        "status_rollups": false,
+        "picker_project_rank": false,
+        "row_quick_actions": false,
+        "date_context": false,
+        "schedule_baseline": false,
+        "small_ux": true,
+        "timeline_handoffs_chain": false,
+        "onboarding_card": false,
+        "capacity_reports": false,
+        "route_counter": false,
+        "template_roles": false,
+        "unfilled_beside_capacity": false,
+        "project_status_note": false,
+        "my_work_follow_up": false,
+        "project_import": false,
+        "capacity_polish": false,
+        "record_engine_additions": false,
+        "live_project_stamp": false,
+        "live_events": false,
+        "admin_review": false,
+        "data_entry_safety": false,
+        "backlog": false,
+        "visual_system": true,
+        "screen_patterns": false,
+        "home_overview": false,
+        "work_screens": true,
+        "project_screens": true,
+        "capacity_screens": true,
+        "register_screens": true,
+        "people_screens": true
+      },
+      "today": "2026-11-01",
+      "orgTimeZone": "America/Halifax"
+    },
+    "omar": {
+      "id": "01a19834-0bfd-738a-b9c8-c025e3da7c04",
+      "displayName": "Omar Haddad",
+      "email": "omar@hub.test",
+      "systemRoles": [],
+      "capabilities": {
+        "createProject": false,
+        "createTask": true,
+        "portfolio": false,
+        "workload": false,
+        "staff": false,
+        "allStaff": false,
+        "admin": false,
+        "templates": false,
+        "readOnly": false,
+        "directReports": 0
+      },
+      "flags": {
+        "verifiable_log": false,
+        "commitment_reliability": false,
+        "allocation_preview": false,
+        "baseline_history": false,
+        "revision_check": false,
+        "task_pickup": false,
+        "org_structure": false,
+        "figure_names": false,
+        "planner_kept_rows": false,
+        "show_deleted": false,
+        "template_working_days": false,
+        "status_rollups": false,
+        "picker_project_rank": false,
+        "row_quick_actions": false,
+        "date_context": false,
+        "schedule_baseline": false,
+        "small_ux": true,
+        "timeline_handoffs_chain": false,
+        "onboarding_card": false,
+        "capacity_reports": false,
+        "route_counter": false,
+        "template_roles": false,
+        "unfilled_beside_capacity": false,
+        "project_status_note": false,
+        "my_work_follow_up": false,
+        "project_import": false,
+        "capacity_polish": false,
+        "record_engine_additions": false,
+        "live_project_stamp": false,
+        "live_events": false,
+        "admin_review": false,
+        "data_entry_safety": false,
+        "backlog": false,
+        "visual_system": true,
+        "screen_patterns": false,
+        "home_overview": false,
+        "work_screens": true,
+        "project_screens": true,
+        "capacity_screens": true,
+        "register_screens": true,
+        "people_screens": true
+      },
+      "today": "2026-11-01",
+      "orgTimeZone": "America/Halifax"
+    },
+    "rita": {
+      "id": "01a19834-0bfd-7c90-829c-88022b77d8cb",
+      "displayName": "Rita Gomez",
+      "email": "rita@hub.test",
+      "systemRoles": [
+        "ReadOnly"
+      ],
+      "capabilities": {
+        "createProject": false,
+        "createTask": false,
+        "portfolio": false,
+        "workload": false,
+        "staff": false,
+        "allStaff": false,
+        "admin": false,
+        "templates": false,
+        "readOnly": true,
+        "directReports": 0
+      },
+      "flags": {
+        "verifiable_log": false,
+        "commitment_reliability": false,
+        "allocation_preview": false,
+        "baseline_history": false,
+        "revision_check": false,
+        "task_pickup": false,
+        "org_structure": false,
+        "figure_names": false,
+        "planner_kept_rows": false,
+        "show_deleted": false,
+        "template_working_days": false,
+        "status_rollups": false,
+        "picker_project_rank": false,
+        "row_quick_actions": false,
+        "date_context": false,
+        "schedule_baseline": false,
+        "small_ux": true,
+        "timeline_handoffs_chain": false,
+        "onboarding_card": false,
+        "capacity_reports": false,
+        "route_counter": false,
+        "template_roles": false,
+        "unfilled_beside_capacity": false,
+        "project_status_note": false,
+        "my_work_follow_up": false,
+        "project_import": false,
+        "capacity_polish": false,
+        "record_engine_additions": false,
+        "live_project_stamp": false,
+        "live_events": false,
+        "admin_review": false,
+        "data_entry_safety": false,
+        "backlog": false,
+        "visual_system": true,
+        "screen_patterns": false,
+        "home_overview": false,
+        "work_screens": true,
+        "project_screens": true,
+        "capacity_screens": true,
+        "register_screens": true,
+        "people_screens": true
+      },
+      "today": "2026-11-01",
+      "orgTimeZone": "America/Halifax"
+    },
+    "lena": {
+      "id": "01a19834-0bfd-7b98-bebc-462904b88c01",
+      "displayName": "Lena Brooks",
+      "email": "lena@hub.test",
+      "systemRoles": [
+        "Executive",
+        "Supervisor"
+      ],
+      "capabilities": {
+        "createProject": false,
+        "createTask": false,
+        "portfolio": true,
+        "workload": true,
+        "staff": true,
+        "allStaff": true,
+        "admin": false,
+        "templates": false,
+        "readOnly": false,
+        "directReports": 4
+      },
+      "flags": {
+        "verifiable_log": false,
+        "commitment_reliability": false,
+        "allocation_preview": false,
+        "baseline_history": false,
+        "revision_check": false,
+        "task_pickup": false,
+        "org_structure": false,
+        "figure_names": false,
+        "planner_kept_rows": false,
+        "show_deleted": false,
+        "template_working_days": false,
+        "status_rollups": false,
+        "picker_project_rank": false,
+        "row_quick_actions": false,
+        "date_context": false,
+        "schedule_baseline": false,
+        "small_ux": true,
+        "timeline_handoffs_chain": false,
+        "onboarding_card": false,
+        "capacity_reports": false,
+        "route_counter": false,
+        "template_roles": false,
+        "unfilled_beside_capacity": false,
+        "project_status_note": false,
+        "my_work_follow_up": false,
+        "project_import": false,
+        "capacity_polish": false,
+        "record_engine_additions": false,
+        "live_project_stamp": false,
+        "live_events": false,
+        "admin_review": false,
+        "data_entry_safety": false,
+        "backlog": false,
+        "visual_system": true,
+        "screen_patterns": false,
+        "home_overview": false,
+        "work_screens": true,
+        "project_screens": true,
+        "capacity_screens": true,
+        "register_screens": true,
+        "people_screens": true
+      },
+      "today": "2026-11-01",
+      "orgTimeZone": "America/Halifax"
+    }
+  },
+  "fixture": {
+    "projectId": "01a19847-7532-7add-84a2-9140b503a54f",
+    "projectNumber": "QA22-PER-MVY51JAX-1DBD8677",
+    "personId": "01a19834-0bfd-75e7-80db-4cbc24e4bd88",
+    "civilReferenceId": "01a19834-0b3d-7e8a-80c6-55db33f2e439",
+    "electricalReferenceId": "01a19834-0b3d-7e05-ab95-06b68ae31054",
+    "clientId": "01a19834-0b4a-7291-997c-e282e6cfd823",
+    "officeId": "01a19834-0b4f-7581-90a5-bcb28e5b4840",
+    "memberId": "01a19847-7535-7f5f-8cbb-729a3eebf4ed",
+    "primaryProjectDisciplineId": "01a19847-7534-76e9-ade4-dbbfda5fa9e6",
+    "wrongLeadProjectDisciplineId": "01a19847-7534-70bc-84d4-073566877c3d",
+    "finalResponsibilityNote": "Synthetic QA22 own Civil lead responsibility note yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy",
+    "finalMemberRowVersion": 3
+  },
+  "commands": {
+    "activate": {
+      "id": "01a19847-7532-7add-84a2-9140b503a54f",
+      "status": "Active",
+      "rowVersion": 1
+    },
+    "priyaNote": {
+      "id": "01a19847-7535-7f5f-8cbb-729a3eebf4ed",
+      "rowVersion": 2,
+      "responsibilityNote": "Synthetic QA22 PM Civil responsibility note xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "priorRowVersion": 1
+    },
+    "marcNote": {
+      "id": "01a19847-7535-7f5f-8cbb-729a3eebf4ed",
+      "rowVersion": 3,
+      "responsibilityNote": "Synthetic QA22 own Civil lead responsibility note yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy",
+      "priorRowVersion": 2
+    },
+    "omarRefusal": {
+      "status": 403,
+      "problem": {
+        "code": "forbidden",
+        "detail": "Only the Project Manager or the  lead can do this. Ask the PM or the discipline lead."
+      },
+      "beforeMember": {
+        "id": "01a19847-7535-7f5f-8cbb-729a3eebf4ed",
+        "userId": "01a19834-0bfd-75e7-80db-4cbc24e4bd88",
+        "rowVersion": 3,
+        "roles": [
+          "TeamMember"
+        ],
+        "primaryDisciplineId": "01a19847-7534-76e9-ade4-dbbfda5fa9e6",
+        "leadOf": [],
+        "isPrimaryPm": false,
+        "responsibilityNote": "Synthetic QA22 own Civil lead responsibility note yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+      },
+      "afterMember": {
+        "id": "01a19847-7535-7f5f-8cbb-729a3eebf4ed",
+        "userId": "01a19834-0bfd-75e7-80db-4cbc24e4bd88",
+        "rowVersion": 3,
+        "roles": [
+          "TeamMember"
+        ],
+        "primaryDisciplineId": "01a19847-7534-76e9-ade4-dbbfda5fa9e6",
+        "leadOf": [],
+        "isPrimaryPm": false,
+        "responsibilityNote": "Synthetic QA22 own Civil lead responsibility note yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+      },
+      "beforeCanonical": {
+        "project": {
+          "id": "01a19847-7532-7add-84a2-9140b503a54f",
+          "projectNumber": "QA22-PER-MVY51JAX-1DBD8677",
+          "name": "Synthetic QA22 person panel MVY51JAX-1DBD8677",
+          "rowVersion": 1,
+          "status": "Active",
+          "projectManagerId": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a",
+          "visibility": "Open"
+        },
+        "team": {
+          "members": [
+            {
+              "id": "01a19847-7533-7fe5-82e2-53731923c321",
+              "userId": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a",
+              "rowVersion": 1,
+              "roles": [
+                "PM"
+              ],
+              "primaryDisciplineId": null,
+              "leadOf": [],
+              "isPrimaryPm": true,
+              "responsibilityNote": null
+            },
+            {
+              "id": "01a19847-7535-7f5f-8cbb-729a3eebf4ed",
+              "userId": "01a19834-0bfd-75e7-80db-4cbc24e4bd88",
+              "rowVersion": 3,
+              "roles": [
+                "TeamMember"
+              ],
+              "primaryDisciplineId": "01a19847-7534-76e9-ade4-dbbfda5fa9e6",
+              "leadOf": [],
+              "isPrimaryPm": false,
+              "responsibilityNote": "Synthetic QA22 own Civil lead responsibility note yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+            },
+            {
+              "id": "01a19847-753c-7d84-b72a-7b1a1b067280",
+              "userId": "01a19834-0bfd-7712-a37f-3197da026009",
+              "rowVersion": 1,
+              "roles": [
+                "TeamMember"
+              ],
+              "primaryDisciplineId": "01a19847-7534-76e9-ade4-dbbfda5fa9e6",
+              "leadOf": [
+                "01a19847-7534-76e9-ade4-dbbfda5fa9e6"
+              ],
+              "isPrimaryPm": false,
+              "responsibilityNote": null
+            },
+            {
+              "id": "01a19847-7542-757f-be05-e5cfa5bcef15",
+              "userId": "01a19834-0bfd-738a-b9c8-c025e3da7c04",
+              "rowVersion": 1,
+              "roles": [
+                "TeamMember"
+              ],
+              "primaryDisciplineId": "01a19847-7534-70bc-84d4-073566877c3d",
+              "leadOf": [
+                "01a19847-7534-70bc-84d4-073566877c3d"
+              ],
+              "isPrimaryPm": false,
+              "responsibilityNote": null
+            }
+          ],
+          "disciplines": [
+            {
+              "id": "01a19847-7534-70bc-84d4-073566877c3d",
+              "disciplineId": "01a19834-0b3d-7e05-ab95-06b68ae31054",
+              "rowVersion": 1,
+              "leadUserId": "01a19834-0bfd-738a-b9c8-c025e3da7c04",
+              "isActive": true
+            },
+            {
+              "id": "01a19847-7534-76e9-ade4-dbbfda5fa9e6",
+              "disciplineId": "01a19834-0b3d-7e8a-80c6-55db33f2e439",
+              "rowVersion": 1,
+              "leadUserId": "01a19834-0bfd-7712-a37f-3197da026009",
+              "isActive": true
+            }
+          ]
+        }
+      },
+      "afterCanonical": {
+        "project": {
+          "id": "01a19847-7532-7add-84a2-9140b503a54f",
+          "projectNumber": "QA22-PER-MVY51JAX-1DBD8677",
+          "name": "Synthetic QA22 person panel MVY51JAX-1DBD8677",
+          "rowVersion": 1,
+          "status": "Active",
+          "projectManagerId": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a",
+          "visibility": "Open"
+        },
+        "team": {
+          "members": [
+            {
+              "id": "01a19847-7533-7fe5-82e2-53731923c321",
+              "userId": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a",
+              "rowVersion": 1,
+              "roles": [
+                "PM"
+              ],
+              "primaryDisciplineId": null,
+              "leadOf": [],
+              "isPrimaryPm": true,
+              "responsibilityNote": null
+            },
+            {
+              "id": "01a19847-7535-7f5f-8cbb-729a3eebf4ed",
+              "userId": "01a19834-0bfd-75e7-80db-4cbc24e4bd88",
+              "rowVersion": 3,
+              "roles": [
+                "TeamMember"
+              ],
+              "primaryDisciplineId": "01a19847-7534-76e9-ade4-dbbfda5fa9e6",
+              "leadOf": [],
+              "isPrimaryPm": false,
+              "responsibilityNote": "Synthetic QA22 own Civil lead responsibility note yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+            },
+            {
+              "id": "01a19847-753c-7d84-b72a-7b1a1b067280",
+              "userId": "01a19834-0bfd-7712-a37f-3197da026009",
+              "rowVersion": 1,
+              "roles": [
+                "TeamMember"
+              ],
+              "primaryDisciplineId": "01a19847-7534-76e9-ade4-dbbfda5fa9e6",
+              "leadOf": [
+                "01a19847-7534-76e9-ade4-dbbfda5fa9e6"
+              ],
+              "isPrimaryPm": false,
+              "responsibilityNote": null
+            },
+            {
+              "id": "01a19847-7542-757f-be05-e5cfa5bcef15",
+              "userId": "01a19834-0bfd-738a-b9c8-c025e3da7c04",
+              "rowVersion": 1,
+              "roles": [
+                "TeamMember"
+              ],
+              "primaryDisciplineId": "01a19847-7534-70bc-84d4-073566877c3d",
+              "leadOf": [
+                "01a19847-7534-70bc-84d4-073566877c3d"
+              ],
+              "isPrimaryPm": false,
+              "responsibilityNote": null
+            }
+          ],
+          "disciplines": [
+            {
+              "id": "01a19847-7534-70bc-84d4-073566877c3d",
+              "disciplineId": "01a19834-0b3d-7e05-ab95-06b68ae31054",
+              "rowVersion": 1,
+              "leadUserId": "01a19834-0bfd-738a-b9c8-c025e3da7c04",
+              "isActive": true
+            },
+            {
+              "id": "01a19847-7534-76e9-ade4-dbbfda5fa9e6",
+              "disciplineId": "01a19834-0b3d-7e8a-80c6-55db33f2e439",
+              "rowVersion": 1,
+              "leadUserId": "01a19834-0bfd-7712-a37f-3197da026009",
+              "isActive": true
+            }
+          ]
+        }
+      },
+      "scopedMemberAudit": {
+        "before": {
+          "status": "AVAILABLE",
+          "rows": [
+            {
+              "id": "01a19847-7548-7884-bdc4-85fadaa62d85",
+              "itemId": "01a19847-7535-7f5f-8cbb-729a3eebf4ed",
+              "itemType": "Member",
+              "action": "MemberAdded",
+              "actorId": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a",
+              "occurredAt": "2026-11-01T18:03:02.34456+00:00",
+              "changes": [
+                {
+                  "field": "UserId",
+                  "old": null,
+                  "new": "01a19834-0bfd-75e7-80db-4cbc24e4bd88",
+                  "oldLabel": null,
+                  "newLabel": "Alex Chen"
+                },
+                {
+                  "field": "Roles",
+                  "old": null,
+                  "new": [
+                    "TeamMember"
+                  ],
+                  "oldLabel": null,
+                  "newLabel": "[\"TeamMember\"]"
+                },
+                {
+                  "field": "PrimaryDisciplineId",
+                  "old": null,
+                  "new": "01a19847-7534-76e9-ade4-dbbfda5fa9e6",
+                  "oldLabel": null,
+                  "newLabel": "Civil"
+                }
+              ],
+              "reason": null,
+              "correlationId": "01a19847-7531-71cc-80bc-d9aa72bd57cd"
+            },
+            {
+              "id": "01a19847-7595-76ce-b1d0-1a8f1108e73f",
+              "itemId": "01a19847-7535-7f5f-8cbb-729a3eebf4ed",
+              "itemType": "Member",
+              "action": "Updated",
+              "actorId": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a",
+              "occurredAt": "2026-11-01T18:03:02.421899+00:00",
+              "changes": [
+                {
+                  "field": "ResponsibilityNote",
+                  "old": null,
+                  "new": "Synthetic QA22 PM Civil responsibility note xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                  "oldLabel": null,
+                  "newLabel": "Synthetic QA22 PM Civil responsibility note xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                }
+              ],
+              "reason": null,
+              "correlationId": "01a19847-758f-7f2e-a02e-ba7a4ba566b5"
+            },
+            {
+              "id": "01a19847-75a7-7844-aa9b-112a445eb4c4",
+              "itemId": "01a19847-7535-7f5f-8cbb-729a3eebf4ed",
+              "itemType": "Member",
+              "action": "Updated",
+              "actorId": "01a19834-0bfd-7712-a37f-3197da026009",
+              "occurredAt": "2026-11-01T18:03:02.439755+00:00",
+              "changes": [
+                {
+                  "field": "ResponsibilityNote",
+                  "old": "Synthetic QA22 PM Civil responsibility note xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                  "new": "Synthetic QA22 own Civil lead responsibility note yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy",
+                  "oldLabel": "Synthetic QA22 PM Civil responsibility note xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                  "newLabel": "Synthetic QA22 own Civil lead responsibility note yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+                }
+              ],
+              "reason": null,
+              "correlationId": "01a19847-75a4-72cc-83e7-0efba6e415de"
+            }
+          ]
+        },
+        "after": {
+          "status": "AVAILABLE",
+          "rows": [
+            {
+              "id": "01a19847-7548-7884-bdc4-85fadaa62d85",
+              "itemId": "01a19847-7535-7f5f-8cbb-729a3eebf4ed",
+              "itemType": "Member",
+              "action": "MemberAdded",
+              "actorId": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a",
+              "occurredAt": "2026-11-01T18:03:02.34456+00:00",
+              "changes": [
+                {
+                  "field": "UserId",
+                  "old": null,
+                  "new": "01a19834-0bfd-75e7-80db-4cbc24e4bd88",
+                  "oldLabel": null,
+                  "newLabel": "Alex Chen"
+                },
+                {
+                  "field": "Roles",
+                  "old": null,
+                  "new": [
+                    "TeamMember"
+                  ],
+                  "oldLabel": null,
+                  "newLabel": "[\"TeamMember\"]"
+                },
+                {
+                  "field": "PrimaryDisciplineId",
+                  "old": null,
+                  "new": "01a19847-7534-76e9-ade4-dbbfda5fa9e6",
+                  "oldLabel": null,
+                  "newLabel": "Civil"
+                }
+              ],
+              "reason": null,
+              "correlationId": "01a19847-7531-71cc-80bc-d9aa72bd57cd"
+            },
+            {
+              "id": "01a19847-7595-76ce-b1d0-1a8f1108e73f",
+              "itemId": "01a19847-7535-7f5f-8cbb-729a3eebf4ed",
+              "itemType": "Member",
+              "action": "Updated",
+              "actorId": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a",
+              "occurredAt": "2026-11-01T18:03:02.421899+00:00",
+              "changes": [
+                {
+                  "field": "ResponsibilityNote",
+                  "old": null,
+                  "new": "Synthetic QA22 PM Civil responsibility note xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                  "oldLabel": null,
+                  "newLabel": "Synthetic QA22 PM Civil responsibility note xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                }
+              ],
+              "reason": null,
+              "correlationId": "01a19847-758f-7f2e-a02e-ba7a4ba566b5"
+            },
+            {
+              "id": "01a19847-75a7-7844-aa9b-112a445eb4c4",
+              "itemId": "01a19847-7535-7f5f-8cbb-729a3eebf4ed",
+              "itemType": "Member",
+              "action": "Updated",
+              "actorId": "01a19834-0bfd-7712-a37f-3197da026009",
+              "occurredAt": "2026-11-01T18:03:02.439755+00:00",
+              "changes": [
+                {
+                  "field": "ResponsibilityNote",
+                  "old": "Synthetic QA22 PM Civil responsibility note xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                  "new": "Synthetic QA22 own Civil lead responsibility note yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy",
+                  "oldLabel": "Synthetic QA22 PM Civil responsibility note xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                  "newLabel": "Synthetic QA22 own Civil lead responsibility note yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+                }
+              ],
+              "reason": null,
+              "correlationId": "01a19847-75a4-72cc-83e7-0efba6e415de"
+            }
+          ]
+        }
+      },
+      "observedUnchanged": {
+        "canonicalProject": true,
+        "canonicalTeamMembershipsAndDisciplineLeads": true,
+        "scopedMemberAudit": true
+      }
+    },
+    "ritaRefusal": {
+      "status": 403,
+      "problem": {
+        "code": "forbidden",
+        "detail": "Read Only accounts cannot make changes."
+      },
+      "beforeMember": {
+        "id": "01a19847-7535-7f5f-8cbb-729a3eebf4ed",
+        "userId": "01a19834-0bfd-75e7-80db-4cbc24e4bd88",
+        "rowVersion": 3,
+        "roles": [
+          "TeamMember"
+        ],
+        "primaryDisciplineId": "01a19847-7534-76e9-ade4-dbbfda5fa9e6",
+        "leadOf": [],
+        "isPrimaryPm": false,
+        "responsibilityNote": "Synthetic QA22 own Civil lead responsibility note yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+      },
+      "afterMember": {
+        "id": "01a19847-7535-7f5f-8cbb-729a3eebf4ed",
+        "userId": "01a19834-0bfd-75e7-80db-4cbc24e4bd88",
+        "rowVersion": 3,
+        "roles": [
+          "TeamMember"
+        ],
+        "primaryDisciplineId": "01a19847-7534-76e9-ade4-dbbfda5fa9e6",
+        "leadOf": [],
+        "isPrimaryPm": false,
+        "responsibilityNote": "Synthetic QA22 own Civil lead responsibility note yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+      },
+      "beforeCanonical": {
+        "project": {
+          "id": "01a19847-7532-7add-84a2-9140b503a54f",
+          "projectNumber": "QA22-PER-MVY51JAX-1DBD8677",
+          "name": "Synthetic QA22 person panel MVY51JAX-1DBD8677",
+          "rowVersion": 1,
+          "status": "Active",
+          "projectManagerId": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a",
+          "visibility": "Open"
+        },
+        "team": {
+          "members": [
+            {
+              "id": "01a19847-7533-7fe5-82e2-53731923c321",
+              "userId": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a",
+              "rowVersion": 1,
+              "roles": [
+                "PM"
+              ],
+              "primaryDisciplineId": null,
+              "leadOf": [],
+              "isPrimaryPm": true,
+              "responsibilityNote": null
+            },
+            {
+              "id": "01a19847-7535-7f5f-8cbb-729a3eebf4ed",
+              "userId": "01a19834-0bfd-75e7-80db-4cbc24e4bd88",
+              "rowVersion": 3,
+              "roles": [
+                "TeamMember"
+              ],
+              "primaryDisciplineId": "01a19847-7534-76e9-ade4-dbbfda5fa9e6",
+              "leadOf": [],
+              "isPrimaryPm": false,
+              "responsibilityNote": "Synthetic QA22 own Civil lead responsibility note yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+            },
+            {
+              "id": "01a19847-753c-7d84-b72a-7b1a1b067280",
+              "userId": "01a19834-0bfd-7712-a37f-3197da026009",
+              "rowVersion": 1,
+              "roles": [
+                "TeamMember"
+              ],
+              "primaryDisciplineId": "01a19847-7534-76e9-ade4-dbbfda5fa9e6",
+              "leadOf": [
+                "01a19847-7534-76e9-ade4-dbbfda5fa9e6"
+              ],
+              "isPrimaryPm": false,
+              "responsibilityNote": null
+            },
+            {
+              "id": "01a19847-7542-757f-be05-e5cfa5bcef15",
+              "userId": "01a19834-0bfd-738a-b9c8-c025e3da7c04",
+              "rowVersion": 1,
+              "roles": [
+                "TeamMember"
+              ],
+              "primaryDisciplineId": "01a19847-7534-70bc-84d4-073566877c3d",
+              "leadOf": [
+                "01a19847-7534-70bc-84d4-073566877c3d"
+              ],
+              "isPrimaryPm": false,
+              "responsibilityNote": null
+            }
+          ],
+          "disciplines": [
+            {
+              "id": "01a19847-7534-70bc-84d4-073566877c3d",
+              "disciplineId": "01a19834-0b3d-7e05-ab95-06b68ae31054",
+              "rowVersion": 1,
+              "leadUserId": "01a19834-0bfd-738a-b9c8-c025e3da7c04",
+              "isActive": true
+            },
+            {
+              "id": "01a19847-7534-76e9-ade4-dbbfda5fa9e6",
+              "disciplineId": "01a19834-0b3d-7e8a-80c6-55db33f2e439",
+              "rowVersion": 1,
+              "leadUserId": "01a19834-0bfd-7712-a37f-3197da026009",
+              "isActive": true
+            }
+          ]
+        }
+      },
+      "afterCanonical": {
+        "project": {
+          "id": "01a19847-7532-7add-84a2-9140b503a54f",
+          "projectNumber": "QA22-PER-MVY51JAX-1DBD8677",
+          "name": "Synthetic QA22 person panel MVY51JAX-1DBD8677",
+          "rowVersion": 1,
+          "status": "Active",
+          "projectManagerId": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a",
+          "visibility": "Open"
+        },
+        "team": {
+          "members": [
+            {
+              "id": "01a19847-7533-7fe5-82e2-53731923c321",
+              "userId": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a",
+              "rowVersion": 1,
+              "roles": [
+                "PM"
+              ],
+              "primaryDisciplineId": null,
+              "leadOf": [],
+              "isPrimaryPm": true,
+              "responsibilityNote": null
+            },
+            {
+              "id": "01a19847-7535-7f5f-8cbb-729a3eebf4ed",
+              "userId": "01a19834-0bfd-75e7-80db-4cbc24e4bd88",
+              "rowVersion": 3,
+              "roles": [
+                "TeamMember"
+              ],
+              "primaryDisciplineId": "01a19847-7534-76e9-ade4-dbbfda5fa9e6",
+              "leadOf": [],
+              "isPrimaryPm": false,
+              "responsibilityNote": "Synthetic QA22 own Civil lead responsibility note yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+            },
+            {
+              "id": "01a19847-753c-7d84-b72a-7b1a1b067280",
+              "userId": "01a19834-0bfd-7712-a37f-3197da026009",
+              "rowVersion": 1,
+              "roles": [
+                "TeamMember"
+              ],
+              "primaryDisciplineId": "01a19847-7534-76e9-ade4-dbbfda5fa9e6",
+              "leadOf": [
+                "01a19847-7534-76e9-ade4-dbbfda5fa9e6"
+              ],
+              "isPrimaryPm": false,
+              "responsibilityNote": null
+            },
+            {
+              "id": "01a19847-7542-757f-be05-e5cfa5bcef15",
+              "userId": "01a19834-0bfd-738a-b9c8-c025e3da7c04",
+              "rowVersion": 1,
+              "roles": [
+                "TeamMember"
+              ],
+              "primaryDisciplineId": "01a19847-7534-70bc-84d4-073566877c3d",
+              "leadOf": [
+                "01a19847-7534-70bc-84d4-073566877c3d"
+              ],
+              "isPrimaryPm": false,
+              "responsibilityNote": null
+            }
+          ],
+          "disciplines": [
+            {
+              "id": "01a19847-7534-70bc-84d4-073566877c3d",
+              "disciplineId": "01a19834-0b3d-7e05-ab95-06b68ae31054",
+              "rowVersion": 1,
+              "leadUserId": "01a19834-0bfd-738a-b9c8-c025e3da7c04",
+              "isActive": true
+            },
+            {
+              "id": "01a19847-7534-76e9-ade4-dbbfda5fa9e6",
+              "disciplineId": "01a19834-0b3d-7e8a-80c6-55db33f2e439",
+              "rowVersion": 1,
+              "leadUserId": "01a19834-0bfd-7712-a37f-3197da026009",
+              "isActive": true
+            }
+          ]
+        }
+      },
+      "scopedMemberAudit": {
+        "before": {
+          "status": "AVAILABLE",
+          "rows": [
+            {
+              "id": "01a19847-7548-7884-bdc4-85fadaa62d85",
+              "itemId": "01a19847-7535-7f5f-8cbb-729a3eebf4ed",
+              "itemType": "Member",
+              "action": "MemberAdded",
+              "actorId": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a",
+              "occurredAt": "2026-11-01T18:03:02.34456+00:00",
+              "changes": [
+                {
+                  "field": "UserId",
+                  "old": null,
+                  "new": "01a19834-0bfd-75e7-80db-4cbc24e4bd88",
+                  "oldLabel": null,
+                  "newLabel": "Alex Chen"
+                },
+                {
+                  "field": "Roles",
+                  "old": null,
+                  "new": [
+                    "TeamMember"
+                  ],
+                  "oldLabel": null,
+                  "newLabel": "[\"TeamMember\"]"
+                },
+                {
+                  "field": "PrimaryDisciplineId",
+                  "old": null,
+                  "new": "01a19847-7534-76e9-ade4-dbbfda5fa9e6",
+                  "oldLabel": null,
+                  "newLabel": "Civil"
+                }
+              ],
+              "reason": null,
+              "correlationId": "01a19847-7531-71cc-80bc-d9aa72bd57cd"
+            },
+            {
+              "id": "01a19847-7595-76ce-b1d0-1a8f1108e73f",
+              "itemId": "01a19847-7535-7f5f-8cbb-729a3eebf4ed",
+              "itemType": "Member",
+              "action": "Updated",
+              "actorId": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a",
+              "occurredAt": "2026-11-01T18:03:02.421899+00:00",
+              "changes": [
+                {
+                  "field": "ResponsibilityNote",
+                  "old": null,
+                  "new": "Synthetic QA22 PM Civil responsibility note xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                  "oldLabel": null,
+                  "newLabel": "Synthetic QA22 PM Civil responsibility note xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                }
+              ],
+              "reason": null,
+              "correlationId": "01a19847-758f-7f2e-a02e-ba7a4ba566b5"
+            },
+            {
+              "id": "01a19847-75a7-7844-aa9b-112a445eb4c4",
+              "itemId": "01a19847-7535-7f5f-8cbb-729a3eebf4ed",
+              "itemType": "Member",
+              "action": "Updated",
+              "actorId": "01a19834-0bfd-7712-a37f-3197da026009",
+              "occurredAt": "2026-11-01T18:03:02.439755+00:00",
+              "changes": [
+                {
+                  "field": "ResponsibilityNote",
+                  "old": "Synthetic QA22 PM Civil responsibility note xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                  "new": "Synthetic QA22 own Civil lead responsibility note yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy",
+                  "oldLabel": "Synthetic QA22 PM Civil responsibility note xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                  "newLabel": "Synthetic QA22 own Civil lead responsibility note yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+                }
+              ],
+              "reason": null,
+              "correlationId": "01a19847-75a4-72cc-83e7-0efba6e415de"
+            }
+          ]
+        },
+        "after": {
+          "status": "AVAILABLE",
+          "rows": [
+            {
+              "id": "01a19847-7548-7884-bdc4-85fadaa62d85",
+              "itemId": "01a19847-7535-7f5f-8cbb-729a3eebf4ed",
+              "itemType": "Member",
+              "action": "MemberAdded",
+              "actorId": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a",
+              "occurredAt": "2026-11-01T18:03:02.34456+00:00",
+              "changes": [
+                {
+                  "field": "UserId",
+                  "old": null,
+                  "new": "01a19834-0bfd-75e7-80db-4cbc24e4bd88",
+                  "oldLabel": null,
+                  "newLabel": "Alex Chen"
+                },
+                {
+                  "field": "Roles",
+                  "old": null,
+                  "new": [
+                    "TeamMember"
+                  ],
+                  "oldLabel": null,
+                  "newLabel": "[\"TeamMember\"]"
+                },
+                {
+                  "field": "PrimaryDisciplineId",
+                  "old": null,
+                  "new": "01a19847-7534-76e9-ade4-dbbfda5fa9e6",
+                  "oldLabel": null,
+                  "newLabel": "Civil"
+                }
+              ],
+              "reason": null,
+              "correlationId": "01a19847-7531-71cc-80bc-d9aa72bd57cd"
+            },
+            {
+              "id": "01a19847-7595-76ce-b1d0-1a8f1108e73f",
+              "itemId": "01a19847-7535-7f5f-8cbb-729a3eebf4ed",
+              "itemType": "Member",
+              "action": "Updated",
+              "actorId": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a",
+              "occurredAt": "2026-11-01T18:03:02.421899+00:00",
+              "changes": [
+                {
+                  "field": "ResponsibilityNote",
+                  "old": null,
+                  "new": "Synthetic QA22 PM Civil responsibility note xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                  "oldLabel": null,
+                  "newLabel": "Synthetic QA22 PM Civil responsibility note xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                }
+              ],
+              "reason": null,
+              "correlationId": "01a19847-758f-7f2e-a02e-ba7a4ba566b5"
+            },
+            {
+              "id": "01a19847-75a7-7844-aa9b-112a445eb4c4",
+              "itemId": "01a19847-7535-7f5f-8cbb-729a3eebf4ed",
+              "itemType": "Member",
+              "action": "Updated",
+              "actorId": "01a19834-0bfd-7712-a37f-3197da026009",
+              "occurredAt": "2026-11-01T18:03:02.439755+00:00",
+              "changes": [
+                {
+                  "field": "ResponsibilityNote",
+                  "old": "Synthetic QA22 PM Civil responsibility note xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                  "new": "Synthetic QA22 own Civil lead responsibility note yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy",
+                  "oldLabel": "Synthetic QA22 PM Civil responsibility note xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                  "newLabel": "Synthetic QA22 own Civil lead responsibility note yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+                }
+              ],
+              "reason": null,
+              "correlationId": "01a19847-75a4-72cc-83e7-0efba6e415de"
+            }
+          ]
+        }
+      },
+      "observedUnchanged": {
+        "canonicalProject": true,
+        "canonicalTeamMembershipsAndDisciplineLeads": true,
+        "scopedMemberAudit": true
+      }
+    }
+  },
+  "reads": {
+    "priyaPerson": {
+      "id": "01a19834-0bfd-75e7-80db-4cbc24e4bd88",
+      "displayName": "Alex Chen",
+      "jobTitle": "Civil Designer (EIT)",
+      "isActive": true,
+      "organisationFacts": {
+        "homeDiscipline": null,
+        "office": {
+          "id": "01a19834-0b4f-7581-90a5-bcb28e5b4840",
+          "name": "Head Office"
+        },
+        "supervisor": {
+          "id": "01a19834-0bfd-7ebf-920e-7297a3b5a0a7",
+          "name": "Sam Patel"
+        }
+      },
+      "today": "2026-11-01",
+      "week": "2026-10-26",
+      "asOf": "2026-11-01T18:03:02.637801+00:00",
+      "projects": {
+        "items": [
+          {
+            "memberId": "01a19847-7054-7db2-86ac-fce99c1fd20b",
+            "projectId": "01a19847-7051-74b1-81b9-2dc73cfe0447",
+            "projectNumber": "QA22-DLV-MVY51IDP-2DD0D2",
+            "projectName": "Synthetic QA22 deliverable register QA22-DLV-MVY51IDP-2DD0D2",
+            "projectStatus": "Active",
+            "roles": [
+              "TeamMember"
+            ],
+            "primaryDiscipline": {
+              "id": "01a19847-7053-78f4-a9b9-169c2a3f5edc",
+              "name": "Civil"
+            },
+            "leadOf": [],
+            "responsibilityNote": null
+          },
+          {
+            "memberId": "01a19847-7535-7f5f-8cbb-729a3eebf4ed",
+            "projectId": "01a19847-7532-7add-84a2-9140b503a54f",
+            "projectNumber": "QA22-PER-MVY51JAX-1DBD8677",
+            "projectName": "Synthetic QA22 person panel MVY51JAX-1DBD8677",
+            "projectStatus": "Active",
+            "roles": [
+              "TeamMember"
+            ],
+            "primaryDiscipline": {
+              "id": "01a19847-7534-76e9-ade4-dbbfda5fa9e6",
+              "name": "Civil"
+            },
+            "leadOf": [],
+            "responsibilityNote": "Synthetic QA22 own Civil lead responsibility note yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+          },
+          {
+            "memberId": "01a19847-6d91-78c3-a3e6-9aff77af61d4",
+            "projectId": "01a19847-6d4d-7e40-a69d-4fde45b64133",
+            "projectNumber": "QA22-TL-mvy51hpc-f22b02-A",
+            "projectName": "QA22 synthetic Timeline mvy51hpc-f22b02 A",
+            "projectStatus": "Active",
+            "roles": [
+              "TeamMember"
+            ],
+            "primaryDiscipline": {
+              "id": "01a19847-6d87-78f8-940c-024f6b7ec5ca",
+              "name": "Civil"
+            },
+            "leadOf": [],
+            "responsibilityNote": null
+          }
+        ],
+        "page": 1,
+        "pageSize": 100,
+        "total": 3
+      },
+      "personFacts": {
+        "notices": {
+          "personType": null,
+          "startDate": null,
+          "endDate": null,
+          "starts": false,
+          "ends": false
+        },
+        "certifications": []
+      }
+    },
+    "ritaPerson": {
+      "id": "01a19834-0bfd-75e7-80db-4cbc24e4bd88",
+      "displayName": "Alex Chen",
+      "jobTitle": "Civil Designer (EIT)",
+      "isActive": true,
+      "organisationFacts": {
+        "homeDiscipline": null,
+        "office": {
+          "id": "01a19834-0b4f-7581-90a5-bcb28e5b4840",
+          "name": "Head Office"
+        },
+        "supervisor": {
+          "id": "01a19834-0bfd-7ebf-920e-7297a3b5a0a7",
+          "name": "Sam Patel"
+        }
+      },
+      "today": "2026-11-01",
+      "week": "2026-10-26",
+      "asOf": "2026-11-01T18:03:02.758576+00:00",
+      "projects": {
+        "items": [
+          {
+            "memberId": "01a19847-7054-7db2-86ac-fce99c1fd20b",
+            "projectId": "01a19847-7051-74b1-81b9-2dc73cfe0447",
+            "projectNumber": "QA22-DLV-MVY51IDP-2DD0D2",
+            "projectName": "Synthetic QA22 deliverable register QA22-DLV-MVY51IDP-2DD0D2",
+            "projectStatus": "Active",
+            "roles": [
+              "TeamMember"
+            ],
+            "primaryDiscipline": {
+              "id": "01a19847-7053-78f4-a9b9-169c2a3f5edc",
+              "name": "Civil"
+            },
+            "leadOf": [],
+            "responsibilityNote": null
+          },
+          {
+            "memberId": "01a19847-7535-7f5f-8cbb-729a3eebf4ed",
+            "projectId": "01a19847-7532-7add-84a2-9140b503a54f",
+            "projectNumber": "QA22-PER-MVY51JAX-1DBD8677",
+            "projectName": "Synthetic QA22 person panel MVY51JAX-1DBD8677",
+            "projectStatus": "Active",
+            "roles": [
+              "TeamMember"
+            ],
+            "primaryDiscipline": {
+              "id": "01a19847-7534-76e9-ade4-dbbfda5fa9e6",
+              "name": "Civil"
+            },
+            "leadOf": [],
+            "responsibilityNote": "Synthetic QA22 own Civil lead responsibility note yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+          },
+          {
+            "memberId": "01a19847-6d91-78c3-a3e6-9aff77af61d4",
+            "projectId": "01a19847-6d4d-7e40-a69d-4fde45b64133",
+            "projectNumber": "QA22-TL-mvy51hpc-f22b02-A",
+            "projectName": "QA22 synthetic Timeline mvy51hpc-f22b02 A",
+            "projectStatus": "Active",
+            "roles": [
+              "TeamMember"
+            ],
+            "primaryDiscipline": {
+              "id": "01a19847-6d87-78f8-940c-024f6b7ec5ca",
+              "name": "Civil"
+            },
+            "leadOf": [],
+            "responsibilityNote": null
+          }
+        ],
+        "page": 1,
+        "pageSize": 100,
+        "total": 3
+      },
+      "personFacts": {
+        "notices": {
+          "personType": null,
+          "startDate": null,
+          "endDate": null,
+          "starts": false,
+          "ends": false
+        },
+        "certifications": []
+      }
+    },
+    "lenaPerson": {
+      "id": "01a19834-0bfd-75e7-80db-4cbc24e4bd88",
+      "displayName": "Alex Chen",
+      "jobTitle": "Civil Designer (EIT)",
+      "isActive": true,
+      "organisationFacts": {
+        "homeDiscipline": null,
+        "office": {
+          "id": "01a19834-0b4f-7581-90a5-bcb28e5b4840",
+          "name": "Head Office"
+        },
+        "supervisor": {
+          "id": "01a19834-0bfd-7ebf-920e-7297a3b5a0a7",
+          "name": "Sam Patel"
+        }
+      },
+      "today": "2026-11-01",
+      "week": "2026-10-26",
+      "asOf": "2026-11-01T18:03:02.774258+00:00",
+      "projects": {
+        "items": [
+          {
+            "memberId": "01a19847-7054-7db2-86ac-fce99c1fd20b",
+            "projectId": "01a19847-7051-74b1-81b9-2dc73cfe0447",
+            "projectNumber": "QA22-DLV-MVY51IDP-2DD0D2",
+            "projectName": "Synthetic QA22 deliverable register QA22-DLV-MVY51IDP-2DD0D2",
+            "projectStatus": "Active",
+            "roles": [
+              "TeamMember"
+            ],
+            "primaryDiscipline": {
+              "id": "01a19847-7053-78f4-a9b9-169c2a3f5edc",
+              "name": "Civil"
+            },
+            "leadOf": [],
+            "responsibilityNote": null
+          },
+          {
+            "memberId": "01a19847-7535-7f5f-8cbb-729a3eebf4ed",
+            "projectId": "01a19847-7532-7add-84a2-9140b503a54f",
+            "projectNumber": "QA22-PER-MVY51JAX-1DBD8677",
+            "projectName": "Synthetic QA22 person panel MVY51JAX-1DBD8677",
+            "projectStatus": "Active",
+            "roles": [
+              "TeamMember"
+            ],
+            "primaryDiscipline": {
+              "id": "01a19847-7534-76e9-ade4-dbbfda5fa9e6",
+              "name": "Civil"
+            },
+            "leadOf": [],
+            "responsibilityNote": "Synthetic QA22 own Civil lead responsibility note yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+          },
+          {
+            "memberId": "01a19847-6d91-78c3-a3e6-9aff77af61d4",
+            "projectId": "01a19847-6d4d-7e40-a69d-4fde45b64133",
+            "projectNumber": "QA22-TL-mvy51hpc-f22b02-A",
+            "projectName": "QA22 synthetic Timeline mvy51hpc-f22b02 A",
+            "projectStatus": "Active",
+            "roles": [
+              "TeamMember"
+            ],
+            "primaryDiscipline": {
+              "id": "01a19847-6d87-78f8-940c-024f6b7ec5ca",
+              "name": "Civil"
+            },
+            "leadOf": [],
+            "responsibilityNote": null
+          }
+        ],
+        "page": 1,
+        "pageSize": 100,
+        "total": 3
+      },
+      "personFacts": {
+        "notices": {
+          "personType": null,
+          "startDate": null,
+          "endDate": null,
+          "starts": false,
+          "ends": false
+        },
+        "certifications": []
+      }
+    },
+    "finalProjectTeam": {
+      "disciplines": [
+        {
+          "id": "01a19847-7534-76e9-ade4-dbbfda5fa9e6",
+          "disciplineId": "01a19834-0b3d-7e8a-80c6-55db33f2e439",
+          "name": "Civil",
+          "code": "CIV",
+          "colour": "#2563eb",
+          "leadUserId": "01a19834-0bfd-7712-a37f-3197da026009",
+          "isActive": true,
+          "sortOrder": 0,
+          "rowVersion": 1,
+          "leadName": "Marc Dubois"
+        },
+        {
+          "id": "01a19847-7534-70bc-84d4-073566877c3d",
+          "disciplineId": "01a19834-0b3d-7e05-ab95-06b68ae31054",
+          "name": "Electrical",
+          "code": "ELE",
+          "colour": "#ca8a04",
+          "leadUserId": "01a19834-0bfd-738a-b9c8-c025e3da7c04",
+          "isActive": true,
+          "sortOrder": 1,
+          "rowVersion": 1,
+          "leadName": "Omar Haddad"
+        }
+      ],
+      "members": [
+        {
+          "id": "01a19847-7535-7f5f-8cbb-729a3eebf4ed",
+          "userId": "01a19834-0bfd-75e7-80db-4cbc24e4bd88",
+          "displayName": "Alex Chen",
+          "email": "alex@hub.test",
+          "jobTitle": "Civil Designer (EIT)",
+          "officeId": "01a19834-0b4f-7581-90a5-bcb28e5b4840",
+          "isActive": true,
+          "roles": [
+            "TeamMember"
+          ],
+          "primaryDisciplineId": "01a19847-7534-76e9-ade4-dbbfda5fa9e6",
+          "addedAt": "2026-11-01T18:03:02.325712+00:00",
+          "addedBy": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a",
+          "rowVersion": 3,
+          "leadOf": [],
+          "isPrimaryPm": false,
+          "canStaff": false,
+          "personFacts": {
+            "notices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            },
+            "certifications": []
+          },
+          "organisationFacts": {
+            "homeDiscipline": null,
+            "office": {
+              "id": "01a19834-0b4f-7581-90a5-bcb28e5b4840",
+              "name": "Head Office"
+            },
+            "supervisor": {
+              "id": "01a19834-0bfd-7ebf-920e-7297a3b5a0a7",
+              "name": "Sam Patel"
+            }
+          },
+          "responsibility": {
+            "note": "Synthetic QA22 own Civil lead responsibility note yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy",
+            "canEdit": true,
+            "editReason": null
+          }
+        },
+        {
+          "id": "01a19847-753c-7d84-b72a-7b1a1b067280",
+          "userId": "01a19834-0bfd-7712-a37f-3197da026009",
+          "displayName": "Marc Dubois",
+          "email": "marc@hub.test",
+          "jobTitle": "Senior Civil Engineer",
+          "officeId": "01a19834-0b4f-7581-90a5-bcb28e5b4840",
+          "isActive": true,
+          "roles": [
+            "TeamMember"
+          ],
+          "primaryDisciplineId": "01a19847-7534-76e9-ade4-dbbfda5fa9e6",
+          "addedAt": "2026-11-01T18:03:02.332664+00:00",
+          "addedBy": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a",
+          "rowVersion": 1,
+          "leadOf": [
+            "01a19847-7534-76e9-ade4-dbbfda5fa9e6"
+          ],
+          "isPrimaryPm": false,
+          "canStaff": false,
+          "personFacts": {
+            "notices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            },
+            "certifications": []
+          },
+          "organisationFacts": {
+            "homeDiscipline": null,
+            "office": {
+              "id": "01a19834-0b4f-7581-90a5-bcb28e5b4840",
+              "name": "Head Office"
+            },
+            "supervisor": {
+              "id": "01a19834-0bfd-7ebf-920e-7297a3b5a0a7",
+              "name": "Sam Patel"
+            }
+          },
+          "responsibility": {
+            "note": null,
+            "canEdit": true,
+            "editReason": null
+          }
+        },
+        {
+          "id": "01a19847-7542-757f-be05-e5cfa5bcef15",
+          "userId": "01a19834-0bfd-738a-b9c8-c025e3da7c04",
+          "displayName": "Omar Haddad",
+          "email": "omar@hub.test",
+          "jobTitle": "Geotechnical Lead",
+          "officeId": "01a19834-0b4f-7581-90a5-bcb28e5b4840",
+          "isActive": true,
+          "roles": [
+            "TeamMember"
+          ],
+          "primaryDisciplineId": "01a19847-7534-70bc-84d4-073566877c3d",
+          "addedAt": "2026-11-01T18:03:02.338722+00:00",
+          "addedBy": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a",
+          "rowVersion": 1,
+          "leadOf": [
+            "01a19847-7534-70bc-84d4-073566877c3d"
+          ],
+          "isPrimaryPm": false,
+          "canStaff": false,
+          "personFacts": {
+            "notices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            },
+            "certifications": []
+          },
+          "organisationFacts": {
+            "homeDiscipline": null,
+            "office": {
+              "id": "01a19834-0b4f-7581-90a5-bcb28e5b4840",
+              "name": "Head Office"
+            },
+            "supervisor": {
+              "id": "01a19834-0bfd-7b98-bebc-462904b88c01",
+              "name": "Lena Brooks"
+            }
+          },
+          "responsibility": {
+            "note": null,
+            "canEdit": true,
+            "editReason": null
+          }
+        },
+        {
+          "id": "01a19847-7533-7fe5-82e2-53731923c321",
+          "userId": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a",
+          "displayName": "Priya Nair",
+          "email": "priya@hub.test",
+          "jobTitle": "Project Manager",
+          "officeId": "01a19834-0b4f-7581-90a5-bcb28e5b4840",
+          "isActive": true,
+          "roles": [
+            "PM"
+          ],
+          "primaryDisciplineId": null,
+          "addedAt": "2026-11-01T18:03:02.323877+00:00",
+          "addedBy": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a",
+          "rowVersion": 1,
+          "leadOf": [],
+          "isPrimaryPm": true,
+          "canStaff": false,
+          "personFacts": {
+            "notices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            },
+            "certifications": []
+          },
+          "organisationFacts": {
+            "homeDiscipline": null,
+            "office": {
+              "id": "01a19834-0b4f-7581-90a5-bcb28e5b4840",
+              "name": "Head Office"
+            },
+            "supervisor": {
+              "id": "01a19834-0bfd-7b98-bebc-462904b88c01",
+              "name": "Lena Brooks"
+            }
+          },
+          "responsibility": {
+            "note": null,
+            "canEdit": true,
+            "editReason": null
+          }
+        }
+      ],
+      "canManage": true,
+      "manageReason": null
+    },
+    "workspaceTeam": {
+      "people": [
+        {
+          "userId": "01a19834-0bfd-75e7-80db-4cbc24e4bd88",
+          "displayName": "Alex Chen",
+          "jobTitle": "Civil Designer (EIT)",
+          "email": "alex@hub.test",
+          "projects": [
+            {
+              "projectId": "01a19847-7532-7add-84a2-9140b503a54f",
+              "projectNumber": "QA22-PER-MVY51JAX-1DBD8677",
+              "projectName": "Synthetic QA22 person panel MVY51JAX-1DBD8677",
+              "roles": [
+                "TeamMember"
+              ],
+              "leads": [],
+              "identityColour": "#1597cc",
+              "responsibilityNote": "Synthetic QA22 own Civil lead responsibility note yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+            }
+          ],
+          "personFacts": {
+            "notices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            },
+            "certifications": []
+          },
+          "organisationFacts": {
+            "homeDiscipline": null,
+            "office": {
+              "id": "01a19834-0b4f-7581-90a5-bcb28e5b4840",
+              "name": "Head Office"
+            },
+            "supervisor": {
+              "id": "01a19834-0bfd-7ebf-920e-7297a3b5a0a7",
+              "name": "Sam Patel"
+            }
+          }
+        },
+        {
+          "userId": "01a19834-0bfd-7712-a37f-3197da026009",
+          "displayName": "Marc Dubois",
+          "jobTitle": "Senior Civil Engineer",
+          "email": "marc@hub.test",
+          "projects": [
+            {
+              "projectId": "01a19847-7532-7add-84a2-9140b503a54f",
+              "projectNumber": "QA22-PER-MVY51JAX-1DBD8677",
+              "projectName": "Synthetic QA22 person panel MVY51JAX-1DBD8677",
+              "roles": [
+                "TeamMember"
+              ],
+              "leads": [
+                "Civil"
+              ],
+              "identityColour": "#1597cc"
+            }
+          ],
+          "personFacts": {
+            "notices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            },
+            "certifications": []
+          },
+          "organisationFacts": {
+            "homeDiscipline": null,
+            "office": {
+              "id": "01a19834-0b4f-7581-90a5-bcb28e5b4840",
+              "name": "Head Office"
+            },
+            "supervisor": {
+              "id": "01a19834-0bfd-7ebf-920e-7297a3b5a0a7",
+              "name": "Sam Patel"
+            }
+          }
+        },
+        {
+          "userId": "01a19834-0bfd-738a-b9c8-c025e3da7c04",
+          "displayName": "Omar Haddad",
+          "jobTitle": "Geotechnical Lead",
+          "email": "omar@hub.test",
+          "projects": [
+            {
+              "projectId": "01a19847-7532-7add-84a2-9140b503a54f",
+              "projectNumber": "QA22-PER-MVY51JAX-1DBD8677",
+              "projectName": "Synthetic QA22 person panel MVY51JAX-1DBD8677",
+              "roles": [
+                "TeamMember"
+              ],
+              "leads": [
+                "Electrical"
+              ],
+              "identityColour": "#1597cc"
+            }
+          ],
+          "personFacts": {
+            "notices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            },
+            "certifications": []
+          },
+          "organisationFacts": {
+            "homeDiscipline": null,
+            "office": {
+              "id": "01a19834-0b4f-7581-90a5-bcb28e5b4840",
+              "name": "Head Office"
+            },
+            "supervisor": {
+              "id": "01a19834-0bfd-7b98-bebc-462904b88c01",
+              "name": "Lena Brooks"
+            }
+          }
+        },
+        {
+          "userId": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a",
+          "displayName": "Priya Nair",
+          "jobTitle": "Project Manager",
+          "email": "priya@hub.test",
+          "projects": [
+            {
+              "projectId": "01a19847-7532-7add-84a2-9140b503a54f",
+              "projectNumber": "QA22-PER-MVY51JAX-1DBD8677",
+              "projectName": "Synthetic QA22 person panel MVY51JAX-1DBD8677",
+              "roles": [
+                "PM"
+              ],
+              "leads": [],
+              "identityColour": "#1597cc"
+            }
+          ],
+          "personFacts": {
+            "notices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            },
+            "certifications": []
+          },
+          "organisationFacts": {
+            "homeDiscipline": null,
+            "office": {
+              "id": "01a19834-0b4f-7581-90a5-bcb28e5b4840",
+              "name": "Head Office"
+            },
+            "supervisor": {
+              "id": "01a19834-0bfd-7b98-bebc-462904b88c01",
+              "name": "Lena Brooks"
+            }
+          }
+        }
+      ],
+      "projects": 1
+    },
+    "ritaPlannerProbe": {
+      "status": 403,
+      "problem": {
+        "code": "forbidden",
+        "detail": "You cannot open Workload or Team Planner."
+      }
+    },
+    "lenaAllStaffPerson": {
+      "id": "01a19834-0bfd-75e7-80db-4cbc24e4bd88",
+      "displayName": "Alex Chen",
+      "jobTitle": "Civil Designer (EIT)",
+      "isActive": true,
+      "organisationFacts": {
+        "homeDiscipline": null,
+        "office": {
+          "id": "01a19834-0b4f-7581-90a5-bcb28e5b4840",
+          "name": "Head Office"
+        },
+        "supervisor": {
+          "id": "01a19834-0bfd-7ebf-920e-7297a3b5a0a7",
+          "name": "Sam Patel"
+        }
+      },
+      "today": "2026-11-01",
+      "week": "2026-10-26",
+      "asOf": "2026-11-01T18:03:02.854812+00:00",
+      "projects": {
+        "items": [
+          {
+            "memberId": "01a19847-7054-7db2-86ac-fce99c1fd20b",
+            "projectId": "01a19847-7051-74b1-81b9-2dc73cfe0447",
+            "projectNumber": "QA22-DLV-MVY51IDP-2DD0D2",
+            "projectName": "Synthetic QA22 deliverable register QA22-DLV-MVY51IDP-2DD0D2",
+            "projectStatus": "Active",
+            "roles": [
+              "TeamMember"
+            ],
+            "primaryDiscipline": {
+              "id": "01a19847-7053-78f4-a9b9-169c2a3f5edc",
+              "name": "Civil"
+            },
+            "leadOf": [],
+            "responsibilityNote": null
+          },
+          {
+            "memberId": "01a19847-7535-7f5f-8cbb-729a3eebf4ed",
+            "projectId": "01a19847-7532-7add-84a2-9140b503a54f",
+            "projectNumber": "QA22-PER-MVY51JAX-1DBD8677",
+            "projectName": "Synthetic QA22 person panel MVY51JAX-1DBD8677",
+            "projectStatus": "Active",
+            "roles": [
+              "TeamMember"
+            ],
+            "primaryDiscipline": {
+              "id": "01a19847-7534-76e9-ade4-dbbfda5fa9e6",
+              "name": "Civil"
+            },
+            "leadOf": [],
+            "responsibilityNote": "Synthetic QA22 own Civil lead responsibility note yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+          },
+          {
+            "memberId": "01a19847-6d91-78c3-a3e6-9aff77af61d4",
+            "projectId": "01a19847-6d4d-7e40-a69d-4fde45b64133",
+            "projectNumber": "QA22-TL-mvy51hpc-f22b02-A",
+            "projectName": "QA22 synthetic Timeline mvy51hpc-f22b02 A",
+            "projectStatus": "Active",
+            "roles": [
+              "TeamMember"
+            ],
+            "primaryDiscipline": {
+              "id": "01a19847-6d87-78f8-940c-024f6b7ec5ca",
+              "name": "Civil"
+            },
+            "leadOf": [],
+            "responsibilityNote": null
+          }
+        ],
+        "page": 1,
+        "pageSize": 25,
+        "total": 3
+      },
+      "personFacts": {
+        "notices": {
+          "personType": null,
+          "startDate": null,
+          "endDate": null,
+          "starts": false,
+          "ends": false
+        },
+        "certifications": []
+      }
+    }
+  },
+  "joins": {
+    "priyaVisibleProjects": {
+      "visibleProjects": [
+        {
+          "id": "01a19847-6d4d-7e40-a69d-4fde45b64133",
+          "projectNumber": "QA22-TL-mvy51hpc-f22b02-A"
+        },
+        {
+          "id": "01a19847-6f2e-752d-8d28-b2647f3e4d94",
+          "projectNumber": "QA22-TL-mvy51hpc-f22b02-B"
+        },
+        {
+          "id": "01a19847-7051-74b1-81b9-2dc73cfe0447",
+          "projectNumber": "QA22-DLV-MVY51IDP-2DD0D2"
+        },
+        {
+          "id": "01a19847-7532-7add-84a2-9140b503a54f",
+          "projectNumber": "QA22-PER-MVY51JAX-1DBD8677"
+        }
+      ],
+      "panelProjectIds": [
+        "01a19847-7051-74b1-81b9-2dc73cfe0447",
+        "01a19847-7532-7add-84a2-9140b503a54f",
+        "01a19847-6d4d-7e40-a69d-4fde45b64133"
+      ],
+      "actualPanelMembershipTotal": 3,
+      "allPanelProjectsVisible": true,
+      "createdMembershipNoteAndRolesMatch": true
+    },
+    "ritaVisibleProjects": {
+      "visibleProjects": [
+        {
+          "id": "01a19847-6d4d-7e40-a69d-4fde45b64133",
+          "projectNumber": "QA22-TL-mvy51hpc-f22b02-A"
+        },
+        {
+          "id": "01a19847-6f2e-752d-8d28-b2647f3e4d94",
+          "projectNumber": "QA22-TL-mvy51hpc-f22b02-B"
+        },
+        {
+          "id": "01a19847-7051-74b1-81b9-2dc73cfe0447",
+          "projectNumber": "QA22-DLV-MVY51IDP-2DD0D2"
+        },
+        {
+          "id": "01a19847-7532-7add-84a2-9140b503a54f",
+          "projectNumber": "QA22-PER-MVY51JAX-1DBD8677"
+        }
+      ],
+      "panelProjectIds": [
+        "01a19847-7051-74b1-81b9-2dc73cfe0447",
+        "01a19847-7532-7add-84a2-9140b503a54f",
+        "01a19847-6d4d-7e40-a69d-4fde45b64133"
+      ],
+      "actualPanelMembershipTotal": 3,
+      "allPanelProjectsVisible": true,
+      "createdMembershipNoteAndRolesMatch": true
+    },
+    "lenaVisibleProjects": {
+      "visibleProjects": [
+        {
+          "id": "01a19847-6d4d-7e40-a69d-4fde45b64133",
+          "projectNumber": "QA22-TL-mvy51hpc-f22b02-A"
+        },
+        {
+          "id": "01a19847-6f2e-752d-8d28-b2647f3e4d94",
+          "projectNumber": "QA22-TL-mvy51hpc-f22b02-B"
+        },
+        {
+          "id": "01a19847-7051-74b1-81b9-2dc73cfe0447",
+          "projectNumber": "QA22-DLV-MVY51IDP-2DD0D2"
+        },
+        {
+          "id": "01a19847-7532-7add-84a2-9140b503a54f",
+          "projectNumber": "QA22-PER-MVY51JAX-1DBD8677"
+        }
+      ],
+      "panelProjectIds": [
+        "01a19847-7051-74b1-81b9-2dc73cfe0447",
+        "01a19847-7532-7add-84a2-9140b503a54f",
+        "01a19847-6d4d-7e40-a69d-4fde45b64133"
+      ],
+      "actualPanelMembershipTotal": 3,
+      "allPanelProjectsVisible": true,
+      "createdMembershipNoteAndRolesMatch": true
+    },
+    "workspaceNoteMatches": true,
+    "lenaCapacity": {
+      "status": "ACTUAL_SCOPED_API_VALUE",
+      "requestedPersonId": "01a19834-0bfd-75e7-80db-4cbc24e4bd88",
+      "week": "2026-10-26",
+      "gridWeeks": [
+        "2026-10-26"
+      ],
+      "currentWeek": "2026-10-26",
+      "evaluatedAt": "2026-11-01T18:03:02.848157+00:00",
+      "partial": false,
+      "provisional": false,
+      "canonicalCell": {
+        "week": "2026-10-26",
+        "capacity": 40,
+        "timeAway": 0,
+        "additionalAvailability": 0,
+        "approved": 0,
+        "confirmed": 0,
+        "expected": 0,
+        "possible": 0,
+        "remaining": 40,
+        "taskEstimates": 0,
+        "unestimatedTasks": 0,
+        "overPlanned": false,
+        "underPlanned": false,
+        "staleEntries": 0,
+        "ownDraftHours": 0,
+        "holidayHours": 0,
+        "provisional": false
+      },
+      "displayState": "Canonical free/away values available"
+    }
+  },
+  "http": [
+    {
+      "actor": "anonymous",
+      "method": "GET",
+      "route": "/config",
+      "status": 200
+    },
+    {
+      "actor": "anonymous",
+      "method": "GET",
+      "route": "/api/dev/users",
+      "status": 200
+    },
+    {
+      "actor": "jordan",
+      "method": "GET",
+      "route": "/me",
+      "status": 200
+    },
+    {
+      "actor": "priya",
+      "method": "GET",
+      "route": "/me",
+      "status": 200
+    },
+    {
+      "actor": "marc",
+      "method": "GET",
+      "route": "/me",
+      "status": 200
+    },
+    {
+      "actor": "alex",
+      "method": "GET",
+      "route": "/me",
+      "status": 200
+    },
+    {
+      "actor": "omar",
+      "method": "GET",
+      "route": "/me",
+      "status": 200
+    },
+    {
+      "actor": "rita",
+      "method": "GET",
+      "route": "/me",
+      "status": 200
+    },
+    {
+      "actor": "lena",
+      "method": "GET",
+      "route": "/me",
+      "status": 200
+    },
+    {
+      "actor": "priya",
+      "method": "GET",
+      "route": "/reference",
+      "status": 200
+    },
+    {
+      "actor": "priya",
+      "method": "POST",
+      "route": "/projects",
+      "status": 201
+    },
+    {
+      "actor": "priya",
+      "method": "GET",
+      "route": "/projects/01a19847-7532-7add-84a2-9140b503a54f",
+      "status": 200
+    },
+    {
+      "actor": "priya",
+      "method": "POST",
+      "route": "/projects/01a19847-7532-7add-84a2-9140b503a54f/transition",
+      "status": 200
+    },
+    {
+      "actor": "priya",
+      "method": "GET",
+      "route": "/projects/01a19847-7532-7add-84a2-9140b503a54f/team",
+      "status": 200
+    },
+    {
+      "actor": "marc",
+      "method": "GET",
+      "route": "/projects/01a19847-7532-7add-84a2-9140b503a54f/team",
+      "status": 200
+    },
+    {
+      "actor": "priya",
+      "method": "GET",
+      "route": "/projects/01a19847-7532-7add-84a2-9140b503a54f/team",
+      "status": 200
+    },
+    {
+      "actor": "priya",
+      "method": "PATCH",
+      "route": "/projects/01a19847-7532-7add-84a2-9140b503a54f/members/01a19847-7535-7f5f-8cbb-729a3eebf4ed/responsibility",
+      "status": 200
+    },
+    {
+      "actor": "priya",
+      "method": "GET",
+      "route": "/projects/01a19847-7532-7add-84a2-9140b503a54f/team",
+      "status": 200
+    },
+    {
+      "actor": "priya",
+      "method": "GET",
+      "route": "/projects/01a19847-7532-7add-84a2-9140b503a54f/team",
+      "status": 200
+    },
+    {
+      "actor": "marc",
+      "method": "PATCH",
+      "route": "/projects/01a19847-7532-7add-84a2-9140b503a54f/members/01a19847-7535-7f5f-8cbb-729a3eebf4ed/responsibility",
+      "status": 200
+    },
+    {
+      "actor": "priya",
+      "method": "GET",
+      "route": "/projects/01a19847-7532-7add-84a2-9140b503a54f/team",
+      "status": 200
+    },
+    {
+      "actor": "priya",
+      "method": "GET",
+      "route": "/projects/01a19847-7532-7add-84a2-9140b503a54f/team",
+      "status": 200
+    },
+    {
+      "actor": "priya",
+      "method": "GET",
+      "route": "/projects/01a19847-7532-7add-84a2-9140b503a54f",
+      "status": 200
+    },
+    {
+      "actor": "priya",
+      "method": "GET",
+      "route": "/projects/01a19847-7532-7add-84a2-9140b503a54f/activity?itemType=Member&pageSize=200&page=1",
+      "status": 200
+    },
+    {
+      "actor": "omar",
+      "method": "GET",
+      "route": "/projects/01a19847-7532-7add-84a2-9140b503a54f/team",
+      "status": 200
+    },
+    {
+      "actor": "omar",
+      "method": "PATCH",
+      "route": "/projects/01a19847-7532-7add-84a2-9140b503a54f/members/01a19847-7535-7f5f-8cbb-729a3eebf4ed/responsibility",
+      "status": 403,
+      "problem": {
+        "code": "forbidden",
+        "detail": "Only the Project Manager or the  lead can do this. Ask the PM or the discipline lead."
+      }
+    },
+    {
+      "actor": "priya",
+      "method": "GET",
+      "route": "/projects/01a19847-7532-7add-84a2-9140b503a54f/team",
+      "status": 200
+    },
+    {
+      "actor": "priya",
+      "method": "GET",
+      "route": "/projects/01a19847-7532-7add-84a2-9140b503a54f",
+      "status": 200
+    },
+    {
+      "actor": "priya",
+      "method": "GET",
+      "route": "/projects/01a19847-7532-7add-84a2-9140b503a54f/activity?itemType=Member&pageSize=200&page=1",
+      "status": 200
+    },
+    {
+      "actor": "priya",
+      "method": "GET",
+      "route": "/projects/01a19847-7532-7add-84a2-9140b503a54f/team",
+      "status": 200
+    },
+    {
+      "actor": "priya",
+      "method": "GET",
+      "route": "/projects/01a19847-7532-7add-84a2-9140b503a54f",
+      "status": 200
+    },
+    {
+      "actor": "priya",
+      "method": "GET",
+      "route": "/projects/01a19847-7532-7add-84a2-9140b503a54f/activity?itemType=Member&pageSize=200&page=1",
+      "status": 200
+    },
+    {
+      "actor": "rita",
+      "method": "GET",
+      "route": "/projects/01a19847-7532-7add-84a2-9140b503a54f/team",
+      "status": 200
+    },
+    {
+      "actor": "rita",
+      "method": "PATCH",
+      "route": "/projects/01a19847-7532-7add-84a2-9140b503a54f/members/01a19847-7535-7f5f-8cbb-729a3eebf4ed/responsibility",
+      "status": 403,
+      "problem": {
+        "code": "forbidden",
+        "detail": "Read Only accounts cannot make changes."
+      }
+    },
+    {
+      "actor": "priya",
+      "method": "GET",
+      "route": "/projects/01a19847-7532-7add-84a2-9140b503a54f/team",
+      "status": 200
+    },
+    {
+      "actor": "priya",
+      "method": "GET",
+      "route": "/projects/01a19847-7532-7add-84a2-9140b503a54f",
+      "status": 200
+    },
+    {
+      "actor": "priya",
+      "method": "GET",
+      "route": "/projects/01a19847-7532-7add-84a2-9140b503a54f/activity?itemType=Member&pageSize=200&page=1",
+      "status": 200
+    },
+    {
+      "actor": "priya",
+      "method": "GET",
+      "route": "/people/01a19834-0bfd-75e7-80db-4cbc24e4bd88/panel?projectsPage=1&projectsPageSize=100",
+      "status": 200
+    },
+    {
+      "actor": "priya",
+      "method": "GET",
+      "route": "/projects?includeArchived=true&pageSize=200&page=1",
+      "status": 200
+    },
+    {
+      "actor": "rita",
+      "method": "GET",
+      "route": "/people/01a19834-0bfd-75e7-80db-4cbc24e4bd88/panel?projectsPage=1&projectsPageSize=100",
+      "status": 200
+    },
+    {
+      "actor": "rita",
+      "method": "GET",
+      "route": "/projects?includeArchived=true&pageSize=200&page=1",
+      "status": 200
+    },
+    {
+      "actor": "lena",
+      "method": "GET",
+      "route": "/people/01a19834-0bfd-75e7-80db-4cbc24e4bd88/panel?projectsPage=1&projectsPageSize=100",
+      "status": 200
+    },
+    {
+      "actor": "lena",
+      "method": "GET",
+      "route": "/projects?includeArchived=true&pageSize=200&page=1",
+      "status": 200
+    },
+    {
+      "actor": "priya",
+      "method": "GET",
+      "route": "/projects/01a19847-7532-7add-84a2-9140b503a54f/team",
+      "status": 200
+    },
+    {
+      "actor": "priya",
+      "method": "GET",
+      "route": "/team?projects=01a19847-7532-7add-84a2-9140b503a54f",
+      "status": 200
+    },
+    {
+      "actor": "rita",
+      "method": "GET",
+      "route": "/planning/grid?personIds=01a19834-0bfd-75e7-80db-4cbc24e4bd88&from=2026-10-26&weeks=1",
+      "status": 403,
+      "problem": {
+        "code": "forbidden",
+        "detail": "You cannot open Workload or Team Planner."
+      }
+    },
+    {
+      "actor": "lena",
+      "method": "GET",
+      "route": "/planning/grid?personIds=01a19834-0bfd-75e7-80db-4cbc24e4bd88&from=2026-10-26&weeks=1",
+      "status": 200
+    },
+    {
+      "actor": "lena",
+      "method": "GET",
+      "route": "/people/01a19834-0bfd-75e7-80db-4cbc24e4bd88/panel?staffScope=all",
+      "status": 200
+    }
+  ],
+  "failures": [],
+  "limits": [
+    "The database env guard is an operator assertion; this script cannot attest the server connection string. Root must bind API5088 to disposable QA22.",
+    "No browser/native/deployment/acceptance result is claimed.",
+    "No facts/certifications or capacity inputs are changed; returned facts/hours may be absent, partial or provisional.",
+    "Refusal no-change assertions cover canonical project identity/name/version/status/manager/visibility and exact Team membership roles/primary/note/versions/discipline leads, plus target-member activity when available. Evaluator timestamps/health materialization are excluded; no all-database or audit-chain attestation is claimed."
+  ],
+  "links": {
+    "projectTeam": "http://127.0.0.1:8853/projects/QA22-PER-MVY51JAX-1DBD8677/team",
+    "workspaceTeam": "http://127.0.0.1:8853/team?projects=01a19847-7532-7add-84a2-9140b503a54f",
+    "priyaPerson": "http://127.0.0.1:8853/projects/QA22-PER-MVY51JAX-1DBD8677/team?panel=Person:01a19834-0bfd-75e7-80db-4cbc24e4bd88",
+    "apiPerson": "http://127.0.0.1:5088/api/v1/people/01a19834-0bfd-75e7-80db-4cbc24e4bd88/panel",
+    "lenaCurrentWeekGrid": "http://127.0.0.1:5088/api/v1/planning/grid?personIds=01a19834-0bfd-75e7-80db-4cbc24e4bd88&from=2026-10-26&weeks=1",
+    "lenaStaffPerson": "http://127.0.0.1:8853/staff?scope=all&panel=Person:01a19834-0bfd-75e7-80db-4cbc24e4bd88&personStaffScope=all"
+  },
+  "selectors": {
+    "personTrigger": "[data-person-panel-trigger=\"01a19834-0bfd-75e7-80db-4cbc24e4bd88\"]",
+    "personPanel": "[data-person-panel=\"01a19834-0bfd-75e7-80db-4cbc24e4bd88\"]",
+    "membershipNote": "[data-member-responsibility=\"01a19847-7535-7f5f-8cbb-729a3eebf4ed\"]",
+    "editResponsibilityButtonName": "Edit responsibility for Alex Chen",
+    "panelVisibleProject": "[data-person-project=\"01a19847-7532-7add-84a2-9140b503a54f\"]",
+    "personName": "Alex Chen",
+    "finalNoteText": "Synthetic QA22 own Civil lead responsibility note yyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+  },
+  "finishedAtUtc": "2026-11-01T18:03:02.862Z"
+}

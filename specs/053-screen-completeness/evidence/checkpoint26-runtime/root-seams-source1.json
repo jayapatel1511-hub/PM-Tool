@@ -1,0 +1,38 @@
+{
+  "atUtc": "2026-11-02T10:42:14.030950+00:00",
+  "status": "ROOT_SEAMS_FROZEN_SOURCE_REVIEW_PENDING",
+  "files": [
+    {
+      "path": "src/Hub.Api/Data/CoordinationEntities.cs",
+      "sha256": "712f2eb1662b3d3164e61ab9dae90f161a69ed77bc368c96832d13407cc7aed7"
+    },
+    {
+      "path": "src/Hub.Api/Data/HubDb.cs",
+      "sha256": "e9e51c0e4f19a1c7866a226106a5b54c57fceefde51758b89e2330103f517008"
+    },
+    {
+      "path": "src/Hub.Api/Records/ReviewFinding.cs",
+      "sha256": "1b7195b4544e59bfa8f857365a52dedbafb43a7684781f69b992268c47433de9"
+    },
+    {
+      "path": "src/Hub.Api/Records/FindingEvent.cs",
+      "sha256": "3635ba4ca32414ab4d548cb6bd3dfcbe13fd4ce60f1248a5e331fc81c113a348"
+    },
+    {
+      "path": "src/Hub.Api/Features/Reviews.cs",
+      "sha256": "6101aa1a733703c43bb539ce99f394dc66eb77d3ee8d06c96eca3318927f9a78"
+    },
+    {
+      "path": "src/Hub.Api/Features/ReviewRegister.cs",
+      "sha256": "7697e7ce2afbfbbc1cdb9620f1f3bd703e2f31b92c7c247112c5b93076931806"
+    },
+    {
+      "path": "src/Hub.Api/Features/Modules.cs",
+      "sha256": "cee6efc7eef46467246b01219fa809cc2584d91ac5c67a9517f3f6326b17b726"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ReviewRegisterTests.cs",
+      "sha256": "13b0e9eac25814aaee66f0ed9e3eb39af753ad690ebbcaa0f6cc946208bc8e5c"
+    }
+  ]
+}

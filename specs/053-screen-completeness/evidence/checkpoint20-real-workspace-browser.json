@@ -1,0 +1,106 @@
+{
+  "observedAtUtc": "2026-11-01T13:49:26.178Z",
+  "rows": [
+    {
+      "viewport": "desktop",
+      "route": "/tasks?projects=01a19754-b327-78af-b89f-a3a43edcffd7&group=deliverable&sort=key:asc&cols=key,name,project,deliverable,reviewer,estimate,lastActivity,submissionDate&page=1",
+      "status": 200,
+      "url": "http://127.0.0.1:8853/tasks?projects=01a19754-b327-78af-b89f-a3a43edcffd7&group=deliverable&sort=key:asc&cols=key,name,project,deliverable,reviewer,estimate,lastActivity,submissionDate&page=1",
+      "headers": [
+        "Key",
+        "Task",
+        "Project",
+        "Deliverable",
+        "Reviewer",
+        "Est. hrs",
+        "Last activity",
+        "Submission date",
+        "QA20-REAL-001-D001 QA20 real deliverable2 shown / 2 matched tasks0 known overdue · 2 state unavailable16 h estimated across matched rows · 0 unestimated0% by hoursNext due 2026-11-05 · 0 undated open",
+        "Other tasks1 shown / 1 matched tasks0 known overdue · 1 state unavailable1 h estimated across matched rows · 0 unestimated0% by hoursNext due 2026-11-06 · 0 undated open"
+      ],
+      "hasSubmissionDate": true,
+      "hasKnownDate": true,
+      "hasKnownNull": true,
+      "hasReviewer": true,
+      "hasEstimate": true,
+      "textSample": "Skip to content\nt\nTuesday\nMy Work\nHome\nProjects\nTasks\nTime\nReports\nTeam\nFiles\nTuesday\nTasks\nSearch\n/\n1 project\nNew\n4\nAC\nTasks\n\n3 tasks\n\nViews\nList\nBoard\nNew task\nDashboard\nBoard\nList\nTimeline\nCalendar\nFiles\nTeam\n1 project\nCopy link\nSearch\nDeliverable\nFilters\nMine\nOverdue\nBlocked\nColumns\n\nGroup totals: first read 2026-11-01 09:49; later pages are separate live reads.\n\nTasks\nKey\n\tTask\tProject\tDeliverable\tReviewer\tEst. hrs\tLast activity\tSubmission date\n\nQA20-REAL-001-D001 QA20 real deliverable\n2 shown / 2 matched tasks\n0 known overdue · 2 state unavailable\n16 h estimated across matched rows · 0 unestimated\n0% by hours\nNext due 2026-11-05 · 0 undated open\n\nQA20-REAL-001-T0001\tQA20 real task one\t\nQA20-REAL-001\n\tQA20-REAL-001-D001 QA20 real deliverable\t—\t8 h\t\n11 min ago\n·\nPriya Nair\n\t2026-11-18\nQA20-REAL-001-T0002\tQA20 real task two\t\nQA20-REAL-001\n\tQA20-REAL-001-D001 QA20 real deliverable\t—\t8 h\t\n11 min ago\n·\nAlex Chen\n\t2026-11-18\n\nOther tasks\n1 shown / 1 matched tasks\n0 known overdue · 1 state unavailable\n1 h estimated across matched rows · 0 unestimated\n0% by hours\nNext due 2026-11-06 · 0 undated open\n\nQA20-REAL-001-T0003\tQA20 Known null workspace task\t\nQA20-REAL-001\n\t—\t—\t1 h\t\njust now\n·\nPriya Nair\n\tNo open submission",
+      "errors": []
+    },
+    {
+      "viewport": "desktop",
+      "route": "/tasks?projects=01a19754-b327-78af-b89f-a3a43edcffd7&group=deliverable&sort=key:asc&cols=key,name,project,deliverable,reviewer,estimate,lastActivity,submissionDate&page=1&view=01a1975f-20e9-765a-a52d-7f1cd8b83c19",
+      "status": 200,
+      "url": "http://127.0.0.1:8853/tasks?projects=01a19754-b327-78af-b89f-a3a43edcffd7&group=deliverable&sort=key:asc&cols=key,name,project,deliverable,reviewer,estimate,lastActivity,submissionDate&page=1&view=01a1975f-20e9-765a-a52d-7f1cd8b83c19",
+      "headers": [
+        "Key",
+        "Task",
+        "Project",
+        "Deliverable",
+        "Reviewer",
+        "Est. hrs",
+        "Last activity",
+        "Submission date",
+        "QA20-REAL-001-D001 QA20 real deliverable2 shown / 2 matched tasks0 known overdue · 2 state unavailable16 h estimated across matched rows · 0 unestimated0% by hoursNext due 2026-11-05 · 0 undated open",
+        "Other tasks1 shown / 1 matched tasks0 known overdue · 1 state unavailable1 h estimated across matched rows · 0 unestimated0% by hoursNext due 2026-11-06 · 0 undated open"
+      ],
+      "hasSubmissionDate": true,
+      "hasKnownDate": true,
+      "hasKnownNull": true,
+      "hasReviewer": true,
+      "hasEstimate": true,
+      "textSample": "Skip to content\nt\nTuesday\nMy Work\nHome\nProjects\nTasks\nTime\nReports\nTeam\nFiles\nTuesday\nTasks\nSearch\n/\n1 project\nNew\n4\nAC\nTasks\n\n3 tasks\n\nQA20 real workspace columns\nList\nBoard\nNew task\nDashboard\nBoard\nList\nTimeline\nCalendar\nFiles\nTeam\n1 project\nCopy link\nSearch\nDeliverable\nFilters\nMine\nOverdue\nBlocked\nColumns\n\nGroup totals: first read 2026-11-01 09:49; later pages are separate live reads.\n\nTasks\nKey\n\tTask\tProject\tDeliverable\tReviewer\tEst. hrs\tLast activity\tSubmission date\n\nQA20-REAL-001-D001 QA20 real deliverable\n2 shown / 2 matched tasks\n0 known overdue · 2 state unavailable\n16 h estimated across matched rows · 0 unestimated\n0% by hours\nNext due 2026-11-05 · 0 undated open\n\nQA20-REAL-001-T0001\tQA20 real task one\t\nQA20-REAL-001\n\tQA20-REAL-001-D001 QA20 real deliverable\t—\t8 h\t\n11 min ago\n·\nPriya Nair\n\t2026-11-18\nQA20-REAL-001-T0002\tQA20 real task two\t\nQA20-REAL-001\n\tQA20-REAL-001-D001 QA20 real deliverable\t—\t8 h\t\n11 min ago\n·\nAlex Chen\n\t2026-11-18\n\nOther tasks\n1 shown / 1 matched tasks\n0 known overdue · 1 state unavailable\n1 h estimated across matched rows · 0 unestimated\n0% by hours\nNext due 2026-11-06 · 0 undated open\n\nQA20-REAL-001-T0003\tQA20 Known null workspace task\t\nQA20-REAL-001\n\t—\t—\t1 h\t\njust now\n·\nPriya Nair\n\tNo open submission",
+      "errors": []
+    },
+    {
+      "viewport": "phone",
+      "route": "/tasks?projects=01a19754-b327-78af-b89f-a3a43edcffd7&group=deliverable&sort=key:asc&cols=key,name,project,deliverable,reviewer,estimate,lastActivity,submissionDate&page=1",
+      "status": 200,
+      "url": "http://127.0.0.1:8853/tasks?projects=01a19754-b327-78af-b89f-a3a43edcffd7&group=deliverable&sort=key:asc&cols=key,name,project,deliverable,reviewer,estimate,lastActivity,submissionDate&page=1",
+      "headers": [
+        "Key",
+        "Task",
+        "Project",
+        "Deliverable",
+        "Reviewer",
+        "Est. hrs",
+        "Last activity",
+        "Submission date",
+        "QA20-REAL-001-D001 QA20 real deliverable2 shown / 2 matched tasks0 known overdue · 2 state unavailable16 h estimated across matched rows · 0 unestimated0% by hoursNext due 2026-11-05 · 0 undated open",
+        "Other tasks1 shown / 1 matched tasks0 known overdue · 1 state unavailable1 h estimated across matched rows · 0 unestimated0% by hoursNext due 2026-11-06 · 0 undated open"
+      ],
+      "hasSubmissionDate": true,
+      "hasKnownDate": true,
+      "hasKnownNull": true,
+      "hasReviewer": true,
+      "hasEstimate": true,
+      "textSample": "Skip to content\n4\nAC\nTasks\n\n3 tasks\n\nViews\nList\nBoard\nNew task\nDashboard\nBoard\nList\nTimeline\nCalendar\nFiles\nTeam\nCopy link\nSearch\nDeliverable\nFilters\nMine\nOverdue\nBlocked\nColumns\n\nGroup totals: first read 2026-11-01 09:49; later pages are separate live reads.\n\nQA20-REAL-001-D001 QA20 real deliverable\n2 shown / 2 matched tasks\n0 known overdue · 2 state unavailable\n16 h estimated across matched rows · 0 unestimated\n0% by hours\nNext due 2026-11-05 · 0 undated open\n\nQA20-REAL-001\nQA20-REAL-001-T0001\n\nQA20 real task one\nDeliverable\nQA20-REAL-001-D001 QA20 real deliverable\nReviewer\n—\nEst. hrs\n8 h\nLast activity\n11 min ago\n·\nPriya Nair\nSubmission date\n2026-11-18\n\nQA20-REAL-001\nQA20-REAL-001-T0002\n\nQA20 real task two\nDeliverable\nQA20-REAL-001-D001 QA20 real deliverable\nReviewer\n—\nEst. hrs\n8 h\nLast activity\n11 min ago\n·\nAlex Chen\nSubmission date\n2026-11-18\nOther tasks\n1 shown / 1 matched tasks\n0 known overdue · 1 state unavailable\n1 h estimated across matched rows · 0 unestimated\n0% by hours\nNext due 2026-11-06 · 0 undated open\n\nQA20-REAL-001\nQA20-REAL-001-T0003\n\nQA20 Known null workspace task\nDeliverable\n—\nReviewer\n—\nEst. hrs\n1 h\nLast activity\njust now\n·\nPriya Nair\nSubmission date\nNo open submission\nMy Work\nSearch\nNotifications",
+      "errors": []
+    },
+    {
+      "viewport": "phone",
+      "route": "/tasks?projects=01a19754-b327-78af-b89f-a3a43edcffd7&group=deliverable&sort=key:asc&cols=key,name,project,deliverable,reviewer,estimate,lastActivity,submissionDate&page=1&view=01a1975f-20e9-765a-a52d-7f1cd8b83c19",
+      "status": 200,
+      "url": "http://127.0.0.1:8853/tasks?projects=01a19754-b327-78af-b89f-a3a43edcffd7&group=deliverable&sort=key:asc&cols=key,name,project,deliverable,reviewer,estimate,lastActivity,submissionDate&page=1&view=01a1975f-20e9-765a-a52d-7f1cd8b83c19",
+      "headers": [
+        "Key",
+        "Task",
+        "Project",
+        "Deliverable",
+        "Reviewer",
+        "Est. hrs",
+        "Last activity",
+        "Submission date",
+        "QA20-REAL-001-D001 QA20 real deliverable2 shown / 2 matched tasks0 known overdue · 2 state unavailable16 h estimated across matched rows · 0 unestimated0% by hoursNext due 2026-11-05 · 0 undated open",
+        "Other tasks1 shown / 1 matched tasks0 known overdue · 1 state unavailable1 h estimated across matched rows · 0 unestimated0% by hoursNext due 2026-11-06 · 0 undated open"
+      ],
+      "hasSubmissionDate": true,
+      "hasKnownDate": true,
+      "hasKnownNull": true,
+      "hasReviewer": true,
+      "hasEstimate": true,
+      "textSample": "Skip to content\n4\nAC\nTasks\n\n3 tasks\n\nQA20 real workspace columns\nList\nBoard\nNew task\nDashboard\nBoard\nList\nTimeline\nCalendar\nFiles\nTeam\nCopy link\nSearch\nDeliverable\nFilters\nMine\nOverdue\nBlocked\nColumns\n\nGroup totals: first read 2026-11-01 09:49; later pages are separate live reads.\n\nQA20-REAL-001-D001 QA20 real deliverable\n2 shown / 2 matched tasks\n0 known overdue · 2 state unavailable\n16 h estimated across matched rows · 0 unestimated\n0% by hours\nNext due 2026-11-05 · 0 undated open\n\nQA20-REAL-001\nQA20-REAL-001-T0001\n\nQA20 real task one\nDeliverable\nQA20-REAL-001-D001 QA20 real deliverable\nReviewer\n—\nEst. hrs\n8 h\nLast activity\n11 min ago\n·\nPriya Nair\nSubmission date\n2026-11-18\n\nQA20-REAL-001\nQA20-REAL-001-T0002\n\nQA20 real task two\nDeliverable\nQA20-REAL-001-D001 QA20 real deliverable\nReviewer\n—\nEst. hrs\n8 h\nLast activity\n11 min ago\n·\nAlex Chen\nSubmission date\n2026-11-18\nOther tasks\n1 shown / 1 matched tasks\n0 known overdue · 1 state unavailable\n1 h estimated across matched rows · 0 unestimated\n0% by hours\nNext due 2026-11-06 · 0 undated open\n\nQA20-REAL-001\nQA20-REAL-001-T0003\n\nQA20 Known null workspace task\nDeliverable\n—\nReviewer\n—\nEst. hrs\n1 h\nLast activity\njust now\n·\nPriya Nair\nSubmission date\nNo open submission\nMy Work\nSearch\nNotifications",
+      "errors": []
+    }
+  ],
+  "errors": []
+}

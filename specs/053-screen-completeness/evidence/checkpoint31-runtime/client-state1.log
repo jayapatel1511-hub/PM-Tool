@@ -1,0 +1,45 @@
+
+> web@0.0.0 test:keys
+> node --test src/lib/keys.test.ts src/lib/page-mode.test.ts src/lib/drafts.test.ts
+
+✔ Task preservation follows only its own presentation and captured Person chain, including nested return and paging (6.125917ms)
+✔ Task presentation proof preserves only its mounted form; leaving, unload and another dirty form remain guarded (0.143333ms)
+✔ a preserved overlay bypasses only its own form, while unload, close, other navigation and other dirty forms stay guarded (0.136834ms)
+✔ a draft is read back until draft_keep_days, then dropped when read or pruned (FR-SAV-03) (1.02325ms)
+✔ a browser that refuses the write gives no draft (0.06275ms)
+✔ leaving asks only while something typed is neither saved nor drafted (FR-SAV-04, FR-SAV-06) (0.0915ms)
+✔ a save cut off by an expired sign-in waits for the same user, record and field, and is spent once (FR-SAV-05) (0.28175ms)
+✔ a 401 from any request asks every form to keep its typed input (FR-SAV-05) (0.0615ms)
+✔ an explicit sign-out drops the person's drafts and waiting fields, and only theirs (051-D2) (0.119791ms)
+✔ a contribution child refreshes mounted collaborator facts and complete history actors without pretending task workflow changed (1.737792ms)
+✔ notification action facts refresh on record, graph, access and untyped evaluation changes without broadening legacy readers (2.804667ms)
+✔ decision, issue and template derived reads refresh after metadata and access changes (2.588583ms)
+✔ file reference readers refresh after revision, parent, author, scope and owning-flag changes (1.054416ms)
+✔ a personal seen commit refreshes its readers while preserving unrelated business and preference caches (0.259958ms)
+✔ follow-up rows refetch typed owners and activity after flags, assignment and comment changes (0.331458ms)
+✔ person fact commands refresh mounted staff, both Teams, editor and date-only picker facts (0.443292ms)
+✔ successful discussion refreshes its originating project task count without a live event (0.121875ms)
+✔ activity, own-week candidates and report inputs refetch otherwise fresh cached facts (2.080875ms)
+✔ a project colour change refreshes an already cached workspace Team identity (0.222542ms)
+✔ item changes keep the previous project and item-specific invalidations (AC-PLAT-19) (0.32225ms)
+✔ project refresh retains its 1.5 second derived-state pass (0.664917ms)
+✔ child audit types refresh mounted details and dependent pickers; reconnect repairs missed events (0.531708ms)
+✔ invalidation prefixes match actual mounted screen query keys (0.360375ms)
+✔ a person's own workspaces and dashboard layout refresh the screens that read them (0.140875ms)
+✔ workload changes refresh the pickup own-load hint (0.049708ms)
+✔ notification and preference commands refresh the bell, the centre, the Following tab and the preferences page (0.077166ms)
+✔ new batch mutations refresh their mounted views and await active refetches (0.075708ms)
+✔ person date and setting changes refresh all authorised candidate sources; submission events refresh workspace dates (1.902041ms)
+✔ board leads and thresholds, Team organisation labels and candidate capacity refresh cached reads (5.055417ms)
+✔ person panels refetch after membership, scope and permitted-fact changes without touching unrelated personal state (0.564542ms)
+✔ an owning flag change refreshes the cached reference vocabulary (0.094041ms)
+✔ coordination readers refresh current linked work and meeting agenda without treating a contribution as a workflow change (0.411ms)
+✔ legacy links migrate without confusing a saved-view id with a mode (AC-PLAT-08) (0.39425ms)
+ℹ tests 33
+ℹ suites 0
+ℹ pass 33
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 109.314875

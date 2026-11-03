@@ -1,0 +1,8 @@
+{
+  "status": "REPAIR_CSHARP_READY_HASH_MATCH_HOLD_UNEXECUTED",
+  "files": {
+    "src/Hub.Api/Features/TaskBulkCommands.cs": "14893e963684d8433c561fbf9dad9a722e6bcc23cfd25718114690bb242cc8fd",
+    "src/Hub.Api/Features/Tasks.cs": "7657a9afb48edefb508d5bb699d1081367b184b4c86a8142fb257b139a25fd88",
+    "tests/Hub.Tests/Api/TaskBulkCommandTests.cs": "b950a2d275a510302fb5dc952f24245b3a86daff0554edabf225bebf72069a33"
+  }
+}

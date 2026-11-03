@@ -1,0 +1,51 @@
+{
+  "exitCode": 1,
+  "args": [
+    "/opt/homebrew/bin/dotnet",
+    "test",
+    "tests/Hub.Tests/Hub.Tests.csproj",
+    "-c",
+    "Release",
+    "--no-build",
+    "--no-restore",
+    "--artifacts-path",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint31-artifacts",
+    "--filter",
+    "FullyQualifiedName~AvailabilityBuildTests|FullyQualifiedName~CoordinationConsequenceAgendaTests|FullyQualifiedName~NoticePreferenceTests|FullyQualifiedName~NoticeDeliveryProofTests|FullyQualifiedName~NoticeDeliveryModelTests",
+    "--logger",
+    "trx;LogFileName=focused1.trx",
+    "--results-directory",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint31-runtime/trx-focused1",
+    "-m:1",
+    "-p:UseSharedCompilation=false",
+    "-p:NuGetAudit=false"
+  ],
+  "atUtc": "2026-11-02T21:42:05.559730+00:00",
+  "scope": "New coordination/preferences/proof/model cases plus existing Availability class controls",
+  "boundary": "Existing authorized55432 tunnel; fresh HubFactory-owned hub_test_* databases only; no retained QA24/operational data or mail provider",
+  "counters": {
+    "total": "56",
+    "executed": "56",
+    "passed": "55",
+    "failed": "1",
+    "error": "0",
+    "timeout": "0",
+    "aborted": "0",
+    "inconclusive": "0",
+    "passedButRunAborted": "0",
+    "notRunnable": "0",
+    "notExecuted": "0",
+    "disconnected": "0",
+    "warning": "0",
+    "completed": "0",
+    "inProgress": "0",
+    "pending": "0"
+  },
+  "failures": [
+    {
+      "name": "Hub.Tests.Api.CoordinationConsequenceAgendaTests.Meeting_carryover_all_categories_and_recorded_weeks_keep_actual_performer_and_independent_states",
+      "outcome": "Failed",
+      "message": "Expected 200 but got 400: {\"type\":\"https://hub.local/errors/validation\",\"title\":\"Validation failed\",\"status\":400,\"code\":\"validation\",\"detail\":\"One or more fields are invalid.\",\"traceId\":\"0HNPP58410NHK\",\"errors\":{\"readiness\":[\"This record cannot take that step from its current state.\"]}}"
+    }
+  ]
+}

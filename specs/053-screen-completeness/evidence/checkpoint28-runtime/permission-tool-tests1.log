@@ -1,0 +1,10 @@
+test_cell_only_change_and_changed_condition_are_detected (test_permission_explainer_coverage.CoverageTests.test_cell_only_change_and_changed_condition_are_detected) ... ok
+test_changed_compound_guard_source_and_unknown_binding_fail (test_permission_explainer_coverage.CoverageTests.test_changed_compound_guard_source_and_unknown_binding_fail) ... ok
+test_missing_row_and_missing_guard_are_not_ignored (test_permission_explainer_coverage.CoverageTests.test_missing_row_and_missing_guard_are_not_ignored) ... ok
+test_new_boolean_method_and_signature_change_fail_closed (test_permission_explainer_coverage.CoverageTests.test_new_boolean_method_and_signature_change_fail_closed) ... ok
+test_partial_is_not_a_complete_permission_matrix (test_permission_explainer_coverage.CoverageTests.test_partial_is_not_a_complete_permission_matrix) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.025s
+
+OK

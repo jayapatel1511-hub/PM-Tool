@@ -1,0 +1,18 @@
+{
+  "status": "HASHES_MATCH_SOURCE_UNCOMPILED_UNRUN",
+  "files": {
+    "src/Hub.Api/Features/Templates.cs": "1167514c0a512d0d36cf867302ff6e9715ea8d5045b4c9e11a0a15bcb9ff15c2",
+    "src/Hub.Api/Features/TemplateRiskSeeds.cs": "d7c3e8b9618c37be40bbd5062defb0ecf22fba617001d9c8683554a0fae3f535",
+    "src/Hub.Api/Features/TemplateVersionProvenance.cs": "7cdc93de3fccb0773511191c08fc098f2f1e95381884669bcb1291cf4c7dbb60",
+    "src/Hub.Api/Features/TemplateDraftDiff.cs": "547fe7013eef251ef5bb6005d9b6f69dd5cd0d97e6e0832ae2b8904960358f1f",
+    "tests/Hub.Tests/Api/TemplateRiskSeedTests.cs": "a4632e3408af26adbe35d3cf7aadac48d18eecb0a762c9f3db87cdc675ac35b6",
+    "tests/Hub.Tests/Api/TemplateVersionProvenanceTests.cs": "abe145ca195335f8c4b2971e0649ca4b1b258454234933e64fffbd83607db692",
+    "tests/Hub.Tests/Api/TemplateDraftDiffTests.cs": "d1f1016f5d91287c8705661e9e940e95b5c70cdf48294dad714fce54c13ca60a",
+    "web/src/pages/Templates.tsx": "8fe4f56451e4eef0acd5ab6a78e95fd2b3edf3a56349ca3338824f92d7fb029f",
+    "web/src/pages/projects/FromTemplate.tsx": "e94fb314f8d20e83cf0133a6d2d11ef5a5fdf9b1d042bb08a4fdfb4dfc9747b4",
+    "web/src/pages/template-risk-seeds.tsx": "46f1e6fe78263beebabd0cad17be857119e23340edf620c6e055f1442eb08c84",
+    "web/src/pages/template-version-provenance.tsx": "b9229725d6011a520e7a33f8ad04f005ef92e311722882d367b32db754bca5a3",
+    "web/tests/template-risk-provenance.cjs": "6704e04851c0fb79251e86163e8105b7fee875593d7338e1f8ba25fc6f24a4f4",
+    "web/tests/template-risk-provenance.fixture.cjs": "5487e5e7cca16d2235d185eea9301bbb96e619d3e35cd57c6cca1dcfeed1673d"
+  }
+}

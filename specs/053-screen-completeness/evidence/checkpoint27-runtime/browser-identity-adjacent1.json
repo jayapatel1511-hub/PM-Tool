@@ -1,0 +1,5 @@
+{
+  "exitCode": 0,
+  "suite": "workspace-identity-surfaces.cjs",
+  "boundary": "Same final SPA2; synthetic adjacent regression, no live API/DB join"
+}

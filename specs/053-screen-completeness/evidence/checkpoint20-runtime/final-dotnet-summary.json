@@ -1,0 +1,539 @@
+{
+  "distinctCases": 133,
+  "latestChangedReportChecks": 30,
+  "cases": {
+    "Hub.Tests.Api.ReportUnitsTests.Saved_views_copy_parameters_and_crossfield_cleaning_retain_unit_period_without_widening_scope": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-final-report-labels.trx"
+    },
+    "Hub.Tests.Api.CapacityPersonPickerNoticeTests.Populated_own_certification_stays_out_of_all_six_authorised_candidate_arrays": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsTests.Capacity_partial_month_uses_displayed_weeks_only_and_horizon_not_internal_lookahead": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-final-report-labels.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsArithmeticTests.Zero_or_unknown_standard_is_unavailable_and_known_zero_hours_remains_zero": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-final-report-labels.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsTests.Every_unit_period_pair_keeps_identical_S23_task_cohort_and_exact_canonical_metric_scope(unit: \"fte\", period: \"months\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-final-report-labels.trx"
+    },
+    "Hub.Tests.Api.CapacityPersonPickerNoticeTests.HR_notice_refresh_keeps_canonical_stale_mapping_refusal_and_admin_only_write": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.WorkTaskColumnsTests.Three_projects_twelve_normal_tasks_keep_same_named_deliverables_separate_with_column_facts": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.WorkTaskColumnsTests.Optional_manifest_membership_counts_but_deleted_and_foreign_import_references_do_not": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsTests.Every_unit_period_pair_keeps_identical_S23_task_cohort_and_exact_canonical_metric_scope(unit: \"hours\", period: \"months\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-final-report-labels.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsTests.Every_unit_period_pair_keeps_identical_S23_task_cohort_and_exact_canonical_metric_scope(unit: \"fte\", period: \"weeks\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-final-report-labels.trx"
+    },
+    "Hub.Tests.Api.WorkTaskColumnsTests.Date_projection_is_work_list_only_and_off_wire_remains_unchanged(work: True, small: False)": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.WorkTaskColumnsTests.Known_no_package_null_deliverable_and_unavailable_recorded_reference_remain_distinct_without_get_writes": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsTests.Missing_estimates_zero_estimates_partial_scope_and_zero_standard_remain_explicitly_distinct": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-final-report-labels.trx"
+    },
+    "Hub.Tests.Api.WorkTaskColumnsTests.Date_projection_is_work_list_only_and_off_wire_remains_unchanged(work: False, small: False)": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.CapacityPersonPickerNoticeTests.Hidden_projects_empty_workspace_scopes_and_nonadmin_HR_requests_keep_existing_boundaries": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.WorkTaskColumnsTests.Two_hundred_and_one_command_created_tasks_keep_page_membership_and_date_facts_on_three_pages": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsTests.Employee_and_discipline_months_use_exact_sub_tenth_source_instead_of_preformatted_week_values": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-final-report-labels.trx"
+    },
+    "Hub.Tests.Api.WorkTaskColumnsTests.Date_projection_is_work_list_only_and_off_wire_remains_unchanged(work: False, small: True)": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.CapacityPersonPickerNoticeTests.Inactive_people_and_nonmember_dates_keep_each_source_own_existing_cohort": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.WorkTaskColumnsTests.Normally_issued_superseded_and_cancelled_packages_never_supply_the_date": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused-repair1.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsTests.Reduced_availability_stays_provisional_in_employee_and_team_months_counts_and_both_exports": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-final-report-labels.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsTests.Dark_flag_keeps_original_wire_and_export_and_hidden_scope_remains_visible_only_without_private_hours": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-final-report-labels.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsTests.Every_unit_period_pair_keeps_identical_S23_task_cohort_and_exact_canonical_metric_scope(unit: \"hours\", period: \"weeks\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-final-report-labels.trx"
+    },
+    "Hub.Tests.Api.WorkTaskColumnsTests.Workspace_saved_columns_preserve_identity_and_scope_while_own_views_remain_private": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsArithmeticTests.Invalid_periods_units_and_noncanonical_displayed_weeks_refuse": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-final-report-labels.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsTests.Team_capacity_months_keep_weekly_people_counts_separate_and_never_convert_or_sum_them": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-final-report-labels.trx"
+    },
+    "Hub.Tests.Api.CapacityPersonPickerNoticeTests.Six_sources_keep_exact_candidate_order_versions_and_fields_across_owner_flag_pairs_without_writes": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.CapacityPersonPickerNoticeTests.Populated_units_override_shared_supervisor_and_recorded_dates_keep_pickup_candidates_unchanged": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsArithmeticTests.Period_conversion_uses_sub_tenth_source_hours_and_does_not_sum_weekly_FTE": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-final-report-labels.trx"
+    },
+    "Hub.Tests.Api.CapacityPersonPickerNoticeTests.Pickup_refusal_current_owner_and_outside_team_never_gain_candidates_from_dates": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsTests.Employee_month_FTE_uses_standard40_despite_custom32_and_exact_aggregate_while_workload_stays8_weeks": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-final-report-labels.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsArithmeticTests.Thursday_assigns_cross_month_and_year_weeks_and_partial_month_uses_only_displayed_weeks": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-final-report-labels.trx"
+    },
+    "Hub.Tests.Api.WorkTaskColumnsTests.Earliest_current_manifest_date_changes_after_normal_edit_replacement_and_cancellation": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused-repair1.trx"
+    },
+    "Hub.Tests.Api.CapacityPersonPickerNoticeTests.New_bridges_use_organisation_timezone_at_a_UTC_midnight_boundary": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsArithmeticTests.Four_exact_weeks_use_one_standard_denominator_for_rows_and_aggregate": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-final-report-labels.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsTests.Strict_unit_period_and_nonmatrix_forms_refuse_instead_of_silently_becoming_a_different_display": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-final-report-labels.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsArithmeticTests.Unknown_hours_and_unestimated_inputs_keep_known_subtotals_and_coverage": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-final-report-labels.trx"
+    },
+    "Hub.Tests.Api.CapacityPersonPickerNoticeTests.All_six_bridges_share_recorded_unknown_start_and_inclusive_end_window_without_status_inference": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.WorkTaskColumnsTests.Date_projection_is_work_list_only_and_off_wire_remains_unchanged(work: True, small: True)": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-focused.trx"
+    },
+    "Hub.Tests.Api.ReportUnitsTests.Positive_undated_known_subtotal_and_missing_inputs_survive_both_exports_without_FTE_conversion": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-final-report-labels.trx"
+    },
+    "Hub.Tests.Api.ContractTests.Me_settings_are_typed_and_route_counter_field_is_flag_scoped": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.CountLinkTests.Reviews_stalled_opens_the_people_who_hold_them_and_old_links_still_work": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: \"/api/v1/admin/operations/outbox/retry\", method: \"post\", status: \"200\", field: \"retried\", type: \"integer\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ReportCapacityTaskInputsTests.Discipline_report_retains_office_people_scope_and_canonical_project_and_status_exclusions": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ContractTests.Nested_dtos_with_equal_names_have_distinct_contract_schemas": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ReportTaskInputsTests.Comma_padded_scalar_references_refuse_on_report_list_and_export_without_dropping_filters": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ReportCapacityTaskInputsTests.Unit_leader_reads_the_existing_widened_cohort_without_a_new_role_or_permission_grant": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ReportTaskInputsTests.Mixed_review_queue_counts_its_filtered_task_branch_without_deliverables_or_other_reviewers": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: \"/api/v1/admin/organisation/levels\", method: \"get\", status: \"200\", field: \"[].name\", type: \"string\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ReportCapacityTaskInputsTests.Both_source_forms_use_scoped_people_tasks_without_invented_entry_task_source_relationships(form: \"hours-by-source\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.TaskGroupingTests.Three_projects_keep_identical_labels_and_null_memberships_separate_before_paging_and_authorisation": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ReportCapacityTaskInputsTests.People_context_counts_are_full_cohort_before_metric_paging_and_retained_report_group_rows": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: \"/api/v1/projects/{projectId}/commitment-reliabilit\"\u00b7\u00b7\u00b7, method: \"get\", status: \"200\", field: \"misses[].commitments[]\", type: \"string\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ReportCatalogueViewsTests.Project_container_does_not_become_data_filter_and_global_discipline_is_not_a_project_discipline": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-final-report-labels.trx"
+    },
+    "Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: \"/api/v1/admin/organisation/import/preview\", method: \"post\", status: \"200\", field: \"applied\", type: \"boolean\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: \"/api/v1/deliverables/{id}/baselines\", method: \"get\", status: \"200\", field: \"people[].displayName\", type: \"string\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ContractTests.Client_error_report_success_is_documented_as_bodyless_204": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ReportTaskInputsTests.Due_week_keeps_week_discipline_assignee_and_mine_and_dated_cohort_has_zero_undated": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ContractTests.Template_preview_contract_keeps_nested_counts_and_role_fields": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.TaskGroupingTests.Other_group_dimensions_execute_their_real_sql_keys_and_full_metrics(dimension: \"due\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ReportTaskInputsTests.Full_counts_pass_screen_and_export_caps_while_pager_and_export_keep_their_bounds": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ContractTests.Allocation_preview_contract_describes_both_saved_and_preview_responses(route: \"/api/v1/projects/{projectId}/allocations/{id}/conf\"\u00b7\u00b7\u00b7)": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(code: \"team-capacity\", query: \"from=2026-09-14&weeks=2&includeMyDrafts=false\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent-repair1.trx"
+    },
+    "Hub.Tests.Api.ViewsTests.Staff_views_are_personal_restore_filters_and_name_missing_references": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.DisciplineCoordinationTests.Change_rows_share_one_definition_and_count_pending_apart_from_acknowledgement": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ReportTaskInputsTests.Blocker_type_matches_full_stored_predicate_including_legacy_missing_blocking_and_excludes_false": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.TaskGroupingTests.Grouped_sql_paging_reuses_the_existing_within_group_sort_expressions": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ReportCatalogueViewsTests.Additions_are_absent_off_and_do_not_change_existing_rows_parameters_or_export_bytes": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-final-report-labels.trx"
+    },
+    "Hub.Tests.Api.TaskGroupingTests.Other_group_dimensions_execute_their_real_sql_keys_and_full_metrics(dimension: \"status\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: \"/api/v1/tasks/{id}/pickup-offer\", method: \"get\", status: \"200\", field: \"allowed.pickUp\", type: \"boolean\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ReportTaskInputsTests.Overdue_custom_minimum_is_not_broadened_to_the_generic_overdue_destination": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: \"/api/v1/admin/organisation/import/preview\", method: \"post\", status: \"200\", field: \"rows\", type: \"integer\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ReportCapacityTaskInputsTests.Team_capacity_uses_union_of_historical_displayed_unit_week_members_not_current_or_lookahead_placement": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.HandoffsTests.List_options_detail_and_create_keep_their_property_names_order_nulls_and_flags": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ReportCatalogueViewsTests.Saved_parameter_link_runs_under_recipient_scope_not_saved_owner_scope": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-final-report-labels.trx"
+    },
+    "Hub.Tests.Api.TaskGroupingTests.Next_due_includes_held_open_work_and_missing_state_remains_unavailable_without_get_writes": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ReportCatalogueViewsTests.Activity_all_history_and_concrete_default_period_remain_distinct_after_save_and_copy": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-final-report-labels.trx"
+    },
+    "Hub.Tests.Api.ReportCapacityTaskInputsTests.Civil_employee_scope_has_four_unestimated_two_undated_and_keeps_the_selected_peoples_other_visible_work": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: \"/api/v1/tasks/{id}\", method: \"get\", status: \"200\", field: \"permissions.transitions[].allowed\", type: \"boolean\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ContractTests.Normalization_removes_servers_and_orders_objects_without_reordering_arrays": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: \"/api/v1/me/work/requested\", method: \"get\", status: \"200\", field: \"total\", type: \"integer\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.RegistryTests.Generated_key_families_match_the_registry_and_vocabulary": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-final-report-labels.trx"
+    },
+    "Hub.Tests.Api.ReportCapacityTaskInputsTests.Capacity_discipline_and_own_draft_selection_use_the_returned_people_then_keep_their_other_work": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: \"/api/v1/projects/{projectId}/revision-check\", method: \"get\", status: \"200\", field: \"deliverables[].issues[].marks[]\", type: \"string\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ReportTaskInputsTests.Stale_exact_source_overlap_paging_and_live_reread_are_read_only_and_keep_custom_days": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.CapacityReportsTests.Source_hours_apply_approved_coverage_and_unlinked_list_filters": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ContractTests.Allocation_preview_contract_describes_both_saved_and_preview_responses(route: \"/api/v1/projects/{projectId}/allocations/{id}/edit\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.RegistryTests.Audit_fields_and_history_types_preserve_the_original_snapshots": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: \"/api/v1/admin/audit-chains\", method: \"get\", status: \"200\", field: \"[].chainId\", type: \"string\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ReportCatalogueViewsTests.Questions_decorate_only_eligible_reports_and_report_views_keep_owner_flags_and_permissions": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-final-report-labels.trx"
+    },
+    "Hub.Tests.Api.TaskGroupingTests.Other_group_dimensions_execute_their_real_sql_keys_and_full_metrics(dimension: \"assignee\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ReportTaskInputsTests.Flag_scope_reference_and_metric_guards_preserve_off_body_and_export_and_never_widen_empty_scope": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: \"/api/v1/projects/import-preview\", method: \"post\", status: \"200\", field: \"rows[].projectNumber\", type: \"string\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.TaskGroupingTests.Two_hundred_and_one_tasks_share_one_stable_full_group_across_three_pages": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.CapacityReportsTests.Source_report_list_link_preserves_supervisor_default_horizon_and_normalized_week": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.TaskPickupTests.Restricted_pickup_lists_reports_and_commands_require_current_membership": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.TaskGroupingTests.Disabled_group_parameter_preserves_legacy_bytes_and_enabled_ungrouped_shape": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent-repair1.trx"
+    },
+    "Hub.Tests.Api.TaskGroupingTests.Milestone_groups_follow_direct_and_deliverable_inherited_references_and_refuse_foreign_assignment": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.TaskGroupingTests.Missing_deliverable_metadata_stays_unavailable_and_does_not_become_a_known_empty_milestone": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.RegistryTests.Every_audited_type_has_one_valid_declaration": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: \"/api/v1/admin/organisation/units\", method: \"get\", status: \"200\", field: \"[].rowVersion\", type: \"integer\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ReportCatalogueViewsTests.Personal_report_views_are_owner_only_defaults_are_report_isolated_and_saved_values_are_validated": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-final-report-labels.trx"
+    },
+    "Hub.Tests.Api.OrgStructureTests.Structure_is_admin_only_and_refuses_cycles": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.CapacityReportsTests.Report_catalogue_envelope_and_rows_keep_their_json_shape": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ReportTaskInputsTests.Malformed_and_repeated_supported_scalars_refuse_instead_of_becoming_defaults_while_numeric_clamping_stays": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ReportCatalogueViewsTests.Missing_references_are_named_as_dropped_and_hidden_container_never_returns_saved_metadata": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-final-report-labels.trx"
+    },
+    "Hub.Tests.Api.CapacityReportsTests.Team_capacity_reuses_twelve_week_planner_scope_drafts_and_exports": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ReportCapacityTaskInputsTests.Both_source_forms_use_scoped_people_tasks_without_invented_entry_task_source_relationships(form: \"entries-without-project\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(code: \"allocations-by-source\", query: \"from=2026-09-14&weeks=2&show=entries-without-proje\"\u00b7\u00b7\u00b7)": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent-repair1.trx"
+    },
+    "Hub.Tests.Api.TaskGroupingTests.Preset_snapshot_and_normal_commands_keep_the_exact_filtered_group_and_row_permission_authority": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(code: \"allocations-by-source\", query: \"from=2026-09-14&weeks=2&show=hours-by-source\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent-repair1.trx"
+    },
+    "Hub.Tests.Api.ReportTaskInputsTests.Maximum_page_offsets_return_empty_with_the_full_count_instead_of_wrapping": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(code: \"workload-discipline\", query: \"\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent-repair2.trx"
+    },
+    "Hub.Tests.Api.ContractTests.Openapi_matches_the_committed_golden_document": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-final-report-labels.trx"
+    },
+    "Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(code: \"workload-employee\", query: \"\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent-repair2.trx"
+    },
+    "Hub.Tests.Api.ContractTests.Allocation_preview_contract_describes_both_saved_and_preview_responses(route: \"/api/v1/projects/{projectId}/allocations\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ReportCapacityTaskInputsTests.Task_hours_uses_mine_team_user_dates_and_each_entry_permission_before_reference_projection": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.TaskGroupingTests.Mixed_zero_and_cancelled_estimates_keep_header_basis_separate_from_progress_denominator": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: \"/api/v1/pickup-offers\", method: \"get\", status: \"200\", field: \"[].task.rowVersion\", type: \"integer\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ReportCapacityTaskInputsTests.Task_hours_deduplicates_permitted_entries_and_distinguishes_unavailable_current_references_from_zero": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: \"/api/v1/me/work/watching\", method: \"get\", status: \"200\", field: \"items[].projectNumber\", type: \"string\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ReportCapacityTaskInputsTests.Remaining_report_inputs_keep_owner_flags_permissions_and_all_scalar_unit_and_range_guards": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.TaskPickupTests.Org_structure_units_override_shared_manager_fallback_for_pickup_teams": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.RegistryTests.Registry_checks_fail_on_seeded_defects": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.RegistryTests.Saved_views_exports_names_and_search_are_snapshot_supersets": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.TaskGroupingTests.Four_normal_tasks_show_full_filtered_forty_hours_fifty_percent_and_one_overdue_on_every_page": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ContractTests.New_endpoint_contracts_keep_required_nested_wire_types(route: \"/api/v1/me/onboarding\", method: \"get\", status: \"200\", field: \"groups[].steps[].done\", type: \"boolean\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ReportCatalogueViewsTests.Capture_uses_actual_supported_defaults_and_normalized_values_without_ui_state": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-final-report-labels.trx"
+    },
+    "Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(code: \"task-hours\", query: \"from=2026-09-14&to=2026-09-20&scope=mine\")": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent-repair1.trx"
+    },
+    "Hub.Tests.Api.ReportTaskInputsTests.Blocking_source_counts_only_its_actual_task_rows_and_preserves_zero_estimate": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.OrgStructureTests.Unit_leader_without_supervisor_role_can_read_subtree_but_cannot_write": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ReportCapacityTaskInputsTests.Hidden_current_projects_and_permission_revocation_do_not_leak_inputs_or_become_an_all_scope_fallback": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    },
+    "Hub.Tests.Api.ViewsTests.Saved_view_answers_keep_their_property_names_order_and_status_codes": {
+      "outcome": "Passed",
+      "latestEvidence": "checkpoint20-adjacent.trx"
+    }
+  },
+  "note": "Incremental verification: unchanged passing cases retained; final30 revalidated every changed report/header/catalogue path after the reviewed label-only repair. Initial failures remain in original TRX/logs."
+}

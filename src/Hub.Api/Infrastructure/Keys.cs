@@ -42,13 +42,27 @@ public static class Keys
 
 public static class Tx
 {
+    /// Enhanced notice producers need one outer boundary across every business save and captured recipient.
+    /// The legacy path keeps its original transaction ownership while the notice feature is disabled.
+    public static async Task<T> Notice<T>(HubDb db, SettingsStore store, Func<Task<T>> work)
+        => (await store.Get(db)).IsFlagOn("people_screens") ? await Run(db, work) : await work();
+
     /// Runs work in one database transaction (keys, the change and its log entries commit together).
     public static async Task<T> Run<T>(HubDb db, Func<Task<T>> work)
     {
         if (db.Database.CurrentTransaction is not null) return await work();
         await using var tx = await db.Database.BeginTransactionAsync();
-        var r = await work();
-        await tx.CommitAsync();
-        return r;
+        try
+        {
+            var r = await work();
+            // A joined command never drains an incomplete recipient set; only the actual owner flushes.
+            await db.FlushNotices();
+            await tx.CommitAsync();
+            return r;
+        }
+        finally
+        {
+            db.DiscardNotices();
+        }
     }
 }

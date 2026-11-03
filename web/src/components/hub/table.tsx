@@ -51,7 +51,7 @@ export function useTable<T>(storageKey: string, columns: Column<T>[], rows: T[],
       <DropdownMenuTrigger asChild><Button variant="outline" size="sm"><Columns3 className="size-4" />{t('task.columns')}</Button></DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {columns.filter((c) => !c.fixed).map((c) => (
-          <DropdownMenuCheckboxItem key={c.id} checked={!hidden.includes(c.id)} onSelect={(e) => e.preventDefault()} onCheckedChange={(on) => toggle(c.id, !!on)}>{c.label}</DropdownMenuCheckboxItem>
+          <DropdownMenuCheckboxItem key={c.id} checked={visible.some(column => column.id === c.id)} onSelect={(e) => e.preventDefault()} onCheckedChange={(on) => toggle(c.id, !!on)}>{c.label}</DropdownMenuCheckboxItem>
         ))}
       </DropdownMenuContent>
     </DropdownMenu>

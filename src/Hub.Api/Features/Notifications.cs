@@ -68,7 +68,20 @@ public static class NotificationEndpoints
             var activity = ids.Count == 0 ? null : await VisibleFollowed(db, access, ids, me.Id).MaxAsync(a => (DateTimeOffset?)a.OccurredAt);
             var seen = follows.Max(f => f.LastSeenAt);
             var stamp = $"{unread}:{latest?.UtcTicks}:{activity?.UtcTicks}:{seen?.UtcTicks}";
-            if (!(await store.Get(db)).IsFlagOn("live_project_stamp") || projectId is not { } pid)
+            var settings = await store.Get(db);
+            if (settings.IsFlagOn("people_screens"))
+            {
+                // Only own work attached to a currently visible app row may affect this opaque stamp.
+                // Reuse the canonical group/planning ACL query; orphaned or hidden groups contribute nothing.
+                var linked = db.NoticeDeliveryIntents.AsNoTracking().Where(intent => intent.UserId == me.Id
+                    && intent.NotificationId != null && permitted.Any(notification => notification.Id == intent.NotificationId.Value));
+                var policyUpdated = await linked.MaxAsync(intent => (DateTimeOffset?)intent.UpdatedAt);
+                var transportObserved = await db.Emails.AsNoTracking().Where(email => email.UserId == me.Id
+                        && linked.Any(intent => intent.DeliveryEmailId == email.Id))
+                    .MaxAsync(email => email.TransportObservedAt);
+                stamp += $":{policyUpdated?.UtcTicks}:{transportObserved?.UtcTicks}";
+            }
+            if (!settings.IsFlagOn("live_project_stamp") || projectId is not { } pid)
                 return TypedResults.Ok(new NotificationPulse(stamp));
             // Check visibility before either source read so restricted and unknown projects remain indistinguishable.
             var visibleIds = await access.VisibleProjectIdSet();
@@ -122,46 +135,74 @@ public static class NotificationEndpoints
             return TypedResults.Ok(new PreferencesRead(events, digest, follows));
         });
 
-        api.MapPut("/me/preferences/events/{code}", async Task<NoContent> (string code, ChannelBody body, HubDb db, CurrentUser me) =>
+        api.MapPut("/me/preferences/events/{code}", async Task<NoContent> (string code, ChannelBody body, HubDb db, CurrentUser me, TimeProvider clock) =>
         {
-            Check.OneOf(code, NotificationEvents.All.Select(e => e.Code).ToArray(), "code");
-            var p = await db.NotificationPreferences.FirstOrDefaultAsync(x => x.UserId == me.Id && x.EventType == code);
-            if (p is null) db.NotificationPreferences.Add(p = new NotificationPreference { UserId = me.Id, EventType = code });
-            p.InApp = body.App;
-            p.Email = body.Email;
-            await db.SaveChangesAsync();
-            return TypedResults.NoContent();
-        });
-
-        api.MapDelete("/me/preferences/events/{code}", async Task<NoContent> (string code, HubDb db, CurrentUser me) =>
-        {
-            await db.NotificationPreferences.Where(x => x.UserId == me.Id && x.EventType == code).ExecuteDeleteAsync(); // back to the organisation default
-            return TypedResults.NoContent();
-        });
-
-        api.MapPut("/me/preferences/digest", async Task<NoContent> (DigestBody body, HubDb db, CurrentUser me) =>
-        {
-            if (body.Time is { Length: > 0 } t) Check.That(TimeOnly.TryParseExact(t, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out _), "time", "setting.time");
-            if (body.SectionsOff is { } sections) Check.That(sections.All(Digest.SectionCodes.Contains), "sectionsOff", "error.one_of", string.Join(", ", Digest.SectionCodes));
-            var set = await UserPreferences.GetOrCreate(db, me.Id);
-            set.DigestEnabled = body.Enabled;
-            set.DigestTimeLocal = string.IsNullOrWhiteSpace(body.Time) ? null : body.Time;
-            if (body.SectionsOff is { } off)
+            return await Tx.Run(db, async () =>
             {
-                set.DigestSectionsOff = JsonSerializer.Serialize(off.Distinct().ToArray());
-            }
-            if (body.WeeklySummary is { } w) set.WeeklySummaryEnabled = w;
-            if (body.HoldDigestWhenAway is { } hold) set.HoldDigestWhenAway = hold;
-            await db.SaveChangesAsync();
-            return TypedResults.NoContent();
+                var recipient = await NotificationDelivery.LockRecipientAsync(db, me.Id);
+                Check.OneOf(code, NotificationEvents.All.Select(e => e.Code).ToArray(), "code");
+                var p = await db.NotificationPreferences.FirstOrDefaultAsync(x => x.UserId == me.Id && x.EventType == code);
+                if (p is null) db.NotificationPreferences.Add(p = new NotificationPreference { UserId = me.Id, EventType = code });
+                p.InApp = body.App;
+                p.Email = body.Email;
+                await db.SaveChangesAsync();
+                await NotificationDelivery.ObservePolicyChangeAsync(recipient,
+                    new(NoticePolicyChangeKind.EventChannels, EventType: code), clock.GetUtcNow());
+                await db.SaveChangesAsync();
+                return TypedResults.NoContent();
+            });
+        });
+
+        api.MapDelete("/me/preferences/events/{code}", async Task<NoContent> (string code, HubDb db, CurrentUser me, TimeProvider clock) =>
+        {
+            return await Tx.Run(db, async () =>
+            {
+                var recipient = await NotificationDelivery.LockRecipientAsync(db, me.Id);
+                await db.NotificationPreferences.Where(x => x.UserId == me.Id && x.EventType == code).ExecuteDeleteAsync(); // back to the organisation default
+                if (NotificationEvents.All.Any(e => e.Code == code))
+                {
+                    await NotificationDelivery.ObservePolicyChangeAsync(recipient,
+                        new(NoticePolicyChangeKind.EventReset, EventType: code), clock.GetUtcNow());
+                    await db.SaveChangesAsync();
+                }
+                return TypedResults.NoContent();
+            });
+        });
+
+        api.MapPut("/me/preferences/digest", async Task<NoContent> (DigestBody body, HubDb db, CurrentUser me, TimeProvider clock) =>
+        {
+            return await Tx.Run(db, async () =>
+            {
+                var recipient = await NotificationDelivery.LockRecipientAsync(db, me.Id);
+                if (body.Time is { Length: > 0 } t) Check.That(TimeOnly.TryParseExact(t, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out _), "time", "setting.time");
+                if (body.SectionsOff is { } sections) Check.That(sections.All(Digest.SectionCodes.Contains), "sectionsOff", "error.one_of", string.Join(", ", Digest.SectionCodes));
+                var set = await UserPreferences.GetOrCreate(db, me.Id);
+                set.DigestEnabled = body.Enabled;
+                set.DigestTimeLocal = string.IsNullOrWhiteSpace(body.Time) ? null : body.Time;
+                if (body.SectionsOff is { } off)
+                {
+                    set.DigestSectionsOff = JsonSerializer.Serialize(off.Distinct().ToArray());
+                }
+                if (body.WeeklySummary is { } w) set.WeeklySummaryEnabled = w;
+                if (body.HoldDigestWhenAway is { } hold) set.HoldDigestWhenAway = hold;
+                await db.SaveChangesAsync();
+                await NotificationDelivery.ObservePolicyChangeAsync(recipient,
+                    new(NoticePolicyChangeKind.Digest), clock.GetUtcNow());
+                await db.SaveChangesAsync();
+                return TypedResults.NoContent();
+            });
         });
 
         api.MapPut("/me/preferences/density", async Task<NoContent> (DensityBody body, HubDb db, CurrentUser me) =>
         {
-            var set = await UserPreferences.GetOrCreate(db, me.Id);
-            set.DenseRows = body.DenseRows;
-            await db.SaveChangesAsync();
-            return TypedResults.NoContent();
+            return await Tx.Run(db, async () =>
+            {
+                await NoticeRecipientLock.Acquire(db, me.Id);
+                var set = await UserPreferences.GetOrCreate(db, me.Id);
+                set.DenseRows = body.DenseRows;
+                await db.SaveChangesAsync();
+                return TypedResults.NoContent();
+            });
         });
 
         // The weekly PM summary as it would be sent now (FR-001), so a PM can see it before Monday.
@@ -180,22 +221,38 @@ public static class NotificationEndpoints
 
         api.MapPut("/projects/{id:guid}/follow", async Task<Ok<FollowRead>> (Guid id, FollowBody body, Access access, HubDb db, CurrentUser me, TimeProvider clock) =>
         {
-            await access.Project(id, track: false); // ASG-03: only projects the user can view
-            Check.OneOf(body.Level, FollowLevel.All, "level");
-            var f = await db.Follows.FirstOrDefaultAsync(x => x.ProjectId == id && x.UserId == me.Id);
-            var now = clock.GetUtcNow();
-            if (f is null) db.Follows.Add(f = new ProjectFollow { ProjectId = id, UserId = me.Id, CreatedAt = now, LastSeenAt = now });
-            f.Level = body.Level;
-            f.Source = FollowSource.Manual; // ASG-02: the user's choice sticks
-            f.UpdatedAt = now;
-            await db.SaveChangesAsync();
-            return TypedResults.Ok(new FollowRead(f.Level, f.Source));
+            return await Tx.Run(db, async () =>
+            {
+                await Coordination.Lock(db, id); // Producers take the project lock before the recipient lock too.
+                var recipient = await NotificationDelivery.LockRecipientAsync(db, me.Id);
+                await access.Project(id, track: false); // ASG-03: only projects the user can view
+                Check.OneOf(body.Level, FollowLevel.All, "level");
+                var f = await db.Follows.FirstOrDefaultAsync(x => x.ProjectId == id && x.UserId == me.Id);
+                var now = clock.GetUtcNow();
+                if (f is null) db.Follows.Add(f = new ProjectFollow { ProjectId = id, UserId = me.Id, CreatedAt = now, LastSeenAt = now });
+                f.Level = body.Level;
+                f.Source = FollowSource.Manual; // ASG-02: the user's choice sticks
+                f.UpdatedAt = now;
+                await db.SaveChangesAsync();
+                await NotificationDelivery.ObservePolicyChangeAsync(recipient,
+                    new(NoticePolicyChangeKind.Follow, ProjectId: id), clock.GetUtcNow());
+                await db.SaveChangesAsync();
+                return TypedResults.Ok(new FollowRead(f.Level, f.Source));
+            });
         });
 
-        api.MapDelete("/projects/{id:guid}/follow", async Task<NoContent> (Guid id, HubDb db, CurrentUser me) =>
+        api.MapDelete("/projects/{id:guid}/follow", async Task<NoContent> (Guid id, HubDb db, CurrentUser me, TimeProvider clock) =>
         {
-            await db.Follows.Where(x => x.ProjectId == id && x.UserId == me.Id).ExecuteDeleteAsync();
-            return TypedResults.NoContent();
+            return await Tx.Run(db, async () =>
+            {
+                await Coordination.Lock(db, id);
+                var recipient = await NotificationDelivery.LockRecipientAsync(db, me.Id);
+                await db.Follows.Where(x => x.ProjectId == id && x.UserId == me.Id).ExecuteDeleteAsync();
+                await NotificationDelivery.ObservePolicyChangeAsync(recipient,
+                    new(NoticePolicyChangeKind.FollowReset, ProjectId: id), clock.GetUtcNow());
+                await db.SaveChangesAsync();
+                return TypedResults.NoContent();
+            });
         });
 
         // ---------- Following feed (ASG-05..ASG-07) ----------
@@ -209,7 +266,7 @@ public static class NotificationEndpoints
                 null, null, null, null, null, null, importantOnly);
             var total = await q.CountAsync();
             var rows = await q.OrderByDescending(a => a.OccurredAt).ThenByDescending(a => a.Id).Skip((pg - 1) * size).Take(size).ToListAsync();
-            var notified = await NotifiedKeys(db, me.Id, rows);
+            var notified = await NotifiedKeys(db, me.Id, rows, await access.VisibleProjectIds().ToListAsync());
             var rendered = await ActivityEndpoints.Render(db, rows);
             var byProject = followed.ToDictionary(f => f.ProjectId);
             // Entries sharing a correlation id (bulk actions, cascades) collapse into one with a count (G-10).
@@ -252,11 +309,13 @@ public static class NotificationEndpoints
     static string Key(ActivityLog a) => a.CorrelationId?.ToString() ?? "";
 
     /// ASG-06: log rows whose action already produced a personal notification for the user (same correlation id).
-    public static async Task<HashSet<string>> NotifiedKeys(HubDb db, Guid userId, List<ActivityLog> rows)
+    public static async Task<HashSet<string>> NotifiedKeys(HubDb db, Guid userId, List<ActivityLog> rows, IReadOnlyCollection<Guid> requiredProjectScope)
     {
         var corr = rows.Select(r => r.CorrelationId).OfType<Guid>().Distinct().ToList();
         if (corr.Count == 0) return [];
-        return (await db.Notifications.Where(n => n.UserId == userId && n.CorrelationId != null && corr.Contains(n.CorrelationId.Value))
+        return (await db.Notifications.Where(n => n.UserId == userId && n.CorrelationId != null && corr.Contains(n.CorrelationId.Value)
+                && (n.RequiredProjectIds == null || n.RequiredProjectIds.Length > 0
+                    && n.RequiredProjectIds.All(id => id != Guid.Empty && requiredProjectScope.Contains(id))))
             .Select(n => n.CorrelationId!.Value).Distinct().ToListAsync()).Select(c => c.ToString()).ToHashSet();
     }
 
@@ -265,11 +324,14 @@ public static class NotificationEndpoints
     public static async Task<Dictionary<Guid, int>> FollowingUnread(HubDb db, Access access, Guid userId)
     {
         var result = new Dictionary<Guid, int>();
+        var visibleProjects = access.VisibleProjectIds();
         foreach (var f in (await Followed(db, access, userId)).Where(f => f.Status != ProjectStatus.Setup))
         {
             var since = f.LastSeenAt ?? DateTimeOffset.MinValue;
             var rows = (await ActivityEndpoints.Visible(db, access, f.ProjectId)).Where(a => a.OccurredAt > since && a.ActorUserId != userId
-                && (a.CorrelationId == null || !db.Notifications.Any(n => n.UserId == userId && n.CorrelationId == a.CorrelationId)));
+                && (a.CorrelationId == null || !db.Notifications.Any(n => n.UserId == userId && n.CorrelationId == a.CorrelationId
+                    && (n.RequiredProjectIds == null || n.RequiredProjectIds.Length > 0
+                        && n.RequiredProjectIds.All(id => id != Guid.Empty && visibleProjects.Contains(id))))));
             var n = await rows.Select(r => r.CorrelationId ?? r.Id).Distinct().CountAsync();
             if (n > 0) result[f.ProjectId] = n;
         }

@@ -1,0 +1,7 @@
+{
+  "atUtc": "2026-11-02T10:27:03.609709+00:00",
+  "status": "PASS_BYTE_IDENTICAL",
+  "files": 129,
+  "base": "http://127.0.0.1:8854",
+  "boundary": "Static synthetic browser preview; no API5089 exists or was joined."
+}

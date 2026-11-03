@@ -1,0 +1,7 @@
+{
+  "boundary": "Only optional coordinator-provided screenshot hooks; assertions, fixtures and app code unchanged; tests still unrun",
+  "files": {
+    "web/tests/file-screen.cjs": "29f931d94ce21b66bc91a3057d00288767125fb1b929fa1f170ef16c59877693",
+    "web/tests/document-link-reference.cjs": "32a9cb1dfe1758f88e8af59ecae2de6938f62bc658a0ab2d4297bd2f229a4a80"
+  }
+}

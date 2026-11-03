@@ -1,0 +1,31 @@
+Test run for /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:10.68]     Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(code: "workload-discipline", query: "") [FAIL]
+  Failed Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(code: "workload-discipline", query: "") [2 s]
+  Error Message:
+   Assert.Equal() Failure: Strings differ
+           ↓ (pos 0)
+Expected: "Total"
+Actual:   "Visible report total"
+           ↑ (pos 0)
+  Stack Trace:
+     at Hub.Tests.Api.ReportCapacityTaskInputsTests.<AssertMatrixExport>g__EqualValue|25_2(JsonNode expected, String actual) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReportCapacityTaskInputsTests.cs:line 266
+   at Hub.Tests.Api.ReportCapacityTaskInputsTests.AssertMatrixExport(JsonNode view, JsonArray originalRows, Byte[] bytes) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReportCapacityTaskInputsTests.cs:line 276
+   at Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(String code, String query) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReportCapacityTaskInputsTests.cs:line 328
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:15.75]     Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(code: "workload-employee", query: "") [FAIL]
+  Failed Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(code: "workload-employee", query: "") [2 s]
+  Error Message:
+   Assert.Equal() Failure: Strings differ
+           ↓ (pos 0)
+Expected: "Total"
+Actual:   "Visible report total"
+           ↑ (pos 0)
+  Stack Trace:
+     at Hub.Tests.Api.ReportCapacityTaskInputsTests.<AssertMatrixExport>g__EqualValue|25_2(JsonNode expected, String actual) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReportCapacityTaskInputsTests.cs:line 266
+   at Hub.Tests.Api.ReportCapacityTaskInputsTests.AssertMatrixExport(JsonNode view, JsonArray originalRows, Byte[] bytes) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReportCapacityTaskInputsTests.cs:line 276
+   at Hub.Tests.Api.ReportCapacityTaskInputsTests.New_context_is_additive_and_dark_off_for_every_actual_remaining_form_with_unchanged_export(String code, String query) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReportCapacityTaskInputsTests.cs:line 328
+--- End of stack trace from previous location ---
+Results File: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint20-runtime/checkpoint20-adjacent-repair1.trx
+
+Failed!  - Failed:     2, Passed:     7, Skipped:     0, Total:     9, Duration: 20 s - Hub.Tests.dll (net10.0)

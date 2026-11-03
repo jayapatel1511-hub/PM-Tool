@@ -1,0 +1,8 @@
+{
+  "command": "node --test src/lib/keys.test.ts",
+  "cwd": "web",
+  "passed": 14,
+  "failed": 0,
+  "skipped": 0,
+  "scope": "Actual QueryClient invalidation/refetch regression including board leads/thresholds, Team references and candidate capacity; physical SSE transport not proved"
+}

@@ -1,0 +1,18 @@
+{
+  "createdAtUtc": "2026-11-02T07:21:18.238131+00:00",
+  "database": "hub_qa_checkpoint24",
+  "container": "codex-pm-052-053-tests",
+  "postgresLoopbackPort": 55432,
+  "apiLoopbackPort": 5088,
+  "ownership": "Root checked database absent and API port unused then CREATE succeeded; only this database may be cleaned",
+  "apiDllSha256": "80658bd2ad102063a6042355ff0d5fb417a5fc3428b2eb5b1ae67916e57145f3",
+  "runtime": "health200Healthy;listenerPID4323/cwdverified;freshQA24migrationsapplied;productsetupflagsnotchangedyet",
+  "boundary": "syntheticlocalQAonly;source/operationalflagsunchanged;nodeployment",
+  "apiPid": 4323,
+  "apiSession": 64308,
+  "apiCwd": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api",
+  "health": {
+    "status": "Healthy",
+    "build": "dev"
+  }
+}

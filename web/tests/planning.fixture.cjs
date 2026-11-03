@@ -56,7 +56,7 @@ const cellDetail = (r) => ({
 /**
  * A page of entries, one page of everything unless given.
  * @param {Schemas['EntryRow'][]} items
- * @returns {Schemas['PageOfEntryRow']}
+ * @returns {Schemas['EntryList']}
  */
 const entryPage = (items) => ({ items, page: 1, pageSize: 50, totalCount: items.length })
 

@@ -1,3 +1,4 @@
+import { PersonPanelTrigger } from './person-panel-trigger'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Pencil, Trash2 } from 'lucide-react'
 import { useId, useMemo, useRef, useState, type KeyboardEvent } from 'react'
@@ -11,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useSafeForm } from '@/hooks/drafts'
 import { get, qs, typedRequest } from '@/lib/api'
 import type { components } from '@/gen/api'
-import { invalidateChange } from '@/lib/keys'
+import { refreshComments } from '@/lib/keys'
 import { fmtTime } from '@/lib/format'
 import { t } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
@@ -27,7 +28,7 @@ export function CommentsPanel({ type, id, projectId }: ItemPartProps) {
   const q = useQuery<CommentList>({ queryKey: ['comments', type, id], queryFn: () => typedRequest('get', '/api/v1/items/{type}/{id}/comments', { params: { type, id } }) })
   const [editing, setEditing] = useState<string | null>(null)
   const [removing, setRemoving] = useState<CommentRow | null>(null)
-  const reload = () => { void invalidateChange(qc, 'Comment') }
+  const reload = () => { void refreshComments(qc, projectId) }
   if (q.isPending) return <Loading rows={3} />
   if (q.error) return <div className="p-4"><ErrorBanner error={q.error} retry={() => q.refetch()} /></div>
   const items = q.data.items
@@ -40,7 +41,7 @@ export function CommentsPanel({ type, id, projectId }: ItemPartProps) {
               <Avatar id={c.authorId} name={c.authorName} className="mt-0.5" />
               <div className="min-w-0 flex-1">
                 <div className="flex min-h-8 flex-wrap items-center gap-x-2">
-                  <span className="text-sm font-semibold">{c.authorName}</span>
+                  <span className="text-sm font-semibold">{c.authorId && c.authorName ? <PersonPanelTrigger userId={c.authorId} name={c.authorName} focusKey={`comment:${type}:${id}:${c.id}:author`} /> : c.authorName ?? t('common.unavailable')}</span>
                   {c.commentKind === 'Review' && <span data-accent="lavender" className="rounded-md bg-(--acc-bg) px-1.5 text-xs/[18px] font-medium text-(--acc-fg)">{t('comments.review', { n: c.reviewRound ?? 1 })}</span>}
                   {c.commentKind === 'Status Note' && <span className="rounded-md bg-secondary px-1.5 text-xs/[18px] font-medium text-muted-foreground">{t('comments.statusNote')}</span>}
                   <time className="text-xs/[18px] text-muted-foreground tabular-nums" dateTime={c.createdAt} title={c.createdAt}>{fmtTime(c.createdAt)}</time>
@@ -53,12 +54,12 @@ export function CommentsPanel({ type, id, projectId }: ItemPartProps) {
                 {c.deleted ? (
                   <div className="text-sm italic text-muted-foreground">
                     {c.deletedByPm ? t('comments.removedByPm') : t('comments.deletedByAuthor')}
-                    {c.body && <div className="mt-1 rounded-md border border-dashed p-2 not-italic" title={t('comments.adminOnly')}><RichText text={c.body} /></div>}
+                    {c.body && <div className="mt-1 rounded-md border border-dashed p-2 not-italic" title={t('comments.adminOnly')}><RichText text={c.body} mentions={c.mentions} focusKey={`comment:${type}:${id}:${c.id}:deleted-body`} /></div>}
                   </div>
                 ) : editing === c.id ? (
                   <Composer projectId={projectId} draftKey={`comment.edit.${c.id}`} initial={c.body ?? ''} submitLabel={t('common.save')} onCancel={() => setEditing(null)}
                     onSubmit={async (body) => { await typedRequest('patch', '/api/v1/comments/{id}', { params: { id: c.id }, body: { body } }); setEditing(null); reload() }} />
-                ) : <RichText text={c.body} className="text-sm" />}
+                ) : <RichText text={c.body} className="text-sm" mentions={c.mentions} focusKey={`comment:${type}:${id}:${c.id}:body`} />}
               </div>
             </li>
           ))}

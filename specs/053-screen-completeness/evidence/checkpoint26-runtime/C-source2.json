@@ -1,0 +1,11 @@
+{
+  "atUtc": "2026-11-02T10:52:58.818781+00:00",
+  "status": "READY_HOLD_OBSERVED_TEST_COMPILE_REPAIR",
+  "files": [
+    {
+      "path": "tests/Hub.Tests/Api/ReviewResponseExportTests.cs",
+      "sha256": "912c87f00b327e85e73d9fde2589305308d442ce356609afc0cd488be25922b1"
+    }
+  ],
+  "repair": "Hub.Api import +genuinelymissingproject andsoftdeletedpackage404, bothformats/noaccesslog/storedstateparity; noAPIchange"
+}

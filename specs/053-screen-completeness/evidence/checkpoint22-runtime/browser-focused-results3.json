@@ -1,0 +1,29 @@
+{
+  "status": "complete",
+  "results": [
+    {
+      "suite": "count-card-overlap",
+      "exitCode": 1,
+      "seconds": 3.46,
+      "log": "count-card-overlap-run3.log"
+    },
+    {
+      "suite": "timeline-saved-views",
+      "exitCode": 0,
+      "seconds": 8.26,
+      "log": "timeline-saved-views-run3.log"
+    },
+    {
+      "suite": "person-panel",
+      "exitCode": 0,
+      "seconds": 52.22,
+      "log": "person-panel-run3.log"
+    },
+    {
+      "suite": "deliverable-register",
+      "exitCode": 0,
+      "seconds": 44.36,
+      "log": "deliverable-register-run3.log"
+    }
+  ]
+}

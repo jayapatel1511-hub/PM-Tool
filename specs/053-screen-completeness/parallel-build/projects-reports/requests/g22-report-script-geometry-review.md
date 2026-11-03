@@ -1,0 +1,9 @@
+# Generation22 script-only repair: first-data geometry
+
+READY / HELD again. Only report-capacity-task-inputs.cjs and own notes changed. No application/C#/CSS edit, test/browser/node/syntax/build execution or helper was run by C.
+
+Full root log `/private/tmp/tuesday-checkpoint19-browser-report-capacity-task-inputs-3.log` was read. It fails at the actual Workload Discipline first data row:443.5px, exceeding the unchanged405px bound; Employee was379.5px. No JS/unknown API errors were logged. This is a geometry failure, not a stale selector/assertion that can responsibly be weakened.
+
+The script previously measured immediately after data/basis visibility and did not assert settled viewport/fonts/main scroll. It now waits for innerWidth1440/innerHeight1000, loaded fonts, main scroll0/0 and three equal animation-frame layout samples before reading the exact same nonempty actual report row. It does NOT wait for a passing y coordinate, change viewport size, scroll the row into view for geometry, shorten explanations, alter headers/data, replace the measured row or relax405. It records band/results/counts/input-block/table/header/row dimensions and main scroll/viewport/font state, including before a failing assertion. This makes a retained actual layout defect distinguishable from an unsettled resize/font/old-scroll frame.
+
+All six forms, exact scalar parameters, real non-first Task source, nonzero return scroll/exact focus, phone/unknown/permission assertions remain. Root's earlier legitimate overflow and VisibleOnly text corrections are preserved. If the settled run still shows443.5 or any >405 row, treat it as a product layout FAIL and use the recorded component heights to grant a specific Reports/reports-catalogue.css repair. No speculative app change is proposed from the log's aggregate coordinates alone. C's script-only repair loan is closed; all sources held22.

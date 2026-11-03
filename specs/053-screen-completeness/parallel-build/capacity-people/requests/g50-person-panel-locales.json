@@ -1,0 +1,22 @@
+{
+  "personPanel.open": "View details for {name}",
+  "personPanel.organisation": "Organisation",
+  "personPanel.currentWeek": "This week · {date}",
+  "personPanel.projects": "Projects and roles",
+  "personPanel.projectsBasis": "Only current memberships on projects you can view.",
+  "personPanel.noProjects": "No current memberships on projects you can view.",
+  "personPanel.emptyPage": "No memberships on this page. Choose Previous to return.",
+  "personPanel.pageSize": "Projects per page",
+  "personPanel.page": "Page {page} · {total} visible memberships",
+  "responsibility.label": "Responsibility",
+  "responsibility.editNamed": "Edit responsibility for {name}",
+  "responsibility.hint": "A short project note. It does not grant a role or permission.",
+  "responsibility.saved": "Responsibility saved.",
+  "responsibility.savedReload": "Saved. Reload to refresh the membership.",
+  "responsibility.unavailable": "This responsibility note cannot be edited now.",
+  "responsibility.conflict": "This membership changed. Your note and its original version are kept. Review the latest saved note before retrying.",
+  "responsibility.latest": "Latest saved note",
+  "responsibility.refresh": "Refresh saved note",
+  "responsibility.keepMine": "Keep my note using this version",
+  "responsibility.takeLatest": "Use latest saved note"
+}

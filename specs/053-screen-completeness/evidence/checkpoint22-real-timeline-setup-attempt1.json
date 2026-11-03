@@ -1,0 +1,2240 @@
+{
+  "kind": "checkpoint22-real-timeline-api-setup",
+  "run": "mvy51hpc-f22b02",
+  "status": "FAIL_OR_UNPROVEN",
+  "startedAtUtc": "2026-11-01T18:03:00.192Z",
+  "finishedAtUtc": "2026-11-01T18:03:01.002Z",
+  "target": {
+    "api": "http://127.0.0.1:5088/api/v1",
+    "preview": "http://127.0.0.1:8853",
+    "databaseFromRootEnvironment": "hub_qa_checkpoint22",
+    "databaseIndependentlyVerified": false,
+    "personasPreexistInDevelopmentPicker": true
+  },
+  "fixture": {
+    "projects": [
+      {
+        "id": "01a19847-6d4d-7e40-a69d-4fde45b64133",
+        "projectNumber": "QA22-TL-mvy51hpc-f22b02-A",
+        "name": "QA22 synthetic Timeline mvy51hpc-f22b02 A",
+        "civil": "01a19847-6d87-78f8-940c-024f6b7ec5ca",
+        "other": "01a19847-6d8f-7d3e-ae0f-fb4a3eae9961"
+      },
+      {
+        "id": "01a19847-6f2e-752d-8d28-b2647f3e4d94",
+        "projectNumber": "QA22-TL-mvy51hpc-f22b02-B",
+        "name": "QA22 synthetic Timeline mvy51hpc-f22b02 B",
+        "civil": "01a19847-6f30-7bee-a469-b8f6e76a6427",
+        "other": null
+      }
+    ],
+    "tasks": [
+      {
+        "id": "01a19847-6ea6-74ae-a10e-b32f1bcd582d",
+        "key": "QA22-TL-mvy51hpc-f22b02-A-T0001",
+        "rowVersion": 0,
+        "projectId": "01a19847-6d4d-7e40-a69d-4fde45b64133",
+        "name": "QA22 mvy51hpc-f22b02 Civil predecessor",
+        "projectDisciplineId": "01a19847-6d87-78f8-940c-024f6b7ec5ca",
+        "assigneeId": "01a19834-0bfd-75e7-80db-4cbc24e4bd88",
+        "requiresReview": false,
+        "startDate": "2026-10-25",
+        "dueDate": "2026-11-03"
+      },
+      {
+        "id": "01a19847-6ed5-7695-8c67-358895b908c6",
+        "key": "QA22-TL-mvy51hpc-f22b02-A-T0002",
+        "rowVersion": 0,
+        "projectId": "01a19847-6d4d-7e40-a69d-4fde45b64133",
+        "name": "QA22 mvy51hpc-f22b02 Civil successor",
+        "projectDisciplineId": "01a19847-6d87-78f8-940c-024f6b7ec5ca",
+        "assigneeId": "01a19834-0bfd-75e7-80db-4cbc24e4bd88",
+        "requiresReview": false,
+        "startDate": "2026-11-04",
+        "dueDate": "2026-11-13"
+      },
+      {
+        "id": "01a19847-6ee5-778d-b38e-d82a6b17ac05",
+        "key": "QA22-TL-mvy51hpc-f22b02-A-T0003",
+        "rowVersion": 0,
+        "projectId": "01a19847-6d4d-7e40-a69d-4fde45b64133",
+        "name": "QA22 mvy51hpc-f22b02 Other discipline",
+        "projectDisciplineId": "01a19847-6d8f-7d3e-ae0f-fb4a3eae9961",
+        "assigneeId": "01a19834-0bfd-738a-b9c8-c025e3da7c04",
+        "requiresReview": false,
+        "startDate": "2026-10-25",
+        "dueDate": "2026-11-13"
+      },
+      {
+        "id": "01a19847-6f5b-79a9-b336-f3f7dfaba093",
+        "key": "QA22-TL-mvy51hpc-f22b02-B-T0001",
+        "rowVersion": 0,
+        "projectId": "01a19847-6f2e-752d-8d28-b2647f3e4d94",
+        "name": "QA22 mvy51hpc-f22b02 Second project Civil work",
+        "projectDisciplineId": "01a19847-6f30-7bee-a469-b8f6e76a6427",
+        "assigneeId": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a",
+        "requiresReview": false,
+        "startDate": "2026-10-25",
+        "dueDate": "2026-11-13"
+      }
+    ],
+    "views": [
+      {
+        "label": "shared-view",
+        "id": "01a19847-6fb0-7c51-9fff-9a5f8c975bee",
+        "rowVersion": 0,
+        "name": "QA22 mvy51hpc-f22b02 Civil Month dependencies",
+        "listType": "timeline",
+        "projectId": "01a19847-6d4d-7e40-a69d-4fde45b64133",
+        "scope": "Project",
+        "params": {
+          "zoom": "month",
+          "group": "discipline",
+          "cols": "items,dates",
+          "layers": "dependencies,milestones",
+          "hideCompleted": "false",
+          "collapsed": "none",
+          "expanded": "loose:01a19847-6d87-78f8-940c-024f6b7ec5ca",
+          "disciplineId": "01a19847-6d87-78f8-940c-024f6b7ec5ca",
+          "from": "2026-10-18",
+          "to": "2026-12-13"
+        },
+        "isDefault": false
+      },
+      {
+        "label": "workspace-explicit-default",
+        "id": "01a19847-6fe0-7de4-a7dd-d3243a870a0a",
+        "rowVersion": 0,
+        "name": "QA22 mvy51hpc-f22b02 private two-project default",
+        "listType": "workspace-timeline",
+        "scope": "Personal",
+        "params": {
+          "projects": "01a19847-6d4d-7e40-a69d-4fde45b64133,01a19847-6f2e-752d-8d28-b2647f3e4d94",
+          "zoom": "quarter",
+          "start": "2026-10-18",
+          "group": "project",
+          "cols": "items,dates",
+          "layers": "dependencies,originalDates",
+          "hideCompleted": "false",
+          "collapsed": "none"
+        },
+        "isDefault": true
+      },
+      {
+        "label": "workspace-mine",
+        "id": "01a19847-6fe8-7965-97cf-ced451574deb",
+        "rowVersion": 0,
+        "name": "QA22 mvy51hpc-f22b02 private My projects",
+        "listType": "workspace-timeline",
+        "scope": "Personal",
+        "params": {
+          "projects": "mine",
+          "zoom": "week",
+          "start": "2026-10-18",
+          "group": "project",
+          "cols": "items,dates",
+          "layers": "dependencies,originalDates",
+          "hideCompleted": "false",
+          "collapsed": "none"
+        },
+        "isDefault": false
+      },
+      {
+        "label": "workspace-named",
+        "id": "01a19847-6fec-7d3f-9af6-76ff5fd46828",
+        "rowVersion": 0,
+        "name": "QA22 mvy51hpc-f22b02 private named scope",
+        "listType": "workspace-timeline",
+        "scope": "Personal",
+        "params": {
+          "zoom": "quarter",
+          "start": "2026-10-18",
+          "group": "project",
+          "cols": "items,dates",
+          "layers": "dependencies,originalDates",
+          "hideCompleted": "false",
+          "collapsed": "none",
+          "ws": "01a19847-6f64-7a30-b147-f376af64421c"
+        },
+        "isDefault": false
+      }
+    ],
+    "actors": {
+      "jordan": {
+        "id": "01a19834-0bfd-7663-a726-c0ab0cc8668c",
+        "email": "jordan@hub.test",
+        "name": "Jordan Lee",
+        "capabilities": {
+          "createProject": true,
+          "createTask": false,
+          "portfolio": true,
+          "workload": true,
+          "staff": true,
+          "allStaff": true,
+          "admin": true,
+          "templates": true,
+          "readOnly": false,
+          "directReports": 0
+        }
+      },
+      "priya": {
+        "id": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a",
+        "email": "priya@hub.test",
+        "name": "Priya Nair",
+        "capabilities": {
+          "createProject": true,
+          "createTask": false,
+          "portfolio": true,
+          "workload": true,
+          "staff": false,
+          "allStaff": false,
+          "admin": false,
+          "templates": false,
+          "readOnly": false,
+          "directReports": 0
+        }
+      },
+      "marc": {
+        "id": "01a19834-0bfd-7712-a37f-3197da026009",
+        "email": "marc@hub.test",
+        "name": "Marc Dubois",
+        "capabilities": {
+          "createProject": true,
+          "createTask": false,
+          "portfolio": true,
+          "workload": true,
+          "staff": true,
+          "allStaff": false,
+          "admin": false,
+          "templates": false,
+          "readOnly": false,
+          "directReports": 0
+        }
+      },
+      "alex": {
+        "id": "01a19834-0bfd-75e7-80db-4cbc24e4bd88",
+        "email": "alex@hub.test",
+        "name": "Alex Chen",
+        "capabilities": {
+          "createProject": false,
+          "createTask": false,
+          "portfolio": false,
+          "workload": false,
+          "staff": false,
+          "allStaff": false,
+          "admin": false,
+          "templates": false,
+          "readOnly": false,
+          "directReports": 0
+        }
+      },
+      "omar": {
+        "id": "01a19834-0bfd-738a-b9c8-c025e3da7c04",
+        "email": "omar@hub.test",
+        "name": "Omar Haddad",
+        "capabilities": {
+          "createProject": false,
+          "createTask": false,
+          "portfolio": false,
+          "workload": false,
+          "staff": false,
+          "allStaff": false,
+          "admin": false,
+          "templates": false,
+          "readOnly": false,
+          "directReports": 0
+        }
+      }
+    },
+    "reference": {
+      "civil": {
+        "id": "01a19834-0b3d-7e8a-80c6-55db33f2e439",
+        "name": "Civil",
+        "code": "CIV",
+        "colour": "#2563eb",
+        "isActive": true,
+        "sortOrder": 2
+      },
+      "other": {
+        "id": "01a19834-0b28-708c-99e6-06171fdf10b7",
+        "name": "Project Management",
+        "code": "PM",
+        "colour": "#475569",
+        "isActive": true,
+        "sortOrder": 0
+      },
+      "client": {
+        "id": "01a19834-0b4a-7291-997c-e282e6cfd823",
+        "name": "Internal / TBD",
+        "shortName": "Internal",
+        "isActive": true
+      },
+      "office": {
+        "id": "01a19834-0b4f-7581-90a5-bcb28e5b4840",
+        "name": "Head Office",
+        "code": "HO",
+        "timeZone": "America/Halifax",
+        "isActive": true
+      }
+    },
+    "dates": {
+      "today": "2026-11-01",
+      "orgTimeZone": "America/Halifax",
+      "dateFormat": "yyyy-MM-dd",
+      "a": "2026-10-25",
+      "b": "2026-11-03",
+      "c": "2026-11-04",
+      "d": "2026-11-13",
+      "from": "2026-10-18",
+      "to": "2026-12-13"
+    },
+    "dependency": {
+      "id": "01a19847-6f08-7f8b-b239-4eaa987b8b4e",
+      "predecessorTaskId": "01a19847-6ea6-74ae-a10e-b32f1bcd582d",
+      "successorTaskId": "01a19847-6ed5-7695-8c67-358895b908c6",
+      "type": "FinishToStart",
+      "lagDays": 0
+    },
+    "milestone": {
+      "id": "01a19847-6f18-7eb1-bbd3-1eae450f81bb",
+      "key": "QA22-TL-mvy51hpc-f22b02-A-M01",
+      "rowVersion": 0
+    },
+    "workspace": {
+      "id": "01a19847-6f64-7a30-b147-f376af64421c",
+      "name": "QA22 mvy51hpc-f22b02 Timeline scope",
+      "projectIds": [
+        "01a19847-6d4d-7e40-a69d-4fde45b64133",
+        "01a19847-6f2e-752d-8d28-b2647f3e4d94"
+      ],
+      "hidden": 0,
+      "rowVersion": 1
+    }
+  },
+  "partialIds": {
+    "project-A-create": "01a19847-6d4d-7e40-a69d-4fde45b64133",
+    "project-A-activate": "01a19847-6d4d-7e40-a69d-4fde45b64133",
+    "task-Civil predecessor": "01a19847-6ea6-74ae-a10e-b32f1bcd582d",
+    "task-Civil successor": "01a19847-6ed5-7695-8c67-358895b908c6",
+    "task-Other discipline": "01a19847-6ee5-778d-b38e-d82a6b17ac05",
+    "dependency": "01a19847-6f08-7f8b-b239-4eaa987b8b4e",
+    "milestone": "01a19847-6f18-7eb1-bbd3-1eae450f81bb",
+    "project-B-create": "01a19847-6f2e-752d-8d28-b2647f3e4d94",
+    "project-B-activate": "01a19847-6f2e-752d-8d28-b2647f3e4d94",
+    "task-Second project Civil work": "01a19847-6f5b-79a9-b336-f3f7dfaba093",
+    "workspace": "01a19847-6f64-7a30-b147-f376af64421c",
+    "shared-view": "01a19847-6fb0-7c51-9fff-9a5f8c975bee",
+    "workspace-explicit-default": "01a19847-6fe0-7de4-a7dd-d3243a870a0a",
+    "workspace-mine": "01a19847-6fe8-7965-97cf-ced451574deb",
+    "workspace-named": "01a19847-6fec-7d3f-9af6-76ff5fd46828"
+  },
+  "journal": [
+    {
+      "name": "config",
+      "actor": "anonymous",
+      "method": "GET",
+      "route": "/config",
+      "expectedStatus": 200,
+      "status": 200,
+      "answer": {}
+    },
+    {
+      "name": "existing-active-seed-personas",
+      "actor": "anonymous",
+      "method": "GET",
+      "route": "/api/dev/users",
+      "expectedStatus": 200,
+      "status": 200,
+      "answer": {}
+    },
+    {
+      "name": "identity-jordan",
+      "actor": "jordan@hub.test",
+      "method": "GET",
+      "route": "/me",
+      "expectedStatus": 200,
+      "status": 200,
+      "answer": {
+        "id": "01a19834-0bfd-7663-a726-c0ab0cc8668c"
+      }
+    },
+    {
+      "name": "identity-priya",
+      "actor": "priya@hub.test",
+      "method": "GET",
+      "route": "/me",
+      "expectedStatus": 200,
+      "status": 200,
+      "answer": {
+        "id": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a"
+      }
+    },
+    {
+      "name": "identity-marc",
+      "actor": "marc@hub.test",
+      "method": "GET",
+      "route": "/me",
+      "expectedStatus": 200,
+      "status": 200,
+      "answer": {
+        "id": "01a19834-0bfd-7712-a37f-3197da026009"
+      }
+    },
+    {
+      "name": "identity-alex",
+      "actor": "alex@hub.test",
+      "method": "GET",
+      "route": "/me",
+      "expectedStatus": 200,
+      "status": 200,
+      "answer": {
+        "id": "01a19834-0bfd-75e7-80db-4cbc24e4bd88"
+      }
+    },
+    {
+      "name": "identity-omar",
+      "actor": "omar@hub.test",
+      "method": "GET",
+      "route": "/me",
+      "expectedStatus": 200,
+      "status": 200,
+      "answer": {
+        "id": "01a19834-0bfd-738a-b9c8-c025e3da7c04"
+      }
+    },
+    {
+      "name": "seed-users",
+      "actor": "jordan@hub.test",
+      "method": "GET",
+      "route": "/admin/users",
+      "expectedStatus": 200,
+      "status": 200,
+      "answer": {}
+    },
+    {
+      "name": "reference",
+      "actor": "priya@hub.test",
+      "method": "GET",
+      "route": "/reference",
+      "expectedStatus": 200,
+      "status": 200,
+      "answer": {}
+    },
+    {
+      "name": "project-A-create",
+      "actor": "priya@hub.test",
+      "method": "POST",
+      "route": "/projects",
+      "expectedStatus": 201,
+      "status": 201,
+      "requestBody": {
+        "projectNumber": "QA22-TL-mvy51hpc-f22b02-A",
+        "name": "QA22 synthetic Timeline mvy51hpc-f22b02 A",
+        "clientId": "01a19834-0b4a-7291-997c-e282e6cfd823",
+        "officeId": "01a19834-0b4f-7581-90a5-bcb28e5b4840",
+        "startDate": "2026-10-18",
+        "targetCompletionDate": "2026-12-13",
+        "disciplines": [
+          {
+            "disciplineId": "01a19834-0b3d-7e8a-80c6-55db33f2e439",
+            "leadUserId": "01a19834-0bfd-7712-a37f-3197da026009"
+          },
+          {
+            "disciplineId": "01a19834-0b28-708c-99e6-06171fdf10b7",
+            "leadUserId": "01a19834-0bfd-738a-b9c8-c025e3da7c04"
+          }
+        ],
+        "members": [
+          {
+            "userId": "01a19834-0bfd-75e7-80db-4cbc24e4bd88",
+            "roles": [
+              "TeamMember"
+            ],
+            "disciplineId": "01a19834-0b3d-7e8a-80c6-55db33f2e439"
+          }
+        ]
+      },
+      "answer": {
+        "id": "01a19847-6d4d-7e40-a69d-4fde45b64133"
+      }
+    },
+    {
+      "name": "project-A-detail",
+      "actor": "priya@hub.test",
+      "method": "GET",
+      "route": "/projects/01a19847-6d4d-7e40-a69d-4fde45b64133",
+      "expectedStatus": 200,
+      "status": 200,
+      "answer": {
+        "id": "01a19847-6d4d-7e40-a69d-4fde45b64133",
+        "rowVersion": 0
+      }
+    },
+    {
+      "name": "project-A-activate",
+      "actor": "priya@hub.test",
+      "method": "POST",
+      "route": "/projects/01a19847-6d4d-7e40-a69d-4fde45b64133/transition",
+      "expectedStatus": 200,
+      "status": 200,
+      "requestBody": {
+        "toStatus": "Active",
+        "rowVersion": 0
+      },
+      "answer": {
+        "id": "01a19847-6d4d-7e40-a69d-4fde45b64133",
+        "rowVersion": 1
+      }
+    },
+    {
+      "name": "project-A-active-detail",
+      "actor": "priya@hub.test",
+      "method": "GET",
+      "route": "/projects/01a19847-6d4d-7e40-a69d-4fde45b64133",
+      "expectedStatus": 200,
+      "status": 200,
+      "answer": {
+        "id": "01a19847-6d4d-7e40-a69d-4fde45b64133",
+        "rowVersion": 1
+      }
+    },
+    {
+      "name": "task-Civil predecessor",
+      "actor": "priya@hub.test",
+      "method": "POST",
+      "route": "/projects/01a19847-6d4d-7e40-a69d-4fde45b64133/tasks",
+      "expectedStatus": 201,
+      "status": 201,
+      "requestBody": {
+        "name": "QA22 mvy51hpc-f22b02 Civil predecessor",
+        "projectDisciplineId": "01a19847-6d87-78f8-940c-024f6b7ec5ca",
+        "assigneeId": "01a19834-0bfd-75e7-80db-4cbc24e4bd88",
+        "requiresReview": false,
+        "startDate": "2026-10-25",
+        "dueDate": "2026-11-03"
+      },
+      "answer": {
+        "id": "01a19847-6ea6-74ae-a10e-b32f1bcd582d",
+        "key": "QA22-TL-mvy51hpc-f22b02-A-T0001",
+        "rowVersion": 0,
+        "warnings": []
+      }
+    },
+    {
+      "name": "task-Civil successor",
+      "actor": "priya@hub.test",
+      "method": "POST",
+      "route": "/projects/01a19847-6d4d-7e40-a69d-4fde45b64133/tasks",
+      "expectedStatus": 201,
+      "status": 201,
+      "requestBody": {
+        "name": "QA22 mvy51hpc-f22b02 Civil successor",
+        "projectDisciplineId": "01a19847-6d87-78f8-940c-024f6b7ec5ca",
+        "assigneeId": "01a19834-0bfd-75e7-80db-4cbc24e4bd88",
+        "requiresReview": false,
+        "startDate": "2026-11-04",
+        "dueDate": "2026-11-13"
+      },
+      "answer": {
+        "id": "01a19847-6ed5-7695-8c67-358895b908c6",
+        "key": "QA22-TL-mvy51hpc-f22b02-A-T0002",
+        "rowVersion": 0,
+        "warnings": []
+      }
+    },
+    {
+      "name": "task-Other discipline",
+      "actor": "priya@hub.test",
+      "method": "POST",
+      "route": "/projects/01a19847-6d4d-7e40-a69d-4fde45b64133/tasks",
+      "expectedStatus": 201,
+      "status": 201,
+      "requestBody": {
+        "name": "QA22 mvy51hpc-f22b02 Other discipline",
+        "projectDisciplineId": "01a19847-6d8f-7d3e-ae0f-fb4a3eae9961",
+        "assigneeId": "01a19834-0bfd-738a-b9c8-c025e3da7c04",
+        "requiresReview": false,
+        "startDate": "2026-10-25",
+        "dueDate": "2026-11-13"
+      },
+      "answer": {
+        "id": "01a19847-6ee5-778d-b38e-d82a6b17ac05",
+        "key": "QA22-TL-mvy51hpc-f22b02-A-T0003",
+        "rowVersion": 0,
+        "warnings": []
+      }
+    },
+    {
+      "name": "dependency",
+      "actor": "priya@hub.test",
+      "method": "POST",
+      "route": "/tasks/01a19847-6ed5-7695-8c67-358895b908c6/dependencies",
+      "expectedStatus": 201,
+      "status": 201,
+      "requestBody": {
+        "predecessorTaskId": "01a19847-6ea6-74ae-a10e-b32f1bcd582d",
+        "type": "FinishToStart",
+        "lagDays": 0,
+        "note": "QA22 synthetic Timeline dependency"
+      },
+      "answer": {
+        "id": "01a19847-6f08-7f8b-b239-4eaa987b8b4e",
+        "warnings": []
+      }
+    },
+    {
+      "name": "milestone",
+      "actor": "priya@hub.test",
+      "method": "POST",
+      "route": "/projects/01a19847-6d4d-7e40-a69d-4fde45b64133/milestones",
+      "expectedStatus": 201,
+      "status": 201,
+      "requestBody": {
+        "name": "QA22 mvy51hpc-f22b02 Timeline milestone",
+        "milestoneType": "Design Submission",
+        "date": "2026-11-13",
+        "projectDisciplineId": "01a19847-6d87-78f8-940c-024f6b7ec5ca",
+        "isClientFacing": true
+      },
+      "answer": {
+        "id": "01a19847-6f18-7eb1-bbd3-1eae450f81bb",
+        "key": "QA22-TL-mvy51hpc-f22b02-A-M01",
+        "rowVersion": 0
+      }
+    },
+    {
+      "name": "project-B-create",
+      "actor": "priya@hub.test",
+      "method": "POST",
+      "route": "/projects",
+      "expectedStatus": 201,
+      "status": 201,
+      "requestBody": {
+        "projectNumber": "QA22-TL-mvy51hpc-f22b02-B",
+        "name": "QA22 synthetic Timeline mvy51hpc-f22b02 B",
+        "clientId": "01a19834-0b4a-7291-997c-e282e6cfd823",
+        "officeId": "01a19834-0b4f-7581-90a5-bcb28e5b4840",
+        "startDate": "2026-10-18",
+        "targetCompletionDate": "2026-12-13",
+        "disciplines": [
+          {
+            "disciplineId": "01a19834-0b3d-7e8a-80c6-55db33f2e439",
+            "leadUserId": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a"
+          }
+        ],
+        "members": []
+      },
+      "answer": {
+        "id": "01a19847-6f2e-752d-8d28-b2647f3e4d94"
+      }
+    },
+    {
+      "name": "project-B-detail",
+      "actor": "priya@hub.test",
+      "method": "GET",
+      "route": "/projects/01a19847-6f2e-752d-8d28-b2647f3e4d94",
+      "expectedStatus": 200,
+      "status": 200,
+      "answer": {
+        "id": "01a19847-6f2e-752d-8d28-b2647f3e4d94",
+        "rowVersion": 0
+      }
+    },
+    {
+      "name": "project-B-activate",
+      "actor": "priya@hub.test",
+      "method": "POST",
+      "route": "/projects/01a19847-6f2e-752d-8d28-b2647f3e4d94/transition",
+      "expectedStatus": 200,
+      "status": 200,
+      "requestBody": {
+        "toStatus": "Active",
+        "rowVersion": 0
+      },
+      "answer": {
+        "id": "01a19847-6f2e-752d-8d28-b2647f3e4d94",
+        "rowVersion": 1
+      }
+    },
+    {
+      "name": "project-B-active-detail",
+      "actor": "priya@hub.test",
+      "method": "GET",
+      "route": "/projects/01a19847-6f2e-752d-8d28-b2647f3e4d94",
+      "expectedStatus": 200,
+      "status": 200,
+      "answer": {
+        "id": "01a19847-6f2e-752d-8d28-b2647f3e4d94",
+        "rowVersion": 1
+      }
+    },
+    {
+      "name": "task-Second project Civil work",
+      "actor": "priya@hub.test",
+      "method": "POST",
+      "route": "/projects/01a19847-6f2e-752d-8d28-b2647f3e4d94/tasks",
+      "expectedStatus": 201,
+      "status": 201,
+      "requestBody": {
+        "name": "QA22 mvy51hpc-f22b02 Second project Civil work",
+        "projectDisciplineId": "01a19847-6f30-7bee-a469-b8f6e76a6427",
+        "assigneeId": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a",
+        "requiresReview": false,
+        "startDate": "2026-10-25",
+        "dueDate": "2026-11-13"
+      },
+      "answer": {
+        "id": "01a19847-6f5b-79a9-b336-f3f7dfaba093",
+        "key": "QA22-TL-mvy51hpc-f22b02-B-T0001",
+        "rowVersion": 0,
+        "warnings": []
+      }
+    },
+    {
+      "name": "workspace",
+      "actor": "priya@hub.test",
+      "method": "POST",
+      "route": "/workspaces",
+      "expectedStatus": 201,
+      "status": 201,
+      "requestBody": {
+        "name": "QA22 mvy51hpc-f22b02 Timeline scope",
+        "projectIds": [
+          "01a19847-6d4d-7e40-a69d-4fde45b64133",
+          "01a19847-6f2e-752d-8d28-b2647f3e4d94"
+        ]
+      },
+      "answer": {
+        "id": "01a19847-6f64-7a30-b147-f376af64421c",
+        "rowVersion": 1
+      }
+    },
+    {
+      "name": "marc-workspaces",
+      "actor": "marc@hub.test",
+      "method": "GET",
+      "route": "/workspaces",
+      "expectedStatus": 200,
+      "status": 200,
+      "answer": {}
+    },
+    {
+      "name": "canonical-before-priya",
+      "actor": "priya@hub.test",
+      "method": "GET",
+      "route": "/projects/01a19847-6d4d-7e40-a69d-4fde45b64133/timeline",
+      "expectedStatus": 200,
+      "status": 200,
+      "answer": {}
+    },
+    {
+      "name": "canonical-before-marc",
+      "actor": "marc@hub.test",
+      "method": "GET",
+      "route": "/projects/01a19847-6d4d-7e40-a69d-4fde45b64133/timeline",
+      "expectedStatus": 200,
+      "status": 200,
+      "answer": {}
+    },
+    {
+      "name": "shared-view",
+      "actor": "priya@hub.test",
+      "method": "POST",
+      "route": "/views",
+      "expectedStatus": 201,
+      "status": 201,
+      "requestBody": {
+        "name": "QA22 mvy51hpc-f22b02 Civil Month dependencies",
+        "listType": "timeline",
+        "projectId": "01a19847-6d4d-7e40-a69d-4fde45b64133",
+        "scope": "Project",
+        "params": {
+          "zoom": "month",
+          "group": "discipline",
+          "cols": "items,dates",
+          "layers": "dependencies,milestones",
+          "hideCompleted": "false",
+          "collapsed": "none",
+          "expanded": "loose:01a19847-6d87-78f8-940c-024f6b7ec5ca",
+          "disciplineId": "01a19847-6d87-78f8-940c-024f6b7ec5ca",
+          "from": "2026-10-18",
+          "to": "2026-12-13"
+        },
+        "isDefault": false
+      },
+      "answer": {
+        "id": "01a19847-6fb0-7c51-9fff-9a5f8c975bee",
+        "rowVersion": 0
+      }
+    },
+    {
+      "name": "shared-list-priya",
+      "actor": "priya@hub.test",
+      "method": "GET",
+      "route": "/views?listType=timeline&projectId=01a19847-6d4d-7e40-a69d-4fde45b64133",
+      "expectedStatus": 200,
+      "status": 200,
+      "answer": {}
+    },
+    {
+      "name": "shared-list-marc",
+      "actor": "marc@hub.test",
+      "method": "GET",
+      "route": "/views?listType=timeline&projectId=01a19847-6d4d-7e40-a69d-4fde45b64133",
+      "expectedStatus": 200,
+      "status": 200,
+      "answer": {}
+    },
+    {
+      "name": "shared-list-alex",
+      "actor": "alex@hub.test",
+      "method": "GET",
+      "route": "/views?listType=timeline&projectId=01a19847-6d4d-7e40-a69d-4fde45b64133",
+      "expectedStatus": 200,
+      "status": 200,
+      "answer": {}
+    },
+    {
+      "name": "workspace-explicit-default",
+      "actor": "priya@hub.test",
+      "method": "POST",
+      "route": "/views",
+      "expectedStatus": 201,
+      "status": 201,
+      "requestBody": {
+        "name": "QA22 mvy51hpc-f22b02 private two-project default",
+        "listType": "workspace-timeline",
+        "scope": "Personal",
+        "params": {
+          "projects": "01a19847-6d4d-7e40-a69d-4fde45b64133,01a19847-6f2e-752d-8d28-b2647f3e4d94",
+          "zoom": "quarter",
+          "start": "2026-10-18",
+          "group": "project",
+          "cols": "items,dates",
+          "layers": "dependencies,originalDates",
+          "hideCompleted": "false",
+          "collapsed": "none"
+        },
+        "isDefault": true
+      },
+      "answer": {
+        "id": "01a19847-6fe0-7de4-a7dd-d3243a870a0a",
+        "rowVersion": 0
+      }
+    },
+    {
+      "name": "workspace-mine",
+      "actor": "priya@hub.test",
+      "method": "POST",
+      "route": "/views",
+      "expectedStatus": 201,
+      "status": 201,
+      "requestBody": {
+        "name": "QA22 mvy51hpc-f22b02 private My projects",
+        "listType": "workspace-timeline",
+        "scope": "Personal",
+        "params": {
+          "projects": "mine",
+          "zoom": "week",
+          "start": "2026-10-18",
+          "group": "project",
+          "cols": "items,dates",
+          "layers": "dependencies,originalDates",
+          "hideCompleted": "false",
+          "collapsed": "none"
+        },
+        "isDefault": false
+      },
+      "answer": {
+        "id": "01a19847-6fe8-7965-97cf-ced451574deb",
+        "rowVersion": 0
+      }
+    },
+    {
+      "name": "workspace-named",
+      "actor": "priya@hub.test",
+      "method": "POST",
+      "route": "/views",
+      "expectedStatus": 201,
+      "status": 201,
+      "requestBody": {
+        "name": "QA22 mvy51hpc-f22b02 private named scope",
+        "listType": "workspace-timeline",
+        "scope": "Personal",
+        "params": {
+          "zoom": "quarter",
+          "start": "2026-10-18",
+          "group": "project",
+          "cols": "items,dates",
+          "layers": "dependencies,originalDates",
+          "hideCompleted": "false",
+          "collapsed": "none",
+          "ws": "01a19847-6f64-7a30-b147-f376af64421c"
+        },
+        "isDefault": false
+      },
+      "answer": {
+        "id": "01a19847-6fec-7d3f-9af6-76ff5fd46828",
+        "rowVersion": 0
+      }
+    },
+    {
+      "name": "workspace-list-priya",
+      "actor": "priya@hub.test",
+      "method": "GET",
+      "route": "/views?listType=workspace-timeline",
+      "expectedStatus": 200,
+      "status": 200,
+      "answer": {}
+    },
+    {
+      "name": "workspace-list-marc",
+      "actor": "marc@hub.test",
+      "method": "GET",
+      "route": "/views?listType=workspace-timeline",
+      "expectedStatus": 200,
+      "status": 200,
+      "answer": {}
+    },
+    {
+      "name": "workspace-canonical-explicit",
+      "actor": "priya@hub.test",
+      "method": "GET",
+      "route": "/timeline?projects=01a19847-6d4d-7e40-a69d-4fde45b64133%2C01a19847-6f2e-752d-8d28-b2647f3e4d94",
+      "expectedStatus": 200,
+      "status": 200,
+      "answer": {}
+    }
+  ],
+  "checks": [
+    {
+      "name": "Development identities, work_screens and fresh reference prerequisites",
+      "status": "PASS",
+      "facts": {
+        "actors": {
+          "jordan": {
+            "id": "01a19834-0bfd-7663-a726-c0ab0cc8668c",
+            "email": "jordan@hub.test",
+            "name": "Jordan Lee",
+            "capabilities": {
+              "createProject": true,
+              "createTask": false,
+              "portfolio": true,
+              "workload": true,
+              "staff": true,
+              "allStaff": true,
+              "admin": true,
+              "templates": true,
+              "readOnly": false,
+              "directReports": 0
+            }
+          },
+          "priya": {
+            "id": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a",
+            "email": "priya@hub.test",
+            "name": "Priya Nair",
+            "capabilities": {
+              "createProject": true,
+              "createTask": false,
+              "portfolio": true,
+              "workload": true,
+              "staff": false,
+              "allStaff": false,
+              "admin": false,
+              "templates": false,
+              "readOnly": false,
+              "directReports": 0
+            }
+          },
+          "marc": {
+            "id": "01a19834-0bfd-7712-a37f-3197da026009",
+            "email": "marc@hub.test",
+            "name": "Marc Dubois",
+            "capabilities": {
+              "createProject": true,
+              "createTask": false,
+              "portfolio": true,
+              "workload": true,
+              "staff": true,
+              "allStaff": false,
+              "admin": false,
+              "templates": false,
+              "readOnly": false,
+              "directReports": 0
+            }
+          },
+          "alex": {
+            "id": "01a19834-0bfd-75e7-80db-4cbc24e4bd88",
+            "email": "alex@hub.test",
+            "name": "Alex Chen",
+            "capabilities": {
+              "createProject": false,
+              "createTask": false,
+              "portfolio": false,
+              "workload": false,
+              "staff": false,
+              "allStaff": false,
+              "admin": false,
+              "templates": false,
+              "readOnly": false,
+              "directReports": 0
+            }
+          },
+          "omar": {
+            "id": "01a19834-0bfd-738a-b9c8-c025e3da7c04",
+            "email": "omar@hub.test",
+            "name": "Omar Haddad",
+            "capabilities": {
+              "createProject": false,
+              "createTask": false,
+              "portfolio": false,
+              "workload": false,
+              "staff": false,
+              "allStaff": false,
+              "admin": false,
+              "templates": false,
+              "readOnly": false,
+              "directReports": 0
+            }
+          }
+        },
+        "dates": {
+          "today": "2026-11-01",
+          "orgTimeZone": "America/Halifax",
+          "dateFormat": "yyyy-MM-dd",
+          "a": "2026-10-25",
+          "b": "2026-11-03",
+          "c": "2026-11-04",
+          "d": "2026-11-13",
+          "from": "2026-10-18",
+          "to": "2026-12-13"
+        },
+        "references": {
+          "civil": {
+            "id": "01a19834-0b3d-7e8a-80c6-55db33f2e439",
+            "name": "Civil",
+            "code": "CIV",
+            "colour": "#2563eb",
+            "isActive": true,
+            "sortOrder": 2
+          },
+          "other": {
+            "id": "01a19834-0b28-708c-99e6-06171fdf10b7",
+            "name": "Project Management",
+            "code": "PM",
+            "colour": "#475569",
+            "isActive": true,
+            "sortOrder": 0
+          },
+          "client": {
+            "id": "01a19834-0b4a-7291-997c-e282e6cfd823",
+            "name": "Internal / TBD",
+            "shortName": "Internal",
+            "isActive": true
+          },
+          "office": {
+            "id": "01a19834-0b4f-7581-90a5-bcb28e5b4840",
+            "name": "Head Office",
+            "code": "HO",
+            "timeZone": "America/Halifax",
+            "isActive": true
+          }
+        }
+      }
+    },
+    {
+      "name": "canonical task, discipline, dependency and milestone ID joins",
+      "status": "PASS",
+      "facts": {
+        "projectId": "01a19847-6d4d-7e40-a69d-4fde45b64133",
+        "taskIds": [
+          "01a19847-6ea6-74ae-a10e-b32f1bcd582d",
+          "01a19847-6ed5-7695-8c67-358895b908c6",
+          "01a19847-6ee5-778d-b38e-d82a6b17ac05"
+        ],
+        "dependency": {
+          "id": "01a19847-6f08-7f8b-b239-4eaa987b8b4e",
+          "predecessorTaskId": "01a19847-6ea6-74ae-a10e-b32f1bcd582d",
+          "successorTaskId": "01a19847-6ed5-7695-8c67-358895b908c6",
+          "type": "FinishToStart",
+          "lagDays": 0
+        },
+        "milestoneId": "01a19847-6f18-7eb1-bbd3-1eae450f81bb"
+      }
+    },
+    {
+      "name": "Priya shared Civil/Month/dependency definition visible to Marc and Alex with authoritative edit rights",
+      "status": "PASS",
+      "facts": {
+        "viewId": "01a19847-6fb0-7c51-9fff-9a5f8c975bee",
+        "params": {
+          "zoom": "month",
+          "group": "discipline",
+          "cols": "items,dates",
+          "layers": "dependencies,milestones",
+          "hideCompleted": "false",
+          "collapsed": "none",
+          "expanded": "loose:01a19847-6d87-78f8-940c-024f6b7ec5ca",
+          "disciplineId": "01a19847-6d87-78f8-940c-024f6b7ec5ca",
+          "from": "2026-10-18",
+          "to": "2026-12-13"
+        }
+      }
+    }
+  ],
+  "failures": [
+    {
+      "message": "Expected values to be strictly deep-equal:\n+ actual - expected\n... Skipped lines\n\n  {\n    deliverableLinks: [],\n    deliverables: [],\n    dependencies: [\n      {\n...\n        name: 'QA22 mvy51hpc-f22b02 Timeline milestone',\n+       status: 'At Risk'\n-       status: null\n      }\n    ],\n    tasks: [\n      {\n        deliverableId: null,\n",
+      "lastRequest": "workspace-canonical-explicit"
+    }
+  ],
+  "reads": {
+    "config": {
+      "authMode": "Development"
+    },
+    "existingActiveSeedPersonas": {
+      "jordan": {
+        "email": "jordan@hub.test",
+        "displayName": "Jordan Lee"
+      },
+      "priya": {
+        "email": "priya@hub.test",
+        "displayName": "Priya Nair"
+      },
+      "marc": {
+        "email": "marc@hub.test",
+        "displayName": "Marc Dubois"
+      },
+      "alex": {
+        "email": "alex@hub.test",
+        "displayName": "Alex Chen"
+      },
+      "omar": {
+        "email": "omar@hub.test",
+        "displayName": "Omar Haddad"
+      }
+    },
+    "me-jordan": {
+      "id": "01a19834-0bfd-7663-a726-c0ab0cc8668c",
+      "email": "jordan@hub.test",
+      "name": "Jordan Lee",
+      "capabilities": {
+        "createProject": true,
+        "createTask": false,
+        "portfolio": true,
+        "workload": true,
+        "staff": true,
+        "allStaff": true,
+        "admin": true,
+        "templates": true,
+        "readOnly": false,
+        "directReports": 0
+      },
+      "roles": [
+        {
+          "role": "Admin",
+          "source": "Manual"
+        }
+      ],
+      "systemRoles": [
+        "Admin"
+      ],
+      "settings": {
+        "dateFormat": "yyyy-MM-dd",
+        "orgTimeZone": "America/Halifax",
+        "today": "2026-11-01",
+        "idleTimeoutHours": 8,
+        "restrictedProjectsEnabled": false,
+        "allowSelfReview": false,
+        "taskDueSoonDays": 5,
+        "milestoneApproachingDays": 14,
+        "chainDepthLimit": 10,
+        "defaultWeeklyCapacityHours": 40,
+        "coordinationLookaheadWeeks": 3,
+        "workingDaysEnabled": false,
+        "activityBurstMinutes": 10
+      },
+      "flags": {
+        "verifiable_log": false,
+        "commitment_reliability": false,
+        "allocation_preview": false,
+        "baseline_history": false,
+        "revision_check": false,
+        "task_pickup": false,
+        "org_structure": false,
+        "figure_names": false,
+        "planner_kept_rows": false,
+        "show_deleted": false,
+        "template_working_days": false,
+        "status_rollups": false,
+        "picker_project_rank": false,
+        "row_quick_actions": false,
+        "date_context": false,
+        "schedule_baseline": false,
+        "small_ux": true,
+        "timeline_handoffs_chain": false,
+        "onboarding_card": false,
+        "capacity_reports": false,
+        "route_counter": false,
+        "template_roles": false,
+        "unfilled_beside_capacity": false,
+        "project_status_note": false,
+        "my_work_follow_up": false,
+        "project_import": false,
+        "capacity_polish": false,
+        "record_engine_additions": false,
+        "live_project_stamp": false,
+        "live_events": false,
+        "admin_review": false,
+        "data_entry_safety": false,
+        "backlog": false,
+        "visual_system": true,
+        "screen_patterns": false,
+        "home_overview": false,
+        "work_screens": true,
+        "project_screens": true,
+        "capacity_screens": true,
+        "register_screens": true,
+        "people_screens": true
+      }
+    },
+    "me-priya": {
+      "id": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a",
+      "email": "priya@hub.test",
+      "name": "Priya Nair",
+      "capabilities": {
+        "createProject": true,
+        "createTask": false,
+        "portfolio": true,
+        "workload": true,
+        "staff": false,
+        "allStaff": false,
+        "admin": false,
+        "templates": false,
+        "readOnly": false,
+        "directReports": 0
+      },
+      "roles": [
+        {
+          "role": "ProjectManager",
+          "source": "Manual"
+        }
+      ],
+      "systemRoles": [
+        "ProjectManager"
+      ],
+      "settings": {
+        "dateFormat": "yyyy-MM-dd",
+        "orgTimeZone": "America/Halifax",
+        "today": "2026-11-01",
+        "idleTimeoutHours": 8,
+        "restrictedProjectsEnabled": false,
+        "allowSelfReview": false,
+        "taskDueSoonDays": 5,
+        "milestoneApproachingDays": 14,
+        "chainDepthLimit": 10,
+        "defaultWeeklyCapacityHours": 40,
+        "coordinationLookaheadWeeks": 3,
+        "workingDaysEnabled": false,
+        "activityBurstMinutes": 10
+      },
+      "flags": {
+        "verifiable_log": false,
+        "commitment_reliability": false,
+        "allocation_preview": false,
+        "baseline_history": false,
+        "revision_check": false,
+        "task_pickup": false,
+        "org_structure": false,
+        "figure_names": false,
+        "planner_kept_rows": false,
+        "show_deleted": false,
+        "template_working_days": false,
+        "status_rollups": false,
+        "picker_project_rank": false,
+        "row_quick_actions": false,
+        "date_context": false,
+        "schedule_baseline": false,
+        "small_ux": true,
+        "timeline_handoffs_chain": false,
+        "onboarding_card": false,
+        "capacity_reports": false,
+        "route_counter": false,
+        "template_roles": false,
+        "unfilled_beside_capacity": false,
+        "project_status_note": false,
+        "my_work_follow_up": false,
+        "project_import": false,
+        "capacity_polish": false,
+        "record_engine_additions": false,
+        "live_project_stamp": false,
+        "live_events": false,
+        "admin_review": false,
+        "data_entry_safety": false,
+        "backlog": false,
+        "visual_system": true,
+        "screen_patterns": false,
+        "home_overview": false,
+        "work_screens": true,
+        "project_screens": true,
+        "capacity_screens": true,
+        "register_screens": true,
+        "people_screens": true
+      }
+    },
+    "me-marc": {
+      "id": "01a19834-0bfd-7712-a37f-3197da026009",
+      "email": "marc@hub.test",
+      "name": "Marc Dubois",
+      "capabilities": {
+        "createProject": true,
+        "createTask": false,
+        "portfolio": true,
+        "workload": true,
+        "staff": true,
+        "allStaff": false,
+        "admin": false,
+        "templates": false,
+        "readOnly": false,
+        "directReports": 0
+      },
+      "roles": [
+        {
+          "role": "ProjectManager",
+          "source": "Manual"
+        },
+        {
+          "role": "Supervisor",
+          "source": "Manual"
+        }
+      ],
+      "systemRoles": [
+        "ProjectManager",
+        "Supervisor"
+      ],
+      "settings": {
+        "dateFormat": "yyyy-MM-dd",
+        "orgTimeZone": "America/Halifax",
+        "today": "2026-11-01",
+        "idleTimeoutHours": 8,
+        "restrictedProjectsEnabled": false,
+        "allowSelfReview": false,
+        "taskDueSoonDays": 5,
+        "milestoneApproachingDays": 14,
+        "chainDepthLimit": 10,
+        "defaultWeeklyCapacityHours": 40,
+        "coordinationLookaheadWeeks": 3,
+        "workingDaysEnabled": false,
+        "activityBurstMinutes": 10
+      },
+      "flags": {
+        "verifiable_log": false,
+        "commitment_reliability": false,
+        "allocation_preview": false,
+        "baseline_history": false,
+        "revision_check": false,
+        "task_pickup": false,
+        "org_structure": false,
+        "figure_names": false,
+        "planner_kept_rows": false,
+        "show_deleted": false,
+        "template_working_days": false,
+        "status_rollups": false,
+        "picker_project_rank": false,
+        "row_quick_actions": false,
+        "date_context": false,
+        "schedule_baseline": false,
+        "small_ux": true,
+        "timeline_handoffs_chain": false,
+        "onboarding_card": false,
+        "capacity_reports": false,
+        "route_counter": false,
+        "template_roles": false,
+        "unfilled_beside_capacity": false,
+        "project_status_note": false,
+        "my_work_follow_up": false,
+        "project_import": false,
+        "capacity_polish": false,
+        "record_engine_additions": false,
+        "live_project_stamp": false,
+        "live_events": false,
+        "admin_review": false,
+        "data_entry_safety": false,
+        "backlog": false,
+        "visual_system": true,
+        "screen_patterns": false,
+        "home_overview": false,
+        "work_screens": true,
+        "project_screens": true,
+        "capacity_screens": true,
+        "register_screens": true,
+        "people_screens": true
+      }
+    },
+    "me-alex": {
+      "id": "01a19834-0bfd-75e7-80db-4cbc24e4bd88",
+      "email": "alex@hub.test",
+      "name": "Alex Chen",
+      "capabilities": {
+        "createProject": false,
+        "createTask": false,
+        "portfolio": false,
+        "workload": false,
+        "staff": false,
+        "allStaff": false,
+        "admin": false,
+        "templates": false,
+        "readOnly": false,
+        "directReports": 0
+      },
+      "roles": [],
+      "systemRoles": [],
+      "settings": {
+        "dateFormat": "yyyy-MM-dd",
+        "orgTimeZone": "America/Halifax",
+        "today": "2026-11-01",
+        "idleTimeoutHours": 8,
+        "restrictedProjectsEnabled": false,
+        "allowSelfReview": false,
+        "taskDueSoonDays": 5,
+        "milestoneApproachingDays": 14,
+        "chainDepthLimit": 10,
+        "defaultWeeklyCapacityHours": 40,
+        "coordinationLookaheadWeeks": 3,
+        "workingDaysEnabled": false,
+        "activityBurstMinutes": 10
+      },
+      "flags": {
+        "verifiable_log": false,
+        "commitment_reliability": false,
+        "allocation_preview": false,
+        "baseline_history": false,
+        "revision_check": false,
+        "task_pickup": false,
+        "org_structure": false,
+        "figure_names": false,
+        "planner_kept_rows": false,
+        "show_deleted": false,
+        "template_working_days": false,
+        "status_rollups": false,
+        "picker_project_rank": false,
+        "row_quick_actions": false,
+        "date_context": false,
+        "schedule_baseline": false,
+        "small_ux": true,
+        "timeline_handoffs_chain": false,
+        "onboarding_card": false,
+        "capacity_reports": false,
+        "route_counter": false,
+        "template_roles": false,
+        "unfilled_beside_capacity": false,
+        "project_status_note": false,
+        "my_work_follow_up": false,
+        "project_import": false,
+        "capacity_polish": false,
+        "record_engine_additions": false,
+        "live_project_stamp": false,
+        "live_events": false,
+        "admin_review": false,
+        "data_entry_safety": false,
+        "backlog": false,
+        "visual_system": true,
+        "screen_patterns": false,
+        "home_overview": false,
+        "work_screens": true,
+        "project_screens": true,
+        "capacity_screens": true,
+        "register_screens": true,
+        "people_screens": true
+      }
+    },
+    "me-omar": {
+      "id": "01a19834-0bfd-738a-b9c8-c025e3da7c04",
+      "email": "omar@hub.test",
+      "name": "Omar Haddad",
+      "capabilities": {
+        "createProject": false,
+        "createTask": false,
+        "portfolio": false,
+        "workload": false,
+        "staff": false,
+        "allStaff": false,
+        "admin": false,
+        "templates": false,
+        "readOnly": false,
+        "directReports": 0
+      },
+      "roles": [],
+      "systemRoles": [],
+      "settings": {
+        "dateFormat": "yyyy-MM-dd",
+        "orgTimeZone": "America/Halifax",
+        "today": "2026-11-01",
+        "idleTimeoutHours": 8,
+        "restrictedProjectsEnabled": false,
+        "allowSelfReview": false,
+        "taskDueSoonDays": 5,
+        "milestoneApproachingDays": 14,
+        "chainDepthLimit": 10,
+        "defaultWeeklyCapacityHours": 40,
+        "coordinationLookaheadWeeks": 3,
+        "workingDaysEnabled": false,
+        "activityBurstMinutes": 10
+      },
+      "flags": {
+        "verifiable_log": false,
+        "commitment_reliability": false,
+        "allocation_preview": false,
+        "baseline_history": false,
+        "revision_check": false,
+        "task_pickup": false,
+        "org_structure": false,
+        "figure_names": false,
+        "planner_kept_rows": false,
+        "show_deleted": false,
+        "template_working_days": false,
+        "status_rollups": false,
+        "picker_project_rank": false,
+        "row_quick_actions": false,
+        "date_context": false,
+        "schedule_baseline": false,
+        "small_ux": true,
+        "timeline_handoffs_chain": false,
+        "onboarding_card": false,
+        "capacity_reports": false,
+        "route_counter": false,
+        "template_roles": false,
+        "unfilled_beside_capacity": false,
+        "project_status_note": false,
+        "my_work_follow_up": false,
+        "project_import": false,
+        "capacity_polish": false,
+        "record_engine_additions": false,
+        "live_project_stamp": false,
+        "live_events": false,
+        "admin_review": false,
+        "data_entry_safety": false,
+        "backlog": false,
+        "visual_system": true,
+        "screen_patterns": false,
+        "home_overview": false,
+        "work_screens": true,
+        "project_screens": true,
+        "capacity_screens": true,
+        "register_screens": true,
+        "people_screens": true
+      }
+    },
+    "projectA": {
+      "id": "01a19847-6d4d-7e40-a69d-4fde45b64133",
+      "projectNumber": "QA22-TL-mvy51hpc-f22b02-A",
+      "name": "QA22 synthetic Timeline mvy51hpc-f22b02 A",
+      "clientId": "01a19834-0b4a-7291-997c-e282e6cfd823",
+      "clientReference": null,
+      "projectManagerId": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a",
+      "pmName": "Priya Nair",
+      "officeId": "01a19834-0b4f-7581-90a5-bcb28e5b4840",
+      "projectTypeId": null,
+      "description": null,
+      "location": null,
+      "status": "Active",
+      "phaseId": null,
+      "startDate": "2026-10-18",
+      "targetCompletionDate": "2026-12-13",
+      "priority": "Medium",
+      "visibility": "Open",
+      "internalNotes": null,
+      "coordinationDay": null,
+      "allowViewerComments": true,
+      "lastCoordinationReviewedAt": null,
+      "lastCoordinationReviewedBy": null,
+      "statusChangedAt": "2026-11-01T18:03:00.586945+00:00",
+      "activatedAt": "2026-11-01T18:03:00.586945+00:00",
+      "completedAt": null,
+      "archivedAt": null,
+      "createdFromTemplateId": null,
+      "templateVersion": null,
+      "rowVersion": 1,
+      "templateName": null,
+      "client": "Internal / TBD",
+      "office": "Head Office",
+      "phase": null,
+      "links": [],
+      "disciplines": [
+        {
+          "id": "01a19847-6d87-78f8-940c-024f6b7ec5ca",
+          "disciplineId": "01a19834-0b3d-7e8a-80c6-55db33f2e439",
+          "name": "Civil",
+          "code": "CIV",
+          "colour": "#2563eb",
+          "leadUserId": "01a19834-0bfd-7712-a37f-3197da026009",
+          "isActive": true,
+          "rowVersion": 1,
+          "leadName": "Marc Dubois"
+        },
+        {
+          "id": "01a19847-6d8f-7d3e-ae0f-fb4a3eae9961",
+          "disciplineId": "01a19834-0b28-708c-99e6-06171fdf10b7",
+          "name": "Project Management",
+          "code": "PM",
+          "colour": "#475569",
+          "leadUserId": "01a19834-0bfd-738a-b9c8-c025e3da7c04",
+          "isActive": true,
+          "rowVersion": 1,
+          "leadName": "Omar Haddad"
+        }
+      ],
+      "health": {
+        "computed": "Grey",
+        "reported": "Grey",
+        "overrideActive": false,
+        "healthOverride": null,
+        "healthOverrideNote": null,
+        "overrideBy": null,
+        "healthOverrideAt": null,
+        "healthOverrideExpiresAt": null,
+        "reasons": [
+          {
+            "rule": "G-05",
+            "text": "Project in setup",
+            "colour": null,
+            "values": null,
+            "threshold": null
+          }
+        ],
+        "inputs": {},
+        "evaluatedAt": "2026-11-01T18:03:00.488452+00:00"
+      },
+      "progressPct": null,
+      "nextMilestone": null,
+      "nextSubmission": null,
+      "myRoles": [
+        "PM"
+      ],
+      "follow": {
+        "level": "AllActivity",
+        "source": "Assignment"
+      },
+      "starred": false,
+      "setupChecklist": null,
+      "suggestArchive": false,
+      "editWindowDaysLeft": null,
+      "permissions": {
+        "edit": {
+          "ok": true,
+          "reason": null
+        },
+        "manageTeam": {
+          "ok": true,
+          "reason": null
+        },
+        "manageMilestones": {
+          "ok": true,
+          "reason": null
+        },
+        "healthOverride": {
+          "ok": true,
+          "reason": null
+        },
+        "comment": {
+          "ok": true,
+          "reason": null
+        },
+        "raiseRegister": {
+          "ok": true,
+          "reason": null
+        },
+        "runCoordination": {
+          "ok": true,
+          "reason": null
+        },
+        "createEvent": {
+          "ok": true,
+          "reason": null
+        },
+        "enterTime": {
+          "ok": true,
+          "reason": null
+        },
+        "proposeAllocation": {
+          "ok": true,
+          "reason": null
+        },
+        "snooze": {
+          "ok": true,
+          "reason": null
+        },
+        "manageExternalParties": {
+          "ok": true,
+          "reason": null
+        },
+        "reviewDates": {
+          "ok": true,
+          "reason": null
+        },
+        "captureWeeklyPlan": {
+          "ok": true,
+          "reason": null
+        },
+        "createSubmission": {
+          "ok": true,
+          "reason": null
+        },
+        "createTaskIn": [
+          "01a19847-6d87-78f8-940c-024f6b7ec5ca",
+          "01a19847-6d8f-7d3e-ae0f-fb4a3eae9961"
+        ],
+        "createDeliverableIn": [
+          "01a19847-6d87-78f8-940c-024f6b7ec5ca",
+          "01a19847-6d8f-7d3e-ae0f-fb4a3eae9961"
+        ],
+        "createBasisIn": [
+          "01a19847-6d87-78f8-940c-024f6b7ec5ca",
+          "01a19847-6d8f-7d3e-ae0f-fb4a3eae9961"
+        ],
+        "assignBasisIn": [
+          "01a19847-6d87-78f8-940c-024f6b7ec5ca",
+          "01a19847-6d8f-7d3e-ae0f-fb4a3eae9961"
+        ],
+        "leadOf": [],
+        "isPm": true,
+        "transitions": [
+          "On Hold",
+          "Complete",
+          "Cancelled"
+        ],
+        "changeNumber": false,
+        "setVisibility": false,
+        "needsReason": false
+      },
+      "identityColour": "#ec6a3e"
+    },
+    "projectB": {
+      "id": "01a19847-6f2e-752d-8d28-b2647f3e4d94",
+      "projectNumber": "QA22-TL-mvy51hpc-f22b02-B",
+      "name": "QA22 synthetic Timeline mvy51hpc-f22b02 B",
+      "clientId": "01a19834-0b4a-7291-997c-e282e6cfd823",
+      "clientReference": null,
+      "projectManagerId": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a",
+      "pmName": "Priya Nair",
+      "officeId": "01a19834-0b4f-7581-90a5-bcb28e5b4840",
+      "projectTypeId": null,
+      "description": null,
+      "location": null,
+      "status": "Active",
+      "phaseId": null,
+      "startDate": "2026-10-18",
+      "targetCompletionDate": "2026-12-13",
+      "priority": "Medium",
+      "visibility": "Open",
+      "internalNotes": null,
+      "coordinationDay": null,
+      "allowViewerComments": true,
+      "lastCoordinationReviewedAt": null,
+      "lastCoordinationReviewedBy": null,
+      "statusChangedAt": "2026-11-01T18:03:00.8118+00:00",
+      "activatedAt": "2026-11-01T18:03:00.8118+00:00",
+      "completedAt": null,
+      "archivedAt": null,
+      "createdFromTemplateId": null,
+      "templateVersion": null,
+      "rowVersion": 1,
+      "templateName": null,
+      "client": "Internal / TBD",
+      "office": "Head Office",
+      "phase": null,
+      "links": [],
+      "disciplines": [
+        {
+          "id": "01a19847-6f30-7bee-a469-b8f6e76a6427",
+          "disciplineId": "01a19834-0b3d-7e8a-80c6-55db33f2e439",
+          "name": "Civil",
+          "code": "CIV",
+          "colour": "#2563eb",
+          "leadUserId": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a",
+          "isActive": true,
+          "rowVersion": 1,
+          "leadName": "Priya Nair"
+        }
+      ],
+      "health": {
+        "computed": "Grey",
+        "reported": "Grey",
+        "overrideActive": false,
+        "healthOverride": null,
+        "healthOverrideNote": null,
+        "overrideBy": null,
+        "healthOverrideAt": null,
+        "healthOverrideExpiresAt": null,
+        "reasons": [
+          {
+            "rule": "G-05",
+            "text": "Project in setup",
+            "colour": null,
+            "values": null,
+            "threshold": null
+          }
+        ],
+        "inputs": {},
+        "evaluatedAt": "2026-11-01T18:03:00.794784+00:00"
+      },
+      "progressPct": null,
+      "nextMilestone": null,
+      "nextSubmission": null,
+      "myRoles": [
+        "PM",
+        "DisciplineLead"
+      ],
+      "follow": {
+        "level": "AllActivity",
+        "source": "Assignment"
+      },
+      "starred": false,
+      "setupChecklist": null,
+      "suggestArchive": false,
+      "editWindowDaysLeft": null,
+      "permissions": {
+        "edit": {
+          "ok": true,
+          "reason": null
+        },
+        "manageTeam": {
+          "ok": true,
+          "reason": null
+        },
+        "manageMilestones": {
+          "ok": true,
+          "reason": null
+        },
+        "healthOverride": {
+          "ok": true,
+          "reason": null
+        },
+        "comment": {
+          "ok": true,
+          "reason": null
+        },
+        "raiseRegister": {
+          "ok": true,
+          "reason": null
+        },
+        "runCoordination": {
+          "ok": true,
+          "reason": null
+        },
+        "createEvent": {
+          "ok": true,
+          "reason": null
+        },
+        "enterTime": {
+          "ok": true,
+          "reason": null
+        },
+        "proposeAllocation": {
+          "ok": true,
+          "reason": null
+        },
+        "snooze": {
+          "ok": true,
+          "reason": null
+        },
+        "manageExternalParties": {
+          "ok": true,
+          "reason": null
+        },
+        "reviewDates": {
+          "ok": true,
+          "reason": null
+        },
+        "captureWeeklyPlan": {
+          "ok": true,
+          "reason": null
+        },
+        "createSubmission": {
+          "ok": true,
+          "reason": null
+        },
+        "createTaskIn": [
+          "01a19847-6f30-7bee-a469-b8f6e76a6427"
+        ],
+        "createDeliverableIn": [
+          "01a19847-6f30-7bee-a469-b8f6e76a6427"
+        ],
+        "createBasisIn": [
+          "01a19847-6f30-7bee-a469-b8f6e76a6427"
+        ],
+        "assignBasisIn": [
+          "01a19847-6f30-7bee-a469-b8f6e76a6427"
+        ],
+        "leadOf": [
+          "01a19847-6f30-7bee-a469-b8f6e76a6427"
+        ],
+        "isPm": true,
+        "transitions": [
+          "On Hold",
+          "Complete",
+          "Cancelled"
+        ],
+        "changeNumber": false,
+        "setVisibility": false,
+        "needsReason": false
+      },
+      "identityColour": "#20a36d"
+    },
+    "canonical-before-priya": {
+      "permissions": {
+        "manageMilestones": true,
+        "needsReason": false
+      },
+      "tasks": [
+        {
+          "id": "01a19847-6ea6-74ae-a10e-b32f1bcd582d",
+          "key": "QA22-TL-mvy51hpc-f22b02-A-T0001",
+          "name": "QA22 mvy51hpc-f22b02 Civil predecessor",
+          "deliverableId": null,
+          "projectDisciplineId": "01a19847-6d87-78f8-940c-024f6b7ec5ca",
+          "milestoneId": null,
+          "startDate": "2026-10-25",
+          "dueDate": "2026-11-03",
+          "originalStartDate": "2026-10-25",
+          "originalDueDate": "2026-11-03",
+          "status": "Not Started",
+          "progressPct": 0,
+          "assignee": "Alex Chen",
+          "rowVersion": 0,
+          "createdOn": "2026-11-01",
+          "isOverdue": false,
+          "canEditDates": true,
+          "dueNeedsReason": false,
+          "lane": "To Do"
+        },
+        {
+          "id": "01a19847-6ed5-7695-8c67-358895b908c6",
+          "key": "QA22-TL-mvy51hpc-f22b02-A-T0002",
+          "name": "QA22 mvy51hpc-f22b02 Civil successor",
+          "deliverableId": null,
+          "projectDisciplineId": "01a19847-6d87-78f8-940c-024f6b7ec5ca",
+          "milestoneId": null,
+          "startDate": "2026-11-04",
+          "dueDate": "2026-11-13",
+          "originalStartDate": "2026-11-04",
+          "originalDueDate": "2026-11-13",
+          "status": "Not Started",
+          "progressPct": 0,
+          "assignee": "Alex Chen",
+          "rowVersion": 0,
+          "createdOn": "2026-11-01",
+          "isOverdue": false,
+          "canEditDates": true,
+          "dueNeedsReason": false,
+          "lane": "To Do"
+        },
+        {
+          "id": "01a19847-6ee5-778d-b38e-d82a6b17ac05",
+          "key": "QA22-TL-mvy51hpc-f22b02-A-T0003",
+          "name": "QA22 mvy51hpc-f22b02 Other discipline",
+          "deliverableId": null,
+          "projectDisciplineId": "01a19847-6d8f-7d3e-ae0f-fb4a3eae9961",
+          "milestoneId": null,
+          "startDate": "2026-10-25",
+          "dueDate": "2026-11-13",
+          "originalStartDate": "2026-10-25",
+          "originalDueDate": "2026-11-13",
+          "status": "Not Started",
+          "progressPct": 0,
+          "assignee": "Omar Haddad",
+          "rowVersion": 0,
+          "createdOn": "2026-11-01",
+          "isOverdue": false,
+          "canEditDates": true,
+          "dueNeedsReason": false,
+          "lane": "To Do"
+        }
+      ],
+      "dependencies": [
+        {
+          "id": "01a19847-6f08-7f8b-b239-4eaa987b8b4e",
+          "predecessorTaskId": "01a19847-6ea6-74ae-a10e-b32f1bcd582d",
+          "successorTaskId": "01a19847-6ed5-7695-8c67-358895b908c6",
+          "type": "FinishToStart",
+          "lagDays": 0,
+          "highlighted": false
+        }
+      ],
+      "deliverableLinks": [],
+      "deliverables": [],
+      "milestones": [
+        {
+          "id": "01a19847-6f18-7eb1-bbd3-1eae450f81bb",
+          "key": "QA22-TL-mvy51hpc-f22b02-A-M01",
+          "name": "QA22 mvy51hpc-f22b02 Timeline milestone",
+          "date": "2026-11-13",
+          "isComplete": false,
+          "status": null
+        }
+      ]
+    },
+    "canonical-before-marc": {
+      "permissions": {
+        "manageMilestones": false,
+        "needsReason": false
+      },
+      "tasks": [
+        {
+          "id": "01a19847-6ea6-74ae-a10e-b32f1bcd582d",
+          "key": "QA22-TL-mvy51hpc-f22b02-A-T0001",
+          "name": "QA22 mvy51hpc-f22b02 Civil predecessor",
+          "deliverableId": null,
+          "projectDisciplineId": "01a19847-6d87-78f8-940c-024f6b7ec5ca",
+          "milestoneId": null,
+          "startDate": "2026-10-25",
+          "dueDate": "2026-11-03",
+          "originalStartDate": "2026-10-25",
+          "originalDueDate": "2026-11-03",
+          "status": "Not Started",
+          "progressPct": 0,
+          "assignee": "Alex Chen",
+          "rowVersion": 0,
+          "createdOn": "2026-11-01",
+          "isOverdue": false,
+          "canEditDates": true,
+          "dueNeedsReason": false,
+          "lane": "To Do"
+        },
+        {
+          "id": "01a19847-6ed5-7695-8c67-358895b908c6",
+          "key": "QA22-TL-mvy51hpc-f22b02-A-T0002",
+          "name": "QA22 mvy51hpc-f22b02 Civil successor",
+          "deliverableId": null,
+          "projectDisciplineId": "01a19847-6d87-78f8-940c-024f6b7ec5ca",
+          "milestoneId": null,
+          "startDate": "2026-11-04",
+          "dueDate": "2026-11-13",
+          "originalStartDate": "2026-11-04",
+          "originalDueDate": "2026-11-13",
+          "status": "Not Started",
+          "progressPct": 0,
+          "assignee": "Alex Chen",
+          "rowVersion": 0,
+          "createdOn": "2026-11-01",
+          "isOverdue": false,
+          "canEditDates": true,
+          "dueNeedsReason": false,
+          "lane": "To Do"
+        },
+        {
+          "id": "01a19847-6ee5-778d-b38e-d82a6b17ac05",
+          "key": "QA22-TL-mvy51hpc-f22b02-A-T0003",
+          "name": "QA22 mvy51hpc-f22b02 Other discipline",
+          "deliverableId": null,
+          "projectDisciplineId": "01a19847-6d8f-7d3e-ae0f-fb4a3eae9961",
+          "milestoneId": null,
+          "startDate": "2026-10-25",
+          "dueDate": "2026-11-13",
+          "originalStartDate": "2026-10-25",
+          "originalDueDate": "2026-11-13",
+          "status": "Not Started",
+          "progressPct": 0,
+          "assignee": "Omar Haddad",
+          "rowVersion": 0,
+          "createdOn": "2026-11-01",
+          "isOverdue": false,
+          "canEditDates": false,
+          "dueNeedsReason": false,
+          "lane": "To Do"
+        }
+      ],
+      "dependencies": [
+        {
+          "id": "01a19847-6f08-7f8b-b239-4eaa987b8b4e",
+          "predecessorTaskId": "01a19847-6ea6-74ae-a10e-b32f1bcd582d",
+          "successorTaskId": "01a19847-6ed5-7695-8c67-358895b908c6",
+          "type": "FinishToStart",
+          "lagDays": 0,
+          "highlighted": false
+        }
+      ],
+      "deliverableLinks": [],
+      "deliverables": [],
+      "milestones": [
+        {
+          "id": "01a19847-6f18-7eb1-bbd3-1eae450f81bb",
+          "key": "QA22-TL-mvy51hpc-f22b02-A-M01",
+          "name": "QA22 mvy51hpc-f22b02 Timeline milestone",
+          "date": "2026-11-13",
+          "isComplete": false,
+          "status": null
+        }
+      ]
+    },
+    "shared-list-priya": {
+      "views": [
+        {
+          "id": "01a19847-6fb0-7c51-9fff-9a5f8c975bee",
+          "name": "QA22 mvy51hpc-f22b02 Civil Month dependencies",
+          "scope": "Project",
+          "projectId": "01a19847-6d4d-7e40-a69d-4fde45b64133",
+          "isDefault": false,
+          "rowVersion": 0,
+          "params": {
+            "to": "2026-12-13",
+            "cols": "items,dates",
+            "from": "2026-10-18",
+            "zoom": "month",
+            "group": "discipline",
+            "layers": "dependencies,milestones",
+            "expanded": "loose:01a19847-6d87-78f8-940c-024f6b7ec5ca",
+            "collapsed": "none",
+            "disciplineId": "01a19847-6d87-78f8-940c-024f6b7ec5ca",
+            "hideCompleted": "false"
+          },
+          "dropped": [],
+          "owner": "Priya Nair",
+          "canEdit": true
+        }
+      ],
+      "canShare": true
+    },
+    "shared-list-marc": {
+      "views": [
+        {
+          "id": "01a19847-6fb0-7c51-9fff-9a5f8c975bee",
+          "name": "QA22 mvy51hpc-f22b02 Civil Month dependencies",
+          "scope": "Project",
+          "projectId": "01a19847-6d4d-7e40-a69d-4fde45b64133",
+          "isDefault": false,
+          "rowVersion": 0,
+          "params": {
+            "to": "2026-12-13",
+            "cols": "items,dates",
+            "from": "2026-10-18",
+            "zoom": "month",
+            "group": "discipline",
+            "layers": "dependencies,milestones",
+            "expanded": "loose:01a19847-6d87-78f8-940c-024f6b7ec5ca",
+            "collapsed": "none",
+            "disciplineId": "01a19847-6d87-78f8-940c-024f6b7ec5ca",
+            "hideCompleted": "false"
+          },
+          "dropped": [],
+          "owner": "Priya Nair",
+          "canEdit": true
+        }
+      ],
+      "canShare": true
+    },
+    "shared-list-alex": {
+      "views": [
+        {
+          "id": "01a19847-6fb0-7c51-9fff-9a5f8c975bee",
+          "name": "QA22 mvy51hpc-f22b02 Civil Month dependencies",
+          "scope": "Project",
+          "projectId": "01a19847-6d4d-7e40-a69d-4fde45b64133",
+          "isDefault": false,
+          "rowVersion": 0,
+          "params": {
+            "to": "2026-12-13",
+            "cols": "items,dates",
+            "from": "2026-10-18",
+            "zoom": "month",
+            "group": "discipline",
+            "layers": "dependencies,milestones",
+            "expanded": "loose:01a19847-6d87-78f8-940c-024f6b7ec5ca",
+            "collapsed": "none",
+            "disciplineId": "01a19847-6d87-78f8-940c-024f6b7ec5ca",
+            "hideCompleted": "false"
+          },
+          "dropped": [],
+          "owner": "Priya Nair",
+          "canEdit": false
+        }
+      ],
+      "canShare": false
+    },
+    "workspace-list-priya": {
+      "views": [
+        {
+          "id": "01a19847-6fe8-7965-97cf-ced451574deb",
+          "name": "QA22 mvy51hpc-f22b02 private My projects",
+          "scope": "Personal",
+          "projectId": null,
+          "isDefault": false,
+          "rowVersion": 0,
+          "params": {
+            "cols": "items,dates",
+            "zoom": "week",
+            "group": "project",
+            "start": "2026-10-18",
+            "layers": "dependencies,originalDates",
+            "projects": "mine",
+            "collapsed": "none",
+            "hideCompleted": "false"
+          },
+          "dropped": [],
+          "owner": "Priya Nair",
+          "canEdit": true
+        },
+        {
+          "id": "01a19847-6fec-7d3f-9af6-76ff5fd46828",
+          "name": "QA22 mvy51hpc-f22b02 private named scope",
+          "scope": "Personal",
+          "projectId": null,
+          "isDefault": false,
+          "rowVersion": 0,
+          "params": {
+            "ws": "01a19847-6f64-7a30-b147-f376af64421c",
+            "cols": "items,dates",
+            "zoom": "quarter",
+            "group": "project",
+            "start": "2026-10-18",
+            "layers": "dependencies,originalDates",
+            "collapsed": "none",
+            "hideCompleted": "false"
+          },
+          "dropped": [],
+          "owner": "Priya Nair",
+          "canEdit": true
+        },
+        {
+          "id": "01a19847-6fe0-7de4-a7dd-d3243a870a0a",
+          "name": "QA22 mvy51hpc-f22b02 private two-project default",
+          "scope": "Personal",
+          "projectId": null,
+          "isDefault": true,
+          "rowVersion": 0,
+          "params": {
+            "cols": "items,dates",
+            "zoom": "quarter",
+            "group": "project",
+            "start": "2026-10-18",
+            "layers": "dependencies,originalDates",
+            "projects": "01a19847-6d4d-7e40-a69d-4fde45b64133,01a19847-6f2e-752d-8d28-b2647f3e4d94",
+            "collapsed": "none",
+            "hideCompleted": "false"
+          },
+          "dropped": [],
+          "owner": "Priya Nair",
+          "canEdit": true
+        }
+      ],
+      "canShare": false
+    },
+    "workspace-list-marc": {
+      "views": [],
+      "canShare": false
+    }
+  },
+  "links": {},
+  "browser": {
+    "status": "NOT_RUN",
+    "screenshots": [],
+    "observations": []
+  },
+  "limits": [
+    "API setup and response joins only; no browser, visual, print, phone, human acceptance or deployment claim.",
+    "Database identity is a required root environment assertion, not independently observable through /config.",
+    "Root owns flags, services, final-build verification and restoration. This runner never writes settings.",
+    "Optional baseline/handoff rendering, inactive discipline and all-off retention require separate root execution.",
+    "Fresh synthetic records are intentionally retained in the disposable QA22 database for browser follow-up."
+  ]
+}

@@ -1,0 +1,351 @@
+{
+  "database": "hub_qa_checkpoint23",
+  "entries": [
+    {
+      "id": "01a19ae7-0968-7087-8f79-e0af8f12471a",
+      "rowVersion": 0
+    },
+    {
+      "id": "01a19ae7-097e-7f4d-8166-a3a7a97c838d",
+      "rowVersion": 0
+    }
+  ],
+  "calls": [
+    {
+      "method": "PUT",
+      "route": "admin/settings/flag.register_screens",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "route": "time",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "route": "time",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "route": "reference",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "route": "projects/01a19ad8-43ef-7ad6-af63-f90bcbd8468e/deliverables",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "route": "deliverables/01a19ae7-0998-7d69-b56f-561887ec5a6b",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "route": "deliverables/01a19ae7-0998-7d69-b56f-561887ec5a6b/issue",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "deliverables/01a19ae7-0998-7d69-b56f-561887ec5a6b",
+      "status": 200
+    },
+    {
+      "method": "PATCH",
+      "route": "deliverables/01a19ae7-0998-7d69-b56f-561887ec5a6b/issues/01a19ae7-0a1c-7610-98b1-d62adc0b984f/response",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "deliverables/01a19ae7-0998-7d69-b56f-561887ec5a6b",
+      "status": 200
+    },
+    {
+      "method": "PATCH",
+      "route": "deliverables/01a19ae7-0998-7d69-b56f-561887ec5a6b",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "deliverables/01a19ae7-0998-7d69-b56f-561887ec5a6b",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "reports/task-hours?projectId=01a19ad8-43ef-7ad6-af63-f90bcbd8468e&from=2026-11-02&to=2026-11-02&scope=mine",
+      "status": 200
+    }
+  ],
+  "deliverable": {
+    "id": "01a19ae7-0998-7d69-b56f-561887ec5a6b",
+    "key": "QA23-MVYUO4PT-D001",
+    "rowVersion": 0,
+    "dueDate": null,
+    "warnings": []
+  },
+  "detail": {
+    "deliverable": {
+      "id": "01a19ae7-0998-7d69-b56f-561887ec5a6b",
+      "projectId": "01a19ad8-43ef-7ad6-af63-f90bcbd8468e",
+      "key": "QA23-MVYUO4PT-D001",
+      "name": "Synthetic QA23 client drawing",
+      "projectDisciplineId": "01a19ad8-442f-7b1c-8f16-643e340ad4a3",
+      "deliverableTypeId": "01a19acd-9e2a-79d0-b747-dd15144eddd9",
+      "ownerId": "01a19acd-9edd-7488-8e32-3e632aed017c",
+      "reviewerId": "01a19acd-9edd-783b-8d9a-75534ab735ee",
+      "milestoneId": null,
+      "startDate": null,
+      "dueDate": null,
+      "originalDueDate": null,
+      "originalStartDate": null,
+      "priority": "Medium",
+      "status": "Issued",
+      "revision": "PRIVATE FUTURE REVISION QA23",
+      "issuedDate": "2026-11-02",
+      "issuedTo": "PRIVATE RECIPIENT QA23",
+      "requiresReview": false,
+      "requiredReviewPackageId": null,
+      "rowVersion": 3,
+      "createdAt": "2026-11-02T06:16:35.006561+00:00",
+      "lastActivityAt": "2026-11-02T06:16:35.186105+00:00",
+      "disciplineName": "Civil",
+      "disciplineColour": "#2563eb",
+      "disciplineOrder": 0,
+      "typeName": "Drawing Package",
+      "ownerName": "Alex Chen",
+      "ownerActive": true,
+      "reviewerName": "Jill Martin",
+      "milestoneKey": null,
+      "milestoneName": null,
+      "milestoneDate": null,
+      "state": null,
+      "tasks": [],
+      "registerInfo": {
+        "clientDrawingNumber": "00123",
+        "numberPattern": null,
+        "numberMatchesPattern": null,
+        "currentIssue": {
+          "id": "01a19ae7-0a1c-7610-98b1-d62adc0b984f",
+          "revision": "A",
+          "issuedDate": "2026-11-02",
+          "purposeOfIssueId": "01a19acd-9e3e-7864-aa9f-c3ed387d35bf",
+          "purpose": "For review",
+          "returnCodeId": "01a19acd-9e46-7b20-bdca-e6e9520a71cc",
+          "returnCode": "B",
+          "returnLabel": "Accepted with comments",
+          "responseDate": "2026-11-02"
+        }
+      }
+    },
+    "description": "PRIVATE DESCRIPTION QA23",
+    "transmittalUrl": null,
+    "issueNote": "PRIVATE NOTE QA23",
+    "acceptedDate": null,
+    "onHoldReason": null,
+    "cancelledReason": null,
+    "previousStatus": null,
+    "project": {
+      "id": "01a19ad8-43ef-7ad6-af63-f90bcbd8468e",
+      "projectNumber": "QA23-MVYUO4PT",
+      "name": "Synthetic QA23 personal work verification",
+      "status": "Active"
+    },
+    "derivedPredecessors": [],
+    "derivedSuccessors": [],
+    "issues": [
+      {
+        "id": "01a19ae7-0a1c-7610-98b1-d62adc0b984f",
+        "issuedDate": "2026-11-02",
+        "revision": "A",
+        "issuedTo": "PRIVATE RECIPIENT QA23",
+        "transmittalUrl": null,
+        "note": "PRIVATE NOTE QA23",
+        "issuedBy": "Marc Dubois",
+        "registerInfo": {
+          "rowVersion": 1,
+          "purposeOfIssueId": "01a19acd-9e3e-7864-aa9f-c3ed387d35bf",
+          "purpose": "For review",
+          "returnCodeId": "01a19acd-9e46-7b20-bdca-e6e9520a71cc",
+          "returnCode": "B",
+          "returnLabel": "Accepted with comments",
+          "responseDate": "2026-11-02"
+        }
+      }
+    ],
+    "explicitPredecessors": [],
+    "explicitSuccessors": [],
+    "permissions": {
+      "edit": {
+        "ok": true,
+        "reason": null
+      },
+      "delete": true,
+      "transitions": [
+        {
+          "to": "Revision Required",
+          "allowed": true,
+          "needsReason": true
+        },
+        {
+          "to": "Accepted",
+          "allowed": true,
+          "needsReason": false
+        },
+        {
+          "to": "Cancelled",
+          "allowed": true,
+          "needsReason": true
+        }
+      ],
+      "issue": false,
+      "linkDeliverables": true,
+      "issueNeedsConfirm": true,
+      "readyToIssueGuard": null,
+      "comment": true,
+      "createTask": true,
+      "needsReason": false,
+      "recordIssueResponse": true
+    },
+    "context": {
+      "owner": {
+        "id": "01a19acd-9edd-7488-8e32-3e632aed017c",
+        "name": "Alex Chen",
+        "state": "Active",
+        "kind": "User"
+      },
+      "nextActors": [],
+      "neededBy": null,
+      "nextAction": "none",
+      "terminal": true,
+      "actorState": "None",
+      "requiresReviewGate": false,
+      "nextTransitions": [],
+      "inputs": []
+    },
+    "workActivity": {
+      "eventId": "01a19ae7-0a72-7474-ac69-60d19a83cc52",
+      "occurredAt": "2026-11-02T06:16:35.186599+00:00",
+      "actorId": "01a19acd-9edd-7b6f-8f0a-d2d6f83f12bf",
+      "actorName": "Priya Nair",
+      "actorType": "User",
+      "commentable": true,
+      "commentCount": 0
+    }
+  },
+  "reportQuery": "projectId=01a19ad8-43ef-7ad6-af63-f90bcbd8468e&from=2026-11-02&to=2026-11-02&scope=mine",
+  "report": {
+    "code": "task-hours",
+    "title": "Task Hours",
+    "itemType": null,
+    "columns": [
+      {
+        "path": "workDate",
+        "header": "Date",
+        "type": "date"
+      },
+      {
+        "path": "person",
+        "header": "Person",
+        "type": "text"
+      },
+      {
+        "path": "projectNumber",
+        "header": "Project",
+        "type": "text"
+      },
+      {
+        "path": "taskKey",
+        "header": "Key",
+        "type": "text"
+      },
+      {
+        "path": "taskName",
+        "header": "Task",
+        "type": "text"
+      },
+      {
+        "path": "hours",
+        "header": "Hours",
+        "type": "number"
+      },
+      {
+        "path": "note",
+        "header": "Note",
+        "type": "text"
+      }
+    ],
+    "rows": [
+      {
+        "workDate": "2026-11-02",
+        "person": "Alex Chen",
+        "projectNumber": "QA23-MVYUO4PT",
+        "taskKey": "QA23-MVYUO4PT-T0002",
+        "taskName": "Synthetic QA23 new exact assignment",
+        "hours": 1,
+        "note": "Synthetic report person row",
+        "itemType": "Task",
+        "id": "01a19ae5-9de8-72cb-a820-c9943f9a4ce3",
+        "personId": "01a19acd-9edd-7488-8e32-3e632aed017c",
+        "entryId": "01a19ae7-0968-7087-8f79-e0af8f12471a",
+        "userReferences": {
+          "person": {
+            "kind": "User",
+            "id": "01a19acd-9edd-7488-8e32-3e632aed017c",
+            "displayName": "Alex Chen",
+            "sourceKey": "task-hours:Task:01a19ae7-0968-7087-8f79-e0af8f12471a"
+          }
+        }
+      },
+      {
+        "workDate": "2026-11-02",
+        "person": "Alex Chen",
+        "projectNumber": "QA23-MVYUO4PT",
+        "taskKey": "QA23-MVYUO4PT-T0002",
+        "taskName": "Synthetic QA23 new exact assignment",
+        "hours": 2,
+        "note": "Synthetic report person row",
+        "itemType": "Task",
+        "id": "01a19ae5-9de8-72cb-a820-c9943f9a4ce3",
+        "personId": "01a19acd-9edd-7488-8e32-3e632aed017c",
+        "entryId": "01a19ae7-097e-7f4d-8166-a3a7a97c838d",
+        "userReferences": {
+          "person": {
+            "kind": "User",
+            "id": "01a19acd-9edd-7488-8e32-3e632aed017c",
+            "displayName": "Alex Chen",
+            "sourceKey": "task-hours:Task:01a19ae7-097e-7f4d-8166-a3a7a97c838d"
+          }
+        }
+      },
+      {
+        "person": "Total",
+        "hours": 3
+      }
+    ],
+    "total": 3,
+    "totalIsLowerBound": false,
+    "truncated": false,
+    "listLink": "/time?from=2026-11-02&to=2026-11-02&projectId=01a19ad8-43ef-7ad6-af63-f90bcbd8468e",
+    "parameters": [
+      {
+        "label": "Projects",
+        "value": "QA23-MVYUO4PT"
+      },
+      {
+        "label": "From",
+        "value": "2026-11-02"
+      },
+      {
+        "label": "To",
+        "value": "2026-11-02"
+      },
+      {
+        "label": "Staff",
+        "value": "Mine"
+      }
+    ],
+    "asOf": "2026-11-02T06:16:35.227879+00:00"
+  },
+  "status": "PASS_NORMAL_COMMAND_SETUP"
+}

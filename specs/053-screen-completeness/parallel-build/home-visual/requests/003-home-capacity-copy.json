@@ -1,0 +1,10 @@
+{
+  "home.capacity.scope": "People in your planner scope: {n}, independent of Home's projects",
+  "home.capacity.basis": "Planned uses the planner's Confidence: Confirmed and Confidence: Expected bands. Free is available capacity minus planned; time off is already included in available capacity and is not subtracted again. Possible is not subtracted.",
+  "home.capacity.partial": "Partial view: totals include only projects you can see (people affected: {n}). The percentage describes visible planned hours; Free is unavailable.",
+  "home.capacity.provisional": "People with unverified capacity: {n}. Available hours, percentage and Free are unavailable.",
+  "home.capacity.missing": "People with missing current-week capacity: {n}. Unknown values are excluded from totals and remain unavailable.",
+  "home.capacity.above": "People above 100% this week: {n}",
+  "home.capacity.aboveVisible": "People above 100% this week in visible, verified totals: at least {n}",
+  "home.capacity.groupPeople": "{name}: people in scope {n}"
+}

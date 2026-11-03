@@ -1,0 +1,10 @@
+{
+  "status": "FAIL_TEST_COMPILATION",
+  "errors": 3,
+  "warnings": 1163,
+  "observed": [
+    "ExportTests missing Hub.Api.Text import (2 errors)",
+    "ExportTests invented Project.DeletedAt property; projecthasarchive notsoftdelete (1 error)"
+  ],
+  "boundary": "APIbootstrap/migrationgenerationPASS; NOproviderchecksrun; APIalreadycompiles. Repair exacttestfileonly before anothercompiler."
+}

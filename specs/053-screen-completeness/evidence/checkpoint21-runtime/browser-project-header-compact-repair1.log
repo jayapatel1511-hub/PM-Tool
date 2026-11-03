@@ -1,0 +1,6 @@
+{"group":"none","name":"spaced120","header":64,"firstMeaningfulY":364.5,"firstTaskY":364.5}
+{"group":"deliverable","name":"spaced120","header":64,"firstMeaningfulY":364.5,"firstTaskY":401.5}
+{"group":"none","name":"unbroken120","header":64,"firstMeaningfulY":364.5,"firstTaskY":364.5}
+{"group":"deliverable","name":"unbroken120","header":64,"firstMeaningfulY":364.5,"firstTaskY":401.5}
+{"observations":[{"group":"none","name":"spaced120","header":64,"firstMeaningfulY":364.5,"firstTaskY":364.5},{"group":"deliverable","name":"spaced120","header":64,"firstMeaningfulY":364.5,"firstTaskY":401.5},{"group":"none","name":"unbroken120","header":64,"firstMeaningfulY":364.5,"firstTaskY":364.5},{"group":"deliverable","name":"unbroken120","header":64,"firstMeaningfulY":364.5,"firstTaskY":401.5}],"densityFailures":[],"note":"Grouped firstMeaningfulY is the actual group-summary row; child firstTaskY is reported separately. Mock API is not server permission evidence."}
+PASS: real project header120-char names/full hover+focus, pills/meta/Mono/details,72cap, strict ungrouped and grouped actual-task405, phone containment, independent flags and exact off restoration

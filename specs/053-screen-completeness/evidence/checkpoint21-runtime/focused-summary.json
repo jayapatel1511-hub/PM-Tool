@@ -1,0 +1,122 @@
+{
+  "passed": 29,
+  "failed": 0,
+  "tests": [
+    {
+      "name": "Hub.Tests.Api.TeamCompletenessTests.Unit_uses_current_placement_and_is_omitted_with_org_flag_off_without_widening_Team",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TeamCompletenessTests.Home_discipline_is_distinct_from_project_primary_and_shared_with_workspace_without_changing_legacy_cohort",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TeamCompletenessTests.Two_open_roles_are_separate_canonical_records_and_never_change_Team_people_or_membership",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ReportCapacityComparisonProjectionTests.Incompatible_or_duplicate_canonical_inputs_refuse_instead_of_being_silently_double_counted",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ReportCapacityComparisonTests.Historical_unit_membership_and_parent_descendant_filter_match_the_existing_actual_measure_cohort",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ReportCapacityComparisonTests.Capture_is_read_only_and_exports_keep_identical_matrix_bytes_and_no_chart_parameters",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.WorkBoardCompletenessTests.Board_fact_is_independent_of_screen_patterns_and_other_rows_remain_unchanged(work: False, patterns: False)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ReportCapacityComparisonProjectionTests.Month_sums_positive_weekly_group_shortfalls_without_netting_spare_weeks_and_converts_once",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.WorkBoardCompletenessTests.Ready_entry_survives_new_activity_and_In_Review_with_five_and_six_day_age_without_changing_canonical_threshold",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ReportCapacityComparisonProjectionTests.Unknown_standard_and_unknown_source_do_not_turn_into_zero_or_an_inferred_deficit_subtotal",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.WorkBoardCompletenessTests.Foreign_discipline_reference_and_missing_current_lead_name_stay_unavailable_instead_of_falling_back_to_pm",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ReportCapacityComparisonTests.Owner_flags_permission_and_other_forms_do_not_expose_comparison_and_visual_flag_is_independent",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TeamCompletenessTests.Team_saved_views_require_owner_flag_and_keep_workspace_personal_and_project_access_sharing_guards",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.WorkBoardCompletenessTests.Board_fact_is_independent_of_screen_patterns_and_other_rows_remain_unchanged(work: False, patterns: True)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.WorkBoardCompletenessTests.Manual_order_guarded_transitions_and_restricted_scope_are_unchanged_by_board_facts",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TeamCompletenessTests.Unknown_references_stay_null_and_workspace_deduplicates_members_across_selected_projects",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.WorkBoardCompletenessTests.Five_normal_in_progress_cards_supply_twelve_hours_one_overdue_and_actual_lead_without_invented_totals",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TeamCompletenessTests.Team_saved_view_group_validation_and_reference_cleanup_keep_known_ids_and_distinct_unknown_sentinels",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ReportCapacityComparisonProjectionTests.Expanded_row_cap_retains_whole_stably_ordered_identity_groups_with_true_and_returned_counts",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ReportCapacityComparisonProjectionTests.Demand_uses_confirmed_expected_without_possible_or_approved_duplication_and_clamps_only_after_group_sum",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.WorkBoardCompletenessTests.Missing_or_future_recorded_review_time_is_unavailable_and_missing_state_is_never_repaired_by_get",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ReportCapacityComparisonProjectionTests.Horizon_partial_is_conservative_in_every_included_week_while_provisional_only_affects_its_availability_week",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.WorkBoardCompletenessTests.Board_fact_is_independent_of_screen_patterns_and_other_rows_remain_unchanged(work: True, patterns: True)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TeamCompletenessTests.Picker_current_week_read_keeps_existing_planner_scope_free_and_away_and_refuses_unknown_people",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TeamCompletenessTests.Certification_filter_and_lead_references_remain_independent_of_people_flag_and_hidden_scope",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ReportCapacityComparisonTests.Real_Civil_row_has_exact_ten_hour_deficit_from_same_canonical_grid_and_no_person_payload",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.WorkBoardCompletenessTests.Board_fact_is_independent_of_screen_patterns_and_other_rows_remain_unchanged(work: True, patterns: False)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.ReportCapacityComparisonTests.Horizon_private_work_and_weekly_provisional_availability_remain_unknown_without_private_source_details",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.WorkBoardCompletenessTests.Distinct_same_named_disciplines_and_projects_keep_current_recorded_leads_and_actual_null_unassigned",
+      "outcome": "Passed"
+    }
+  ]
+}

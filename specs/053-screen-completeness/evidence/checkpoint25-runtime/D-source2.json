@@ -1,0 +1,7 @@
+{
+  "atUtc": "2026-11-02T09:43:25.113457+00:00",
+  "status": "RELATIVE_LOCATOR_REPAIR_HASH_PASS_SYNTAX_PENDING",
+  "file": "web/tests/review-register.cjs",
+  "sha256": "93157ffeb38c2c5d0fd4a47f479dfae05609e9536ef1bb0568745670f09162ea",
+  "changes": "Only2has locator scopes corrected; widget/fixture sourceheldunchanged"
+}

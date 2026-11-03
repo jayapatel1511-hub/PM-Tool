@@ -1,0 +1,173 @@
+
+> web@0.0.0 build
+> npm run gen && tsc -b && vite build
+
+
+> web@0.0.0 gen
+> openapi-typescript src/gen/openapi.json -o src/gen/api.d.ts
+
+✨ openapi-typescript 7.13.0
+🚀 src/gen/openapi.json → src/gen/api.d.ts [268.9ms]
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - `__dirname` (vite.config.ts:12:41). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+vite v8.3.1 building client environment for production...
+transforming...
+✓ 2499 modules transformed.
+rendering chunks...
+computing gzip size...
+../src/Hub.Api/wwwroot/index.html                                          4.36 kB │ gzip:   1.01 kB
+../src/Hub.Api/wwwroot/assets/IBMPlexMono-Regular-Du0PCiXT.woff2          49.24 kB
+../src/Hub.Api/wwwroot/assets/IBMPlexMono-Medium-CiYsa3y2.woff2           50.40 kB
+../src/Hub.Api/wwwroot/.vite/manifest.json                                50.50 kB │ gzip:   5.00 kB
+../src/Hub.Api/wwwroot/assets/IBMPlexMono-SemiBold-CT2p8cOJ.woff2         50.60 kB
+../src/Hub.Api/wwwroot/assets/IBMPlexSans-Regular-BiEB_oxT.woff2          63.02 kB
+../src/Hub.Api/wwwroot/assets/IBMPlexSans-Medium-BQLKo0ot.woff2           66.74 kB
+../src/Hub.Api/wwwroot/assets/IBMPlexSans-SemiBold-KfaJl9PC.woff2         67.06 kB
+../src/Hub.Api/wwwroot/assets/Time-CbSQmF5r.css                            0.64 kB │ gzip:   0.26 kB
+../src/Hub.Api/wwwroot/assets/title-block-hdyxJNMI.css                     1.26 kB │ gzip:   0.42 kB
+../src/Hub.Api/wwwroot/assets/Staff-CcxsPuBK.css                           1.81 kB │ gzip:   0.45 kB
+../src/Hub.Api/wwwroot/assets/pills-GRc589h_.css                           1.84 kB │ gzip:   0.44 kB
+../src/Hub.Api/wwwroot/assets/count-card-iiayh2De.css                      2.44 kB │ gzip:   0.73 kB
+../src/Hub.Api/wwwroot/assets/visual-tabs-Droa3Yn1.css                     3.03 kB │ gzip:   0.65 kB
+../src/Hub.Api/wwwroot/assets/Portfolio-C86c8S7c.css                       4.98 kB │ gzip:   1.14 kB
+../src/Hub.Api/wwwroot/assets/Reports-C9L1fA_m.css                         5.27 kB │ gzip:   1.37 kB
+../src/Hub.Api/wwwroot/assets/Home-C0xDwDht.css                           10.00 kB │ gzip:   2.25 kB
+../src/Hub.Api/wwwroot/assets/Entrance-ChlWH_uU.css                       25.58 kB │ gzip:   5.29 kB
+../src/Hub.Api/wwwroot/assets/index-9Akouhj1.css                         129.66 kB │ gzip:  22.50 kB
+../src/Hub.Api/wwwroot/assets/BrowserPerformanceMeasurement-CRRdnzEp.js    0.11 kB │ gzip:   0.09 kB
+../src/Hub.Api/wwwroot/assets/chevron-left-B3kDE_VO.js                     0.15 kB │ gzip:   0.16 kB
+../src/Hub.Api/wwwroot/assets/plus-vw_u1OSf.js                             0.18 kB │ gzip:   0.16 kB
+../src/Hub.Api/wwwroot/assets/arrow-right-TviIEF_5.js                      0.19 kB │ gzip:   0.18 kB
+../src/Hub.Api/wwwroot/assets/check-check-KLA_YKkr.js                      0.20 kB │ gzip:   0.19 kB
+../src/Hub.Api/wwwroot/assets/download-BC-jqnYR.js                         0.26 kB │ gzip:   0.21 kB
+../src/Hub.Api/wwwroot/assets/link-2-DXavmfDU.js                           0.27 kB │ gzip:   0.22 kB
+../src/Hub.Api/wwwroot/assets/arrow-up-down-DHgghNSX.js                    0.27 kB │ gzip:   0.21 kB
+../src/Hub.Api/wwwroot/assets/external-link-BWRnjv3O.js                    0.28 kB │ gzip:   0.22 kB
+../src/Hub.Api/wwwroot/assets/monitor-B453rmdw.js                          0.28 kB │ gzip:   0.22 kB
+../src/Hub.Api/wwwroot/assets/circle-alert-BJbcNcQl.js                     0.30 kB │ gzip:   0.21 kB
+../src/Hub.Api/wwwroot/assets/pencil-BIa4Qm-B.js                           0.30 kB │ gzip:   0.24 kB
+../src/Hub.Api/wwwroot/assets/arrow-up-Du0mjDsm.js                         0.32 kB │ gzip:   0.23 kB
+../src/Hub.Api/wwwroot/assets/discipline-colour-B7Cu5WgU.js                0.32 kB │ gzip:   0.19 kB
+../src/Hub.Api/wwwroot/assets/users-DEUKZTFQ.js                            0.33 kB │ gzip:   0.24 kB
+../src/Hub.Api/wwwroot/assets/shield-check-C5MvOuyT.js                     0.34 kB │ gzip:   0.26 kB
+../src/Hub.Api/wwwroot/assets/item-mark-Hs1gJCTu.js                        0.35 kB │ gzip:   0.25 kB
+../src/Hub.Api/wwwroot/assets/calendar-clock-C3axPN1Q.js                   0.41 kB │ gzip:   0.27 kB
+../src/Hub.Api/wwwroot/assets/schedule-note-CDSSIKdg.js                    0.43 kB │ gzip:   0.28 kB
+../src/Hub.Api/wwwroot/assets/NotFound-Do7ETlE8.js                         0.43 kB │ gzip:   0.28 kB
+../src/Hub.Api/wwwroot/assets/layers-GY8UzkGQ.js                           0.47 kB │ gzip:   0.27 kB
+../src/Hub.Api/wwwroot/assets/square-check-big-Dzf1Pq0Y.js                 0.47 kB │ gzip:   0.31 kB
+../src/Hub.Api/wwwroot/assets/star-DI8dkK2Z.js                             0.50 kB │ gzip:   0.31 kB
+../src/Hub.Api/wwwroot/assets/page-mode-mIVW2woN.js                        0.50 kB │ gzip:   0.33 kB
+../src/Hub.Api/wwwroot/assets/calendar-days-CuYoiSjC.js                    0.52 kB │ gzip:   0.28 kB
+../src/Hub.Api/wwwroot/assets/data-Z7uxQbbL.js                             0.55 kB │ gzip:   0.35 kB
+../src/Hub.Api/wwwroot/assets/rolldown-runtime-hePW80VL.js                 0.71 kB │ gzip:   0.42 kB
+../src/Hub.Api/wwwroot/assets/input-CSbLhXja.js                            0.83 kB │ gzip:   0.46 kB
+../src/Hub.Api/wwwroot/assets/export-AROBCCFY.js                           0.90 kB │ gzip:   0.50 kB
+../src/Hub.Api/wwwroot/assets/CopyStructure-bUOIWHbC.js                    1.00 kB │ gzip:   0.55 kB
+../src/Hub.Api/wwwroot/assets/square-kanban-gx81C63K.js                    1.00 kB │ gzip:   0.49 kB
+../src/Hub.Api/wwwroot/assets/useOrgPlacement-ChDKcU_H.js                  1.03 kB │ gzip:   0.56 kB
+../src/Hub.Api/wwwroot/assets/scale-D9lje-eA.js                            1.07 kB │ gzip:   0.52 kB
+../src/Hub.Api/wwwroot/assets/useInfiniteQuery-CBOStFmB.js                 1.11 kB │ gzip:   0.47 kB
+../src/Hub.Api/wwwroot/assets/title-block-C6-xsmD-.js                      1.14 kB │ gzip:   0.66 kB
+../src/Hub.Api/wwwroot/assets/preload-helper-BZ1Pz5am.js                   1.21 kB │ gzip:   0.69 kB
+../src/Hub.Api/wwwroot/assets/drafts-CsdN9dv5.js                           1.33 kB │ gzip:   0.72 kB
+../src/Hub.Api/wwwroot/assets/drafts-BTV1BUye.js                           1.77 kB │ gzip:   0.76 kB
+../src/Hub.Api/wwwroot/assets/extension-slots-DOaIPLBi.js                  1.83 kB │ gzip:   0.76 kB
+../src/Hub.Api/wwwroot/assets/count-card-oRQojacF.js                       1.95 kB │ gzip:   0.87 kB
+../src/Hub.Api/wwwroot/assets/useMutation-MdDMeTVU.js                      2.41 kB │ gzip:   1.01 kB
+../src/Hub.Api/wwwroot/assets/project-status-note--fbSHAfJ.js              2.49 kB │ gzip:   1.13 kB
+../src/Hub.Api/wwwroot/assets/Health-BNN2g4OF.js                           2.69 kB │ gzip:   1.15 kB
+../src/Hub.Api/wwwroot/assets/AuditChains-QI188N4y.js                      3.26 kB │ gzip:   1.18 kB
+../src/Hub.Api/wwwroot/assets/Organisation-RlWQloOc.js                     3.42 kB │ gzip:   1.30 kB
+../src/Hub.Api/wwwroot/assets/team-organisation-controls-BcBhTtm5.js       3.54 kB │ gzip:   1.48 kB
+../src/Hub.Api/wwwroot/assets/Operations-Bf5gPL7b.js                       3.80 kB │ gzip:   1.43 kB
+../src/Hub.Api/wwwroot/assets/pills-Bh_xyr93.js                            3.92 kB │ gzip:   1.51 kB
+../src/Hub.Api/wwwroot/assets/Holidays-D8gKp0iX.js                         4.38 kB │ gzip:   1.71 kB
+../src/Hub.Api/wwwroot/assets/checkbox-CYS5cLaa.js                         4.61 kB │ gzip:   1.95 kB
+../src/Hub.Api/wwwroot/assets/switch-CLwqanKk.js                           4.62 kB │ gzip:   1.92 kB
+../src/Hub.Api/wwwroot/assets/Search-D5BpvGhB.js                           4.81 kB │ gzip:   1.93 kB
+../src/Hub.Api/wwwroot/assets/TimeAwayDialog-DjUJ_bQR.js                   4.92 kB │ gzip:   2.10 kB
+../src/Hub.Api/wwwroot/assets/ReassignWork-CnSl03Pg.js                     5.05 kB │ gzip:   2.19 kB
+../src/Hub.Api/wwwroot/assets/Files-B6ZlYkG5.js                            5.24 kB │ gzip:   2.18 kB
+../src/Hub.Api/wwwroot/assets/Pickup-ap7AcEEE.js                           5.27 kB │ gzip:   1.94 kB
+../src/Hub.Api/wwwroot/assets/ProjectActivity-DBFKYCEg.js                  5.70 kB │ gzip:   2.08 kB
+../src/Hub.Api/wwwroot/assets/WorkspaceTeam-DgACZG_t.js                    5.85 kB │ gzip:   2.41 kB
+../src/Hub.Api/wwwroot/assets/activity-CJoFDgD3.js                         6.02 kB │ gzip:   2.14 kB
+../src/Hub.Api/wwwroot/assets/person-panel-trigger-1v8ElRcB.js             6.12 kB │ gzip:   2.69 kB
+../src/Hub.Api/wwwroot/assets/AdminReview-C2TV_Bd3.js                      6.37 kB │ gzip:   2.17 kB
+../src/Hub.Api/wwwroot/assets/person-panel-DgOMROzl.js                     6.39 kB │ gzip:   2.23 kB
+../src/Hub.Api/wwwroot/assets/links-DeYcKmjO.js                            6.75 kB │ gzip:   2.74 kB
+../src/Hub.Api/wwwroot/assets/keys-BNiF73M6.js                             6.91 kB │ gzip:   2.03 kB
+../src/Hub.Api/wwwroot/assets/views-CxamdAHU.js                            6.99 kB │ gzip:   2.69 kB
+../src/Hub.Api/wwwroot/assets/project-list-details-VAg6rO7g.js             7.19 kB │ gzip:   2.40 kB
+../src/Hub.Api/wwwroot/assets/comments-D39XdCxx.js                         7.60 kB │ gzip:   2.91 kB
+../src/Hub.Api/wwwroot/assets/CoordinationRegister-_z9QwAgl.js             9.62 kB │ gzip:   3.33 kB
+../src/Hub.Api/wwwroot/assets/auth-C9wHBIOu.js                             9.78 kB │ gzip:   3.95 kB
+../src/Hub.Api/wwwroot/assets/Notifications-CM_QWibu.js                   10.38 kB │ gzip:   3.39 kB
+../src/Hub.Api/wwwroot/assets/FromTemplate-D1p-YdE4.js                    11.01 kB │ gzip:   3.24 kB
+../src/Hub.Api/wwwroot/assets/Structure-Bhxh59GD.js                       11.90 kB │ gzip:   2.90 kB
+../src/Hub.Api/wwwroot/assets/Preferences-VYTmA_aW.js                     12.27 kB │ gzip:   3.42 kB
+../src/Hub.Api/wwwroot/assets/person-facts-editor-B6X2gI5l.js             13.33 kB │ gzip:   3.89 kB
+../src/Hub.Api/wwwroot/assets/search-TJcrJ5Ht.js                          13.60 kB │ gzip:   5.44 kB
+../src/Hub.Api/wwwroot/assets/workspace-CL1i7huZ.js                       15.46 kB │ gzip:   5.57 kB
+../src/Hub.Api/wwwroot/assets/Gantt-CcRI0Ohr.js                           18.77 kB │ gzip:   6.55 kB
+../src/Hub.Api/wwwroot/assets/Staff-Dei0YGrx.js                           21.49 kB │ gzip:   6.52 kB
+../src/Hub.Api/wwwroot/assets/Dashboard-H1496TRW.js                       21.54 kB │ gzip:   6.12 kB
+../src/Hub.Api/wwwroot/assets/ProjectSettings-DgUjiBqK.js                 21.63 kB │ gzip:   6.04 kB
+../src/Hub.Api/wwwroot/assets/Reviews-BXH-FMsi.js                         21.90 kB │ gzip:   6.18 kB
+../src/Hub.Api/wwwroot/assets/WorkspaceTasks-CzNlfbQu.js                  22.13 kB │ gzip:   6.96 kB
+../src/Hub.Api/wwwroot/assets/Team-Dh9xSzhz.js                            22.77 kB │ gzip:   6.71 kB
+../src/Hub.Api/wwwroot/assets/useQuery-BiBTTWaU.js                        22.98 kB │ gzip:   7.67 kB
+../src/Hub.Api/wwwroot/assets/Vacation-CM9a7p86.js                        23.63 kB │ gzip:   6.98 kB
+../src/Hub.Api/wwwroot/assets/people-B0S1rWly.js                          24.21 kB │ gzip:   9.00 kB
+../src/Hub.Api/wwwroot/assets/Entrance-DLLOtR5B.js                        24.55 kB │ gzip:   6.43 kB
+../src/Hub.Api/wwwroot/assets/Changes-DUijHqaF.js                         24.55 kB │ gzip:   6.63 kB
+../src/Hub.Api/wwwroot/assets/Portfolio-DbdwgKH5.js                       26.92 kB │ gzip:   7.57 kB
+../src/Hub.Api/wwwroot/assets/Admin-Co_Lv17x.js                           27.79 kB │ gzip:   7.59 kB
+../src/Hub.Api/wwwroot/assets/Time-CLQszv-1.js                            27.90 kB │ gzip:   8.15 kB
+../src/Hub.Api/wwwroot/assets/Handoffs-iMpkeyJq.js                        30.26 kB │ gzip:   7.25 kB
+../src/Hub.Api/wwwroot/assets/Milestones-CvPbZdw_.js                      31.18 kB │ gzip:   8.57 kB
+../src/Hub.Api/wwwroot/assets/Templates-Fnf4ArnY.js                       31.76 kB │ gzip:   7.57 kB
+../src/Hub.Api/wwwroot/assets/DesignBasis-CWnl7q3f.js                     32.28 kB │ gzip:   8.09 kB
+../src/Hub.Api/wwwroot/assets/Coordination-g9QHpFBY.js                    32.59 kB │ gzip:   9.28 kB
+../src/Hub.Api/wwwroot/assets/ProjectList-DuZba_zM.js                     34.43 kB │ gzip:   9.26 kB
+../src/Hub.Api/wwwroot/assets/Workload-BjYh3_gA.js                        36.57 kB │ gzip:   9.58 kB
+../src/Hub.Api/wwwroot/assets/Submissions-Co46GK5G.js                     37.75 kB │ gzip:   9.20 kB
+../src/Hub.Api/wwwroot/assets/Planner-B6qzJyhG.js                         38.63 kB │ gzip:  10.44 kB
+../src/Hub.Api/wwwroot/assets/Reports-BWy15fzG.js                         38.87 kB │ gzip:  11.03 kB
+../src/Hub.Api/wwwroot/assets/Timeline-BGubpwpN.js                        39.56 kB │ gzip:  11.82 kB
+../src/Hub.Api/wwwroot/assets/Home-a3lQ4itD.js                            40.09 kB │ gzip:  11.00 kB
+../src/Hub.Api/wwwroot/assets/Decisions-D-FUv8gg.js                       44.14 kB │ gzip:  11.31 kB
+../src/Hub.Api/wwwroot/assets/Allocations-BvIZ_QN4.js                     54.38 kB │ gzip:  13.39 kB
+../src/Hub.Api/wwwroot/assets/Readiness-D-7nEENi.js                       62.00 kB │ gzip:  14.32 kB
+../src/Hub.Api/wwwroot/assets/Registers-B85LuV3T.js                       66.05 kB │ gzip:  15.45 kB
+../src/Hub.Api/wwwroot/assets/common-By2IU64p.js                         266.93 kB │ gzip:  81.95 kB
+../src/Hub.Api/wwwroot/assets/dist-BfBb9CKk.js                           284.94 kB │ gzip:  73.15 kB
+../src/Hub.Api/wwwroot/assets/label-Cl4QH66_.js                          313.24 kB │ gzip:  91.82 kB
+../src/Hub.Api/wwwroot/assets/index-BOGh8_qK.js                          833.47 kB │ gzip: 229.88 kB
+
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0msrc/pages/Calendar.tsx is dynamically imported by src/app/routes.tsx but also statically imported by src/components/hub/new-item.tsx, dynamic import will not move module into another chunk.
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0msrc/pages/projects/Deliverables.tsx is dynamically imported by src/app/registrations.tsx, src/app/routes.tsx but also statically imported by src/pages/projects/Milestones.tsx, src/pages/projects/TaskPanel.tsx, dynamic import will not move module into another chunk.
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0msrc/pages/projects/TaskPanel.tsx is dynamically imported by src/app/registrations.tsx, src/app/routes.tsx but also statically imported by src/pages/projects/Board.tsx, src/pages/projects/Tasks.tsx, dynamic import will not move module into another chunk.
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0msrc/pages/projects/Tasks.tsx is dynamically imported by src/app/routes.tsx but also statically imported by src/components/hub/new-item.tsx, src/pages/MyWork.tsx, src/pages/Pickup.tsx, src/pages/Planner.tsx, src/pages/ReassignWork.tsx, ..., dynamic import will not move module into another chunk.
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0msrc/components/hub/new-item.tsx is dynamically imported by src/app/registrations.tsx but also statically imported by src/pages/MyWork.tsx, src/pages/WorkspaceTasks.tsx, dynamic import will not move module into another chunk.
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0msrc/components/hub/notifications.tsx is dynamically imported by src/app/registrations.tsx but also statically imported by src/pages/MyWork.tsx, src/pages/Notifications.tsx, dynamic import will not move module into another chunk.
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0msrc/pages/projects/Board.tsx is dynamically imported by src/app/routes.tsx but also statically imported by src/pages/MyWork.tsx, src/pages/WorkspaceTasks.tsx, dynamic import will not move module into another chunk.
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0msrc/pages/projects/Meetings.tsx is dynamically imported by src/app/registrations.tsx, src/app/routes.tsx but also statically imported by src/pages/MyWork.tsx, src/pages/projects/Coordination.tsx, src/pages/projects/Registers.tsx, dynamic import will not move module into another chunk.
+
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0msrc/pages/projects/Follow.tsx is dynamically imported by src/app/registrations.tsx but also statically imported by src/pages/MyWork.tsx, src/pages/Preferences.tsx, dynamic import will not move module into another chunk.
+
+✓ built in 307ms

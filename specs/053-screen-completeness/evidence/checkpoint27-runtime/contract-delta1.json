@@ -1,0 +1,36 @@
+{
+  "addedSchemas": [
+    "DocumentLinkReferenceComparison",
+    "DocumentLinkReferenceContext",
+    "DocumentLinkReferenceInput",
+    "DocumentLinkReferenceTarget",
+    "DocumentLinkReferenceUser",
+    "DocumentLinkReferenceValue",
+    "FileScreenApplied",
+    "FileScreenAuthorChoice",
+    "FileScreenDisciplineChoice",
+    "FileScreenLinkContext",
+    "FileScreenMissingDeliverable",
+    "FileScreenMissingDeliverables",
+    "FileScreenRead"
+  ],
+  "removedSchemas": [],
+  "changedSchemas": [
+    "DocumentLinkAddBody",
+    "FilesRead",
+    "LinkRow"
+  ],
+  "changedPaths": [
+    "/api/v1/files"
+  ],
+  "status": "PASS_INTENDED_ONLY",
+  "existingSchemas": "Only three optional nullable additions; all prior members/required lists identical",
+  "pathChange": "Only three optional raw query params on Files",
+  "registryAddedKeys": [
+    "field.ReferenceDeliverableId",
+    "field.ReferenceRegisteredAt",
+    "field.ReferenceRegisteredBy"
+  ],
+  "removedKeys": [],
+  "checkNote": "First helper incorrectly indexed optional required key; corrected to OpenAPI default false; no golden/source change"
+}

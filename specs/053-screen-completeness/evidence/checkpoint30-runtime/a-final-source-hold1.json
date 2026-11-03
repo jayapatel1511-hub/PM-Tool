@@ -1,0 +1,11 @@
+{
+  "atUtc": "2026-11-02T20:15:27.739209+00:00",
+  "files": {
+    "tests/task-sections.cjs": "92df7ff97fb64271b2e43da32f160891f32d6bc886c2ae30f732e764102e767b",
+    "tests/task-sections.fixture.cjs": "a157dc642e1b6e268833552ac1e7e7c5b09bd6935e0b2456ced1fcc66b5de1bd",
+    "src/pages/projects/TaskPanel.tsx": "84ae2e5eea80fee2a21f9903242af0d0e18dc70b33e2887017d175e4176fe369",
+    "src/pages/projects/Tasks.tsx": "ea669626080d70f490444755f6e8e6c051069d87354e20e9719c77a05378595d",
+    "tests/task-contribution.cjs": "cb984fe5e5fb1711cfa7266620b23f2da344d498a68fbb8e6af0979a6dd915ff",
+    "tests/task-contribution.fixture.cjs": "b5737b979139702799c9cc3f4606a3ea49fde726bf0fba8d9cd2c81d4166bf3b"
+  }
+}

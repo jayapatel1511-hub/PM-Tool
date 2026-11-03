@@ -1,0 +1,7 @@
+{
+  "atUtc": "2026-11-02T11:24:29.585998+00:00",
+  "status": "FAIL_CAPTURE_HELPER_SELECTOR",
+  "error": "Exactresponse textmatchedcurrentparagraphandhiddensamehistoryparagraph; strict2matches beforefirstscreenshot",
+  "repair": "Capture2explicitdirectarticlecurrentresponseparagraph, nothistory/notarbitraryfirst",
+  "boundary": "No app defect/POST/screenshotpass implied. Final newappcompatibilityrepair pending."
+}

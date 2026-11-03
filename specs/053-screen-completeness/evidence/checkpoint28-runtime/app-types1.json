@@ -1,0 +1,10 @@
+{
+  "exitCode": 0,
+  "args": [
+    "node",
+    "node_modules/typescript/bin/tsc",
+    "-b",
+    "--pretty",
+    "false"
+  ]
+}

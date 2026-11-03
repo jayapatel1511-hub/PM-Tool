@@ -1,0 +1,92 @@
+--- previous_model
++++ new_model
+@@ -3277,6 +3277,11 @@
+                         .HasColumnType("uuid")
+                         .HasColumnName("added_by");
+ 
++                    b.Property<string>("DeclaredRevision")
++                        .HasMaxLength(50)
++                        .HasColumnType("character varying(50)")
++                        .HasColumnName("declared_revision");
++
+                     b.Property<DateTimeOffset?>("DeletedAt")
+                         .HasColumnType("timestamp with time zone")
+                         .HasColumnName("deleted_at");
+@@ -3302,12 +3307,34 @@
+                     b.Property<Guid>("ProjectId")
+                         .HasColumnType("uuid")
+                         .HasColumnName("project_id");
++
++                    b.Property<Guid?>("ReferenceDeliverableId")
++                        .HasColumnType("uuid")
++                        .HasColumnName("reference_deliverable_id");
++
++                    b.Property<DateTimeOffset?>("ReferenceRegisteredAt")
++                        .HasColumnType("timestamp with time zone")
++                        .HasColumnName("reference_registered_at");
++
++                    b.Property<Guid?>("ReferenceRegisteredBy")
++                        .HasColumnType("uuid")
++                        .HasColumnName("reference_registered_by");
+ 
+                     b.Property<int>("RowVersion")
+                         .IsConcurrencyToken()
+                         .HasColumnType("integer")
+                         .HasColumnName("row_version");
+ 
++                    b.Property<string>("SourceSystem")
++                        .HasMaxLength(200)
++                        .HasColumnType("character varying(200)")
++                        .HasColumnName("source_system");
++
++                    b.Property<string>("StableSourceId")
++                        .HasMaxLength(200)
++                        .HasColumnType("character varying(200)")
++                        .HasColumnName("stable_source_id");
++
+                     b.Property<string>("Title")
+                         .IsRequired()
+                         .HasColumnType("text")
+@@ -3321,10 +3348,19 @@
+                     b.HasKey("Id")
+                         .HasName("pk_document_link");
+ 
++                    b.HasIndex("ReferenceDeliverableId")
++                        .HasDatabaseName("ix_document_link_reference_deliverable_id");
++
++                    b.HasIndex("ReferenceRegisteredBy")
++                        .HasDatabaseName("ix_document_link_reference_registered_by");
++
+                     b.HasIndex("ItemType", "ItemId")
+                         .HasDatabaseName("ix_document_link_item_type_item_id");
+ 
+-                    b.ToTable("document_link", "hub");
++                    b.ToTable("document_link", "hub", t =>
++                        {
++                            t.HasCheckConstraint("ck_document_link_reference_registration", "(source_system IS NULL AND stable_source_id IS NULL AND declared_revision IS NULL AND reference_registered_by IS NULL AND reference_registered_at IS NULL AND reference_deliverable_id IS NULL) OR (source_system IS NOT NULL AND btrim(source_system) <> '' AND reference_registered_by IS NOT NULL AND reference_registered_at IS NOT NULL AND (stable_source_id IS NULL OR btrim(stable_source_id) <> '') AND (declared_revision IS NULL OR btrim(declared_revision) <> ''))");
++                        });
+                 });
+ 
+             modelBuilder.Entity("Hub.Api.Data.EmailMessage", b =>
+@@ -11357,6 +11393,21 @@
+                         .HasConstraintName("fk_discipline_review_review_rounds_round_id");
+                 });
+ 
++            modelBuilder.Entity("Hub.Api.Data.DocumentLink", b =>
++                {
++                    b.HasOne("Hub.Api.Data.Deliverable", null)
++                        .WithMany()
++                        .HasForeignKey("ReferenceDeliverableId")
++                        .OnDelete(DeleteBehavior.Restrict)
++                        .HasConstraintName("fk_document_link_deliverable_reference_deliverable_id");
++
++                    b.HasOne("Hub.Api.Data.AppUser", null)
++                        .WithMany()
++                        .HasForeignKey("ReferenceRegisteredBy")
++                        .OnDelete(DeleteBehavior.Restrict)
++                        .HasConstraintName("fk_document_link_app_user_reference_registered_by");
++                });
++
+             modelBuilder.Entity("Hub.Api.Data.ExternalIdentity", b =>
+                 {
+                     b.HasOne("Hub.Api.Data.AppUser", null)

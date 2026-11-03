@@ -1,0 +1,10 @@
+{
+  "exitCode": 0,
+  "args": [
+    "node",
+    "node_modules/oxlint/bin/oxlint",
+    "src/lib/keys.ts",
+    "src/lib/keys.test.ts"
+  ],
+  "atUtc": "2026-11-02T18:33:22.515377+00:00"
+}

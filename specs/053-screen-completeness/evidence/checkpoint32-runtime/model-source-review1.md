@@ -1,0 +1,3 @@
+# Private model bounded source review
+
+Independent reviewer PASS on private-model1.patch and actual held DATA/MODEL sections. No findings: nullable JsonIgnore/jsonb immutable digest witness, legacy null/materializable old Digest compatibility, composite selfFK same user/kind +Restrict/alternate key, one-time tracked Exhausted ->later containing window guard, no reset/repoint/cycle on tracked path, existing budgets/window guards, AddressChanged bounded reason mapping. Safe-unsent provenance/codec/claim authority remains D core. No migration, compilation, provider, execution or collector-seam claim.

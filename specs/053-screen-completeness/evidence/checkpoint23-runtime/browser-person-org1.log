@@ -1,0 +1,11 @@
+locator.getAttribute: Timeout 12000ms exceeded.
+Call log:
+[2m  - waiting for locator('[data-person-panel-trigger="00000000-0000-0000-0000-000000008101"]:visible').first()[22m
+
+    at roundtrip (/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/person-organisation-surfaces.cjs:85:59)
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/person-organisation-surfaces.cjs:226:37 {
+  log: [
+    `  - waiting for locator('[data-person-panel-trigger="00000000-0000-0000-0000-000000008101"]:visible').first()`
+  ],
+  name: 'TimeoutError'
+}

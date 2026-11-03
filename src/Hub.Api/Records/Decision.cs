@@ -2,7 +2,7 @@ using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 namespace Hub.Api.Records;
-public static class DecisionRecord { public static RegistryEntry Entry { get; } = new(typeof(Hub.Api.Data.Decision), "Decision", ["Subject", "Description", "OwnerUserId", "OwnerExternalPartyId", "RequiredByDate", "ImpactLevel", "ImpactDescription", "Status", "DecisionText", "DecisionDate", "DecidedById", "DeferralReason", "CancelledReason", "DeletedAt"], true, null)
+public static class DecisionRecord { public static RegistryEntry Entry { get; } = new(typeof(Hub.Api.Data.Decision), "Decision", ["Subject", "Description", "OwnerUserId", "OwnerExternalPartyId", "RequiredByDate", "ImpactLevel", "ImpactDescription", "Status", "DecisionText", "DecisionDate", "DecidedById", "DeferralReason", "CancelledReason", "DeletedAt", "CategoryId", "OptionsConsidered", "Rationale"], true, null)
     {
         NameOrder = 6,
         Names = async (db, list) => (await db.Decisions.IgnoreQueryFilters().Where(x => list.Contains(x.Id)).Select(x => new { x.Id, x.Key, x.Subject }).ToListAsync()).Select(x => (x.Id, $"{x.Key} {x.Subject}")),

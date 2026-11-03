@@ -1,0 +1,81 @@
+{
+  "exitCode": 0,
+  "args": [
+    "node",
+    "tests/review-register.cjs"
+  ],
+  "base": "http://127.0.0.1:8880",
+  "visualSystem": true,
+  "atUtc": "2026-11-03T05:38:37.336441+00:00",
+  "scope": "Actual isolated SPA; finite synthetic intercepted HTTP; no real business writes or mail",
+  "driverSHA256": "8b4ae8c32057b72cb96b0013ef23cead5a8004d0cc436c6ec4eca9d5320b8926",
+  "tail": [
+    "{\"status\":\"PASS\",\"scope\":\"synthetic R1 finding-register UI regression only; R2 responses/exports and external intake have separate verification\",\"cases\":[\"75 unresolved findings/two packages, full options/page totals, register-only exact round/finding/Person/fold/scroll/focus return\",\"Each and combined four filters AND correctly; finding-only paging changes preserve package q/status/page\",\"Current excludes old carry; all-rounds adds exact history, pending acknowledgement and explicit terminal/history/unknown provenance states\",\"Explicit external originator discriminator remains empty and never becomes a User\",\"Answered missing finding never falls back to a cached package; register error is honest and retryable\",\"375px cards keep keyboard inspection, exact return and no page overflow\",\"Register-only/both-on/pattern-only/both-off independently gate list and exact locator; no business/Seen command\"],\"registerReads\":23,\"exactLocators\":[{\"id\":\"00000000-0000-0000-0000-000000010074\",\"packageId\":\"00000000-0000-0000-0000-000000009202\",\"roundId\":\"00000000-0000-0000-0000-000000009221\",\"context\":false,\"status\":200},{\"id\":\"00000000-0000-0000-0000-000000010901\",\"packageId\":\"00000000-0000-0000-0000-000000009201\",\"roundId\":\"00000000-0000-0000-0000-000000009210\",\"context\":false,\"status\":200},{\"id\":\"00000000-0000-0000-0000-000000010074\",\"status\":404},{\"id\":\"00000000-0000-0000-0000-000000010074\",\"packageId\":\"00000000-0000-0000-0000-000000009202\",\"roundId\":\"00000000-0000-0000-0000-000000009221\",\"context\":false,\"status\":200},{\"id\":\"00000000-0000-0000-0000-000000010001\",\"packageId\":\"00000000-0000-0000-0000-000000009201\",\"roundId\":\"00000000-0000-0000-0000-000000009211\",\"context\":true,\"status\":200},{\"id\":\"00000000-0000-0000-0000-000000010901\",\"packageId\":\"00000000-0000-0000-0000-000000009201\",\"roundId\":\"00000000-0000-0000-0000-000000009210\",\"context\":true,\"status\":200}],\"detailReads\":[\"00000000-0000-0000-0000-000000009202\",\"00000000-0000-0000-0000-000000009201\",\"00000000-0000-0000-0000-000000009202\",\"00000000-0000-0000-0000-000000009201\",\"00000000-0000-0000-0000-000000009201\"],\"personReads\":[\"00000000-0000-0000-0000-000000009101\"],\"businessWrites\":0}"
+  ],
+  "browserResult": {
+    "status": "PASS",
+    "scope": "synthetic R1 finding-register UI regression only; R2 responses/exports and external intake have separate verification",
+    "cases": [
+      "75 unresolved findings/two packages, full options/page totals, register-only exact round/finding/Person/fold/scroll/focus return",
+      "Each and combined four filters AND correctly; finding-only paging changes preserve package q/status/page",
+      "Current excludes old carry; all-rounds adds exact history, pending acknowledgement and explicit terminal/history/unknown provenance states",
+      "Explicit external originator discriminator remains empty and never becomes a User",
+      "Answered missing finding never falls back to a cached package; register error is honest and retryable",
+      "375px cards keep keyboard inspection, exact return and no page overflow",
+      "Register-only/both-on/pattern-only/both-off independently gate list and exact locator; no business/Seen command"
+    ],
+    "registerReads": 23,
+    "exactLocators": [
+      {
+        "id": "00000000-0000-0000-0000-000000010074",
+        "packageId": "00000000-0000-0000-0000-000000009202",
+        "roundId": "00000000-0000-0000-0000-000000009221",
+        "context": false,
+        "status": 200
+      },
+      {
+        "id": "00000000-0000-0000-0000-000000010901",
+        "packageId": "00000000-0000-0000-0000-000000009201",
+        "roundId": "00000000-0000-0000-0000-000000009210",
+        "context": false,
+        "status": 200
+      },
+      {
+        "id": "00000000-0000-0000-0000-000000010074",
+        "status": 404
+      },
+      {
+        "id": "00000000-0000-0000-0000-000000010074",
+        "packageId": "00000000-0000-0000-0000-000000009202",
+        "roundId": "00000000-0000-0000-0000-000000009221",
+        "context": false,
+        "status": 200
+      },
+      {
+        "id": "00000000-0000-0000-0000-000000010001",
+        "packageId": "00000000-0000-0000-0000-000000009201",
+        "roundId": "00000000-0000-0000-0000-000000009211",
+        "context": true,
+        "status": 200
+      },
+      {
+        "id": "00000000-0000-0000-0000-000000010901",
+        "packageId": "00000000-0000-0000-0000-000000009201",
+        "roundId": "00000000-0000-0000-0000-000000009210",
+        "context": true,
+        "status": 200
+      }
+    ],
+    "detailReads": [
+      "00000000-0000-0000-0000-000000009202",
+      "00000000-0000-0000-0000-000000009201",
+      "00000000-0000-0000-0000-000000009202",
+      "00000000-0000-0000-0000-000000009201",
+      "00000000-0000-0000-0000-000000009201"
+    ],
+    "personReads": [
+      "00000000-0000-0000-0000-000000009101"
+    ],
+    "businessWrites": 0
+  }
+}

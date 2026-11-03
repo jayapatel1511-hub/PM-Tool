@@ -1,0 +1,55 @@
+{
+  "exitCode": 1,
+  "args": [
+    "node",
+    "tests/notice-preferences.cjs"
+  ],
+  "base": "http://127.0.0.1:8872",
+  "atUtc": "2026-11-02T23:59:15.761484+00:00",
+  "scope": "Actual isolated SPA; finite synthetic intercepted HTTP; no real business writes or mail",
+  "driverSHA256": "853de995fba6d85d68ef1eae9c01883096aba2a1c5a68f0e1d332831e6bd4eb9",
+  "tail": [
+    "{\"status\":\"FAIL\",\"suite\":\"notice-preferences\",\"url\":\"http://127.0.0.1:8872/preferences\",\"observations\":[],\"reads\":[{\"status\":200,\"malformed\":false,\"revision\":0},{\"status\":200,\"malformed\":false,\"revision\":0},{\"status\":200,\"malformed\":false,\"revision\":0},{\"status\":200,\"malformed\":false,\"revision\":0}],\"writes\":[],\"unexpected\":[],\"errors\":[]}",
+    "locator.click: Timeout 15000ms exceeded.",
+    "Call log:",
+    "\u001b[2m  - waiting for getByRole('link', { name: 'Home', exact: true })\u001b[22m",
+    "",
+    "    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/notice-preferences.cjs:107:65 {",
+    "  log: [",
+    "    \"  - waiting for getByRole('link', { name: 'Home', exact: true })\"",
+    "  ],",
+    "  name: 'TimeoutError'",
+    "}"
+  ],
+  "browserResult": {
+    "status": "FAIL",
+    "suite": "notice-preferences",
+    "url": "http://127.0.0.1:8872/preferences",
+    "observations": [],
+    "reads": [
+      {
+        "status": 200,
+        "malformed": false,
+        "revision": 0
+      },
+      {
+        "status": 200,
+        "malformed": false,
+        "revision": 0
+      },
+      {
+        "status": 200,
+        "malformed": false,
+        "revision": 0
+      },
+      {
+        "status": 200,
+        "malformed": false,
+        "revision": 0
+      }
+    ],
+    "writes": [],
+    "unexpected": [],
+    "errors": []
+  }
+}

@@ -1,3 +1,7 @@
+import { PersonPanelTrigger } from '@/components/hub/person-panel-trigger'
+import { useWorkSeenDetailOwner, WorkSeenDetailNotice } from '@/components/hub/work-seen-detail-owner'
+import type { WorkSeenFields } from '@/components/hub/work-seen'
+import { RecordContext } from '@/components/hub/record-context'
 import { useQuery } from '@tanstack/react-query'
 import { Building2, CalendarDays, ExternalLink, ListPlus, Plus, Users } from 'lucide-react'
 import { useRef, useState, type ReactNode } from 'react'
@@ -5,7 +9,7 @@ import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { ActiveFilters, ChipToggle, ConfirmDialog, Empty, ErrorBanner, Field, FilterBar, Loading, Page, Spinner, selectCls } from '@/components/hub/common'
 import { ExportMenu } from '@/components/hub/export'
-import { FieldRow, HistoryList, InlineDate, InlineText, TabBar } from '@/components/hub/fields'
+import { useRecordTab, FieldRow, HistoryList, InlineDate, InlineText, TabBar } from '@/components/hub/fields'
 import { useItemPanel, type PanelProps } from '@/components/hub/panel-host'
 import { PeoplePicker } from '@/components/hub/people'
 import { Chip, Key, StatusPill } from '@/components/hub/pills'
@@ -14,7 +18,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useProject, useProjectRefresh } from '@/hooks/data'
-import { useFlag } from '@/lib/auth'
+import { useFlag, useMe } from '@/lib/auth'
+import { useProjectRelatedPanel } from './project-related-navigation'
+import { projectActionRelations } from './project-action-relations'
+import { useWorkRecordOrigin } from './work-record-navigation'
 import type { components } from '@/gen/api'
 import { ApiError, typedRequest } from '@/lib/api'
 import { addDays, fmtDate, today } from '@/lib/format'
@@ -32,7 +39,7 @@ import { useSafeForm } from '@/hooks/drafts'
 type Schemas = components['schemas']
 export type ActionRow = Schemas['MeetingActionRow']
 type MeetingRow = Schemas['MeetingListRow']
-const ACTION_LINK_ROUTES: Record<string, string> = { Task: 'tasks', Deliverable: 'deliverables', Milestone: 'milestones', Handoff: 'handoffs', ChangeNotice: 'changes' }
+const ACTION_LINK_ROUTES: Record<string, string> = { Task: 'tasks', Decision: 'decisions', Deliverable: 'deliverables', Milestone: 'milestones', Handoff: 'handoffs', ChangeNotice: 'changes' }
 
 const TYPES = ['Coordination', 'Client', 'Design Review', 'Site', 'Other']
 const STATUSES = ['Open', 'In Progress', 'Complete', 'Cancelled']
@@ -45,16 +52,16 @@ function useActionRefresh() {
 }
 
 /** Who owns the action, with discipline actions showing their lead and external ones set apart (MTG-01, MTG-02). */
-export function ActionOwner({ a }: { a: ActionRow }) {
+export function ActionOwner({ a, focusKey = `action:${a.id}` }: { a: ActionRow; focusKey?: string }) {
   if (a.ownerType === 'External Party') return (
     <span className="inline-flex items-center gap-1" title={t('action.external')}><Building2 className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />{a.ownerName}
       <span className="sr-only">({t('action.external')})</span></span>
   )
   if (a.ownerType === 'Discipline') return (
     <span className="inline-flex flex-wrap items-center gap-1"><Users className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />{a.ownerName}
-      {a.noLead ? <Chip tone="warn">{t('action.noLead')}</Chip> : <span className="text-muted-foreground">· {a.leadName}</span>}</span>
+      {a.noLead ? <Chip tone="warn">{t('action.noLead')}</Chip> : <span className="text-muted-foreground">· {a.leadId && a.leadName ? <PersonPanelTrigger userId={a.leadId} name={a.leadName} focusKey={`${focusKey}:discipline-lead`} /> : a.leadName}</span>}</span>
   )
-  return <span>{a.ownerName}</span>
+  return a.ownerType === 'User' && a.ownerUserId && a.ownerName ? <PersonPanelTrigger userId={a.ownerUserId} name={a.ownerName} focusKey={`${focusKey}:owner`} /> : <span>{a.ownerName}</span>
 }
 
 function Due({ a }: { a: ActionRow }) {
@@ -62,8 +69,8 @@ function Due({ a }: { a: ActionRow }) {
 }
 
 /** A person owner gets their avatar; discipline and external owners keep their own marks (ActionOwner). */
-function OwnerCell({ a }: { a: ActionRow }) {
-  return a.ownerType === 'User' ? <Person id={a.ownerUserId} name={a.ownerName} /> : <ActionOwner a={a} />
+function OwnerCell({ a, surface }: { a: ActionRow; surface: string }) {
+  return a.ownerType === 'User' ? <Person id={a.ownerUserId} name={a.ownerName} focusKey={`action:${a.id}:${surface}:owner`} /> : <ActionOwner a={a} focusKey={`action:${a.id}:${surface}`} />
 }
 
 // ---------- Owner fields (FR-002) ----------
@@ -345,7 +352,7 @@ export function MeetingsTab() {
                           <button className={TITLE_LINK} aria-current={current || undefined} onClick={() => openPanel('Action', a.id)}>{a.text}</button>
                           {a.taskKey && <button className="ml-2 hover:underline" title={t('action.becameTask')} onClick={() => openPanel('Task', a.relatedTaskId!)}><Key>{a.taskKey}</Key></button>}
                         </span>
-                        <span className="min-w-0"><OwnerCell a={a} /></span>
+                        <span className="min-w-0"><OwnerCell a={a} surface="list" /></span>
                         <Due a={a} />
                         <StatusPill status={a.status} className="justify-self-start" />
                       </li>
@@ -407,15 +414,29 @@ function ConvertDialog({ a, disciplineId, onClose }: { a: ActionRow; disciplineI
 
 const STEP: Record<string, string> = { Open: 'register.toOpen', 'In Progress': 'action.start', Complete: 'action.complete', Cancelled: 'action.cancel' }
 
+function ActionLinkedPerson({ row, actionId }: { row: { id: string; personId?: string | null; person?: string | null }; actionId: string }) {
+  const peopleOn = useFlag('people_screens')
+  return peopleOn && row.personId && row.person ? <> · <PersonPanelTrigger userId={row.personId} name={row.person} focusKey={`action:${actionId}:link:${row.id}:person`} /></> : null
+}
+
 export function ActionPanel({ id }: PanelProps) {
-  const q = useQuery({ queryKey: ['action', id], queryFn: () => typedRequest('get', '/api/v1/actions/{id}', { params: { id } }) })
+  const me = useMe()
+  const workOn = useFlag('work_screens'), peopleOn = useFlag('people_screens')
+  const q = useQuery({ queryKey: ['action', id, me.id, workOn, peopleOn], queryFn: async () => await typedRequest('get', '/api/v1/actions/{id}', { params: { id } }) as Schemas['ActionDetail'] & WorkSeenFields })
   // The project says whether a change needs a reason; asked only while pause saves exist (flag.data_entry_safety).
   const project = useProject(useFlag('data_entry_safety') ? q.data?.action.projectNumber ?? undefined : undefined)
   const done = useActionRefresh()
   const openPanel = useItemPanel()
-  const [tab, setTab] = useState<'comments' | 'history'>(ItemSlots.Comments ? 'comments' : 'history')
+  const openRelatedPanel = useProjectRelatedPanel()
+  const followRelatedLink = useWorkRecordOrigin()
+  const [tab, setTab] = useRecordTab('Action', id, ItemSlots.Comments ? 'comments' : 'history', [...(ItemSlots.Comments ? ['comments'] : []), 'history'])
   const [step, setStep] = useState<string | null>(null)
   const [owner, setOwner] = useState<Owner | null>(null)
+  const contextOn = useFlag('screen_patterns')
+  const [detailParams] = useSearchParams()
+  const seenOwner = useWorkSeenDetailOwner({ itemType: 'Action', itemId: q.data?.action.id ?? id,
+    sourceVersion: q.data?.action.rowVersion, seen: q.data?.seen, read: q,
+    visible: detailParams.get('panel') === `Action:${id}` && !step })
   if (q.isPending) return <Loading />
   if (q.error) return <div className="p-4"><ErrorBanner error={q.error} /></div>
   const { action: a, permissions: perm, meeting: m } = q.data
@@ -429,22 +450,25 @@ export function ActionPanel({ id }: PanelProps) {
     if (to === 'Cancelled') { setStep(to); return }
     try { await go(to) } catch (e) { toast.error(errorText(e)) }
   }
-  const related = (q.data.task && !a.converted) || q.data.decision || q.data.links?.length > 0
+  const relatedLinks = contextOn ? projectActionRelations(q.data) : q.data.links
+  const related = contextOn ? relatedLinks.length > 0 : (q.data.task && !a.converted) || q.data.decision || q.data.links?.length > 0
   return (
-    <div>
+    <div ref={seenOwner.surfaceRef}>
+      <WorkSeenDetailNotice state={seenOwner.state} />
       <PanelHead title={a.text} meta={<>
         <ListPlus className="size-4 text-muted-foreground" aria-hidden /><Key>{a.key}</Key><StatusPill status={a.status} />
         {a.isOverdue && <Chip tone="bad">{t('ind.overdueD', { n: a.daysOverdue })}</Chip>}{a.noLead && <Chip tone="warn">{t('action.noLead')}</Chip>}
       </>}>
         <p className="text-sm text-muted-foreground">{t('action.fromMeeting', { title: m.title, date: fmtDate(m.meetingDate) })}
           {m.notesLink && <> · <a className="text-primary underline underline-offset-4" href={m.notesLink} target="_blank" rel="noreferrer noopener">{t('meeting.minutes')}</a></>}</p>
-        {q.data.task && a.converted && <p className="text-sm">{t('action.followsTask')} <button className="hover:underline" onClick={() => openPanel('Task', q.data.task!.id)}><Key>{q.data.task.key}</Key> {q.data.task.name}</button> <StatusPill status={q.data.task.status} /></p>}
+        {q.data.task && a.converted && <p className="text-sm">{t('action.followsTask')} <button className="hover:underline" onClick={e => openRelatedPanel('Task', q.data.task!.id, e)}><Key>{q.data.task.key}</Key> {q.data.task.name}</button> <StatusPill status={q.data.task.status} /></p>}
         <div className="flex flex-wrap gap-2">
           {perm.transitions.map((s) => <Button key={s.to} size="sm" variant={s.to === 'Complete' ? 'default' : 'outline'} disabled={!s.ok} title={s.reason ?? undefined}
             onClick={() => onStep(s.to)}>{runtimeText(s.to === 'In Progress' && a.status === 'Complete' ? 'action.reopen' : STEP[s.to])}</Button>)}
           {perm.convert && <Button size="sm" variant="outline" onClick={() => setStep('convert')}>{t('action.convert')}</Button>}
         </div>
       </PanelHead>
+      {contextOn && <RecordContext context={q.data.context} projectNumber={q.data.project.projectNumber} meId={me.id} openPanel={openPanel} />}
       <FieldGroup title={t('common.details')}>
         <FieldRow label={t('action.text')}><InlineText value={a.text} multiline disabled={!can} needsReason={needsReason} title={perm.edit.reason ?? undefined} onSave={(v) => save({ text: v })} /></FieldRow>
         <FieldRow label={t('common.owner')}>
@@ -454,7 +478,7 @@ export function ActionPanel({ id }: PanelProps) {
               <div className="flex gap-2"><Button size="sm" onClick={() => save(ownerBody(owner)).then((ok) => ok && setOwner(null))}>{t('common.save')}</Button><Button size="sm" variant="ghost" onClick={() => setOwner(null)}>{t('common.cancel')}</Button></div>
             </div>
           ) : (
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-2 py-1.5"><OwnerCell a={a} />
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-2 py-1.5"><OwnerCell a={a} surface="detail" />
               {can && <button type="button" className="text-sm text-primary underline underline-offset-4 hover:text-foreground"
                 onClick={() => setOwner({ type: a.ownerType as Owner['type'], userId: a.ownerUserId, userName: a.ownerType === 'User' ? a.ownerName : null, disciplineId: a.ownerDisciplineId, partyId: a.ownerExternalPartyId })}>{t('action.changeOwner')}</button>}</div>
           )}
@@ -462,11 +486,11 @@ export function ActionPanel({ id }: PanelProps) {
         <FieldRow label={t('common.due')}><InlineDate value={a.dueDate} disabled={!can} onSave={(v) => save({ dueDate: v })} /></FieldRow>
       </FieldGroup>
       {related && <FieldGroup title={t('register.group.related')}>
-        {q.data.task && !a.converted && <FieldRow label={t('action.relatedTask')}><button className="px-2 py-1.5 text-left hover:underline" onClick={() => openPanel('Task', q.data.task!.id)}><Key>{q.data.task.key}</Key> {q.data.task.name}</button></FieldRow>}
-        {q.data.decision && <FieldRow label={t('action.relatedDecision')}><button className="px-2 py-1.5 text-left hover:underline" onClick={() => openPanel('Decision', q.data.decision!.id)}><Key>{q.data.decision.key}</Key> {q.data.decision.subject}</button></FieldRow>}
-        {q.data.links?.length > 0 && <FieldRow label={t('decision.links')}><ul className="space-y-1 px-2 py-1.5">{q.data.links.map(link => {
+        {!contextOn && q.data.task && !a.converted && <FieldRow label={t('action.relatedTask')}><button className="px-2 py-1.5 text-left hover:underline" onClick={e => openRelatedPanel('Task', q.data.task!.id, e)}><Key>{q.data.task.key}</Key> {q.data.task.name}</button></FieldRow>}
+        {!contextOn && q.data.decision && <FieldRow label={t('action.relatedDecision')}><button className="px-2 py-1.5 text-left hover:underline" onClick={e => openRelatedPanel('Decision', q.data.decision!.id, e)}><Key>{q.data.decision.key}</Key> {q.data.decision.subject}</button></FieldRow>}
+        {relatedLinks.length > 0 && <FieldRow label={t('decision.links')}><ul className="space-y-1 px-2 py-1.5">{relatedLinks.map(link => {
           const route = ACTION_LINK_ROUTES[link.targetType]
-          return route && <li key={link.id}><Link className="text-primary underline underline-offset-4" to={`/projects/${a.projectNumber}/${route}?panel=${encodeURIComponent(`${link.targetType}:${link.targetId}`)}`}><Key>{link.key}</Key> {link.name}</Link>{link.status && <> · <StatusPill status={link.status} /></>}</li>
+          return route && <li key={link.id}><Link className="text-primary underline underline-offset-4" to={`/projects/${a.projectNumber}/${route}?panel=${encodeURIComponent(`${link.targetType}:${link.targetId}`)}`} onClick={followRelatedLink}><Key>{link.key}</Key> {link.name}</Link>{contextOn && <> · <span className="text-muted-foreground">{link.relation === 'converted_to_task' ? t('action.followsTask') : link.relation === 'realised_as' ? t('risk.realisedAs') : runtimeText(`decision.rel.${link.relation}`)}</span></>}{link.status && <> · <StatusPill status={link.status} /></>}<ActionLinkedPerson row={link} actionId={a.id} /></li>
         })}</ul></FieldRow>}
       </FieldGroup>}
       <TabBar tabs={[...(ItemSlots.Comments ? [{ id: 'comments' as const, label: t('common.comments') }] : []), { id: 'history' as const, label: t('common.history') }]} value={tab} onChange={setTab} />

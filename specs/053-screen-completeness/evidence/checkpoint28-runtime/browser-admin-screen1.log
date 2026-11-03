@@ -1,0 +1,15 @@
+{"stage":"columns","url":"http://127.0.0.1:8859/admin/users","active":{"id":"","text":"\n    Skip to contenttTuesdayMy WorkProjectsTasksTimeReportsMoreHomeBoardsCalendarTeamFilesAdminTuesdayAdminUsers & rolesACAlex ChenAdministrationDisci"},"dialogs":[],"completedCases":[],"userReads":[{},{"inactive":"true"}],"roleReads":[{"role":"baseline-Standard","scenario":"same-discipline"}],"writes":[],"unknown":[],"errors":[]}
+locator.waitFor: Error: strict mode violation: getByRole('table', { name: 'Users & roles', exact: true }).getByRole('row').filter({ has: getByText('Synthetic unknown discipline', { exact: true }) }).getByText('Unavailable', { exact: true }) resolved to 4 elements:
+    1) <span class="sr-only">Unavailable</span> aka locator('tr:nth-child(3) > td:nth-child(2) > .text-muted-foreground > .sr-only')
+    2) <span class="sr-only">Unavailable</span> aka locator('tr:nth-child(3) > td:nth-child(3) > .text-muted-foreground > .sr-only')
+    3) <span class="text-muted-foreground">Unavailable</span> aka locator('td:nth-child(5) > .text-muted-foreground')
+    4) <span class="sr-only">Unavailable</span> aka locator('tr:nth-child(3) > .h-\\(--row-min\\).px-\\(--cell-px\\).py-\\(--cell-py\\).align-top.whitespace-nowrap > .text-muted-foreground > .sr-only')
+
+Call log:
+[2m  - waiting for getByRole('table', { name: 'Users & roles', exact: true }).getByRole('row').filter({ has: getByText('Synthetic unknown discipline', { exact: true }) }).getByText('Unavailable', { exact: true }) to be visible[22m
+
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/admin-screen.cjs:52:89 {
+  log: [
+    "  - waiting for getByRole('table', { name: 'Users & roles', exact: true }).getByRole('row').filter({ has: getByText('Synthetic unknown discipline', { exact: true }) }).getByText('Unavailable', { exact: true }) to be visible"
+  ]
+}

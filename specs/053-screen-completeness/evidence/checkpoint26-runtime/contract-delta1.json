@@ -1,0 +1,18 @@
+{
+  "atUtc": "2026-11-02T11:00:52.203702+00:00",
+  "status": "PASS_INTENDED_CONTRACT_DELTA",
+  "addedPaths": [
+    "/api/v1/projects/{projectId}/reviews/{id}/response-sheet"
+  ],
+  "removedPaths": [],
+  "changedExistingSchemas": [
+    "FindingAction",
+    "ReviewFindingEventRow",
+    "ReviewFindingRow",
+    "ReviewRegisterRow"
+  ],
+  "schemaChange": "Only optionalnullable responseOutcome property appended; no required additions/otherchanges",
+  "addedOrRemovedSchemas": 0,
+  "registry": "Exactlyone newfield.ResponseOutcome key, nootherdelta",
+  "generationResult": "2 intentional goldenupdatefailures; normalrerunpending"
+}

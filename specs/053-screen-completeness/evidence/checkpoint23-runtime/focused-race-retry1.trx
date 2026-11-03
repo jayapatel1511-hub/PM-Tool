@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="fb6ee957-f16a-4e40-bc68-121a0537325c" name="@Jays-MacBook-Pro 2026-11-02 01:04:51" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-11-02T01:04:51.0257380-04:00" queuing="2026-11-02T01:04:51.0257380-04:00" start="2026-11-02T01:04:44.3325610-04:00" finish="2026-11-02T01:04:51.0275520-04:00" />
+  <TestSettings name="default" id="dd54f35f-8a51-4a03-8740-95373d235c1b">
+    <Deployment runDeploymentRoot="_Jays-MacBook-Pro_2026-11-02_01_04_51" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="fc731243-bb18-4210-9c71-cf5839666dcb" testId="5a620e23-e8a9-19e0-7069-19f0f56896e3" testName="Hub.Tests.Api.MyWorkSeenRaceTests.Producers_commit_under_actual_personal_lock_contention_then_competing_commands_replay_once" computerName="Jays-MacBook-Pro" duration="00:00:06.2514480" startTime="2026-11-02T01:04:44.7277860-04:00" endTime="2026-11-02T01:04:50.9828840-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="fc731243-bb18-4210-9c71-cf5839666dcb" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="Hub.Tests.Api.MyWorkSeenRaceTests.Producers_commit_under_actual_personal_lock_contention_then_competing_commands_replay_once" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="5a620e23-e8a9-19e0-7069-19f0f56896e3">
+      <Execution id="fc731243-bb18-4210-9c71-cf5839666dcb" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.MyWorkSeenRaceTests" name="Producers_commit_under_actual_personal_lock_contention_then_competing_commands_replay_once" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="5a620e23-e8a9-19e0-7069-19f0f56896e3" executionId="fc731243-bb18-4210-9c71-cf5839666dcb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="1" executed="1" passed="1" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.11)
+[xUnit.net 00:00:00.08]   Discovering: Hub.Tests
+[xUnit.net 00:00:00.19]   Discovered:  Hub.Tests
+[xUnit.net 00:00:00.20]   Starting:    Hub.Tests
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+warn: Microsoft.EntityFrameworkCore.Query[10103]
+      The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+[xUnit.net 00:00:06.47]   Finished:    Hub.Tests
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

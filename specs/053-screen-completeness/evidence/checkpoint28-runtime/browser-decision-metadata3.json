@@ -1,0 +1,8 @@
+{
+  "suite": "decision-metadata",
+  "exitCode": 1,
+  "base": "http://127.0.0.1:8860",
+  "visualDir": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint28-runtime/browser3-visual",
+  "atUtc": "2026-11-02T15:29:35.356259+00:00",
+  "boundary": "Final SPA synthetic API only; one serial Chrome lane"
+}

@@ -1,3 +1,5 @@
+import { useWorkSeenDetailOwner, WorkSeenDetailNotice } from '@/components/hub/work-seen-detail-owner'
+import type { WorkSeenFields } from '@/components/hub/work-seen'
 import { usePageMode } from '@/hooks/page-mode'
 import { UrlSearchInput } from '@/components/hub/url-search'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -6,7 +8,7 @@ import { Fragment, useMemo, useState, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { ActiveFilters, ChipToggle, ConfirmDialog, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Notice, Page, Segmented, Spinner, TableRegion, selectCls } from '@/components/hub/common'
-import { FieldRow, HistoryList, InlineDate, InlineSelect, InlineText, TabBar } from '@/components/hub/fields'
+import { FieldRow, HistoryList, InlineDate, InlineSelect, InlineText, TabBar, useRecordTab } from '@/components/hub/fields'
 import { useItemPanel, type PanelProps } from '@/components/hub/panel-host'
 import { PeoplePicker } from '@/components/hub/people'
 import { Chip, Key, StatusPill } from '@/components/hub/pills'
@@ -17,6 +19,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useProject, useProjectRefresh } from '@/hooks/data'
 import { useFlag } from '@/lib/auth'
+import { PersonPanelTrigger } from '@/components/hub/person-panel-trigger'
 import { ApiError, download, qs, typedRequest } from '@/lib/api'
 import { addDays, fmtDate, fmtTime, today } from '@/lib/format'
 import { plural, t, tv , runtimeText } from '@/lib/i18n'
@@ -34,6 +37,10 @@ import { ViewMenu } from '@/components/hub/views'
 import type { SavedViewKeys } from '@/gen/registry.gen'
 import { DraftNotice } from '@/components/hub/drafts'
 import { useSafeForm } from '@/hooks/drafts'
+import { RecordContext } from '@/components/hub/record-context'
+import { useMe } from '@/lib/auth'
+import { useProjectRelatedPanel } from './project-related-navigation'
+import { DecisionMetadataSection, DecisionOrganisationLag, DecisionRegisteredCreate, DecisionRegisteredOutcome } from './decision-metadata'
 
 export type DecisionRow = components['schemas']['DecisionRow']
 export type Party = components['schemas']['ExternalPartyRow']
@@ -75,6 +82,7 @@ function Blocking({ d }: { d: DecisionRow }) {
 /** Decision Register (§13.8): an agenda for the client call, with filters in the URL and rows that expand to linked items. */
 export function DecisionsTab() {
   const p = useCurrentProject()
+  const me = useMe(), registerOn = useFlag('register_screens')
   const [sp, setSp] = useSearchParams()
   const openPanel = useItemPanel()
   const [dialog, setDialog] = useState<'new' | 'parties' | 'client' | null>(null)
@@ -82,7 +90,7 @@ export function DecisionsTab() {
   const set = (k: string, v?: string | null) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
   const filters = Object.fromEntries(FILTERS.map((k) => [k, sp.get(k)]))
   const q = useQuery({
-    queryKey: ['p', p.id, 'decisions', filters],
+    queryKey: ['p', p.id, 'decisions', filters, ...(registerOn ? [me.id, registerOn] : [])],
     queryFn: () => typedRequest('get', '/api/v1/projects/{id}/decisions', { params: { id: p.id }, query: filters }),
   })
   const panel = sp.get('panel')
@@ -90,6 +98,8 @@ export function DecisionsTab() {
     { id: 'key', label: t('milestone.key'), fixed: true, sort: (d) => d.key, className: 'whitespace-nowrap', cell: (d) => <Key>{d.key}</Key> },
     { id: 'subject', label: t('decision.subject'), fixed: true, sort: (d) => d.subject.toLowerCase(), className: 'min-w-[12rem]',
       cell: (d) => <button className={TITLE_LINK} aria-current={panel === `Decision:${d.id}` || undefined} onClick={() => openPanel('Decision', d.id)}>{d.subject}</button> },
+    ...(registerOn ? [{ id: 'category', label: t('decisionMetadata.category'), sort: (d: DecisionRow) => d.metadata?.category?.name,
+      cell: (d: DecisionRow) => d.metadata?.category ? d.metadata.category.isActive ? d.metadata.category.name : t('decisionMetadata.inactive', { name: d.metadata.category.name }) : <Missing /> }] : []),
     { id: 'owner', label: t('common.owner'), sort: (d) => d.ownerName, className: 'whitespace-nowrap',
       cell: (d) => <span className="flex flex-wrap items-center gap-x-2 gap-y-1"><Owner d={d} />{d.isInactiveOwner && <Chip tone="bad">{t('decision.inactiveOwner')}</Chip>}</span> },
     { id: 'requestedBy', label: t('decision.requestedBy'), sort: (d) => d.requestedByName, className: 'whitespace-nowrap', cell: (d) => <Person id={d.requestedById} name={d.requestedByName} /> },
@@ -136,6 +146,7 @@ export function DecisionsTab() {
         {can.ok && <Button onClick={() => setDialog('new')}><Plus className="size-4" />{t('decision.new')}</Button>}
       </>}>
       {!can.ok && can.reason && <Notice icon={Lock} title={can.reason} />}
+      <DecisionOrganisationLag projectId={p.id} />
       <div><Segmented label={t('decision.view')} value={view} onChange={(v) => set('tab', v === 'log' ? v : null)}
         options={(['register', 'log'] as const).map((v) => ({ value: v, label: t(`decision.view.${v}`) }))} /></div>
       {view === 'log' ? <DecisionLog projectId={p.id} /> : <>
@@ -278,12 +289,14 @@ function ClientExportDialog({ p, onClose }: { p: ProjectDetail; onClose: () => v
   )
 }
 function useDecision(id: string) {
-  return useQuery({ queryKey: ['decision', id], queryFn: () => typedRequest('get', '/api/v1/decisions/{id}', { params: { id } }) })
+  const me = useMe(), workOn = useFlag('work_screens'), peopleOn = useFlag('people_screens'), registerOn = useFlag('register_screens')
+  return useQuery({ queryKey: ['decision', id, me.id, workOn, peopleOn, ...(registerOn ? [true] : [])], queryFn: () => typedRequest('get', '/api/v1/decisions/{id}', { params: { id } }) })
 }
 
 function LinkedItems({ id, canRemove }: { id: string; canRemove?: boolean }) {
   const q = useDecision(id)
-  const openPanel = useItemPanel()
+  const people = useFlag('people_screens')
+  const openRelatedPanel = useProjectRelatedPanel()
   const done = useDecisionRefresh()
   if (q.isPending) return <Loading rows={2} />
   if (q.error) return <ErrorBanner error={q.error} />
@@ -296,9 +309,9 @@ function LinkedItems({ id, canRemove }: { id: string; canRemove?: boolean }) {
           <tr key={l.id} className="border-b last:border-0">
             <td className="py-1.5 pr-3 text-xs/[18px] text-muted-foreground">{runtimeText(`decision.rel.${l.relation}`)}</td>
             <td className="whitespace-nowrap py-1.5 pr-3"><Key>{l.key}</Key></td>
-            <td className="py-1.5 pr-3"><button className="break-words text-left hover:underline" onClick={() => openPanel(l.targetType, l.targetId)}>{l.name}</button></td>
+            <td className="py-1.5 pr-3"><button className="break-words text-left hover:underline" onClick={e => openRelatedPanel(l.targetType, l.targetId, e)}>{l.name}</button></td>
             <td className="py-1.5 pr-3">{l.status && <StatusPill status={l.status} />}</td>
-            <td className="whitespace-nowrap py-1.5 pr-3">{l.person}</td>
+            <td className="whitespace-nowrap py-1.5 pr-3">{people && l.personId && l.person ? <PersonPanelTrigger userId={l.personId} name={l.person} focusKey={`decision:${id}:link:${l.id}:person`} /> : l.person}</td>
             <td className="py-1.5 pr-3"><DateText date={l.date} /></td>
             <td className="py-1 text-right">{canRemove && <Button variant="ghost" size="icon-sm" aria-label={t('decision.unlink', { key: l.key })}
               onClick={async () => { try { await typedRequest('delete', '/api/v1/item-links/{id}', { params: { id: l.id } }); done(q.data.decision.projectId, id) } catch (e) { toast.error(errorText(e)) } }}><Trash2 className="size-4" /></Button>}</td>
@@ -356,6 +369,12 @@ function OwnerField({ p, user, userName, party, onChange, error }: {
 export type Pick = { targetType: 'Task' | 'Deliverable' | 'Milestone'; targetId: string; key: string; name: string }
 
 function DecisionForm({ p, onClose }: { p: ProjectDetail; onClose: () => void }) {
+  const enabled = useFlag('register_screens'), done = useDecisionRefresh(), open = useItemPanel()
+  return enabled ? <DecisionRegisteredCreate p={p} onClose={onClose} onCreated={created => { done(p.id); onClose(); open('Decision', created.id) }} renderItems={(excluded, onPick) => <ItemPicker projectId={p.id} exclude={excluded} onPick={onPick} />}
+    renderOwner={(value, onChange) => <OwnerField p={p} user={value.ownerUserId} userName={value.ownerName} party={value.ownerExternalPartyId} onChange={onChange} />} /> : <LegacyDecisionForm p={p} onClose={onClose} />
+}
+
+function LegacyDecisionForm({ p, onClose }: { p: ProjectDetail; onClose: () => void }) {
   const done = useDecisionRefresh()
   const openPanel = useItemPanel()
   const [f, setF] = useState<Record<string, any>>({ dateRequested: today(), impactLevel: 'Medium' })
@@ -457,6 +476,11 @@ type Step = { to: string; ok: boolean; reason?: string | null }
 
 /** One dialog with the decision text, its date and "notify linked task assignees", on by default (§13.8). */
 export function RecordDecisionDialog({ id, onClose }: { id: string; onClose: (ok: boolean) => void }) {
+  const enabled = useFlag('register_screens'), done = useDecisionRefresh()
+  return enabled ? <DecisionRegisteredOutcome id={id} onClose={onClose} onSaved={done} /> : <LegacyRecordDecisionDialog id={id} onClose={onClose} />
+}
+
+function LegacyRecordDecisionDialog({ id, onClose }: { id: string; onClose: (ok: boolean) => void }) {
   const q = useDecision(id)
   const done = useDecisionRefresh()
   const [text, setText] = useState('')
@@ -530,9 +554,14 @@ export function DecisionPanel({ id }: PanelProps) {
   const parties = useParties(q.data?.project.id ?? '')
   // The project says whether a change needs a reason; asked only while pause saves exist (flag.data_entry_safety).
   const project = useProject(useFlag('data_entry_safety') ? q.data?.project.projectNumber : undefined)
-  const [tab, setTab] = useState<'links' | 'comments' | 'history'>('links')
+  const contextOn = useFlag('screen_patterns')
+  const me = useMe()
+  const [tab, setTab] = useRecordTab('Decision', id, 'links', ['links', ...(ItemSlots.Comments ? ['comments'] : []), 'history'])
   const [step, setStep] = useState<string | null>(null)
   const [linking, setLinking] = useState(false)
+  const openPanel = useItemPanel()
+  const seenOwner = useWorkSeenDetailOwner({ itemType: 'Decision', itemId: q.data?.decision.id ?? id,
+    sourceVersion: q.data?.decision.rowVersion, seen: (q.data as WorkSeenFields | undefined)?.seen, read: q, visible: !step && !linking })
   if (q.isPending) return <Loading />
   if (q.error) return <div className="p-4"><ErrorBanner error={q.error} /></div>
   const { decision: d, permissions: perm } = q.data
@@ -547,7 +576,8 @@ export function DecisionPanel({ id }: PanelProps) {
   }
   const partyOptions = (parties.data ?? []).filter((x) => x.isActive || x.id === d.ownerExternalPartyId).map((x) => ({ value: x.id, label: `${x.name}${x.organisation ? ` · ${x.organisation}` : ''}` }))
   return (
-    <div>
+    <div ref={seenOwner.surfaceRef}>
+      <WorkSeenDetailNotice state={seenOwner.state} />
       <PanelHead title={d.subject} meta={<>
         <Scale className="size-4 text-muted-foreground" aria-hidden /><Key>{d.key}</Key><StatusPill status={d.status} /><Impact level={d.impactLevel} />
         {d.isOverdue && <Chip tone="bad">{t('ind.overdueD', { n: d.daysOverdue })}</Chip>}
@@ -563,6 +593,7 @@ export function DecisionPanel({ id }: PanelProps) {
           ))}
         </div>
       </PanelHead>
+      {contextOn && <RecordContext context={q.data.context} projectNumber={q.data.project.projectNumber} meId={me.id} openPanel={openPanel} />}
       {d.status === 'Decided' && (
         <div className="mx-4 mb-4 rounded-md border border-done/30 bg-done-bg px-4 py-3 text-sm">
           <div className="text-xs/[18px] text-muted-foreground">{t('decision.decidedBy', { who: q.data.decidedBy ?? '', date: fmtDate(d.decisionDate) })}</div>
@@ -571,6 +602,7 @@ export function DecisionPanel({ id }: PanelProps) {
       )}
       {d.status === 'Deferred' && q.data.deferralReason && <p className="mx-4 mb-4 rounded-md bg-warn-bg px-4 py-3 text-sm">{t('decision.deferredNote', { reason: q.data.deferralReason })}</p>}
       {d.status === 'Cancelled' && q.data.cancelledReason && <p className="mx-4 mb-4 rounded-md bg-idle-bg px-4 py-3 text-sm">{t('decision.cancelledNote', { reason: q.data.cancelledReason })}</p>}
+      <DecisionMetadataSection detail={q.data} onSaved={() => done(d.projectId, d.id)} />
       <FieldGroup title={t('common.details')}>
         <FieldRow label={t('decision.subject')}><InlineText value={d.subject} disabled={!can} needsReason={needsReason} title={perm.edit.reason ?? undefined} onSave={(v) => save({ subject: v })} /></FieldRow>
         <FieldRow label={t('common.description')}><InlineText value={q.data.description} multiline disabled={!can} needsReason={needsReason} onSave={(v) => save({ description: v })} /></FieldRow>
@@ -586,7 +618,7 @@ export function DecisionPanel({ id }: PanelProps) {
         </FieldRow>
         <FieldRow label={t('decision.requestedBy')}>{can
           ? <PeoplePicker compact value={d.requestedById} valueName={d.requestedByName} allowClear={false} onChange={(v) => v && save({ requestedById: v })} label={t('decision.requestedBy')} />
-          : <div className="px-2 py-1.5"><Person id={d.requestedById} name={d.requestedByName} /></div>}</FieldRow>
+          : <div className="px-2 py-1.5"><Person id={d.requestedById} name={d.requestedByName} focusKey={`decision:${d.id}:requested-by`} /></div>}</FieldRow>
       </FieldGroup>
       <FieldGroup title={t('allocation.dates')}>
         <FieldRow label={t('decision.requested')}><InlineDate value={d.dateRequested} disabled={!can} onSave={(v) => save({ dateRequested: v })} /></FieldRow>

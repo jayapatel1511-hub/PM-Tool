@@ -1,0 +1,9 @@
+{
+  "reportInputs.basis.WorkloadPeopleContext": "Tasks assigned to people in this report scope, including their other visible disciplines. A task can appear in both counts.",
+  "reportInputs.basis.PlannerPeopleContext": "Tasks assigned to people represented in this report scope; task context is separate from planning-entry source and confidence. A task can appear in both counts.",
+  "reportInputs.basis.CurrentRecordedTaskContext": "Current inputs for distinct tasks referenced by permitted time entries. Recorded hours stay separate; a task can appear in both counts.",
+  "reportInputs.visibleOnly": "Only task records you may view in this report scope are counted.",
+  "reportInputs.unavailableReferences": "Recorded task references with unavailable current inputs: {n}. Matching counts retain their known subtotal.",
+  "reportInputs.noneKnown": "No known matching current tasks in this report scope",
+  "reportInputs.knownPage": "Known matches: page {page} of {pages}"
+}

@@ -1,0 +1,16 @@
+{
+  "exitCode": 0,
+  "args": [
+    "node",
+    "node_modules/vite/bin/vite.js",
+    "build",
+    "--outDir",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint30-artifacts/bin/spa-wwwroot-build1"
+  ],
+  "APIOrigin": "http://127.0.0.1:5100",
+  "noRealAPI": true,
+  "atUtc": "2026-11-02T20:04:16.832184+00:00",
+  "sourceFiles": 271,
+  "boundary": "App source READY/HOLD; browser fixture authoring is excluded from Vite input graph",
+  "bundleFiles": 143
+}

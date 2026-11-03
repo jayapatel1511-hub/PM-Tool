@@ -1,0 +1,48 @@
+{
+  "generatedAt": "2026-11-01T05:38:00Z",
+  "base": "http://127.0.0.1:5088",
+  "project": "SYN-JOIN18-1101",
+  "workReference": "Initial work/comments journey remains PASS; no fifth comment was posted.",
+  "time": {
+    "status": "PASS",
+    "week": "2026-11-02..2026-11-08",
+    "person": "Alex Chen",
+    "capacity32": true,
+    "awayWednesday8h": true,
+    "taskRows": 4,
+    "blankLoadCreatedNothing": true,
+    "entryHours": 2,
+    "entryTask": "SYN-JOIN18-1101-T0002",
+    "entryDate": "2026-11-04",
+    "observedTotal": "2 h",
+    "capacityAfterEntry": "32 h",
+    "normalApiPostCount": 1,
+    "errors": []
+  },
+  "reports": {
+    "status": "PASS",
+    "mainRows": 3,
+    "mainFirstRowBox": {"x":553,"y":379.5,"width":1171.0625,"height":57},
+    "mainOrigin": "http://127.0.0.1:5088/reports/tasks-due-this-week?projectId=01a19593-8092-79f4-a9a7-7f1f6a1ac5fd&week=2026-11-02",
+    "mainNonFirstTaskOpened": true,
+    "mainClosePreservedExactURL": true,
+    "metric": {
+      "linkText": "3 unestimated tasks",
+      "rows": 3,
+      "firstRowBox": {"x":553,"y":379.5,"width":1171.0625,"height":57},
+      "nonFirstTaskOpened": true,
+      "childClosePreservedMetricURL": true,
+      "returnToReportControlWorked": true,
+      "returnURL": "http://127.0.0.1:5088/reports/tasks-due-this-week?projectId=01a19593-8092-79f4-a9a7-7f1f6a1ac5fd&week=2026-11-02",
+      "returnFocus": "not measured"
+    },
+    "errors": []
+  },
+  "layout": {
+    "mobileWidth": 375,
+    "documentScrollWidth": 375,
+    "bodyScrollWidth": 375,
+    "innerScrollRegions": [{"tag":"DIV","scrollWidth":1171,"clientWidth":341},{"tag":"DIV","scrollWidth":670,"clientWidth":291}]
+  },
+  "limits": ["Metric return-link focus was not measured; URL and row navigation were verified."]
+}

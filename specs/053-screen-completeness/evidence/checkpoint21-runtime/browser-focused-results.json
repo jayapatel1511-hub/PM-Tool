@@ -1,0 +1,18 @@
+[
+  {
+    "suite": "project-header-compact",
+    "exitCode": 1
+  },
+  {
+    "suite": "work-board-completeness",
+    "exitCode": 1
+  },
+  {
+    "suite": "team-completeness",
+    "exitCode": 1
+  },
+  {
+    "suite": "report-capacity-comparison",
+    "exitCode": 1
+  }
+]

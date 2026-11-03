@@ -1,0 +1,106 @@
+// Packet 052 S04: visual-system project colour is visible/editable only behind its flag.
+const assert = require('node:assert/strict')
+const { chromium } = require('playwright')
+const { clientConfig } = require('./config.fixture.cjs')
+const { meView, referenceData } = require('./me.fixture.cjs')
+const { projectDetail, projectRow, projectList } = require('./projects.fixture.cjs')
+const { homeRead } = require('./workspace.fixture.cjs')
+
+const base = process.env.TUESDAY_UI_BASE_URL
+assert.ok(base && ['localhost', '127.0.0.1'].includes(new URL(base).hostname), 'Set TUESDAY_UI_BASE_URL to the local preview')
+;
+(async () => {
+  const browser = await chromium.launch({ headless: true, ...(process.env.CHROME_EXECUTABLE_PATH ? { executablePath: process.env.CHROME_EXECUTABLE_PATH } : {}) })
+  try {
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
+    page.setDefaultTimeout(8000)
+    const errors = []; const writes = []
+    page.on('pageerror', e => errors.push(e)); page.on('console', m => { if (m.type() === 'error') errors.push(new Error(m.text())) })
+    let enabled = false
+    const project = projectDetail({ id: '00000000-0000-0000-0000-000000000101', projectNumber: 'SYN-101', name: 'Colour fixture', identityColour: '#1597cc', permissions: { edit: true } })
+    const row = projectRow({ id: project.id, projectNumber: project.projectNumber, name: project.name, identityColour: project.identityColour })
+    await page.addInitScript(() => { sessionStorage.setItem('hub.devUser', 'sam@hub.test'); sessionStorage.setItem('hub.signedIn', '1'); localStorage.setItem('hub.lastActivity', String(Date.now())) })
+    await page.route('**/api/**', async route => {
+      const req = route.request(); const path = new URL(req.url()).pathname.replace('/api/v1/', '')
+      if (path === 'config') return route.fulfill({ json: clientConfig() })
+      if (path === 'me') return route.fulfill({ json: meView({ id: '00000000-0000-0000-0000-000000000002', displayName: 'Alex Chen', email: 'alex@hub.test', capabilities: { workload: true }, flags: { visual_system: enabled } }) })
+      if (path === 'reference' || path === 'workspaces' || path === 'views') return route.fulfill({ json: path === 'reference' ? referenceData() : [] })
+      if (path === 'projects') return route.fulfill({ json: projectList([row]) })
+      if (path === 'home') { const home = homeRead({ projectId: project.id, asOf: '2026-10-31T17:24:05Z' }); home.tasksByProject[0] = { ...home.tasksByProject[0], projectNumber: project.projectNumber, identityColour: '#1597cc' }; return route.fulfill({ json: home }) }
+      if (path === 'timeline') return route.fulfill({ json: { projects: [{ project: { id: project.id, projectNumber: project.projectNumber, name: project.name, status: 'Active', startDate: '2026-10-01', targetCompletionDate: '2026-11-30', identityColour: '#1597cc' }, data: { permissions: { manageMilestones: false, needsReason: false }, tasks: [{ id: '00000000-0000-0000-0000-000000000201', key: 'SYN-101-T001', name: 'Task mark', deliverableId: null, projectDisciplineId: '00000000-0000-0000-0000-000000000301', milestoneId: null, startDate: '2026-10-10', dueDate: '2026-10-12', originalStartDate: null, originalDueDate: null, status: 'In Progress', progressPct: 20, assignee: 'Alex', rowVersion: 1, createdOn: '2026-10-01', isOverdue: false, canEditDates: false, dueNeedsReason: false }], dependencies: [], deliverableLinks: [], deliverables: [{ id: '00000000-0000-0000-0000-000000000202', key: 'SYN-101-D001', name: 'Deliverable mark', startDate: '2026-10-10', dueDate: '2026-10-14', originalStartDate: null, originalDueDate: null, status: 'In Progress', rowVersion: 1, createdOn: '2026-10-01', progressPct: 20, isOverdue: false, canEditDates: false }], milestones: [{ id: '00000000-0000-0000-0000-000000000203', key: 'SYN-101-M001', name: 'Milestone mark', date: '2026-10-15', isComplete: false, status: 'In Progress' }] } }], truncated: false, max: 25 } })
+      if (path === 'calendar') return route.fulfill({ json: { timeZone: 'America/Halifax', from: '2026-10-12', to: '2026-10-18', entries: [{ kind: 'deadline', sourceType: 'Task', id: '00000000-0000-0000-0000-000000000201', key: 'SYN-101-T001', title: 'Calendar mark', date: '2026-10-15', projectId: project.id, projectNumber: project.projectNumber, projectName: project.name, status: 'In Progress', overdue: false, identityColour: '#1597cc' }] } })
+      if (path === `projects/${project.id}` && req.method() === 'PATCH') { writes.push({ body: req.postDataJSON(), match: req.headers()['if-match'] }); return route.fulfill({ json: { ...project, identityColour: req.postDataJSON().identityColour, rowVersion: 2 } }) }
+      if (path === `projects/${project.projectNumber}` || path === `projects/${project.id}`) return route.fulfill({ json: project })
+      if (req.method() !== 'GET') return route.fulfill({ status: 204, body: '' })
+      return route.fulfill({ json: {} })
+    })
+    await page.goto(`${base}/projects/${project.projectNumber}/settings`)
+    await page.locator('body').waitFor()
+    assert.equal(await page.locator('#s-identity-colour').count(), 0, 'flag-off hides the stale stored colour picker')
+    enabled = true; await page.reload(); await page.locator('#s-identity-colour').waitFor()
+    assert.equal(await page.locator('#s-identity-colour').inputValue(), '#1597cc')
+    await page.locator('#s-identity-colour').selectOption('#20a36d')
+    const saveRequest = page.waitForRequest(req => req.method() === 'PATCH' && req.url().endsWith(`/projects/${project.id}`))
+    await page.getByRole('button', { name: 'Save', exact: true }).first().click()
+    // A mocked API write proves the UI sent the canonical value and optimistic version header.
+    await saveRequest
+    assert.equal(writes.length, 1); assert.equal(writes[0].body.identityColour, '#20a36d'); assert.equal(writes[0].match, '"1"')
+    await page.evaluate(async () => {
+      const React = await import('/node_modules/.vite/deps/react.js'); const ReactDOM = await import('/node_modules/.vite/deps/react-dom_client.js')
+      const R = React.default ?? React; const client = ReactDOM.default ?? ReactDOM; const { Ctx } = await import('/src/lib/auth-context.ts'); const { IdentityDot, ItemMark } = await import('/src/components/hub/identity-colour.tsx')
+      const root = document.createElement('div'); root.id = 'identity-mark-fixture'; document.body.append(root); const renderer = client.createRoot(root)
+      window.__renderMarks = (on) => renderer.render(R.createElement(Ctx.Provider, { value: { me: { flags: { visual_system: on }, settings: {}, capabilities: {}, preferences: {} }, signOut: () => {} } }, R.createElement(R.Fragment, null,
+        R.createElement(IdentityDot, { id: 'project-1', colour: '#1597cc' }), R.createElement(IdentityDot, { id: 'project-missing' }), R.createElement(IdentityDot, { id: 'project-invalid', colour: '#ffffff' }),
+        R.createElement(ItemMark, { kind: 'Task', colour: '#1597cc' }), R.createElement(ItemMark, { kind: 'Deliverable', colour: '#ffffff' }), R.createElement(ItemMark, { kind: 'Milestone' }))))
+      window.__renderMarks(true)
+    })
+    await page.locator('#identity-mark-fixture [data-identity-colour]').waitFor()
+    assert.equal(await page.locator('#identity-mark-fixture [data-identity-colour]').getAttribute('data-identity-colour'), '#1597cc')
+    assert.equal(await page.locator('#identity-mark-fixture [data-item-mark]').count(), 3)
+    assert.equal(await page.locator('#identity-mark-fixture [data-identity-colour]').evaluate(el => el.style.borderColor), 'var(--project-cyan)')
+    assert.equal(await page.locator('#identity-mark-fixture [data-identity-state="missing"]').count(), 2)
+    assert.equal(await page.locator('#identity-mark-fixture [data-identity-state="missing"][data-accent]').count(), 0, 'unknown enabled identity must not invent a hash colour')
+    assert.deepEqual(await page.locator('#identity-mark-fixture [data-item-mark]').evaluateAll(els => els.map(el => getComputedStyle(el).backgroundColor)), ['rgb(21, 151, 204)', 'rgb(70, 80, 99)', 'rgb(70, 80, 99)'])
+    assert.deepEqual(await page.locator('#identity-mark-fixture [data-identity-state="missing"]').evaluateAll(els => els.map(el => el.style.borderColor)), ['var(--line-3)', 'var(--line-3)'])
+    await page.evaluate(() => window.__renderMarks(false))
+    await page.locator('#identity-mark-fixture [data-accent]').first().waitFor()
+    assert.equal(await page.locator('#identity-mark-fixture [data-accent]').count(), 3)
+    assert.equal(await page.locator('#identity-mark-fixture [data-identity-colour]').count(), 0)
+    assert.equal(await page.locator('#identity-mark-fixture [data-item-mark]').count(), 0)
+    // Route-level propagation: the same persisted colour reaches Timeline and Calendar marks.
+    await page.goto(`${base}/home?projects=all`)
+    await page.locator('#h-projects [data-identity-colour="#1597cc"]').waitFor()
+    await page.clock.setFixedTime(new Date('2040-01-01T00:00:00Z'))
+    await page.evaluate(() => localStorage.setItem('hub.lastActivity', String(Date.now())))
+    await page.getByRole('button', { name: 'Edit Dashboard', exact: true }).click()
+    await page.locator('.visual-title-block dd').first().waitFor()
+    assert.equal(await page.locator('.visual-title-block dd').first().textContent(), '2026-10-31 14:24', 'Home shows response time despite a 2040 browser clock')
+    await page.clock.setFixedTime(new Date())
+    await page.evaluate(() => localStorage.setItem('hub.lastActivity', String(Date.now())))
+    await page.goto(`${base}/timeline?projects=all`)
+    await page.locator('[data-identity-colour="#1597cc"]').first().waitFor()
+    const timeline = page.getByRole('region', { name: 'Timeline', exact: true })
+    await timeline.waitFor()
+    const recordMarks = timeline.locator('[data-item-mark]')
+    // Legend samples remain neutral; only actual record-row marks take project identity.
+    await page.waitForFunction(region => { const marks=[...region.querySelectorAll('[data-item-mark]')]; return marks.length === 3 && marks.every(el => getComputedStyle(el).backgroundColor === 'rgb(21, 151, 204)') }, await timeline.elementHandle())
+    assert.deepEqual((await recordMarks.evaluateAll(els => els.map(el => el.dataset.itemKind))).sort(), ['Deliverable', 'Milestone', 'Task'])
+    await page.goto(`${base}/calendar?mode=agenda&date=2026-10-15`)
+    await page.locator('[data-identity-colour="#1597cc"]').first().waitFor()
+    assert.ok(await page.getByText('Calendar mark').count() > 0, 'calendar renders the persisted-colour deadline')
+    assert.equal(await page.locator('[data-item-kind="Task"]').evaluate(el => getComputedStyle(el).backgroundColor), 'rgb(21, 151, 204)')
+    await page.goto(`${base}/calendar?mode=month&date=2026-10-15`)
+    const deadline = page.getByRole('button').filter({ hasText: 'Calendar mark' })
+    await deadline.waitFor()
+    assert.match(await deadline.innerText(), /SYN-101/)
+    assert.equal(await deadline.locator('[data-item-kind="Task"]').evaluate(el => getComputedStyle(el).backgroundColor), 'rgb(21, 151, 204)')
+    enabled = false
+    await page.reload()
+    await deadline.waitFor()
+    assert.doesNotMatch(await deadline.innerText(), /SYN-101/, 'flag-off restores the original Calendar chip text')
+    assert.equal(await deadline.locator('[data-item-mark]').count(), 0, 'flag-off removes the added deadline shape')
+    assert.ok(await deadline.getAttribute('data-accent'), 'flag-off uses the original derived stripe despite a stale stored colour')
+    assert.equal(errors.length, 0, errors.map(e => e.stack ?? e.message).join('\n'))
+    console.log('PASS: identity colour picker is flag-gated, canonical options save with If-Match, stale off-state remains hidden')
+  } finally { await browser.close() }
+})().catch(e => { console.error(e); process.exitCode = 1 })

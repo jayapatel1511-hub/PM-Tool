@@ -1,0 +1,33 @@
+{
+  "coordinatorThreadId": "01a192dd-0b3b-7d31-81f0-69243cd8be2c",
+  "threads": [
+    {
+      "lane": "home-visual",
+      "threadId": "01a19461-822c-7811-85fe-efd8e09bd7af",
+      "hostId": "local",
+      "title": "PM-Tool \u2014 Home and visual system",
+      "afterCursor": "438e06d0-dce6-4d24-b7b7-5bd5518188e2:1"
+    },
+    {
+      "lane": "work-delivery",
+      "threadId": "01a19461-f283-7612-a5b7-e6638aa92196",
+      "hostId": "local",
+      "title": "PM-Tool \u2014 Work and delivery",
+      "afterCursor": "e6e089ec-7632-44cf-8dce-954a1c881732:44"
+    },
+    {
+      "lane": "projects-reports",
+      "threadId": "01a19462-65cb-7ca2-9228-79a3c15c3549",
+      "hostId": "local",
+      "title": "PM-Tool \u2014 Projects and reports",
+      "afterCursor": "810ce9f9-7292-4fab-860f-7b21f99b7838:1"
+    },
+    {
+      "lane": "capacity-people",
+      "threadId": "01a19462-d82f-7793-9dd3-315aec7437ad",
+      "hostId": "local",
+      "title": "PM-Tool \u2014 Capacity and people",
+      "afterCursor": "36ee52f0-8c17-412f-807a-b0ff7190d275:55"
+    }
+  ]
+}

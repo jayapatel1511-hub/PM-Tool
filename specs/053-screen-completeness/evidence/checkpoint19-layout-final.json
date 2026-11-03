@@ -1,0 +1,122 @@
+{
+  "base": "http://127.0.0.1:5088",
+  "project": "SYN-JOIN19-1101",
+  "reports": [
+    {
+      "name": "employee",
+      "url": "http://127.0.0.1:5088/reports/workload-employee?projectId=01a195dd-3df4-797f-b1ea-b2dbb79b6d75",
+      "rows": 2,
+      "firstRow": {
+        "x": 553,
+        "y": 387.5,
+        "width": 11854.5,
+        "height": 57
+      },
+      "docWidth": 1440,
+      "bodyWidth": 1440,
+      "namedRegions": 1,
+      "containsControls": true,
+      "containsCoverage": true,
+      "text": "26 · Available (h)\tWeek of 2026-10-26 · Confirmed reservation (h)\tWeek of 2026-10-26 · Proposed request (h)\tWeek of 2026-10-26 · Committed load (h)\tWeek of 2026-11-02\tWeek of 2026-11-02 · Available (h)\tWeek of 2026-11-02 · Confirmed reservation (h)\tWeek of 2026-11-02 · Proposed request (h)\tWeek of 2026-11-02 · Committed load (h)\tWeek of 2026-11-09\tWeek of 2026-11-09 · Available (h)\tWeek of 2026-11-09 · Confirmed reservation (h)\tWeek of 2026-11-09 · Proposed request (h)\tWeek of 2026-11-09 · Committed load (h)\tWeek of 2026-11-16\tWeek of 2026-11-16 · Available (h)\tWeek of 2026-11-16 · Confirmed reservation (h)\tWeek of 2026-11-16 · Proposed request (h)\tWeek of 2026-11-16 · Committed load (h)\tWeek of 2026-11-23\tWeek of 2026-11-23 · Available (h)\tWeek of 2026-11-23 · Confirmed reservation (h)\tWeek of 2026-11-23 · Proposed request (h)\tWeek of 2026-11-23 · Committed load (h)\tWeek of 2026-11-30\tWeek of 2026-11-30 · Available (h)\tWeek of 2026-11-30 · Confirmed reservation (h)\tWeek of 2026-11-30 · Proposed request (h)\tWeek of 2026-11-30 · Committed load (h)\tWeek of 2026-12-07\tWeek of 2026-12-07 · Available (h)\tWeek of 2026-12-07 · Confirmed reservation (h)\tWeek of 2026-12-07 · Proposed request (h)\tWeek of 2026-12-07 · Committed load (h)\tWeek of 2026-12-14\tWeek of 2026-12-14 · Available (h)\tWeek of 2026-12-14 · Confirmed reservation (h)\tWeek of 2026-12-14 · Proposed request (h)\tWeek of 2026-12-14 · Committed load (h)\tNo due date (h)\tOpen tasks\tUnestimated\tOverdue tasks\tProjects\tIndicator\nAlex Chen\tSam Patel\t40\tPartial project scope\t0\t40\t0\t0\t0\t20\t40\t0\t0\t20\t0\t40\t0\t0\t0\t0\t40\t0\t0\t0\t0\t40\t0\t0\t0\t0\t40\t0\t0\t0\t0\t40\t0\t0\t0\t0\t40\t0\t0\t0\t0\t2\t0\t0\t1\tOK\nOmar Haddad\tLena Brooks\t40\tPartial project scope\t0\t40\t0\t0\t0\t20\t40\t0\t0\t20\t0\t40\t0\t0\t0\t0\t40\t0\t0\t0\t0\t40\t0\t0\t0\t0\t40\t0\t0\t0\t0\t40\t0\t0\t0\t0\t40\t0\t0\t0\t0\t4\t2\t0\t1\tOK",
+      "mobile": {
+        "docWidth": 375,
+        "bodyWidth": 375,
+        "innerRegions": [
+          {
+            "tag": "DIV",
+            "scrollWidth": 11855,
+            "clientWidth": 341
+          }
+        ]
+      }
+    },
+    {
+      "name": "discipline",
+      "url": "http://127.0.0.1:5088/reports/workload-discipline",
+      "rows": 2,
+      "firstRow": {
+        "x": 553,
+        "y": 387.5,
+        "width": 1780.8125,
+        "height": 37
+      },
+      "docWidth": 1440,
+      "bodyWidth": 1440,
+      "namedRegions": 1,
+      "containsControls": true,
+      "containsCoverage": true,
+      "text": "atus by Project\nEvery deliverable by project with status, due and issue dates.\nUpcoming Milestones\nMilestones in the coming days with readiness and slip.\nWhat needs a decision, response or review?\nOpen Decisions\nDecisions still to be made, by required-by date.\nOpen Issues / High Risks\nOpen issues and open risks, most severe first. Without a severity, every open issue and the High risks.\nMeeting Actions Outstanding\nOpen actions from project meetings, by due date, with who owns them.\nReview Queue\nTasks and deliverables waiting for review, longest first.\nWhat changed and which projects need attention?\nProject Activity Log\nEvery recorded change on one project.\nProjects At Risk\nActive projects whose computed or reported health is Red or Yellow, and why.\nHealth History\nNightly computed and reported health by project.\nWhere is work concentrated by discipline?\nWorkload by Discipline\nEstimated hours per week by discipline.\nWhat do pilot activity and screen measurements show?\nPilot measures\nWeekly readings of the pilot goals on chosen projects: coordination reviews, tasks without an owner or due date, blocked tasks, and people updating task status.\nWhat task time was recorded?\nTask Hours\nActual hours recorded against tasks, by date and person.\nParameters and views\n2 rows\n2 unestimated tasks\n0 open tasks with no due date\n\nTasks assigned to people in this report scope, including their other visible disciplines. A task can appear in both counts. Only task records you may view in this report scope are counted.\n\nDiscipline\tWeek of 2026-10-26\tWeek of 2026-11-02\tWeek of 2026-11-09\tWeek of 2026-11-16\tWeek of 2026-11-23\tWeek of 2026-11-30\tWeek of 2026-12-07\tWeek of 2026-12-14\tNo due date (h)\tOpen tasks\tUnestimated\tPeople\nCivil\t0\t20\t0\t0\t0\t0\t0\t0\t0\t2\t0\t1\nGeotechnical\t0\t20\t0\t0\t0\t0\t0\t0\t0\t4\t2\t1",
+      "mobile": {
+        "docWidth": 375,
+        "bodyWidth": 375,
+        "innerRegions": [
+          {
+            "tag": "DIV",
+            "scrollWidth": 1781,
+            "clientWidth": 341
+          }
+        ]
+      }
+    },
+    {
+      "name": "hours",
+      "url": "http://127.0.0.1:5088/reports/task-hours?projectId=01a195dd-3df4-797f-b1ea-b2dbb79b6d75&userId=01a195db-15ab-7cfd-8481-4ee914d8fe58&from=2026-11-02&to=2026-11-08&scope=mine",
+      "rows": 1,
+      "firstRow": {
+        "x": 553,
+        "y": 371.5,
+        "width": 854,
+        "height": 36.5
+      },
+      "docWidth": 1440,
+      "bodyWidth": 1440,
+      "namedRegions": 1,
+      "containsControls": true,
+      "containsCoverage": true,
+      "text": "\nWhat is due, issued or approaching submission?\nUpcoming Deliverables\nOpen deliverables due in the coming days.\nDeliverable Status by Project\nEvery deliverable by project with status, due and issue dates.\nUpcoming Milestones\nMilestones in the coming days with readiness and slip.\nWhat needs a decision, response or review?\nOpen Decisions\nDecisions still to be made, by required-by date.\nOpen Issues / High Risks\nOpen issues and open risks, most severe first. Without a severity, every open issue and the High risks.\nMeeting Actions Outstanding\nOpen actions from project meetings, by due date, with who owns them.\nReview Queue\nTasks and deliverables waiting for review, longest first.\nWhat changed and which projects need attention?\nProject Activity Log\nEvery recorded change on one project.\nProjects At Risk\nActive projects whose computed or reported health is Red or Yellow, and why.\nHealth History\nNightly computed and reported health by project.\nWhere is work concentrated by discipline?\nWorkload by Discipline\nEstimated hours per week by discipline.\nWhat do pilot activity and screen measurements show?\nPilot measures\nWeekly readings of the pilot goals on chosen projects: coordination reviews, tasks without an owner or due date, blocked tasks, and people updating task status.\nWhat task time was recorded?\nTask Hours\nActual hours recorded against tasks, by date and person.\nParameters and views\n1 row Projects: SYN-JOIN19-1101Person: Alex ChenFrom: 2026-11-02To: 2026-11-08Staff: Mine\n0 unestimated tasks\n0 open tasks with no due date\n\nCurrent inputs for distinct tasks referenced by permitted time entries. Recorded hours stay separate; a task can appear in both counts.\n\nDate\tPerson\tProject\tKey\tTask\tHours\tNote\n—\nUnavailable\n\tTotal\t—\nUnavailable\n\t—\nUnavailable\n\t—\nUnavailable\n\t0\t—\nUnavailable",
+      "mobile": {
+        "docWidth": 375,
+        "bodyWidth": 375,
+        "innerRegions": [
+          {
+            "tag": "DIV",
+            "scrollWidth": 756,
+            "clientWidth": 341
+          }
+        ]
+      }
+    },
+    {
+      "name": "teamCapacity",
+      "url": "http://127.0.0.1:5088/reports/team-capacity?from=2026-11-02&weeks=2&includeMyDrafts=true",
+      "rows": 9,
+      "firstRow": {
+        "x": 553,
+        "y": 387.5,
+        "width": 854,
+        "height": 37
+      },
+      "docWidth": 1440,
+      "bodyWidth": 1440,
+      "namedRegions": 1,
+      "containsControls": true,
+      "containsCoverage": true,
+      "text": "le by project with status, due and issue dates.\nUpcoming Milestones\nMilestones in the coming days with readiness and slip.\nWhat needs a decision, response or review?\nOpen Decisions\nDecisions still to be made, by required-by date.\nOpen Issues / High Risks\nOpen issues and open risks, most severe first. Without a severity, every open issue and the High risks.\nMeeting Actions Outstanding\nOpen actions from project meetings, by due date, with who owns them.\nReview Queue\nTasks and deliverables waiting for review, longest first.\nWhat changed and which projects need attention?\nProject Activity Log\nEvery recorded change on one project.\nProjects At Risk\nActive projects whose computed or reported health is Red or Yellow, and why.\nHealth History\nNightly computed and reported health by project.\nWhere is work concentrated by discipline?\nWorkload by Discipline\nEstimated hours per week by discipline.\nWhat do pilot activity and screen measurements show?\nPilot measures\nWeekly readings of the pilot goals on chosen projects: coordination reviews, tasks without an owner or due date, blocked tasks, and people updating task status.\nWhat task time was recorded?\nTask Hours\nActual hours recorded against tasks, by date and person.\nParameters and views\n9 rows From: 2026-11-02Weeks: 2Include my private drafts: Yes\n\nRemaining capacity in the Weekly Planner: capacity − Confirmed − Expected\n\n2 unestimated tasks\n0 open tasks with no due date\n\nTasks assigned to people represented in this report scope; task context is separate from planning-entry source and confidence. A task can appear in both counts.\n\nMeasure\t2026-11-02\t2026-11-09\nCapacity\t200\t200\nTime away\t0\t0\nConfirmed\t0\t0\nExpected\t0\t0\nPossible\t0\t0\nRemaining capacity\t200\t200\nPeople over-planned\t0\t0\nPeople under-planned\t4\t4\nPeople with partial view\t0\t0",
+      "mobile": {
+        "docWidth": 375,
+        "bodyWidth": 375,
+        "innerRegions": []
+      }
+    }
+  ],
+  "peoplePicker": {
+    "url": "http://127.0.0.1:5088/projects/SYN-JOIN19-1101/team",
+    "jillVisible": true,
+    "starts": true,
+    "ends": true,
+    "certChip": false,
+    "text": "Skip to content\nt\nTuesday\nMy Work\nHome\nProjects\nTasks\nResources\nTime\nReports\nTeam\nFiles\nTuesday\nProjects\nSYN-JOIN19-1101 Synthetic Checkpoint 19 joined journeys\nTeam & Disciplines\nSearch\n/\nPeople\nJill Martin\nCivil Designer · jill@hub.test\nSee all results for \"Jill\"\nMy projects\nNew\nPN\nSYN-JOIN19-1101\nSynthetic Checkpoint 19 joined journeys\n○\nSetup\n○\nGrey\nOwner (PM): Priya Nair\nClient: Internal / TBD\nTarget date: 2026-11-30\nOverview\nWork\nDeliverables\nCoordination\nPeople\nFiles\nActivity\nSettings\nTeam & Disciplines\nAllocations\nWorkload\nSetup: nothing is evaluated or sent in digests until the project is activated. Checklist (advisory):\n○ At least one milestone\n✓ Every discipline has a lead\n✓ Every submission milestone has a deliverable\nTeam & Disciplines\nDisciplines2\nCivil\nMarc Dubois\nRemove\nGeotechnical\nOmar Haddad\nRemove\nAdd discipline\nChoose…\nProject Management\nSurvey\nElectrical\nEnvironmental\nStructural\nTransportation\nArchitecture\nAdd\nAdd from template\nMembers5\nCertification tag\nAll certification tags\nSynthetic QA19 Certification\nSynthetic QA19 UI Certification\nPerson\nAdd a person…\nRole\nTeam Member\nReviewer\nViewer\nProject Manager\nPrimary discipline\n(optional)\nNo primary discipline\nCivil\nGeotechnical\nAdd\nMembers\nName\tProject Manager\tTeam Member\tReviewer\tViewer\tPrimary discipline\tAdded\t\nActions\n\n\nAC\nAlex Chen\nCivil Designer (EIT)\n\t\t\n\t\t\t\nNo primary discipline\nCivil\nGeotechnical\n\t2026-11-01\tRemove\n\nDR\nDiane Roy\nSenior Technical Reviewer\n\t\t\t\n\t\t\nNo primary discipline\nCivil\nGeotechnical\n\t2026-11-01\tRemove\n\nMD\nMarc Dubois\nSenior Civil Engineer · Discipline Lead: Civil\n\t\t\n\t\t\t\nNo primary discipline\nCivil\nGeotechnical\n\t2026-11-01\tRemove\n\nOH\nOmar Haddad\nGeotechnical Lead · Discipline Lead: Geotechnical\nSynthetic QA19 Certification\n· Expires in 20 days\nSynthetic QA19 UI Certification\n· Expires in 30 days\n\t\t\n\t\t\t\nNo primary discipline\nCivil\nGeotechnical\n\t2026-11-01\tRemove\n\nPN\nPriya Nair\nProject Manager\n\t\n\t\t\t\t\nNo primary discipline\nCivil\nGeotechnical\n\t2026-11-01\t"
+  },
+  "errors": [],
+  "mutations": []
+}

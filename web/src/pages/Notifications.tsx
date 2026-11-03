@@ -2,16 +2,18 @@ import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { CheckCheck, Settings } from 'lucide-react'
 import { useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router'
-import { ChangeList } from '@/components/hub/activity'
+import { ActivityActor, ChangeList } from '@/components/hub/activity'
 import { AccentDot, ActiveFilters, ChipToggle, Empty, ErrorBanner, Field, Loading, Page, selectCls } from '@/components/hub/common'
 import { TabBar } from '@/components/hub/fields'
 import { NotificationItem, useMarkRead, useOpenNotification, useUnread } from '@/components/hub/notifications'
+import { NotificationRowActions } from '@/components/hub/notification-row-actions'
 import { Avatar } from '@/components/hub/people'
 import { Key } from '@/components/hub/pills'
 import { itemHref } from '@/components/hub/search'
 import { Button } from '@/components/ui/button'
 import type { components } from '@/gen/api'
 import { typedRequest } from '@/lib/api'
+import { useFlag, useMe } from '@/lib/auth'
 import { fmtDate, fmtTime, localIso, today, addDays } from '@/lib/format'
 import { en } from '@/i18n/en'
 import { t , runtimeText } from '@/lib/i18n'
@@ -51,6 +53,11 @@ export function NotificationsPage() {
 }
 
 function Personal() {
+  const on = useFlag('people_screens')
+  return on ? <ScreenPersonal /> : <LegacyPersonal />
+}
+
+function LegacyPersonal() {
   const [sp, setSp] = useSearchParams()
   const set = (k: string, v?: string) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
   const filters = { unread: sp.get('unread') === 'true', type: sp.get('type') ?? undefined, projectId: sp.get('projectId') ?? undefined }
@@ -107,6 +114,53 @@ function Personal() {
       )}
     </div>
   )
+}
+
+function ScreenPersonal() {
+  const me = useMe(), [sp, setSp] = useSearchParams()
+  const set = (key: string, value?: string) => { const next = new URLSearchParams(sp); if (value) next.set(key, value); else next.delete(key); setSp(next, { replace: true }) }
+  const filters = { unread: sp.get('unread') === 'true', type: sp.get('type') ?? undefined, projectId: sp.get('projectId') ?? undefined, needsAction: sp.get('needsAction') === 'true' }
+  const query = useInfiniteQuery({ queryKey: ['notifications', 'screen', me.id, true, filters],
+    queryFn: ({ pageParam }) => typedRequest('get', '/api/v1/me/notifications/screen', { query: { ...filters, page: pageParam, pageSize: 50 } }),
+    initialPageParam: 1, getNextPageParam: last => last.page * last.pageSize < last.totalCount ? last.page + 1 : undefined })
+  const pages = query.isSuccess && !query.error ? query.data.pages : []
+  const rows = pages.flatMap(page => page.items), first = pages[0]
+  const projects = [...new Map(rows.filter(entry => entry.notification.projectId && entry.notification.projectNumber)
+    .map(entry => [entry.notification.projectId!, entry.notification.projectNumber!])).entries()]
+  const markRead = useMarkRead(), open = useOpenNotification()
+  const tokens = ([
+    ['unread', t('notif.unreadOnly'), filters.unread && t('common.yes')],
+    ['type', t('common.type'), filters.type && runtimeText(`event.${filters.type}`)],
+    ['projectId', t('common.project'), projects.find(([id]) => id === filters.projectId)?.[1]],
+    ['needsAction', t('notifScreen.needsAction'), filters.needsAction && t('common.yes')],
+  ] as const).filter(([key]) => sp.get(key))
+  const clear = () => { const next = new URLSearchParams(sp); for (const [key] of tokens) next.delete(key); setSp(next, { replace: true }) }
+  return <div>
+    <div className="flex flex-col gap-3 border-b px-4 py-4">
+      <div className="flex flex-wrap items-end gap-3">
+        <Field label={t('common.type')} htmlFor="notif-type" className="w-full sm:w-64"><select id="notif-type" className={selectCls} value={filters.type ?? ''} onChange={event => set('type', event.target.value || undefined)}>
+          <option value="">{t('notif.anyType')}</option>{EVENTS.map(event => <option key={event} value={event}>{runtimeText(`event.${event}`)}</option>)}
+        </select></Field>
+        <Field label={t('common.project')} htmlFor="notif-project" className="w-full sm:w-44"><select id="notif-project" className={selectCls} value={filters.projectId ?? ''} onChange={event => set('projectId', event.target.value || undefined)}>
+          <option value="">{t('notif.anyProject')}</option>{projects.map(([id, number]) => <option key={id} value={id}>{number}</option>)}
+        </select></Field>
+        <ChipToggle on={filters.unread} onClick={() => set('unread', filters.unread ? undefined : 'true')}>{t('notif.unreadOnly')}</ChipToggle>
+        <ChipToggle on={filters.needsAction} onClick={() => set('needsAction', filters.needsAction ? undefined : 'true')}>{t('notifScreen.needsAction')}</ChipToggle>
+        <div className="flex-1" /><Button variant="outline" onClick={() => markRead({ all: true })}><CheckCheck className="size-4" />{t('notif.markAll')}</Button>
+      </div>
+      <ActiveFilters tokens={tokens.map(([key, label, value]) => ({ key, label, value: value || t('common.dash') }))} onRemove={key => set(key)} onClear={clear} />
+      {first && <div className="space-y-1 text-sm text-muted-foreground"><p>{t('notifScreen.results', { count: first.totalCount })}</p>
+        {first.contextCoverage.unknown > 0 && <p>{t('notifScreen.unknownContexts', { count: first.contextCoverage.unknown })}</p>}</div>}
+    </div>
+    {query.error ? <div className="border-b p-4"><ErrorBanner error={query.error} retry={() => void query.refetch()} /></div> : query.isPending ? <Loading rows={5} /> : rows.length === 0
+      ? <Empty action={tokens.length > 0 && <Button variant="outline" onClick={clear}>{t('filters.clear')}</Button>}>{filters.needsAction
+        ? t(first && first.contextCoverage.unknown > 0 ? 'notifScreen.emptyActionUnknown' : 'notifScreen.emptyAction') : filters.unread ? t('notif.noneUnread') : t('notif.none')}</Empty>
+      : <div className="divide-y">{byDay(rows, entry => entry.notification.updatedAt).map(([day, list]) => <section key={day} aria-label={day}>
+        <h2 className="border-b bg-muted px-4 py-2 text-xs/[18px] font-semibold uppercase tracking-[0.5px] text-muted-foreground">{day}</h2>
+        <div className="divide-y">{list.map(entry => <NotificationItem key={`${me.id}:${entry.notification.id}`} n={entry.notification} onOpen={open}
+          footer={<NotificationRowActions entry={entry} />} />)}</div>
+      </section>)}{query.hasNextPage && <div className="p-4 text-center"><Button variant="outline" size="sm" onClick={() => void query.fetchNextPage()}>{t('notif.more')}</Button></div>}</div>}
+  </div>
 }
 
 type FeedItem = components['schemas']['FollowingItem']
@@ -181,7 +235,7 @@ function Following() {
                             <Avatar id={e.actorId} name={e.actorName ?? t('common.system')} />
                             <div className="min-w-0 flex-1">
                               <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                                <span className="font-semibold">{e.actorName ?? t('common.system')}</span>
+                                <span className="font-semibold"><ActivityActor row={e} focusKey={`notification:${e.id}:actor`} /></span>
                                 <span className="text-muted-foreground">{runtimeText(`action.${e.action}`)}</span>
                                 {e.itemId && e.action !== 'Deleted'
                                   ? <Link className="break-words text-primary underline underline-offset-4 hover:text-foreground" to={itemHref(e.itemType, num, e.itemId)}>{item}</Link>

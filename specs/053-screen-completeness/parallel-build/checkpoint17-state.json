@@ -1,0 +1,70 @@
+{
+  "checkpoint": 17,
+  "goal": "active, incomplete; no commit/push/deploy/activation",
+  "generation": 16,
+  "mode": "all source frozen except read-only proposal notes and one named real-journey verifier",
+  "backend": {
+    "focused": 28,
+    "adjacent": 209,
+    "overlap": 10,
+    "unique": 227,
+    "result": "PASS",
+    "logs": [
+      "/private/tmp/tuesday-checkpoint17-api-final.log",
+      "/private/tmp/tuesday-checkpoint17-api-adjacent.log"
+    ]
+  },
+  "node_cache_suite": "PASS9, /private/tmp/tuesday-checkpoint17-cache-keys.log",
+  "frontend": "build/forced app types/fixture types/lint/SSR PASS; final maintained script syntax/fixture types PASS; no product source change since build",
+  "browser_new_and_nav": {
+    "work-delivery-readiness-order": "PASS log suffix -6",
+    "capacity-allocation-shift": "PASS initial log",
+    "report-catalogue-views": "PASS suffix -5",
+    "workspace-identity-surfaces": "PASS suffix -2",
+    "visual-navigation": "PASS suffix -2",
+    "visual-tabs": "PASS suffix -2",
+    "visual-drawer": "PASS suffix -2",
+    "visual-layout": "PASS dev8854 log"
+  },
+  "affected_regressions_pass": [
+    "workspace",
+    "readiness",
+    "capacity-allocation-screen",
+    "home-overview",
+    "home-visual-deadline-notes",
+    "work-delivery-related-return"
+  ],
+  "full_census": "68 observations, all34enabled<=405 max402, zero serious/page/font; overallFAIL2 preserved offMyWork558",
+  "full_reflow": "68/68PASS; no overflow/smalltext/clipped/serious/page/font/restoration failures",
+  "pending": [],
+  "services": {
+    "qa_api": {
+      "url": "http://127.0.0.1:5088",
+      "session_id": 93651,
+      "db": "hub_qa_checkpoint17",
+      "note": "Stopped, database dropped after verification."
+    },
+    "source_vite": {
+      "url": "http://127.0.0.1:8854",
+      "session_id": 25996,
+      "note": "Stopped."
+    },
+    "production_mock_preview": "http://127.0.0.1:8853 existing preserved",
+    "test_pg": "codex-pm-052-053-tests loopback55432, keep for future tests",
+    "review_pg": "55433 untouched"
+  },
+  "next_proposals": "A planner/hatch semantic proposal; B S10-S16 next Work proposal; C S23-B exact report-task-context contract, all read-only. D S32 proposal already saved. No next implementation open.",
+  "build_hashes": {
+    "api": "bcec56575318350dd530b92654d6a29a124bed7b91ecb815a1daa4759dba0ac3",
+    "ui": "80c5df1509fa3cbef6035904cb5fcf2187f32482f076715cf3241a6a13c695c5"
+  },
+  "status": "closed functional checkpoint; incomplete 052 visual acceptance recorded",
+  "joined_journeys": "3PASS; root screenshot review preserves density/measurement and transition-frame limits",
+  "planning_reporting": "PASS; handle8616 exit0",
+  "spec": "PASS1546IDs/438sections zero uncited/unknown",
+  "checked053": [
+    "S05",
+    "S31"
+  ],
+  "cleanup": "API5088/dev8854 stopped; hub_qa_checkpoint17 dropped; no hub_test_*;8853/prototypes/review55433/testPG preserved"
+}

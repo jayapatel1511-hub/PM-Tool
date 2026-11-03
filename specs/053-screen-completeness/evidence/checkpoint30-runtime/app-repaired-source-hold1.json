@@ -1,0 +1,10 @@
+{
+  "atUtc": "2026-11-02T20:04:28.653730+00:00",
+  "files": {
+    "web/src/pages/projects/TaskPanel.tsx": "b6eb6f335f49728c06321b2d5d20b29d8060da49af961b96619a0ad5ba46a9b8",
+    "web/src/pages/projects/Tasks.tsx": "ea669626080d70f490444755f6e8e6c051069d87354e20e9719c77a05378595d",
+    "web/src/components/hub/fields.tsx": "070664970a89e9a38217b08b78f966c73bd3da105b2b661720edebf4a6900cdf",
+    "web/src/pages/projects/task-section-navigation.tsx": "62ed1cd97ac0009459a2cf2843c52361d212c1e9b86c14eaeef6ac96e8dde6c3",
+    "web/src/pages/projects/task-contribution.tsx": "22ea5d44ce92ed6722c128336a5610f35369da243544383492c446c7b959fe61"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "suite": "issue-root-cause",
+  "exitCode": 0,
+  "base": "http://127.0.0.1:8859",
+  "visualDir": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint28-runtime/browser2-visual",
+  "atUtc": "2026-11-02T15:24:35.426256+00:00",
+  "boundary": "Actual SPA synthetic API only; single serial Chrome lane"
+}

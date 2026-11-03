@@ -1,0 +1,12 @@
+{
+  "files": {
+    "web/tests/calendar-screen.cjs": "a3c9178040985c1cdf2ddda7acb40f4e4a4590dc8d73b06ad50ee4a1874c046d",
+    "web/tests/review-discipline-patterns.cjs": "8307ebfbff4976d4738106423bb42d2e04a9f958f7bf20edd06c6a3b3445c071",
+    "web/tests/task-cross-project-bulk.cjs": "a7de45ea2eec12ffcb2984d8548ab46826fb5f73c25c27be510c21931d20dd9b",
+    "web/tests/notification-screen.cjs": "e05b8bfa7da411843180209959f147c802e810b26fd193428c39c4508248d298",
+    "web/src/lib/keys.ts": "99cad6a10286311bf2c1677e3e115f98a6c3e4c573b6ddea512d48ff1f316912",
+    "web/src/lib/keys.test.ts": "d8aa1018efd79bfe8c049254e8450b11a0603a72c76714f275e743c6f19eb2a3",
+    "web/src/components/hub/common.tsx": "94be45182f80790b12fcaafa3884d4689e3c160846787e7542cc423a8a19861b"
+  },
+  "status": "ALL_HOLD_FINAL_PROVIDER_AND_BROWSER_LOCAL_PASS"
+}

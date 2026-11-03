@@ -1,0 +1,20 @@
+{
+  "exitCode": 0,
+  "args": [
+    "node",
+    "tests/task-contribution.cjs"
+  ],
+  "atUtc": "2026-11-02T20:05:31.269055+00:00",
+  "base": "http://127.0.0.1:8866",
+  "transport": "Finite synthetic HTTP; no real API or operational writes",
+  "driverHashes": {
+    "tests/task-contribution.cjs": "cb984fe5e5fb1711cfa7266620b23f2da344d498a68fbb8e6af0979a6dd915ff",
+    "tests/task-contribution.fixture.cjs": "b5737b979139702799c9cc3f4606a3ea49fde726bf0fba8d9cd2c81d4166bf3b"
+  },
+  "screenshots": [
+    "task-current-read-404.png",
+    "task-contribution-phone-refusal.png",
+    "task-current-read-403.png",
+    "task-current-read-503.png"
+  ]
+}

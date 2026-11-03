@@ -1,0 +1,11 @@
+{
+  "outcomes": {
+    "Passed": 66,
+    "Failed": 1
+  },
+  "failures": [
+    "Hub.Tests.Api.FileScreenTests.Missing_is_an_independent_live_direct_link_anti_join_including_on_hold_and_ignoring_link_filters"
+  ],
+  "cause": "Fixture updates AddedAt and then incorrectly uses initial creation RowVersion for expected successful delete",
+  "boundary": "Raw log/TRX retained; source fix and failed case rerun required"
+}

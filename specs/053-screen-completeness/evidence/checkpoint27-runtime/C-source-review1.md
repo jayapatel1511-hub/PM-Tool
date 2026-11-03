@@ -1,0 +1,1 @@
+Bounded source PASS for four C files at CD-source-ready1 hashes. Canonical permissions/If-Match, authorship, legacy wire, validation before assignment, URL clearing, scoped batched targets, task-parent precedence and provider test sources reviewed. Known global pre-replay guard gap excluded and root repair follows. No execution.

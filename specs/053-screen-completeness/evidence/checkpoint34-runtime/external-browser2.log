@@ -1,0 +1,13 @@
+{"stage":"read and permission loss","completedCases":["Normal current-started record with explicit actual IDs, four versions, disabled blank confirmation, native invalid-date refusal, reason over4000 preserved in wire, typed party provenance, original/current issued revision, no automatic verifier","Explicit PM designation and separate verifier reason/evidence; resolver evidence remains distinct; closure event retains verifier evidence","409 preserves typed draft and originally selected issue/party/code/package versions after normal options reread; no silent promotion","Lost response after synthetic commit retries byte-identical body/request ID; later 403 stays uncertain; explicit success produces one synthetic receipt","Malformed success is unconfirmed and locks the exact command rather than clearing the draft"],"currentUrl":"http://127.0.0.1:8876/projects/P-MOCK/reviews?q=Synthetic&page=1&findingSeverity=Advisory&panel=ReviewPackage:00000000-0000-0000-0000-000000018201","commands":9,"unexpectedGets":[],"unexpectedWrites":[],"pageErrors":[],"baseUnknownGets":[]}
+locator.waitFor: Error: strict mode violation: locator('[data-external-review-form]').getByRole('alert') resolved to 2 elements:
+    1) <div role="alert" class="flex flex-wrap items-center gap-3 rounded-md border border-bad/30 bg-bad-bg px-4 py-3 text-sm text-bad">…</div> aka getByRole('alert').filter({ hasText: 'Synthetic choices unavailable' })
+    2) <div role="alert" class="flex flex-wrap items-center gap-3 rounded-md border border-bad/30 bg-bad-bg px-4 py-3 text-sm text-bad">…</div> aka getByRole('alert').filter({ hasText: 'Synthetic 403 external-review' })
+
+Call log:
+[2m  - waiting for locator('[data-external-review-form]').getByRole('alert') to be visible[22m
+
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/external-review.cjs:242:37 {
+  log: [
+    "  - waiting for locator('[data-external-review-form]').getByRole('alert') to be visible"
+  ]
+}

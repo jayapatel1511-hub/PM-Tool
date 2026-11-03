@@ -1,0 +1,116 @@
+{
+  "taskId": "01a19754-b4f4-7d85-8480-9cd3522778fc",
+  "offerCreate": {
+    "status": 201,
+    "value": {
+      "taskId": "01a19754-b4f4-7d85-8480-9cd3522778fc"
+    }
+  },
+  "before": {
+    "status": 200,
+    "candidates": [
+      {
+        "id": "01a19751-d447-7f75-a176-926ba05c6c3e",
+        "displayName": "Jill Martin",
+        "personNotices": {
+          "personType": null,
+          "startDate": null,
+          "endDate": null,
+          "starts": false,
+          "ends": false
+        }
+      },
+      {
+        "id": "01a19758-d722-7e80-924f-8512667cbbe5",
+        "displayName": "qa20-report-a",
+        "personNotices": {
+          "personType": null,
+          "startDate": null,
+          "endDate": null,
+          "starts": false,
+          "ends": false
+        }
+      },
+      {
+        "id": "01a19758-d73a-7cbd-892a-36e719785ce3",
+        "displayName": "qa20-report-b",
+        "personNotices": {
+          "personType": null,
+          "startDate": null,
+          "endDate": null,
+          "starts": false,
+          "ends": false
+        }
+      },
+      {
+        "id": "01a19751-d447-780f-8722-3aaa0a0c4d21",
+        "displayName": "Marc Dubois",
+        "personNotices": {
+          "personType": "Co-op",
+          "startDate": "2026-11-02",
+          "endDate": "2026-11-11",
+          "starts": true,
+          "ends": true
+        }
+      }
+    ]
+  },
+  "factsPatch": {
+    "status": 200,
+    "value": {
+      "id": "01a19751-d447-780f-8722-3aaa0a0c4d21",
+      "rowVersion": 2
+    }
+  },
+  "after": {
+    "status": 200,
+    "candidates": [
+      {
+        "id": "01a19751-d447-7f75-a176-926ba05c6c3e",
+        "displayName": "Jill Martin",
+        "personNotices": {
+          "personType": null,
+          "startDate": null,
+          "endDate": null,
+          "starts": false,
+          "ends": false
+        }
+      },
+      {
+        "id": "01a19758-d722-7e80-924f-8512667cbbe5",
+        "displayName": "qa20-report-a",
+        "personNotices": {
+          "personType": null,
+          "startDate": null,
+          "endDate": null,
+          "starts": false,
+          "ends": false
+        }
+      },
+      {
+        "id": "01a19758-d73a-7cbd-892a-36e719785ce3",
+        "displayName": "qa20-report-b",
+        "personNotices": {
+          "personType": null,
+          "startDate": null,
+          "endDate": null,
+          "starts": false,
+          "ends": false
+        }
+      },
+      {
+        "id": "01a19751-d447-780f-8722-3aaa0a0c4d21",
+        "displayName": "Marc Dubois",
+        "personNotices": {
+          "personType": "Co-op",
+          "startDate": "2026-11-02",
+          "endDate": "2026-11-11",
+          "starts": true,
+          "ends": true
+        }
+      }
+    ]
+  },
+  "marcId": "01a19751-d447-780f-8722-3aaa0a0c4d21",
+  "idsPreserved": true
+}

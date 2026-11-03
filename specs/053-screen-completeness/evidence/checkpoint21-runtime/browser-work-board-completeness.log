@@ -1,0 +1,12 @@
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+8 !== 0
+
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/work-board-completeness.cjs:118:151 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 8,
+  expected: 0,
+  operator: 'strictEqual',
+  diff: 'simple'
+}

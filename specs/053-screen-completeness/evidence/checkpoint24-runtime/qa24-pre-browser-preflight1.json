@@ -1,0 +1,14 @@
+{
+  "atUtc": "2026-11-02T08:22:34.610560+00:00",
+  "apiPid": 4323,
+  "listener": "127.0.0.1:5088",
+  "cwd": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api",
+  "apiDllSha256": "80658bd2ad102063a6042355ff0d5fb417a5fc3428b2eb5b1ae67916e57145f3",
+  "identityVerified": "lsof listener/cwd + SHA256 match priorownershipreceipt",
+  "health": {
+    "status": "Degraded",
+    "build": "dev"
+  },
+  "healthInterpretation": "Program.cs health directly queries oldest unprocessed/non-deadlettered outbox; after10minutes reportsDegraded. Jobs were intentionally disabled for owned synthetic QA; no workers or delivery acceptance is claimed. Database remains reachable; no queued events were cleared.",
+  "realUiProgressAbsent": true
+}

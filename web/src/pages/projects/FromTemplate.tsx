@@ -1,4 +1,4 @@
-import { useFlag } from '@/lib/auth'
+import { useFlag, useMe } from '@/lib/auth'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -16,13 +16,23 @@ import { runtimeText, plural, t, tv } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import type { ProjectDetail } from '@/lib/types'
 import type { CreateContext } from './CreateProject'
+import { TemplateRiskPreview } from '../template-risk-seeds'
+import { ProjectTemplateProvenance } from '../template-version-provenance'
 
 type Schemas = components['schemas']
 export type TemplateRow = Schemas['TemplateListRow']
 type Value = { templateId: string; dates: Record<string, string | null> } | null
 
 export function usePublishedTemplates() {
-  return useQuery({ queryKey: ['templates'], queryFn: () => typedRequest('get', '/api/v1/templates', {}), select: (d) => d.templates.filter((x) => x.status === 'Published') })
+  const me = useMe(); const people = useFlag('people_screens'); const roles = useFlag('template_roles')
+  return useQuery({ queryKey: ['templates', me.id, people, roles], queryFn: () => typedRequest('get', '/api/v1/templates', {}), select: (d) => d.templates.filter((x) => x.status === 'Published') })
+}
+
+function useTemplateDetail(id: string | undefined) {
+  const me = useMe(); const people = useFlag('people_screens'); const risks = useFlag('register_screens')
+  const roles = useFlag('template_roles'); const working = useFlag('template_working_days')
+  return useQuery({ queryKey: ['template', id, me.id, people, risks, roles, working], enabled: !!id,
+    queryFn: () => typedRequest('get', '/api/v1/templates/{id}', { params: { id: id! } }) })
 }
 
 function usePreview(value: Value, ctx: CreateContext) {
@@ -36,7 +46,7 @@ function usePreview(value: Value, ctx: CreateContext) {
 export function TemplateSource({ value, onChange, ctx }: { value: Value; onChange: (v: Value) => void; ctx: CreateContext }) {
   const list = usePublishedTemplates()
   const preview = usePreview(value, ctx)
-  const detail = useQuery({ queryKey: ['template', value?.templateId], enabled: !!value, queryFn: () => typedRequest('get', '/api/v1/templates/{id}', { params: { id: value!.templateId } }) })
+  const detail = useTemplateDetail(value?.templateId)
   if (!list.data?.length) return null
   const choose = async (id: string) => {
     if (!id) { onChange(null); return }
@@ -97,8 +107,9 @@ export function TemplateSource({ value, onChange, ctx }: { value: Value; onChang
  *  disciplines are copied as Proposed only (031 FR-BAS-07, AC-BAS-05); the others are left out, as on the server. */
 export function TemplateSummary({ value, ctx }: { value: Value; ctx: CreateContext }) {
   const rolesOn = useFlag('template_roles')
+  const risksOn = useFlag('register_screens')
   const preview = usePreview(value, ctx)
-  const detail = useQuery({ queryKey: ['template', value?.templateId], enabled: !!value, queryFn: () => typedRequest('get', '/api/v1/templates/{id}', { params: { id: value!.templateId } }) })
+  const detail = useTemplateDetail(value?.templateId)
   const p = preview.data
   if (!p) return null
   const undated = p.undated.milestones + p.undated.deliverables + p.undated.tasks
@@ -109,6 +120,8 @@ export function TemplateSummary({ value, ctx }: { value: Value; ctx: CreateConte
       <h3 id="tpl-summary" className="text-base/6 font-semibold">{t('tpl.summary')}</h3>
       {detail.data?.offsetDayKind === 'WorkingDays' && <p className="text-xs/[18px] text-muted-foreground">{t('rcv.workingDaysNote')}</p>}
       <p>{t('tpl.creates', { m: p.counts.milestones, d: p.counts.deliverables, k: p.counts.tasks, x: p.counts.dependencies })}{rolesOn && ` · ${t('tpl.roleCount', { count: p.counts.roles ?? 0 })}`}</p>
+      {risksOn && (detail.error ? <ErrorBanner error={detail.error} retry={() => detail.refetch()} /> : detail.isPending ? <Spinner />
+        : Array.isArray(detail.data?.risks) ? <TemplateRiskPreview rows={detail.data.risks} /> : <ErrorBanner error={new Error(t('tpl.dataUnavailable'))} />)}
       {rolesOn && (p.roles ?? []).length > 0 && <ul className="space-y-1 text-xs/[18px]">{p.roles?.map(r => <li key={r.id} className={r.skipReason ? 'text-warn' : 'text-muted-foreground'}>{r.label} · {r.disciplineName ?? t('tpl.noDiscipline')} · {r.hours} h · {r.skipReason ? runtimeText(`tpl.roleSkip.${r.skipReason}`) : `${t('tpl.roleWillCreate')} ${fmtDate(r.from)} → ${fmtDate(r.through)}`}</li>)}</ul>}
       {basis.length > 0 && <p>{plural(copied, 'templates.basisCopiedOne', 'templates.basisCopied')}{copied < basis.length && ` ${t('templates.basisSkipped', { n: basis.length - copied })}`}</p>}
       {undated > 0 && <p className="text-warn" role="status"><span aria-hidden>▲ </span>{t('tpl.undatedWarning', { m: p.undated.milestones, d: p.undated.deliverables, k: p.undated.tasks })}</p>}
@@ -204,5 +217,7 @@ export function AddFromTemplateDialog({ projectId, onClose }: { projectId: strin
 /** FR-008: which template and version the project was made from; later versions never change it (E-12). */
 
 export function TemplateSettings({ project: p }: { project: ProjectDetail }) {
+  const enhanced = useFlag('people_screens')
+  if (enhanced && p.createdFromTemplateId) return <ProjectTemplateProvenance key={p.id} projectId={p.id} />
   return p.createdFromTemplateId ? <Section title={t('tpl.origin')}><p className="px-5 py-4 text-sm">{t('tpl.originText', { name: p.templateName ?? t('tpl.aTemplate'), v: p.templateVersion ?? '' })}</p></Section> : null
 }

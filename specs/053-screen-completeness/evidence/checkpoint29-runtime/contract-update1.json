@@ -1,0 +1,37 @@
+{
+  "exitCode": 1,
+  "args": [
+    "dotnet",
+    "test",
+    "tests/Hub.Tests/Hub.Tests.csproj",
+    "-c",
+    "Release",
+    "--no-build",
+    "--no-restore",
+    "--artifacts-path",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint29-artifacts",
+    "--filter",
+    "FullyQualifiedName=Hub.Tests.Api.ContractTests.Openapi_matches_the_committed_golden_document|FullyQualifiedName=Hub.Tests.Api.RegistryTests.Generated_key_families_match_the_registry_and_vocabulary",
+    "--logger",
+    "trx;LogFileName=contract-update1.trx",
+    "--results-directory",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint29-runtime/trx-contract-update1",
+    "-m:1",
+    "-p:UseSharedCompilation=false",
+    "-p:NuGetAudit=false"
+  ],
+  "atUtc": "2026-11-02T17:46:57.795935+00:00",
+  "boundary": "Only explicit golden producers; intentional drift failures must be reviewed and rerun without update vars",
+  "cases": [
+    {
+      "name": "Hub.Tests.Api.ContractTests.Openapi_matches_the_committed_golden_document",
+      "outcome": "Failed",
+      "message": "Updated web/src/gen/openapi.json; review the diff, run npm run gen, and rerun without HUB_UPDATE_CONTRACT"
+    },
+    {
+      "name": "Hub.Tests.Api.RegistryTests.Generated_key_families_match_the_registry_and_vocabulary",
+      "outcome": "Failed",
+      "message": "Updated web/src/gen/registry.gen.ts; review the diff and rerun without HUB_UPDATE_REGISTRY"
+    }
+  ]
+}

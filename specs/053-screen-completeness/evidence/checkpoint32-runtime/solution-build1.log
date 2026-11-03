@@ -1,0 +1,9 @@
+  Hub.Domain -> /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint32-artifacts/bin/Hub.Domain/release/Hub.Domain.dll
+  Hub.Api -> /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint32-artifacts/bin/Hub.Api/release/Hub.Api.dll
+  Hub.Tests -> /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint32-artifacts/bin/Hub.Tests/release/Hub.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.75

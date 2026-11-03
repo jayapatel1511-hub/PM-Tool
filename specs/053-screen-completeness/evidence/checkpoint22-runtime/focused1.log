@@ -1,0 +1,5 @@
+Test run for /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+Results File: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint22-runtime/focused1.trx
+
+Passed!  - Failed:     0, Passed:    33, Skipped:     0, Total:    33, Duration: 39 s - Hub.Tests.dll (net10.0)

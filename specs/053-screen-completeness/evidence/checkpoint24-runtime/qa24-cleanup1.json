@@ -1,0 +1,11 @@
+{
+  "atUtc": "2026-11-02T08:25:54.494417+00:00",
+  "status": "BLOCKED_AUTO_REVIEW_NO_ACTION_EXECUTED",
+  "database": "hub_qa_checkpoint24",
+  "apiPid": 4323,
+  "apiLoopback": "127.0.0.1:5088",
+  "action": "SIGINT identity-verified QA24 API; DROP only root-created hub_qa_checkpoint24 after zero-client check",
+  "rejection": "Automatic approval review rejected stopping a running service and irreversibly dropping a database without explicit user confirmation; do not bypass.",
+  "state": "Nothing stopped or deleted; preserve running API and QA24 database pending explicit approval. TestPG55432 and preview8853 unchanged.",
+  "evidencePreserved": "real-import-browser1.json / real-import-api1.json and recovery progress already saved"
+}

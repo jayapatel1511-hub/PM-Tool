@@ -1,0 +1,26 @@
+{
+  "passed": 4,
+  "failed": 0,
+  "latest": [
+    {
+      "suite": "project-header-compact",
+      "exitCode": 0,
+      "resultsFile": "browser-focused-repair1-results.json"
+    },
+    {
+      "suite": "work-board-completeness",
+      "exitCode": 0,
+      "resultsFile": "browser-focused-repair2-results.json"
+    },
+    {
+      "suite": "team-completeness",
+      "exitCode": 0,
+      "resultsFile": "browser-focused-repair2-results.json"
+    },
+    {
+      "suite": "report-capacity-comparison",
+      "exitCode": 0,
+      "resultsFile": "browser-focused-repair1-results.json"
+    }
+  ]
+}

@@ -1,14 +1,17 @@
+import { PersonPanelTrigger } from '@/components/hub/person-panel-trigger'
 import { ProjectStatusNote } from '@/components/hub/project-status-note'
 import { useFlag } from '@/lib/auth'
 import { useProjectRefresh } from '@/hooks/data'
 import { useQuery } from '@tanstack/react-query'
 import { Plus } from 'lucide-react'
 import { useState } from 'react'
-import { Link, useSearchParams } from 'react-router'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { type ActivityRow, ChangeList } from '@/components/hub/activity'
 import { ScheduleNote, type PlannedTarget } from '@/components/hub/schedule-note'
 import { AttentionPanel } from '@/components/hub/attention'
 import { Empty, ErrorBanner, Loading, Missing, Page, Section, SummaryTile, TableRegion, selectCls, tdCls, thCls } from '@/components/hub/common'
+import { TitleBlock } from '@/components/hub/title-block'
+import { CountCard } from '@/components/hub/count-card'
 import { useItemPanel } from '@/components/hub/panel-host'
 import { Avatar } from '@/components/hub/people'
 import { Chip, HealthPill, Key, StatusPill } from '@/components/hub/pills'
@@ -18,7 +21,9 @@ import { Checkbox } from '@/components/ui/checkbox'
 import type { components } from '@/gen/api'
 import { typedRequest } from '@/lib/api'
 import { useOffer } from '@/lib/auth'
-import { fmtDate, fmtTime, relative } from '@/lib/format'
+import { fmtDate, fmtTime, hours, relative } from '@/lib/format'
+import { captureRecordContextOrigin } from '@/lib/record-context-navigation'
+import { itemHref } from '@/components/hub/search'
 import { t , runtimeText } from '@/lib/i18n'
 import { cn, type Accent } from '@/lib/utils'
 import { MilestoneStrip, type MilestoneRow } from './Milestones'
@@ -39,6 +44,8 @@ interface Dash extends Omit<components['schemas']['DashboardView'], 'milestones'
 export function DashboardTab() {
   const p = useCurrentProject()
   const statusNote = useFlag('project_status_note')
+  const projectScreens = useFlag('project_screens')
+  const visualSystem = useFlag('visual_system')
   const refresh = useProjectRefresh()
   const [sp, setSp] = useSearchParams()
   const [important, setImportant] = useState(false)
@@ -51,7 +58,7 @@ export function DashboardTab() {
   const lead = (id?: string | null) => p.disciplines.find((x) => x.leadUserId === id)?.leadName
   const snooze = useOffer()(p.permissions.snooze, p.status) // FR-FIG-08 decision 2
   return (
-    <Page title={t('ptab.dashboard')} actions={<>
+    <Page className={visualSystem ? 'visual-dashboard-band' : undefined} overlap={visualSystem && !!q.data && !q.error} title={t('ptab.dashboard')} titleBlock={q.data && <TitleBlock asOf={(q.data as Dash & { asOf?: string }).asOf} />} actions={<>
       <div className="flex items-center gap-2">
         <label htmlFor="dash-scope" className="text-sm font-medium">{t('dash.scope')}</label>
         <select id="dash-scope" className={cn(selectCls, 'w-auto max-w-56')} value={disciplineId ?? ''}
@@ -71,10 +78,11 @@ export function DashboardTab() {
             <MilestoneStrip rows={q.data.milestones.map((m) => ({ ...m, isComplete: false, isCancelled: false }) as MilestoneRow)} onOpen={(m) => openPanel('Milestone', m.id)} />
           </div>}
           <Headline />
+          {projectScreens && <StaffingUntilSubmission value={q.isFetching ? undefined : q.data.staffing} pending={q.isFetching} />}
           <ScheduleNote value={(p as typeof p & { latestPlanned?: PlannedTarget }).latestPlanned} />
           <div className="grid items-start gap-6 xl:grid-cols-[3fr_2fr]">
             <Section title={t('dash.attention')} id="attention" accent="peach">
-              <AttentionPanel projectId={p.id} canSnooze={snooze.shown} refused={snooze.props.title} limit={10} disciplineId={disciplineId} severity={sp.get('severity') ?? undefined} />
+              <AttentionPanel projectId={p.id} canSnooze={snooze.shown} refused={snooze.props.title} limit={10} disciplineId={disciplineId} severity={sp.get('severity') ?? undefined} groupByKind={projectScreens} />
             </Section>
             <Section title={t('dash.disciplines')} id="disciplines" accent="mint">
               {q.data.disciplines.length === 0 ? <Empty>{t('dash.notEvaluated')}</Empty> : (
@@ -94,7 +102,7 @@ export function DashboardTab() {
                           <tr key={d.disciplineId} className="border-t hover:bg-muted">
                             <td className={tdCls}><Link className="font-semibold hover:underline" to={tasks}>{d.name}</Link></td>
                             <td className={cn(tdCls, 'whitespace-nowrap')}>
-                              {name ? <span className="inline-flex items-center gap-2"><Avatar id={d.leadId} name={name} />{name}</span> : <Chip tone="warn">{t('dash.noLead')}</Chip>}
+                              {name ? <span className="inline-flex items-center gap-2"><Avatar id={d.leadId} name={name} />{d.leadId ? <PersonPanelTrigger userId={d.leadId} name={name} focusKey={`dashboard:discipline:${d.disciplineId}:lead`} /> : name}</span> : <Chip tone="warn">{t('dash.noLead')}</Chip>}
                             </td>
                             <td className={tdCls}><Why reasons={d.reasons} title={d.name}><HealthPill health={d.health} /></Why></td>
                             {q.data.disciplineStatus && <td className={tdCls}><DisciplineStatus segments={q.data.disciplineStatus[d.disciplineId]} base={base} /></td>}
@@ -127,7 +135,7 @@ export function DashboardTab() {
                     {r.actorName ? <Avatar id={r.actorId} name={r.actorName} className="mt-0.5" /> : <span aria-hidden className="size-7 shrink-0" />}
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-baseline gap-x-2">
-                        <span className="font-semibold">{r.actorName ?? t('common.system')}</span>
+                        <span className="font-semibold">{r.actorId && r.actorName ? <PersonPanelTrigger userId={r.actorId} name={r.actorName} focusKey={`dashboard:activity:${r.id}:actor`} /> : r.actorName ?? t('common.system')}</span>
                         <span className="text-muted-foreground">{runtimeText(`action.${r.action}`)}</span>
                         {r.itemKey && <Key>{r.itemKey}</Key>}<span className="break-words">{r.itemName}</span>
                         <time className="ml-auto whitespace-nowrap text-xs/[18px] text-muted-foreground tabular-nums" dateTime={r.occurredAt}>{fmtTime(r.occurredAt)}</time>
@@ -189,9 +197,45 @@ const BAD = ['overdue', 'blocked', 'atRisk', 'issuesHigh', 'risksHigh'], WARN = 
 /** The counts row (§13.1 item 4) as summary tiles: every number opens the filtered list it was counted from, and each tile
  *  says what it counts (AC-CNT-06). Decisions, issues and risks are project-wide, so a discipline scope says so (AC-CNT-07). */
 function Counts({ d, base, scoped }: { d: Dash; base: string; scoped: boolean }) {
+  const visualSystem = useFlag('visual_system')
+  const project = useCurrentProject()
+  const [sp] = useSearchParams()
   const tasks = (k: keyof Dash['tasks']): Entry => [k, d.tasks[k]!, `${base}/tasks?${d.tasks[k]!.link}`]
   const dels = (k: keyof Dash['deliverables']): Entry => [k, d.deliverables[k], `${base}/deliverables?${d.deliverables[k].link}`]
   const decs = (k: keyof Dash['decisions']): Entry => [`dec${k}`, d.decisions[k], `${base}/decisions?${d.decisions[k].link}`]
+  if (visualSystem) {
+    const selected = project.disciplines.find(discipline => discipline.id === sp.get('discipline'))
+    const where = (whole = false) => t(whole ? 'dashboardScreens.whereWhole' : scoped ? 'dashboardScreens.whereDiscipline' : 'dashboardScreens.whereProject', {
+      project: project.projectNumber, discipline: selected?.name ?? t('common.unavailable'),
+    })
+    const primary = [
+      { key: 'inProgress', count: d.tasks.inProgress, path: 'tasks', tone: 'violet', whole: false },
+      { key: 'review', count: d.tasks.review, path: 'tasks', tone: 'amber', whole: false },
+      { key: 'overdue', count: d.tasks.overdue, path: 'tasks', tone: 'red', whole: false },
+      { key: 'upcoming', count: d.deliverables.upcoming, path: 'deliverables', tone: 'amber', whole: false },
+      { key: 'decpending', count: d.decisions.pending, path: 'decisions', tone: 'violet', whole: true },
+      { key: 'issuesOpen', count: d.registers.issuesOpen, path: 'issues', tone: 'violet', whole: true },
+    ] as const
+    const siblings: { title: string; whole: boolean; values: Entry[] }[] = [
+      { title: t('ptab.tasks'), whole: false, values: [tasks('total'), tasks('complete'), tasks('blocked'), tasks('waiting'), tasks('unassigned'), ...(d.tasks.backlog ? [tasks('backlog')] : [])] },
+      { title: t('ptab.deliverables'), whole: false, values: [dels('total'), dels('atRisk'), dels('issued')] },
+      { title: t('ptab.decisions'), whole: true, values: [decs('overdue')] },
+      { title: t('dash.registers'), whole: true, values: [
+        ['issuesHigh', d.registers.issuesHigh, `${base}/issues?${d.registers.issuesHigh.link}`],
+        ['risksHigh', d.registers.risksHigh, `${base}/risks?${d.registers.risksHigh.link}`],
+      ] },
+    ]
+    return <div className="space-y-4" data-dashboard-counts>
+      <div className="home-count-cards">{primary.map(card => <CountCard key={card.key} label={t(`dashboardScreens.card.${card.key}`)} value={card.count.value}
+        tone={card.tone} definition={t(`dashboardScreens.definition.${card.key}`)} where={where(card.whole)} to={`${base}/${card.path}?${card.count.link}`} />)}</div>
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label={t('dashboardScreens.otherCounts')}>{siblings.map(group => <section key={group.title} className="rounded border bg-card p-4">
+        <h3 className="mb-2 text-sm font-medium">{group.title}{group.whole && scoped && <span className="ml-2 text-xs text-muted-foreground">{t('sig.wholeProject')}</span>}</h3>
+        <ul className="space-y-1">{group.values.map(([key, count, href]) => <li key={key}><Link className="flex min-h-7 items-baseline justify-between gap-3 rounded text-sm hover:underline" to={href}>
+          <span>{runtimeText(`dash.count.${key}`)}</span><span className="font-medium tabular-nums">{count.value}</span>
+        </Link></li>)}</ul>
+      </section>)}</div>
+    </div>
+  }
   const tile = (accent: Accent, title: string, hint: string, whole: boolean, [[key, c, to], ...rest]: Entry[]) => (
     <article aria-label={title} className="grid">
       <SummaryTile accent={accent} hint={hint} to={to}
@@ -229,8 +273,46 @@ function Counts({ d, base, scoped }: { d: Dash; base: string; scoped: boolean })
   )
 }
 
+function StaffingUntilSubmission({ value, pending }: { value?: Dash['staffing']; pending: boolean }) {
+  const openPanel = useItemPanel(), location = useLocation(), navigate = useNavigate(), project = useCurrentProject()
+  const target = value?.target
+  const measure = (total: number | null | undefined, known: number) => <div className="space-y-1 tabular-nums">
+    <p>{total == null ? t('common.unavailable') : hours(total)}</p>
+    {total == null && <p className="text-xs text-muted-foreground">{t('dashboardScreens.knownHours', { hours: hours(known) })}</p>}
+  </div>
+  return <Section id="dashboard-staffing" title={t('dashboardScreens.staffing')}>
+    {pending ? <Loading rows={3} /> : !value ? <p className="p-5 text-sm">{t('dashboardScreens.staffingUnavailable')}</p> : <div className="space-y-3 p-5 text-sm">
+      <p>{target ? <><span>{t(target.kind === 'SubmissionPackage' ? 'dashboardScreens.submissionBasis' : 'dashboardScreens.milestoneBasis')} </span>{target.kind === 'SubmissionPackage'
+        ? <Link className="underline underline-offset-4" to={itemHref('SubmissionPackage', project.projectNumber, target.id)} onClick={event => {
+          if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+          event.preventDefault()
+          navigate(itemHref('SubmissionPackage', project.projectNumber, target.id), { state: { recordContextReturn: captureRecordContextOrigin(location, event.currentTarget) } })
+        }}><Key>{target.key}</Key> {target.name}</Link>
+        : <button className="underline underline-offset-4" onClick={event => openPanel('Milestone', target.id, captureRecordContextOrigin(location, event.currentTarget))}><Key>{target.key}</Key> {target.name}</button>}</> : t('dashboardScreens.noTarget')}</p>
+      {value.state !== 'NoTarget' && value.state !== 'OverdueTarget' && <p className="text-xs text-muted-foreground">{t('dashboardScreens.staffingWindow', { from: fmtDate(value.fromDate), through: fmtDate(value.throughDate) })}</p>}
+      {value.state === 'OverdueTarget' ? <p>{t('dashboardScreens.overdueTarget')}</p> : value.state === 'NoTarget' ? <p>{t('dashboardScreens.staffingUnavailable')}</p> : <>
+        <p className="text-xs text-muted-foreground">{t('dashboardScreens.staffingDefinition')}</p>
+        {value.allocationCoverage !== 'Complete' && <p>{t('dashboardScreens.visibleAllocations')}</p>}
+        {(value.unattributedConfirmedHours == null || (value.knownUnattributedConfirmedHours ?? 0) > 0 || (value.unavailableUnattributed ?? 0) > 0) && <p>{t('dashboardScreens.unattributedReservations', { hours: hours(value.knownUnattributedConfirmedHours ?? 0) })}</p>}
+        {!value.disciplines.length ? <Empty>{t('dashboardScreens.noDisciplines')}</Empty> : <TableRegion className="rounded-none border-0" role="region" aria-label={t('dashboardScreens.staffing')}>
+          <table className="w-full text-sm"><caption className="sr-only">{t('dashboardScreens.staffing')}</caption><thead className="bg-muted"><tr>
+            <th className={thCls} scope="col">{t('common.discipline')}</th><th className={thCls} scope="col">{t('dashboardScreens.remaining')}</th><th className={thCls} scope="col">{t('dashboardScreens.confirmed')}</th><th className={thCls} scope="col">{t('dashboardScreens.openRoles')}</th><th className={thCls} scope="col">{t('dashboardScreens.comparison')}</th>
+          </tr></thead><tbody>{value.disciplines.map(row => <tr key={row.projectDisciplineId ?? 'unattributed'} className="border-t" data-dashboard-staffing={row.projectDisciplineId ?? 'unattributed'}>
+            <th className={cn(tdCls, 'text-left font-medium')} scope="row">{row.name ?? t('dashboardScreens.unattributed')}</th>
+            <td className={tdCls}>{measure(row.remainingHours, row.knownRemainingHours)}{row.unestimatedTasks > 0 && <p className="text-xs text-muted-foreground">{t('dashboardScreens.unestimated', { n: row.unestimatedTasks })}</p>}{row.undatedTasks > 0 && <p className="text-xs text-muted-foreground">{t('dashboardScreens.undated', { n: row.undatedTasks })}</p>}</td>
+            <td className={tdCls}>{measure(row.confirmedHours, row.knownConfirmedHours)}{row.unavailableConfirmed > 0 && <p className="text-xs text-muted-foreground">{t('dashboardScreens.unavailableReservations', { n: row.unavailableConfirmed })}</p>}</td>
+            <td className={tdCls}>{measure(row.openRoleHours, row.knownOpenRoleHours)}{row.unavailableOpenRoles > 0 && <p className="text-xs text-muted-foreground">{t('dashboardScreens.unavailableRoles', { n: row.unavailableOpenRoles })}</p>}</td>
+            <td className={tdCls}>{row.excessHours == null ? t('dashboardScreens.comparisonUnavailable') : row.excessHours > 0 ? t('dashboardScreens.excess', { hours: hours(row.excessHours) }) : t('dashboardScreens.noExcess')}</td>
+          </tr>)}</tbody></table>
+        </TableRegion>}
+      </>}
+    </div>}
+  </Section>
+}
+
 function TaskListCard({ title, empty, data, to }: { title: string; empty: string; data: { items: TaskRow[]; total: number }; to: string }) {
   const openPanel = useItemPanel()
+  const visualSystem = useFlag('visual_system')
   return (
     <Section title={title} count={data.total} accent="blue"
       actions={data.total > data.items.length && <Link to={to} className="text-sm text-primary underline underline-offset-4 hover:text-foreground">{t('attention.showAll', { n: data.total })}</Link>}>
@@ -239,8 +321,8 @@ function TaskListCard({ title, empty, data, to }: { title: string; empty: string
           {data.items.map((r) => (
             <li key={r.id} className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-5 py-3 text-sm">
               <Key>{r.key}</Key>
-              <button type="button" className="min-w-0 grow basis-48 truncate text-left font-medium hover:underline" onClick={() => openPanel('Task', r.id)}>{r.name}</button>
-              <span className="text-xs/[18px] text-muted-foreground">{r.assigneeName ?? t('ind.unassigned')}</span>
+              <button type="button" className={cn('min-w-0 grow basis-48 text-left font-medium hover:underline', visualSystem ? 'whitespace-normal break-words' : 'truncate')} onClick={() => openPanel('Task', r.id)}>{r.name}</button>
+              <span className="text-xs/[18px] text-muted-foreground">{r.assigneeId && r.assigneeName ? <PersonPanelTrigger userId={r.assigneeId} name={r.assigneeName} focusKey={`dashboard:${to}:task:${r.id}:assignee`} /> : r.assigneeName ?? t('ind.unassigned')}</span>
               <StatusPill status={r.status} />
               <span className={cn('whitespace-nowrap text-xs/[18px] tabular-nums', r.state?.isOverdue ? 'font-semibold text-bad' : 'text-muted-foreground')}>{t('workload.taskDue', { date: fmtDate(r.dueDate) })}</span>
               <TaskIndicators r={r} />

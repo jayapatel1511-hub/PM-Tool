@@ -1,0 +1,14 @@
+{
+  "atUtc": "2026-11-02T21:48:18.221940+00:00",
+  "distinctPassed": 56,
+  "firstPass": 55,
+  "repairedOnlyRerun": 1,
+  "failedCurrent": 0,
+  "initialFailure": "Fixture attempted a canonical commitment on correctly blocked work; independent genuinely Ready task created through canonical assessment and applicability commands",
+  "evidence": [
+    "focused1.json",
+    "fixture-build1.json",
+    "focused2.json"
+  ],
+  "boundary": "Provider synthetic local tests only; no delivery/UI/acceptance claim"
+}

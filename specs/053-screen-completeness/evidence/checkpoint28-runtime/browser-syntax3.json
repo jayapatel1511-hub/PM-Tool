@@ -1,0 +1,7 @@
+{
+  "exitCode": 0,
+  "files": [
+    "web/tests/decision-metadata.cjs",
+    "web/tests/template-risk-provenance.cjs"
+  ]
+}

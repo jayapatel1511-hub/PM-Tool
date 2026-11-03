@@ -1,0 +1,1106 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_API_SETUP",
+  "startedAtUtc": "2026-11-01T18:03:01.028Z",
+  "api": "http://127.0.0.1:5088/api/v1",
+  "guard": {
+    "requiredDatabase": "hub_qa_checkpoint22",
+    "databaseSelector": "hub_qa_checkpoint22",
+    "databaseIdentity": "Operator-attested selector; the public API does not expose its actual database name.",
+    "authMode": "Development",
+    "personasPreexistInDevelopmentPicker": true,
+    "registerScreens": true
+  },
+  "personas": {
+    "pm": {
+      "id": "01a19834-0bfd-7ea4-b342-1bf9d5b7179a",
+      "email": "priya@hub.test",
+      "displayName": "Priya Nair"
+    },
+    "lead": {
+      "id": "01a19834-0bfd-7712-a37f-3197da026009",
+      "email": "marc@hub.test",
+      "displayName": "Marc Dubois"
+    },
+    "owner": {
+      "id": "01a19834-0bfd-75e7-80db-4cbc24e4bd88",
+      "email": "alex@hub.test",
+      "displayName": "Alex Chen"
+    }
+  },
+  "reference": {
+    "disciplineId": "01a19834-0b3d-7e8a-80c6-55db33f2e439",
+    "clientId": "01a19834-0b4a-7291-997c-e282e6cfd823",
+    "officeId": "01a19834-0b4f-7581-90a5-bcb28e5b4840",
+    "deliverableTypeId": "01a19834-0b44-7862-bf72-c4ba234383d9",
+    "reviewPurpose": {
+      "id": "01a19834-0b59-7b5e-8900-564db19b60dc",
+      "name": "For review",
+      "isActive": true,
+      "sortOrder": 0
+    },
+    "constructionPurpose": {
+      "id": "01a19834-0b5d-7f1c-9913-845e7bed0323",
+      "name": "For construction",
+      "isActive": true,
+      "sortOrder": 2
+    },
+    "returnB": {
+      "id": "01a19834-0b62-7dba-9bfc-26a85161ace8",
+      "code": "B",
+      "name": "Accepted with comments",
+      "isActive": true,
+      "sortOrder": 1
+    },
+    "returnC": {
+      "id": "01a19834-0b62-7fb1-b0a4-97eaf836b541",
+      "code": "C",
+      "name": "Revise and resubmit",
+      "isActive": true,
+      "sortOrder": 2
+    },
+    "projectDisciplineId": "01a19847-7053-78f4-a9b9-169c2a3f5edc"
+  },
+  "fixture": {
+    "project": {
+      "id": "01a19847-7051-74b1-81b9-2dc73cfe0447",
+      "projectNumber": "QA22-DLV-MVY51IDP-2DD0D2",
+      "href": "/projects/QA22-DLV-MVY51IDP-2DD0D2/deliverables"
+    },
+    "deliverables": [
+      {
+        "label": "For review and B recipient response",
+        "id": "01a19847-70b1-7952-af40-f0d9aeecef9a",
+        "key": "QA22-DLV-MVY51IDP-2DD0D2-D001",
+        "creationWarnings": [
+          "Does not match C-###"
+        ],
+        "issueIds": [
+          "01a19847-7135-7dd3-88c3-b16af678d1dd"
+        ],
+        "href": "/projects/QA22-DLV-MVY51IDP-2DD0D2/deliverables?panel=Deliverable:01a19847-70b1-7952-af40-f0d9aeecef9a",
+        "status": "Issued",
+        "rowVersion": 2,
+        "dueDate": null,
+        "currentIssueId": "01a19847-7135-7dd3-88c3-b16af678d1dd",
+        "registerInfo": {
+          "clientDrawingNumber": "C12",
+          "numberPattern": "C-###",
+          "numberMatchesPattern": false,
+          "currentIssue": {
+            "id": "01a19847-7135-7dd3-88c3-b16af678d1dd",
+            "revision": "A",
+            "issuedDate": "2026-10-31",
+            "purposeOfIssueId": "01a19834-0b59-7b5e-8900-564db19b60dc",
+            "purpose": "For review",
+            "returnCodeId": "01a19834-0b62-7dba-9bfc-26a85161ace8",
+            "returnCode": "B",
+            "returnLabel": "Accepted with comments",
+            "responseDate": "2026-11-01"
+          }
+        }
+      },
+      {
+        "label": "Backdated reissue and older response isolation",
+        "id": "01a19847-71a0-7a65-b343-b5961050aa90",
+        "key": "QA22-DLV-MVY51IDP-2DD0D2-D002",
+        "creationWarnings": [],
+        "issueIds": [
+          "01a19847-71c7-7d54-ba28-46b3fe851fd8",
+          "01a19847-7277-7a8c-8313-3ca7e665c102"
+        ],
+        "href": "/projects/QA22-DLV-MVY51IDP-2DD0D2/deliverables?panel=Deliverable:01a19847-71a0-7a65-b343-b5961050aa90",
+        "status": "Issued",
+        "rowVersion": 7,
+        "dueDate": null,
+        "currentIssueId": "01a19847-7277-7a8c-8313-3ca7e665c102",
+        "registerInfo": {
+          "clientDrawingNumber": "C-102",
+          "numberPattern": "C-###",
+          "numberMatchesPattern": true,
+          "currentIssue": {
+            "id": "01a19847-7277-7a8c-8313-3ca7e665c102",
+            "revision": "B",
+            "issuedDate": "2026-10-30",
+            "purposeOfIssueId": "01a19834-0b5d-7f1c-9913-845e7bed0323",
+            "purpose": "For construction",
+            "returnCodeId": null,
+            "returnCode": null,
+            "returnLabel": null,
+            "responseDate": null
+          }
+        }
+      },
+      {
+        "label": "Undated Not Started",
+        "id": "01a19847-72b6-7193-917d-74aa43c98fb8",
+        "key": "QA22-DLV-MVY51IDP-2DD0D2-D003",
+        "creationWarnings": [],
+        "issueIds": [],
+        "href": "/projects/QA22-DLV-MVY51IDP-2DD0D2/deliverables?panel=Deliverable:01a19847-72b6-7193-917d-74aa43c98fb8",
+        "status": "Not Started",
+        "rowVersion": 0,
+        "dueDate": null,
+        "currentIssueId": null,
+        "registerInfo": {
+          "clientDrawingNumber": "C-201",
+          "numberPattern": "C-###",
+          "numberMatchesPattern": true,
+          "currentIssue": null
+        }
+      },
+      {
+        "label": "Undated In Progress",
+        "id": "01a19847-72d0-7cdd-bceb-0628aa69bdda",
+        "key": "QA22-DLV-MVY51IDP-2DD0D2-D004",
+        "creationWarnings": [],
+        "issueIds": [],
+        "href": "/projects/QA22-DLV-MVY51IDP-2DD0D2/deliverables?panel=Deliverable:01a19847-72d0-7cdd-bceb-0628aa69bdda",
+        "status": "In Progress",
+        "rowVersion": 1,
+        "dueDate": null,
+        "currentIssueId": null,
+        "registerInfo": {
+          "clientDrawingNumber": "C-202",
+          "numberPattern": "C-###",
+          "numberMatchesPattern": true,
+          "currentIssue": null
+        }
+      },
+      {
+        "label": "Undated On Hold",
+        "id": "01a19847-730c-7e64-a269-7a5a95fe918e",
+        "key": "QA22-DLV-MVY51IDP-2DD0D2-D005",
+        "creationWarnings": [],
+        "issueIds": [],
+        "href": "/projects/QA22-DLV-MVY51IDP-2DD0D2/deliverables?panel=Deliverable:01a19847-730c-7e64-a269-7a5a95fe918e",
+        "status": "On Hold",
+        "rowVersion": 1,
+        "dueDate": null,
+        "currentIssueId": null,
+        "registerInfo": {
+          "clientDrawingNumber": "C-203",
+          "numberPattern": "C-###",
+          "numberMatchesPattern": true,
+          "currentIssue": null
+        }
+      },
+      {
+        "label": "Undated Revision Required",
+        "id": "01a19847-7343-70b2-8fa2-47ed32f2ef53",
+        "key": "QA22-DLV-MVY51IDP-2DD0D2-D006",
+        "creationWarnings": [],
+        "issueIds": [
+          "01a19847-7369-7038-a53c-93991a02d80d"
+        ],
+        "href": "/projects/QA22-DLV-MVY51IDP-2DD0D2/deliverables?panel=Deliverable:01a19847-7343-70b2-8fa2-47ed32f2ef53",
+        "status": "Revision Required",
+        "rowVersion": 2,
+        "dueDate": null,
+        "currentIssueId": "01a19847-7369-7038-a53c-93991a02d80d",
+        "registerInfo": {
+          "clientDrawingNumber": "C-204",
+          "numberPattern": "C-###",
+          "numberMatchesPattern": true,
+          "currentIssue": {
+            "id": "01a19847-7369-7038-a53c-93991a02d80d",
+            "revision": "A",
+            "issuedDate": "2026-10-31",
+            "purposeOfIssueId": "01a19834-0b59-7b5e-8900-564db19b60dc",
+            "purpose": "For review",
+            "returnCodeId": null,
+            "returnCode": null,
+            "returnLabel": null,
+            "responseDate": null
+          }
+        }
+      },
+      {
+        "label": "Excluded undated Issued",
+        "id": "01a19847-73a3-798c-abb8-3863e1aa0c4f",
+        "key": "QA22-DLV-MVY51IDP-2DD0D2-D007",
+        "creationWarnings": [],
+        "issueIds": [
+          "01a19847-73ca-793d-b62e-1e29341862fb"
+        ],
+        "href": "/projects/QA22-DLV-MVY51IDP-2DD0D2/deliverables?panel=Deliverable:01a19847-73a3-798c-abb8-3863e1aa0c4f",
+        "status": "Issued",
+        "rowVersion": 1,
+        "dueDate": null,
+        "currentIssueId": "01a19847-73ca-793d-b62e-1e29341862fb",
+        "registerInfo": {
+          "clientDrawingNumber": null,
+          "numberPattern": "C-###",
+          "numberMatchesPattern": null,
+          "currentIssue": {
+            "id": "01a19847-73ca-793d-b62e-1e29341862fb",
+            "revision": "A",
+            "issuedDate": "2026-10-31",
+            "purposeOfIssueId": "01a19834-0b59-7b5e-8900-564db19b60dc",
+            "purpose": "For review",
+            "returnCodeId": null,
+            "returnCode": null,
+            "returnLabel": null,
+            "responseDate": null
+          }
+        }
+      },
+      {
+        "label": "Excluded undated Accepted",
+        "id": "01a19847-73dd-72ab-8955-5e3203244ed8",
+        "key": "QA22-DLV-MVY51IDP-2DD0D2-D008",
+        "creationWarnings": [],
+        "issueIds": [
+          "01a19847-7405-73fb-8f20-c8c7726a371a"
+        ],
+        "href": "/projects/QA22-DLV-MVY51IDP-2DD0D2/deliverables?panel=Deliverable:01a19847-73dd-72ab-8955-5e3203244ed8",
+        "status": "Accepted",
+        "rowVersion": 2,
+        "dueDate": null,
+        "currentIssueId": "01a19847-7405-73fb-8f20-c8c7726a371a",
+        "registerInfo": {
+          "clientDrawingNumber": null,
+          "numberPattern": "C-###",
+          "numberMatchesPattern": null,
+          "currentIssue": {
+            "id": "01a19847-7405-73fb-8f20-c8c7726a371a",
+            "revision": "A",
+            "issuedDate": "2026-10-31",
+            "purposeOfIssueId": "01a19834-0b59-7b5e-8900-564db19b60dc",
+            "purpose": "For review",
+            "returnCodeId": null,
+            "returnCode": null,
+            "returnLabel": null,
+            "responseDate": null
+          }
+        }
+      },
+      {
+        "label": "Excluded undated Cancelled",
+        "id": "01a19847-743b-74b6-912a-3e6f71f1f75e",
+        "key": "QA22-DLV-MVY51IDP-2DD0D2-D009",
+        "creationWarnings": [],
+        "issueIds": [],
+        "href": "/projects/QA22-DLV-MVY51IDP-2DD0D2/deliverables?panel=Deliverable:01a19847-743b-74b6-912a-3e6f71f1f75e",
+        "status": "Cancelled",
+        "rowVersion": 1,
+        "dueDate": null,
+        "currentIssueId": null,
+        "registerInfo": {
+          "clientDrawingNumber": null,
+          "numberPattern": "C-###",
+          "numberMatchesPattern": null,
+          "currentIssue": null
+        }
+      },
+      {
+        "label": "Dated open control",
+        "id": "01a19847-7479-7eec-8aa5-db3707e69f7b",
+        "key": "QA22-DLV-MVY51IDP-2DD0D2-D010",
+        "creationWarnings": [],
+        "issueIds": [],
+        "href": "/projects/QA22-DLV-MVY51IDP-2DD0D2/deliverables?panel=Deliverable:01a19847-7479-7eec-8aa5-db3707e69f7b",
+        "status": "Not Started",
+        "rowVersion": 0,
+        "dueDate": "2026-11-08",
+        "currentIssueId": null,
+        "registerInfo": {
+          "clientDrawingNumber": "C-301",
+          "numberPattern": "C-###",
+          "numberMatchesPattern": true,
+          "currentIssue": null
+        }
+      }
+    ]
+  },
+  "requests": [
+    {
+      "persona": null,
+      "method": "GET",
+      "route": "/config",
+      "status": 200
+    },
+    {
+      "persona": null,
+      "method": "GET",
+      "route": "/api/dev/users",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/me",
+      "status": 200
+    },
+    {
+      "persona": "lead",
+      "method": "GET",
+      "route": "/me",
+      "status": 200
+    },
+    {
+      "persona": "owner",
+      "method": "GET",
+      "route": "/me",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/reference",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "POST",
+      "route": "/projects",
+      "status": 201
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/projects/01a19847-7051-74b1-81b9-2dc73cfe0447",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "POST",
+      "route": "/projects/01a19847-7051-74b1-81b9-2dc73cfe0447/transition",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/projects/01a19847-7051-74b1-81b9-2dc73cfe0447",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/projects/01a19847-7051-74b1-81b9-2dc73cfe0447/deliverable-numbering",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "PUT",
+      "route": "/projects/01a19847-7051-74b1-81b9-2dc73cfe0447/deliverable-numbering",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/projects/01a19847-7051-74b1-81b9-2dc73cfe0447/deliverable-numbering",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "POST",
+      "route": "/projects/01a19847-7051-74b1-81b9-2dc73cfe0447/deliverables",
+      "status": 201
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-70b1-7952-af40-f0d9aeecef9a",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-70b1-7952-af40-f0d9aeecef9a",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "POST",
+      "route": "/deliverables/01a19847-70b1-7952-af40-f0d9aeecef9a/issue",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-70b1-7952-af40-f0d9aeecef9a",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-70b1-7952-af40-f0d9aeecef9a",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "PATCH",
+      "route": "/deliverables/01a19847-70b1-7952-af40-f0d9aeecef9a/issues/01a19847-7135-7dd3-88c3-b16af678d1dd/response",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-70b1-7952-af40-f0d9aeecef9a",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/projects/01a19847-7051-74b1-81b9-2dc73cfe0447/deliverables?purposeOfIssueId=01a19834-0b59-7b5e-8900-564db19b60dc&returnCodeId=01a19834-0b62-7dba-9bfc-26a85161ace8",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "POST",
+      "route": "/projects/01a19847-7051-74b1-81b9-2dc73cfe0447/deliverables",
+      "status": 201
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-71a0-7a65-b343-b5961050aa90",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-71a0-7a65-b343-b5961050aa90",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "POST",
+      "route": "/deliverables/01a19847-71a0-7a65-b343-b5961050aa90/issue",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-71a0-7a65-b343-b5961050aa90",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-71a0-7a65-b343-b5961050aa90",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "PATCH",
+      "route": "/deliverables/01a19847-71a0-7a65-b343-b5961050aa90/issues/01a19847-71c7-7d54-ba28-46b3fe851fd8/response",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-71a0-7a65-b343-b5961050aa90",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-71a0-7a65-b343-b5961050aa90",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "POST",
+      "route": "/deliverables/01a19847-71a0-7a65-b343-b5961050aa90/transition",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-71a0-7a65-b343-b5961050aa90",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-71a0-7a65-b343-b5961050aa90",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "POST",
+      "route": "/deliverables/01a19847-71a0-7a65-b343-b5961050aa90/transition",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-71a0-7a65-b343-b5961050aa90",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-71a0-7a65-b343-b5961050aa90",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "POST",
+      "route": "/deliverables/01a19847-71a0-7a65-b343-b5961050aa90/transition",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-71a0-7a65-b343-b5961050aa90",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-71a0-7a65-b343-b5961050aa90",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "POST",
+      "route": "/deliverables/01a19847-71a0-7a65-b343-b5961050aa90/issue",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-71a0-7a65-b343-b5961050aa90",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-71a0-7a65-b343-b5961050aa90",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "PATCH",
+      "route": "/deliverables/01a19847-71a0-7a65-b343-b5961050aa90/issues/01a19847-71c7-7d54-ba28-46b3fe851fd8/response",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-71a0-7a65-b343-b5961050aa90",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/projects/01a19847-7051-74b1-81b9-2dc73cfe0447/deliverables?returnCodeId=01a19834-0b62-7fb1-b0a4-97eaf836b541",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/projects/01a19847-7051-74b1-81b9-2dc73cfe0447/deliverables?purposeOfIssueId=01a19834-0b5d-7f1c-9913-845e7bed0323",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "POST",
+      "route": "/projects/01a19847-7051-74b1-81b9-2dc73cfe0447/deliverables",
+      "status": 201
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-72b6-7193-917d-74aa43c98fb8",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "POST",
+      "route": "/projects/01a19847-7051-74b1-81b9-2dc73cfe0447/deliverables",
+      "status": 201
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-72d0-7cdd-bceb-0628aa69bdda",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-72d0-7cdd-bceb-0628aa69bdda",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "POST",
+      "route": "/deliverables/01a19847-72d0-7cdd-bceb-0628aa69bdda/transition",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-72d0-7cdd-bceb-0628aa69bdda",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "POST",
+      "route": "/projects/01a19847-7051-74b1-81b9-2dc73cfe0447/deliverables",
+      "status": 201
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-730c-7e64-a269-7a5a95fe918e",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-730c-7e64-a269-7a5a95fe918e",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "POST",
+      "route": "/deliverables/01a19847-730c-7e64-a269-7a5a95fe918e/transition",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-730c-7e64-a269-7a5a95fe918e",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "POST",
+      "route": "/projects/01a19847-7051-74b1-81b9-2dc73cfe0447/deliverables",
+      "status": 201
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-7343-70b2-8fa2-47ed32f2ef53",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-7343-70b2-8fa2-47ed32f2ef53",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "POST",
+      "route": "/deliverables/01a19847-7343-70b2-8fa2-47ed32f2ef53/issue",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-7343-70b2-8fa2-47ed32f2ef53",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-7343-70b2-8fa2-47ed32f2ef53",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "POST",
+      "route": "/deliverables/01a19847-7343-70b2-8fa2-47ed32f2ef53/transition",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-7343-70b2-8fa2-47ed32f2ef53",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "POST",
+      "route": "/projects/01a19847-7051-74b1-81b9-2dc73cfe0447/deliverables",
+      "status": 201
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-73a3-798c-abb8-3863e1aa0c4f",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-73a3-798c-abb8-3863e1aa0c4f",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "POST",
+      "route": "/deliverables/01a19847-73a3-798c-abb8-3863e1aa0c4f/issue",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-73a3-798c-abb8-3863e1aa0c4f",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "POST",
+      "route": "/projects/01a19847-7051-74b1-81b9-2dc73cfe0447/deliverables",
+      "status": 201
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-73dd-72ab-8955-5e3203244ed8",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-73dd-72ab-8955-5e3203244ed8",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "POST",
+      "route": "/deliverables/01a19847-73dd-72ab-8955-5e3203244ed8/issue",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-73dd-72ab-8955-5e3203244ed8",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-73dd-72ab-8955-5e3203244ed8",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "POST",
+      "route": "/deliverables/01a19847-73dd-72ab-8955-5e3203244ed8/transition",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-73dd-72ab-8955-5e3203244ed8",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "POST",
+      "route": "/projects/01a19847-7051-74b1-81b9-2dc73cfe0447/deliverables",
+      "status": 201
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-743b-74b6-912a-3e6f71f1f75e",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-743b-74b6-912a-3e6f71f1f75e",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "POST",
+      "route": "/deliverables/01a19847-743b-74b6-912a-3e6f71f1f75e/transition",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-743b-74b6-912a-3e6f71f1f75e",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "POST",
+      "route": "/projects/01a19847-7051-74b1-81b9-2dc73cfe0447/deliverables",
+      "status": 201
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/deliverables/01a19847-7479-7eec-8aa5-db3707e69f7b",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/projects/01a19847-7051-74b1-81b9-2dc73cfe0447/deliverables?indicator=open",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/projects/01a19847-7051-74b1-81b9-2dc73cfe0447/deliverables?noDueDate=true",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/projects/01a19847-7051-74b1-81b9-2dc73cfe0447/deliverables?noDueDate=true&dueFrom=2026-11-01",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/projects/01a19847-7051-74b1-81b9-2dc73cfe0447/deliverables?noDueDate=true&status=Issued",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/projects/01a19847-7051-74b1-81b9-2dc73cfe0447/deliverables?noDueDate=true&disciplineId=01a19847-7053-78f4-a9b9-169c2a3f5edc",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/projects/01a19847-7051-74b1-81b9-2dc73cfe0447/deliverables?noDueDate=true&status=In+Progress",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/projects/01a19847-7051-74b1-81b9-2dc73cfe0447/deliverables?",
+      "status": 200
+    },
+    {
+      "persona": "pm",
+      "method": "GET",
+      "route": "/me",
+      "status": 200
+    }
+  ],
+  "assertions": [
+    "For review and B recipient response: normal create is Not Started with no fabricated issue",
+    "C12 is saved with a warning, not a status/issue change",
+    "response 01a19847-7135-7dd3-88c3-b16af678d1dd: immutable issuance, same status/count, explicit code/date and both versions",
+    "For review + B filter returns the actual responded deliverable",
+    "B response register/current/history equality",
+    "Backdated reissue and older response isolation: normal create is Not Started with no fabricated issue",
+    "response 01a19847-71c7-7d54-ba28-46b3fe851fd8: immutable issuance, same status/count, explicit code/date and both versions",
+    "response 01a19847-71c7-7d54-ba28-46b3fe851fd8: immutable issuance, same status/count, explicit code/date and both versions",
+    "backdated actual B identity stays current after older A response correction",
+    "older C response never leaks into the current C filter",
+    "backdated current register/history equality",
+    "Undated Not Started: normal create is Not Started with no fabricated issue",
+    "Undated In Progress: normal create is Not Started with no fabricated issue",
+    "Undated On Hold: normal create is Not Started with no fabricated issue",
+    "Undated Revision Required: normal create is Not Started with no fabricated issue",
+    "Excluded undated Issued: normal create is Not Started with no fabricated issue",
+    "Excluded undated Accepted: normal create is Not Started with no fabricated issue",
+    "Excluded undated Cancelled: normal create is Not Started with no fabricated issue",
+    "Dated open control: normal create is Not Started with no fabricated issue",
+    "exact four open undated statuses equal No due date filter and canonical dates/tray partition",
+    "No due date preserves AND date/status/discipline scope",
+    "root-controlled register flag and organisation date remain unchanged during setup"
+  ],
+  "facts": {
+    "numbering": {
+      "pattern": "C-###",
+      "rowVersion": 2,
+      "canEdit": true
+    },
+    "reviewResponse": {
+      "deliverableId": "01a19847-70b1-7952-af40-f0d9aeecef9a",
+      "issueId": "01a19847-7135-7dd3-88c3-b16af678d1dd",
+      "status": "Issued",
+      "currentIssue": {
+        "id": "01a19847-7135-7dd3-88c3-b16af678d1dd",
+        "revision": "A",
+        "issuedDate": "2026-10-31",
+        "purposeOfIssueId": "01a19834-0b59-7b5e-8900-564db19b60dc",
+        "purpose": "For review",
+        "returnCodeId": "01a19834-0b62-7dba-9bfc-26a85161ace8",
+        "returnCode": "B",
+        "returnLabel": "Accepted with comments",
+        "responseDate": "2026-11-01"
+      },
+      "warnings": [
+        "Does not match C-###"
+      ],
+      "filter": {
+        "purposeOfIssueId": "01a19834-0b59-7b5e-8900-564db19b60dc",
+        "returnCodeId": "01a19834-0b62-7dba-9bfc-26a85161ace8"
+      },
+      "filteredIds": [
+        "01a19847-70b1-7952-af40-f0d9aeecef9a"
+      ]
+    },
+    "backdatedReissue": {
+      "deliverableId": "01a19847-71a0-7a65-b343-b5961050aa90",
+      "olderIssueId": "01a19847-71c7-7d54-ba28-46b3fe851fd8",
+      "currentIssueId": "01a19847-7277-7a8c-8313-3ca7e665c102",
+      "oldIssuedDate": "2026-10-31",
+      "currentIssuedDate": "2026-10-30",
+      "currentIssue": {
+        "id": "01a19847-7277-7a8c-8313-3ca7e665c102",
+        "revision": "B",
+        "issuedDate": "2026-10-30",
+        "purposeOfIssueId": "01a19834-0b5d-7f1c-9913-845e7bed0323",
+        "purpose": "For construction",
+        "returnCodeId": null,
+        "returnCode": null,
+        "returnLabel": null,
+        "responseDate": null
+      },
+      "olderResponse": {
+        "rowVersion": 2,
+        "purposeOfIssueId": "01a19834-0b59-7b5e-8900-564db19b60dc",
+        "purpose": "For review",
+        "returnCodeId": "01a19834-0b62-7fb1-b0a4-97eaf836b541",
+        "returnCode": "C",
+        "returnLabel": "Revise and resubmit",
+        "responseDate": "2026-11-01"
+      },
+      "currentCFilterIds": []
+    },
+    "undated": {
+      "expectedByStatus": {
+        "Not Started": "01a19847-72b6-7193-917d-74aa43c98fb8",
+        "In Progress": "01a19847-72d0-7cdd-bceb-0628aa69bdda",
+        "On Hold": "01a19847-730c-7e64-a269-7a5a95fe918e",
+        "Revision Required": "01a19847-7343-70b2-8fa2-47ed32f2ef53"
+      },
+      "expectedIds": [
+        "01a19847-72b6-7193-917d-74aa43c98fb8",
+        "01a19847-72d0-7cdd-bceb-0628aa69bdda",
+        "01a19847-730c-7e64-a269-7a5a95fe918e",
+        "01a19847-7343-70b2-8fa2-47ed32f2ef53"
+      ],
+      "openIds": [
+        "01a19847-72b6-7193-917d-74aa43c98fb8",
+        "01a19847-72d0-7cdd-bceb-0628aa69bdda",
+        "01a19847-730c-7e64-a269-7a5a95fe918e",
+        "01a19847-7343-70b2-8fa2-47ed32f2ef53",
+        "01a19847-7479-7eec-8aa5-db3707e69f7b"
+      ],
+      "trayIds": [
+        "01a19847-72b6-7193-917d-74aa43c98fb8",
+        "01a19847-72d0-7cdd-bceb-0628aa69bdda",
+        "01a19847-730c-7e64-a269-7a5a95fe918e",
+        "01a19847-7343-70b2-8fa2-47ed32f2ef53"
+      ],
+      "noDueFilterIds": [
+        "01a19847-72b6-7193-917d-74aa43c98fb8",
+        "01a19847-72d0-7cdd-bceb-0628aa69bdda",
+        "01a19847-730c-7e64-a269-7a5a95fe918e",
+        "01a19847-7343-70b2-8fa2-47ed32f2ef53"
+      ],
+      "datedIds": [
+        "01a19847-7479-7eec-8aa5-db3707e69f7b"
+      ],
+      "datedDueDate": "2026-11-08",
+      "queries": {
+        "open": {
+          "indicator": "open"
+        },
+        "noDueDate": {
+          "noDueDate": true
+        },
+        "rangeAND": {
+          "noDueDate": true,
+          "dueFrom": "2026-11-01"
+        },
+        "terminalAND": {
+          "noDueDate": true,
+          "status": "Issued"
+        },
+        "disciplineAND": {
+          "noDueDate": true,
+          "disciplineId": "01a19847-7053-78f4-a9b9-169c2a3f5edc"
+        },
+        "statusAND": {
+          "noDueDate": true,
+          "status": "In Progress"
+        }
+      },
+      "rangeANDIds": [],
+      "terminalANDIds": [],
+      "disciplineANDIds": [
+        "01a19847-72b6-7193-917d-74aa43c98fb8",
+        "01a19847-72d0-7cdd-bceb-0628aa69bdda",
+        "01a19847-730c-7e64-a269-7a5a95fe918e",
+        "01a19847-7343-70b2-8fa2-47ed32f2ef53"
+      ],
+      "statusANDIds": [
+        "01a19847-72d0-7cdd-bceb-0628aa69bdda"
+      ]
+    }
+  },
+  "links": {
+    "register": "http://127.0.0.1:8853/projects/QA22-DLV-MVY51IDP-2DD0D2/deliverables",
+    "dates": "http://127.0.0.1:8853/projects/QA22-DLV-MVY51IDP-2DD0D2/deliverables?layout=dates",
+    "noDueDate": "http://127.0.0.1:8853/projects/QA22-DLV-MVY51IDP-2DD0D2/deliverables?layout=register&noDueDate=true",
+    "reviewB": "http://127.0.0.1:8853/projects/QA22-DLV-MVY51IDP-2DD0D2/deliverables?purposeOfIssueId=01a19834-0b59-7b5e-8900-564db19b60dc&returnCodeId=01a19834-0b62-7dba-9bfc-26a85161ace8",
+    "reviewHistory": "http://127.0.0.1:8853/projects/QA22-DLV-MVY51IDP-2DD0D2/deliverables?panel=Deliverable%3A01a19847-70b1-7952-af40-f0d9aeecef9a&deliverableTab=01a19847-70b1-7952-af40-f0d9aeecef9a%3Aissues",
+    "backdatedHistory": "http://127.0.0.1:8853/projects/QA22-DLV-MVY51IDP-2DD0D2/deliverables?panel=Deliverable%3A01a19847-71a0-7a65-b343-b5961050aa90&deliverableTab=01a19847-71a0-7a65-b343-b5961050aa90%3Aissues",
+    "numbering": "http://127.0.0.1:8853/projects/QA22-DLV-MVY51IDP-2DD0D2/settings",
+    "rangeAND": "http://127.0.0.1:8853/projects/QA22-DLV-MVY51IDP-2DD0D2/deliverables?layout=dates&noDueDate=true&dueFrom=2026-11-01"
+  },
+  "selectors": {
+    "dates": {
+      "role": "button",
+      "name": "Dates"
+    },
+    "undatedHeading": {
+      "role": "heading",
+      "name": "No due date (4)"
+    },
+    "tray": "[data-register-undated] [data-register-date-id]",
+    "dated": "[data-register-dated] [data-register-date-id]",
+    "trayRecordIds": [
+      "01a19847-72b6-7193-917d-74aa43c98fb8",
+      "01a19847-72d0-7cdd-bceb-0628aa69bdda",
+      "01a19847-730c-7e64-a269-7a5a95fe918e",
+      "01a19847-7343-70b2-8fa2-47ed32f2ef53"
+    ],
+    "currentHistoryRow": "[data-register-issue-id=\"01a19847-7277-7a8c-8313-3ca7e665c102\"]",
+    "oldHistoryRow": "[data-register-issue-id=\"01a19847-71c7-7d54-ba28-46b3fe851fd8\"]",
+    "returnedHistoryRow": "[data-register-issue-id=\"01a19847-7135-7dd3-88c3-b16af678d1dd\"]",
+    "issuesTab": {
+      "role": "tab",
+      "nameStartsWith": "Issues"
+    },
+    "recordResponse": {
+      "role": "button",
+      "nameStartsWith": "Record recipient response"
+    },
+    "responseCodeLabel": "Return code",
+    "responseDateLabel": "Response date",
+    "numberPatternLabel": "Numbering pattern",
+    "clientNumberLabel": "Client drawing number",
+    "warningText": "Does not match C-###",
+    "rangeAction": {
+      "role": "button",
+      "name": "Remove due-date range"
+    },
+    "trayToRegister": {
+      "role": "button",
+      "name": "Show no due date in the register"
+    },
+    "note": "deliverableTab restoration requires screen_patterns; with that independent flag off, select the Issues tab explicitly. Links/selectors are prepared, not browser-verified."
+  },
+  "failures": [],
+  "limits": [
+    "API setup/assertions only; no UI, browser, human, pilot, deployment or Accepted claim.",
+    "All IDs are discovered or returned during this invocation; no prior receipt is used to select records.",
+    "No retry, cleanup, deletion, auth/role/flag/clock/schema change or external connection. Partial synthetic records remain available for inspection on failure."
+  ],
+  "today": "2026-11-01",
+  "finishedAtUtc": "2026-11-01T18:03:02.240Z"
+}

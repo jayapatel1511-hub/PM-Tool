@@ -1,0 +1,16 @@
+{
+  "atUtc": "2026-11-02T09:49:54.232861+00:00",
+  "status": "PASS_99_DISTINCT_DOTNET_CASES",
+  "counts": {
+    "SearchScreen": 16,
+    "ReviewRegister": 24,
+    "ContractAndAdjacent": 59
+  },
+  "node": {
+    "recentSearches": 7,
+    "cache": 18
+  },
+  "sourceReview": "Searchbackend+recenthistory+ReviewRegisterbackend+rootlocator+R1widget bounded sourcePASS; twoD browser has-locators fixed/rereviewclosed",
+  "contracts": "oneaddedpath/14prefixedschemas/2intendedexistingschemaextensions/0removals; typesgenerated",
+  "boundaries": "Frontendtypes/lint/SSR/productionbuild/browser stillpending. FullS35response/export/externalintake missing. QA24stop/drop permissionpending;oldruntimepreserved."
+}

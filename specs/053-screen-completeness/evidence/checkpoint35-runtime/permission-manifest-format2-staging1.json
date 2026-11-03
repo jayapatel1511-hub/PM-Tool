@@ -1,0 +1,15 @@
+{
+  "atUtc": "2026-11-03T06:37:57.374330+00:00",
+  "rows": 83,
+  "operations": 257,
+  "evaluated": 0,
+  "changedLegacyGuards": [
+    "src/Hub.Api/Features/Planning.cs",
+    "src/Hub.Api/Features/Availability.cs",
+    "src/Hub.Api/Features/Reviews.cs",
+    "src/Hub.Api/Features/Readiness.cs",
+    "src/Hub.Api/Features/Registers.cs"
+  ],
+  "mappingStatus": "CANDIDATES_ONLY_NOT_EQUIVALENCE_PROOF",
+  "sourceEvidence": "G62 compiled-source5 and G63 compiled-source4 plus focused role-final4; future per-child witness review required"
+}

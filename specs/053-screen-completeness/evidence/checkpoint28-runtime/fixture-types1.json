@@ -1,0 +1,8 @@
+{
+  "exitCode": 2,
+  "args": [
+    "npm",
+    "run",
+    "typecheck:tests"
+  ]
+}

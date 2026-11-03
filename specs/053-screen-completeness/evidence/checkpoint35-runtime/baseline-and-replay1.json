@@ -1,0 +1,62 @@
+{
+  "exitCode": 1,
+  "args": [
+    "/opt/homebrew/bin/dotnet",
+    "test",
+    "tests/Hub.Tests/Hub.Tests.csproj",
+    "-c",
+    "Release",
+    "--no-build",
+    "--no-restore",
+    "--artifacts-path",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint35-artifacts",
+    "--filter",
+    "FullyQualifiedName~PlanningLeaveReplayAuthorityTests|FullyQualifiedName~PermissionExplanationTests|FullyQualifiedName~AdminRoleExplanationTests",
+    "--logger",
+    "trx;LogFileName=baseline-and-replay1.trx",
+    "--results-directory",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint35-runtime/trx-baseline-and-replay1",
+    "-m:1",
+    "-p:UseSharedCompilation=false",
+    "-p:NuGetAudit=false"
+  ],
+  "atUtc": "2026-11-03T06:02:16.317710+00:00",
+  "boundary": "Fresh HubFactory-owned synthetic databases via authorized tunnel; no retained QA/operational data or mail",
+  "producer": false,
+  "counters": {
+    "total": "8",
+    "executed": "8",
+    "passed": "4",
+    "failed": "4",
+    "error": "0",
+    "timeout": "0",
+    "aborted": "0",
+    "inconclusive": "0",
+    "passedButRunAborted": "0",
+    "notRunnable": "0",
+    "notExecuted": "0",
+    "disconnected": "0",
+    "warning": "0",
+    "completed": "0",
+    "inProgress": "0",
+    "pending": "0"
+  },
+  "failures": [
+    {
+      "name": "Hub.Tests.Api.PlanningLeaveReplayAuthorityTests.Effective_read_only_supervisor_cannot_replay_previously_authorized_leave_success(operation: \"reconcile\")",
+      "message": "Expected 403 but got 200: {\"count\":1}"
+    },
+    {
+      "name": "Hub.Tests.Domain.PermissionExplanationTests.Contribution_examples_require_own_actual_membership_even_for_admin_and_pm",
+      "message": "Assert.True() Failure\nExpected: True\nActual:   False"
+    },
+    {
+      "name": "Hub.Tests.Api.PlanningLeaveReplayAuthorityTests.Effective_read_only_supervisor_cannot_replay_previously_authorized_leave_success(operation: \"manual\")",
+      "message": "Expected 403 but got 200: {\"id\":\"01a1a000-4a91-7254-910d-509451f4271e\",\"rowVersion\":1}"
+    },
+    {
+      "name": "Hub.Tests.Api.AdminRoleExplanationTests.Current_role_examples_are_admin_only_bounded_translated_readonly_and_dark_off",
+      "message": "Assert.DoesNotContain() Failure: Sub-string found\n                                \u2193 (pos 186409)\nString: \u00b7\u00b7\u00b7\"uirements\":[{\"key\":\"adminRole.requirement\"\u00b7\u00b7\u00b7\nFound:  \"adminRole.\""
+    }
+  ]
+}

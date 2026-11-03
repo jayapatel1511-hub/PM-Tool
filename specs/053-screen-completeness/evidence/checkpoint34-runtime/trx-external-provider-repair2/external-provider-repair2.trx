@@ -1,0 +1,200 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="79bbd2b8-d170-45b6-afb4-3bee0531ba73" name="@Jays-MacBook-Pro 2026-11-03 00:49:49" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-11-03T00:49:49.5566170-04:00" queuing="2026-11-03T00:49:49.5566170-04:00" start="2026-11-03T00:49:41.5291140-04:00" finish="2026-11-03T00:50:01.7934680-04:00" />
+  <TestSettings name="default" id="c2dace4f-1d8d-43af-8b89-b7ac0623d478">
+    <Deployment runDeploymentRoot="_Jays-MacBook-Pro_2026-11-03_00_49_49" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="23165dd0-1a78-4fa5-b002-76ddf20dc198" testId="a78de8a8-0c6d-42e3-8af3-25ff8468589c" testName="Hub.Tests.Api.ExternalReviewTests.Actual_future_issue_authors_refuse_downgrade_with_55000_before_schema_data_or_history_changes" computerName="Jays-MacBook-Pro" duration="00:00:03.7895988" startTime="2026-11-03T00:49:54.3106550-04:00" endTime="2026-11-03T00:49:58.1062310-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="23165dd0-1a78-4fa5-b002-76ddf20dc198">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.Throws() Failure: Exception type was not an exact match
+Expected: typeof(Npgsql.PostgresException)
+Actual:   typeof(System.InvalidOperationException)
+---- System.InvalidOperationException : An exception has been raised that is likely due to a transient failure.
+-------- Npgsql.PostgresException : 55000: Cannot downgrade issued-review schema while captured authorship or issued-review records remain.</Message>
+          <StackTrace>   at Hub.Tests.Api.ExternalReviewTests.Actual_future_issue_authors_refuse_downgrade_with_55000_before_schema_data_or_history_changes() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ExternalReviewSchemaTests.cs:line 105
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Migrations.Internal.MigrationCommandExecutor.ExecuteNonQueryAsync(IReadOnlyList`1 migrationCommands, IRelationalConnection connection, MigrationExecutionState executionState, Boolean commitTransaction, Nullable`1 isolationLevel, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Migrations.Internal.Migrator.MigrateImplementationAsync(DbContext context, String targetMigration, MigrationExecutionState state, Boolean useTransaction, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Migrations.Internal.Migrator.MigrateImplementationAsync(DbContext context, String targetMigration, MigrationExecutionState state, Boolean useTransaction, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Migrations.Internal.Migrator.&lt;&gt;c.&lt;&lt;MigrateAsync&gt;b__22_1&gt;d.MoveNext()
+--- End of stack trace from previous location ---
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Migrations.Internal.Migrator.MigrateAsync(String targetMigration, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Migrations.Internal.Migrator.MigrateAsync(String targetMigration, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Migrations.Internal.NpgsqlMigrator.MigrateAsync(String targetMigration, CancellationToken cancellationToken)
+   at Hub.Tests.Api.ExternalReviewTests.&lt;&gt;c.&lt;&lt;Actual_future_issue_authors_refuse_downgrade_with_55000_before_schema_data_or_history_changes&gt;b__20_15&gt;d.MoveNext() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ExternalReviewSchemaTests.cs:line 106
+--- End of stack trace from previous location ---
+   at Hub.Tests.Api.HubFactory.DbAsync[T](Func`2 f) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 104
+----- Inner Stack Trace -----
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource&lt;TResult&gt;.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteNonQuery(Boolean async, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteNonQueryAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteNonQueryAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteNonQueryAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Migrations.Internal.MigrationCommandExecutor.ExecuteAsync(IReadOnlyList`1 migrationCommands, IRelationalConnection connection, MigrationExecutionState executionState, Boolean beginTransaction, Boolean commitTransaction, Nullable`1 isolationLevel, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Migrations.Internal.MigrationCommandExecutor.ExecuteAsync(IReadOnlyList`1 migrationCommands, IRelationalConnection connection, MigrationExecutionState executionState, Boolean beginTransaction, Boolean commitTransaction, Nullable`1 isolationLevel, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="6f260df9-2719-4502-9ab2-cfc245a19b2e" testId="6453844f-3b3f-2766-2331-3876d91f05b8" testName="Hub.Tests.Api.ExternalReviewTests.Explicit_carry_keeps_incoming_identity_resets_response_and_rechecks_independence_against_both_issues" computerName="Jays-MacBook-Pro" duration="00:00:03.6535097" startTime="2026-11-03T00:49:58.1093700-04:00" endTime="2026-11-03T00:50:01.7596840-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6f260df9-2719-4502-9ab2-cfc245a19b2e" />
+    <UnitTestResult executionId="112663fd-bb18-499e-a571-0fa3827144c4" testId="9f724e9e-fc49-92d3-dc37-aff4fc3ba53b" testName="Hub.Tests.Api.ExternalReviewTests.Future_issue_capture_is_private_even_off_and_historical_authority_does_not_follow_todays_owner" computerName="Jays-MacBook-Pro" duration="00:00:07.5451477" startTime="2026-11-03T00:49:41.9874510-04:00" endTime="2026-11-03T00:49:49.5358880-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="112663fd-bb18-499e-a571-0fa3827144c4" />
+    <UnitTestResult executionId="acf649e0-ccb3-4186-bca2-40c11ed0c729" testId="ed2ac0c6-0da5-a060-d5f9-4091e4e29425" testName="Hub.Tests.Api.ExternalReviewTests.Removed_issue_scope_carries_through_a_later_round_without_repeating_the_old_removal_impact" computerName="Jays-MacBook-Pro" duration="00:00:04.7727999" startTime="2026-11-03T00:49:49.5437560-04:00" endTime="2026-11-03T00:49:54.3096840-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="acf649e0-ccb3-4186-bca2-40c11ed0c729" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="Hub.Tests.Api.ExternalReviewTests.Explicit_carry_keeps_incoming_identity_resets_response_and_rechecks_independence_against_both_issues" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint34-artifacts/bin/hub.tests/release/hub.tests.dll" id="6453844f-3b3f-2766-2331-3876d91f05b8">
+      <Execution id="6f260df9-2719-4502-9ab2-cfc245a19b2e" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint34-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ExternalReviewTests" name="Explicit_carry_keeps_incoming_identity_resets_response_and_rechecks_independence_against_both_issues" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ExternalReviewTests.Actual_future_issue_authors_refuse_downgrade_with_55000_before_schema_data_or_history_changes" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint34-artifacts/bin/hub.tests/release/hub.tests.dll" id="a78de8a8-0c6d-42e3-8af3-25ff8468589c">
+      <Execution id="23165dd0-1a78-4fa5-b002-76ddf20dc198" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint34-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ExternalReviewTests" name="Actual_future_issue_authors_refuse_downgrade_with_55000_before_schema_data_or_history_changes" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ExternalReviewTests.Future_issue_capture_is_private_even_off_and_historical_authority_does_not_follow_todays_owner" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint34-artifacts/bin/hub.tests/release/hub.tests.dll" id="9f724e9e-fc49-92d3-dc37-aff4fc3ba53b">
+      <Execution id="112663fd-bb18-499e-a571-0fa3827144c4" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint34-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ExternalReviewTests" name="Future_issue_capture_is_private_even_off_and_historical_authority_does_not_follow_todays_owner" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ExternalReviewTests.Removed_issue_scope_carries_through_a_later_round_without_repeating_the_old_removal_impact" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint34-artifacts/bin/hub.tests/release/hub.tests.dll" id="ed2ac0c6-0da5-a060-d5f9-4091e4e29425">
+      <Execution id="acf649e0-ccb3-4186-bca2-40c11ed0c729" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint34-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ExternalReviewTests" name="Removed_issue_scope_carries_through_a_later_round_without_repeating_the_old_removal_impact" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="a78de8a8-0c6d-42e3-8af3-25ff8468589c" executionId="23165dd0-1a78-4fa5-b002-76ddf20dc198" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6453844f-3b3f-2766-2331-3876d91f05b8" executionId="6f260df9-2719-4502-9ab2-cfc245a19b2e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9f724e9e-fc49-92d3-dc37-aff4fc3ba53b" executionId="112663fd-bb18-499e-a571-0fa3827144c4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ed2ac0c6-0da5-a060-d5f9-4091e4e29425" executionId="acf649e0-ccb3-4186-bca2-40c11ed0c729" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="4" executed="4" passed="3" failed="1" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.11)
+[xUnit.net 00:00:00.11]   Discovering: Hub.Tests
+[xUnit.net 00:00:00.26]   Discovered:  Hub.Tests
+[xUnit.net 00:00:00.27]   Starting:    Hub.Tests
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+warn: Microsoft.EntityFrameworkCore.Query[10103]
+      The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      DO $$
+      BEGIN
+          IF EXISTS (SELECT 1 FROM hub.external_review)
+              OR EXISTS (SELECT 1 FROM hub.review_manifest_item WHERE deliverable_issue_id IS NOT NULL)
+              OR EXISTS (SELECT 1 FROM hub.review_finding WHERE deliverable_issue_id IS NOT NULL OR external_review_id IS NOT NULL)
+              OR EXISTS (SELECT 1 FROM hub.deliverable_issue WHERE issued_author_ids IS NOT NULL)
+          THEN
+              RAISE EXCEPTION 'Cannot downgrade issued-review schema while captured authorship or issued-review records remain.'
+                  USING ERRCODE = '55000';
+          END IF;
+      END $$;
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+[xUnit.net 00:00:16.39]       Assert.Throws() Failure: Exception type was not an exact match
+[xUnit.net 00:00:16.39]       Expected: typeof(Npgsql.PostgresException)
+[xUnit.net 00:00:16.39]       Actual:   typeof(System.InvalidOperationException)
+[xUnit.net 00:00:16.39]       ---- System.InvalidOperationException : An exception has been raised that is likely due to a transient failure.
+[xUnit.net 00:00:16.39]       -------- Npgsql.PostgresException : 55000: Cannot downgrade issued-review schema while captured authorship or issued-review records remain.
+[xUnit.net 00:00:16.39]       Stack Trace:
+[xUnit.net 00:00:16.39]         /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ExternalReviewSchemaTests.cs(105,0): at Hub.Tests.Api.ExternalReviewTests.Actual_future_issue_authors_refuse_downgrade_with_55000_before_schema_data_or_history_changes()
+[xUnit.net 00:00:16.39]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:16.39]         ----- Inner Stack Trace -----
+[xUnit.net 00:00:16.39]            at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+[xUnit.net 00:00:16.39]            at Microsoft.EntityFrameworkCore.Migrations.Internal.MigrationCommandExecutor.ExecuteNonQueryAsync(IReadOnlyList`1 migrationCommands, IRelationalConnection connection, MigrationExecutionState executionState, Boolean commitTransaction, Nullable`1 isolationLevel, CancellationToken cancellationToken)
+[xUnit.net 00:00:16.39]            at Microsoft.EntityFrameworkCore.Migrations.Internal.Migrator.MigrateImplementationAsync(DbContext context, String targetMigration, MigrationExecutionState state, Boolean useTransaction, CancellationToken cancellationToken)
+[xUnit.net 00:00:16.39]            at Microsoft.EntityFrameworkCore.Migrations.Internal.Migrator.MigrateImplementationAsync(DbContext context, String targetMigration, MigrationExecutionState state, Boolean useTransaction, CancellationToken cancellationToken)
+[xUnit.net 00:00:16.40]            at Microsoft.EntityFrameworkCore.Migrations.Internal.Migrator.&lt;&gt;c.&lt;&lt;MigrateAsync&gt;b__22_1&gt;d.MoveNext()
+[xUnit.net 00:00:16.40]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:16.40]            at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+[xUnit.net 00:00:16.40]            at Microsoft.EntityFrameworkCore.Migrations.Internal.Migrator.MigrateAsync(String targetMigration, CancellationToken cancellationToken)
+[xUnit.net 00:00:16.40]            at Microsoft.EntityFrameworkCore.Migrations.Internal.Migrator.MigrateAsync(String targetMigration, CancellationToken cancellationToken)
+[xUnit.net 00:00:16.40]            at Npgsql.EntityFrameworkCore.PostgreSQL.Migrations.Internal.NpgsqlMigrator.MigrateAsync(String targetMigration, CancellationToken cancellationToken)
+[xUnit.net 00:00:16.40]         /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ExternalReviewSchemaTests.cs(106,0): at Hub.Tests.Api.ExternalReviewTests.&lt;&gt;c.&lt;&lt;Actual_future_issue_authors_refuse_downgrade_with_55000_before_schema_data_or_history_changes&gt;b__20_15&gt;d.MoveNext()
+[xUnit.net 00:00:16.40]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:16.40]         /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs(104,0): at Hub.Tests.Api.HubFactory.DbAsync[T](Func`2 f)
+[xUnit.net 00:00:16.40]         ----- Inner Stack Trace -----
+[xUnit.net 00:00:16.40]            at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+[xUnit.net 00:00:16.40]            at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource&lt;TResult&gt;.GetResult(Int16 token)
+[xUnit.net 00:00:16.40]            at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+[xUnit.net 00:00:16.40]            at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+[xUnit.net 00:00:16.40]            at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+[xUnit.net 00:00:16.40]            at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+[xUnit.net 00:00:16.40]            at Npgsql.NpgsqlCommand.ExecuteNonQuery(Boolean async, CancellationToken cancellationToken)
+[xUnit.net 00:00:16.40]            at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteNonQueryAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+[xUnit.net 00:00:16.40]            at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteNonQueryAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+[xUnit.net 00:00:16.40]            at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteNonQueryAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+[xUnit.net 00:00:16.40]            at Microsoft.EntityFrameworkCore.Migrations.Internal.MigrationCommandExecutor.ExecuteAsync(IReadOnlyList`1 migrationCommands, IRelationalConnection connection, MigrationExecutionState executionState, Boolean beginTransaction, Boolean commitTransaction, Nullable`1 isolationLevel, CancellationToken cancellationToken)
+[xUnit.net 00:00:16.40]            at Microsoft.EntityFrameworkCore.Migrations.Internal.MigrationCommandExecutor.ExecuteAsync(IReadOnlyList`1 migrationCommands, IRelationalConnection connection, MigrationExecutionState executionState, Boolean beginTransaction, Boolean commitTransaction, Nullable`1 isolationLevel, CancellationToken cancellationToken)
+[xUnit.net 00:00:16.40]            at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+[xUnit.net 00:00:20.05]   Finished:    Hub.Tests
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="Jays-MacBook-Pro" outcome="Error" timestamp="2026-11-03T00:49:58.1075010-04:00">
+        <Text>[xUnit.net 00:00:16.39]     Hub.Tests.Api.ExternalReviewTests.Actual_future_issue_authors_refuse_downgrade_with_55000_before_schema_data_or_history_changes [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

@@ -1,0 +1,292 @@
+Skip to content
+t
+Tuesday
+My Work
+Home
+Projects
+Tasks
+Resources
+Time
+Reports
+Team
+Files
+Admin
+Tuesday
+Reports
+Search
+/
+My projects
+New
+AC
+
+Reports
+
+Team Capacity
+
+Effective availability and canonical planning bands.
+
+Current values
+2026-11-02 08:00
+Reports
+Export
+Search reports
+Who has room in the coming weeks?
+Team Capacity
+Effective availability and canonical planning bands.
+Parameters and views
+9 rows From: 2026-11-02Weeks: 5Include my private drafts: falseReport unit: hoursPeriod: weeks
+
+Remaining capacity in the Weekly Planner: capacity − Confirmed − Expected
+
+1 unestimated tasks
+0 open tasks with no due date
+
+Tasks assigned to people represented in this report scope; task context is separate from planning-entry source and confidence. A task can appear in both counts. Only task records you may view in this report scope are counted.
+
+Measure	2026-11-02	2026-11-09	2026-11-16	2026-11-23	2026-11-30
+Capacity	
+560
+	
+560
+	
+560
+	
+560
+	
+560
+
+Time away	
+0
+	
+0
+	
+0
+	
+0
+	
+0
+
+Confirmed	
+500
+	
+480
+	
+490
+	
+490
+	
+490
+
+Expected	
+70
+	
+70
+	
+70
+	
+70
+	
+70
+
+Possible	
+980
+	
+980
+	
+980
+	
+980
+	
+980
+
+Remaining capacity	
+-10
+	
+10
+	
+0
+	
+0
+	
+0
+
+People over-planned	
+1
+Recorded indicator; availability coverage is not assessed
+	
+0
+Recorded indicator; availability coverage is not assessed
+	
+0
+Recorded indicator; availability coverage is not assessed
+	
+0
+Recorded indicator; availability coverage is not assessed
+	
+0
+Recorded indicator; availability coverage is not assessed
+
+People under-planned	
+0
+Recorded indicator; availability coverage is not assessed
+	
+0
+Recorded indicator; availability coverage is not assessed
+	
+0
+Recorded indicator; availability coverage is not assessed
+	
+0
+Recorded indicator; availability coverage is not assessed
+	
+0
+Recorded indicator; availability coverage is not assessed
+
+People with partial view	
+0
+	
+0
+	
+0
+	
+0
+	
+0
+Capacity by home discipline
+
+Current home disciplines; all visible planning work of the selected people. Capacity already includes time away; Confirmed already includes approved reservations.
+
+Planning demand is Confirmed + Expected. Possible is shown separately and excluded. Weekly shortfall sums positive discipline shortages in each displayed week; spare weeks do not cancel shortages.
+
+Visible work only; planning coverage may be incomplete.
+
+Comparison period
+2026-11-02
+2026-11-09
+2026-11-16
+2026-11-23
+2026-11-30
+
+2026-11-02: 1 displayed ISO weeks; standard denominator 40 h. Read 2026-11-02 08:00.
+
+Showing 13–14 of 14 returned disciplines.
+
+Synthetic discipline 012
+Capacity
+40 h
+Planning demand
+40 h
+Weekly shortfall
+0 h
+No recorded weekly shortfall
+Not set
+Capacity
+40 h
+Planning demand
+40 h
+Weekly shortfall
+0 h
+No recorded weekly shortfall
+Capacity comparison values
+Home discipline	Capacity	Planning demand	Weekly shortfall	Confirmed	Expected	Possible (excluded)
+Synthetic discipline 012
+Partial people: 0; provisional availability: 0.
+	
+40 h
+	
+40 h
+	
+0 h
+No recorded weekly shortfall
+	
+35 h
+	
+5 h
+	
+70 h
+
+Not set
+Partial people: 0; provisional availability: 0.
+	
+40 h
+	
+40 h
+	
+0 h
+No recorded weekly shortfall
+	
+35 h
+	
+5 h
+	
+70 h
+Previous disciplines
+Next disciplines
+
+Values are rounded for display. Periods and totals are computed from exact source hours before rounding.
+
+Export downloads the original measure matrix; the comparison is shown on this screen.
+
+Unit: Hours · Period: Weeks. FTE uses exact visible hours divided by displayed ISO weeks × organisation standard hours. Personal capacity changes utilisation separately.
+
+Standard full-time hours: 40 h/week · Displayed ISO weeks: 5
+
+Visible work only; coverage stays limited to the permitted report scope.
+
+Unestimated tasks in report context: 1 · Weekly people counts, weekly capacity rates and undated hours keep their original units.
+
+Values are rounded for display. Periods and totals are computed from exact source hours before rounding. {
+  "runs": [
+    {
+      "from": "2026-11-02",
+      "weeks": "5",
+      "includeMyDrafts": "false",
+      "unit": "hours",
+      "period": "weeks"
+    },
+    {
+      "from": "2026-11-02",
+      "weeks": "5",
+      "includeMyDrafts": "false",
+      "unit": "hours",
+      "period": "weeks"
+    },
+    {
+      "from": "2026-11-02",
+      "weeks": "5",
+      "includeMyDrafts": "false",
+      "unit": "hours",
+      "period": "weeks"
+    },
+    {
+      "from": "2026-11-02",
+      "weeks": "5",
+      "includeMyDrafts": "false",
+      "unit": "hours",
+      "period": "weeks"
+    }
+  ],
+  "metrics": [],
+  "saves": [],
+  "exports": [],
+  "geometry": [
+    {
+      "x": 553,
+      "y": 379.5,
+      "width": 1804.640625,
+      "height": 37
+    }
+  ],
+  "errors": [],
+  "unknownGets": []
+}
+locator.selectOption: Timeout 15000ms exceeded.
+Call log:
+[2m  - waiting for locator('[data-report-capacity-comparison]').getByLabel('Comparison period', { exact: true })[22m
+
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/report-capacity-comparison.cjs:109:70 {
+  log: [
+    "  - waiting for locator('[data-report-capacity-comparison]').getByLabel('Comparison period', { exact: true })"
+  ],
+  name: 'TimeoutError'
+}

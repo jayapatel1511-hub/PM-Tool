@@ -12,6 +12,22 @@ public sealed class ProjectsTests(HubFactory f, Xunit.Abstractions.ITestOutputHe
     readonly TestData d = new(f);
 
     [Fact]
+    public async Task Home_empty_project_cohort_stays_empty_in_its_drilldown()
+    {
+        var project = await d.Project();
+        var admin = f.As(TestData.Admin);
+        try
+        {
+            (await admin.Put("/api/v1/admin/settings/flag.home_overview", new { value = true })).EnsureSuccessStatusCode();
+            var empty = await (await f.As(TestData.Pm).GetAsync("/api/v1/projects?mine=false&status=Active&ids=none")).Json();
+            Assert.Empty(empty["items"]!.AsArray());
+            var one = await (await f.As(TestData.Pm).GetAsync($"/api/v1/projects?mine=false&status=Active&ids={project.Id}")).Json();
+            Assert.Equal(project.Id, Assert.Single(one["items"]!.AsArray())!.G("id"));
+        }
+        finally { (await admin.Put("/api/v1/admin/settings/flag.home_overview", new { value = false })).EnsureSuccessStatusCode(); }
+    }
+
+    [Fact]
     public async Task Newly_added_restricted_member_receives_the_membership_notice()
     {
         var admin = f.As(TestData.Admin);

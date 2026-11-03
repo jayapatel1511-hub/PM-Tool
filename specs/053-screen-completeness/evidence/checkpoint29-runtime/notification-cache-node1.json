@@ -1,0 +1,14 @@
+{
+  "exitCode": 0,
+  "args": [
+    "node",
+    "--test",
+    "web/src/lib/keys.test.ts"
+  ],
+  "passed": 21,
+  "failed": 0,
+  "evidence": "Root observed Node TAP output; no repeat of passing check",
+  "keysSha256": "99cad6a10286311bf2c1677e3e115f98a6c3e4c573b6ddea512d48ff1f316912",
+  "testsSha256": "d8aa1018efd79bfe8c049254e8450b11a0603a72c76714f275e743c6f19eb2a3",
+  "atUtc": "2026-11-02T18:33:12.991930+00:00"
+}

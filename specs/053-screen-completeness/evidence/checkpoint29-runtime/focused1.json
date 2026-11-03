@@ -1,0 +1,171 @@
+{
+  "exitCode": 1,
+  "args": [
+    "dotnet",
+    "test",
+    "tests/Hub.Tests/Hub.Tests.csproj",
+    "-c",
+    "Release",
+    "--no-build",
+    "--no-restore",
+    "--artifacts-path",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint29-artifacts",
+    "--filter",
+    "FullyQualifiedName~TaskBulkCommandTests|FullyQualifiedName~CalendarScreenTests|FullyQualifiedName~CalendarRescheduleTests|FullyQualifiedName~CalendarViewReplayTests|FullyQualifiedName~ReviewDisciplineSummaryTests|FullyQualifiedName~ReviewDisciplineDefaultsTests|FullyQualifiedName~NotificationScreenTests|FullyQualifiedName=Hub.Tests.Api.ContractTests.Openapi_matches_the_committed_golden_document|FullyQualifiedName=Hub.Tests.Api.RegistryTests.Generated_key_families_match_the_registry_and_vocabulary",
+    "--logger",
+    "trx;LogFileName=focused1.trx",
+    "--results-directory",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint29-runtime/trx-focused1",
+    "-m:1",
+    "-p:UseSharedCompilation=false",
+    "-p:NuGetAudit=false"
+  ],
+  "atUtc": "2026-11-02T17:50:40.604826+00:00",
+  "boundary": "Focused newfeature/sharedguard tests plus two golden checks; disposable HubFactory hub_test databases only, no operational or retained QA24 mutation",
+  "counters": {
+    "total": "67",
+    "executed": "67",
+    "passed": "46",
+    "failed": "21",
+    "error": "0",
+    "timeout": "0",
+    "aborted": "0",
+    "inconclusive": "0",
+    "passedButRunAborted": "0",
+    "notRunnable": "0",
+    "notExecuted": "0",
+    "disconnected": "0",
+    "warning": "0",
+    "completed": "0",
+    "inProgress": "0",
+    "pending": "0"
+  },
+  "failures": [
+    {
+      "name": "Hub.Tests.Api.TaskBulkCommandTests.Zero_shift_is_a_terminal_noop_without_offer_outbox_or_assignment_publication_side_effects",
+      "outcome": "Failed",
+      "message": "Expected 200 but got 400: {\"type\":\"https://hub.local/errors/validation\",\"title\":\"Validation failed\",\"status\":400,\"code\":\"validation\",\"detail\":\"One or more fields are invalid.\",\"traceId\":\"0HNPP16CV2DIB\",\"errors\":{\"items\":[\"One or more fields are invalid.\"]}}",
+      "stack": "   at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118\n   at Hub.Tests.Api.TaskBulkCommandTests.Zero_shift_is_a_terminal_noop_without_offer_outbox_or_assignment_publication_side_effects() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/TaskBulkCommandTests.cs:line 110\n--- End of stack trace from previous location ---"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskBulkCommandTests.Current_discipline_reviewer_conflicts_are_refused_per_row_in_preview_and_mixed_apply(operation: \"setDeliverable\")",
+      "outcome": "Failed",
+      "message": "Expected 200 but got 400: {\"type\":\"https://hub.local/errors/validation\",\"title\":\"Validation failed\",\"status\":400,\"code\":\"validation\",\"detail\":\"One or more fields are invalid.\",\"traceId\":\"0HNPP16CV2DVA\",\"errors\":{\"items\":[\"One or more fields are invalid.\"]}}",
+      "stack": "   at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118\n   at Hub.Tests.Api.TaskBulkCommandTests.Current_discipline_reviewer_conflicts_are_refused_per_row_in_preview_and_mixed_apply(String operation) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/TaskBulkCommandTests.cs:line 57\n--- End of stack trace from previous location ---"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskBulkCommandTests.Current_discipline_reviewer_conflicts_are_refused_per_row_in_preview_and_mixed_apply(operation: \"assign\")",
+      "outcome": "Failed",
+      "message": "Expected 200 but got 400: {\"type\":\"https://hub.local/errors/validation\",\"title\":\"Validation failed\",\"status\":400,\"code\":\"validation\",\"detail\":\"One or more fields are invalid.\",\"traceId\":\"0HNPP16CV2DVM\",\"errors\":{\"items\":[\"One or more fields are invalid.\"]}}",
+      "stack": "   at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118\n   at Hub.Tests.Api.TaskBulkCommandTests.Current_discipline_reviewer_conflicts_are_refused_per_row_in_preview_and_mixed_apply(String operation) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/TaskBulkCommandTests.cs:line 57\n--- End of stack trace from previous location ---"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskBulkCommandTests.Every_toolbar_operation_uses_a_versioned_canonical_command(operation: \"setDueDate\")",
+      "outcome": "Failed",
+      "message": "Expected 200 but got 400: {\"type\":\"https://hub.local/errors/validation\",\"title\":\"Validation failed\",\"status\":400,\"code\":\"validation\",\"detail\":\"One or more fields are invalid.\",\"traceId\":\"0HNPP16CV2DPR\",\"errors\":{\"items\":[\"One or more fields are invalid.\"]}}",
+      "stack": "   at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118\n   at Hub.Tests.Api.TaskBulkCommandTests.Every_toolbar_operation_uses_a_versioned_canonical_command(String operation) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/TaskBulkCommandTests.cs:line 162\n--- End of stack trace from previous location ---"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskBulkCommandTests.Every_toolbar_operation_uses_a_versioned_canonical_command(operation: \"assign\")",
+      "outcome": "Failed",
+      "message": "Expected 200 but got 400: {\"type\":\"https://hub.local/errors/validation\",\"title\":\"Validation failed\",\"status\":400,\"code\":\"validation\",\"detail\":\"One or more fields are invalid.\",\"traceId\":\"0HNPP16CV2DQF\",\"errors\":{\"items\":[\"One or more fields are invalid.\"]}}",
+      "stack": "   at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118\n   at Hub.Tests.Api.TaskBulkCommandTests.Every_toolbar_operation_uses_a_versioned_canonical_command(String operation) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/TaskBulkCommandTests.cs:line 162\n--- End of stack trace from previous location ---"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskBulkCommandTests.Keyed_preview_is_write_free_and_stale_noop_and_refused_results_never_revive",
+      "outcome": "Failed",
+      "message": "Expected 200 but got 400: {\"type\":\"https://hub.local/errors/validation\",\"title\":\"Validation failed\",\"status\":400,\"code\":\"validation\",\"detail\":\"One or more fields are invalid.\",\"traceId\":\"0HNPP16CV2DT3\",\"errors\":{\"items\":[\"One or more fields are invalid.\"]}}",
+      "stack": "   at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118\n   at Hub.Tests.Api.TaskBulkCommandTests.Keyed_preview_is_write_free_and_stale_noop_and_refused_results_never_revive() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/TaskBulkCommandTests.cs:line 200\n--- End of stack trace from previous location ---"
+    },
+    {
+      "name": "Hub.Tests.Api.NotificationScreenTests.Unknown_mismatched_deleted_targets_stay_unknown_and_hidden_recipient_and_compound_scope_rows_are_excluded_before_counts",
+      "outcome": "Failed",
+      "message": "Assert.Equal() Failure: Values differ\nExpected: 3\nActual:   5",
+      "stack": "   at Hub.Tests.Api.NotificationScreenTests.Unknown_mismatched_deleted_targets_stay_unknown_and_hidden_recipient_and_compound_scope_rows_are_excluded_before_counts() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/NotificationScreenTests.cs:line 88\n--- End of stack trace from previous location ---"
+    },
+    {
+      "name": "Hub.Tests.Api.CalendarRescheduleTests.Foreign_scope_and_nonmember_sources_never_gain_preview_or_write_authority",
+      "outcome": "Failed",
+      "message": "Expected 404 but got 403: {\"type\":\"https://hub.local/errors/forbidden\",\"title\":\"Forbidden\",\"status\":403,\"code\":\"forbidden\",\"detail\":\"You cannot move this deadline.\",\"traceId\":\"0HNPP16CV2DLL\"}",
+      "stack": "   at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118\n   at Hub.Tests.Api.CalendarScreenData.Preview(String type, Guid id, Int32 version, Guid project, String date, String who, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/CalendarScreenTests.cs:line 21\n   at Hub.Tests.Api.CalendarRescheduleTests.Foreign_scope_and_nonmember_sources_never_gain_preview_or_write_authority() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/CalendarRescheduleTests.cs:line 74\n--- End of stack trace from previous location ---"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskBulkCommandTests.Every_toolbar_operation_uses_a_versioned_canonical_command(operation: \"hold\")",
+      "outcome": "Failed",
+      "message": "Expected 200 but got 400: {\"type\":\"https://hub.local/errors/validation\",\"title\":\"Validation failed\",\"status\":400,\"code\":\"validation\",\"detail\":\"One or more fields are invalid.\",\"traceId\":\"0HNPP16CV2DSM\",\"errors\":{\"items\":[\"One or more fields are invalid.\"]}}",
+      "stack": "   at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118\n   at Hub.Tests.Api.TaskBulkCommandTests.Every_toolbar_operation_uses_a_versioned_canonical_command(String operation) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/TaskBulkCommandTests.cs:line 162\n--- End of stack trace from previous location ---"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskBulkCommandTests.Eight_rows_three_projects_commit_six_changes_and_two_terminal_refusals_with_one_receipt_and_recipient_summaries",
+      "outcome": "Failed",
+      "message": "Expected 200 but got 400: {\"type\":\"https://hub.local/errors/validation\",\"title\":\"Validation failed\",\"status\":400,\"code\":\"validation\",\"detail\":\"One or more fields are invalid.\",\"traceId\":\"0HNPP16CV2DUU\",\"errors\":{\"items\":[\"One or more fields are invalid.\"]}}",
+      "stack": "   at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118\n   at Hub.Tests.Api.TaskBulkCommandTests.Eight_rows_three_projects_commit_six_changes_and_two_terminal_refusals_with_one_receipt_and_recipient_summaries() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/TaskBulkCommandTests.cs:line 126\n--- End of stack trace from previous location ---"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskBulkCommandTests.Savehook_pickup_offer_closures_join_the_same_bulk_capture_and_receipt_without_duplicate_retry(operation: \"assign\")",
+      "outcome": "Failed",
+      "message": "Expected 200 but got 400: {\"type\":\"https://hub.local/errors/validation\",\"title\":\"Validation failed\",\"status\":400,\"code\":\"validation\",\"detail\":\"One or more fields are invalid.\",\"traceId\":\"0HNPP16CV2DDO\",\"errors\":{\"items\":[\"One or more fields are invalid.\"]}}",
+      "stack": "   at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118\n   at Hub.Tests.Api.TaskBulkCommandTests.Savehook_pickup_offer_closures_join_the_same_bulk_capture_and_receipt_without_duplicate_retry(String operation) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/TaskBulkCommandTests.cs:line 84\n--- End of stack trace from previous location ---"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskBulkCommandTests.Complete_reasons_foreign_references_stale_versions_and_envelope_bounds_store_only_permitted_rows",
+      "outcome": "Failed",
+      "message": "Expected 200 but got 400: {\"type\":\"https://hub.local/errors/validation\",\"title\":\"Validation failed\",\"status\":400,\"code\":\"validation\",\"detail\":\"One or more fields are invalid.\",\"traceId\":\"0HNPP16CV2DLM\",\"errors\":{\"items\":[\"One or more fields are invalid.\"]}}",
+      "stack": "   at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118\n   at Hub.Tests.Api.TaskBulkCommandTests.Complete_reasons_foreign_references_stale_versions_and_envelope_bounds_store_only_permitted_rows() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/TaskBulkCommandTests.cs:line 244\n--- End of stack trace from previous location ---"
+    },
+    {
+      "name": "Hub.Tests.Api.CalendarScreenTests.Calendar_view_update_delete_off_guards_and_current_visibility_clean_definitions_without_rewriting_stored_filters",
+      "outcome": "Failed",
+      "message": "Assert.Contains() Failure: Item not found in collection\nCollection: []\nNot found:  \"projects\"",
+      "stack": "   at Hub.Tests.Api.CalendarScreenTests.Calendar_view_update_delete_off_guards_and_current_visibility_clean_definitions_without_rewriting_stored_filters() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/CalendarScreenTests.cs:line 160\n--- End of stack trace from previous location ---"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskBulkCommandTests.Savehook_pickup_offer_closures_join_the_same_bulk_capture_and_receipt_without_duplicate_retry(operation: \"cancel\")",
+      "outcome": "Failed",
+      "message": "Expected 200 but got 400: {\"type\":\"https://hub.local/errors/validation\",\"title\":\"Validation failed\",\"status\":400,\"code\":\"validation\",\"detail\":\"One or more fields are invalid.\",\"traceId\":\"0HNPP16CV2DB8\",\"errors\":{\"items\":[\"One or more fields are invalid.\"]}}",
+      "stack": "   at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118\n   at Hub.Tests.Api.TaskBulkCommandTests.Savehook_pickup_offer_closures_join_the_same_bulk_capture_and_receipt_without_duplicate_retry(String operation) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/TaskBulkCommandTests.cs:line 84\n--- End of stack trace from previous location ---"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskBulkCommandTests.Deliverable_mapping_order_is_canonical_but_input_row_order_is_significant",
+      "outcome": "Failed",
+      "message": "Expected 200 but got 400: {\"type\":\"https://hub.local/errors/validation\",\"title\":\"Validation failed\",\"status\":400,\"code\":\"validation\",\"detail\":\"One or more fields are invalid.\",\"traceId\":\"0HNPP16CV2E01\",\"errors\":{\"items\":[\"One or more fields are invalid.\"]}}",
+      "stack": "   at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118\n   at Hub.Tests.Api.TaskBulkCommandTests.Deliverable_mapping_order_is_canonical_but_input_row_order_is_significant() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/TaskBulkCommandTests.cs:line 185\n--- End of stack trace from previous location ---"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskBulkCommandTests.Every_toolbar_operation_uses_a_versioned_canonical_command(operation: \"cancel\")",
+      "outcome": "Failed",
+      "message": "Expected 200 but got 400: {\"type\":\"https://hub.local/errors/validation\",\"title\":\"Validation failed\",\"status\":400,\"code\":\"validation\",\"detail\":\"One or more fields are invalid.\",\"traceId\":\"0HNPP16CV2DOQ\",\"errors\":{\"items\":[\"One or more fields are invalid.\"]}}",
+      "stack": "   at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118\n   at Hub.Tests.Api.TaskBulkCommandTests.Every_toolbar_operation_uses_a_versioned_canonical_command(String operation) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/TaskBulkCommandTests.cs:line 162\n--- End of stack trace from previous location ---"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskBulkCommandTests.Replay_uses_current_visibility_without_requiring_lost_assignment_rights_and_hidden_rows_have_no_true_outcome",
+      "outcome": "Failed",
+      "message": "Expected 200 but got 400: {\"type\":\"https://hub.local/errors/validation\",\"title\":\"Validation failed\",\"status\":400,\"code\":\"validation\",\"detail\":\"One or more fields are invalid.\",\"traceId\":\"0HNPP16CV2DU6\",\"errors\":{\"items\":[\"One or more fields are invalid.\"]}}",
+      "stack": "   at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118\n   at Hub.Tests.Api.TaskBulkCommandTests.Replay_uses_current_visibility_without_requiring_lost_assignment_rights_and_hidden_rows_have_no_true_outcome() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/TaskBulkCommandTests.cs:line 214\n--- End of stack trace from previous location ---"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskBulkCommandTests.Actual_supervisor_summary_is_excluded_from_digest_build_and_queued_body_after_any_contributing_project_is_hidden",
+      "outcome": "Failed",
+      "message": "Expected 200 but got 400: {\"type\":\"https://hub.local/errors/validation\",\"title\":\"Validation failed\",\"status\":400,\"code\":\"validation\",\"detail\":\"One or more fields are invalid.\",\"traceId\":\"0HNPP16CV2DFM\",\"errors\":{\"items\":[\"One or more fields are invalid.\"]}}",
+      "stack": "   at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118\n   at Hub.Tests.Api.TaskBulkCommandTests.Actual_supervisor_summary_is_excluded_from_digest_build_and_queued_body_after_any_contributing_project_is_hidden() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/TaskBulkCommandTests.cs:line 284\n--- End of stack trace from previous location ---"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskBulkCommandTests.Provider_failure_after_changes_rolls_back_the_whole_attempt_and_identical_retry_commits_once",
+      "outcome": "Failed",
+      "message": "Expected 500 but got 400: {\"type\":\"https://hub.local/errors/validation\",\"title\":\"Validation failed\",\"status\":400,\"code\":\"validation\",\"detail\":\"One or more fields are invalid.\",\"traceId\":\"0HNPP16CV2DN0\",\"errors\":{\"items\":[\"One or more fields are invalid.\"]}}",
+      "stack": "   at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118\n   at Hub.Tests.Api.TaskBulkCommandTests.Provider_failure_after_changes_rolls_back_the_whole_attempt_and_identical_retry_commits_once() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/TaskBulkCommandTests.cs:line 231\n--- End of stack trace from previous location ---"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskBulkCommandTests.Every_toolbar_operation_uses_a_versioned_canonical_command(operation: \"setPriority\")",
+      "outcome": "Failed",
+      "message": "Expected 200 but got 400: {\"type\":\"https://hub.local/errors/validation\",\"title\":\"Validation failed\",\"status\":400,\"code\":\"validation\",\"detail\":\"One or more fields are invalid.\",\"traceId\":\"0HNPP16CV2DQV\",\"errors\":{\"items\":[\"One or more fields are invalid.\"]}}",
+      "stack": "   at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118\n   at Hub.Tests.Api.TaskBulkCommandTests.Every_toolbar_operation_uses_a_versioned_canonical_command(String operation) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/TaskBulkCommandTests.cs:line 162\n--- End of stack trace from previous location ---"
+    },
+    {
+      "name": "Hub.Tests.Api.TaskBulkCommandTests.Every_toolbar_operation_uses_a_versioned_canonical_command(operation: \"shiftDueDates\")",
+      "outcome": "Failed",
+      "message": "Expected 200 but got 400: {\"type\":\"https://hub.local/errors/validation\",\"title\":\"Validation failed\",\"status\":400,\"code\":\"validation\",\"detail\":\"One or more fields are invalid.\",\"traceId\":\"0HNPP16CV2DS2\",\"errors\":{\"items\":[\"One or more fields are invalid.\"]}}",
+      "stack": "   at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118\n   at Hub.Tests.Api.TaskBulkCommandTests.Every_toolbar_operation_uses_a_versioned_canonical_command(String operation) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/TaskBulkCommandTests.cs:line 162\n--- End of stack trace from previous location ---"
+    }
+  ]
+}

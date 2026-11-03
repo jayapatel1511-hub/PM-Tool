@@ -1,0 +1,58 @@
+{
+  "base": "http://127.0.0.1:5088",
+  "project": "SYN-JOIN19-1101",
+  "civilGroup": {
+    "status": "PASS",
+    "pages": 2,
+    "pageSize": 2,
+    "serverTotalCount": 4,
+    "rowCount": 4,
+    "estimatedHours": 40,
+    "progressPctByHours": 50,
+    "page1Statuses": ["Complete", "Complete"],
+    "page2Statuses": ["Not Started", "Not Started"],
+    "uiHeader": "Civil · 4 shown / 4 matched tasks · 40 h estimated across matched rows · 50% by hours",
+    "sourceReturnExactURL": true,
+    "sourceURL": "http://127.0.0.1:5088/projects/SYN-JOIN19-1101/tasks?group=discipline&disciplineId=01a195dd-3df7-768a-aae0-1c5281c67ce0&pageSize=2&page=1&sort=dueDate"
+  },
+  "certificationUI": {
+    "status": "PASS",
+    "viewer": "Omar Haddad",
+    "newTag": "Synthetic QA19 UI Certification",
+    "expiry": "2026-12-01",
+    "responseStatus": 201,
+    "createdVia": "/api/v1/me/certifications",
+    "versionAcknowledged": 0
+  },
+  "jillFactsUI": {
+    "status": "PASS",
+    "type": "Co-op",
+    "start": "2026-12-01",
+    "end": "2026-12-18",
+    "actualUIResponse": 200,
+    "staffText": "Co-op · Starts 2026-12-01 · Ends 2026-12-18",
+    "capacityUnchanged": "40 h free",
+    "activationUnchanged": true,
+    "pickerCertificationClaim": "not claimed; picker coverage remains an explicit limit"
+  },
+  "reportMetric": {
+    "status": "PASS",
+    "metric": "2 unestimated tasks",
+    "metricRows": 2,
+    "nonFirstTaskOpened": true,
+    "metricClosePreservedExactQuery": true,
+    "returnToReportWorked": true,
+    "metricURL": "http://127.0.0.1:5088/reports/workload-employee?projectId=01a195dd-3df4-797f-b1ea-b2dbb79b6d75&taskInput=unestimated&inputPage=1&inputPageSize=50",
+    "metricTask": "SYN-JOIN19-1101-T0006"
+  },
+  "artifacts": [
+    "checkpoint19-real-civil-group.png",
+    "checkpoint19-real-omar-cert-ui.png",
+    "checkpoint19-real-jill-facts-ui.png",
+    "checkpoint19-real-staff-final.png",
+    "checkpoint19-real-report-metric.png"
+  ],
+  "limits": ["No whole-directory picker coverage claim; report geometry remains held for the parent’s repaired CSS build."],
+  "errors": [],
+  "unintendedMutations": []
+}

@@ -1,0 +1,8 @@
+{
+  "base": "http://127.0.0.1:8857",
+  "pid": 64520,
+  "execSession": 65905,
+  "command": "node node_modules/vite/bin/vite.js preview --host 127.0.0.1 --port 8857 --strictPort --outDir /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint27-artifacts/bin/spa-wwwroot",
+  "atUtc": "2026-11-02T12:47:10.970740+00:00",
+  "boundary": "Static synthetic test preview; no API5092; not an unmocked working review instance"
+}

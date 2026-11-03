@@ -1,0 +1,9 @@
+{
+  "exitCode": 2,
+  "args": [
+    "npm",
+    "run",
+    "typecheck:tests"
+  ],
+  "atUtc": "2026-11-02T18:00:54.674944+00:00"
+}

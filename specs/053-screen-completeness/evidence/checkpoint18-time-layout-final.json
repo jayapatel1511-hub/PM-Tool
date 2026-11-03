@@ -1,0 +1,737 @@
+{
+  "base": "http://127.0.0.1:5088",
+  "week": "2026-11-02..2026-11-08",
+  "screens": [
+    {
+      "width": 1440,
+      "docWidth": 1440,
+      "bodyWidth": 1440,
+      "grid": {
+        "scrollWidth": 1134,
+        "clientWidth": 1134,
+        "rect": {
+          "x": 273,
+          "y": 291,
+          "width": 1134,
+          "height": 605,
+          "top": 291,
+          "right": 1407,
+          "bottom": 896,
+          "left": 273
+        }
+      },
+      "firstTaskRow": {
+        "x": 273,
+        "y": 399.5,
+        "width": 1134,
+        "height": 113,
+        "top": 399.5,
+        "right": 1407,
+        "bottom": 512.5,
+        "left": 273
+      },
+      "named": [
+        {
+          "tag": "NAV",
+          "role": null,
+          "aria": "Main navigation",
+          "scrollWidth": 239,
+          "clientWidth": 239
+        },
+        {
+          "tag": "UL",
+          "role": null,
+          "aria": "More",
+          "scrollWidth": 215,
+          "clientWidth": 215
+        },
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "aria": "Collapse navigation",
+          "scrollWidth": 215,
+          "clientWidth": 215
+        },
+        {
+          "tag": "NAV",
+          "role": null,
+          "aria": "Breadcrumb",
+          "scrollWidth": 483,
+          "clientWidth": 483
+        },
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "aria": "Project scope: My projects",
+          "scrollWidth": 140,
+          "clientWidth": 140
+        },
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "aria": "New",
+          "scrollWidth": 75,
+          "clientWidth": 75
+        },
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "aria": "Notifications, 2 unread",
+          "scrollWidth": 40,
+          "clientWidth": 40
+        },
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "aria": "Account",
+          "scrollWidth": 48,
+          "clientWidth": 48
+        },
+        {
+          "tag": "DL",
+          "role": null,
+          "aria": "Current values",
+          "scrollWidth": 597,
+          "clientWidth": 597
+        },
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "aria": "Previous",
+          "scrollWidth": 38,
+          "clientWidth": 38
+        },
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "aria": "Next",
+          "scrollWidth": 38,
+          "clientWidth": 38
+        },
+        {
+          "tag": "SECTION",
+          "role": null,
+          "aria": "Your time week",
+          "scrollWidth": 1136,
+          "clientWidth": 1136
+        },
+        {
+          "tag": "DIV",
+          "role": "region",
+          "aria": "Your task hours by day",
+          "scrollWidth": 1134,
+          "clientWidth": 1134
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0001 SYN-JOIN18 task 1 on 2026-11-02",
+          "scrollWidth": 82,
+          "clientWidth": 82
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0001 SYN-JOIN18 task 1 on 2026-11-03",
+          "scrollWidth": 82,
+          "clientWidth": 82
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0001 SYN-JOIN18 task 1 on 2026-11-04",
+          "scrollWidth": 92,
+          "clientWidth": 92
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0001 SYN-JOIN18 task 1 on 2026-11-05",
+          "scrollWidth": 82,
+          "clientWidth": 82
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0001 SYN-JOIN18 task 1 on 2026-11-06",
+          "scrollWidth": 82,
+          "clientWidth": 82
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0001 SYN-JOIN18 task 1 on 2026-11-07",
+          "scrollWidth": 82,
+          "clientWidth": 82
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0001 SYN-JOIN18 task 1 on 2026-11-08",
+          "scrollWidth": 82,
+          "clientWidth": 82
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0002 SYN-JOIN18 task 2 on 2026-11-02",
+          "scrollWidth": 82,
+          "clientWidth": 82
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0002 SYN-JOIN18 task 2 on 2026-11-03",
+          "scrollWidth": 82,
+          "clientWidth": 82
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0002 SYN-JOIN18 task 2 on 2026-11-04",
+          "scrollWidth": 92,
+          "clientWidth": 92
+        },
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "aria": "Entry details for Hours for SYN-JOIN18-1101-T0002 SYN-JOIN18 task 2 on 2026-11-04",
+          "scrollWidth": 94,
+          "clientWidth": 94
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0002 SYN-JOIN18 task 2 on 2026-11-05",
+          "scrollWidth": 82,
+          "clientWidth": 82
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0002 SYN-JOIN18 task 2 on 2026-11-06",
+          "scrollWidth": 82,
+          "clientWidth": 82
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0002 SYN-JOIN18 task 2 on 2026-11-07",
+          "scrollWidth": 82,
+          "clientWidth": 82
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0002 SYN-JOIN18 task 2 on 2026-11-08",
+          "scrollWidth": 82,
+          "clientWidth": 82
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0003 SYN-JOIN18 task 3 on 2026-11-02",
+          "scrollWidth": 82,
+          "clientWidth": 82
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0003 SYN-JOIN18 task 3 on 2026-11-03",
+          "scrollWidth": 82,
+          "clientWidth": 82
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0003 SYN-JOIN18 task 3 on 2026-11-04",
+          "scrollWidth": 92,
+          "clientWidth": 92
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0003 SYN-JOIN18 task 3 on 2026-11-05",
+          "scrollWidth": 82,
+          "clientWidth": 82
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0003 SYN-JOIN18 task 3 on 2026-11-06",
+          "scrollWidth": 82,
+          "clientWidth": 82
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0003 SYN-JOIN18 task 3 on 2026-11-07",
+          "scrollWidth": 82,
+          "clientWidth": 82
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0003 SYN-JOIN18 task 3 on 2026-11-08",
+          "scrollWidth": 82,
+          "clientWidth": 82
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0004 SYN-JOIN18 task P on 2026-11-02",
+          "scrollWidth": 82,
+          "clientWidth": 82
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0004 SYN-JOIN18 task P on 2026-11-03",
+          "scrollWidth": 82,
+          "clientWidth": 82
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0004 SYN-JOIN18 task P on 2026-11-04",
+          "scrollWidth": 92,
+          "clientWidth": 92
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0004 SYN-JOIN18 task P on 2026-11-05",
+          "scrollWidth": 82,
+          "clientWidth": 82
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0004 SYN-JOIN18 task P on 2026-11-06",
+          "scrollWidth": 82,
+          "clientWidth": 82
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0004 SYN-JOIN18 task P on 2026-11-07",
+          "scrollWidth": 82,
+          "clientWidth": 82
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0004 SYN-JOIN18 task P on 2026-11-08",
+          "scrollWidth": 82,
+          "clientWidth": 82
+        },
+        {
+          "tag": "ASIDE",
+          "role": null,
+          "aria": "Totals",
+          "scrollWidth": 1136,
+          "clientWidth": 1136
+        },
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "aria": "What this counts",
+          "scrollWidth": 24,
+          "clientWidth": 24
+        },
+        {
+          "tag": "NAV",
+          "role": null,
+          "aria": "Main navigation",
+          "scrollWidth": 0,
+          "clientWidth": 0
+        },
+        {
+          "tag": "SECTION",
+          "role": null,
+          "aria": "Notifications alt+T",
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        }
+      ],
+      "capacity32": true,
+      "away8": true,
+      "total2": true,
+      "taskRows": 4
+    },
+    {
+      "width": 375,
+      "docWidth": 375,
+      "bodyWidth": 375,
+      "grid": {
+        "scrollWidth": 1065,
+        "clientWidth": 1065,
+        "rect": {
+          "x": 17,
+          "y": 523,
+          "width": 1065,
+          "height": 605,
+          "top": 523,
+          "right": 1082,
+          "bottom": 1128,
+          "left": 17
+        }
+      },
+      "firstTaskRow": {
+        "x": 17,
+        "y": 631.5,
+        "width": 1065,
+        "height": 113,
+        "top": 631.5,
+        "right": 1082,
+        "bottom": 744.5,
+        "left": 17
+      },
+      "named": [
+        {
+          "tag": "NAV",
+          "role": null,
+          "aria": "Main navigation",
+          "scrollWidth": 0,
+          "clientWidth": 0
+        },
+        {
+          "tag": "UL",
+          "role": null,
+          "aria": "More",
+          "scrollWidth": 0,
+          "clientWidth": 0
+        },
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "aria": "Collapse navigation",
+          "scrollWidth": 0,
+          "clientWidth": 0
+        },
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "aria": "Main navigation",
+          "scrollWidth": 36,
+          "clientWidth": 36
+        },
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "aria": "Search",
+          "scrollWidth": 40,
+          "clientWidth": 40
+        },
+        {
+          "tag": "NAV",
+          "role": null,
+          "aria": "Breadcrumb",
+          "scrollWidth": 0,
+          "clientWidth": 0
+        },
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "aria": "Project scope: My projects",
+          "scrollWidth": 60,
+          "clientWidth": 60
+        },
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "aria": "New",
+          "scrollWidth": 40,
+          "clientWidth": 40
+        },
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "aria": "Notifications, 2 unread",
+          "scrollWidth": 40,
+          "clientWidth": 40
+        },
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "aria": "Account",
+          "scrollWidth": 44,
+          "clientWidth": 44
+        },
+        {
+          "tag": "DL",
+          "role": null,
+          "aria": "Current values",
+          "scrollWidth": 341,
+          "clientWidth": 341
+        },
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "aria": "Previous",
+          "scrollWidth": 38,
+          "clientWidth": 38
+        },
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "aria": "Next",
+          "scrollWidth": 38,
+          "clientWidth": 38
+        },
+        {
+          "tag": "SECTION",
+          "role": null,
+          "aria": "Your time week",
+          "scrollWidth": 343,
+          "clientWidth": 343
+        },
+        {
+          "tag": "DIV",
+          "role": "region",
+          "aria": "Your task hours by day",
+          "scrollWidth": 1065,
+          "clientWidth": 341
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0001 SYN-JOIN18 task 1 on 2026-11-02",
+          "scrollWidth": 78,
+          "clientWidth": 78
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0001 SYN-JOIN18 task 1 on 2026-11-03",
+          "scrollWidth": 78,
+          "clientWidth": 78
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0001 SYN-JOIN18 task 1 on 2026-11-04",
+          "scrollWidth": 88,
+          "clientWidth": 88
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0001 SYN-JOIN18 task 1 on 2026-11-05",
+          "scrollWidth": 78,
+          "clientWidth": 78
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0001 SYN-JOIN18 task 1 on 2026-11-06",
+          "scrollWidth": 78,
+          "clientWidth": 78
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0001 SYN-JOIN18 task 1 on 2026-11-07",
+          "scrollWidth": 78,
+          "clientWidth": 78
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0001 SYN-JOIN18 task 1 on 2026-11-08",
+          "scrollWidth": 78,
+          "clientWidth": 78
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0002 SYN-JOIN18 task 2 on 2026-11-02",
+          "scrollWidth": 78,
+          "clientWidth": 78
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0002 SYN-JOIN18 task 2 on 2026-11-03",
+          "scrollWidth": 78,
+          "clientWidth": 78
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0002 SYN-JOIN18 task 2 on 2026-11-04",
+          "scrollWidth": 88,
+          "clientWidth": 88
+        },
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "aria": "Entry details for Hours for SYN-JOIN18-1101-T0002 SYN-JOIN18 task 2 on 2026-11-04",
+          "scrollWidth": 90,
+          "clientWidth": 90
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0002 SYN-JOIN18 task 2 on 2026-11-05",
+          "scrollWidth": 78,
+          "clientWidth": 78
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0002 SYN-JOIN18 task 2 on 2026-11-06",
+          "scrollWidth": 78,
+          "clientWidth": 78
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0002 SYN-JOIN18 task 2 on 2026-11-07",
+          "scrollWidth": 78,
+          "clientWidth": 78
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0002 SYN-JOIN18 task 2 on 2026-11-08",
+          "scrollWidth": 78,
+          "clientWidth": 78
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0003 SYN-JOIN18 task 3 on 2026-11-02",
+          "scrollWidth": 78,
+          "clientWidth": 78
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0003 SYN-JOIN18 task 3 on 2026-11-03",
+          "scrollWidth": 78,
+          "clientWidth": 78
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0003 SYN-JOIN18 task 3 on 2026-11-04",
+          "scrollWidth": 88,
+          "clientWidth": 88
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0003 SYN-JOIN18 task 3 on 2026-11-05",
+          "scrollWidth": 78,
+          "clientWidth": 78
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0003 SYN-JOIN18 task 3 on 2026-11-06",
+          "scrollWidth": 78,
+          "clientWidth": 78
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0003 SYN-JOIN18 task 3 on 2026-11-07",
+          "scrollWidth": 78,
+          "clientWidth": 78
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0003 SYN-JOIN18 task 3 on 2026-11-08",
+          "scrollWidth": 78,
+          "clientWidth": 78
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0004 SYN-JOIN18 task P on 2026-11-02",
+          "scrollWidth": 78,
+          "clientWidth": 78
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0004 SYN-JOIN18 task P on 2026-11-03",
+          "scrollWidth": 78,
+          "clientWidth": 78
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0004 SYN-JOIN18 task P on 2026-11-04",
+          "scrollWidth": 88,
+          "clientWidth": 88
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0004 SYN-JOIN18 task P on 2026-11-05",
+          "scrollWidth": 78,
+          "clientWidth": 78
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0004 SYN-JOIN18 task P on 2026-11-06",
+          "scrollWidth": 78,
+          "clientWidth": 78
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0004 SYN-JOIN18 task P on 2026-11-07",
+          "scrollWidth": 78,
+          "clientWidth": 78
+        },
+        {
+          "tag": "INPUT",
+          "role": null,
+          "aria": "Hours for SYN-JOIN18-1101-T0004 SYN-JOIN18 task P on 2026-11-08",
+          "scrollWidth": 78,
+          "clientWidth": 78
+        },
+        {
+          "tag": "ASIDE",
+          "role": null,
+          "aria": "Totals",
+          "scrollWidth": 343,
+          "clientWidth": 343
+        },
+        {
+          "tag": "BUTTON",
+          "role": null,
+          "aria": "What this counts",
+          "scrollWidth": 24,
+          "clientWidth": 24
+        },
+        {
+          "tag": "NAV",
+          "role": null,
+          "aria": "Main navigation",
+          "scrollWidth": 375,
+          "clientWidth": 375
+        },
+        {
+          "tag": "SECTION",
+          "role": null,
+          "aria": "Notifications alt+T",
+          "scrollWidth": 375,
+          "clientWidth": 375
+        }
+      ],
+      "capacity32": true,
+      "away8": true,
+      "total2": true,
+      "taskRows": 4
+    }
+  ],
+  "errors": [],
+  "mutations": [],
+  "status": true
+}

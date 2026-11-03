@@ -1,0 +1,15 @@
+{
+  "status": "PLAN_ONLY_NO_EXECUTION",
+  "artifactsPath": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint27-artifacts",
+  "spaOutput": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint27-artifacts/bin/spa-wwwroot",
+  "retainedOutputFiles": 573,
+  "guards": [
+    "All C# authors HOLD before .NET/EF/tests/generator",
+    "All frontend authors HOLD before types/lint/Vite/Chrome",
+    "No production Vite and .NET concurrently; single Chrome lane",
+    "Direct EF isolated new assembly, Db__Migrate=false; inspect exactly six nullable columns, two Restrict FKs/indexes, one check; no backfill",
+    "No old outputs overwritten; QA24 API4323 and DBhub_qa_checkpoint24 untouched, cleanup answer pending",
+    "Only disposable HubFactory hub_test_* databases under existing test workflow; shared PG retained"
+  ],
+  "boundary": "No new API or services started; external legacy choice unanswered, no dependent R3 code"
+}

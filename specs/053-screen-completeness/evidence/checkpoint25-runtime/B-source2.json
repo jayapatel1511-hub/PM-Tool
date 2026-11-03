@@ -1,0 +1,10 @@
+{
+  "atUtc": "2026-11-02T09:10:06.109621+00:00",
+  "files": {
+    "src/Hub.Api/Features/Search.cs": "49468d21a8b7ff9b8c3443314c7ac5fa2c8376721045a4474a2ecee75f43cfc1",
+    "src/Hub.Api/Features/SearchScreenReads.cs": "ebe448702a8a1e8cfabdd014f8a456d57a82a064f602d038e95f87ef15d9c62d",
+    "tests/Hub.Tests/Api/SearchScreenTests.cs": "9e8406d7095ddfbaa92d3b0467f977cd1ac68caeeedb436df45737c62c955b3c"
+  },
+  "status": "HANDOFF_HASHES_PASS_UNCOMPILED_UNRUN",
+  "repair": "Canonical Complete precedence when both milestoneflags; one normal-command regression added,16 expandedsourcecases"
+}

@@ -1,0 +1,26 @@
+{
+  "verdict": "PASS_SYNTHETIC_BROWSER",
+  "cases": [
+    "stored-author-mention-dirty-composer-remount-historical404",
+    "inline-person-collaborator-watcher-distinct-actions",
+    "dark-activity-and-history-actor-summary-native-toggle",
+    "grouped-audit-user-admin-preserved-fold",
+    "shared-history-tab-remount-and-notification-actor",
+    "risk-comment-history-remount-exact-record-tab-allowlist",
+    "planner-entry-history-retains-local-draft",
+    "allocation-shift-retains-preview-and-reason-zero-apply",
+    "person-label-real-custom-dialog-remount",
+    "legacy-submission-same-user-two-discipline-groups-second-trigger-return",
+    "follow-up-user-external-legacy-kind",
+    "board-natural-keyboard-drag-cancel-passive-overlay",
+    "no-workload-person-facts-without-capacity-query",
+    "phone-unique-ids-flag-off-no-person-read",
+    "both-flags-off-local-tab-behavior"
+  ],
+  "businessWrites": 0,
+  "personalVisitCommands": 1,
+  "explicitPreviewReads": 1,
+  "personReads": 18,
+  "gridReads": 16,
+  "source": "coordinator-built local preview; not API authority or global S43 acceptance"
+}

@@ -1,0 +1,24 @@
+{
+  "exitCode": 0,
+  "args": [
+    "node",
+    "node_modules/oxlint/bin/oxlint",
+    "src/pages/projects/TaskPanel.tsx",
+    "src/pages/projects/Tasks.tsx",
+    "src/pages/projects/task-section-navigation.tsx",
+    "src/pages/projects/task-contribution.tsx",
+    "src/components/hub/fields.tsx",
+    "src/components/hub/form-navigation-context.tsx",
+    "src/components/hub/panel-host.tsx",
+    "src/components/ui/dialog.tsx",
+    "src/components/ui/dropdown-menu.tsx",
+    "src/components/ui/popover.tsx",
+    "src/components/ui/tooltip.tsx",
+    "src/hooks/drafts.ts",
+    "src/lib/drafts.ts",
+    "src/lib/keys.ts",
+    "src/components/hub/deadline-date-dialog.tsx"
+  ],
+  "atUtc": "2026-11-02T20:03:02.352053+00:00",
+  "boundary": "All app sources READY/HOLD; A owns only browser driver/fixture authoring excluded from app graph"
+}

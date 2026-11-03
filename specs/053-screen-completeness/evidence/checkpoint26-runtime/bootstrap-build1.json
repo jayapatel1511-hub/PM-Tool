@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "errors": 0,
+  "warnings": 7,
+  "frozenCSharpInputs": 611,
+  "oldApiDllUnchanged": true,
+  "boundary": "NewAPIisolatedassemblyonly; migration/provider/testsgenerationstillpending",
+  "atUtc": "2026-11-02T10:48:03.047448+00:00"
+}

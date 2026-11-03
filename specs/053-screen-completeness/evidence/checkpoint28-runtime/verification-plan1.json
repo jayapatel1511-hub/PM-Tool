@@ -1,0 +1,45 @@
+{
+  "status": "PLANNED_NOT_EXECUTED",
+  "newClasses": [
+    "DecisionMetadataTests",
+    "DecisionLagTests",
+    "DecisionMetadataReplayTests",
+    "TemplateRiskSeedTests",
+    "TemplateVersionProvenanceTests",
+    "TemplateDraftDiffTests",
+    "IssueRootCauseTests",
+    "IssueRootCauseReadTests",
+    "IssueRootCauseVocabularyTests",
+    "IssueRootCauseSavedViewsTests",
+    "AdminUserScreenTests",
+    "AdminRoleExplanationTests",
+    "PermissionExplanationTests"
+  ],
+  "focusedFilter": "FullyQualifiedName~Hub.Tests.Api.DecisionMetadataTests.|FullyQualifiedName~Hub.Tests.Api.DecisionLagTests.|FullyQualifiedName~Hub.Tests.Api.DecisionMetadataReplayTests.|FullyQualifiedName~Hub.Tests.Api.TemplateRiskSeedTests.|FullyQualifiedName~Hub.Tests.Api.TemplateVersionProvenanceTests.|FullyQualifiedName~Hub.Tests.Api.TemplateDraftDiffTests.|FullyQualifiedName~Hub.Tests.Api.IssueRootCauseTests.|FullyQualifiedName~Hub.Tests.Api.IssueRootCauseReadTests.|FullyQualifiedName~Hub.Tests.Api.IssueRootCauseVocabularyTests.|FullyQualifiedName~Hub.Tests.Api.IssueRootCauseSavedViewsTests.|FullyQualifiedName~Hub.Tests.Api.AdminUserScreenTests.|FullyQualifiedName~Hub.Tests.Api.AdminRoleExplanationTests.|FullyQualifiedName~Hub.Tests.Domain.PermissionExplanationTests.",
+  "adjacentCandidates": [
+    "Api.DecisionContractTests",
+    "Api.DecisionsTests",
+    "Api.TemplatesTests",
+    "Api.RegisterEnhancementsTests",
+    "Api.AdminContractTests",
+    "Domain.OrgTreeTests"
+  ],
+  "frontend": [
+    "gen",
+    "app types",
+    "4 new fixture types",
+    "lint",
+    "28 node cache/draft/page tests expected",
+    "SSR UI review",
+    "isolated Vite",
+    "4 new strict synthetic browser drivers",
+    "visual captures"
+  ],
+  "notClaimed": [
+    "fullS49/83 coverage",
+    "deactivation inventory",
+    "R3 legacy author policy",
+    "real user/hosted/pilot acceptance",
+    "deployment"
+  ]
+}

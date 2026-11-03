@@ -1,0 +1,25 @@
+{
+  "exitCode": 0,
+  "args": [
+    "node",
+    "node_modules/vite/bin/vite.js",
+    "build",
+    "--outDir",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint34-artifacts/bin/spa-wwwroot-build4"
+  ],
+  "APIOrigin": "http://127.0.0.1:5106",
+  "noRealAPI": true,
+  "atUtc": "2026-11-03T05:25:00.332442+00:00",
+  "sourceFiles": 275,
+  "bundleFiles": 143,
+  "tail": [
+    "",
+    "\u001b[33m[INEFFECTIVE_DYNAMIC_IMPORT] \u001b[0msrc/pages/projects/Board.tsx is dynamically imported by src/app/routes.tsx but also statically imported by src/pages/MyWork.tsx, src/pages/WorkspaceTasks.tsx, dynamic import will not move module into another chunk.",
+    "",
+    "\u001b[33m[INEFFECTIVE_DYNAMIC_IMPORT] \u001b[0msrc/pages/projects/Meetings.tsx is dynamically imported by src/app/registrations.tsx, src/app/routes.tsx but also statically imported by src/pages/MyWork.tsx, src/pages/projects/Coordination.tsx, src/pages/projects/Registers.tsx, dynamic import will not move module into another chunk.",
+    "",
+    "\u001b[33m[INEFFECTIVE_DYNAMIC_IMPORT] \u001b[0msrc/pages/projects/Follow.tsx is dynamically imported by src/app/registrations.tsx but also statically imported by src/pages/MyWork.tsx, src/pages/Preferences.tsx, dynamic import will not move module into another chunk.",
+    "",
+    "\u2713 built in 341ms"
+  ]
+}

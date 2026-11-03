@@ -1,0 +1,9 @@
+{
+  "atUtc": "2026-11-02T09:32:51.763736+00:00",
+  "files": {
+    "src/Hub.Api/Features/SearchScreenReads.cs": "5eb3bdf859438b00c708545d2649fbe15dbf5bcdc28177c83de305db3dde7ee4",
+    "tests/Hub.Tests/Api/SearchScreenTests.cs": "4b819ba00088b2d60c0ae91c446a21e2dcee546a84008c5dfe79441a07493b54"
+  },
+  "status": "HANDOFF_HASHES_PASS_UNCOMPILED_REPAIRS",
+  "repair": "Canonical metadata tab ordering and legal Self/Confirmed versus nonself Confirmed planning fixture; exact assertions preserved"
+}

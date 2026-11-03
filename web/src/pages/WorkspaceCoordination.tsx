@@ -1,7 +1,9 @@
+import { WorkRowEvidence } from '@/components/hub/work-row-evidence'
+import { personOptionLabel } from '@/components/hub/person-option-label'
 import { useQuery } from '@tanstack/react-query'
 import { Download, Printer } from 'lucide-react'
-import type { ReactNode } from 'react'
-import { Link, useSearchParams } from 'react-router'
+import type { ComponentProps, ReactNode } from 'react'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { ActiveFilters, Empty, ErrorBanner, Field, FilterBar, Loading, Missing, Page, Section, selectCls } from '@/components/hub/common'
 import { ViewMenu } from '@/components/hub/views'
 import { useScope } from '@/components/hub/workspace'
@@ -14,9 +16,13 @@ import { fmtDate } from '@/lib/format'
 import { plural, t, tv } from '@/lib/i18n'
 import { accentOf, cn } from '@/lib/utils'
 import { ChangeAssessmentCounts } from './projects/DisciplineCoordinationView'
+import { RecordContext } from '@/components/hub/record-context'
+import { useItemPanel } from '@/components/hub/panel-host'
+import { useFlag, useMe } from '@/lib/auth'
+import { captureRecordContextOrigin } from '@/lib/record-context-navigation'
 
 type Schemas = components['schemas']
-type Item = { id: string; key: string; title: string; status: string }
+type Item = { id: string; key: string; title: string; status: string; context?: Schemas['RecordContextView'] | null }
 type Projection = Schemas['WorkspaceCoordinationProjection']
 type ProjectProjection = Projection['projects'][number]
 
@@ -51,8 +57,22 @@ function downloadCsv(projection: Projection) {
 
 const link = 'text-primary underline underline-offset-4 hover:text-foreground'
 
+function ContextLink({ to, children, ...props }: Omit<ComponentProps<typeof Link>, 'to'> & { to: string }) {
+  const location = useLocation(), navigate = useNavigate(), contextOn = useFlag('screen_patterns')
+  return <Link to={to} {...props} onClick={event => {
+    props.onClick?.(event)
+    if (!contextOn || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+    event.preventDefault()
+    navigate(to, { state: { recordContextReturn: captureRecordContextOrigin(location, event.currentTarget) } })
+  }}>{children}</Link>
+}
+
 /** Permitted workspace projection. One server snapshot supplies each project's rows and counts. */
 export function WorkspaceCoordination() {
+  const noticesOn = useFlag('capacity_screens')
+  const me = useMe(), contextOn = useFlag('screen_patterns'), workOn = useFlag('work_screens'), peopleOn = useFlag('people_screens')
+  const openPanel = useItemPanel()
+  const context = (value: Schemas['RecordContextView'] | null | undefined, projectNumber: string) => contextOn && value ? <RecordContext context={value} projectNumber={projectNumber} meId={me.id} openPanel={openPanel} /> : null
   const [sp, setSp] = useSearchParams()
   const scope = useScope()
   const projectId = sp.get('projectId') ?? '', disciplineId = sp.get('disciplineId') ?? ''
@@ -64,7 +84,7 @@ export function WorkspaceCoordination() {
   }, { replace: true })
   const scopeParams = { scopeKind: scope.kind, scopeProjectIds: scope.kind === 'set' ? scope.ids?.join(',') : undefined,
     scopeWorkspaceId: scope.ws?.id }
-  const q = useQuery({ queryKey: ['workspace-coordination', scope.kind, scope.api, projectId, disciplineId, ownerId, from, to],
+  const q = useQuery({ queryKey: ['workspace-coordination', scope.kind, scope.api, projectId, disciplineId, ownerId, from, to, me.id, workOn, peopleOn],
     enabled: scope.ready,
     queryFn: () => typedRequest('get', '/api/v1/discipline-coordination', { query: { ...scopeParams, projectId, disciplineId, ownerId, from, to } }) })
   const header = { title: t('dcv.ws.title'), subtitle: t('dcv.ws.subtitle') }
@@ -85,14 +105,15 @@ export function WorkspaceCoordination() {
     ['to', t('common.to'), to && fmtDate(to)],
   ] as const).filter(([name]) => sp.get(name))
   const clear = () => setSp(previous => { const next = new URLSearchParams(previous); for (const [name] of tokens) next.delete(name); return next }, { replace: true })
+  const evidence = (project: ProjectProjection, value: object, type: string, id: string, key: string, section: string) => <WorkRowEvidence row={value} itemType={type} itemId={id} itemKey={key} projectNumber={project.projectNumber} sourceKey={`workspace-coordination:${project.id}:${section}:${type}:${id}`} />
   const none = <p className="text-muted-foreground">{t('dcv.none')}</p>
-  const item = (project: ProjectProjection, path: string, prefix: string, row: Item) =>
-    <li key={row.id}><Link className={cn('font-medium', link)} to={`/projects/${project.projectNumber}/${path}?panel=${prefix}:${row.id}`}>
-      {project.projectNumber} · {row.key}</Link> · {row.title} · <span className="text-muted-foreground">{tv(row.status)}</span></li>
+  const item = (project: ProjectProjection, path: string, prefix: string, row: Item, section = path) =>
+    <li key={row.id}>{context(row.context, project.projectNumber)}<ContextLink className={cn('font-medium', link)} to={`/projects/${project.projectNumber}/${path}?panel=${prefix}:${row.id}`}>
+      {project.projectNumber} · {row.key}</ContextLink> · {row.title} · <span className="text-muted-foreground">{tv(row.status)}</span>{evidence(project, row, prefix, row.id, row.key, section)}</li>
   const actionsFor = (project: ProjectProjection, type: string, id: string) =>
     project.data.linkedActions.filter(action => action.sourceType === type && action.sourceId === id)
-      .map(action => <li key={action.id}>{t('dcv.existingAction')} <Link className={link} to={`/projects/${project.projectNumber}/meetings?panel=Action:${action.id}`}>
-        {action.key}</Link> · {action.text} · <span className="text-muted-foreground">{tv(action.status)}</span>{action.dueDate && ` · ${t('dcv.actionDue', { date: fmtDate(action.dueDate) })}`}</li>)
+      .map(action => <li key={action.id}>{context(action.context, project.projectNumber)}{t('dcv.existingAction')} <ContextLink className={link} to={`/projects/${project.projectNumber}/meetings?panel=Action:${action.id}`}>
+        {action.key}</ContextLink> · {action.text} · <span className="text-muted-foreground">{tv(action.status)}</span>{action.dueDate && ` · ${t('dcv.actionDue', { date: fmtDate(action.dueDate) })}`}{evidence(project, action, 'Action', action.id, action.key, `linked:${action.sourceType}:${action.sourceId}`)}</li>)
   /** One coordination question with its count, as in the project view's sectioned agenda. */
   const block = (title: string, count: ReactNode, body: ReactNode) => <section className="min-w-0 space-y-2">
     <h3 className="flex flex-wrap items-center gap-2 text-sm font-semibold">{title}
@@ -115,7 +136,7 @@ export function WorkspaceCoordination() {
           <option value="">{t('dcv.ws.myProjectDisciplines')}</option>{data.disciplines.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
         </select></Field>
         <Field label={t('common.owner')} htmlFor="workspace-coordination-owner" className="w-full sm:w-52"><select id="workspace-coordination-owner" className={selectCls} value={ownerId} onChange={e => set('ownerId', e.target.value)}>
-          <option value="">{t('dcv.ws.allOwners')}</option>{data.owners.map(o => <option key={o.id} value={o.id}>{o.displayName}</option>)}
+          <option value="">{t('dcv.ws.allOwners')}</option>{data.owners.map(o => <option key={o.id} value={o.id}>{personOptionLabel(o.displayName, o.personNotices, noticesOn)}</option>)}
         </select></Field>
         {dates}
       </div>
@@ -125,33 +146,41 @@ export function WorkspaceCoordination() {
       title={<><span className="key mr-2 text-(--acc-fg)">{project.projectNumber}</span>{project.name}</>}>
       <div className="grid gap-x-8 gap-y-6 p-5 md:grid-cols-2">
         {block(t('dcv.owe'), project.data.outgoing.length,
-          project.data.outgoing.length ? <ul className="space-y-1.5">{project.data.outgoing.map(h => item(project, 'handoffs', 'Handoff', h))}</ul> : none)}
+          project.data.outgoing.length ? <ul className="space-y-1.5">{project.data.outgoing.map(h => item(project, 'handoffs', 'Handoff', h, 'outgoing'))}</ul> : none)}
         {block(t('dcv.waiting'), project.data.incoming.length, <>
-          {project.data.incoming.length ? <ul className="space-y-1.5">{project.data.incoming.map(h => item(project, 'handoffs', 'Handoff', h))}</ul> : none}
+          {project.data.incoming.length ? <ul className="space-y-1.5">{project.data.incoming.map(h => item(project, 'handoffs', 'Handoff', h, 'incoming'))}</ul> : none}
           {project.data.blockerGroups.length > 0 && <>
             <h4 className="pt-1 font-medium">{t('dcv.ws.linkedTaskBlockers')}</h4>
             <ul className="space-y-1.5">{project.data.blockerGroups.map(g =>
-              <li key={g.handoffId}><Link className={cn('font-medium', link)} to={`/projects/${project.projectNumber}/handoffs?panel=Handoff:${g.handoffId}`}>{g.handoffKey}</Link>
+              <li key={g.handoffId}>{context(g.context, project.projectNumber)}<ContextLink className={cn('font-medium', link)} to={`/projects/${project.projectNumber}/handoffs?panel=Handoff:${g.handoffId}`}>{g.handoffKey}</ContextLink>
                 {' · '}<Link className={link} to={`/projects/${project.projectNumber}/tasks?ids=${g.taskIds.join(',')}`}>{t('dcv.linkedTasks', { n: g.taskIds.length })}</Link>: {g.taskIds.map((id, index) => <span key={id}>{index > 0 && ', '}
-                  <Link className={link} to={`/projects/${project.projectNumber}/tasks?panel=Task:${id}`}>{g.taskKeys[index]}</Link></span>)}
-                <ul className="mt-1 space-y-1 pl-4">{actionsFor(project, 'Handoff', g.handoffId)}</ul></li>)}</ul>
+                  <ContextLink className={link} to={`/projects/${project.projectNumber}/tasks?panel=Task:${id}`}>{g.taskKeys[index]}</ContextLink></span>)}
+                {evidence(project, g, 'Handoff', g.handoffId, g.handoffKey, 'blockers')}<ul className="mt-1 space-y-1 pl-4">{actionsFor(project, 'Handoff', g.handoffId)}</ul></li>)}</ul>
           </>}
         </>)}
-        {block(t('dcv.using'), project.data.uses.length,
-          <Link className={link} to={`/projects/${project.projectNumber}/coordination`}>{t('dcv.ws.openSourceRevisions')}</Link>)}
+        {block(t('dcv.using'), project.data.uses.length, <>
+          {contextOn && project.data.uses.length > 0 && <ul className="space-y-3">{project.data.uses.map(use => <li key={use.id}>
+            {context(use.context, project.projectNumber)}
+            {use.targetKey && (use.targetType === 'Task' || use.targetType === 'Deliverable') ? <ContextLink className={link} to={`/projects/${project.projectNumber}/${use.targetType === 'Task' ? 'tasks' : 'deliverables'}?panel=${use.targetType}:${use.targetId}`}>{use.targetKey}</ContextLink> : <Missing />} · {use.targetName ?? t('dcv.unknownWork')}
+            {use.targetKey && evidence(project, use, use.targetType, use.targetId, use.targetKey, `use:${use.id}`)}
+            <p>{t('dcv.sourceRevision')}: {use.sourceUrl ? <a className={link} href={use.sourceUrl} target="_blank" rel="noopener noreferrer">{use.sourceKey} {use.revision}</a> : <Missing />}</p>
+          </li>)}</ul>}
+          <Link className={link} to={`/projects/${project.projectNumber}/coordination`}>{t('dcv.ws.openSourceRevisions')}</Link>
+        </>)}
         {block(t('dcv.changed'), project.data.changes.length,
           project.data.changes.length ? <ul className="space-y-2">{project.data.changes.map(c => <li key={c.id}>
-            <Link className={cn('font-medium', link)} to={`/projects/${project.projectNumber}/changes?panel=ChangeNotice:${c.id}`}>
-              {project.projectNumber} · {c.key}</Link> · {c.title} · <span className="text-muted-foreground">{tv(c.status)}</span> · <ChangeAssessmentCounts c={c} scoped={!!(project.disciplineId || ownerId)} />
-            <ul className="mt-1 space-y-1 pl-4">{actionsFor(project, 'ChangeNotice', c.id)}</ul>
+            {context(c.context, project.projectNumber)}<ContextLink className={cn('font-medium', link)} to={`/projects/${project.projectNumber}/changes?panel=ChangeNotice:${c.id}`}>
+              {project.projectNumber} · {c.key}</ContextLink> · {c.title} · <span className="text-muted-foreground">{tv(c.status)}</span> · <ChangeAssessmentCounts c={c} scoped={!!(project.disciplineId || ownerId)} />
+            {evidence(project, c, 'ChangeNotice', c.id, c.key, 'changes')}<ul className="mt-1 space-y-1 pl-4">{actionsFor(project, 'ChangeNotice', c.id)}</ul>
             {project.data.unavailableChangeTargets.filter(target => target.changeNoticeId === c.id).map(target =>
               <p key={target.changeNoticeId} role="status" className="text-xs/[18px] text-muted-foreground">{plural(target.count, 'dcv.targetUnavailableOne', 'dcv.targetUnavailableMany')}</p>)}
           </li>)}</ul> : none)}
         {block(t('dcv.start'), t('dcv.readyOfAssessed', { ready: project.data.startabilityReadyTotal, n: project.data.startability.length }), <>
           <p className="text-xs/[18px] text-muted-foreground">{t('dcv.ws.assessedWindow', { from: project.data.startabilityFrom, to: project.data.startabilityTo })}</p>
           {project.data.startability.length > 0 && <ul className="space-y-1.5">{project.data.startability.map(row => <li key={row.id}>
-            <Link className={cn('font-medium', link)} to={`/projects/${project.projectNumber}/${row.targetType === 'Task' ? 'tasks' : 'deliverables'}?panel=${row.targetType}:${row.targetId}`}>
-              {project.projectNumber} · {row.key}</Link> · {row.name} · <span className="text-muted-foreground">{tv(row.state)}</span>
+            {context(row.context, project.projectNumber)}<ContextLink className={cn('font-medium', link)} to={`/projects/${project.projectNumber}/${row.targetType === 'Task' ? 'tasks' : 'deliverables'}?panel=${row.targetType}:${row.targetId}`}>
+              {project.projectNumber} · {row.key}</ContextLink> · {row.name} · <span className="text-muted-foreground">{tv(row.state)}</span>
+            {evidence(project, row, row.targetType, row.targetId, row.key, 'startability')}
             {row.blocked.length > 0 && <span className="text-bad"> · <span aria-hidden>■ </span>{t('dcv.blocked', { list: row.blocked.join(', ') })}</span>}
             {row.unknown.length > 0 && <span className="text-warn"> · <span aria-hidden>▲ </span>{t('dcv.unknown', { list: row.unknown.join(', ') })}</span>}
           </li>)}</ul>}
@@ -160,8 +189,10 @@ export function WorkspaceCoordination() {
         </>)}
       </div>
       <div className="flex flex-col gap-2 border-t px-5 py-3 text-sm">
-        {project.data.reviews.length > 0 && <p>{t('dcv.ws.reviewPackages', { n: project.data.reviews.length })} · <Link className={link} to={`/projects/${project.projectNumber}/reviews`}>{t('dcv.ws.openReviews')}</Link></p>}
-        {project.data.linkedIssues.length > 0 && <p>{t('dcv.ws.linkedIssues', { n: project.data.linkedIssues.length })} · <Link className={link} to={`/projects/${project.projectNumber}/issues`}>{t('dcv.ws.openIssues')}</Link></p>}
+        {project.data.reviews.length > 0 && <div><p>{t('dcv.ws.reviewPackages', { n: project.data.reviews.length })} · <Link className={link} to={`/projects/${project.projectNumber}/reviews`}>{t('dcv.ws.openReviews')}</Link></p>{contextOn && <ul className="mt-2 space-y-3">{project.data.reviews.map(row => item(project, 'reviews', 'ReviewPackage', row))}</ul>}</div>}
+        {project.data.linkedIssues.length > 0 && <div><p>{t('dcv.ws.linkedIssues', { n: project.data.linkedIssues.length })} · <Link className={link} to={`/projects/${project.projectNumber}/issues`}>{t('dcv.ws.openIssues')}</Link></p>{contextOn && <ul className="mt-2 space-y-3">{project.data.linkedIssues.map(row => item(project, 'issues', 'Issue', row))}</ul>}</div>}
+        {contextOn && project.data.upcomingSubmissions.length > 0 && <div><h3 className="font-medium">{t('dcv.upcomingSubmissions')}</h3><ul className="mt-2 space-y-3">{project.data.upcomingSubmissions.map(row => item(project, 'submissions', 'SubmissionPackage', { ...row, status: row.effectiveStatus }))}</ul></div>}
+        {contextOn && project.data.staffingConflicts.length > 0 && <div><h3 className="font-medium">{t('dcv.staffingConflicts')}</h3><ul className="mt-2 space-y-3">{project.data.staffingConflicts.map(row => item(project, 'readiness', 'WorkConstraint', { ...row, title: row.description, status: row.state }))}</ul></div>}
         <p><Link className={cn('font-medium', link)} to={`/projects/${project.projectNumber}/coordination${qs({ meeting: '1', discipline: project.disciplineId, owner: ownerId, from, to })}`}>
           {t('dcv.ws.openMeetingMode')}</Link></p>
       </div>

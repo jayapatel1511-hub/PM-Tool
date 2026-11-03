@@ -1,0 +1,8 @@
+{
+  "earlierBaselineCount": 5507,
+  "g61AdditionalCount": 787,
+  "distinctFiles": 6294,
+  "changed": [],
+  "status": "PASS",
+  "boundary": "Earlier5507 baseline verified after G62; G61787 additionally captured for future preservation"
+}

@@ -1,0 +1,8 @@
+{
+  "status": "EXACT_TWO_VALUE_CHANGE",
+  "reason": "An ID outside capped choices is not evidence the person or discipline is unavailable. Show the applied raw ID without that inference. Existing browser expectations already require this neutral fallback.",
+  "reconstructedPriorLocaleHash": "b346e17277046fe03618ed6d5f326a36f46ee5e9ac5925786d2b97b60d755f1c",
+  "newLocaleHash": "5612829380f2afd683078e371fb41e32b19dbd9b7471953f60906a2f3956663d",
+  "boundary": "Only production delta from SPA1; no C# change; affected browser must run SPA2.",
+  "checkNote": "First reconstruction helper replaced identical text in unrelated keys; scoped exact files.* key replacement reproduces original hash."
+}

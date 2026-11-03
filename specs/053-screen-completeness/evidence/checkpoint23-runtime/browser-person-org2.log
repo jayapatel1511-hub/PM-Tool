@@ -1,0 +1,10 @@
+locator.waitFor: Timeout 12000ms exceeded.
+Call log:
+[2m  - waiting for locator('.portfolio-print-table').getByText('Synthetic Morgan Member', { exact: true })[22m
+
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/person-organisation-surfaces.cjs:227:102 {
+  log: [
+    "  - waiting for locator('.portfolio-print-table').getByText('Synthetic Morgan Member', { exact: true })"
+  ],
+  name: 'TimeoutError'
+}

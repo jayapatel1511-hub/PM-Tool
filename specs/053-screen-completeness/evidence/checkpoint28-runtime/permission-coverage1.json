@@ -1,0 +1,7 @@
+{
+  "exitCode": 1,
+  "args": [
+    "python3",
+    "tools/check_permission_explainer_coverage.py"
+  ]
+}

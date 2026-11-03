@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
@@ -10,7 +11,7 @@ namespace Hub.Api.Features;
 /// Risk and Issue Registers (§12.10, §13.13, RSK-01..03, ISS-01..03, packet 014): risks scored on a 3 × 3 grid, issues with
 /// a severity and a target date, and a realised risk that becomes a linked issue. A-07 and the issue input to health are
 /// in the rules engine; the dashboard counts and Weekly Coordination section 10 read these rows.
-public static class RegisterEndpoints
+public static partial class RegisterEndpoints
 {
     public sealed record RiskBody(string Title, string? Description, Guid? OwnerId, int? Probability, int? Impact, string? Mitigation, string? TriggerIndicator,
         DateOnly? ReviewDate, Guid? ProjectDisciplineId, DecisionEndpoints.LinkInput[]? Links);
@@ -18,10 +19,11 @@ public static class RegisterEndpoints
         DateOnly? TargetResolutionDate, Guid? ProjectDisciplineId, DecisionEndpoints.LinkInput[]? Links, Guid[]? AffectedDisciplineIds = null,
         string? IssueType = null, IssueLocationBody[]? Locations = null, IssueDocumentBody[]? Documents = null);
     public sealed record RiskMove(string ToStatus, string? Reason, Guid? IssueId, IssueBody? Issue, int? RowVersion);
-    public sealed record IssueMove(string ToStatus, string? Reason, string? Resolution, DateOnly? ResolvedDate, int? RowVersion);
+    public sealed record IssueMove(string ToStatus, string? Reason, string? Resolution, DateOnly? ResolvedDate, int? RowVersion,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] Guid? RootCauseCategoryId = null);
     public sealed record RegisterQuery(string? Status, string? Severity, Guid? OwnerId, Guid? DisciplineId, string? Indicator, string? Q,
         string? Location = null, string? Document = null, string? Revision = null, string? Verification = null,
-        string? Alignment = null, decimal? StationFrom = null, decimal? StationTo = null, string? StationUnits = null, string? IssueType = null);
+        string? Alignment = null, decimal? StationFrom = null, decimal? StationTo = null, string? StationUnits = null, string? IssueType = null, string? RootCause = null);
     public sealed record IssueLocationBody(string Kind, string? SiteArea, string? Building, string? Level, string? Room, string? AssetSystem,
         string? Alignment, decimal? StartStation, decimal? EndStation, string? StationUnits, decimal? CoordinateX, decimal? CoordinateY,
         decimal? CoordinateZ, string? CoordinateReferenceSystem, string? CoordinateUnits, int RowVersion);
@@ -40,8 +42,9 @@ public static class RegisterEndpoints
     public sealed record RegisterPermission(bool Ok, string? Reason);
     public sealed record RegisterTransition(string To, bool Ok, string? Reason);
     public sealed record RiskPermissions(RegisterPermission Edit, IEnumerable<RegisterTransition> Transitions, bool Comment);
-    public sealed record RiskDetailData(RiskListRow Risk, string? Description, RegisterProject Project, RealisedRiskIssue? RealisedIssue,
-        List<DecisionEndpoints.ItemLinkRow> Links, RiskPermissions Permissions);
+    public sealed partial record RiskDetailData(RiskListRow Risk, string? Description, RegisterProject Project, RealisedRiskIssue? RealisedIssue,
+        List<DecisionEndpoints.ItemLinkRow> Links, RiskPermissions Permissions,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] RecordContextView? Context = null);
 
     /// A raised risk or issue: its id, key and first version.
     public sealed record RegisterCreated(Guid Id, string Key, int RowVersion);
@@ -55,11 +58,13 @@ public static class RegisterEndpoints
         string Severity, DateOnly DateRaised, DateOnly? TargetResolutionDate, bool IsOverdue, int DaysOverdue, string? Resolution, DateOnly? ResolvedDate, Guid? OriginRiskId,
         string? OriginRiskKey, Guid? ProjectDisciplineId, string? DisciplineName, string[] LocationLabels, string LocationSummary, Guid[] AffectedDisciplineIds,
         string[] AffectedDisciplineNames, string AffectedDisciplineSummary, string DocumentSummary, string[] DocumentIdentifiers, string[] DocumentRevisions,
-        string VerificationStatus, int RowVersion, DateTimeOffset LastActivityAt);
+        string VerificationStatus, int RowVersion, DateTimeOffset LastActivityAt,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IssueRootCauseValue? RootCause = null);
     public sealed record IssueOriginRisk(Guid Id, string Key, string Title, string Status);
     public sealed record IssuePermissions(RegisterPermission Edit, RegisterPermission ChangeType, IEnumerable<RegisterTransition> Transitions, bool Comment);
-    public sealed record IssueDetailData(IssueRow Issue, string? Description, RegisterProject Project, IssueOriginRisk? OriginRisk,
-        List<DecisionEndpoints.ItemLinkRow> Links, IssuePermissions Permissions);
+    public sealed partial record IssueDetailData(IssueRow Issue, string? Description, RegisterProject Project, IssueOriginRisk? OriginRisk,
+        List<DecisionEndpoints.ItemLinkRow> Links, IssuePermissions Permissions,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] RecordContextView? Context = null);
     public sealed record IssueLocationRow(Guid Id, string Kind, string? SiteArea, string? Building, string? Level, string? Room, string? AssetSystem, string? Alignment,
         decimal? StartStation, decimal? EndStation, string? StationUnits, decimal? CoordinateX, decimal? CoordinateY, decimal? CoordinateZ, string? CoordinateReferenceSystem,
         string? CoordinateUnits, int RowVersion);
@@ -73,7 +78,7 @@ public static class RegisterEndpoints
     /// The same for each issue.
     sealed record IssueJoin(Guid Id, Guid ProjectId, string Key, int Seq, string Title, string Status, string IssueType, Guid RaisedById, Guid OwnerId, string Severity, DateOnly DateRaised,
         DateOnly? TargetResolutionDate, string? Resolution, DateOnly? ResolvedDate, Guid? OriginRiskId, Guid? ProjectDisciplineId, int RowVersion, DateTimeOffset LastActivityAt,
-        string? RaisedByName, string? OwnerName, string? DisciplineName, string? OriginRiskKey);
+        string? RaisedByName, string? OwnerName, string? DisciplineName, string? OriginRiskKey, Guid? RootCauseCategoryId, string? RootCauseLabelSnapshot);
     sealed record AffectedName(Guid IssueId, Guid ProjectDisciplineId, string Name);
     sealed record LatestVerification(string Status, Guid VerifierId);
 
@@ -82,6 +87,7 @@ public static class RegisterEndpoints
 
     public static void Map(RouteGroupBuilder api)
     {
+        IssueRootCauses.Map(api);
         api.MapGet("/projects/{id:guid}/risks", async (Guid id, [AsParameters] RegisterQuery f, Access access, HubDb db, SettingsStore store, TimeProvider clock) =>
             TypedResults.Ok(await RiskList(id, f, access, db, store, clock)));
         api.MapPost("/projects/{id:guid}/risks", CreateRisk);
@@ -109,7 +115,7 @@ public static class RegisterEndpoints
         api.MapPost("/projects/{id:guid}/issues", CreateIssue);
         api.MapGet("/issues/{id}", GetIssue);
         api.MapPatch("/issues/{id:guid}", EditIssue);
-        api.MapPost("/issues/{id:guid}/transition", MoveIssue);
+        api.MapPost("/issues/{id:guid}/transition", MoveIssue).WithMetadata(new IssueRootCauseReplay.Guard());
         api.MapGet("/issues/{id:guid}/locations", ListIssueLocations);
         api.MapPost("/issues/{id:guid}/locations", AddIssueLocation);
         api.MapGet("/issues/{id:guid}/documents", ListIssueDocuments);
@@ -205,7 +211,7 @@ public static class RegisterEndpoints
             r.ProjectDisciplineId, r.RealisedIssueId, r.RowVersion, r.LastActivityAt,
             db.Users.Where(u => u.Id == r.OwnerId).Select(u => u.IsActive ? u.DisplayName : u.DisplayName + " (Inactive)").FirstOrDefault(),
             db.ProjectDisciplines.Where(x => x.Id == r.ProjectDisciplineId).Select(x => x.Discipline!.Name).FirstOrDefault(),
-            db.Issues.Where(x => x.Id == r.RealisedIssueId).Select(x => x.Key).FirstOrDefault())).ToListAsync();
+            db.Issues.Where(x => x.Id == r.RealisedIssueId && x.ProjectId == r.ProjectId).Select(x => x.Key).FirstOrDefault())).ToListAsync();
         return [.. rows.Select(r => (r, score: Registers.Score(r.Probability, r.Impact))).OrderByDescending(x => x.score).ThenBy(x => x.r.ReviewDate ?? DateOnly.MaxValue).ThenBy(x => x.r.Seq)
             .Select(x =>
             {
@@ -247,20 +253,25 @@ public static class RegisterEndpoints
 
     internal static async Task<RiskDetailData> GetRisk(string id, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
+        var settings = await store.Get(db);
+        await using var snapshot = settings.IsFlagOn("work_screens")
+            ? await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead) : null;
         var r = (Guid.TryParse(id, out var g) ? await db.Risks.AsNoTracking().FirstOrDefaultAsync(x => x.Id == g)
             : await db.Risks.AsNoTracking().FirstOrDefaultAsync(x => x.Key == id)) ?? throw ApiException.NotFound();
         var (p, ctx) = await access.Project(r.ProjectId, track: false);
-        var row = (await RiskRows(db, db.Risks.AsNoTracking().Where(x => x.Id == r.Id), clock.Today(await store.Get(db)))).Single();
+        var row = (await RiskRows(db, db.Risks.AsNoTracking().Where(x => x.Id == r.Id), clock.Today(settings))).Single();
         var edit = Permissions.EditRegisterItem(access.Actor, ctx, Facts(r));
         var reason = edit.Ok ? null : Text.Get(edit.Why!, edit.Arg ?? p.Status);
-        return new RiskDetailData(row, r.Description, new(p.Id, p.ProjectNumber, p.Name, p.Status),
-            r.RealisedIssueId is { } ri ? await db.Issues.Where(x => x.Id == ri).Select(x => new RealisedRiskIssue(x.Id, x.Key, x.Title, x.Status)).FirstOrDefaultAsync() : null,
-            await DecisionEndpoints.LinkRows(db, r.Id),
+        var context = await new RecordContextReader(db, p, settings).Read(RecordContextKind.Risk, r.Id);
+        return await WorkScreenResponseMetadata.AttachDetailAsync(new RiskDetailData(row, r.Description, new(p.Id, p.ProjectNumber, p.Name, p.Status),
+            r.RealisedIssueId is { } ri ? await db.Issues.Where(x => x.Id == ri && x.ProjectId == p.Id).Select(x => new RealisedRiskIssue(x.Id, x.Key, x.Title, x.Status)).FirstOrDefaultAsync() : null,
+            await DecisionEndpoints.LinkRows(db, p.Id, ItemType.Risk, r.Id, settings.IsFlagOn("screen_patterns")),
             new(new(edit.Ok, reason), RiskStatus.All.Where(to => Workflow.RiskStep(r.Status, to)).Select(to => new RegisterTransition(to, edit.Ok, reason)),
-                Permissions.Comment(access.Actor, ctx).Ok));
+                Permissions.Comment(access.Actor, ctx).Ok), context), r, access, db, settings, clock);
     }
 
-    static async Task<Ok<RegisterSaved>> EditRisk(Guid id, JsonElement body, HttpContext http, Access access, HubDb db, TeamService team, TimeProvider clock)
+    static async Task<Ok<RegisterSaved>> EditRisk(Guid id, JsonElement body, HttpContext http, Access access, HubDb db, TeamService team, TimeProvider clock, SettingsStore store)
+        => await Tx.Notice<Ok<RegisterSaved>>(db, store, async () =>
     {
         var (r, p, ctx) = await LoadRisk(db, access, id);
         Access.Demand(Permissions.EditRegisterItem(access.Actor, ctx, Facts(r)));
@@ -287,7 +298,7 @@ public static class RegisterEndpoints
         await db.SaveChangesAsync();
         Http.ETag(http, r);
         return TypedResults.Ok(new RegisterSaved(r.Id, r.RowVersion));
-    }
+    });
 
     /// RSK-03: Realised needs the issue it became, new or existing; the link is kept on both (realised issue, origin risk).
     static async Task<Ok<RiskMoved>> MoveRisk(Guid id, RiskMove body, HttpContext http, Access access, HubDb db, TeamService team, SettingsStore store, TimeProvider clock, CurrentUser me, Notifier notify)
@@ -328,12 +339,13 @@ public static class RegisterEndpoints
     public static async Task<List<IssueRow>> IssueList(Guid id, [AsParameters] RegisterQuery f, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
         await access.Project(id, track: false);
-        var today = clock.Today(await store.Get(db));
-        return await IssueRows(db, IssueQuery(db, id, f, today), today, Http.List(f.Verification));
+        var settings = await store.Get(db); var today = clock.Today(settings);
+        var enabled = settings.IsFlagOn(IssueRootCauses.Flag);
+        return await IssueRows(db, IssueQuery(db, id, f, today, enabled), today, Http.List(f.Verification), enabled);
     }
 
     /// The issue register's filters, shared with the dashboard counts so a number always equals the list it opens (FR-RCV-08).
-    public static IQueryable<Issue> IssueQuery(HubDb db, Guid id, RegisterQuery f, DateOnly today)
+    public static IQueryable<Issue> IssueQuery(HubDb db, Guid id, RegisterQuery f, DateOnly today, bool rootCauseEnabled = false)
     {
         var q = db.Issues.AsNoTracking().Where(i => i.ProjectId == id);
         var st = Http.List(f.Status); if (st.Length > 0) q = q.Where(i => st.Contains(i.Status));
@@ -380,11 +392,11 @@ public static class RegisterEndpoints
                 "overdue" => q.Where(i => (i.Status == IssueStatus.Open || i.Status == IssueStatus.InProgress) && i.TargetResolutionDate < today),
                 _ => q,
             };
-        return q;
+        return IssueRootCauses.Filter(q, f.RootCause, rootCauseEnabled);
     }
 
     /// Default sort (§13.13): severity descending, then target resolution date, then key.
-    public static async Task<List<IssueRow>> IssueRows(HubDb db, IQueryable<Issue> q, DateOnly today, string[]? verification = null)
+    public static async Task<List<IssueRow>> IssueRows(HubDb db, IQueryable<Issue> q, DateOnly today, string[]? verification = null, bool rootCauseEnabled = false)
     {
         var rows = await q.Select(i => new IssueJoin(
             i.Id, i.ProjectId, i.Key, i.Seq, i.Title, i.Status, i.IssueType, i.RaisedById, i.OwnerId, i.Severity, i.DateRaised, i.TargetResolutionDate, i.Resolution, i.ResolvedDate,
@@ -392,7 +404,7 @@ public static class RegisterEndpoints
             db.Users.Where(u => u.Id == i.RaisedById).Select(u => u.DisplayName).FirstOrDefault(),
             db.Users.Where(u => u.Id == i.OwnerId).Select(u => u.IsActive ? u.DisplayName : u.DisplayName + " (Inactive)").FirstOrDefault(),
             db.ProjectDisciplines.Where(x => x.Id == i.ProjectDisciplineId).Select(x => x.Discipline!.Name).FirstOrDefault(),
-            db.Risks.Where(x => x.Id == i.OriginRiskId).Select(x => x.Key).FirstOrDefault())).ToListAsync();
+            db.Risks.Where(x => x.Id == i.OriginRiskId && x.ProjectId == i.ProjectId).Select(x => x.Key).FirstOrDefault(), i.RootCauseCategoryId, i.RootCauseLabelSnapshot)).ToListAsync();
         var issueIds = rows.Select(i => i.Id).ToArray();
         var locations = await db.IssueLocations.AsNoTracking().Where(x => issueIds.Contains(x.IssueId)).ToListAsync();
         var documents = await db.IssueDocumentReferences.AsNoTracking().Where(x => issueIds.Contains(x.IssueId)).ToListAsync();
@@ -425,7 +437,7 @@ public static class RegisterEndpoints
                     string.Join("; ", issueDocuments.Select(x => $"{x.Kind} {x.Identifier} rev {x.Revision} · {(x.ReplacedById is null ? "current reference" : "historical replaced reference")} · manually registered · source {x.SourceSystem ?? "[unknown]"} · ID {x.StableSourceId ?? "[unknown]"} · {(x.IsAvailable ? x.SourceUrl : "[unavailable]")}")),
                     issueDocuments.Select(x => x.Identifier).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToArray(),
                     issueDocuments.Select(x => x.Revision).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToArray(),
-                    verificationStatus, i.RowVersion, i.LastActivityAt);
+                    verificationStatus, i.RowVersion, i.LastActivityAt, rootCauseEnabled && i.RootCauseCategoryId is { } cause && i.RootCauseLabelSnapshot is { } label ? new(cause, label) : null);
             });
         return [.. results.Where(x => verification is null || verification.Length == 0 ||
             verification.Contains(x.VerificationStatus, StringComparer.OrdinalIgnoreCase))];
@@ -517,20 +529,25 @@ public static class RegisterEndpoints
 
     static async Task<Ok<IssueDetailData>> GetIssue(string id, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
+        var settings = await store.Get(db);
+        await using var snapshot = settings.IsFlagOn("work_screens")
+            ? await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead) : null;
         var i = (Guid.TryParse(id, out var g) ? await db.Issues.AsNoTracking().FirstOrDefaultAsync(x => x.Id == g)
             : await db.Issues.AsNoTracking().FirstOrDefaultAsync(x => x.Key == id)) ?? throw ApiException.NotFound();
         var (p, ctx) = await access.Project(i.ProjectId, track: false);
-        var row = (await IssueRows(db, db.Issues.AsNoTracking().Where(x => x.Id == i.Id), clock.Today(await store.Get(db)))).Single();
+        var row = (await IssueRows(db, db.Issues.AsNoTracking().Where(x => x.Id == i.Id), clock.Today(settings), rootCauseEnabled: settings.IsFlagOn(IssueRootCauses.Flag))).Single();
         var edit = Permissions.EditRegisterItem(access.Actor, ctx, Facts(i));
-        return TypedResults.Ok(new IssueDetailData(row, i.Description, new(p.Id, p.ProjectNumber, p.Name, p.Status),
-            i.OriginRiskId is { } ri ? await db.Risks.Where(x => x.Id == ri).Select(x => new IssueOriginRisk(x.Id, x.Key, x.Title, x.Status)).FirstOrDefaultAsync() : null,
-            await DecisionEndpoints.LinkRows(db, i.Id),
+        var context = await new RecordContextReader(db, p, settings).Read(RecordContextKind.Issue, i.Id);
+        return TypedResults.Ok(await WorkScreenResponseMetadata.AttachDetailAsync(new IssueDetailData(row, i.Description, new(p.Id, p.ProjectNumber, p.Name, p.Status),
+            i.OriginRiskId is { } ri ? await db.Risks.Where(x => x.Id == ri && x.ProjectId == p.Id).Select(x => new IssueOriginRisk(x.Id, x.Key, x.Title, x.Status)).FirstOrDefaultAsync() : null,
+            await DecisionEndpoints.LinkRows(db, p.Id, ItemType.Issue, i.Id, settings.IsFlagOn("screen_patterns")),
             new(Perm(edit, p), Perm(TypeChange(access, ctx, i), p),
                 IssueStatus.All.Where(to => Workflow.IssueStep(i.Status, to)).Select(to => new RegisterTransition(to, edit.Ok, edit.Ok ? null : Text.Get(edit.Why!, edit.Arg ?? p.Status))),
-                Permissions.Comment(access.Actor, ctx).Ok)));
+                Permissions.Comment(access.Actor, ctx).Ok), context), i, access, db, settings, clock));
     }
 
     static async Task<Ok<RegisterSaved>> EditIssue(Guid id, JsonElement body, HttpContext http, Access access, HubDb db, TeamService team, SettingsStore store, TimeProvider clock, Notifier notify)
+        => await Tx.Notice<Ok<RegisterSaved>>(db, store, async () =>
     {
         var (i, p, ctx) = await LoadIssue(db, access, id);
         Access.Demand(Permissions.EditRegisterItem(access.Actor, ctx, Facts(i)));
@@ -608,11 +625,17 @@ public static class RegisterEndpoints
         await db.SaveChangesAsync();
         Http.ETag(http, i);
         return TypedResults.Ok(new RegisterSaved(i.Id, i.RowVersion));
-    }
+    });
 
     /// ISS-02: Resolved needs the resolution and records the resolved date; cancelling and reopening need a reason.
     static async Task<Ok<IssueMoved>> MoveIssue(Guid id, IssueMove body, HttpContext http, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
+        var rootCauseEnabled = (await store.Get(db)).IsFlagOn(IssueRootCauses.Flag);
+        if (!rootCauseEnabled && body.RootCauseCategoryId is not null) throw ApiException.NotFound();
+        if (rootCauseEnabled && body.ToStatus != IssueStatus.Resolved && body.RootCauseCategoryId is not null)
+            throw ApiException.Invalid("rootCauseCategoryId", "issueRootCause.onlyResolution");
+        await using var transaction = rootCauseEnabled && body.ToStatus == IssueStatus.Resolved && db.Database.CurrentTransaction is null
+            ? await db.Database.BeginTransactionAsync() : null;
         var (i, p, ctx) = await LoadIssue(db, access, id);
         await Http.CheckVersion(db, http, i, body.RowVersion);
         Check.OneOf(body.ToStatus, IssueStatus.All, "toStatus");
@@ -640,6 +663,8 @@ public static class RegisterEndpoints
                 i.Resolution = Check.Required(body.Resolution, "resolution", 8000);
                 i.ResolvedDate = body.ResolvedDate ?? today;
                 Check.That(i.ResolvedDate <= today, "resolvedDate", "issue.future_resolved");
+                var cause = rootCauseEnabled ? await IssueRootCauses.LockSelection(db, body.RootCauseCategoryId) : null;
+                i.RootCauseCategoryId = cause?.CategoryId; i.RootCauseLabelSnapshot = cause?.RecordedName;
                 break;
             case IssueStatus.Cancelled:
                 reason = Check.Reason(body.Reason);
@@ -656,6 +681,7 @@ public static class RegisterEndpoints
         i.LastActivityAt = now;
         db.Audit.Note(i, action: to == IssueStatus.Resolved ? "Resolved" : from == IssueStatus.Resolved ? "Reopened" : null, reason: reason);
         await db.SaveChangesAsync();
+        if (transaction is not null) await transaction.CommitAsync();
         return TypedResults.Ok(new IssueMoved(i.Id, i.Status, i.RowVersion));
     }
     static async Task<Ok<List<IssueLocationRow>>> ListIssueLocations(Guid id, Access access, HubDb db)

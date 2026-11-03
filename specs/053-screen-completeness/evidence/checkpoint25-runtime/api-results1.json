@@ -1,0 +1,16 @@
+{
+  "atUtc": "2026-11-02T09:22:47.943204+00:00",
+  "status": "FAIL_38_PASS_2_SEARCH_REPAIRS_PENDING",
+  "counts": {
+    "ReviewRegisterTests": {
+      "Passed": 24
+    },
+    "SearchScreenTests": {
+      "Passed": 14,
+      "Failed": 2
+    }
+  },
+  "raw": "screen-readers1.trx",
+  "r1Boundary": "24API/provider casesPASS; partialreadonlyR1 notfullS35acceptance",
+  "retainedQA24": "No lifecycle action or old DLL/output mutation; only normal hub_test_* factory databases used by tests"
+}

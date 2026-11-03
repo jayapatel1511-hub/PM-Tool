@@ -1,0 +1,247 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="73b17b00-f8de-44c9-a628-cb7f6865f7a8" name="@Jays-MacBook-Pro 2026-11-03 02:24:21" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-11-03T02:24:21.4992880-04:00" queuing="2026-11-03T02:24:21.4992880-04:00" start="2026-11-03T02:24:20.9667050-04:00" finish="2026-11-03T02:24:38.8590330-04:00" />
+  <TestSettings name="default" id="087c1e2d-6477-47d3-a6e4-0be05a65fd12">
+    <Deployment runDeploymentRoot="_Jays-MacBook-Pro_2026-11-03_02_24_21" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="c26a72d5-5c85-45f1-9f1f-0dc37212c455" testId="b10515da-aee5-6776-e194-8ed297993c37" testName="Hub.Tests.Domain.PermissionOperationExplanationTests.Blocking_withdrawal_acknowledgement_belongs_to_the_package_coordinator_not_the_verifier" computerName="Jays-MacBook-Pro" duration="00:00:00.0004549" startTime="2026-11-03T02:24:21.4830310-04:00" endTime="2026-11-03T02:24:21.4831120-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c26a72d5-5c85-45f1-9f1f-0dc37212c455" />
+    <UnitTestResult executionId="82a92851-8cef-4886-b243-a1237e68c70a" testId="e54c09e7-24a8-46fc-2877-0ecc61fdca70" testName="Hub.Tests.Domain.PermissionOperationExplanationTests.Private_entry_refusal_does_not_veto_capacity_or_time_away_source_kinds" computerName="Jays-MacBook-Pro" duration="00:00:00.0002310" startTime="2026-11-03T02:24:21.4832710-04:00" endTime="2026-11-03T02:24:21.4832880-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="82a92851-8cef-4886-b243-a1237e68c70a" />
+    <UnitTestResult executionId="2e1a1677-bb79-4dcb-92f1-6b11340a2bb3" testId="d9229ec7-52fb-d313-0358-d14e145a6e53" testName="Hub.Tests.Domain.PermissionExplanationTests.Current_overrides_privacy_boolean_reasons_and_resolved_template_policy_stay_canonical" computerName="Jays-MacBook-Pro" duration="00:00:00.0009157" startTime="2026-11-03T02:24:21.4829590-04:00" endTime="2026-11-03T02:24:21.4830490-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2e1a1677-bb79-4dcb-92f1-6b11340a2bb3" />
+    <UnitTestResult executionId="0f33230a-4c36-41c0-bcaf-2c34114276a3" testId="c916c372-9ce7-4085-d19d-172f86f5c9fa" testName="Hub.Tests.Api.PlanningLeaveReplayAuthorityTests.Effective_read_only_supervisor_cannot_replay_previously_authorized_leave_success(operation: &quot;reconcile&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:08.8361834" startTime="2026-11-03T02:24:21.4498610-04:00" endTime="2026-11-03T02:24:30.2881310-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0f33230a-4c36-41c0-bcaf-2c34114276a3" />
+    <UnitTestResult executionId="04e6c855-78fd-4152-a1d8-c080104e8fb3" testId="426a5cfe-6c92-9b5d-aaa4-9e742ec554e9" testName="Hub.Tests.Domain.PermissionOperationExplanationTests.Stored_readonly_admin_precedence_does_not_erase_inactivity_or_private_entry_boundaries" computerName="Jays-MacBook-Pro" duration="00:00:00.0003476" startTime="2026-11-03T02:24:21.4833250-04:00" endTime="2026-11-03T02:24:21.4833390-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="04e6c855-78fd-4152-a1d8-c080104e8fb3" />
+    <UnitTestResult executionId="ec22a1a0-499b-46de-9df1-71df4fd7465b" testId="8de1aba9-f323-4d48-7e85-105316c2922b" testName="Hub.Tests.Domain.PermissionExplanationTests.Every_public_allow_bool_and_correction_tuple_has_one_actual_method_binding" computerName="Jays-MacBook-Pro" duration="00:00:00.0045946" startTime="2026-11-03T02:24:21.4830950-04:00" endTime="2026-11-03T02:24:21.4838440-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ec22a1a0-499b-46de-9df1-71df4fd7465b" />
+    <UnitTestResult executionId="9ac6727b-a776-4e06-a230-5d0e03bd3c63" testId="c9de52e9-55ff-a875-9aec-8286b1cb91f1" testName="Hub.Tests.Api.AdminRoleOperationExplanationTests.Valid_rows_are_translated_identifier_free_and_readonly_even_when_examples_are_ineligible_or_policy_pending" computerName="Jays-MacBook-Pro" duration="00:00:04.3488089" startTime="2026-11-03T02:24:34.4725460-04:00" endTime="2026-11-03T02:24:38.8212220-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9ac6727b-a776-4e06-a230-5d0e03bd3c63" />
+    <UnitTestResult executionId="8b5892c2-293b-40db-8527-a31a5946fdb0" testId="64912a32-7dfc-d29e-5612-477f6e8ddbc8" testName="Hub.Tests.Domain.PermissionExplanationTests.Public_examples_are_bounded_labelled_and_never_publish_synthetic_identifiers" computerName="Jays-MacBook-Pro" duration="00:00:00.0060204" startTime="2026-11-03T02:24:21.4845350-04:00" endTime="2026-11-03T02:24:21.4845600-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8b5892c2-293b-40db-8527-a31a5946fdb0" />
+    <UnitTestResult executionId="6037356f-e3a2-44e9-ba3f-58d9e1024706" testId="8b32be87-5910-8d9b-daac-63c35552216a" testName="Hub.Tests.Api.AdminRoleOperationExplanationTests.Query_accepts_only_closed_single_choices_and_never_accepts_live_identity_inputs" computerName="Jays-MacBook-Pro" duration="00:00:04.6026131" startTime="2026-11-03T02:24:29.8695230-04:00" endTime="2026-11-03T02:24:34.4721510-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6037356f-e3a2-44e9-ba3f-58d9e1024706" />
+    <UnitTestResult executionId="761173b4-3755-41d1-979d-0f2e0c1ed777" testId="5a557a85-2e87-310b-b6f3-a5a74082327f" testName="Hub.Tests.Domain.PermissionOperationExplanationTests.A_resolver_or_discipline_reviewer_does_not_acquire_the_findings_verifier_signature" computerName="Jays-MacBook-Pro" duration="00:00:00.0009870" startTime="2026-11-03T02:24:21.4717270-04:00" endTime="2026-11-03T02:24:21.4717730-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="761173b4-3755-41d1-979d-0f2e0c1ed777" />
+    <UnitTestResult executionId="3dbb984b-3278-4f20-b5e5-ce743eeead77" testId="f823530b-0397-face-1834-35cd784e44bb" testName="Hub.Tests.Api.RegistryTests.Generated_key_families_match_the_registry_and_vocabulary" computerName="Jays-MacBook-Pro" duration="00:00:00.0705161" startTime="2026-11-03T02:24:21.4498510-04:00" endTime="2026-11-03T02:24:21.5219940-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3dbb984b-3278-4f20-b5e5-ce743eeead77" />
+    <UnitTestResult executionId="1ba9075a-89cf-4f68-a045-89ac960019aa" testId="a0b6fb5a-7a6d-4f7e-99d1-187ef8ca1e63" testName="Hub.Tests.Domain.PermissionOperationExplanationTests.Default_and_system_project_manager_examples_do_not_imply_team_membership" computerName="Jays-MacBook-Pro" duration="00:00:00.0004958" startTime="2026-11-03T02:24:21.4829000-04:00" endTime="2026-11-03T02:24:21.4829790-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1ba9075a-89cf-4f68-a045-89ac960019aa" />
+    <UnitTestResult executionId="bb567be8-f939-4f69-8361-0f252f19f5e3" testId="4f67d386-4fbe-b6eb-5b42-d752125aaae9" testName="Hub.Tests.Domain.PermissionExplanationTests.Discipline_lead_examples_call_current_own_other_scope_and_milestone_rules" computerName="Jays-MacBook-Pro" duration="00:00:00.0152840" startTime="2026-11-03T02:24:21.4498690-04:00" endTime="2026-11-03T02:24:21.4688990-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="bb567be8-f939-4f69-8361-0f252f19f5e3" />
+    <UnitTestResult executionId="83861f82-b292-4123-ab60-4c4af4c12a68" testId="74030761-029c-10b7-7d1a-279755204e0f" testName="Hub.Tests.Domain.PermissionOperationExplanationTests.Pending_report_policy_and_successful_role_factors_never_become_whole_command_authority" computerName="Jays-MacBook-Pro" duration="00:00:00.0003019" startTime="2026-11-03T02:24:21.4832140-04:00" endTime="2026-11-03T02:24:21.4832310-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="83861f82-b292-4123-ab60-4c4af4c12a68" />
+    <UnitTestResult executionId="49f9a7b8-dfcc-4a34-90f7-08a42035f33b" testId="b2543fa5-65d9-32ce-8f9d-44080d644992" testName="Hub.Tests.Domain.PermissionOperationExplanationTests.Coordination_snapshot_uses_project_management_and_does_not_mask_a_definitive_denial" computerName="Jays-MacBook-Pro" duration="00:00:00.0154687" startTime="2026-11-03T02:24:21.4498340-04:00" endTime="2026-11-03T02:24:21.4675090-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="49f9a7b8-dfcc-4a34-90f7-08a42035f33b" />
+    <UnitTestResult executionId="6059b538-71ce-4b1d-afb2-8e00b11299b9" testId="b27db51f-a217-ac16-df18-4c09f7bc1a49" testName="Hub.Tests.Api.AdminRoleOperationExplanationTests.Selected_operation_echoes_explicit_membership_without_silently_adding_a_team_role" computerName="Jays-MacBook-Pro" duration="00:00:08.4160521" startTime="2026-11-03T02:24:21.4498770-04:00" endTime="2026-11-03T02:24:29.8687340-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6059b538-71ce-4b1d-afb2-8e00b11299b9" />
+    <UnitTestResult executionId="650e820e-05f5-42a2-a4da-a472a798d4dd" testId="3cfdc508-7762-63f1-1c82-1753f8064386" testName="Hub.Tests.Domain.PermissionExplanationTests.Contribution_examples_require_own_actual_membership_even_for_admin_and_pm" computerName="Jays-MacBook-Pro" duration="00:00:00.0009946" startTime="2026-11-03T02:24:21.4717450-04:00" endTime="2026-11-03T02:24:21.4827880-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="650e820e-05f5-42a2-a4da-a472a798d4dd" />
+    <UnitTestResult executionId="23b15387-64a9-4e3b-98ec-01c59495f7e4" testId="5237ef7c-28e8-f625-f532-bb5633176a02" testName="Hub.Tests.Api.PlanningLeaveReplayAuthorityTests.Effective_read_only_supervisor_cannot_replay_previously_authorized_leave_success(operation: &quot;manual&quot;)" computerName="Jays-MacBook-Pro" duration="00:00:04.7095693" startTime="2026-11-03T02:24:30.2882350-04:00" endTime="2026-11-03T02:24:34.9978480-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="23b15387-64a9-4e3b-98ec-01c59495f7e4" />
+    <UnitTestResult executionId="83528783-764c-4adc-9d2e-d6288a5b3b69" testId="4751ba24-03aa-3aa5-077b-ce8c02fee37a" testName="Hub.Tests.Api.AdminRoleExplanationTests.Current_role_examples_are_admin_only_bounded_translated_readonly_and_dark_off" computerName="Jays-MacBook-Pro" duration="00:00:08.4168541" startTime="2026-11-03T02:24:21.4492180-04:00" endTime="2026-11-03T02:24:29.8687940-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="83528783-764c-4adc-9d2e-d6288a5b3b69" />
+    <UnitTestResult executionId="d965d6fe-ad58-4252-83c2-8c234426ed05" testId="90ec3c6c-24d3-ee2a-568e-b131e5854412" testName="Hub.Tests.Domain.PermissionOperationExplanationTests.Deliverable_hold_requires_a_reason_and_resumes_only_the_retained_previous_state" computerName="Jays-MacBook-Pro" duration="00:00:00.0006261" startTime="2026-11-03T02:24:21.4831570-04:00" endTime="2026-11-03T02:24:21.4831730-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d965d6fe-ad58-4252-83c2-8c234426ed05" />
+    <UnitTestResult executionId="be3b8f82-579e-459b-b876-44b7557397ae" testId="49ffbb51-b125-18fc-ff07-1628bdcaedea" testName="Hub.Tests.Api.ContractTests.Openapi_matches_the_committed_golden_document" computerName="Jays-MacBook-Pro" duration="00:00:09.3867642" startTime="2026-11-03T02:24:21.4498840-04:00" endTime="2026-11-03T02:24:30.8384990-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="be3b8f82-579e-459b-b876-44b7557397ae" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="Hub.Tests.Domain.PermissionOperationExplanationTests.Blocking_withdrawal_acknowledgement_belongs_to_the_package_coordinator_not_the_verifier" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint35-artifacts/bin/hub.tests/release/hub.tests.dll" id="b10515da-aee5-6776-e194-8ed297993c37">
+      <Execution id="c26a72d5-5c85-45f1-9f1f-0dc37212c455" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint35-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Domain.PermissionOperationExplanationTests" name="Blocking_withdrawal_acknowledgement_belongs_to_the_package_coordinator_not_the_verifier" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Domain.PermissionExplanationTests.Current_overrides_privacy_boolean_reasons_and_resolved_template_policy_stay_canonical" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint35-artifacts/bin/hub.tests/release/hub.tests.dll" id="d9229ec7-52fb-d313-0358-d14e145a6e53">
+      <Execution id="2e1a1677-bb79-4dcb-92f1-6b11340a2bb3" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint35-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Domain.PermissionExplanationTests" name="Current_overrides_privacy_boolean_reasons_and_resolved_template_policy_stay_canonical" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Domain.PermissionOperationExplanationTests.Coordination_snapshot_uses_project_management_and_does_not_mask_a_definitive_denial" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint35-artifacts/bin/hub.tests/release/hub.tests.dll" id="b2543fa5-65d9-32ce-8f9d-44080d644992">
+      <Execution id="49f9a7b8-dfcc-4a34-90f7-08a42035f33b" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint35-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Domain.PermissionOperationExplanationTests" name="Coordination_snapshot_uses_project_management_and_does_not_mask_a_definitive_denial" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.PlanningLeaveReplayAuthorityTests.Effective_read_only_supervisor_cannot_replay_previously_authorized_leave_success(operation: &quot;reconcile&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint35-artifacts/bin/hub.tests/release/hub.tests.dll" id="c916c372-9ce7-4085-d19d-172f86f5c9fa">
+      <Execution id="0f33230a-4c36-41c0-bcaf-2c34114276a3" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint35-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.PlanningLeaveReplayAuthorityTests" name="Effective_read_only_supervisor_cannot_replay_previously_authorized_leave_success" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Domain.PermissionOperationExplanationTests.Deliverable_hold_requires_a_reason_and_resumes_only_the_retained_previous_state" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint35-artifacts/bin/hub.tests/release/hub.tests.dll" id="90ec3c6c-24d3-ee2a-568e-b131e5854412">
+      <Execution id="d965d6fe-ad58-4252-83c2-8c234426ed05" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint35-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Domain.PermissionOperationExplanationTests" name="Deliverable_hold_requires_a_reason_and_resumes_only_the_retained_previous_state" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.AdminRoleOperationExplanationTests.Selected_operation_echoes_explicit_membership_without_silently_adding_a_team_role" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint35-artifacts/bin/hub.tests/release/hub.tests.dll" id="b27db51f-a217-ac16-df18-4c09f7bc1a49">
+      <Execution id="6059b538-71ce-4b1d-afb2-8e00b11299b9" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint35-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.AdminRoleOperationExplanationTests" name="Selected_operation_echoes_explicit_membership_without_silently_adding_a_team_role" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Domain.PermissionOperationExplanationTests.Pending_report_policy_and_successful_role_factors_never_become_whole_command_authority" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint35-artifacts/bin/hub.tests/release/hub.tests.dll" id="74030761-029c-10b7-7d1a-279755204e0f">
+      <Execution id="83861f82-b292-4123-ab60-4c4af4c12a68" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint35-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Domain.PermissionOperationExplanationTests" name="Pending_report_policy_and_successful_role_factors_never_become_whole_command_authority" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.AdminRoleExplanationTests.Current_role_examples_are_admin_only_bounded_translated_readonly_and_dark_off" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint35-artifacts/bin/hub.tests/release/hub.tests.dll" id="4751ba24-03aa-3aa5-077b-ce8c02fee37a">
+      <Execution id="83528783-764c-4adc-9d2e-d6288a5b3b69" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint35-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.AdminRoleExplanationTests" name="Current_role_examples_are_admin_only_bounded_translated_readonly_and_dark_off" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Domain.PermissionExplanationTests.Every_public_allow_bool_and_correction_tuple_has_one_actual_method_binding" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint35-artifacts/bin/hub.tests/release/hub.tests.dll" id="8de1aba9-f323-4d48-7e85-105316c2922b">
+      <Execution id="ec22a1a0-499b-46de-9df1-71df4fd7465b" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint35-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Domain.PermissionExplanationTests" name="Every_public_allow_bool_and_correction_tuple_has_one_actual_method_binding" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Domain.PermissionOperationExplanationTests.A_resolver_or_discipline_reviewer_does_not_acquire_the_findings_verifier_signature" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint35-artifacts/bin/hub.tests/release/hub.tests.dll" id="5a557a85-2e87-310b-b6f3-a5a74082327f">
+      <Execution id="761173b4-3755-41d1-979d-0f2e0c1ed777" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint35-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Domain.PermissionOperationExplanationTests" name="A_resolver_or_discipline_reviewer_does_not_acquire_the_findings_verifier_signature" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Domain.PermissionOperationExplanationTests.Private_entry_refusal_does_not_veto_capacity_or_time_away_source_kinds" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint35-artifacts/bin/hub.tests/release/hub.tests.dll" id="e54c09e7-24a8-46fc-2877-0ecc61fdca70">
+      <Execution id="82a92851-8cef-4886-b243-a1237e68c70a" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint35-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Domain.PermissionOperationExplanationTests" name="Private_entry_refusal_does_not_veto_capacity_or_time_away_source_kinds" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.AdminRoleOperationExplanationTests.Query_accepts_only_closed_single_choices_and_never_accepts_live_identity_inputs" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint35-artifacts/bin/hub.tests/release/hub.tests.dll" id="8b32be87-5910-8d9b-daac-63c35552216a">
+      <Execution id="6037356f-e3a2-44e9-ba3f-58d9e1024706" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint35-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.AdminRoleOperationExplanationTests" name="Query_accepts_only_closed_single_choices_and_never_accepts_live_identity_inputs" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Domain.PermissionExplanationTests.Discipline_lead_examples_call_current_own_other_scope_and_milestone_rules" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint35-artifacts/bin/hub.tests/release/hub.tests.dll" id="4f67d386-4fbe-b6eb-5b42-d752125aaae9">
+      <Execution id="bb567be8-f939-4f69-8361-0f252f19f5e3" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint35-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Domain.PermissionExplanationTests" name="Discipline_lead_examples_call_current_own_other_scope_and_milestone_rules" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Domain.PermissionOperationExplanationTests.Stored_readonly_admin_precedence_does_not_erase_inactivity_or_private_entry_boundaries" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint35-artifacts/bin/hub.tests/release/hub.tests.dll" id="426a5cfe-6c92-9b5d-aaa4-9e742ec554e9">
+      <Execution id="04e6c855-78fd-4152-a1d8-c080104e8fb3" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint35-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Domain.PermissionOperationExplanationTests" name="Stored_readonly_admin_precedence_does_not_erase_inactivity_or_private_entry_boundaries" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Domain.PermissionExplanationTests.Contribution_examples_require_own_actual_membership_even_for_admin_and_pm" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint35-artifacts/bin/hub.tests/release/hub.tests.dll" id="3cfdc508-7762-63f1-1c82-1753f8064386">
+      <Execution id="650e820e-05f5-42a2-a4da-a472a798d4dd" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint35-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Domain.PermissionExplanationTests" name="Contribution_examples_require_own_actual_membership_even_for_admin_and_pm" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.ContractTests.Openapi_matches_the_committed_golden_document" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint35-artifacts/bin/hub.tests/release/hub.tests.dll" id="49ffbb51-b125-18fc-ff07-1628bdcaedea">
+      <Execution id="be3b8f82-579e-459b-b876-44b7557397ae" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint35-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.ContractTests" name="Openapi_matches_the_committed_golden_document" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.AdminRoleOperationExplanationTests.Valid_rows_are_translated_identifier_free_and_readonly_even_when_examples_are_ineligible_or_policy_pending" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint35-artifacts/bin/hub.tests/release/hub.tests.dll" id="c9de52e9-55ff-a875-9aec-8286b1cb91f1">
+      <Execution id="9ac6727b-a776-4e06-a230-5d0e03bd3c63" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint35-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.AdminRoleOperationExplanationTests" name="Valid_rows_are_translated_identifier_free_and_readonly_even_when_examples_are_ineligible_or_policy_pending" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Domain.PermissionOperationExplanationTests.Default_and_system_project_manager_examples_do_not_imply_team_membership" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint35-artifacts/bin/hub.tests/release/hub.tests.dll" id="a0b6fb5a-7a6d-4f7e-99d1-187ef8ca1e63">
+      <Execution id="1ba9075a-89cf-4f68-a045-89ac960019aa" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint35-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Domain.PermissionOperationExplanationTests" name="Default_and_system_project_manager_examples_do_not_imply_team_membership" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.PlanningLeaveReplayAuthorityTests.Effective_read_only_supervisor_cannot_replay_previously_authorized_leave_success(operation: &quot;manual&quot;)" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint35-artifacts/bin/hub.tests/release/hub.tests.dll" id="5237ef7c-28e8-f625-f532-bb5633176a02">
+      <Execution id="23b15387-64a9-4e3b-98ec-01c59495f7e4" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint35-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.PlanningLeaveReplayAuthorityTests" name="Effective_read_only_supervisor_cannot_replay_previously_authorized_leave_success" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.RegistryTests.Generated_key_families_match_the_registry_and_vocabulary" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint35-artifacts/bin/hub.tests/release/hub.tests.dll" id="f823530b-0397-face-1834-35cd784e44bb">
+      <Execution id="3dbb984b-3278-4f20-b5e5-ce743eeead77" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint35-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.RegistryTests" name="Generated_key_families_match_the_registry_and_vocabulary" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Domain.PermissionExplanationTests.Public_examples_are_bounded_labelled_and_never_publish_synthetic_identifiers" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/.review/checkpoint35-artifacts/bin/hub.tests/release/hub.tests.dll" id="64912a32-7dfc-d29e-5612-477f6e8ddbc8">
+      <Execution id="8b5892c2-293b-40db-8527-a31a5946fdb0" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint35-artifacts/bin/Hub.Tests/release/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Domain.PermissionExplanationTests" name="Public_examples_are_bounded_labelled_and_never_publish_synthetic_identifiers" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="b10515da-aee5-6776-e194-8ed297993c37" executionId="c26a72d5-5c85-45f1-9f1f-0dc37212c455" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e54c09e7-24a8-46fc-2877-0ecc61fdca70" executionId="82a92851-8cef-4886-b243-a1237e68c70a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d9229ec7-52fb-d313-0358-d14e145a6e53" executionId="2e1a1677-bb79-4dcb-92f1-6b11340a2bb3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c916c372-9ce7-4085-d19d-172f86f5c9fa" executionId="0f33230a-4c36-41c0-bcaf-2c34114276a3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="426a5cfe-6c92-9b5d-aaa4-9e742ec554e9" executionId="04e6c855-78fd-4152-a1d8-c080104e8fb3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8de1aba9-f323-4d48-7e85-105316c2922b" executionId="ec22a1a0-499b-46de-9df1-71df4fd7465b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c9de52e9-55ff-a875-9aec-8286b1cb91f1" executionId="9ac6727b-a776-4e06-a230-5d0e03bd3c63" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="64912a32-7dfc-d29e-5612-477f6e8ddbc8" executionId="8b5892c2-293b-40db-8527-a31a5946fdb0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8b32be87-5910-8d9b-daac-63c35552216a" executionId="6037356f-e3a2-44e9-ba3f-58d9e1024706" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5a557a85-2e87-310b-b6f3-a5a74082327f" executionId="761173b4-3755-41d1-979d-0f2e0c1ed777" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f823530b-0397-face-1834-35cd784e44bb" executionId="3dbb984b-3278-4f20-b5e5-ce743eeead77" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a0b6fb5a-7a6d-4f7e-99d1-187ef8ca1e63" executionId="1ba9075a-89cf-4f68-a045-89ac960019aa" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4f67d386-4fbe-b6eb-5b42-d752125aaae9" executionId="bb567be8-f939-4f69-8361-0f252f19f5e3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="74030761-029c-10b7-7d1a-279755204e0f" executionId="83861f82-b292-4123-ab60-4c4af4c12a68" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b2543fa5-65d9-32ce-8f9d-44080d644992" executionId="49f9a7b8-dfcc-4a34-90f7-08a42035f33b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b27db51f-a217-ac16-df18-4c09f7bc1a49" executionId="6059b538-71ce-4b1d-afb2-8e00b11299b9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3cfdc508-7762-63f1-1c82-1753f8064386" executionId="650e820e-05f5-42a2-a4da-a472a798d4dd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5237ef7c-28e8-f625-f532-bb5633176a02" executionId="23b15387-64a9-4e3b-98ec-01c59495f7e4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4751ba24-03aa-3aa5-077b-ce8c02fee37a" executionId="83528783-764c-4adc-9d2e-d6288a5b3b69" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="90ec3c6c-24d3-ee2a-568e-b131e5854412" executionId="d965d6fe-ad58-4252-83c2-8c234426ed05" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="49ffbb51-b125-18fc-ff07-1628bdcaedea" executionId="be3b8f82-579e-459b-b876-44b7557397ae" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="21" executed="21" passed="21" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.11)
+[xUnit.net 00:00:00.12]   Discovering: Hub.Tests
+[xUnit.net 00:00:00.26]   Discovered:  Hub.Tests
+[xUnit.net 00:00:00.28]   Starting:    Hub.Tests
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (4ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (4ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (4ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (4ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+warn: Microsoft.EntityFrameworkCore.Query[10103]
+      The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+[xUnit.net 00:00:17.66]   Finished:    Hub.Tests
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

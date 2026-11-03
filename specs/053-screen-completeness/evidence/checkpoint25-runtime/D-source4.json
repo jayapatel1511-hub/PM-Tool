@@ -1,0 +1,7 @@
+{
+  "atUtc": "2026-11-02T10:19:35.789897+00:00",
+  "file": "web/tests/review-register.cjs",
+  "sha256": "382109425774169dd2a3854bc4f61d9626311e5c246f266fc22e6305000504c7",
+  "repair": "Native user click followed by actualURL/checked/APIallRounds/77count proof; failurediagnostics; assertionsretained",
+  "status": "READY_HOLD"
+}

@@ -1,0 +1,30 @@
+[
+  {
+    "suite": "decision-metadata",
+    "exitCode": 1,
+    "base": "http://127.0.0.1:8859",
+    "atUtc": "2026-11-02T15:09:29.688635+00:00",
+    "boundary": "Actual SPA synthetic intercepted API only; one Chrome lane"
+  },
+  {
+    "suite": "template-risk-provenance",
+    "exitCode": 1,
+    "base": "http://127.0.0.1:8859",
+    "atUtc": "2026-11-02T15:09:47.555205+00:00",
+    "boundary": "Actual SPA synthetic intercepted API only; one Chrome lane"
+  },
+  {
+    "suite": "issue-root-cause",
+    "exitCode": 1,
+    "base": "http://127.0.0.1:8859",
+    "atUtc": "2026-11-02T15:09:54.055731+00:00",
+    "boundary": "Actual SPA synthetic intercepted API only; one Chrome lane"
+  },
+  {
+    "suite": "admin-screen",
+    "exitCode": 1,
+    "base": "http://127.0.0.1:8859",
+    "atUtc": "2026-11-02T15:09:54.802243+00:00",
+    "boundary": "Actual SPA synthetic intercepted API only; one Chrome lane"
+  }
+]

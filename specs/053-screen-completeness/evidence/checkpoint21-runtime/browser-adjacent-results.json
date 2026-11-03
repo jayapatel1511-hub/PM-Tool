@@ -1,0 +1,30 @@
+[
+  {
+    "suite": "task-grouping",
+    "exitCode": 0
+  },
+  {
+    "suite": "work-task-columns",
+    "exitCode": 0
+  },
+  {
+    "suite": "report-units",
+    "exitCode": 0
+  },
+  {
+    "suite": "report-capacity-task-inputs",
+    "exitCode": 0
+  },
+  {
+    "suite": "capacity-person-facts",
+    "exitCode": 0
+  },
+  {
+    "suite": "staff-time-count-cards",
+    "exitCode": 0
+  },
+  {
+    "suite": "project-dashboard-completeness",
+    "exitCode": 0
+  }
+]

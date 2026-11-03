@@ -217,7 +217,7 @@ public static class WeeklyCommitmentsEndpoints
 
     static readonly Col[] ExportColumns = Hub.Api.Records.ScreenLists.WeeklyCommitmentsExportColumns;
 
-    static IQueryable<OutputCommitment> TargetWindow(IQueryable<OutputCommitment> query, DateOnly? from, DateOnly? to) =>
+    internal static IQueryable<OutputCommitment> TargetWindow(IQueryable<OutputCommitment> query, DateOnly? from, DateOnly? to) =>
         query.Where(c => (!from.HasValue || c.TargetDate >= from.Value) && (!to.HasValue || c.TargetDate <= to.Value));
 
     /// FR-MDC-06: the promises the readiness page shows for a window (those due in it), with their recorded week and snapshot.

@@ -1,0 +1,1 @@
+Bounded source PASS. Exact three A hashes matched. Metadata IDs/versions, viewer/flag/scope/filter cache partition, error withholding, independent missing rows/caps, actual User/Deliverable navigation, HTTP/UNC and strict browser proof reviewed. No execution. B/C/D interfaces only.

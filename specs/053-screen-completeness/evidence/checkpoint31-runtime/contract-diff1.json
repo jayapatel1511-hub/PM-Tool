@@ -1,0 +1,148 @@
+{
+  "addedPaths": [
+    "/api/v1/me/notice-preferences",
+    "/api/v1/projects/{projectId}/coordination/readiness-agenda",
+    "/api/v1/projects/{projectId}/handoffs/{id}/readiness-linked-tasks"
+  ],
+  "removedPaths": [],
+  "changedPaths": [],
+  "addedSchemas": [
+    "HandoffLinkedTask",
+    "HandoffLinkedTaskPage",
+    "HandoffReadinessLinks",
+    "HandoffTaskRelationship",
+    "NoticePreferencesRead",
+    "NoticePreferencesSetBody",
+    "PageOfHandoffLinkedTask",
+    "PageOfWeeklyConstraintAgendaRow",
+    "PageOfWeeklyProposedAgendaRow",
+    "WeeklyConstraintAgendaRow",
+    "WeeklyProposedAgendaRow",
+    "WeeklyReadinessAgenda"
+  ],
+  "removedSchemas": [],
+  "changedSchemas": {
+    "CoordinationBlockerGroup": {
+      "addedProperties": [
+        "readinessLinks"
+      ],
+      "removedProperties": [],
+      "requiredBefore": [
+        "handoffId",
+        "handoffKey",
+        "taskIds",
+        "taskKeys"
+      ],
+      "requiredAfter": [
+        "handoffId",
+        "handoffKey",
+        "taskIds",
+        "taskKeys"
+      ]
+    },
+    "CoordinationHandoffRow": {
+      "addedProperties": [
+        "readinessLinks"
+      ],
+      "removedProperties": [],
+      "requiredBefore": [
+        "id",
+        "key",
+        "title",
+        "status",
+        "neededBy",
+        "promisedBy",
+        "targetTaskId",
+        "targetDeliverableId",
+        "sendingOwnerId",
+        "receivingOwnerId",
+        "sendingDisciplineId",
+        "receivingDisciplineId"
+      ],
+      "requiredAfter": [
+        "id",
+        "key",
+        "title",
+        "status",
+        "neededBy",
+        "promisedBy",
+        "targetTaskId",
+        "targetDeliverableId",
+        "sendingOwnerId",
+        "receivingOwnerId",
+        "sendingDisciplineId",
+        "receivingDisciplineId"
+      ]
+    },
+    "HandoffRow": {
+      "addedProperties": [
+        "readinessLinks"
+      ],
+      "removedProperties": [],
+      "requiredBefore": [
+        "id",
+        "key",
+        "title",
+        "status",
+        "rowVersion",
+        "sourceDeliverableId",
+        "sourceRowVersion",
+        "declaredRevision",
+        "sourceUrl",
+        "sendingDisciplineId",
+        "receivingDisciplineId",
+        "sendingOwnerId",
+        "receivingOwnerId",
+        "targetTaskId",
+        "targetDeliverableId",
+        "intendedUse",
+        "acceptanceCriteria",
+        "neededBy",
+        "promisedBy",
+        "currentRevisionId",
+        "incorporatedRevisionId",
+        "senderName",
+        "receiverName",
+        "sourceKey",
+        "targetKey",
+        "ownersAvailable",
+        "sourceChanged",
+        "dateMismatch",
+        "isOverdue"
+      ],
+      "requiredAfter": [
+        "id",
+        "key",
+        "title",
+        "status",
+        "rowVersion",
+        "sourceDeliverableId",
+        "sourceRowVersion",
+        "declaredRevision",
+        "sourceUrl",
+        "sendingDisciplineId",
+        "receivingDisciplineId",
+        "sendingOwnerId",
+        "receivingOwnerId",
+        "targetTaskId",
+        "targetDeliverableId",
+        "intendedUse",
+        "acceptanceCriteria",
+        "neededBy",
+        "promisedBy",
+        "currentRevisionId",
+        "incorporatedRevisionId",
+        "senderName",
+        "receiverName",
+        "sourceKey",
+        "targetKey",
+        "ownersAvailable",
+        "sourceChanged",
+        "dateMismatch",
+        "isOverdue"
+      ]
+    }
+  },
+  "registryUnchanged": true,
+  "privateModelNamesPublished": []
+}

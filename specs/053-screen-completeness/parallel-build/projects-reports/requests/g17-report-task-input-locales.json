@@ -1,0 +1,19 @@
+{
+  "reportInputs.title": "Task inputs in this report",
+  "reportInputs.unestimated": "{n} unestimated tasks",
+  "reportInputs.openUndated": "{n} open tasks with no due date",
+  "reportInputs.basis": "Tasks in this report's filtered results; the two counts may include the same task.",
+  "reportInputs.scope": "Counts cover records you may view within these report parameters.",
+  "reportInputs.metric.unestimated": "Unestimated tasks",
+  "reportInputs.metric.open-undated": "Open tasks with no due date",
+  "reportInputs.live": "This list is a fresh read under your current permissions; its count may have changed since the report was opened.",
+  "reportInputs.known": "Known matching tasks: {n}",
+  "reportInputs.unavailable": "Some current task inputs are unavailable.",
+  "reportInputs.page": "Page {page} of {pages}",
+  "reportInputs.previous": "Previous page",
+  "reportInputs.next": "Next page",
+  "reportInputs.none": "No matching tasks in this report scope",
+  "reportInputs.controls": "Parameters and views",
+  "reportInputs.controlsHint": "All report filters, saved views and the sharing container",
+  "reportInputs.close": "Return to report"
+}

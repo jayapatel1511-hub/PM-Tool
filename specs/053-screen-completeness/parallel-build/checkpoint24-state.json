@@ -1,0 +1,22 @@
+{
+  "checkpoint": 24,
+  "generation": 52,
+  "mode": "local-S34-S43-PASS-cleanup-approval-pending",
+  "previous": "checkpoint23 CLOSED; S10 locally checked31/49; allcompiled/apppriorinputs held",
+  "runtime": "OwnedQA24API5088PID4323/session64308databasehub_qa_checkpoint24healthy/migrated;ownershipreceipt. TestPG55432+preview8853retained;previewall129manifestfilesmatchbuild1.",
+  "activeSourceLoans": {
+    "root": "Repairs only; all compiled/app/test lane sources READY/HOLD",
+    "A": [],
+    "B": [],
+    "C": [],
+    "D": []
+  },
+  "pending": [
+    "Explicit confirmation for rejected cleanup of only QA24API4323/databasehub_qa_checkpoint24; both preserved",
+    "All other unchecked052/053 slices remain required; next bounded implementation plans in B/C"
+  ],
+  "lastUpdatedUtc": "2026-11-02T08:27:14.587021+00:00",
+  "verification": "137.NET/7Node/types/lintwarnings/SSR/webbuild3PASS; CSharp exact source parity PASS. SearchChrome3/residualChrome4+Accountrepro2PASS; final Pickup source inventoryPASS after typedFK trigger. RealAPI80 imports+80ImportCreated logs/noissues/sentinelunchanged/exactretry+ALLhubtable preview/refusal parityPASS;1.27MBpreviewPASS/normal413. ImportChrome2 FAILED refresh-count expectation under review, realUI script notexecuted. S34/S43stillunchecked. ImportChrome5PASS:5observations/10previews/6explicitcommitrequests3keys/2replies/2Personreads/0unexpectedwrites; refresh exact3register+2header/cycle afterlegalstablepulse fixture. PickupChrome1PASS7cases/3Personreads/0businesswrites/375naturalreturn/404/off.129servedfinalbuild3filesbyteidentical. ActualrealChromeAPI/SQLjoin1PASS:singleXLSX40Create;bad39/1unchanged;delta81to121/40newCreatedImport/40sourceRows/1batch/noissues/sentinelunchanged; Marcfilehash+focus/disclosures/nonzeroOLreturn; actualSearchAlex+FilesJill naturalreturn; oneexpectedprivateProjectopenedseparate.",
+  "verificationLoans": {},
+  "locallyCheckedSlices": 33
+}

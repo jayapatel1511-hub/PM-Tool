@@ -1,0 +1,14 @@
+{
+  "C": {
+    "src/Hub.Api/Features/DocumentLinks.cs": "a578639960ac109cb4917019a47b7e87e04254fe24ca5a0db1aa05623cf3f8e7",
+    "src/Hub.Api/Features/DocumentLinkReferences.cs": "fed612845273364abf37c24cb3789dee48c03a612ba1d5b3ced5a3a634d055d5",
+    "tests/Hub.Tests/Api/DocumentLinkReferenceTests.cs": "7d8f711463c3d1cb8e0c312ef1914458f21a79e8f786a768a926ee772d2c0e8e",
+    "tests/Hub.Tests/Api/DocumentLinkReferenceReadTests.cs": "4188a7440ee041f9e04aa919af498fd4c17b2957a41fdedacc862853f7f25bb4"
+  },
+  "D": {
+    "web/src/components/hub/links.tsx": "23e19ed5be1d77bc32f593279169329604cfa6b18b8b717dad1292149b9a0d24",
+    "web/src/components/hub/document-link-reference.tsx": "8a5da7e54765fc33fe5dbd517dea734a9ded02e6ed63e20c183feef2521fc2cd",
+    "web/tests/document-link-reference.cjs": "fd2cb62bf0deffaea00868bb4f1d84bf631bbf88d420bbf93339825c1985777f",
+    "web/tests/document-link-reference.fixture.cjs": "190fe0c0c38899054dffca5b2f9131139c541c7a31d2522ae6401e36f4bd6fc7"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "file": "web/src/i18n/en.ts",
+  "before": "1781667dc5534763332b333b2d4189b2d4499357f553cb87f3fe67c9824b889f",
+  "after": "4fcb45ed9aac45a3342eca43dba88ef705276ac193370db82a14ace2d1834f17",
+  "labelsAdded": 39,
+  "reason": "Visual review showed raw tpl.field.name; exact supplied second locale table had not been imported. Runtime field text only, no behavior changes."
+}

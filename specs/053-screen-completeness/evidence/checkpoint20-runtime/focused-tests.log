@@ -1,0 +1,61 @@
+Test run for /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Debug/net10.0/Hub.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:11.70]     Hub.Tests.Api.WorkTaskColumnsTests.Normally_issued_superseded_and_cancelled_packages_never_supply_the_date [FAIL]
+  Failed Hub.Tests.Api.WorkTaskColumnsTests.Normally_issued_superseded_and_cancelled_packages_never_supply_the_date [3 s]
+  Error Message:
+   Expected 200 but got 403: {"type":"https://hub.local/errors/forbidden","title":"Forbidden","status":403,"code":"forbidden","detail":"Only the Project Manager can do this.","traceId":"0HNPO3AG0OMSF"}
+  Stack Trace:
+     at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118
+   at Hub.Tests.Api.WorkTaskColumnsTests.Post(String who, String path, Object body, Int32 status) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/WorkTaskColumnsTests.cs:line 18
+   at Hub.Tests.Api.WorkTaskColumnsTests.Normally_issued_superseded_and_cancelled_packages_never_supply_the_date() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/WorkTaskColumnsTests.cs:line 113
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:14.66]     Hub.Tests.Api.ReportUnitsTests.Reduced_availability_stays_provisional_in_employee_and_team_months_counts_and_both_exports [FAIL]
+  Failed Hub.Tests.Api.ReportUnitsTests.Reduced_availability_stays_provisional_in_employee_and_team_months_counts_and_both_exports [3 s]
+  Error Message:
+   Assert.Equal() Failure: Strings differ
+Expected: "156"
+Actual:   "156.000"
+              ↑ (pos 3)
+  Stack Trace:
+     at Hub.Tests.Api.ReportUnitsTests.Reduced_availability_stays_provisional_in_employee_and_team_months_counts_and_both_exports() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReportUnitsTests.cs:line 255
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:34.37]     Hub.Tests.Api.ReportUnitsTests.Dark_flag_keeps_original_wire_and_export_and_hidden_scope_remains_visible_only_without_private_hours [FAIL]
+  Failed Hub.Tests.Api.ReportUnitsTests.Dark_flag_keeps_original_wire_and_export_and_hidden_scope_remains_visible_only_without_private_hours [4 s]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: 0.25
+Actual:   0
+  Stack Trace:
+     at Hub.Tests.Api.ReportUnitsTests.Dark_flag_keeps_original_wire_and_export_and_hidden_scope_remains_visible_only_without_private_hours() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReportUnitsTests.cs:line 342
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:41.16]     Hub.Tests.Api.ReportUnitsTests.Employee_and_discipline_months_use_exact_sub_tenth_source_instead_of_preformatted_week_values [FAIL]
+  Failed Hub.Tests.Api.ReportUnitsTests.Employee_and_discipline_months_use_exact_sub_tenth_source_instead_of_preformatted_week_values [3 s]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: 0.13
+Actual:   0.100
+  Stack Trace:
+     at Hub.Tests.Api.ReportUnitsTests.Employee_and_discipline_months_use_exact_sub_tenth_source_instead_of_preformatted_week_values() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReportUnitsTests.cs:line 153
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:44.27]     Hub.Tests.Api.ReportUnitsTests.Positive_undated_known_subtotal_and_missing_inputs_survive_both_exports_without_FTE_conversion [FAIL]
+  Failed Hub.Tests.Api.ReportUnitsTests.Positive_undated_known_subtotal_and_missing_inputs_survive_both_exports_without_FTE_conversion [3 s]
+  Error Message:
+   Assert.Equal() Failure: Strings differ
+Expected: "8"
+Actual:   "8.0"
+            ↑ (pos 1)
+  Stack Trace:
+     at Hub.Tests.Api.ReportUnitsTests.Positive_undated_known_subtotal_and_missing_inputs_survive_both_exports_without_FTE_conversion() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/ReportUnitsTests.cs:line 226
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:51.49]     Hub.Tests.Api.WorkTaskColumnsTests.Earliest_current_manifest_date_changes_after_normal_edit_replacement_and_cancellation [FAIL]
+  Failed Hub.Tests.Api.WorkTaskColumnsTests.Earliest_current_manifest_date_changes_after_normal_edit_replacement_and_cancellation [3 s]
+  Error Message:
+   Expected 200 but got 403: {"type":"https://hub.local/errors/forbidden","title":"Forbidden","status":403,"code":"forbidden","detail":"Only the Project Manager can do this.","traceId":"0HNPO3AG0ONL0"}
+  Stack Trace:
+     at Hub.Tests.Api.HttpJson.Json(HttpResponseMessage r, Int32 expect) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 118
+   at Hub.Tests.Api.WorkTaskColumnsTests.Post(String who, String path, Object body, Int32 status) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/WorkTaskColumnsTests.cs:line 18
+   at Hub.Tests.Api.WorkTaskColumnsTests.Earliest_current_manifest_date_changes_after_normal_edit_replacement_and_cancellation() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/WorkTaskColumnsTests.cs:line 101
+--- End of stack trace from previous location ---
+Results File: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/specs/053-screen-completeness/evidence/checkpoint20-runtime/checkpoint20-focused.trx
+
+Failed!  - Failed:     6, Passed:    34, Skipped:     0, Total:    40, Duration: 53 s - Hub.Tests.dll (net10.0)

@@ -1,0 +1,11 @@
+{
+  "file": "web/tests/template-risk-provenance.cjs",
+  "before": "26b314c6e36551cf54e856cb2cff168fb48aecae048ef2c3e3399e749fb285ca",
+  "after": "65df77e37aa96f19ca061f3d72a65590e981129ad9a714e835264e92eb1a8d7b",
+  "change": "Optional environment-gated screenshots only, no request/assertion/fixture logic changes",
+  "captures": [
+    "risk fieldset",
+    "saved diff",
+    "375px actual provenance"
+  ]
+}

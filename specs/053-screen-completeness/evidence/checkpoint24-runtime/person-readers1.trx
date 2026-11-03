@@ -1,0 +1,301 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="38a5203a-0024-4511-9a82-a726107ab950" name="@Jays-MacBook-Pro 2026-11-02 03:09:11" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-11-02T03:09:11.1457850-04:00" queuing="2026-11-02T03:09:11.1457850-04:00" start="2026-11-02T03:09:04.0746830-04:00" finish="2026-11-02T03:09:19.6599210-04:00" />
+  <TestSettings name="default" id="c5da3d47-8742-4cc9-a722-eeb8714ea58e">
+    <Deployment runDeploymentRoot="_Jays-MacBook-Pro_2026-11-02_03_09_11" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="0c333349-2c5a-48b7-b6ca-ce4285a789bb" testId="bc9b82ae-c451-a28f-bdc8-15347c9a049e" testName="Hub.Tests.Api.SearchPersonReferencesTests.Every_prescribed_fk_is_enriched_and_stripping_metadata_preserves_exact_legacy_payload_and_order" computerName="Jays-MacBook-Pro" duration="00:00:04.5859743" startTime="2026-11-02T03:09:11.1346170-04:00" endTime="2026-11-02T03:09:15.7134460-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0c333349-2c5a-48b7-b6ca-ce4285a789bb" />
+    <UnitTestResult executionId="9d806448-a01e-40a5-aa8c-e0b6404618a9" testId="eca757a5-d596-1917-9019-79cd4bac4bbb" testName="Hub.Tests.Api.SearchPersonReferencesTests.Restricted_and_planning_allocation_scopes_stay_narrow_and_directory_metadata_grants_no_panel_access" computerName="Jays-MacBook-Pro" duration="00:00:06.6428665" startTime="2026-11-02T03:09:04.4745320-04:00" endTime="2026-11-02T03:09:11.1266110-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9d806448-a01e-40a5-aa8c-e0b6404618a9">
+      <Output>
+        <ErrorInfo>
+          <Message>Microsoft.EntityFrameworkCore.DbUpdateException : An error occurred while saving the entity changes. See the inner exception for details.
+---- Npgsql.PostgresException : 23514: new row for relation "planning_entry" violates check constraint "ck_planning_project_source"
+
+DETAIL: Failing row contains (01a19b17-31a6-761a-8158-db92afd33780, 01a19b17-293c-7a31-a758-2a801fe1fabc, 4.0, 2026-09-21, 2026-09-28, searchscope7ea74932 private plan, Other, 01a19b17-2f5e-7f42-9d50-a34e26f14c2c, null, Expected, Published, null, 2026-09-14 13:00:00+00, null, null, 2026-09-14 13:00:00+00, 01a19b17-293c-7b73-9bf5-9f888363fca0, 2026-09-14 13:00:00+00, null, 0).</Message>
+          <StackTrace>   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Hub.Api.Data.HubDb.SaveChangesAsync(CancellationToken ct) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Data/HubDb.cs:line 1204
+   at Hub.Tests.Api.SearchPersonReferencesTests.&lt;&gt;c__DisplayClass16_0.&lt;&lt;Restricted_and_planning_allocation_scopes_stay_narrow_and_directory_metadata_grants_no_panel_access&gt;b__0&gt;d.MoveNext() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/SearchPersonReferencesTests.cs:line 173
+--- End of stack trace from previous location ---
+   at Hub.Tests.Api.HubFactory.DbAsync[T](Func`2 f) in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs:line 104
+   at Hub.Tests.Api.SearchPersonReferencesTests.Restricted_and_planning_allocation_scopes_stay_narrow_and_directory_metadata_grants_no_panel_access() in /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/SearchPersonReferencesTests.cs:line 168
+--- End of stack trace from previous location ---
+----- Inner Stack Trace -----
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource&lt;TResult&gt;.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="a7cfec5f-f3da-454c-a878-4e0c9ac8c4a5" testId="546456d1-4d60-5651-5e71-a483b947c0ee" testName="Hub.Tests.Api.WorkspaceFilePersonTests.Explicit_hidden_project_scope_cannot_disclose_links_or_their_author_metadata" computerName="Jays-MacBook-Pro" duration="00:00:03.9174276" startTime="2026-11-02T03:09:15.7141210-04:00" endTime="2026-11-02T03:09:19.6313450-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a7cfec5f-f3da-454c-a878-4e0c9ac8c4a5" />
+    <UnitTestResult executionId="cc9b395e-8bbe-4417-8acd-eea704f9f3e3" testId="6023ebfb-70c9-ccd4-2d08-2c5b56031df2" testName="Hub.Tests.Api.WorkspaceFilePersonTests.User_projection_preserves_the_2000_link_cap_and_does_not_drop_a_historical_missing_author" computerName="Jays-MacBook-Pro" duration="00:00:07.1461697" startTime="2026-11-02T03:09:04.4766470-04:00" endTime="2026-11-02T03:09:11.6243600-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="cc9b395e-8bbe-4417-8acd-eea704f9f3e3" />
+    <UnitTestResult executionId="881e15b7-47e5-4487-acde-642a11a24583" testId="a3443da6-d26e-c6b7-c8f7-4703d53b8d72" testName="Hub.Tests.Api.SearchPersonReferencesTests.Paging_type_filters_exact_key_and_empty_search_keep_their_existing_results" computerName="Jays-MacBook-Pro" duration="00:00:03.9186888" startTime="2026-11-02T03:09:15.7139790-04:00" endTime="2026-11-02T03:09:19.6325090-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="881e15b7-47e5-4487-acde-642a11a24583" />
+    <UnitTestResult executionId="7380f17d-05a3-48c3-9994-744db1cc606c" testId="f893db4c-a531-ac71-c8e8-68d737deaec4" testName="Hub.Tests.Api.WorkspaceFilePersonTests.Normal_links_keep_their_legacy_payload_and_use_actual_authors_even_with_the_same_name_and_inactive_history" computerName="Jays-MacBook-Pro" duration="00:00:04.0892883" startTime="2026-11-02T03:09:11.6250330-04:00" endTime="2026-11-02T03:09:15.7140320-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7380f17d-05a3-48c3-9994-744db1cc606c" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="Hub.Tests.Api.SearchPersonReferencesTests.Paging_type_filters_exact_key_and_empty_search_keep_their_existing_results" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="a3443da6-d26e-c6b7-c8f7-4703d53b8d72">
+      <Execution id="881e15b7-47e5-4487-acde-642a11a24583" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.SearchPersonReferencesTests" name="Paging_type_filters_exact_key_and_empty_search_keep_their_existing_results" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkspaceFilePersonTests.Explicit_hidden_project_scope_cannot_disclose_links_or_their_author_metadata" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="546456d1-4d60-5651-5e71-a483b947c0ee">
+      <Execution id="a7cfec5f-f3da-454c-a878-4e0c9ac8c4a5" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkspaceFilePersonTests" name="Explicit_hidden_project_scope_cannot_disclose_links_or_their_author_metadata" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkspaceFilePersonTests.Normal_links_keep_their_legacy_payload_and_use_actual_authors_even_with_the_same_name_and_inactive_history" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="f893db4c-a531-ac71-c8e8-68d737deaec4">
+      <Execution id="7380f17d-05a3-48c3-9994-744db1cc606c" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkspaceFilePersonTests" name="Normal_links_keep_their_legacy_payload_and_use_actual_authors_even_with_the_same_name_and_inactive_history" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.WorkspaceFilePersonTests.User_projection_preserves_the_2000_link_cap_and_does_not_drop_a_historical_missing_author" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="6023ebfb-70c9-ccd4-2d08-2c5b56031df2">
+      <Execution id="cc9b395e-8bbe-4417-8acd-eea704f9f3e3" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.WorkspaceFilePersonTests" name="User_projection_preserves_the_2000_link_cap_and_does_not_drop_a_historical_missing_author" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.SearchPersonReferencesTests.Restricted_and_planning_allocation_scopes_stay_narrow_and_directory_metadata_grants_no_panel_access" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="eca757a5-d596-1917-9019-79cd4bac4bbb">
+      <Execution id="9d806448-a01e-40a5-aa8c-e0b6404618a9" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.SearchPersonReferencesTests" name="Restricted_and_planning_allocation_scopes_stay_narrow_and_directory_metadata_grants_no_panel_access" />
+    </UnitTest>
+    <UnitTest name="Hub.Tests.Api.SearchPersonReferencesTests.Every_prescribed_fk_is_enriched_and_stripping_metadata_preserves_exact_legacy_payload_and_order" storage="/users/jaypatel/.codex/worktrees/ef94/pm-tool/.build-052-053/tests/hub.tests/bin/release/net10.0/hub.tests.dll" id="bc9b82ae-c451-a28f-bdc8-15347c9a049e">
+      <Execution id="0c333349-2c5a-48b7-b6ca-ce4285a789bb" />
+      <TestMethod codeBase="/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/bin/Release/net10.0/Hub.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Hub.Tests.Api.SearchPersonReferencesTests" name="Every_prescribed_fk_is_enriched_and_stripping_metadata_preserves_exact_legacy_payload_and_order" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="bc9b82ae-c451-a28f-bdc8-15347c9a049e" executionId="0c333349-2c5a-48b7-b6ca-ce4285a789bb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="eca757a5-d596-1917-9019-79cd4bac4bbb" executionId="9d806448-a01e-40a5-aa8c-e0b6404618a9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="546456d1-4d60-5651-5e71-a483b947c0ee" executionId="a7cfec5f-f3da-454c-a878-4e0c9ac8c4a5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6023ebfb-70c9-ccd4-2d08-2c5b56031df2" executionId="cc9b395e-8bbe-4417-8acd-eea704f9f3e3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a3443da6-d26e-c6b7-c8f7-4703d53b8d72" executionId="881e15b7-47e5-4487-acde-642a11a24583" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f893db4c-a531-ac71-c8e8-68d737deaec4" executionId="7380f17d-05a3-48c3-9994-744db1cc606c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="6" executed="6" passed="5" failed="1" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.11)
+[xUnit.net 00:00:00.08]   Discovering: Hub.Tests
+[xUnit.net 00:00:00.20]   Discovered:  Hub.Tests
+[xUnit.net 00:00:00.20]   Starting:    Hub.Tests
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+warn: Microsoft.EntityFrameworkCore.Query[10103]
+      The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (2ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?', @p2='?', @p3='?' (DbType = Guid), @p4='?' (DbType = Object), @p5='?' (DbType = Guid), @p6='?' (DbType = Int64), @p7='?' (DbType = Object), @p8='?' (DbType = Guid), @p9='?' (DbType = Guid), @p10='?', @p11='?', @p12='?', @p13='?' (DbType = DateTime), @p14='?', @p15='?' (DbType = Guid), @p16='?' (DbType = Guid), @p17='?', @p18='?', @p19='?' (DbType = Object), @p20='?', @p21='?' (DbType = Guid), @p22='?', @p23='?', @p24='?' (DbType = Guid), @p25='?' (DbType = Object), @p26='?' (DbType = Guid), @p27='?' (DbType = Int64), @p28='?' (DbType = Object), @p29='?' (DbType = Guid), @p30='?' (DbType = Guid), @p31='?', @p32='?', @p33='?', @p34='?' (DbType = DateTime), @p35='?', @p36='?' (DbType = Guid), @p37='?' (DbType = Guid), @p38='?', @p39='?', @p40='?' (DbType = Object), @p41='?', @p42='?' (DbType = Guid), @p43='?', @p44='?', @p45='?' (DbType = Guid), @p46='?' (DbType = Object), @p47='?' (DbType = Guid), @p48='?' (DbType = Int64), @p49='?' (DbType = Object), @p50='?' (DbType = Guid), @p51='?' (DbType = Guid), @p52='?', @p53='?', @p54='?', @p55='?' (DbType = DateTime), @p56='?', @p57='?' (DbType = Guid), @p58='?' (DbType = Guid), @p59='?', @p60='?', @p61='?' (DbType = Object), @p62='?', @p65='?' (DbType = Guid), @p63='?', @p64='?' (DbType = Int32), @p66='?' (DbType = Int32), @p67='?' (DbType = Guid), @p68='?', @p69='?' (DbType = DateTime), @p70='?' (DbType = Guid), @p71='?' (DbType = DateTime), @p72='?' (DbType = Guid), @p73='?' (DbType = Date), @p74='?' (DbType = Decimal), @p75='?', @p76='?' (DbType = DateTime), @p77='?', @p78='?' (DbType = Guid), @p79='?' (DbType = Guid), @p80='?' (DbType = Guid), @p81='?' (DbType = Int32), @p82='?', @p83='?' (DbType = Date), @p84='?' (DbType = DateTime), @p85='?' (DbType = Guid), @p86='?', @p87='?' (DbType = Guid), @p88='?' (DbType = Object), @p89='?' (DbType = DateTime), @p90='?' (DbType = Guid), @p91='?' (DbType = DateTime), @p92='?' (DbType = Guid), @p93='?' (DbType = Date), @p94='?', @p95='?' (DbType = Guid), @p96='?' (DbType = Decimal), @p97='?' (DbType = Guid), @p98='?', @p99='?' (DbType = Int32), @p100='?', @p101='?' (DbType = Date), @p102='?' (DbType = DateTime), @p103='?' (DbType = Guid)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO hub.activity_log (id, action, actor_type, actor_user_id, categories, chain_id, chain_seq, changes, correlation_id, item_id, item_key, item_name, item_type, occurred_at, prev_hash, project_discipline_id, project_id, reason, row_hash, snapshot, source)
+      VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17, @p18, @p19, @p20);
+      INSERT INTO hub.activity_log (id, action, actor_type, actor_user_id, categories, chain_id, chain_seq, changes, correlation_id, item_id, item_key, item_name, item_type, occurred_at, prev_hash, project_discipline_id, project_id, reason, row_hash, snapshot, source)
+      VALUES (@p21, @p22, @p23, @p24, @p25, @p26, @p27, @p28, @p29, @p30, @p31, @p32, @p33, @p34, @p35, @p36, @p37, @p38, @p39, @p40, @p41);
+      INSERT INTO hub.activity_log (id, action, actor_type, actor_user_id, categories, chain_id, chain_seq, changes, correlation_id, item_id, item_key, item_name, item_type, occurred_at, prev_hash, project_discipline_id, project_id, reason, row_hash, snapshot, source)
+      VALUES (@p42, @p43, @p44, @p45, @p46, @p47, @p48, @p49, @p50, @p51, @p52, @p53, @p54, @p55, @p56, @p57, @p58, @p59, @p60, @p61, @p62);
+      UPDATE hub.app_user SET display_name = @p63, row_version = @p64
+      WHERE id = @p65 AND row_version = @p66;
+      INSERT INTO hub.planning_entry (id, confidence, created_at, created_by, deleted_at, deleted_by, end_week, hours_per_week, label, last_validated_at, notes, person_id, project_discipline_id, project_id, row_version, source_category, start_week, updated_at, updated_by, visibility)
+      VALUES (@p67, @p68, @p69, @p70, @p71, @p72, @p73, @p74, @p75, @p76, @p77, @p78, @p79, @p80, @p81, @p82, @p83, @p84, @p85, @p86);
+      INSERT INTO hub.resource_allocation (id, confirmation_snapshot, confirmed_at, confirmed_by, created_at, created_by, from_date, over_capacity_reason, person_id, planned_hours, project_id, purpose, row_version, status, through_date, updated_at, updated_by)
+      VALUES (@p87, @p88, @p89, @p90, @p91, @p92, @p93, @p94, @p95, @p96, @p97, @p98, @p99, @p100, @p101, @p102, @p103);
+fail: Microsoft.EntityFrameworkCore.Update[10000]
+      An exception occurred in the database while saving changes for context type 'Hub.Api.Data.HubDb'.
+      Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+       ---&gt; Npgsql.PostgresException (0x80004005): 23514: new row for relation "planning_entry" violates check constraint "ck_planning_project_source"
+      DETAIL: Failing row contains (01a19b17-31a6-761a-8158-db92afd33780, 01a19b17-293c-7a31-a758-2a801fe1fabc, 4.0, 2026-09-21, 2026-09-28, searchscope7ea74932 private plan, Other, 01a19b17-2f5e-7f42-9d50-a34e26f14c2c, null, Expected, Published, null, 2026-09-14 13:00:00+00, null, null, 2026-09-14 13:00:00+00, 01a19b17-293c-7b73-9bf5-9f888363fca0, 2026-09-14 13:00:00+00, null, 0).
+         at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource&lt;TResult&gt;.GetResult(Int16 token)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+        Exception data:
+          Severity: ERROR
+          SqlState: 23514
+          MessageText: new row for relation "planning_entry" violates check constraint "ck_planning_project_source"
+          Detail: Failing row contains (01a19b17-31a6-761a-8158-db92afd33780, 01a19b17-293c-7a31-a758-2a801fe1fabc, 4.0, 2026-09-21, 2026-09-28, searchscope7ea74932 private plan, Other, 01a19b17-2f5e-7f42-9d50-a34e26f14c2c, null, Expected, Published, null, 2026-09-14 13:00:00+00, null, null, 2026-09-14 13:00:00+00, 01a19b17-293c-7b73-9bf5-9f888363fca0, 2026-09-14 13:00:00+00, null, 0).
+          SchemaName: hub
+          TableName: planning_entry
+          ConstraintName: ck_planning_project_source
+          File: execMain.c
+          Line: 2074
+          Routine: ExecConstraints
+         --- End of inner exception stack trace ---
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+         at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+      Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+       ---&gt; Npgsql.PostgresException (0x80004005): 23514: new row for relation "planning_entry" violates check constraint "ck_planning_project_source"
+      DETAIL: Failing row contains (01a19b17-31a6-761a-8158-db92afd33780, 01a19b17-293c-7a31-a758-2a801fe1fabc, 4.0, 2026-09-21, 2026-09-28, searchscope7ea74932 private plan, Other, 01a19b17-2f5e-7f42-9d50-a34e26f14c2c, null, Expected, Published, null, 2026-09-14 13:00:00+00, null, null, 2026-09-14 13:00:00+00, 01a19b17-293c-7b73-9bf5-9f888363fca0, 2026-09-14 13:00:00+00, null, 0).
+         at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+         at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource&lt;TResult&gt;.GetResult(Int16 token)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+         at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+        Exception data:
+          Severity: ERROR
+          SqlState: 23514
+          MessageText: new row for relation "planning_entry" violates check constraint "ck_planning_project_source"
+          Detail: Failing row contains (01a19b17-31a6-761a-8158-db92afd33780, 01a19b17-293c-7a31-a758-2a801fe1fabc, 4.0, 2026-09-21, 2026-09-28, searchscope7ea74932 private plan, Other, 01a19b17-2f5e-7f42-9d50-a34e26f14c2c, null, Expected, Published, null, 2026-09-14 13:00:00+00, null, null, 2026-09-14 13:00:00+00, 01a19b17-293c-7b73-9bf5-9f888363fca0, 2026-09-14 13:00:00+00, null, 0).
+          SchemaName: hub
+          TableName: planning_entry
+          ConstraintName: ck_planning_project_source
+          File: execMain.c
+          Line: 2074
+          Routine: ExecConstraints
+         --- End of inner exception stack trace ---
+         at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+         at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+[xUnit.net 00:00:06.87]       Microsoft.EntityFrameworkCore.DbUpdateException : An error occurred while saving the entity changes. See the inner exception for details.
+[xUnit.net 00:00:06.87]       ---- Npgsql.PostgresException : 23514: new row for relation "planning_entry" violates check constraint "ck_planning_project_source"
+[xUnit.net 00:00:06.87]       
+[xUnit.net 00:00:06.87]       DETAIL: Failing row contains (01a19b17-31a6-761a-8158-db92afd33780, 01a19b17-293c-7a31-a758-2a801fe1fabc, 4.0, 2026-09-21, 2026-09-28, searchscope7ea74932 private plan, Other, 01a19b17-2f5e-7f42-9d50-a34e26f14c2c, null, Expected, Published, null, 2026-09-14 13:00:00+00, null, null, 2026-09-14 13:00:00+00, 01a19b17-293c-7b73-9bf5-9f888363fca0, 2026-09-14 13:00:00+00, null, 0).
+[xUnit.net 00:00:06.87]       Stack Trace:
+[xUnit.net 00:00:06.87]            at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+[xUnit.net 00:00:06.87]            at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+[xUnit.net 00:00:06.87]            at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+[xUnit.net 00:00:06.87]            at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+[xUnit.net 00:00:06.87]            at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+[xUnit.net 00:00:06.87]            at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+[xUnit.net 00:00:06.87]            at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+[xUnit.net 00:00:06.87]            at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+[xUnit.net 00:00:06.87]            at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+[xUnit.net 00:00:06.87]            at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+[xUnit.net 00:00:06.87]         /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api/Data/HubDb.cs(1204,0): at Hub.Api.Data.HubDb.SaveChangesAsync(CancellationToken ct)
+[xUnit.net 00:00:06.87]         /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/SearchPersonReferencesTests.cs(173,0): at Hub.Tests.Api.SearchPersonReferencesTests.&lt;&gt;c__DisplayClass16_0.&lt;&lt;Restricted_and_planning_allocation_scopes_stay_narrow_and_directory_metadata_grants_no_panel_access&gt;b__0&gt;d.MoveNext()
+[xUnit.net 00:00:06.87]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:06.87]         /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/Factory.cs(104,0): at Hub.Tests.Api.HubFactory.DbAsync[T](Func`2 f)
+[xUnit.net 00:00:06.87]         /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/tests/Hub.Tests/Api/SearchPersonReferencesTests.cs(168,0): at Hub.Tests.Api.SearchPersonReferencesTests.Restricted_and_planning_allocation_scopes_stay_narrow_and_directory_metadata_grants_no_panel_access()
+[xUnit.net 00:00:06.87]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:06.87]         ----- Inner Stack Trace -----
+[xUnit.net 00:00:06.87]            at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+[xUnit.net 00:00:06.87]            at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource&lt;TResult&gt;.GetResult(Int16 token)
+[xUnit.net 00:00:06.87]            at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+[xUnit.net 00:00:06.87]            at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+[xUnit.net 00:00:06.87]            at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+[xUnit.net 00:00:06.87]            at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+[xUnit.net 00:00:06.87]            at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+[xUnit.net 00:00:06.87]            at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+[xUnit.net 00:00:06.87]            at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+[xUnit.net 00:00:06.87]            at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM hub.__ef_migrations
+      ORDER BY "MigrationId";
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Testing
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/src/Hub.Api
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+[xUnit.net 00:00:15.37]   Finished:    Hub.Tests
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="Jays-MacBook-Pro" outcome="Error" timestamp="2026-11-02T03:09:11.1279170-04:00">
+        <Text>[xUnit.net 00:00:06.87]     Hub.Tests.Api.SearchPersonReferencesTests.Restricted_and_planning_allocation_scopes_stay_narrow_and_directory_metadata_grants_no_panel_access [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

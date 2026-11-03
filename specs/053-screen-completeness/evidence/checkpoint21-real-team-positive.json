@@ -1,0 +1,633 @@
+{
+  "observedAtUtc": "2026-11-01T16:07:25.305Z",
+  "commands": {
+    "patch-alex": {
+      "status": 200,
+      "body": {
+        "id": "01a197bd-ba3c-7a2c-91b0-ae7a7140aeb9",
+        "rowVersion": 1
+      }
+    },
+    "patch-jill": {
+      "status": 200,
+      "body": {
+        "id": "01a197bd-ba3c-7024-a2a4-c6581e4b7428",
+        "rowVersion": 1
+      }
+    },
+    "dianeSupervisorCapacity": {
+      "status": 200,
+      "body": {
+        "id": "01a197bd-ba3c-7810-ade7-48c382890f96",
+        "rowVersion": 1
+      }
+    }
+  },
+  "reads": {
+    "beforeTeam": {
+      "status": 200,
+      "value": {
+        "disciplines": [
+          {
+            "id": "01a197d2-4609-7f79-b091-f5ea0fa32659",
+            "disciplineId": "01a197bd-b98a-7b9e-833e-8ab59cfa4aac",
+            "name": "Civil",
+            "code": "CIV",
+            "colour": "#2563eb",
+            "leadUserId": "01a197bd-ba3c-749e-a252-425184b403b0",
+            "isActive": true,
+            "sortOrder": 0,
+            "rowVersion": 1,
+            "leadName": "Marc Dubois"
+          }
+        ],
+        "members": [
+          {
+            "id": "01a197d2-4613-7eaf-a252-1f938f97b19b",
+            "userId": "01a197bd-ba3c-7a2c-91b0-ae7a7140aeb9",
+            "displayName": "Alex Chen",
+            "email": "alex@hub.test",
+            "jobTitle": "Civil Designer (EIT)",
+            "officeId": "01a197dc-62e6-784d-830f-7932b9b488c6",
+            "isActive": true,
+            "roles": [
+              "TeamMember"
+            ],
+            "primaryDisciplineId": "01a197d2-4609-7f79-b091-f5ea0fa32659",
+            "addedAt": "2026-11-01T15:55:02.547006+00:00",
+            "addedBy": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "rowVersion": 1,
+            "leadOf": [],
+            "isPrimaryPm": false,
+            "canStaff": false,
+            "personFacts": {
+              "notices": {
+                "personType": null,
+                "startDate": null,
+                "endDate": null,
+                "starts": false,
+                "ends": false
+              },
+              "certifications": []
+            },
+            "organisationFacts": {
+              "homeDiscipline": {
+                "id": "01a197bd-b98a-7b9e-833e-8ab59cfa4aac",
+                "name": "Civil"
+              },
+              "office": {
+                "id": "01a197dc-62e6-784d-830f-7932b9b488c6",
+                "name": "QA21 Halifax"
+              },
+              "supervisor": {
+                "id": "01a197bd-ba3c-7258-adc0-8330b4dec463",
+                "name": "Sam Patel"
+              }
+            }
+          },
+          {
+            "id": "01a197d2-4641-7750-b0a4-6eeb248af7db",
+            "userId": "01a197bd-ba3c-7024-a2a4-c6581e4b7428",
+            "displayName": "Jill Martin",
+            "email": "jill@hub.test",
+            "jobTitle": "Civil Designer",
+            "officeId": "01a197dc-62e6-784d-830f-7932b9b488c6",
+            "isActive": true,
+            "roles": [
+              "TeamMember"
+            ],
+            "primaryDisciplineId": "01a197d2-4609-7f79-b091-f5ea0fa32659",
+            "addedAt": "2026-11-01T15:55:02.593016+00:00",
+            "addedBy": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "rowVersion": 1,
+            "leadOf": [],
+            "isPrimaryPm": false,
+            "canStaff": false,
+            "personFacts": {
+              "notices": {
+                "personType": null,
+                "startDate": null,
+                "endDate": null,
+                "starts": false,
+                "ends": false
+              },
+              "certifications": []
+            },
+            "organisationFacts": {
+              "homeDiscipline": null,
+              "office": {
+                "id": "01a197dc-62e6-784d-830f-7932b9b488c6",
+                "name": "QA21 Halifax"
+              },
+              "supervisor": {
+                "id": "01a197bd-ba3c-7258-adc0-8330b4dec463",
+                "name": "Sam Patel"
+              }
+            }
+          },
+          {
+            "id": "01a197d2-464b-7c70-ab99-b03b495ac9ed",
+            "userId": "01a197bd-ba3c-749e-a252-425184b403b0",
+            "displayName": "Marc Dubois",
+            "email": "marc@hub.test",
+            "jobTitle": "Senior Civil Engineer",
+            "officeId": "01a197bd-b99d-7182-b168-be4cf3245483",
+            "isActive": true,
+            "roles": [
+              "TeamMember"
+            ],
+            "primaryDisciplineId": "01a197d2-4609-7f79-b091-f5ea0fa32659",
+            "addedAt": "2026-11-01T15:55:02.603558+00:00",
+            "addedBy": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "rowVersion": 1,
+            "leadOf": [
+              "01a197d2-4609-7f79-b091-f5ea0fa32659"
+            ],
+            "isPrimaryPm": false,
+            "canStaff": false,
+            "personFacts": {
+              "notices": {
+                "personType": null,
+                "startDate": null,
+                "endDate": null,
+                "starts": false,
+                "ends": false
+              },
+              "certifications": []
+            },
+            "organisationFacts": {
+              "homeDiscipline": null,
+              "office": {
+                "id": "01a197bd-b99d-7182-b168-be4cf3245483",
+                "name": "Head Office"
+              },
+              "supervisor": {
+                "id": "01a197bd-ba3c-7258-adc0-8330b4dec463",
+                "name": "Sam Patel"
+              }
+            }
+          },
+          {
+            "id": "01a197d2-45fc-7151-b042-a7f72e31c39a",
+            "userId": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "displayName": "Priya Nair",
+            "email": "priya@hub.test",
+            "jobTitle": "Project Manager",
+            "officeId": "01a197bd-b99d-7182-b168-be4cf3245483",
+            "isActive": true,
+            "roles": [
+              "PM"
+            ],
+            "primaryDisciplineId": null,
+            "addedAt": "2026-11-01T15:55:02.524467+00:00",
+            "addedBy": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "rowVersion": 1,
+            "leadOf": [],
+            "isPrimaryPm": true,
+            "canStaff": false,
+            "personFacts": {
+              "notices": {
+                "personType": null,
+                "startDate": null,
+                "endDate": null,
+                "starts": false,
+                "ends": false
+              },
+              "certifications": []
+            },
+            "organisationFacts": {
+              "homeDiscipline": null,
+              "office": {
+                "id": "01a197bd-b99d-7182-b168-be4cf3245483",
+                "name": "Head Office"
+              },
+              "supervisor": {
+                "id": "01a197bd-ba3c-7b3b-a27a-5114a13f4e92",
+                "name": "Lena Brooks"
+              }
+            }
+          }
+        ],
+        "canManage": true,
+        "manageReason": null
+      }
+    },
+    "beforeRoles": {
+      "status": 200,
+      "value": [
+        {
+          "id": "01a197d2-999b-7f92-b2ae-394a7ed831ee",
+          "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+          "roleLabel": "QA21 Civil reviewer",
+          "projectDisciplineId": "01a197d2-4609-7f79-b091-f5ea0fa32659",
+          "disciplineName": "Civil",
+          "fromDate": "2026-11-02",
+          "throughDate": "2026-11-06",
+          "plannedHours": 10,
+          "status": "Open",
+          "filledAllocationId": null,
+          "note": "Disposable QA21 role",
+          "rowVersion": 0,
+          "canManage": true
+        },
+        {
+          "id": "01a197d2-99b7-7486-bb99-d5eb0135f066",
+          "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+          "roleLabel": "QA21 Civil technologist",
+          "projectDisciplineId": "01a197d2-4609-7f79-b091-f5ea0fa32659",
+          "disciplineName": "Civil",
+          "fromDate": "2026-11-02",
+          "throughDate": "2026-11-06",
+          "plannedHours": 20,
+          "status": "Open",
+          "filledAllocationId": null,
+          "note": "Disposable QA21 role",
+          "rowVersion": 0,
+          "canManage": true
+        }
+      ]
+    },
+    "grid": {
+      "status": 200,
+      "value": {
+        "weeks": [
+          "2026-10-26"
+        ],
+        "currentWeek": "2026-10-26",
+        "evaluatedAt": "2026-11-01T16:07:25.444321+00:00",
+        "partialView": false,
+        "draftAccess": false,
+        "settings": {
+          "horizonWeeks": 12,
+          "overPct": 105,
+          "underPct": 50,
+          "underWeeks": 2,
+          "staleDays": 28,
+          "maxHoursPerWeek": 80
+        },
+        "people": [
+          {
+            "id": "01a197bd-ba3c-7810-ade7-48c382890f96",
+            "displayName": "Diane Roy",
+            "supervisorId": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "supervisorName": "Priya Nair",
+            "weeklyCapacity": 40,
+            "canCreateSelfEntry": false,
+            "canCreateManagerEntry": true,
+            "canRecordTimeAway": true,
+            "indicators": [],
+            "cells": [
+              {
+                "week": "2026-10-26",
+                "capacity": 32,
+                "timeAway": 8,
+                "additionalAvailability": 0,
+                "approved": 0,
+                "confirmed": 0,
+                "expected": 20,
+                "possible": 0,
+                "remaining": 12,
+                "taskEstimates": 0,
+                "unestimatedTasks": 0,
+                "overPlanned": false,
+                "underPlanned": false,
+                "staleEntries": 0,
+                "ownDraftHours": 0,
+                "holidayHours": 0,
+                "provisional": false
+              }
+            ],
+            "entries": [
+              {
+                "id": "01a197dc-6344-776f-b2ff-fd1fec0fc7a4",
+                "personId": "01a197bd-ba3c-7810-ade7-48c382890f96",
+                "personName": "Diane Roy",
+                "ownerId": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+                "ownerName": "Priya Nair",
+                "ownerKind": "Manager",
+                "label": "QA21 Diane Expected Published",
+                "sourceCategory": "Other",
+                "projectId": null,
+                "projectNumber": null,
+                "projectName": null,
+                "projectDisciplineId": null,
+                "disciplineName": null,
+                "hoursPerWeek": 20,
+                "startWeek": "2026-10-26",
+                "endWeek": "2026-10-26",
+                "confidence": "Expected",
+                "visibility": "Published",
+                "notes": null,
+                "lastValidatedAt": "2026-11-01T16:06:05.406128+00:00",
+                "stale": false,
+                "warnings": [],
+                "canEdit": true,
+                "canChangeVisibility": true,
+                "correctionOnly": false,
+                "rowVersion": 1,
+                "matchesFilter": true,
+                "weekHours": null,
+                "countedHours": null,
+                "coveredHours": null
+              }
+            ],
+            "approvedAllocations": [],
+            "officeId": "01a197bd-b99d-7182-b168-be4cf3245483",
+            "jobTitle": "Senior Technical Reviewer",
+            "homeDisciplineId": null,
+            "partial": false
+          }
+        ],
+        "asOf": "2026-11-01T16:07:25.444323+00:00",
+        "deadlines": {
+          "weeks": [
+            "2026-10-26"
+          ],
+          "dated": [],
+          "undated": [],
+          "asOf": "2026-11-01T16:07:25.444318+00:00"
+        }
+      }
+    },
+    "afterTeam": {
+      "status": 200,
+      "value": {
+        "disciplines": [
+          {
+            "id": "01a197d2-4609-7f79-b091-f5ea0fa32659",
+            "disciplineId": "01a197bd-b98a-7b9e-833e-8ab59cfa4aac",
+            "name": "Civil",
+            "code": "CIV",
+            "colour": "#2563eb",
+            "leadUserId": "01a197bd-ba3c-749e-a252-425184b403b0",
+            "isActive": true,
+            "sortOrder": 0,
+            "rowVersion": 1,
+            "leadName": "Marc Dubois"
+          }
+        ],
+        "members": [
+          {
+            "id": "01a197d2-4613-7eaf-a252-1f938f97b19b",
+            "userId": "01a197bd-ba3c-7a2c-91b0-ae7a7140aeb9",
+            "displayName": "Alex Chen",
+            "email": "alex@hub.test",
+            "jobTitle": "Civil Designer (EIT)",
+            "officeId": "01a197dc-62e6-784d-830f-7932b9b488c6",
+            "isActive": true,
+            "roles": [
+              "TeamMember"
+            ],
+            "primaryDisciplineId": "01a197d2-4609-7f79-b091-f5ea0fa32659",
+            "addedAt": "2026-11-01T15:55:02.547006+00:00",
+            "addedBy": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "rowVersion": 1,
+            "leadOf": [],
+            "isPrimaryPm": false,
+            "canStaff": false,
+            "personFacts": {
+              "notices": {
+                "personType": null,
+                "startDate": null,
+                "endDate": null,
+                "starts": false,
+                "ends": false
+              },
+              "certifications": []
+            },
+            "organisationFacts": {
+              "homeDiscipline": {
+                "id": "01a197bd-b98a-7b9e-833e-8ab59cfa4aac",
+                "name": "Civil"
+              },
+              "office": {
+                "id": "01a197dc-62e6-784d-830f-7932b9b488c6",
+                "name": "QA21 Halifax"
+              },
+              "supervisor": {
+                "id": "01a197bd-ba3c-7258-adc0-8330b4dec463",
+                "name": "Sam Patel"
+              }
+            }
+          },
+          {
+            "id": "01a197d2-4641-7750-b0a4-6eeb248af7db",
+            "userId": "01a197bd-ba3c-7024-a2a4-c6581e4b7428",
+            "displayName": "Jill Martin",
+            "email": "jill@hub.test",
+            "jobTitle": "Civil Designer",
+            "officeId": "01a197dc-62e6-784d-830f-7932b9b488c6",
+            "isActive": true,
+            "roles": [
+              "TeamMember"
+            ],
+            "primaryDisciplineId": "01a197d2-4609-7f79-b091-f5ea0fa32659",
+            "addedAt": "2026-11-01T15:55:02.593016+00:00",
+            "addedBy": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "rowVersion": 1,
+            "leadOf": [],
+            "isPrimaryPm": false,
+            "canStaff": false,
+            "personFacts": {
+              "notices": {
+                "personType": null,
+                "startDate": null,
+                "endDate": null,
+                "starts": false,
+                "ends": false
+              },
+              "certifications": []
+            },
+            "organisationFacts": {
+              "homeDiscipline": null,
+              "office": {
+                "id": "01a197dc-62e6-784d-830f-7932b9b488c6",
+                "name": "QA21 Halifax"
+              },
+              "supervisor": {
+                "id": "01a197bd-ba3c-7258-adc0-8330b4dec463",
+                "name": "Sam Patel"
+              }
+            }
+          },
+          {
+            "id": "01a197d2-464b-7c70-ab99-b03b495ac9ed",
+            "userId": "01a197bd-ba3c-749e-a252-425184b403b0",
+            "displayName": "Marc Dubois",
+            "email": "marc@hub.test",
+            "jobTitle": "Senior Civil Engineer",
+            "officeId": "01a197bd-b99d-7182-b168-be4cf3245483",
+            "isActive": true,
+            "roles": [
+              "TeamMember"
+            ],
+            "primaryDisciplineId": "01a197d2-4609-7f79-b091-f5ea0fa32659",
+            "addedAt": "2026-11-01T15:55:02.603558+00:00",
+            "addedBy": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "rowVersion": 1,
+            "leadOf": [
+              "01a197d2-4609-7f79-b091-f5ea0fa32659"
+            ],
+            "isPrimaryPm": false,
+            "canStaff": false,
+            "personFacts": {
+              "notices": {
+                "personType": null,
+                "startDate": null,
+                "endDate": null,
+                "starts": false,
+                "ends": false
+              },
+              "certifications": []
+            },
+            "organisationFacts": {
+              "homeDiscipline": null,
+              "office": {
+                "id": "01a197bd-b99d-7182-b168-be4cf3245483",
+                "name": "Head Office"
+              },
+              "supervisor": {
+                "id": "01a197bd-ba3c-7258-adc0-8330b4dec463",
+                "name": "Sam Patel"
+              }
+            }
+          },
+          {
+            "id": "01a197d2-45fc-7151-b042-a7f72e31c39a",
+            "userId": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "displayName": "Priya Nair",
+            "email": "priya@hub.test",
+            "jobTitle": "Project Manager",
+            "officeId": "01a197bd-b99d-7182-b168-be4cf3245483",
+            "isActive": true,
+            "roles": [
+              "PM"
+            ],
+            "primaryDisciplineId": null,
+            "addedAt": "2026-11-01T15:55:02.524467+00:00",
+            "addedBy": "01a197bd-ba3c-7004-8608-b9ff012100b9",
+            "rowVersion": 1,
+            "leadOf": [],
+            "isPrimaryPm": true,
+            "canStaff": false,
+            "personFacts": {
+              "notices": {
+                "personType": null,
+                "startDate": null,
+                "endDate": null,
+                "starts": false,
+                "ends": false
+              },
+              "certifications": []
+            },
+            "organisationFacts": {
+              "homeDiscipline": null,
+              "office": {
+                "id": "01a197bd-b99d-7182-b168-be4cf3245483",
+                "name": "Head Office"
+              },
+              "supervisor": {
+                "id": "01a197bd-ba3c-7b3b-a27a-5114a13f4e92",
+                "name": "Lena Brooks"
+              }
+            }
+          }
+        ],
+        "canManage": true,
+        "manageReason": null
+      }
+    },
+    "afterRoles": {
+      "status": 200,
+      "value": [
+        {
+          "id": "01a197d2-999b-7f92-b2ae-394a7ed831ee",
+          "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+          "roleLabel": "QA21 Civil reviewer",
+          "projectDisciplineId": "01a197d2-4609-7f79-b091-f5ea0fa32659",
+          "disciplineName": "Civil",
+          "fromDate": "2026-11-02",
+          "throughDate": "2026-11-06",
+          "plannedHours": 10,
+          "status": "Open",
+          "filledAllocationId": null,
+          "note": "Disposable QA21 role",
+          "rowVersion": 0,
+          "canManage": true
+        },
+        {
+          "id": "01a197d2-99b7-7486-bb99-d5eb0135f066",
+          "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+          "roleLabel": "QA21 Civil technologist",
+          "projectDisciplineId": "01a197d2-4609-7f79-b091-f5ea0fa32659",
+          "disciplineName": "Civil",
+          "fromDate": "2026-11-02",
+          "throughDate": "2026-11-06",
+          "plannedHours": 20,
+          "status": "Open",
+          "filledAllocationId": null,
+          "note": "Disposable QA21 role",
+          "rowVersion": 0,
+          "canManage": true
+        }
+      ]
+    }
+  },
+  "browser": [
+    {
+      "name": "workspace",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "status": 200,
+      "contained": true,
+      "textSample": "Skip to content\nt\nTuesday\nMy Work\nHome\nProjects\nTasks\nResources\nTime\nReports\nTeam\nFiles\nMy Staff\nTuesday\nTeam\nSearch\n/\nMy projects\nNew\n1\nPN\nTeam\n\n2 people\n\nViews\nDashboard\nBoard\nList\nTimeline\nCalendar\nFiles\nTeam\nWorkload\nMy projects\nCopy link\nSearch\nGroup by\nNo grouping\nHome discipline\nOffice\nSupervisor\nCurrent unit\nFilters\n1\n1 active\nColumns\nTeam\nPerson\tHome discipline\tOffice\tSupervisor\tCurrent unit\tProjects and roles\nCivil1\n\nAC\nAlex Chen\nCivil Designer (EIT)\n\tCivil\tQA21 Halifax\tSam Patel\tNot set\t\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTeam Member\n\nNot set1\n\nJM\nJill Martin\nCivil Designer\n\tNot set\tQA21 Halifax\tSam Patel\tNot set\t\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTeam Member",
+      "errors": []
+    },
+    {
+      "name": "workspace",
+      "viewport": [
+        375,
+        812
+      ],
+      "status": 200,
+      "contained": true,
+      "textSample": "Skip to content\n1\nPN\nTeam\n\n2 people\n\nViews\nDashboard\nBoard\nList\nTimeline\nCalendar\nFiles\nTeam\nWorkload\nCopy link\nSearch\nGroup by\nNo grouping\nHome discipline\nOffice\nSupervisor\nCurrent unit\nFilters\n1\n1 active\nColumns\nCivil1\nPerson\nAC\nAlex Chen\nCivil Designer (EIT)\nHome discipline\nCivil\nOffice\nQA21 Halifax\nSupervisor\nSam Patel\nCurrent unit\nNot set\nProjects and roles\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTeam Member\nNot set1\nPerson\nJM\nJill Martin\nCivil Designer\nHome discipline\nNot set\nOffice\nQA21 Halifax\nSupervisor\nSam Patel\nCurrent unit\nNot set\nProjects and roles\nQA21-REAL-001\nCheckpoint 21 real Board Team project\nTeam Member\nMy Work\nSearch\nNotifications",
+      "errors": []
+    }
+  ],
+  "failures": [
+    {
+      "fatal": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Add a person…', exact: true })\u001b[22m\n"
+    }
+  ],
+  "limits": [
+    "QA21 only; normal API commands; no fill/save membership; all browser contexts closed"
+  ],
+  "gridFacts": {
+    "weeklyCapacity": 40,
+    "effectiveCapacity": 32,
+    "timeAway": 8,
+    "remaining": 12,
+    "provisional": false
+  },
+  "fixture": {
+    "projectId": "01a197d2-45c9-7dfb-a496-f000632dc4d8",
+    "projectNumber": "QA21-REAL-001",
+    "officeId": "01a197dc-62e6-784d-830f-7932b9b488c6",
+    "civil": "01a197bd-b98a-7b9e-833e-8ab59cfa4aac",
+    "ids": {
+      "alex": "01a197bd-ba3c-7a2c-91b0-ae7a7140aeb9",
+      "jill": "01a197bd-ba3c-7024-a2a4-c6581e4b7428",
+      "diane": "01a197bd-ba3c-7810-ade7-48c382890f96",
+      "omar": "01a197bd-ba3c-7f94-afd9-343012f0c4e4",
+      "priya": "01a197bd-ba3c-7004-8608-b9ff012100b9"
+    },
+    "today": "2026-11-01",
+    "week": "2026-10-26",
+    "gridPersonIds": [
+      "01a197bd-ba3c-7810-ade7-48c382890f96"
+    ]
+  }
+}

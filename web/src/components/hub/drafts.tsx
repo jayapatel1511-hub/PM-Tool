@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import type { SafeForm } from '@/hooks/drafts'
 import { fmtTime } from '@/lib/format'
-import { discardUnsaved, hasUnsaved, leaveQuestion } from '@/lib/drafts'
+import { blocksUnsavedNavigation, discardUnsaved, leaveQuestion } from '@/lib/drafts'
 import { t } from '@/lib/i18n'
 
 /** FR-SAV-03: the one-line notice of a restored draft; Discard puts the form back to empty. */
@@ -21,7 +21,7 @@ export function DraftNotice({ form }: { form: Pick<SafeForm, 'restoredAt' | 'dis
  *  and the Reload action of the build-update notice (FR-SAV-06). Mounted once, in the page frame. */
 export function LeaveHost() {
   const ask = useSyncExternalStore(leaveQuestion.subscribe, leaveQuestion.get)
-  const blocker = useBlocker(hasUnsaved)
+  const blocker = useBlocker(blocksUnsavedNavigation)
   const keep = useRef<HTMLButtonElement>(null)
   useEffect(() => { if (blocker.state === 'blocked') leaveQuestion.show({ proceed: () => { discardUnsaved(); blocker.proceed() }, cancel: blocker.reset }) }, [blocker])
   return (

@@ -13,7 +13,7 @@ namespace Hub.Api.Features;
 public interface IProjectCreateHook { Task AfterCreate(Project p, ProjectEndpoints.CreateBody body); }
 
 /// Projects: creation, fields, lifecycle, links, stars, list and header (§12.1, §13.2, §13.16, §15.2).
-public static class ProjectEndpoints
+public static partial class ProjectEndpoints
 {
     public sealed record DisciplineInput(Guid DisciplineId, Guid? LeadUserId);
     public sealed record MemberInput(Guid UserId, string[] Roles, Guid? DisciplineId);
@@ -40,7 +40,12 @@ public static class ProjectEndpoints
         ProjectClientRef Client, ProjectPmRef Pm, Guid OfficeId, string Office, Guid? PhaseId, string? Phase, Guid? ProjectTypeId, string ComputedHealth, string ReportedHealth,
         JsonElement? HealthReasons, string? HealthOverrideNote, DateTimeOffset? HealthOverrideAt, string? OverrideBy, bool OverrideActive, int? ProgressPct, int OverdueTasks, int BlockedTasks,
         int OverdueDecisions, int HighIssues, int AttentionCritical, int AttentionWarning, ProjectMilestoneRef? NextMilestone, ProjectMilestoneRef? NextSubmission,
-        IReadOnlyList<string> MyRoles, bool Starred, DateTimeOffset? LastActivityAt);
+        IReadOnlyList<string> MyRoles, bool Starred, DateTimeOffset? LastActivityAt,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? IdentityColour = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] ProjectListCompleteness.StaffingView? Staffing = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] ProjectListCompleteness.SpanView? Span = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] ProjectListCompleteness.ProgressView? ProgressFacts = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] int? RowVersion = null);
 
     /// A permission verdict with the reason it was refused, null when allowed.
     public sealed record ProjectPermission(bool Ok, string? Reason);
@@ -58,14 +63,15 @@ public static class ProjectEndpoints
         IReadOnlyList<Guid> CreateDeliverableIn, IReadOnlyList<Guid> CreateBasisIn, IReadOnlyList<Guid> AssignBasisIn, IReadOnlyList<Guid> LeadOf, bool IsPm, IReadOnlyList<string> Transitions,
         bool ChangeNumber, bool SetVisibility, bool NeedsReason, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] ProjectPermission? Restore = null);
     /// The project header (§12.1, P-09). `StatusNote` and `LatestPlanned` are sent only while `flag.project_status_note` and `flag.schedule_baseline` are on (and the planned date is past the target).
-    public sealed record ProjectDetail(Guid Id, string ProjectNumber, string Name, Guid ClientId, string? ClientReference, Guid ProjectManagerId, string PmName, Guid OfficeId, Guid? ProjectTypeId,
+    public sealed partial record ProjectDetail(Guid Id, string ProjectNumber, string Name, Guid ClientId, string? ClientReference, Guid ProjectManagerId, string PmName, Guid OfficeId, Guid? ProjectTypeId,
         string? Description, string? Location, string Status, Guid? PhaseId, DateOnly? StartDate, DateOnly? TargetCompletionDate, string Priority, string Visibility, string? InternalNotes,
         string? CoordinationDay, bool AllowViewerComments, DateTimeOffset? LastCoordinationReviewedAt, string? LastCoordinationReviewedBy, DateTimeOffset? StatusChangedAt, DateTimeOffset? ActivatedAt,
         DateTimeOffset? CompletedAt, DateTimeOffset? ArchivedAt, Guid? CreatedFromTemplateId, int? TemplateVersion, int RowVersion, string? TemplateName, string Client, string Office, string? Phase,
         IReadOnlyList<DocumentLinkEndpoints.LinkResponse> Links, IReadOnlyList<ProjectDisciplineRow> Disciplines, ProjectHealth Health, int? ProgressPct, ProjectHeaderMilestone? NextMilestone,
         ProjectHeaderMilestone? NextSubmission, IReadOnlyList<string> MyRoles, ProjectFollowState? Follow, bool Starred, SetupChecklist? SetupChecklist, bool SuggestArchive, int? EditWindowDaysLeft,
         ProjectPermissions Permissions, ProjectStatusNote.NoteView? StatusNote = null,
-        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] Evaluator.PlannedTarget? LatestPlanned = null)
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] Evaluator.PlannedTarget? LatestPlanned = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? IdentityColour = null)
     {
         [JsonIgnore]
         public bool StatusNoteEnabled { get; init; }
@@ -83,6 +89,7 @@ public static class ProjectEndpoints
         api.MapGet("/projects", List);
         api.MapPost("/projects", Create);
         api.MapGet("/projects/{idOrNumber}", Get);
+        api.MapGet("/projects/{id:guid}/peek", ProjectListCompleteness.Peek);
         api.MapPatch("/projects/{id:guid}", Edit);
         api.MapGet("/projects/{id:guid}/closeout", CloseoutPreview);
         api.MapPost("/projects/{id:guid}/transition", Transition);
@@ -126,34 +133,47 @@ public static class ProjectEndpoints
 
     public sealed record ProjectQuery(string? Q, string? Status, Guid? PmId, Guid? ClientId, Guid? OfficeId, Guid? PhaseId, Guid? DisciplineId, string? Health,
         Guid? ProjectTypeId, bool? IncludeArchived, bool? Mine, bool? Starred, string? Priority, string? Ids, string? Sort, int? Page, int? PageSize, int? SubmissionWithinDays,
-        string? ComputedHealth = null, Guid? LeadUnitId = null);
+        string? ComputedHealth = null, Guid? LeadUnitId = null, string? HomePreset = null, string? HomeProjects = null);
 
     static async Task<Ok<Page<ProjectRow>>> List([AsParameters] ProjectQuery f, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock)
     {
+        var settings = await store.Get(db);
+        await using var snapshot = settings.IsFlagOn("project_screens") || (settings.IsFlagOn("home_overview")
+            && (!string.IsNullOrWhiteSpace(f.HomePreset) || !string.IsNullOrWhiteSpace(f.HomeProjects)))
+            ? await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead) : null;
         var items = await Sorted(f, access, db, me, store, clock);
         var (pg, size) = Http.Paging(f.Page, f.PageSize ?? 200);
-        return TypedResults.Ok(new Page<ProjectRow>(items.Skip((pg - 1) * size).Take(size).ToList(), pg, size, items.Count, f.Sort));
+        var page = items.Skip((pg - 1) * size).Take(size).ToList();
+        if (settings.IsFlagOn("project_screens")) page = await ProjectListCompleteness.Enrich(page, access, db, store, settings, clock);
+        return TypedResults.Ok(new Page<ProjectRow>(page, pg, size, items.Count, f.Sort));
     }
 
     sealed record ListState(string ComputedHealth, string HealthReasons, int? ProgressPct, int OverdueTasks, int BlockedTasks, int OverdueDecisions, int HighIssues, int AttentionCritical,
         int AttentionWarning, Guid? NextMilestoneId, Guid? NextSubmissionMilestoneId);
     sealed record ListSource(Guid Id, string ProjectNumber, string Name, string Status, string Priority, string Visibility, DateOnly? StartDate, DateOnly? TargetCompletionDate, Guid ClientId,
         Guid OfficeId, Guid? PhaseId, Guid? ProjectTypeId, Guid ProjectManagerId, string? HealthOverride, string? HealthOverrideNote, DateTimeOffset? HealthOverrideAt,
-        DateTimeOffset? HealthOverrideExpiresAt, string? Client, string? Office, string? Phase, string? Pm, string? OverrideBy, ListState? State, List<string>? MyRoles, int Leads,
-        bool Starred, DateTimeOffset? LastActivityAt);
+        DateTimeOffset? HealthOverrideExpiresAt, string? Client, string? Office, string? Phase, string? Pm, string? OverrideBy, ListState? State, List<string>? MyRoles, int Leads, string? IdentityColour,
+        bool Starred, DateTimeOffset? LastActivityAt, int RowVersion);
 
     /// The project list's rows in list order, unpaged (the list pages them; exports take them all).
     public static async Task<List<ProjectRow>> Sorted(ProjectQuery f, Access access, HubDb db, CurrentUser me, SettingsStore store, TimeProvider clock)
     {
-        var (q, status, pmId, clientId, officeId, phaseId, disciplineId, health, projectTypeId, includeArchived, mine, starred, priority, ids, sort, _, _, submissionWithinDays, computedHealth, leadUnitId) = f;
+        var (q, status, pmId, clientId, officeId, phaseId, disciplineId, health, projectTypeId, includeArchived, mine, starred, priority, ids, sort, _, _, submissionWithinDays, computedHealth, leadUnitId, homePreset, homeProjects) = f;
         var s = await store.Get(db);
         var today = clock.Today(s);
         var query = access.VisibleProjects().AsNoTracking();
+        var presetScope = await HomePresets.Resolve(access, db, s, homePreset);
+        if (s.IsFlagOn("home_overview") && !string.IsNullOrWhiteSpace(homeProjects))
+        {
+            var baseScope = Hub.Api.Features.Scope.Projects(access, db, homeProjects);
+            query = query.Where(p => baseScope.Any(b => b.Id == p.Id));
+        }
+        if (presetScope is not null) query = presetScope.ApplyProjects(query);
         var statuses = Http.List(status);
         if (statuses.Length > 0) query = query.Where(p => statuses.Contains(p.Status));
         else if (includeArchived != true) query = query.Where(p => p.Status == ProjectStatus.Active || p.Status == ProjectStatus.Setup || p.Status == ProjectStatus.OnHold);
         var idList = Http.Ids(ids);
-        if (idList.Length > 0) query = query.Where(p => idList.Contains(p.Id));
+        if (idList.Length > 0 || (s.IsFlagOn("home_overview") && ids?.Trim() == "none")) query = query.Where(p => idList.Contains(p.Id));
         if (!string.IsNullOrWhiteSpace(q)) query = query.Where(p => EF.Functions.ILike(p.Name, $"%{q.Trim()}%") || EF.Functions.ILike(p.ProjectNumber, $"{q.Trim()}%")
             || db.Clients.Any(c => c.Id == p.ClientId && EF.Functions.ILike(c.Name, $"%{q.Trim()}%")));
         if (pmId is { } pm) query = query.Where(p => p.ProjectManagerId == pm);
@@ -185,8 +205,9 @@ public static class ProjectEndpoints
                 x.OverdueDecisions, x.HighIssues, x.AttentionCritical, x.AttentionWarning, x.NextMilestoneId, x.NextSubmissionMilestoneId)).FirstOrDefault(),
             db.ProjectMembers.Where(m => m.ProjectId == p.Id && m.UserId == me.Id && m.RemovedAt == null).Select(m => m.Roles).FirstOrDefault(),
             db.ProjectDisciplines.Count(x => x.ProjectId == p.Id && x.LeadUserId == me.Id),
+            s.IsFlagOn("visual_system") ? p.IdentityColour : null,
             db.ProjectStars.Any(x => x.ProjectId == p.Id && x.UserId == me.Id),
-            db.ActivityLog.Where(a => a.ProjectId == p.Id).Max(a => (DateTimeOffset?)a.OccurredAt))).Take(5000).ToListAsync();
+            db.ActivityLog.Where(a => a.ProjectId == p.Id).Max(a => (DateTimeOffset?)a.OccurredAt), p.RowVersion)).Take(5000).ToListAsync();
 
         var msIds = rows.SelectMany(r => new[] { r.State?.NextMilestoneId, r.State?.NextSubmissionMilestoneId }).OfType<Guid>().Distinct().ToList();
         var ms = await db.Milestones.AsNoTracking().Where(m => msIds.Contains(m.Id))
@@ -211,7 +232,9 @@ public static class ProjectEndpoints
                 r.State?.ProgressPct, r.State?.OverdueTasks ?? 0, r.State?.BlockedTasks ?? 0,
                 r.State?.OverdueDecisions ?? 0, r.State?.HighIssues ?? 0,
                 r.State?.AttentionCritical ?? 0, r.State?.AttentionWarning ?? 0,
-                next, sub, roles, r.Starred, r.LastActivityAt);
+                next, sub, roles, r.Starred, r.LastActivityAt, r.IdentityColour,
+                ProgressFacts: s.IsFlagOn("project_screens") ? ProjectListCompleteness.Progress(r.StartDate, r.TargetCompletionDate, today, r.State?.ProgressPct) : null,
+                RowVersion: s.IsFlagOn("project_screens") ? r.RowVersion : null);
         }).ToList();
         var healths = Http.List(health);
         if (healths.Length > 0) list = list.Where(r => healths.Contains(r.ReportedHealth) || healths.Contains(r.ComputedHealth)).ToList();
@@ -270,6 +293,9 @@ public static class ProjectEndpoints
         };
         await Tx.Run(db, async () =>
         {
+            if (s.IsFlagOn("visual_system"))
+                p.IdentityColour = IdentityColour.LeastUsed(await db.Projects.Where(x => x.Status == ProjectStatus.Setup || x.Status == ProjectStatus.Active)
+                    .Select(x => x.IdentityColour).ToListAsync());
             db.Projects.Add(p);
             await team.Add(p, me.Id, [ProjectRole.PM], null, notifyPerson: false);
             var pds = new Dictionary<Guid, ProjectDiscipline>();
@@ -298,6 +324,9 @@ public static class ProjectEndpoints
         var (p, ctx) = await access.ProjectByKeyOrId(idOrNumber, track: false);
         await eval.EnsureFresh(p.Id);
         var s = await store.Get(db);
+        await using var snapshot = s.IsFlagOn("work_screens")
+            ? await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead) : null;
+        if (snapshot is not null) (p, ctx) = await access.Project(p.Id, track: false);
         var a = access.Actor;
         var state = await db.ProjectStates.AsNoTracking().FirstOrDefaultAsync(x => x.ProjectId == p.Id);
         var now = clock.GetUtcNow();
@@ -327,7 +356,7 @@ public static class ProjectEndpoints
                     .Concat(await db.Deliverables.AsNoTracking().Where(d => d.ProjectId == p.Id)
                         .Select(d => new DateItem(d.Id, d.Key, d.StartDate, d.DueDate,
                             d.Status == DeliverableStatus.Issued || d.Status == DeliverableStatus.Accepted || d.Status == DeliverableStatus.Cancelled)).ToListAsync()));
-        return TypedResults.Ok(new ProjectDetail(
+        return TypedResults.Ok(await WorkScreenResponseMetadata.AttachDetailAsync(new ProjectDetail(
             p.Id, p.ProjectNumber, p.Name, p.ClientId, p.ClientReference, p.ProjectManagerId, names.GetValueOrDefault(p.ProjectManagerId)!,
             p.OfficeId, p.ProjectTypeId, p.Description, p.Location, p.Status, p.PhaseId, p.StartDate, p.TargetCompletionDate, p.Priority, p.Visibility,
             ctx.IsMember || a.Admin || a.Executive || a.Supervisor ? p.InternalNotes : null,
@@ -380,7 +409,7 @@ public static class ProjectEndpoints
                 s.RestrictedProjectsEnabled && Permissions.EditProject(a, ctx).Ok,
                 ProjectStatus.NeedsCorrectionReason(p.Status),
                 s.IsFlagOn(RecoveryEndpoints.Flag) ? Perm(Permissions.RestoreItem(a, ctx), p.Status) : null),
-            note, latest) { StatusNoteEnabled = s.IsFlagOn("project_status_note") });
+            note, latest, s.IsFlagOn("visual_system") ? p.IdentityColour : null) { StatusNoteEnabled = s.IsFlagOn("project_status_note") }, p, access, db, s, clock));
     }
 
     static ProjectPermission Perm(Allow a, string status) => new(a.Ok, a.Why is null ? null : Text.Get(a.Why, a.Arg ?? status));
@@ -391,6 +420,7 @@ public static class ProjectEndpoints
     // ---------- Edit (FR-003, P-07, FR-016) ----------
 
     static async Task<Ok<ProjectSaved>> Edit(Guid id, JsonElement body, HttpContext http, Access access, HubDb db, TeamService team, SettingsStore store, TimeProvider clock)
+        => await Tx.Notice<Ok<ProjectSaved>>(db, store, async () =>
     {
         var (p, ctx) = await access.Project(id);
         var patch = new Patch(body);
@@ -452,10 +482,17 @@ public static class ProjectEndpoints
             Check.That(unit is null || await db.Set<OrgUnit>().AnyAsync(x => x.Id == unit && x.ClosedOn == null), "leadUnitId", "error.not_found");
             p.LeadUnitId = unit;
         }
+        if (s.IsFlagOn("visual_system") && patch.Has("identityColour"))
+        {
+            var colour = patch.Str("identityColour");
+            Check.That(IdentityColour.IsValid(colour), "identityColour", "error.invalid");
+            if (!string.Equals(p.IdentityColour, colour, StringComparison.OrdinalIgnoreCase))
+                p.IdentityColour = IdentityColour.Palette.First(c => string.Equals(c, colour, StringComparison.OrdinalIgnoreCase));
+        }
         await db.SaveChangesAsync();
         Http.ETag(http, p);
         return TypedResults.Ok(new ProjectSaved(p.Id, p.RowVersion));
-    }
+    });
 
     // ---------- Lifecycle (P-02..P-06, AC-PRJ-03..06, ASG-07, AC-NOT-07) ----------
 

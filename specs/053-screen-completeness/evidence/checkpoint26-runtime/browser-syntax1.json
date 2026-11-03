@@ -1,0 +1,10 @@
+{
+  "atUtc": "2026-11-02T10:57:38.294350+00:00",
+  "status": "PASS_PARSE_ONLY",
+  "files": [
+    "web/tests/review-response.cjs",
+    "web/tests/review-response.fixture.cjs"
+  ],
+  "commands": "node --check onboth finalDsource2files exited0",
+  "boundary": "No browser execution/typecheck or app acceptance implied"
+}

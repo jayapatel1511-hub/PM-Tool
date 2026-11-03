@@ -1,0 +1,3 @@
+Initial P2: raw UTF8 JsonDocument parse with catch fallback bypassed reference guard for valid UTF16 bodies. Root replaced with charset-aware Request.ReadFromJsonAsync<JsonElement>, original stream restored; no malformed JSON fallback. Actual provider tests now cover UTF8+UTF16 exact create/replay/current-off404/archived403/deletedowner404/no extra claims or business writes and omitted/null legacy bodies. Independent re-review pending; no tests run yet.
+
+Independent re-review: bounded source PASS on repaired root-replay-source2 hashes; charset-aware parsing and stream restoration confirmed; provider proof still pending.

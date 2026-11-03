@@ -1,0 +1,141 @@
+{
+  "checkpoint": 22,
+  "generation": 50,
+  "count": 33,
+  "passed": 33,
+  "failed": 0,
+  "tests": [
+    {
+      "name": "Hub.Tests.Api.TimelineSavedViewTests.Disabled_new_view_routes_keep_old_Timeline_reads_and_preserve_stored_definitions(small: True)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TimelineSavedViewTests.Deactivated_discipline_with_retained_Timeline_work_remains_a_valid_saved_filter",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TimelineSavedViewTests.Independent_flags_drop_and_name_stale_layer_and_chain_parameters_without_rewriting_definition_or_Timeline",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TimelineSavedViewTests.Disabled_new_view_routes_keep_old_Timeline_reads_and_preserve_stored_definitions(small: False)",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TimelineSavedViewTests.Invalid_layout_zoom_calendar_dates_and_layers_are_refused_without_creating_a_view",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.DeliverableRegisterRuleTests.Drawing_pattern_is_a_bounded_literal_comparison_with_one_ASCII_digit_per_hash_and_missing_stays_unknown",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.PersonPanelTests.Complete_requires_PM_and_correction_reason_then_Archived_refuses_even_PM",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.DeliverableRegisterTests.Retired_or_renamed_references_keep_recorded_snapshots_and_missing_choices_are_never_defaulted",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.RegisterVocabularyReplayTests.Replay_retains_the_original_result_but_cannot_bypass_disabled_or_revoked_access(kind: \"issuePurposes\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.RegisterVocabularyReplayTests.Replay_retains_the_original_result_but_cannot_bypass_disabled_or_revoked_access(kind: \"issueReturnCodes\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.DeliverableRegisterTests.Dark_commands_wires_and_real_issuance_are_preserved_while_new_metadata_and_routes_stay_hidden",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.DeliverableRegisterTests.No_due_date_filter_keeps_the_exact_four_open_records_and_all_other_filters_remain_ANDed",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.DeliverableRegisterTests.Project_pattern_is_PM_versioned_and_client_number_mismatch_warns_while_create_and_owner_edit_still_save",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.DeliverableRegisterTests.Backdated_reissue_at_the_same_clock_tracks_actual_identity_and_an_old_response_never_overwrites_the_current_one",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.DeliverableRegisterRuleTests.Drawing_values_refuse_control_characters_and_excess_length_without_running_user_regex",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.PersonPanelTests.Dark_endpoints_refuse_without_mutation_and_Team_omits_the_additive_note",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.PersonPanelTests.Recorded_facts_use_captured_organisation_day_and_flag_off_omits_them",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.DeliverableRegisterTests.Parent_IfMatch_never_substitutes_for_missing_or_stale_issue_baseline_and_dirty_versions_do_not_advance_on_refusal",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.PersonPanelTests.Only_PM_or_active_lead_of_members_actual_primary_can_edit_and_role_PATCH_stays_PM_only",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.DeliverableRegisterRuleTests.Legacy_timestamp_ties_remain_unknown_and_only_a_unique_latest_record_is_selected",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.PersonPanelTests.Explicit_Staff_context_must_contain_target_and_rejects_unknown_or_disabled_scope",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.DeliverableRegisterTests.Saved_register_definition_keeps_legacy_fields_while_dark_and_restores_new_filters_layout_and_columns_when_reenabled",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.DeliverableRegisterRuleTests.Actual_issue_identity_wins_even_when_the_recorded_dates_tie_or_the_identity_order_is_reversed",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TimelineSavedViewTests.Priya_shared_Civil_Months_dependencies_definition_opens_for_Marc_without_changing_the_canonical_Timeline",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.PersonPanelTests.Unit_leader_uses_current_placement_and_unit_authority_disappears_with_org_flag",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.PersonPanelTests.Visible_membership_paging_is_stable_capped_and_keeps_empty_out_of_range_distinct",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.DeliverableRegisterTests.Response_pair_dates_authority_and_exact_target_are_guarded_and_correction_clear_does_not_mutate_status",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.PersonPanelTests.PM_note_is_trimmed_shared_with_panel_audited_once_and_changes_no_roles_or_capacity",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TimelineSavedViewTests.Existing_project_share_edit_version_and_visibility_guards_remain_authoritative",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.DeliverableRegisterTests.Real_issue_for_review_then_explicit_B_response_matches_current_register_history_and_reference_filters",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.PersonPanelTests.Strict_body_versions_wrong_project_and_removed_member_refuse_without_overwriting",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.PersonPanelTests.Rita_sees_only_current_visible_memberships_and_no_contact_or_private_work_facts",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Hub.Tests.Api.TimelineSavedViewTests.Workspace_personal_views_keep_scope_anchor_zoom_layers_and_collapsed_projects_without_sharing",
+      "outcome": "Passed"
+    }
+  ]
+}

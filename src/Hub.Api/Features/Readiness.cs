@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Hub.Api.Data;
 using Hub.Api.Infrastructure;
 using Hub.Domain;
@@ -38,20 +39,28 @@ public static class ReadinessEndpoints
         string AuditType, Guid ProjectId, Guid? AuditProjectId, string? AuditKey, string? AuditName, DateTimeOffset CreatedAt, Guid? CreatedBy, DateTimeOffset UpdatedAt, Guid? UpdatedBy, int RowVersion, Guid Id);
     /// One work item's readiness: the assessment, its checks and the source records behind them, the codes still unknown or blocked, and its exceptions.
     public sealed record ReadinessDetail(ReadinessAssessmentRead Assessment, IReadOnlyList<ReadinessCheckRead> Checks, IReadOnlyList<CheckSource> Sources,
-        string[] Unknown, string[] Blocked, IReadOnlyList<ReadinessExceptionRead> Exceptions);
+        string[] Unknown, string[] Blocked, IReadOnlyList<ReadinessExceptionRead> Exceptions,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] ReadinessDeliveryPresentation? Presentation = null);
     /// One open constraint of the readiness window.
     public sealed record ReadinessWindowConstraint(int Seq, string Key, string TargetType, Guid TargetId, string Category, string Description, Guid RemovalOwnerId, Guid AffectedOwnerId, DateOnly NeededBy,
         string SourceUrl, string State, string? ResolutionEvidenceUrl, Guid? VerifiedBy, DateTimeOffset? VerifiedAt, string? LinkedType, Guid? LinkedId,
         string AuditType, string? AuditKey, string? AuditName, Guid ProjectId, Guid? AuditProjectId, DateTimeOffset CreatedAt, Guid? CreatedBy, DateTimeOffset UpdatedAt, Guid? UpdatedBy, int RowVersion, Guid Id);
     /// The readiness window behind the page: open constraints needed by its end and the Ready outputs due in it, each list with its own page.
     public sealed record ReadinessWindow(DateOnly From, DateOnly To, IReadOnlyList<ReadinessWindowConstraint> Constraints, int ConstraintsTotal, int ConstraintsPage, int ReadyPage, int PageSize,
-        bool ConstraintsTruncated, IReadOnlyList<ReadyOutput> ReadyOutputs, int ReadyOutputsTotal, bool ReadyOutputsTruncated);
+        bool ConstraintsTruncated, IReadOnlyList<ReadyOutput> ReadyOutputs, int ReadyOutputsTotal, bool ReadyOutputsTruncated,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] ReadinessWorkPage? Work = null);
+    public sealed record ReadinessWorkRow(string TargetType, Guid TargetId, string Key, string Name, DateOnly? DueDate,
+        Guid? OwnerId, Guid DisciplineId, string State, bool HasAssessment, bool Available, ReadinessDeliveryPresentation Presentation);
+    public sealed record ReadinessWorkPage(string Scope, DateTimeOffset EvaluatedAt, IReadOnlyList<ReadinessWorkRow> Items,
+        int Total, int Page, int PageSize);
     /// One constraint on a work item, with the decision, issue or handoff it links when that record still exists.
     public sealed record ReadinessConstraintRow(Guid Id, string Key, int RowVersion, string TargetType, Guid TargetId, string Category, string Description, Guid RemovalOwnerId, Guid AffectedOwnerId,
         DateOnly NeededBy, string SourceUrl, string State, string? ResolutionEvidenceUrl, Guid? VerifiedBy, DateTimeOffset? VerifiedAt, string? LinkedType, Guid? LinkedId,
         DateTimeOffset CreatedAt, Guid? CreatedBy, LinkedRecord? Linked);
     /// Where a constraint found by key or search lives, so its work's inspector can open.
-    public sealed record ReadinessConstraintLocation(Guid Id, string Key, string TargetType, Guid TargetId);
+    public sealed record ReadinessConstraintLocation(Guid Id, string Key, string TargetType, Guid TargetId,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] RecordContextView? Context = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Title = null);
     public sealed record ReadinessPackageRef(Guid Id, string Key, string Title, string Status);
     /// One submission package the work waits on, the package that now governs it (a superseded one is followed), and whether that package lists the work's own output.
     public sealed record ReadinessPrerequisiteRow(Guid Id, int RowVersion, Guid PackageId, string Reason, DateTimeOffset CreatedAt, Guid? CreatedBy, DateTimeOffset? RemovedAt, Guid? RemovedBy,
@@ -60,6 +69,7 @@ public static class ReadinessEndpoints
     // The queries' own projections and the export rows.
     sealed record AllocationFacts(Guid Id, string Purpose, string Status, DateOnly FromDate, DateOnly ThroughDate);
     sealed record WorkFacts(Guid Id, string Key, string Name, DateOnly? DueDate, Guid? OwnerId, Guid ProjectDisciplineId);
+    sealed record WorkEvaluation(string TargetType, WorkFacts Facts, WorkReadinessInputReader.Evaluation Evaluation);
     sealed record ReadyExportRow(string Key, string Name, string TargetType, string? Owner, string? Discipline, DateOnly? DueDate, string IntendedOutput, string CompletionCriteria, string State);
     sealed record ConstraintExportRow(string Key, string? Work, string Category, string Description, string? RemovalOwner, string? AffectedOwner, DateOnly NeededBy, string State, string? Linked, string SourceUrl);
 
@@ -75,7 +85,7 @@ public static class ReadinessEndpoints
 
     // FR-RDY-03: a constraint points at the same-project decision, issue or handoff that already represents it instead of
     // duplicating it. Deleted records drop out through the soft-deletion query filters, so a stale link reads as unavailable.
-    static IQueryable<LinkedRecord> Linkable(HubDb db, Guid projectId, string type, Guid? id = null) => type switch
+    internal static IQueryable<LinkedRecord> Linkable(HubDb db, Guid projectId, string type, Guid? id = null) => type switch
     {
         ItemType.Decision => db.Decisions.AsNoTracking().Where(d => d.ProjectId == projectId && (id == null || d.Id == id))
             .OrderByDescending(d => d.Seq).Select(d => new LinkedRecord(ItemType.Decision, d.Id, d.Key, d.Subject, d.Status)),
@@ -160,7 +170,8 @@ public static class ReadinessEndpoints
             .Select(l => l.SourceId).Distinct().ToListAsync();
         if (decisionIds.Count > 0)
         {
-            var decisions = await Linkable(db, project.Id, ItemType.Decision).Where(d => decisionIds.Contains(d.Id)).ToListAsync();
+            var decisions = await db.Decisions.AsNoTracking().Where(d => d.ProjectId == project.Id && decisionIds.Contains(d.Id))
+                .OrderByDescending(d => d.Seq).Select(d => new LinkedRecord(ItemType.Decision, d.Id, d.Key, d.Subject, d.Status)).ToListAsync();
             sources?.AddRange(decisions.Select(d => new CheckSource(ReadinessCheckCode.Decision, d)));
             Source(ReadinessCheckCode.Decision, true, decisions.Count == decisionIds.Count && decisions.All(d => d.Status == DecisionStatus.Decided),
                 "Linked decisions are current source evidence.");
@@ -191,7 +202,7 @@ public static class ReadinessEndpoints
         var requiredReviewPackageId = reviewRequirement?.RequiredReviewPackageId;
         if (requiredReviewPackageId is { } packageId)
         {
-            var review = await db.ReviewPackages.AsNoTracking().Where(p => p.Id == packageId && p.ProjectId == project.Id)
+            var review = await ReviewIssuedSources.VisiblePackages(db, false).AsNoTracking().Where(p => p.Id == packageId && p.ProjectId == project.Id)
                 .Select(p => new { p.Status, p.CurrentRoundId }).SingleOrDefaultAsync();
             var round = review?.CurrentRoundId is { } roundId
                 ? await db.ReviewRounds.AsNoTracking().Where(r => r.Id == roundId && r.ProjectId == project.Id && r.PackageId == packageId)
@@ -202,7 +213,7 @@ public static class ReadinessEndpoints
                     m.RoundId == currentRoundId && m.DeliverableId == targetId);
             if (sources is not null)
             {
-                var source = await db.ReviewPackages.AsNoTracking().Where(p => p.ProjectId == project.Id && p.Id == packageId)
+                var source = await ReviewIssuedSources.VisiblePackages(db, false).AsNoTracking().Where(p => p.ProjectId == project.Id && p.Id == packageId)
                     .Select(p => new LinkedRecord("ReviewPackage", p.Id, p.Key, p.Title, p.Status)).SingleOrDefaultAsync();
                 if (source is not null) sources.Add(new CheckSource(ReadinessCheckCode.ReviewGate, source));
             }
@@ -343,7 +354,7 @@ public static class ReadinessEndpoints
             ? OrgSettings.From((await db.Settings.AsNoTracking().ToListAsync()).ToDictionary(r => r.Key,
                 r => System.Text.Json.JsonDocument.Parse(r.Value).RootElement.Clone()))
             : await suppliedSettings.Get(db);
-        var package = await db.ReviewPackages.AsNoTracking().Where(p => p.Id == requirement.RequiredReviewPackageId && p.ProjectId == project.Id)
+        var package = await ReviewIssuedSources.VisiblePackages(db, false).AsNoTracking().Where(p => p.Id == requirement.RequiredReviewPackageId && p.ProjectId == project.Id)
             .Select(p => new { p.Id, p.CurrentRoundId, p.Status }).SingleOrDefaultAsync();
         if (package?.CurrentRoundId is not { } roundId)
             return new(true, null, "Review capacity is unknown until the required package has a current round.");
@@ -798,14 +809,26 @@ public static class ReadinessEndpoints
         SettingsStore settings)
     {
         var (project, ctx) = await access.Project(projectId, false);
+        var org = await settings.Get(db);
+        await using var snapshot = org.IsFlagOn("screen_patterns")
+            ? await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead) : null;
+        if (snapshot is not null) (project, ctx) = await access.Project(projectId, false);
+        var now = clock.GetUtcNow();
         Check.OneOf(targetType, ["Task", "Deliverable"], "targetType");
         var assessment = await db.ReadinessAssessments.AsNoTracking().SingleOrDefaultAsync(a =>
             a.ProjectId == projectId && a.TargetType == targetType && a.TargetId == targetId) ?? throw ApiException.NotFound();
         var checks = await db.ReadinessChecks.AsNoTracking().Where(c => c.ProjectId == projectId &&
             c.AssessmentId == assessment.Id).OrderBy(c => c.Code).ToListAsync();
         var sources = new List<CheckSource>();
-        var result = await EvaluateCurrent(db, project, targetType, targetId, assessment, checks,
-            clock.Today(await settings.Get(db)), clock.GetUtcNow(), settings, sources);
+        WorkReadinessInputReader.Evaluation? evaluation = null;
+        ReadinessResult result;
+        if (org.IsFlagOn("screen_patterns"))
+        {
+            evaluation = await WorkReadinessInputReader.Evaluate(db, project, targetType, targetId, org, settings, now, assessment, checks, true);
+            sources = evaluation.Sources; result = evaluation.Result;
+        }
+        else result = await EvaluateCurrent(db, project, targetType, targetId, assessment, checks,
+            clock.Today(org), now, settings, sources);
         var managedProjects = Permissions.IsPM(access.Actor, ctx)
             ? db.Projects.Where(p => p.Id == projectId).Select(p => p.Id) : db.Projects.Where(_ => false).Select(p => p.Id);
         var allocationLinks = db.AllocationWorkLinks.AsNoTracking().Where(l => l.ReleasedAt == null &&
@@ -819,9 +842,15 @@ public static class ReadinessEndpoints
         sources.AddRange(allocationSources.Select(a => new CheckSource(a.Purpose == AllocationPurpose.Review
             ? ReadinessCheckCode.ReviewCapacity : ReadinessCheckCode.ProductionCapacity,
             new LinkedRecord("ResourceAllocation", a.Id, "", $"{a.Purpose} · {a.FromDate:yyyy-MM-dd}–{a.ThroughDate:yyyy-MM-dd}", a.Status))));
+        ReadinessDeliveryPresentation? presentation = null;
+        if (evaluation is not null)
+        {
+            var target = await ReadTarget(db, project, targetType, targetId);
+            presentation = await WorkReadinessInputReader.Present(db, project, org, evaluation, target.DisciplineId, target.OwnerId);
+        }
         return TypedResults.Ok(new ReadinessDetail(Read(assessment), [.. checks.Select(Read)], sources.Distinct().ToList(), result.Unknown, result.Blocked,
             [.. (await db.ReadinessExceptions.AsNoTracking().Where(e => e.ProjectId == projectId &&
-                e.AssessmentId == assessment.Id).OrderBy(e => e.CreatedAt).ThenBy(e => e.Id).ToListAsync()).Select(Read)]));
+                e.AssessmentId == assessment.Id).OrderBy(e => e.CreatedAt).ThenBy(e => e.Id).ToListAsync()).Select(Read)], presentation));
     }
 
     static async Task<Ok<List<ReadinessConstraintRow>>> Constraints(Guid projectId, string targetType, Guid targetId, Access access, HubDb db)
@@ -839,11 +868,15 @@ public static class ReadinessEndpoints
         return TypedResults.Ok(result);
     }
 
-    static async Task<Ok<ReadinessConstraintLocation>> ConstraintById(Guid projectId, Guid id, Access access, HubDb db)
+    static async Task<Ok<ReadinessConstraintLocation>> ConstraintById(Guid projectId, Guid id, Access access, HubDb db, SettingsStore store)
     {
-        await access.Project(projectId, false);
-        return TypedResults.Ok(await db.WorkConstraints.AsNoTracking().Where(c => c.ProjectId == projectId && c.Id == id)
-            .Select(c => new ReadinessConstraintLocation(c.Id, c.Key, c.TargetType, c.TargetId)).SingleOrDefaultAsync() ?? throw ApiException.NotFound());
+        var (project, _) = await access.Project(projectId, false);
+        var raw = await db.WorkConstraints.AsNoTracking().Where(c => c.ProjectId == projectId && c.Id == id)
+            .Select(c => new { c.Id, c.Key, c.Description, c.TargetType, c.TargetId }).SingleOrDefaultAsync() ?? throw ApiException.NotFound();
+        var row = new ReadinessConstraintLocation(raw.Id, raw.Key, raw.TargetType, raw.TargetId);
+        var settings = await store.Get(db);
+        var context = await new RecordContextReader(db, project, settings).Read(RecordContextKind.WorkConstraint, id);
+        return TypedResults.Ok(row with { Title = settings.IsFlagOn("screen_patterns") ? raw.Description : null, Context = context });
     }
 
     static async Task<List<LinkedRecord>> LinkOptions(Guid projectId, string type, Access access, HubDb db)
@@ -856,22 +889,29 @@ public static class ReadinessEndpoints
     public sealed record ReadyOutput(Guid Id, string TargetType, Guid TargetId, string Key, string Name, DateOnly? DueDate,
         Guid? OwnerId, Guid DisciplineId, string IntendedOutput, string CompletionCriteria, string State);
 
+    // Shared unchanged carryover predicate; meeting reads do not invoke the readiness evaluator.
+    internal static IQueryable<WorkConstraint> ConstraintsThrough(HubDb db, Guid projectId, DateOnly last) =>
+        db.WorkConstraints.AsNoTracking().Where(c => c.ProjectId == projectId &&
+            c.State != ConstraintState.VerifiedRemoved && c.State != ConstraintState.Cancelled &&
+            c.NeededBy <= last).OrderBy(c => c.NeededBy).ThenBy(c => c.CreatedAt).ThenBy(c => c.Id);
+
     /// The readiness window behind both the page and its exports (FR-RDY-07, FR-MDC-06): open constraints needed by the end of
     /// the window, and work due in it whose current evaluation is Ready.
-    static async Task<(DateOnly First, DateOnly Last, IQueryable<WorkConstraint> Constraints, List<ReadyOutput> Ready)> WindowData(
-        Project project, DateOnly? from, DateOnly? to, HubDb db, SettingsStore settings, TimeProvider clock)
+    static async Task<(DateOnly First, DateOnly Last, IQueryable<WorkConstraint> Constraints, List<ReadyOutput> Ready, List<WorkEvaluation>? Work)> WindowData(
+        Project project, DateOnly? from, DateOnly? to, HubDb db, SettingsStore settings, TimeProvider clock,
+        bool includeWork = false, DateTimeOffset? capturedAt = null)
     {
         var projectId = project.Id;
         var org = await settings.Get(db);
-        var first = from ?? clock.Today(org);
+        var now = capturedAt ?? clock.GetUtcNow();
+        var today = DateOnly.FromDateTime(Clock.Local(now, org).DateTime);
+        var first = from ?? today;
         var defaultDays = org.CoordinationLookaheadWeeks * 7 - 1;
         Check.That(to.HasValue || first.DayNumber <= DateOnly.MaxValue.DayNumber - defaultDays, "from", "error.invalid");
         var last = to ?? first.AddDays(defaultDays);
         Check.That(last >= first && last.DayNumber - first.DayNumber <= 83, "to", "error.invalid");
 
-        var constraints = db.WorkConstraints.AsNoTracking().Where(c => c.ProjectId == projectId &&
-            c.State != ConstraintState.VerifiedRemoved && c.State != ConstraintState.Cancelled &&
-            c.NeededBy <= last).OrderBy(c => c.NeededBy).ThenBy(c => c.CreatedAt).ThenBy(c => c.Id);
+        var constraints = ConstraintsThrough(db, projectId, last);
 
         var tasks = await db.Tasks.AsNoTracking().Where(t => t.ProjectId == projectId && t.DeletedAt == null &&
             t.DueDate >= first && t.DueDate <= last && t.Status != TaskStatuses.Complete && t.Status != TaskStatuses.Cancelled && t.Status != TaskStatuses.OnHold)
@@ -887,8 +927,26 @@ public static class ReadinessEndpoints
             .ToListAsync();
         var checks = await db.ReadinessChecks.AsNoTracking().Where(c => c.ProjectId == projectId &&
             assessments.Select(a => a.Id).Contains(c.AssessmentId)).ToListAsync();
-        var today = clock.Today(org);
         var ready = new List<ReadyOutput>();
+        if (includeWork)
+        {
+            var all = new List<WorkEvaluation>();
+            foreach (var (type, facts) in tasks.Select(t => (ItemType.Task, t)).Concat(deliverables.Select(d => (ItemType.Deliverable, d))))
+            {
+                var assessment = assessments.SingleOrDefault(a => a.TargetType == type && a.TargetId == facts.Id);
+                var evaluation = await WorkReadinessInputReader.Evaluate(db, project, type, facts.Id, org, settings, now,
+                    assessment, assessment is null ? null : checks.Where(c => c.AssessmentId == assessment.Id).ToList(), true);
+                all.Add(new(type, facts, evaluation));
+                if (evaluation.HasAssessment && evaluation.Available && evaluation.Result.State == ReadinessState.Ready)
+                    ready.Add(new(evaluation.Assessment.Id, type, facts.Id, facts.Key, facts.Name, facts.DueDate, facts.OwnerId,
+                        facts.ProjectDisciplineId, evaluation.Assessment.IntendedOutput, evaluation.Assessment.CompletionCriteria, evaluation.Result.State));
+            }
+            int Order(string state) => state == ReadinessState.NotReady ? 0 : state == ReadinessState.NeedsAssessment ? 1
+                : state == ReadinessState.ProceedUnderAssumption ? 2 : 3;
+            return (first, last, constraints, [.. ready.OrderBy(r => r.DueDate).ThenBy(r => r.Key)],
+                [.. all.OrderBy(w => Order(w.Evaluation.Result.State)).ThenBy(w => w.Facts.DueDate)
+                    .ThenBy(w => w.Facts.Key, StringComparer.Ordinal).ThenBy(w => w.TargetType, StringComparer.Ordinal).ThenBy(w => w.Facts.Id)]);
+        }
         foreach (var assessment in assessments)
         {
             var result = await EvaluateCurrent(db, project, assessment.TargetType, assessment.TargetId, assessment,
@@ -901,14 +959,19 @@ public static class ReadinessEndpoints
                 ready.Add(new(assessment.Id, assessment.TargetType, deliverable.Id, deliverable.Key, deliverable.Name, deliverable.DueDate,
                     deliverable.OwnerId, deliverable.ProjectDisciplineId, assessment.IntendedOutput, assessment.CompletionCriteria, result.State));
         }
-        return (first, last, constraints, [.. ready.OrderBy(r => r.DueDate).ThenBy(r => r.Key)]);
+        return (first, last, constraints, [.. ready.OrderBy(r => r.DueDate).ThenBy(r => r.Key)], null);
     }
 
-    static async Task<Ok<ReadinessWindow>> Window(Guid projectId, DateOnly? from, DateOnly? to, int? constraintsPage, int? readyPage, int? pageSize, Access access, HubDb db,
+    static async Task<Ok<ReadinessWindow>> Window(Guid projectId, DateOnly? from, DateOnly? to, int? constraintsPage, int? readyPage, int? workPage, int? pageSize, Access access, HubDb db,
         SettingsStore settings, TimeProvider clock)
     {
         var (project, _) = await access.Project(projectId, false);
-        var window = await WindowData(project, from, to, db, settings, clock);
+        var org = await settings.Get(db);
+        var enabled = org.IsFlagOn("screen_patterns");
+        await using var snapshot = enabled ? await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead) : null;
+        if (snapshot is not null) (project, _) = await access.Project(projectId, false);
+        var now = clock.GetUtcNow();
+        var window = await WindowData(project, from, to, db, settings, clock, enabled, now);
         var constraintsTotal = await window.Constraints.CountAsync();
         var paged = constraintsPage.HasValue || readyPage.HasValue || pageSize.HasValue;
         var (cp, size) = Http.Paging(constraintsPage, pageSize);
@@ -916,11 +979,25 @@ public static class ReadinessEndpoints
         if (!paged) size = 500; // existing preview callers retain their bounded response
         var constraints = await window.Constraints.Skip((cp - 1) * size).Take(size).ToListAsync();
         var readyTotal = window.Ready.Count;
+        ReadinessWorkPage? work = null;
+        if (window.Work is { } cohort)
+        {
+            var (wp, ws) = Http.Paging(workPage, pageSize);
+            var items = new List<ReadinessWorkRow>();
+            foreach (var row in cohort.Skip((wp - 1) * ws).Take(ws))
+            {
+                var facts = row.Facts; var evaluation = row.Evaluation;
+                items.Add(new(row.TargetType, facts.Id, facts.Key, facts.Name, facts.DueDate, facts.OwnerId, facts.ProjectDisciplineId,
+                    evaluation.Result.State, evaluation.HasAssessment, evaluation.Available,
+                    await WorkReadinessInputReader.Present(db, project, org, evaluation, facts.ProjectDisciplineId, facts.OwnerId)));
+            }
+            work = new("DatedOpenWork", now, items, cohort.Count, wp, ws);
+        }
         return TypedResults.Ok(new ReadinessWindow(window.First, window.Last, [.. constraints.Select(Read)], constraintsTotal,
             cp, rp, size,
             !paged && constraintsTotal > constraints.Count,
             [.. window.Ready.Skip((rp - 1) * size).Take(size)],
-            readyTotal, !paged && readyTotal > size));
+            readyTotal, !paged && readyTotal > size, work));
     }
 
     static readonly Col[] ConstraintColumns = Hub.Api.Records.WorkConstraintRecord.ReadinessConstraintColumns;

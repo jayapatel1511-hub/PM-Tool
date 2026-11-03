@@ -1,0 +1,11 @@
+{"status":"FAIL","suite":"notice-preferences","url":"http://127.0.0.1:8872/preferences","observations":[],"reads":[{"status":200,"malformed":false,"revision":0},{"status":200,"malformed":false,"revision":0},{"status":200,"malformed":false,"revision":0},{"status":200,"malformed":false,"revision":0}],"writes":[],"unexpected":[],"errors":[]}
+locator.click: Timeout 15000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('link', { name: 'Home', exact: true })[22m
+
+    at /Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/web/tests/notice-preferences.cjs:107:65 {
+  log: [
+    "  - waiting for getByRole('link', { name: 'Home', exact: true })"
+  ],
+  name: 'TimeoutError'
+}

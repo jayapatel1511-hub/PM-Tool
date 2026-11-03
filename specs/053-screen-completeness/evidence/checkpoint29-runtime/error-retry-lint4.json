@@ -1,0 +1,9 @@
+{
+  "exitCode": 0,
+  "args": [
+    "node",
+    "node_modules/oxlint/bin/oxlint",
+    "src/components/hub/common.tsx"
+  ],
+  "atUtc": "2026-11-02T18:38:07.564147+00:00"
+}

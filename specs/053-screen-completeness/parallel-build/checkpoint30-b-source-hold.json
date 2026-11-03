@@ -1,0 +1,9 @@
+{
+  "files": {
+    "src/Hub.Api/Features/TaskContributions.cs": "e5e2dd9249859b84522da0c55bd8368a2821ed60e97ab0152b544955c8996a81",
+    "src/Hub.Api/Features/Tasks.cs": "07f580dc6f3abfb1c94a70b0029e1cedde4abf08cb32309f075d0eeece58c3b3",
+    "tests/Hub.Tests/Api/TaskContributionTests.cs": "7b3d8d11c5265ca9d310426705c0fa19a6a10c86a4e06554c2d5405d25ac19ab",
+    "tests/Hub.Tests/Api/TaskHistoryActorTests.cs": "298a376a0cb5c5b979d3218cda6120f7f4f0e3d909074662fac55e9f18277733"
+  },
+  "status": "REPAIRED_READY_HASH_MATCH_HOLD_UNRUN"
+}

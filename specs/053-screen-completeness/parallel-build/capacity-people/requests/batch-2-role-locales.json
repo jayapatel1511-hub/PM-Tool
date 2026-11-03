@@ -1,0 +1,7 @@
+{
+  "web/src/i18n/en.ts": {
+    "openRole.statusFilter": "Role status",
+    "openRole.allStatuses": "All statuses",
+    "openRole.exportAllStatuses": "Open roles · all statuses"
+  }
+}

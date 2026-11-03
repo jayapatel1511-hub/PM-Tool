@@ -1,0 +1,28 @@
+{
+  "atUtc": "2026-11-02T11:47:58.227162+00:00",
+  "status": "LOCAL_R2_FR61_PASS_S35_R3_OPEN",
+  "dotnetDistinct": 149,
+  "browserFinalCases": 10,
+  "browserExplicitMockCommands": 66,
+  "browserDownloads": 2,
+  "unexpectedRequestsOrPageErrors": 0,
+  "adjacentChrome": [
+    "register1",
+    "findingcontext1"
+  ],
+  "visual": "capture4inspectedread-only0writes",
+  "sourceCounts": {
+    "csharp": 613,
+    "web": 446,
+    "finalServed": 143,
+    "retainedOutputs": 401
+  },
+  "checkedSlices": 34,
+  "limits": [
+    "R3/fullS35unimplemented",
+    "Legacyprovenancechoicepending",
+    "QA24cleanuprejectedpendingexplicitconfirmation",
+    "NoKestreljoin/human/hosted/pilot/Accepted"
+  ],
+  "findings": "../checkpoint26-findings.md"
+}

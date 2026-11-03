@@ -1,0 +1,265 @@
+{
+  "observedAtUtc": "2026-11-01T13:57:08.765Z",
+  "staff": {
+    "status": 200,
+    "body": {
+      "scope": "direct",
+      "canSeeAll": false,
+      "tiles": {
+        "staff": 5,
+        "assignments": 6,
+        "withOverdue": 0,
+        "withBlocked": 0,
+        "reviewsStalled": 0
+      },
+      "people": [
+        {
+          "id": "01a19751-d447-7e1f-9a5f-23c4303d03a4",
+          "displayName": "Alex Chen",
+          "jobTitle": "Civil Designer (EIT)",
+          "officeId": "01a19751-d397-7b0f-8816-fd179d794104",
+          "isActive": true,
+          "projects": 1,
+          "roles": {
+            "pm": 0,
+            "dl": 0,
+            "team": 1,
+            "reviewer": 0,
+            "viewer": 0
+          },
+          "open": 1,
+          "overdue": 0,
+          "blocked": 0,
+          "blocking": 0,
+          "reviews": 0,
+          "reviewsStalled": 0,
+          "deliverablesDue": 1,
+          "lastActivityAt": "2026-11-01T13:48:55.248333+00:00",
+          "personFacts": {
+            "notices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            },
+            "certifications": []
+          }
+        },
+        {
+          "id": "01a19751-d447-7f75-a176-926ba05c6c3e",
+          "displayName": "Jill Martin",
+          "jobTitle": "Civil Designer",
+          "officeId": "01a19751-d397-7b0f-8816-fd179d794104",
+          "isActive": true,
+          "projects": 1,
+          "roles": {
+            "pm": 0,
+            "dl": 0,
+            "team": 1,
+            "reviewer": 0,
+            "viewer": 0
+          },
+          "open": 0,
+          "overdue": 0,
+          "blocked": 0,
+          "blocking": 0,
+          "reviews": 0,
+          "reviewsStalled": 0,
+          "deliverablesDue": 0,
+          "lastActivityAt": null,
+          "personFacts": {
+            "notices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            },
+            "certifications": []
+          }
+        },
+        {
+          "id": "01a19751-d447-780f-8722-3aaa0a0c4d21",
+          "displayName": "Marc Dubois",
+          "jobTitle": "Senior Civil Engineer",
+          "officeId": "01a19751-d397-7b0f-8816-fd179d794104",
+          "isActive": true,
+          "projects": 2,
+          "roles": {
+            "pm": 0,
+            "dl": 2,
+            "team": 2,
+            "reviewer": 0,
+            "viewer": 0
+          },
+          "open": 0,
+          "overdue": 0,
+          "blocked": 0,
+          "blocking": 0,
+          "reviews": 0,
+          "reviewsStalled": 0,
+          "deliverablesDue": 0,
+          "lastActivityAt": "2026-11-01T13:49:11.125841+00:00",
+          "personFacts": {
+            "notices": {
+              "personType": "Co-op",
+              "startDate": "2026-11-02",
+              "endDate": "2026-11-11",
+              "starts": true,
+              "ends": true
+            },
+            "certifications": []
+          }
+        },
+        {
+          "id": "01a19758-d722-7e80-924f-8512667cbbe5",
+          "displayName": "qa20-report-a",
+          "jobTitle": null,
+          "officeId": null,
+          "isActive": true,
+          "projects": 1,
+          "roles": {
+            "pm": 0,
+            "dl": 0,
+            "team": 1,
+            "reviewer": 0,
+            "viewer": 0
+          },
+          "open": 20,
+          "overdue": 0,
+          "blocked": 0,
+          "blocking": 0,
+          "reviews": 0,
+          "reviewsStalled": 0,
+          "deliverablesDue": 0,
+          "lastActivityAt": null,
+          "personFacts": {
+            "notices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            },
+            "certifications": []
+          }
+        },
+        {
+          "id": "01a19758-d73a-7cbd-892a-36e719785ce3",
+          "displayName": "qa20-report-b",
+          "jobTitle": null,
+          "officeId": null,
+          "isActive": true,
+          "projects": 1,
+          "roles": {
+            "pm": 0,
+            "dl": 0,
+            "team": 1,
+            "reviewer": 0,
+            "viewer": 0
+          },
+          "open": 15,
+          "overdue": 0,
+          "blocked": 0,
+          "blocking": 0,
+          "reviews": 0,
+          "reviewsStalled": 0,
+          "deliverablesDue": 0,
+          "lastActivityAt": null,
+          "personFacts": {
+            "notices": {
+              "personType": null,
+              "startDate": null,
+              "endDate": null,
+              "starts": false,
+              "ends": false
+            },
+            "certifications": []
+          }
+        }
+      ],
+      "asOf": "2026-11-01T13:57:08.756081+00:00"
+    }
+  },
+  "time": {
+    "status": 200,
+    "body": {
+      "from": "2026-10-26",
+      "to": "2026-11-01",
+      "entries": [
+        {
+          "id": "01a19754-b510-72fe-8855-afc8b8da84e9",
+          "projectId": "01a19754-b327-78af-b89f-a3a43edcffd7",
+          "projectNumber": "QA20-REAL-001",
+          "projectName": "Checkpoint 20 real QA project",
+          "taskId": "01a19754-b4c9-7e32-b408-97c300f9c125",
+          "taskKey": "QA20-REAL-001-T0001",
+          "taskName": "QA20 real task one",
+          "userId": "01a19751-d447-79d4-91a8-0895553dde52",
+          "person": "Priya Nair",
+          "workDate": "2026-10-27",
+          "hours": 2,
+          "note": "QA20 real acceptance entry",
+          "rowVersion": 0,
+          "canEdit": true,
+          "editNeedsReason": false
+        },
+        {
+          "id": "01a19754-b522-7311-9440-c37d40c61b4f",
+          "projectId": "01a19754-b327-78af-b89f-a3a43edcffd7",
+          "projectNumber": "QA20-REAL-001",
+          "projectName": "Checkpoint 20 real QA project",
+          "taskId": "01a19754-b4f4-7d85-8480-9cd3522778fc",
+          "taskKey": "QA20-REAL-001-T0002",
+          "taskName": "QA20 real task two",
+          "userId": "01a19751-d447-79d4-91a8-0895553dde52",
+          "person": "Priya Nair",
+          "workDate": "2026-10-28",
+          "hours": 2,
+          "note": "QA20 real acceptance entry",
+          "rowVersion": 0,
+          "canEdit": true,
+          "editNeedsReason": false
+        }
+      ],
+      "total": 4,
+      "byDay": [
+        {
+          "date": "2026-10-27",
+          "hours": 2
+        },
+        {
+          "date": "2026-10-28",
+          "hours": 2
+        }
+      ],
+      "byTask": [
+        {
+          "taskId": "01a19754-b4c9-7e32-b408-97c300f9c125",
+          "taskKey": "QA20-REAL-001-T0001",
+          "taskName": "QA20 real task one",
+          "projectNumber": "QA20-REAL-001",
+          "hours": 2
+        },
+        {
+          "taskId": "01a19754-b4f4-7d85-8480-9cd3522778fc",
+          "taskKey": "QA20-REAL-001-T0002",
+          "taskName": "QA20 real task two",
+          "projectNumber": "QA20-REAL-001",
+          "hours": 2
+        }
+      ],
+      "byProject": [
+        {
+          "projectId": "01a19754-b327-78af-b89f-a3a43edcffd7",
+          "projectNumber": "QA20-REAL-001",
+          "projectName": "Checkpoint 20 real QA project",
+          "hours": 4
+        }
+      ],
+      "canReview": true,
+      "asOf": "2026-11-01T13:57:08.765478+00:00"
+    }
+  }
+}

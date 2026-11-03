@@ -1,0 +1,31 @@
+{
+  "atUtc": "2026-11-03T03:32:39.517731+00:00",
+  "userChoice": "Align template enforcement with \u00a78",
+  "sourceReview": "checkpoint24_creator_review scopedPASS",
+  "selectedChecks": {
+    "total": "176",
+    "executed": "176",
+    "passed": "176",
+    "failed": "0",
+    "error": "0",
+    "timeout": "0",
+    "aborted": "0",
+    "inconclusive": "0",
+    "passedButRunAborted": "0",
+    "notRunnable": "0",
+    "notExecuted": "0",
+    "disconnected": "0",
+    "warning": "0",
+    "completed": "0",
+    "inProgress": "0",
+    "pending": "0"
+  },
+  "canonicalPolicy": "Admin OR effective non-ReadOnly(SystemPM OR TemplateEditor)",
+  "projectOnlyPMExcluded": true,
+  "editorFlagDoesNotGrantProjectCreation": true,
+  "apiAndUIRegistrationDeriveExistingCapability": true,
+  "actualNewNavBrowser": "UNRUN; no frontend source changed",
+  "fullFR83": "INCOMPLETE; no S49/Accepted claim",
+  "sourceCount": 697,
+  "qa24Cleanup": "PASS_APPROVED_QA24_CLEANUP"
+}

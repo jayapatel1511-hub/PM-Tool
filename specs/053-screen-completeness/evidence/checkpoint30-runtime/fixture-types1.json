@@ -1,0 +1,10 @@
+{
+  "exitCode": 0,
+  "args": [
+    "node",
+    "node_modules/typescript/bin/tsc",
+    "-p",
+    "tests/tsconfig.json"
+  ],
+  "atUtc": "2026-11-02T20:15:28.330076+00:00"
+}

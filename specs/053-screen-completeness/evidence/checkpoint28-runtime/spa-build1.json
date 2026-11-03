@@ -1,0 +1,13 @@
+{
+  "exitCode": 0,
+  "args": [
+    "node",
+    "node_modules/vite/bin/vite.js",
+    "build",
+    "--outDir",
+    "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053/.review/checkpoint28-artifacts/bin/spa-wwwroot"
+  ],
+  "atUtc": "2026-11-02T15:08:01.409938+00:00",
+  "APIOrigin": "http://127.0.0.1:5094",
+  "noRealAPI": true
+}

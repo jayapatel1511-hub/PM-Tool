@@ -1,0 +1,359 @@
+{
+  "inventory": "G63 coordination command and witness inventory",
+  "date": "2026-11-03",
+  "checkout": "/Users/jaypatel/.codex/worktrees/ef94/PM-Tool/.build-052-053",
+  "authority": "The G63 inventory loan authors only this file. During inventory, a separate exact Root loan repaired Reviews.cs inherited-verifier validation; that source is now HOLD. No tests, manifest or specification status edited.",
+  "plan": "specs/053-screen-completeness/parallel-build/capacity-people/requests/g61-role-completeness-plan.md",
+  "manifest": "tests/Hub.Tests/Snapshots/permission-explainer-bindings.json",
+  "section_fingerprint_observed": "85c711e3f84e390bf71cc817cd5fb188705d21477f59f17262a874ef36420982",
+  "coverage": "Pending",
+  "execution": "No tests, application, compiler, parser, coverage checker, generator or runtime executed by this inventory. Static reads, source diffs and requested SHA256 only.",
+  "limits": [
+    "All paths below are relative to checkout. C01-C18 are aliases; exact manifest keys are retained.",
+    "A method reference is test-file alias::exact method name. X classes in four partial files are all Hub.Tests.Api.ExternalReviewTests.",
+    "Saved PASS means a matching UnitTestResult outcome=Passed was observed, not that every role, suboperation or theory case is covered.",
+    "Source equality is byte identity for listed files only; it never marks a row Evaluated or proves a whole dependency graph equivalent.",
+    "Root is verifying G62 concurrently. Provider1 and its source freeze remain historical; the separately authorized Reviews.cs repair below has no fresh execution evidence in this inventory. Refresh before reuse.",
+    "No PermissionExplainerCoordinationRowsTests.cs file was found. Reuse existing witnesses before adding missing cases."
+  ],
+  "test_files": {
+    "H": "tests/Hub.Tests/Api/HandoffsTests.cs",
+    "R": "tests/Hub.Tests/Api/ReviewChangeTests.cs",
+    "RM": "tests/Hub.Tests/Api/ReviewChangePermissionMatrixTests.cs",
+    "RR": "tests/Hub.Tests/Api/ReviewRegisterTests.cs",
+    "RESP": "tests/Hub.Tests/Api/ReviewResponseTests.cs",
+    "RECEIPT": "tests/Hub.Tests/Api/ReviewResponseReceiptTests.cs",
+    "EXPORT": "tests/Hub.Tests/Api/ReviewResponseExportTests.cs",
+    "S": "tests/Hub.Tests/Api/SubmissionApiTests.cs",
+    "SM": "tests/Hub.Tests/Api/SubmissionPermissionMatrixTests.cs",
+    "A": "tests/Hub.Tests/Api/AllocationApiTests.cs",
+    "V": "tests/Hub.Tests/Api/AvailabilityBuildTests.cs",
+    "B": "tests/Hub.Tests/Api/DesignBasisApiTests.cs",
+    "BM": "tests/Hub.Tests/Api/DesignBasisPermissionMatrixTests.cs",
+    "READY": "tests/Hub.Tests/Api/ReadinessApiTests.cs",
+    "GATE": "tests/Hub.Tests/Api/ReadinessSubmissionGateTests.cs",
+    "W": "tests/Hub.Tests/Api/WeeklyCommitmentWeekTests.cs",
+    "L": "tests/Hub.Tests/Api/LocationIssueTests.cs",
+    "SWEEP": "tests/Hub.Tests/Api/CoordinationLifecycleSweepTests.cs",
+    "X": "tests/Hub.Tests/Api/ExternalReviewTests.cs",
+    "XR": "tests/Hub.Tests/Api/ExternalReviewReceiptTests.cs",
+    "XS": "tests/Hub.Tests/Api/ExternalReviewSchemaTests.cs",
+    "XE": "tests/Hub.Tests/Api/ExternalReviewExportTests.cs"
+  },
+  "evidence": {
+    "E20": {
+      "trx": "specs/053-screen-completeness/evidence/checkpoint20-runtime/checkpoint20-adjacent.trx",
+      "source_manifest": null,
+      "note": "Only Handoff wire-contract PASS located here for this inventory; no authorization completion inferred. Exact per-run C# source binding not established.",
+      "passed_methods": ["H::List_options_detail_and_create_keep_their_property_names_order_nulls_and_flags"]
+    },
+    "E26A": {
+      "trx": "specs/053-screen-completeness/evidence/checkpoint26-runtime/review-adjacent1.trx",
+      "source_manifest": "specs/053-screen-completeness/evidence/checkpoint26-runtime/compiled-csharp-source2.json",
+      "association": "Same-checkpoint recorded compiled sources; full producer chain not independently replayed.",
+      "passed_methods": [
+        "R::AC_MRV_01_02_all_disciplines_and_independent_finding_verification_gate_issue",
+        "R::AC_MRV_03_05_new_revision_resets_decisions_and_carries_findings_without_erasing_history",
+        "R::AC_MRV_04_authorship_and_reviewer_reassignment_cannot_bypass_independence",
+        "R::Removing_a_manifest_deliverable_requires_impact_review_and_releases_its_issue_gate",
+        "R::Reassigning_a_resolver_does_not_make_their_old_response_independent_evidence",
+        "R::Withdrawal_needs_named_verifier_then_coordinator_ack_and_has_history",
+        "R::AC_CHG_01_02_03_only_linked_targets_assessed_ack_is_not_disposition_and_retention_is_explicit",
+        "R::AC_CHG_04_concurrent_retries_and_stale_head_cannot_mix_publication_or_adoption",
+        "R::AC_CHG_05_update_needs_completed_correction_and_independent_verification",
+        "R::Named_owner_and_verifier_removed_from_the_team_cannot_decide_a_reference_impact",
+        "R::Review_and_change_surfaces_are_scoped_searchable_exportable_and_audited",
+        "RR::Malformed_foreign_relationships_are_omitted_from_rows_counts_and_options",
+        "RR::Restricted_project_access_and_foreign_filter_values_never_expand_authorized_options"
+      ],
+      "source_note": "Changes.cs matches its recorded 85e2d586 hash. Reviews.cs, ReviewRegister.cs, ReviewResponseExport.cs and Coordination.cs differ; Permissions.cs also differs. Historical Handoffs.cs d12d71e2 differs from current b151f39e."
+    },
+    "E26R": {
+      "trx": "specs/053-screen-completeness/evidence/checkpoint26-runtime/response-outcome1.trx",
+      "source_manifest": "specs/053-screen-completeness/evidence/checkpoint26-runtime/compiled-csharp-source2.json",
+      "association": "Same checkpoint; inventory does not prove that every later compiled-source manifest was the exact producer of this earlier run.",
+      "passed_methods": [
+        "RESP::Response_updates_current_and_one_immutable_event_without_bypassing_independent_closure",
+        "RESP::Named_actor_stale_version_and_non_response_outcome_refusals_are_atomic",
+        "RESP::Missing_or_invalid_response_evidence_is_refused_without_writes",
+        "RESP::Both_carry_paths_reset_the_new_finding_and_retain_the_original_response",
+        "RECEIPT::Genuine_six_field_receipt_replays_after_flag_on_without_new_event_or_legacy_backfill",
+        "RECEIPT::New_outcome_receipt_replays_once_and_is_hidden_before_lookup_while_flag_off",
+        "EXPORT::Eight_fixed_columns_preserve_complete_history_safe_text_and_actual_people_without_private_metadata",
+        "EXPORT::Authorization_readonly_filename_dark_route_and_existing_summary_export_keep_their_contracts",
+        "EXPORT::Foreign_relationships_refuse_the_entire_download_without_leaking_or_logging"
+      ],
+      "source_note": "R2 owner Reviews.cs and exporter have changed for G62; rerun existing tests rather than treating old PASS as current."
+    },
+    "E31": {
+      "trx": "specs/053-screen-completeness/evidence/checkpoint31-runtime/trx-focused1/focused1.trx",
+      "source_manifest": "specs/053-screen-completeness/evidence/checkpoint31-runtime/solution-csharp-source1.json",
+      "passed_methods": [
+        "V::Management_commands_refuse_read_only_supervisor_without_writes_and_restore_supervisor_success",
+        "V::Management_commands_preserve_canonical_admin_with_stored_read_only_role",
+        "V::HR_import_is_idempotent_explicit_cancellation_restores_capacity_and_no_missing_row_cancels",
+        "V::Invalid_or_unmapped_rows_block_preview_and_stale_apply_changes_nothing",
+        "V::Own_team_availability_excludes_other_teams_and_HR_identifiers",
+        "V::Coverage_exports_and_calendar_recheck_project_permissions"
+      ],
+      "source_note": "Availability.cs a1ae4973 and Access.cs 957e845c match. Recorded Permissions f08d1591 and Coordination 0943586c differ from current; no complete current graph equivalence claim."
+    },
+    "E33": {
+      "trx": "specs/053-screen-completeness/evidence/checkpoint33-runtime/trx-template-policy1/template-policy1.trx",
+      "source_manifest": "specs/053-screen-completeness/evidence/checkpoint33-runtime/compiled-csharp-source1.json",
+      "passed_methods": [
+        "RM::Coordination_option_flags_match_real_commands_for_every_role_and_status",
+        "RM::Change_assessment_management_matches_work_row_for_every_role_and_status",
+        "SM::Submission_supersede_matches_create_submission_for_every_role_and_status",
+        "BM::Basis_create_and_assign_flags_match_real_commands_for_every_role_and_status"
+      ],
+      "note": "Concrete scopes differ: RM covers source registration, review creation, applicability and promise proposal; SM covers creating a superseding package, not technical issue authorization; BM covers create and another-owner input, not every confirm/assign endpoint."
+    },
+    "E34": {
+      "trx": "specs/053-screen-completeness/evidence/checkpoint34-runtime/trx-external-provider1/external-provider1.trx",
+      "run": "specs/053-screen-completeness/evidence/checkpoint34-runtime/external-provider1.json",
+      "source_manifest": "specs/053-screen-completeness/evidence/checkpoint34-runtime/csharp-source-freeze1.json",
+      "source_at_utc": "2026-11-03T04:36:26.515024+00:00",
+      "finished_at_utc": "2026-11-03T04:39:03.0514770+00:00",
+      "result": "FAIL",
+      "executed": 26,
+      "passed": 22,
+      "failed": 4,
+      "passed_methods": [
+        "X::Member_records_party_comments_without_account_acceptance_or_automatic_signature_and_explicit_verifier_owns_their_evidence",
+        "X::Current_members_may_transcribe_but_viewers_readonly_and_removed_members_cannot",
+        "X::Only_an_inactive_discipline_lead_relation_does_not_grant_recording_or_options_capability",
+        "XR::Advisory_record_queued_after_coordinator_change_must_recheck_its_package_baseline_under_lock",
+        "XR::Exact_named_verifier_retry_waiting_behind_real_reassignment_is_refused_before_receipt_replay",
+        "XR::External_batch_receipt_is_exactly_once_under_concurrency_payload_mismatch_and_current_authority",
+        "XR::Internal_omitted_and_null_extension_keep_exact_wire_hash_and_genuine_receipt_parity",
+        "XR::Stale_nested_baselines_and_late_batch_errors_leave_no_partial_incoming_finding_receipt_sequence_or_notice",
+        "XR::Stored_external_work_disappears_when_dark_while_internal_routes_and_wire_remain_unchanged",
+        "XS::Trusted_legacy_NULL_is_unknown_before_self_review_or_admin_and_cannot_be_backfilled",
+        "XS::Deliberately_corrupt_stored_snapshot_blocks_real_start_record_designation_closure_and_final_approval",
+        "XS::Same_GUID_party_and_user_stay_typed_snapshot_identity_survives_rename_and_scalar_FK_targets_party",
+        "XS::Real_rows_enforce_source_origin_XOR_internal_verifier_and_immutable_capture_and_receipt",
+        "XS::Deliberately_corrupt_carry_is_not_actionable_and_cannot_pass_command_or_save_guards",
+        "XS::Legacy_internal_review_downgrades_to_required_columns_without_defaults_and_reupgrades_without_data_loss",
+        "XE::External_response_sheet_keeps_all_rounds_exact_eight_columns_snapshot_party_and_safe_bytes",
+        "XE::External_export_parent_scope_and_dark_guards_refuse_before_any_export_log_or_read_side_effect"
+      ],
+      "failed_methods": [
+        "X::Future_issue_capture_is_private_even_off_and_historical_authority_does_not_follow_todays_owner",
+        "X::Removed_issue_scope_carries_through_a_later_round_without_repeating_the_old_removal_impact",
+        "X::Explicit_carry_keeps_incoming_identity_resets_response_and_rechecks_independence_against_both_issues",
+        "XS::Actual_future_issue_authors_refuse_downgrade_with_55000_before_schema_data_or_history_changes"
+      ],
+      "note": "Individual passed methods are usable bounded witnesses at this recorded source. The suite failed; four failures remain for Root triage. Do not infer browser acceptance, all-role completeness, commit, deployment or Accepted."
+    }
+  },
+  "source_comparison": {
+    "reference": "E33.source_manifest",
+    "E34_comparison": "All listed hashes match E34.source_manifest except Reviews.cs, repaired after provider1 under a separate exact source loan. That repair is pending fresh verification.",
+    "current_files": [
+      {"path":"src/Hub.Domain/Permissions.cs","sha256":"ba479f7fde5c80ce28c6a35007d2e0fcbb34b5a58ea7c982cf4b0571996ae6e7","E33_sha256":"102f9fad62e6fddf3d43872cadfbb4c9fbadee7e1c7d468aedda55d72410c9a4","comparison":"changed; baseline diff adds RecordExternalReview only; existing methods byte-preserved"},
+      {"path":"src/Hub.Api/Infrastructure/Access.cs","sha256":"957e845ca5607b76687aa8769728c8e1152c1d7725b9d42c293f568565b1576d","comparison":"same E33"},
+      {"path":"src/Hub.Api/Infrastructure/Http.cs","sha256":"d20706c6a09899e30e4e571ee8d363d369e0e18604d573be5304863e1403bb47","comparison":"same E33"},
+      {"path":"src/Hub.Api/Infrastructure/Coordination.cs","sha256":"f473f7e1b928f5e223417c5142f9b26b15deb23eee343300ef29806234045b3d","E33_sha256":"0943586c22b28ca7c5f17f05ec75e89e828b9396481d7494692f32881a1935da","comparison":"changed; optional beforeReplay after lock/fresh context/generic gate, before hash/receipt"},
+      {"path":"src/Hub.Api/Features/Handoffs.cs","sha256":"b151f39e1d85e733dff17be2f1599630edff170065b76104df5a4be086564347","comparison":"same E33; differs E26A"},
+      {"path":"src/Hub.Api/Features/Reviews.cs","sha256":"8d4afca03c772935f100ceecf23dc0a97e2a1a64d23164169d988da35fd512ae","E33_sha256":"6101aa1a733703c43bb539ce99f394dc66eb77d3ee8d06c96eca3318927f9a78","E34_sha256":"8d614010739ffe944cb971ec1dfcd748b7363a248e0f03a72db1ca349612507e","comparison":"changed G62; subsequent inherited-verifier repair HOLD, pending fresh verification"},
+      {"path":"src/Hub.Api/Features/ExternalReviews.cs","sha256":"3e198c5f763ba5878c0161c05b97d11747efd8db5bee69dee8e333512d83756b","comparison":"absent E33; new G62"},
+      {"path":"src/Hub.Api/Features/ReviewIssuedSources.cs","sha256":"309e59528e05995fa0b91ad7b5793ba84edc9c01204203dc20d3657c32b08913","comparison":"absent E33; new G62"},
+      {"path":"src/Hub.Api/Features/Changes.cs","sha256":"85e2d5867a61472431584a54023c704c738994faa2b38abb66d67accbcf77446","comparison":"same E33 and E26A"},
+      {"path":"src/Hub.Api/Features/Submissions.cs","sha256":"2435aea92bfbc3a1efd85625f269cd00f63769922fe2e4d30d0e9a7b7f18001c","comparison":"same E33"},
+      {"path":"src/Hub.Api/Features/SubmissionReadiness.cs","sha256":"13c0d888918a5b5c7ea90ccb20c7404e893cb2aebef4c668fbe78fb9a235eea4","E33_sha256":"2e91e6e59a1d00fb5095957537ec2519108c424f72976b88deaeb57692528447","comparison":"changed G62"},
+      {"path":"src/Hub.Api/Features/Allocations.cs","sha256":"543bb5ccb27e9c12389a7b758b88fe78045c76901d02eaf0e1ce0fa0d82a1492","comparison":"same E33"},
+      {"path":"src/Hub.Api/Features/Availability.cs","sha256":"a1ae49738444aaa4d4ca332a8b951bd86ec7b55d16aebcdbb0da7e22e6671ebe","comparison":"same E33 and E31"},
+      {"path":"src/Hub.Api/Features/PersonCapacity.cs","sha256":"b765ee629bce4541fe65f8056105e1be32f8457d7cf6936c6da315a6a9966b45","comparison":"same E33"},
+      {"path":"src/Hub.Api/Features/DesignBasis.cs","sha256":"9781600667994990b86f28ea4809e69ae294a737fe75b3d032fcb4d4e85241cb","comparison":"same E33"},
+      {"path":"src/Hub.Api/Features/Readiness.cs","sha256":"33fd6b1b4fb65c647eebf558c2265ddb500ecacb4656b164889b4b8fdd080d3b","E33_sha256":"394ab32bfd091fdae381e63545ec1f77c651877558d0d3ace736119b1cf43e49","comparison":"changed G62"},
+      {"path":"src/Hub.Api/Features/WeeklyCommitments.cs","sha256":"7e904bd5f32d643099b45bc7d76df05c114cb124324b7b8ac4ad68a1a861fb0f","comparison":"same E33"},
+      {"path":"src/Hub.Api/Features/Registers.cs","sha256":"a8337cf6d832f14de8684eaf0cf0568104e1e3daf12b4ffef2764bd5fbd31a93","comparison":"same E33"},
+      {"path":"src/Hub.Api/Features/ReviewRegister.cs","sha256":"43e1c4fb6d6f7d35ab54f3b16731772242a335afb1923f51744165e91033793e","E33_sha256":"7697e7ce2afbfbbc1cdb9620f1f3bd703e2f31b92c7c247112c5b93076931806","comparison":"changed G62; historical omit-vs-current refusal contract needs reconciliation"},
+      {"path":"src/Hub.Api/Features/ReviewResponseExport.cs","sha256":"cb3ec0d2bf3cc6f91d5d7735abc5b72a47d579abc4a3568d6ffbfaf23d1fcf4d","E33_sha256":"606cb93d922fa4c64db2fb8b291e92e2386a5132c938010e22e8b5430152d421","comparison":"changed G62"}
+    ],
+    "baseline_diff_reference": ".review/checkpoint34-baseline/manifest.json",
+    "baseline_binding": "Permissions 102f9fad and Coordination 0943586c equal E33's recorded hashes before their source diffs; method-body preservation claim is based on that actual baseline diff."
+  },
+  "shared_boundaries": {
+    "all_project_reads": "Access.Project(projectId,false), actual same-project parents and existing scoped query; public access never grants signatures or write rights.",
+    "canonical_coordination_commands": "Coordination.Run validates requestId, project lock, fresh Access.Project and CoordinationWrite; exact actor/project/request hash receipt; correction reason and atomic save/receipt. Inline business guards run on fresh commands after prior lookup.",
+    "beforeReplay_change": {
+      "default": "Final optional Func<Project,ProjectContext,Task>? beforeReplay=null. No new callback runs for unchanged callers.",
+      "external_opt_in": "Reviews.Create with IssuedRevisionIds; source-aware round/action/coordinator/reviewer/decision/findingAction guards and ExternalReviewEndpoints.Record recheck external current authority/provenance under lock. Internal branches return without new external authority checks; exact internal body/hash preserved.",
+      "unchanged_callers": ["Changes.cs", "Submissions.cs", "Allocations.cs", "DesignBasis.cs", "Readiness.cs", "WeeklyCommitments.cs"],
+      "separate_engines": "Handoffs.Command owns its existing project lock/receipt path. Registers issue operations use their existing version/Tx path. Do not claim the new Run hook covers them.",
+      "saved_current_witnesses": ["XR::Advisory_record_queued_after_coordinator_change_must_recheck_its_package_baseline_under_lock", "XR::Exact_named_verifier_retry_waiting_behind_real_reassignment_is_refused_before_receipt_replay", "XR::Internal_omitted_and_null_extension_keep_exact_wire_hash_and_genuine_receipt_parity"],
+      "fresh_adjacent_candidate": "SWEEP::Mutation_respects_role_and_project_lifecycle",
+      "limit": "E34 exercises only external-review filter. Default-null callers' exact replay/lifecycle regressions are not proved by the three new external witnesses or source hashes."
+    }
+  },
+  "rows": [
+    {
+      "alias":"C01","key":"8.10:Create/assign handoff","source":"src/Hub.Api/Features/Handoffs.cs","status":"FreshNeeded",
+      "operations":[
+        {"handler":"Create","permission":"Permissions.CreateHandoff","guards":"Source same-project/version/noncancelled; one real receiving target, active disciplines/people, source URL, needed/promised dates; Handoffs.Command lifecycle/receipt lock.","tests":["H::Cross_project_targets_missing_promises_stale_sources_and_unavailable_owners_are_refused_atomically","SWEEP::Mutation_respects_role_and_project_lifecycle"]},
+        {"handler":"Edit; Assign","permission":"Permissions.EditHandoff; Permissions.AssignHandoff; CreateHandoff on changed receiving scope","guards":"Version, fixed source, editable/nonterminal state, eligible owners, reason for reassignment; IndependentAssignment includes historical submitters.","tests":["H::Reassignment_preserves_the_submitter_and_cannot_bypass_independence","H::Saving_an_unchanged_draft_keeps_submission_sign_offs_and_a_real_change_still_resets_them"]}
+      ],"saved_pass":["E20: wire only"],"gap":"No saved behavioral PASS located for these create/edit/assign witnesses. E33 Handoffs byte match is not an executed row witness."
+    },
+    {
+      "alias":"C02","key":"8.10:Submit/respond to handoff","source":"src/Hub.Api/Features/Handoffs.cs:Move","status":"FreshNeeded",
+      "operations":[
+        {"handler":"Move Submitted/resubmission","permission":"Permissions.HandoffTransition named sending owner","guards":"Actual legal step/version, current eligible owners/targets, promised date, source SHARE lock/version and immutable snapshot.","tests":["H::AC_HND_04_return_requires_reason_and_resubmission_keeps_each_snapshot","H::FR_HND_02_03_corrected_resubmission_is_incorporated_as_the_revision_used"]},
+        {"handler":"Move receiver response/return; cancellation","permission":"HandoffTransition named receiver; cancellation uses AssignHandoff","guards":"Actual transition and required reason; project correction reason; no manager-as-receiver substitution.","tests":["H::AC_HND_04_return_requires_reason_and_resubmission_keeps_each_snapshot","H::Lifecycle_guards_veto_receiver_commands"]}
+      ],"saved_pass":[],"gap":"Existing behavioral methods found; saved PASS not located in searched packet TRX files. Named sender/receiver and cancellation role alternatives need explicit witnessed mapping."
+    },
+    {
+      "alias":"C03","key":"8.10:Accept/incorporate handoff","source":"src/Hub.Api/Features/Handoffs.cs:Move; IndependentAssignment","status":"FreshNeeded",
+      "operations":[
+        {"handler":"Move Accepted","permission":"Permissions.HandoffTransition","guards":"Named current receiver, legal step/version, existing receipt, criteria outcome, self-receipt setting and current membership.","tests":["H::AC_HND_01_02_usable_acceptance_and_incorporation_preserve_dates_tasks_and_evidence","H::Reassignment_preserves_the_submitter_and_cannot_bypass_independence"]},
+        {"handler":"Move Incorporated","permission":"Permissions.HandoffTransition","guards":"Named receiver; current published/corrected revision or explicitly approved retention; real target not issued; Coordination.Adopt against receipt source.","tests":["H::FR_HND_04_corrected_revision_overtaken_by_a_published_change_needs_approved_retention","H::Scoped_delivery_rechecks_access_and_preserves_source_snapshots_after_a_later_edit"]}
+      ],"saved_pass":[],"gap":"No saved behavioral PASS located for these methods; refresh both AllowSelfReview states and removed/reassigned named receiver without duplicating existing cases."
+    },
+    {
+      "alias":"C04","key":"8.10:Coordinate review package","sources":["src/Hub.Api/Features/Reviews.cs","src/Hub.Api/Features/ReviewIssuedSources.cs"],"status":"RepairPendingFreshVerification",
+      "operations":[
+        {"handler":"Create","permission":"ManageCoordination","guards":"Current eligible coordinator/discipline, one source branch, manifest1..200/assignment1..50, real published internal head or captured known issue authors; independent named reviewers; issued-only RequiredForIssue=false.","tests":["RM::Coordination_option_flags_match_real_commands_for_every_role_and_status","XS::Trusted_legacy_NULL_is_unknown_before_self_review_or_admin_and_cannot_be_backfilled"]},
+        {"handler":"NewRound; Action start/cancel","permission":"CoordinateReview; cancellation and removed scope require management gates","guards":"Fresh package version/current source mode, live status, start Draft, source/assignment revalidation; PM reason/RemovalImpact at real removal boundary; preserve actual carry receipt/source; cancellation releases internal issue gate.","tests":["R::AC_MRV_03_05_new_revision_resets_decisions_and_carries_findings_without_erasing_history","R::Removing_a_manifest_deliverable_requires_impact_review_and_releases_its_issue_gate","X::Explicit_carry_keeps_incoming_identity_resets_response_and_rechecks_independence_against_both_issues","X::Removed_issue_scope_carries_through_a_later_round_without_repeating_the_old_removal_impact"]},
+        {"handler":"AssignCoordinator; AssignReviewer","permission":"ManageCoordination; CoordinateReview respectively","guards":"Fresh row versions, current round, eligible person and actual reviewer independence; external replay guard repeats current authority under project lock.","tests":["R::AC_MRV_04_authorship_and_reviewer_reassignment_cannot_bypass_independence","XR::Advisory_record_queued_after_coordinator_change_must_recheck_its_package_baseline_under_lock"]}
+      ],"saved_pass":["E33: review creation matrix only","E26A: historical internal round/authorship methods","E34: unknown-source and stale-package guards at pre-repair source"],"gap":"E34 inherited-verifier carry and removed-scope methods failed. A separate exact source repair now checks inherited verifier independence against old ancestry plus validated new issued authors before carry/save; source SHA8d4afca0 is HOLD and pending fresh verification."
+    },
+    {
+      "alias":"C05","key":"8.10:Technical review approval","source":"src/Hub.Api/Features/Reviews.cs:Decide; ValidateRound; Recompute; Gate","status":"FreshNeeded",
+      "operations":[
+        {"handler":"Decide InReview/ChangesRequired/Approved","permission":"NamedCoordinationAction for stored assignment reviewer","guards":"Live/current started round and assignment/version; active eligible named reviewer; source/provenance + independence before self-review; unresolved blockers and current-round findings gate final approval. External beforeReplay uses original assignment round.","tests":["R::AC_MRV_01_02_all_disciplines_and_independent_finding_verification_gate_issue","XS::Deliberately_corrupt_stored_snapshot_blocks_real_start_record_designation_closure_and_final_approval"]},
+        {"handler":"Pre-issue Gate","permission":"Issuing command's own authority plus review gate","guards":"Required internal package Approved/current/source revision+URL; external-only package cannot replace required internal pre-issue gate.","tests":["R::AC_MRV_01_02_all_disciplines_and_independent_finding_verification_gate_issue","X::Member_records_party_comments_without_account_acceptance_or_automatic_signature_and_explicit_verifier_owns_their_evidence"]}
+      ],"saved_pass":["E26A","E34: unknown stored snapshot false/true and AC62 happy path"],"gap":"Old internal approval/gate witnesses need current Reviews/shared-caller regression. NewRound inherited verifier conflict is also relevant to later technical eligibility."
+    },
+    {
+      "alias":"C06","key":"8.10:Respond to/verify review finding","sources":["src/Hub.Api/Features/Reviews.cs","src/Hub.Api/Features/ReviewResponses.cs","src/Hub.Api/Features/ExternalReviews.cs"],"status":"FreshNeeded",
+      "operations":[
+        {"handler":"AddFinding internal","permission":"CoordinationWrite plus inline named round/discipline assignment","guards":"Started current round/manifest, real internal source, eligible resolver, independent internal originator/verifier, severity/link; issued mode rejects this route.","tests":["R::AC_MRV_01_02_all_disciplines_and_independent_finding_verification_gate_issue"]},
+        {"handler":"ExternalReviewEndpoints.Record","permission":"RecordPermission -> RecordExternalReview with actual active-DL context","guards":"register_screens/project, issued-only started live round, four required versions, known captured authors, actual party/code and received date; atomic1..200 comments, resolver/discipline/link checks; NULL verifier; no automatic signature/account.","tests":["X::Member_records_party_comments_without_account_acceptance_or_automatic_signature_and_explicit_verifier_owns_their_evidence","X::Current_members_may_transcribe_but_viewers_readonly_and_removed_members_cannot","X::Only_an_inactive_discipline_lead_relation_does_not_grant_recording_or_options_capability","XR::Stale_nested_baselines_and_late_batch_errors_leave_no_partial_incoming_finding_receipt_sequence_or_notice"]},
+        {"handler":"FindingCommand Responded","permission":"NamedCoordinationAction for actual resolver","guards":"Current finding/version, legal step, reason, HTTP(S) resolver evidence, exact outcome when flagged; external source/receipt/ancestor knowledge checked; may respond while verifier NULL.","tests":["RESP::Response_updates_current_and_one_immutable_event_without_bypassing_independent_closure","RESP::Named_actor_stale_version_and_non_response_outcome_refusals_are_atomic","X::Member_records_party_comments_without_account_acceptance_or_automatic_signature_and_explicit_verifier_owns_their_evidence"]},
+        {"handler":"assignResolver; assignVerifier","permission":"CoordinateReview; ManageTeam respectively","guards":"Open/Responded state/version and reason; eligible owner; verifier is explicit named reviewer and independent of complete captured/resolver/responder ancestry; resolver change resets response evidence/outcome.","tests":["R::Reassigning_a_resolver_does_not_make_their_old_response_independent_evidence","X::Member_records_party_comments_without_account_acceptance_or_automatic_signature_and_explicit_verifier_owns_their_evidence"]},
+        {"handler":"VerifiedClosed; return to Open; Withdrawn; acknowledgeWithdrawal","permission":"NamedCoordinationAction for designated verifier; named coordinator acknowledges blocking withdrawal","guards":"Actual step/actor and independent ancestry; external own verification evidence on event without replacing resolver evidence; under-lock original-target replay authority. No unassigned-verifier shortcut.","tests":["R::Withdrawal_needs_named_verifier_then_coordinator_ack_and_has_history","XR::Exact_named_verifier_retry_waiting_behind_real_reassignment_is_refused_before_receipt_replay","XS::Deliberately_corrupt_carry_is_not_actionable_and_cannot_pass_command_or_save_guards"]}
+      ],"saved_pass":["E26A","E26R","E34: bounded external record/response/designation/closure/replay witnesses"],"gap":"Refresh internal R2/receipt tests against current Reviews; E34 is a failed suite and does not complete every return/withdrawal or role scenario."
+    },
+    {
+      "alias":"C07","key":"8.10:Publish source revision/change","source":"src/Hub.Api/Features/Changes.cs","status":"FreshNeeded",
+      "operations":[
+        {"handler":"Register source revision","permission":"PublishSource for actual deliverable; ManageCoordination for external source/changed owner/existing head discipline","guards":"Real target/version/discipline, active eligible owner, stable source identity, explicit supersedes/current head version, published predecessor, valid source fields and nonfuture check date.","tests":["RM::Coordination_option_flags_match_real_commands_for_every_role_and_status","R::External_source_supersession_requires_the_existing_head_discipline"]},
+        {"handler":"Publish change","permission":"PublishSource for notice/source head/actual work","guards":"Draft notice/version, current head/source versions and owner references; publish/adoption/review invalidation in one transaction.","tests":["R::AC_CHG_04_concurrent_retries_and_stale_head_cannot_mix_publication_or_adoption","R::AC_MRV_03_approved_round_is_replaced_on_publication_without_reusing_approvals"]}
+      ],"saved_pass":["E33: register matrix","E26A: publication/concurrency"],"gap":"Changes.cs is byte-identical to both recorded versions, but canonical Run acquired an optional hook; refresh relevant default-null publication/receipt regressions, not an invented second test family."
+    },
+    {
+      "alias":"C08","key":"8.10:Assess changed input","source":"src/Hub.Api/Features/Changes.cs:Adopt; Assess; NoticeCommand; DecideIssueImpact","status":"FreshNeeded",
+      "operations":[
+        {"handler":"input Adopt; acknowledge/disposition/adopt assessment","permission":"NamedCoordinationAction for actual receiving-work owner","guards":"Actual current target owner/source/head/version, same-project use/assessment; acknowledgement alone is not disposition; issued target cannot adopt new work.","tests":["R::AC_CHG_01_02_03_only_linked_targets_assessed_ack_is_not_disposition_and_retention_is_explicit"]},
+        {"handler":"assign assessment; approveRetention; notice assign/cancel","permission":"ManageCoordination for actual work/notice discipline","guards":"Required reason; current owner, eligible reviewer, independent retention approver; old-revision disposition and current impact explicitly retained.","tests":["RM::Change_assessment_management_matches_work_row_for_every_role_and_status","R::AC_CHG_01_02_03_only_linked_targets_assessed_ack_is_not_disposition_and_retention_is_explicit"]},
+        {"handler":"resolve assessment; close notice; decide issue reference impact","permission":"NamedCoordinationAction for designated reviewer/notice owner/reference actor as branch requires","guards":"Completed correction task/version/evidence, independent correction authors, retention approval if needed, all assessments complete; removed named actors cannot decide.","tests":["R::AC_CHG_05_update_needs_completed_correction_and_independent_verification","R::Named_owner_and_verifier_removed_from_the_team_cannot_decide_a_reference_impact"]}
+      ],"saved_pass":["E33: management matrix","E26A"],"gap":"Relevant source bytes match, but no inventory proof of all target-type/status/signature alternatives or current default-null replay behavior."
+    },
+    {
+      "alias":"C09","key":"8.10:Issue submission package","sources":["src/Hub.Api/Features/Submissions.cs","src/Hub.Api/Features/SubmissionReadiness.cs"],"status":"FreshNeeded",
+      "operations":[
+        {"handler":"Create/supersede; Edit/ReplaceManifest/Start; Assign; optional CheckCommand/AssignCheck; Cancel","permission":"CreateSubmission; CoordinateSubmission; AuthoriseSubmission; SignSubmissionCheck according to branch","guards":"Actual same-project milestone/source manifest, current package/check versions and state, active designated owners, source heads; optional applicability sign-off cannot override required derived gate.","tests":["SM::Submission_supersede_matches_create_submission_for_every_role_and_status","S::Optional_applicability_fail_is_recorded_without_blocking_issue"]},
+        {"handler":"Issue","permission":"AuthoriseSubmission","guards":"Current package/manifest version and fingerprint; SubmissionReadiness.Evaluate under project lock rechecks mandatory review/source/hand-off/basis/readiness gates; immutable issue snapshot; transmittal URL and destination; failure rolls back all writes.","tests":["S::Issue_rechecks_fingerprint_and_preserves_the_first_snapshot","S::Required_review_edit_makes_a_stale_issue_request_refuse_finalization","S::Electrical_blocking_finding_refuses_issue_and_cannot_be_waived"]}
+      ],"saved_pass":["E33: superseding-create only"],"gap":"No saved PASS located for these issue/signature methods. Submissions.cs matches E33 but SubmissionReadiness.cs changed G62; supersede matrix cannot certify issuance."
+    },
+    {
+      "alias":"C10","key":"8.10:Propose allocation","source":"src/Hub.Api/Features/Allocations.cs:Create; Edit; Cancel; Complete","status":"FreshNeeded",
+      "operations":[
+        {"handler":"Create proposal/capacity preview","permission":"ProposeAllocation","guards":"Actual project/person/target or role scope, dates/hours/purpose/confidence and source links, active eligible people; capacity preview is read-only and does not confirm.","tests":["A::Proposed_allocation_is_scoped_versioned_retry_safe_and_releases_its_link","A::Restricted_project_and_mismatched_task_are_rejected","SWEEP::Mutation_respects_role_and_project_lifecycle"]},
+        {"handler":"Edit; Cancel; Complete","permission":"ProposeAllocation plus PM-or-creator condition","guards":"Current versions/status and real source links; material edits withdraw confirmation/release reservations; complete and cancel are distinct state branches.","tests":["A::Date_only_edit_withdraws_confirmation_and_requires_reconfirmation","A::Supervisor_declines_and_pm_completes_with_links_and_versions_released"]}
+      ],"saved_pass":[],"gap":"Exact existing API methods found; no saved PASS located for them. Byte equality to E33 is not an executed proposal/management witness."
+    },
+    {
+      "alias":"C11","key":"8.10:Confirm allocation/change availability","sources":["src/Hub.Api/Features/Allocations.cs","src/Hub.Api/Features/Availability.cs","src/Hub.Api/Features/PersonCapacity.cs"],"status":"FreshNeeded",
+      "operations":[
+        {"handler":"ConfirmationPreview; Confirm; Decline","permission":"ConfirmAllocation with actual person's current SupervisorId","guards":"Project access, active eligible person, Proposed/version, person lock, current source links and every date version; overcapacity needs reason; preview is not mutation.","tests":["A::Simultaneous_cross_project_confirmation_accepts_only_one_stale_date_version","A::Confirmation_preview_rejects_a_task_reassigned_after_proposal","A::Supervisor_declines_and_pm_completes_with_links_and_versions_released"]},
+        {"handler":"SetAvailability private day capacity","permission":"ActOnStaff","guards":"Actual user/current supervision, existing private date version and hour bounds; person/project read visibility is not a staff-write grant.","tests":["A::Supervisor_sets_private_day_capacity_with_expected_version"]},
+        {"handler":"Availability Manual; Reconcile; Schedule; HR preview/apply; holidays","permission":"Manage -> ActOnStaff for person changes; Administer for organization HR import/holiday writers","guards":"Real HR reference/provenance, read-only imported rows, source/mapping freshness and versions, actual schedule dates/hours; no arbitrary legacy override.","tests":["V::Management_commands_refuse_read_only_supervisor_without_writes_and_restore_supervisor_success","V::Management_commands_preserve_canonical_admin_with_stored_read_only_role","V::Invalid_or_unmapped_rows_block_preview_and_stale_apply_changes_nothing"]}
+      ],"saved_pass":["E31: manual/reconcile/schedule and HR source guards"],"gap":"Allocation confirmation/day override PASS not located. Keep HR/schedule and project confirmation separate; reused Availability byte match does not certify all staff/role alternatives."
+    },
+    {
+      "alias":"C12","key":"8.10:Propose design basis/assumption","source":"src/Hub.Api/Features/DesignBasis.cs","status":"FreshNeeded",
+      "operations":[
+        {"handler":"Create","permission":"CreateBasis","guards":"Actual owner/approver/discipline eligibility, member own-discipline restriction, due date, source/units/evidence and duplicate inspection; another-owner proposal requires management branch.","tests":["BM::Basis_create_and_assign_flags_match_real_commands_for_every_role_and_status","B::Member_can_propose_only_own_discipline_and_cannot_assign_another_owner_or_approver"]},
+        {"handler":"Propose replacement; EditProposed; Assign; Withdraw; ResolveConflict","permission":"ManageCoordination; EditProposed also permits actual named owner","guards":"Actual entry/version/state and versions; inspected duplicates, fixed retained uses, reasoned reassignment/withdrawal, real conflict same discipline and confirmed resolution.","tests":["B::Scope_edit_and_replacement_require_inspection_of_another_duplicate_entry","B::Withdrawal_marks_confirmed_basis_with_consumers_and_requires_assessment"]}
+      ],"saved_pass":["E33: Create and another-owner input only"],"gap":"Do not promote BM's another-owner Create case to evidence for Assign endpoint, confirmation or all replacement/withdrawal/conflict branches."
+    },
+    {
+      "alias":"C13","key":"8.10:Confirm design basis","source":"src/Hub.Api/Features/DesignBasis.cs:Confirm; LinkUse; DecideImpact","status":"FreshNeeded",
+      "operations":[
+        {"handler":"Confirm","permission":"ConfirmBasis for actual discipline/named approver","guards":"Entry+version versions, owner separation unless self-review allowed, source system/revision/HTTP evidence, due date, units and reason; exact current predecessor/supersedes relation.","tests":["B::Confirmation_preserves_exact_uses_and_creates_assessments_for_replacement"]},
+        {"handler":"LinkUse; DecideImpact Adopt/Unaffected","permission":"NamedCoordinationAction for consumer owner; ManageCoordination for unaffected management branch","guards":"Actual current confirmed version or scoped unexpired proceed disposition, same-project target/version/use; independent management assessment and retained source.","tests":["B::Confirmation_preserves_exact_uses_and_creates_assessments_for_replacement","B::Proposed_assumption_requires_approved_unexpired_scope_for_its_consumer"]}
+      ],"saved_pass":[],"gap":"Existing API methods found; no saved PASS located. BM create matrix cannot certify responsible lead or named independent confirmation."
+    },
+    {
+      "alias":"C14","key":"8.10:Approve Proceed under Assumption","sources":["src/Hub.Api/Features/DesignBasis.cs:ProceedUnderAssumption","src/Hub.Api/Features/Readiness.cs:ApproveException"],"status":"FreshNeeded",
+      "operations":[
+        {"handler":"Basis ProceedUnderAssumption","permission":"ManageCoordination for actual entry discipline","guards":"Actual Proposed Assumption/version, owner/approver independence, exact scope, explicit nonexpired ExpiresOn and reason.","tests":["B::Proposed_assumption_requires_approved_unexpired_scope_for_its_consumer"]},
+        {"handler":"Readiness ApproveException","permission":"ManageCoordination for actual target discipline","guards":"Current assessment/target owner and versions, latest use of actual proposed assumption, independent verifier, approved disposition covering scope/expiry, limited work/risk and retained audit.","tests":["READY::Scoped_assumption_exception_expires_without_erasing_approval"]}
+      ],"saved_pass":[],"gap":"No saved PASS located. Readiness owner changed G62; generic design-basis edit/create is not exception authority or source sufficiency."
+    },
+    {
+      "alias":"C15","key":"8.10:Propose/verify constraint removal","source":"src/Hub.Api/Features/Readiness.cs:AddConstraint; MoveConstraint","status":"FreshNeeded",
+      "operations":[
+        {"handler":"AddConstraint","permission":"NamedCoordinationAction for target owner OR ManageCoordination","guards":"Target version, eligible removal owner distinct from affected target owner, actual linked reference/category and HTTP source evidence.","tests":["READY::Named_owner_creates_unassessed_output_with_scoped_and_retry_safe_command","SWEEP::Mutation_respects_role_and_project_lifecycle"]},
+        {"handler":"MoveConstraint ResolutionProposed/VerifiedRemoved/Cancelled","permission":"NamedCoordinationAction for removal owner/affected-work owner; ManageCoordination for cancellation","guards":"Exact current constraint/target versions, legal state and reason; proposer evidence before affected owner verifies; current affected owner unchanged. Management cannot substitute technical verification.","tests":["READY::Named_owner_creates_unassessed_output_with_scoped_and_retry_safe_command","READY::Open_constraint_lists_as_blocking_but_never_hides_an_unknown_check"]}
+      ],"saved_pass":[],"gap":"No saved PASS located; existing full create/propose/verify method should be executed/reused before adding a duplicate. Readiness source differs from E33."
+    },
+    {
+      "alias":"C16","key":"8.10:Commit weekly output","source":"src/Hub.Api/Features/WeeklyCommitments.cs","status":"FreshNeeded",
+      "operations":[
+        {"handler":"Propose","permission":"NamedCoordinationAction for target owner OR ManageCoordination for target discipline","guards":"Actual target/version, project coordination week, target date within week, no recorded snapshot; proposal does not sign a commitment.","tests":["RM::Coordination_option_flags_match_real_commands_for_every_role_and_status","W::Weeks_start_on_the_project_coordination_day_for_propose_snapshot_and_list"]},
+        {"handler":"Move Committed; Withdrawn; Met/NotMet; Snapshot","permission":"NamedCoordinationAction for actual performer; management only in explicit snapshot/exceptional-close branches","guards":"Current versions/state/owner, live readiness Ready and no unresolved constraints, snapshot/week rules, reason/evidence; performer-only Met; commitment_reliability changes require their own flag/category/confirmation witnesses.","tests":["READY::Chair_proposal_requires_performer_confirmation_and_snapshot_retains_withdrawal","W::Recorded_weeks_and_target_window_pages_preserve_snapshots_export_scope_and_privacy","W::Complete_project_promise_needs_a_correction_reason"]}
+      ],"saved_pass":["E33: proposal only"],"gap":"No saved PASS located for actual performer commitment/closure methods; unchanged WeeklyCommitments bytes depend on changed readiness evaluation/default-null Run."
+    },
+    {
+      "alias":"C17","key":"8.10:Resolve/verify location issue","source":"src/Hub.Api/Features/Registers.cs","status":"FreshNeeded",
+      "operations":[
+        {"handler":"Propose verifier via AddIssueVerification","permission":"Writable AND PM OR actual creator while current member","guards":"Issue version, eligible actual verifier and independence from owner/creator/raiser unless self-review setting; explicit reason; appointed party is an internal user.","tests":["L::Only_creator_or_pm_can_propose_an_independent_verifier","L::An_issue_creator_removed_from_the_team_cannot_appoint_a_verifier"]},
+        {"handler":"AddIssueVerification Verified/Rejected","permission":"Writable plus actual named-appointed verifier inline guards","guards":"Actor must submit own verifierId, latest proposal names actor; required HTTP evidence for Verified, source/issue version and independence after owner reassignment.","tests":["L::Appointed_non_owner_verifier_decides_and_latest_rejection_blocks_resolution","L::Verification_remains_independent_after_owner_reassignment"]},
+        {"handler":"Resolve issue; location/reference edit","permission":"EditRegisterItem plus existing owner/source/type branches","guards":"Actual location/document reference/version and latest valid verification for coordination resolution; own submission cannot masquerade as independent verification.","tests":["L::Location_document_and_independent_verification_are_scoped_and_gate_resolution","L::Coordination_issue_needs_a_reference_at_creation_and_verification_to_resolve"]}
+      ],"saved_pass":[],"gap":"No saved PASS located for these exact methods. Current guard uses inline Writable/named checks, not literally NamedCoordinationAction for all branches; explainer must describe actual enforcement."
+    },
+    {
+      "alias":"C18","key":"8.10:View coordination, sources and export","sources":["src/Hub.Api/Features/Handoffs.cs","src/Hub.Api/Features/Changes.cs","src/Hub.Api/Features/Reviews.cs","src/Hub.Api/Features/ReviewRegister.cs","src/Hub.Api/Features/ReviewResponseExport.cs","src/Hub.Api/Features/ExternalReviews.cs","src/Hub.Api/Features/Submissions.cs","src/Hub.Api/Features/DesignBasis.cs","src/Hub.Api/Features/Readiness.cs","src/Hub.Api/Features/WeeklyCommitments.cs"],"status":"FreshNeededWithContractConflict",
+      "operations":[
+        {"handler":"Project lists/options/detail/child locators; source readers","permission":"Access.Project actual scoped read; visibility/projection helpers, not generic write permission","guards":"Same-project parent/round/source; read-only remains readable, restricted/removed access excluded; actual history labels and unknowns; search/filter/pagination never widen source scope.","tests":["H::AC_HND_05_receipts_are_independent_and_restricted_search_lists_and_exports_do_not_leak","R::Review_and_change_surfaces_are_scoped_searchable_exportable_and_audited","RR::Restricted_project_access_and_foreign_filter_values_never_expand_authorized_options"]},
+        {"handler":"Summary/all-round CSV/XLSX and submission snapshot exports","permission":"Actual project/source read scope plus ExportFile bounds/access event","guards":"Every relevant stored row/round, safe cells/filenames, exact eight R2 columns, no hidden party/HR facts; invalid export relation refuses before logging; links grant no external-system permission.","tests":["EXPORT::Authorization_readonly_filename_dark_route_and_existing_summary_export_keep_their_contracts","EXPORT::Foreign_relationships_refuse_the_entire_download_without_leaking_or_logging","V::Coverage_exports_and_calendar_recheck_project_permissions","W::Recorded_weeks_and_target_window_pages_preserve_snapshots_export_scope_and_privacy"]},
+        {"handler":"G62 issued source guidance/options; incoming receipt list/detail; typed register and external response export","permission":"register_screens plus actual project scope; RecordPermission only determines CanRecord","guards":"Bounded exact-count pages; actual issued identity and nullable revision; Captured/Unknown availability without raw author input; typed captured party identity, explicit Unassigned verifier; flag-off hides external-only surfaces and reads do not create business/Seen receipts.","tests":["XR::Stored_external_work_disappears_when_dark_while_internal_routes_and_wire_remain_unchanged","XS::Same_GUID_party_and_user_stay_typed_snapshot_identity_survives_rename_and_scalar_FK_targets_party","XE::External_response_sheet_keeps_all_rounds_exact_eight_columns_snapshot_party_and_safe_bytes","XE::External_export_parent_scope_and_dark_guards_refuse_before_any_export_log_or_read_side_effect"]}
+      ],"saved_pass":["E26A","E26R","E31: availability scope","E34: typed party/export/dark witnesses"],"gap":"Existing RR malformed foreign relationship method expects omission/count0; current R1 expected-vs-joined count check refuses the whole read. E26 PASS therefore conflicts with G62 changed behavior and must be reconciled by Root. Broad source/export row still needs per-reader evidence, not a single CanView boolean."
+    }
+  ],
+  "fresh_candidates": {
+    "reuse_first": [
+      "Hub.Tests.Api.ReviewChangePermissionMatrixTests",
+      "Hub.Tests.Api.HandoffsTests",
+      "Hub.Tests.Api.ReviewChangeTests",
+      "Hub.Tests.Api.ReviewResponseTests",
+      "Hub.Tests.Api.ReviewResponseReceiptTests",
+      "Hub.Tests.Api.ReviewResponseExportTests",
+      "Hub.Tests.Api.ReviewRegisterTests",
+      "Hub.Tests.Api.SubmissionPermissionMatrixTests",
+      "Hub.Tests.Api.SubmissionApiTests",
+      "Hub.Tests.Api.AllocationApiTests",
+      "Hub.Tests.Api.AvailabilityBuildTests",
+      "Hub.Tests.Api.DesignBasisPermissionMatrixTests",
+      "Hub.Tests.Api.DesignBasisApiTests",
+      "Hub.Tests.Api.ReadinessApiTests",
+      "Hub.Tests.Api.ReadinessSubmissionGateTests",
+      "Hub.Tests.Api.WeeklyCommitmentWeekTests",
+      "Hub.Tests.Api.LocationIssueTests",
+      "Hub.Tests.Api.CoordinationLifecycleSweepTests"
+    ],
+    "g62_filter": "FullyQualifiedName~ExternalReviewTests",
+    "g62_scope": "All four partial test files; retain provider1's failures and rerun repaired source. The three concurrency/inactive-DL witnesses individually passed in E34; that does not turn provider1 into a passing suite.",
+    "new_tests_only_if_missing_after_reuse": "Discriminating real-command permission, named-signature, lifecycle, scope and replay cases still absent after mapping the existing methods; no duplicate framework or blanket all-row PASS from suite registration.",
+    "open": [
+      "G62 provider1 Explicit_carry failed. Separate Root-authorized Reviews.cs repair SHA8d4afca0 now checks inherited verifier with existing Independent against full old authors/resolvers/responders plus validated new issue authors; unknown snapshots still block before AllowSelfReview/Admin. Invalid designation blocks until ordinary PM replacement. Expected400/no-effects then Omar-replacement success is pending fresh verification.",
+      "Root triage still needed for provider1 future-capture, removed-scope and downgrade failures; inventory does not assign unverified causes.",
+      "R1 malformed relationship omission versus current entire-read refusal requires an explicit compatibility decision/repair.",
+      "Existing matrix witnesses are bounded command examples; role coverage plus inline/source/version refusals must be reconciled before any C row becomes Evaluated.",
+      "S49/FR83 UI explanations, server adapter, complete83-row ledger and human Accepted remain separate gates outside this one-file inventory."
+    ]
+  }
+}

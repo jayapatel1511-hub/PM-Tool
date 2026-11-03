@@ -1,3 +1,4 @@
+import { PersonPanelTrigger } from '@/components/hub/person-panel-trigger'
 import { PickerProject } from '@/components/hub/people'
 import { useQuery } from '@tanstack/react-query'
 import { ChevronDown, ChevronRight, Lock, Monitor, MoreHorizontal, Plus } from 'lucide-react'
@@ -32,6 +33,8 @@ import { ExportMenu } from '@/components/hub/export'
 import { DeletedList, DeletedToggle, useShowDeleted } from '@/components/hub/deleted'
 import { DraftNotice } from '@/components/hub/drafts'
 import { useSafeForm } from '@/hooks/drafts'
+import { RecordContext } from '@/components/hub/record-context'
+import { useMe } from '@/lib/auth'
 
 type Schemas = components['schemas']
 export type MilestoneRow = Schemas['MilestoneMilestoneRow']
@@ -209,7 +212,7 @@ function TargetedDeliverables({ milestoneId }: { milestoneId: string }) {
   if (q.isPending) return <Loading rows={2} />
   const list = q.data?.deliverables ?? []
   if (!list.length) return <p className="py-1 text-sm text-muted-foreground">{t('milestone.noDeliverables')}</p>
-  if (phone) return <ul className="divide-y rounded-md border bg-card">{list.map(d => <li key={d.id} className="space-y-2 p-3 text-sm"><Key>{d.key}</Key><button type="button" className="block break-words text-left font-semibold text-primary hover:underline" onClick={() => openPanel('Deliverable', d.id)}>{d.name}</button><StatusPill status={d.status} /><p>{t('common.owner')}: {d.ownerName || t('common.dash')}</p><p>{t('common.due')}: {fmtDate(d.dueDate)}</p><ProgressBar pct={d.state?.progressPct} />{d.state && <p className="text-xs/[18px] text-muted-foreground">{t('milestone.taskCounts', { open: d.state.taskOpen, overdue: d.state.taskOverdue, blocked: d.state.taskBlocked })}</p>}</li>)}</ul>
+  if (phone) return <ul className="divide-y rounded-md border bg-card">{list.map(d => <li key={d.id} className="space-y-2 p-3 text-sm"><Key>{d.key}</Key><button type="button" className="block break-words text-left font-semibold text-primary hover:underline" onClick={() => openPanel('Deliverable', d.id)}>{d.name}</button><StatusPill status={d.status} /><p>{t('common.owner')}: {d.ownerId && d.ownerName ? <PersonPanelTrigger userId={d.ownerId} name={d.ownerName} focusKey={`milestone-deliverable:${d.id}:owner:card`} /> : d.ownerName || t('common.dash')}</p><p>{t('common.due')}: {fmtDate(d.dueDate)}</p><ProgressBar pct={d.state?.progressPct} />{d.state && <p className="text-xs/[18px] text-muted-foreground">{t('milestone.taskCounts', { open: d.state.taskOpen, overdue: d.state.taskOverdue, blocked: d.state.taskBlocked })}</p>}</li>)}</ul>
   return (
     <div className="scroll-region overflow-x-auto rounded-md border bg-card">
       <table className="w-full text-sm">
@@ -223,7 +226,7 @@ function TargetedDeliverables({ milestoneId }: { milestoneId: string }) {
               <td className={cn(tdCls, 'whitespace-nowrap')}><Key>{d.key}</Key></td>
               <td className={tdCls}><button type="button" className="break-words text-left font-medium hover:underline" onClick={() => openPanel('Deliverable', d.id)}>{d.name}</button></td>
               <td className={tdCls}><StatusPill status={d.status} /></td>
-              <td className={tdCls}>{d.ownerName}</td>
+              <td className={tdCls}>{d.ownerId && d.ownerName ? <PersonPanelTrigger userId={d.ownerId} name={d.ownerName} focusKey={`milestone-deliverable:${d.id}:owner:table`} /> : d.ownerName}</td>
               <td className={cn(tdCls, 'whitespace-nowrap tabular-nums')}>{fmtDate(d.dueDate)}</td>
               <td className={tdCls}><ProgressBar pct={d.state?.progressPct} /></td>
               <td className={cn(tdCls, 'whitespace-nowrap text-xs/[18px] text-muted-foreground tabular-nums')}>{d.state ? t('milestone.taskCounts', { open: d.state.taskOpen, overdue: d.state.taskOverdue, blocked: d.state.taskBlocked }) : ''}</td>
@@ -456,9 +459,12 @@ export function MilestonePanel({ id }: PanelProps) {
   const q = useQuery({ queryKey: ['milestone', id], queryFn: () => typedRequest('get', '/api/v1/milestones/{id}', { params: { id } }) })
   // The project says whether a change needs a reason; asked only while pause saves exist (flag.data_entry_safety).
   const project = useProject(useFlag('data_entry_safety') ? q.data?.project.projectNumber : undefined)
+  const contextOn = useFlag('screen_patterns')
+  const me = useMe()
   const [tab, setTab] = useState<'deliverables' | 'comments' | 'history'>('deliverables')
   const [baseline, setBaseline] = useState<'set' | 'clear' | null>(null)
   const refresh = useProjectRefresh()
+  const openPanel = useItemPanel()
   if (q.isPending) return <Loading />
   if (q.error) return <div className="p-6"><ErrorBanner error={q.error} retry={() => q.refetch()} /></div>
   const m = q.data.milestone
@@ -477,6 +483,7 @@ export function MilestonePanel({ id }: PanelProps) {
         <h2 className="break-words text-2xl/8 font-semibold tracking-[-0.4px]">{m.isSubmission && '◆ '}{m.name}</h2>
         {reasonsOf(m)?.length ? <Why reasons={reasonsOf(m)} title={t('milestone.statusWhy', { key: m.key })}><span className="text-sm text-muted-foreground">{t('common.why')}</span></Why> : null}
       </div>
+      {contextOn && <RecordContext context={q.data.context} projectNumber={q.data.project.projectNumber} meId={me.id} openPanel={openPanel} />}
       {can && <DesktopOnly notice={<PhoneNotice className="mx-6 mt-4" />}>{null}</DesktopOnly>}
       {m.canRebaseline && <div className="flex flex-wrap gap-2 px-6 pt-3"><Button size="sm" variant="outline" onClick={() => setBaseline('set')}>{t('baseline.rebaseline')}</Button>{m.baselineDate && <Button size="sm" variant="ghost" onClick={() => setBaseline('clear')}>{t('baseline.useOriginal')}</Button>}</div>}
       <div className="px-6 py-3">

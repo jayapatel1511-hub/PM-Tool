@@ -1,0 +1,2447 @@
+{
+  "atUtc": "2026-11-02T09:12:39.635217+00:00",
+  "scope": "Frozen generation53 backend before isolated compiler; oldAPI DLL +129oldassets unchanged",
+  "csharpCount": 606,
+  "files": [
+    {
+      "path": "src/Hub.Api/Data/AllocationEntities.cs",
+      "sha256": "ef16da6fe4c8e2872945754d762e678299e8355d4eeaa47ca44b9fa866ad32a4"
+    },
+    {
+      "path": "src/Hub.Api/Data/AvailabilityEntities.cs",
+      "sha256": "bf688b50eefce675aac642e87dc6407e544a46c6ef8422a6f2e1e1084d02e0cb"
+    },
+    {
+      "path": "src/Hub.Api/Data/CoordinationEntities.cs",
+      "sha256": "bbfe4782b51cee2aabb12055fe3455877db2cfe0132abc6836b74fdfcaa50779"
+    },
+    {
+      "path": "src/Hub.Api/Data/DesignBasisEntities.cs",
+      "sha256": "50d59c60cf6e777ac0f3fb43cecd3309e2e2b755d0a11a0ef1615fd7f6ed7b4c"
+    },
+    {
+      "path": "src/Hub.Api/Data/Entities.cs",
+      "sha256": "e65d4a797a1c73dd69a2a3b1877549b9069d5ba0f5549f56d1a45e711f92c771"
+    },
+    {
+      "path": "src/Hub.Api/Data/ExternalIdentity.cs",
+      "sha256": "f9fc437b7941f5c3971ae8fa4e645cd3ca90d2b02a8492f5b4154081d797ba9d"
+    },
+    {
+      "path": "src/Hub.Api/Data/HubDb.cs",
+      "sha256": "ec2239f36b341e2e0f77eb3faa944d491e895563e39ac646d7730ba75a9bdf23"
+    },
+    {
+      "path": "src/Hub.Api/Data/LocalAuthSession.cs",
+      "sha256": "22f1656c8912ab5a8ce0eee49bd4503b495f6b6bb85d6f2020cda47983592054"
+    },
+    {
+      "path": "src/Hub.Api/Data/LocationIssueEntities.cs",
+      "sha256": "63a5c6d01a281f9c1d785cc8495b9fb097a99fe243920447e40bcff6399c797e"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260925015745_InitialSchema.Designer.cs",
+      "sha256": "f923ae54252660868fb712d3bc8d4f654c4810ae3b8e0de3cead31851131ad5f"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260925015745_InitialSchema.cs",
+      "sha256": "03f9e2c157ebe2a47f7c5023672d95c76a0e8c7a8062332bc6d847802fd69810"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260925035631_ProjectLinksAsDocumentLinks.Designer.cs",
+      "sha256": "1ba2684591765d73f0a8e945b9ad1007e7b6c26e58ce9678388d4df2c08c0534"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260925035631_ProjectLinksAsDocumentLinks.cs",
+      "sha256": "ab9b8aa57c6c86c94b299b120462399444a48616707852e099e0093f9b6453db"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260925055846_SavedViewConcurrency.Designer.cs",
+      "sha256": "18f97d0b8bc3ccb08fc143364a35c4b974b71fe060b04afbb51247ccdb3a4456"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260925055846_SavedViewConcurrency.cs",
+      "sha256": "173aa2f81640575574137fe9d5f2e7944ba74554e6f0c07c6f17b7ce3b78ddb0"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260925071902_SnapshotCounts.Designer.cs",
+      "sha256": "927bae8a6b1132a408fc57a7ac588990b720648c10e6baeab3059d2d0970d531"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260925071902_SnapshotCounts.cs",
+      "sha256": "7f0b19c4355bf759f4516c5fbe9c21f11c8773d9c669b31dfb5e9d156f238085"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260925074437_SearchTrigramIndexes.Designer.cs",
+      "sha256": "8a6977c0ba06a282d44a35a5cfac48a3f173dcff6ab5041737ecdd2d54e4adf9"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260925074437_SearchTrigramIndexes.cs",
+      "sha256": "109ca0c71f1022bdd8ddac44545a209a3bbeff8bbef3c5a1777c61b1020c45b0"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260925093048_SearchTextIndexes.Designer.cs",
+      "sha256": "837d4f68e8d15a11bacf548b517d10639912ce56b3789e859433a0997f3b3e48"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260925093048_SearchTextIndexes.cs",
+      "sha256": "9f2faf13756f87d82e0c289b16fef25806c1e60a7839323aeb9418f47807b45a"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260925094802_DeliverableBlockingCount.Designer.cs",
+      "sha256": "f381b7dbe034138d524182e673fa7568ea462fd6357ffab2fbf3a247fc98daea"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260925094802_DeliverableBlockingCount.cs",
+      "sha256": "4dffac824d7308e8c5a1db6d1de195576b82f94e530b6cd74db7f44a340b4ffb"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260925101736_IdempotencyRecords.Designer.cs",
+      "sha256": "d167cee2d8e7efffa3a1d6de23b054469e65636a22aeed42b84a55a73a12f907"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260925101736_IdempotencyRecords.cs",
+      "sha256": "1a9b3d0b27d34d5a3864cffc2517fb0d67e500a2018045d85b147edbccf71472"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260927020422_DisciplineHandoffs.Designer.cs",
+      "sha256": "6e92d09f9aba1b0e1b3260fa5ddd31e6357c146244d55acc5b38ac081ba7b46f"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260927020422_DisciplineHandoffs.cs",
+      "sha256": "0a0c54622c85000679b4c94ce427eb97a505ad2581a0d552d3e34517ac037888"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260927105109_ReviewsAndRevisionChanges.Designer.cs",
+      "sha256": "f913d3c718d8e1504d388d9d5e59172818e0179cbaffeeebd9a8a8a4341af834"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260927105109_ReviewsAndRevisionChanges.cs",
+      "sha256": "8508cf5b5cf9c279e85597eecde9289a709c66be3dc548d6dff4900d63ec1f6d"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260927210259_SubmissionReadinessSchema.Designer.cs",
+      "sha256": "af8b86725c0822226c5b2298f4fa2ab5a8bf72e5b0e57621c1114c13ae80a6f7"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260927210259_SubmissionReadinessSchema.cs",
+      "sha256": "eeb174ffd06e629265896be18c5506211c2f034c754a5834138dab1a305d92bd"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260927221401_DatedAllocations.Designer.cs",
+      "sha256": "e5d917e17b2ad0e0f32d8736c534121d27f2269bae87ae97141cacd492864900"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260927221401_DatedAllocations.cs",
+      "sha256": "80775301a5604842402d72e0c0190f4171e5018dee40b28ae100071a7a9e1f24"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260927223041_AllocationReviewEffort.Designer.cs",
+      "sha256": "4522cd992f3d28c13f57acc10520c414cdf575e88c43a175d709ef43b10040ed"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260927223041_AllocationReviewEffort.cs",
+      "sha256": "d783cbcd919fbb16ad07de217a9495d72dcb3825b9e6426ed3d7012acc187a73"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260927234721_DesignBasisSchema.Designer.cs",
+      "sha256": "2e269824ef3e74ecf05287e2b1160d3b4ccbf4bdddd6942de6cca88fd9ffbd14"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260927234721_DesignBasisSchema.cs",
+      "sha256": "c65e5563c6c88dd9c2440cb835ad25c7406d26c8b8f7320a7214dc54660f8ea1"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260927235100_DesignBasisWorkflow.Designer.cs",
+      "sha256": "db39ebf6ad8c815d57e322338db129a8b86c5a7cd32d26d173177491a0b59284"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260927235100_DesignBasisWorkflow.cs",
+      "sha256": "b77d29b9f6aa953d198f194adfd791174bce84539d1e401c47d38dc4f901f1a7"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260928003457_ReadinessSchema.Designer.cs",
+      "sha256": "9ac7d0a25e5e9db2a071f159453e5dfbd768d94b6705b497711ac6c116ab2687"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260928003457_ReadinessSchema.cs",
+      "sha256": "eed46a20fba2da8cd1a5286643079b3e7b3dca8e231c89aa32735d2114b5ba7f"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260928004716_IssueLocationReferences.Designer.cs",
+      "sha256": "3b82763fb628de00f75f95b61afaaadeb0197bac303703dc63043ff67d3883c8"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260928004716_IssueLocationReferences.cs",
+      "sha256": "f9704e34405cc6f0cbd52a48121894f5842a3e563edcfdbb6646c8373b8338c5"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260928010417_IssueMetadataIssueVersion.Designer.cs",
+      "sha256": "3e833b0dcc90deba88a4ffc093a77cac0f5cf6e22bdce01cb1c744a5f4921d72"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260928010417_IssueMetadataIssueVersion.cs",
+      "sha256": "5a687f9d6c2145faaaa62a069f49d89a198978b0f5ea8be5134fe4e3a60ccdd7"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260928012854_DesignBasisWithdrawalAssessment.Designer.cs",
+      "sha256": "cc5deeb952595f5f3ad0565ba75574ac9c612a05d7a613ad5862844c28291f71"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260928012854_DesignBasisWithdrawalAssessment.cs",
+      "sha256": "248942fba26db1d7a200982a84958d1491a8fc8958cf7affbcdcf42e6bbdc76a"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260928013739_DesignBasisWithdrawalProvenance.Designer.cs",
+      "sha256": "1ad5acf830a4a65ff396b9eb2a2dbd8891e31596d67acd19ce8d5ebdf86e1f83"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260928013739_DesignBasisWithdrawalProvenance.cs",
+      "sha256": "2aed017240e66507607cb7b8d86fa4ab0bb2569de7d8632e3affac096200d957"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260928031954_IssueReferenceImpactAssessment.Designer.cs",
+      "sha256": "f11a6796c99cae840c8ac9b4cfbce6a48abc13f2dd4122477042f1aa03a5cb84"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260928031954_IssueReferenceImpactAssessment.cs",
+      "sha256": "16a10abce1ef871a057106e40ab2e21d58e91be0f3340328d99d02f326ed9077"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260928033829_ReviewFindingIssueLink.Designer.cs",
+      "sha256": "84e28f8cc94db0f48e4199942a5941e016844486df1180f1d08c4879d73b00a5"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20260928033829_ReviewFindingIssueLink.cs",
+      "sha256": "6de05c735bbc61b3eab1843d7466042c09c342f8217d5c1f8af484af622ff857"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261001205406_IssueAffectedDiscipline.Designer.cs",
+      "sha256": "1d7e39f5a8d32557a30540bf83075b8d2f6ff4e8b0a48189c535e0c4e714ba51"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261001205406_IssueAffectedDiscipline.cs",
+      "sha256": "cb6bd5faac87170e6a85b009a1478c1d3b5156909cee521c6b5070971a435a96"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261001212053_ReadinessSubmissionPrerequisite.Designer.cs",
+      "sha256": "8519cfa58d867130a1998a8f91d468b08040617e41107428ded82351e9c7bb09"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261001212053_ReadinessSubmissionPrerequisite.cs",
+      "sha256": "715da248280354ecd3450746cbb1fbb6deb1400a946045c1e6941d498b90dec4"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261001213118_TaskStartAuthorisation.Designer.cs",
+      "sha256": "498ed0c36d636eb904e1a8729cd45569e1445e59ec12fd16bc67e8744c5d4db3"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261001213118_TaskStartAuthorisation.cs",
+      "sha256": "b537da6d0fac37b377f554b36617f1f445eba9e2183ae625085ef887d03fdf56"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261001213200_CoordinationIssueType.Designer.cs",
+      "sha256": "c8f9a32a9c450f70a5a47dee62e552eea3cf18c4b9aad8390f56bbeb96392888"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261001213200_CoordinationIssueType.cs",
+      "sha256": "661ec05a8031ed89107911d46a787120e9cc8a5180827582f3934117afce8fdb"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261001221250_ReadinessConstraintLinksAndKeys.Designer.cs",
+      "sha256": "578fc40fcba97e30a5eef1e51bdde0612ecc2066dcf8d3d89f6b805251cb8a56"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261001221250_ReadinessConstraintLinksAndKeys.cs",
+      "sha256": "2da95256724f2a5d3cfb14978b07cc84ca447a5152441b8ef8b666166e0ab7bd"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261003051003_IssueReferenceProvenance.Designer.cs",
+      "sha256": "118555bee10afe5397265fe532954dd9cb30ef8f247c139d893d3218f6c8b10a"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261003051003_IssueReferenceProvenance.cs",
+      "sha256": "fb5c0f57b4e063eb3667f71092bfdf22268477120a98171716e6c4d67ef2ea02"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261003051957_SubmissionChecksAndIssueReferenceRecovery.Designer.cs",
+      "sha256": "228d36d1eddda4ceb2c8e19375bb0d4d1c507f4768764d56d3b3a989bd882330"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261003051957_SubmissionChecksAndIssueReferenceRecovery.cs",
+      "sha256": "0fbdc2df00d5cd07161846e5ab0441a671735fc6c9f2902fc0d3c7c42837cba7"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261004022246_PlanningEntries.Designer.cs",
+      "sha256": "ef36b9d0024e7d8927324afc1f991ade9571a71dec07c26ebfefaaefa53301eb"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261004022246_PlanningEntries.cs",
+      "sha256": "77890394885fe8aa5e62e1937f646097b540cd621391dc8bca9c49ab984f11f1"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261004035357_PlanningNotificationPrivacy.Designer.cs",
+      "sha256": "8abd034fbffb0a78b2c3d9ba12142566abed2c135afbeaba1d0267b4468226be"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261004035357_PlanningNotificationPrivacy.cs",
+      "sha256": "ef1cc2e8070a2a0b8024060cca9cf7221748f6d61b9333e8e06fc6d4752e6b2d"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261009225223_AvailabilityAndCalendarFeeds.Designer.cs",
+      "sha256": "f34ccc972e55500e34a6a99105365bab38130f6e7661605cc7aeb0f8b290fd15"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261009225223_AvailabilityAndCalendarFeeds.cs",
+      "sha256": "6954be2a942b23808aab9e62d4386959aa7bb361b5b4f4801cd60c934d00da25"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261012014621_StaffingSignals.Designer.cs",
+      "sha256": "cc0c6a315c06f30f8a5444457e9360c9d27a16e45a80980c6e9fb11e917861e8"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261012014621_StaffingSignals.cs",
+      "sha256": "90cc2b8d3297efc963ba8f58f5c510b0358ef2a1411d30ce45ca5476b256c1ad"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261012155414_SupervisorCapacitySignals.Designer.cs",
+      "sha256": "833b47b22d85ec76879c593b3dfc98196106ee5ecef68ebc634f4f35cdec08ef"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261012155414_SupervisorCapacitySignals.cs",
+      "sha256": "1d4f0770d72d2563815d8d1a607299e86e965f2dfeecf59f37e08e8d8b6a84fe"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261012160119_ProjectMemberWorkspaceDocumentLinkConcurrency.Designer.cs",
+      "sha256": "deaeb9a0ade793e44a1a2b7ce2f1be9d400375d1376f4108c78a13606a0c49e0"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261012160119_ProjectMemberWorkspaceDocumentLinkConcurrency.cs",
+      "sha256": "ee13093a731fe0b5a84286f1cef55dde0693b7961ebbb288fee058e93d37efc5"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261012160644_ProjectDisciplineConcurrency.Designer.cs",
+      "sha256": "6e31a4c696631d6a73683e23db476ad4eb883da64d09f6d9adb61f38d68f25a6"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261012160644_ProjectDisciplineConcurrency.cs",
+      "sha256": "f7494e808e9868e292b43c097f7d2544458353b68930c0a6eebf7511f657500a"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261012200704_LocalAuthSessions.Designer.cs",
+      "sha256": "f9ea9c85ccb3e033d8e7e8d2aa2e9a89849ad0edb51c934bafd971d55257ee90"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261012200704_LocalAuthSessions.cs",
+      "sha256": "c9abdfebe9d0c5a296475ffc3669c73bdee29c0b7fb97192722ca9caa6ce1087"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261015001137_ExternalIdentities.Designer.cs",
+      "sha256": "3ad50e851af45722a9f03c38add834a64ec0d29d0a95b482110409e32b8eeb7c"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261015001137_ExternalIdentities.cs",
+      "sha256": "0d3df5c38c3b49caa93f3958bb4d47078c019119d7a2bfcae7ad7ada7d208e7f"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261018214033_OutboxDeadLetter.Designer.cs",
+      "sha256": "1d1ff161f42f6391680791e20bb8a75da5767ad8ca587c3f96d37ad0b3e352b8"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261018214033_OutboxDeadLetter.cs",
+      "sha256": "60021636cf662108c76207027e16903c1d1f08c7406c9fe1ddb5ba8b0c52ed5c"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261018222421_TemplateOffsetDayKind.Designer.cs",
+      "sha256": "d697cfbb6d1ac70cc71bcd198f04c1f40533e2c3f50e9d4cea8deebd273b7008"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261018222421_TemplateOffsetDayKind.cs",
+      "sha256": "f31c0544e0f4a9541096bbd95c17a9720e7d09c163b06ec6a7ac08f91f5d747d"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261018232730_DeliveryWorkflowRecords.Designer.cs",
+      "sha256": "2a4f406e4bbe6731969ef228c29f9fac9b21d7984c60e1001e749eb29d73376e"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261018232730_DeliveryWorkflowRecords.cs",
+      "sha256": "9194db30a0c5563a05767fab866c855f45ec95111a7772da401b969d0ab0b561"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261026012843_AdminReview.Designer.cs",
+      "sha256": "3561363ac771af09ceb55c51e4597a614d4f9803d5f30371a1c68736f8a333c4"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261026012843_AdminReview.cs",
+      "sha256": "10a8c6b92d1dc161810f7ffa94c6a2f953cbd65e23fbe79dbfd358095deb5424"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261031200512_ProjectIdentityColour.Designer.cs",
+      "sha256": "458c52e3f07cb105d27fec699a43caaf62f579b10e5e38f8b98c99d3cad7e779"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261031200512_ProjectIdentityColour.cs",
+      "sha256": "fd1db6affe3fcbb8d40e4e62572bd3b0472526c7e225964c0bc782f51e5478f3"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261101020524_HomeOverviewSnapshots.Designer.cs",
+      "sha256": "28b73f24ebd369284910341374eb91ec7dd4929149e7f95c54bc1e440b6fb971"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261101020524_HomeOverviewSnapshots.cs",
+      "sha256": "6d9a3a19ea03ec8dffb97b33406a730df63de375f0b6797c1a10ef7e45984479"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261101062102_ScreenPersonFacts.Designer.cs",
+      "sha256": "b7fb0011998f5b2efab56f9d41401c21d858ae509ad4e2e9f99b37da72451ab8"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261101062102_ScreenPersonFacts.cs",
+      "sha256": "72f8ccaffe1bd0b01c5c5fa0fb62b0165a995d918061c25985b69a0101024a87"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261101171546_ScreenPersonAndIssueMetadata.Designer.cs",
+      "sha256": "32db1defd4494dbfccf66e03cd98902428559cb49242bc782206e38ae76ac17d"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261101171546_ScreenPersonAndIssueMetadata.cs",
+      "sha256": "6884c1fe1692cf9dc5918fe07ceb351b7faad4b00e7f7e56140e97b846ed43e5"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261102045615_PrivateWorkSeenLedger.Designer.cs",
+      "sha256": "cccc16c0b3eeb191c9c7064c2bcea9c2fd9670dfc4f237a6158fb42b11f39a4c"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/20261102045615_PrivateWorkSeenLedger.cs",
+      "sha256": "ec4c09abbe4f583479e22922ca6d81727d9f889738fdf11e59633b6756179d5e"
+    },
+    {
+      "path": "src/Hub.Api/Data/Migrations/HubDbModelSnapshot.cs",
+      "sha256": "7f89e0b8f88166ef1a97152a86d78f6ce7fb0b091a27669fea3003e171581d3c"
+    },
+    {
+      "path": "src/Hub.Api/Data/OpenRoleEntities.cs",
+      "sha256": "ace3c24c152bb60ca013a89ea44f32bd0e0cd4d4f0a9042340834d6677d04fe8"
+    },
+    {
+      "path": "src/Hub.Api/Data/OrgStructure.cs",
+      "sha256": "57e525d9282676bfd9a95f3e2d39b1639af8bd850d21e3dc0006582e59ad3af9"
+    },
+    {
+      "path": "src/Hub.Api/Data/PersonFactEntities.cs",
+      "sha256": "a0d73736ec668686d7a96f3475c221cac27f7de51ffa33ed16ef926d49e4a02f"
+    },
+    {
+      "path": "src/Hub.Api/Data/PlanningEntities.cs",
+      "sha256": "d4217694710055167e3a6824e67856653dfba166105a5b724c12f0cb8d07a30d"
+    },
+    {
+      "path": "src/Hub.Api/Data/PlanningReportingEntities.cs",
+      "sha256": "b509aad929e82347d362f49f54950bf3595b224e9c6dddab842a90d104beb58f"
+    },
+    {
+      "path": "src/Hub.Api/Data/ReadinessEntities.cs",
+      "sha256": "79c2fa3ea4f447db96155cbb8a92a2b5c2dc6b6a30783be675efc7c8cf1556eb"
+    },
+    {
+      "path": "src/Hub.Api/Data/ReferenceTemplate.cs",
+      "sha256": "3e81a554af1765affa9b343f5c59eb245e7b0447711c62afb2517a31b3171db4"
+    },
+    {
+      "path": "src/Hub.Api/Data/ReviewDemoSeed.cs",
+      "sha256": "c8d916dd415f34ac23b4edc74c24d8413406266600e27fdaf59838a1b1563033"
+    },
+    {
+      "path": "src/Hub.Api/Data/Seed.cs",
+      "sha256": "38205daa0f0907be3c33bbe252f3656ea1dd0a903abb91aa6a62a626e774375f"
+    },
+    {
+      "path": "src/Hub.Api/Data/SubmissionEntities.cs",
+      "sha256": "14730e1ac724717b3f6b29ca0cd5f3ce83c833eaa68eeb7b5187d0d2c96cb4cf"
+    },
+    {
+      "path": "src/Hub.Api/Data/TaskPickupOffer.cs",
+      "sha256": "257abf42df30b9a519b4c303c08cc34ea393c466f5d69c55afd9ed9cf568e23a"
+    },
+    {
+      "path": "src/Hub.Api/Data/TaskStartEntities.cs",
+      "sha256": "0981a7f82f603993497ea018d24df9e95a2e5b2dd1e601ccfc27c43dd6d5f829"
+    },
+    {
+      "path": "src/Hub.Api/Data/VerifiableRecords.cs",
+      "sha256": "b50549d82c389eb1a823952c905e63b862fb65ba870dbf2b19e71a77c0472b70"
+    },
+    {
+      "path": "src/Hub.Api/Data/WorkSeenEntities.cs",
+      "sha256": "6e71249a8db8081864cb782dfc1a36d3e126bc46142f539b57bb0edf0eec7717"
+    },
+    {
+      "path": "src/Hub.Api/Features/Activity.cs",
+      "sha256": "467c2bc7602643669ab0713c7726e000288ad1384bb9d1091daf79ae56332ee6"
+    },
+    {
+      "path": "src/Hub.Api/Features/Admin.cs",
+      "sha256": "976686fad34acd9d324bf8b60b6aeecb10c63211a1a8885d8ca995d8a58ddbd1"
+    },
+    {
+      "path": "src/Hub.Api/Features/AdminReview.cs",
+      "sha256": "d0db0defe72627374dd334e03c04c2448b4daf0cb3cc9bd7c551070c57a51c79"
+    },
+    {
+      "path": "src/Hub.Api/Features/AllocationPreview.cs",
+      "sha256": "745338aac1aa338dca05a9386dc8d0306f626e6548e0c58294e118558a9c55f3"
+    },
+    {
+      "path": "src/Hub.Api/Features/AllocationScreenReads.cs",
+      "sha256": "c0b0a581b346938a849151db6deef5323b216877ef6d054e2a3c4efd0e7a9f3c"
+    },
+    {
+      "path": "src/Hub.Api/Features/AllocationShift.cs",
+      "sha256": "2e8da87173d51711b7e60b93d1b9805aa4d583f4dc038ca5e18af24bb9d8507a"
+    },
+    {
+      "path": "src/Hub.Api/Features/Allocations.cs",
+      "sha256": "543bb5ccb27e9c12389a7b758b88fe78045c76901d02eaf0e1ce0fa0d82a1492"
+    },
+    {
+      "path": "src/Hub.Api/Features/AuditChain.cs",
+      "sha256": "710421c7d23a0c4d228b7783b704f6980cb63d4bda064ba1fa9b07be4feecdc7"
+    },
+    {
+      "path": "src/Hub.Api/Features/Availability.cs",
+      "sha256": "df463cb0ca60bc93cdd30ebf39636d07a14f4abbebd465bd410acbaff6e281e2"
+    },
+    {
+      "path": "src/Hub.Api/Features/BaselineHistory.cs",
+      "sha256": "7d91c309fc7c740d7192cb842c43e5f2c236f8cb78859a079d263f2f1c2f1752"
+    },
+    {
+      "path": "src/Hub.Api/Features/BoardScreenReads.cs",
+      "sha256": "45aaf7e719c6354c5c940fc654123a24c22a7a8a23df14f243b78dca41c868d2"
+    },
+    {
+      "path": "src/Hub.Api/Features/Calendar.cs",
+      "sha256": "01f49cf6b2cf2717cbd16a195c88b4b1fc667e601bd35ff1509f95c35ae33cd3"
+    },
+    {
+      "path": "src/Hub.Api/Features/CalendarFeed.cs",
+      "sha256": "b07feb76537040c5f840e2c21934f1e2b22028068255657ecef183ea8ca33c26"
+    },
+    {
+      "path": "src/Hub.Api/Features/CapacityReports.cs",
+      "sha256": "0e9becdb0a2295175a14e318d88c48c71dc2d5241f904da27d564be138c6be05"
+    },
+    {
+      "path": "src/Hub.Api/Features/Changes.cs",
+      "sha256": "85e2d5867a61472431584a54023c704c738994faa2b38abb66d67accbcf77446"
+    },
+    {
+      "path": "src/Hub.Api/Features/Comments.cs",
+      "sha256": "bcca0dd12a1568a01f11ca4d85c47be77f70fee33ceab7578dc37cdef0aa892b"
+    },
+    {
+      "path": "src/Hub.Api/Features/CommitmentReliability.cs",
+      "sha256": "61bcfa319d0e24315ecaee98eea0c9df06c9e47935a6b7655b65f2851da6d0ca"
+    },
+    {
+      "path": "src/Hub.Api/Features/Dashboard.cs",
+      "sha256": "3d1db6bede0b25e8168472daa63a872d2d300f1819ff561b5ecab7ed7be1b7bf"
+    },
+    {
+      "path": "src/Hub.Api/Features/DecisionExtras.cs",
+      "sha256": "52690d1e0b3e32abf6c1021be087ffb646d1bc935ce4a8c149d4be46b69f2791"
+    },
+    {
+      "path": "src/Hub.Api/Features/Decisions.cs",
+      "sha256": "30771153ff32c895c16dbddadc8bb306eb5c7c908b9ea34078b4603427e99d0b"
+    },
+    {
+      "path": "src/Hub.Api/Features/DeliverableClientExport.cs",
+      "sha256": "4822c432cd7f9fe09206f6a3234cbbf5ac5882ec0915858ef67b512da34adb8d"
+    },
+    {
+      "path": "src/Hub.Api/Features/DeliverableCreation.cs",
+      "sha256": "bae9c7a453bdb9583b357b196845463047e256a1911a0b619fec17677f3541d1"
+    },
+    {
+      "path": "src/Hub.Api/Features/DeliverableNumbering.cs",
+      "sha256": "cff09fe35e76379dce6592b6339695e25fbc7927c858402548a05e43ed186c9b"
+    },
+    {
+      "path": "src/Hub.Api/Features/DeliverableRegisterReads.cs",
+      "sha256": "fea4f5076738d170412b70f840726bb3f11292971b8168a6a270895eaa9b567f"
+    },
+    {
+      "path": "src/Hub.Api/Features/DeliverableViewParameters.cs",
+      "sha256": "75cd13552ddae56d7f72ad79ce8efd43bd3818f91c8ae287eba52f844f4a54b3"
+    },
+    {
+      "path": "src/Hub.Api/Features/Deliverables.cs",
+      "sha256": "6a115315824e7298cc8e35c740386edd600fecafa0b5a38ef8d090dccc0834d6"
+    },
+    {
+      "path": "src/Hub.Api/Features/DeliveryScreenReads.cs",
+      "sha256": "662b4a3a88c374b259b97bed6eb529361bc6c5295337ead82331803a2c5bdb82"
+    },
+    {
+      "path": "src/Hub.Api/Features/Dependencies.cs",
+      "sha256": "24d1b1f7b57616b65bbaede1d4b443e65c8d1ffb17c205632d79f3d1e30d4f39"
+    },
+    {
+      "path": "src/Hub.Api/Features/DesignBasis.cs",
+      "sha256": "9781600667994990b86f28ea4809e69ae294a737fe75b3d032fcb4d4e85241cb"
+    },
+    {
+      "path": "src/Hub.Api/Features/DisciplineCoordination.cs",
+      "sha256": "ec29be927f7db4cd3cb73fd8232b4b8a5a1d326f597a4615452269f4928c54b4"
+    },
+    {
+      "path": "src/Hub.Api/Features/DocumentLinks.cs",
+      "sha256": "128c2e9cefc97cd0270f6e817ab2c4574ba5fafe244bc528f7fdf675f418766f"
+    },
+    {
+      "path": "src/Hub.Api/Features/DrawingImport.cs",
+      "sha256": "69db7cefbca125d157e22f2d3c94d7d8901f613de3b128db2c53bcedb489337a"
+    },
+    {
+      "path": "src/Hub.Api/Features/DrawingImportFormat.cs",
+      "sha256": "397153c22b487eaa30f420560892a5fce6baa5846a2ab9c99dfa9a6f649fd0b9"
+    },
+    {
+      "path": "src/Hub.Api/Features/DrawingImportReceipts.cs",
+      "sha256": "77826b2766076762e38dba55a93f3bb1a28cb2d90e57d006cf0176d8192cb076"
+    },
+    {
+      "path": "src/Hub.Api/Features/DrawingImportRows.cs",
+      "sha256": "c6d1b3f67c6b115e8712fc62a1e23a945a64128463010be7f25e86eac973b80d"
+    },
+    {
+      "path": "src/Hub.Api/Features/Evaluation.cs",
+      "sha256": "ff3a797d8f17032e50b6fa64bef684f2404e5db77bca786673620eb82c0de5f8"
+    },
+    {
+      "path": "src/Hub.Api/Features/Events.cs",
+      "sha256": "4b95c012968f5461b6bae259efe37c0e499b82ff39a7b6f84c0cf39febe61689"
+    },
+    {
+      "path": "src/Hub.Api/Features/Extras.cs",
+      "sha256": "11cbcdbf509d6327355354356617c03c5f47c3928dbe2fbf980743dce943f926"
+    },
+    {
+      "path": "src/Hub.Api/Features/Handoffs.cs",
+      "sha256": "d12d71e26a4b71cae00e9b80bd3f97854483748feffaeb3da008adf8f77b3492"
+    },
+    {
+      "path": "src/Hub.Api/Features/HomeVisualDeadlineNotes.cs",
+      "sha256": "f7516d24371f0e33207e50033e056c5305780707429345e308f33eeb6aef4b19"
+    },
+    {
+      "path": "src/Hub.Api/Features/HomeVisualTrends.cs",
+      "sha256": "d4efee0538d934595e3892f0b32acb3519470d31406e7e9e941ce4c145323a1a"
+    },
+    {
+      "path": "src/Hub.Api/Features/ListExports.cs",
+      "sha256": "b6b4cce13c99a705e6f9c58e2e1042159a81fb1d1cc751a45c93783426541a85"
+    },
+    {
+      "path": "src/Hub.Api/Features/Me.cs",
+      "sha256": "f66025145cd03f57c57cc3303f1e753637802c2cd3e44f3e7162bf2d0379b189"
+    },
+    {
+      "path": "src/Hub.Api/Features/Meetings.cs",
+      "sha256": "b4549ddeaf0b249f64bd150006fa1ad26d83f13d7c1e43d83e80e3b5f9736d43"
+    },
+    {
+      "path": "src/Hub.Api/Features/MemberResponsibility.cs",
+      "sha256": "9fe5b5dfcdea89dba067fccd8cf4dfcf648fbf6c04363bab775ad67bd4e36f41"
+    },
+    {
+      "path": "src/Hub.Api/Features/Milestones.cs",
+      "sha256": "915256bc859635518dfb794cc156c897d4a18590b84a9be1a5eb363c11ba1047"
+    },
+    {
+      "path": "src/Hub.Api/Features/Modules.cs",
+      "sha256": "dc690cb03d9f7c8fbf3783e838adbce8ec72fba2988b9aa31272c8e879c58f32"
+    },
+    {
+      "path": "src/Hub.Api/Features/MyWork.cs",
+      "sha256": "9ac83ca036e613fc29e63265cdc79c72bf5f6e52321771d9a5c9f2920c1c9e5b"
+    },
+    {
+      "path": "src/Hub.Api/Features/MyWorkFollowUp.cs",
+      "sha256": "0cb1719af2cc0186c2ca36deaa6354a534790018758276b1df2c29b7b80c3fd2"
+    },
+    {
+      "path": "src/Hub.Api/Features/MyWorkSeen.cs",
+      "sha256": "b4ae1b5f10f2f9a39a8da28a572baf9646d0876de6aecf299e886a6a606b7879"
+    },
+    {
+      "path": "src/Hub.Api/Features/Notifications.cs",
+      "sha256": "7cba6f115d17eee2e5e09fc7b1a6c6bc667f0d0e97a6d6099008091efa32c5f2"
+    },
+    {
+      "path": "src/Hub.Api/Features/Onboarding.cs",
+      "sha256": "3cdcef4750164648152a96641a0848bf5ae84cf79ab42d87af48b9f17bad7f28"
+    },
+    {
+      "path": "src/Hub.Api/Features/OpenRoles.cs",
+      "sha256": "4ff4e08e7530f594eebe11d1fd62390809fbe7325418b25247616bfb3dc410a1"
+    },
+    {
+      "path": "src/Hub.Api/Features/OrgStructure.cs",
+      "sha256": "d225f67711bdd91a3fa0512397d89d02e184ac156d4d86e26a1bdef110d7d033"
+    },
+    {
+      "path": "src/Hub.Api/Features/PersonCapacity.cs",
+      "sha256": "b765ee629bce4541fe65f8056105e1be32f8457d7cf6936c6da315a6a9966b45"
+    },
+    {
+      "path": "src/Hub.Api/Features/PersonFacts.cs",
+      "sha256": "1357156e55a853f05af85615d91c5bde1163afce22bcbd041ba6276dbe7d49de"
+    },
+    {
+      "path": "src/Hub.Api/Features/PersonPanel.cs",
+      "sha256": "760cff73a7e2d422cf883ad5e0ae92474cccb94f5f98a6dcadbb07146d99a1ff"
+    },
+    {
+      "path": "src/Hub.Api/Features/Planning.cs",
+      "sha256": "56609e4730d6bce5ddd6c53df80a1ea66a23eb7b7d9d002ea2ce864b1fbe6a87"
+    },
+    {
+      "path": "src/Hub.Api/Features/PlanningDeadlines.cs",
+      "sha256": "15e25ba2e3c8a7684a6ce4fb9145eb7baba1360e38a03e46d7874a4417b0ea14"
+    },
+    {
+      "path": "src/Hub.Api/Features/Portfolio.cs",
+      "sha256": "39fac455af933528aeacf21525c8a5d034c69d7d569f10af1eba55ef53680594"
+    },
+    {
+      "path": "src/Hub.Api/Features/ProjectImport.cs",
+      "sha256": "9599265821a2176319007645e7deac4fb76f8cb7819a307be3ec177c0d80216b"
+    },
+    {
+      "path": "src/Hub.Api/Features/ProjectListCompleteness.cs",
+      "sha256": "b1e365aead02a0ad7a37bd5d2b00c45f7d60b955315bf7051d2502c10b225e21"
+    },
+    {
+      "path": "src/Hub.Api/Features/ProjectStatusNote.cs",
+      "sha256": "2faa163021c33dba1eab437381a77653c2365975c3cdd67d1f709a46b6c99c4c"
+    },
+    {
+      "path": "src/Hub.Api/Features/Projects.cs",
+      "sha256": "acd448f9a415c1883846f0685fe6629baf3fac38155bc0c606306ecd73b0319f"
+    },
+    {
+      "path": "src/Hub.Api/Features/Readiness.cs",
+      "sha256": "a796be11ae9e8ae849a132fa71d30a1d267a34a2e1195a21b575d8e2f7a8d7e6"
+    },
+    {
+      "path": "src/Hub.Api/Features/Recovery.cs",
+      "sha256": "fc6f3b30c37a74ce83121343f479e6049d1fb9395938e385d415d2ad793049a9"
+    },
+    {
+      "path": "src/Hub.Api/Features/Registers.cs",
+      "sha256": "3ffca5ee4216054e33f9dc1101b67f2c8a6319fc2c2895f7e4123b85b2470a78"
+    },
+    {
+      "path": "src/Hub.Api/Features/ReportCapacityComparison.cs",
+      "sha256": "9e4601a8e76256bf6f602e98b09bf74772ab4c4bf376411960c221fa8fbbf213"
+    },
+    {
+      "path": "src/Hub.Api/Features/ReportCapacityTaskInputs.cs",
+      "sha256": "f2043bd64cbd5650c16c8b9fa2f29b0ea1fd5f2b8de3c41c627d4de13940a139"
+    },
+    {
+      "path": "src/Hub.Api/Features/ReportPeople.cs",
+      "sha256": "e5bc8ed90b22d954f9715ad99ed969f57680b9cc4db893483e1e138c44f3bbcc"
+    },
+    {
+      "path": "src/Hub.Api/Features/ReportTaskInputs.cs",
+      "sha256": "63c8508846d29df56ca927232ac05d327471e884eb48caab8cdae5b27d421ce4"
+    },
+    {
+      "path": "src/Hub.Api/Features/ReportUnits.cs",
+      "sha256": "95ed817847eefed723e549e4c296c1348609592f833d3dfdffd27c9edd43561f"
+    },
+    {
+      "path": "src/Hub.Api/Features/ReportViewParameters.cs",
+      "sha256": "47f308830b041b7e5d9ef71545fbbdd4897efb573bd8e8c9e59a753af285af54"
+    },
+    {
+      "path": "src/Hub.Api/Features/Reports.cs",
+      "sha256": "6348281ec3f427010f139caf4e89ebc2a86f494d446c66678371de8a232c2cbb"
+    },
+    {
+      "path": "src/Hub.Api/Features/ReviewRegister.cs",
+      "sha256": "b0063c687f8927ce461aef53c26e4297a595a27b6ad8803504c57bc9ce8aaee1"
+    },
+    {
+      "path": "src/Hub.Api/Features/Reviews.cs",
+      "sha256": "72102a10bbb15dc827f6b2f1165f1e3b75c0923ed5406643de1c76479b2a2b14"
+    },
+    {
+      "path": "src/Hub.Api/Features/RevisionCheck.cs",
+      "sha256": "8b2974e9e7873597ce6577742aa5aa4c93ce1c3eaeab0c9260b5f79c3822ecd9"
+    },
+    {
+      "path": "src/Hub.Api/Features/RouteCounter.cs",
+      "sha256": "f7ebdbfd2f1ec8998f6f4878648c67aa1500b61494508eb1ad97e4ef067b90d8"
+    },
+    {
+      "path": "src/Hub.Api/Features/Search.cs",
+      "sha256": "49468d21a8b7ff9b8c3443314c7ac5fa2c8376721045a4474a2ecee75f43cfc1"
+    },
+    {
+      "path": "src/Hub.Api/Features/SearchScreenReads.cs",
+      "sha256": "ebe448702a8a1e8cfabdd014f8a456d57a82a064f602d038e95f87ef15d9c62d"
+    },
+    {
+      "path": "src/Hub.Api/Features/SubmissionReadiness.cs",
+      "sha256": "2e91e6e59a1d00fb5095957537ec2519108c424f72976b88deaeb57692528447"
+    },
+    {
+      "path": "src/Hub.Api/Features/Submissions.cs",
+      "sha256": "2435aea92bfbc3a1efd85625f269cd00f63769922fe2e4d30d0e9a7b7f18001c"
+    },
+    {
+      "path": "src/Hub.Api/Features/TaskGroupReads.cs",
+      "sha256": "c5030db9277d6d88284e892ef3c7c81300d3579d2b94f861bc6b07aa9e102325"
+    },
+    {
+      "path": "src/Hub.Api/Features/TaskPickup.cs",
+      "sha256": "db2c3fcec58680fc758525f6eead0bf3651a785f100cd7bf7feb3bc22fad7657"
+    },
+    {
+      "path": "src/Hub.Api/Features/TaskQueries.cs",
+      "sha256": "96d592c7ed7bfbd6f21b3100d94ef862f73599ca41031137a523960c008e307c"
+    },
+    {
+      "path": "src/Hub.Api/Features/TaskStart.cs",
+      "sha256": "dc849f21f43782d9c05a19f3c98cf62020e5d423dcca982896361fa580f6eb89"
+    },
+    {
+      "path": "src/Hub.Api/Features/TaskSubmissionDates.cs",
+      "sha256": "8e30cffc8c3a1fa25d7f03a4607cc6ccb6179d77b472f5cea398a9ef142f447f"
+    },
+    {
+      "path": "src/Hub.Api/Features/Tasks.cs",
+      "sha256": "aa92f0e620039654b35928a434e3764985dcced826c13aa5c731d66cb7d52a7f"
+    },
+    {
+      "path": "src/Hub.Api/Features/Team.cs",
+      "sha256": "7c5cab9bebb0dcf54699954fc4a4c5c68bb3ccedd780d9e4a985aeaff5993a3a"
+    },
+    {
+      "path": "src/Hub.Api/Features/TeamScreenReads.cs",
+      "sha256": "b40ea53068407c34db79ea05ee562b6c1657b9c8974919f7600a1c7a65039419"
+    },
+    {
+      "path": "src/Hub.Api/Features/Templates.cs",
+      "sha256": "6312226ad1e0d5df94232832baa85343b8d2d706707d295af4397d4cb9c5d24d"
+    },
+    {
+      "path": "src/Hub.Api/Features/Time.cs",
+      "sha256": "1ff77c13fc3ad239a35aae08557f32de692fbb50a3bea460fc10386a09b9628f"
+    },
+    {
+      "path": "src/Hub.Api/Features/TimeWeekRead.cs",
+      "sha256": "65f69ff5982d0ea25e3a03fc88725a27141913f3b18c3c2af286fd505cb9139f"
+    },
+    {
+      "path": "src/Hub.Api/Features/Timeline.cs",
+      "sha256": "41919ece74551e39c4c959822d4ce67b49496353a8d468a0cc6d29d4ae5cfdcf"
+    },
+    {
+      "path": "src/Hub.Api/Features/TimelineViewParameters.cs",
+      "sha256": "acb1860623253fab531f71bb8fcc0363a78b7158a4cbef50b0ecbd195c6ae376"
+    },
+    {
+      "path": "src/Hub.Api/Features/Views.cs",
+      "sha256": "0a300fd0a63a9bdd0a74c0d95c868fdb2abae1e4baa2e7a7850d14e540f58d61"
+    },
+    {
+      "path": "src/Hub.Api/Features/WeeklyCommitments.cs",
+      "sha256": "43af99db473ab95909bffce96af3e19a5f75ea6cc77b9080d6ab7e0854ee4f30"
+    },
+    {
+      "path": "src/Hub.Api/Features/WeeklyPlanning.cs",
+      "sha256": "10e131dcc775e084a166557b799ef4a26c1177d4f41bc421ed52cc1f1b333ee4"
+    },
+    {
+      "path": "src/Hub.Api/Features/WorkActivityFacts.cs",
+      "sha256": "8fb1106599154974c0cadc024835625304870462d439d91ace76b1b8d51fbd00"
+    },
+    {
+      "path": "src/Hub.Api/Features/WorkCoordinationReadMetadata.cs",
+      "sha256": "77d12ac938fa24329e2b8650765f183b7503d240ce456b4086cf11f6711393d7"
+    },
+    {
+      "path": "src/Hub.Api/Features/WorkInputPatterns.cs",
+      "sha256": "bf7dcb892868884f2c13757813e6b950cb45195501fcd097052d94ac52a3d134"
+    },
+    {
+      "path": "src/Hub.Api/Features/WorkReadinessInputs.cs",
+      "sha256": "6ea74e91aab3949b4835eb6006fc981b7477f686b9e6f984c6b69b53dcaa982e"
+    },
+    {
+      "path": "src/Hub.Api/Features/WorkScreenReads.cs",
+      "sha256": "94a1c6ec0ac7bf8f7d1a19d330d2f9db2d5afed3bf381aeae0d620cde7bf5c67"
+    },
+    {
+      "path": "src/Hub.Api/Features/WorkScreenResponseMetadata.cs",
+      "sha256": "cae798a2c4f1fbf03d573e302b92d420ec8cb3ee96b9a561036f02d2e01c267d"
+    },
+    {
+      "path": "src/Hub.Api/Features/WorkSeenContracts.cs",
+      "sha256": "6d78dc1f2b0a935848d9b0111c7620e5023f5c86b43dc2b1bb61cf5150b08b31"
+    },
+    {
+      "path": "src/Hub.Api/Features/WorkSeenEligibility.cs",
+      "sha256": "53f50a230ef90097500ce3a8b9902e85a1516b25da4a95f8e51ece74b0e689b7"
+    },
+    {
+      "path": "src/Hub.Api/Features/WorkSeenReads.cs",
+      "sha256": "f1971ef6b2afa90a0f9f2011258c8d540dfe0e8840bb5443fdc6f7d5bbab0974"
+    },
+    {
+      "path": "src/Hub.Api/Features/Workload.cs",
+      "sha256": "1cb310a1fb616cdca840c548738fedce02e7fe9cc24e0ca69a4a9ad0bbac08a8"
+    },
+    {
+      "path": "src/Hub.Api/Features/Workspace.cs",
+      "sha256": "920a498e04a4f39e2fcc7693d4db8d05dbd5dcdb25b30a12826dcf9ef3c11579"
+    },
+    {
+      "path": "src/Hub.Api/Infrastructure/Access.cs",
+      "sha256": "957e845ca5607b76687aa8769728c8e1152c1d7725b9d42c293f568565b1576d"
+    },
+    {
+      "path": "src/Hub.Api/Infrastructure/Audit.cs",
+      "sha256": "8d1aa1b689e598211ce6f8f233e4103c9eb8d191d3492b4f5bc6c360d90ae25f"
+    },
+    {
+      "path": "src/Hub.Api/Infrastructure/Auth.cs",
+      "sha256": "e6bb47e4b67dab2ad67eda7b97be77e82f4086dbef72473de795aa83f78df8f0"
+    },
+    {
+      "path": "src/Hub.Api/Infrastructure/Coordination.cs",
+      "sha256": "0943586c22b28ca7c5f17f05ec75e89e828b9396481d7494692f32881a1935da"
+    },
+    {
+      "path": "src/Hub.Api/Infrastructure/Digest.cs",
+      "sha256": "f31a422aed43db1b307b64112c0125e2a10faae44a76967cb661bea015e905d8"
+    },
+    {
+      "path": "src/Hub.Api/Infrastructure/Directory.cs",
+      "sha256": "36a6996c5eb79870322018d32dc099db0651d3faf1c8703b694e524aa8cc67e1"
+    },
+    {
+      "path": "src/Hub.Api/Infrastructure/Email.cs",
+      "sha256": "2c035fe2495f35e408ad5e1a0bf8f4bec9d001ea7a37f8147dd9aef521aa3b30"
+    },
+    {
+      "path": "src/Hub.Api/Infrastructure/Errors.cs",
+      "sha256": "bcc0426a9baf481e473bb5d84db50771bd7132a22db06449021b0ff30efc305c"
+    },
+    {
+      "path": "src/Hub.Api/Infrastructure/EvaluationService.cs",
+      "sha256": "36725db373bdab2b6eb509ca1f919a62a63ba355734d4110ca5111a901c23c38"
+    },
+    {
+      "path": "src/Hub.Api/Infrastructure/Export.cs",
+      "sha256": "88857ddf325a13e0e2c70351b87bfa0c69577da0d8aa3311e4e4c6b0b018e437"
+    },
+    {
+      "path": "src/Hub.Api/Infrastructure/HomePresets.cs",
+      "sha256": "33117426e4a9362ead92e6e7a082481ad3a61893ffd2afde16d9f7eb4b9de3ee"
+    },
+    {
+      "path": "src/Hub.Api/Infrastructure/HomeSnapshots.cs",
+      "sha256": "40305f2f669bdc3f589c3da5b2b06adfc35f9bc5f7ae436b93a657570d2d2b26"
+    },
+    {
+      "path": "src/Hub.Api/Infrastructure/Http.cs",
+      "sha256": "d20706c6a09899e30e4e571ee8d363d369e0e18604d573be5304863e1403bb47"
+    },
+    {
+      "path": "src/Hub.Api/Infrastructure/Idempotency.cs",
+      "sha256": "c9f723702017d53ddd79c33dc98de9dab0e36ffa83ec35e7f856e4d95f4e1cef"
+    },
+    {
+      "path": "src/Hub.Api/Infrastructure/Jobs.cs",
+      "sha256": "572059512f9b50e04371137eb56dcb6a476ee33fcc5b8049c9824015b8303010"
+    },
+    {
+      "path": "src/Hub.Api/Infrastructure/Keys.cs",
+      "sha256": "22779868644b24d6220ecf370f8714752912d8eb356f5ad417546ed6eea08d1a"
+    },
+    {
+      "path": "src/Hub.Api/Infrastructure/LiveFeed.cs",
+      "sha256": "e1c87bf510a1c095a712d437d7a4a9058795021e155860e5bdf765b91570330b"
+    },
+    {
+      "path": "src/Hub.Api/Infrastructure/LocalPasswordStore.cs",
+      "sha256": "f29e22e0971aaad04762e4d7d13cc9dad4165ef6443bcd0e842bf960df9fb171"
+    },
+    {
+      "path": "src/Hub.Api/Infrastructure/LocalSessionStore.cs",
+      "sha256": "c7571972a780e64cc5a3ea4bd8ad4129a0ffcdc7bffbfe1c8a8043a9a296d157"
+    },
+    {
+      "path": "src/Hub.Api/Infrastructure/Notify.cs",
+      "sha256": "b30f317df7f5f378a4751fb4dbb1ee4720d8a3f0b6e91333fbd3e6258c68eaef"
+    },
+    {
+      "path": "src/Hub.Api/Infrastructure/Operations.cs",
+      "sha256": "1ffde2409fc78767f28e1bb5d3f9ca39dd3a204c11165a56b4994892ae675d15"
+    },
+    {
+      "path": "src/Hub.Api/Infrastructure/OrgStructureReports.cs",
+      "sha256": "b181dbcf618e09c5ed2af22c1491ff61c8a194910d9672cfc199e4c9bb2596fb"
+    },
+    {
+      "path": "src/Hub.Api/Infrastructure/PeopleScope.cs",
+      "sha256": "76b55b9fede13b0ec7f2df314690947b27ae3fd48202cde12cb0d8378de8ce5b"
+    },
+    {
+      "path": "src/Hub.Api/Infrastructure/RecordContextReader.cs",
+      "sha256": "4f693a1bc177260cce6199f0d52ac517654509b2aff2b2bb826859b60a71de61"
+    },
+    {
+      "path": "src/Hub.Api/Infrastructure/ReviewFindingContextData.cs",
+      "sha256": "4189a1f567c7646de449d1344bb0d816e5bd1a3568d16405192304f781239f3c"
+    },
+    {
+      "path": "src/Hub.Api/Infrastructure/SocialAuth.cs",
+      "sha256": "e6fe8aafeb81fd069749b79273227f1e6731582b9bcbf7a6a2888b4c7f326882"
+    },
+    {
+      "path": "src/Hub.Api/Infrastructure/SubmissionContextData.cs",
+      "sha256": "6071eeae54c296f6b25c82ba2f17e35576630d7dc6408e66059cb6a037fee25a"
+    },
+    {
+      "path": "src/Hub.Api/Infrastructure/UserPreferences.cs",
+      "sha256": "a8c12f249feffae2dea6c899655c17e9e60fdfacdbbb33a79c2ad08469d83ab3"
+    },
+    {
+      "path": "src/Hub.Api/Infrastructure/WorkAssignmentPublication.cs",
+      "sha256": "2ddfd2efff143cd45e6287126fc4d06610f91585eb171bdd20a0762ed07acb5a"
+    },
+    {
+      "path": "src/Hub.Api/Program.cs",
+      "sha256": "b60776e71951ee7e309f4193bfc126e3f9619db91068d02adc87464a193ddf91"
+    },
+    {
+      "path": "src/Hub.Api/Records/AllocationDayOverride.cs",
+      "sha256": "1a8bfe92517a5db7cbaccac3f22dd2415995b9c67d393478751388d37107d7f2"
+    },
+    {
+      "path": "src/Hub.Api/Records/AllocationWorkLink.cs",
+      "sha256": "97e04bb788cd41eb7cc7610761f8da87f17b8da8b3c235fcc45e1e177d4538cd"
+    },
+    {
+      "path": "src/Hub.Api/Records/AppUser.cs",
+      "sha256": "f401758121b950f729e9e5a270588102a166cb208e5298f6fbb7f8b3ba0648c6"
+    },
+    {
+      "path": "src/Hub.Api/Records/ApprovedLeave.cs",
+      "sha256": "28ea16a9cdb781f1e4397e3df63d5b9352202d6f8c0796ca180bdb51587bfa32"
+    },
+    {
+      "path": "src/Hub.Api/Records/BasisAssumptionDisposition.cs",
+      "sha256": "60413d45d04756c4c24504034b70c0deb37b5daaa6c6b3bf116788bcd4021b2f"
+    },
+    {
+      "path": "src/Hub.Api/Records/BasisConflict.cs",
+      "sha256": "ba5bc9acc94b72bbebd65c8d2f5cbe1a1a8f867b803a977e09e93dfe58d97c5b"
+    },
+    {
+      "path": "src/Hub.Api/Records/BasisImpactAssessment.cs",
+      "sha256": "108454895b2ba7afb0f5f75686d82591443032c3ebbc9860520008abf331abaf"
+    },
+    {
+      "path": "src/Hub.Api/Records/BasisUse.cs",
+      "sha256": "19890c8ccc369d56d42379280f52fe52bc898398d0841887276c48fb5e396f15"
+    },
+    {
+      "path": "src/Hub.Api/Records/CalendarEvent.cs",
+      "sha256": "24dab9595ec0cb4762fafa22a771916174d9c7b81a878c1a9c3650777aeafbea"
+    },
+    {
+      "path": "src/Hub.Api/Records/CalendarSubscription.cs",
+      "sha256": "9defcc3fb5128bcc140d0a19cf6dcb03caabd46b314e8b068400eccd142a7d9e"
+    },
+    {
+      "path": "src/Hub.Api/Records/CertificationTag.cs",
+      "sha256": "5ab22acbfa1216589f7131998f79cba1ecd8f1cc66a1cc94f790119d6f6e93a3"
+    },
+    {
+      "path": "src/Hub.Api/Records/ChangeAssessment.cs",
+      "sha256": "371afd2b2e0f1811976e63e6ac127e11a4aad09b6c13eb41d3f93edd553415e9"
+    },
+    {
+      "path": "src/Hub.Api/Records/ChangeNotice.cs",
+      "sha256": "c553ce543412ed6e3560c4c3cd86ed8f288260b9e0a145551b39240c1e1fb71b"
+    },
+    {
+      "path": "src/Hub.Api/Records/CheckEvidence.cs",
+      "sha256": "7e80479a9069b88c7ef55d8855790be08b0403d42ac7b9963e512fa7605d49a3"
+    },
+    {
+      "path": "src/Hub.Api/Records/Client.cs",
+      "sha256": "b1f119e1dbe85620e1e2a81bd8b481bf25e70383dedfe74c70b00f734b00b656"
+    },
+    {
+      "path": "src/Hub.Api/Records/Comment.cs",
+      "sha256": "54bd1f4b6f15b85dff42d6eacafb188c1ea85bfb30d90a6c7005db750279fff4"
+    },
+    {
+      "path": "src/Hub.Api/Records/CommitmentMissCategory.cs",
+      "sha256": "0036f700cfb9f9ab5b151183b2f494e4f8ca1c9bbd10391b58065e2b13ec14f9"
+    },
+    {
+      "path": "src/Hub.Api/Records/Decision.cs",
+      "sha256": "41e3094f22a5d348a29a222272209b10fa19ed184d3d21f48a4cd7833840ff4e"
+    },
+    {
+      "path": "src/Hub.Api/Records/Deliverable.cs",
+      "sha256": "b91ca961c48184b37f78755cac49f8ae23ca9a1b7caee92676491b712b4a655a"
+    },
+    {
+      "path": "src/Hub.Api/Records/DeliverableDependency.cs",
+      "sha256": "0b1fce1349bb56b7c9ab1e642f47c321b1e246bbd93f8da1c2aab57593af79dd"
+    },
+    {
+      "path": "src/Hub.Api/Records/DeliverableType.cs",
+      "sha256": "f441cf8bd8fbd918e954f0c46164369b02731a6f3d3c2d2af4b4bfdd7d8103e8"
+    },
+    {
+      "path": "src/Hub.Api/Records/DesignBasisEntry.cs",
+      "sha256": "397a8417027c65855e2243c4e83df0a4feb881e49af342dc63cc5f658da68ca1"
+    },
+    {
+      "path": "src/Hub.Api/Records/DesignBasisVersion.cs",
+      "sha256": "9573a470c0113c83eab6662301cf95089e44c049e36b2747db1939ec1798d78a"
+    },
+    {
+      "path": "src/Hub.Api/Records/Discipline.cs",
+      "sha256": "69f9c04e120fcaadc3143dd8d53d5f299ff3cc73c2b64edac019d3cd20799864"
+    },
+    {
+      "path": "src/Hub.Api/Records/DisciplineReview.cs",
+      "sha256": "ed582418f8c632b7fd10c09a3c7bfd2e801d85da9609bbe3b6a6219358efe756"
+    },
+    {
+      "path": "src/Hub.Api/Records/DocumentLink.cs",
+      "sha256": "33c688a65d1314755334042c5dad5b18065eff4d0ec5213fc996dfba0d9cc0f0"
+    },
+    {
+      "path": "src/Hub.Api/Records/ExternalParty.cs",
+      "sha256": "4599e974ebe9f3661febbd0fed163c1d5cc1e4e8a025788abbd329cd8ad746ee"
+    },
+    {
+      "path": "src/Hub.Api/Records/FindingEvent.cs",
+      "sha256": "7a63eb8184b3ae55ed1491736efb4fcbb5a2db238ac4284aee541257ab81f4ae"
+    },
+    {
+      "path": "src/Hub.Api/Records/Handoff.cs",
+      "sha256": "b4dece72748cc0b68b74ed3743805b8de13acf9eba0e9cf07c01476b61fcf1a5"
+    },
+    {
+      "path": "src/Hub.Api/Records/Holiday.cs",
+      "sha256": "a871d1392cd3f7afedc6181621e06b07844ffec2fb4f9bb004a5bbb069322ef5"
+    },
+    {
+      "path": "src/Hub.Api/Records/InputAdoption.cs",
+      "sha256": "4a76bcbbfbfd2cab989a4cdcc2ed5b4d64b4b04ceed013efe8f33139f435838e"
+    },
+    {
+      "path": "src/Hub.Api/Records/InputUse.cs",
+      "sha256": "b0175ee691a3519be56400c7fa1e19b3ffe4736923d37b0c3ad94373accfec90"
+    },
+    {
+      "path": "src/Hub.Api/Records/Issue.cs",
+      "sha256": "e8d657f18aa8f524f24f91a8f8b4c52d7038450de9e27eef69250a7122f701f1"
+    },
+    {
+      "path": "src/Hub.Api/Records/IssueAffectedDiscipline.cs",
+      "sha256": "e8f9b4e288b7329037ce38b4a19af1334e7b6f47eaf16509847f1a0467582452"
+    },
+    {
+      "path": "src/Hub.Api/Records/IssueDocumentReference.cs",
+      "sha256": "0d5c81998dddf15533ec1cb676e2048edb08f62f1ef8c0f1e9ac1db2d23ca008"
+    },
+    {
+      "path": "src/Hub.Api/Records/IssueLocation.cs",
+      "sha256": "4a4dde7eb87943d80ce0b5f8515846f73d54937b1863e4118cd19998ab766690"
+    },
+    {
+      "path": "src/Hub.Api/Records/IssuePurpose.cs",
+      "sha256": "761b0139d126dee9bd3904a2cc33590583eca90e4ae15c9fdbc518053b88966a"
+    },
+    {
+      "path": "src/Hub.Api/Records/IssueReferenceImpactAssessment.cs",
+      "sha256": "5dfcfb4765d891a8a174ac59b0b50f0fa14a928a58c899f03e685de1193d2f26"
+    },
+    {
+      "path": "src/Hub.Api/Records/IssueReturnCode.cs",
+      "sha256": "8099fbb5f8ddd44e25100f9f305d3f9fe3c0d38d14a2e38dfd7ade569fd9cf1b"
+    },
+    {
+      "path": "src/Hub.Api/Records/IssueVerification.cs",
+      "sha256": "226f29721ef7eb4b8a79433d5a4351f919e51d8cbc8d7008c887030edc1dac12"
+    },
+    {
+      "path": "src/Hub.Api/Records/ItemLink.cs",
+      "sha256": "780301b8277ff7c2a77b0de22ef3170428a2b31c29cc1b2b687bc40a2fc4b10d"
+    },
+    {
+      "path": "src/Hub.Api/Records/LeaveImportState.cs",
+      "sha256": "cd696fb4722cce2ca1131c0b9161ae650943b54ab823b665bf8370cd5f8cd892"
+    },
+    {
+      "path": "src/Hub.Api/Records/Meeting.cs",
+      "sha256": "63d782bc5436092de9282aa9d87de91a10e2fb4acc4da40cd0521684cd48c488"
+    },
+    {
+      "path": "src/Hub.Api/Records/MeetingAction.cs",
+      "sha256": "98d347f68c0814c4deca0563ffd2d3eaa1cd891536d238bb45d0db66d4330b8f"
+    },
+    {
+      "path": "src/Hub.Api/Records/Milestone.cs",
+      "sha256": "4528e14c5da07fd8e31815933ed186e5ce037f2d5c7e9fb28ad9ce7d58aa23a5"
+    },
+    {
+      "path": "src/Hub.Api/Records/Office.cs",
+      "sha256": "6b7387ebef8122f89addf79d55625913ad347be041b36c63410444d6670fae2c"
+    },
+    {
+      "path": "src/Hub.Api/Records/OpenRole.cs",
+      "sha256": "46971f6af1e94a7b852ff314d5670935cf2975d5c4ac24ff8a5a184cf85a0988"
+    },
+    {
+      "path": "src/Hub.Api/Records/OrgLevel.cs",
+      "sha256": "3b79149acb52e16332e4359903bf45b75fb687da04760c56dc4c3d61182d575e"
+    },
+    {
+      "path": "src/Hub.Api/Records/OrgSetting.cs",
+      "sha256": "6285a0ee725c1abc4f406a65ad497e0480925f37c50e6e46abf17b9e0ee6830c"
+    },
+    {
+      "path": "src/Hub.Api/Records/OrgUnit.cs",
+      "sha256": "bf4964e4a7e6722fd8e7a07f1dcbfc114c44416b7c8bf290d1517f06b54bc79c"
+    },
+    {
+      "path": "src/Hub.Api/Records/OutputCommitment.cs",
+      "sha256": "241f4c3aa1d196465be9d3a7e92c2fd5af4ad5c2cfffda87dba41be3be47f0dd"
+    },
+    {
+      "path": "src/Hub.Api/Records/OutputCommitmentEvent.cs",
+      "sha256": "3f33413262b6252fd227830563b332e0071d45c455b0ea176b3a5eec255ab9e8"
+    },
+    {
+      "path": "src/Hub.Api/Records/PersonAvailabilityOverride.cs",
+      "sha256": "c4e4a3f93973a22a0bdc5cb0ad77799746e8bf97c7f3690888bcb1351586c8db"
+    },
+    {
+      "path": "src/Hub.Api/Records/PersonSchedule.cs",
+      "sha256": "d62985d2edb866f603da93d2ddd91321c9a4b22d986000a4d9c87a5a59545b27"
+    },
+    {
+      "path": "src/Hub.Api/Records/Phase.cs",
+      "sha256": "a93fcea2f3738c08ade31d2b323b11df3cf726e1631278ac61e6ade4887c3fe6"
+    },
+    {
+      "path": "src/Hub.Api/Records/PlanningEntry.cs",
+      "sha256": "e3fc4f237ae07e3e85736842bf88be3aaed0063096d2c041da3a15f8287657c3"
+    },
+    {
+      "path": "src/Hub.Api/Records/Project.cs",
+      "sha256": "6f5f7247fb1eab96ecd9a63a5235b38d89e9b96f1c95702711e00bd0c90c0b5f"
+    },
+    {
+      "path": "src/Hub.Api/Records/ProjectDiscipline.cs",
+      "sha256": "d75633e1f70f2e93328332c87d1d23db54142c9dfff64b9b978462e7dda0fe6e"
+    },
+    {
+      "path": "src/Hub.Api/Records/ProjectMember.cs",
+      "sha256": "ae9f59ef35c953e12809402dcedaac4efeb5a5d5f6aeae6ee7d6af6a909b43e5"
+    },
+    {
+      "path": "src/Hub.Api/Records/ProjectTemplate.cs",
+      "sha256": "f6242a87129f718775f3252560e781d7110ae4a69a013cdbc361f98ac5878494"
+    },
+    {
+      "path": "src/Hub.Api/Records/ProjectType.cs",
+      "sha256": "4bf82066fff7b23578346e61c59b1932278a0b5ccd24d0f9be694bab9b551f32"
+    },
+    {
+      "path": "src/Hub.Api/Records/ReadinessAssessment.cs",
+      "sha256": "23dd8ebda5d79e97e17b7fa00adc0f48fa2afb3908bc8356a7ffec6f1744a267"
+    },
+    {
+      "path": "src/Hub.Api/Records/ReadinessCheckRecord.cs",
+      "sha256": "cdb57742f585ff63b17b8b455b19151b095cb68b1b1c96b6faafa0522cf30202"
+    },
+    {
+      "path": "src/Hub.Api/Records/ReadinessException.cs",
+      "sha256": "2818bf809d38fc3df69f78cda50ece6d530382f80ab6ae1e3663e7a7a864ec5c"
+    },
+    {
+      "path": "src/Hub.Api/Records/ReadinessSubmissionPrerequisite.cs",
+      "sha256": "b8f5304a6629d8a5798bc0d4757cb22fa3a8df5e08a504b040f8c1207d6c3239"
+    },
+    {
+      "path": "src/Hub.Api/Records/Registry.cs",
+      "sha256": "538fe2eedae7d6878e42be280e9eaafde150366398b8a62a527f8a442028f0f7"
+    },
+    {
+      "path": "src/Hub.Api/Records/ResourceAllocation.cs",
+      "sha256": "bdfd41edde59e94e8803dacabada9bc7076052420713e462a3b835ab70a671a5"
+    },
+    {
+      "path": "src/Hub.Api/Records/ReviewFinding.cs",
+      "sha256": "9e57a1bc7f8d71bc81683c637a33fada1d5668dd2af5418353fbf030d3b4df32"
+    },
+    {
+      "path": "src/Hub.Api/Records/ReviewManifestItem.cs",
+      "sha256": "8acfd5b51f03cc3f854bbc0539a739caab7a3a9cbd88fdaaa8f4465e52bd5a1a"
+    },
+    {
+      "path": "src/Hub.Api/Records/ReviewPackage.cs",
+      "sha256": "3f97246be37fe3d81d79a2976bf6cd4a920cac74224cc6a2a94ad417f28a20e8"
+    },
+    {
+      "path": "src/Hub.Api/Records/ReviewRound.cs",
+      "sha256": "bd32378d4aa22c809979aefa07983e57882169631e10d28c5c6b95e8fe21b5f6"
+    },
+    {
+      "path": "src/Hub.Api/Records/Risk.cs",
+      "sha256": "0d37f3aedcce5966f29756d02d308da41f55fc8d5ac08fd415df4360cfabac00"
+    },
+    {
+      "path": "src/Hub.Api/Records/ScreenLists.cs",
+      "sha256": "67b143f35ddf4dc2caf16af0598c9da8fc1d843d2803d44bb3515014e7cc8954"
+    },
+    {
+      "path": "src/Hub.Api/Records/SourceHead.cs",
+      "sha256": "a7fc5c56fba6e6b8abdc6fd3d8f31ed074e1d88f78b80b3ef3b35d681c986253"
+    },
+    {
+      "path": "src/Hub.Api/Records/SourceRevision.cs",
+      "sha256": "2d6f641b4eb7f4544e40a5bff782620bf89a55b9c005caddb3ef999f39dea455"
+    },
+    {
+      "path": "src/Hub.Api/Records/SubmissionCheck.cs",
+      "sha256": "e0fb1b1118a9cd3b424cf268747cef544ae08948130790d28e3a97229bbc6b72"
+    },
+    {
+      "path": "src/Hub.Api/Records/SubmissionIssue.cs",
+      "sha256": "3e293e39c72f7ebb78a08da8e9087a25a685794499c9fdb198544b98f1467c49"
+    },
+    {
+      "path": "src/Hub.Api/Records/SubmissionManifestItem.cs",
+      "sha256": "ba68d9cffcfa6b8e706cbaf451861c6428078005a83baee603e80bbfd363b46b"
+    },
+    {
+      "path": "src/Hub.Api/Records/SubmissionPackage.cs",
+      "sha256": "2010d6752215f3fe349137f5117f369dcce1caef799dbb06163086e63b11fe64"
+    },
+    {
+      "path": "src/Hub.Api/Records/TaskDependency.cs",
+      "sha256": "5cf6b296d73c56a276eb1814e9e3e5683376bddec02f7c303100e231afe67a4a"
+    },
+    {
+      "path": "src/Hub.Api/Records/TaskPickupOffer.cs",
+      "sha256": "5822e362e720a1e6b1f47949fdec33614080e1a2019327cec856f0d354fa4107"
+    },
+    {
+      "path": "src/Hub.Api/Records/TaskStartAuthorisation.cs",
+      "sha256": "dc5f2f4c065d6419889bcfa49d8e568e56c17910dd6143075bc7d6a424a323d7"
+    },
+    {
+      "path": "src/Hub.Api/Records/TaskTimeEntry.cs",
+      "sha256": "b40245ba0fab9f1098d02e02f6aca8567aa31088a46c8c1ac5cc71b65c146dfc"
+    },
+    {
+      "path": "src/Hub.Api/Records/UserCertification.cs",
+      "sha256": "b24dfd18eb57e6c17fddb1cd2936fbcb895a535a78de16d82e03a36094962ee1"
+    },
+    {
+      "path": "src/Hub.Api/Records/UserSystemRole.cs",
+      "sha256": "4448f158f56a293b19181f50ed43be5102a9bd13f3ea3426ff00520f53dd7b68"
+    },
+    {
+      "path": "src/Hub.Api/Records/WeeklyPlanSnapshot.cs",
+      "sha256": "0cfecebdf328db3bc069c90ed1d06a731c53669982b714abdc13ab3d0b101331"
+    },
+    {
+      "path": "src/Hub.Api/Records/WorkConstraint.cs",
+      "sha256": "4f94d64fd077da135e2b4b58c1361f835e8debdaceece911a9813c3cb0ac1796"
+    },
+    {
+      "path": "src/Hub.Api/Records/WorkTask.cs",
+      "sha256": "8c95da3e663b2e37ecffee9359940154bd71ea0b1ef1cc0d8f93579aa91d56cb"
+    },
+    {
+      "path": "src/Hub.Api/Text.cs",
+      "sha256": "8d260f750ace25127c3b40c664372f1a616ddce5b85b7c613d5a7f5ed17a384c"
+    },
+    {
+      "path": "src/Hub.Domain/Allocations.cs",
+      "sha256": "57c24938412d4d3e414199b95716d63562f9b69b06734627d70419209def5c83"
+    },
+    {
+      "path": "src/Hub.Domain/AuditChain.cs",
+      "sha256": "a5a5441052422d9e82d0ba7902fe2712cc1b6d449cea37d9d566b4c846ce743e"
+    },
+    {
+      "path": "src/Hub.Domain/Calendar.cs",
+      "sha256": "8a62f97b8e611512eceaf962e74d7b933771f228871e0ebfd6afd1089c280238"
+    },
+    {
+      "path": "src/Hub.Domain/Changes.cs",
+      "sha256": "c4a1cab48e79fc4d3045a0fdcdf5cdd80567376d7694103cfe0f179b9218f246"
+    },
+    {
+      "path": "src/Hub.Domain/CommitmentReliability.cs",
+      "sha256": "bf7ffc667e3903e2fa98814320dd410542624d4397b38ee52cd61c7142494ea2"
+    },
+    {
+      "path": "src/Hub.Domain/DesignBasis.cs",
+      "sha256": "f1a36c5d8f9b690ba253de1bd43a30df8126773988957aacf4d995e762c17603"
+    },
+    {
+      "path": "src/Hub.Domain/Evaluation.cs",
+      "sha256": "a9d5caebc0aa9150394f13f9260398529dc27532dec5080edc43b9c51b2220ff"
+    },
+    {
+      "path": "src/Hub.Domain/Flags.cs",
+      "sha256": "10e50c9fd2b3fbe1c55fa5b655a9a30a10dc0d9e5384858d18a71a2984f87439"
+    },
+    {
+      "path": "src/Hub.Domain/Handoffs.cs",
+      "sha256": "26f6aa6be5345701f6e8c6a9a51d9055993a3b143ea582d45ebf54c31e440911"
+    },
+    {
+      "path": "src/Hub.Domain/ICalendar.cs",
+      "sha256": "1463b93a4630bb9245b04c2d79ba092d7e10fbdf1fe1946d5de8670ff6ba2827"
+    },
+    {
+      "path": "src/Hub.Domain/IdentityColour.cs",
+      "sha256": "1e53db58a499162c6536b225d7eace93e40be160aaf02af59c57d2b8892550a1"
+    },
+    {
+      "path": "src/Hub.Domain/Links.cs",
+      "sha256": "69c5bf60d197088dd40d0fd0cf639818f6287570e534b659d4f5e7dfc6da5b02"
+    },
+    {
+      "path": "src/Hub.Domain/Onboarding.cs",
+      "sha256": "8de566e35e472e67ef2193905f2d70de33c4c683aee4a4a18ed4ff9e85e2f0c7"
+    },
+    {
+      "path": "src/Hub.Domain/OrgTree.cs",
+      "sha256": "7acf810c2c325db1136c750e68be5b739967d38d4e0b073e9bb343c31beb4af7"
+    },
+    {
+      "path": "src/Hub.Domain/Permissions.cs",
+      "sha256": "66d72a188aea42a8a0b56c0b7a62742d6c4ee7df8e880dc260fdc9f7a376e9fa"
+    },
+    {
+      "path": "src/Hub.Domain/Planning.cs",
+      "sha256": "44ac17dd6a7ecfb428ab4acec032fa6ceaae9e83a4adfed94741b60d295ef0f4"
+    },
+    {
+      "path": "src/Hub.Domain/Readiness.cs",
+      "sha256": "781d8afd6c341a9f2288dcc4582292d17d064624b0f8bd8eb02fc746033b94a3"
+    },
+    {
+      "path": "src/Hub.Domain/RecordContextRules.cs",
+      "sha256": "913be8f06aaa7bd2d4103ee2166a77f1f1d71ec217de2420380ddea0b18713e0"
+    },
+    {
+      "path": "src/Hub.Domain/Registers.cs",
+      "sha256": "0436e614258e67adbae3c5b988073fdf41994dfd42fb8df82eeefaf1f08cc369"
+    },
+    {
+      "path": "src/Hub.Domain/Reviews.cs",
+      "sha256": "5ee95b1f762903b5e6a75fbd7f7396a51cd2fdcd42317011866fae9c3b02171c"
+    },
+    {
+      "path": "src/Hub.Domain/RevisionConvention.cs",
+      "sha256": "b9266893f7028f528ce1e3723e35083f5e2649ddf578b715dc1ed5801f43fbf9"
+    },
+    {
+      "path": "src/Hub.Domain/RouteCounter.cs",
+      "sha256": "4356a35f4113b8083bc1aba68d0d313edc5a526fdcb597c1d792595434280aba"
+    },
+    {
+      "path": "src/Hub.Domain/Settings.cs",
+      "sha256": "3c748722faee332e07d4405043e2b16d4c4cf197b42da207364a2414fe58eeb8"
+    },
+    {
+      "path": "src/Hub.Domain/Submissions.cs",
+      "sha256": "1dcdbdabd103f63bc839f27d5c22afaf960fcb8b16d3c41c22fd0cfe3659bb48"
+    },
+    {
+      "path": "src/Hub.Domain/TaskRules.cs",
+      "sha256": "4f8d07689087011548d282d8c4a0399e137a3d1bcd98d3306310421906135e44"
+    },
+    {
+      "path": "src/Hub.Domain/Templates.cs",
+      "sha256": "da00791720349d70585190a61fdc8b8cecd2d9382fdb5b524b8509f37b994b57"
+    },
+    {
+      "path": "src/Hub.Domain/Vocabulary.cs",
+      "sha256": "120696218f61b56e923f7403f7dfa5b32841c7cf9bb4cd19985888402ec0e67a"
+    },
+    {
+      "path": "src/Hub.Domain/Workflow.cs",
+      "sha256": "d3f2d651f0af800d5545c2590ff460444933c3ee636f95cad3074417abd109f9"
+    },
+    {
+      "path": "src/Hub.Domain/Workload.cs",
+      "sha256": "30c50ca3d775a64b2b7c10461bdcb95b55dc68a85497b0bed4d3268ce26e3ace"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ActivityTests.cs",
+      "sha256": "c12960ba78bebe377986df18e1671aa4a47539d9b5a130ca68d0f2c8e5895818"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/AdminContractTests.cs",
+      "sha256": "9260530ef89b42277c80b59fc6a41e1513ece664968e680054fe90a017ac47a7"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/AdminReviewStripTests.cs",
+      "sha256": "e15017d3fc7da3ae2795d5fe9ada7bd5c8cf7002c796a276ea6f3eb8643cf576"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/AdminReviewTests.cs",
+      "sha256": "d4ed91dde67878bccdec475fd44cf51cb9f18c0be8de7adcf1b6e8180a6072b1"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/AdminSweepTests.cs",
+      "sha256": "4c76c55b03f07edbbd93f1dae2b4629065807eb445256ac8130d729df2f17223"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/AllocationApiTests.cs",
+      "sha256": "0e2143557ab9245ceb402fb1898505ca7a66f669f4b25a61b3dc82dcabe30a8f"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/AllocationSchemaTests.cs",
+      "sha256": "64103faa572bfe7f12a458636a3b3d842349c371fea6bf318b39036be988235d"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/AttentionContextTests.cs",
+      "sha256": "c2280dd5e287e7a0d988ca62dbf15ce52b8e33e53aa0e7414f37cbc85ce437a7"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/AuditChainApiTests.cs",
+      "sha256": "36fefc8c65caab94b0475f8013d57e542be09fa36d7600b4e5090c78d5f50fb7"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/AvailabilityBuildTests.cs",
+      "sha256": "62d141768c7c8a22f5e9aef84cf135dfd22f624f3188ccbc88b8d28c7c92ec81"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/BaselineHistoryTests.cs",
+      "sha256": "81fff0a495e081472dad973110fc4798824a4e06f077edcb7d983265c12125fe"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/BuildStampTests.cs",
+      "sha256": "656e474bdc3073103eaa5b25fe5187317aee4693a2938f4efdf35872fb918b34"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/CalendarTests.cs",
+      "sha256": "d32dd115b822d3ab9a97382d27b53824413056e259e5799720c87db5728410e9"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/CapacityAllocationScreenTests.cs",
+      "sha256": "a9279a219dd07669a43c00dc16756ef52842afa5959e267dbce50c9ea58eda59"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/CapacityAllocationShiftTests.cs",
+      "sha256": "6954da98b8cab0eee7d006945103b5bbad3ff963d999eb4798131ecdda2a10d7"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/CapacityExactDateReservationTests.cs",
+      "sha256": "4fe4b20ba29e140d70aaab9b37548de7c1efa7145ea29fa4a03a91f849645836"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/CapacityPersonFactsTests.cs",
+      "sha256": "d01a8aaf024753782ab2786a9607cf64cd42afc7545829938281e6d9e0b155c3"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/CapacityPersonPickerNoticeTests.cs",
+      "sha256": "0fc07bdeb3ff22be0d020c555b3c63326fe51be68ee54c4a36b911ff77dec1b6"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/CapacityPlannerHeaderTests.cs",
+      "sha256": "62212d36e48686073d7eb71027fba40ff8706a02ea01f156f4130e5cb955326c"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/CapacityReportsTests.cs",
+      "sha256": "a698ee6b557673646c63999e568b9c139257e58069f73c9d78185be4eae90f29"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/CapacityScreenTests.cs",
+      "sha256": "8258fc6a5b0cffab9f8281441c8ba11c5e2712dcc05fdbcac4c62ebf6b5c2c40"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/CapacityTimeWeekTests.cs",
+      "sha256": "1215b0c37dbd04c152390bbed87c9f75f9acc13b194b50274b33aa730efa31ba"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ChangeContextTests.cs",
+      "sha256": "b6913cee1f1af0c66b9e4d9426d203a52e3b456e6b5551b2942744d859628516"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/CollaborationTests.cs",
+      "sha256": "093181370cddc29c514ba8da1f68b2f25851036d9ae92324229dcda583814c24"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ContractCoverageTests.cs",
+      "sha256": "0659a09556f3da9393b3181504c42d7f74fef0b7414abb10c3dc933cbcab7011"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ContractTests.cs",
+      "sha256": "1c2a83f4bb7610575fc8f01b9753848b51fb3a6133d282e164696678afa2b929"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/CoordinationContextTests.cs",
+      "sha256": "12e91b1f95794d80cc2916ec7b7198e5cf2d3192e7fea260d0b00d44701f6530"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/CoordinationDigestTests.cs",
+      "sha256": "3fdd3ee39130cc38dcb5077896df9f465eaf35edfd520bd8423ca34ae8afbef9"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/CoordinationLifecycleSweepTests.cs",
+      "sha256": "347b6c33d1a7a793755e8f0f8845a887a0a3d2eda5e5a812ca19222fc658f2d5"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/CountLinkTests.cs",
+      "sha256": "3cde5230ca8723eb1dc0a79e7d17ab9af9e6d7b2a16de7cd32b7f243f897cacd"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/DataEntrySafetyTests.cs",
+      "sha256": "6930482026ce4915997dc12ffe23640b6e24952fa0a61c95924fb11793cfebfd"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/DateContextTests.cs",
+      "sha256": "5e01ef65ce818ae1987c29994f25b91d42612a723225f14f6876c80e579b0c49"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/DecisionContractTests.cs",
+      "sha256": "8e0aedd1311fc67521febbad396b22532cc2fb10214ff29a19eea41b8922a6b9"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/DecisionsTests.cs",
+      "sha256": "8d78a46254a72ce7482b65ff0ed6edfd68f111cf8b092325105dbb16be9a59f0"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/DeliverableClientExportTests.cs",
+      "sha256": "a247387e4751346df6724cefcb22a3a2cb829b94a7149b97f758297a035b46a7"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/DeliverableContractTests.cs",
+      "sha256": "9d073da62d9672b9d3789064374bccd9aa631250c1c8ac42ad80042ce7dfe8bc"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/DeliverableRegisterTests.cs",
+      "sha256": "8f967f19ae60af6df14aa88ee2cfd15f28f18a7e9398100557d63b5e03aeeadb"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/DependencyLagApiTests.cs",
+      "sha256": "9fa8ef287c6a364806b71def610a55620ce2cb4766452014e61a2cead56721f2"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/DependencyTypeApiTests.cs",
+      "sha256": "7215ac8f180cc5efce23dc984f0b7e97644198f00a94f2c5ac98ffd56a0712d1"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/DeploymentConformanceTests.cs",
+      "sha256": "da66c81f55d8637b452baf927b7f2960888103ded79d9172d4f1677bdbae3e2d"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/DesignBasisApiTests.cs",
+      "sha256": "a09cb3939c262ce433fffcfb1f6d1cb7c99cd6bee4115b5c863888ee4649bb4f"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/DesignBasisNotificationTests.cs",
+      "sha256": "eb3761abb1b02b31fb0ba758127e21237157fe2fb0cfc937900cd8560a4eff3e"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/DesignBasisPermissionMatrixTests.cs",
+      "sha256": "6b9363258de84aa0052eb566b883b16bd31d9139cab1e0afdda71ea98f73df49"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/DesignBasisSchemaTests.cs",
+      "sha256": "6c82aaac3a47be6387b8ff43e284afc900df5cf0129f4c02154662617c6543ae"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/DigestTests.cs",
+      "sha256": "b00d8deb2c7feb1f729b115a3f80a5a02316deea20dd12624be5365d2168d7c0"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/DisciplineCoordinationContractTests.cs",
+      "sha256": "2db98ddc58ba5683c8eb0ade948f2bc6aa44a13fd12064db72ff08f958dc52e3"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/DisciplineCoordinationTests.cs",
+      "sha256": "576ff0ba4455f257163c8c947424e224d02eaaf7d00a8a5ab5cd936c98f2fb0e"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/DrawingImportFormatTests.cs",
+      "sha256": "e1213e38c303bec736b47a4b8f1d9d522e242446343b418b3852483796c4a0a7"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/DrawingImportTests.cs",
+      "sha256": "eba2a96822e037122a6615285208c2ae5a722b3a1541b9fc08afba9da2dccc1b"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/EvaluationTests.cs",
+      "sha256": "504c43bb9c7c7601b9350537d0c9ee5e3505b2471650a90daf21d99fabc71fdd"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ExportTests.cs",
+      "sha256": "fbf5932a2c0804f8577066cd857de04593ae54f509f5843c413de63e7599de5a"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ExtrasTests.cs",
+      "sha256": "7ea478282fdf67adb73d11b095038fd50047f78dd59b5ed438d5c9ffa6770d8f"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/Factory.cs",
+      "sha256": "5fa62cde50ee036866ec796c904a89d556694401d8e9804da76a391cf88b5b38"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/FlagsApiTests.cs",
+      "sha256": "80493b6ea08a12500c7cb1271d48534d1c06fe8defbdc32c238c28d0e1d707e8"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/FoundationsTests.cs",
+      "sha256": "1f8f9d8e1772b666ff563d7fd9bca23cb55a9c2a75651492c6a10a9053f0756c"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/HandoffsTests.cs",
+      "sha256": "015ef3dca65d4ac4a6dbb51dae0f1e57f27539a2adc636d931b2ee54863660ac"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/HomeOverviewTests.cs",
+      "sha256": "08965504eae04e149e0c9e3eb106be0022bb3947ade48c29f58eceaaea0fbfe0"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/HomeSnapshotCaptureTests.cs",
+      "sha256": "6fa25df6042c128b216db733f0d0e60e9c2d8d4c01d3b786049c6e6be1010993"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/HomeVisualCapacityTests.cs",
+      "sha256": "baba6fbfaa4dc3f2532bdd296625e3217db8b26bd82bde8a933c29bbc3708550"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/HomeVisualDeadlineNoteTests.cs",
+      "sha256": "fd3966b9f418b6047e610de7bcc890c1b145d86d5ea828fda66eece88109d191"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/HomeVisualLayoutTests.cs",
+      "sha256": "85d4b670d3eae130f6e75c829b44f42b5fe9417e0661f1584933b4d3578b96b2"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/HomeVisualPresetTests.cs",
+      "sha256": "f897ff6fda4b0366438284c62334ef045890298828d4cdb3e49f803ce9e13bfe"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/HomeVisualTrendTests.cs",
+      "sha256": "3b27f328632e5cf1ded3338eac79b57b2023ff7bea79ec27da256e2f3dc7cff9"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/IdentityColourApiTests.cs",
+      "sha256": "709fd4c9f2bfa8c255441ef9a92bd38f888140df7182d54419ba1099cca904e8"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/InteractionScaleTests.cs",
+      "sha256": "b866931be8ab3ddf8eb0ce62d3cb89584d7f203948f20c16dced9d9c5d640efd"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/LiveEventsTests.cs",
+      "sha256": "f87c99bf5b321c7fb73b9d0f34d8f584158e1b8184bb86be07e642e6b0b9da60"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/LiveFeedTests.cs",
+      "sha256": "300cbe57a9586c64f20eff3210a09de3a78004c7f381105fbf4a7b600f8c9f59"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/LiveStampTests.cs",
+      "sha256": "baab7fa44c5212d003c69ae41ece4d5fef7fdc62efec364a5bd55a2fc9196eed"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/LocalAccountsTests.cs",
+      "sha256": "c7136fe0ebb1847f86c1f452d165c99d605da86d1e288ee012f4a0097a58804f"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/LocalSessionTests.cs",
+      "sha256": "7bfb1eebc67ff592b6d32719745f0de77e8517d38afb09c31df6c3c7a2518750"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/LocationIssueTests.cs",
+      "sha256": "55bc24071b1393832ff918bfab72c855c9fcefa817967259be506f59a990fbe1"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/MeetingActionsTests.cs",
+      "sha256": "09fbc8edc2becb525fb66e074246de5be63167095980edc40f7d76658211267a"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/MilestoneContractTests.cs",
+      "sha256": "6d8687310cec6f4942af48365db517992dab571dbea9a82d3c5e83f0f04be232"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/MilestonesDeliverablesTests.cs",
+      "sha256": "a19e6893451adf25967dde35abeee62c12fb55a0a9dc0c8fd79a635a9e6d4f46"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ModulesContractTests.cs",
+      "sha256": "2c768e62c19ad6bd3d9c21d9abcad0b9001c1d618d9e4439719ecc489efed03e"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/MyWorkPersonOwnerTests.cs",
+      "sha256": "9ea72cd05854941492f38e00a945d2685a2504abc87c4653a99783f008977aa3"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/MyWorkSeenRaceTests.cs",
+      "sha256": "ad197803e4167b55f7c527e2289fbaf252814d1ca0d403a5490d6e23af0e5b05"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/MyWorkSeenTests.cs",
+      "sha256": "d99175987bc64e57809d75a0e8e40cd6c925c4e6aa46307fbb4ab683d2856823"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/MyWorkTests.cs",
+      "sha256": "c6a01b1c24447981c955cefa9e7498ba9176e5e9e14e62c5a067b0e6753f3b53"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/NotificationContractTests.cs",
+      "sha256": "7da63a8089f686029232979d798806560d169c749f46806029b117294b7fce70"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/NotificationSearchTests.cs",
+      "sha256": "93e7b67b78c1b87918a164a3f2c49f8b2cefa6051855fad408ce115d0e86c106"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/OnboardingApiTests.cs",
+      "sha256": "79cf752ab6b2e18eb7560c2ae020254921131f3788ca1a4eb543eb9c972d4423"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/OpenRoleApiTests.cs",
+      "sha256": "a3177a25676b87a9726df6fa7467f2811cc3e58b6f2b3f050169d03cca075a66"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/OperationalContextTests.cs",
+      "sha256": "2cc0405e21dc28e2f6f649b7872536f673a63c33034e7909dce324f6abc499fd"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/OperationsHardeningTests.cs",
+      "sha256": "d11180961965accd695e1762d442eec53b7026ea639e086cd71e2d255181bbf9"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/OperationsTests.cs",
+      "sha256": "2d928a772a2b8266d8faee827c7a7b9b9adeb3d36835d29929840230c9c44af5"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/OrgCapacityIntegrationTests.cs",
+      "sha256": "f3d9163928c528968c64f365764f7a82257da2684fecdecd07caa534261955b5"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/OrgStructureTests.cs",
+      "sha256": "226ec48343111942085d83695969cd4c5078cb781d121d11f5c694ebcdbab224"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/OwnerReplacementTests.cs",
+      "sha256": "fa4c454a2071c965f1f1132c96dc9973332a8b59b36b47c5c759f3f98ace4900"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/PersonFactsFoundationTests.cs",
+      "sha256": "80c21e509c5554f3ec0fc35976e191b2b88a14a44dcb6fc7aebb3979a5bd8c4d"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/PersonPanelTests.cs",
+      "sha256": "6299feaedbd255f1a9bc328182aaa9f94f3dce602deee8efa24f38e6c0a57699"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/PickerRankTests.cs",
+      "sha256": "9335a43275471df3702a8dbfb7dfc7fbd6117435f65d9e5a569f75539a7991b5"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/PlanningApiTests.cs",
+      "sha256": "1fe0ca36e4f8b980a4e9ed17474db1a0d643c5a74047b18876f85f24fa758181"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/PlanningContractTests.cs",
+      "sha256": "93a9513d4d311ff6304fa26feadb5f5ec06359d0336b5aece854bf1a3c93ec18"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/PlanningPrivacyTests.cs",
+      "sha256": "bde7878d33fb75f12d4bade91f735d670c4698e52f94d37e2d6a34b7ce0affd3"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/PlanningReportingWorkflowTests.cs",
+      "sha256": "bd12495a8ec6ee79bbe831e5140581aeea2eb364f4be75bfd0b05e6960e36b8a"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/PlanningSchemaTests.cs",
+      "sha256": "2d6789e3c6342ebf179dd47b52ddfd817c3e2d43569a4af4b131d3758d45dc39"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/PlatformViewKeysTests.cs",
+      "sha256": "9e301ef719d812004063db6060c38b8d58f93b301a44d91153bca1cf6f4db442"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/PortfolioCompletenessTests.cs",
+      "sha256": "34051253ddec3b9027bdcb30574bab29fa38fc9a599381e97a1e4412dbe86284"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/PortfolioTests.cs",
+      "sha256": "ab58d0afd7b150090430668b15b5b2cbf8a30cae9fecfcb120d22be1fd6cd1c9"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ProjectDashboardCompletenessTests.cs",
+      "sha256": "a966efa2c6393f97e7b982df620a038f6a875f15f0e632dba2283c304693e81f"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ProjectImportTests.cs",
+      "sha256": "2600712008724f6e66645ea5d441d7e2b8efee5c4d017d6fb890248ebf507603"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ProjectListCompletenessTests.cs",
+      "sha256": "255e9b3e6ee685805f5e688ebd1e56d1833963dd26f7cae74c5c09e99bd92687"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ProjectProgressBulkTests.cs",
+      "sha256": "461f5c6bcc9f52dabd825d1953293fb1c9f0f8fa5672439e05d55b93f2f8aba7"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ProjectRelationContextTests.cs",
+      "sha256": "95e5b024e5888f0f8b1013067d92dcbe19873ed30258889fb2f7804214f9a3f0"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ProjectsContractTests.cs",
+      "sha256": "94eb8cfffa02c3a39c55e495a0f5cfce54cdf07329006fb42f1010a8b4b1ea01"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ProjectsTests.cs",
+      "sha256": "b68861d19937259d613552b7147c078a4e638d3c1d06ff32f134f15a671f6a12"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/PrototypeAmendmentFlagApiTests.cs",
+      "sha256": "82425a494c806e55f36da1175f17419434881f9acdca27a830cd50925fbdb57c"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ReadinessApiTests.cs",
+      "sha256": "7aa8d1a1f3f3d8d4a6bb2c8c7c14a61fa25ab400317ae240076e5e426c7cd5c5"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ReadinessConstraintLinkTests.cs",
+      "sha256": "2f3ee0d7041296a66ea6e3b7a27f61fd9d17d5f8a68702189930f1b42889bab5"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ReadinessContractTests.cs",
+      "sha256": "03369e4165b9e6b9ed8d43bfd833811c8e50de1564b12598a0b91590134f9642"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ReadinessExportTests.cs",
+      "sha256": "5a2d4e4b6995902e9402afcf9e35dc24b6fcaffe23238f0da228ec1ba4693f3a"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ReadinessInvalidOwnerTests.cs",
+      "sha256": "deb532d5b5d9a8766eca54d27574bf83818d78084d2c15a7458fb910fbd40e4b"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ReadinessNotificationTests.cs",
+      "sha256": "6c27ea4e59c310d65e806ac9e174c2585f5448911d24cb2aa210d87e48d52ebf"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ReadinessSchemaTests.cs",
+      "sha256": "84e7aa2f39d7d61a0cccb9d3a27ada238636ee70d845595a30aa03d7aa23b813"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ReadinessSearchTests.cs",
+      "sha256": "18eb3967f473583bd1785a21e873e7e0f5162d69a80771a900cb9278de7d4188"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ReadinessSubmissionGateTests.cs",
+      "sha256": "30bf3cd037f7ff6d74ca15c256745dbedeef0a503ad3f4fe1dc7c6143344a253"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/RecordContextDetailTests.cs",
+      "sha256": "c435008bf38d3b6015e67e63186e96b0a35a8defb9c061b0fc120f540a5d931c"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/RecoveryApiTests.cs",
+      "sha256": "6fd5173d4428f859b1913684b523d3cece3e6412bac1f4fdcabd8b0bc32d49eb"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/RegisterEnhancementsTests.cs",
+      "sha256": "d4f1e98968a62948e4dc323edad1f04bb7b88916dc7730694da744057c112c20"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/RegisterVocabularyReplayTests.cs",
+      "sha256": "d138a9a013b52ff3bf0d3638b42847756bc2411cddc9fe63d07c985c11ff4388"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/RegistersApiTests.cs",
+      "sha256": "383bcc3bfae4dee6e34f090069e046e16d8f5cbb2e15fb8ffdabe12313af963d"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/RegistryParityTests.cs",
+      "sha256": "26f37f70bca0259f0c319133b61cdaa734f79342eb9eb2507afb87aec81e0c65"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/RegistryTests.cs",
+      "sha256": "ef0fcf0201bede24590ca56341c9bf38f9dc4c2ab1a688fd86a994318aa0135d"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ReportCapacityComparisonTests.cs",
+      "sha256": "04d861cf82ac21c149b07d0eb8f0980053ed024d127fd7a12a150076e3363d7d"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ReportCapacityTaskInputsTests.cs",
+      "sha256": "d5f59285249c7ec743018838db5687902426f36f3f64ce0b4776a49b671c8143"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ReportCatalogueViewsTests.cs",
+      "sha256": "3992eef4c162f7a9d99727161ed23cb245ceb0a1600a4d664c0977fd6442730d"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ReportPersonReferenceTests.cs",
+      "sha256": "87a6e0cafb2b5a70787f0a7004f64aeae2e9dddc63480c75cc396a292148afc3"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ReportTaskInputsTests.cs",
+      "sha256": "c4dff39b92ab93cc2623613644c8ff9d5aa61d9ee372f74dc4d4e39342a6d9a4"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ReportUnitsTests.cs",
+      "sha256": "0c17895bc6e06c79e42e5824b88f99301355330ef6307fcf3f5d217c8da383fc"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ReviewChangePermissionMatrixTests.cs",
+      "sha256": "a6962dfa806e5247a725a26746a3c9f5b9c5d77820a25001a4614f237ae5e78c"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ReviewChangeTests.cs",
+      "sha256": "5b37695846fbf6c9105aa0bb3a15b1659904c48b281c36da80596f5269e54a4b"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ReviewDemoSeedTests.cs",
+      "sha256": "435121e05072f3735bd912591a908aa9762e81f0a33bc32a4012a96b394f1621"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ReviewFindingContextTests.cs",
+      "sha256": "a14b69f52064eb5121e36200e5751fbcc73e0e570d47f721d6179cb79566e975"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ReviewRegisterTests.cs",
+      "sha256": "1bfad4cf6edc0fe70f76027c982e2809d99dc646f378c6987e3c1f2f2efbae53"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/RouteCounterTests.cs",
+      "sha256": "4b2741ee3e5aa44ba784e7422fa19d7577e05e8f209480d9b9d5c8abdcf87034"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ScheduleBaselineTests.cs",
+      "sha256": "38c64c89c83b35c41628b8616f89074497a0e6887cc095d62df01059e1f16d87"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/SchemaResponseShapeTests.cs",
+      "sha256": "3ecfcf75decf156372298802c47aa8fcece4fdf3acf40634db38bcb0c0fe28a3"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/SearchContractTests.cs",
+      "sha256": "baf3fcc9b4c590f586e67a5626e75369853604bd5874f9cc70a41edc80dcb859"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/SearchPersonReferencesTests.cs",
+      "sha256": "3472dbf541793460cdd10b798c54b7493dab7e9ca9cbb03d97901f41a0577ee0"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/SearchReportsTests.cs",
+      "sha256": "706bf1c49afd35db616a428d100b7218b02818178759fdaeb15fd5c6053a6ec7"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/SearchScreenTests.cs",
+      "sha256": "9e8406d7095ddfbaa92d3b0467f977cd1ac68caeeedb436df45737c62c955b3c"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ServedFilesTests.cs",
+      "sha256": "7636ea3ea81ba6fc77038eb3be46e9b019b7a653192937292d33f2849f64adc3"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ShapeRecorder.cs",
+      "sha256": "9fa00c52f5fe5ee87453321c2e04c6270d82325b70522b81ae1c899a81ffc1d4"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ShapeRecorderTests.cs",
+      "sha256": "c75f391a05bf606516fa4e31d76d97bf5239d732bf9f2c565e1e6e65e0edb62a"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/SignalTrustApiTests.cs",
+      "sha256": "38b503730fcb7fc2435b34ac5ba68457eb9e326932d82e35c79a7e3a529c95fe"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/SocialAuthTests.cs",
+      "sha256": "36f2896ac2d96b1fe0d5f9784fdf21b7280e49f978b09965d73f0714c72c8367"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/StaffingSignalsSchemaTests.cs",
+      "sha256": "6e6c784126ac48213b30ef58ad87d7409b4e193be5d18b5bc37b7bf7eeb7dbfc"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/StaticCacheTests.cs",
+      "sha256": "984ebb05c72524dde5b6692f44403cc3ed9064ed78d04159f08b4376ef0df58c"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/SubmissionApiTests.cs",
+      "sha256": "934382f55c50e2b763ca88d572bf8efb156621e82aa406cdd82a65c930f1b8db"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/SubmissionContextTests.cs",
+      "sha256": "c1579575d8f0854935008907c2f21e7fb4fe1795348f8665401b5d589de4c014"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/SubmissionPermissionMatrixTests.cs",
+      "sha256": "435a1c2d9ac1663cd2f2a4f652e65a0a134f9bc4206ffea7a2c8655923bae0a5"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/SupervisorCapacityTests.cs",
+      "sha256": "3a8d7e46bc5595ada12aa0e821136de17d908c05978323cfca4393bd86954ab2"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/SurfacesTests.cs",
+      "sha256": "91474d61b9b9744a4899ec96bc1e9c28ac37571bd462a75d04b55ad8dfe7c8a2"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/TaskContextTests.cs",
+      "sha256": "85e138e6a732e5d8c6d82017e7c5b6972733c294531728ece7c49477104e62bc"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/TaskGroupingTests.cs",
+      "sha256": "7dc0470d22c0bf6b945b4509c0cc173baa1c2bc1f1f38ff8b1106bef58dc0867"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/TaskPickupTests.cs",
+      "sha256": "b6ffcd5e90df33c9c7058416ea264c5f4949d149be40f1fdf75aa834341f02fa"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/TaskQueriesTests.cs",
+      "sha256": "8bdfc43d583df9a1931bb76e531ea39d36b1518871913003f860ea50c4b097f3"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/TaskStartTests.cs",
+      "sha256": "81cf3bf535b72f71fbeead8bd2290c7643317313e39cde175d05cb4c489b5b86"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/TasksContractTests.cs",
+      "sha256": "87b974a05b2cb9a80144464553130b1085cff851416f76bedf2632f5411a9352"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/TasksTests.cs",
+      "sha256": "b754f0a3e8298275acca1fadd75a51bafdfded602fe5ce62baa05504166f4a88"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/TeamCompletenessTests.cs",
+      "sha256": "ba986a07c318c0df2220968b63d36df7914e09f7e77965569c465dee2cc3d93a"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/TemplatesTests.cs",
+      "sha256": "199c772cab6052b516b1459037c1aafbb84bfd278118acde22fa1f1441c42fdb"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/TestData.cs",
+      "sha256": "bbe1852cc49a6e65bc393932875fe9b962876e9250f62dcce53920b220496ddf"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/TimeTests.cs",
+      "sha256": "3d154b40da11a8deddb5a67c0d7c5b0e983e05791b788bd8c8907ea85797c691"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/TimelineSavedViewTests.cs",
+      "sha256": "d3a5b50b717213020a4d713aa99bece6da953ed261318e36ce112de5a11e4714"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/TimelineTests.cs",
+      "sha256": "69629b0117b022f86b7cfd1c4ab8b6b0225eef19397f641ae362f2dcf007e363"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/VerifiableWorkflowTests.cs",
+      "sha256": "ee2379506e45dcdd4836bbe196c34e675d561d6697df58fc303c77184237eea7"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/ViewsTests.cs",
+      "sha256": "73e7ac5b07be41b07b3508af74b701403d491f190d7caa5384a43c842cec8167"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/VisualAsOfTests.cs",
+      "sha256": "c2e692d8ba4a335dcf5bd68fad40b2ed519eacbf0c2fcbb25ee63096eb72f0a5"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/VisualNonWorkingCalendarTests.cs",
+      "sha256": "5c6ffcf6ce3dede6f523a03262a7306d92aa112f61dea5ea2c6f807c4ee997e4"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/VisualTimelineLaneTests.cs",
+      "sha256": "103c0731ca6b3550c29f9849b9a1a8873987531a7471d40e7fd531019438c2bf"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/WeeklyAgendaContextTests.cs",
+      "sha256": "d446a83ed969c578c777eed1c2d61ba9b4c3db674940054299f95fb5a2277ae0"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/WeeklyCommitmentWeekTests.cs",
+      "sha256": "45bacb45dfeb373bec2d8ed84587302b730fac542d1249a93585135a574e1320"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/WeeklyCoordinationContextTests.cs",
+      "sha256": "f6a967119ae387488307326fd43571d3d084b2d56ad5e789dabd4d7621ecfa38"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/WorkActivityCommentsTests.cs",
+      "sha256": "ae7dce40571f7ff8a3873905973e0c14ad99f2d013194e92ea0fe3a91f56e53e"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/WorkActivityCoverageTests.cs",
+      "sha256": "f126ad40f90c1c0e50504a6aed49f31964c8d7abb4dda55a465ba76b654df588"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/WorkActivityFlagBoundaryTests.cs",
+      "sha256": "f914a11690be768879fe4e0937b9bfe5323c617f8f1fac3899d5892a8185ce38"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/WorkAssignmentProducerPathsTests.cs",
+      "sha256": "8c609ab292ceb72b4c3d1a46331b51b238263e86405d018719f9ea67f3368ba8"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/WorkAssignmentPublicationTests.cs",
+      "sha256": "464bb454e3325935ffe30583ed2495dc1eb2b8fc1a034ca56bf2976c19309ef3"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/WorkBoardCompletenessTests.cs",
+      "sha256": "3601c07be002e28a0bd63543c02a133d980d16bf44466fc1269acc16fcd81669"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/WorkDeliveryReadinessTests.cs",
+      "sha256": "42768c8762370344d21283f3ea4e383f9654eb51a6b2cb84b3476399b277704a"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/WorkDeliverySubmissionTests.cs",
+      "sha256": "0722325d26ae918d2d053383510c8464432c3af82bbe2fe5a0fa7a185d6d29d8"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/WorkHomePresetBridgeTests.cs",
+      "sha256": "159664f6a114ca18172e3b63575766514e6aebf5276ddf00eb537c3ba293742b"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/WorkInputPatternsTests.cs",
+      "sha256": "79594fd188f29f6d9bb9579956c1f8be75b7c41c34c33b37ce1ed25ea4900147"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/WorkReadinessSourceEvidenceTests.cs",
+      "sha256": "bd20d28b8c884ba98723ceb41771606fbeb88f41d93ef790d957464442fe10cb"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/WorkReviewerPresentationTests.cs",
+      "sha256": "9b6f73524b9f7c6bf977e5f33f81263cd4d0b89b529c3fa81ca544a86087e695"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/WorkScreenReadEnvelopeTests.cs",
+      "sha256": "c7bd090798e8554fc44136ac91fc7f25ed81e68a26a5c532350fb9e224cc7e9c"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/WorkSeenEligibilityTests.cs",
+      "sha256": "7dc5852dd7d72688be5fa9465064a41679902fc97f00ff2c4ff3d56488dc9041"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/WorkSeenMigrationTests.cs",
+      "sha256": "ba8b1425a3afe2a2b0ae9788a1ebab94c4ec5e712ba5c2bb32282592119a3305"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/WorkTaskColumnsTests.cs",
+      "sha256": "c5acd641f30b45536499b53a2409c26c529f74fd6331b92615330e2de6a757bb"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/WorkloadApiTests.cs",
+      "sha256": "1fd876a7faf2572f9374cf75cc710c19a94a629e37a81b12e14114c618a27b47"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/WorkspaceContractTests.cs",
+      "sha256": "9021da44b589084f0e9b1d7e84a338214a84c9e8ed22a49da71203ba75e5d639"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/WorkspaceFilePersonTests.cs",
+      "sha256": "ecccc94a61160b7936b0e046abf94516eb1e508df4cc66e61d87f6416582810f"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/WorkspaceIdentitySurfaceTests.cs",
+      "sha256": "354ada4af5edbf9067c8e2becdb3b7096fa488f375220237dba5db5e89723bce"
+    },
+    {
+      "path": "tests/Hub.Tests/Api/WorkspaceTests.cs",
+      "sha256": "f9d4a17a697970a662ecafc2eff070b8810ae8e9adaa18f0f559f9f7c5609510"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/AllocationsTests.cs",
+      "sha256": "b7df9cac7a473856d31efba62e2c5f9d34cebdbc4e92c521fe9d6b38452e11d7"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/AuditChainTests.cs",
+      "sha256": "14f02d57d6dcaca7466562c6eb1d1d3f187057088765e2ed3b787e7cb3c1b7ab"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/BacklogTests.cs",
+      "sha256": "8b34794b5df3fa8e1c898dc8d10e8ed3705545307b1cc6ce6bbc82fa3e0e7dfc"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/ChangeContextRuleTests.cs",
+      "sha256": "66d7d71b5f7b9693bfdcafb551ef52da0398f814f5cd561a71c8ca3f8ad3a2b3"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/CommitmentReliabilityTests.cs",
+      "sha256": "a7f9a436de2f5e82cf255267ed94f7c83804ed592ba9a07322fe392b3c9028aa"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/CoordinationTests.cs",
+      "sha256": "e568b6f849fbb762dbf5f308680ac93f9db1ba285bb9703b2032ec94c47778b6"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/DependencyLagTests.cs",
+      "sha256": "56dc1a6a0703f246f37769723770fdf7238d4b0be2b4e82bcb3cde88ee525627"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/DesignBasisTests.cs",
+      "sha256": "3bf428ff052bc10c78d42d4b6d6788d5a5dbe4e9ad6de53f91c7a9c69ac5797f"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/DomainHelpersTests.cs",
+      "sha256": "fc3bf6fa750057797a8cdcdc4a3cd50b47d66f0305d406214108f17c0cb2dcb4"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/EvaluatorEdgeTests.cs",
+      "sha256": "63a317931e9fc7d9a30e2d11bf4096f0039cb6e263d1a04f50827b3cc71512e2"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/EvaluatorTests.cs",
+      "sha256": "4edff74a9691b2833b4aa9f38e0e3f6fb28d8cf7a788fd1b9274bcb9b73dfc01"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/FlagsTests.cs",
+      "sha256": "6f25c1b675a5c04b295d180df6a728d3d91e3135acb228df4129301aac8b3195"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/HandoffsTests.cs",
+      "sha256": "1b27a0a6f0f4f33924e12216e1cc469aa22ed80f14dcd27a6aca1638ba4f3ef7"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/ICalendarTests.cs",
+      "sha256": "03284eb038070449aa8c11b9bc50a03a5f0e729287f00c7e5296683884174694"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/IdentityColourTests.cs",
+      "sha256": "6a7fca56cb542245b2e194b782754a020b1d4b0ec716ca76eb17d21098073ef6"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/LocalPasswordTests.cs",
+      "sha256": "23298fa60e443c9744bb4912d5c28d439072553ebd12b5b8566615a0f404053e"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/LocationIssueRulesTests.cs",
+      "sha256": "8a22c229f31f7bb3737fd6bff2f11c873939810041eac985fb562cb9a1a05f0c"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/OnboardingAndRouteCounterTests.cs",
+      "sha256": "11713170ec9835544b0c49bc6603e0dcbabd79be22bb58d459e262d112246f11"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/OrgTreeTests.cs",
+      "sha256": "3086a8d3c9d69364c73141d8d374fba773284943f4cc71ddc3d0e4d9406405d4"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/PermissionMatrixTests.cs",
+      "sha256": "49c36d48fbdef769d6241c440bd9f95dce5245eb5920129532f0d9a117f673e4"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/PermissionSweepTests.cs",
+      "sha256": "f344f1ebce314c1745e1bf318e75d79b2c15dbd71a16ef324328da76c21a5f18"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/PlanningTests.cs",
+      "sha256": "ed545299ded7285921c6bdb6bef8375d73c4593594b52d3ccb49f5006380cf3f"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/PrototypeAmendmentFlagTests.cs",
+      "sha256": "3b80aff44abf4ed8de7b59e9990c7858b335ca390d0a400aa095cf72fefe9721"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/ReadinessTests.cs",
+      "sha256": "c108c5c2cd3aac34eaa21f4a1fc8d10012007391967eb5302e9bf48cec0c464b"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/RecordContextRulesTests.cs",
+      "sha256": "29865cfb65e81b909c9ecf9262c281e4c5862a3699cfebb5c7922391060f6329"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/RegistersTests.cs",
+      "sha256": "f7b4669b8287af487d904b07b4dd96b89ed4327e5eca83cc62507af8f0d3c916"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/ReviewFindingContextRuleTests.cs",
+      "sha256": "a95f65f85985b53c62254f747a81e63178aebf7e17c070992893d3e183c21cd5"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/RevisionConventionTests.cs",
+      "sha256": "6d06c771fccbef8657a541717740a7584a743cb406194225e3666591b9b585b3"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/ScheduleTests.cs",
+      "sha256": "f230db74a59d4786667ce7883c499b238c6af70b426f7c4eff555837c4d00dd4"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/SubmissionContextRuleTests.cs",
+      "sha256": "d9826ff26ca90acf3535ae107dff727f230ffb63d6845c3c8dcf3aa0f9dea560"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/SubmissionTests.cs",
+      "sha256": "10117dd548187b49bc1380bcfdc335615cae415a7d553f6a1b9378af1b71c3fa"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/TaskPickupRulesTests.cs",
+      "sha256": "27fcd02667ee5c1abbe6c2e32d66cc30a364e673ea61b32f5dd47fbf6f714a68"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/TemplatePlannerTests.cs",
+      "sha256": "773b18ced11b8af9cef4c28a8e564abfe2ba4f43574a470890fd0f06e36336ef"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/WorkflowTests.cs",
+      "sha256": "f520079f59eb307240cdb358b8a4d2fbb601340420e052270fcc1f7371600331"
+    },
+    {
+      "path": "tests/Hub.Tests/Domain/WorkloadTests.cs",
+      "sha256": "10bb77c419f7c8f04114c546009a577adb15b481bf6c7c32e7eab13966c4bdff"
+    },
+    {
+      "path": "Directory.Build.props",
+      "sha256": "ab3f978bf68346e245ce6a7b8fcdfaf9bdd14867050c4b6f9c0ec7973c5be646"
+    },
+    {
+      "path": "src/Hub.Api/Hub.Api.csproj",
+      "sha256": "e5fe716a8ed2250815616042159d9defac3dd7b6060dcb02a89e7f18bba95a97"
+    },
+    {
+      "path": "src/Hub.Domain/Hub.Domain.csproj",
+      "sha256": "11c0c110e19c9eaeaef66a0382f7a3e4ff6ab395d99ca6664e1ba378371cc47c"
+    },
+    {
+      "path": "tests/Hub.Tests/Hub.Tests.csproj",
+      "sha256": "9d48dfe1db61bbf2e7bfe4e98ca9068d70b414b75628a24eeb07df0dedccdcf7"
+    }
+  ]
+}

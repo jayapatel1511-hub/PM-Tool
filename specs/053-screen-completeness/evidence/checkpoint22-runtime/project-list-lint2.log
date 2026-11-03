@@ -1,0 +1,5 @@
+
+> web@0.0.0 lint
+> oxlint src/pages/projects/ProjectList.tsx
+
+src/pages/projects/ProjectList.tsx:117:7: warning react-hooks(exhaustive-deps): React hook useMemo depends on `rows`, which changes every render help: Try memoizing this variable with `useRef` or `useCallback`.

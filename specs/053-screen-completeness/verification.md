@@ -642,3 +642,14 @@ with every flag off and then every 052/053 flag on, 6 personas' workspace reads 
 | `pr_checks.py migrations --base ac2fa894` | two contract migrations flagged, as described above (need Jay's `contract` label) |
 | `dotnet list package --vulnerable --include-transitive` | no vulnerable packages |
 | Explainer evidence checker | structural pass; 3 of 257 operations Evaluated; strict completeness still refuses (unchanged scope) |
+
+Jay approved a local commit of checkpoint 36: `ca8fccea` (2026-11-04), not pushed or deployed.
+
+## Prototype comparison follow-up · 2026-11-04
+
+Comparing the build with the 2026-10-31 prototype found one 053 defect: with `flag.screen_patterns` on and
+provisional or missing capacity, My Week's collapsed line read "My Week: 85 h planned, Free unavailable free".
+It now reads "… planned, Free unavailable" (`mywork.weekCompactFreeUnavailable`), and
+`work-delivery-today-reviewers.cjs` asserts the exact line; the pattern it used before let the doubled word pass.
+The full comparison, two 052 fixes and the open observations are in
+[052 verification](../052-visual-system-and-navigation/verification.md), "Prototype comparison".

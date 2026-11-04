@@ -64,7 +64,7 @@ const row = taskRow({ ...task, key: 'P-MOCK-T0005', name: 'Focus survey check', 
     await page.goto(`${base}/my-work?myWeek=2026-09-28`)
     await week.getByRole('button', { name: 'Hide', exact: true }).waitFor()
     partial = true; await page.reload(); await week.getByText(/at most 10 h/i).waitFor()
-    provisional = true; await page.reload(); await week.getByText(/Free unavailable/).waitFor()
+    provisional = true; await page.reload(); await week.getByText('My Week: 30 h planned, Free unavailable', { exact: true }).waitFor()
     partial = false; provisional = false
 
     await page.goto(`${base}/projects/${project.projectNumber}/tasks?panel=Task:${task.id}`)

@@ -131,3 +131,69 @@ Four final SPA2 combined-design desktop/phone captures retain the existing navy 
 S45 +S47 now locally checked;45/49 screen slices,4remain open.127 distinct selected .NET checks (114provider-backed/13pure),19final finite browser scenarios including17receipt matrix rows, generated/strict contract, app/fixture types, scoped lint, final isolated SPA and solution build PASS. Three initial fixture failures and producer drift refusal are retained with their narrow repairs/reruns. Real transports/hosted/pilot/human acceptance/full specification acceptance remain unproven; no commit/push/deploy/maintained flags.
 
 Evidence: [findings](../053-screen-completeness/evidence/checkpoint32-findings.md), [rollup](../053-screen-completeness/evidence/checkpoint32-runtime/verification-rollup1.json). Review copy: http://127.0.0.1:8873/#addition-09 (09Notice preferences/10Delivery history; earlier prototypes/gallery preserved). Final source/bundle/preservation/document checks follow in checkpoint32-runtime. Remaining S12/S35/S37/S49 and prior QA24 cleanup decision stay open.
+
+## Prototype comparison · 2026-11-04 · after commit ca8fccea
+
+Jay asked for the build to be checked against the mockup. Reference: the 33-screen prototype of 2026-10-31
+(`~/PM-Tool/.review/2026-10-31-unslop-home/proto/`, untracked, 052-D7) and its own desktop/phone shots.
+Method: a copy of the same preview database (5 projects, 34 tasks) upgraded from 38 to 56 migrations in a
+scratch database, all eight 052/053 flags on there only, each screen opened as the person the prototype shows
+(Lena Brooks, Priya Nair, Alex Chen, Jordan Lee) at 1440×900 and 375×812, workspace screens at the
+prototype's "All permitted" scope, and each pair read side by side. The day differs (prototype 2026-10-31,
+app 2026-11-04), so dates and relative times differ.
+
+All 33 screens render with no console error and no sideways scroll at either width. Band, title block,
+count-card overlap, the eight-item sidebar with its foot group, the one-line project header, the six project
+groups with Activity and Settings as links, and the workspace tab row match the prototype's direction and
+FR-VSN-10 to FR-VSN-19.
+
+Fixed in this pass (flag-off output unchanged):
+
+| Defect | Where | Fix |
+|---|---|---|
+| Board column headers cut off at the top on long columns (To Do 23, In Progress 7) | Boards and project Board, 1440×900 | The shared kanban header no longer shrinks in its height-capped column (`shrink-0`) |
+| Person names on the navy band at 2.21:1 contrast (AA needs 4.5:1) | Home "Welcome back, Lena Brooks"; the Project Manager name on all 13 project pages | On the band, person-name buttons take the band's text colour (14:1) and the navy focus ring |
+| My Week's collapsed line read "Free unavailable free" | My Work with `flag.screen_patterns`, provisional or missing capacity | Own text "My Week: {planned} planned, Free unavailable"; the suite now asserts the exact line instead of a pattern |
+
+A text-contrast scan of all 33 screens after the fix finds no failure on the band; its remaining hits are
+overlay layers the scanner cannot resolve, and those rows are white in the screenshots.
+
+Differences that follow the specification or an open decision, not defects: My Week collapsed below the
+queue (053 accepted pattern); register, milestone, deliverable, review, time, template and team-matrix
+"moment" charts are prototype ideas outside 053-D2's default; count-card figures take their metric colour
+(AC-VSN-02) where the prototype used ink; application labels win (052-D8: "Red", "Team Planner",
+"Owner (PM)"); the prototype's two-line project name is not adopted (FR-VSN-12).
+
+Open observations for Jay (no change made):
+
+- Tab rows sit on the light page instead of the band on Notifications (Notifications / Following) and Admin
+  (17 tabs over two rows); FR-VSN-11 and the prototype put them in the band. Part of S07, still open.
+- Home's capacity card: with 2 of 22 people unverified, the headline reads "Percentage unavailable" at hero
+  size and the card carries about eight lines of explanation; the prototype shows one percentage and a bar.
+- Every Home count card carries a two-line "Trend unavailable for this scope" box; the prototype shows a
+  small trend chip.
+- At 375 px the project header truncates the name to a few letters and hides the Project Manager's name.
+- The project identity swatch is a 2 px ring, fainter than the prototype's filled swatch (FR-VSN-07 says
+  "swatch"); a filled circle would read as a task mark (FR-VSN-08).
+- FR-SCR-66 flags a client workshop between the 60 % and 90 % submissions as "Out of sequence", because
+  Design Submission precedes Client Workshop in the §12.3 order. The build follows the rule; the rule may
+  need a series exception.
+- The Projects list at 1440 px is 1,834 px of 18 columns inside a 1,134 px card, so Next milestone and the
+  attention columns start off-screen and rows grow to 141 px from the Staffing cell; the prototype fits one
+  compact row per project. Columns can be hidden; no default changed.
+- Home and Projects open on "My projects", so a Supervisor who is on no project sees empty pages until
+  choosing All permitted; the prototype assumed All permitted. Existing behaviour, outside 052/053.
+
+Checks after the fixes (uncommitted on `codex/build-052-053`; flags stay off):
+
+| Check | Result |
+|---|---|
+| `npm run build`, `lint`, served-asset allowlist | pass |
+| CI web job suites (38 scripts) and `typecheck:tests` | 38 of 39 pass; `test:supervisor-capacity` failed only because an SSH tunnel holds port 5178 here and passes on `SUPERVISOR_CAPACITY_TEST_PORT=5198`; `test:record-parity` needs a clean tree and a PR base, so it runs once these fixes are committed |
+| 053 suites the fixes touch: `work-delivery-today-reviewers` (exact My Week line), `work-board-completeness`, `visual-system`, `visual-navigation`, `visual-layout` (on the Vite dev server it requires), `home-visual-layout`, `project-dashboard-completeness` | pass |
+| `visual-route-matrix` (not in CI) | fails waiting for `/projects/NAV-001` to settle on its dashboard; fails the same way on Codex's `5663eca1`, last recorded pass checkpoint 19. The running app redirects `/projects/250101` to its dashboard; the harness expectation needs updating (open) |
+| `ratchet.py`, `text_keys.py`, `trace_spec.py --check`, explainer evidence checker | pass |
+| Contrast scan, 33 screens at 1440 px, flags on | no band failure after the fix |
+
+Side-by-side gallery of all 33 pairs, desktop and phone: `~/PM-Tool/.review/2026-11-04-mockup-check/index.html`
+(untracked). The scratch database `hub_mockup` was dropped afterwards.

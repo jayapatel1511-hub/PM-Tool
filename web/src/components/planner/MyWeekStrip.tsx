@@ -44,7 +44,7 @@ export function MyWeekStrip({ personId, canPlan: _canPlan, id, view = 'today' }:
   const mine = q.data?.people.find((p) => p.id === personId)
   const first = mine?.cells.find((c) => c.week === q.data?.currentWeek) ?? mine?.cells[0]
   const partial = mine?.partial === true || q.data?.partialView === true
-  const free = !first || first.provisional ? t('mywork.weekFreeUnavailable') : partial
+  const free = !first || first.provisional ? null : partial
     ? t('planner.atMost', { hours: hoursLabel(first.remaining) }) : hoursLabel(first.remaining)
   const signal = !first ? null : first.overPlanned ? <Chip tone="warn">{t('planner.indicator.over')}</Chip>
     : first.staleEntries > 0 ? <Chip tone="warn">{t('planner.indicator.stale')}</Chip> : first.underPlanned && <Chip tone="idle">{t('planner.indicator.under')}</Chip>
@@ -60,7 +60,7 @@ export function MyWeekStrip({ personId, canPlan: _canPlan, id, view = 'today' }:
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-5 py-2">
         <h2 id="my-week-h" className={patternsOn ? 'sr-only' : 'text-base/6 font-semibold'}>{t('planner.myWeek')}</h2>
         <span className="text-sm text-muted-foreground tabular-nums">{q.isPending ? t('app.loading') : first
-          ? patternsOn ? t('mywork.weekCompact', { planned: hoursLabel(first.confirmed + first.expected), free })
+          ? patternsOn ? t(free ? 'mywork.weekCompact' : 'mywork.weekCompactFreeUnavailable', { planned: hoursLabel(first.confirmed + first.expected), free: free ?? '' })
             : t('mywork.weekSummary', { week: shortDate(first.week), planned: hoursLabel(first.confirmed + first.expected + first.possible), capacity: hoursLabel(first.capacity) })
           : t('planner.myWeekUnavailable')}</span>
         {patternsOn && partial && <span className="text-xs text-muted-foreground">{t('planner.partialTitle')}</span>}

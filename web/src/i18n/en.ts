@@ -3662,7 +3662,7 @@ export const en = {
   "workReview.startUnavailable": "Start checks unavailable",
   "workReview.assignmentIncomplete": "Assign an active, independent reviewer to every required discipline",
   "mywork.weekCompact": "My Week: {planned} planned, {free} free",
-  "mywork.weekFreeUnavailable": "Free unavailable",
+  "mywork.weekCompactFreeUnavailable": "My Week: {planned} planned, Free unavailable",
   'setting.trend_compare_days': 'Trend comparison days',
   "home.deadline.inReview": "in review {n} days",
   "home.deadline.inReviewOne": "in review 1 day",

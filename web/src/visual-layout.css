@@ -27,6 +27,9 @@
 }
 :root[data-visual="v2"] .visual-page-band :is(h1, h2) { font-size: 28px; line-height: 36px; font-weight: 500; }
 :root[data-visual="v2"] .visual-page-band p { color: var(--on-navy-secondary); }
+/* Person names are buttons styled as links (text-primary); on navy they take the band's own text colour and focus ring. */
+:root[data-visual="v2"] :is(.visual-page-band, .visual-project-meta) [data-person-panel-trigger] { color: var(--on-navy); font-weight: 500; }
+:root[data-visual="v2"] :is(.visual-page-band, .visual-project-meta) [data-person-panel-trigger]:focus-visible { outline-color: var(--on-navy-focus); }
 :root[data-visual="v2"] .visual-page-band .visual-page-actions :is(button, a) { background: transparent; color: var(--on-navy); border-color: var(--on-navy-boundary); }
 :root[data-visual="v2"] .visual-page-content { padding: 24px 32px 32px; }
 :root[data-visual="v2"] .visual-page--overlap .visual-page-band { padding-bottom: 92px; }

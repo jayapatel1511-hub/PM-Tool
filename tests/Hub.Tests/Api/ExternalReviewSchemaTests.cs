@@ -99,7 +99,9 @@ public sealed partial class ExternalReviewTests
                 'receipts', (SELECT jsonb_agg(to_jsonb(r) ORDER BY id) FROM hub.external_review r)
             )::text AS "Value"
             """).SingleAsync());
-        var history = await History(); Assert.Contains("20261103042711_ExternalIssuedReviewSources", history);
+        // Later migrations are reversible on their own; step down to this one so its own refusal is what the test sees.
+        await F.DbAsync(async db => { await db.GetService<IMigrator>().MigrateAsync("20261103042711_ExternalIssuedReviewSources"); return 0; });
+        var history = await History(); Assert.Equal("20261103042711_ExternalIssuedReviewSources", history[^1]);
         var schema = await Schema(); var rows = await Rows(); var state = State(s);
 
         var thrown = await Assert.ThrowsAnyAsync<Exception>(() => F.DbAsync(async db => {
@@ -111,6 +113,7 @@ public sealed partial class ExternalReviewTests
         Assert.Equal(history, await History()); Assert.Equal(schema, await Schema()); Assert.Equal(rows, await Rows());
         Assert.Equal(state, State(s)); Assert.Equal(authors, Authors(s.Issue));
         Assert.Equal(s.Issue, F.Db(db => db.Deliverables.Single(row => row.Id == s.Deliverable).CurrentIssueId));
+        await F.DbAsync(async db => { await db.GetService<IMigrator>().MigrateAsync(); return 0; });
     }
 
     async Task<Guid> TrustedLegacyUnknown(Scenario s)

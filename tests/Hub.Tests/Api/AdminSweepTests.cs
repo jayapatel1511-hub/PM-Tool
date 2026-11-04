@@ -71,7 +71,8 @@ public sealed class AdminSweepTests(HubFactory f)
             foreach (var (method, url) in routes)
             {
                 var req = new HttpRequestMessage(new HttpMethod(method), url);
-                if (method is not ("GET" or "HEAD" or "DELETE")) req.Content = new StringContent("{}", Encoding.UTF8, "application/json");
+                // A body-bound route (a DELETE with a reason) matches only JSON; others ignore the empty object.
+                if (method is not ("GET" or "HEAD")) req.Content = new StringContent("{}", Encoding.UTF8, "application/json");
                 var res = await c.SendAsync(req);
                 if (res.StatusCode != HttpStatusCode.Forbidden && !BindsFirst.ContainsKey(RouteKey(url)))
                     wrong.Add($"{who} {method} {url} -> {(int)res.StatusCode} {await res.Content.ReadAsStringAsync()}");

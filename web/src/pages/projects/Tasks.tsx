@@ -65,7 +65,7 @@ export const createTask = (projectId: string, b: Pick<Schemas['TaskCreateBody'],
   body: { description: null, deliverableId: null, milestoneId: null, assigneeId: null, reviewerId: null, requiresReview: null, priority: null, startDate: null, dueDate: null, estimatedHours: null, dependsOn: null, ...b },
 })
 export const moveTask = (id: string, body: TransitionBody) => typedRequest('post', '/api/v1/tasks/{id}/transition', { params: { id }, body })
-export interface MoveRequest { id: string; key: string; rowVersion: number; to: string; needsReason: boolean; needsReviewer?: boolean; via?: string | null }
+export interface MoveRequest { id: string; key: string; rowVersion: number; to: string; needsReason: boolean; needsReviewer?: boolean; via?: string | null; from?: string }
 
 export const TASK_STATUSES = ['Not Started', 'In Progress', 'Ready for Review', 'In Review', 'Revision Required', 'Complete', 'On Hold', 'Cancelled']
 export const PRIORITIES = ['Low', 'Medium', 'High', 'Critical']
@@ -163,17 +163,37 @@ export type PendingTaskAction =
   | { readonly kind: 'authoriseStart'; readonly id: string }
 
 /** `onSaved` hears about every change that was actually saved, including ones completed in a dialog (meeting tray, §12.13). */
+/** FR-SCR-20 (053-D9): a list, board or panel change offers Undo naming it for 10 seconds, through the same command. */
+const UNDO_MS = 10_000
+
 export function useTaskActions(onChanged: () => void, onSaved?: (id: string, key: string, what: string) => void) {
+  const undoOn = useFlag('work_screens')
   const [ask, setAsk] = useState<{ title: string; action: Extract<PendingTaskAction, { kind: 'edit' }>; run: (reason: string) => Promise<unknown>; cancel: () => void } | null>(null)
   const [moving, setMoving] = useState<MoveRequest | null>(null)
   const [offer, setOffer] = useState<{ id: string; key: string; rowVersion: number; to: string } | null>(null)
   const [starting, setStarting] = useState<StartRequest | null>(null)
+
+  // The reverse is the same command with the earlier value, sent against the version this change made: a change since is refused (G-07).
+  const offerUndo = (key: string, what: string, revert: (reason: string) => Promise<unknown>) => {
+    if (!undoOn) return
+    toast.success(t('undo.saved', { key, what }), { duration: UNDO_MS, className: 'hub-undo-toast', action: { label: t('undo.action'), onClick: () => {
+      revert(t('undo.reasonOn', { key, what })).then(() => toast.success(t('undo.undone', { what })),
+        e => toast.error(t('undo.refused', { reason: Object.values((e as ApiError).fieldErrors ?? {})[0]?.[0] ?? errorText(e) }))).finally(onChanged)
+    } } })
+  }
+  const offerSaveUndo = (r: { id: string; key: string }, body: Record<string, unknown>, version: number) => {
+    const row = r as unknown as Record<string, unknown>, fields = Object.keys(body).filter(k => k !== 'reason')
+    if (!fields.length || fields.some(k => !(k in row))) return // only fields whose earlier value the caller's row holds
+    const previous = Object.fromEntries(fields.map(k => [k, row[k] ?? null]))
+    offerUndo(r.key, describe(body), reason => typedRequest('patch', '/api/v1/tasks/{id}', { params: { id: r.id }, body: { ...previous, reason }, ifMatch: version }))
+  }
 
   const save = async (r: { id: string; key: string; rowVersion: number }, body: Record<string, unknown>): Promise<number | null | undefined> => {
     try {
       const res = await typedRequest('patch', '/api/v1/tasks/{id}', { params: { id: r.id }, body, ifMatch: r.rowVersion })
       onSaved?.(r.id, r.key, describe(body))
       onChanged()
+      offerSaveUndo(r, body, res.rowVersion)
       return res.rowVersion
     } catch (e) {
       const err = e as ApiError
@@ -185,7 +205,7 @@ export function useTaskActions(onChanged: () => void, onSaved?: (id: string, key
           run: async (reason) => {
             try {
               const result = await typedRequest('patch', '/api/v1/tasks/{id}', { params: { id: r.id }, body: { ...body, reason }, ifMatch: r.rowVersion })
-              onSaved?.(r.id, r.key, describe(body)); onChanged(); resolve(result.rowVersion); return result
+              onSaved?.(r.id, r.key, describe(body)); onChanged(); offerSaveUndo(r, body, result.rowVersion); resolve(result.rowVersion); return result
             } catch (reasonError) { resolve(null); throw reasonError }
           },
         }))
@@ -200,7 +220,12 @@ export function useTaskActions(onChanged: () => void, onSaved?: (id: string, key
   const move = async (m: MoveRequest): Promise<boolean | null> => {
     if (m.needsReason || m.to === 'Revision Required' || m.needsReviewer) { setMoving(m); return null }
     const body = transitionBody({ toStatus: m.to, rowVersion: m.rowVersion })
-    try { await moveTask(m.id, body); onSaved?.(m.id, m.key, `→ ${tv(m.to)}`); onChanged(); return true }
+    try {
+      const res = await moveTask(m.id, body); onSaved?.(m.id, m.key, `→ ${tv(m.to)}`); onChanged()
+      const from = m.from
+      if (from) offerUndo(m.key, `→ ${tv(m.to)}`, reason => moveTask(m.id, transitionBody({ toStatus: from, rowVersion: res.rowVersion, reason })))
+      return true
+    }
     catch (e) {
       if (needsStartAuthorisation(e)) { setStarting({ id: m.id, key: m.key, to: m.to, body }); return null } // FR-RDY-02
       toast.error(Object.values((e as ApiError).fieldErrors ?? {})[0]?.[0] ?? errorText(e)); onChanged(); return false
@@ -299,7 +324,7 @@ export function TransitionDialog({ m, onClose, onStart }: { m: MoveRequest; onCl
 }
 
 export function moveFrom(detail: Pick<TaskDetailData, 'task'>, x: Transition): MoveRequest {
-  return { id: detail.task.id, key: detail.task.key, rowVersion: detail.task.rowVersion, to: x.to, needsReason: x.needsReason, via: x.via,
+  return { id: detail.task.id, key: detail.task.key, rowVersion: detail.task.rowVersion, to: x.to, needsReason: x.needsReason, via: x.via, from: detail.task.status,
     needsReviewer: x.to === 'Ready for Review' && detail.task.requiresReview && !detail.task.reviewerId }
 }
 

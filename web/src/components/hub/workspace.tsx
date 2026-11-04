@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { pageMode } from '@/lib/page-mode'
 import {
   AlertTriangle, CalendarDays, Check, ChartGantt, ChevronDown, EyeOff, FileStack, FolderKanban, KanbanSquare, Layers, LayoutDashboard, Link2, List, Plus, Users, type LucideIcon,
 } from 'lucide-react'
@@ -246,7 +247,7 @@ export const VIEWS: View[] = [
 type AreaTab = { path: string; label: string; show?: (me: Me) => boolean }
 const PROJECT_AREA_TABS: AreaTab[] = [
   { path: '/projects', label: 'wsview.list' },
-  { path: '/projects?view=board', label: 'nav.boards' },
+  { path: '/projects?layout=board', label: 'nav.boards' },
   { path: '/portfolio', label: 'nav.portfolio', show: (m) => m.capabilities.portfolio },
 ]
 const RESOURCE_AREA_TABS: AreaTab[] = [
@@ -285,10 +286,11 @@ export function ProjectAreaTabs() {
   const visualSystem = useFlag('visual_system')
   const overview = useFlag('home_overview')
   if (!visualSystem) return null
-  const board = pathname === '/projects' && sp.get('view') === 'board'
+  // `view` names a saved view (FR-PLAT-09); the layout has its own key, and an old ?view=board link still opens the board.
+  const board = pathname === '/projects' && pageMode(sp, 'layout', ['board'], 'list') === 'board'
   return <nav data-area-tabs aria-label={t('wsview.label')} className="visual-area-tabs">
     {PROJECT_AREA_TABS.filter((tab) => !tab.show || tab.show(me)).map((tab) => {
-      const isBoard = tab.path.includes('?view=board')
+      const isBoard = tab.path.includes('?layout=board')
       const target = isBoard ? '/projects' : tab.path
       const queryKeys = target === '/portfolio' ? PROJECT_QUERY : new Set([...PROJECT_QUERY].filter(key => !['overdueDecisions', 'ws', 'projects'].includes(key)))
       // Both project layouts use the same reader. Its scalar Home scope is not a Portfolio contract.
@@ -296,7 +298,7 @@ export function ProjectAreaTabs() {
         queryKeys.add('homePreset'); queryKeys.add('homeProjects')
       }
       const search = areaSearch(sp, queryKeys)
-      const next = new URLSearchParams(search); if (isBoard) next.set('view', 'board'); else next.delete('view')
+      const next = new URLSearchParams(search); if (isBoard) next.set('layout', 'board'); else next.delete('layout')
       return <Link key={tab.label} to={{ pathname: target, search: next.toString() }} aria-current={(isBoard ? board : pathname === target && !board) ? 'page' : undefined}>{runtimeText(tab.label)}</Link>
     })}
   </nav>

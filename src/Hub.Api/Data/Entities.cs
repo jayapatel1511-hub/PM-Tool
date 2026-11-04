@@ -97,6 +97,8 @@ public class IssuePurpose : RefData { }
 public class IssueReturnCode : RefData { public string Code { get; set; } = ""; }
 public class DecisionCategory : RefData { }
 public class IssueRootCauseCategory : RefData { }
+/// FR-SCR-65 (053-D13): why a milestone or deliverable date moved; organisation-managed.
+public class DateReasonCategory : RefData { }
 
 public class OrgSetting : IAuditable
 {

@@ -7,7 +7,7 @@ const base = process.env.TUESDAY_UI_BASE_URL ?? 'http://127.0.0.1:8853'
 assert.ok(['localhost', '127.0.0.1'].includes(new URL(base).hostname))
 ;(async () => {
   const ui = await newMockPage(base, { events: false }), { page } = ui, source = f.state()
-  const errors = [], unexpected = [], previews = [], writes = [], legacy = [], taskReads = [], receipts = new Map(), observations = []
+  const errors = [], unexpected = [], previews = [], writes = [], legacy = [], taskReads = [], receipts = new Map(), observations = [], undos = []
   let enabled = true, firstApply = true, releaseFirst, signalHeld
   const firstGate = new Promise(resolve => { releaseFirst = resolve }), firstHeld = new Promise(resolve => { signalHeld = resolve })
   const labels = { assign: 'Assign', setDueDate: 'Set due date', shiftDueDates: 'Shift due dates', setPriority: 'Set priority', setDeliverable: 'Set deliverable', hold: 'Put on hold', cancel: 'Cancel tasks' }
@@ -58,6 +58,12 @@ assert.ok(['localhost', '127.0.0.1'].includes(new URL(base).hostname))
           return problem(503, 'Synthetic reply lost after commit')
         }
         return route.fulfill({ json: answer })
+      }
+      if (method === 'POST' && /^tasks\/bulk\/commands\/[^/]+\/undo$/.test(name)) {
+        const commandId = name.split('/')[3]; undos.push(commandId)
+        const original = [...receipts.values()].find(receipt => receipt.answer.commandId === commandId)?.answer
+        assert.ok(original, 'Undo names a real command receipt'); const rows = original.rows.filter(row => row.outcome === 'changed')
+        return route.fulfill({ json: { commandId: f.id(9900 + undos.length), completedAt: '2026-11-14T14:00:05Z', rows, counts: f.counts(rows), warnings: [] } })
       }
       if (method === 'POST' && name === 'projects/' + f.projects[0].id + '/tasks/bulk') { legacy.push(request.postDataJSON()); return route.fulfill({ json: { updated: 1, skipped: [], warnings: [] } }) }
       unexpected.push(method + ' ' + name); return problem(405, 'Unexpected command')
@@ -135,7 +141,7 @@ assert.ok(['localhost', '127.0.0.1'].includes(new URL(base).hostname))
     assert.equal(await dialog().getByText(source.rows[1].key, { exact: true }).count(), 0)
     assert.equal(await dialog().locator('[data-task-bulk-outcome="refused"]').count(), 3); assert.equal(await dialog().locator('[data-task-bulk-outcome="unavailable"]').count(), 1)
     assert.equal(source.applied, 5); assert.equal(writes.length, 2); assert.deepEqual(writes[0], writes[1]); assert.equal(source.commands, 1)
-    assert.equal(await dialog().getByRole('button', { name: /Undo/ }).count(), 0); assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1))
+    await dialog().locator('[data-task-bulk-undo]').getByText('Undo', { exact: true }).waitFor(); assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1))
     await capture('task-bulk-phone-result'); await dialog().locator('[data-slot="dialog-footer"]').getByRole('button', { name: 'Close', exact: true }).click(); await dialog().waitFor({ state: 'hidden' })
     assert.equal((await focus()).connected, true); assert.equal((await focus()).visible, true)
     observations.push('Pending and uncertain actual Back are cancelled; original request survives and identical retry sanitizes a now-hidden outcome')
@@ -153,6 +159,18 @@ assert.ok(['localhost', '127.0.0.1'].includes(new URL(base).hostname))
     assert.equal(previews.length - originalPreviews, 7); assert.equal(writes.length, 8); assert.equal(source.commands, 7); assert.equal(source.applied, 11)
     assert.equal(writes.find(write => write.intent.operation === 'assign').intent.params.assigneeId, f.people[0].id)
     observations.push('All seven operations are distinct; assignment chooses an actual picker candidate rather than only clearing')
+
+    // FR-SCR-20: the result offers Undo for 10 seconds; it posts the command's own ID and shows the reversal's outcome.
+    await select(chosen); await toolbar().getByRole('button', { name: labels.setPriority, exact: true }).click()
+    await dialog().getByRole('combobox', { name: 'Priority', exact: true }).selectOption('Low')
+    await review(); await dialog().getByRole('button', { name: 'Apply changes', exact: true }).click()
+    await dialog().getByText('1 changed; 0 unchanged; 0 refused; 0 unavailable.', { exact: true }).waitFor()
+    const undoneCommand = [...receipts.values()].at(-1).answer.commandId
+    await dialog().locator('[data-task-bulk-undo]').click()
+    await dialog().locator('[data-task-bulk-undone]').getByText('Undone 1; 0 refused.', { exact: true }).waitFor()
+    assert.deepEqual(undos, [undoneCommand]); assert.equal(await dialog().locator('[data-task-bulk-undo]').count(), 0)
+    await dialog().locator('[data-slot="dialog-footer"]').getByRole('button', { name: 'Close', exact: true }).click(); await dialog().waitFor({ state: 'hidden' })
+    observations.push('Result Undo posts the exact command receipt ID once and replaces the result with its own outcome')
 
     // Different project-local choices must survive the request, not one shared ID/name guessed across projects.
     const mapped = [source.rows[3], source.rows[4]]
@@ -203,7 +221,7 @@ assert.ok(['localhost', '127.0.0.1'].includes(new URL(base).hostname))
     await goto('/projects/' + f.projects[0].projectNumber + '/tasks'); await select(source.rows[0]); await page.getByRole('region', { name: 'Bulk actions', exact: true }).getByRole('button', { name: 'Set priority', exact: true }).click()
     const old = page.getByRole('dialog', { name: 'Set priority', exact: true }); await old.getByRole('button', { name: 'Confirm', exact: true }).click(); await old.waitFor({ state: 'hidden' })
     assert.equal(legacy.length, 1); assert.equal(legacy[0].operation, 'setPriority'); assert.equal(legacy[0].items, undefined)
-    assert.equal(previews.length, 12); assert.equal(writes.length, 12); assert.equal(source.commands, 11); assert.equal(source.applied, 16)
+    assert.equal(previews.length, 13); assert.equal(writes.length, 13); assert.equal(source.commands, 12); assert.equal(source.applied, 17); assert.equal(undos.length, 1)
     assert.deepEqual(errors, []); assert.deepEqual(unexpected, []); assert.deepEqual(ui.mock.unknownGets, [])
     console.log(JSON.stringify({ status: 'PASS', suite: 'task-cross-project-bulk', evidence: 'synthetic actual-SPA; provider tests own canonical transaction/receipt/notification/ACL', observations, previews: previews.length, attempts: writes.length, logicalCommands: source.commands, changedTasks: source.applied, legacyCommands: legacy.length }))
   } catch (error) {

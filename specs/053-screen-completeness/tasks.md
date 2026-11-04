@@ -18,7 +18,7 @@ checks. Existing features stay available when a flag is off.
 | S09 | [x] Home capacity and deadline notes | Home.tsx; planner read adapter | FR-SCR-11 / AC-SCR-11, FR-SCR-13 / AC-SCR-13 |
 | S10 | [x] Work activity and seen state | MyWork.tsx; WorkspaceTasks.tsx; current-user seen marker | FR-SCR-15 / AC-SCR-15, FR-SCR-16 / AC-SCR-16 |
 | S11 | [x] Task grouping and columns | WorkspaceTasks.tsx; projects/Tasks.tsx | FR-SCR-17 / AC-SCR-17, FR-SCR-18 / AC-SCR-18 |
-| S12 | [ ] Cross-project bulk and reversal | TaskQueries.cs; Tasks.cs; bulk command UI; activity writer | FR-SCR-19 / AC-SCR-19, FR-SCR-20 / AC-SCR-20 |
+| S12 | [x] Cross-project bulk and reversal | TaskQueries.cs; Tasks.cs; bulk command UI; activity writer | FR-SCR-19 / AC-SCR-19, FR-SCR-20 / AC-SCR-20 |
 | S13 | [x] Board headers and review cards | projects/Board.tsx; WorkspaceTasks.tsx board view | FR-SCR-21 / AC-SCR-21, FR-SCR-22 / AC-SCR-22 |
 | S14 | [x] Timeline saved views | Gantt.tsx; projects/Timeline.tsx; Views.cs | FR-SCR-23 / AC-SCR-23 |
 | S15 | [x] Calendar layer and rescheduling | Calendar.tsx; Calendar.cs; existing move preview | FR-SCR-24 / AC-SCR-24, FR-SCR-25 / AC-SCR-25 |
@@ -43,7 +43,7 @@ checks. Existing features stay available when a flag is off.
 | S34 | [x] Drawing-list import and client export | Deliverables.cs; ListExports.cs; projects/Deliverables.tsx | FR-SCR-59 / AC-SCR-59, FR-SCR-60 / AC-SCR-60 |
 | S35 | [x] Review response and external provenance | projects/Reviews.tsx; Reviews.cs; additive response metadata | FR-SCR-61 / AC-SCR-61, FR-SCR-62 / AC-SCR-62 |
 | S36 | [x] Review discipline summaries/defaults | Reviews.cs; Reviews.tsx; Admin.cs deliverable type settings | FR-SCR-63 / AC-SCR-63, FR-SCR-64 / AC-SCR-64 |
-| S37 | [ ] Date reason and sequence cues | Milestones.cs; Deliverables.cs; projects/Milestones.tsx | FR-SCR-65 / AC-SCR-65, FR-SCR-66 / AC-SCR-66 |
+| S37 | [x] Date reason and sequence cues | Milestones.cs; Deliverables.cs; projects/Milestones.tsx | FR-SCR-65 / AC-SCR-65, FR-SCR-66 / AC-SCR-66 |
 | S38 | [x] Coordination consequences | projects/Coordination.tsx; DisciplineCoordination.cs | FR-SCR-67 / AC-SCR-67, FR-SCR-68 / AC-SCR-68 |
 | S39 | [x] Decision metadata | projects/Decisions.tsx; Decisions.cs; additive metadata | FR-SCR-69 / AC-SCR-69 |
 | S40 | [x] Template risk seed | Templates.cs; template snapshot instantiation | FR-SCR-70 / AC-SCR-70 |
@@ -55,7 +55,8 @@ checks. Existing features stay available when a flag is off.
 | S46 | [x] Search filters and recents | Search.tsx; Search.cs; browser recent-search storage | FR-SCR-79 / AC-SCR-79 |
 | S47 | [x] Notice preferences and away hold | Preferences.tsx; Notifications.cs; digest/outbox dispatch | FR-SCR-80 / AC-SCR-80 |
 | S48 | [x] Template version provenance | Templates.tsx; Templates.cs; project settings provenance | FR-SCR-81 / AC-SCR-81 |
-| S49 | [ ] Admin person scope and role explainer | admin/Admin.tsx; Admin.cs; canonical permission description adapter | FR-SCR-82 / AC-SCR-82, FR-SCR-83 / AC-SCR-83 |
+| S49 | [x] Admin person scope and role explainer | admin/Admin.tsx; Admin.cs; canonical permission description adapter | FR-SCR-82 / AC-SCR-82, FR-SCR-83 / AC-SCR-83 |
+| S50 | [ ] Ratchet restoration (053-D24), before any 052/053 flag goes on in pilot | the 052/053 files named in verification.md checkpoint 36 | FR-PLAT-20 counters back to the 039–051 baseline |
 
 Additional dependencies: S03/S04/S05 use S02’s context contract; S07 uses S06 counts;
 S08 uses the exact same scope contract; S27 uses S26’s header inputs; S43 uses S29
@@ -124,3 +125,8 @@ slices remain required; no hosted/human/pilot/formal Accepted claim.
 
 
 Local checkpoint27 checks S44 after independent source/migration/coverage review,103 distinct API passes,27 Node checks, final feature and adjacent Chrome suites, desktop/375px visual review and final parity/spec checks.35/49 slices are locally checked; no hosted/human/formal Accepted claim. See evidence/checkpoint27-findings.md.
+
+Local checkpoint thirty-six (Claude, 2026-11-04) checks S12, S37 and S49: 49 of 49 slices are locally checked. S12 Undo and S37 date
+reasons are built to the 053-D9 and 053-D13 defaults, which stay Open for Jay (defaults apply while work ships dark). S49 includes the
+053-D23 report-export rule Jay confirmed on 2026-11-03. See verification.md "Checkpoint 36". Checked means local implementation and
+verification, not hosted or human acceptance, flag activation or a decision closed.

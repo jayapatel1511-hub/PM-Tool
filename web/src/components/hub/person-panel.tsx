@@ -44,7 +44,7 @@ export function PersonPanel({ id }: PanelProps) {
     </section>}
     {facts && <section aria-labelledby="person-panel-recorded"><h3 id="person-panel-recorded" className="text-sm font-semibold">{t('personFacts.adminSection')}</h3>
       <dl className="mt-2 grid gap-2 text-sm">{[
-        [t('personFacts.type'), facts.notices.personType || t('personFacts.unrecorded')],
+        [t('personFacts.typeLabel'), facts.notices.personType || t('personFacts.unrecorded')],
         [t('personFacts.start'), facts.notices.startDate ? fmtDate(facts.notices.startDate) : t('personFacts.unrecorded')],
         [t('personFacts.end'), facts.notices.endDate ? fmtDate(facts.notices.endDate) : t('personFacts.unrecorded')],
       ].map(([label, value]) => <div key={label} className="grid gap-0.5 sm:grid-cols-[9rem_1fr] sm:gap-3"><dt className="text-muted-foreground">{label}</dt><dd>{value}</dd></div>)}</dl>

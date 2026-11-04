@@ -79,6 +79,9 @@ public static class AdminEndpoints
         Ref<IssueRootCauseCategory, ReferenceRow>(register, "issueRootCauses", Row,
             (db, id) => db.Issues.IgnoreQueryFilters().Where(issue => issue.RootCauseCategoryId == id).Select(issue => issue.ProjectId).Distinct().CountAsync(),
             (entry, _) => Check.That(!entry.Name.Any(ch => char.IsControl(ch) || ch is '\u2028' or '\u2029'), "name", "error.invalid"));
+        Ref<DateReasonCategory, ReferenceRow>(register, "dateReasons", Row,
+            (db, id) => db.ActivityLog.Where(a => a.ProjectId != null && a.Categories.Contains(DateReasons.Tag(id))).Select(a => a.ProjectId).Distinct().CountAsync(),
+            (entry, _) => Check.That(!entry.Name.Any(ch => char.IsControl(ch) || ch is '\u2028' or '\u2029'), "name", "error.invalid"));
         Ref<IssueReturnCode, IssueReturnCodeRow>(register, "issueReturnCodes", Row,
             (db, id) => db.DeliverableIssues.Where(issue => issue.ReturnCodeId == id).Select(issue => issue.ProjectId).Distinct().CountAsync(),
             (entry, patch) =>

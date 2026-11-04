@@ -186,7 +186,11 @@ public sealed class ProjectDashboardCompletenessTests : IDisposable
         var foreignDiscipline = d.ProjectDiscipline(foreign.Id, "Civil");
         await (await f.As(TestData.Pm).GetAsync(Path(p.Id) + $"?disciplineId={foreignDiscipline}")).Json(404);
         await Flag("project_screens", false); await Flag("visual_system"); var visual = await Read(p.Id);
-        Assert.False(visual.AsObject().ContainsKey("staffing")); Assert.NotNull(visual["asOf"]); visual.AsObject().Remove("asOf"); Assert.True(JsonNode.DeepEquals(baseline, visual));
+        Assert.False(visual.AsObject().ContainsKey("staffing")); Assert.NotNull(visual["asOf"]); visual.AsObject().Remove("asOf");
+        // The same entries; the one-time identity backfill's IdentityColour change is shown only while visual_system is on (ActivityScreenFields).
+        Assert.Equal(baseline["activity"]!.AsArray().Select(a => a!.S("id")), visual["activity"]!.AsArray().Select(a => a!.S("id")));
+        var withoutActivity = baseline.DeepClone(); withoutActivity.AsObject().Remove("activity"); visual.AsObject().Remove("activity");
+        Assert.True(JsonNode.DeepEquals(withoutActivity, visual));
         await Flag("visual_system", false); Assert.True(JsonNode.DeepEquals(baseline, await Read(p.Id)));
         await f.DbAsync(async db => { (await db.Projects.SingleAsync(x => x.Id == p.Id)).Visibility = Visibility.Restricted; return await db.SaveChangesAsync(); });
         foreach (var on in new[] { false, true }) { await Flag("project_screens", on); Assert.Equal(HttpStatusCode.NotFound, (await f.As(TestData.Sam).GetAsync(Path(p.Id))).StatusCode); }

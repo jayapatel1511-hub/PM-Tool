@@ -59,7 +59,7 @@ internal static class DrawingImportRows
         var parsed = DrawingImportFormat.Parse(new(format, bytes, body.Worksheet));
         var diagnostics = parsed.Diagnostics.ToList();
         void FileError(string code, string field, int? row = null, int? column = null) => diagnostics.Add(new(code, DrawingImportDiagnosticSeverity.Error,
-            Text.Get("drawingImport." + code, field), parsed.SelectedSheet, row, column));
+            Text.Get($"drawingImport.{code}", field), parsed.SelectedSheet, row, column));
         foreach (var header in parsed.Headers.Where(header => !Headers.Contains(header.Normalized)))
         {
             var sourceRow = new string(header.Cell.Reference.Where(char.IsDigit).ToArray());
@@ -79,7 +79,7 @@ internal static class DrawingImportRows
                 (diagnostic.Severity == DrawingImportDiagnosticSeverity.Error ? row.Errors : row.Warnings)
                     .Add(new(diagnostic.Code, diagnostic.Column?.ToString(CultureInfo.InvariantCulture) ?? "row", diagnostic.Message));
             DrawingImportRawCell? Cell(string header) => columns.TryGetValue(header, out var column) ? record.Cells.FirstOrDefault(cell => cell.Column == column) : null;
-            void Error(string code, string field) => row.Errors.Add(new(code, field, Text.Get("drawingImport." + code, field)));
+            void Error(string code, string field) => row.Errors.Add(new(code, field, Text.Get($"drawingImport.{code}", field)));
             string? Literal(string header, int max = 200, bool plain = false)
             {
                 var cell = Cell(header);

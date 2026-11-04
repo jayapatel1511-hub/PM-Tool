@@ -1,4 +1,5 @@
 import { useWorkSeenDetailOwner, WorkSeenDetailNotice } from '@/components/hub/work-seen-detail-owner'
+import { DateReasonSelect, needsDateReason, useDateReasonPrompt, useDateReasons } from '@/components/hub/date-reason'
 import type { WorkSeenFields } from '@/components/hub/work-seen'
 import { PickerProject } from '@/components/hub/people'
 import { disciplineColour } from '@/lib/discipline-colour'
@@ -281,11 +282,12 @@ export function DeliverablesTab() {
 
 function BulkDialog({ p, op, ids, milestones, onClose }: { p: ProjectDetail; op: string; ids: string[]; milestones: MilestoneRow[]; onClose: (ok: boolean) => void }) {
   const [v, setV] = useState<string | null>('')
+  const [why, setWhy] = useState(''), needsWhy = useDateReasons().required && op === 'shiftDueDates'
   return (
     <ConfirmDialog open onOpenChange={(o) => !o && onClose(false)} title={runtimeText(`bulk.${op === 'setMilestone' ? 'setMilestone' : op === 'setOwner' ? 'setOwner' : 'shiftDue'}`)} reason={op === 'shiftDueDates'}
-      body={t('bulk.selected', { n: ids.length })} busy={!v}
+      body={t('bulk.selected', { n: ids.length })} busy={!v || needsWhy && !why}
       onConfirm={async (reason) => {
-        const params = op === 'setMilestone' ? { milestoneId: v } : op === 'setOwner' ? { ownerId: v } : { days: Number(v) }
+        const params = op === 'setMilestone' ? { milestoneId: v } : op === 'setOwner' ? { ownerId: v } : { days: Number(v), ...(why ? { dateReasonCategoryId: why } : {}) }
         const r = await typedRequest('post', '/api/v1/projects/{id}/deliverables/bulk', { params: { id: p.id }, body: { ids, operation: op, params, reason: reason ?? null } })
         toast.success(t('bulk.result', { updated: r.updated, skipped: r.skipped.length }))
         onClose(true)
@@ -294,6 +296,7 @@ function BulkDialog({ p, op, ids, milestones, onClose }: { p: ProjectDetail; op:
         <option value="">{t('common.selectPlaceholder')}</option>{milestones.map((m) => <option key={m.id} value={m.id}>{m.key} {m.name}</option>)}</select></Field>}
       {op === 'setOwner' && <Field label={t('common.owner')} htmlFor="bulk-owner"><PeoplePicker id="bulk-owner" value={v} onChange={setV} /></Field>}
       {op === 'shiftDueDates' && <Field label={t('bulk.days')} htmlFor="bulk-days"><Input id="bulk-days" type="number" value={v ?? ''} onChange={(e) => setV(e.target.value)} /></Field>}
+      {op === 'shiftDueDates' && <DateReasonSelect id="bulk-why" value={why} onChange={setWhy} />}
     </ConfirmDialog>
   )
 }
@@ -407,6 +410,7 @@ export function DeliverablePanel({ id }: PanelProps) {
     setPanelParams(next, { replace: true, state: location.state })
   }
   const me = useMe()
+  const dateReason = useDateReasonPrompt()
   const revisionQ = useQuery({ queryKey: ['project', q.data?.project.id, 'revision-check'], queryFn: () => typedRequest('get', '/api/v1/projects/{projectId}/revision-check', { params: { projectId: q.data!.project.id } }), enabled: revisionEnabled && !!q.data })
   const seenOwner = useWorkSeenDetailOwner({ itemType: 'Deliverable', itemId: q.data?.deliverable.id ?? id,
     sourceVersion: q.data?.deliverable.rowVersion, seen: (q.data as WorkSeenFields | undefined)?.seen, read: q,
@@ -427,6 +431,7 @@ export function DeliverablePanel({ id }: PanelProps) {
       return true
     } catch (e) {
       if ((e as ApiError).code === 'confirm_move_tasks' && confirm((e as ApiError).message)) return save({ ...body, confirmMoveTasks: true })
+      if (needsDateReason(e)) { const why = await dateReason.ask(); if (why) return save({ ...body, dateReasonCategoryId: why }) } // FR-SCR-65
       setErr(e)
       return false
     }
@@ -434,6 +439,7 @@ export function DeliverablePanel({ id }: PanelProps) {
   const s = d.state
   return (
     <PickerProject.Provider value={d.projectId}><div ref={seenOwner.surfaceRef}>
+      {dateReason.dialog}
       <WorkSeenDetailNotice state={seenOwner.state} />
       <PanelHead title={d.name} meta={<>
         <Key>{d.key}</Key>

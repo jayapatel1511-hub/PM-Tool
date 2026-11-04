@@ -5290,6 +5290,13 @@
               "boolean"
             ]
           },
+          "dateReasonCategoryId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
           "dryRun": {
             "type": [
               "null",
@@ -9351,6 +9358,93 @@
           "deliverables",
           "tasks",
           "inconsistent"
+        ],
+        "type": "object"
+      },
+      "DateReasonChoice": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "sortOrder": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "isActive",
+          "sortOrder"
+        ],
+        "type": "object"
+      },
+      "DateReasonCount": {
+        "properties": {
+          "activityCategory": {
+            "type": "string"
+          },
+          "categoryId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "count": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "categoryId",
+          "name",
+          "isActive",
+          "count",
+          "activityCategory"
+        ],
+        "type": "object"
+      },
+      "DateReasonSummary": {
+        "properties": {
+          "moves": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "notRecorded": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": "integer"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reasons": {
+            "items": {
+              "$ref": "#/components/schemas/DateReasonCount"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "projectId",
+          "moves",
+          "notRecorded",
+          "reasons"
         ],
         "type": "object"
       },
@@ -32183,6 +32277,15 @@
             },
             "type": "array"
           },
+          "dateReasons": {
+            "items": {
+              "$ref": "#/components/schemas/DateReasonChoice"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
           "deliverableTypes": {
             "items": {
               "$ref": "#/components/schemas/ReferenceDeliverableType"
@@ -47727,6 +47830,125 @@
         ]
       }
     },
+    "/api/v1/admin/dateReasons": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ReferenceRow"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Hub.Api"
+        ]
+      },
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JsonElement"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferenceRow"
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "tags": [
+          "Hub.Api"
+        ]
+      }
+    },
+    "/api/v1/admin/dateReasons/{id}": {
+      "patch": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JsonElement"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferenceRow"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Hub.Api"
+        ]
+      }
+    },
+    "/api/v1/admin/dateReasons/{id}/usage": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferenceUsage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Hub.Api"
+        ]
+      }
+    },
     "/api/v1/admin/decisionCategories": {
       "get": {
         "responses": {
@@ -59751,6 +59973,36 @@
         ]
       }
     },
+    "/api/v1/projects/{id}/milestones/date-reasons": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DateReasonSummary"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "DateReasons"
+        ]
+      }
+    },
     "/api/v1/projects/{id}/milestones/deleted": {
       "get": {
         "parameters": [
@@ -69194,6 +69446,36 @@
         ]
       }
     },
+    "/api/v1/tasks/bulk/commands/{commandId}/undo": {
+      "post": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "commandId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskBulkCommandResult"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "TaskBulkCommandEndpoints"
+        ]
+      }
+    },
     "/api/v1/tasks/bulk/preview": {
       "post": {
         "requestBody": {
@@ -71614,6 +71896,9 @@
     },
     {
       "name": "MilestoneEndpoints"
+    },
+    {
+      "name": "DateReasons"
     },
     {
       "name": "DeliverableEndpoints"

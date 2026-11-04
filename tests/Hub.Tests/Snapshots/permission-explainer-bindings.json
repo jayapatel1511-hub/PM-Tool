@@ -6,8 +6,7 @@
     "g57-new-feature-guard-equivalence",
     "g58-task-contribution-compound-guard-equivalence",
     "g59-new-coordination-and-notice-guard-equivalence",
-    "g63-operation-witness-review-pending",
-    "s21-report-policy-pending"
+    "g63-operation-witness-review-pending"
   ],
   "sections": {
     "8.5.1": {
@@ -195,7 +194,9 @@
     "EnterTime": "Allow EnterTime(Actor a, ProjectContext p)",
     "EditTime": "(Allow Allow, bool NeedsReason) EditTime(Actor a, ProjectContext p, Guid entryOwnerId)",
     "ViewTimeEntry": "bool ViewTimeEntry(Actor a, ProjectContext p, Guid entryOwnerId, Guid taskDisciplineId, Guid? ownerSupervisorId)",
-    "RecordExternalReview": "Allow RecordExternalReview(Actor a, ProjectContext p)"
+    "RecordExternalReview": "Allow RecordExternalReview(Actor a, ProjectContext p)",
+    "ExportAllReportProjects": "bool ExportAllReportProjects(Actor a)",
+    "ExportReportProject": "Allow ExportReportProject(Actor a, ProjectContext p)"
   },
   "guards": {
     "src/Hub.Api/Infrastructure/Auth.cs": {
@@ -204,7 +205,7 @@
       "binding": "Current transport/context/workflow source; independent compound evaluation still required"
     },
     "src/Hub.Api/Infrastructure/Access.cs": {
-      "sha256": "957e845ca5607b76687aa8769728c8e1152c1d7725b9d42c293f568565b1576d",
+      "sha256": "fe3df315d2b3d5cbe0d120d07746214fb5b79c5d3bce3aa2a8319c3ae60fef7e",
       "coverage": "Pending",
       "binding": "Current transport/context/workflow source; independent compound evaluation still required"
     },
@@ -214,7 +215,7 @@
       "binding": "Current transport/context/workflow source; independent compound evaluation still required"
     },
     "src/Hub.Api/Features/Admin.cs": {
-      "sha256": "908a0a388a4d7132daa228682efc047b4402585b2640cc3897d35f5a86584126",
+      "sha256": "db635836e537972eb61d4b9ec21b602beb21819a7a778794404ef774667527c5",
       "coverage": "Pending",
       "binding": "Current transport/context/workflow source; independent compound evaluation still required"
     },
@@ -284,7 +285,7 @@
       "binding": "Current transport/context/workflow source; independent compound evaluation still required"
     },
     "src/Hub.Api/Features/Reports.cs": {
-      "sha256": "6348281ec3f427010f139caf4e89ebc2a86f494d446c66678371de8a232c2cbb",
+      "sha256": "92f8abc51b713e3e55f07280e0a79b7e39e647bd1693eb5fcfe6f5ae6c92be5e",
       "coverage": "Pending",
       "binding": "Current transport/context/workflow source; independent compound evaluation still required"
     },
@@ -294,7 +295,7 @@
       "binding": "Current transport/context/workflow source; independent compound evaluation still required"
     },
     "src/Hub.Api/Features/Me.cs": {
-      "sha256": "f02f3b5ac7e43de89ce36a3f521f5442792ede24445593091f25bb2dd99df9f8",
+      "sha256": "180c116a9a69f45b2b148371ac78c1ec032fc3b06b0a1edd3220f0e87d895d55",
       "coverage": "Pending",
       "binding": "Current transport/context/workflow source; independent compound evaluation still required"
     }
@@ -524,12 +525,14 @@
       "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
     },
     "8.5.1:Export reports": {
-      "methods": [],
+      "methods": [
+        "ExportReportProject"
+      ],
       "guards": [
         "src/Hub.Api/Infrastructure/Auth.cs",
         "src/Hub.Api/Features/Admin.cs"
       ],
-      "coverage": "PolicyPending",
+      "coverage": "Pending",
       "note": "Canonical predicate examples evaluated; full row/compound/transport equivalence is not claimed"
     },
     "8.5.1:Manage own notification preferences, project follow levels, and saved views": {
@@ -2039,15 +2042,17 @@
     },
     "S21.export": {
       "rowId": "S21",
-      "methods": [],
-      "sourceFingerprint": "855da8520d86480ed2a739c925cf44476d93a754db8e3c21176e868c47a1d688",
+      "methods": [
+        "ExportReportProject"
+      ],
+      "sourceFingerprint": "5a8868167bc71b634a8d93aaffdbe21e4ba8a8ceeb920d217ab991ad842ce3fe",
       "guards": [
         "src/Hub.Api/Infrastructure/Auth.cs",
         "src/Hub.Api/Infrastructure/Access.cs",
         "src/Hub.Api/Features/Reports.cs"
       ],
-      "coverage": "PolicyPending",
-      "note": "Candidate handler/dependency mapping only; no full command equivalence or per-child evidence review claimed."
+      "coverage": "Pending",
+      "note": "053-D23 (Jay, 2026-11-03): a Standard User exports member projects only. Canonical factor ExportReportProject; compound/transport equivalence is not claimed."
     },
     "S22.notification-preferences": {
       "rowId": "S22",
@@ -3360,8 +3365,8 @@
         },
         "operationFingerprint": "05e6d3b361a18fbc3c75afb64d886d3ef24f004508a92417628809b8942f2d6c",
         "witnessFingerprints": {
-          "g63-meeting-command": "80e8e5873151b20c9b61548e4b2c0a4a7b32370ba893f1183f5e9b4424dc7010",
-          "g63-meeting-explanation": "829df4458a404f4390d6ea4c8869d02a0e949c4381b237663fe2d3445452f162"
+          "g63-meeting-command": "785854aca8dddc1781d01795ecd997b0920ab29ea8a7efd8260e105ce02b38dd",
+          "g63-meeting-explanation": "ff7285be3a4c1b4d4e82d63590a247a4f77dfe31e95ba79c1860faba2fdd6abd"
         }
       }
     },
@@ -3405,8 +3410,8 @@
         },
         "operationFingerprint": "91a34babee287a7cb3c32d5a3baa655935d0a10049bf793f085db66f4e1c528a",
         "witnessFingerprints": {
-          "g63-meeting-command": "80e8e5873151b20c9b61548e4b2c0a4a7b32370ba893f1183f5e9b4424dc7010",
-          "g63-meeting-explanation": "829df4458a404f4390d6ea4c8869d02a0e949c4381b237663fe2d3445452f162"
+          "g63-meeting-command": "785854aca8dddc1781d01795ecd997b0920ab29ea8a7efd8260e105ce02b38dd",
+          "g63-meeting-explanation": "ff7285be3a4c1b4d4e82d63590a247a4f77dfe31e95ba79c1860faba2fdd6abd"
         }
       }
     },
@@ -3450,8 +3455,8 @@
         },
         "operationFingerprint": "67698f515f5d265fc0242ccd1de4666bb5e6fa456ec26088e849ed753b9dc4ba",
         "witnessFingerprints": {
-          "g63-meeting-command": "80e8e5873151b20c9b61548e4b2c0a4a7b32370ba893f1183f5e9b4424dc7010",
-          "g63-meeting-explanation": "829df4458a404f4390d6ea4c8869d02a0e949c4381b237663fe2d3445452f162"
+          "g63-meeting-command": "785854aca8dddc1781d01795ecd997b0920ab29ea8a7efd8260e105ce02b38dd",
+          "g63-meeting-explanation": "ff7285be3a4c1b4d4e82d63590a247a4f77dfe31e95ba79c1860faba2fdd6abd"
         }
       }
     },
@@ -5105,14 +5110,14 @@
       "testSource": "tests/Hub.Tests/Domain/PermissionOperationExplanationTests.cs",
       "test": "Hub.Tests.Domain.PermissionOperationExplanationTests.A_project_lead_can_record_any_project_meeting_without_owning_its_register_item",
       "testId": "eef8fb23-2a38-f437-8041-ab13cba65e7f",
-      "executionId": "25a18c7a-7d9e-42ba-90cc-e1b09569c333",
+      "executionId": "1fada4f0-0254-473d-b56a-72b019507b6c",
       "trx": {
-        "path": "specs/053-screen-completeness/evidence/checkpoint35-runtime/trx-command-witnesses6/command-witnesses6.trx",
-        "sha256": "1782165e42fd9ae0731d901c75f0fa9939d9cf815925f79b45d4ce8cc6fb8a11"
+        "path": "specs/053-screen-completeness/evidence/checkpoint36-runtime/trx-command-witnesses/command-witnesses.trx",
+        "sha256": "06d1719031b8a09d9c706a6daa3aaf4ccbc16d5a29b4f47cbad86f165904b0a5"
       },
       "snapshot": {
-        "path": "specs/053-screen-completeness/evidence/checkpoint35-runtime/command-witnesses6-sources.json",
-        "sha256": "0966b68f1ef283605bbf44ca71eb07af2163f64784b0c651f6afcef737aa3697"
+        "path": "specs/053-screen-completeness/evidence/checkpoint36-runtime/command-witnesses-sources.json",
+        "sha256": "79276efbba5d4e7415bda6ca5691881bd8e5ba5b0072e4c45641c2d745b01613"
       }
     },
     "g63-meeting-command": {
@@ -5130,14 +5135,14 @@
       "testSource": "tests/Hub.Tests/Api/RoleCommandWitnessTests.cs",
       "test": "Hub.Tests.Api.RoleCommandWitnessTests.Civil_only_project_lead_can_create_edit_and_join_an_electrical_context_meeting_while_team_member_is_refused",
       "testId": "04a229d0-7aa8-21ed-84fc-27bfd1aff03f",
-      "executionId": "7ef6679c-929d-4149-b890-c39664c675a0",
+      "executionId": "aed851ed-9f07-41d2-9ec9-781c07fbd108",
       "trx": {
-        "path": "specs/053-screen-completeness/evidence/checkpoint35-runtime/trx-command-witnesses6/command-witnesses6.trx",
-        "sha256": "1782165e42fd9ae0731d901c75f0fa9939d9cf815925f79b45d4ce8cc6fb8a11"
+        "path": "specs/053-screen-completeness/evidence/checkpoint36-runtime/trx-command-witnesses/command-witnesses.trx",
+        "sha256": "06d1719031b8a09d9c706a6daa3aaf4ccbc16d5a29b4f47cbad86f165904b0a5"
       },
       "snapshot": {
-        "path": "specs/053-screen-completeness/evidence/checkpoint35-runtime/command-witnesses6-sources.json",
-        "sha256": "0966b68f1ef283605bbf44ca71eb07af2163f64784b0c651f6afcef737aa3697"
+        "path": "specs/053-screen-completeness/evidence/checkpoint36-runtime/command-witnesses-sources.json",
+        "sha256": "79276efbba5d4e7415bda6ca5691881bd8e5ba5b0072e4c45641c2d745b01613"
       }
     }
   }

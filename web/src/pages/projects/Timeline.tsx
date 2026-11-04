@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import type { components } from '@/gen/api'
 import { useFlag } from '@/lib/auth'
 import { ScheduleNote } from '@/components/hub/schedule-note'
+import { DateReasonSelect, useDateReasons } from '@/components/hub/date-reason'
 import { ActiveFilters, ChoiceMenu, ConfirmDialog, DesktopOnly, Empty, ErrorBanner, Field, FilterBar, Loading, Notice, Page, Section, selectCls, useIsPhone } from '@/components/hub/common'
 import { useItemPanel } from '@/components/hub/panel-host'
 import { Key, toneOf } from '@/components/hub/pills'
@@ -505,11 +506,12 @@ export function MoveDialog({ move, projectComplete, onClose }: { move: Move; pro
   const newStart = move.start ? addDays(move.start, move.days) : null
   const newDue = addDays(move.due, move.days)
   const reason = move.needsReason || projectComplete
+  const [category, setCategory] = useState(''), needsWhy = useDateReasons().required && move.kind !== 'task' // FR-SCR-65: deliverable moves
   const dateContext = useFlag('date_context')
   const context = useQuery({ queryKey: ['date-context', move.kind, move.id, newStart, newDue], enabled: dateContext, queryFn: () => typedRequest('get', '/api/v1/items/{type}/{id}/date-context', { params: { type: move.kind === 'task' ? 'Task' : 'Deliverable', id: move.id }, query: { startDate: newStart ?? undefined, dueDate: newDue } }) })
   return (
     <ConfirmDialog open onOpenChange={(o) => !o && onClose(false)} reason={reason ? true : undefined} title={t('timeline.moveTitle', { key: move.key, name: move.name })}
-      confirmLabel={t('timeline.moveConfirm')}
+      confirmLabel={t('timeline.moveConfirm')} busy={needsWhy && !category}
       body={<>
         <p>{t('timeline.moveBy', { n: move.days > 0 ? `+${move.days}` : move.days })}</p>
         <ul className="list-disc pl-5">
@@ -523,11 +525,14 @@ export function MoveDialog({ move, projectComplete, onClose }: { move: Move; pro
       onConfirm={async (why) => {
         const body: Record<string, unknown> = { dueDate: newDue, reason: why || undefined }
         if (newStart) body.startDate = newStart
+        if (needsWhy) body.dateReasonCategoryId = category
         if (move.kind === 'task') await typedRequest('patch', '/api/v1/tasks/{id}', { params: { id: move.id }, body, ifMatch: move.rowVersion })
         else await typedRequest('patch', '/api/v1/deliverables/{id}', { params: { id: move.id }, body, ifMatch: move.rowVersion })
         toast.success(t('timeline.moved', { key: move.key }))
         onClose(true)
-      }} />
+      }}>
+      {needsWhy && <DateReasonSelect id="timeline-why" value={category} onChange={setCategory} />}
+    </ConfirmDialog>
   )
 }
 

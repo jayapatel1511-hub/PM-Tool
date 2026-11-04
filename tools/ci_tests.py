@@ -95,7 +95,7 @@ def api_classes(folder=API_TESTS):
             body = text[m.end(): heads[i + 1].start() if i + 1 < len(heads) else len(text)]
             tests = len(TEST_ATTRIBUTE.findall(body))
             if tests:
-                found[m.group(1)] = tests
+                found[m.group(1)] = found.get(m.group(1), 0) + tests  # a partial class adds up across its files
     return found
 
 

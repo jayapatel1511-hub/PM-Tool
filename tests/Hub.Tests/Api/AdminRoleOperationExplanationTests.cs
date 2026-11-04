@@ -97,7 +97,7 @@ public sealed class AdminRoleOperationExplanationTests
             var operation = Assert.Single(Assert.Single(read["rows"]!.AsArray())!["operations"]!.AsArray())!;
             Assert.Contains(operation.S("decisionKind"), new[] { "Conditional", "NotEligible", "PolicyPending" });
             Assert.NotEmpty(operation["requirements"]!.AsArray());
-            if (query.EndsWith("S21.export", StringComparison.Ordinal)) Assert.Equal("PolicyPending", operation.S("decisionKind"));
+            if (query.EndsWith("S21.export", StringComparison.Ordinal)) Assert.Equal("Conditional", operation.S("decisionKind"));
             if (query.Contains("scenario=inactive-person", StringComparison.Ordinal)) Assert.Equal("NotEligible", operation.S("decisionKind"));
             var text = read.ToJsonString();
             Assert.DoesNotMatch(Identifier, text);

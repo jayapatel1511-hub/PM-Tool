@@ -40,6 +40,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
     public DbSet<IssueReturnCode> IssueReturnCodes => Set<IssueReturnCode>();
     public DbSet<DecisionCategory> DecisionCategories => Set<DecisionCategory>();
     public DbSet<IssueRootCauseCategory> IssueRootCauseCategories => Set<IssueRootCauseCategory>();
+    public DbSet<DateReasonCategory> DateReasonCategories => Set<DateReasonCategory>();
     public DbSet<CertificationTag> CertificationTags => Set<CertificationTag>();
     public DbSet<UserCertification> UserCertifications => Set<UserCertification>();
     public DbSet<OrgSetting> Settings => Set<OrgSetting>();
@@ -230,6 +231,12 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
             e.Property(x => x.Name).HasMaxLength(120).HasColumnType("citext");
             e.HasIndex(x => x.Name).IsUnique();
             e.ToTable(t => t.HasCheckConstraint("ck_issue_root_cause_category_name", "name = btrim(name) AND char_length(name) BETWEEN 1 AND 120 AND name !~ '[[:cntrl:]]'"));
+        });
+        mb.Entity<DateReasonCategory>(e =>
+        {
+            e.Property(x => x.Name).HasMaxLength(120).HasColumnType("citext");
+            e.HasIndex(x => x.Name).IsUnique();
+            e.ToTable(t => t.HasCheckConstraint("ck_date_reason_category_name", "name = btrim(name) AND char_length(name) BETWEEN 1 AND 120 AND name !~ '[[:cntrl:]]'"));
         });
         mb.Entity<IssuePurpose>().Property(x => x.Name).HasMaxLength(120);
         mb.Entity<IssueReturnCode>(e =>
@@ -1900,6 +1907,7 @@ public sealed class HubDb(DbContextOptions<HubDb> options, AuditContext audit, T
         }
         if (AuditRules.TypeCategory(item) is { } tc) { if (tc == "admin") cats.Clear(); cats.Add(tc); }
         if (note?.Categories is { } extra) foreach (var c in extra) cats.Add(c);
+        if (audit.DateReasonCategoryId is { } why && entry.Entity is Milestone or Deliverable && cats.Contains("date")) cats.Add(Hub.Api.Features.DateReasons.Tag(why));
         if (note?.Snapshot is { } snap) snapshot = snap;
         return new ActivityLog
         {

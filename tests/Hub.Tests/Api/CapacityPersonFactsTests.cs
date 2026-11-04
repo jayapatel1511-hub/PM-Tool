@@ -205,7 +205,9 @@ public sealed class CapacityPersonFactsTests : IDisposable
             }
             Assert.False(organisation.AsObject().ContainsKey("unit"));
             Assert.True(member.AsObject().Remove("organisationFacts"));
+            member.AsObject().Remove("responsibility"); // S43 FR-SCR-76 adds the member's responsibility under the same flag
         }
+        Assert.All(legacy["members"]!.AsArray(), member => Assert.False(member!.AsObject().ContainsKey("responsibility")));
         Assert.Equal(legacy.ToJsonString(), off.ToJsonString());
         (await f.As(TestData.Admin).Put("/api/v1/admin/settings/flag.people_screens", new { value = false })).EnsureSuccessStatusCode();
         Assert.Equal(legacy.ToJsonString(), (await (await f.As(TestData.Pm).GetAsync($"/api/v1/projects/{project.Id}/team?certificationTagId=bad")).Json()).ToJsonString());

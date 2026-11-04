@@ -15,7 +15,7 @@ namespace Hub.Api.Features;
 public static class MilestoneEndpoints
 {
     public sealed record CreateBody(string Name, string MilestoneType, DateOnly? Date, string? Description, Guid? ProjectDisciplineId, Guid? CompletesPhaseId, bool? IsClientFacing);
-    public sealed record ChangeDateBody(DateOnly NewDate, string? Reason, bool? CascadeDeliverables, bool? IncludeTasks, bool? DryRun, int? RowVersion);
+    public sealed record ChangeDateBody(DateOnly NewDate, string? Reason, bool? CascadeDeliverables, bool? IncludeTasks, bool? DryRun, int? RowVersion, Guid? DateReasonCategoryId = null);
     public sealed record CompleteBody(DateOnly? CompletedDate, bool? Confirm, int? RowVersion);
     public sealed record ReasonBody(string? Reason, int? RowVersion);
     public sealed record RebaselineBody(string? Reason, bool? Clear, int? RowVersion);
@@ -55,6 +55,7 @@ public static class MilestoneEndpoints
         api.MapGet("/milestones/{id}", Get);
         api.MapPatch("/milestones/{id:guid}", Edit);
         api.MapPost("/milestones/{id:guid}/change-date", ChangeDate).AddOpenApiOperationTransformer(DescribeChangeDate);
+        DateReasons.Map(api);
         api.MapPost("/milestones/{id:guid}/rebaseline", Rebaseline);
         api.MapPost("/milestones/{id:guid}/complete", Complete);
         api.MapPost("/milestones/{id:guid}/reopen", Reopen);
@@ -254,6 +255,7 @@ public static class MilestoneEndpoints
         await Http.CheckVersion(db, http, m, body.RowVersion);
         var reason = Check.Reason(body.Reason); // G-09: milestone date change needs a reason
         db.Audit.Reason = reason;
+        if (old is not null && delta != 0) await DateReasons.Require(db, store, body.DateReasonCategoryId);
         m.Date = body.NewDate;
         m.OriginalDate ??= body.NewDate;
         foreach (var d in deliverables) { d.DueDate = d.DueDate!.Value.AddDays(delta); if (d.StartDate is { } s) d.StartDate = s.AddDays(delta); db.Audit.Note(d, action: "Cascade", reason: reason); }

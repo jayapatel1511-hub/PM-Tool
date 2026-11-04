@@ -121,11 +121,11 @@ assert.ok(['127.0.0.1', 'localhost'].includes(new URL(base).hostname))
     await operation('W15').locator('[data-role-requirement="synthetic-current-source"]').getByText('Requires a live check', { exact: true }).waitFor()
     await operation('W15').getByRole('region', { name: 'Facts for this operation', exact: true }).getByText('Synthetic project membership: Project Manager', { exact: true }).waitFor()
     await choose('Operation', f.firstOperation('S21'))
-    await operation('S21').locator('[data-semantic-tone]').filter({ hasText: 'Policy decision pending' }).waitFor()
-    await operation('S21').getByText('An unresolved policy choice affects this operation; no permission decision is implied.', { exact: true }).waitFor()
+    await operation('S21').locator('[data-semantic-tone]').filter({ hasText: 'Conditional' }).waitFor()
+    assert.equal(await operation('S21').getByText('An unresolved policy choice affects this operation; no permission decision is implied.', { exact: true }).count(), 0)
     assert.equal(await examples().getByText('Allowed', { exact: true }).count(), 0)
     await screenshot('admin-screen-operation-policy')
-    cases.push('Operation-specific facts and unmet/live-check requirements stay visible; explicit project membership remains Conditional; S21 policy unresolved without own-project scope inference')
+    cases.push('Operation-specific facts and unmet/live-check requirements stay visible; explicit project membership remains Conditional; S21 report export reads the member-project rule')
 
     stage = 'pending-old-response-and-selection-mismatch'
     await choose('Operation', 'all')
@@ -208,7 +208,7 @@ assert.ok(['127.0.0.1', 'localhost'].includes(new URL(base).hostname))
     await page.getByRole('dialog').getByRole('button', { name: 'Cancel', exact: true }).click()
     cases.push('AC-SCR-84: new columns/examples/GET absent off while legacy user fields and Cancel remain available')
     assert.deepEqual(writes, []); assert.deepEqual(unknown, []); assert.deepEqual(errors, []); assert.deepEqual(mock.unknownGets, [])
-    console.log(JSON.stringify({ status: 'PASS', scope: 'Synthetic read-only UI against integrated draft DTOs; no canonical operation authorization, S21 policy resolution or S49 acceptance claim', cases, userReads, roleReads, writes }))
+    console.log(JSON.stringify({ status: 'PASS', scope: 'Synthetic read-only UI against integrated draft DTOs; no canonical operation authorization or S49 acceptance claim', cases, userReads, roleReads, writes }))
   } catch (error) {
     let state
     try { state = await page.evaluate(() => ({ url: location.href, active: { id: document.activeElement?.id, text: document.activeElement?.textContent?.slice(0, 150) },

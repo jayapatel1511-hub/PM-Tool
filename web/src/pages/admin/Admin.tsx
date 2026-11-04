@@ -32,8 +32,8 @@ import { DraftNotice } from '@/components/hub/drafts'
 import { useSafeForm } from '@/hooks/drafts'
 import { DeliverableReviewDefaults } from './deliverable-review-defaults'
 
-const KINDS = ['disciplines', 'clients', 'offices', 'deliverableTypes', 'phases', 'projectTypes', 'issuePurposes', 'issueReturnCodes', 'decisionCategories', 'issueRootCauses'] as const
-const REGISTER_KINDS: readonly string[] = ['issuePurposes', 'issueReturnCodes', 'decisionCategories', 'issueRootCauses']
+const KINDS = ['disciplines', 'clients', 'offices', 'deliverableTypes', 'phases', 'projectTypes', 'issuePurposes', 'issueReturnCodes', 'decisionCategories', 'issueRootCauses', 'dateReasons'] as const
+const REGISTER_KINDS: readonly string[] = ['issuePurposes', 'issueReturnCodes', 'decisionCategories', 'issueRootCauses', 'dateReasons']
 type Kind = (typeof KINDS)[number]
 type Schemas = components['schemas']
 
@@ -405,13 +405,17 @@ function CredentialHandoff({ user, onClose }: { user: { id: string; email: strin
 }
 
 function UserDialog({ user, users, offices, disciplines, onClose }: { user: UserRow; users: UserRow[]; offices: any[]; disciplines: { id: string; name: string; isActive: boolean }[]; onClose: () => void }) {
-  const factsEnabled = useFlag('capacity_screens')
+  const factsEnabled = useFlag('capacity_screens'), screens = useFlag('people_screens')
   const [userVersion, setUserVersion] = useState(user.rowVersion)
   const [form, setForm] = useState({ supervisorId: user.supervisorId ?? '', officeId: user.officeId ?? '', homeDisciplineId: user.homeDisciplineId ?? '', weeklyCapacityHours: user.weeklyCapacityHours?.toString() ?? '', isTemplateEditor: user.isTemplateEditor, isActive: user.isActive })
   const [role, setRole] = useState('')
   const [err, setErr] = useState<unknown>(null)
   const [busy, setBusy] = useState(false)
   const [roles, setRoles] = useState(user.roles)
+  // FR-SCR-82, AC-SCR-82: turning a person off shows what they still own and where to reassign it; it never blocks.
+  const deactivating = screens && user.isActive && !form.isActive
+  const openWork = useQuery({ queryKey: ['users', user.id, 'open-work'], enabled: deactivating,
+    queryFn: () => typedRequest('get', '/api/v1/users/{id}/open-work', { params: { id: user.id } }) })
   const submit = async () => {
     setErr(null); setBusy(true)
     try {
@@ -449,6 +453,9 @@ function UserDialog({ user, users, offices, disciplines, onClose }: { user: User
           <Field label={t('admin.capacity')} htmlFor="u-cap"><Input id="u-cap" className="w-32" type="number" min={0} max={80} value={form.weeklyCapacityHours} onChange={(e) => setForm({ ...form, weeklyCapacityHours: e.target.value })} /></Field>
           <label className="flex min-h-6 items-center gap-2 text-sm"><Checkbox checked={form.isTemplateEditor} onCheckedChange={(c) => setForm({ ...form, isTemplateEditor: !!c })} />{t('admin.templateEditor')}</label>
           <label className="flex min-h-6 items-center gap-2 text-sm"><Switch checked={form.isActive} onCheckedChange={(c) => setForm({ ...form, isActive: c })} />{t('admin.userActive')}</label>
+          {deactivating && (openWork.error ? <ErrorBanner error={openWork.error} retry={() => openWork.refetch()} /> : !openWork.data ? <Loading rows={1} />
+            : openWork.data.items.length > 0 && <p role="status" className="rounded-md bg-muted px-3 py-2 text-sm" data-deactivate-open-work={openWork.data.items.length}>
+              {t('adminScreen.deactivateOpenWork', { count: openWork.data.items.length })} <Link className="font-medium text-primary underline" to={`/people/${user.id}/reassign-work`}>{t('reassign.action')}</Link></p>)}
           <div className="space-y-2">
             <div className="text-sm font-medium">{t('admin.roles')}</div>
             <div className="flex flex-wrap gap-1.5">

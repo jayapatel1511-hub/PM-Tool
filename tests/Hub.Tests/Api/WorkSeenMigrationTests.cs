@@ -43,6 +43,11 @@ public sealed class WorkSeenMigrationTests
             await db.Database.ExecuteSqlAsync($"UPDATE hub.task SET row_version=0, status='Complete', progress_pct=100, completed_at={f.Clock.Now}, deleted_at={f.Clock.Now} WHERE id={hiddenId}");
             return await db.Database.ExecuteSqlAsync($"UPDATE hub.project SET status='Archived', visibility='Restricted' WHERE id={hidden.Id}");
         });
+        var before = await CanonicalFingerprint(f);
+        await f.DbAsync(async db => { await db.GetService<IMigrator>().MigrateAsync(migration); return 0; });
+        Assert.Equal(before, await CanonicalFingerprint(f));
+        // Later migrations add columns the current model reads, so the model and API are used only at the latest schema.
+        await f.DbAsync(async db => { await db.GetService<IMigrator>().MigrateAsync(); return 0; });
         var expected = await f.DbAsync(async db => {
             var canonical = new List<object>();
             canonical.AddRange(await db.Tasks.IgnoreQueryFilters().AsNoTracking().ToListAsync());
@@ -59,9 +64,6 @@ public sealed class WorkSeenMigrationTests
         });
         Assert.Equal(12, expected.Select(row => (row.ItemType, row.Role)).Distinct().Count());
         Assert.Contains(expected, row => row.ItemId == hiddenId && row.SourceVersion == 0 && row.RecipientId == alex);
-        var before = await CanonicalFingerprint(f);
-        await f.DbAsync(async db => { await db.GetService<IMigrator>().MigrateAsync(migration); return 0; });
-        Assert.Equal(before, await CanonicalFingerprint(f));
         var seeded = f.Db(db => db.WorkAssignmentOccurrences.AsNoTracking().ToArray());
         Assert.True(expected.SetEquals(seeded.Select(row => new Expected(row.ItemType, row.ItemId, row.Role, row.RecipientId, row.SourceVersion))));
         Assert.All(seeded, row => {
@@ -72,6 +74,7 @@ public sealed class WorkSeenMigrationTests
         Assert.Equal(0, f.Db(db => db.WorkSeenCommandReceipts.Count()));
         Assert.False(f.Db(db => db.UserSettings.Any(row => row.MyWorkFirstVisitAt != null || row.MyWorkSeenRevision != 0)));
         var baseline = seeded.Single(row => row.ItemId == taskId && row.Role == "Assignee").Token;
+        before = await CanonicalFingerprint(f);
         await s.Visit();
         Assert.Equal(before, await CanonicalFingerprint(f));
         var acknowledged = f.Db(db => db.WorkSeenAcknowledgements.Where(row => row.RecipientId == alex).Select(row => row.Token).ToHashSet());

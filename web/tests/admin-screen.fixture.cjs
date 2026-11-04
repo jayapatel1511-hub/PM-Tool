@@ -425,7 +425,7 @@ const roles = (role, scenario, membership = 'none', operation = 'all') => {
     const membershipMissing = row.rowId === 'W15' && membership === 'none'
     /** @type {Schemas['AdminPermissionOperation']} */
     const result = { key, label: operationLabels[key],
-      decisionKind: row.rowId === 'S21' ? 'PolicyPending' : membershipMissing ? 'NotEligible' : 'Conditional',
+      decisionKind: membershipMissing ? 'NotEligible' : 'Conditional',
       facts: [`Synthetic system role: ${roleLabel}`, `Synthetic project membership: ${membershipLabel}`, `Synthetic conditions: ${scenarioLabel}`, `Synthetic operation-specific facts: ${row.label}`, ...scenarioFacts],
       factors: [{ actionKey: 'CoordinationWrite', actionLabel: 'Synthetic supporting role check', resultKind: 'CanonicalPermissionFactor', eligible: true, reasonCode: null, reasonText: null, requiresReason: null },
         { actionKey: 'CreateTask', actionLabel: 'Synthetic project-role check', resultKind: 'CanonicalPermissionFactor', eligible: !membershipMissing, reasonCode: membershipMissing ? 'perm.project_role' : null,

@@ -41,12 +41,15 @@ public static class PersonFacts
 
     static async Task<OrgSettings> Enabled(HubDb db, SettingsStore store)
     { var settings = await store.Get(db); if (!settings.IsFlagOn("capacity_screens")) throw ApiException.NotFound(); return settings; }
+    /// Admin routes answer 403 to non-Admins whatever the flag; only an Admin sees the flagged-off 404 (Jay, 2026-10-25).
+    static Task<OrgSettings> Enabled(HubDb db, SettingsStore store, Access access, bool admin)
+    { if (admin) Access.Demand(Permissions.Administer(access.Actor)); return Enabled(db, store); }
     /// Root's existing idempotency middleware calls this only for the two marked creates before claiming/replaying.
     /// Reuse its receipt machinery, but a replay must still obey today's flag and authority without returning stale facts.
     public static async Task AuthoriseCreateReplay(HttpContext http, Access access, HubDb db, SettingsStore store)
     {
         if (http.GetEndpoint()?.Metadata.GetMetadata<CertificationCreateGuard>() is not { } guard) return;
-        await Enabled(db, store);
+        await Enabled(db, store, access, guard.Admin);
         var userId = access.Me.Id;
         if (guard.Admin && !Guid.TryParse(http.Request.RouteValues["userId"]?.ToString(), out userId)) throw ApiException.NotFound();
         var user = await Target(userId, guard.Admin, false, access, db);
@@ -109,7 +112,7 @@ public static class PersonFacts
     }
     static async Task<Ok<EditorRead>> Editor(Guid userId, bool admin, Access access, HubDb db, SettingsStore store, TimeProvider clock)
     {
-        var settings = await Enabled(db, store);
+        var settings = await Enabled(db, store, access, admin);
         await using var snapshot = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead);
         var user = await Target(userId, admin, false, access, db);
         var today = clock.Today(settings); var facts = await ReadAt(db, [userId], settings, today);
@@ -117,7 +120,7 @@ public static class PersonFacts
     }
     static async Task<Created<Saved>> Create(Guid userId, bool admin, CreateBody body, HttpContext http, Access access, HubDb db, SettingsStore store)
     {
-        await Enabled(db, store);
+        await Enabled(db, store, access, admin);
         // Resolve authority before any target-person row lock; then re-read the target inside the transaction.
         await Target(userId, admin, false, access, db);
         return await Tx.Run(db, async () => {
@@ -148,7 +151,7 @@ public static class PersonFacts
     }
     static async Task<Ok<Saved>> Edit(Guid userId, bool admin, Guid id, JsonElement body, HttpContext http, Access access, HubDb db, SettingsStore store)
     {
-        await Enabled(db, store); await Target(userId, admin, false, access, db);
+        await Enabled(db, store, access, admin); await Target(userId, admin, false, access, db);
         Shape(body, ["expiresOn", "rowVersion", "reason"]); Check.That(body.TryGetProperty("expiresOn", out _), "expiresOn", "error.required");
         return await Tx.Run(db, async () => {
             var user = await LockedTarget(userId, admin, access, db);
@@ -161,7 +164,7 @@ public static class PersonFacts
     }
     static async Task<NoContent> Remove(Guid userId, bool admin, Guid id, RemoveBody body, HttpContext http, Access access, HubDb db, SettingsStore store)
     {
-        await Enabled(db, store); await Target(userId, admin, false, access, db);
+        await Enabled(db, store, access, admin); await Target(userId, admin, false, access, db);
         return await Tx.Run(db, async () => {
             var user = await LockedTarget(userId, admin, access, db);
             var record = await db.UserCertifications.SingleOrDefaultAsync(record => record.Id == id && record.UserId == userId) ?? throw ApiException.NotFound();
@@ -171,7 +174,7 @@ public static class PersonFacts
     }
     static async Task<Ok<Saved>> SetFacts(Guid userId, JsonElement body, HttpContext http, Access access, HubDb db, SettingsStore store)
     {
-        await Enabled(db, store); await Target(userId, true, false, access, db);
+        await Enabled(db, store, access, true); await Target(userId, true, false, access, db);
         Shape(body, ["personType", "personStartDate", "personEndDate", "rowVersion", "reason"]);
         var patch = new Patch(body); Check.That(patch.Has("personType") || patch.Has("personStartDate") || patch.Has("personEndDate"), "body", "error.required");
         return await Tx.Run(db, async () => {

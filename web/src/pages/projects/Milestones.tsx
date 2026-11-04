@@ -10,6 +10,8 @@ import { FieldRow, HistoryList, InlineText, TabBar } from '@/components/hub/fiel
 import { useItemPanel, type PanelProps } from '@/components/hub/panel-host'
 import { Chip, Key, ProgressBar, StatusPill, toneOf } from '@/components/hub/pills'
 import { DataTable } from '@/components/hub/registers'
+import { MILESTONE_TYPES, sequenceCue } from '@/lib/milestone-sequence'
+import { DateReasonCounts, DateReasonSelect, useDateReasons } from '@/components/hub/date-reason'
 import { useTable, type Column } from '@/components/hub/table'
 import { Why, type Reason } from '@/components/hub/why'
 import { Button } from '@/components/ui/button'
@@ -41,7 +43,13 @@ export type MilestoneRow = Schemas['MilestoneMilestoneRow']
 /** The evaluated state's reasons are free JSON on the contract; the register has always read them as the shared reason list. */
 const reasonsOf = (m: Pick<MilestoneRow, 'statusReasons'>) => m.statusReasons as Reason[] | null
 
-const TYPES = ['Kickoff', 'Field Work', 'Design Submission', 'Client Workshop', 'Permit Submission', 'Tender', 'Construction', 'IFC', 'Record Drawings', 'Closeout', 'Other'] as const
+const TYPES = MILESTONE_TYPES
+
+/** FR-SCR-66's cue in words. */
+function sequenceText(m: MilestoneRow, all: readonly MilestoneRow[]) {
+  const cue = sequenceCue(m, all)
+  return !cue ? null : cue.kind === 'noDate' ? t('milestone.noDate') : t('milestone.outOfSequence', { name: cue.name })
+}
 
 export function milestoneStatusLabel(m: MilestoneRow) {
   if (!m.date && !m.isComplete && !m.isCancelled) return t('milestone.undated')
@@ -102,6 +110,10 @@ function LiveMilestonesTab() {
   const q = useQuery({ queryKey: ['p', p.id, 'milestones', showCompleted, type], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/milestones', { params: { id: p.id }, query: { ShowCompleted: showCompleted, Type: type || undefined } }) })
   const can = p.permissions.manageMilestones.ok
   const rows = q.data ?? []
+  const registerOn = useFlag('register_screens')
+  // The cues compare every live milestone, whatever the filters show (FR-SCR-66).
+  const every = useQuery({ queryKey: ['p', p.id, 'milestones', true, ''], enabled: registerOn, queryFn: () => typedRequest('get', '/api/v1/projects/{id}/milestones', { params: { id: p.id }, query: { ShowCompleted: true } }) })
+  const cue = (m: MilestoneRow) => registerOn && every.data ? sequenceText(m, every.data) : null
   const disc = (id?: string | null) => p.disciplines.find((d) => d.id === id)?.name
   const base = `/projects/${p.projectNumber}`
   const toggle = (id: string) => { const n = new Set(open); if (n.has(id)) n.delete(id); else n.add(id); setOpen(n) }
@@ -114,7 +126,7 @@ function LiveMilestonesTab() {
     { id: 'name', label: t('common.name'), className: 'min-w-48',
       cell: (m) => <button type="button" className="break-words text-left font-semibold hover:underline" onClick={() => openPanel('Milestone', m.id)}>{m.isSubmission && '◆ '}{m.name}</button> },
     { id: 'type', label: t('common.type'), cell: (m) => runtimeText(`mtype.${m.milestoneType}`) },
-    { id: 'date', label: t('common.date'), className: 'whitespace-nowrap tabular-nums', cell: (m) => fmtDate(m.date) },
+    { id: 'date', label: t('common.date'), className: 'whitespace-nowrap tabular-nums', cell: (m) => <>{fmtDate(m.date)}{cue(m) && <span className="block text-xs text-warn" data-sequence-cue>{cue(m)}</span>}</> },
     { id: 'original', label: t('milestone.original'), className: 'whitespace-nowrap tabular-nums text-muted-foreground', cell: (m) => fmtDate(m.originalDate) },
     { id: 'slip', label: t('milestone.slip'), className: 'whitespace-nowrap text-right tabular-nums',
       cell: (m) => <span className={cn(m.slipDays > 0 && 'font-semibold text-warn')}>{m.slipDays > 0 && <span aria-hidden className="mr-1 text-xs">▲</span>}{slip(m.slipDays)}</span> },
@@ -139,6 +151,7 @@ function LiveMilestonesTab() {
       {!can && p.permissions.manageMilestones.reason && <Notice icon={Lock} title={p.permissions.manageMilestones.reason} />}
       {can && <DesktopOnly notice={<PhoneNotice />}>{null}</DesktopOnly>}
       <MilestoneStrip rows={rows} onOpen={(m) => openPanel('Milestone', m.id)} />
+      {registerOn && <DateReasonCounts projectId={p.id} base={base} />}
       <FilterBar activeCount={(type ? 1 : 0) + (showCompleted ? 1 : 0)}>
         <DeletedToggle project={p} />
         <div className="flex flex-wrap items-end gap-3">
@@ -158,7 +171,7 @@ function LiveMilestonesTab() {
           <dl className="grid grid-cols-[minmax(5rem,auto)_minmax(0,1fr)] gap-x-3 gap-y-2 text-sm">
             {[
               [t('common.type'), runtimeText(`mtype.${m.milestoneType}`)],
-              [t('common.date'), fmtDate(m.date)], [t('milestone.original'), fmtDate(m.originalDate)],
+              [t('common.date'), <Fragment key="date">{fmtDate(m.date)}{cue(m) && <span className="block text-xs text-warn" data-sequence-cue>{cue(m)}</span>}</Fragment>], [t('milestone.original'), fmtDate(m.originalDate)],
               [t('milestone.slip'), slip(m.slipDays)],
               [t('milestone.remaining'), m.isComplete ? fmtDate(m.completedDate) : m.date ? relative(m.date) : t('common.dash')],
               [t('milestone.deliverables'), <DeliverableCount key="d" m={m} base={base} />],
@@ -372,6 +385,7 @@ export function ChangeDateDialog({ m, onClose, onDone, initialDate }: { m: Miles
   const [date, setDate] = useState(initialDate ?? m.date ?? '')
   const [cascade, setCascade] = useState(false)
   const [tasks, setTasks] = useState(false)
+  const [why, setWhy] = useState(''), reasons = useDateReasons(), needsWhy = reasons.required && !!m.date
   const preview = useQuery({ queryKey: ['ms-preview', m.id, date, cascade, tasks], enabled: !!date && date !== m.date,
     queryFn: async () => { // a dry run answers the preview itself; the union also carries the preview of a real move
       const r = await typedRequest('post', '/api/v1/milestones/{id}/change-date', { params: { id: m.id }, body: { newDate: date, cascadeDeliverables: cascade, includeTasks: tasks, dryRun: true, reason: null, rowVersion: null } })
@@ -379,11 +393,12 @@ export function ChangeDateDialog({ m, onClose, onDone, initialDate }: { m: Miles
     } })
   const pv = preview.data
   return (
-    <ConfirmDialog open onOpenChange={(o) => !o && onClose()} title={t('milestone.changeDateTitle', { key: m.key, name: m.name })} reason busy={!date || date === m.date}
+    <ConfirmDialog open onOpenChange={(o) => !o && onClose()} title={t('milestone.changeDateTitle', { key: m.key, name: m.name })} reason busy={!date || date === m.date || needsWhy && !why}
       confirmLabel={t('milestone.changeDate')}
-      onConfirm={async (reason) => { await typedRequest('post', '/api/v1/milestones/{id}/change-date', { params: { id: m.id }, body: { newDate: date, reason: reason ?? null, cascadeDeliverables: cascade, includeTasks: tasks, dryRun: null, rowVersion: m.rowVersion } }); onDone() }}>
+      onConfirm={async (reason) => { await typedRequest('post', '/api/v1/milestones/{id}/change-date', { params: { id: m.id }, body: { newDate: date, reason: reason ?? null, cascadeDeliverables: cascade, includeTasks: tasks, dryRun: null, rowVersion: m.rowVersion, ...(why ? { dateReasonCategoryId: why } : {}) } }); onDone() }}>
       <div className="space-y-3 text-sm">
         <Field label={t('milestone.newDate')} htmlFor="md-date"><Input id="md-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} /></Field>
+        {m.date && <DateReasonSelect id="md-why" value={why} onChange={setWhy} />}
         {pv && <p className="rounded-md bg-muted px-3 py-2 tabular-nums">{t('milestone.slipPreview', { from: fmtDate(pv.milestone.oldDate), to: fmtDate(pv.milestone.newDate), delta: pv.milestone.delta, slip: pv.milestone.slipDays })}</p>}
         <label className="flex items-start gap-2"><Checkbox className="mt-0.5" checked={cascade} onCheckedChange={(c) => { setCascade(!!c); if (!c) setTasks(false) }} />{t('milestone.cascade')}</label>
         {cascade && <label className="ml-6 flex items-start gap-2"><Checkbox className="mt-0.5" checked={tasks} onCheckedChange={(c) => setTasks(!!c)} />{t('milestone.cascadeTasks')}</label>}

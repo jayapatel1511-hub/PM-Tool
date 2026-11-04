@@ -31,6 +31,7 @@ public sealed class ActivityScreenFields(OrgSettings settings, HubDb? context = 
     [
         ("register_screens", "ReferenceData", nameof(DecisionCategory)),
         ("register_screens", "ReferenceData", nameof(IssueRootCauseCategory)),
+        ("register_screens", "ReferenceData", nameof(DateReasonCategory)),
         ("register_screens", "ReferenceData", nameof(Hub.Api.Data.IssuePurpose)),
         ("register_screens", "ReferenceData", nameof(Hub.Api.Data.IssueReturnCode)),
         ("register_screens", "ExternalReview", null),

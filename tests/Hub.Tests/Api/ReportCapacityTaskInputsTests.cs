@@ -319,7 +319,8 @@ public sealed class ReportCapacityTaskInputsTests : IDisposable
             after.AsObject().Remove("unitView");
         }
         else Assert.False(after.AsObject().ContainsKey("unitView"));
-        after.AsObject().Remove("taskInputs"); after.AsObject().Remove("savedParameters"); Assert.True(JsonNode.DeepEquals(before, after));
+        Assert.False(before.AsObject().ContainsKey("capacityComparison")); // S30 adds the comparison to team-capacity under the same flag
+        after.AsObject().Remove("taskInputs"); after.AsObject().Remove("savedParameters"); after.AsObject().Remove("capacityComparison"); Assert.True(JsonNode.DeepEquals(before, after));
         var enabledCsv = await f.As(TestData.Pm).GetByteArrayAsync($"/api/v1/reports/{code}/export?{query}{(query.Length > 0 ? "&" : "")}format=csv");
         if (matrix)
         {

@@ -1,4 +1,5 @@
 import { PersonPanelTrigger } from '@/components/hub/person-panel-trigger'
+import { pageMode } from '@/lib/page-mode'
 import { ProjectImportDialog } from '@/components/hub/project-import'
 import { useQuery } from '@tanstack/react-query'
 import { Columns3, Plus, Rows3, Star } from 'lucide-react'
@@ -59,7 +60,7 @@ export function ProjectListPage() {
   const visualSystem = useFlag('visual_system')
   const projectScreens = useFlag('project_screens')
   const overview = useFlag('home_overview')
-  const boardView = visualSystem && sp.get('view') === 'board'
+  const boardView = visualSystem && pageMode(sp, 'layout', ['board'], 'list') === 'board'
   const [importing, setImporting] = useState(false)
   const [creating, setCreating] = useState(false)
   const [selected, setSelected] = useState<Map<string, SelectedProject>>(() => new Map())

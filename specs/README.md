@@ -179,14 +179,15 @@ Dependency order: 039 first, because its flags slice gates most later slices. 04
 The saved research at `~/Documents/Tuesday-Research/2026-10-31-Prototype-vs-REA.md`
 and the preferred prototype informed these two additive amendments. Accepted visual ideas
 and reviewed HTML interactions are input evidence, not approval of every new requirement
-or proof of application implementation. Both packets are **specified, not implemented**;
-all 052-D1–D10 and 053-D1–D22 decisions remain Open with recommended defaults. Existing
+or proof of application implementation. Both packets are built dark behind their flags
+(status rows below); 052-D1–D10, 053-D1–D22 and 053-D24 remain Open with recommended defaults,
+052-D11, 052-D12 and 053-D23 are confirmed. Existing
 §41 R8 and sidebar decision E2 are preserved; their proposed changes are stated in §56.
 
 | Packet | Delivers | Depends on | Status |
 |---|---|---|---|
 | [052-visual-system-and-navigation](052-visual-system-and-navigation/spec.md) | §56: fixed semantic colour domains, navy band, light sidebar, IBM Plex, title block, inspectable count cards and one-list sidebar proposal | Existing shell/layout (022, 037); 039 flags; 044 served-font boundary | Draft complete; user-authorized dark local implementation in progress; decisions Open |
-| [053-screen-completeness](053-screen-completeness/spec.md) | §57: five accepted interaction patterns, Home ideas and screen gaps with explicit acceptance; existing requirements tracked as build gaps | Relevant existing screen/data contracts; 039 flags; 052 only for visual tokens when enabled | Draft complete; user-authorized dark local implementation in progress; decisions Open |
+| [053-screen-completeness](053-screen-completeness/spec.md) | §57: five accepted interaction patterns, Home ideas and screen gaps with explicit acceptance; existing requirements tracked as build gaps | Relevant existing screen/data contracts; 039 flags; 052 only for visual tokens when enabled | Draft complete; all 49 slices locally implemented and verified dark (checkpoint 36); S50 ratchet restoration open before pilot; decisions Open except 053-D23 |
 
 The new packets preserve server permissions, one accountable owner, partial-view labels,
 source revisions, and unknown values. Older requirements are cited as build gaps rather

@@ -29,7 +29,9 @@ public sealed class WorkActivityCommentsTests : IDisposable
     {
         if (node is JsonObject obj)
         {
-            obj.Remove("lastActivityActorName");
+            // The final S10 projection adds the compound actor facts and, on My Work, the shared activity/seen facts (FR-SCR-15/16);
+            // list pages also carry the S11/S13 submission date and board facts under the same flag.
+            foreach (var key in new[] { "lastActivityActorName", "lastActivityActorId", "lastActivityActorType", "lastActivityEventAt", "workActivity", "seen", "board", "submissionDate" }) obj.Remove(key);
             foreach (var value in obj.ToList()) if (value.Value is { } child) StripActor(child);
         }
         else if (node is JsonArray array) foreach (var child in array) if (child is not null) StripActor(child);
@@ -59,8 +61,9 @@ public sealed class WorkActivityCommentsTests : IDisposable
             Assert.Equal(3, row.I("commentCount"));
             Assert.Equal(f.Clock.Now, row["lastActivityAt"]!.GetValue<DateTimeOffset>());
         }
-        Assert.Equal(work, ownRow.AsObject().ContainsKey("lastActivityActorName"));
-        if (work) Assert.Equal(Name(TestData.Pm), ownRow.S("lastActivityActorName"));
+        // My Work shows the Last activity cell from its shared activity fact.
+        Assert.Equal(work, ownRow["workActivity"] is not null);
+        if (work) Assert.Equal(Name(TestData.Pm), ownRow["workActivity"]!.S("actorName"));
         Assert.Equal(3, ownRow.I("commentCount")); Assert.Equal(f.Clock.Now, ownRow["lastActivityAt"]!.GetValue<DateTimeOffset>());
         StripActor(project); StripActor(workspace); StripActor(own);
         Assert.True(JsonNode.DeepEquals(offProject, project)); Assert.True(JsonNode.DeepEquals(offWorkspace, workspace)); Assert.True(JsonNode.DeepEquals(offWork, own));
@@ -92,11 +95,11 @@ public sealed class WorkActivityCommentsTests : IDisposable
         {
             var id = row!.G("id");
             var actor = f.Db(db => db.ActivityLog.Where(a => a.ItemType == ItemType.Task && a.ItemId == id).OrderByDescending(a => a.OccurredAt).ThenByDescending(a => a.Id).Select(a => a.ActorUserId).First());
-            Assert.Equal(f.Db(db => db.Users.Where(u => u.Id == actor).Select(u => u.DisplayName).First()), row.S("lastActivityActorName"));
+            Assert.Equal(f.Db(db => db.Users.Where(u => u.Id == actor).Select(u => u.DisplayName).First()), row["workActivity"]!.S("actorName"));
             Assert.Equal(1, row.I("commentCount"));
         }
         var fromTaskRoute = await Get($"/api/v1/tasks?projects={p.Id}&status=Complete&assigneeId={alex}&sort=completed:desc");
-        Assert.Equal(completed.S("lastActivityActorName"), Row(fromTaskRoute, done.G("id")).S("lastActivityActorName"));
+        Assert.Equal(completed["workActivity"]!.S("actorName"), Row(fromTaskRoute, done.G("id")).S("lastActivityActorName"));
         var personView = await Get($"/api/v1/me/work?userId={alex}", TestData.Pm);
         Assert.True(personView["readOnly"]!.GetValue<bool>());
         Assert.Equal(before, Stored());

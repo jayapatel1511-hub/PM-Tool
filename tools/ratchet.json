@@ -2,7 +2,7 @@
   "counters": {
     "anonymous_objects": {
       "ratchet": true,
-      "value": 211
+      "value": 320
     },
     "api_helpers_without_type": {
       "ratchet": true,
@@ -18,7 +18,7 @@
     },
     "html_tables": {
       "ratchet": true,
-      "value": 49
+      "value": 63
     },
     "load_percentage_literals": {
       "ratchet": true,
@@ -26,11 +26,11 @@
     },
     "page_permission_derivations": {
       "ratchet": true,
-      "value": 2
+      "value": 4
     },
     "runtime_text_keys": {
       "ratchet": true,
-      "value": 230
+      "value": 386
     },
     "task_object_handlers": {
       "ratchet": true,
@@ -134,5 +134,8 @@
       "client": "Partial project scope; spare capacity is unknown",
       "server": "Partial project scope"
     }
+  },
+  "notes": {
+    "053-D24": "anonymous_objects 211, runtime_text_keys 230, html_tables 49 and page_permission_derivations 2 at the 039-051 release candidate (ac2fa894) rose with the packet 052/053 build. Raised to the measured values under decision 053-D24; 053 S50 restores them before any 052/053 flag goes on in pilot."
   }
 }

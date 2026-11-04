@@ -115,7 +115,7 @@ public sealed class TemplateRiskSeedTests : IDisposable
         await t.SetFlag("register_screens", true); var template = await t.New(); var before = t.State();
         await t.Save(template, body => body["risks"] = JsonSerializer.SerializeToNode(new[] { new { @ref = "bad", title = "Synthetic", probability, impact } }), expect: 400);
         Assert.Equal(before, t.State());
-        await t.Save(template, who: TestData.Pm, expect: 403); Assert.Equal(before, t.State());
+        await t.Save(template, who: TestData.Alex, expect: 403); Assert.Equal(before, t.State()); // a System PM may manage templates (§8.5.1, checkpoint 33)
         await t.Save(template, body => body["rowVersion"] = template.I("rowVersion") - 1, expect: 409); Assert.Equal(before, t.State());
     }
 

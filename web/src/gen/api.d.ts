@@ -711,6 +711,142 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/dateReasons": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReferenceRow"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["JsonElement"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReferenceRow"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/dateReasons/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["JsonElement"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReferenceRow"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/api/v1/admin/dateReasons/{id}/usage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReferenceUsage"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/decisionCategories": {
         parameters: {
             query?: never;
@@ -10928,6 +11064,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{id}/milestones/date-reasons": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DateReasonSummary"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{id}/milestones/deleted": {
         parameters: {
             query?: never;
@@ -17361,6 +17534,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/tasks/bulk/commands/{commandId}/undo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    commandId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TaskBulkCommandResult"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/tasks/bulk/preview": {
         parameters: {
             query?: never;
@@ -21017,6 +21227,8 @@ export interface components {
         };
         ChangeDateBody: {
             cascadeDeliverables: null | boolean;
+            /** Format: uuid */
+            dateReasonCategoryId?: null | string;
             dryRun: null | boolean;
             includeTasks: null | boolean;
             /** Format: date */
@@ -22032,6 +22244,32 @@ export interface components {
             inconsistent: components["schemas"]["DeliverableLeftBehind"][];
             milestone: components["schemas"]["DateMove"];
             tasks: components["schemas"]["TaskShift"][];
+        };
+        DateReasonChoice: {
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+            name: string;
+            /** Format: int32 */
+            sortOrder: number;
+        };
+        DateReasonCount: {
+            activityCategory: string;
+            /** Format: uuid */
+            categoryId: string;
+            /** Format: int32 */
+            count: number;
+            isActive: boolean;
+            name: string;
+        };
+        DateReasonSummary: {
+            /** Format: int32 */
+            moves: number;
+            /** Format: int32 */
+            notRecorded: number;
+            /** Format: uuid */
+            projectId: string;
+            reasons: components["schemas"]["DateReasonCount"][];
         };
         DateReviewView: {
             deliverables: components["schemas"]["DeliverableRow"][];
@@ -27789,6 +28027,7 @@ export interface components {
         };
         ReferenceView: {
             clients: components["schemas"]["ReferenceClient"][];
+            dateReasons?: null | components["schemas"]["DateReasonChoice"][];
             deliverableTypes: components["schemas"]["ReferenceDeliverableType"][];
             disciplines: components["schemas"]["ReferenceDiscipline"][];
             issuePurposes?: null | components["schemas"]["ReferenceIssuePurpose"][];

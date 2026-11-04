@@ -11,6 +11,7 @@ import { fmtDate, fmtTime } from '@/lib/format'
 import { t , runtimeText } from '@/lib/i18n'
 import { useItemPanel } from '@/components/hub/panel-host'
 import { useCurrentProject } from './ProjectLayout'
+import { isDateReasonTag, useDateReasons } from '@/components/hub/date-reason'
 import { ExportMenu } from '@/components/hub/export'
 import { PeoplePicker } from '@/components/hub/people'
 
@@ -31,6 +32,7 @@ export function ProjectActivityTab() {
   const params = { from: sp.get('from') ?? undefined, to: sp.get('to') ?? undefined, itemType: sp.get('itemType') ?? undefined, category: sp.get('category') ?? undefined,
     disciplineId: sp.get('disciplineId') ?? undefined, importantOnly: sp.get('importantOnly') === 'true', actorId: sp.get('actorId') ?? undefined }
   const page = Number(sp.get('page') ?? 1)
+  const dateReasons = useDateReasons().all
   const q = useQuery({ queryKey: ['p', p.id, 'activity', params, page], queryFn: () => typedRequest('get', '/api/v1/projects/{id}/activity', { params: { id: p.id }, query: { ...params, page, pageSize: 50 } }) })
   // Every row of an actor-filtered page carries that person's name, so the picker and the token can show it.
   const actorName = params.actorId ? q.data?.items.find((r) => r.actorId === params.actorId)?.actorName : undefined
@@ -38,7 +40,7 @@ export function ProjectActivityTab() {
     ['from', t('common.from'), params.from && fmtDate(params.from)],
     ['to', t('common.to'), params.to && fmtDate(params.to)],
     ['itemType', t('common.item'), params.itemType && runtimeText(`itemType.${params.itemType}`)],
-    ['category', t('common.action'), params.category && runtimeText(`category.${params.category}`)],
+    ['category', t('common.action'), params.category && (isDateReasonTag(params.category) ? dateReasons.find(reason => `dateReason:${reason.id}` === params.category)?.name ?? t('dateReason.summary') : runtimeText(`category.${params.category}`))],
     ['disciplineId', t('common.discipline'), p.disciplines.find((d) => d.id === params.disciplineId)?.name],
     ['importantOnly', t('activity.important'), t('common.yes')],
     ['actorId', t('activity.actor'), actorName],

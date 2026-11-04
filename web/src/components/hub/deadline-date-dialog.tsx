@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { ErrorBanner, Field, Loading } from '@/components/hub/common'
+import { DateReasonSelect, useDateReasons } from '@/components/hub/date-reason'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -28,17 +29,17 @@ export function DeadlineDateDialog({ source, initialDate, projectIds, onClose, o
       query: { dueDate: date, rowVersion: source.rowVersion, projectIds } }) })
   const current = !preview.error && preview.data?.source.id === source.id && preview.data.source.rowVersion === source.rowVersion && preview.data.dueDate === date ? preview.data : undefined
   const needsReason = source.needsReason || current?.source.needsReason === true
+  const [category, setCategory] = useState(''), needsWhy = useDateReasons().required && source.sourceType !== 'Task' && !!source.dueDate // FR-SCR-65
   const save = async () => {
-    if (!current || !current.source.canMove || pending || uncertain || needsReason && !reason.trim()) return
+    if (!current || !current.source.canMove || pending || uncertain || needsReason && !reason.trim() || needsWhy && !category) return
     setPending(true); setError(null)
     try {
       if (source.sourceType === 'Task') await typedRequest('patch', '/api/v1/tasks/{id}', { params: { id: source.id }, body: { dueDate: date, reason: reason || undefined }, ifMatch: source.rowVersion })
-      else if (source.sourceType === 'Deliverable') await typedRequest('patch', '/api/v1/deliverables/{id}', { params: { id: source.id }, body: { dueDate: date, reason: reason || undefined }, ifMatch: source.rowVersion })
+      else if (source.sourceType === 'Deliverable') await typedRequest('patch', '/api/v1/deliverables/{id}', { params: { id: source.id }, body: { dueDate: date, reason: reason || undefined, ...(category ? { dateReasonCategoryId: category } : {}) }, ifMatch: source.rowVersion })
       else if (source.sourceType === 'Milestone') await typedRequest('post', '/api/v1/milestones/{id}/change-date', { params: { id: source.id },
-        body: { newDate: date, reason: reason || null, cascadeDeliverables: false, includeTasks: false, dryRun: false, rowVersion: source.rowVersion } })
+        body: { newDate: date, reason: reason || null, cascadeDeliverables: false, includeTasks: false, dryRun: false, rowVersion: source.rowVersion, ...(category ? { dateReasonCategoryId: category } : {}) } })
       else throw new Error(t('calendarScreen.cannotMove'))
       await invalidateChange(qc, source.sourceType, source.projectId, source.id)
-      await qc.invalidateQueries({ queryKey: ['calendar-screen'] }); await qc.invalidateQueries({ queryKey: ['calendar'] })
       toast.success(t('calendarScreen.saved', { key: source.key })); onSaved(date)
     } catch (failure) {
       setError(failure)
@@ -61,6 +62,7 @@ export function DeadlineDateDialog({ source, initialDate, projectIds, onClose, o
           {current.context?.availability?.map(item => <p className="text-warn" key={item.date}>{fmtDate(item.date)}: {item.message}{item.nextAvailableDate ? ` · ${fmtDate(item.nextAvailableDate)}` : ''}</p>)}
           {current.milestone?.inconsistent.map(item => <p className="text-warn" key={item.key}>{t('calendarScreen.childAfter', { key: item.key, date: item.dueDate ? fmtDate(item.dueDate) : '—' })}</p>)}
         </div>}
+        {needsWhy && <DateReasonSelect id="calendar-move-why" value={category} onChange={setCategory} />}
         <Field label={t('calendarScreen.reason')} htmlFor="calendar-move-reason" optional={!needsReason}>
           <Textarea id="calendar-move-reason" value={reason} disabled={pending} onChange={event => setReason(event.target.value)} />
         </Field>
@@ -69,7 +71,7 @@ export function DeadlineDateDialog({ source, initialDate, projectIds, onClose, o
       <DialogFooter>
         <Button variant="outline" disabled={pending} onClick={onClose}>{t('common.cancel')}</Button>
         {(uncertain || preview.error instanceof ApiError && preview.error.status === 409) && <Button variant="outline" disabled={pending} onClick={async () => { setPending(true); try { await onReload() } finally { setPending(false) } }}>{t('calendarScreen.reloadRestart')}</Button>}
-        <Button disabled={pending || uncertain || !current?.source.canMove || !date || date === source.dueDate || needsReason && !reason.trim()} onClick={save}>{t('calendarScreen.confirm')}</Button>
+        <Button disabled={pending || uncertain || !current?.source.canMove || !date || date === source.dueDate || needsReason && !reason.trim() || needsWhy && !category} onClick={save}>{t('calendarScreen.confirm')}</Button>
       </DialogFooter>
     </DialogContent>
   </Dialog>

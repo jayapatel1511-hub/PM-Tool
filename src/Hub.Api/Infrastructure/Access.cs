@@ -55,5 +55,12 @@ public sealed class Access(HubDb db, CurrentUser me)
 
     public IQueryable<Guid> VisibleProjectIds() => VisibleProjects().Select(p => p.Id);
 
+    /// Projects the caller belongs to (active member or PM), the export scope of a Standard User (Permissions.ExportReportProject).
+    public IQueryable<Project> MemberProjects()
+    {
+        var uid = me.Id;
+        return db.Projects.Where(p => p.ProjectManagerId == uid || db.ProjectMembers.Any(m => m.ProjectId == p.Id && m.UserId == uid && m.RemovedAt == null));
+    }
+
     public async Task<HashSet<Guid>> VisibleProjectIdSet() => [.. await VisibleProjectIds().ToListAsync()];
 }

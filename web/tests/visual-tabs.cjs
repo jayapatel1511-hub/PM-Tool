@@ -151,10 +151,10 @@ const rows = [projectRow({ id: projectId, projectNumber: 'SYN-101', name: 'Synth
     assert.equal(portfolioHref.searchParams.has('homeProjects'), false)
     await page.locator('[data-area-tabs]').getByRole('link', { name: 'Boards', exact: true }).click()
     await page.locator('[data-project-board]').waitFor()
-    assert.equal(assertScalarScope(page.url()).searchParams.get('view'), 'board')
+    assert.equal(assertScalarScope(page.url()).searchParams.get('layout'), 'board')
     assertScalarScope(await page.locator('[data-area-tabs]').getByRole('link', { name: 'List', exact: true }).getAttribute('href'))
     await page.locator('[data-area-tabs]').getByRole('link', { name: 'List', exact: true }).click()
-    await page.waitForURL(url => !url.searchParams.has('view'))
+    await page.waitForURL(url => !url.searchParams.has('layout'))
     assertScalarScope(page.url())
     assert.ok(projectRequests.some(url => url.searchParams.get('HomePreset') === 'ProjectManager' && url.searchParams.get('HomeProjects') === 'mine'), 'supported scalar scope reaches the project reader')
     homeOverview = false; shownProjects = rows
@@ -166,7 +166,7 @@ const rows = [projectRow({ id: projectId, projectNumber: 'SYN-101', name: 'Synth
 
     await page.goto(`${base}/projects?status=Active&mine=false&ids=${projectId}&computedHealth=Green&view=board`); await page.locator('[data-area-tabs]').waitFor()
     assert.equal(await page.locator('[data-area-tabs] a[aria-current="page"]').textContent(), 'Boards')
-    assert.deepEqual([...new URL(await page.locator('[data-area-tabs] a').nth(1).getAttribute('href'), base).searchParams].sort(), [...new URL(`/projects?status=Active&mine=false&ids=${projectId}&computedHealth=Green&view=board`, base).searchParams].sort())
+    assert.deepEqual([...new URL(await page.locator('[data-area-tabs] a').nth(1).getAttribute('href'), base).searchParams].sort(), [...new URL(`/projects?status=Active&mine=false&ids=${projectId}&computedHealth=Green&layout=board`, base).searchParams].sort())
     await page.locator('[data-project-board]').waitFor()
     await page.goto(`${base}/projects?status=Active&mine=false&ids=${projectId}`); assert.equal(await page.locator('[data-area-tabs] a[aria-current="page"]').textContent(), 'List')
     await page.goto(`${base}/projects?ids=${projectId}&starred=true&priority=High`)
@@ -176,7 +176,7 @@ const rows = [projectRow({ id: projectId, projectNumber: 'SYN-101', name: 'Synth
     assert.equal(new URL(page.url()).pathname, '/portfolio')
     assert.equal(await page.locator('[data-area-tabs] a[aria-current="page"]').textContent(), 'Portfolio')
     assert.ok(portfolioRequests.some(url => url.searchParams.get('ids') === projectId && url.searchParams.get('starred') === 'true' && url.searchParams.get('priority') === 'High'), 'Portfolio receives project filters')
-    await page.getByRole('link', { name: 'Boards', exact: true }).click(); await page.waitForURL(/\/projects\?.*view=board/)
+    await page.getByRole('link', { name: 'Boards', exact: true }).click(); await page.waitForURL(/\/projects\?.*layout=board/)
 
     shownProjects = []
     await page.goto(`${base}/projects?view=board&q=nothing`)
@@ -186,7 +186,7 @@ const rows = [projectRow({ id: projectId, projectNumber: 'SYN-101', name: 'Synth
     await page.getByText('No projects to show', { exact: true }).waitFor()
     await page.getByRole('button', { name: 'Clear filters', exact: true }).first().click()
     await page.waitForFunction(() => !['clientId', 'pmId', 'phaseId', 'projectTypeId', 'submissionWithinDays', 'starred', 'priority'].some(key => new URL(location.href).searchParams.has(key)))
-    assert.equal(new URL(page.url()).searchParams.get('view'), 'board', 'clear transferred filters retains board layout')
+    assert.equal(new URL(page.url()).searchParams.get('view'), 'board', 'clear transferred filters retains the (legacy) board layout link')
     holdProjects = true
     await page.goto(`${base}/projects?view=board&q=pending`)
     await page.getByRole('status', { name: 'Loading' }).waitFor()

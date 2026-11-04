@@ -163,6 +163,10 @@ public static class Permissions
     public static Allow ViewWorkload(Actor a) => a.Admin || a.Executive || a.Supervisor || a.SystemPM ? Allow.Yes : Allow.No("perm.workload");
     public static Allow ViewStaff(Actor a) => a.Admin || a.Executive || a.Supervisor ? Allow.Yes : Allow.No("perm.staff");
     public static bool ViewAllStaff(Actor a) => a.Admin || a.Executive;
+    /// Export reports (§8.5.1): a Standard User exports only projects they belong to (active member or PM); every system role exports all it can view.
+    public static bool ExportAllReportProjects(Actor a) => a.Admin || a.Executive || a.Supervisor || a.SystemPM || a.Has(SystemRole.ReadOnly);
+    public static Allow ExportReportProject(Actor a, ProjectContext p) =>
+        ExportAllReportProjects(a) || p.PrimaryPmId == a.Id || p.MemberRoles.Count > 0 ? Allow.Yes : Allow.No("perm.report_export_member");
     public static Allow Administer(Actor a) => a.Admin ? Allow.Yes : Allow.No("perm.admin");
     public static Allow ManageTemplates(Actor a, bool templateEditor) => a.Admin || (!a.ReadOnly && (a.SystemPM || templateEditor)) ? Allow.Yes : Allow.No("perm.templates");
 

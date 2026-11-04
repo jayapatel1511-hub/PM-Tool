@@ -223,12 +223,14 @@ public sealed class PermissionOperationExplanationTests
     }
 
     [Fact]
-    public void Pending_report_policy_and_successful_role_factors_never_become_whole_command_authority()
+    public void Report_export_policy_and_successful_role_factors_never_become_whole_command_authority()
     {
         var report = Operation("S21.export", "system-Admin", membership: "none");
-        Assert.Equal("PolicyPending", report.DecisionKind);
+        Assert.Equal("Conditional", report.DecisionKind);
+        Assert.True(Factor(report, nameof(Permissions.ExportReportProject)).Outcome.Allowed);
         Assert.Contains(report.Requirements, requirement => requirement.Key == "adminRole.requirement.report-policy"
             && requirement.State == "RequiresLiveCheck");
+        Assert.Equal("NotEligible", Operation("S21.export", membership: "none").DecisionKind);
         var incoming = Operation("C06.record-incoming");
         Assert.True(Factor(incoming, nameof(Permissions.RecordExternalReview)).Outcome.Allowed);
         Assert.Equal("Conditional", incoming.DecisionKind);

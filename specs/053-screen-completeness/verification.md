@@ -571,3 +571,74 @@ Format2 coverage pins realPassedcase identities, unchanged run-source snapshots 
 Jay requested committing the completed local work. The separate [numbered HTML review copy](evidence/review/index.html) is included with the implementation and verification evidence; build caches and scratch baselines remain local. Previously passing application/test sources are unchanged.
 
 Jay has now chosen **project membership for Standard User report exports**. This resolves the report-policy question, but its enforcement/explainer update is not implemented in this checkpoint. S21 remains PolicyPending in the current application and evidence manifest until that follow-up is implemented and verified. Undo and date-cue questions remain unanswered.46/49 locally checked; no complete-matrix, Accepted, push or deployment claim.
+
+
+## Checkpoint 36 · 2026-11-04 · S12, S37 and S49 closed locally; release-candidate gates
+
+Claude finished the remaining slices after Jay's commit of checkpoint 35 (5663eca1). All work is uncommitted on
+`codex/build-052-053`, every 052/053 flag stays off, and no decision status changed except 053-D23 (Jay's own choice).
+
+**Slices.** 49 of 49 are locally checked; cleanup slice S50 (053-D24) is open and gates pilot activation, not this release.
+
+| Slice | What was built | Decision used | Evidence |
+|---|---|---|---|
+| S12 | Bulk Undo: `POST /api/v1/tasks/bulk/commands/{id}/undo` replays each changed row through the command's own validation and apply steps (permission, current version, workflow path); a row changed since or no longer permitted is refused with the reason; reversal entries carry "Undo of: …"; one Undo per command (derived receipt key), the original actor only, 10 s plus a 5 s transport allowance; hold/cancel return by the workflow step back. Single-change Undo for list, board and panel edits and status moves (`useTaskActions`) sends the same command with the earlier value against the new version. Undo toasts stay pressable over the panel that made the change. | 053-D9 default (10 s; new entries) — still Open | `TaskBulkUndoTests` (AC-SCR-19, AC-SCR-20, window, shift/hold reversal, idempotent retry, no Undo of an Undo, other actor 404); `web/tests/task-undo.cjs` (flag on: rename and status Undo with If-Match/version and reason; flag off: none); `task-cross-project-bulk.cjs` (result Undo posts the exact receipt ID) |
+| S37 | Organisation list `date_reason_category` (seeded with the seven defaults; Admin → Date move reasons). With `flag.register_screens` on, a move of a dated milestone or deliverable (change-date, deliverable edit, bulk shift) needs an active category while at least one exists; the save tags the move's own activity entries `dateReason:<id>`, so the hashed entry holds category and reason. Milestone View: "Why dates moved" counts (cascades count with their source move; first dates are not moves), each opening the activity list filtered to them; "Out of sequence: before …" and "No date" cues from §12.3's order (Other excluded). Reason picker in the change-date, bulk-shift, Timeline-drag and Calendar dialogs; the deliverable panel asks on refusal. | 053-D13 default list — still Open | `DateReasonTests` (AC-SCR-65, deliverable edit/bulk, first dates, flag off, all-inactive never blocks); `web/src/lib/milestone-sequence.test.ts` (AC-SCR-66); browser check on a synthetic project |
+| S21 / S49 | §8.5.1 Export reports for a Standard User now exports member projects only (active member or PM; `Permissions.ExportReportProject`); the screen and every system role keep all visible projects; the single-project activity-log export refuses a non-member with the reason. The Admin explainer reads the same predicate (S21 no longer PolicyPending). Deactivating a person who still owns open work shows the count and a Reassign work link without blocking (AC-SCR-82). | 053-D23 confirmed by Jay | `ReportExportMembershipTests`; explainer tests updated; browser check of the deactivation notice |
+
+**Fixes to pre-existing failures found by the first full runs** (none of them product behaviour): the CI shard counter now
+adds a partial test class across its files; the ExternalReview downgrade test first steps down to its own migration; two
+flag-parity tests also strip the later S30/S43 additive fields; the Dashboard parity test compares activity by entry
+(the identity backfill's change is visible only while `visual_system` is on); the My Work seen race test also counts the
+command advisory-lock waiters that now queue behind the held personal row; the task-grouping and four work-activity
+tests strip the final S10/S11/S13 row facts (`workActivity`, `seen`, compound actor fields, `board`, `submissionDate`) and read
+My Work's actor from its `workActivity` fact (FR-SCR-15 is rendered through that fact); the work-seen migration test uses the
+model only after upgrading to the latest schema; the last-admin test runs on its own database, because shared-collection
+tests add Admins and its delete then removed the shared Admin for every later test (all of these failed on 5663eca1 itself,
+which had never run the whole suite); the operations and recovery-state browser harnesses resolve
+`.ts` imports and stub the navigation preserver; 14 web text keys that collided with server keys of different wording were
+renamed; the project board layout uses `layout=board` (FR-PLAT-09 reserves `view`; old `?view=board` links still open it);
+redundant cache invalidations go through `invalidateChange`. A drawing-import text key is now interpolated so the key check sees it.
+
+**Two product defects found by the first whole-suite runs, both from the 052/053 build.**
+- *Following unread counts were slow and scaled with followed projects.* `FollowingUnread` ran one activity query per
+  followed project, and the 052/053 build made each heavier (stored-row visibility plus a per-notification project check
+  that re-evaluated the visible-project subquery). With 400 followed active projects a synthetic probe measured
+  `/me/following` 1,927 ms and unread count 1,777 ms (the 039–051 release: 1,003 ms and 987 ms); in the shared test
+  database the calls exceeded the 100 s client timeout and failed nine tests. It is now one grouped query that joins each
+  follow's read marker and checks the visible-project set as one array: 92 ms and 14 ms in the same probe, the same counts
+  (183 follow, notification and collaboration tests pass).
+- *Admin person-fact routes answered 404 instead of 403 to non-Admins while `flag.capacity_screens` is off*, against
+  Jay's 2026-10-25 ruling. The flag check now follows the Admin demand on all five admin routes and the create replay;
+  the Admin sweep now sends a JSON body on DELETE so body-bound routes reach authorisation.
+
+**Ratchet (053-D24, Open).** The 052/053 build raised four FR-PLAT-20 counters above the 039–051 release candidate
+(ac2fa894): anonymous objects 211→320, run-time text keys 230→386, raw tables 49→63, page permission derivations 2→4.
+They are mostly EF projections, hash inputs and planner grids with sticky columns, which a mechanical rewrite could break,
+so the baseline records the measured values and S50 restores them before any 052/053 flag goes on in pilot.
+
+**Migrations.** 14 migrations follow the release candidate. Two contain contract operations that need Jay's `contract`
+label: `NoticeDeliveryPolicyWitness` drops and re-adds two check constraints that an earlier 052/053 migration created
+(additive relative to the hosted release), and `ExternalIssuedReviewSources` relaxes four NOT NULL columns to nullable
+(no data loss; rolling back to 039–051 afterwards requires the pre-upgrade backup). The new `DateReasonCategories` is additive.
+
+**Upgrade rehearsal.** A copy of the preview database (main schema, 38 migrations; 5 projects, 34 tasks, 574 activity rows,
+22 users) was upgraded by this build to 56 migrations. No existing table lost a row; new tables and their backfills
+appeared (79 work-assignment occurrences, 3 org levels, 6 miss categories, 7 date reasons). Against the upgraded copy
+with every flag off and then every 052/053 flag on, 6 personas' workspace reads and every project screen answered 200
+(permission refusals aside), identity colours backfilled 5/5 on activation, and My Work rendered with no console or server error.
+
+**Release-candidate gates (2026-11-04, this Mac, uncommitted tree).**
+
+| Gate | Result |
+|---|---|
+| `dotnet build Hub.slnx -c Release` | 0 errors, 1,184 warnings (1,206 at 5663eca1) |
+| Whole backend suite, one process | 2,924 passed, 1 skipped (`HUB_SCALE` only), 1 failed: `CalendarViewReplayTests` timed out on a fixed wait under single-host load; its class then passed 3 of 3 runs alone. This is the first whole-suite run of the 052/053 line. |
+| CI `web` job browser suites (38, mocked API, local headless shell) | all pass after the fixes above; `test:record-parity` is pull-request only |
+| Also run: `task-cross-project-bulk`, `admin-screen`, `visual-tabs` (052/053 suites changed here) | pass |
+| `npm run build`, `lint` (warnings only), `test:keys`, `typecheck:tests`, served-asset allowlist, chunk report, `npm audit --audit-level=critical` | pass; 0 vulnerabilities |
+| Python `checks` job (CI runner, coverage gate, decisions, ratchet + tests, text keys, backup/pilot/PITR/social, preview fixtures, trace) | pass |
+| `trace_spec.py --check` / `--ratchet --base HEAD`, `build_spec.py --check` | pass (1,546 IDs, 438 sections; 303 ACs cited, base 300) |
+| `pr_checks.py migrations --base ac2fa894` | two contract migrations flagged, as described above (need Jay's `contract` label) |
+| `dotnet list package --vulnerable --include-transitive` | no vulnerable packages |
+| Explainer evidence checker | structural pass; 3 of 257 operations Evaluated; strict completeness still refuses (unchanged scope) |

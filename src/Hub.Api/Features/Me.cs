@@ -37,7 +37,8 @@ public static class MeEndpoints
         IReadOnlyList<ReferenceDeliverableType> DeliverableTypes, IReadOnlyList<ReferencePhase> Phases, IReadOnlyList<ReferenceProjectType> ProjectTypes, ReferenceLimits Limits,
         [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<ReferenceIssuePurpose>? IssuePurposes = null,
         [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<ReferenceIssueReturnCode>? IssueReturnCodes = null,
-        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<IssueRootCauseChoice>? IssueRootCauses = null);
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<IssueRootCauseChoice>? IssueRootCauses = null,
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] IReadOnlyList<DateReasonChoice>? DateReasons = null);
 
     /// One person with the facts the picker orders by. Built with an initializer so the ordering can still be translated to SQL.
     sealed record PickerMatch { public required AppUser User { get; init; } public bool OnProject { get; init; } public bool Direct { get; init; } }
@@ -130,7 +131,8 @@ public static class MeEndpoints
             new ReferenceLimits(OpenRoleLimits.Label),
             register ? await db.IssuePurposes.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Name).Select(x => new ReferenceIssuePurpose(x.Id, x.Name, x.IsActive, x.SortOrder)).ToListAsync() : null,
             register ? await db.IssueReturnCodes.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Name).Select(x => new ReferenceIssueReturnCode(x.Id, x.Code, x.Name, x.IsActive, x.SortOrder)).ToListAsync() : null,
-            register ? await db.IssueRootCauseCategories.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Name).ThenBy(x => x.Id).Select(x => new IssueRootCauseChoice(x.Id, x.Name, x.IsActive, x.SortOrder)).ToListAsync() : null));
+            register ? await db.IssueRootCauseCategories.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Name).ThenBy(x => x.Id).Select(x => new IssueRootCauseChoice(x.Id, x.Name, x.IsActive, x.SortOrder)).ToListAsync() : null,
+            register ? await db.DateReasonCategories.AsNoTracking().OrderBy(x => x.SortOrder).ThenBy(x => x.Name).ThenBy(x => x.Id).Select(x => new DateReasonChoice(x.Id, x.Name, x.IsActive, x.SortOrder)).ToListAsync() : null));
         });
     }
 }

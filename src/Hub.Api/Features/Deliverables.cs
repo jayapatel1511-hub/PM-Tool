@@ -335,6 +335,9 @@ public static partial class DeliverableEndpoints
         if (patch.Has("revision")) d.Revision = Check.Optional(patch.Str("revision"), "revision", 50);
         if (registerEnabled && patch.Has("clientDrawingNumber")) d.ClientDrawingNumber = DeliverableNumberingEndpoints.Number(patch.Str("clientDrawingNumber"));
         if (patch.Has("requiresReview")) d.RequiresReview = patch.Bool("requiresReview") ?? true;
+        if (patch.Has("dueDate") && d.DueDate is not null && patch.Date("dueDate") != d.DueDate
+            || patch.Has("startDate") && d.StartDate is not null && patch.Date("startDate") != d.StartDate)
+            await DateReasons.Require(db, store, patch.Id("dateReasonCategoryId")); // FR-SCR-65: a move, not a first date
         if (patch.Has("startDate")) d.StartDate = patch.Date("startDate");
         if (patch.Has("dueDate")) d.DueDate = patch.Date("dueDate");
         Milestone? ms = null;
@@ -513,7 +516,7 @@ public static partial class DeliverableEndpoints
         var items = await db.Deliverables.Where(d => d.ProjectId == id && body.Ids.Contains(d.Id)).ToListAsync();
         var skipped = new List<DeliverableBulkSkipped>();
         var updated = 0;
-        if (body.Operation == "shiftDueDates") db.Audit.Reason = Check.Reason(body.Reason); // G-09 bulk date shift
+        if (body.Operation == "shiftDueDates") { db.Audit.Reason = Check.Reason(body.Reason); await DateReasons.Require(db, store, p2.Id("dateReasonCategoryId")); } // G-09, FR-SCR-65
         Milestone? ms = null;
         if (body.Operation == "setMilestone" && p2.Id("milestoneId") is { } mid) ms = await db.Milestones.FirstOrDefaultAsync(m => m.Id == mid && m.ProjectId == id) ?? throw ApiException.Invalid("milestoneId", "error.not_found");
         foreach (var d in items)

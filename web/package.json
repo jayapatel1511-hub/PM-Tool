@@ -51,7 +51,7 @@
     "test:verifiable-records-real": "node tests/verifiable-records-real.cjs",
     "test:schema-workflows": "node tests/schema-workflows.cjs",
     "gen": "openapi-typescript src/gen/openapi.json -o src/gen/api.d.ts",
-    "test:keys": "node --test src/lib/keys.test.ts src/lib/page-mode.test.ts src/lib/drafts.test.ts",
+    "test:keys": "node --test src/lib/keys.test.ts src/lib/page-mode.test.ts src/lib/drafts.test.ts src/lib/milestone-sequence.test.ts",
     "typecheck:tests": "tsc -p tests/tsconfig.json",
     "test:registrations": "node tests/registrations.cjs",
     "test:browser-verification": "node tests/registrations-browser.cjs && node tests/route-splitting.cjs && node tests/live-browser.cjs",
@@ -74,7 +74,8 @@
     "test:task-sections": "node tests/task-sections.cjs",
     "test:task-contribution": "node tests/task-contribution.cjs",
     "test:coordination-consequence-agenda": "node tests/coordination-consequence-agenda.cjs",
-    "test:external-review": "node tests/external-review.cjs"
+    "test:external-review": "node tests/external-review.cjs",
+    "test:task-undo": "node tests/task-undo.cjs"
   },
   "dependencies": {
     "@azure/msal-browser": "^5.23.0",

@@ -242,7 +242,7 @@ public sealed class TaskGroupingTests : IDisposable
         await Flag("small_ux", true); var path = ProjectPath(p) + "?sort=key:asc&pageSize=1&page=2";
         var before = await Get(path); Assert.True(JsonNode.DeepEquals(before, await Get(path + "&group=not-a-group")));
         Assert.Null(before["groups"]); Assert.Null(before["asOf"]);
-        Assert.All(before["items"]!.AsArray(), row => Assert.False(row!.AsObject().ContainsKey("board")));
+        Assert.All(before["items"]!.AsArray(), row => Assert.False(row!.AsObject().ContainsKey("board") || row.AsObject().ContainsKey("workActivity")));
         void RemoveAddedFacts(JsonNode page)
         {
             Assert.NotEmpty(page["items"]!.AsArray());
@@ -255,6 +255,8 @@ public sealed class TaskGroupingTests : IDisposable
                 Assert.Equal("Known", board["disciplineLead"]!.S("state")); Assert.Equal(data.User(TestData.Marc), board["disciplineLead"]!.G("id")); Assert.Equal("Marc Dubois", board["disciplineLead"]!.S("name"));
                 Assert.Equal("Known", board["projectManager"]!.S("state")); Assert.Equal(data.User(TestData.Pm), board["projectManager"]!.G("id")); Assert.Equal("Priya Nair", board["projectManager"]!.S("name"));
                 Assert.True(row.AsObject().Remove("board"));
+                // S10 work activity and seen state ride on the same flag (FR-SCR-15, FR-SCR-16).
+                foreach (var key in new[] { "workActivity", "seen", "lastActivityActorId", "lastActivityActorType", "lastActivityEventAt" }) row.AsObject().Remove(key);
             }
         }
         await Flag("work_screens", true); var ungrouped = await Get(path + "&group=none"); RemoveAddedFacts(ungrouped);

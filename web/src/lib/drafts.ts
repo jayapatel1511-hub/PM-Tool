@@ -92,8 +92,9 @@ export function forgetDrafts(user: string) {
 /** FR-SAV-06: with the flag on (the page frame sets this mark), the Reload of the build-update notice can be pressed while a dialog or
  *  panel is open: a click on a notice neither falls through to the overlay nor closes what is open under it. */
 export const GUARD_TOASTS = 'data-guard-toasts'
-export const onToast = (target: EventTarget | null) =>
-  document.documentElement.hasAttribute(GUARD_TOASTS) && target instanceof Element && target.closest('[data-sonner-toaster]') != null
+export const onToast = (target: EventTarget | null) => target instanceof Element
+  && (document.documentElement.hasAttribute(GUARD_TOASTS) && target.closest('[data-sonner-toaster]') != null
+    || target.closest('[data-sonner-toast].hub-undo-toast') != null) // FR-SCR-20: Undo leaves the panel that made the change open
 
 // ---- The leave guard: forms holding typed input that nothing has saved ----
 

@@ -128,6 +128,8 @@ public static class PermissionExplanationCatalog
         new(nameof(Permissions.ViewWorkload), c => A(Permissions.ViewWorkload(c.Actor))),
         new(nameof(Permissions.ViewStaff), c => A(Permissions.ViewStaff(c.Actor))),
         new(nameof(Permissions.ViewAllStaff), c => B(Permissions.ViewAllStaff(c.Actor))),
+        new(nameof(Permissions.ExportAllReportProjects), c => B(Permissions.ExportAllReportProjects(c.Actor))),
+        new(nameof(Permissions.ExportReportProject), c => A(Permissions.ExportReportProject(c.Actor, c.Project))),
         new(nameof(Permissions.Administer), c => A(Permissions.Administer(c.Actor))),
         new(nameof(Permissions.ManageTemplates), c => A(Permissions.ManageTemplates(c.Actor, c.TemplateEditor))),
         new(nameof(Permissions.ActOnStaff), c => A(Permissions.ActOnStaff(c.Actor, c.Supervisor))),
@@ -565,8 +567,8 @@ public static class PermissionExplanationCatalog
         ], ProjectScope: false),
         new("S21", "8.5.1:Export reports", ["report-policy", "report-definition", "export-parity"],
         [
-            new("S21.export", "adminRole.operation.S21.export", [], Mode: "Context"),
-        ], ProjectScope: false, PolicyPending: true),
+            new("S21.export", "adminRole.operation.S21.export", [nameof(Permissions.ExportReportProject)]),
+        ], ProjectScope: true),
         new("S22", "8.5.1:Manage own notification preferences, project follow levels, and saved views", ["personal-owner", "personal-flags", "view", "replay"],
         [
             new("S22.notification-preferences", "adminRole.operation.S22.notification-preferences", [], Mode: "Context"),

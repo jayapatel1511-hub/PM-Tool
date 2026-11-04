@@ -43,7 +43,7 @@ export function LinkReferenceSummary({ context, focusKey }: { context?: Schemas[
   switch (state) {
     case 'NoDeliverable': message = t('linkReference.noDeliverable'); break
     case 'TargetChanged': message = t('linkReference.targetChanged'); break
-    case 'TargetUnavailable': message = t('linkReference.targetUnavailable'); break
+    case 'TargetUnavailable': message = t('linkReference.targetUnavailableNote'); break
     case 'CurrentNotRecorded': message = t('linkReference.currentNotRecorded'); break
     case 'Matches': case 'Different': message = comparable ? t('linkReference.comparison', { declared, current }) : t('linkReference.notRecorded'); break
     default: message = t('linkReference.notRecorded')

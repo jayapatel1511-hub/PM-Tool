@@ -25,7 +25,7 @@ type Register = components['schemas']['DeliverableRegisterInfo']
 
 export function ClientNumber({ value }: { value?: Register | null }) {
   return <span className="block"><span>{value?.clientDrawingNumber || <Missing />}</span>{value?.numberMatchesPattern === false &&
-    <span className="mt-1 block text-xs text-warn">{t('deliverableRegister.numberMismatch', { pattern: value.numberPattern ?? '' })}</span>}</span>
+    <span className="mt-1 block text-xs text-warn">{t('deliverableRegister.numberMismatchNote', { pattern: value.numberPattern ?? '' })}</span>}</span>
 }
 
 export function RecipientReturn({ code, label }: { code?: string | null; label?: string | null }) {

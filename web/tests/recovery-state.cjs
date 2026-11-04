@@ -39,6 +39,7 @@ const context = {
   useQueryClient: () => ({}),
   useMe: () => ({ id: 'alex', settings: { draftKeepDays: 7 } }),
   useFlag: () => true,
+  useFormNavigationPreserver: () => () => false, // outside a FormNavigationScope nothing preserves navigation
   useState: init => {
     const i = cursor++
     if (!(i in slots)) slots[i] = { value: typeof init === 'function' ? init() : init }

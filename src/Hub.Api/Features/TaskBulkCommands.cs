@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Hub.Api.Features;
 
-/// S12-A only: seven bounded task operations, one transaction and one immutable terminal receipt. No Undo engine.
+/// S12: seven bounded task operations, one transaction and one immutable terminal receipt, and its 10-second Undo (FR-SCR-20, 053-D9).
 public static class TaskBulkCommandEndpoints
 {
     public sealed class AtomicCommand { }
@@ -70,6 +70,7 @@ public static class TaskBulkCommandEndpoints
     {
         api.MapPost("/tasks/bulk/preview", Preview).WithMetadata(new AtomicCommand()).RequireFlag("work_screens");
         api.MapPost("/tasks/bulk/commands", Execute).WithMetadata(new AtomicCommand()).RequireFlag("work_screens");
+        api.MapPost("/tasks/bulk/commands/{commandId:guid}/undo", Undo).WithMetadata(new AtomicCommand()).RequireFlag("work_screens");
     }
 
     static TaskBulkIntent Envelope(TaskBulkIntent value)
@@ -136,27 +137,7 @@ public static class TaskBulkCommandEndpoints
                 // A new race/provider failure here aborts this entire transaction, never a task-only tracker reload.
                 await Http.CheckBodyVersion(db, task, plan.Intent.RowVersion);
                 db.Audit.Reason = intent.Reason;
-                switch (intent.Params)
-                {
-                    case TaskBulkAssignParameters assignment:
-                        await TaskEndpoints.AssignTo(db, plan.Project, task, assignment.AssigneeId, team, s);
-                        await notify.Send(NotificationEvents.TaskAssigned, assignment.AssigneeId, TaskEndpoints.Item(plan.Project, task),
-                            Text.Get("notify.task_assigned", await notify.ActorName(), task.Key, task.Name));
-                        break;
-                    case TaskBulkDueDateParameters:
-                    case TaskBulkShiftDatesParameters:
-                        if (task.DueDate != plan.After.DueDate) { if (task.DueDate is not null) task.DueDateChangeCount++; task.DueDate = plan.After.DueDate; task.OriginalDueDate ??= task.DueDate; }
-                        task.StartDate = plan.After.StartDate; task.OriginalStartDate ??= task.StartDate;
-                        await notify.Send(NotificationEvents.DueDateChanged, task.AssigneeId, TaskEndpoints.Item(plan.Project, task),
-                            Text.Get("notify.bulk_due", await notify.ActorName(), 1, plan.Project.ProjectNumber), intent.Reason);
-                        break;
-                    case TaskBulkPriorityParameters priority: task.Priority = priority.Priority; break;
-                    case TaskBulkDeliverableParameters: task.DeliverableId = plan.After.DeliverableId; task.MilestoneId = plan.After.MilestoneId; break;
-                    case TaskBulkHoldParameters:
-                    case TaskBulkCancelParameters:
-                        await TaskEndpoints.ApplyTransition(db, access, plan.Context, plan.Project, task, plan.After.Status, intent.Reason, null, null, s, clock, team, [], store: store); break;
-                }
-                if (intent.Params is not (TaskBulkHoldParameters or TaskBulkCancelParameters)) task.OriginalStartDate ??= task.StartDate;
+                await Apply(intent.Params, intent.Reason, plan, task, access, db, store, notify, team, s, clock);
                 task.LastActivityAt = clock.GetUtcNow(); tasks.Add(task.Id, task);
             }
             await db.SaveChangesAsync();
@@ -175,6 +156,145 @@ public static class TaskBulkCommandEndpoints
             return TypedResults.Ok(await Result(receipt, payload, access, db));
         }); }
         finally { db.Audit.CorrelationId = initialCorrelation; db.Audit.Reason = initialReason; }
+    }
+
+    /// One planned row through the same steps for a command and its Undo. Null parameters are Undo's transition back (hold/cancel).
+    static async Task Apply(TaskBulkParameters? parameters, string? reason, Plan plan, WorkTask task, Access access, HubDb db, SettingsStore store,
+        Notifier notify, TeamService team, OrgSettings s, TimeProvider clock)
+    {
+        switch (parameters)
+        {
+            case TaskBulkAssignParameters assignment:
+                await TaskEndpoints.AssignTo(db, plan.Project, task, assignment.AssigneeId, team, s);
+                await notify.Send(NotificationEvents.TaskAssigned, assignment.AssigneeId, TaskEndpoints.Item(plan.Project, task),
+                    Text.Get("notify.task_assigned", await notify.ActorName(), task.Key, task.Name));
+                break;
+            case TaskBulkDueDateParameters:
+            case TaskBulkShiftDatesParameters:
+                if (task.DueDate != plan.After.DueDate) { if (task.DueDate is not null) task.DueDateChangeCount++; task.DueDate = plan.After.DueDate; task.OriginalDueDate ??= task.DueDate; }
+                task.StartDate = plan.After.StartDate; task.OriginalStartDate ??= task.StartDate;
+                await notify.Send(NotificationEvents.DueDateChanged, task.AssigneeId, TaskEndpoints.Item(plan.Project, task),
+                    Text.Get("notify.bulk_due", await notify.ActorName(), 1, plan.Project.ProjectNumber), reason);
+                break;
+            case TaskBulkPriorityParameters priority: task.Priority = priority.Priority; break;
+            case TaskBulkDeliverableParameters: task.DeliverableId = plan.After.DeliverableId; task.MilestoneId = plan.After.MilestoneId; break;
+            case TaskBulkHoldParameters or TaskBulkCancelParameters or null:
+                await TaskEndpoints.ApplyTransition(db, access, plan.Context, plan.Project, task, plan.After.Status, reason, null, null, s, clock, team, [], store: store); break;
+        }
+        if (parameters is not (TaskBulkHoldParameters or TaskBulkCancelParameters or null)) task.OriginalStartDate ??= task.StartDate;
+    }
+
+    // ---------- Undo (FR-SCR-20, AC-SCR-20, 053-D9) ----------
+
+    public static readonly TimeSpan UndoWindow = TimeSpan.FromSeconds(10);
+    // ponytail: a 5 s transport allowance so a click at 9.9 s survives the round trip; the screen offers Undo for 10 s only.
+    static readonly TimeSpan UndoAllowance = TimeSpan.FromSeconds(5);
+    sealed record UndoIntent(Guid UndoOf);
+
+    /// One Undo per command: its receipt key derives from the command, so a retry returns the same result and a second Undo nothing new.
+    static Guid UndoRequestId(Guid commandId) => new(SHA256.HashData(Encoding.UTF8.GetBytes("task-bulk-undo:" + commandId.ToString("D")))[..16]);
+    static ReceiptRows Stored(TaskBulkCommandReceipt receipt) =>
+        JsonSerializer.Deserialize<ReceiptRows>(receipt.ResponseJson, JsonOpts.Web) ?? throw new InvalidOperationException("Invalid task bulk receipt.");
+
+    /// Each changed row goes back through the same validation (permission, current version, workflow path) and the same apply step.
+    /// A row changed since, or whose reverse is no longer permitted, is refused with the reason; the rest are undone. Entries are new.
+    static async Task<Ok<TaskBulkCommandResult>> Undo(Guid commandId, Access access, HubDb db, SettingsStore store, Notifier notify, TeamService team, TimeProvider clock)
+    {
+        var s = await store.Get(db); Http.RequireFlag(s, "work_screens");
+        var requestId = UndoRequestId(commandId);
+        var initialCorrelation = db.Audit.CorrelationId; var initialReason = db.Audit.Reason;
+        try { return await Tx.Run(db, async () => {
+            var identity = $"task-bulk:{access.Me.Id:D}:{requestId:D}";
+            await db.Database.ExecuteSqlInterpolatedAsync($"SELECT pg_advisory_xact_lock(hashtextextended({identity}, 0))");
+            var previous = await db.TaskBulkCommandReceipts.AsNoTracking().SingleOrDefaultAsync(r => r.ActorId == access.Me.Id && r.RequestId == requestId);
+            if (previous is not null) return TypedResults.Ok(await Result(previous, Stored(previous), access, db));
+            var original = await db.TaskBulkCommandReceipts.AsNoTracking().SingleOrDefaultAsync(r => r.Id == commandId && r.ActorId == access.Me.Id)
+                ?? throw ApiException.NotFound();
+            // The stored intent is read as plain JSON: only its operation and shift length are needed for the reverse. An Undo is not undone.
+            var stored = System.Text.Json.Nodes.JsonNode.Parse(original.IntentJson) ?? throw new InvalidOperationException("Invalid task bulk intent.");
+            if (stored["undoOf"] is not null) throw ApiException.NotFound();
+            if (clock.GetUtcNow() > original.CompletedAt + UndoWindow + UndoAllowance) throw ApiException.Rule("undo_expired", "undo.expired");
+            var operation = stored["operation"]!.GetValue<string>();
+            var changed = Stored(original).Rows.Where(r => r.Outcome == "changed" && r.Before is not null && r.RowVersion is not null).ToArray();
+            var reason = Text.Get("undo.reason", Text.Get($"undo.op.{operation}"), changed.Length);
+            foreach (var project in changed.Select(r => r.ProjectId).Distinct().Order()) await Coordination.Lock(db, project);
+            foreach (var task in changed.Select(r => r.TaskId).Order())
+                await db.Database.SqlQueryRaw<Guid>("SELECT id AS \"Value\" FROM hub.task WHERE id = {0} FOR UPDATE", task).ToListAsync();
+            var rows = new List<TerminalRow>(); var plans = new List<(Plan Plan, TaskBulkParameters? Reverse, FieldFacts Original)>();
+            foreach (var row in changed)
+            {
+                var before = row.Before!;
+                TaskBulkParameters? reverse = operation switch
+                {
+                    "assign" => new TaskBulkAssignParameters(before.AssigneeId),
+                    "setDueDate" => new TaskBulkDueDateParameters(before.DueDate),
+                    "shiftDueDates" => new TaskBulkShiftDatesParameters(-stored["params"]!["days"]!.GetValue<int>()),
+                    "setPriority" => new TaskBulkPriorityParameters(before.Priority),
+                    "setDeliverable" => new TaskBulkDeliverableParameters([new(row.ProjectId, before.DeliverableId)]),
+                    _ => null,
+                };
+                var item = new TaskBulkItem(row.TaskId, row.ProjectId, row.RowVersion!.Value);
+                var check = reverse is null ? await ValidateReturn(item, before.Status, access, db)
+                    : await Validate(new(1, [item], operation, reverse, reason), access, db, s);
+                rows.AddRange(check.Rows.Select(r => r with { Index = row.Index }));
+                plans.AddRange(check.Plans.Select(plan => (plan with { Index = row.Index }, reverse, before)));
+            }
+            var receipt = new TaskBulkCommandReceipt { ActorId = access.Me.Id, RequestId = requestId, HashVersion = 1,
+                IntentHash = Convert.ToHexString(SHA256.HashData(commandId.ToByteArray())).ToLowerInvariant(),
+                IntentJson = JsonSerializer.Serialize(new UndoIntent(commandId), JsonOpts.Web), CreatedAt = clock.GetUtcNow() };
+            db.Audit.CorrelationId = receipt.Id; db.Audit.Reason = reason;
+            using var capture = notify.BeginTaskBulkCapture(receipt.Id, access.Me.Id);
+            var tasks = new Dictionary<Guid, WorkTask>();
+            foreach (var (plan, reverse, before) in plans)
+            {
+                var task = await db.Tasks.SingleAsync(t => t.Id == plan.Task.Id);
+                await Http.CheckBodyVersion(db, task, plan.Intent.RowVersion);
+                await Apply(reverse, reason, plan, task, access, db, store, notify, team, s, clock);
+                // The reverse restores what the command replaced: its slip count, first dates and cleared milestone link.
+                if (reverse is TaskBulkDueDateParameters or TaskBulkShiftDatesParameters)
+                { task.DueDateChangeCount = before.DueDateChangeCount; task.OriginalDueDate = before.OriginalDueDate; task.OriginalStartDate = before.OriginalStartDate; }
+                if (reverse is TaskBulkDeliverableParameters) task.MilestoneId = before.MilestoneId;
+                task.LastActivityAt = clock.GetUtcNow(); tasks.Add(task.Id, task);
+            }
+            await db.SaveChangesAsync();
+            var logs = db.ActivityLog.Local.Where(a => a.CorrelationId == receipt.Id).ToArray();
+            foreach (var (plan, _, _) in plans)
+            {
+                var task = tasks[plan.Task.Id];
+                var activity = logs.Where(a => a.ItemType == ItemType.Task && a.ItemId == task.Id).Select(a => a.Id).ToArray();
+                rows.Add(Row(plan, "changed", task.RowVersion) with { After = Facts(task), ActivityIds = activity });
+            }
+            var summaries = await notify.StageTaskBulkSummaries(capture, tasks.Keys.ToArray());
+            var payload = new ReceiptRows(rows.OrderBy(r => r.Index).ToArray(), logs.Where(a => a.ItemType != ItemType.Task).Select(a => a.Id).ToArray(), summaries.NotificationIds, summaries.EmailIds);
+            receipt.ResponseJson = JsonSerializer.Serialize(payload, JsonOpts.Web); receipt.CompletedAt = clock.GetUtcNow();
+            db.TaskBulkCommandReceipts.Add(receipt); await db.SaveChangesAsync();
+            return TypedResults.Ok(await Result(receipt, payload, access, db));
+        }); }
+        finally { db.Audit.CorrelationId = initialCorrelation; db.Audit.Reason = initialReason; }
+    }
+
+    /// Hold and cancel are undone by the workflow step back to the earlier status, with the same transition permissions.
+    static async Task<Validation> ValidateReturn(TaskBulkItem item, string to, Access access, HubDb db)
+    {
+        var p = await access.VisibleProjects().AsNoTracking().SingleOrDefaultAsync(x => x.Id == item.ProjectId);
+        var task = p is null ? null : await db.Tasks.AsNoTracking().SingleOrDefaultAsync(t => t.Id == item.TaskId && t.ProjectId == p.Id);
+        if (p is null || task is null) return new([], [new(0, item.TaskId, item.ProjectId, null, "unavailable", null, null, null, null, null, [], [])]);
+        try
+        {
+            await Http.CheckBodyVersion(db, task, item.RowVersion);
+            var ctx = await access.Context(p); var facts = await TaskEndpoints.Facts(db, task);
+            var path = Workflow.TaskPath(task.Status, to, task.RequiresReview, task.PreviousStatus)
+                ?? throw ApiException.Rule("illegal_transition", "task.illegal_transition", null, task.Status, to);
+            var current = task.Status;
+            foreach (var step in path) { Access.Demand(Permissions.TaskTransition(access.Actor, ctx, facts, current, step)); current = step; }
+            var before = Facts(task);
+            return new([new(item, 0, p, ctx, task, before, before with { Status = to })], []);
+        }
+        catch (ApiException error)
+        {
+            var why = error.Errors?.Values.SelectMany(v => v).FirstOrDefault() ?? error.Message;
+            return new([], [new(0, item.TaskId, item.ProjectId, task.Key, "refused", error.Code, why, task.RowVersion, null, null, [], [])]);
+        }
     }
 
     static FieldFacts Facts(WorkTask t) => new(t.AssigneeId, t.StartDate, t.DueDate, t.Priority, t.DeliverableId, t.MilestoneId, t.Status,

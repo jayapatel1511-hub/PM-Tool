@@ -319,10 +319,10 @@ function ReportTable({ r, itemType, asOf, enhanced, compact, compactNotes }: { r
       ))}
       {units && <div role="note" className="report-units-basis text-xs text-muted-foreground" data-report-unit-basis>
         <p>{t('reportUnits.selection', { unit: t(units.unit === 'fte' ? 'reportUnits.fteLabel' : 'reportUnits.hoursLabel'), period: t(units.period === 'months' ? 'reportUnits.monthsLabel' : 'reportUnits.weeksLabel') })} {t('reportUnits.basis')}</p>
-        <p>{units.standardWeeklyHours == null || units.standardWeeklyHours <= 0 ? t('reportUnits.unavailable') : t('reportUnits.standard', { n: units.standardWeeklyHours })} · {t('reportUnits.displayedWeeks', { n: units.displayedWeekCount })}</p>
-        {units.period === 'months' && <><p>{t('reportUnits.thursday')}</p><ul className="flex flex-wrap gap-x-5 gap-y-1">{units.periods.map(period => <li key={period.key}>{t('reportUnits.periodBasis', { period: period.label, weeks: period.weekCount, hours: period.denominatorHours ?? t('reportUnits.unavailable') })}</li>)}</ul></>}
+        <p>{units.standardWeeklyHours == null || units.standardWeeklyHours <= 0 ? t('reportUnits.unavailable') : t('reportUnits.standardLine', { n: units.standardWeeklyHours })} · {t('reportUnits.displayedWeeksLine', { n: units.displayedWeekCount })}</p>
+        {units.period === 'months' && <><p>{t('reportUnits.thursday')}</p><ul className="flex flex-wrap gap-x-5 gap-y-1">{units.periods.map(period => <li key={period.key}>{t('reportUnits.periodBasisLine', { period: period.label, weeks: period.weekCount, hours: period.denominatorHours ?? t('reportUnits.unavailable') })}</li>)}</ul></>}
         {units.scopeCoverage === 'VisibleOnly' && <p>{t('reportUnits.partial')}</p>}
-        <p>{t('reportUnits.missing', { n: units.unestimatedTasks })} · {t('reportUnits.counts')}</p><p>{t('reportUnits.rounding')}</p>
+        <p>{t('reportUnits.missingLine', { n: units.unestimatedTasks })} · {t('reportUnits.counts')}</p><p>{t('reportUnits.rounding')}</p>
       </div>}
     </div>
   )

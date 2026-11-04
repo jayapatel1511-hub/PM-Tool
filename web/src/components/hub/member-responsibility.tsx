@@ -1,4 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
+import { invalidateChange } from '@/lib/keys'
 import { useId, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import type { components } from '@/gen/api'
@@ -23,9 +24,7 @@ export function MemberResponsibilityDialog({ projectId, draft, latest, needsReas
   const form = useSafeForm(`member-responsibility.${projectId}.${draft.memberId}`, value, setValue)
   const [busy, setBusy] = useState(false), [error, setError] = useState<unknown>(null), [acknowledged, setAcknowledged] = useState(false)
   const conflict = error instanceof ApiError && error.status === 409
-  const refresh = () => Promise.all([
-    qc.invalidateQueries({ queryKey: ['p', projectId, 'team'] }), qc.invalidateQueries({ queryKey: ['wteam'] }), qc.invalidateQueries({ queryKey: ['person-panel'] }),
-  ])
+  const refresh = () => invalidateChange(qc, 'Member', projectId) // covers the project Team, workspace Team and person panel
   const close = () => { if (!inFlight.current) form.close(onClose) }
   const canEdit = latest?.responsibility?.canEdit === true
   const changed = (latest?.rowVersion ?? draft.rowVersion) !== value.rowVersion

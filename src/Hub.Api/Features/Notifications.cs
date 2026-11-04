@@ -323,20 +323,22 @@ public static class NotificationEndpoints
     /// excluding ones that notified the user; Setup projects have no unread counts (ASG-05..ASG-07).
     public static async Task<Dictionary<Guid, int>> FollowingUnread(HubDb db, Access access, Guid userId)
     {
-        var result = new Dictionary<Guid, int>();
-        var visibleProjects = access.VisibleProjectIds();
-        foreach (var f in (await Followed(db, access, userId)).Where(f => f.Status != ProjectStatus.Setup))
-        {
-            var since = f.LastSeenAt ?? DateTimeOffset.MinValue;
-            var rows = (await ActivityEndpoints.Visible(db, access, f.ProjectId)).Where(a => a.OccurredAt > since && a.ActorUserId != userId
-                && (a.CorrelationId == null || !db.Notifications.Any(n => n.UserId == userId && n.CorrelationId == a.CorrelationId
-                    && (n.RequiredProjectIds == null || n.RequiredProjectIds.Length > 0
-                        && n.RequiredProjectIds.All(id => id != Guid.Empty && visibleProjects.Contains(id))))));
-            var n = await rows.Select(r => r.CorrelationId ?? r.Id).Distinct().CountAsync();
-            if (n > 0) result[f.ProjectId] = n;
-        }
-        return result;
+        // One grouped query over every followed, visible, non-Setup project (Followed applies visibility); each project's
+        // read marker comes from its follow row. The visible set is read once, so the per-row notification check is an array test.
+        var followed = (await Followed(db, access, userId)).Where(f => f.Status != ProjectStatus.Setup).Select(f => f.ProjectId).ToArray();
+        if (followed.Length == 0) return [];
+        var visibleProjects = (await access.VisibleProjectIdSet()).ToArray();
+        var rows = from a in ActivityEndpoints.Visible(db, access, followed)
+                   join f in db.Follows.Where(f => f.UserId == userId) on a.ProjectId equals f.ProjectId
+                   where (f.LastSeenAt == null || a.OccurredAt > f.LastSeenAt) && a.ActorUserId != userId
+                       && (a.CorrelationId == null || !db.Notifications.Any(n => n.UserId == userId && n.CorrelationId == a.CorrelationId
+                           && (n.RequiredProjectIds == null || n.RequiredProjectIds.Length > 0
+                               && n.RequiredProjectIds.All(id => id != Guid.Empty && visibleProjects.Contains(id)))))
+                   select a;
+        return await rows.GroupBy(a => a.ProjectId!.Value).Select(g => new ProjectUnread(g.Key, g.Select(a => a.CorrelationId ?? a.Id).Distinct().Count()))
+            .ToDictionaryAsync(g => g.ProjectId, g => g.Count);
     }
+    sealed record ProjectUnread(Guid ProjectId, int Count);
 
     static IQueryable<ActivityLog> VisibleFollowed(HubDb db, Access access, IEnumerable<Guid> projectIds, Guid userId) =>
         ActivityEndpoints.Visible(db, access, projectIds.Distinct().ToArray()).Where(a => a.ActorUserId != userId);

@@ -82,11 +82,12 @@ public sealed class MyWorkSeenRaceTests
             var waiting = 0;
             while (waiting < 3)
             {
-                // Observe actual PostgreSQL lock waiters in this factory's isolated database, not task scheduling.
+                // Observe actual PostgreSQL lock waiters in this factory's isolated database, not task scheduling. The first visit waits on
+                // the held personal row; the duplicate visit and Mark all wait behind its command advisory lock.
                 waiting = await s.Factory.DbAsync(db => db.Database.SqlQuery<int>($"""
                     SELECT COUNT(*)::int AS "Value" FROM pg_stat_activity
                     WHERE datname=current_database() AND pid<>pg_backend_pid()
-                      AND wait_event_type='Lock' AND query LIKE '%user_setting%'
+                      AND wait_event_type='Lock' AND (query LIKE '%user_setting%' OR query LIKE '%pg_advisory_xact_lock%')
                     """).SingleAsync(deadline.Token));
                 if (waiting < 3) await Task.Yield();
                 deadline.Token.ThrowIfCancellationRequested();

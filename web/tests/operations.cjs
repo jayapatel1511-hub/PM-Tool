@@ -10,7 +10,9 @@ function sourceModule(file) {
   if (cache.has(file)) return cache.get(file);
   const module = { exports: {} }; cache.set(file, module.exports);
   const source = ts.transpileModule(fs.readFileSync(file, 'utf8').replaceAll('import.meta.env.VITE_HUB_BUILD', '"dev"'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
-  new Function('require', 'module', 'exports', source)(name => name === 'sonner' ? { toast: { warning() {} } } : sourceModule(path.join(root, 'src', name.replace('@/', '') + '.ts')), module, module.exports);
+  // `@/x` is src/x; a relative import resolves from the importing file; an explicit `.ts` is kept as written.
+  const resolve = name => { const base = name.startsWith('@/') ? path.join(root, 'src', name.slice(2)) : path.resolve(path.dirname(file), name); return base.endsWith('.ts') ? base : base + '.ts' };
+  new Function('require', 'module', 'exports', source)(name => name === 'sonner' ? { toast: { warning() {} } } : sourceModule(resolve(name)), module, module.exports);
   return module.exports;
 }
 let server, browser;

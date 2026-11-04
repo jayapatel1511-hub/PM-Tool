@@ -360,3 +360,5 @@
 
 /* FR-SAV-06: while the draft guard is on, the build-update notice can be pressed over an open dialog or panel. */
 html[data-guard-toasts] [data-sonner-toast] { pointer-events: auto; }
+/* FR-SCR-20: an Undo toast can be pressed over the open panel or dialog that made the change (they ignore toast clicks). */
+[data-sonner-toast].hub-undo-toast { pointer-events: auto; }

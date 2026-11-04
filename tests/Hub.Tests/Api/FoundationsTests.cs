@@ -114,10 +114,13 @@ public sealed class FoundationsTests(HubFactory f)
     [Fact]
     public async Task Last_active_admin_cannot_lose_the_role() // FR-027
     {
-        var jordan = await f.DbAsync(db => db.Users.FirstAsync(u => u.Email == Admin));
-        var r = await f.As(Admin).DeleteAsync($"/api/v1/admin/users/{jordan.Id}/roles/Admin");
+        // Its precondition (Jordan is the only active Admin) needs its own database: shared-collection tests add Admins, and a
+        // delete that then succeeds would strip the shared Admin from every later test.
+        using var own = new HubFactory();
+        var jordan = await own.DbAsync(db => db.Users.FirstAsync(u => u.Email == Admin));
+        var r = await own.As(Admin).DeleteAsync($"/api/v1/admin/users/{jordan.Id}/roles/Admin");
         Assert.Equal("last_admin", (await r.Json(422)).S("code"));
-        var self = await f.As(Admin).Patch($"/api/v1/admin/users/{jordan.Id}", new { supervisorId = jordan.Id }, jordan.RowVersion);
+        var self = await own.As(Admin).Patch($"/api/v1/admin/users/{jordan.Id}", new { supervisorId = jordan.Id }, jordan.RowVersion);
         Assert.Equal(HttpStatusCode.BadRequest, self.StatusCode);
     }
 

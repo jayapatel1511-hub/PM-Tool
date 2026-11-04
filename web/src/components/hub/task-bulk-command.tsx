@@ -58,6 +58,9 @@ export function TaskBulkToolbar({ selected, pageIds, onAction, onClear, omitShif
   </div>
 }
 
+const UNDO_MS = 10_000 // FR-SCR-20, 053-D9
+const requestUndo = (commandId: string) => typedRequest('post', '/api/v1/tasks/bulk/commands/{commandId}/undo', { params: { commandId } })
+
 /** Preview is read-only; Apply and uncertain retry retain one exact body/request ID/version set. */
 export function TaskBulkCommandDialog({ operation, rows, scopeKey, onClose, onChanged }: { operation: TaskBulkOperation; rows: TaskBulkSelectionRow[]; scopeKey: string; onClose: (completed: boolean) => void; onChanged: () => void | Promise<unknown> }) {
   const me = useMe(), initialActor = useRef(me.id).current, initialScope = useRef(scopeKey).current
@@ -85,6 +88,11 @@ export function TaskBulkCommandDialog({ operation, rows, scopeKey, onClose, onCh
   const [assignee, setAssignee] = useState<string | null>(null), [targets, setTargets] = useState<Record<string, string>>({}), [reason, setReason] = useState('')
   const [preview, setPreview] = useState<Preview | null>(null), [result, setResult] = useState<Result | null>(null), [error, setError] = useState<unknown>(null)
   const [busy, setBusy] = useState(false), [uncertain, setUncertain] = useState(false)
+  const [undoUntil, setUndoUntil] = useState(0), [undone, setUndone] = useState<Result | null>(null)
+  useEffect(() => {
+    if (!undoUntil) return
+    const timer = setTimeout(() => setUndoUntil(0), Math.max(0, undoUntil - Date.now())); return () => clearTimeout(timer)
+  }, [undoUntil])
   const command = useRef<Command | null>(null), sending = useRef(false)
   useLayoutEffect(() => {
     if (!sameActor) { locked.current = false; uncertainty.current = false; command.current = null; onClose(false) }
@@ -117,7 +125,7 @@ export function TaskBulkCommandDialog({ operation, rows, scopeKey, onClose, onCh
       const answer = await typedRequest('post', '/api/v1/tasks/bulk/commands', { body: command.current })
       if (!mounted.current || current.current.actor !== initialActor) return
       locked.current = false; uncertainty.current = false
-      setResult(answer); setUncertain(false)
+      setResult(answer); setUncertain(false); if (answer.counts.changed > 0) setUndoUntil(Date.now() + UNDO_MS)
       // Close cannot race the refresh that may remove its selected row. Receipt success stays definite if a read fails.
       await Promise.allSettled([invalidateChange(qc, 'Task'), Promise.resolve().then(onChanged)])
     } catch (caught) {
@@ -127,7 +135,29 @@ export function TaskBulkCommandDialog({ operation, rows, scopeKey, onClose, onCh
       setUncertain(uncertainty.current); setError(caught)
     } finally { sending.current = false; if (mounted.current) setBusy(false) }
   }
-  const close = () => { if (!busy && !uncertain) onClose(!!result) }
+  const undo = async () => {
+    if (!result || sending.current) return; sending.current = true; setBusy(true); setError(null)
+    try {
+      const answer = await requestUndo(result.commandId)
+      if (!mounted.current) return
+      setUndone(answer); setUndoUntil(0)
+      await Promise.allSettled([invalidateChange(qc, 'Task'), Promise.resolve().then(onChanged)])
+    } catch (caught) { if (mounted.current) setError(caught) }
+    finally { sending.current = false; if (mounted.current) setBusy(false) }
+  }
+  const close = () => {
+    if (busy || uncertain) return
+    // Closing early keeps the rest of the 10 seconds as a toast.
+    const left = undoUntil - Date.now()
+    if (result && !undone && left > 0) {
+      const commandId = result.commandId
+      toast.success(t('undo.bulkDone', { what: t(`tbulk.${operation}`), n: result.counts.changed }), { duration: left, className: 'hub-undo-toast', action: { label: t('undo.action'), onClick: () => {
+        requestUndo(commandId).then(answer => toast.success(t('undo.bulkUndone', answer.counts)), e => toast.error(t('undo.refused', { reason: e instanceof ApiError ? e.message : String(e) })))
+          .finally(() => { void invalidateChange(qc, 'Task'); void onChanged() })
+      } } })
+    }
+    onClose(!!result)
+  }
   const restoreFocus = (event: Event) => {
     event.preventDefault()
     const visible = (element: HTMLElement) => element.isConnected && element.getClientRects().length > 0
@@ -143,7 +173,7 @@ export function TaskBulkCommandDialog({ operation, rows, scopeKey, onClose, onCh
     target?.focus({ preventScroll: true })
     for (const { node, top, left } of focusOrigin.current?.scroll ?? []) if (node.isConnected) { node.scrollTop = top; node.scrollLeft = left }
   }
-  const renderedRows = result?.rows ?? preview?.rows ?? []
+  const renderedRows = undone?.rows ?? result?.rows ?? preview?.rows ?? []
   return <Dialog open onOpenChange={open => !open && close()}><DialogContent onOpenAutoFocus={captureFocus} onCloseAutoFocus={restoreFocus} className="max-h-[90vh] overflow-y-auto sm:max-w-2xl" data-task-bulk-dialog data-bulk-navigation-blocked={navigationBlocks || undefined}>
     <DialogHeader><DialogTitle>{t(result ? 'bulkCommand.result' : 'bulkCommand.title')}</DialogTitle><DialogDescription>{runtimeText(`tbulk.${operation}`)} · {t('bulk.selected', { n: original.length })}</DialogDescription></DialogHeader>
     {!result && <form className="space-y-3" onSubmit={event => { event.preventDefault(); if (!uncertain) void review() }}>
@@ -166,10 +196,12 @@ export function TaskBulkCommandDialog({ operation, rows, scopeKey, onClose, onCh
     {(uncertain || navigationBlocks > 0) && !result && <p role="status">{t('bulkCommand.uncertain')}</p>}
     {preview && !result && <p role="status" className="text-sm tabular-nums">{t('bulkCommand.previewCounts', preview.counts)} <span className="block text-muted-foreground">{t('bulkCommand.previewHint')}</span></p>}
     {result && <p role="status" className="text-sm tabular-nums">{t('bulkCommand.resultCounts', result.counts)}</p>}
+    {undone && <p role="status" className="text-sm tabular-nums" data-task-bulk-undone>{t('undo.bulkUndone', undone.counts)}</p>}
     {renderedRows.length > 0 && <ul className="max-h-72 space-y-2 overflow-y-auto text-sm" aria-label={t(result ? 'bulkCommand.result' : 'bulkCommand.preview')}>{renderedRows.map(row => <li key={row.index} data-task-bulk-outcome={row.outcome} className="break-words rounded border p-2">
       {row.outcome === 'unavailable' ? t('bulkCommand.unavailable', { index: row.index + 1 }) : <><strong>{row.key}</strong> · {runtimeText('bulkCommand.' + row.outcome)}{row.reason && <p>{row.reason}</p>}</>}
     </li>)}</ul>}
-    <DialogFooter><Button variant="outline" disabled={busy || uncertain} onClick={close}>{t(result ? 'common.close' : 'common.cancel')}</Button>
+    <DialogFooter>{result && !undone && undoUntil > 0 && <Button variant="outline" disabled={busy} onClick={undo} data-task-bulk-undo>{busy && <Spinner />}{t('undo.action')}</Button>}
+      <Button variant="outline" disabled={busy || uncertain} onClick={close}>{t(result ? 'common.close' : 'common.cancel')}</Button>
       {!result && (uncertain || preview) && <Button disabled={busy || !sameActor || !sameScope && !uncertain || !uncertain && !preview?.counts.eligible} onClick={apply}>{busy && <Spinner />}{t(uncertain ? 'bulkCommand.retry' : 'bulkCommand.confirm')}</Button>}
     </DialogFooter>
   </DialogContent></Dialog>

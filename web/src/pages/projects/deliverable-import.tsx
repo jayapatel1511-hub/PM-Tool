@@ -69,7 +69,7 @@ export function DeliverableImportDialog({ projectId, onClose, onChanged }: { pro
     if (!selected) return
     const format = selected.name.toLowerCase().endsWith('.xlsx') ? 'xlsx' : selected.name.toLowerCase().endsWith('.csv') ? 'csv' : null
     if (!format) { setError(new Error(t('drawingImport.fileType'))); return }
-    if (selected.size > (format === 'csv' ? 256 * 1024 : 2 * 1024 * 1024)) { setError(new Error(t('drawingImport.fileLimit'))); return }
+    if (selected.size > (format === 'csv' ? 256 * 1024 : 2 * 1024 * 1024)) { setError(new Error(t('drawingImport.fileLimitHint'))); return }
     setBusy(true)
     try { const contentBase64 = await readFile(selected); if (generation === fileRead.current) setFile({ name: selected.name, format, contentBase64 }) }
     catch (failure) { if (generation === fileRead.current) setError(failure) }
@@ -151,7 +151,7 @@ export function DeliverableImportDialog({ projectId, onClose, onChanged }: { pro
               <div><dt className="text-xs text-muted-foreground">{t('drawingImport.reviewer')}</dt><dd>{row.values.reviewerId && row.values.reviewerName ? <PersonPanelTrigger userId={row.values.reviewerId} name={row.values.reviewerName} focusKey={`drawing-import:${projectId}:${row.sourceRow}:reviewer`} /> : <Missing />}</dd></div>
               <div><dt className="text-xs text-muted-foreground">{t('drawingImport.numberRevision')}</dt><dd className="break-words">{row.values.clientDrawingNumber || '—'} · {row.values.revision || '—'}</dd></div>
               <div><dt className="text-xs text-muted-foreground">{t('drawingImport.dates')}</dt><dd>{fmtDate(row.values.startDate)} → {fmtDate(row.values.dueDate)}{row.values.dueFromMilestone && <span className="ml-1 text-xs text-muted-foreground">{t('drawingImport.milestoneDefault')}</span>}</dd></div>
-              <div><dt className="text-xs text-muted-foreground">{t('drawingImport.milestone')}</dt><dd className="break-words">{row.values.milestoneKey || <Missing />}</dd></div>
+              <div><dt className="text-xs text-muted-foreground">{t('drawingImport.milestoneColumn')}</dt><dd className="break-words">{row.values.milestoneKey || <Missing />}</dd></div>
               <div><dt className="text-xs text-muted-foreground">{t('drawingImport.priorityReview')}</dt><dd>{row.values.priority} · {t(row.values.requiresReview ? 'drawingImport.reviewRequired' : 'drawingImport.noReview')}</dd></div>
               {row.values.description && <div className="sm:col-span-2"><dt className="text-xs text-muted-foreground">{t('drawingImport.description')}</dt><dd className="whitespace-pre-wrap break-words">{row.values.description}</dd></div>}
             </dl>}

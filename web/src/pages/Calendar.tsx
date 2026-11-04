@@ -108,7 +108,7 @@ function DeadlineAction({ source }: { source: ScreenDeadline }) {
 
 function CalendarScreenPage() {
   const viewer = useMe(), scope = useScope(), openPanel = useItemPanel()
-  const [sp, setSp] = useSearchParams(), qc = useQueryClient()
+  const [sp, setSp] = useSearchParams()
   const state = calendarScreenState(sp, viewer.settings.today ?? today())
   const { mode: view, anchor, hidden, types, personId, disciplineId, showAway } = state
   const [page, setPage] = useState(1), [subscription, setSubscription] = useState(false), [editing, setEditing] = useState<CalEvent | 'new' | null>(null)
@@ -186,7 +186,7 @@ function CalendarScreenPage() {
       {intent && <DeadlineDateDialog source={intent.source} initialDate={intent.date} projectIds={scope.api}
         onClose={() => { setRestoreFocus(intent.trigger); setIntent(null) }}
         onReload={async () => { await q.refetch(); setRestoreFocus(intent.trigger); setIntent(null) }}
-        onSaved={date => { setRestoreFocus(calendarTriggerId(intent.source.sourceType, intent.source.id)); setIntent(null); if (date < from || date > to) set('date', date); void qc.invalidateQueries({ queryKey: ['calendar-screen'] }) }} />}
+        onSaved={date => { setRestoreFocus(calendarTriggerId(intent.source.sourceType, intent.source.id)); setIntent(null); if (date < from || date > to) set('date', date) }} />}
     </Page>
   </CalendarInteraction.Provider>
 }

@@ -14,6 +14,8 @@ public sealed class AuditContext
     public string Source { get; set; } = "API";
     /// Reason applied to every row of the next save unless a note overrides it.
     public string? Reason { get; set; }
+    /// FR-SCR-65: the organisation reason category tagged on every milestone or deliverable date change of the next save.
+    public Guid? DateReasonCategoryId { get; set; }
     readonly Dictionary<object, AuditNote> notes = new(ReferenceEqualityComparer.Instance);
 
     public AuditContext Note(object entity, string? action = null, string? reason = null, string? key = null, string[]? categories = null, string? snapshot = null)
@@ -23,7 +25,7 @@ public sealed class AuditContext
     }
 
     public AuditNote? NoteFor(object entity) => notes.GetValueOrDefault(entity);
-    public void Clear() { notes.Clear(); Reason = null; }
+    public void Clear() { notes.Clear(); Reason = null; DateReasonCategoryId = null; }
 
     public void AsSystem(string source = "Job") { ActorType = "System"; ActorId = null; Source = source; }
 }

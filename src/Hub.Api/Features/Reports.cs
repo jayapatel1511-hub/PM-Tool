@@ -254,7 +254,7 @@ public static partial class ReportEndpoints
         });
         api.MapGet("/reports/{code}/export", async (string code, string? format, HttpContext http, HubDb db, Access access, CurrentUser me, SettingsStore store, TimeProvider clock) =>
         {
-            var (def, ctx) = await Prepare(code, http, db, access, me, store, clock);
+            var (def, ctx) = await Prepare(code, http, db, access, me, store, clock, export: true);
             await using var snapshot = UsesReportUnits(def, ctx) ? await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead) : null;
             var r = await def.Run(ctx);
             var title = Text.Get($"report.{def.Code}");
@@ -284,7 +284,7 @@ public static partial class ReportEndpoints
         _ => ItemType.Task,
     };
 
-    static async Task<(Def, Ctx)> Prepare(string code, HttpContext http, HubDb db, Access access, CurrentUser me, SettingsStore store, TimeProvider clock, bool taskInputList = false)
+    static async Task<(Def, Ctx)> Prepare(string code, HttpContext http, HubDb db, Access access, CurrentUser me, SettingsStore store, TimeProvider clock, bool taskInputList = false, bool export = false)
     {
         var def = All.FirstOrDefault(r => r.Code == code) ?? throw ApiException.NotFound();
         var s = await store.Get(db);
@@ -294,6 +294,7 @@ public static partial class ReportEndpoints
         if (inputs) { today = Clock.LocalDate(now, s); ValidateTaskInputScope(def, http.Request.Query, s, taskInputList); }
         var context = new Ctx(http.Request.Query, db, access, me, s, today, now, store, clock);
         context.InputsEnabled = inputs;
+        context.MemberProjectsOnly = export && !Permissions.ExportAllReportProjects(me.Actor);
         if (inputs) ValidateRemainingInputRange(def, context);
         ValidateUnitForm(def, context);
         context.InputTasks = def.TaskSource?.Invoke(context);
@@ -309,6 +310,9 @@ public static partial class ReportEndpoints
         public bool Partial { get; set; }
         public IQueryable<WorkTask>? InputTasks { get; set; }
         public bool InputsEnabled { get; set; }
+        /// A Standard User's export: rows come only from projects they belong to (§8.5.1).
+        public bool MemberProjectsOnly { get; set; }
+        public IQueryable<Project> Scope() => MemberProjectsOnly ? access.MemberProjects() : access.VisibleProjects();
         public bool CaptureCapacityComparison { get; set; }
         public ReportCapacityComparison? CapacityComparison { get; set; }
         public TaskInputContext? InputContext { get; set; }
@@ -329,7 +333,7 @@ public static partial class ReportEndpoints
         /// Projects in scope: the chosen ones the caller may view, or every visible project that is not Archived or Cancelled.
         public IQueryable<Project> Projects()
         {
-            var visible = access.VisibleProjects();
+            var visible = Scope();
             var chosen = Ids("projectId");
             return chosen.Length > 0 ? visible.Where(p => chosen.Contains(p.Id)) : visible.Where(p => Live.Contains(p.Status));
         }
@@ -358,7 +362,7 @@ public static partial class ReportEndpoints
                 var value = p.Type switch
                 {
                     // Only projects the caller may view are named; people and reference data are organisation-wide already.
-                    "projects" or "project" => string.Join(", ", await access.VisibleProjects().Where(x => ids.Contains(x.Id)).Select(x => x.ProjectNumber).ToListAsync()),
+                    "projects" or "project" => string.Join(", ", await Scope().Where(x => ids.Contains(x.Id)).Select(x => x.ProjectNumber).ToListAsync()),
                     "discipline" => string.Join(", ", await db.Disciplines.Where(x => ids.Contains(x.Id)).Select(x => x.Name).ToListAsync()),
                     "office" => string.Join(", ", await db.Offices.Where(x => ids.Contains(x.Id)).Select(x => x.Name).ToListAsync()),
                     "person" => string.Join(", ", await db.Users.Where(x => ids.Contains(x.Id)).Select(x => x.DisplayName).ToListAsync()),
@@ -369,7 +373,7 @@ public static partial class ReportEndpoints
                 };
                 list.Add((Text.Get($"param.{p.Key}"), value));
             }
-            if (list.All(x => x.Item1 != Text.Get("param.projectId")) && ps.Any(p => p.Type == "projects")) list.Insert(0, (Text.Get("param.projectId"), Text.Get("report.allVisible")));
+            if (list.All(x => x.Item1 != Text.Get("param.projectId")) && ps.Any(p => p.Type == "projects")) list.Insert(0, (Text.Get("param.projectId"), Text.Get(MemberProjectsOnly ? "report.allMember" : "report.allVisible")));
             if (Partial) list.Add((Text.Get("planning.partial"), Text.Get("planning.partial_hint")));
             if (integrity && s.IsFlagOn("verifiable_log"))
             {
@@ -660,7 +664,8 @@ public static partial class ReportEndpoints
     static async Task<Result> ActivityLog_(Ctx c)
     {
         var id = c.Id("projectId") ?? throw ApiException.Invalid("projectId", "error.required");
-        var (p, _) = await c.Access.Project(id, track: false);
+        var (p, pc) = await c.Access.Project(id, track: false);
+        if (c.MemberProjectsOnly) Access.Demand(Permissions.ExportReportProject(c.Me.Actor, pc));
         var logs = await ActivityEndpoints.Filter(await ActivityEndpoints.Visible(c.Db, c.Access, id), c.Date("from"), c.Date("to"), null, null, c.Str("category"), null, null)
             .OrderByDescending(a => a.OccurredAt).ThenByDescending(a => a.Id).Take(Export.MaxRows + 1).ToListAsync();
         var rows = Json(await ActivityEndpoints.Render(c.Db, logs));
@@ -826,7 +831,7 @@ public static partial class ReportEndpoints
         var people = c.Db.Users.AsNoTracking().Where(u => u.IsActive && (all || u.SupervisorId == c.Me.Id));
         if (!all) people = await PeopleScope.Widen(c.Db, a, people);
         if (c.Id("officeId") is { } office) people = people.Where(u => u.OfficeId == office);
-        var projects = c.Access.VisibleProjects().Where(p => p.Status != ProjectStatus.Archived && p.Status != ProjectStatus.Cancelled);
+        var projects = c.Scope().Where(p => p.Status != ProjectStatus.Archived && p.Status != ProjectStatus.Cancelled);
         if (c.Ids("projectId") is { Length: > 0 } chosen) projects = projects.Where(p => chosen.Contains(p.Id));
         var members = c.Db.ProjectMembers.AsNoTracking().Where(m => m.RemovedAt == null && people.Any(u => u.Id == m.UserId) && projects.Any(p => p.Id == m.ProjectId));
         if (c.Str("role") is { } role) members = members.Where(m => m.Roles.Contains(role));

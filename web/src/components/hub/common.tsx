@@ -222,7 +222,8 @@ export function FilterBar({ search, lead, quick, active, activeCount = 0, action
     <div className={cn('flex flex-wrap items-center gap-2', className)}>
       {search && <div className="w-full sm:w-auto sm:min-w-64 [&_[data-slot=label]]:sr-only">{search}</div>}
       {lead}
-      {children && (narrow
+      {/* No Filters button when every field is conditionally hidden (`[false, false]` is truthy). */}
+      {Children.toArray(children).length > 0 && (narrow
         ? <Sheet><SheetTrigger asChild>{trigger}</SheetTrigger><SheetContent aria-describedby={undefined} className="overflow-y-auto"><SheetHeader><SheetTitle>{t('calm.filters')}</SheetTitle></SheetHeader><div className="px-4 pb-4">{fields}</div></SheetContent></Sheet>
         : <Popover><PopoverTrigger asChild>{trigger}</PopoverTrigger><PopoverContent align="start" aria-label={t('calm.filters')} className="w-[46rem]">{fields}</PopoverContent></Popover>)}
       {quick}

@@ -12,7 +12,7 @@ export const TITLE_LINK = 'break-words text-left font-medium text-primary underl
 
 export function Person({ id, name, focusKey }: { id?: string | null; name?: string | null; focusKey?: string }) {
   if (!name) return <Missing />
-  return <span className="inline-flex items-center gap-2"><Avatar id={id} name={name} />{id ? <PersonPanelTrigger userId={id} name={name} focusKey={focusKey} /> : name}</span>
+  return <span className="inline-flex items-center gap-2"><Avatar id={id} name={name} />{id ? <PersonPanelTrigger userId={id} name={name} focusKey={focusKey}>{name}</PersonPanelTrigger> : name}</span>
 }
 
 export function DateText({ date }: { date?: string | null }) {

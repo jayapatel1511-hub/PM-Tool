@@ -184,12 +184,13 @@ Open observations for Jay (no change made):
 - Home and Projects open on "My projects", so a Supervisor who is on no project sees empty pages until
   choosing All permitted; the prototype assumed All permitted. Existing behaviour, outside 052/053.
 
-Checks after the fixes (uncommitted on `codex/build-052-053`; flags stay off):
+Checks after the fixes (committed locally as `98ed6fd3` on `codex/build-052-053`; flags stay off):
 
 | Check | Result |
 |---|---|
 | `npm run build`, `lint`, served-asset allowlist | pass |
-| CI web job suites (38 scripts) and `typecheck:tests` | 38 of 39 pass; `test:supervisor-capacity` failed only because an SSH tunnel holds port 5178 here and passes on `SUPERVISOR_CAPACITY_TEST_PORT=5198`; `test:record-parity` needs a clean tree and a PR base, so it runs once these fixes are committed |
+| CI web job suites (38 scripts) and `typecheck:tests` | 38 of 39 pass; `test:supervisor-capacity` failed only because the local Docker (Colima) port forward holds port 5178 here and passes on `SUPERVISOR_CAPACITY_TEST_PORT=5198` |
+| `test:record-parity`, base `ca8fccea`, candidate `98ed6fd3` | pass: self-check, all 12 persona/width sets (6 personas × 1600 and 375 px), AC-REC-09 additions flag off and on |
 | 053 suites the fixes touch: `work-delivery-today-reviewers` (exact My Week line), `work-board-completeness`, `visual-system`, `visual-navigation`, `visual-layout` (on the Vite dev server it requires), `home-visual-layout`, `project-dashboard-completeness` | pass |
 | `visual-route-matrix` (not in CI) | fails waiting for `/projects/NAV-001` to settle on its dashboard; fails the same way on Codex's `5663eca1`, last recorded pass checkpoint 19. The running app redirects `/projects/250101` to its dashboard; the harness expectation needs updating (open) |
 | `ratchet.py`, `text_keys.py`, `trace_spec.py --check`, explainer evidence checker | pass |

@@ -575,8 +575,8 @@ Jay has now chosen **project membership for Standard User report exports**. This
 
 ## Checkpoint 36 · 2026-11-04 · S12, S37 and S49 closed locally; release-candidate gates
 
-Claude finished the remaining slices after Jay's commit of checkpoint 35 (5663eca1). All work is uncommitted on
-`codex/build-052-053`, every 052/053 flag stays off, and no decision status changed except 053-D23 (Jay's own choice).
+Claude finished the remaining slices after Jay's commit of checkpoint 35 (5663eca1). The work was checked uncommitted on
+`codex/build-052-053` and then committed locally (below); every 052/053 flag stays off, and no decision status changed except 053-D23 (Jay's own choice).
 
 **Slices.** 49 of 49 are locally checked; cleanup slice S50 (053-D24) is open and gates pilot activation, not this release.
 
@@ -653,3 +653,55 @@ It now reads "… planned, Free unavailable" (`mywork.weekCompactFreeUnavailable
 `work-delivery-today-reviewers.cjs` asserts the exact line; the pattern it used before let the doubled word pass.
 The full comparison, two 052 fixes and the open observations are in
 [052 verification](../052-visual-system-and-navigation/verification.md), "Prototype comparison".
+
+## Pre-deploy self-review · 2026-11-04/05
+
+Jay asked for a self-review before deployment. It compares the release candidate `98ed6fd3` with the live review release
+(image `bf8a39d7`, recorded in `ac2fa894`) as a flags-off upgrade. Nothing was deployed, pushed or activated.
+
+**Static review.** Every new 052/053 flag defaults off; all 67 new routes are flag-gated; new jobs and email are inert with
+their flags off; the 14 migrations are additive apart from the two contract migrations named under Checkpoint 36; no hosting,
+configuration or package changes.
+
+**Record parity against the live release found two flags-off differences**, both from checkpoint 35 (`5663eca1`), not from
+checkpoint 36 or the prototype fixes. Both are fixed in the working tree, uncommitted:
+- *Risk and issue register owner cell.* The shared register `Person` let the person-panel trigger draw its own name, which
+  with `flag.people_screens` off is a `<span>` inside the inline-flex cell instead of the live bare text. Only the row
+  text differed (an extra line break); the screen looked the same. `Person` now passes the name as the trigger's content
+  (`web/src/components/hub/registers.tsx`), so the cell matches live with the flag off and is unchanged with it on
+  (an active `PersonName` is the bare name). A first fix inside `PersonPanelTrigger` changed the Reviews and Changes owner
+  cells, which already match live, and was undone.
+- *Empty Filters button on Allocations → Open roles.* With every flag off, the tab showed a Filters button that opened an
+  empty panel; live has none. The filter bar tested `children` for truthiness, and a list of hidden fields (`[false, false]`)
+  is truthy. `FilterBar` now counts rendered children (`Children.toArray`) in `web/src/components/hub/common.tsx`, so no
+  screen draws an empty Filters button.
+
+| Check (this Mac, fixes applied) | Result |
+|---|---|
+| Record parity `ac2fa894` → candidate | 12 of 13 runs and AC-REC-09 pass. priya/375 differed only in the Raise issue dialog's default "Date raised" (2026-11-04 vs 2026-11-05): the base captured that screen at 23:58 and the candidate at 00:02, and the date is the server's organisation today (`me.settings.today`), which neither build changed. A rerun clear of midnight (01:40–03:24) passed: 13 of 13 checks, 27 screens, AC-REC-09 off and on. |
+| `npm run build` (gen, `tsc -b`, Vite) | pass |
+| CI `web` job suites (38) plus `test:keys` and `typecheck:tests` | pass; `test:supervisor-capacity` first failed to start because port 5178 is held by the local Docker port forward, then passed on port 5198 |
+| Person-name suites outside CI (`admin-screen`, `decision-metadata`, `deliverable-import`, `document-link-reference`, `file-screen`, `person-remaining-surfaces`, `person-search-reassign`, `search-screen`, `review-register`, `task-contribution`) | pass |
+| Suites that import Vite's dev dependencies (`count-card-contract`, `identity-colours`, `planner-semantic`, `semantic-colours`, `title-block`), run against the dev server | pass |
+
+**All 96 browser suites, run on `98ed6fd3` before the fixes.** 71 passed. Five need the Vite dev server and pass there
+(above). Seven need a running API with a disposable database or a `CALM_VERSION` comparison and were not run: `backlog`,
+`calm-acceptance`, `calm-clicks`, `clutter`, `counts`, `smoke-live`, `ui-consistency`. Thirteen fail the same way on
+`5663eca1`. They are mocked tests of flag-on behaviour that predate the final slices: `capacity-person-facts`,
+`person-organisation-surfaces` and `task-grouping` (unanswered requests for notice preferences, role explanations and work visits),
+`work-task-columns` (12 columns, test expects 11), `person-panel` (open panel kind), and timeouts in `notice-preferences`,
+`notification-screen`, `person-surface-completeness`, `review-discipline-patterns`, `submission-context`, `task-sections`,
+`work-activity-comments` and `work-seen-state`. None runs in CI, and with flags off none is visible after an upgrade.
+They must be brought up to date before the flags they cover go on in pilot. `visual-route-matrix` also fails on both
+`98ed6fd3` and `5663eca1`.
+
+**Verdict.** The candidate plus these two fixes is ready to deploy as a flags-off upgrade of the live review release.
+Before deployment, Jay needs to:
+- approve a local commit of the two fixes;
+- give the `contract` label for `NoticeDeliveryPolicyWitness` and `ExternalIssuedReviewSources`;
+- give an explicit go-ahead to deploy;
+- run activation on homedev with his own sudo. Activation expects image `bf8a39d7` as the prior release and ends at 56
+  migrations, with every 052/053 flag and `task_pickup` and `verifiable_log` off.
+
+Pilot activation of any 052/053 flag remains gated on S50 (053-D24 ratchet), the thirteen suites above, and the open decisions
+053-D9, 053-D13, 053-D24 and 052-D1–D10.

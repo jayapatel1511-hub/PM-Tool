@@ -133,7 +133,7 @@ secrets live in each stack's owner-only `.runtime/` directory on homedev.
 | `ConnectionStrings:Hub` | development database | PostgreSQL connection; on homedev the password comes from the stack's `.runtime/` env file |
 | `Db:UseManagedIdentity` | `false` | Use a managed identity's Entra token as the database password; not used on homedev |
 | `Db:Migrate` | `true` | Apply migrations at start |
-| `Auth:Mode` | `Entra` | `Development` (header sign-in) is accepted only in Development and Testing |
+| `Auth:Mode` | `Social` (homedev compose files set `LocalPassword`) | `Development` (header sign-in) is accepted only in Development and Testing |
 | `Auth:Entra:TenantId`, `:Audience`, `:SpaClientId`, `:ApiScope` | empty | Entra sign-in (above) |
 | `Graph:DirectorySync` | `false` | Nightly leaver, title, office and manager sync from Entra ID |
 | `Graph:Mail` | `false` | Send mail with Microsoft Graph from `Graph:Mailbox` |

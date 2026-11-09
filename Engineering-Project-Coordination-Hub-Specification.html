@@ -6641,7 +6641,7 @@ td,th{font-variant-numeric:tabular-nums}
 </tr>
 <tr>
 <td>Authentication</td>
-<td>An individual account per person, through the mode <code>Auth:Mode</code> selects (FR-AUTH-01, §23.6). On homedev: <code>LocalPassword</code>, with a Secure, HttpOnly, SameSite=Lax session cookie, same-origin checks on writes and server-side sessions; <code>Social</code> (Microsoft and Google) only by an authorised activation. <code>Entra</code> (OpenID Connect / OAuth 2.0 with PKCE, bearer tokens for the Hub API audience) stays available. The optional read-only ICS endpoint uses a revocable personal capability (§12.19) as its sole exception. No password is stored, only salted verifiers in private files outside Git; no shared accounts.</td>
+<td>An individual account per person, through the mode <code>Auth:Mode</code> selects (FR-AUTH-01, §23.6). On homedev: <code>LocalPassword</code>, with a Secure, HttpOnly, SameSite=Strict session cookie and server-side sessions; <code>Social</code> (Microsoft and Google) only by an authorised activation, with a Secure, HttpOnly, SameSite=Lax cookie (the provider callback needs it) and same-origin checks on writes. <code>Entra</code> (OpenID Connect / OAuth 2.0 with PKCE, bearer tokens for the Hub API audience) stays available. The optional read-only ICS endpoint uses a revocable personal capability (§12.19) as its sole exception. No password is stored, only salted verifiers in private files outside Git; no shared accounts.</td>
 <td>MVP</td>
 </tr>
 <tr>
